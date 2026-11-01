@@ -4,7 +4,7 @@ use crate::utils::AncestorFinder;
 use crate::{Control, TopLevel};
 use ferroui_base::input::{ICommand, KeyBinding, KeyGesture};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::{
     ferro_property, AttachedProperty, BoxedValue, FerroObject, FerroProperty, Ref, WeakRef,
 };
@@ -91,8 +91,8 @@ impl ICommand for HotkeyCommandWrapper {
 struct Manager {
     control: WeakRef<Control>,
     root: RefCell<Option<WeakRef<TopLevel>>>,
-    parent_sub: RefCell<Option<Rc<dyn IDisposable>>>,
-    hotkey_sub: RefCell<Option<Rc<dyn IDisposable>>>,
+    parent_sub: RefCell<Option<Subscription>>,
+    hotkey_sub: RefCell<Option<Subscription>>,
     hotkey: Cell<Option<KeyGesture>>,
     wrapper: Rc<HotkeyCommandWrapper>,
     binding: RefCell<Option<Ref<KeyBinding>>>,
@@ -123,7 +123,7 @@ impl Manager {
                 this.on_hotkey_changed(e.get_new_value::<Option<KeyGesture>>());
             }
         });
-        *self.hotkey_sub.borrow_mut() = Some(hotkey_sub);
+        *self.hotkey_sub.borrow_mut() = Some(Subscription::new(hotkey_sub));
         self.on_hotkey_changed(control.get_value(HotKeyManager::hot_key_property()));
 
         let weak = Rc::downgrade(self);
@@ -134,7 +134,7 @@ impl Manager {
                 }
             },
         );
-        *self.parent_sub.borrow_mut() = Some(parent_sub);
+        *self.parent_sub.borrow_mut() = Some(Subscription::new(parent_sub));
     }
 
     fn on_parent_changed(&self, control: Option<Ref<TopLevel>>) {

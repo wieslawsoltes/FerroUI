@@ -18,7 +18,7 @@ use ferroui_base::interactivity::{
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::text_formatting::unicode::{Codepoint, GeneralCategory};
 use ferroui_base::media::{IBrush, TextAlignment};
-use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::number_format::format_decimal_composite;
 use ferroui_base::utilities::{CultureInfo, Decimal, HandlerList, NumberFormatInfo, NumberParseError, NumberStyles};
@@ -57,7 +57,7 @@ type Part<T> = (Ref<T>, RoutedEventHandlerToken);
 #[repr(C)]
 pub struct NumericUpDown {
     base: TemplatedControl,
-    text_box_text_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    text_box_text_changed_subscription: RefCell<Option<Subscription>>,
     internal_value_set: Cell<bool>,
     is_syncing_text_and_value_properties: Cell<bool>,
     is_text_changed_from_ui: Cell<bool>,
@@ -209,7 +209,7 @@ impl TemplatedControlImpl for NumericUpDown {
                         this.text_box_on_text_changed();
                     }
                 });
-            *this.text_box_text_changed_subscription.borrow_mut() = Some(subscription);
+            *this.text_box_text_changed_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
 
         if let Some((spinner, token)) = this.spinner.take() {

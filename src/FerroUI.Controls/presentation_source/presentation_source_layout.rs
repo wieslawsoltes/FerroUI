@@ -1,6 +1,6 @@
 use super::PresentationSource;
 use ferroui_base::layout::{ILayoutManager, ILayoutRoot, LayoutManager, Layoutable};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::rendering::{RendererDebugOverlays, RendererDiagnostics};
 use ferroui_base::Ref;
 use std::cell::{Cell, RefCell};
@@ -50,7 +50,7 @@ impl ILayoutRoot for PresentationSource {
 /// diagnostics purposes.
 pub(super) struct LayoutDiagnosticBridge {
     state: Rc<BridgeState>,
-    property_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    property_changed_subscription: RefCell<Option<Subscription>>,
 }
 
 struct BridgeState {
@@ -74,7 +74,7 @@ impl LayoutDiagnosticBridge {
             }
         });
 
-        Self { state, property_changed_subscription: RefCell::new(Some(subscription)) }
+        Self { state, property_changed_subscription: RefCell::new(Some(Subscription::new(subscription))) }
     }
 
     pub fn setup_bridge(&self) {

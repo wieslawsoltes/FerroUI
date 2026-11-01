@@ -5,7 +5,7 @@ use crate::{Control, ControlImpl, ItemsControl, Panel, VirtualizingPanel};
 use ferroui_base::input::{IScrollable, InputElementImpl, NavigationDirection};
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{BringIntoViewRequest, Layoutable, LayoutableImpl};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroObject, FerroObjectImpl, FerroObjectImplExt,
@@ -24,7 +24,7 @@ pub struct ItemsPresenter {
     generator: RefCell<Option<Rc<PanelContainerGenerator>>>,
     /// The panel, when it is a logical scrollable.
     logical_scrollable: RefCell<Option<Ref<Panel>>>,
-    logical_scroll_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    logical_scroll_subscription: RefCell<Option<Subscription>>,
     scroll_invalidated: Rc<HandlerList<dyn Fn()>>,
     pending_scroll_into_view_index: Cell<i32>,
 }
@@ -105,7 +105,7 @@ impl LayoutableImpl for ItemsPresenter {
                     }
                 }
             }));
-            *this.logical_scroll_subscription.borrow_mut() = Some(subscription);
+            *this.logical_scroll_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
     }
 }

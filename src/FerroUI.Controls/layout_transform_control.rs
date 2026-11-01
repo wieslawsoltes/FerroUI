@@ -6,7 +6,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::media::{ITransform, MatrixTransform};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::utilities::math_utilities::min;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroObjectImpl, FerroProperty,
@@ -41,7 +41,7 @@ pub struct LayoutTransformControl {
     /// Transformation matrix corresponding to the matrix transform.
     transformation: Cell<Matrix>,
     /// The subscription to the changed notification of the layout transform.
-    layout_transform_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+    layout_transform_changed: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(LayoutTransformControl: Decorator);
@@ -412,7 +412,7 @@ impl LayoutTransformControl {
                 this.apply_layout_transform();
             }
         }));
-        *self.layout_transform_changed.borrow_mut() = Some(subscription);
+        *self.layout_transform_changed.borrow_mut() = Some(Subscription::new(subscription));
     }
 
     /// Ends the subscription made by `subscribe_layout_transform`.

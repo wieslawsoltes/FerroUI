@@ -17,7 +17,7 @@ use ferroui_base::interactivity::{
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::logical_tree::LogicalTreeAttachmentEventArgs;
 use ferroui_base::utilities::WeakEvents;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, BoxedValue,
@@ -44,14 +44,14 @@ pub struct SplitButton {
     primary_button: RefCell<Option<(Ref<Button>, RoutedEventHandlerToken)>>,
     secondary_button: RefCell<Option<SecondaryButton>>,
     hotkey: Cell<Option<KeyGesture>>,
-    can_execute_change_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    can_execute_change_subscription: RefCell<Option<Subscription>>,
     command_can_execute: Cell<bool>,
     is_attached_to_logical_tree: Cell<bool>,
     is_flyout_open: Cell<bool>,
     is_keyboard_pressed: Cell<bool>,
     /// The subscriptions to the `Opened` and `Closed` events of the flyout.
     flyout_events: RefCell<Option<(Rc<dyn IDisposable>, Rc<dyn IDisposable>)>>,
-    flyout_property_changed_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    flyout_property_changed_disposable: RefCell<Option<Subscription>>,
     flyout_state_changed: HandlerList<dyn Fn()>,
 }
 
@@ -516,7 +516,7 @@ impl SplitButton {
         let subscription = WeakEvents::subscribe_command_can_execute_changed(command, &self.to_ref(), |this| {
             this.can_execute_changed_handler()
         });
-        let old = self.can_execute_change_subscription.replace(Some(subscription));
+        let old = self.can_execute_change_subscription.replace(Some(Subscription::new(subscription)));
         if let Some(old) = old {
             old.dispose();
         }
@@ -599,7 +599,7 @@ impl SplitButton {
                         this.flyout_placement_property_changed();
                     }
                 });
-            *self.flyout_property_changed_disposable.borrow_mut() = Some(subscription);
+            *self.flyout_property_changed_disposable.borrow_mut() = Some(Subscription::new(subscription));
         }
     }
 

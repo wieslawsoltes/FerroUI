@@ -16,7 +16,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::{EffectiveViewportChangedEventArgs, LayoutableImpl, Orientation};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, AttachedProperty, BoxedValue,
@@ -57,7 +57,7 @@ pub struct VirtualizingStackPanel {
     last_known_extended_viewport: Cell<Rect>,
 
     /// The subscription to the property changes of the items control.
-    items_control_property_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+    items_control_property_changed: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(VirtualizingStackPanel: VirtualizingPanel);
@@ -393,7 +393,7 @@ impl VirtualizingPanelImpl for VirtualizingStackPanel {
                     this.on_items_control_property_changed(e);
                 }
             });
-            *this.items_control_property_changed.borrow_mut() = Some(subscription);
+            *this.items_control_property_changed.borrow_mut() = Some(Subscription::new(subscription));
         }
 
         let realized_elements = this.realized_elements.borrow().clone();

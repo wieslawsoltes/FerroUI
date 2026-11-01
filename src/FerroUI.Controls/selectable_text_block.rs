@@ -18,7 +18,7 @@ use ferroui_base::media::text_formatting::{
     TextRunProperties,
 };
 use ferroui_base::media::{BaselineAlignment, DrawingContext, IBrush, Typeface};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::{ReadOnlyMemory, ValueSpan};
 use ferroui_base::{
     ferro_class, ferro_property, ferro_routed_event, instantiate, DirectProperty, FerroObjectImpl,
@@ -36,7 +36,7 @@ pub struct SelectableTextBlock {
     can_copy: Cell<bool>,
     word_selection_start: Cell<i32>,
     selection_at_pointer_press: Cell<(i32, i32)>,
-    inlines_invalidated: RefCell<Option<Rc<dyn IDisposable>>>,
+    inlines_invalidated: RefCell<Option<Subscription>>,
     /// The UTF-16 form of the text the last layout was created for, so that
     /// a new layout of unchanged text (a new selection, a new constraint)
     /// does not transcode it again.
@@ -94,7 +94,7 @@ impl FerroObjectImpl for SelectableTextBlock {
                         this.on_text_or_inlines_changed();
                     }
                 });
-                *this.inlines_invalidated.borrow_mut() = Some(subscription);
+                *this.inlines_invalidated.borrow_mut() = Some(Subscription::new(subscription));
             }
 
             this.on_text_or_inlines_changed();

@@ -3,17 +3,16 @@ use super::{
     WindowBaseAutomationPeer,
 };
 use crate::primitives::PopupRoot;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, FerroObjectImplExt, Ref};
 use std::cell::RefCell;
-use std::rc::Rc;
 
 /// An automation peer which represents a [`PopupRoot`].
 #[repr(C)]
 pub struct PopupRootAutomationPeer {
     base: WindowBaseAutomationPeer,
-    opened_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    closed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    opened_subscription: RefCell<Option<Subscription>>,
+    closed_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(PopupRootAutomationPeer: WindowBaseAutomationPeer);
@@ -33,7 +32,7 @@ impl FerroObjectImpl for PopupRootAutomationPeer {
                     this.on_opened();
                 }
             });
-            *this.opened_subscription.borrow_mut() = Some(subscription);
+            *this.opened_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
 
         let weak = this.to_ref().downgrade();
@@ -42,7 +41,7 @@ impl FerroObjectImpl for PopupRootAutomationPeer {
                 this.on_closed();
             }
         });
-        *this.closed_subscription.borrow_mut() = Some(subscription);
+        *this.closed_subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 }
 

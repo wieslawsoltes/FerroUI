@@ -1,7 +1,7 @@
 use super::{
     DocumentChangedEventArgs, DocumentError, RichTextDocument, TextElement, WeakRichTextDocument,
 };
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use crate::{Control, RichTextBlock};
 use ferroui_base::{Rect, Ref};
 use std::cell::{Cell, RefCell};
@@ -75,7 +75,7 @@ pub struct TextPointer(Rc<TextPointerData>);
 struct TextPointerData {
     document: WeakRichTextDocument,
     position: Cell<TextPosition>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl Drop for TextPointerData {
@@ -115,7 +115,7 @@ impl TextPointer {
                     .set(change.map_position(pointer.position.get()));
             }
         });
-        *pointer.0.subscription.borrow_mut() = Some(subscription);
+        *pointer.0.subscription.borrow_mut() = Some(Subscription::new(subscription));
         Ok(pointer)
     }
 

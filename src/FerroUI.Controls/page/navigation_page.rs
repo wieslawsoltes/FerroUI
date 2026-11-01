@@ -19,7 +19,7 @@ use ferroui_base::interactivity::{InteractiveImpl, RoutedEventArgs, RoutedEventH
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::{FlowDirection, Geometry, StreamGeometry};
-use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::threading::{CancellationTokenSource, DispatcherTask};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -43,7 +43,7 @@ const PC_NAV_BAR_COMPACT: &str = ":nav-bar-compact";
 
 const ALREADY_HOSTED: &str = "The page is already hosted by this NavigationPage.";
 
-type Subscription = RefCell<Option<Rc<dyn IDisposable>>>;
+type SubscriptionSlot = RefCell<Option<Subscription>>;
 
 /// A navigation page that supports simple stack-based navigation.
 #[repr(C)]
@@ -75,12 +75,12 @@ pub struct NavigationPage {
     modal_back_presenter: RefCell<Option<Ref<ContentPresenter>>>,
     modal_presenter: RefCell<Option<Ref<ContentPresenter>>>,
     top_command_bar_presenter: RefCell<Option<Ref<ContentPresenter>>>,
-    has_navigation_bar_sub: Subscription,
-    has_back_button_sub: Subscription,
-    is_back_button_enabled_sub: Subscription,
-    bar_layout_behavior_sub: Subscription,
-    bar_height_sub: Subscription,
-    back_button_content_sub: Subscription,
+    has_navigation_bar_sub: SubscriptionSlot,
+    has_back_button_sub: SubscriptionSlot,
+    is_back_button_enabled_sub: SubscriptionSlot,
+    bar_layout_behavior_sub: SubscriptionSlot,
+    bar_height_sub: SubscriptionSlot,
+    back_button_content_sub: SubscriptionSlot,
     restoring_pages_property: Cell<bool>,
     is_navigating: Cell<bool>,
     can_go_back: Cell<bool>,
@@ -481,36 +481,36 @@ impl MultiPageImpl for NavigationPage {
             let subscription =
                 FerroObjectExtensions::get_observable(object, &**Self::has_navigation_bar_property())
                     .subscribe_fn(move |_| update());
-            *this.has_navigation_bar_sub.borrow_mut() = Some(subscription);
+            *this.has_navigation_bar_sub.borrow_mut() = Some(Subscription::new(subscription));
 
             let update = observe(Self::update_is_back_button_effectively_visible);
             let subscription = FerroObjectExtensions::get_observable(object, &**Self::has_back_button_property())
                 .subscribe_fn(move |_| update());
-            *this.has_back_button_sub.borrow_mut() = Some(subscription);
+            *this.has_back_button_sub.borrow_mut() = Some(Subscription::new(subscription));
 
             let update = observe(Self::update_is_back_button_effectively_enabled);
             let subscription =
                 FerroObjectExtensions::get_observable(object, &**Self::is_back_button_enabled_property())
                     .subscribe_fn(move |_| update());
-            *this.is_back_button_enabled_sub.borrow_mut() = Some(subscription);
+            *this.is_back_button_enabled_sub.borrow_mut() = Some(Subscription::new(subscription));
 
             let update = observe(Self::update_bar_layout_behavior_effective);
             let subscription =
                 FerroObjectExtensions::get_observable(object, &**Self::bar_layout_behavior_property())
                     .subscribe_fn(move |_| update());
-            *this.bar_layout_behavior_sub.borrow_mut() = Some(subscription);
+            *this.bar_layout_behavior_sub.borrow_mut() = Some(Subscription::new(subscription));
 
             let update = observe(Self::update_effective_bar_height);
             let subscription =
                 FerroObjectExtensions::get_observable(object, &**Self::bar_height_override_property())
                     .subscribe_fn(move |_| update());
-            *this.bar_height_sub.borrow_mut() = Some(subscription);
+            *this.bar_height_sub.borrow_mut() = Some(Subscription::new(subscription));
 
             let update = observe(Self::update_back_button_content);
             let subscription =
                 FerroObjectExtensions::get_observable(object, &**Self::back_button_content_property())
                     .subscribe_fn(move |_| update());
-            *this.back_button_content_sub.borrow_mut() = Some(subscription);
+            *this.back_button_content_sub.borrow_mut() = Some(Subscription::new(subscription));
         }
 
         this.update_is_nav_bar_effectively_visible();

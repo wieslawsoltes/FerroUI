@@ -30,7 +30,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutingStrategies};
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::IBrush;
-use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::utilities::{CalendarWeekRule, DateTime, DayOfWeek, FormatError, HandlerList};
 use ferroui_base::{
@@ -106,20 +106,20 @@ pub struct CalendarDatePicker {
 
     calendar: RefCell<Option<Ref<Calendar>>>,
     /// The subscriptions to the events of the calendar.
-    calendar_subscriptions: RefCell<Option<Rc<dyn IDisposable>>>,
+    calendar_subscriptions: RefCell<Option<Subscription>>,
     default_text: RefCell<String>,
     drop_down_button: RefCell<Option<Ref<Button>>>,
     /// The subscription to the click event of the drop-down button.
-    drop_down_button_click_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    drop_down_button_click_subscription: RefCell<Option<Subscription>>,
     pop_up: RefCell<Option<Ref<Popup>>>,
     /// The subscription to the closed event of the popup.
-    pop_up_closed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    pop_up_closed_subscription: RefCell<Option<Subscription>>,
     text_box: RefCell<Option<Ref<TextBox>>>,
     /// The subscriptions to the key down and got focus events of the text
     /// box.
-    text_box_subscriptions: RefCell<Option<Rc<dyn IDisposable>>>,
-    text_box_text_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    button_pointer_pressed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    text_box_subscriptions: RefCell<Option<Subscription>>,
+    text_box_text_changed_subscription: RefCell<Option<Subscription>>,
+    button_pointer_pressed_subscription: RefCell<Option<Subscription>>,
 
     on_open_selected_date: Cell<Option<DateTime>>,
     setting_selected_date: Cell<bool>,
@@ -441,7 +441,7 @@ impl TemplatedControlImpl for CalendarDatePicker {
                     this.calendar_key_down(sender, e);
                 }
             }));
-            *this.calendar_subscriptions.borrow_mut() = Some(Rc::new(subscriptions));
+            *this.calendar_subscriptions.borrow_mut() = Some(Subscription::new(Rc::new(subscriptions)));
 
             let current_blackout_days = this.blackout_dates();
             let blackout_dates = calendar.blackout_dates();
@@ -469,7 +469,7 @@ impl TemplatedControlImpl for CalendarDatePicker {
                     this.pop_up_closed();
                 }
             });
-            *this.pop_up_closed_subscription.borrow_mut() = Some(closed);
+            *this.pop_up_closed_subscription.borrow_mut() = Some(Subscription::new(closed));
 
             if this.is_drop_down_open() {
                 this.open_drop_down();
@@ -493,7 +493,7 @@ impl TemplatedControlImpl for CalendarDatePicker {
                     this.drop_down_button_click();
                 }
             });
-            *this.drop_down_button_click_subscription.borrow_mut() = Some(click);
+            *this.drop_down_button_click_subscription.borrow_mut() = Some(Subscription::new(click));
 
             let routes = RoutingStrategies::DIRECT | RoutingStrategies::BUBBLE;
             let weak = this.to_ref().downgrade();
@@ -519,7 +519,7 @@ impl TemplatedControlImpl for CalendarDatePicker {
                 true,
             );
             *this.button_pointer_pressed_subscription.borrow_mut() =
-                Some(Rc::new(CompositeDisposable::from_disposables([pressed, released])));
+                Some(Subscription::new(Rc::new(CompositeDisposable::from_disposables([pressed, released]))));
         }
 
         if this.text_box.take().is_some() {
@@ -551,7 +551,7 @@ impl TemplatedControlImpl for CalendarDatePicker {
                     this.text_box_got_focus();
                 }
             }));
-            *this.text_box_subscriptions.borrow_mut() = Some(Rc::new(subscriptions));
+            *this.text_box_subscriptions.borrow_mut() = Some(Subscription::new(Rc::new(subscriptions)));
 
             let weak = this.to_ref().downgrade();
             let object: &FerroObject = text_box;
@@ -561,7 +561,7 @@ impl TemplatedControlImpl for CalendarDatePicker {
                         this.text_box_text_changed();
                     }
                 });
-            *this.text_box_text_changed_subscription.borrow_mut() = Some(subscription);
+            *this.text_box_text_changed_subscription.borrow_mut() = Some(Subscription::new(subscription));
 
             if let Some(selected_date) = this.selected_date() {
                 text_box.set_text(this.date_time_to_string(selected_date).as_deref());

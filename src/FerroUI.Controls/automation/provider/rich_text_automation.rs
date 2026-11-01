@@ -23,7 +23,7 @@ use ferroui_base::media::{
     BaselineAlignment, Color, FlowDirection, FontStyle, IBrush, TextAlignment,
     TextDecorationLocation,
 };
-use ferroui_base::reactive::{CompositeDisposable, IDisposable, SerialDisposable};
+use ferroui_base::reactive::{CompositeDisposable, IDisposable, SerialDisposable, Subscription};
 use ferroui_base::{Matrix, ObjectType, Point, Rect, Ref, Visual, WeakRef};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -1106,7 +1106,7 @@ fn text_views(view: &Ref<RichTextBlock>) -> Vec<Ref<RichTextBlock>> {
 #[derive(Default)]
 pub(crate) struct RichTextAutomationState {
     children: RefCell<Option<TextChildrenCache>>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 struct TextChildrenCache {
@@ -1142,7 +1142,7 @@ impl RichTextAutomationState {
                 let _ = state.entries(host, &peer);
             }))
             .ok();
-        if let Some(previous) = self.subscription.replace(subscription) {
+        if let Some(previous) = self.subscription.replace(subscription.map(Subscription::new)) {
             previous.dispose();
         }
     }

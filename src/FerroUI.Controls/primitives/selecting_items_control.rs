@@ -21,7 +21,7 @@ use ferroui_base::interactivity::{
     RoutingStrategies,
 };
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::threading::DispatcherTimer;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, AnyValue, AttachedProperty,
@@ -131,7 +131,7 @@ pub struct SelectingItemsControl {
     text_search_timer: RefCell<Option<(Rc<DispatcherTimer>, Rc<dyn IDisposable>)>>,
     selection: RefCell<Option<Rc<dyn ISelectionModel>>>,
     selection_property_changed_token: Cell<u64>,
-    selection_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    selection_changed_subscription: RefCell<Option<Subscription>>,
     old_selected_index: Cell<i32>,
     old_selected_item: RefCell<Option<BoxedValue>>,
     old_selected_items: RefCell<Option<SelectedItemsList>>,
@@ -1494,7 +1494,7 @@ impl SelectingItemsControl {
                 this.on_selection_model_selection_changed(e);
             }
         }));
-        *self.selection_changed_subscription.borrow_mut() = Some(subscription);
+        *self.selection_changed_subscription.borrow_mut() = Some(Subscription::new(subscription));
 
         let weak = self.to_ref().downgrade();
         model.lost_selection(Rc::new(move || {

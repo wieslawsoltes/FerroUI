@@ -13,7 +13,7 @@ use super::{TriggerRank, VisualState, VisualStateGroup, VisualStateGroupCollecti
 use crate::Control;
 use ferroui_base::collections::{CollectionChangedHandler, NotifyCollectionChangedEventArgs};
 use ferroui_base::layout::Layoutable;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::{ferro_properties, ferro_static_type, AttachedProperty, FerroProperty, Ref, Visual, WeakRef};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -25,7 +25,7 @@ pub(crate) struct TriggerHost {
     // Attached and detached, and the changes of the collection.
     element_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
     // The size changes of the root of the tree, while the element is in one.
-    root_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    root_subscription: RefCell<Option<Subscription>>,
 }
 
 /// The value of the private attached property that keeps a [`TriggerHost`] with its element.
@@ -138,7 +138,7 @@ impl TriggerHost {
                         }
                     }
                 });
-                *self.root_subscription.borrow_mut() = Some(subscription);
+                *self.root_subscription.borrow_mut() = Some(Subscription::new(subscription));
             }
         }
         self.evaluate();
