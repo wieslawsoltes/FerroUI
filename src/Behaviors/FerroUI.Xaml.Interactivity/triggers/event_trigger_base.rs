@@ -8,7 +8,7 @@ use crate::{
 use ferroui_base::data::core::{ValueTypes, WeakValue};
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RouteHandler};
 use ferroui_base::metadata::{MarkupDelegate, MarkupValue};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::utilities::EventArgs;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, BoxedValue, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -36,7 +36,7 @@ pub struct EventTriggerBase {
     event_handler: RefCell<Option<Rc<dyn IDisposable>>>,
     is_loaded_event_registered: Cell<bool>,
     loaded_event_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    try_register_event_handler_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    try_register_event_handler_disposable: RefCell<Option<Subscription>>,
 }
 
 ferro_class! {
@@ -242,7 +242,7 @@ impl EventTriggerBase {
 
         let disposable = AddEventHandlerRegistry::try_register_event_handler(resolved_source, event_name, self.handler());
         if let Some(disposable) = disposable {
-            *self.try_register_event_handler_disposable.borrow_mut() = Some(disposable);
+            *self.try_register_event_handler_disposable.borrow_mut() = Some(Subscription::new(disposable));
             return;
         }
 

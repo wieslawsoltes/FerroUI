@@ -9,7 +9,7 @@ use ferroui_base::animation::{IGlobalClock, TimeSpan};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::{AnonymousObserver, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, Subscription};
 use ferroui_base::{
     BoxedValue, CornerRadius, FerroLocator, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, LocatorExtensions, Rect, Ref, Size, StyledElementImpl,
@@ -31,8 +31,8 @@ pub struct MaterialChipLayout {
     wanted_leading: Cell<u8>,
     wanted_trailing: Cell<u8>,
     painted_height: Cell<f64>,
-    clock: RefCell<Option<Rc<dyn IDisposable>>>,
-    visibility: RefCell<Option<Rc<dyn IDisposable>>>,
+    clock: RefCell<Option<Subscription>>,
+    visibility: RefCell<Option<Subscription>>,
     last_frame: Cell<Option<f64>>,
 }
 ferro_class!(MaterialChipLayout: Panel);
@@ -71,7 +71,7 @@ impl VisualImpl for MaterialChipLayout {
                 this.update_clock();
             }
         });
-        if let Some(old) = this.visibility.replace(Some(subscription)) {
+        if let Some(old) = this.visibility.replace(Some(Subscription::new(subscription))) {
             old.dispose();
         }
         this.publish_frame();
@@ -563,7 +563,7 @@ impl MaterialChipLayout {
                     this.stop_clock();
                 }
             })));
-        *self.clock.borrow_mut() = Some(subscription);
+        *self.clock.borrow_mut() = Some(Subscription::new(subscription));
     }
     fn stop_clock(&self) {
         if let Some(subscription) = self.clock.borrow_mut().take() {

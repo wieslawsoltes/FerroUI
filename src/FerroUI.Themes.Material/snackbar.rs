@@ -18,7 +18,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::ScaleTransform;
-use ferroui_base::reactive::{AnonymousObserver, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate,
@@ -250,12 +250,12 @@ pub struct MaterialSnackbarHost {
     visuals: RefCell<Vec<AnimatedSnackbar>>,
     items: RefCell<Option<Ref<Panel>>>,
     timeout_policy: RefCell<Option<Rc<dyn MaterialSnackbarTimeoutPolicy>>>,
-    lifetime_timer: RefCell<Option<Rc<dyn IDisposable>>>,
+    lifetime_timer: RefCell<Option<Subscription>>,
     lifetime_remaining: Cell<Option<Duration>>,
     lifetime_started: Cell<Option<Instant>>,
     timer_generation: Cell<u64>,
-    clock_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    clock_subscription: RefCell<Option<Subscription>>,
+    visibility_subscription: RefCell<Option<Subscription>>,
     last_frame: Cell<Option<f64>>,
 }
 
@@ -302,7 +302,7 @@ impl VisualImpl for MaterialSnackbarHost {
                 this.update_activity();
             }
         });
-        if let Some(old) = this.visibility_subscription.replace(Some(subscription)) {
+        if let Some(old) = this.visibility_subscription.replace(Some(Subscription::new(subscription))) {
             old.dispose();
         }
         this.update_activity();
@@ -635,7 +635,7 @@ impl MaterialSnackbarHost {
             interval,
             DispatcherPriority::NORMAL,
         );
-        *self.lifetime_timer.borrow_mut() = Some(timer);
+        *self.lifetime_timer.borrow_mut() = Some(Subscription::new(timer));
     }
 
     fn pause_lifetime(&self) {
@@ -741,7 +741,7 @@ impl MaterialSnackbarHost {
                     }
                 }
             })));
-        *self.clock_subscription.borrow_mut() = Some(subscription);
+        *self.clock_subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 
     fn stop_clock(&self) {

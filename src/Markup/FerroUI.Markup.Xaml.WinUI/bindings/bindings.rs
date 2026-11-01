@@ -2,7 +2,7 @@
 
 use super::path_node::RootGate;
 use ferroui_base::interactivity::RoutedEventHandlerToken;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     ferro_properties, ferro_static_type, AttachedProperty, BoxedValue, FerroObject, FerroProperty,
     StyledElement, WeakRef,
@@ -67,7 +67,7 @@ pub struct WinUIBindings {
     initialized: Cell<bool>,
     updating: Cell<bool>,
     has_template_bindings: Cell<bool>,
-    template_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    template_subscription: RefCell<Option<Subscription>>,
     unload_token: Cell<Option<RoutedEventHandlerToken>>,
 }
 
@@ -267,7 +267,7 @@ impl WinUIBindings {
                 let _ = group.update();
             }
         });
-        self.template_subscription.replace(Some(subscription));
+        self.template_subscription.replace(Some(Subscription::new(subscription)));
     }
 }
 

@@ -21,7 +21,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::{FontWeight, IBrush, SolidColorBrush, TextAlignment};
-use ferroui_base::reactive::{AnonymousObserver, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, IDisposable, Subscription};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::{
     BoxedValue, DirectProperty, ElementRef, FerroLocator, FerroObjectImpl, FerroObjectImplExt,
@@ -120,8 +120,8 @@ pub struct MaterialAppBar {
     animation: RefCell<Option<HeightAnimation>>,
     color_motion: RefCell<MaterialSpringState>,
     color_brush: RefCell<Option<Ref<SolidColorBrush>>>,
-    clock_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    clock_subscription: RefCell<Option<Subscription>>,
+    visibility_subscription: RefCell<Option<Subscription>>,
     idle_timer: RefCell<Option<Rc<dyn IDisposable>>>,
     last_frame: Cell<Option<f64>>,
 }
@@ -209,7 +209,7 @@ impl VisualImpl for MaterialAppBar {
         this.connect_source();
         let weak = this.to_ref().downgrade();
         *this.visibility_subscription.borrow_mut() =
-            Some(this.is_effectively_visible_changed(move || {
+            Some(Subscription::new(this.is_effectively_visible_changed(move || {
                 if let Some(this) = weak.upgrade() {
                     if this.is_effectively_visible() {
                         this.update_clock();
@@ -219,7 +219,7 @@ impl VisualImpl for MaterialAppBar {
                         this.drag.set(None);
                     }
                 }
-            }));
+            })));
         this.update_clock();
     }
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
@@ -885,7 +885,7 @@ impl MaterialAppBar {
                     this.advance(delta);
                 }
             })));
-        *self.clock_subscription.borrow_mut() = Some(subscription);
+        *self.clock_subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
     fn stop_clock(&self) {
         if let Some(subscription) = self.clock_subscription.borrow_mut().take() {

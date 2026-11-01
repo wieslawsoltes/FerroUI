@@ -19,7 +19,7 @@ use ferroui_base::data::BindingPriority;
 use ferroui_base::layout::Layoutable;
 use ferroui_base::reactive::{
     IDisposable, IObservable, IObserver, Observable, ObservableError,
-    SingleSubscriberObservableBase,
+    SingleSubscriberObservableBase, Subscription,
 };
 use ferroui_base::{
     AnyValue, BoxedValue, CornerRadius, FerroObjectImpl, FerroProperty, PropertyValue, Ref,
@@ -308,7 +308,7 @@ fn apply_spring<C: Transition<T>, T: SpringValue>(
 struct SpringObservable<T: SpringValue> {
     this: Weak<Self>,
     core: SingleSubscriberObservableBase<T>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
     clock: Rc<dyn IClock>,
     frame: Rc<RefCell<SpringFrame>>,
     origin: [MaterialSpringSample; 4],
@@ -357,7 +357,7 @@ impl<T: SpringValue> IObservable<T> for SpringObservable<T> {
                 .expect("spring observable alive during subscribe");
             let subscription = self.clock.subscribe(this);
             if self.core.has_observer() {
-                *self.subscription.borrow_mut() = Some(subscription);
+                *self.subscription.borrow_mut() = Some(Subscription::new(subscription));
             } else {
                 subscription.dispose();
             }

@@ -1,7 +1,7 @@
 //! Port of `Dialog/DialogOpenedTrigger.cs`.
 
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::EventArgs;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, ElementRef, FerroObjectImpl,
@@ -23,7 +23,7 @@ pub struct DialogOpenedTrigger {
     // The subscription to the event of the window (the reference removes its delegate).
     // Deviation (DEVIATIONS.md, Behaviors): the subscription ends on the window it was made on; the
     // reference removes its delegate from the current source object.
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(DialogOpenedTrigger: StyledElementTriggerOfT);
@@ -60,7 +60,7 @@ ferroui_base::ferro_overrides! {
                         trigger.on_opened();
                     }
                 });
-                let previous = this.subscription.borrow_mut().replace(subscription);
+                let previous = this.subscription.borrow_mut().replace(Subscription::new(subscription));
                 if let Some(previous) = previous {
                     previous.dispose();
                 }

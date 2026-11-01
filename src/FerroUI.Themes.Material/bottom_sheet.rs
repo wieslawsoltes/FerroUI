@@ -20,7 +20,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::media::{MediaContext, TranslateTransform};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs,
     Point, Ref, Size, StyledElementImpl, StyledProperty, StyledPropertyOptions, Thickness, Vector,
@@ -64,7 +64,7 @@ pub struct MaterialBottomSheetHost {
     frame_pending: Cell<bool>,
     frame_generation: Cell<u64>,
     last_frame: Cell<Option<TimeSpan>>,
-    visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    visibility_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(MaterialBottomSheetHost: ContentControl);
@@ -159,7 +159,7 @@ impl VisualImpl for MaterialBottomSheetHost {
         Self::parent_on_attached_to_visual_tree(this, event);
         let weak = this.to_ref().downgrade();
         *this.visibility_subscription.borrow_mut() =
-            Some(this.is_effectively_visible_changed(move || {
+            Some(Subscription::new(this.is_effectively_visible_changed(move || {
                 if let Some(this) = weak.upgrade() {
                     if this.is_effectively_visible() {
                         this.request_frame();
@@ -169,7 +169,7 @@ impl VisualImpl for MaterialBottomSheetHost {
                         this.cancel_drag();
                     }
                 }
-            }));
+            })));
         if this.state() != MaterialSheetState::Hidden {
             this.transition_to(this.state(), false);
         }

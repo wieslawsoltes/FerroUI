@@ -8,7 +8,7 @@ use ferroui_base::data::core::ValueTypes;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{
@@ -35,9 +35,9 @@ pub struct OverlayHost {
     rebuilding: Cell<bool>,
     requested: Cell<bool>,
     scheduled: Cell<bool>,
-    overlays_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    layers_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    services_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    overlays_subscription: RefCell<Option<Subscription>>,
+    layers_subscription: RefCell<Option<Subscription>>,
+    services_subscription: RefCell<Option<Subscription>>,
     layer_subscriptions: RefCell<Vec<LayerSubscription>>,
     registry_subscription: Cell<Option<u64>>,
 }
@@ -158,7 +158,7 @@ impl OverlayHost {
     pub fn set_use_service_layers(&self, value: bool) {
         self.set_value(Self::use_service_layers_property(), value);
     }
-    fn dispose_slot(slot: &RefCell<Option<Rc<dyn IDisposable>>>) {
+    fn dispose_slot(slot: &RefCell<Option<Subscription>>) {
         let old = slot.take();
         if let Some(old) = old {
             old.dispose();
@@ -232,7 +232,7 @@ impl OverlayHost {
                 host.request_rebuild();
             }
         }));
-        self.overlays_subscription.replace(sub);
+        self.overlays_subscription.replace(sub.map(Subscription::new));
     }
     fn subscribe_collection(&self, list: &OverlayLayerCollection, service: bool) {
         let weak = self.to_ref().downgrade();
@@ -246,9 +246,9 @@ impl OverlayHost {
             list.remove_collection_changed(token);
         });
         if service {
-            self.services_subscription.replace(Some(sub));
+            self.services_subscription.replace(Some(Subscription::new(sub)));
         } else {
-            self.layers_subscription.replace(Some(sub));
+            self.layers_subscription.replace(Some(Subscription::new(sub)));
         }
     }
     fn on_layers_collection_changed(

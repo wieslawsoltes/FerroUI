@@ -16,7 +16,7 @@ use ferroui_base::input::InputElement;
 use ferroui_base::interactivity::RoutedEventHandlerToken;
 use ferroui_base::layout::{EffectiveViewportChangedEventArgs, Orientation};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{FerroObject, ObjectType, Rect, Ref, Size, StyledElement, Upcast, Visual, WeakRef};
 use ferroui_controls::{as_scroll_anchor_provider, Control};
@@ -320,7 +320,7 @@ pub struct TreeDataGridPresenterBase {
     viewport: Cell<Rect>,
     /// The subscription to the effective viewport changes, held while attached to the visual tree:
     /// subscribing adds a reference to the presenter in the layout manager.
-    effective_viewport_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    effective_viewport_subscription: RefCell<Option<Subscription>>,
 }
 
 impl Default for TreeDataGridPresenterBase {
@@ -915,7 +915,7 @@ impl TreeDataGridPresenterBase {
                 this.on_effective_viewport_changed(e);
             }
         });
-        if let Some(previous) = self.effective_viewport_subscription.borrow_mut().replace(subscription) {
+        if let Some(previous) = self.effective_viewport_subscription.borrow_mut().replace(Subscription::new(subscription)) {
             previous.dispose();
         }
 
