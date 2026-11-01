@@ -77,7 +77,14 @@ impl Instance {
 
 pub(crate) fn release_value(v: &Value, dead: &BTreeSet<ObjectId>) -> Option<Value> {
     match v {
-        Value::Object(id) | Value::DelegateRow(id) if dead.contains(id) => Some(Value::Null),
+        Value::Object(id)
+        | Value::DelegateRow(id)
+        | Value::AnchorGroup(id)
+        | Value::AnchorLine(id, _)
+            if dead.contains(id) =>
+        {
+            Some(Value::Null)
+        }
         Value::Method(method) if dead.contains(&method.receiver()) => Some(Value::Null),
         Value::List(items) => {
             let mut copy: Option<Vec<Value>> = None;

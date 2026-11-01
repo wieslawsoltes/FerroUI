@@ -240,6 +240,9 @@ impl Transaction<'_> {
             }
             Value::ModelRow(row) => self.read_role(row, name, reads),
             Value::DelegateRow(owner) => self.read_delegate_role(owner, name, reads),
+            Value::AnchorGroup(id) => {
+                self.read(self.model.key(id, &format!("anchors.{name}"))?, reads)
+            }
             Value::Record(record) if record.is_incubator() && name == "object" => {
                 Ok(Incubator::from_record(record)
                     .expect("incubator")

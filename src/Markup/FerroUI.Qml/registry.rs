@@ -53,6 +53,29 @@ impl TypeDefinition {
         self
     }
 
+    /// Register Qt Quick Item anchor lines and their assignable grouped properties.
+    pub fn quick_anchors(mut self) -> Self {
+        for edge in crate::AnchorEdge::ALL {
+            self = self
+                .readonly_property(edge.name(), "$qml:anchorLine", Value::Undefined)
+                .property(
+                    &format!("anchors.{}", edge.name()),
+                    "$qml:anchorLine",
+                    Value::Undefined,
+                );
+        }
+        for side in ["left", "right", "top", "bottom"] {
+            self = self.property(&format!("anchors.{side}Margin"), "var", Value::Undefined);
+        }
+        self.readonly_property("anchors", "$qml:anchorGroup", Value::Undefined)
+            .property("anchors.alignWhenCentered", "bool", Value::Bool(true))
+            .property("anchors.fill", "Item", Value::Null)
+            .property("anchors.centerIn", "Item", Value::Null)
+            .property("anchors.margins", "real", Value::Number(0.))
+            .property("anchors.horizontalCenterOffset", "real", Value::Number(0.))
+            .property("anchors.verticalCenterOffset", "real", Value::Number(0.))
+    }
+
     /// Register a Rust enumeration in the type namespace. Keys are accessible
     /// via both Type.Enum.Key and Type.Key.
     pub fn enumeration(mut self, name: &str, keys: &[(&str, i32)]) -> Result<Self, Error> {

@@ -60,6 +60,14 @@ def main():
     root.eraseRow()
     assert root.savedAt(0) and root.summary() == "5/2/1/0=updated/-"
     print("Qt 6.12.0 multi-target Binding, Repeater order and delegate identity passed")
+    component, root = load(folder.parent / "anchors/Main.qml")
+    assert root.geometry() == "63/42/132/52/124/23", root.geometry()
+    root.moveMarker()
+    assert root.geometry() == "83/52/112/42/134/33", root.geometry()
+    root.resetLeft()
+    assert root.geometry() == "3/52/192/42/94/33", root.geometry()
+    print("Qt 6.12.0 sibling anchor geometry passed")
+
     from PySide6.QtQuick import QQuickWindow
     component, root = load(folder.parent / "views/Main.qml")
     window = QQuickWindow()

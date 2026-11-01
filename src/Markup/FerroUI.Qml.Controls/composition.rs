@@ -76,16 +76,19 @@ pub(super) fn plan(instance: &Instance, nodes: &tree::Peers) -> Result<Plan, Err
         if !node.uses_item_anchors() {
             continue;
         }
-        let Some((target, rule)) = super::anchors::read(instance, id)? else {
+        let Some(rule) = super::anchors::read(instance, id, &parents, nodes)? else {
             continue;
         };
-        if parents.get(&id) != Some(&target) {
-            return Err(Error::new("anchor target must be the item's visual parent"));
-        }
+        let parent = parents
+            .get(&id)
+            .ok_or_else(|| Error::new("anchored Item has no visual parent"))?;
         let (_, rules) = hosts
-            .get_mut(&target)
-            .ok_or_else(|| Error::new("parent anchors require an Item or Rectangle layout host"))?;
+            .get_mut(parent)
+            .ok_or_else(|| Error::new("anchors require an Item or Rectangle layout host"))?;
         rules.insert(node.control(), rule);
+    }
+    for (_, rules) in hosts.values_mut() {
+        rules.validate()?;
     }
     Ok(Plan {
         children: plan,

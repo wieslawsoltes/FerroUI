@@ -217,6 +217,9 @@ impl Instance {
             }
             Value::ModelRow(row) => self.model_role(*row, "").map(|_| ()),
             Value::DelegateRow(owner) => self.delegate_row(*owner).map(|_| ()),
+            Value::AnchorGroup(id) | Value::AnchorLine(id, _) if self.node(*id).is_none() => {
+                Err(Error::new("stale anchor target"))
+            }
             Value::Method(method) if self.node(method.receiver()).is_none() => {
                 Err(Error::new("foreign method receiver"))
             }
@@ -233,6 +236,9 @@ impl Instance {
         match (ty, &value) {
             ("var" | "variant" | "alias", _) => {
                 self.validate_handles(&value)?;
+            }
+            ("$qml:anchorLine", Value::AnchorLine(_, _) | Value::Undefined | Value::Null) => {
+                self.validate_handles(&value)?
             }
             ("bool", Value::Bool(_))
             | ("real" | "double" | "float", Value::Number(_))
@@ -549,7 +555,18 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         if let Some(parent) = parent {
             self.instance.nodes[parent.index].children.push(id);
         }
-        for property in shell.properties {
+        for mut property in shell.properties {
+            if property.ty == "$qml:anchorGroup" {
+                property.slot.value = Value::AnchorGroup(id);
+            }
+            if property.ty == "$qml:anchorLine" && property.readonly {
+                if let Some(edge) = AnchorEdge::ALL
+                    .into_iter()
+                    .find(|e| e.name() == property.name)
+                {
+                    property.slot.value = Value::AnchorLine(id, edge);
+                }
+            }
             self.instance.properties.push(Property {
                 owner: id,
                 name: property.name,

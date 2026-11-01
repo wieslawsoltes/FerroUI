@@ -230,14 +230,14 @@ fn parent_anchors_follow_native_arrangement_and_unfill_restores_explicit_dimensi
     view.set(backdrop_id, "anchors.fill", Value::Null).unwrap();
     layout(140., 80.);
     assert_eq!(backdrop.bounds(), Rect::new(0., 0., 32., 12.));
-    assert!(view
-        .set(
-            backdrop_id,
-            "anchors.fill",
-            Value::Object(view.id("middle").unwrap())
-        )
-        .is_err());
-    assert_eq!(view.get(backdrop_id, "anchors.fill").unwrap(), Value::Null);
+    view.set(
+        backdrop_id,
+        "anchors.fill",
+        Value::Object(view.id("middle").unwrap()),
+    )
+    .unwrap();
+    layout(140., 80.);
+    assert_eq!(backdrop.bounds(), Rect::new(71., 40., 2., 0.));
 }
 
 #[test]
@@ -530,4 +530,58 @@ fn state_transition_samples_the_original_native_peer_on_the_view_clock() {
     view.advance_time(Duration::from_millis(40)).unwrap();
     assert_eq!(view.control(id).unwrap(), peer);
     assert_eq!(peer.width(), 100.);
+}
+
+#[test]
+fn sibling_anchor_order_margins_and_failed_cycles_are_transactional() {
+    use ferroui_base::{Rect, Size};
+    use ferroui_qml::AnchorEdge;
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let view = mount(include_str!("../../../tests/QmlCompiled/anchors/Main.qml"));
+    let root = view.root();
+    let follower = view.id("follower").unwrap();
+    let marker = view.id("marker").unwrap();
+    let label = view.id("label").unwrap();
+    let frames = || {
+        root.measure(Size::new(200., 100.));
+        root.arrange(Rect::new(0., 0., 200., 100.));
+        (
+            view.control(follower).unwrap().bounds(),
+            view.control(label).unwrap().bounds(),
+        )
+    };
+    assert_eq!(
+        frames(),
+        (
+            Rect::new(63., 42., 132., 52.),
+            Rect::new(124., 23., 10., 6.)
+        )
+    );
+    view.call(view.root_id(), "moveMarker", vec![]).unwrap();
+    assert_eq!(
+        frames(),
+        (
+            Rect::new(83., 52., 112., 42.),
+            Rect::new(134., 33., 10., 6.)
+        )
+    );
+    let target = Value::AnchorLine(follower, AnchorEdge::Right);
+    assert!(view
+        .set(marker, "anchors.left", target)
+        .unwrap_err()
+        .message
+        .contains("cycle"));
+    assert_eq!(view.get(marker, "anchors.left").unwrap(), Value::Undefined);
+    assert!(view
+        .set(
+            marker,
+            "anchors.left",
+            Value::AnchorLine(follower, AnchorEdge::Bottom)
+        )
+        .is_err());
+    view.call(view.root_id(), "resetLeft", vec![]).unwrap();
+    assert_eq!(
+        frames(),
+        (Rect::new(3., 52., 192., 42.), Rect::new(94., 33., 10., 6.))
+    );
 }

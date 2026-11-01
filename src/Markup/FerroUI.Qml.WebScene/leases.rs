@@ -13,6 +13,8 @@ enum Key {
     Record(Record),
     Row(RowId),
     DelegateRow(ferroui_qml::ObjectId),
+    AnchorGroup(ferroui_qml::ObjectId),
+    Anchor(ferroui_qml::ObjectId, ferroui_qml::AnchorEdge),
     Namespace(usize),
 }
 impl Key {
@@ -21,6 +23,8 @@ impl Key {
             Value::Record(record) => Ok(Self::Record(record.clone())),
             Value::ModelRow(id) => Ok(Self::Row(*id)),
             Value::DelegateRow(id) => Ok(Self::DelegateRow(*id)),
+            Value::AnchorGroup(id) => Ok(Self::AnchorGroup(*id)),
+            Value::AnchorLine(id, edge) => Ok(Self::Anchor(*id, *edge)),
             Value::Namespace(namespace) => Ok(Self::Namespace(Rc::as_ptr(namespace) as usize)),
             _ => Err(Error::new("value does not have a dynamic host identity")),
         }

@@ -13,6 +13,8 @@ fn main() {
         .with_javascript()
         .compile_file("states/Main.qml", "states_guest.rs")
         .expect("compile states and transitions for V8");
+    ferroui_qml_build::compile_file("anchors/Main.qml", "anchors.rs")
+        .expect("compile native anchor lines fixture");
     ferroui_qml_build::compile_file("views/Main.qml", "views.rs")
         .expect("compile virtualized list fixture");
     ferroui_qml_build::compile_file("delegates/Main.qml", "delegates.rs")

@@ -8,6 +8,38 @@ pub struct ObjectId {
     pub(crate) index: usize,
 }
 
+/// One of the six visual Item lines used in edge and center anchor expressions.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum AnchorEdge {
+    Left,
+    Right,
+    HorizontalCenter,
+    Top,
+    Bottom,
+    VerticalCenter,
+}
+
+impl AnchorEdge {
+    pub const ALL: [Self; 6] = [
+        Self::Left,
+        Self::Right,
+        Self::HorizontalCenter,
+        Self::Top,
+        Self::Bottom,
+        Self::VerticalCenter,
+    ];
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Left => "left",
+            Self::Right => "right",
+            Self::HorizontalCenter => "horizontalCenter",
+            Self::Top => "top",
+            Self::Bottom => "bottom",
+            Self::VerticalCenter => "verticalCenter",
+        }
+    }
+}
+
 /// A callable QML method or signal together with its original receiver.
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MethodRef {
@@ -37,6 +69,8 @@ pub enum Value {
     ModelRow(crate::RowId),
     /// Role projection of a ListModel row through one live Qt Quick delegate.
     DelegateRow(ObjectId),
+    AnchorLine(ObjectId, AnchorEdge),
+    AnchorGroup(ObjectId),
     Record(crate::Record),
     Namespace(std::rc::Rc<crate::Namespace>),
     List(Vec<Value>),
@@ -51,6 +85,8 @@ impl Value {
             Self::String(value) => !value.is_empty(),
             Self::External(_)
             | Self::Method(_)
+            | Self::AnchorGroup(_)
+            | Self::AnchorLine(_, _)
             | Self::DelegateRow(_)
             | Self::ModelRow(_)
             | Self::Record(_)
@@ -70,6 +106,8 @@ impl Value {
             Self::String(s) => s.trim().parse().unwrap_or(f64::NAN),
             Self::External(_)
             | Self::Method(_)
+            | Self::AnchorGroup(_)
+            | Self::AnchorLine(_, _)
             | Self::DelegateRow(_)
             | Self::ModelRow(_)
             | Self::Record(_)
@@ -95,6 +133,8 @@ impl Value {
             Self::Undefined => "undefined".into(),
             Self::Method(method) => format!("function {}() {{ [native code] }}", method.name),
             Self::External(_)
+            | Self::AnchorGroup(_)
+            | Self::AnchorLine(_, _)
             | Self::DelegateRow(_)
             | Self::ModelRow(_)
             | Self::Record(_)

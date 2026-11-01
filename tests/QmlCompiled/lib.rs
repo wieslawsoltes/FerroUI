@@ -3,6 +3,8 @@ mod incubators;
 #[cfg(test)]
 mod states;
 #[cfg(test)]
+mod anchors;
+#[cfg(test)]
 mod delegates;
 #[cfg(test)]
 mod views;

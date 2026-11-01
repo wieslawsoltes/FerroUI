@@ -411,6 +411,13 @@ impl ScriptContext<'_, '_> {
                 .collect(),
             Value::ModelRow(row) => self.tx.model.model_keys(*row)?,
             Value::DelegateRow(owner) => self.tx.model.delegate_row(*owner)?.keys(),
+            Value::AnchorGroup(owner) => self
+                .tx
+                .model
+                .property_names(*owner)
+                .into_iter()
+                .filter_map(|p| p.strip_prefix("anchors.").map(str::to_owned))
+                .collect(),
             Value::Namespace(namespace) => namespace.names().map(str::to_owned).collect(),
             _ => Vec::new(),
         })
@@ -770,6 +777,9 @@ impl ScriptContext<'_, '_> {
             }
             Value::ModelRow(row) => self.tx.write_role(*row, name, value),
             Value::DelegateRow(owner) => self.tx.write_delegate_role(*owner, name, value),
+            Value::AnchorGroup(id) => {
+                return self.write_key(self.tx.scoped_key(*id, &format!("anchors.{name}"))?, value)
+            }
             Value::Record(record) => self.tx.set_record_field(record, name, value),
             Value::External(external) => {
                 self.tx

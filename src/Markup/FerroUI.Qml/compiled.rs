@@ -326,6 +326,11 @@ impl Frame<'_, '_> {
                 .validate_handles(&Value::External(value.clone()))?;
             return Ok(self.target(Location::External(value, name.into())));
         }
+        if let Value::AnchorGroup(id) = base {
+            return Ok(self.target(Location::Property(
+                self.tx.scoped_key(id, &format!("anchors.{name}"))?,
+            )));
+        }
         if let Value::DelegateRow(owner) = base {
             return Ok(self.target(Location::DelegateRole(owner, name.to_owned())));
         }

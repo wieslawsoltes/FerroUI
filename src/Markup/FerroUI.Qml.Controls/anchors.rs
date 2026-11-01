@@ -1,6 +1,5 @@
-//! Parent-relative anchors run inside native measure and arrange. Fill temporarily
-//! overrides explicit dimensions at a higher value-store priority; removing the
-//! anchor exposes the current local width/height and their bindings again.
+//! Resolve each axis in dependency order without changing the native child stack.
+//! Per-axis animation-priority overrides preserve the authored dimensions for unanchoring.
 use super::*;
 use ferroui_base::{
     data::BindingPriority,
@@ -8,19 +7,109 @@ use ferroui_base::{
     input::InputElementImpl,
     instantiate,
     interactivity::InteractiveImpl,
-    layout::{Layoutable, LayoutableImpl},
+    layout::{Layoutable, LayoutableImpl, LayoutableImplExt},
     FerroObjectImpl, Rect, Size, StyledElementImpl, VisualImpl,
 };
-use ferroui_controls::{Canvas, CanvasImpl, CanvasImplExt, ControlImpl, PanelImpl};
+use ferroui_controls::{Canvas, CanvasImpl, ControlImpl, PanelImpl};
+use ferroui_qml::AnchorEdge;
 use std::collections::HashMap;
 
-#[derive(Clone, Copy, PartialEq)]
-pub(super) enum Anchor {
-    Fill { margins: f64 },
-    Center { dx: f64, dy: f64 },
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Side {
+    Start,
+    End,
+    Center,
 }
-pub(super) type Rules = HashMap<Ref<Control>, Anchor>;
+fn axis_side(edge: AnchorEdge) -> (usize, Side) {
+    use AnchorEdge::*;
+    match edge {
+        Left => (0, Side::Start),
+        Right => (0, Side::End),
+        HorizontalCenter => (0, Side::Center),
+        Top => (1, Side::Start),
+        Bottom => (1, Side::End),
+        VerticalCenter => (1, Side::Center),
+    }
+}
+#[derive(Clone, PartialEq)]
+struct Line {
+    target: Option<Ref<Control>>,
+    side: Side,
+    offset: f64,
+    align: bool,
+}
+#[derive(Clone, Default, PartialEq)]
+struct Axis {
+    start: Option<Line>,
+    end: Option<Line>,
+    center: Option<Line>,
+}
+impl Axis {
+    fn lines(&self) -> impl Iterator<Item = &Line> {
+        [&self.start, &self.end, &self.center].into_iter().flatten()
+    }
+    fn stretches(&self) -> bool {
+        self.lines().count() >= 2
+    }
+}
+#[derive(Clone, PartialEq)]
+pub(super) struct Anchor {
+    axes: [Axis; 2],
+    align: bool,
+}
+#[derive(Default)]
+pub(super) struct Rules {
+    rules: HashMap<Ref<Control>, Anchor>,
+    order: [Vec<Ref<Control>>; 2],
+}
+impl Rules {
+    pub(super) fn insert(&mut self, child: Ref<Control>, anchor: Anchor) {
+        self.rules.insert(child, anchor);
+    }
+    pub(super) fn validate(&mut self) -> Result<(), Error> {
+        for axis in 0..2 {
+            let mut degrees = HashMap::new();
+            let mut users: HashMap<_, Vec<_>> = HashMap::new();
+            let mut ready = vec![];
+            for (child, rule) in &self.rules {
+                let mut count = 0usize;
+                for line in rule.axes[axis].lines() {
+                    if let Some(target) =
+                        line.target.as_ref().filter(|t| self.rules.contains_key(*t))
+                    {
+                        users.entry(target.clone()).or_default().push(child.clone());
+                        count += 1;
+                    }
+                }
+                if count == 0 {
+                    ready.push(child.clone());
+                }
+                degrees.insert(child.clone(), count);
+            }
+            let mut order = vec![];
+            while let Some(child) = ready.pop() {
+                if let Some(list) = users.get(&child) {
+                    for next in list {
+                        let count = degrees.get_mut(next).expect("recorded child");
+                        *count -= 1;
+                        if *count == 0 {
+                            ready.push(next.clone());
+                        }
+                    }
+                }
+                order.push(child);
+            }
+            if order.len() != self.rules.len() {
+                return Err(Error::new("cycle between sibling anchor lines"));
+            }
+            self.order[axis] = order;
+        }
+        Ok(())
+    }
+}
+
 type Overrides = [Option<Rc<dyn IDisposable>>; 2];
+type Frames = HashMap<Ref<Control>, Rect>;
 
 #[repr(C)]
 pub struct AnchorCanvas {
@@ -28,54 +117,161 @@ pub struct AnchorCanvas {
     rules: RefCell<Rules>,
     overrides: RefCell<HashMap<Ref<Control>, Overrides>>,
 }
-
 ferro_class!(AnchorCanvas: Canvas);
-ferro_impl_classes!(AnchorCanvas: FerroObjectImpl, StyledElementImpl, VisualImpl, InteractiveImpl,
-    InputElementImpl, ControlImpl, PanelImpl);
+ferro_impl_classes!(AnchorCanvas: FerroObjectImpl,StyledElementImpl,VisualImpl,InteractiveImpl,InputElementImpl,ControlImpl,PanelImpl);
+impl CanvasImpl for AnchorCanvas {}
 
+fn half(length: f64, align: bool) -> f64 {
+    if align && length.is_finite() {
+        (length.trunc() / 2.).ceil()
+    } else {
+        length / 2.
+    }
+}
+fn component(rect: Rect, axis: usize) -> (f64, f64) {
+    if axis == 0 {
+        (rect.x, rect.width)
+    } else {
+        (rect.y, rect.height)
+    }
+}
+fn resolve(line: &Line, frames: &Frames, parent: Rect, axis: usize) -> f64 {
+    let rect = line
+        .target
+        .as_ref()
+        .and_then(|target| frames.get(target))
+        .copied()
+        .unwrap_or(parent);
+    let (pos, extent) = component(rect, axis);
+    pos + match line.side {
+        Side::Start => 0.,
+        Side::End => extent,
+        Side::Center => half(extent, line.align),
+    } + line.offset
+}
+fn solve(rules: &Rules, frames: &mut Frames, size: Size, axis: usize) {
+    let parent = Rect::new(0., 0., size.width, size.height);
+    for child in &rules.order[axis] {
+        let Some(frame) = frames.get(child) else {
+            continue;
+        };
+        let (_, natural) = component(*frame, axis);
+        let anchor = &rules.rules[child];
+        let constraint = &anchor.axes[axis];
+        let coord =
+            |target: &Option<Line>| target.as_ref().map(|l| resolve(l, frames, parent, axis));
+        let (pos, extent) = match (
+            coord(&constraint.start),
+            coord(&constraint.end),
+            coord(&constraint.center),
+        ) {
+            (Some(start), Some(end), _) => (start, (end - start).max(0.)),
+            (Some(start), _, Some(center)) => (start, (2. * (center - start)).max(0.)),
+            (_, Some(end), Some(center)) => {
+                let n = (2. * (end - center)).max(0.);
+                (end - n, n)
+            }
+            (Some(start), _, _) => (start, natural),
+            (_, Some(end), _) => (end - natural, natural),
+            (_, _, Some(center)) => (center - half(natural, anchor.align), natural),
+            _ => continue,
+        };
+        let frame = frames.get_mut(child).unwrap();
+        if axis == 0 {
+            frame.x = pos;
+            frame.width = extent;
+        } else {
+            frame.y = pos;
+            frame.height = extent;
+        }
+    }
+}
+impl AnchorCanvas {
+    fn frames(&self, size: Size) -> Frames {
+        self.children()
+            .snapshot()
+            .iter()
+            .map(|c| {
+                let desired = c.desired_size();
+                let x = origin(
+                    Canvas::get_left(c),
+                    Canvas::get_right(c),
+                    size.width,
+                    desired.width,
+                );
+                let y = origin(
+                    Canvas::get_top(c),
+                    Canvas::get_bottom(c),
+                    size.height,
+                    desired.height,
+                );
+                (c.clone(), Rect::new(x, y, desired.width, desired.height))
+            })
+            .collect()
+    }
+}
+fn origin(start: f64, end: f64, size: f64, desired: f64) -> f64 {
+    if start.is_finite() {
+        start
+    } else if end.is_finite() {
+        size - end - desired
+    } else {
+        0.
+    }
+}
 impl LayoutableImpl for AnchorCanvas {
     fn measure_override(this: &Self, available: Size) -> Size {
-        for child in this.children().snapshot().iter() {
-            let anchor = this.rules.borrow().get(child).copied();
-            let constraint = match anchor {
-                Some(Anchor::Fill { margins }) => inset(available, margins),
-                _ => Size::new(f64::INFINITY, f64::INFINITY),
-            };
-            child.measure(constraint);
+        let children = this.children().snapshot();
+        for c in children.iter() {
+            c.measure(Size::new(f64::INFINITY, f64::INFINITY));
+        }
+        let rules = this.rules.borrow();
+        if !rules.rules.is_empty() {
+            let mut frames = this.frames(available);
+            if available.width.is_finite() {
+                solve(&rules, &mut frames, available, 0);
+            }
+            // Width constraints can change intrinsic height (for example, wrapped text).
+            for (child, rule) in &rules.rules {
+                if rule.axes[0].stretches() && available.width.is_finite() {
+                    if let Some(rect) = frames.get_mut(child) {
+                        child.measure(Size::new(rect.width, f64::INFINITY));
+                        rect.height = child.desired_size().height;
+                    }
+                }
+            }
+            if available.height.is_finite() {
+                solve(&rules, &mut frames, available, 1);
+            }
+            for (child, rule) in &rules.rules {
+                if rule.axes[1].stretches() && available.height.is_finite() {
+                    if let Some(rect) = frames.get(child) {
+                        let width = if rule.axes[0].stretches() && available.width.is_finite() {
+                            rect.width
+                        } else {
+                            f64::INFINITY
+                        };
+                        child.measure(Size::new(width, rect.height));
+                    }
+                }
+            }
         }
         Size::default()
     }
-}
-
-impl CanvasImpl for AnchorCanvas {
-    fn arrange_child(this: &Self, child: &Ref<Control>, size: Size) {
-        let anchor = this.rules.borrow().get(child).copied();
-        match anchor {
-            Some(Anchor::Fill { margins }) => {
-                let inner = inset(size, margins);
-                child.arrange(Rect::new(margins, margins, inner.width, inner.height));
-            }
-            Some(Anchor::Center { dx, dy }) => {
-                let desired = child.desired_size();
-                child.arrange(Rect::new(
-                    (size.width - desired.width) * 0.5 + dx,
-                    (size.height - desired.height) * 0.5 + dy,
-                    desired.width,
-                    desired.height,
-                ));
-            }
-            None => Self::parent_arrange_child(this, child, size),
+    fn arrange_override(this: &Self, size: Size) -> Size {
+        let rules = this.rules.borrow();
+        if rules.rules.is_empty() {
+            return Self::parent_arrange_override(this, size);
         }
+        let mut frames = this.frames(size);
+        solve(&rules, &mut frames, size, 0);
+        solve(&rules, &mut frames, size, 1);
+        for child in this.children().snapshot().iter() {
+            child.arrange(frames[child]);
+        }
+        size
     }
 }
-
-fn inset(size: Size, margins: f64) -> Size {
-    Size::new(
-        (size.width - 2.0 * margins).max(0.0),
-        (size.height - 2.0 * margins).max(0.0),
-    )
-}
-
 impl AnchorCanvas {
     pub(super) fn create() -> Ref<Canvas> {
         instantiate(Self {
@@ -85,38 +281,41 @@ impl AnchorCanvas {
         })
         .upcast()
     }
-
     pub(super) fn update(&self, next: Rules) {
-        if *self.rules.borrow() == next {
+        if self.rules.borrow().rules == next.rules {
             return;
         }
         let mut old = self.overrides.take();
         let mut active = HashMap::new();
-        for (child, rule) in &next {
-            if !matches!(rule, Anchor::Fill { .. }) {
-                continue;
+        for (child, anchor) in &next.rules {
+            let mut dimensions = old.remove(child).unwrap_or_default();
+            for (axis, dimension) in dimensions.iter_mut().enumerate() {
+                if anchor.axes[axis].stretches() {
+                    if dimension.is_none() {
+                        let property = if axis == 0 {
+                            Layoutable::width_property()
+                        } else {
+                            Layoutable::height_property()
+                        };
+                        *dimension = child.set_value_with_priority(
+                            property,
+                            f64::NAN,
+                            BindingPriority::Animation,
+                        );
+                    }
+                } else if let Some(d) = dimension.take() {
+                    d.dispose();
+                }
             }
-            let dimensions = old.remove(child).unwrap_or_else(|| {
-                [
-                    child.set_value_with_priority(
-                        Layoutable::width_property(),
-                        f64::NAN,
-                        BindingPriority::Animation,
-                    ),
-                    child.set_value_with_priority(
-                        Layoutable::height_property(),
-                        f64::NAN,
-                        BindingPriority::Animation,
-                    ),
-                ]
-            });
-            active.insert(child.clone(), dimensions);
+            if dimensions.iter().any(Option::is_some) {
+                active.insert(child.clone(), dimensions);
+            }
         }
         *self.rules.borrow_mut() = next;
         *self.overrides.borrow_mut() = active;
-        for dimensions in old.into_values() {
-            for value in dimensions.into_iter().flatten() {
-                value.dispose();
+        for dims in old.into_values() {
+            for d in dims.into_iter().flatten() {
+                d.dispose();
             }
         }
         self.invalidate_measure();
@@ -126,40 +325,119 @@ impl AnchorCanvas {
 pub(super) fn read(
     instance: &Instance,
     child: ObjectId,
-) -> Result<Option<(ObjectId, Anchor)>, Error> {
-    let fill = instance.get(child, "anchors.fill")?;
-    let center = instance.get(child, "anchors.centerIn")?;
-    let scalar = |name| match instance.get(child, name)? {
-        Value::Number(n) if n.is_finite() => Ok(n),
-        _ => Err(Error::new(format!("{name} must be finite"))),
+    parents: &BTreeMap<ObjectId, ObjectId>,
+    nodes: &tree::Peers,
+) -> Result<Option<Anchor>, Error> {
+    let field = |name: &str| instance.get(child, &format!("anchors.{name}"));
+    let optional_target = |name| match field(name)? {
+        Value::Object(o) => Ok(Some(o)),
+        Value::Undefined | Value::Null => Ok(None),
+        _ => Err(Error::new("invalid anchor target")),
     };
-    match (fill, center) {
-        (Value::Null, Value::Null) => Ok(None),
-        (Value::Object(id), Value::Null) => Ok(Some((
-            id,
-            Anchor::Fill {
-                margins: scalar("anchors.margins")?,
-            },
-        ))),
-        (Value::Null, Value::Object(id)) => Ok(Some((
-            id,
-            Anchor::Center {
-                dx: scalar("anchors.horizontalCenterOffset")?,
-                dy: scalar("anchors.verticalCenterOffset")?,
-            },
-        ))),
-        _ => Err(Error::new(
+    let scalar = |name, default| match field(name)? {
+        Value::Number(n) if n.is_finite() => Ok(n),
+        Value::Undefined => Ok(default),
+        _ => Err(Error::new(format!("anchors.{name} must be finite"))),
+    };
+    let fill = optional_target("fill")?;
+    let center = optional_target("centerIn")?;
+    if fill.is_some() && center.is_some() {
+        return Err(Error::new(
             "anchors.fill and anchors.centerIn cannot both be active",
-        )),
+        ));
     }
+    let parent = parents.get(&child).copied();
+    let align = |id| instance.get(id, "anchors.alignWhenCentered").ok() != Some(Value::Bool(false));
+    let margin = scalar("margins", 0.)?;
+    let mut anchor = Anchor {
+        axes: Default::default(),
+        align: align(child),
+    };
+    let mut anchored = false;
+    for edge in AnchorEdge::ALL {
+        let (axis, side) = axis_side(edge);
+        let explicit = match field(edge.name())? {
+            Value::Undefined | Value::Null => None,
+            Value::AnchorLine(id, target_edge) => Some((id, target_edge)),
+            _ => return Err(Error::new("expected an Item anchor line")),
+        };
+        let shorthand = if matches!(side, Side::Center) {
+            center
+        } else {
+            fill
+        };
+        if explicit.is_some() && (fill.is_some() || center.is_some()) {
+            return Err(Error::new(
+                "cannot combine explicit anchor lines with fill or centerIn",
+            ));
+        }
+        let Some((id, target_edge)) = explicit.or(shorthand.map(|id| (id, edge))) else {
+            continue;
+        };
+        let (target_axis, target_side) = axis_side(target_edge);
+        if target_axis != axis {
+            return Err(Error::new("anchor lines must use the same axis"));
+        }
+        let target = if Some(id) == parent {
+            None
+        } else if parent.is_some() && child != id && parents.get(&id) == parent.as_ref() {
+            Some(
+                nodes
+                    .get(&id)
+                    .ok_or_else(|| Error::new("anchor target has no native peer"))?
+                    .control(),
+            )
+        } else {
+            return Err(Error::new(
+                "anchor target must be the item's visual parent or sibling",
+            ));
+        };
+        let (slot, offset) = match side {
+            Side::Start => (
+                &mut anchor.axes[axis].start,
+                scalar(if axis == 0 { "leftMargin" } else { "topMargin" }, margin)?,
+            ),
+            Side::End => (
+                &mut anchor.axes[axis].end,
+                -scalar(
+                    if axis == 0 {
+                        "rightMargin"
+                    } else {
+                        "bottomMargin"
+                    },
+                    margin,
+                )?,
+            ),
+            Side::Center => (
+                &mut anchor.axes[axis].center,
+                scalar(
+                    if axis == 0 {
+                        "horizontalCenterOffset"
+                    } else {
+                        "verticalCenterOffset"
+                    },
+                    0.,
+                )?,
+            ),
+        };
+        *slot = Some(Line {
+            target,
+            side: target_side,
+            offset,
+            align: align(id),
+        });
+        anchored = true;
+    }
+    if anchor.axes.iter().any(|axis| axis.lines().count() > 2) {
+        return Err(Error::new("an axis accepts at most two anchor lines"));
+    }
+    Ok(anchored.then_some(anchor))
 }
-
 impl Drop for AnchorCanvas {
     fn drop(&mut self) {
-        // A Rust caller may retain a child after the QML parent is released.
-        for (_, dimensions) in self.overrides.get_mut().drain() {
-            for value in dimensions.into_iter().flatten() {
-                value.dispose();
+        for (_, dims) in self.overrides.get_mut().drain() {
+            for d in dims.into_iter().flatten() {
+                d.dispose();
             }
         }
     }
