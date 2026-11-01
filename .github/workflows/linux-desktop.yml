@@ -1,0 +1,48 @@
+name: Ferro Desktop
+
+on:
+  pull_request:
+    paths:
+      - 'samples/LinuxDesktop/**'
+      - 'src/Skia/FerroUI.Skia/**'
+      - 'src/FerroUI.Vulkan/**'
+      - 'src/FerroUI.X11/**'
+      - 'src/FerroUI.Themes.*/**'
+      - '.github/workflows/linux-desktop.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  desktop:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CARGO_INCREMENTAL: 0
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+      CARGO_BUILD_JOBS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: graphite-linux-desktop
+      - name: Install native dependencies and test clients
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libfontconfig-dev libfreetype-dev libharfbuzz-dev fonts-dejavu-core \
+            mesa-vulkan-drivers xvfb xauth openbox xdotool dbus-x11 imagemagick x11-utils x11-xserver-utils
+      - name: Build and test the Graphite desktop
+        run: |
+          samples/LinuxDesktop/build.sh build --profile dev
+          samples/LinuxDesktop/build.sh test --profile dev
+      - name: Exercise the shell and capture its three themes
+        run: samples/LinuxDesktop/tests/smoke.sh target/debug/ferro-desktop desktop-captures
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: ferro-desktop-graphite
+          path: desktop-captures/
