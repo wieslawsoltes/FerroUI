@@ -134,7 +134,6 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
         section("Media & Graphics", Icons::MEDIA, &mut unavailable, |s| {
             s.add("/Pages/AcrylicPage.xaml", "Acrylic", Icons::BLUR, "Translucent acrylic window materials");
             s.add("/Pages/BitmapCachePage.xaml", "BitmapCache", Icons::LIGHTNING, "Cache visuals as bitmaps for performance");
-            s.add("/Pages/CompositionPage.xaml", "Composition", Icons::LAYERS, "Composition-layer animations and effects");
             s.add("/Pages/CustomDrawing.xaml", "Custom Drawing", Icons::BRUSH, "Render custom geometry in code");
             // Not from upstream: SymbolIcon and FontIcon of WinUI (docs/porting/winui-controls.md) and PathIcon.
             s.add("/Pages/IconElementPage.xaml", "IconElement", Icons::SPARKLE, "Symbol, font and path icons");
@@ -151,6 +150,7 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
         // materials, one per feature (`Pages/winui_composition_pages.rs`, docs/porting/winui-composition.md
         // and docs/porting/winui-materials.md).
         section("Composition", Icons::LAYERS, &mut unavailable, |s| {
+            s.add("/Pages/CompositionPage.xaml", "Composition overview", Icons::LAYERS, "Implicit animations, a custom visual and brushes of the composition layer");
             s.add_page(|| crate::pages::winui_composition_pages::connected_animations_page().upcast(), "Connected animations", Icons::TRANSITION, "A connected animation between a list and a detail view");
             s.add_page(|| crate::pages::winui_composition_pages::implicit_animations_page().upcast(), "Implicit animations", Icons::SPARKLE, "Implicit show and hide animations of elements");
             s.add_page(|| crate::pages::winui_composition_pages::pointer_position_page().upcast(), "Pointer position", Icons::CURSOR, "A visual that follows the pointer position property set");

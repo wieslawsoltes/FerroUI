@@ -627,7 +627,7 @@ Missing). `DEVIATIONS.md` points here for this area.
 
 ## 8. Verification in the catalog
 
-The ControlCatalog has a section "Composition", after "Media & Graphics", with one page per feature (`samples/ControlCatalog/Pages/winui_composition_pages.rs`; the upstream page "Composition" stays in "Media & Graphics"). Each page shows its demo at once, under a title that names the API it uses and a description. The pages of the WinUI materials are in the same section (`winui-materials.md`, section 10). The pages of the composition API, and the page "Reveal" of the materials, which replaces a section of the earlier single page:
+The ControlCatalog has a section "Composition", after "Media & Graphics", with one page per feature (`samples/ControlCatalog/Pages/winui_composition_pages.rs`). Its first page is the upstream page "Composition", moved from "Media & Graphics" and titled "Composition overview", so that the section and a page do not share a name. Each page shows its demo at once, under a title that names the API it uses and a description. The pages of the WinUI materials are in the same section (`winui-materials.md`, section 10). The pages of the composition API, and the page "Reveal" of the materials, which replaces a section of the earlier single page:
 
 | Page | Phase | What it shows |
 |---|---|---|

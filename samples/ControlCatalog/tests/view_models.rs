@@ -86,7 +86,8 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
     // pages, each exactly once and available through its page factory.
     let additional_pages = ["TreeDataGrid", "InkCanvas", "InkToolbar", "IconElement", "InfoBadge", "InfoBar", "ProgressRing", "NumberBox", "RadioButtons", "RatingControl", "AutoSuggestBox", "NavigationView", "ItemsRepeater", "Visual States", "RichTextBlock", "RichEditBox", "CartesianChart", "PieChart"]
         .into_iter()
-        .chain(COMPOSITION_PAGES)
+        // The first page of the section "Composition" is the upstream page "Composition".
+        .chain(COMPOSITION_PAGES.into_iter().skip(1))
         .collect::<Vec<_>>();
     assert_eq!(74 + additional_pages.len(), available + view_model.unavailable_pages().len());
     for header in additional_pages {
@@ -100,9 +101,11 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
     }
 }
 
-/// The pages of the section "Composition" (not from upstream): one per feature of the WinUI
-/// composition API and of the WinUI materials, in the order of the page list.
-const COMPOSITION_PAGES: [&str; 19] = [
+/// The pages of the section "Composition" (not from upstream): the composition page of the
+/// original, then one per feature of the WinUI composition API and of the WinUI materials, in the
+/// order of the page list.
+const COMPOSITION_PAGES: [&str; 20] = [
+    "Composition overview",
     "Connected animations",
     "Implicit animations",
     "Pointer position",
@@ -138,7 +141,7 @@ fn the_composition_section_has_a_page_per_feature() {
     let headers: Vec<String> =
         sections[media + 1].items().map(|items| items.iter().map(|page| page.header()).collect()).unwrap_or_default();
     assert_eq!(COMPOSITION_PAGES.to_vec(), headers);
-    for header in ["Acrylic", "BitmapCache", "Composition"] {
+    for header in ["Acrylic", "BitmapCache"] {
         let media_pages = sections[media].items().unwrap();
         assert!(media_pages.iter().any(|page| page.header() == header), "{header} stays in Media & Graphics");
     }
