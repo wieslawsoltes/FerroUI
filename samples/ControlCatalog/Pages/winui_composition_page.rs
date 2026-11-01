@@ -1,11 +1,11 @@
-//! The page of the WinUI composition API (not from upstream; `docs/porting/winui-composition.md`):
-//! a connected animation between a list and a detail view, the implicit show and hide
-//! animations of `ElementCompositionPreview`, a light that follows the pointer through the
-//! pointer position property set, and a parallax header driven by the manipulation property set
-//! of a scroll viewer. The sections of the later phases (visuals, brushes, animations, shadows and
-//! lights, the interaction tracker, effects) are in `winui_composition_phases.rs`.
+//! The demos of the first phase of the port of the WinUI composition API (not from upstream;
+//! `docs/porting/winui-composition.md`): a connected animation between a list and a detail view,
+//! the implicit show and hide animations of `ElementCompositionPreview`, a light that follows the
+//! pointer through the pointer position property set, and a parallax header driven by the
+//! manipulation property set of a scroll viewer, with the helpers the other demos share. Each is a
+//! page of the section "Composition" of the catalog (`winui_composition_pages.rs`).
 
-use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
+use ferroui_base::layout::{HorizontalAlignment, Orientation};
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Color, FontWeight, IBrush, TextWrapping};
 use ferroui_base::rendering::composition::animations::{ICompositionAnimation, ICompositionAnimationBase};
@@ -17,7 +17,7 @@ use ferroui_controls::animation::{
     DirectConnectedAnimationConfiguration, GravityConnectedAnimationConfiguration,
 };
 use ferroui_controls::hosting::ElementCompositionPreview;
-use ferroui_controls::{Border, Button, ContentPage, Control, ScrollViewer, StackPanel, TextBlock, TopLevel, WrapPanel};
+use ferroui_controls::{Border, Button, Control, ScrollViewer, StackPanel, TextBlock, TopLevel, WrapPanel};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
@@ -108,17 +108,18 @@ fn hide_animation(compositor: &Rc<Compositor>) -> Rc<dyn ICompositionAnimationBa
 }
 
 ferroui_base::ferro_thread_local! {
-    /// The gallery of the page last created, for the smoke run of the desktop entry point.
+    /// The gallery of the page "Connected animations" last created, for the smoke run of the
+    /// desktop entry point.
     static GALLERY: RefCell<std::rc::Weak<Gallery>> = RefCell::new(std::rc::Weak::new());
 
-    /// The box of the implicit animations and the parallax scroller of the page last created,
-    /// for the smoke run.
+    /// The box of the page "Implicit animations" and the scroller of the page "Parallax" last
+    /// created, for the smoke run.
     static SMOKE_TARGETS: RefCell<(Option<ferroui_base::WeakRef<Border>>, Option<ferroui_base::WeakRef<ScrollViewer>>)> =
         const { RefCell::new((None, None)) };
 }
 
-/// Toggles `IsVisible` of the box of the implicit animations of the page last created (for the
-/// smoke run of the desktop entry point).
+/// Toggles `IsVisible` of the box of the page "Implicit animations" last created (for the smoke
+/// run of the desktop entry point).
 pub fn smoke_toggle_box() -> bool {
     let Some(box_) = SMOKE_TARGETS.with(|targets| targets.borrow().0.as_ref().and_then(|weak| weak.upgrade())) else {
         return false;
@@ -127,7 +128,7 @@ pub fn smoke_toggle_box() -> bool {
     true
 }
 
-/// Scrolls the parallax scroller of the page last created, and brings it into view (for the
+/// Scrolls the scroller of the page "Parallax" last created, and brings it into view (for the
 /// smoke run of the desktop entry point).
 pub fn smoke_scroll_parallax(offset: f64) -> bool {
     let Some(scroller) = SMOKE_TARGETS.with(|targets| targets.borrow().1.as_ref().and_then(|weak| weak.upgrade()))
@@ -139,8 +140,9 @@ pub fn smoke_scroll_parallax(offset: f64) -> bool {
     true
 }
 
-/// Opens the detail view of card `index` of the page last created, as a click on it does (for
-/// the smoke run of the desktop entry point). Returns whether there was such a page.
+/// Opens the detail view of card `index` of the page "Connected animations" last created, as a
+/// click on it does (for the smoke run of the desktop entry point). Returns whether there was such
+/// a page.
 pub fn smoke_open_card(index: usize) -> bool {
     let Some(gallery) = GALLERY.with(|gallery| gallery.borrow().upgrade()) else { return false };
     let Some(image) = gallery.images.get(index).cloned() else { return false };
@@ -148,15 +150,16 @@ pub fn smoke_open_card(index: usize) -> bool {
     true
 }
 
-/// Chooses the configuration of the page last created (0 gravity, 1 direct, 2 basic), as its
-/// buttons do.
+/// Chooses the configuration of the page "Connected animations" last created (0 gravity,
+/// 1 direct, 2 basic), as its buttons do.
 pub fn smoke_set_configuration(index: usize) -> bool {
     let Some(gallery) = GALLERY.with(|gallery| gallery.borrow().upgrade()) else { return false };
     gallery.configuration.set(index);
     true
 }
 
-/// Returns to the list of the page last created, as the back button does.
+/// Returns to the list of the page "Connected animations" last created, as the back button
+/// does.
 pub fn smoke_close_card() -> bool {
     let Some(gallery) = GALLERY.with(|gallery| gallery.borrow().upgrade()) else { return false };
     gallery.close();
@@ -229,7 +232,7 @@ impl Gallery {
     }
 }
 
-fn connected_animation_section() -> Ref<StackPanel> {
+pub(super) fn connected_animation_section() -> Ref<StackPanel> {
     let status = text("Pick a card", 12.0, FontWeight::Normal);
     status.set_opacity(0.7);
 
@@ -356,7 +359,7 @@ fn connected_animation_section() -> Ref<StackPanel> {
     )
 }
 
-fn implicit_animations_section() -> Ref<StackPanel> {
+pub(super) fn implicit_animations_section() -> Ref<StackPanel> {
     let box_ = Border::new();
     SMOKE_TARGETS.with(|targets| targets.borrow_mut().0 = Some(box_.downgrade()));
     box_.set_width(220.0);
@@ -432,7 +435,7 @@ fn implicit_animations_section() -> Ref<StackPanel> {
     )
 }
 
-fn pointer_section() -> Ref<StackPanel> {
+pub(super) fn pointer_section() -> Ref<StackPanel> {
     let surface = Border::new();
     surface.set_width(420.0);
     surface.set_height(160.0);
@@ -491,7 +494,7 @@ fn pointer_section() -> Ref<StackPanel> {
     )
 }
 
-fn parallax_section() -> Ref<StackPanel> {
+pub(super) fn parallax_section() -> Ref<StackPanel> {
     let header = Border::new();
     header.set_height(140.0);
     header.set_corner_radius(CornerRadius::uniform(8.0));
@@ -539,25 +542,4 @@ fn parallax_section() -> Ref<StackPanel> {
         "ElementCompositionPreview.GetScrollViewerManipulationPropertySet: an expression animation of the Translation of the header reads the scrolling of its scroll viewer.",
         &scroller.upcast(),
     )
-}
-
-/// Creates the page.
-pub fn winui_composition_page() -> Ref<ContentPage> {
-    let page = ContentPage::new();
-    page.set_header(Some(label("Composition (WinUI)")));
-    let panel = StackPanel::new();
-    panel.set_spacing(28.0);
-    panel.set_margin(Thickness::uniform(16.0));
-    panel.set_vertical_alignment(VerticalAlignment::Top);
-    panel.children().add(connected_animation_section());
-    panel.children().add(implicit_animations_section());
-    panel.children().add(pointer_section());
-    panel.children().add(parallax_section());
-    for section in super::winui_composition_phases::phase_sections() {
-        panel.children().add(section);
-    }
-    let scroller = ScrollViewer::new();
-    scroller.set_content(Some(Control::boxed(panel)));
-    page.set_content(Some(Control::boxed(scroller)));
-    page
 }

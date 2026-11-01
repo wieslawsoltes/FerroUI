@@ -150,9 +150,9 @@ export async function settled(page, quiet = 500, timeout = 8000) {
 export const TOUR = [
     { section: "Window & Platform", name: "Platform Information" },
     { section: "Status & Feedback", name: "Data Validation" },
+    { section: "Composition", name: "Composition overview", animated: true },
     { section: "Media & Graphics", name: "OpenGL" },
     { section: "Media & Graphics", name: "Image" },
-    { section: "Media & Graphics", name: "Composition", animated: true },
     { section: "Layout", name: "Container Queries" },
     { section: "Layout", name: "Border" },
     { section: "Navigation & Pages", name: "TabControl" },
@@ -244,7 +244,7 @@ export const PAGE_ACTIONS = {
     "TabbedPage": { open: ["Fluid Nav Bar"] },
     "TabControl": { open: ["_Leaf", "Leaf"] },
     "Expander": { open: ["Expand Up", "Expand Down"] },
-    "Composition": { open: ["Animations", "Custom", "Brushes"] },
+    "Composition overview": { open: ["Animations", "Custom", "Brushes"] },
     "Image": { open: ["Drawing", "Crop"] },
     "TransitioningContentControl": { open: [">", ">"] },
     "Notifications": { open: ["Show Standard Managed Notification", "Show Custom Managed Notification"] }

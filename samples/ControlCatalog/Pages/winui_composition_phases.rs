@@ -1,9 +1,9 @@
-//! The sections of the page "Composition (WinUI)" for phases 2 to 6 of the port (not from
-//! upstream; `docs/porting/winui-composition.md`): visuals, brushes, animations, shadows and
-//! lights, the interaction tracker and the effect brushes. Each section builds its demo the first
-//! time its expander opens, so the page stays light until a demo is looked at.
+//! The demos of phases 2 to 6 of the port of the WinUI composition API (not from upstream;
+//! `docs/porting/winui-composition.md`): visuals, brushes, animations, shadows and lights, the
+//! interaction tracker and the effect brushes. Each is a page of the section "Composition" of the
+//! catalog (`winui_composition_pages.rs`).
 
-use super::winui_composition_page::{brush, compositor_of, scalar, section, text, vector};
+use super::winui_composition_page::{brush, compositor_of, scalar, text, vector};
 use ferroui_base::animation::PlaybackDirection;
 use ferroui_base::input::{InputElement, PointerPressedEventArgs};
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
@@ -31,131 +31,19 @@ use ferroui_base::rendering::composition::{
 };
 use ferroui_base::{BoxedValue, CornerRadius, PixelSize, Ref, Thickness, Vector, Vector3D, WeakRef};
 use ferroui_controls::hosting::ElementCompositionPreview;
-use ferroui_controls::{Border, Button, Control, Expander, Slider, StackPanel, TextBlock, WrapPanel};
+use ferroui_controls::{Border, Button, Control, Slider, StackPanel, TextBlock, WrapPanel};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::{Duration, Instant};
 
-/// What the smoke run does in an open section: presses its buttons.
+/// What the smoke run does on the page of a demo: presses its buttons.
 pub(super) type SmokeAction = Rc<dyn Fn()>;
 
 /// A demo: its content, and what the smoke run does in it.
 pub(super) struct Demo {
     pub(super) content: Ref<Control>,
     pub(super) smoke: SmokeAction,
-}
-
-ferroui_base::ferro_thread_local! {
-    /// The sections of the page last created, with their expanders and the smoke action of the
-    /// demo once it is built, for the smoke run of the desktop entry point.
-    static SECTIONS: RefCell<Vec<SectionEntry>> = const { RefCell::new(Vec::new()) };
-}
-
-struct SectionEntry {
-    section: WeakRef<StackPanel>,
-    expander: WeakRef<Expander>,
-    smoke: Rc<RefCell<Option<SmokeAction>>>,
-}
-
-/// Opens the expander of every section of the page last created (for the smoke run of the
-/// desktop entry point). Returns how many sections there are.
-pub fn smoke_expand_sections() -> usize {
-    SECTIONS.with(|sections| {
-        let sections = sections.borrow();
-        for entry in sections.iter() {
-            if let Some(expander) = entry.expander.upgrade() {
-                expander.set_is_expanded(true);
-            }
-        }
-        sections.len()
-    })
-}
-
-/// Brings section `index` of the page last created into view and runs its demo, as its buttons
-/// do (for the smoke run). Returns whether the section exists and its demo is built.
-pub fn smoke_show_section(index: usize) -> bool {
-    let entry = SECTIONS.with(|sections| {
-        sections.borrow().get(index).map(|entry| (entry.section.upgrade(), entry.smoke.borrow().clone()))
-    });
-    let Some((Some(section), smoke)) = entry else { return false };
-    section.bring_into_view();
-    let Some(smoke) = smoke else { return false };
-    smoke();
-    true
-}
-
-/// The sections of phases 2 to 6, for the page.
-pub fn phase_sections() -> Vec<Ref<StackPanel>> {
-    SECTIONS.with(|sections| sections.borrow_mut().clear());
-    vec![
-        lazy_section(
-            "Visuals",
-            "SpriteVisual with a CompositionColorBrush; ShapeVisual with rounded rectangle, ellipse and path geometries (the path animates TrimEnd); LayerVisual with an effect over its children; RedirectVisual drawing the visual of another element.",
-            visuals_demo,
-        ),
-        lazy_section(
-            "Brushes",
-            "CompositionLinearGradientBrush and CompositionRadialGradientBrush with their WinUI members, CompositionNineGridBrush over a LoadedImageSurface, and CompositionMaskBrush.",
-            brushes_demo,
-        ),
-        lazy_section(
-            "Animations",
-            "SpringScalarNaturalMotionAnimation and SpringVector3NaturalMotionAnimation with DampingRatio and Period; key frame animations with the CompositionEasingFunction curves side by side; a CompositionAnimationGroup whose CompositionScopedBatch reports its completion.",
-            animations_demo,
-        ),
-        lazy_section(
-            "Shadows and lights",
-            "DropShadow with BlurRadius, Offset and Color; AmbientLight, DistantLight, PointLight and SpotLight lighting the visuals of their Targets.",
-            shadows_and_lights_demo,
-        ),
-        lazy_section(
-            "InteractionTracker",
-            "InteractionTracker with a VisualInteractionSource redirected from the pointer: drag the surface, release to coast in inertia within MinPosition and MaxPosition. An expression animation reads tracker.Position.",
-            interaction_tracker_demo,
-        ),
-        lazy_section(
-            "Effects",
-            "CompositionEffectFactory and CompositionEffectBrush for the effects of the port: GaussianBlurEffect, OpacityEffect, CrossFadeEffect, CompositeEffect and ColorSourceEffect, over a LoadedImageSurface.",
-            effects_demo,
-        ),
-        lazy_section(
-            "Reveal and XAML lights",
-            "RevealBackgroundBrush and RevealBorderBrush lit by the XAML lights of WinUI: RevealBrush.State (set here by the pointer) gives the element a RevealHoverLight and a RevealPressLight in its Lights, and the window's RevealBorderLight lights the borders near the pointer. More on the page Materials (WinUI).",
-            reveal_demo,
-        ),
-    ]
-    .into_iter()
-    // Phase 7: alpha masks, theme shadows and zoom.
-    .chain(super::winui_composition_phase7::phase7_sections())
-    .collect()
-}
-
-/// A section whose demo is built when its expander first opens.
-pub(super) fn lazy_section(title: &str, description: &str, build: fn() -> Demo) -> Ref<StackPanel> {
-    let expander = Expander::new();
-    expander.set_header(Some(label("Show the demo")));
-    expander.set_horizontal_alignment(HorizontalAlignment::Stretch);
-    let smoke: Rc<RefCell<Option<SmokeAction>>> = Rc::new(RefCell::new(None));
-    {
-        let weak = expander.downgrade();
-        let smoke = smoke.clone();
-        let _ = expander.expanding(move |_, _| {
-            let Some(expander) = weak.upgrade() else { return };
-            if expander.content().is_some() {
-                return;
-            }
-            let demo = build();
-            demo.content.set_horizontal_alignment(HorizontalAlignment::Left);
-            *smoke.borrow_mut() = Some(demo.smoke);
-            expander.set_content(Some(Control::boxed(demo.content)));
-        });
-    }
-    let panel = section(title, description, &expander.clone().upcast());
-    SECTIONS.with(|sections| {
-        sections.borrow_mut().push(SectionEntry { section: panel.downgrade(), expander: expander.downgrade(), smoke })
-    });
-    panel
 }
 
 // --- helpers -------------------------------------------------------------------------------
@@ -319,7 +207,7 @@ fn forever(compositor: &Rc<Compositor>, from: f32, to: f32, ms: u64) -> Rc<dyn I
 
 // --- visuals -------------------------------------------------------------------------------
 
-fn visuals_demo() -> Demo {
+pub(super) fn visuals_demo() -> Demo {
     // A sprite visual with a colour brush, and a smaller one turned inside it.
     let sprite_host = host(150.0, 150.0, DARK);
     on_composition(&sprite_host, |host, compositor| {
@@ -474,7 +362,7 @@ fn frame_bitmap() -> Bitmap {
     })
 }
 
-fn brushes_demo() -> Demo {
+pub(super) fn brushes_demo() -> Demo {
     let linear_host = host(170.0, 110.0, DARK);
     on_composition(&linear_host, |host, compositor| {
         let linear = compositor.create_linear_gradient_brush();
@@ -681,7 +569,7 @@ impl Animations {
     }
 }
 
-fn animations_demo() -> Demo {
+pub(super) fn animations_demo() -> Demo {
     let state = Rc::new(Animations { damping_ratio: Cell::new(0.3), period_ms: Cell::new(60.0), ..Default::default() });
     let status = caption("Not run yet");
 
@@ -826,7 +714,7 @@ fn animations_demo() -> Demo {
 
 // --- shadows and lights --------------------------------------------------------------------
 
-fn shadows_and_lights_demo() -> Demo {
+pub(super) fn shadows_and_lights_demo() -> Demo {
     // A drop shadow with adjustable blur, offset and colour.
     let shadow: Rc<RefCell<Option<Rc<DropShadow>>>> = Rc::new(RefCell::new(None));
     let shadow_host = host(320.0, 190.0, LIGHT);
@@ -1031,7 +919,7 @@ struct Tracker {
     source: RefCell<Option<Rc<VisualInteractionSource>>>,
 }
 
-fn interaction_tracker_demo() -> Demo {
+pub(super) fn interaction_tracker_demo() -> Demo {
     const VIEW: (f64, f64) = (420.0, 240.0);
     const CONTENT: (f64, f64) = (720.0, 480.0);
     let state = Rc::new(Tracker::default());
@@ -1145,7 +1033,7 @@ fn effect_sprite(compositor: &Rc<Compositor>, effect: &CompositionEffectBrush) -
     visual
 }
 
-fn effects_demo() -> Demo {
+pub(super) fn effects_demo() -> Demo {
     let blur: Rc<RefCell<Option<CompositionEffectBrush>>> = Rc::new(RefCell::new(None));
     let mut tiles = Vec::new();
 
@@ -1244,20 +1132,4 @@ fn effects_demo() -> Demo {
     content.children().add(grid);
     let smoke: SmokeAction = Rc::new(move || blur_slider.set_range_value(8.0));
     Demo { content: content.upcast(), smoke }
-}
-
-// --- Reveal --------------------------------------------------------------------------------
-
-fn reveal_demo() -> Demo {
-    let surface = Border::new();
-    surface.set_padding(Thickness::uniform(12.0));
-    surface.set_corner_radius(CornerRadius::uniform(8.0));
-    surface.set_background(Some(brush(DARK)));
-    let tiles = row(8.0);
-    for name in ["Reveal", "Hover", "Press"] {
-        tiles.children().add(super::winui_materials_page::reveal_tile(name));
-    }
-    surface.set_child(tiles);
-    let smoke: SmokeAction = Rc::new(|| {});
-    Demo { content: surface.upcast(), smoke }
 }

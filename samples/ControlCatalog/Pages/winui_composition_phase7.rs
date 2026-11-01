@@ -1,12 +1,13 @@
-//! The sections of the page "Composition (WinUI)" for phase 7 of the port (not from upstream;
+//! The demos of phase 7 of the port of the WinUI composition API (not from upstream;
 //! `docs/porting/winui-composition.md`): the shadow of an alpha mask (`GetAlphaMask` of a shape,
 //! a text block and an image as the `Mask` of a `DropShadow`, with the trace pointer of the
 //! Windows Calculator), the `Offset.Z` of a drop shadow, `ThemeShadow` at the elevations of the
 //! WinUI controls in both themes, and the zoom of a scroll viewer driving visuals through its
-//! manipulation property set.
+//! manipulation property set. Each is a page of the section "Composition" of the catalog
+//! (`winui_composition_pages.rs`).
 
 use super::winui_composition_page::{brush, compositor_of, text};
-use super::winui_composition_phases::{lazy_section, Demo, SmokeAction};
+use super::winui_composition_phases::{Demo, SmokeAction};
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::{Color, FontWeight, Geometry, IImage, ScaleTransform, Shadow, ThemeShadow};
@@ -25,27 +26,6 @@ use ferroui_controls::{
 };
 use std::cell::RefCell;
 use std::rc::Rc;
-
-/// The sections of phase 7, for the page.
-pub fn phase7_sections() -> Vec<Ref<StackPanel>> {
-    vec![
-        lazy_section(
-            "Shadows of an alpha mask",
-            "Shape.GetAlphaMask, TextBlock.GetAlphaMask and Image.GetAlphaMask as the Mask of a DropShadow on a SpriteVisual set with SetElementChildVisual: the shadow follows the alpha of the element, not its rectangle. The first tile is the trace pointer of the Windows Calculator (DropShadow BlurRadius 6, Opacity 0.33, Offset (2, 2, 0)); the slider scales it. The last tile turns a sprite out of its plane: the Z of the Offset of its shadow moves the shadow along the tilt.",
-            alpha_mask_demo,
-        ),
-        lazy_section(
-            "ThemeShadow",
-            "UIElement.Shadow set to a ThemeShadow, the elevation from Translation.Z: 16 (a tool tip), 32 (a flyout), 40 (a submenu), 64 and 128 (a content dialog). An ambient and a directional shadow drawn around the rounded corners, darker in the dark theme, none in high contrast.",
-            theme_shadow_demo,
-        ),
-        lazy_section(
-            "Zoom and the manipulation property set",
-            "A ScrollViewer with ZoomMode Enabled (Ctrl and the wheel, or the buttons calling ChangeView). The marker over it is a composition visual whose Offset is an expression of the Translation and Scale of GetScrollViewerManipulationPropertySet: it stays on the dot of the content at every zoom and offset.",
-            zoom_demo,
-        ),
-    ]
-}
 
 // --- helpers -------------------------------------------------------------------------------
 
@@ -209,7 +189,7 @@ fn circle_bitmap() -> Bitmap {
 
 // --- the shadows of alpha masks --------------------------------------------------------------
 
-fn alpha_mask_demo() -> Demo {
+pub(super) fn alpha_mask_demo() -> Demo {
     let tiles = WrapPanel::new();
     tiles.set_orientation(Orientation::Horizontal);
 
@@ -388,7 +368,7 @@ fn alpha_mask_demo() -> Demo {
 
 // --- ThemeShadow ---------------------------------------------------------------------------
 
-fn theme_shadow_demo() -> Demo {
+pub(super) fn theme_shadow_demo() -> Demo {
     let scope = ThemeVariantScope::new();
     scope.set_requested_theme_variant(Some(ThemeVariant::light()));
     let ground = Border::new();
@@ -456,7 +436,7 @@ fn theme_shadow_demo() -> Demo {
 /// The point of the content the marker follows.
 const MARKED: (f64, f64) = (300.0, 200.0);
 
-fn zoom_demo() -> Demo {
+pub(super) fn zoom_demo() -> Demo {
     let content = Canvas::new();
     content.set_width(600.0);
     content.set_height(400.0);
