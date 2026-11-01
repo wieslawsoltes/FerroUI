@@ -245,3 +245,33 @@ fn sticky_next_label_follows_the_last_visible_group() {
         );
     }
 }
+
+#[test]
+fn unrelated_role_edits_retain_section_delegates_and_failed_regrouping_rolls_back() {
+    let mut ui = view(
+        r#"import QtQuick
+        ListView { id: v; height:100; width:100; property int createdLabels: 0
+            model: ListModel { id: rows; ListElement { category: "A"; score: 0 }; ListElement { category: "B"; score: 0 } }
+            section.property: "category"
+            section.delegate: Item { required property string section; height: 10; Component.onCompleted: v.createdLabels++ }
+            delegate: Item { required property int score; property string label: ListView.section; height: 10 }
+            function unrelated(){ rows.set(0,{score: 17, category:"A"}); return itemAtIndex(0).score }
+            function fail(){ rows.setProperty(0,"category","B"); missing() }
+            function regroup(){ rows.setProperty(0,"category","B"); return itemAtIndex(0).label }
+        }"#,
+    );
+    let root = ui.root();
+    let labels = ui.get(root, "createdLabels").unwrap();
+    assert_eq!(labels, Value::Number(2.));
+    assert_eq!(
+        ui.call(root, "unrelated", vec![]).unwrap(),
+        Value::Number(17.)
+    );
+    assert_eq!(ui.get(root, "createdLabels").unwrap(), labels);
+    assert!(ui.call(root, "fail", vec![]).is_err());
+    assert_eq!(ui.get(root, "createdLabels").unwrap(), labels);
+    assert_eq!(
+        ui.call(root, "regroup", vec![]).unwrap(),
+        Value::String("B".into())
+    );
+}

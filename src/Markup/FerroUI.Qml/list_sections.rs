@@ -152,19 +152,19 @@ impl Sections {
 }
 
 impl State {
-    pub(super) fn attached(
+    pub(super) fn attached_values(
         &self,
         id: ObjectId,
         index: usize,
         count: usize,
         selected: Option<usize>,
-    ) -> BTreeMap<String, Value> {
-        BTreeMap::from([
-            ("view".into(), Value::Object(id)),
-            ("isCurrentItem".into(), Value::Bool(Some(index) == selected)),
-            ("section".into(), Value::String(self.sections.at(index))),
+    ) -> [(&'static str, Value); 5] {
+        [
+            ("view", Value::Object(id)),
+            ("isCurrentItem", Value::Bool(Some(index) == selected)),
+            ("section", Value::String(self.sections.at(index))),
             (
-                "previousSection".into(),
+                "previousSection",
                 Value::String(
                     index
                         .checked_sub(1)
@@ -173,17 +173,25 @@ impl State {
                 ),
             ),
             (
-                "nextSection".into(),
+                "nextSection",
                 Value::String(if index + 1 < count {
                     self.sections.at(index + 1)
                 } else {
                     String::new()
                 }),
             ),
-        ])
+        ]
     }
-    pub(crate) fn sectioned(&self) -> bool {
-        !self.sections.role.is_empty()
+    pub(crate) fn section_role<'a>(&'a self, roles: Option<&'a [String]>) -> Option<&'a str> {
+        match self.sections.role.as_str() {
+            "" => None,
+            // A single-role ListModel projects that role as modelData.
+            "modelData" => match roles {
+                Some([role]) => Some(role),
+                _ => None,
+            },
+            named => Some(named),
+        }
     }
 }
 
@@ -280,7 +288,7 @@ impl Transaction<'_> {
         id: ObjectId,
         state: &mut State,
         dirty: bool,
-    ) -> Result<(), Error> {
+    ) -> Result<bool, Error> {
         let sections = &mut state.sections;
         let Value::String(role) = self.model.get(id, "section.property")? else {
             unreachable!()
@@ -302,8 +310,9 @@ impl Transaction<'_> {
             sections.first_character = first;
             sections.factory = next;
             sections.rebuild(self, id, &state.source)?;
+            return Ok(true);
         }
-        Ok(())
+        Ok(false)
     }
 
     pub(super) fn layout_sections(

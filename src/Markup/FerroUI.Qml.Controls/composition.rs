@@ -4,7 +4,27 @@
 use super::*;
 use std::collections::{BTreeSet, HashSet};
 
+pub(super) struct Graph {
+    parents: BTreeMap<ObjectId, ObjectId>,
+    pub stable_hosts: bool,
+    collections: Vec<(Controls, std::rc::Weak<Vec<Ref<Control>>>)>,
+}
+
+impl Graph {
+    // Native callers can also modify the exposed child collections. FerroList
+    // snapshots are copy-on-write: a weak snapshot detects changes without
+    // retaining a removed control or copying the list when it is edited.
+    pub fn is_current(&self) -> bool {
+        self.stable_hosts
+            && self
+                .collections
+                .iter()
+                .all(|(children, previous)| previous.as_ptr() == Rc::as_ptr(&children.snapshot()))
+    }
+}
+
 pub(super) struct Plan {
+    pub graph: Option<Graph>,
     children: Vec<(Controls, Vec<Ref<Control>>)>,
     anchors: Vec<(Ref<super::anchors::AnchorCanvas>, super::anchors::Rules)>,
 }
@@ -90,13 +110,26 @@ pub(super) fn plan(instance: &Instance, nodes: &tree::Peers) -> Result<Plan, Err
     for (_, rules) in hosts.values_mut() {
         rules.validate()?;
     }
+    let stable_hosts = nodes.values().all(|node| node.has_stable_visual_host());
+    let collections = if stable_hosts {
+        plan.iter()
+            .map(|(children, _)| (children.clone(), std::rc::Weak::new()))
+            .collect()
+    } else {
+        Vec::new()
+    };
     Ok(Plan {
+        graph: Some(Graph {
+            parents,
+            stable_hosts,
+            collections,
+        }),
         children: plan,
         anchors: hosts.into_values().collect(),
     })
 }
 
-pub(super) fn apply(mut plan: Plan) {
+pub(super) fn apply(mut plan: Plan) -> Option<Graph> {
     // A structural change in one delegate need not edit every sibling collection.
     plan.children.retain(|(collection, children)| {
         collection.count() != children.len()
@@ -135,9 +168,51 @@ pub(super) fn apply(mut plan: Plan) {
     for (host, rules) in plan.anchors {
         host.update(rules);
     }
+    if let Some(graph) = &mut plan.graph {
+        for (collection, snapshot) in &mut graph.collections {
+            *snapshot = Rc::downgrade(&collection.snapshot());
+        }
+    }
+    plan.graph
 }
 
-pub(super) fn reconcile(instance: &Instance, nodes: &tree::Peers) -> Result<(), Error> {
-    apply(plan(instance, nodes)?);
-    Ok(())
+/// Patch only the owners of changed anchor lines. Properties also read by
+/// siblings (baselineOffset and alignWhenCentered) use the full planner.
+pub(super) fn anchor_changes(
+    instance: &Instance,
+    nodes: &tree::Peers,
+    graph: &Graph,
+    changed: BTreeSet<ObjectId>,
+) -> Result<Plan, Error> {
+    let mut hosts = BTreeMap::new();
+    for child in changed {
+        let rule = super::anchors::read(instance, child, &graph.parents, nodes)?;
+        let host = graph.parents.get(&child).and_then(|parent| {
+            nodes[parent]
+                .anchor_host()?
+                .cast::<super::anchors::AnchorCanvas>()
+        });
+        let Some(canvas) = host else {
+            if rule.is_some() {
+                return Err(Error::new(if graph.parents.contains_key(&child) {
+                    "anchors require an Item or Rectangle layout host"
+                } else {
+                    "anchored Item has no visual parent"
+                }));
+            }
+            continue;
+        };
+        let (_, rules) = hosts
+            .entry(graph.parents[&child])
+            .or_insert_with(|| (canvas.clone(), canvas.snapshot_rules()));
+        rules.replace(nodes[&child].control(), rule);
+    }
+    for (_, rules) in hosts.values_mut() {
+        rules.validate()?;
+    }
+    Ok(Plan {
+        graph: None,
+        children: Vec::new(),
+        anchors: hosts.into_values().collect(),
+    })
 }

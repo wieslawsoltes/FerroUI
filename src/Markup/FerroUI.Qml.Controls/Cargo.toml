@@ -25,3 +25,8 @@ ferroui-controls = { workspace = true, features = ["testing"] }
 
 [package.metadata.release]
 group = "markup"
+
+[[bench]]
+name = "visual_collections"
+path = "benches/visual_collections.rs"
+harness = false

@@ -72,15 +72,41 @@ impl Inner {
             None
         };
         let peers = next.as_ref().unwrap_or(&current);
+        let graph = self.visual_graph.borrow();
+        // A nested native notification may arrive in the middle of applying a
+        // previous plan. In that case validate against the complete model.
+        let mut full =
+            topology_changed || self.flushing.get() || self.validated_layout.borrow().is_some();
+        let mut local = std::collections::BTreeSet::new();
         let mut layout_changed = topology_changed;
         for change in changes {
             if let Some(peer) = peers.get(&change.object) {
                 peer.validate(&change.property, &change.value)?;
-                layout_changed |= affects_layout(&**peer, &change.property);
+                if affects_layout(&**peer, &change.property) {
+                    layout_changed = true;
+                    if peer.children_property() == Some(&change.property)
+                        || matches!(
+                            change.property.as_str(),
+                            "baselineOffset" | "anchors.alignWhenCentered"
+                        )
+                    {
+                        full = true;
+                    } else {
+                        local.insert(change.object);
+                    }
+                }
             }
         }
         if layout_changed {
-            composition::plan(model, peers)?;
+            let plan = if full || !graph.is_current() {
+                composition::plan(model, peers)?
+            } else {
+                composition::anchor_changes(model, peers, &graph, local)?
+            };
+            // Custom peers may replace their native hosts during apply. They
+            // still re-plan after applying the property notifications.
+            let stable = plan.graph.as_ref().unwrap_or(&graph).stable_hosts;
+            self.validated_layout.replace(stable.then_some(plan));
         }
         if let Some(peers) = next {
             self.candidate.replace(Some(Candidate {

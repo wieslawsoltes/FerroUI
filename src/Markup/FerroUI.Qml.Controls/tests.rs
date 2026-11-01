@@ -934,3 +934,17 @@ fn sampling_rotation_updates_the_retained_native_transform() {
     view.advance_time(Duration::from_millis(50)).unwrap();
     assert_eq!(transform.angle(), 10.);
 }
+
+#[test]
+fn local_anchor_change_repairs_external_edits_to_the_native_child_list() {
+    let _services = UnitTestApplication::start(TestServices::new());
+    let view = mount("import QtQuick\nItem { Item { id: marker; anchors.left: parent.left } }");
+    let children = view.root().cast::<Canvas>().unwrap().children();
+    assert_eq!(children.count(), 1);
+    children.clear();
+    let marker = view.id("marker").unwrap();
+    view.set(marker, "anchors.leftMargin", Value::Number(4.))
+        .unwrap();
+    assert_eq!(children.count(), 1);
+    assert_eq!(children.get(0), view.control(marker).unwrap());
+}

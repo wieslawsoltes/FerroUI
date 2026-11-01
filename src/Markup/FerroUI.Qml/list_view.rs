@@ -485,7 +485,6 @@ impl Transaction<'_> {
             Value::Object(o) if self.model.dynamic.templates.contains_key(&o) => Some(o),
             _ => None,
         };
-        let old_items: BTreeSet<_> = state.items().collect();
         let reset = model_changed || factory != retained.factory;
         let horizontal = real(self.model, id, "orientation") == 1.;
         if reset || structural || horizontal != state.horizontal {
@@ -550,7 +549,7 @@ impl Transaction<'_> {
         self.update_decoration(id, "footer", axis, &mut state.footer)?;
         let section_dirty = self.repeater_changes.section_changes.remove(&id);
         let retained_horizontal = state.horizontal;
-        self.prepare_sections(
+        let sections_changed = self.prepare_sections(
             id,
             &mut state,
             reset || structural || section_dirty || horizontal != retained_horizontal,
@@ -604,7 +603,7 @@ impl Transaction<'_> {
             Default::default()
         };
         let keys: BTreeSet<_> = targets.values().map(|r| r.0).collect();
-        let previous = state.realized.clone();
+        let previous = std::mem::take(&mut state.realized);
         let mut retained = BTreeMap::new();
         let can_reuse =
             self.model.get(id, "reuseItems")? == Value::Bool(true) && !reset && !structural;
@@ -623,7 +622,6 @@ impl Transaction<'_> {
                 removed.push(item);
             }
         }
-        state.realized.clear();
         self.destroy_subtrees(&removed)?;
         let mut measured = false;
         if let Some(f) = factory {
@@ -638,33 +636,50 @@ impl Transaction<'_> {
                 let owner = kept
                     .or(recycled)
                     .unwrap_or_else(|| self.model.next_object());
-                let mut inputs = self.model.delegate_inputs(id, index, &value, owner)?;
-                let attached = state.attached(id, index, count, selected);
-                if kept.is_some() || recycled.is_some() {
-                    for (name, value) in attached {
-                        self.list_property(owner, &format!("ListView.{name}"), value)?;
+                let item = if let Some(item) = kept {
+                    let moved = !previous.get(&index).is_some_and(|e| e.1 == item);
+                    if structural || moved {
+                        let inputs = self.model.delegate_inputs(id, index, &value, item)?;
+                        self.update_delegate(item, inputs)?;
                     }
-                } else {
-                    inputs.attached = Some(attached);
-                }
-                let item = if let Some(&old) = retained.get(&key) {
-                    if structural || !previous.get(&index).is_some_and(|e| e.1 == old) {
-                        self.update_delegate(old, inputs)?;
+                    if sections_changed || moved {
+                        for (name, value) in state.attached_values(id, index, count, selected) {
+                            self.list_property(item, &format!("ListView.{name}"), value)?;
+                        }
+                    } else if current != state.current {
+                        self.list_property(
+                            item,
+                            "ListView.isCurrentItem",
+                            Value::Bool(Some(index) == selected),
+                        )?;
                     }
-                    old
-                } else if let Some(item) = recycled {
-                    self.recycle_delegate(item, inputs)?;
-                    self.dispatch(item, "ListView.reused", vec![])?;
                     item
                 } else {
-                    self.construct_object(
-                        f,
-                        Some(id),
-                        &template,
-                        Default::default(),
-                        Some(&inputs),
-                        Default::default(),
-                    )?
+                    let mut inputs = self.model.delegate_inputs(id, index, &value, owner)?;
+                    let attached = state.attached_values(id, index, count, selected);
+                    if let Some(item) = recycled {
+                        for (name, value) in attached {
+                            self.list_property(item, &format!("ListView.{name}"), value)?;
+                        }
+                        self.recycle_delegate(item, inputs)?;
+                        self.dispatch(item, "ListView.reused", vec![])?;
+                        item
+                    } else {
+                        inputs.attached = Some(
+                            attached
+                                .into_iter()
+                                .map(|(k, v)| (k.to_owned(), v))
+                                .collect(),
+                        );
+                        self.construct_object(
+                            f,
+                            Some(id),
+                            &template,
+                            Default::default(),
+                            Some(&inputs),
+                            Default::default(),
+                        )?
+                    }
                 };
                 let size = match self.model.get(item, axis)? {
                     Value::Number(n) if n > 0. => n,
@@ -773,12 +788,25 @@ impl Transaction<'_> {
             }
         }
         let data = self.model.key(id, "data")?;
-        let Value::List(mut children) = self.model.slots[data].value.clone() else {
+        let Value::List(children) = &self.model.slots[data].value else {
             return Err(Error::new("ListView data must be a list"));
         };
-        children.retain(|v| !matches!(v,Value::Object(o) if old_items.contains(o)));
-        children.extend(state.visual_items().map(Value::Object));
-        self.set_value(data, Value::List(children));
+        if !state
+            .visual_items()
+            .map(Value::Object)
+            .eq(children.iter().cloned())
+        {
+            let old_items: BTreeSet<_> = self.model.dynamic.repeaters[&id]
+                .list
+                .as_ref()
+                .expect("registered view")
+                .items()
+                .collect();
+            let mut children = children.clone();
+            children.retain(|v| !matches!(v,Value::Object(o) if old_items.contains(o)));
+            children.extend(state.visual_items().map(Value::Object));
+            self.set_value(data, Value::List(children));
+        }
         self.list_property(id, "count", Value::Number(count as f64))?;
         self.list_property(id, "currentIndex", Value::Number(current as f64))?;
         self.list_property(
@@ -811,7 +839,8 @@ impl Transaction<'_> {
             },
             Value::Number(state.dimension(self.model, id, cross)),
         )?;
-        if previous != state.realized {
+        let changed = previous != state.realized;
+        if changed {
             // The revision slot is private. Resolve directly instead of via the public getter.
             let key = self.model.key(id, REVISION)?;
             let Value::Number(rev) = self.model.slots[key].value else {
@@ -826,17 +855,19 @@ impl Transaction<'_> {
         state.reversed = reversed;
         let out = self.model.dynamic.repeaters.get_mut(&id).unwrap();
         out.factory = factory;
-        out.rows = state
-            .realized
-            .iter()
-            .filter_map(|(&index, &(key, item))| {
-                if let Key::Row(row) = key {
-                    Some((row, (index, item)))
-                } else {
-                    None
-                }
-            })
-            .collect();
+        if changed {
+            out.rows = state
+                .realized
+                .iter()
+                .filter_map(|(&index, &(key, item))| {
+                    if let Key::Row(row) = key {
+                        Some((row, (index, item)))
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+        }
         out.list = Some(Box::new(state));
         if measured {
             self.repeater_changes.pending.insert(id);

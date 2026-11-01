@@ -44,6 +44,11 @@ pub trait NativeObject {
         self.apply(property, value)
     }
 
+    /// True if the control, child collection, and anchor host keep their identity
+    /// as properties are applied. This lets the mount reuse its validated layout.
+    fn has_stable_visual_host(&self) -> bool {
+        false
+    }
     fn uses_item_anchors(&self) -> bool {
         false
     }
@@ -167,6 +172,8 @@ struct Inner {
     nodes: RefCell<tree::Peers>,
     factories: tree::Factories,
     revision: Cell<u64>,
+    visual_graph: RefCell<composition::Graph>,
+    validated_layout: RefCell<Option<composition::Plan>>,
     candidate: RefCell<Option<tree::Candidate>>,
     flushing: Cell<bool>,
     flush_again: Cell<bool>,
@@ -259,7 +266,8 @@ impl QmlView {
             .get(&instance.root())
             .ok_or_else(|| Error::new("component root has no native visual factory"))?
             .control();
-        composition::reconcile(&instance, &nodes)?;
+        let graph =
+            composition::apply(composition::plan(&instance, &nodes)?).expect("full visual plan");
         instance.drain_changes();
         instance.drain_created();
         let view = Self(Rc::new(Inner {
@@ -272,6 +280,8 @@ impl QmlView {
             nodes: RefCell::new(nodes),
             factories: registry.factories.clone(),
             revision: Cell::new(revision),
+            visual_graph: RefCell::new(graph),
+            validated_layout: RefCell::default(),
             candidate: RefCell::default(),
             flushing: Cell::new(false),
             flush_again: Cell::new(false),
@@ -439,8 +449,15 @@ impl QmlView {
         }
         if layout_changed && self.0.revision.get() == self.0.instance.borrow().structure_revision()
         {
-            let plan = composition::plan(&self.0.instance.borrow(), &self.0.nodes.borrow())?;
-            composition::apply(plan);
+            let plan = match self.0.validated_layout.take() {
+                Some(plan) if plan.graph.is_some() || self.0.visual_graph.borrow().is_current() => {
+                    plan
+                }
+                _ => composition::plan(&self.0.instance.borrow(), &self.0.nodes.borrow())?,
+            };
+            if let Some(graph) = composition::apply(plan) {
+                self.0.visual_graph.replace(graph);
+            }
         }
         Ok(())
     }

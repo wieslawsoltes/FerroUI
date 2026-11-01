@@ -69,6 +69,13 @@ impl State {
         self.list.is_some()
     }
 
+    pub(crate) fn section_role_for(&self, model: ObjectId) -> Option<&str> {
+        if self.model != Some(Value::Object(model)) {
+            return None;
+        }
+        self.list.as_ref()?.section_role(self.roles.as_deref())
+    }
+
     pub(crate) fn items(&self) -> impl Iterator<Item = ObjectId> + '_ {
         self.entries
             .iter()
@@ -82,6 +89,7 @@ pub(crate) struct Changes {
     pub(crate) reveal_header: BTreeSet<ObjectId>,
     pub(crate) section_changes: BTreeSet<ObjectId>,
     rebound: BTreeMap<ObjectId, RowId>,
+    deferred_role_edits: BTreeSet<ObjectId>,
     pub(crate) list_models: BTreeSet<ObjectId>,
     pub(crate) list_structure: BTreeSet<ObjectId>,
     pub(crate) pending: BTreeSet<ObjectId>,
@@ -532,13 +540,6 @@ impl Transaction<'_> {
             .filter_map(|(&id, state)| (state.model == Some(Value::Object(model))).then_some(id))
             .collect();
         for id in views {
-            let sectioned = self.model.dynamic.repeaters[&id]
-                .list
-                .as_ref()
-                .is_some_and(|s| s.sectioned());
-            if sectioned {
-                self.repeater_changes.section_changes.insert(id);
-            }
             if let Some(row) = edited {
                 if !self.repeater_changes.busy.contains(&id)
                     && !self.repeater_changes.pending.contains(&id)
@@ -549,11 +550,14 @@ impl Transaction<'_> {
                                 .delegate_inputs(id, index, &Value::ModelRow(row), item)?;
                         self.update_delegate(item, inputs)?;
                     }
-                    if sectioned {
+                    if self.repeater_changes.section_changes.contains(&id) {
                         self.repeater_changes.pending.insert(id);
                     }
                     continue;
                 }
+            }
+            if edited.is_some() && !self.model.dynamic.repeaters[&id].is_list_view() {
+                self.repeater_changes.deferred_role_edits.insert(id);
             }
             self.repeater_changes.pending.insert(id);
             self.repeater_changes.list_structure.insert(id);
@@ -625,6 +629,12 @@ impl Transaction<'_> {
         if factory.is_none() {
             values.clear();
         }
+        // A ListModel role edit updates its realized delegate directly, except
+        // when the view is already being reconciled. Only those deferred edits
+        // need another projection at an otherwise unchanged row and position.
+        let deferred_edit = self.repeater_changes.deferred_role_edits.remove(&id);
+        let unchanged_inputs =
+            !deferred_edit && matches!(&model, Value::Object(o) if self.model.is_list_model(*o));
         let state = &self.model.dynamic.repeaters[&id];
         let model_changed = !state
             .model
@@ -670,6 +680,12 @@ impl Transaction<'_> {
         if let (Some(factory), Some(slot)) = (factory, siblings) {
             let template = self.model.dynamic.templates[&factory].clone();
             for (index, (key, value)) in values.into_iter().enumerate() {
+                if unchanged_inputs
+                    && matches!(previous.get(index), Some((old_key, Some(_))) if *old_key == key)
+                    && !reset
+                {
+                    continue;
+                }
                 let owner = retained
                     .get(&key)
                     .copied()

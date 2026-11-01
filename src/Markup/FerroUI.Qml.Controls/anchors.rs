@@ -79,6 +79,13 @@ impl Rules {
     pub(super) fn insert(&mut self, child: Ref<Control>, anchor: Anchor) {
         self.rules.insert(child, anchor);
     }
+    pub(super) fn replace(&mut self, child: Ref<Control>, anchor: Option<Anchor>) {
+        if let Some(anchor) = anchor {
+            self.insert(child, anchor);
+        } else {
+            self.rules.remove(&child);
+        }
+    }
     pub(super) fn validate(&mut self) -> Result<(), Error> {
         for axis in 0..2 {
             let mut degrees = HashMap::new();
@@ -301,6 +308,12 @@ impl AnchorCanvas {
             overrides: RefCell::default(),
         })
         .upcast()
+    }
+    pub(super) fn snapshot_rules(&self) -> Rules {
+        Rules {
+            rules: self.rules.borrow().rules.clone(),
+            order: Default::default(),
+        }
     }
     pub(super) fn update(&self, next: Rules) {
         if self.rules.borrow().rules == next.rules {

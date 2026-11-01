@@ -248,6 +248,9 @@ impl NativeObject for Peer {
         }
     }
 
+    fn has_stable_visual_host(&self) -> bool {
+        true
+    }
     fn uses_item_anchors(&self) -> bool {
         true
     }

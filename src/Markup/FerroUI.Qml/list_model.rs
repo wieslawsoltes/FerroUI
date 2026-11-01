@@ -541,6 +541,15 @@ impl Transaction<'_> {
                 .iter()
                 .filter_map(|(_, value)| self.model.owned_role(row.model, value.as_ref()?)),
         );
+        // Section keys depend on one role. Non-section edits must not discard
+        // live section delegates or scan the entire model to rebuild boundaries.
+        for (&view, state) in &self.model.dynamic.repeaters {
+            if let Some(role) = state.section_role_for(row.model) {
+                if changes.iter().any(|(name, _)| name == role) {
+                    self.repeater_changes.section_changes.insert(view);
+                }
+            }
+        }
         self.model_edits
             .push((row.model, Undo::Update(row.serial, changes)));
         Ok(())
