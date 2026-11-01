@@ -51,10 +51,7 @@ fn source_and_rust_share_the_dynamic_component_graph() {
     let reg = TypeRegistry::new();
     exercise(
         Instance::new(
-            &ferroui_qml_build::Compiler::new()
-                .load(file)
-                .unwrap()
-                .document,
+            &ferroui_qml::ir::parse(&std::fs::read_to_string(file).unwrap()).unwrap(),
             &reg,
             BTreeMap::new(),
         )
