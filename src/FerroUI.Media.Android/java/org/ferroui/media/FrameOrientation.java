@@ -17,6 +17,27 @@ public final class FrameOrientation {
         }
         return null;
     }
+    /** Map logical raw-image crop into the already-oriented immutable output.
+     * Sampling scales caused by decoder padding are excluded: width/height
+     * describe Media3's logical decoded image, rather than padded GL storage. */
+    public static int[] outputCrop(float[] matrix,int width,int height,int x,int y,int w,int h){
+        if(width<=0 || height<=0 || x<0 || y<0 || w<=0 || h<=0 || (long)x+w>width || (long)y+h>height)return null;
+        int[] sampling=remaining(matrix,0,false);if(sampling==null)return null;
+        boolean swap=Math.abs(matrix[1])>Math.abs(matrix[0]) && Math.abs(matrix[4])>Math.abs(matrix[5]);
+        int ow=swap?height:width,oh=swap?width:height;
+        double minX=1,minY=1,maxX=0,maxY=0;
+        for(int i=0;i<4;i++){
+            double u=(x+((i&1)==0?0:w))/(double)width,v=(y+((i&2)==0?0:h))/(double)height;
+            // Invert the normalized output-to-raw sampling orientation.
+            if(sampling[1]!=0)u=1-u;
+            double a=u,b=v;
+            switch(sampling[0]){case 90:u=b;v=1-a;break;case 180:u=1-a;v=1-b;break;case 270:u=1-b;v=a;break;default:break;}
+            minX=Math.min(minX,u);minY=Math.min(minY,v);maxX=Math.max(maxX,u);maxY=Math.max(maxY,v);
+        }
+        double[] edges={minX*ow,minY*oh,maxX*ow,maxY*oh};int[] rounded=new int[4];
+        for(int i=0;i<4;i++){if(!Double.isFinite(edges[i]) || Math.abs(edges[i]-Math.rint(edges[i]))>1e-3)return null;rounded[i]=(int)Math.rint(edges[i]);}
+        return new int[]{rounded[0],rounded[1],rounded[2]-rounded[0],rounded[3]-rounded[1]};
+    }
     private static void rotate(double[] point,int clockwise,boolean mirror){
         double x=point[0],y=point[1];
         switch(clockwise){case 0:break;case 90:x=-point[1];y=point[0];break;case 180:x=-x;y=-y;break;case 270:x=point[1];y=-point[0];break;default:throw new IllegalArgumentException();}

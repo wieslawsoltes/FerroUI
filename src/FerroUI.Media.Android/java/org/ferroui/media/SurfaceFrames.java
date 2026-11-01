@@ -130,6 +130,9 @@ public final class SurfaceFrames {
     public int[] remainingOrientation(int rotation,boolean mirror) {
         synchronized(geometryLock) {return hasGeometry && !closed?FrameOrientation.remaining(publishedTransform,rotation,mirror):null;}
     }
+    public int[] videoCrop(int width,int height,int x,int y,int w,int h){
+        synchronized(geometryLock){return hasGeometry && !closed?FrameOrientation.outputCrop(publishedTransform,width,height,x,y,w,h):null;}
+    }
     public float[] mapRawPoints(float[] points) {
         synchronized(geometryLock) {
             if(!hasGeometry || closed) return null;

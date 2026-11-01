@@ -17,6 +17,8 @@ import androidx.media3.common.VideoSize;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.SeekParameters;
 import androidx.media3.exoplayer.DefaultLoadControl;
+import androidx.media3.datasource.DefaultDataSource;
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import java.io.File;
 import org.ferroui.media.SurfaceFrames;
 
@@ -29,6 +31,11 @@ public final class VideoPlayer {
     private String clockDiagnostics() {synchronized(clock){StringBuilder value=new StringBuilder("state="+snapshotState+" position="+snapshotPosition+" seek="+appliedRequest+"/"+completedRequest+" surface="+lastSurfaceTimestamp+" mapped="+clockMatches+" misses="+clockMisses+" epoch="+epoch+" count="+count);
         for(int i=1;i<=Math.min(4,count);i++){int at=(head-i+releases.length)%releases.length;value.append(" [").append(releases[at]).append(',').append(times[at]).append(',').append(epochs[at]).append(']');}return value.toString();}}
     private ExoPlayer player;
+    private final Mp4Geometry geometry=new Mp4Geometry();
+    private final Mp4Geometry.Info[] frameGeometry=new Mp4Geometry.Info[32];
+    private volatile int naturalWidth,naturalHeight;
+    private volatile boolean unsupported;
+    public boolean unsupported(){return unsupported;}
     private volatile boolean prepared,closed;
     private volatile int snapshotState;
     private volatile long snapshotPosition,snapshotDuration=-1,completedRequest;
@@ -61,7 +68,9 @@ public final class VideoPlayer {
     private void initialize(Context context,String source) {
         if(closed) return;
         try {
+            DefaultDataSource.Factory data=new DefaultDataSource.Factory(context);
             player=new ExoPlayer.Builder(context).setLooper(thread.getLooper())
+                .setMediaSourceFactory(new DefaultMediaSourceFactory(()->new GeometryDataSource(data.createDataSource(),geometry)))
                 .setLoadControl(new DefaultLoadControl.Builder().setBufferDurationsMs(2500,5000,500,1000)
                     .setTargetBufferBytes(16*1024*1024).setPrioritizeTimeOverSizeThresholds(false).build()).build();
             player.setAudioAttributes(new AudioAttributes.Builder().setUsage(C.USAGE_MEDIA)
@@ -78,10 +87,22 @@ public final class VideoPlayer {
             player.setVideoFrameMetadataListener((presentationUs,releaseNs,format,mediaFormat)->{
                 int color=frameColor(format,mediaFormat);
                 if(color==0) {error="HDR/wide-gamut video has no admitted SDR texture route";return;}
+                Mp4Geometry.Info info;
+                try {info=geometry.info(format.id);}
+                catch(IllegalArgumentException failure){unsupported=true;error=failure.getMessage();return;}
+                if(info!=null){
+                    if(format.pixelWidthHeightRatio!=1f){unsupported=true;error="Non-square video pixels are unsupported";return;}
+                    if((format.width!=info.width || format.height!=info.height) && (format.width!=info.cropWidth || format.height!=info.cropHeight)){
+                        unsupported=true;error="Native decoded dimensions do not match the MP4 geometry";return;
+                    }
+                    boolean swap=info.rotation==90 || info.rotation==270;
+                    naturalWidth=swap?info.cropHeight:info.cropWidth;naturalHeight=swap?info.cropWidth:info.cropHeight;
+                    snapshotWidth=naturalWidth;snapshotHeight=naturalHeight;
+                }
                 synchronized(clock) {
                     int index=head;head=(head+1)%releases.length;count=Math.min(count+1,releases.length);
                     releases[index]=releaseNs;times[index]=presentationUs;epochs[index]=epoch;
-                    widths[index]=format.width;heights[index]=format.height;colors[index]=color;
+                    widths[index]=format.width;heights[index]=format.height;colors[index]=color;frameGeometry[index]=info;
                     frameWidth=format.width;frameHeight=format.height;
                 }
             });
@@ -113,7 +134,16 @@ public final class VideoPlayer {
                 if(epochs[index]!=epoch || times[index]<0) continue;
                 if(releases[index]==surfaceTimestampNs || releases[index]/1000==surfaceTimestampNs/1000 || times[index]*1000==surfaceTimestampNs) {
                     clockMatches++;
-                    return times[index]+","+widths[index]+","+heights[index]+","+colors[index];
+                    int width=widths[index],height=heights[index];boolean swap=surfaceFrames.swapsAxes();
+                    int[] orientation={0,0},crop={0,0,swap?height:width,swap?width:height};
+                    Mp4Geometry.Info info=frameGeometry[index];
+                    if(info!=null){
+                        orientation=surfaceFrames.remainingOrientation(info.rotation,info.mirror);
+                        crop=width==info.width && height==info.height
+                            ?surfaceFrames.videoCrop(width,height,info.x,info.y,info.cropWidth,info.cropHeight):crop;
+                        if(orientation==null || crop==null){unsupported=true;error="Native video sampling geometry is unsupported";return "";}
+                    }
+                    return times[index]+","+width+","+height+","+colors[index]+","+orientation[0]+","+orientation[1]+","+crop[0]+","+crop[1]+","+crop[2]+","+crop[3];
                 }
             }
             clockMisses++;return "";
@@ -135,7 +165,7 @@ public final class VideoPlayer {
     private void updateSnapshot() {
         if(closed || player==null) return;
         snapshotPosition=player.getCurrentPosition();snapshotDuration=player.getDuration()==C.TIME_UNSET ? -1 : player.getDuration();
-        VideoSize size=player.getVideoSize();snapshotWidth=size.width;snapshotHeight=size.height;
+        VideoSize size=player.getVideoSize();snapshotWidth=naturalWidth>0?naturalWidth:size.width;snapshotHeight=naturalHeight>0?naturalHeight:size.height;
         snapshotSeekable=player.isCurrentMediaItemSeekable();
         snapshotState=!prepared ? 0 : player.getPlaybackState()==Player.STATE_ENDED ? 4 : player.getPlaybackState()==Player.STATE_BUFFERING ? 3 : player.isPlaying() ? 2 : 1;
         if(!tickQueued && (snapshotState==0 || snapshotState==2 || snapshotState==3)) {
@@ -177,7 +207,7 @@ public final class VideoPlayer {
         synchronized(clock) {epoch++;head=0;count=0;}
         worker.post(()->{
             try {if(player!=null) {player.clearVideoSurface();player.release();player=null;}}
-            finally {surfaceFrames.releaseSurface();LIVE.decrementAndGet();thread.quitSafely();}
+            finally {geometry.close();surfaceFrames.releaseSurface();LIVE.decrementAndGet();thread.quitSafely();}
         });
     }
 }

@@ -18,6 +18,10 @@ public final class FrameOrientationContract {
         // Positive crop scaling changes no orientation.
         check(sample(0,-.9f,-.8f,0),90,false,0,0);
         if(FrameOrientation.remaining(sample(1,.3f,0,-1),0,false)!=null)throw new AssertionError("Shear was admitted as orientation");
+        if(!Arrays.equals(FrameOrientation.outputCrop(sample(1,0,0,-1),160,90,10,6,144,80),new int[]{10,6,144,80}))throw new AssertionError("Raw aperture changed");
+        if(!Arrays.equals(FrameOrientation.outputCrop(sample(0,-1,-1,0),160,90,10,6,144,80),new int[]{4,10,80,144}))throw new AssertionError("Rotated aperture changed");
+        if(!Arrays.equals(FrameOrientation.outputCrop(sample(0,-1,1,0),160,90,10,6,144,80),new int[]{6,10,80,144}))throw new AssertionError("Reflected aperture changed");
+        if(FrameOrientation.outputCrop(sample(1,0,0,-1),160,90,10,6,160,80)!=null)throw new AssertionError("Invalid aperture admitted");
         System.out.println("PASS camera HAL orientation, mirroring, display rotation, crop and incompatible shear");
     }
 }

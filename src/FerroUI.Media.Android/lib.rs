@@ -361,76 +361,89 @@ impl AndroidFrameStream {
             } else {
                 sequence
             };
-            let (timestamp, width, height, color, rotation, mirrored) = if let Some(clock) =
-                frame_clock
-            {
-                let value = call_object(
-                    &clock,
-                    "frameInfo",
-                    "(J)Ljava/lang/String;",
-                    &[JavaValue::Long(timestamp as i64)],
-                )
-                .map(|v| string_of(&v))
-                .unwrap_or_default();
-                if value.is_empty() {
-                    return Ok(None);
-                }
-                let values = value
-                    .split(',')
-                    .map(str::parse::<u64>)
-                    .collect::<Result<Vec<_>, _>>()
-                    .map_err(|_| native_error("Invalid native frame-clock metadata"))?;
-                if values.len() != if clock_nanoseconds { 6 } else { 4 }
-                    || values[1] > u32::MAX as u64
-                    || values[2] > u32::MAX as u64
-                {
-                    return Err(native_error("Invalid native frame dimensions"));
-                }
-                (
-                    values[0]
-                        .checked_mul(if clock_nanoseconds { 1 } else { 1000 })
-                        .ok_or_else(|| native_error("Native timestamp overflow"))?,
-                    values[1] as u32,
-                    values[2] as u32,
-                    match values[3] {
-                        1 => FrameColor::Srgb,
-                        2 => FrameColor::Rec709Full,
-                        _ => return Err(native_error("Unsupported native video color")),
-                    },
-                    if clock_nanoseconds {
-                        match values[4] {
-                            0 => FrameRotation::None,
-                            90 => FrameRotation::Clockwise90,
-                            180 => FrameRotation::Clockwise180,
-                            270 => FrameRotation::Clockwise270,
-                            _ => return Err(native_error("Unsupported native frame orientation")),
-                        }
-                    } else {
-                        rotation
-                    },
-                    if clock_nanoseconds {
-                        match values[5] {
-                            0 => false,
-                            1 => true,
-                            _ => return Err(native_error("Invalid native mirror flag")),
-                        }
-                    } else {
-                        mirrored
-                    },
-                )
-            } else {
-                if epoch.load(std::sync::atomic::Ordering::Acquire) != requested_epoch {
-                    return Ok(None);
-                }
-                (
-                    timestamp,
-                    width,
-                    height,
-                    FrameColor::Srgb,
-                    rotation,
-                    mirrored,
-                )
-            };
+            let (timestamp, width, height, color, rotation, mirrored, visible) =
+                if let Some(clock) = frame_clock {
+                    let value = call_object(
+                        &clock,
+                        "frameInfo",
+                        "(J)Ljava/lang/String;",
+                        &[JavaValue::Long(timestamp as i64)],
+                    )
+                    .map(|v| string_of(&v))
+                    .unwrap_or_default();
+                    if value.is_empty() {
+                        return Ok(None);
+                    }
+                    let values = value
+                        .split(',')
+                        .map(str::parse::<u64>)
+                        .collect::<Result<Vec<_>, _>>()
+                        .map_err(|_| native_error("Invalid native frame-clock metadata"))?;
+                    if values.len() != if clock_nanoseconds { 6 } else { 10 }
+                        || values[1] > u32::MAX as u64
+                        || values[2] > u32::MAX as u64
+                    {
+                        return Err(native_error("Invalid native frame dimensions"));
+                    }
+                    (
+                        values[0]
+                            .checked_mul(if clock_nanoseconds { 1 } else { 1000 })
+                            .ok_or_else(|| native_error("Native timestamp overflow"))?,
+                        values[1] as u32,
+                        values[2] as u32,
+                        match values[3] {
+                            1 => FrameColor::Srgb,
+                            2 => FrameColor::Rec709Full,
+                            _ => return Err(native_error("Unsupported native video color")),
+                        },
+                        {
+                            match values[4] {
+                                0 => FrameRotation::None,
+                                90 => FrameRotation::Clockwise90,
+                                180 => FrameRotation::Clockwise180,
+                                270 => FrameRotation::Clockwise270,
+                                _ => {
+                                    return Err(native_error(
+                                        "Unsupported native frame orientation",
+                                    ))
+                                }
+                            }
+                        },
+                        {
+                            match values[5] {
+                                0 => false,
+                                1 => true,
+                                _ => return Err(native_error("Invalid native mirror flag")),
+                            }
+                        },
+                        if clock_nanoseconds {
+                            None
+                        } else {
+                            if values[6..].iter().any(|v| *v > u32::MAX as u64) {
+                                return Err(native_error("Native crop overflow"));
+                            }
+                            Some(FrameRegion {
+                                x: values[6] as u32,
+                                y: values[7] as u32,
+                                width: values[8] as u32,
+                                height: values[9] as u32,
+                            })
+                        },
+                    )
+                } else {
+                    if epoch.load(std::sync::atomic::Ordering::Acquire) != requested_epoch {
+                        return Ok(None);
+                    }
+                    (
+                        timestamp,
+                        width,
+                        height,
+                        FrameColor::Srgb,
+                        rotation,
+                        mirrored,
+                        None,
+                    )
+                };
             // A seek can race the render-thread acquisition itself. The
             // playback clock accepts only a frame belonging to its current
             // epoch; keep that newly sought frame instead of discarding the
@@ -448,12 +461,12 @@ impl AndroidFrameStream {
                 identity,
                 width,
                 height,
-                visible: FrameRegion {
+                visible: visible.unwrap_or(FrameRegion {
                     x: 0,
                     y: 0,
                     width,
                     height,
-                },
+                }),
                 format: FrameFormat::Rgba8,
                 color,
                 alpha: FrameAlpha::Opaque,

@@ -262,3 +262,16 @@ profiles and physical audible output still need acceptance.
 A public contract or simulated lifetime test is not
 functional support for a missing provider. Earlier media-branch evidence is not
 acceptance of this implementation.
+
+Android progressive MP4 playback inspects the encoded bytes already read by
+Media3 to preserve track reflections and integral clean apertures. The inspector
+buffers at most one 8 MiB `moov` box, releases it after parsing, admits at most
+16 video-track descriptions and bounds box traversal. It performs no additional
+source fetch or decode. The selected profile requires a single visual sample
+description per video track, square pixels and an orthogonal track matrix;
+malformed, incomplete, oversized or incompatible geometry reports Unsupported.
+The crop maps into the already-oriented immutable texture; reflection and any
+remaining rotation stay in shared frame metadata. Ordinary preview performs no
+CPU pixel transfer. Native Android rendered-colour evidence includes a 16 KiB
+emulator; network/ranged SDK behavior beyond the parser contract still needs
+separate application-policy evidence.

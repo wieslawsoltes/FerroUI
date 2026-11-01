@@ -144,7 +144,11 @@ impl AndroidSession {
         if error.is_empty() {
             Ok(())
         } else {
-            Err(native_error(error))
+            Err(if call_boolean(&self.java, "unsupported", "()Z", &[]) {
+                MediaError::new(MediaErrorKind::Unsupported, error)
+            } else {
+                native_error(error)
+            })
         }
     }
 }

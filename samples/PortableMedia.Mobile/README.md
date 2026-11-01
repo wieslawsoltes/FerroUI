@@ -123,8 +123,10 @@ off-centre clean-aperture variant. The Apple checks require the native transform
 visible crop and natural size to match independently specified fixture geometry.
 The renderer diagnostics additionally check four projected quadrant colours,
 using fixed expected positions and colours rather than the framework mapping.
-Android accepts the corresponding `geometrySmoke` and `cropSmoke` launch extras
-for provider investigation; its container geometry profile needs its own evidence.
+Android accepts the corresponding `geometrySmoke` and `cropSmoke` launch extras.
+Its 16 KiB emulator run passed the reflected/cropped fixture using the native
+Media3 pipeline and independent projected quadrant probes. Native output may
+already contain rotation; the remaining reflection/crop are reported in metadata.
 
 Generate new copies without replacing existing fixtures:
 
@@ -137,3 +139,14 @@ These test-only producer operations allocate synthetic CPU pixels. Production
 preview retains its zero CPU-transfer policy. Metal diagnostic mapping counts
 the mapped output allocation; GLES diagnostic probes count 13 RGBA pixels
 (52 bytes). No diagnostic probe runs during ordinary playback/camera presentation.
+
+Host metadata/orientation contracts (no Android device or decoder):
+
+```sh
+javac -d /tmp/media-geometry-tests \
+  src/FerroUI.Media.Video.Android/java/org/ferroui/media/video/Mp4Geometry.java \
+  src/FerroUI.Media.Android/java/org/ferroui/media/FrameOrientation.java \
+  tests/media/android/Mp4GeometryContract.java tests/media/android/FrameOrientationContract.java
+java -cp /tmp/media-geometry-tests Mp4GeometryContract tests/media/fixtures
+java -cp /tmp/media-geometry-tests FrameOrientationContract
+```

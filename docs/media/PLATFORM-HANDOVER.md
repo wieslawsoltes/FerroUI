@@ -216,7 +216,7 @@ They are functional evidence, not a frozen performance acceptance profile.
 | Check | Result and limit |
 | --- | --- |
 | Windows/Linux provider adapters | Rust cross-checks passed with the native bridge deliberately skipped; C/C++ compilation, linking, codec/driver behavior and native samples remain unverified |
-| Android reflected-track negative control | The same reflected MP4 plays and retires, but Media3/SurfaceTexture output omits its reflection. Independent quadrant probes detect the incorrect colours. Container-transform admission/correction remains implementation work; the ordinary video/camera orientation evidence does not close this case. |
+| Android container geometry | A pre-fix reflected-track negative control exposed Media3's missing reflection. Bounded inspection of the existing encoded stream now preserves the full orthogonal transform and integral clean aperture. The 16 KiB emulator passed independent projected colours, natural size, seek/Stop and source/renderer retirement for the reflected/cropped fixture; zero preview CPU transfers. Host JVM contracts separately cover fragmented/ranged reads, extended boxes, malformed metadata, cancellation and output-crop mapping. |
 | Apple playback geometry | macOS and iOS simulator runs decoded rotated/mirrored and off-centre clean-aperture fixtures. The native crop `(10,6,144,80)`, natural size, cardinal rotation/reflection and independent projected quadrant colour probes passed, with zero preview CPU transfers and final source/renderer retirement. Two Rust geometry contracts separately exercise affine point mapping and rejection. |
 | Paused producer saturation | Android 16 KiB and iOS 27.0 simulator runs retained three real source leases across a paused seek, observed pending work after 1.5 seconds, then published the sought frame after release. Stop/frame-zero and zero retained source frames passed; preview CPU counters stayed zero. A UI contract test separately checks polling beyond the settling interval and idle shutdown. |
 | Renderer scheduling | Four mailbox notification/lifetime tests and two UI scheduling tests cover worker dispatch, disposal, static idle, ancestor visibility and continuous work. macOS/iOS native playback/Metal projection and Android 16 KiB playback/GLES projection and teardown passed again. Android camera + QR + JPEG also continued through rotation and released hardware/output after Stop. |
@@ -273,7 +273,9 @@ and `renderer-notification-browser-regression.log`, `pending-frame-ui-tests.log`
 `pending-frame-browser-regression.log`, `pending-frame-windows-bindings.log` and
 `pending-frame-linux-bindings.log`, `apple-track-crop-pixels-macos.log`,
 `apple-track-crop-pixels-ios.log`, `apple-geometry-affine-contracts.log` and
-`video-geometry-android-negative.log`. Re-run applicable gates on the receiving host.
+`video-geometry-android-negative.log`, `android-mp4-geometry-pixels.log`,
+`android-mp4-geometry-contracts.log`, `android-output-crop-contracts.log`,
+`android-mp4-saturation-regression.log` and `android-mp4-camera-qr-regression.log`. Re-run applicable gates on the receiving host.
 
 Useful commands, from the repository root:
 
