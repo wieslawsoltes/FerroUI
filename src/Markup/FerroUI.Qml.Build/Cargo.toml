@@ -23,10 +23,12 @@ javascript = [
     "dep:swc_ecma_transforms_base",
     "dep:swc_ecma_transforms_module",
     "dep:swc_ecma_codegen",
+    "dep:swc_ecma_compat_es2017",
 ]
 
 [dependencies]
 percent-encoding = "2"
+swc_ecma_compat_es2017 = { version = "52", optional = true }
 swc_common = { version = "27", optional = true }
 swc_ecma_ast = { version = "30", optional = true }
 swc_ecma_parser = { version = "47", default-features = false, optional = true }

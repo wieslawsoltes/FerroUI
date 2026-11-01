@@ -12,6 +12,8 @@ pub use parser::parse;
 pub use parser::parse_external;
 #[cfg(feature = "javascript")]
 pub mod javascript;
+#[cfg(feature = "javascript")]
+pub mod async_functions;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Diagnostic {

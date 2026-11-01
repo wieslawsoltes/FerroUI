@@ -242,6 +242,12 @@ impl Resources {
             resource.import_hook = sites.hook;
             edits.extend(sites.edits);
             replace(&mut resource.executable, edits);
+            if let Some(lowered) =
+                ferroui_qml_compiler::async_functions::lower(&resource.executable, false)
+                    .map_err(|e| format!("{}:{e}", path.display()))?
+            {
+                resource.executable = lowered;
+            }
         }
         self.embedded.insert(key.clone(), resource);
         Ok(key)

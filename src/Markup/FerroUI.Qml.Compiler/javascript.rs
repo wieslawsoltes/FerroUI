@@ -5,7 +5,11 @@ use swc_ecma_ast as js;
 use swc_ecma_parser::{lexer::Lexer, EsSyntax, Parser, StringInput, Syntax};
 use swc_ecma_visit::{Visit, VisitWith};
 
-fn parser(source: &str, start: usize, allow_return: bool) -> Result<Parser<Lexer<'_>>, Diagnostic> {
+pub(super) fn parser(
+    source: &str,
+    start: usize,
+    allow_return: bool,
+) -> Result<Parser<Lexer<'_>>, Diagnostic> {
     let len = u32::try_from(source.len()).map_err(|_| {
         Diagnostic::new(
             source,
@@ -131,6 +135,7 @@ pub(super) fn expression(source: &str, start: usize) -> Result<(SourceSpan, Expr
         _ => Expr::JavaScript(Box::new(script(source, range, ScriptForm::Expression))),
     };
     if let Expr::JavaScript(js) = &mut value {
+        js.executable = crate::async_functions::lower(js.code(), true)?;
         js.property_read = property_read(&expr);
         let mut inspect = Inspect::default();
         expr.visit_with(&mut inspect);
@@ -163,6 +168,9 @@ pub(super) fn block(
     stmt.visit_with(&mut inspect);
     if form == ScriptForm::BindingBlock {
         code.executable = completion_block(source, body, &stmt, &inspect.identifiers);
+    }
+    if let Some(lowered) = crate::async_functions::lower(code.code(), false)? {
+        code.executable = Some(lowered);
     }
     code.references = inspect.names.into_iter().collect();
     Ok((range, code))
@@ -237,8 +245,14 @@ pub(super) fn handler(
             if count > 0 { "," } else { "" },
             parameters.join(",")
         ));
+        if let Some(lowered) = crate::async_functions::lower(code.code(), false)? {
+            code.executable = Some(lowered);
+        }
         Ok((range, parameters, code))
     } else {
+        if let Some(lowered) = crate::async_functions::lower(code.code(), false)? {
+            code.executable = Some(lowered);
+        }
         Ok((range, Vec::new(), code))
     }
 }
