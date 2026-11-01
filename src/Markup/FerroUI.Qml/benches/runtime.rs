@@ -92,6 +92,21 @@ fn main() {
     );
     assert_eq!(app.get(id, "hits").unwrap(), Value::Number(fired as f64));
 
+    let Value::Object(connection) = app.get(id, "live").unwrap() else {
+        panic!("missing Connections")
+    };
+    let inactive = app.id("inactive").unwrap();
+    let mut alternate = false;
+    measure("retarget one of 513 Connections", 1000, || {
+        alternate = !alternate;
+        app.set(
+            connection,
+            "target",
+            Value::Object(if alternate { inactive } else { id }),
+        )
+        .unwrap();
+    });
+
     let fields = (0..512)
         .map(|i| format!("property int p{i}: tick + {i};\n"))
         .collect::<String>();

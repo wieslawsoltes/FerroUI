@@ -6,7 +6,61 @@ use ferroui_qml_compiler::{MemberKind, Object};
 
 /// Positions in declaration order. Dispatch can resume the ordinary traversal
 /// at its next position if a handler retargets a later listener.
-pub(crate) type TargetIndex = BTreeMap<String, BTreeMap<ObjectId, Rc<Vec<usize>>>>;
+#[derive(Default)]
+pub(crate) struct TargetIndex {
+    routes: BTreeMap<String, BTreeMap<ObjectId, Rc<Vec<usize>>>>,
+    receivers: BTreeMap<ObjectId, Receiver>,
+}
+
+struct Receiver {
+    slot: SlotId,
+    target: Option<ObjectId>,
+    // (signal, position) also preserves the global signal validation order.
+    handlers: Vec<(Rc<str>, usize)>,
+}
+
+pub(crate) enum IndexUpdate {
+    Rebuild(TargetIndex),
+    Retarget(Vec<(ObjectId, Option<ObjectId>)>),
+}
+impl IndexUpdate {
+    pub(crate) fn commit(self, model: &mut Instance) {
+        match self {
+            Self::Rebuild(index) => model.listener_targets = Some(index),
+            Self::Retarget(edits) => {
+                let index = model
+                    .listener_targets
+                    .as_mut()
+                    .expect("validated routing index");
+                for (id, next) in edits {
+                    let receiver = index.receivers.get_mut(&id).expect("registered receiver");
+                    let old = std::mem::replace(&mut receiver.target, next);
+                    for (signal, position) in &receiver.handlers {
+                        let targets = index
+                            .routes
+                            .get_mut(signal.as_ref())
+                            .expect("registered signal");
+                        if let Some(old) = old {
+                            let slots =
+                                Rc::make_mut(targets.get_mut(&old).expect("previous target"));
+                            slots.remove(
+                                slots.binary_search(position).expect("registered position"),
+                            );
+                            if slots.is_empty() {
+                                targets.remove(&old);
+                            }
+                        }
+                        if let Some(next) = next {
+                            let slots = Rc::make_mut(targets.entry(next).or_default());
+                            let at = slots.partition_point(|p| p < position);
+                            slots.insert(at, *position);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 #[derive(Clone)]
 pub(crate) struct Listener {
@@ -97,32 +151,79 @@ impl Instance {
         });
     }
 
-    pub(crate) fn index_connections(&self) -> Result<TargetIndex, Error> {
-        let mut index = TargetIndex::new();
-        for (signal, listeners) in &self.listeners {
-            let mut targets = BTreeMap::<ObjectId, Vec<usize>>::new();
-            for (position, listener) in listeners.iter().enumerate() {
-                let Value::Object(target) = self.slots[listener.target].value else {
-                    continue;
-                };
-                targets.entry(target).or_default().push(position);
-                if self.slots[listener.ignore_unknown].value == Value::Bool(true) {
-                    continue;
-                }
-                let node = &self.nodes[target.index];
-                let parameters = node.signal(signal).ok_or_else(|| {
-                    Error::new(format!(
-                        "Connections target '{}' has no signal '{signal}'",
-                        node.name
-                    ))
-                })?;
-                if listener.handler.parameters.len() > parameters.len() {
-                    return Err(Error::new(format!(
-                        "too many parameters for Connections handler '{signal}'"
-                    )));
+    fn listener_target(&self, slot: SlotId) -> Option<ObjectId> {
+        match self.slots[slot].value {
+            Value::Object(id) => Some(id),
+            _ => None,
+        }
+    }
+
+    fn validate_listener(&self, signal: &str, listener: &Listener) -> Result<(), Error> {
+        let Some(target) = self.listener_target(listener.target) else {
+            return Ok(());
+        };
+        if self.slots[listener.ignore_unknown].value == Value::Bool(true) {
+            return Ok(());
+        }
+        let node = &self.nodes[target.index];
+        let parameters = node.signal(signal).ok_or_else(|| {
+            Error::new(format!(
+                "Connections target '{}' has no signal '{signal}'",
+                node.name
+            ))
+        })?;
+        if listener.handler.parameters.len() > parameters.len() {
+            return Err(Error::new(format!(
+                "too many parameters for Connections handler '{signal}'"
+            )));
+        }
+        Ok(())
+    }
+
+    pub(crate) fn connection_updates(
+        &self,
+        changed: &BTreeSet<ObjectId>,
+    ) -> Result<IndexUpdate, Error> {
+        if let Some(index) = &self.listener_targets {
+            let mut edits = Vec::new();
+            let mut handlers = Vec::new();
+            for id in changed {
+                if let Some(receiver) = index.receivers.get(id) {
+                    let target = self.listener_target(receiver.slot);
+                    if target != receiver.target {
+                        edits.push((*id, target));
+                    }
+                    handlers.extend(&receiver.handlers);
                 }
             }
-            index.insert(
+            handlers.sort_unstable();
+            for (signal, position) in handlers {
+                self.validate_listener(signal, &self.listeners[signal.as_ref()][*position])?;
+            }
+            return Ok(IndexUpdate::Retarget(edits));
+        }
+        let mut index = TargetIndex::default();
+        for (signal, listeners) in &self.listeners {
+            let name: Rc<str> = signal.as_str().into();
+            let mut targets = BTreeMap::<ObjectId, Vec<usize>>::new();
+            for (position, listener) in listeners.iter().enumerate() {
+                self.validate_listener(signal, listener)?;
+                let target = self.listener_target(listener.target);
+                if let Some(id) = target {
+                    targets.entry(id).or_default().push(position);
+                }
+                let receiver =
+                    index
+                        .receivers
+                        .entry(listener.receiver)
+                        .or_insert_with(|| Receiver {
+                            slot: listener.target,
+                            target,
+                            handlers: Vec::new(),
+                        });
+                receiver.handlers.push((name.clone(), position));
+            }
+            index.routes.insert(
                 signal.clone(),
                 targets
                     .into_iter()
@@ -130,7 +231,7 @@ impl Instance {
                     .collect(),
             );
         }
-        Ok(index)
+        Ok(IndexUpdate::Rebuild(index))
     }
 }
 
@@ -149,12 +250,12 @@ impl Transaction<'_> {
             .model
             .listener_targets
             .as_ref()
-            .and_then(|index| index.get(signal)?.get(&sender))
+            .and_then(|index| index.routes.get(signal)?.get(&sender))
             .cloned();
         let mut matches = matching.iter().flat_map(|indices| indices.iter().copied());
         let mut next = 0;
         while next < end {
-            if !self.connection_targets_changed && self.model.listener_targets.is_some() {
+            if self.changed_receivers.is_empty() && self.model.listener_targets.is_some() {
                 let Some(position) = matches.next() else {
                     break;
                 };

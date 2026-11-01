@@ -30,7 +30,7 @@ pub(crate) struct Transaction<'a> {
     scope: Option<u32>,
     pub(crate) depth: usize,
     steps: std::cell::Cell<usize>,
-    pub(crate) connection_targets_changed: bool,
+    pub(crate) changed_receivers: BTreeSet<ObjectId>,
     pub(crate) connection_changes: signal_callbacks::Journal,
     pub(crate) deferred: Vec<deferred::DeferredWork>,
     pub(crate) structure: dynamic::Checkpoint,
@@ -114,7 +114,7 @@ impl Instance {
             depth: 0,
             steps: Default::default(),
             connection_changes: Default::default(),
-            connection_targets_changed: false,
+            changed_receivers: BTreeSet::new(),
             deferred: Vec::new(),
             loader_changes: Default::default(),
             range_pending: Default::default(),
@@ -130,8 +130,9 @@ impl Instance {
             if let Some(error) = tx.failed_host_call.take() {
                 return Err(error);
             }
-            let targets = if tx.connection_targets_changed || tx.model.listener_targets.is_none() {
-                Some(tx.model.index_connections()?)
+            let targets = if !tx.changed_receivers.is_empty() || tx.model.listener_targets.is_none()
+            {
+                Some(tx.model.connection_updates(&tx.changed_receivers)?)
             } else {
                 None
             };
@@ -164,8 +165,8 @@ impl Instance {
                     .collect::<Vec<_>>();
                 validate(tx.model, &changes)?;
             }
-            if let Some(index) = targets {
-                tx.model.listener_targets = Some(index);
+            if let Some(update) = targets {
+                update.commit(tx.model);
             }
             Ok(value)
         });
@@ -271,11 +272,12 @@ impl Transaction<'_> {
                     property.name.as_str(),
                     "target" | "enabled" | "ignoreUnknownSignals"
                 )
-            {
-                self.connection_targets_changed |= self.model.nodes[property.owner.index]
+                && self.model.nodes[property.owner.index]
                     .data
                     .as_deref()
-                    .is_some_and(|node| node.module == "QtQml" && node.name == "Connections");
+                    .is_some_and(|node| node.module == "QtQml" && node.name == "Connections")
+            {
+                self.changed_receivers.insert(property.owner);
             }
             let index = self.original.len();
             self.original.push((key, slot.clone()));

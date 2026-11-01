@@ -503,3 +503,62 @@ fn registry_snapshots_preserve_transitive_import_priority_after_late_reexports()
     assert_eq!(model.get(model.root(), "v").unwrap(), Value::Number(2.));
     assert!(types.reexport("Leaf", "Top").is_err());
 }
+
+#[test]
+fn retargeting_preserves_registration_order_across_signals_disposal_and_rollback() {
+    let mut app = component(
+        r#"
+        id: root
+        signal ping()
+        signal pong()
+        property string events: ""
+        property QtObject first
+        property QtObject last
+        property QtObject other: QtObject { id: alternative; signal ping(); signal pong() }
+        property QtObject invalid: QtObject { signal ping() }
+        property Component maker: Component {
+            Connections {
+                target: null
+                required property string label
+                function onPing() { root.events += label }
+                function onPong() { root.events += label }
+            }
+        }
+        function invalidSwap() { first.target = other; last.target = invalid }
+    "#,
+    )
+    .unwrap();
+    let root = app.root();
+    let Value::Object(factory) = app.get(root, "maker").unwrap() else {
+        panic!("factory")
+    };
+    let make = |app: &mut Instance, label: &str| {
+        app.create_object(
+            factory,
+            Some(root),
+            [("label".into(), Value::String(label.into()))].into(),
+        )
+        .unwrap()
+    };
+    let first = make(&mut app, "A");
+    let last = make(&mut app, "B");
+    app.set(root, "first", Value::Object(first)).unwrap();
+    app.set(root, "last", Value::Object(last)).unwrap();
+    // Attach in reverse order. Signal delivery must still use registration order.
+    app.set(last, "target", Value::Object(root)).unwrap();
+    app.set(first, "target", Value::Object(root)).unwrap();
+    app.emit(root, "pong", vec![]).unwrap();
+    assert!(app.call(root, "invalidSwap", vec![]).is_err());
+    app.emit(root, "ping", vec![]).unwrap();
+    let alternative = app.id("alternative").unwrap();
+    app.set(last, "target", Value::Object(alternative)).unwrap();
+    app.emit(root, "pong", vec![]).unwrap();
+    app.emit(alternative, "ping", vec![]).unwrap();
+    app.destroy_object(first).unwrap();
+    app.set(last, "target", Value::Object(root)).unwrap();
+    app.emit(root, "ping", vec![]).unwrap();
+    assert_eq!(
+        app.get(root, "events").unwrap(),
+        Value::String("ABABABB".into())
+    );
+}
