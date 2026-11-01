@@ -70,6 +70,8 @@ How the model of the bindings differs from upstream's, and what the port does ab
 
 **`xkbcommon-dl` 0.4.2** (MIT; `bitflags`, `dlib`, `log`, `once_cell`, `xkeysym`) **[V]**: the C declarations of `libxkbcommon.so.0`, opened at run time, with the compose functions; it is what `winit` uses. The 20 functions and the constants of upstream's `XkbCommonNativeMethods.cs` are a subset of it, so that file is not ported: its declarations are those of the crate, as the structures of `X11Structs.cs` are those of `x11-dl`. The four small classes over it (`XkbContext`, `XkbCommonKeymap`, `XkbComposeTable`, `XkbComposeState`) are ported and are where the `unsafe` of the library is: each owns one pointer and frees it once.
 
+A compositor hosted inside a Wayland window can opt into native keyboard metadata with `WaylandPlatformOptions::capture_native_keyboard`. Downcast `KeyEventArgs::platform_input_event_cookie()` to `WaylandKeyEvent` to obtain the original evdev code, the seat's latest XKB modifier masks and group, and its validated keymap. The worker serializes the map when the seat receives a replacement. Events share that allocation, so queued events retain the layout used to translate them. Locally synthesized repeat events are marked, allowing a nested client to generate its own repeat stream. Ordinary applications leave capture disabled and use FerroUI's translated key and text events.
+
 | Alternative | Why not |
 |---|---|
 | `xkbcommon` 0.9 | Links `libxkbcommon` at build time: no check from another system, and a link-time dependency of every application that carries the backend. |
