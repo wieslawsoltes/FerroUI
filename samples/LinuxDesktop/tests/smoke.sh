@@ -39,14 +39,19 @@ export XDG_CURRENT_DESKTOP=FerroDesktop
 export FERROUI_FRAME_TIMES=1
 mkdir -p "$XDG_DATA_HOME/applications" "$XDG_CONFIG_HOME"
 mkdir -m 700 "$XDG_RUNTIME_DIR"
-convert -size 380x220 'gradient:#25463e-#83daba' "$fixture/study.png"
+convert -size 420x240 'gradient:#193345-#91ddc3' \
+    -fill '#192d40' -draw 'rectangle 20,183 95,220' \
+    -fill '#285867' -draw 'rectangle 96,183 171,220' \
+    -fill '#367e86' -draw 'rectangle 172,183 247,220' \
+    -fill '#63aaa5' -draw 'rectangle 248,183 323,220' \
+    -fill '#9fe2c9' -draw 'rectangle 324,183 399,220' "$fixture/study.png"
 cat >"$XDG_DATA_HOME/applications/ferro-smoke-viewer.desktop" <<EOF
 [Desktop Entry]
 Type=Application
-Name=Ferro Smoke Viewer
-Comment=Open the smoke test image in ImageMagick
+Name=ImageMagick Display
+Comment=Open the Ferro color study in ImageMagick
 Icon=display-im6.q16
-Exec=display -nostdin -title "Ferro Smoke Viewer" "$fixture/study.png"
+Exec=display -nostdin -title "Color study - ImageMagick" "$fixture/study.png"
 EOF
 
 # Disable the WM's own shortcuts so a workspace switch tests the shell's
@@ -117,10 +122,16 @@ capture() {
 capture desktop
 xdotool key --clearmodifiers ctrl+k
 capture applications desktop
-xdotool type --clearmodifiers --delay 20 'Ferro Smoke Viewer'
+xdotool type --clearmodifiers --delay 20 'ferro color study'
 xdotool key --clearmodifiers Return
-viewer=$(await_window '^Ferro Smoke Viewer$')
+viewer=$(await_window '^Color study - ImageMagick$')
 [[ "$viewer" != "$shell_window" ]]
+xdotool windowactivate --sync "$shell_window" key --clearmodifiers Escape
+xdotool windowmove --sync "$viewer" 810 384 windowactivate --sync "$viewer"
+read -r sx sy sw sh < <(xdotool getwindowgeometry --shell "$shell_window" | awk -F= '
+    $1=="X" {x=$2} $1=="Y" {y=$2} $1=="WIDTH" {w=$2} $1=="HEIGHT" {h=$2}
+    END {print x, y, w, h}')
+import -window root -crop "${sw}x${sh}+${sx}+${sy}" +repage "$output/native-client.png"
 xdotool windowactivate --sync "$shell_window" key --clearmodifiers Escape ctrl+w
 capture workspaces desktop
 xdotool key --clearmodifiers Escape
@@ -139,6 +150,14 @@ for choice in '2 macos' '3 material' '1 windows'; do
     [[ "$(cat "$XDG_CONFIG_HOME/ferro-desktop/appearance")" == "$theme" ]]
     xdotool key --clearmodifiers Escape
     capture "$theme" appearance
+    if [[ "$theme" != windows ]]; then
+        xdotool key --clearmodifiers ctrl+k
+        # Opening an appearance can restore a previous search. Show the full
+        # installed catalog for the screenshot.
+        xdotool key --clearmodifiers ctrl+a BackSpace
+        capture "$theme-applications" "$theme"
+        xdotool key --clearmodifiers Escape
+    fi
     [[ "$(xdotool get_desktop)" == 0 ]]
     [[ "$(xdotool get_desktop_for_window "$viewer")" == 0 ]]
 done

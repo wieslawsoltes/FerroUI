@@ -34,13 +34,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             libfontconfig-dev libfreetype-dev libharfbuzz-dev fonts-dejavu-core \
-            mesa-vulkan-drivers xvfb xauth openbox xdotool dbus-x11 imagemagick x11-utils x11-xserver-utils
+            mesa-vulkan-drivers vulkan-validationlayers xvfb xauth openbox xdotool dbus-x11 imagemagick x11-utils x11-xserver-utils
       - name: Build and test the Graphite desktop
         run: |
           samples/LinuxDesktop/build.sh build --profile dev
           samples/LinuxDesktop/build.sh test --profile dev
       - name: Exercise the shell and capture its three themes
-        run: samples/LinuxDesktop/tests/smoke.sh target/debug/ferro-desktop desktop-captures
+        env:
+          VK_INSTANCE_LAYERS: VK_LAYER_KHRONOS_validation
+          VK_LAYER_ENABLES: VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT
+        run: |
+          samples/LinuxDesktop/tests/smoke.sh target/debug/ferro-desktop desktop-captures
+          if grep -E 'Validation Error|SYNC-HAZARD|VUID-' desktop-captures/desktop.log; then exit 1; fi
+      - name: Test and capture a managed login session
+        run: |
+          samples/LinuxDesktop/tests/session.sh test
+          samples/LinuxDesktop/tests/session.sh capture target/debug/ferro-desktop desktop-captures/session
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
