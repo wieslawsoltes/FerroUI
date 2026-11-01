@@ -74,14 +74,15 @@ pub struct SelectionModelExtensions;
 
 impl SelectionModelExtensions {
     /// Begins a batch update that ends when the returned operation is
-    /// disposed.
+    /// disposed or dropped.
     pub fn batch_update(model: &Rc<dyn ISelectionModel>) -> BatchUpdateOperation {
         BatchUpdateOperation::new(model.clone())
     }
 }
 
-/// A batch update of a selection model in progress; disposing it ends the
-/// update.
+/// A batch update of a selection model in progress; disposing or dropping
+/// it ends the update, once.
+#[must_use = "dropping the operation ends the batch update at once"]
 pub struct BatchUpdateOperation {
     owner: Rc<dyn ISelectionModel>,
     is_disposed: Cell<bool>,
@@ -96,9 +97,18 @@ impl BatchUpdateOperation {
 
 impl IDisposable for BatchUpdateOperation {
     fn dispose(&self) {
-        if !self.is_disposed.get() {
+        if !self.is_disposed.replace(true) {
             self.owner.end_batch_update();
-            self.is_disposed.set(true);
+        }
+    }
+}
+
+impl Drop for BatchUpdateOperation {
+    fn drop(&mut self) {
+        // While unwinding, ending the update (which raises the selection
+        // events) could panic again.
+        if !std::thread::panicking() {
+            self.dispose();
         }
     }
 }
