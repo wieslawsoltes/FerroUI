@@ -1,7 +1,8 @@
-//! The page of the WinUI materials (not from the managed original; `docs/porting/winui-materials.md`):
+//! The demos of the WinUI materials (not from the managed original; `docs/porting/winui-materials.md`):
 //! `AcrylicBrush` over a busy scene, the blend and colour effects the materials are built from,
-//! the Reveal brushes and lights, the system backdrops of the window (`MicaBackdrop`,
-//! `DesktopAcrylicBackdrop`) and the menus whose background is the desktop acrylic backdrop.
+//! the lights, the Reveal brushes and lights, the system backdrops of the window (`MicaBackdrop`,
+//! `DesktopAcrylicBackdrop`) and the menus whose background is the desktop acrylic backdrop. Each
+//! is a page of the section "Composition" of the catalog (`winui_composition_pages.rs`).
 
 use super::winui_composition_page::{brush, compositor_of, section, text};
 use ferroui_base::input::InputElement;
@@ -28,8 +29,7 @@ use ferroui_controls::media::{
 use ferroui_controls::shapes::Ellipse;
 use ferroui_controls::MenuFlyout;
 use ferroui_controls::{
-    Border, Button, Canvas, ContentPage, Control, MenuItem, Panel, ScrollViewer, Slider, StackPanel, TextBlock, TopLevel,
-    WrapPanel,
+    Border, Button, Canvas, Control, MenuItem, Panel, Slider, StackPanel, TextBlock, TopLevel, WrapPanel,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -133,7 +133,7 @@ fn acrylic(tint: Color, tint_opacity: f64, luminosity: Option<f64>, fallback: Co
     acrylic
 }
 
-fn acrylic_section() -> Ref<StackPanel> {
+pub(super) fn acrylic_section() -> Ref<StackPanel> {
     let light = acrylic(Color::from_rgb(0xFC, 0xFC, 0xFC), 0.0, Some(0.85), Color::from_rgb(0xF9, 0xF9, 0xF9));
     let dark = acrylic(Color::from_rgb(0x2C, 0x2C, 0x2C), 0.15, Some(0.96), Color::from_rgb(0x2C, 0x2C, 0x2C));
     let accent = acrylic(Color::from_rgb(0x00, 0x5F, 0xB8), 0.8, Some(0.8), Color::from_rgb(0x00, 0x5F, 0xB8));
@@ -351,7 +351,7 @@ fn blend(mode: BlendEffectMode) -> GraphicsEffect {
     BlendEffect { name: "Blend".into(), mode, background: parameter("image"), foreground: parameter("rings") }.into()
 }
 
-fn effects_section() -> Ref<StackPanel> {
+pub(super) fn effects_section() -> Ref<StackPanel> {
     let grid = WrapPanel::new();
     grid.set_orientation(Orientation::Horizontal);
     let tiles: Vec<(&str, GraphicsEffect)> = vec![
@@ -479,7 +479,7 @@ fn light_tile(name: &str, width: f64, height: f64, build: impl Fn(&Ref<Border>, 
     tile
 }
 
-fn lighting_section() -> Ref<StackPanel> {
+pub(super) fn lighting_section() -> Ref<StackPanel> {
     let grid = WrapPanel::new();
     grid.set_orientation(Orientation::Horizontal);
 
@@ -583,7 +583,7 @@ fn lighting_section() -> Ref<StackPanel> {
 
 /// An element with a Reveal background and border whose Reveal state follows the pointer, as
 /// the visual states of a WinUI control set it.
-pub(super) fn reveal_tile(name: &str) -> Ref<Border> {
+fn reveal_tile(name: &str) -> Ref<Border> {
     let tile = Border::new();
     tile.set_width(150.0);
     tile.set_height(64.0);
@@ -639,7 +639,7 @@ pub(super) fn reveal_tile(name: &str) -> Ref<Border> {
     tile
 }
 
-fn reveal_section() -> Ref<StackPanel> {
+pub(super) fn reveal_section() -> Ref<StackPanel> {
     let surface = Border::new();
     surface.set_padding(Thickness::uniform(16.0));
     surface.set_corner_radius(CornerRadius::uniform(8.0));
@@ -710,14 +710,14 @@ fn reveal_section() -> Ref<StackPanel> {
 // --- system backdrops ----------------------------------------------------------------------
 
 ferroui_base::ferro_thread_local! {
-    /// The function of the page last created that sets the backdrop of the window, for the
-    /// smoke run of the desktop entry point.
+    /// The function of the page "System backdrops" last created that sets the backdrop of the
+    /// window, for the smoke run of the desktop entry point.
     static SET_BACKDROP: RefCell<Option<Rc<dyn Fn(usize)>>> = const { RefCell::new(None) };
 }
 
-/// Sets the system backdrop of the window of the page last created, as its buttons do:
-/// 0 none, 1 Mica, 2 Mica Alt, 3 desktop acrylic (for the smoke run). Returns whether the
-/// page exists.
+/// Sets the system backdrop of the window of the page "System backdrops" last created, as its
+/// buttons do: 0 none, 1 Mica, 2 Mica Alt, 3 desktop acrylic (for the smoke run). Returns whether
+/// the page exists.
 pub fn smoke_set_materials_backdrop(index: usize) -> bool {
     let set = SET_BACKDROP.with(|set| set.borrow().clone());
     match set {
@@ -729,7 +729,7 @@ pub fn smoke_set_materials_backdrop(index: usize) -> bool {
     }
 }
 
-fn backdrop_section() -> Ref<StackPanel> {
+pub(super) fn backdrop_section() -> Ref<StackPanel> {
     let status = caption("The window has no system backdrop.");
     let anchor = row(8.0);
     let set: Rc<dyn Fn(usize)> = {
@@ -785,7 +785,7 @@ fn backdrop_section() -> Ref<StackPanel> {
 
 // --- menus ---------------------------------------------------------------------------------
 
-fn menu_section() -> Ref<StackPanel> {
+pub(super) fn menu_section() -> Ref<StackPanel> {
     let flyout = MenuFlyout::new();
     for name in ["Open", "Save", "Save as", "Print", "Close"] {
         let item = MenuItem::new();
@@ -817,26 +817,6 @@ fn menu_section() -> Ref<StackPanel> {
         "MenuFlyoutPresenter.SystemBackdrop is the theme resource MenuFlyoutSystemBackdrop, a DesktopAcrylicBackdrop: in a popup of the window the menu shows the acrylic of what is behind it; in a popup window of its own, the fallback colour of the acrylic. The context menu shares the property.",
         &content.upcast(),
     )
-}
-
-/// Creates the page.
-pub fn winui_materials_page() -> Ref<ContentPage> {
-    let page = ContentPage::new();
-    page.set_header(Some(label("Materials (WinUI)")));
-    let panel = StackPanel::new();
-    panel.set_spacing(28.0);
-    panel.set_margin(Thickness::uniform(16.0));
-    panel.set_vertical_alignment(VerticalAlignment::Top);
-    panel.children().add(acrylic_section().upcast::<Control>());
-    panel.children().add(effects_section().upcast::<Control>());
-    panel.children().add(lighting_section().upcast::<Control>());
-    panel.children().add(reveal_section().upcast::<Control>());
-    panel.children().add(backdrop_section().upcast::<Control>());
-    panel.children().add(menu_section().upcast::<Control>());
-    let scroller = ScrollViewer::new();
-    scroller.set_content(Some(Control::boxed(panel)));
-    page.set_content(Some(Control::boxed(scroller)));
-    page
 }
 
 /// Applies the control theme `key` of the application's resources (the

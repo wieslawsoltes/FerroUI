@@ -60,8 +60,9 @@ if [ -n "$CHECK" ]; then
     # Both halves are checked and reported before the result.
     status=0
     python3 "$ROOT/scripts/convert_catalog_xaml.py" "$SOURCE" "$TARGET" --check || status=1
-    # FerroUICatalogSymbols.ttf is the port's own (scripts/winui-controls/catalog_symbol_font.py).
-    diff -r -x icon.ico -x icon-32.png -x FerroUICatalogSymbols.ttf "$SOURCE/Assets" "$TARGET/Assets" || status=1
+    # FerroUICatalogSymbols.ttf is the port's own (scripts/winui-controls/catalog_symbol_font.py),
+    # and so is FallbackFonts (scripts/fonts/catalog_fallback_fonts.py).
+    diff -r -x icon.ico -x icon-32.png -x FerroUICatalogSymbols.ttf -x FallbackFonts "$SOURCE/Assets" "$TARGET/Assets" || status=1
     cmp "$UPSTREAM/build/Assets/icon.ico" "$TARGET/Assets/icon.ico" || status=1
     cmp "$UPSTREAM/build/Assets/icon-32.png" "$TARGET/Assets/icon-32.png" || status=1
     cmp "$SOURCE/Pages/teapot.bin" "$TARGET/Pages/teapot.bin" || status=1

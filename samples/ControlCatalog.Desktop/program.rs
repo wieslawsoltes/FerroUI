@@ -1057,9 +1057,10 @@ fn screenshot_run(directory: PathBuf) {
         // The first page is selected one interval after the start.
         winui_flight_run(&directory, interval);
     }
-    // `FERROUI_SMOKE_MATERIALS_BACKDROP=<n>` on a run whose first page is "Materials (WinUI)":
-    // the system backdrop `n` of the page (1 Mica, 2 Mica Alt, 3 desktop acrylic) is set on the
-    // window half an interval after the page is selected. Not in the managed original.
+    // `FERROUI_SMOKE_MATERIALS_BACKDROP=<n>` on a run whose first page is "System backdrops"
+    // (section "Composition"): the system backdrop `n` of the page (1 Mica, 2 Mica Alt, 3 desktop
+    // acrylic) is set on the window half an interval after the page is selected. Not in the
+    // managed original.
     if let Some(index) = std::env::var("FERROUI_SMOKE_MATERIALS_BACKDROP").ok().and_then(|value| value.parse::<usize>().ok()) {
         let _ = DispatcherTimer::run_once(
             move || println!("Materials: set the backdrop {index}: {}", control_catalog::pages::smoke_set_materials_backdrop(index)),
@@ -1134,15 +1135,17 @@ fn screenshot_run(directory: PathBuf) {
     );
 }
 
-/// With `FERROUI_SMOKE_WINUI_FLIGHT` on a screenshot run whose first page is "Composition
-/// (WinUI)": the first card is opened, which starts its connected animation, and the frames of
-/// the compositor are saved during the flight to the detail view and during the flight back
-/// (`flight-NN-<ms>.png`, the time from the selection of the page). Not in the original. The
-/// page should be shown for 5 s at least (`FERROUI_SMOKE_PAGES=5000`). The box of the implicit
-/// animations is then hidden and shown and the parallax scroller scrolled (`steps-<ms>.png`).
-/// From 5 s the sections of the later phases are opened, and each is brought into view in turn
-/// with its demo run (`section-N-<ms>.png`); that part needs `FERROUI_SMOKE_PAGES=13000`, or
-/// more with `FERROUI_SMOKE_WINUI_SECTION_MS`.
+/// With `FERROUI_SMOKE_WINUI_FLIGHT` on a screenshot run whose first page is "Connected
+/// animations" (section "Composition"): the first card is opened, which starts its connected
+/// animation, and the frames of the compositor are saved during the flight to the detail view and
+/// during the flight back (`flight-NN-<ms>.png`, the time from the selection of the page). Not in
+/// the original. The run then goes to other pages of the section: on "Implicit animations" the box
+/// is hidden and shown, on "Parallax" the scroller is scrolled (`steps-<ms>.png`). From 5.4 s the
+/// pages of the demos of the later phases are selected in turn, each with its demo run
+/// (`section-N-<ms>.png`, N the index of `pages::smoke_section_header`). The first page of the run
+/// should be shown for all of that: `FERROUI_SMOKE_PAGES=22000`, or more with
+/// `FERROUI_SMOKE_WINUI_SECTION_MS`; the pictures of the run taken at the end of that interval
+/// show the last page the flight selected.
 fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
     let open_at = selected_at + Duration::from_millis(400);
     let back_at = selected_at + Duration::from_millis(2000);
@@ -1166,11 +1169,14 @@ fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
         back_at,
         DispatcherPriority::NORMAL,
     );
-    // Then the implicit hide and show animations of the box, and the parallax header.
-    let steps: [(u64, fn() -> bool, &str); 3] = [
-        (2900, control_catalog::pages::smoke_toggle_box, "hide the box"),
-        (3600, control_catalog::pages::smoke_toggle_box, "show the box"),
-        (4300, || control_catalog::pages::smoke_scroll_parallax(160.0), "scroll the parallax scroller"),
+    // Then the implicit hide and show animations of the box, and the parallax header, each on its
+    // page of the section "Composition".
+    let steps: [(u64, fn() -> bool, &str); 5] = [
+        (2600, || control_catalog::select_page("Implicit animations"), "select the page Implicit animations"),
+        (3100, control_catalog::pages::smoke_toggle_box, "hide the box"),
+        (3800, control_catalog::pages::smoke_toggle_box, "show the box"),
+        (4200, || control_catalog::select_page("Parallax"), "select the page Parallax"),
+        (4700, || control_catalog::pages::smoke_scroll_parallax(160.0), "scroll the parallax scroller"),
     ];
     for (at, step, name) in steps {
         let _ = DispatcherTimer::run_once(
@@ -1179,7 +1185,7 @@ fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
             DispatcherPriority::NORMAL,
         );
     }
-    for at in [2960u64, 3150, 3660, 3800, 4700] {
+    for at in [3160u64, 3350, 3860, 4000, 5100] {
         let at = selected_at + Duration::from_millis(at);
         let path = directory.join(format!("steps-{}.png", (at - selected_at).as_millis()));
         let _ = DispatcherTimer::run_once(
@@ -1192,32 +1198,34 @@ fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
             DispatcherPriority::NORMAL,
         );
     }
-    // The sections of the later phases: all opened (their demos are built then), then each
-    // brought into view with its demo run, and saved.
-    let _ = DispatcherTimer::run_once(
-        || println!("Flight: open the sections: {}", control_catalog::pages::smoke_expand_sections()),
-        selected_at + Duration::from_millis(5000),
-        DispatcherPriority::NORMAL,
-    );
-    // `FERROUI_SMOKE_WINUI_SECTION_MS`: the time between two sections (1200 ms by default); a
-    // debug build with Vello needs more, as each saved frame holds the compositor up.
-    let spacing = environment_milliseconds("FERROUI_SMOKE_WINUI_SECTION_MS").unwrap_or(1200);
+    // The pages of the demos of the later phases (the sections of the earlier single page): each
+    // selected in turn, its demo run as its buttons do once the page is shown, and the window saved.
+    // `FERROUI_SMOKE_WINUI_SECTION_MS`: the time between two pages (1600 ms by default, at least
+    // 1400: the picture is taken 1300 ms after the selection); a debug build with Vello needs more,
+    // as each saved frame holds the compositor up.
+    let spacing = environment_milliseconds("FERROUI_SMOKE_WINUI_SECTION_MS").unwrap_or(1600);
     // `FERROUI_SMOKE_WINUI_FIRST_SECTION`: the first section shown (0 by default), so that the
-    // later sections (6 to 8: alpha masks, theme shadows, zoom) can be saved in a short run.
+    // later sections (7 to 9: alpha masks, theme shadows, zoom) can be saved in a short run.
     let first = environment_milliseconds("FERROUI_SMOKE_WINUI_FIRST_SECTION").unwrap_or(0) as usize;
-    for (slot, section) in (first..9usize).enumerate() {
-        let shown = 5800 + slot as u64 * spacing;
+    for (slot, section) in (first..control_catalog::pages::smoke_section_count()).enumerate() {
+        let shown = 5400 + slot as u64 * spacing;
+        let header = control_catalog::pages::smoke_section_header(section).unwrap_or_default();
         let _ = DispatcherTimer::run_once(
-            move || println!("Flight: show section {section}: {}", control_catalog::pages::smoke_show_section(section)),
+            move || println!("Flight: show section {section} ({header}): {}", control_catalog::pages::smoke_show_section(section)),
             selected_at + Duration::from_millis(shown),
             DispatcherPriority::NORMAL,
         );
-        let at = selected_at + Duration::from_millis(shown + 900);
+        let _ = DispatcherTimer::run_once(
+            move || println!("Flight: run the demo of section {section}: {}", control_catalog::pages::smoke_run_section(section)),
+            selected_at + Duration::from_millis(shown + 500),
+            DispatcherPriority::NORMAL,
+        );
+        let at = selected_at + Duration::from_millis(shown + 1300);
         let path = directory.join(format!("section-{section}-{}.png", (at - selected_at).as_millis()));
         let _ = DispatcherTimer::run_once(
             move || {
                 if let Some(window) = main_window() {
-                    save_composed(&window, path.clone(), format!("section {section}"));
+                    save_composed(&window, path.clone(), format!("section {section} ({header})"));
                 }
             },
             at,
