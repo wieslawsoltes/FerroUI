@@ -267,7 +267,7 @@ impl WinUIBindings {
                 let _ = group.update();
             }
         });
-        self.template_subscription.replace(Some(Subscription::new(subscription)));
+        self.template_subscription.replace(Some(subscription));
     }
 }
 

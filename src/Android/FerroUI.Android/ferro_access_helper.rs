@@ -225,7 +225,7 @@ impl FerroAccessHelper {
                         if let Some(registration) = registration {
                             registration.dispose();
                         }
-                    }));
+                    }).detach());
                 }
             }
         }

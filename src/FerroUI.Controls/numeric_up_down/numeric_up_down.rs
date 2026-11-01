@@ -144,7 +144,7 @@ impl FerroObjectImpl for NumericUpDown {
 
                 this.set_valid_spin_direction();
             }
-        });
+        }).detach();
     }
 }
 

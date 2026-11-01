@@ -117,7 +117,7 @@ impl VisualImpl for MaterialSearchView {
         Self::parent_on_attached_to_visual_tree(this, event);
         let weak = this.to_ref().downgrade();
         *this.visibility_subscription.borrow_mut() =
-            Some(Subscription::new(this.is_effectively_visible_changed(move || {
+            Some(this.is_effectively_visible_changed(move || {
                 if let Some(this) = weak.upgrade() {
                     if this.is_effectively_visible() {
                         this.request_frame();
@@ -125,7 +125,7 @@ impl VisualImpl for MaterialSearchView {
                         this.invalidate_frame();
                     }
                 }
-            })));
+            }));
         this.retarget();
     }
     fn on_detached_from_visual_tree(this: &Self, event: &VisualTreeAttachmentEventArgs) {

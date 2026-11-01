@@ -62,7 +62,7 @@ impl TransformTrackingHelper {
                 let this = self.strong();
                 visual.detached_from_visual_tree(move |_| this.on_detached_from_visual_tree())
             };
-            self.attachment_subscriptions.borrow_mut().extend([attached, detached]);
+            self.attachment_subscriptions.borrow_mut().extend([attached.detach(), detached.detach()]);
 
             if visual.is_attached_to_visual_tree() {
                 self.subscribe_to_parents();

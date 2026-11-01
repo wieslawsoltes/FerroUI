@@ -820,7 +820,7 @@ impl Popup {
                     this.target_detached(e);
                 }
             }
-        }));
+        }).detach());
 
         self.subscribe_to_top_level(&top_level, &placement_target, &handler_cleanup);
         if !self.is_current_lifecycle_request(generation) {
@@ -1000,7 +1000,7 @@ impl Popup {
                                 this.placement_target_layout_updated();
                             }
                         }
-                    }));
+                    }).detach());
                 }
 
                 return;

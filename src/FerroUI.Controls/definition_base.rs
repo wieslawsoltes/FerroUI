@@ -681,7 +681,7 @@ impl SharedSizeState {
                     this.on_layout_updated();
                 }
             });
-            *self.layout_updated_host.borrow_mut() = Some((layout_updated_host.to_ref().downgrade(), subscription));
+            *self.layout_updated_host.borrow_mut() = Some((layout_updated_host.to_ref().downgrade(), subscription.detach()));
         }
     }
 

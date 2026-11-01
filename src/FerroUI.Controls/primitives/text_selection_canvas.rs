@@ -728,7 +728,7 @@ impl TextSelectionHandleCanvas {
                 tapped,
                 pointer_pressed,
                 got_focus,
-                is_effectively_visible_changed,
+                is_effectively_visible_changed: is_effectively_visible_changed.detach(),
                 text_box,
             });
         }
@@ -900,7 +900,7 @@ impl PresenterVisualListener {
 
         if let Some(layoutable) = visual.cast::<Layoutable>() {
             let on_invalidated = on_invalidated.clone();
-            disposables.push(layoutable.effective_viewport_changed(move |_| on_invalidated()));
+            disposables.push(layoutable.effective_viewport_changed(move |_| on_invalidated()).detach());
         }
         if let Some(control) = visual.cast::<Control>() {
             let token = control.size_changed(move |_, _| on_invalidated());

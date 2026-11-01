@@ -72,7 +72,7 @@ fn should_raise_detached_from_logical_tree_on_content_changed_standalone() {
     assert_eq!(foo.content().and_then(|x| string_of(&x)).as_deref(), Some("foo"));
 
     let detached = foo_detached.clone();
-    foo.detached_from_logical_tree(move |_| detached.set(true));
+    foo.detached_from_logical_tree(move |_| detached.set(true)).detach();
 
     target.set_content(boxed_str("bar"));
     target.update_child();
@@ -129,7 +129,7 @@ fn should_raise_detached_from_logical_tree_in_content_control_on_content_changed
     assert_eq!(tbfoo.content().and_then(|x| string_of(&x)).as_deref(), Some("foo"));
 
     let detached = foo_detached.clone();
-    tbfoo.detached_from_logical_tree(move |_| detached.set(true));
+    tbfoo.detached_from_logical_tree(move |_| detached.set(true)).detach();
 
     content_control.set_content(boxed_str("bar"));
     target.update_child();
@@ -169,7 +169,7 @@ fn should_raise_detached_from_logical_tree_on_detached_standalone() {
     assert_eq!(foo.content().and_then(|x| string_of(&x)).as_deref(), Some("foo"));
 
     let detached = foo_detached.clone();
-    foo.detached_from_logical_tree(move |_| detached.set(true));
+    foo.detached_from_logical_tree(move |_| detached.set(true)).detach();
 
     target.set_parent(None);
 

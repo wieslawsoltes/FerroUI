@@ -325,7 +325,7 @@ impl EventTriggerBase {
                 let event_args: BoxedValue = Rc::new(e.clone());
                 handler(sender.as_ref(), &event_args);
             });
-            *self.loaded_event_subscription.borrow_mut() = Some(subscription);
+            *self.loaded_event_subscription.borrow_mut() = Some(subscription.detach());
         }
     }
 

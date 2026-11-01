@@ -82,7 +82,7 @@ impl LightweightObservable<Option<Ref<Visual>>> for VisualTracker {
                 this.attached_detached();
             }
         });
-        self.subscriptions.borrow_mut().extend([attached, detached]);
+        self.subscriptions.borrow_mut().extend([attached.detach(), detached.detach()]);
     }
 
     fn deinitialize(&self) {

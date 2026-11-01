@@ -185,7 +185,7 @@ impl ImplicitEntry {
                 entry.on_removed(e);
             }
         });
-        self.subscriptions.borrow_mut().extend([changed, attached, detached]);
+        self.subscriptions.borrow_mut().extend([changed, attached.detach(), detached.detach()]);
     }
 
     /// The compositor of the visual, while it is in a tree rendered by one.

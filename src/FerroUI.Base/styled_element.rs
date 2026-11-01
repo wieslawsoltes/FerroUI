@@ -7,7 +7,7 @@ use crate::controls::{
 use crate::data::BindingPriority;
 use crate::logical_tree::{IChildIndexProvider, LogicalTreeAttachmentEventArgs};
 use crate::property_store::FrameType;
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::styling::{
     DuplicateSetterError, ContainerQuery, ControlTheme, IStyle, IStyleHost, IThemeVariantHost, Style, StyleBase, StyleHostRef,
     StyleInstance, Styles, ThemeVariant,
@@ -366,50 +366,50 @@ impl StyledElement {
     pub fn attached_to_logical_tree(
         &self,
         handler: impl Fn(&LogicalTreeAttachmentEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.attached_to_logical_tree.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.attached_to_logical_tree.remove(token);
             }
-        })
+        }))
     }
 
     /// Raised when the styled element is detached from a rooted logical tree.
     pub fn detached_from_logical_tree(
         &self,
         handler: impl Fn(&LogicalTreeAttachmentEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.detached_from_logical_tree.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.detached_from_logical_tree.remove(token);
             }
-        })
+        }))
     }
 
     /// Occurs when the data context property changes.
-    pub fn data_context_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    pub fn data_context_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.data_context_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.data_context_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Occurs when the styled element has finished initialization.
-    pub fn initialized(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    pub fn initialized(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.initialized.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.initialized.remove(token);
             }
-        })
+        }))
     }
 
     /// Raised when the resources change on the element or an ancestor of the
@@ -417,8 +417,8 @@ impl StyledElement {
     pub fn resources_changed(
         &self,
         handler: impl Fn(&ResourcesChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
-        self.subscribe_resources_changed(Rc::new(handler))
+    ) -> Subscription {
+        Subscription::new(self.subscribe_resources_changed(Rc::new(handler)))
     }
 
     fn subscribe_resources_changed(&self, handler: Rc<dyn Fn(&ResourcesChangedEventArgs)>) -> Rc<dyn IDisposable> {
@@ -432,8 +432,8 @@ impl StyledElement {
     }
 
     /// Raised when the theme variant in effect for the element changes.
-    pub fn actual_theme_variant_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe_actual_theme_variant_changed(Rc::new(handler))
+    pub fn actual_theme_variant_changed(&self, handler: impl Fn() + 'static) -> Subscription {
+        Subscription::new(self.subscribe_actual_theme_variant_changed(Rc::new(handler)))
     }
 
     fn subscribe_actual_theme_variant_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {

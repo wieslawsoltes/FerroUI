@@ -212,7 +212,7 @@ fn wire_trimmed_description(description: &Ref<TextBlock>) {
                 tooltip.map(|text| Rc::new(text) as ferroui_base::BoxedValue),
             );
         }
-    });
+    }).detach();
 }
 
 fn item_button(
@@ -473,7 +473,7 @@ fn wire_collection(
         if let Some(state) = weak_state.upgrade() {
             state.animation.clear();
         }
-    });
+    }).detach();
     frame.navigate(source_type, None)?;
     Ok(())
 }
@@ -566,7 +566,7 @@ fn wire_simple(root: &Ref<Control>) -> Result<(), NavigationError> {
         });
     root.detached_from_visual_tree(move |_| {
         animation.clear();
-    });
+    }).detach();
     frame.navigate(ConnectedFirstPage::TYPE, None)?;
     Ok(())
 }
@@ -668,7 +668,7 @@ fn wire_cards(root: &Ref<Control>) -> Result<(), NavigationError> {
             });
             cards.detached_from_visual_tree(move |_| {
                 active.clear();
-            });
+            }).detach();
             Ok(ConnectedCardPage::with_content(cards))
         }),
     )?;

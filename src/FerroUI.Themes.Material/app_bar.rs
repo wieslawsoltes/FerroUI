@@ -209,7 +209,7 @@ impl VisualImpl for MaterialAppBar {
         this.connect_source();
         let weak = this.to_ref().downgrade();
         *this.visibility_subscription.borrow_mut() =
-            Some(Subscription::new(this.is_effectively_visible_changed(move || {
+            Some(this.is_effectively_visible_changed(move || {
                 if let Some(this) = weak.upgrade() {
                     if this.is_effectively_visible() {
                         this.update_clock();
@@ -219,7 +219,7 @@ impl VisualImpl for MaterialAppBar {
                         this.drag.set(None);
                     }
                 }
-            })));
+            }));
         this.update_clock();
     }
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {

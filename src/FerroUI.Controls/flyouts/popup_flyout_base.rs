@@ -73,7 +73,7 @@ impl TargetLifetime {
         let detached = Rc::new(Cell::new(false));
         let observed = detached.clone();
         let subscription = target.detached_from_visual_tree(move |_| observed.set(true));
-        Self { target, root, detached, subscription }
+        Self { target, root, detached, subscription: subscription.detach() }
     }
 
     fn is_current(&self) -> bool {
@@ -723,7 +723,7 @@ impl PopupFlyoutBase {
                 this.on_placement_target_or_popup_key_up(e);
             }
         });
-        let old = self.target_handlers.replace(Some(TargetHandlers { owner, generation, detached, key_up }));
+        let old = self.target_handlers.replace(Some(TargetHandlers { owner, generation, detached: detached.detach(), key_up }));
         drop(old);
     }
 

@@ -174,7 +174,7 @@ impl FerroObjectImpl for ItemsRepeater {
                 owner.stack_measure_count.set(0);
                 owner.viewport_manager.on_layout_updated(&owner);
             }
-        });
+        }).detach();
         let weak = this.to_ref().downgrade();
         this.add_handler_with(
             Control::request_bring_into_view_event(),

@@ -98,7 +98,7 @@ impl FerroObjectImpl for Chart {
         });
         this.resource_subscriptions
             .borrow_mut()
-            .extend([resources, theme]);
+            .extend([resources.detach(), theme.detach()]);
     }
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs) {
         Self::parent_on_property_changed(this, change);

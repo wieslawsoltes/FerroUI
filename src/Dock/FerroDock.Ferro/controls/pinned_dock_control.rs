@@ -102,7 +102,7 @@ impl TemplatedControlImpl for PinnedDockControl {
         let attached = this.attached_to_visual_tree(move |_| owner.on_attached());
         let owner = this.to_ref();
         let detached = this.detached_from_visual_tree(move |_| owner.on_detached());
-        this.layout_events.replace(vec![layout, attached, detached]);
+        this.layout_events.replace(vec![layout.detach(), attached.detach(), detached.detach()]);
     }
 }
 ferro_properties! {impl PinnedDockControl {

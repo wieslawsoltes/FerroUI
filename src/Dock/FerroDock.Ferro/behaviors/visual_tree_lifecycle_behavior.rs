@@ -80,7 +80,7 @@ impl VisualTreeLifecycleBehavior {
                         subscriptions: Vec::new(),
                     })
                     .subscriptions
-                    .push(Subscriptions { attached, detached });
+                    .push(Subscriptions { attached: attached.detach(), detached: detached.detach() });
             });
             if element.is_attached_to_visual_tree() {
                 Self::invoke_attached(element);

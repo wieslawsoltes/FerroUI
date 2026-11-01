@@ -40,7 +40,7 @@ impl RootDockDebugBehavior {
         view.data_context_changed(move || {
             let factory = dockable(owner.data_context().as_ref()).and_then(|model| model.factory());
             owner.presentation().set_factory(factory);
-        });
+        }).detach();
         let owner = view.clone();
         view.presentation()
             .property_changed()
@@ -72,9 +72,9 @@ impl RootDockDebugBehavior {
             overlay: RefCell::new(None),
         });
         let attached = state.clone();
-        view.attached_to_visual_tree(move |_| attached.attach());
+        view.attached_to_visual_tree(move |_| attached.attach()).detach();
         let detached = state.clone();
-        view.detached_from_visual_tree(move |_| detached.detach());
+        view.detached_from_visual_tree(move |_| detached.detach()).detach();
         if view.is_attached_to_visual_tree() {
             state.attach();
         }

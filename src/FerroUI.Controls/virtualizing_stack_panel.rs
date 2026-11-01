@@ -102,7 +102,7 @@ impl FerroObjectImpl for VirtualizingStackPanel {
             if let Some(this) = weak.upgrade() {
                 this.on_effective_viewport_changed(e);
             }
-        });
+        }).detach();
     }
 }
 

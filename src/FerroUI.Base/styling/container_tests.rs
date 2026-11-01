@@ -425,7 +425,7 @@ fn requested_theme_variant_sets_actual_theme_variant_and_is_inherited() {
 
     let raised = std::rc::Rc::new(std::cell::Cell::new(0));
     let r = raised.clone();
-    child.actual_theme_variant_changed(move || r.set(r.get() + 1));
+    child.actual_theme_variant_changed(move || r.set(r.get() + 1)).detach();
 
     root.set_value(ThemeVariant::requested_theme_variant_property(), Some(ThemeVariant::dark()));
     assert_eq!(root.actual_theme_variant(), Some(ThemeVariant::dark()));

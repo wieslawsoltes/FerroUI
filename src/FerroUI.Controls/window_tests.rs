@@ -879,7 +879,7 @@ fn extending_client_area_to_decorations_when_attached_to_visual_tree_works() {
                 changed(true);
             }
         }
-    });
+    }).detach();
 
     window.show();
 
