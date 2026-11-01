@@ -79,7 +79,7 @@ impl PlatformRenderInterface {
         panic!("Graphics context of type is not supported");
     }
 
-    #[cfg(ferro_skia_vulkan)]
+    #[cfg(any(ferro_skia_vulkan, ferro_skia_graphite_vulkan))]
     fn create_vulkan_gpu(
         vulkan: Rc<dyn IVulkanPlatformGraphicsContext>,
         max_resource_bytes: Option<i64>,
@@ -88,7 +88,7 @@ impl PlatformRenderInterface {
         crate::gpu::vulkan::VulkanSkiaGpu::new(vulkan, max_resource_bytes, use_stencil_buffers)
     }
 
-    #[cfg(not(ferro_skia_vulkan))]
+    #[cfg(not(any(ferro_skia_vulkan, ferro_skia_graphite_vulkan)))]
     fn create_vulkan_gpu(
         _vulkan: Rc<dyn IVulkanPlatformGraphicsContext>,
         _max_resource_bytes: Option<i64>,

@@ -1,4 +1,4 @@
-//! Rendering with Vulkan through Skia's Ganesh backend.
+//! Rendering with Vulkan through Skia's configured GPU backend.
 //!
 //! The GPU over the graphics context of a Vulkan device
 //! ([`VulkanSkiaGpu`]), the render target that draws a frame into the image
@@ -8,20 +8,34 @@
 //! The module needs a Skia build with Vulkan (the `ferro_skia_vulkan`
 //! configuration: Linux, and the feature `vulkan` of this crate elsewhere).
 
+#[cfg(ferro_skia_graphite_vulkan)]
+pub(super) mod graphite_frame;
+
+#[cfg(ferro_skia_graphite_vulkan)]
+use super::graphite::GraphiteGrContext as VulkanGrContext;
+#[cfg(ferro_skia_vulkan)]
+use super::ganesh::GaneshGrContext as VulkanGrContext;
+
+#[cfg(ferro_skia_vulkan)]
 mod vulkan_skia_external_objects_feature;
 mod vulkan_skia_gpu;
 mod vulkan_skia_render_target;
 
+#[cfg(ferro_skia_vulkan)]
 pub use vulkan_skia_external_objects_feature::VulkanSkiaExternalObjectsFeature;
 pub use vulkan_skia_gpu::VulkanSkiaGpu;
 pub use vulkan_skia_render_target::VulkanSkiaRenderTarget;
 
+#[cfg(ferro_skia_vulkan)]
 use ferroui_vulkan::VulkanImageInfo;
+#[cfg(ferro_skia_vulkan)]
 use skia_safe::gpu::vk;
+#[cfg(ferro_skia_vulkan)]
 use skia_safe::gpu::Protected;
 
 /// The format of an image as Skia names it. The framework renders to the
 /// two formats with 8 bits per channel and no others.
+#[cfg(ferro_skia_vulkan)]
 pub(crate) fn sk_format(format: u32) -> Option<vk::Format> {
     use ferroui_vulkan::ash::vk::Format;
     if format == Format::R8G8B8A8_UNORM.as_raw() as u32 {
@@ -35,6 +49,7 @@ pub(crate) fn sk_format(format: u32) -> Option<vk::Format> {
 
 /// The layout of an image as Skia names it, for the layouts of the first
 /// version of Vulkan and the one of a presented image.
+#[cfg(ferro_skia_vulkan)]
 pub(crate) fn sk_image_layout(layout: u32) -> Option<vk::ImageLayout> {
     use ferroui_vulkan::ash::vk::ImageLayout;
     let layout = ImageLayout::from_raw(layout as i32);
@@ -54,6 +69,7 @@ pub(crate) fn sk_image_layout(layout: u32) -> Option<vk::ImageLayout> {
 }
 
 /// The tiling of an image as Skia names it.
+#[cfg(ferro_skia_vulkan)]
 pub(crate) fn sk_image_tiling(tiling: u32) -> Option<vk::ImageTiling> {
     use ferroui_vulkan::ash::vk::ImageTiling;
     match ImageTiling::from_raw(tiling as i32) {
@@ -68,6 +84,7 @@ pub(crate) fn sk_image_tiling(tiling: u32) -> Option<vk::ImageTiling> {
 /// # Panics
 /// Panics when the format, the layout or the tiling of the image is one the
 /// backend does not render to.
+#[cfg(ferro_skia_vulkan)]
 pub(crate) fn sk_image_info(info: &VulkanImageInfo, current_queue_family: u32) -> vk::ImageInfo {
     let format = sk_format(info.format).unwrap_or_else(|| panic!("Unsupported image format {}", info.format));
     let layout =
@@ -102,5 +119,5 @@ pub(crate) fn sk_image_info(info: &VulkanImageInfo, current_queue_family: u32) -
     image_info
 }
 
-#[cfg(test)]
+#[cfg(all(test, ferro_skia_vulkan))]
 mod tests;

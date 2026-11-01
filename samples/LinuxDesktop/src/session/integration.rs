@@ -33,7 +33,7 @@ fn real_client_lifecycle() {
         ..Default::default()
     }));
     let session = Session::connect().unwrap();
-    assert!(session.snapshot().workspace_names.len() >= 2);
+    until(&session, || session.snapshot().workspace_names.len() >= 2);
     // A second X connection behaves like an ordinary application external to the shell.
     let display = xlib::x_open_display().unwrap();
     let id = xlib::x_create_simple_window(display, xlib::x_default_root_window(display), 20, 50, 220, 120, 0, 0, 0);

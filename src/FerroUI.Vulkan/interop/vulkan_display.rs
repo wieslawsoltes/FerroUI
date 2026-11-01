@@ -466,7 +466,7 @@ impl VulkanDisplay {
             command_buffer,
             image.handle(),
             image.current_layout(),
-            vk::AccessFlags::NONE,
+            vk::AccessFlags::COLOR_ATTACHMENT_WRITE,
             vk::ImageLayout::TRANSFER_SRC_OPTIMAL,
             vk::AccessFlags::TRANSFER_READ,
             image.mip_levels(),
