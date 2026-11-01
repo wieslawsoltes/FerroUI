@@ -119,7 +119,10 @@ EGL cannot defer releasing its native resources. The WSL mock EGL suite and
 five factory/display-ownership contracts pass. An opt-in test also creates a
 real EGL/GLES display/context under WSL, makes it current, disposes it and
 observes `EGL_NO_CONTEXT` (`linux-native-egl-disposal.log`). It passes while
-Mesa reports that the X server has no DRI3 device. This verifies native EGL
+Mesa reports that the X server has no DRI3 device. The final renderer string
+is `llvmpipe (LLVM 21.1.8, 256 bits)` (`linux-native-egl-disposal-final.log`).
+The final shared EGL suite passes 27 tests, with this opt-in test ignored in
+that ordinary invocation and separately run successfully. This verifies native EGL
 lifetime behavior, not accelerated rendering or DMA-BUF media import.
 
 ```sh

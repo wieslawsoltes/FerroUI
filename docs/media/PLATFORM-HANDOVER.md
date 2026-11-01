@@ -402,6 +402,18 @@ unattributed. Repeated factory replacement or real device loss can still grow
 ANGLE registry metadata. See WINDOWS-VERIFICATION.md for the probe, tests,
 commands and exact limitations; this does not establish universal leak freedom.
 
+Final verification on `d1c16abc4` passes all 50 runner stages, including 16
+presentation cases, three race cycles, 20 full camera cycles / 120 resets,
+default recovery/EOF and WSL build/control/EGL contracts. Independent longer
+fixed-window runs also pass: 300 cycles / 1,800 resets leave live Rust bytes
+unchanged and allocated default heap slightly lower; 100 camera-only cycles
+plateau after warm-up. Every tracked native owner/resource checkpoint is zero.
+The shared EGL fixes also destroy failed constructions, restore failed context
+switches and unbind disposed current contexts. A real WSL EGL disposal test
+passes using llvmpipe; this is software-context lifecycle evidence, not DMA-BUF
+media acceptance. Full details and the frozen executable hash are in the
+Windows/Linux verification notes.
+
 That runner also caught an intermittent EOF restart in the shared
 `MediaPlayerElement`: its timer stopped on an old Ended snapshot before native
 Play reached Playing. Ended now receives the existing bounded command-settling

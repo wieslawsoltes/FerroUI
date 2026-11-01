@@ -660,3 +660,54 @@ create many rendering threads. Repeated graphics-factory replacement or real
 device-removal events can still add ANGLE registry metadata; removing those
 containers needs an upstream lifetime fix. Physical driver loss, a physical
 camera and the remaining release gates above are still unverified.
+
+The final end-to-end run on `d1c16abc4` passes all 50 stages, including eight
+memory workloads, the native four-test suite, five display-ownership tests,
+27 EGL tests, all 16 orientation/crop presentation cases, three lifecycle race
+cycles, a 20-cycle camera soak / 120 resets, default recovery, five EOF restarts,
+default fixture rejection, the WSL native build and shared control/EGL suites.
+The soak's live Rust bytes are exactly 2,957,320 at cycles 5 and 20; default
+heap allocated is 14,167,294 → 14,111,525, GPU bytes are exactly 54,542,336,
+and handles are 647 → 641. Private bytes are 136,355,840 → 147,697,664; those
+process-wide retained/committed bytes are not equated with live heap objects.
+Every native session/callback/stream/frame/alias checkpoint is zero and
+framework CPU preview attempts/bytes remain zero.
+
+```powershell
+./tests/media/verify-windows.ps1 -MemoryCycles 6 -StressCycles 20 -RaceCycles 3 `
+  -EndedRestartRuns 5 -IncludeWsl `
+  -WslTargetDirectory /home/danw/build-cache/ferroui-portable-media `
+  -TargetDirectory F:\build-cache\ferroui-portable-media-windows `
+  -OutputDirectory '../windows verification native memory final'
+```
+
+That report's frozen binary SHA-256 is
+`E1417149105E3A34A85D27B50BBAFA502A8D941462D58D062112C886654650BC`.
+The earlier `windows verification display lifetime` report was stopped for
+constructor cleanup work. `windows verification memory fixes final` retains
+its failed native regression: the new current-context assertion failed before
+explicit unbinding was added. Neither is reported as a successful full run.
+
+Two longer processes then use that exact frozen executable with
+`--quiet-diagnostics --no-png-diagnostics --memory-fixed-window`. All ordered
+resource and five-owner checkpoints are verified, including all 300 reset and
+100 capture checkpoints:
+
+| Fixed-window workload | Live Rust bytes, cycle 5 → last | Default heap allocated, cycle 5 → last | Private bytes, cycle 5 → last | Handles, cycle 5 → last |
+| --- | ---: | ---: | ---: | ---: |
+| 300 reset cycles / 1,800 resets | 2,922,173 → 2,922,173 | 9,845,370 → 9,808,745 | 88,334,336 → 87,736,320 | 596 → 587 |
+| 100 camera-only cycles | 2,934,792 → 2,934,792 | 15,765,392 → 16,418,424 | 100,974,592 → 102,916,096 | 652 → 640 |
+
+The reset process passes in 168,505 ms and ends with slightly less allocated
+heap/private memory than cycle 5. The camera process passes in 279,488 ms.
+Its allocated heap reaches 16,586,106 at cycle 10 and ends at 16,418,424,
+showing a plateau after initial warm-up in this workload. CPU preview attempts
+and bytes remain zero. This does not erase the smaller, unattributed growth
+observed in the separate rapid 1,000-native-source experiment.
+
+Replay the frozen executable with the usual camera/synthetic-camera/smoke/
+recovery/renderer arguments plus `--memory-workload=reset
+--camera-stress-cycles=300 --memory-fixed-window`, or
+`--memory-workload=capture --camera-stress-cycles=100 --memory-fixed-window`.
+Logs are `windows-memory-reset-fixed-300-final.log` and
+`windows-memory-capture-fixed-100-final.log` beside the worktree.
