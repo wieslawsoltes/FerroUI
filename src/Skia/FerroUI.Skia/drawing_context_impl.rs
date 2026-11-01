@@ -1975,6 +1975,9 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
 
     fn push_lighting_multiply_layer(&mut self, bounds: Rect, lighting: &ferroui_base::platform::LightingParameters) -> bool {
         self.check_lease();
+        if !self.destination_reads_supported() {
+            return false;
+        }
         let Some(shader) =
             crate::composition_effects::lighting_shader(lighting, crate::composition_effects::LightingOutput::Factors)
         else {
@@ -1993,6 +1996,9 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
 
     fn push_pixel_operation(&mut self, bounds: Rect, operation: &ferroui_base::platform::PixelOperation) -> bool {
         self.check_lease();
+        if !self.destination_reads_supported() {
+            return false;
+        }
         // Every program the operation needs, before anything is pushed.
         let Some(programs) = crate::composition_effects::pixel_operation_programs(operation) else { return false };
         let bounds = to_sk_rect(bounds);
@@ -2140,6 +2146,17 @@ impl DrawingContextImpl {
     /// frame needs them: every stage of
     /// [`prewarm_runtime_effects_stage`](Self::prewarm_runtime_effects_stage)
     /// at once. Returns how many SkSL programs compiled.
+    /// Whether a shader of this context may read its destination: the runtime blenders of the
+    /// multiply layer of the lights and of the pixel operations. Not on a GPU surface of the iOS
+    /// simulator: Skia turns framebuffer fetch on for the Apple GPU family the simulator's Metal
+    /// device reports, the simulator's Metal compiler rejects it ("reading from a rendertarget is
+    /// not supported"), and Graphite then fails on the pipeline it could not make. There the
+    /// compositor draws these effects with its CPU path, as the drawing contexts without the
+    /// capability do (docs/porting/gpu-rendering.md).
+    fn destination_reads_supported(&self) -> bool {
+        !(cfg!(all(target_os = "ios", target_abi = "sim")) && self.gpu.is_some())
+    }
+
     pub(crate) fn prewarm_runtime_effects(&mut self) -> usize {
         let compiled = crate::composition_effects::compile_all();
         for stage in 0..Self::PREWARM_STAGES {
