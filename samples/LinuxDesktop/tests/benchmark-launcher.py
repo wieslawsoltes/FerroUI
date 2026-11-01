@@ -108,7 +108,7 @@ def isolated_run(binary):
         apps.mkdir()
         for index in range(6):
             (apps / f"ferro-benchmark-{index}.desktop").write_text(
-                f"[Desktop Entry]\nType=Application\nName=Benchmark app {index + 1}\nExec=true\n",
+                f"[Desktop Entry]\nType=Application\nName=FerroUI timing fixture {index + 1}\nExec=true\n",
                 encoding="utf-8",
             )
         wm_config = Path(__file__).resolve().parents[1] / "session/openbox.xml"
@@ -118,9 +118,6 @@ def isolated_run(binary):
             if time.monotonic() - wm_started > 5:
                 raise RuntimeError("Openbox did not initialize")
             time.sleep(.05)
-        # Openbox needs its system data directories for its own fonts and theme.
-        # Only the shell receives the isolated application catalog.
-        os.environ["XDG_DATA_DIRS"] = str(base / "data")
         shell = stack.enter_context(process([binary, "--theme=windows"]))
         window = xdo("search", "--sync", "--onlyvisible", "--name", "^Ferro Desktop$").splitlines()[0]
         xdo("windowsize", "--sync", window, "1280", "800", "windowactivate", "--sync", window,
@@ -130,6 +127,9 @@ def isolated_run(binary):
         time.sleep(1.5)
         closed = probe.rgb()
         probe.transition(probe.open_keys, closed)
+        # Filter to exactly the six fixture entries. Keep the system data
+        # paths available for Vulkan ICD manifests and native theme resources.
+        xdo("type", "--clearmodifiers", "FerroUI timing fixture")
         time.sleep(.4)
         opened = probe.rgb()
         probe.transition(probe.close_keys, opened)
