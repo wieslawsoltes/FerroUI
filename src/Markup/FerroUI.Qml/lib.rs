@@ -16,6 +16,8 @@ mod initial;
 mod lifetime;
 pub use compiled::{CompiledComponent, ComponentSource};
 pub use initial::InitialProperty;
+mod engine;
+pub use engine::Engine;
 mod enums;
 pub use enums::Namespace;
 mod evaluation;
@@ -82,6 +84,7 @@ impl std::ops::DerefMut for NodeEntry {
     }
 }
 struct Node {
+    document: Option<ObjectId>,
     source_url: Option<String>,
     source_layers: Vec<ir::SourceLayer>,
     context: Option<ObjectId>,
@@ -184,6 +187,7 @@ pub struct SignalEmission {
 }
 
 pub struct Instance {
+    roots: engine::Roots,
     dynamic: dynamic::Components,
     javascript: scripting::ScriptState,
     models: BTreeMap<ObjectId, list_model::Model>,

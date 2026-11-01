@@ -161,6 +161,7 @@ structure!(ScriptResource {
     exports
 });
 structure!(Document {
+    type_keys,
     components,
     scripts,
     singletons,

@@ -27,7 +27,7 @@ impl Transaction<'_> {
         self.scoped_key(owner, name)
             .or_else(|_| self.scoped_key(root, name))
             .or_else(|error| self.model.delegate_context_key(owner, name).ok_or(error))
-            .or_else(|_| self.scoped_key(self.model.root(), name))
+            .or_else(|_| self.scoped_key(self.model.document_root(owner), name))
     }
 
     pub(crate) fn name(
@@ -66,7 +66,7 @@ impl Transaction<'_> {
         match self.lookup_property(owner, root, name) {
             Ok(key) => self.script_read(key, reads),
             Err(error) => {
-                let receiver = [owner, root, self.model.root()]
+                let receiver = [owner, root, self.model.document_root(owner)]
                     .into_iter()
                     .find(|&receiver| self.model.script_method(receiver, name));
                 match receiver {
@@ -108,7 +108,8 @@ impl Transaction<'_> {
             Native(index) => {
                 let eval = *self
                     .model
-                    .native_functions
+                    .unit(owner)
+                    .map_or(self.model.native_functions, |u| u.functions)
                     .get(*index)
                     .ok_or_else(|| Error::new("invalid compiled expression index"))?;
                 eval(&mut compiled::Frame {
@@ -306,7 +307,7 @@ impl Transaction<'_> {
                 return object;
             }
         }
-        self.model.root()
+        self.model.document_root(owner)
     }
 
     pub(crate) fn invoke(
@@ -475,7 +476,8 @@ impl Transaction<'_> {
                 Stmt::Native(index) => {
                     let script = *self
                         .model
-                        .native_scripts
+                        .unit(owner)
+                        .map_or(self.model.native_scripts, |u| u.scripts)
                         .get(*index)
                         .ok_or_else(|| Error::new("invalid compiled script index"))?;
                     return script(&mut compiled::Frame {

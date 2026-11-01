@@ -231,7 +231,7 @@ impl Transaction<'_> {
             .ok_or_else(|| Error::new("invalid declaration context"))?;
         let url = resolve(origin.or(node.source_url.as_deref()), spec)?;
         let parsed = Url::parse(&url).map_err(|e| Error::new(e.to_string()))?;
-        let definition = if let Some(template) = self.model.dynamic.catalog.get(&url) {
+        let definition = if let Some(template) = self.model.component_catalog(owner).get(&url) {
             FactoryDefinition::Bundled(Ok(template.clone()))
         } else if matches!(parsed.scheme(), "https" | "http")
             && parsed.host_str() != Some("qml.invalid")
@@ -389,7 +389,7 @@ impl Transaction<'_> {
             key: origin.clone(),
             document: Rc::new(doc),
         };
-        let doc = ir::link(source, &mut Resolver(&self.model.dynamic.catalog))
+        let doc = ir::link(source, &mut Resolver(self.model.component_catalog(parent)))
             .map_err(|e| Error::new(format!("{}:1:1: {}", e.origin, e.message)))?;
         let template = Template::from_object(doc.root, &doc.imports)?;
         self.build_object(parent, Some(parent), BTreeMap::new(), &template)
@@ -437,6 +437,7 @@ impl ir::ComponentResolver for Resolver<'_> {
             ir::ComponentSource {
                 key,
                 document: Rc::new(ir::Document {
+                    type_keys: vec![],
                     root: (*template.object).clone(),
                     imports: template.imports.to_vec(),
                     components: Default::default(),

@@ -187,6 +187,7 @@ impl<'s> Parser<'s> {
             return Err(self.error("expected end of document after the root object"));
         }
         Ok(Document {
+            type_keys: vec![],
             scripts: Default::default(),
             singletons: Vec::new(),
             components: Default::default(),

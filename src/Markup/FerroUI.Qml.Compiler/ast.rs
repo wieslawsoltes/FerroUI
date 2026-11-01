@@ -11,6 +11,9 @@ pub struct SourceSpan {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Document {
+    /// Stable type identities indexed by this link unit's declaration scope.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub type_keys: Vec<String>,
     /// JavaScript resources embedded from the local import graph during linking.
     #[serde(default)]
     pub scripts: BTreeMap<String, ScriptResource>,

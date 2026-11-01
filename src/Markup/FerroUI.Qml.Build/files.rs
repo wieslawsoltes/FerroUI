@@ -150,6 +150,44 @@ impl Files {
 }
 
 impl ComponentResolver for Files {
+    fn type_key(&self, origin: &str) -> String {
+        let (file, inline) = if self.documents.contains_key(Path::new(origin)) {
+            (origin, "")
+        } else {
+            origin.rsplit_once('#').unwrap_or((origin, ""))
+        };
+        let path = Path::new(file);
+        let key = self.modules.type_key(path).unwrap_or_else(|| {
+            // Different entry directories in one Cargo package can each have a
+            // Foo.qml. The package-relative name survives moving the checkout.
+            if let (Ok(manifest), Ok(package)) = (
+                std::env::var("CARGO_MANIFEST_DIR"),
+                std::env::var("CARGO_PKG_NAME"),
+            ) {
+                if let Ok(relative) = path.strip_prefix(manifest) {
+                    return format!(
+                        "cargo:{package}/{}",
+                        relative.to_string_lossy().replace('\\', "/")
+                    );
+                }
+            }
+            // Standalone compilers share the entry directory as their project base.
+            let mut prefix = PathBuf::new();
+            for ancestor in self.project.ancestors() {
+                if let Ok(relative) = path.strip_prefix(ancestor) {
+                    return project_url(&prefix.join(relative));
+                }
+                prefix.push("..");
+            }
+            file.to_owned()
+        });
+        if inline.is_empty() {
+            key
+        } else {
+            format!("{key}#{inline}")
+        }
+    }
+
     fn next_component(&mut self) -> Result<Option<(String, ComponentSource)>, String> {
         self.component_entries
             .pop_first()

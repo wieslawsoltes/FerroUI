@@ -66,6 +66,15 @@ impl<R: ComponentResolver> Linker<'_, R> {
                 let defining = Context::new(source.key.clone(), &source.document, self.resolver)?;
                 self.stack.push(source.key);
                 self.object(&defining, &mut root)?;
+                // Expanding a composite base keeps its root ID member. The
+                // singleton identity belongs to the exported document.
+                if let Some(member) = root
+                    .members
+                    .iter_mut()
+                    .find(|m| matches!(m.kind, MemberKind::Id(_)))
+                {
+                    member.scope = Some(scope);
+                }
                 self.stack.pop();
                 self.singletons.push(root);
                 Ok(Some(Expr::Name(id)))

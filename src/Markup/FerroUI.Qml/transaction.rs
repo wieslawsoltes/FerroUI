@@ -432,10 +432,12 @@ impl Transaction<'_> {
         let Binding::Expr(expr) = binding.as_ref() else {
             return None;
         };
+        let owner = self.model.properties[key].owner;
         let (name, scope) = match expr {
             ir::Expr::Native(index) => self
                 .model
-                .native_first_reads
+                .unit(owner)
+                .map_or(self.model.native_first_reads, |u| u.first_reads)
                 .get(*index)
                 .copied()
                 .flatten()?,
@@ -445,10 +447,9 @@ impl Transaction<'_> {
             return None;
         }
         // QML ids shadow a same-named property even on the binding owner.
-        if self.model.ids.contains_key(name) {
+        if self.model.lexical_id(owner, name).is_some() {
             return None;
         }
-        let owner = self.model.properties[key].owner;
         if let Ok(slot) = self.model.key_in(owner, name, self.model.slots[key].scope) {
             return Some(slot);
         }
@@ -460,14 +461,17 @@ impl Transaction<'_> {
             return None;
         }
         let root = match scope {
-            Some(name) => *self.model.ids.get(name)?,
-            None => self.model.root(),
+            Some(name) => self.model.lexical_id(owner, name)?,
+            None => self.model.context_root(owner),
         };
         self.model
             .key_in(root, name, self.model.slots[key].scope)
             .or_else(|_| {
-                self.model
-                    .key_in(self.model.root(), name, self.model.slots[key].scope)
+                self.model.key_in(
+                    self.model.document_root(owner),
+                    name,
+                    self.model.slots[key].scope,
+                )
             })
             .ok()
     }

@@ -158,6 +158,16 @@ fn main() {
         .compile_file("singletons/Main.qml", "singletons.rs")
         .expect("compile source singleton fixture");
     ferroui_qml_build::Compiler::new()
+        .import_path("singletons/imports")
+        .compile_file("singletons/Independent.qml", "independent_root.rs")
+        .expect("compile independent engine root");
+    #[cfg(feature = "webscene")]
+    ferroui_qml_build::Compiler::new()
+        .with_javascript()
+        .import_path("singletons/imports")
+        .compile_file("singletons/Independent.qml", "independent_guest.rs")
+        .expect("compile independent guest root");
+    ferroui_qml_build::Compiler::new()
         .check_with(|doc| types.check(doc))
         .compile_file("ui/Main.qml", "component.rs")
         .expect("compile test component");

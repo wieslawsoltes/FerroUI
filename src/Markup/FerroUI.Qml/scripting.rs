@@ -404,9 +404,13 @@ impl ScriptContext<'_, '_> {
         if self.locals.contains_key(name) || self.id(name).is_some() {
             return None;
         }
-        [self.owner, self.root, self.tx.model.root()]
-            .into_iter()
-            .find_map(|o| self.property_type(o, name))
+        [
+            self.owner,
+            self.root,
+            self.tx.model.document_root(self.owner),
+        ]
+        .into_iter()
+        .find_map(|o| self.property_type(o, name))
     }
     pub fn keys(&self, base: &Value) -> Result<Vec<String>, Error> {
         self.tx.model.validate_handles(base)?;
@@ -544,7 +548,11 @@ impl ScriptContext<'_, '_> {
         if let Some(ids) = self.ids {
             names.extend(ids.keys().filter(|n| !private(n)).cloned());
         }
-        for object in [self.owner, self.root, self.tx.model.root()] {
+        for object in [
+            self.owner,
+            self.root,
+            self.tx.model.document_root(self.owner),
+        ] {
             names.extend(self.members(object));
         }
         if let Some(node) = self.tx.model.node(self.owner) {
@@ -704,9 +712,13 @@ impl ScriptContext<'_, '_> {
         if self.locals.contains_key(name) || self.id(name).is_some() {
             return None;
         }
-        [self.owner, self.root, self.tx.model.root()]
-            .into_iter()
-            .find(|&object| self.is_method(object, name))
+        [
+            self.owner,
+            self.root,
+            self.tx.model.document_root(self.owner),
+        ]
+        .into_iter()
+        .find(|&object| self.is_method(object, name))
     }
 
     pub fn assign(&mut self, name: &str, value: Value) -> Result<(), Error> {

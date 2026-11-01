@@ -66,6 +66,20 @@ impl IdentifiedModules {
         }
     }
 
+    pub(crate) fn type_key(&self, path: &Path) -> Option<String> {
+        let module = self.origins.get(path)?;
+        // The directory suffix distinguishes versioned module directories.
+        Some(format!(
+            "module:{}/{}/{}",
+            module.manifest.uri,
+            module.dir.file_name()?.to_str()?,
+            path.strip_prefix(&module.dir)
+                .ok()?
+                .to_str()?
+                .replace('\\', "/")
+        ))
+    }
+
     pub(crate) fn watched(&self) -> impl Iterator<Item = &Path> {
         self.watched.iter().map(PathBuf::as_path)
     }

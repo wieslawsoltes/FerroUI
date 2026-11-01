@@ -105,6 +105,11 @@ impl crate::transaction::Transaction<'_> {
         if self.in_binding() {
             return Err(Error::new("a binding cannot destroy objects"));
         }
+        if self.model.roots.units.contains_key(&id) {
+            return Err(Error::new(
+                "document roots and singletons have engine-managed lifetimes",
+            ));
+        }
         if self.model.node(id).is_none() || !self.model.dynamic.contexts.contains_key(&id) {
             return Err(Error::new(
                 "only a live dynamically created root can be destroyed",

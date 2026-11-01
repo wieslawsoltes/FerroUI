@@ -386,6 +386,7 @@ impl<'a> Builder<'a> {
             context: None,
             scopes: enums::Scopes::named(name, &document.root)?,
             instance: Box::new(Instance {
+                roots: Default::default(),
                 dynamic: dynamic::Components {
                     registry: Some(Rc::new(registry.clone())),
                     ..Default::default()
@@ -558,6 +559,14 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                 return Err(Error::new(format!("duplicate id '{name}'")));
             }
         }
+        shell.node.document = self.context.and_then(|context| {
+            if self.instance.roots.units.contains_key(&context) {
+                Some(context)
+            } else {
+                let declaration = self.instance.dynamic.contexts.get(&context)?.declaration;
+                self.instance.node(declaration)?.document
+            }
+        });
         shell.node.context = self.context;
         shell.node.parent = parent;
         self.instance.nodes.push(NodeEntry {
@@ -1221,5 +1230,87 @@ impl Instance {
         builder.link_binding_targets()?;
         builder.default_children()?;
         Ok(builder.assigned)
+    }
+}
+
+impl Instance {
+    pub(crate) fn allocate_document(
+        &mut self,
+        doc: &Document,
+        registry: &TypeRegistry,
+        unit: Rc<engine::Unit>,
+    ) -> Result<BTreeSet<SlotId>, Error> {
+        let mut builder = Builder {
+            prepared: Default::default(),
+            context: None,
+            scopes: enums::Scopes::named(None, &doc.root)?,
+            instance: self,
+            registry,
+            imports: &doc.imports,
+            assigned: Default::default(),
+            aliases: vec![],
+            implicit: vec![],
+            binding_targets: vec![],
+            read_candidates: vec![],
+        };
+        let root = builder.document_object(&doc.root, &unit)?;
+        let mut fresh = vec![root];
+        let mut aliases = BTreeMap::new();
+        for definition in &doc.singletons {
+            let (name, scope) = definition
+                .members
+                .iter()
+                .find_map(|member| match &member.kind {
+                    MemberKind::Id(name) => Some((name, member.scope?)),
+                    _ => None,
+                })
+                .ok_or_else(|| Error::new("linked singleton needs a declaration identity"))?;
+            let id = if let Some(id) = builder.instance.roots.singletons.get(&scope) {
+                *id
+            } else {
+                let id = builder.document_object(definition, &unit)?;
+                builder.instance.roots.singletons.insert(scope, id);
+                fresh.push(id);
+                id
+            };
+            aliases.insert(name.clone(), id);
+        }
+        for id in fresh {
+            builder
+                .instance
+                .dynamic
+                .contexts
+                .get_mut(&id)
+                .expect("document context")
+                .ids
+                .extend(aliases.clone());
+        }
+        builder.link_aliases()?;
+        builder.link_binding_targets()?;
+        builder.default_children()?;
+        Ok(builder.assigned)
+    }
+}
+
+impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
+    fn document_object(
+        &mut self,
+        object: &Object,
+        unit: &Rc<engine::Unit>,
+    ) -> Result<ObjectId, Error> {
+        let id = self.instance.next_object();
+        let declaration = self.instance.root();
+        self.instance.dynamic.contexts.insert(
+            id,
+            dynamic::Context {
+                declaration,
+                row_revision: None,
+                delegate_inputs: None,
+                ids: BTreeMap::new(),
+            },
+        );
+        self.instance.roots.units.insert(id, unit.clone());
+        self.context = Some(id);
+        self.object(object, None)
     }
 }

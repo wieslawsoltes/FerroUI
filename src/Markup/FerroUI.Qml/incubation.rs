@@ -48,6 +48,7 @@ impl PreparedNode {
         let properties = definition.properties.keys().cloned().zip(0..).collect();
         Self {
             node: Box::new(Node {
+                document: None,
                 source_url: source.source_url.clone(),
                 source_layers: source.source_layers.clone(),
                 context: None,

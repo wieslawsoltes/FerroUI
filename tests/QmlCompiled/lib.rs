@@ -84,6 +84,9 @@ mod tests {
 }
 
 #[cfg(test)]
+mod engine_roots;
+
+#[cfg(test)]
 mod singleton_tests {
     use ferroui_qml::{Instance, TypeRegistry, Value};
     include!(concat!(env!("OUT_DIR"), "/singletons.rs"));

@@ -17,6 +17,11 @@ pub struct ComponentSource {
 /// Native types are left for the host registry. Returning a component instead
 /// gives this instantiation a fresh private id scope.
 pub trait ComponentResolver {
+    /// Relocatable identity shared by independently linked documents in one engine.
+    fn type_key(&self, origin: &str) -> String {
+        origin.to_owned()
+    }
+
     /// Imports that are to be resolved by the host, after consuming source modules.
     fn native_imports(&mut self, _from: &str, imports: &[Import]) -> Result<Vec<Import>, String> {
         Ok(imports.iter().filter(|i| !i.is_path).cloned().collect())
@@ -103,7 +108,12 @@ pub fn link(
         object.type_imports.get_or_insert(scope.native_imports);
         components.insert(url, object);
     }
+    let mut type_keys = vec![String::new(); linker.types.len()];
+    for (key, index) in linker.types {
+        type_keys[index as usize] = linker.resolver.type_key(&key);
+    }
     Ok(Document {
+        type_keys,
         components,
         scripts: linker.scripts,
         singletons: linker.singletons,
