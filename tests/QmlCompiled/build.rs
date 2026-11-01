@@ -1,5 +1,11 @@
 fn main() {
     #[cfg(feature="webscene")] ferroui_qml_build::Compiler::new().with_javascript().qml_entry("Part.qml").qml_entry("sub/Part.qml").qml_entry("sub/scripts/Part.qml").compile_file("creation/origin/Main.qml","catalog_origin.rs").expect("compile nested factories");
+    ferroui_qml_build::Compiler::new().compile_file("loader/Main.qml","loader_model.rs").expect("compile Loader fixture");
+    #[cfg(feature="webscene")]
+    for (source, output) in [("loader/Main.qml","loader_js.rs"),("loader/Bindings.qml","loader_initial_bindings.rs")] {
+        ferroui_qml_build::Compiler::new().with_javascript().compile_file(source,output).expect("compile Loader for V8");
+    }
+
     ferroui_qml_build::Compiler::new().qml_entry("Part.qml").compile_file("creation/catalog/Main.qml","catalog_native.rs").expect("compile file factories");
     #[cfg(feature="webscene")] ferroui_qml_build::Compiler::new().with_javascript().qml_entry("Part.qml").compile_file("creation/catalog/Main.qml","catalog_guest.rs").expect("compile guest file factories");
     #[cfg(feature="webscene")] ferroui_qml_build::Compiler::new().with_javascript().compile_file("creation/Initial.qml","component_properties.rs").expect("compile initial bindings");

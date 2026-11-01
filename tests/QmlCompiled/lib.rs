@@ -1,4 +1,6 @@
 #[cfg(test)]
+mod loader;
+#[cfg(test)]
 mod tests {
     use ferroui_qml::{Instance, TypeRegistry, Value};
     include!(concat!(env!("OUT_DIR"), "/component.rs"));
