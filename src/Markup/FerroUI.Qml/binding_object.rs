@@ -137,7 +137,7 @@ impl Transaction<'_> {
         self.pending.insert(key);
     }
 
-    fn remove_overlay(&mut self, target: SlotId, input: SlotId, mode: u8) {
+    pub(crate) fn remove_overlay(&mut self, target: SlotId, input: SlotId, mode: u8) {
         let slot = self.touched(target);
         let mut overlay = slot
             .overlay

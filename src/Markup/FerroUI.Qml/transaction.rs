@@ -86,7 +86,7 @@ impl Instance {
                             return None;
                         }
                         let property = &tx.model.properties[*key];
-                        if property.name.starts_with("$qml:") {
+                        if tx.model.node(property.owner).is_none() || property.name.starts_with("$qml:") {
                             return None;
                         }
                         Some(Change {
@@ -126,13 +126,14 @@ impl Instance {
             tx.model.emissions.append(&mut tx.emitted);
             for (key, old) in tx.original {
                 let value = &tx.model.slots[key].value;
-                if tx.model.properties[key].name.starts_with("$qml:") {
+                if tx.model.node(tx.model.properties[key].owner).is_none() || tx.model.properties[key].name.starts_with("$qml:") {
                     continue;
                 }
                 if !old.value.unchanged(value) || old.assigned != tx.model.slots[key].assigned {
                     tx.model.changes.insert(key, value.clone());
                 }
             }
+            tx.model.retire_objects(&tx.structure.removed);
         }
         if tx.used_engine {
             if let Some(engine) = &tx.model.javascript.engine {
@@ -629,7 +630,7 @@ impl Transaction<'_> {
             .collect()
     }
 
-    fn dispatch(
+    pub(crate) fn dispatch(
         &mut self,
         owner: ObjectId,
         signal: &str,

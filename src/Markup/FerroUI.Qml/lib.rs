@@ -7,6 +7,7 @@ pub mod compiled;
 mod connections;
 mod deferred;
 mod dynamic;
+mod lifetime;
 pub use compiled::{CompiledComponent, ComponentSource};
 mod enums;
 pub use enums::Namespace;
@@ -47,8 +48,15 @@ struct Procedure {
     body: Vec<Stmt>,
 }
 
+struct NodeEntry {id:ObjectId, live:bool, data:Option<Box<Node>>}
+impl std::ops::Deref for NodeEntry{
+    type Target=Node;
+    fn deref(&self)->&Node{self.data.as_deref().expect("access to retired QML object")}
+}
+impl std::ops::DerefMut for NodeEntry{
+    fn deref_mut(&mut self)->&mut Node{self.data.as_deref_mut().expect("access to retired QML object")}
+}
 struct Node {
-    id:ObjectId,
     context:Option<ObjectId>,
     visual_children:Option<String>,
     shadows: Vec<ir::PropertyShadow>,
@@ -149,7 +157,7 @@ pub struct Instance {
     validator: Option<Validator>,
     watched: BTreeSet<(ObjectId, String)>,
     emissions: Vec<SignalEmission>,
-    nodes: Vec<Node>,
+    nodes: Vec<NodeEntry>,
     ids: BTreeMap<String, ObjectId>,
     properties: Vec<Property>,
     slots: Vec<Slot>,
@@ -176,7 +184,7 @@ impl Instance {
     fn node(&self, object: ObjectId) -> Option<&Node> {
         (object.instance == self.identity)
             .then(|| self.nodes.get(object.index))
-            .flatten().filter(|n| n.id==object)
+            .flatten().filter(|n|n.live && n.id==object).and_then(|n|n.data.as_deref())
     }
 
     pub fn type_name(&self, object: ObjectId) -> Option<&str> {

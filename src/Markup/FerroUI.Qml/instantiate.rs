@@ -154,6 +154,7 @@ impl Instance {
     pub(crate) fn write_target(&self, mut key: SlotId) -> Result<SlotId, Error> {
         loop {
             let property = &self.properties[key];
+            if self.node(property.owner).is_none(){return Err(Error::new("property belongs to a destroyed object"));}
             if property.readonly {
                 return Err(Error::new(format!(
                     "property '{}' is readonly",
@@ -403,8 +404,8 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
         let (module, name, definition) = self.registry.resolve(imports, &source.type_name)?;
         let id=self.instance.next_object();
         self.instance.dynamic.serial+=1;
-        self.instance.nodes.push(Node {
-            id,context:self.context,visual_children:definition.visual_children.clone(),
+        self.instance.nodes.push(NodeEntry{id,live:true,data:Some(Box::new(Node {
+            context:self.context,visual_children:definition.visual_children.clone(),
             shadows: source.shadows.clone(),
             type_scope: self.scopes.imports(imports, self.registry),
             composite_types: source.composite_types.clone(),
@@ -419,7 +420,7 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
             signals: definition.signals.clone(),
             handlers: BTreeMap::new(),
             methods: BTreeMap::new(),
-        });
+        }))});
         if let Some(parent) = parent {
             self.instance.nodes[parent.index].children.push(id);
         }
@@ -603,7 +604,7 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
                     ..
                 } => self.bind(id, name, value, member.scope)?,
                 MemberKind::Handler { name, .. }
-                    if connections && name != "Component.onCompleted" => {}
+                    if connections && !name.starts_with("Component.on") => {}
                 MemberKind::Handler {
                     name,
                     parameters,
@@ -726,7 +727,7 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
         scope: Option<u32>,
     ) -> Result<(), Error> {
         let node = &mut self.instance.nodes[owner.index];
-        let (signal, formal) = if name == "Component.onCompleted" {
+        let (signal, formal) = if name=="Component.onDestruction" {("Component.destruction".to_owned(),Vec::new())} else if name == "Component.onCompleted" {
             ("Component.completed".to_owned(), Vec::new())
         } else {
             let raw = name

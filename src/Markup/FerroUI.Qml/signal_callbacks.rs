@@ -27,7 +27,14 @@ enum Edit {
     Removed(SignalKey, Vec<(u64, Callback)>),
 }
 
-impl SignalCallbacks {
+impl SignalCallbacks{
+    pub(crate) fn retire(&mut self, dead:&BTreeSet<ObjectId>){
+        self.by_signal.retain(|(sender,_),listeners|{
+            listeners.retain(|_,cb|!matches!(cb.receiver,Value::Object(id) if dead.contains(&id)));
+            !dead.contains(sender) && !listeners.is_empty()
+        });
+    }
+
     pub(crate) fn has(&self, object: ObjectId, signal: &str) -> bool {
         !self.by_signal.is_empty() && self.by_signal.contains_key(&(object, signal.into()))
     }

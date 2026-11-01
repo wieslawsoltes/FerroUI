@@ -7,11 +7,12 @@ use std::time::Duration;
 
 #[derive(Default)]
 pub(crate) struct Timers {
-    now: Duration,
+    pub(crate) now: Duration,
     deadlines: BTreeMap<ObjectId, Option<Duration>>,
 }
 
 impl Timers {
+    pub(crate) fn remove(&mut self,id:ObjectId){self.deadlines.remove(&id); }
     pub(crate) fn truncate(&mut self,index:usize){self.deadlines.retain(|id,_|id.index<index);}
     pub(crate) fn register(&mut self, object: ObjectId) {
         self.deadlines.insert(object, None);
@@ -46,13 +47,13 @@ impl Instance {
         self.timers
             .deadlines
             .values()
-            .flatten()
+            .flatten().chain(self.dynamic.deadlines.values())
             .min()
             .map(|deadline| deadline.saturating_sub(self.timers.now))
     }
 
     pub fn has_timers(&self) -> bool {
-        !self.timers.deadlines.is_empty()
+        !self.timers.deadlines.is_empty() || !self.dynamic.deadlines.is_empty()
     }
 
     /// A deterministic dispatcher tick. A delayed host delivers at most one
@@ -134,6 +135,7 @@ impl Transaction<'_> {
             .checked_add(elapsed)
             .ok_or_else(|| Error::new("component clock overflow"))?;
         self.model.timers.now = now;
+        let pending_destroy:Vec<_>=self.model.dynamic.deadlines.iter().filter_map(|(&id,&due)|(due<=now).then_some(id)).collect();
         let due: Vec<_> = self
             .model
             .timers
@@ -155,6 +157,7 @@ impl Transaction<'_> {
             self.signal(id, "triggered", Vec::new())?;
             self.settle()?;
         }
+        for id in pending_destroy{if self.model.node(id).is_some(){self.destroy_object(id)?;}}
         Ok(())
     }
 }

@@ -18,6 +18,7 @@ pub(crate) struct Components {
     pub registry: Option<Rc<TypeRegistry>>,
     pub contexts: BTreeMap<ObjectId, Context>,
     pub created: Vec<ObjectId>,
+    pub deadlines: BTreeMap<ObjectId, std::time::Duration>,
     pub templates: BTreeMap<ObjectId, Template>,
 }
 impl Instance {
@@ -29,7 +30,10 @@ impl Instance {
         }
     }
     pub fn objects(&self) -> impl Iterator<Item = ObjectId> + '_ {
-        self.nodes.iter().map(|node| node.id)
+        self.nodes
+            .iter()
+            .filter(|node| node.live)
+            .map(|node| node.id)
     }
     pub fn structure_revision(&self) -> u64 {
         self.dynamic.revision
@@ -39,6 +43,10 @@ impl Instance {
     }
 }
 pub(crate) struct Checkpoint {
+    pub(crate) removed: BTreeSet<ObjectId>,
+    pub(crate) children: BTreeMap<ObjectId, Vec<ObjectId>>,
+    pub(crate) deadlines: BTreeMap<ObjectId, Option<std::time::Duration>>,
+    pub(crate) aliases: Vec<(SlotId, Alias)>,
     nodes: usize,
     slots: usize,
     revision: u64,
@@ -95,6 +103,10 @@ impl Instance {
     }
     pub(crate) fn checkpoint(&self) -> Checkpoint {
         Checkpoint {
+            removed: Default::default(),
+            children: Default::default(),
+            deadlines: Default::default(),
+            aliases: vec![],
             nodes: self.nodes.len(),
             slots: self.slots.len(),
             revision: self.dynamic.revision,
@@ -102,6 +114,25 @@ impl Instance {
         }
     }
     pub(crate) fn rollback_creation(&mut self, c: Checkpoint) {
+        for (id, old) in c.deadlines {
+            match old {
+                Some(when) => {
+                    self.dynamic.deadlines.insert(id, when);
+                }
+                None => {
+                    self.dynamic.deadlines.remove(&id);
+                }
+            }
+        }
+        for id in c.removed {
+            self.nodes[id.index].live = true;
+        }
+        for (id, children) in c.children {
+            self.nodes[id.index].children = children;
+        }
+        for (slot, alias) in c.aliases {
+            self.properties[slot].alias = Some(alias);
+        }
         if self.nodes.len() == c.nodes && self.dynamic.revision == c.revision {
             return;
         }

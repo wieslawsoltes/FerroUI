@@ -434,6 +434,7 @@ impl ScriptContext<'_, '_> {
         if self.tx.model.timers.is_timer(object) {
             names.extend(["start", "restart", "stop"].map(str::to_owned));
         }
+        if self.tx.model.dynamic.contexts.contains_key(&object){names.insert("destroy".into());}
         if self.tx.model.is_component(object){names.insert("createObject".into());}
         if self.tx.model.models.contains_key(&object) {
             names.extend(
@@ -726,7 +727,7 @@ impl Instance {
             return false;
         }
         self.node(object).is_some_and(|node| {
-            (self.is_component(object) && name=="createObject") || node.methods.contains_key(name)
+            (self.dynamic.contexts.contains_key(&object)&&name=="destroy") || (self.is_component(object) && name=="createObject") || node.methods.contains_key(name)
                 || node.native.contains_key(name)
                 || node.signal(name).is_some()
                 || self.workers.contains(object) && name == "sendMessage"

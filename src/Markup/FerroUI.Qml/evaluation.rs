@@ -275,7 +275,7 @@ impl Transaction<'_> {
     pub(crate) fn call_receiver(&self, owner: ObjectId, root: ObjectId, name: &str) -> ObjectId {
         for object in [owner, root] {
             let node = &self.model.nodes[object.index];
-            if node.methods.contains_key(name)
+            if (self.model.dynamic.contexts.contains_key(&object) && name=="destroy") || node.methods.contains_key(name)
                 || node.signals.contains_key(name)
                 || node.native.contains_key(name)
                 || self.scoped_key(object, name).is_ok()
@@ -323,6 +323,7 @@ impl Transaction<'_> {
                 }
             }
         }
+        if name=="destroy"{return self.destroy_method(owner,&arguments);}
         if self.model.is_component(owner) && name=="createObject" {return self.create_method(owner,&arguments);}
         if node.signal(name).is_some() {
             self.signal(owner, name, arguments)?;

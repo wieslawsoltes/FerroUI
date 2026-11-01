@@ -44,6 +44,47 @@ fn exercise(mut app: Instance) {
     assert!(app.id("internal").is_none());
     assert_eq!(app.drain_created(), vec![a, b]);
     assert_eq!(app.structure_revision(), 2);
+    app.call(root, "hold", vec![Value::Object(a)]).unwrap();
+    app.call(
+        root,
+        "removeLater",
+        vec![Value::Object(a), Value::Number(15.)],
+    )
+    .unwrap();
+    app.advance_time(std::time::Duration::from_millis(14))
+        .unwrap();
+    assert!(app.type_name(a).is_some());
+    let reject = std::rc::Rc::new(std::cell::Cell::new(true));
+    let gate = reject.clone();
+    app.set_validator(move |model, _| {
+        if gate.get() && model.type_name(a).is_none() {
+            Err(ferroui_qml::Error::new("reject removal"))
+        } else {
+            Ok(())
+        }
+    });
+    assert!(app
+        .advance_time(std::time::Duration::from_millis(1))
+        .is_err());
+    assert_eq!(app.get(root, "destructions").unwrap(), Value::Number(0.));
+    assert_eq!(app.get(root, "retained").unwrap(), Value::Object(a));
+    reject.set(false);
+    app.advance_time(std::time::Duration::from_millis(1))
+        .unwrap();
+    assert!(app.type_name(a).is_none());
+    assert!(!app.children(root).contains(&a));
+    assert_eq!(app.get(root, "retained").unwrap(), Value::Null);
+    assert_eq!(
+        app.get(root, "saved").unwrap(),
+        Value::List(vec![Value::Null])
+    );
+    assert_eq!(app.get(root, "destructions").unwrap(), Value::Number(1.));
+    assert!(app.set(a, "seed", Value::Number(0.)).is_err());
+    app.destroy_object(b).unwrap();
+    assert!(app.destroy_object(root).is_err());
+    let replacement = id(app.call(root, "make", vec![Value::Number(11.)]).unwrap());
+    assert_ne!(replacement, b);
+    assert!(app.get(b, "seed").is_err());
 }
 #[test]
 fn source_and_rust_share_the_dynamic_component_graph() {
