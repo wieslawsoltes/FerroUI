@@ -17,8 +17,8 @@ use ferroui_base::rendering::composition::{
 };
 use ferroui_base::{
     ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, FerroObjectImplExt,
-    FerroPropertyChangedEventArgs, ObjectType, PixelSize, Point, Rect, Ref, StyledElementImpl,
-    Vector, Vector3D, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
+    FerroPropertyChangedEventArgs, PixelSize, Point, Rect, Ref, StyledElementImpl, Vector,
+    Vector3D, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
 };
 use ferroui_controls::{Control, ControlImpl};
 use ferroui_view::prelude::{Element, IntoElement};
@@ -298,6 +298,23 @@ impl ClientPlane {
     }
 
     fn key(&self, e: &KeyEventArgs, pressed: bool) {
+        if let Some(event) = e
+            .platform_input_event_cookie()
+            .and_then(|cookie| cookie.downcast_ref::<ferroui_wayland::WaylandKeyEvent>())
+        {
+            // Forward the physical code with the exact keymap and modifier
+            // state in effect when the outer seat delivered it. The child
+            // handles repeat according to wl_keyboard.repeat_info.
+            if !event.repeat {
+                self.server.send(Input::WaylandKey {
+                    event: event.clone(),
+                    pressed,
+                    time: self.time(),
+                });
+            }
+            e.set_handled(true);
+            return;
+        }
         // Invert FerroUI's native scan-code table once. Layout-dependent text
         // is translated by the child's keymap from the physical key.
         static CODES: OnceLock<HashMap<PhysicalKey, u32>> = OnceLock::new();
