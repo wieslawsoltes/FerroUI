@@ -208,7 +208,9 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
         Layout::MenuBarDock => ("Search applications", "SPOTLIGHT"),
         Layout::BottomNavigation => ("All apps", "APP DRAWER"),
     };
+    let scene = shell.scene;
     super::desktop::popup_frame()
+        .is_visible(move || scene.get() == super::Scene::Applications)
         .max_width(560.0)
         .max_height(690.0)
         .padding(22.0)

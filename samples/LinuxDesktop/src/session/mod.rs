@@ -1,6 +1,7 @@
 //! A pager over the X11 connection and event pump that FerroUI already owns. The window manager
 //! owns focus, stacking, workspaces and client lifetime. We never reparent or draw client windows.
 
+pub mod commands;
 mod decorations;
 mod placement;
 
@@ -71,6 +72,7 @@ impl Dirty {
 }
 
 pub struct Session {
+    commands: RefCell<Option<Rc<commands::Endpoint>>>,
     platform: Rc<FerroX11Platform>,
     order: RefCell<Vec<XID>>,
     // Some managed clients are docks or intentionally hidden from task lists. Observe those too
@@ -103,6 +105,7 @@ impl Session {
         let platform = FerroLocator::current().get_service::<FerroX11Platform>()?;
         let display = platform.display();
         let session = Rc::new(Self {
+            commands: RefCell::default(),
             platform,
             order: RefCell::default(),
             clients: RefCell::default(),
@@ -146,6 +149,23 @@ impl Session {
     pub fn subscribe(&self, changed: impl Fn() + 'static) {
         self.changed.replace(Some(Rc::new(changed)));
     }
+    pub fn claim_commands(&self) -> std::io::Result<()> {
+        self.commands.replace(Some(commands::Endpoint::claim(&self.platform)?));
+        Ok(())
+    }
+
+    pub fn publish_scene(&self, name: &str) {
+        if let Some(endpoint) = self.commands.borrow().as_ref() {
+            endpoint.publish_scene(name);
+        }
+    }
+
+    pub fn on_command(&self, handler: impl Fn(commands::Command) + 'static) {
+        if let Some(endpoint) = self.commands.borrow().as_ref() {
+            endpoint.set_handler(Rc::new(handler));
+        }
+    }
+
     pub fn on_reveal(&self, revealed: impl Fn() + 'static) {
         self.revealed.replace(Some(Rc::new(revealed)));
     }

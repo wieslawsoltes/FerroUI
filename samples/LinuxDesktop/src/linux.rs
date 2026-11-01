@@ -1,5 +1,5 @@
 use crate::services::ApplicationCatalog;
-use crate::session::Session;
+use crate::session::{commands, Session};
 use crate::shell::appearance::{Appearance, ThemeController};
 use crate::shell::{self, Scene};
 use ferroui_controls::{AppBuilder, Application, Control, Window};
@@ -17,7 +17,9 @@ By default the shell opens a window on DISPLAY using Skia Graphite over Vulkan.
 --session   Own the primary desktop surface in a dedicated X11 session.
 --software  Use Skia's CPU rasterizer explicitly.
 --theme     Start with this appearance (otherwise use the saved preference).
---scene     Select the initial shell view.";
+--scene     Select the initial shell view.
+--current-scene  Print the scene displayed by the running login session.
+--show=applications|workspaces|settings|notifications   Toggle a surface in the running login session.";
 
 struct Options {
     session: bool,
@@ -65,6 +67,24 @@ pub fn run() -> ExitCode {
         println!("{HELP}");
         return ExitCode::SUCCESS;
     }
+    if let [argument] = args.as_slice() {
+        if argument == "--current-scene" {
+            return match commands::current_scene() {
+                Ok(scene) => { println!("{scene}"); ExitCode::SUCCESS }
+                Err(error) => { eprintln!("{error}"); ExitCode::FAILURE }
+            };
+        }
+        if let Some(name) = argument.strip_prefix("--show=") {
+            let Some(command) = commands::Command::parse(name) else {
+                eprintln!("Unknown desktop command '{name}'");
+                return ExitCode::from(2);
+            };
+            return match commands::send(command) {
+                Ok(()) => ExitCode::SUCCESS,
+                Err(error) => { eprintln!("{error}"); ExitCode::FAILURE }
+            };
+        }
+    }
     let options = match Options::parse(&args) {
         Ok(options) => options,
         Err(error) => {
@@ -101,6 +121,8 @@ pub fn run() -> ExitCode {
     // Let GIO resolve the user's installed entries while X11, Skia and the
     // initial theme load. No native application handles leave the worker.
     let applications = std::thread::spawn(ApplicationCatalog::discover);
+    let exit_code = std::cell::Cell::new(ExitCode::SUCCESS);
+    let result = &exit_code;
     AppBuilder::configure::<Application>()
         .with(Rc::new(platform))
         .with(Rc::new(vulkan))
@@ -110,6 +132,14 @@ pub fn run() -> ExitCode {
         .with_material_fonts()
         .start(
             move |app, _| {
+                let session = Session::connect();
+                if options.session {
+                    if let Err(error) = session.as_ref().expect("FerroUI X11 session initialized").claim_commands() {
+                        eprintln!("{error}");
+                        result.set(ExitCode::FAILURE);
+                        return;
+                    }
+                }
                 // System Task workers post their completions to this UI dispatcher.
                 // Without the poster, GIO launches, pin edits and settings requests finish
                 // on the worker but their continuations remain queued until shutdown.
@@ -120,7 +150,6 @@ pub fn run() -> ExitCode {
                     ),
                 ));
                 let themes = ThemeController::install(app, theme);
-                let session = Session::connect();
                 let catalog = Rc::new(applications.join().expect("application discovery worker"));
                 let window = Window::new();
                 window.set_title(Some("Ferro Desktop".into()));
@@ -152,7 +181,7 @@ pub fn run() -> ExitCode {
             },
             &args,
         );
-    ExitCode::SUCCESS
+    exit_code.get()
 }
 
 #[cfg(test)]

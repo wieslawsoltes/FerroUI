@@ -7,7 +7,10 @@
   </desktops>
   <keyboard>
     <keybind key="W-d"><action name="ToggleShowDesktop"/></keybind>
-    <keybind key="W-space"><action name="ToggleShowDesktop"/></keybind>
+    <keybind key="W-space"><action name="Execute"><command>ferro-desktop-session --show=applications</command></action></keybind>
+    <keybind key="W-a"><action name="Execute"><command>ferro-desktop-session --show=settings</command></action></keybind>
+    <keybind key="W-n"><action name="Execute"><command>ferro-desktop-session --show=notifications</command></action></keybind>
+    <keybind key="W-Tab"><action name="Execute"><command>ferro-desktop-session --show=workspaces</command></action></keybind>
     <keybind key="W-1"><action name="GoToDesktop"><to>1</to></action></keybind>
     <keybind key="W-2"><action name="GoToDesktop"><to>2</to></action></keybind>
     <keybind key="W-3"><action name="GoToDesktop"><to>3</to></action></keybind>

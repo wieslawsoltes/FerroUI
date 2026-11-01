@@ -2,6 +2,10 @@
 # Run a dedicated login session. Do not take over an existing window manager.
 set -eu
 
+case ${1:-} in
+    --show=applications|--show=workspaces|--show=settings|--show=notifications)
+        exec "${FERRO_DESKTOP_BINARY:-ferro-desktop}" "$1" ;;
+esac
 if [[ ${1:-} == --ready ]]; then
     printf 'ready\n' > "${FERRO_DESKTOP_READY_PIPE:?}"
     exit 0

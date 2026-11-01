@@ -119,9 +119,33 @@ capture() {
     return 1
 }
 
+# The native Start/search flyouts leave surrounding wallpaper unchanged on Windows
+# and macOS; the Material app drawer dims it. All three capture the outside press.
+dismiss_launcher() {
+    local baseline=$1 opened=$2 theme=$3 before after delta
+    before=$(convert "$output/$baseline.png" -format '%[pixel:p{126,194}]' info:)
+    after=$(convert "$output/$opened.png" -format '%[pixel:p{126,194}]' info:)
+    if [[ $theme == material ]]; then
+        [[ $before != "$after" ]] || { echo "Missing Material modal backdrop" >&2; return 1; }
+    else
+        [[ $before == "$after" ]] || { echo "$theme search repainted the surrounding wallpaper" >&2; return 1; }
+    fi
+    xdotool mousemove --window "$shell_window" 126 194 click 1 mousemove 1420 940
+    for ((i=0; i<60; i++)); do
+        import -window "$shell_window" "$fixture/dismissed.png"
+        delta=$(compare -metric AE "$output/$baseline.png" "$fixture/dismissed.png" null: 2>&1 || :)
+        if awk -v delta="$delta" 'BEGIN {exit !(delta + 0 < 6000)}'; then return; fi
+        sleep .1
+    done
+    echo "Outside click did not dismiss the $theme launcher" >&2
+    return 1
+}
+
 capture desktop
 xdotool key --clearmodifiers ctrl+k
 capture applications desktop
+dismiss_launcher desktop applications windows
+xdotool key --clearmodifiers ctrl+k
 # Reopening must restore keyboard focus and retain the partially typed query.
 xdotool type --clearmodifiers --delay 20 'ferro color'
 xdotool key --clearmodifiers Escape ctrl+k
@@ -159,7 +183,7 @@ for choice in '2 macos' '3 material' '1 windows'; do
         # installed catalog for the screenshot.
         xdotool key --clearmodifiers ctrl+a BackSpace
         capture "$theme-applications" "$theme"
-        xdotool key --clearmodifiers Escape
+        dismiss_launcher "$theme" "$theme-applications" "$theme"
     fi
     [[ "$(xdotool get_desktop)" == 0 ]]
     [[ "$(xdotool get_desktop_for_window "$viewer")" == 0 ]]

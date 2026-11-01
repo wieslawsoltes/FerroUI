@@ -169,6 +169,8 @@ fn notification_button(state: &Rc<Shell>) -> Element {
 
 fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
     let snapshot = state.snapshot;
+    let width = state.viewport_width;
+    let compact = memo(move |_| width.get() < 760.0);
     let start = command(state, Scene::Applications, "Open applications")
         .name("Start")
         .node_ref(state.desktop_focus)
@@ -179,6 +181,7 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
         .border_thickness(0)
         .child(glyph(Icon::Applications, 23.0, colors().dock_tiles[0]));
     let search = command(state, Scene::Applications, "Search applications")
+        .is_visible(move || !compact.get())
         .corner_radius(20)
         .height(34.0)
         .padding((14.0, 2.0))
@@ -197,6 +200,7 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
         )
         .child(
             shell_text("", 11.0, Ink::Secondary)
+                .is_visible(move || !compact.get())
                 .horizontal_alignment(H::Right)
                 .text(move || date(clock.get())),
         );
@@ -217,7 +221,7 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 .child(clock_labels),
         );
     let center = row(5.0)
-        .horizontal_alignment(H::Center)
+        .horizontal_alignment(move || if compact.get() { H::Left } else { H::Center })
         .child(start)
         .child(search)
         .child(
@@ -237,7 +241,11 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 .child(glyph(Icon::Appearance, 19.0, colors().dock_tiles[2])),
         )
         .child(super::launcher::pinned_shortcuts(state))
-        .child(running_clients(state));
+        .child(
+            border()
+                .is_visible(move || !compact.get())
+                .child(running_clients(state)),
+        );
     grid()
         .row_definitions(&format!("*,{}", state.themes.current().insets().1))
         .child(
@@ -267,17 +275,17 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 .border_thickness((0.0, 1.0, 0.0, 0.0))
                 .child(
                     grid()
-                        .column_definitions("*,Auto,*")
                         .margin((10.0, 0.0))
                         .child(
                             shell_text("", 11.0, Ink::Secondary)
+                                .is_visible(move || !compact.get())
                                 .margin((5.0, 0.0))
                                 .text(move || snapshot.with(workspace_name)),
                         )
-                        .child(border().grid_column(1).child(center))
+                        .child(center)
                         .child(
                             border()
-                                .grid_column(2)
+                                .horizontal_alignment(H::Right)
                                 .padding((0.0, 0.0, 5.0, 0.0))
                                 .child(tray),
                         ),
@@ -287,8 +295,11 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
 }
 
 fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
+    let width = state.viewport_width;
+    let compact = memo(move |_| width.get() < 550.0);
     let menu = |scene, title: &'static str| {
         command(state, scene, title)
+            .is_visible(move || !compact.get())
             .background("Transparent")
             .border_thickness(0)
             .padding((7.0, 0.0))
@@ -393,7 +404,11 @@ fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element
                             colors().dock_tiles[2],
                         ))
                         .child(super::launcher::pinned_shortcuts(state))
-                        .child(running_clients(state)),
+                        .child(
+                            border()
+                                .is_visible(move || !compact.get())
+                                .child(running_clients(state)),
+                        ),
                 ),
         )
         .into()

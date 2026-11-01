@@ -42,6 +42,7 @@ struct Shell {
     favorites: Signal<Vec<String>>,
     pin_editing: Signal<bool>,
     pin_limit: Signal<usize>,
+    viewport_width: Signal<f64>,
     notifications: notifications::Notifications,
     settings: quick_settings::Settings,
     query: Signal<String>,
@@ -246,11 +247,13 @@ pub fn view(
         eprintln!("{initial_status}");
     }
     let pin_limit = signal(4);
+    let viewport_width = signal(1280.0);
     let state = Rc::new(Shell {
         scene: signal(initial),
         favorites: signal(favorites.unwrap_or_default()),
         pin_editing: signal(false),
         pin_limit,
+        viewport_width,
         notifications: notifications::Notifications::new(managed),
         settings: quick_settings::Settings::new(),
         appearance,
@@ -273,6 +276,32 @@ pub fn view(
 
     notifications::attach(&state);
     if let Some(session) = &state.session {
+        let weak = Rc::downgrade(&state);
+        if managed {
+            let current = state.scene;
+            let session = session.clone();
+            effect(move || session.publish_scene(match current.get() {
+                Scene::Desktop => "desktop", Scene::Applications => "applications",
+                Scene::Workspaces => "workspaces", Scene::QuickSettings => "settings",
+                Scene::Notifications => "notifications", Scene::Calendar => "calendar",
+                Scene::Appearance => "appearance",
+            }));
+        }
+        session.on_command(move |command| {
+            use crate::session::commands::Command;
+            let Some(state) = weak.upgrade().filter(|shell| shell.owner.is_alive()) else { return };
+            let scene = match command {
+                Command::Applications => Scene::Applications,
+                Command::Workspaces => Scene::Workspaces,
+                Command::QuickSettings => Scene::QuickSettings,
+                Command::Notifications => Scene::Notifications,
+            };
+            if state.scene.get_untracked() == scene {
+                state.dismiss();
+            } else {
+                state.open(scene);
+            }
+        });
         let weak = Rc::downgrade(&state);
         session.subscribe(move || {
             if let Some(state) = weak.upgrade().filter(|s| s.owner.is_alive()) {
@@ -312,6 +341,7 @@ pub fn view(
         .name("DesktopShell")
         .on_size_changed(move |event| {
             let width = event.new_size().width;
+            viewport_width.set_if_changed(width);
             pin_limit.set_if_changed(if width >= 1024.0 {
                 4
             } else if width >= 800.0 {
@@ -392,28 +422,30 @@ pub fn view(
         }))
         .child(
             grid()
-                .is_visible(move || current.get() != Scene::Desktop)
+                .is_hit_test_visible(move || current.get() != Scene::Desktop)
                 .keyboard_navigation_tab_navigation(
                     ferroui_base::input::KeyboardNavigationMode::Cycle,
                 )
                 .child(
-                    border()
-                        .background("#65081420")
-                        .on_pointer_pressed(move |e| {
-                            dismiss.dismiss();
-                            e.set_handled(true);
-                        }),
+                    // Keep the click target mounted. A transparent hit-test brush
+                    // catches outside presses without changing desktop pixels.
+                    border().background("Transparent").on_pointer_pressed(move |e| {
+                        dismiss.dismiss();
+                        e.set_handled(true);
+                    }),
                 )
                 .child(
-                    grid()
-                        .is_visible(move || current.get() == Scene::Applications)
-                        .child(dynamic(move || {
-                            match launcher_state.cached_launcher.get() {
-                                Some(_) => launcher::view(&launcher_state),
-                                None => Element::Empty,
-                            }
-                        })),
+                    border().background("#65081420").is_hit_test_visible(false)
+                        .is_visible(move || match current.get() {
+                            Scene::Desktop => false,
+                            Scene::Applications => appearance.get().layout() == appearance::Layout::BottomNavigation,
+                            _ => true,
+                        }),
                 )
+                .child(dynamic(move || match launcher_state.cached_launcher.get() {
+                    Some(_) => launcher::view(&launcher_state),
+                    None => Element::Empty,
+                }))
                 .child(dynamic(move || match (current.get(), appearance.get()) {
                     (Scene::QuickSettings, _) => quick_settings::view(&overlays),
                     (Scene::Calendar, _) => quick_settings::calendar_view(&overlays),
