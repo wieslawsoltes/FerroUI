@@ -221,6 +221,11 @@ impl crate::transaction::Transaction<'_> {
                 self.touched(key).dirty = false;
                 self.pending.remove(&key);
             }
+            if self.model.slots[key].overlay.is_some() {
+                if let Some(overlay) = &mut self.touched(key).overlay {
+                    overlay.clear_dead_references(&dead);
+                }
+            }
             if let Some(value) = next {
                 self.set_value(key, value);
             }

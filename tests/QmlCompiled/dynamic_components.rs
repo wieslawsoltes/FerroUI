@@ -80,7 +80,16 @@ fn exercise(mut app: Instance) {
     );
     assert_eq!(app.get(root, "destructions").unwrap(), Value::Number(1.));
     assert!(app.set(a, "seed", Value::Number(0.)).is_err());
+    app.set(root, "masked", Value::Object(b)).unwrap();
+    app.set(root, "overlayActive", Value::Bool(true)).unwrap();
+    assert_eq!(app.get(root, "masked").unwrap(), Value::Null);
     app.destroy_object(b).unwrap();
+    app.set(root, "overlayActive", Value::Bool(false)).unwrap();
+    assert_eq!(
+        app.get(root, "masked").unwrap(),
+        Value::Null,
+        "restore must not resurrect a retired receiver"
+    );
     assert!(app.destroy_object(root).is_err());
     let replacement = id(app.call(root, "make", vec![Value::Number(11.)]).unwrap());
     assert_ne!(replacement, b);

@@ -24,6 +24,20 @@ impl Overlay {
     pub(crate) fn input(&self) -> SlotId {
         self.stack.last().expect("nonempty overlay stack").input
     }
+    pub(crate) fn clear_dead_references(&mut self, dead: &BTreeSet<ObjectId>) {
+        if let Some(value) = lifetime::release_value(&self.source_value, dead) {
+            self.source_value = value;
+        }
+        for entry in &mut self.stack {
+            if let Some(value) = entry
+                .frozen
+                .as_ref()
+                .and_then(|v| lifetime::release_value(v, dead))
+            {
+                entry.frozen = Some(value);
+            }
+        }
+    }
     pub(crate) fn frozen(&self) -> Option<&Value> {
         self.stack.last()?.frozen.as_ref()
     }

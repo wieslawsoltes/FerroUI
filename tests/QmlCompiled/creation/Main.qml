@@ -4,6 +4,9 @@ QtObject {
     property int offset: 2
     property int completions: 0
     property int destructions: 0
+    property bool overlayActive: false
+    property QtObject masked: null
+    property Binding mask: Binding { target: scene; property: "masked"; value: null; when: scene.overlayActive }
     property QtObject retained: null
     property list<QtObject> saved: []
     function hold(obj: QtObject) { retained = obj; saved = [obj] }
