@@ -52,13 +52,31 @@ pub struct ClientWindow {
     pub focused: bool,
     pub minimized: bool,
     pub maximized: bool,
+    pub fullscreen: bool,
+    pub above: bool,
+    pub workspace: usize,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct Scene {
     pub serial: u64,
     pub surfaces: Vec<Surface>,
     pub windows: Vec<ClientWindow>,
+    pub workspace_count: usize,
+    pub current_workspace: usize,
+}
+
+const INITIAL_WORKSPACES: usize = 4;
+impl Default for Scene {
+    fn default() -> Self {
+        Self {
+            serial: 0,
+            surfaces: Vec::new(),
+            windows: Vec::new(),
+            workspace_count: INITIAL_WORKSPACES,
+            current_workspace: 0,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -109,6 +127,15 @@ pub enum Input {
     },
     Activate(u64),
     Close(u64),
+    SwitchWorkspace(usize),
+    MoveToWorkspace {
+        id: u64,
+        workspace: usize,
+    },
+    AddWorkspace,
+    RemoveWorkspace,
+    Fullscreen(u64),
+    AlwaysOnTop(u64),
     Maximize(u64),
     Minimize(u64),
     Presented(u64),

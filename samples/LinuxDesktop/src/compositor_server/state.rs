@@ -12,7 +12,7 @@ use smithay::{
                 wl_buffer::WlBuffer, wl_callback::WlCallback, wl_output::WlOutput, wl_seat::WlSeat,
                 wl_surface::WlSurface,
             },
-            Client, DisplayHandle,
+            Client, DisplayHandle, Resource,
         },
     },
     utils::{Logical, Point, Rectangle, Serial, Transform, SERIAL_COUNTER},
@@ -35,7 +35,7 @@ use smithay::{
 use smithay::reexports::wayland_protocols::xdg::decoration::zv1::server::zxdg_toplevel_decoration_v1::Mode as DecorationMode;
 use smithay::wayland::shell::xdg::decoration::{XdgDecorationState, XdgDecorationHandler};
 use std::{
-    collections::{HashMap, VecDeque},
+    collections::HashMap,
     io,
     sync::Arc,
     time::Instant,
@@ -65,11 +65,20 @@ pub(super) struct Window {
     saved: Option<Rectangle<i32, Logical>>,
     pub hidden: bool,
     pub fullscreen: bool,
+    pub maximized: bool,
+    pub above: bool,
+    pub workspace: usize,
 }
 
 pub(super) struct Hit {
     pub wl: WlSurface,
     pub view: Surface,
+}
+
+struct PendingFrame {
+    scene: u64,
+    surface: WlSurface,
+    callbacks: Vec<WlCallback>,
 }
 
 pub(super) struct State {
@@ -84,6 +93,8 @@ pub(super) struct State {
     output: Output,
     mode: Mode,
     work_area: (i32, i32),
+    current_workspace: usize,
+    workspace_count: usize,
     pub(super) popups: PopupManager,
     images: HashMap<WlSurface, Image>,
     pub(super) windows: Vec<Window>,
@@ -91,7 +102,8 @@ pub(super) struct State {
     pub(super) focused: Option<u64>,
     pub(super) pointer_at: Option<Point<f64, Logical>>,
     pub(super) drag: Option<super::seat::Drag>,
-    pending_frames: VecDeque<(u64, Vec<WlCallback>)>,
+    pending_frames: Vec<PendingFrame>,
+    visible_since: HashMap<WlSurface, u64>,
     pub(super) dirty: bool,
     serial: u64,
     next: u64,
@@ -140,6 +152,8 @@ impl State {
             output,
             mode,
             work_area: (0, 0),
+            current_workspace: 0,
+            workspace_count: super::INITIAL_WORKSPACES,
             popups: PopupManager::default(),
             images: HashMap::new(),
             windows: vec![],
@@ -147,7 +161,8 @@ impl State {
             focused: None,
             pointer_at: None,
             drag: None,
-            pending_frames: VecDeque::new(),
+            pending_frames: Vec::new(),
+            visible_since: HashMap::new(),
             dirty: false,
             serial: 0,
             next: 1,
@@ -181,7 +196,7 @@ impl State {
         window: u64,
         origin: Point<i32, Logical>,
         hits: &mut Vec<Hit>,
-        frames: &mut Vec<WlCallback>,
+        frames: &mut Vec<PendingFrame>,
     ) {
         let position = |surface: &WlSurface,
                         states: &smithay::wayland::compositor::SurfaceData,
@@ -220,13 +235,20 @@ impl State {
                     height: im.shown.height / im.scale,
                     pixels: im.shown.clone(),
                 };
-                frames.append(
+                let callbacks = std::mem::take(
                     &mut s
                         .cached_state
                         .get::<SurfaceAttributes>()
                         .current()
                         .frame_callbacks,
                 );
+                if !callbacks.is_empty() {
+                    frames.push(PendingFrame {
+                        scene: self.serial + 1,
+                        surface: surface.clone(),
+                        callbacks,
+                    });
+                }
                 hits.push(Hit {
                     wl: surface.clone(),
                     view,
@@ -272,9 +294,12 @@ impl State {
                 height: geometry.size.h,
                 focused: self.focused == Some(win.id),
                 minimized: win.hidden,
-                maximized: win.saved.is_some() && !win.fullscreen,
+                maximized: win.maximized,
+                fullscreen: win.fullscreen,
+                workspace: win.workspace,
+                above: win.above,
             });
-            if win.hidden {
+            if win.hidden || win.workspace != self.current_workspace {
                 continue;
             }
             self.tree(
@@ -296,24 +321,30 @@ impl State {
             }
         }
         self.serial += 1;
-        if !frames.is_empty() {
-            self.pending_frames.push_back((self.serial, frames));
-        }
+        self.pending_frames.extend(frames);
         let surfaces = hits.iter().map(|h| h.view.clone()).collect();
         let visible: std::collections::HashSet<_> = hits.iter().map(|h| &h.wl).collect();
-        for hit in &self.hits {
-            if !visible.contains(&hit.wl) {
-                self.output.leave(&hit.wl);
+        self.visible_since.retain(|surface, _| {
+            if visible.contains(surface) {
+                true
+            } else {
+                self.output.leave(surface);
+                false
             }
-        }
+        });
         for hit in &hits {
-            self.output.enter(&hit.wl);
+            self.visible_since.entry(hit.wl.clone()).or_insert_with(|| {
+                self.output.enter(&hit.wl);
+                self.serial
+            });
         }
         self.hits = hits;
         Some(Scene {
             serial: self.serial,
             surfaces,
             windows,
+            workspace_count: self.workspace_count,
+            current_workspace: self.current_workspace,
         })
     }
 
@@ -327,7 +358,11 @@ impl State {
 
     fn refit(&mut self) {
         let area = self.area();
-        for win in self.windows.iter_mut().filter(|w| w.saved.is_some()) {
+        for win in self
+            .windows
+            .iter_mut()
+            .filter(|w| w.maximized || w.fullscreen)
+        {
             let rect = if win.fullscreen {
                 Rectangle::from_size((self.mode.size.w, self.mode.size.h).into())
             } else {
@@ -346,33 +381,38 @@ impl State {
         let Some(idx) = self.windows.iter().position(|w| w.id == id) else {
             return;
         };
-        let geom = self.geometry(self.windows[idx].role.wl_surface());
+        let geometry = self
+            .images
+            .contains_key(self.windows[idx].role.wl_surface())
+            .then(|| self.geometry(self.windows[idx].role.wl_surface()));
         let w = &mut self.windows[idx];
-        let frame = if value {
-            w.saved.get_or_insert(Rectangle::new(w.location, geom.size));
-            w.fullscreen = fullscreen;
-            if fullscreen {
-                bounds
-            } else {
-                area
-            }
+        if value && !w.maximized && !w.fullscreen {
+            w.saved = geometry.map(|g| Rectangle::new(w.location, g.size));
+        }
+        if fullscreen {
+            w.fullscreen = value;
         } else {
-            w.fullscreen = false;
-            w.saved
-                .take()
-                .unwrap_or(Rectangle::new(w.location, geom.size))
+            w.maximized = value;
+        }
+        let frame = if w.fullscreen {
+            Some(bounds)
+        } else if w.maximized {
+            Some(area)
+        } else {
+            w.saved.take()
         };
-        w.location = frame.loc;
+        if let Some(frame) = frame {
+            w.location = frame.loc;
+        }
         w.role.with_pending_state(|s| {
-            s.size = Some(frame.size);
+            s.size = frame.map(|r| r.size);
             s.states.unset(xdg_toplevel::State::Maximized);
             s.states.unset(xdg_toplevel::State::Fullscreen);
-            if value {
-                s.states.set(if fullscreen {
-                    xdg_toplevel::State::Fullscreen
-                } else {
-                    xdg_toplevel::State::Maximized
-                });
+            if w.maximized {
+                s.states.set(xdg_toplevel::State::Maximized);
+            }
+            if w.fullscreen {
+                s.states.set(xdg_toplevel::State::Fullscreen);
             }
         });
         if w.role.is_initial_configure_sent() {
@@ -386,6 +426,7 @@ impl State {
             w.hidden = true;
             self.dirty = true;
         }
+        self.hits.retain(|hit| hit.view.window != id);
         if self.focused == Some(id) {
             self.focus_last();
         }
@@ -396,24 +437,78 @@ impl State {
             .windows
             .iter()
             .rev()
-            .find(|w| !w.hidden && self.images.contains_key(w.role.wl_surface()))
+            .find(|w| {
+                w.workspace == self.current_workspace
+                    && !w.hidden
+                    && self.images.contains_key(w.role.wl_surface())
+            })
             .map(|w| w.id);
         self.focus(top);
     }
 
+    fn raise(&mut self, id: u64) {
+        let Some(idx) = self.windows.iter().position(|w| w.id == id) else {
+            return;
+        };
+        let win = self.windows.remove(idx);
+        let position = if win.above {
+            self.windows.len()
+        } else {
+            self.windows.partition_point(|w| !w.above)
+        };
+        self.windows.insert(position, win);
+        if idx != position {
+            let order: HashMap<_, _> = self
+                .windows
+                .iter()
+                .enumerate()
+                .map(|(i, w)| (w.id, i))
+                .collect();
+            self.hits
+                .sort_by_key(|h| order.get(&h.view.window).copied());
+        }
+    }
+
     pub(super) fn focus(&mut self, id: Option<u64>) {
+        if self.focused != id {
+            // A popup grab belongs to its toplevel and must not continue
+            // capturing keys after switching desktop or minimizing that window.
+            if let Some(root) = self
+                .windows
+                .iter()
+                .find(|w| Some(w.id) == self.focused)
+                .map(|w| w.role.wl_surface().clone())
+            {
+                let popups: Vec<_> = PopupManager::popups_for_surface(&root)
+                    .map(|(p, _)| p)
+                    .collect();
+                if !popups.is_empty() {
+                    for popup in popups {
+                        let _ = PopupManager::dismiss_popup(&root, &popup);
+                    }
+                    if let Some(kbd) = self.seat.get_keyboard() {
+                        kbd.unset_grab(self);
+                    }
+                    if let Some(ptr) = self.seat.get_pointer() {
+                        ptr.unset_grab(
+                            self,
+                            SERIAL_COUNTER.next_serial(),
+                            self.start.elapsed().as_millis() as u32,
+                        );
+                    }
+                }
+            }
+        }
         if let Some(id) = id {
-            let Some(idx) = self.windows.iter().position(|w| w.id == id) else {
+            let Some(w) = self.windows.iter_mut().find(|w| w.id == id) else {
                 return;
             };
-            if idx + 1 != self.windows.len() {
-                // A batched native activate + pointer event must observe the new
-                // stacking order even before the next snapshot reaches FerroUI.
-                self.hits.sort_by_key(|hit| hit.view.window == id);
+            w.hidden = false;
+            if self.current_workspace != w.workspace {
+                self.hits.clear();
             }
-            let mut window = self.windows.remove(idx);
-            window.hidden = false;
-            self.windows.push(window);
+            self.current_workspace = w.workspace;
+            self.raise(id);
         }
         self.focused = id;
         for w in &self.windows {
@@ -440,19 +535,41 @@ impl State {
         self.dirty = true;
     }
 
+    fn switch_workspace(&mut self, workspace: usize) {
+        if workspace >= self.workspace_count || self.current_workspace == workspace {
+            return;
+        }
+        self.current_workspace = workspace;
+        self.drag = None;
+        self.hits.clear();
+        self.focus_last();
+    }
+
     pub fn input(&mut self, event: Input) {
         match event {
             Input::Presented(serial) => {
                 let now = self.start.elapsed().as_millis() as u32;
-                while self
-                    .pending_frames
-                    .front()
-                    .is_some_and(|(n, _)| *n <= serial)
-                {
-                    for cb in self.pending_frames.pop_front().unwrap().1 {
-                        cb.done(now);
+                self.pending_frames.retain_mut(|batch| {
+                    if !batch.surface.is_alive() {
+                        return false;
                     }
-                }
+                    // Several commits can coalesce into one composed frame. A
+                    // hidden surface (or one just revealed in a newer scene)
+                    // must not receive credit for an unrelated presentation.
+                    if batch.scene <= serial
+                        && self
+                            .visible_since
+                            .get(&batch.surface)
+                            .is_some_and(|since| *since <= serial)
+                    {
+                        for callback in batch.callbacks.drain(..) {
+                            callback.done(now);
+                        }
+                        false
+                    } else {
+                        true
+                    }
+                });
             }
             Input::Resize { width, height }
                 if width > 0 && height > 0 && self.mode.size != (width, height).into() =>
@@ -474,9 +591,50 @@ impl State {
             }
             Input::Activate(id) => self.focus(Some(id)),
             Input::Minimize(id) => self.minimize(id),
+            Input::SwitchWorkspace(index) => self.switch_workspace(index),
+            Input::AddWorkspace => {
+                self.workspace_count += 1;
+                self.switch_workspace(self.workspace_count - 1);
+            }
+            Input::RemoveWorkspace => {
+                let last = self.workspace_count - 1;
+                if last > 0 && !self.windows.iter().any(|w| w.workspace == last) {
+                    if self.current_workspace == last {
+                        self.switch_workspace(last - 1);
+                    }
+                    self.workspace_count -= 1;
+                    self.dirty = true;
+                }
+            }
+            Input::MoveToWorkspace { id, workspace } => {
+                if workspace < self.workspace_count {
+                    if let Some(w) = self.windows.iter_mut().find(|w| w.id == id) {
+                        w.workspace = workspace;
+                        if workspace != self.current_workspace {
+                            self.hits.retain(|h| h.view.window != id);
+                            if self.focused == Some(id) {
+                                self.focus_last();
+                            }
+                        }
+                        self.dirty = true;
+                    }
+                }
+            }
+            Input::Fullscreen(id) => {
+                if let Some(w) = self.windows.iter().find(|w| w.id == id) {
+                    self.maximize(id, !w.fullscreen, true);
+                }
+            }
+            Input::AlwaysOnTop(id) => {
+                if let Some(w) = self.windows.iter_mut().find(|w| w.id == id) {
+                    w.above = !w.above;
+                    self.raise(id);
+                    self.dirty = true;
+                }
+            }
             Input::Maximize(id) => {
                 if let Some(w) = self.windows.iter().find(|w| w.id == id) {
-                    self.maximize(id, w.saved.is_none(), false)
+                    self.maximize(id, !w.maximized, false)
                 }
             }
             Input::Close(id) => {
@@ -581,7 +739,7 @@ impl CompositorHandler for State {
             } else if mapped {
                 if !w.role.ensure_configured() {
                     self.images.remove(surface);
-                } else if !previously_mapped {
+                } else if !previously_mapped && w.workspace == self.current_workspace {
                     self.focus(Some(id));
                 }
             } else if !w.role.is_initial_configure_sent() {
@@ -619,6 +777,7 @@ impl CompositorHandler for State {
     }
     fn destroyed(&mut self, surface: &WlSurface) {
         self.images.remove(surface);
+        self.pending_frames.retain(|f| f.surface != *surface);
         self.dirty = true;
     }
 }
@@ -632,14 +791,29 @@ impl XdgShellHandler for State {
         let n = (self.windows.len() % 7) as i32;
         let area = self.area();
         role.with_pending_state(|s| s.bounds = Some(area.size));
-        self.windows.push(Window {
-            role,
-            id,
-            location: (32 + 26 * n, area.loc.y + 36 + 26 * n).into(),
-            saved: None,
-            hidden: false,
-            fullscreen: false,
-        });
+        let workspace = role
+            .parent()
+            .and_then(|surface| {
+                self.windows
+                    .iter()
+                    .find(|w| *w.role.wl_surface() == surface)
+            })
+            .map_or(self.current_workspace, |w| w.workspace);
+        let index = self.windows.partition_point(|w| !w.above);
+        self.windows.insert(
+            index,
+            Window {
+                role,
+                id,
+                location: (32 + 26 * n, area.loc.y + 36 + 26 * n).into(),
+                saved: None,
+                hidden: false,
+                fullscreen: false,
+                maximized: false,
+                above: false,
+                workspace,
+            },
+        );
     }
     fn toplevel_destroyed(&mut self, role: ToplevelSurface) {
         if let Some(i) = self.windows.iter().position(|w| w.role == role) {
