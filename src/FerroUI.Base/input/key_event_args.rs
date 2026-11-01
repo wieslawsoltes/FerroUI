@@ -1,3 +1,5 @@
+use std::any::Any;
+use std::rc::Rc;
 use super::{IKeyModifiersEventArgs, Key, KeyDeviceType, KeyModifiers, PhysicalKey};
 use crate::ferro_routed_event_args;
 use crate::interactivity::RoutedEventArgs;
@@ -45,11 +47,22 @@ pub struct KeyEventArgs {
 
     /// The type of key device that sent this event.
     pub key_device_type: KeyDeviceType,
+    platform_input_event_cookie: Option<Rc<dyn Any>>,
 }
 
 ferro_routed_event_args!(KeyEventArgs: RoutedEventArgs);
 
 impl KeyEventArgs {
+    /// Native data captured for this specific event, if supplied by the input backend.
+    pub fn platform_input_event_cookie(&self) -> Option<&Rc<dyn Any>> {
+        self.platform_input_event_cookie.as_ref()
+    }
+
+    pub fn with_platform_input_event_cookie(mut self, value: Option<Rc<dyn Any>>) -> Self {
+        self.platform_input_event_cookie = value;
+        self
+    }
+
     /// Creates args with default values and no routed event.
     pub fn new() -> Self {
         Self::default()

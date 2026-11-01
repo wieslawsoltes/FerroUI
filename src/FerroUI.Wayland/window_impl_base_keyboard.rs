@@ -3,6 +3,7 @@
 //! held: the compositor only says at which rate and after which delay.
 
 use crate::window_impl_base::{RawEvent, Sink};
+use crate::server::persistent::i_w_surface_event_sink::KeyboardInput;
 use ferroui_base::input::raw::{IRawInputEventArgs, RawInputEventArgs, RawKeyEventArgs, RawKeyEventType};
 use ferroui_base::input::{IInputDevice, IInputRoot, Key, KeyDeviceType, PhysicalKey, RawInputModifiers};
 use ferroui_base::reactive::IDisposable;
@@ -64,6 +65,7 @@ pub(crate) struct KeyRepeat {
     repeat_physical_key: Cell<PhysicalKey>,
     repeat_modifiers: Cell<RawInputModifiers>,
     repeat_key_symbol: RefCell<Option<String>>,
+    repeat_native: RefCell<Option<Rc<dyn Any>>>,
     key_repeat_delay: Cell<i32>,
     key_repeat_rate: Cell<i32>,
 }
@@ -77,6 +79,7 @@ impl KeyRepeat {
             repeat_physical_key: Cell::new(PhysicalKey::None),
             repeat_modifiers: Cell::new(RawInputModifiers::NONE),
             repeat_key_symbol: RefCell::new(None),
+            repeat_native: RefCell::new(None),
             key_repeat_delay: Cell::new(0),
             key_repeat_rate: Cell::new(0),
         }
@@ -97,7 +100,7 @@ impl KeyRepeat {
 
         if let Some(key_args) = args.downcast_ref::<RawKeyEventArgs>() {
             if key_args.type_() == RawKeyEventType::KeyDown {
-                self.start(key_args.key(), key_args.physical_key(), key_args.modifiers(), key_args.key_symbol());
+                self.start(key_args);
             } else if key_args.type_() == RawKeyEventType::KeyUp && self.repeat_key.get() == key_args.key() {
                 self.stop();
             }
@@ -106,7 +109,8 @@ impl KeyRepeat {
         false
     }
 
-    fn start(&self, key: Key, physical_key: PhysicalKey, modifiers: RawInputModifiers, key_symbol: Option<String>) {
+    fn start(&self, event: &RawKeyEventArgs) {
+        let key = event.key();
         self.stop();
 
         if self.key_repeat_rate.get() <= 0 {
@@ -119,9 +123,13 @@ impl KeyRepeat {
         }
 
         self.repeat_key.set(key);
-        self.repeat_physical_key.set(physical_key);
-        self.repeat_modifiers.set(modifiers);
-        *self.repeat_key_symbol.borrow_mut() = key_symbol;
+        self.repeat_physical_key.set(event.physical_key());
+        self.repeat_modifiers.set(event.modifiers());
+        *self.repeat_key_symbol.borrow_mut() = event.key_symbol();
+        *self.repeat_native.borrow_mut() = event.platform_input_event_cookie().and_then(|cookie| {
+            let key = cookie.downcast_ref::<crate::WaylandKeyEvent>()?;
+            Some(Rc::new(crate::WaylandKeyEvent { repeat: true, ..key.clone() }) as Rc<dyn Any>)
+        });
 
         let timer = DispatcherTimer::with_interval(
             repeat_interval(self.key_repeat_rate.get()),
@@ -142,6 +150,7 @@ impl KeyRepeat {
     }
 
     pub(crate) fn stop(&self) {
+        self.repeat_native.borrow_mut().take();
         let timer = self.key_repeat_timer.borrow_mut().take();
         if let Some(timer) = timer {
             timer.timer.stop();
@@ -178,57 +187,32 @@ impl KeyRepeat {
             self.repeat_physical_key.get(),
             self.repeat_key_symbol.borrow().clone(),
             KeyDeviceType::Keyboard,
-        )));
+        ).with_platform_input_event_cookie(self.repeat_native.borrow().clone())));
     }
 }
 
 impl Sink {
-    pub(crate) fn on_key_down(
-        &self,
-        timestamp: u64,
-        key: Key,
-        modifiers: RawInputModifiers,
-        physical_key: PhysicalKey,
-        key_symbol: Option<String>,
-    ) {
-        let (Some(parent), Some(input_root)) = (self.parent(), self.input_root()) else {
-            return;
-        };
-        self.schedule_input(Rc::new(RawKeyEventArgs::new(
-            parent.base().keyboard(),
-            timestamp,
-            input_root,
-            RawKeyEventType::KeyDown,
-            key,
-            modifiers,
-            physical_key,
-            key_symbol,
-            KeyDeviceType::Keyboard,
-        )));
+    pub(crate) fn on_key_down(&self, timestamp: u64, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, symbol: Option<String>) {
+        self.on_key(KeyboardInput { timestamp, key, modifiers, physical_key, symbol, pressed: true, native: None });
     }
 
-    pub(crate) fn on_key_up(
-        &self,
-        timestamp: u64,
-        key: Key,
-        modifiers: RawInputModifiers,
-        physical_key: PhysicalKey,
-        key_symbol: Option<String>,
-    ) {
+    pub(crate) fn on_key_up(&self, timestamp: u64, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, symbol: Option<String>) {
+        self.on_key(KeyboardInput { timestamp, key, modifiers, physical_key, symbol, pressed: false, native: None });
+    }
+
+    pub(crate) fn on_key(&self, event: KeyboardInput) {
+        if self.is_disposed() {
+            return;
+        }
         let (Some(parent), Some(input_root)) = (self.parent(), self.input_root()) else {
             return;
         };
-        self.schedule_input(Rc::new(RawKeyEventArgs::new(
-            parent.base().keyboard(),
-            timestamp,
-            input_root,
-            RawKeyEventType::KeyUp,
-            key,
-            modifiers,
-            physical_key,
-            key_symbol,
-            KeyDeviceType::Keyboard,
-        )));
+        let kind = if event.pressed { RawKeyEventType::KeyDown } else { RawKeyEventType::KeyUp };
+        let raw = RawKeyEventArgs::new(
+            parent.base().keyboard(), event.timestamp, input_root, kind,
+            event.key, event.modifiers, event.physical_key, event.symbol, KeyDeviceType::Keyboard,
+        ).with_platform_input_event_cookie(event.native.map(|native| Rc::new(native) as Rc<dyn Any>));
+        self.schedule_input(Rc::new(raw));
     }
 
     pub(crate) fn on_keyboard_leave(&self) {

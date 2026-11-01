@@ -159,6 +159,10 @@ impl IWSurfaceEventSink for PopupImplSink {
         self.base.on_touch_cancel(touch_id, position);
     }
 
+    fn on_key(&self, event: crate::server::persistent::i_w_surface_event_sink::KeyboardInput) {
+        self.base.on_key(event);
+    }
+
     fn on_key_down(&self, timestamp: u64, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<String>) {
         self.base.on_key_down(timestamp, key, modifiers, physical_key, key_symbol);
     }

@@ -78,6 +78,20 @@ impl XkbCommonKeymap {
         Ok(Self { keymap, state })
     }
 
+    /// Serialize the expanded, compiled map once when requested by a nested
+    /// compositor. xkbcommon owns the keymap and returns a malloc-allocated string.
+    pub(crate) fn serialized(&self) -> Option<std::sync::Arc<str>> {
+        let xkb = xkbcommon_option()?;
+        // SAFETY: self owns this live keymap and xkbcommon returns either a
+        // NUL-terminated string or a null pointer on failure.
+        let data = unsafe { (xkb.xkb_keymap_get_as_string)(self.keymap, xkb_keymap_format::XKB_KEYMAP_FORMAT_TEXT_V1) };
+        if data.is_null() { return None; }
+        let text = unsafe { std::ffi::CStr::from_ptr(data) }.to_str().ok().map(std::sync::Arc::from);
+        // SAFETY: the returned projection above owns its bytes.
+        unsafe { libc::free(data.cast_mut().cast()) };
+        text
+    }
+
     /// Updates modifier and layout group state from wl_keyboard.modifiers event.
     pub fn update_modifiers(&self, mods_depressed: u32, mods_latched: u32, mods_locked: u32, group: u32) {
         let Some(xkb) = xkbcommon_option() else {
@@ -184,6 +198,24 @@ mod tests {
             key <LFSH> { type = "ONE_LEVEL", symbols[Group1] = [ Shift_L ], symbols[Group2] = [ Shift_L ] };
         };
     };"#;
+
+    #[test]
+    fn a_forwarded_keymap_retains_non_latin_groups_and_keycodes() {
+        let Some(context) = XkbContext::new() else { return };
+        let original = XkbCommonKeymap::from_text(&context, TEST_KEYMAP).unwrap();
+        let serialized = original.serialized().expect("valid XKB text");
+        let copy = XkbCommonKeymap::from_text(&context, &serialized).unwrap();
+        assert_eq!(copy.layout_count(), 2);
+        for group in 0..2 {
+            for depressed in [0, 1] {
+                original.update_modifiers(depressed, 0, 0, group);
+                copy.update_modifiers(depressed, 0, 0, group);
+                for code in [16, 30, 42] {
+                    assert_eq!(copy.resolve_key(code), original.resolve_key(code));
+                }
+            }
+        }
+    }
 
     #[test]
     fn a_keymap_resolves_keys_in_its_layouts_and_with_its_modifiers() {

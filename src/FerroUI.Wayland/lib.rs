@@ -24,6 +24,8 @@ pub mod server;
 pub mod ferro_wayland_exception;
 pub mod text_input_options_converter;
 pub mod wayland_platform_options;
+mod wayland_key_event;
+pub use wayland_key_event::{WaylandKeyEvent, WaylandKeyModifiers};
 pub mod wayland_text_utils;
 pub mod xkb_key_transform;
 

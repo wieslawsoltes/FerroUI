@@ -27,6 +27,8 @@ impl std::fmt::Debug for WaylandRenderingMode {
 /// with the application builder before `use_wayland`.
 #[derive(Clone)]
 pub struct WaylandPlatformOptions {
+    /// Attach native evdev, modifiers and XKB keymap snapshots to routed keyboard events.
+    pub capture_native_keyboard: bool,
     pub rendering_mode: WaylandRenderingMode,
     /// The default AppId for Wayland windows (`xdg_toplevel.set_app_id`).
     /// If `None`, no application identifier is sent. Defaults to the file name of the executable
@@ -84,6 +86,7 @@ pub struct WaylandPlatformOptions {
 impl WaylandPlatformOptions {
     pub fn new() -> Self {
         Self {
+            capture_native_keyboard: false,
             rendering_mode: WaylandRenderingMode::Auto,
             app_id: Self::entry_app_id(),
             wl_display_name: None,
@@ -118,6 +121,7 @@ impl WaylandPlatformOptions {
     /// What the worker thread needs of the options, as values.
     pub fn for_worker(&self) -> WaylandWorkerOptions {
         WaylandWorkerOptions {
+            capture_native_keyboard: self.capture_native_keyboard,
             rendering_mode: self.rendering_mode.clone(),
             wl_display_name: self.wl_display_name.clone(),
             display_fd: self.display_fd,
@@ -140,6 +144,8 @@ impl Default for WaylandPlatformOptions {
 /// thread, so the worker gets the values it needs.
 #[derive(Clone, Debug)]
 pub struct WaylandWorkerOptions {
+    /// Attach native evdev, modifiers and XKB keymap snapshots to routed keyboard events.
+    pub capture_native_keyboard: bool,
     pub rendering_mode: WaylandRenderingMode,
     pub wl_display_name: Option<String>,
     pub display_fd: Option<i32>,
@@ -173,6 +179,7 @@ mod tests {
         assert_eq!(options.gl_profiles[0], GlVersion::new(GlProfileType::OpenGL, 4, 0));
         assert_eq!(options.gl_profiles[5], GlVersion::new(GlProfileType::OpenGLES, 2, 0));
         assert_eq!(options.use_dmabuf_swapchain, None);
+        assert!(!options.for_worker().capture_native_keyboard);
         assert!(!options.use_g_lib_main_loop);
         assert!(options.external_g_lib_main_loop_exception_logger.is_none());
     }
