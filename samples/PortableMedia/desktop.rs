@@ -247,6 +247,8 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
     let recovery_started = Cell::new(false);
     let previous_generation = Cell::new(0u64);
     let previous_position = Cell::new(Duration::ZERO);
+    let restart_started = Cell::new(false);
+    let sequence_before_restart = Cell::new(0u64);
     DispatcherTimer::run(
         move || {
             let (Some(view), Some(window)) = (view.upgrade(), window.upgrade()) else {
@@ -281,9 +283,43 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
                 window.close();
                 return false;
             }
+            if std::env::args().any(|a| a == "--ended-restart-smoke") && !restart_started.get() {
+                if state.state == MediaPlaybackState::Ended {
+                    sequence_before_restart.set(
+                        player
+                            .frames()
+                            .latest()
+                            .map_or(0, |f| f.metadata().identity.sequence),
+                    );
+                    restart_started.set(true);
+                    stage.set(9);
+                    let pending = player.play();
+                    let stage = stage.clone();
+                    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                        match pending.await {
+                            Ok(()) => {
+                                println!("ENDED_RESTART_COMPLETED");
+                                stage.set(0);
+                            }
+                            Err(error) => {
+                                eprintln!("ENDED_RESTART_FAILED {error}");
+                                FAILED.store(true, Ordering::Relaxed);
+                            }
+                        }
+                    });
+                }
+                return true;
+            }
             match stage.get() {
                 0 if player.frames().latest().is_some()
-                    && state.position > Duration::from_millis(200) =>
+                    && state.position > Duration::from_millis(200)
+                    && (!restart_started.get()
+                        || (state.state == MediaPlaybackState::Playing
+                            && state.position < Duration::from_millis(1500)
+                            && player.frames().latest().is_some_and(|f| {
+                                f.metadata().identity.sequence > sequence_before_restart.get()
+                                    && f.metadata().timestamp < Duration::from_secs(1)
+                            }))) =>
                 {
                     let frame = player.frames().latest().unwrap();
                     if std::env::args().any(|v| v == "--geometry-smoke") {

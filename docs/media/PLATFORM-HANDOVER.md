@@ -146,6 +146,12 @@ output, while already submitted GPU leases retire through completion.
 
 ## Windows agent
 
+Receiving-host update: [WINDOWS-VERIFICATION.md](WINDOWS-VERIFICATION.md) records
+MSVC linking, independent GPU pixel/admission tests, real playback and controlled
+recovery, EOF restart, packaging and keyboard/UI Automation evidence. Its
+remaining physical-camera and broader profile gates are explicit; the original
+deferred status below describes the initial handoff.
+
 Provider source is now present in `FerroUI.Media.Windows`,
 `FerroUI.Media.Video.Windows` and `FerroUI.Media.Camera.Windows`. The
 `PortableMedia` desktop harness selects these providers on Windows. Native
@@ -164,7 +170,7 @@ capable D3D11 device, preserving its ordinary graphics fallback when unavailable
 
 Native EGL/Ganesh consumer completion and the lease-backed GL importer now
 exist. WGL, legacy snapshot imports and Vulkan do not gain direct media sampling
-from this change. The selected native output profile is SDR RGB32 with validated
+from this change. The selected native output profile is SDR ARGB32/BGRA with validated
 color, aperture, size and adapter identity. Missing native tags are rejected;
 verify that the requested MF processor actually negotiates those tags and
 compatible shader-readable DXGI storage on each selected codec/driver.

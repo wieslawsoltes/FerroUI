@@ -19,7 +19,10 @@ ferroui-media-opengl.workspace = true
 ferroui-opengl.workspace = true
 [build-dependencies]
 cc.workspace = true
+[target.'cfg(windows)'.dev-dependencies]
+ferroui-win32 = { workspace = true, features = ["angle"] }
 [features]
 controls = ["ferroui-media-opengl/controls"]
+native-frame-tests = []
 [package.metadata.release]
 group = "platforms"

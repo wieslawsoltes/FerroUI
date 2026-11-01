@@ -109,6 +109,12 @@ impl WindowsFrameStream {
                     pending.take();
                     match result {
                         Ok(Some(frame)) => {
+                            // Count the requested MF RGB-processing boundary
+                            // once per admitted sample, including after retries.
+                            self.producer
+                                .budget()
+                                .counters()
+                                .gpu_conversion(GpuTransferReason::PixelFormatConversion);
                             self.retry.borrow_mut().take();
                             self.ready.replace(Some(frame));
                         }
@@ -177,10 +183,6 @@ impl WindowsFrameStream {
         };
         // The requested native MF video processor supplies RGB DXGI storage.
         // No framework video copy/readback is used by this import.
-        self.producer
-            .budget()
-            .counters()
-            .gpu_conversion(GpuTransferReason::PixelFormatConversion);
         let job = native::import(&self.producer, metadata, frame);
         *pending = Some(job);
         Ok(None)

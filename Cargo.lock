@@ -2439,6 +2439,7 @@ dependencies = [
  "ferroui-media",
  "ferroui-media-opengl",
  "ferroui-opengl",
+ "ferroui-win32",
 ]
 
 [[package]]

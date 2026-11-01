@@ -98,11 +98,24 @@ impl NativeMediaSession for Session {
         })
     }
     fn play(&self) -> MediaFuture<()> {
+        // MF keeps both streams at EOS after Ended. Restart the seekable source
+        // in a fresh publication epoch before requesting playback again.
+        let restart_epoch = match self.stream.native.state() {
+            Ok(s) if s.state == 4 && s.seekable != 0 => {
+                let epoch = self.stream.native.seek(0);
+                self.stream.retire(epoch);
+                Some(epoch)
+            }
+            Err(error) => return Box::pin(async move { Err(error) }),
+            _ => None,
+        };
         self.stream.native.intent(1);
         let native = self.stream.native.clone();
         poll_native(move || match native.state() {
             Err(e) => Poll::Ready(Err(e)),
-            Ok(s) if s.state == 2 => Poll::Ready(Ok(())),
+            Ok(s) if s.state == 2 && restart_epoch.is_none_or(|epoch| s.seek_done >= epoch) => {
+                Poll::Ready(Ok(()))
+            }
             _ => Poll::Pending,
         })
     }

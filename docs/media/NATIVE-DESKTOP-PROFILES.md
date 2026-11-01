@@ -22,7 +22,7 @@ GPU-only both reject a missing admitted GPU route in these profiles.
 
 | Profile | Implemented source route | Still open |
 | --- | --- | --- |
-| Windows ANGLE/EGL + GLES3 | Active D3D11 device → MF DXGI manager/Source Reader → retained RGB32 DXGI sample → EGL texture alias → leased direct sampling | Native SDK build, codec/driver negotiation, packaging and all runtime gates |
+| Windows ANGLE/EGL + GLES3 | Active D3D11 device → MF DXGI manager/Source Reader → retained ARGB32/BGRA DXGI sample → EGL texture alias → leased direct sampling | Physical camera, wider codec/driver profiles and remaining acceptance in WINDOWS-VERIFICATION.md |
 | Linux EGL + GLES3 | Exact DMA_DRM caps from the active display → retained GStreamer DMA-BUF → direct XRGB/XBGR alias, or counted NV12 GPU conversion → leased sampling | Native build passed; WSL lacks DMA-BUF import; positive GPU/runtime gates remain open |
 | Linux EGL + desktop GL | Explicitly negotiated XRGB/XBGR direct aliases | NV12 conversion shader profile and native verification |
 | Linux default X11 GLX, Vulkan; Windows WGL/Vulkan | No direct media route added | Completion/import implementation and profile acceptance |
@@ -39,6 +39,10 @@ native-only release and quarantines accounting. A dropped uncommitted view rolls
 back on its owning context. This route allocates no framework image copy.
 
 ## Windows
+
+Receiving-host build, playback/renderer/recovery, independent native pixels,
+packaging and remaining acceptance gates are recorded in
+[WINDOWS-VERIFICATION.md](WINDOWS-VERIFICATION.md).
 
 Build on a Windows machine with the MSVC Rust target, Visual C++ tools and a
 current Windows SDK. Use the repository's normal ANGLE/runtime packaging. No
@@ -60,9 +64,9 @@ is resolved at runtime so an unavailable newer media entry point does not become
 a mandatory application import on older framework UI profiles. Other missing
 capabilities are reported by the provider instead of raising framework floors.
 
-One MF source reader supplies both audio and video. Native advanced RGB video
+One MF source reader supplies both audio and video. Native advanced ARGB32/BGRA video
 processing is requested on that DXGI manager. Each video sample must expose an
-`IMFDXGIBuffer` from the exact device with compatible, shader-readable BGRA/XRGB
+`IMFDXGIBuffer` from the exact device with compatible, shader-readable BGRA
 storage, known SDR color tags, dimensions, aperture and array slice. A native
 D3D event query establishes producer readiness; consuming GL fences establish
 GPU retirement. Audio is PCM through WASAPI, with its native audio clock driving

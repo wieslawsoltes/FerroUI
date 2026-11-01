@@ -1,6 +1,7 @@
 fn main() {
     println!("cargo:rerun-if-changed=native/media.cpp");
     println!("cargo:rerun-if-changed=native/media.h");
+    println!("cargo:rerun-if-changed=native/frame_tests.cpp");
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("windows") {
         return;
     }
@@ -9,7 +10,11 @@ fn main() {
         println!("cargo:warning=FFI binding check only: native Windows media is not compiled or linkable");
         return;
     }
-    cc::Build::new()
+    let mut build = cc::Build::new();
+    if std::env::var_os("CARGO_FEATURE_NATIVE_FRAME_TESTS").is_some() {
+        build.define("FERROUI_NATIVE_FRAME_TESTS", None);
+    }
+    build
         .cpp(true)
         .file("native/media.cpp")
         .flag_if_supported("/std:c++17")

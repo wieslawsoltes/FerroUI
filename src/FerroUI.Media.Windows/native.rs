@@ -7,6 +7,44 @@ use std::{
     rc::Rc,
     sync::Arc,
 };
+
+#[cfg(all(test, feature = "native-frame-tests"))]
+mod native_frame_tests {
+    use super::Egl;
+    use ferroui_opengl::IPlatformGraphicsOpenGlContextFactory;
+    extern "C" {
+        fn ferro_windows_test_frames() -> i32;
+        fn ferro_windows_test_alias(display: isize, egl: *const Egl, gl: *const isize) -> i32;
+    }
+
+    #[test]
+    fn independent_d3d11_frames_and_admission() {
+        assert_eq!(unsafe { ferro_windows_test_frames() }, 0);
+    }
+
+    #[test]
+    fn independent_angle_alias_pixels() {
+        let graphics =
+            ferroui_win32::open_gl::angle::D3D11AngleWin32PlatformGraphics::new(None, None);
+        let context = graphics.create_context(None);
+        let current = context.make_current();
+        let (display, egl) = Egl::current(&context).unwrap();
+        let functions = [
+            "glGenFramebuffers",
+            "glBindFramebuffer",
+            "glFramebufferTexture2D",
+            "glCheckFramebufferStatus",
+            "glReadPixels",
+            "glDeleteFramebuffers",
+        ]
+        .map(|name| context.gl_interface().get_proc_address(name) as isize);
+        assert!(!functions.contains(&0));
+        let result = unsafe { ferro_windows_test_alias(display, &egl, functions.as_ptr()) };
+        current.dispose();
+        context.dispose();
+        assert_eq!(result, 0);
+    }
+}
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct NativeState {

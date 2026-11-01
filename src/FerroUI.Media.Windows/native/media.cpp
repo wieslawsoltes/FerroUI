@@ -137,7 +137,9 @@ static void prepare(const std::shared_ptr<Session> &owner){
         check(MFCreateDeviceSource(selection.Get(),&s.camera_source));check(MFCreateSourceReaderFromMediaSource(s.camera_source.Get(),attributes.Get(),&s.reader));
     }else check(MFCreateSourceReaderFromURL(s.source.c_str(),attributes.Get(),&s.reader));
     check(s.reader->SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS,FALSE));check(s.reader->SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM,TRUE));
-    ComPtr<IMFMediaType> type;check(MFCreateMediaType(&type));check(type->SetGUID(MF_MT_MAJOR_TYPE,MFMediaType_Video));check(type->SetGUID(MF_MT_SUBTYPE,MFVideoFormat_RGB32));
+    // ANGLE's D3D11 image import accepts BGRA, but not B8G8R8X8 storage.
+    // Request ARGB32 so the native processor allocates an importable format.
+    ComPtr<IMFMediaType> type;check(MFCreateMediaType(&type));check(type->SetGUID(MF_MT_MAJOR_TYPE,MFMediaType_Video));check(type->SetGUID(MF_MT_SUBTYPE,MFVideoFormat_ARGB32));
     // Explicit GPU video-processor output request. Validate the negotiated tags
     // and IMFDXGIBuffer on every frame; no system-memory output is admitted.
     check(type->SetUINT32(MF_MT_VIDEO_PRIMARIES,MFVideoPrimaries_BT709));check(type->SetUINT32(MF_MT_TRANSFER_FUNCTION,MFVideoTransFunc_sRGB));check(type->SetUINT32(MF_MT_VIDEO_NOMINAL_RANGE,MFNominalRange_0_255));
@@ -162,7 +164,7 @@ static std::unique_ptr<FerroWindowsFrame> video_frame(Session &s,const Packet &p
     auto f=std::make_unique<FerroWindowsFrame>();check(dxgi->GetResource(IID_PPV_ARGS(&f->texture)));check(dxgi->GetSubresourceIndex(&f->slice));
     ComPtr<ID3D11Device> actual;f->texture->GetDevice(&actual);if(actual.Get()!=s.device.Get())throw Failure{MF_E_UNSUPPORTED_D3D_TYPE};
     D3D11_TEXTURE2D_DESC desc{};f->texture->GetDesc(&desc);
-    if(desc.Width!=s.width||desc.Height!=s.height||desc.MipLevels!=1||desc.SampleDesc.Count!=1||!(desc.BindFlags&D3D11_BIND_SHADER_RESOURCE)||(desc.Format!=DXGI_FORMAT_B8G8R8A8_UNORM&&desc.Format!=DXGI_FORMAT_B8G8R8X8_UNORM)||f->slice>=desc.ArraySize)throw Failure{MF_E_UNSUPPORTED_D3D_TYPE};
+    if(desc.Width!=s.width||desc.Height!=s.height||desc.MipLevels!=1||desc.SampleDesc.Count!=1||!(desc.BindFlags&D3D11_BIND_SHADER_RESOURCE)||desc.Format!=DXGI_FORMAT_B8G8R8A8_UNORM||f->slice>=desc.ArraySize)throw Failure{MF_E_UNSUPPORTED_D3D_TYPE};
     uint64_t bytes=(uint64_t)desc.Width*desc.Height*4*desc.ArraySize;if(bytes>128ull*1024*1024)throw Failure{E_OUTOFMEMORY};
     f->sample=packet.sample;f->context=s.context;
     D3D11_QUERY_DESC query{D3D11_QUERY_EVENT,0};check(s.device->CreateQuery(&query,&f->ready));s.context->End(f->ready.Get());s.context->Flush();
@@ -197,6 +199,17 @@ static void write_audio(Session &s){
     }
     if(!s.audio_started&&s.clock_based){check(s.audio->Start());s.audio_started=true;}
 }
+static void present_video(Session &s,LONGLONG clock){
+    // A paused seek publishes its first ready frame once. Read-ahead packets
+    // can already be queued while its GPU query settles; keep those for resume
+    // instead of replacing the achieved seek frame.
+    while((s.camera||s.playing||!s.prepared_frame)&&!s.video.empty()&&ready(*s.video.front())&&(s.camera||!s.playing||(LONGLONG)(s.video.front()->info.timestamp_ns/100)<=clock+100000)){
+        auto frame=std::move(s.video.front());s.video.pop_front();
+        std::lock_guard<std::mutex> guard(s.lock);
+        if(frame->info.epoch==s.epoch){s.position=s.playing?clock:(LONGLONG)(frame->info.timestamp_ns/100);s.state.seek_done=frame->info.epoch;s.latest=std::move(frame);s.prepared_frame=true;s.state.state=s.playing?2:1;}
+        if(!s.playing)break;
+    }
+}
 static void run(const std::shared_ptr<Session> &owner){
     auto &s=*owner;HRESULT initialized=CoInitializeEx(nullptr,COINIT_MULTITHREADED);
     try{
@@ -224,18 +237,13 @@ static void run(const std::shared_ptr<Session> &owner){
             }
             if(s.playing&&s.has_audio)write_audio(s);
             LONGLONG clock=s.clock_position();
-            while(!s.video.empty()&&ready(*s.video.front())&&(s.camera||!s.playing||(LONGLONG)(s.video.front()->info.timestamp_ns/100)<=clock+100000)){
-                auto frame=std::move(s.video.front());s.video.pop_front();
-                std::lock_guard<std::mutex> guard(s.lock);
-                if(frame->info.epoch==s.epoch){s.position=s.playing?clock:(LONGLONG)(frame->info.timestamp_ns/100);s.state.seek_done=frame->info.epoch;s.latest=std::move(frame);s.prepared_frame=true;s.state.state=s.playing?2:1;}
-                if(!s.playing)break;
-            }
+            present_video(s,clock);
             bool request=false;
             {std::lock_guard<std::mutex> guard(s.lock);
                 if(s.playing&&s.state.state!=5)s.state.state=2;
                 if(s.has_audio&&s.playing){UINT padding=0;check(s.audio->GetCurrentPadding(&padding));s.state.buffering=(s.audio_started&&padding==0&&!s.audio_eos)?1:0;}else s.state.buffering=0;
                 s.state.position_ns=(uint64_t)std::max<LONGLONG>(0,s.playing?clock:s.position)*100;
-                if(s.video_eos&&(!s.has_audio||s.audio_eos)&&s.video.empty()&&s.pcm.empty()){
+                if(!s.pending_seek&&s.request_epoch==s.epoch&&s.video_eos&&(!s.has_audio||s.audio_eos)&&s.video.empty()&&s.pcm.empty()){
                     UINT padding=0;if(s.audio)check(s.audio->GetCurrentPadding(&padding));
                     if(!padding){s.state.state=4;s.intent=0;}
                 }
@@ -371,3 +379,7 @@ char *ferro_windows_devices(void){
     for(UINT32 i=0;i<count;i++)devices[i]->Release();CoTaskMemFree(devices);if(SUCCEEDED(initialized))CoUninitialize();return result;
 }
 void ferro_windows_string_release(char *text){CoTaskMemFree(text);}
+
+#ifdef FERROUI_NATIVE_FRAME_TESTS
+#include "frame_tests.cpp"
+#endif

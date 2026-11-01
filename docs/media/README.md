@@ -46,7 +46,7 @@ The packages are independently installable and use the `FerroUI.Media.*` family:
 | `FerroUI.Media.Camera.Controls` | `ferroui-media-camera-controls` | Explicit-start CameraPreview and weak supplied sessions |
 | `FerroUI.Media.Qr.Apple` | `ferroui-media-qr-apple` | Optional native Vision analysis of retained CoreVideo storage |
 | `FerroUI.Media.Qr.Android` | `ferroui-media-qr-android` | Optional bundled offline ML Kit analysis of borrowed CameraX images |
-| `FerroUI.Media.Windows` | `ferroui-media-windows` | Retained MF/DXGI storage and compatible ANGLE device import; native build pending |
+| `FerroUI.Media.Windows` | `ferroui-media-windows` | Retained MF/DXGI storage and compatible ANGLE device import; [Windows verification](WINDOWS-VERIFICATION.md) |
 | `FerroUI.Media.Video.Windows` | `ferroui-media-video-windows` | MF source reader, WASAPI audio/clock, shared video leases |
 | `FerroUI.Media.Camera.Windows` | `ferroui-media-camera-windows` | Metadata discovery, explicit MF capture and JPEG preview snapshots |
 | `FerroUI.Media.Linux` | `ferroui-media-linux` | System GStreamer, negotiated DMA-BUF storage and EGL import; [Linux/WSL verification](LINUX-VERIFICATION.md) |
