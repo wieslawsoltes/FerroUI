@@ -82,6 +82,18 @@ impl BrowserApplication {
     }
 }
 
+fn watched_data(
+    model: &mut ferroui_qml::Instance,
+    owner: ObjectId,
+    member: &str,
+) -> Result<(WorkerValue, Option<String>), Error> {
+    let value = model.get(owner, member)?;
+    let is_model = matches!(value, Value::Object(id) if model.is_list_model(id));
+    let data = model.copy_data(owner, value)?;
+    let snapshot = is_model.then(|| serde_json::to_string(&data).expect("model snapshot"));
+    Ok((data, snapshot))
+}
+
 fn error(e: Error) -> JsValue {
     JsValue::from_str(&e.to_string())
 }
@@ -105,10 +117,7 @@ impl BrowserApplication {
             watch.tokens.insert(token);
             return Ok(());
         }
-        let value = self.model.get(owner, member).map_err(error)?;
-        let data = self.model.copy_data(owner, value).map_err(error)?;
-        let snapshot = matches!(data, WorkerValue::Model { .. })
-            .then(|| serde_json::to_string(&data).expect("model snapshot"));
+        let (_, snapshot) = watched_data(&mut self.model, owner, member).map_err(error)?;
         self.watches.insert(
             key,
             Watch {
@@ -139,14 +148,8 @@ impl BrowserApplication {
             if !changed && !(revision != self.revision && watch.snapshot.is_some()) {
                 continue;
             }
-            let value = self
-                .model
-                .get(*owner, member)
-                .and_then(|value| self.model.copy_data(*owner, value));
-            let update = match value {
-                Ok(data) => {
-                    let snapshot = matches!(data, WorkerValue::Model { .. })
-                        .then(|| serde_json::to_string(&data).expect("model snapshot"));
+            let update = match watched_data(&mut self.model, *owner, member) {
+                Ok((data, snapshot)) => {
                     if !changed && snapshot == watch.snapshot {
                         continue;
                     }

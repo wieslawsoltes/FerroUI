@@ -35,7 +35,6 @@ function decode(data) {
         case "Number": return Number(data.v);
         case "Array": return data.v.map(decode);
         case "Object": return Object.fromEntries(Object.entries(data.v).map(([k,v]) => [k,decode(v)]));
-        case "Model": return data.v.rows.map(row => decode({t:"Object",v:row}));
         default: throw new Error("Unknown QML response value");
     }
 }
@@ -62,8 +61,14 @@ export async function openQmlApplication(url, {timeout = 15000, signal, onError 
     }
     const abort = () => close(signal.reason || new Error("QML application aborted"));
     signal?.addEventListener("abort", abort, {once:true});
-    worker.onerror = e => { e.preventDefault(); close(new Error(e.message || "QML application worker failed")); };
-    port.onmessageerror = () => close(new Error("Invalid QML application message"));
+    function transportFailure(error) {
+        if (closed) return;
+        const started = !pending.has(0);
+        close(error);
+        if (started) onError(error);
+    }
+    worker.onerror = e => { e.preventDefault(); transportFailure(new Error(e.message || "QML application worker failed")); };
+    port.onmessageerror = () => transportFailure(new Error("Invalid QML application message"));
     function wait(id, size = 0) {
         return new Promise((resolve,reject) => {
             const timer = setTimeout(()=>close(new Error("QML application request deadline exceeded")),timeout);
@@ -73,7 +78,8 @@ export async function openQmlApplication(url, {timeout = 15000, signal, onError 
     port.onmessage = ({data}) => {
         if (closed) return;
         try {
-            if (data.fatal) { const error=new Error(data.fatal); close(error); onError(error); return; }
+            if (data.fatal) { transportFailure(new Error(data.fatal)); return; }
+            if (data.issue !== undefined) { onError(new Error(data.issue)); return; }
             if (data.changes) {
                 for (const token of data.tokens) {
                     const callback = watches.get(token), update = data.changes;
@@ -89,7 +95,7 @@ export async function openQmlApplication(url, {timeout = 15000, signal, onError 
             clearTimeout(item.timer); pending.delete(data.id); bytes -= item.size;
             if (data.error !== undefined) item.reject(new Error(data.error));
             else { try { item.resolve(data.value ? decode(JSON.parse(data.value)) : undefined); } catch(e) { item.reject(e); } }
-        } catch(e) { close(e); }
+        } catch(e) { transportFailure(e); }
     };
     const ready = wait(0);
     worker.onmessage = ({data}) => {
@@ -151,9 +157,26 @@ export function serveQmlApplication(create) {
             model?.free(); model = null;
             port.postMessage({fatal:String(e?.message || e)}); port.close();
         }
+        function advance() {
+            let retry = false;
+            try {
+                model.pump();
+            } catch (e) {
+                // BrowserApplication returns string-valued QML errors after
+                // rollback. Wasm traps and broken host objects are terminal.
+                if (typeof e !== "string") throw e;
+                port.postMessage({issue:e});
+                retry = true;
+            }
+            changes();
+            return retry;
+        }
         function pump() {
-            try { notified = false; model.pump(); changes(); schedule(notified ? 0 : model.nextWake()); }
-            catch(e) { fail(e); }
+            try {
+                notified = false;
+                const retry = advance();
+                schedule(retry ? 16 : notified ? 0 : model.nextWake());
+            } catch(e) { fail(e); }
         }
         try {
             model = await create();
@@ -161,13 +184,16 @@ export function serveQmlApplication(create) {
             port.onmessage = ({data:r}) => {
                 let response;
                 try {
-                    model.pump(); changes();
+                    advance();
                     if (r.op === "watch") model.watch(r.token,r.object,r.member);
                     else if (r.op === "unwatch") model.unwatch(r.token);
                     else response = bounded(model.dispatch(r.op,r.object,r.member,r.data || ""));
                     changes();
                     port.postMessage({id:r.id,value:response});
-                } catch(e) { port.postMessage({id:r.id,error:String(e?.message || e)}); }
+                } catch(e) {
+                    if (e instanceof WebAssembly.RuntimeError) { fail(e); return; }
+                    port.postMessage({id:r.id,error:String(e?.message || e)});
+                }
                 // Earlier asynchronous deliveries may already be waiting.
                 wake();
             };

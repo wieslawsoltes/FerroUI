@@ -682,7 +682,7 @@ impl Transaction<'_> {
             ));
         }
         let mut grants = BTreeMap::new();
-        let value = self.export_worker(input, 0, &mut grants)?;
+        let value = self.export_worker(input, 0, Some(&mut grants))?;
         self.worker_actions.push(Action::Send(id, value, grants));
         Ok(Value::Undefined)
     }
@@ -694,7 +694,7 @@ impl Transaction<'_> {
         } else {
             value
         };
-        let data = self.export_worker(&value, 0, &mut BTreeMap::new())?;
+        let data = self.export_worker(&value, 0, None)?;
         if data.estimated_bytes() > BYTE_LIMIT {
             return Err(Error::new("copied QML value exceeds 32 MiB"));
         }
@@ -705,7 +705,7 @@ impl Transaction<'_> {
         &mut self,
         input: &Value,
         depth: usize,
-        grants: &mut BTreeMap<u64, ObjectId>,
+        mut grants: Option<&mut BTreeMap<u64, ObjectId>>,
     ) -> Result<WorkerValue, Error> {
         self.budget()?;
         if depth >= 64 {
@@ -724,24 +724,30 @@ impl Transaction<'_> {
             Value::List(values) => WorkerValue::Array(
                 values
                     .iter()
-                    .map(|v| self.export_worker(v, depth + 1, grants))
+                    .map(|v| self.export_worker(v, depth + 1, grants.as_deref_mut()))
                     .collect::<Result<_, _>>()?,
             ),
             Value::Object(id) if self.model.models.contains_key(id) => {
                 let (token, revision, rows) = self.model.worker_model_snapshot(*id)?;
-                grants.insert(token, *id);
                 let rows = rows
                     .into_iter()
                     .map(|row| {
                         row.into_iter()
-                            .map(|(k, v)| Ok((k, self.export_worker(&v, depth + 1, grants)?)))
+                            .map(|(k, v)| {
+                                Ok((k, self.export_worker(&v, depth + 1, grants.as_deref_mut())?))
+                            })
                             .collect::<Result<_, Error>>()
                     })
                     .collect::<Result<_, _>>()?;
-                WorkerValue::Model {
-                    id: token,
-                    revision,
-                    rows,
+                if let Some(grants) = grants {
+                    grants.insert(token, *id);
+                    WorkerValue::Model {
+                        id: token,
+                        revision,
+                        rows,
+                    }
+                } else {
+                    WorkerValue::Array(rows.into_iter().map(WorkerValue::Object).collect())
                 }
             }
             Value::Record(r) => {
@@ -753,7 +759,7 @@ impl Transaction<'_> {
                                 self.export_worker(
                                     fields.get(&i.to_string()).unwrap_or(&Value::Undefined),
                                     depth + 1,
-                                    grants,
+                                    grants.as_deref_mut(),
                                 )
                             })
                             .collect::<Result<_, _>>()?,
@@ -763,7 +769,10 @@ impl Transaction<'_> {
                         fields
                             .iter()
                             .map(|(k, v)| {
-                                Ok((k.clone(), self.export_worker(v, depth + 1, grants)?))
+                                Ok((
+                                    k.clone(),
+                                    self.export_worker(v, depth + 1, grants.as_deref_mut())?,
+                                ))
                             })
                             .collect::<Result<_, Error>>()?,
                     )

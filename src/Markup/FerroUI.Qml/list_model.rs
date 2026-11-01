@@ -260,6 +260,11 @@ impl Instance {
         }
         None
     }
+    /// Whether this object provides a ListModel with observable row content.
+    pub fn is_list_model(&self, object: ObjectId) -> bool {
+        self.models.contains_key(&object)
+    }
+
     /// Changes after a transaction commits edits to any ListModel in the instance.
     pub fn models_revision(&self) -> u64 {
         self.dynamic.model_revision

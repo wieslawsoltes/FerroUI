@@ -17,7 +17,9 @@ try {
         await openQmlApplication("./owner.js?application&fail");
         throw Error("missing startup failure");
     } catch(e) { if (!String(e).includes("fixture initialization failed")) throw e; }
-    const app = await openQmlApplication("./owner.js?application");
+    let notifyError;
+    const reportedError = new Promise(resolve => { notifyError=resolve; });
+    const app = await openQmlApplication("./owner.js?application",{onError:notifyError});
     function check(ok, label) { if (!ok) throw new Error(label); }
     check(await app.get("caption","nested") === "native child","id-addressed child");
     const totals = [];
@@ -42,6 +44,9 @@ try {
     try { await app.call("fail"); throw Error("missing exception"); } catch(e) { check(String(e).includes("browser rollback"),"exception propagation"); }
     try { await app.call("uncopyable"); throw Error("exported function"); } catch(e) { check(String(e).includes("plain"),"non-data result"); }
     check(await app.get("seed") === 6 && totals.length === 2,"rollback and unsubscribe");
+    await app.call("failLater");
+    check((await reportedError).message.includes("browser rollback"),"deferred error delivery");
+    check(await app.get("seed") === 6,"deferred error rollback and recovery");
     check(await app.call("later") === 21,"Promise result");
     const pending = app.call("spin").then(()=>false,e=>String(e).includes("disposed"));
     const queued = app.get("seed").then(()=>false,e=>String(e).includes("disposed"));
