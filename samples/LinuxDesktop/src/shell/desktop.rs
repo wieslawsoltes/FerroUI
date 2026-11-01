@@ -142,7 +142,7 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
         .height(40.0)
         .background("Transparent")
         .border_thickness(0)
-        .child(glyph(Icon::Applications, 23.0, "#0078D4"));
+        .child(glyph(Icon::Applications, 23.0, colors().dock_tiles[0]));
     let search = command(state, Scene::Applications, "Search applications")
         .corner_radius(20)
         .height(34.0)
@@ -175,7 +175,7 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 .height(40.0)
                 .background("Transparent")
                 .border_thickness(0)
-                .child(glyph(Icon::Workspaces, 19.0, "#326AAA")),
+                .child(glyph(Icon::Workspaces, 19.0, colors().dock_tiles[1])),
         )
         .child(
             command(state, Scene::Appearance, "Appearance settings")
@@ -183,11 +183,11 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 .height(40.0)
                 .background("Transparent")
                 .border_thickness(0)
-                .child(glyph(Icon::Appearance, 19.0, "#465E78")),
+                .child(glyph(Icon::Appearance, 19.0, colors().dock_tiles[2])),
         )
         .child(running_clients(state));
     grid()
-        .row_definitions("*,52")
+        .row_definitions(&format!("*,{}", state.themes.current().insets().1))
         .child(
             stack_panel()
                 .margin((10.0, 17.0))
@@ -210,8 +210,8 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
         .child(
             border()
                 .grid_row(1)
-                .background("#F5EAF0F7")
-                .border_brush("#F2FFFFFF")
+                .background(colors().bar)
+                .border_brush(colors().bar_edge)
                 .border_thickness((0.0, 1.0, 0.0, 0.0))
                 .child(
                     grid()
@@ -250,13 +250,17 @@ fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element
             .corner_radius(12)
             .background(fill)
             .border_thickness(1)
-            .border_brush("#60FFFFFF")
+            .border_brush(colors().bar_edge)
             .child(glyph(icon, 22.0, "#FFFFFF"))
     };
     grid()
-        .row_definitions("34,*,64")
+        .row_definitions(&format!(
+            "{},*,{}",
+            state.themes.current().insets().0,
+            state.themes.current().insets().1
+        ))
         .child(
-            border().background("#E8383044").child(
+            border().background(colors().bar).child(
                 grid()
                     .column_definitions("*,Auto")
                     .margin((12.0, 0.0))
@@ -270,10 +274,12 @@ fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element
                                     .background("Transparent")
                                     .border_thickness(0)
                                     .child(
-                                        row(6.0).child(glyph(Icon::Mark, 15.0, "#FFFFFF")).child(
-                                            label("Ferro", 13.0, "#FFFFFF")
-                                                .font_weight(FontWeight::Bold),
-                                        ),
+                                        row(6.0)
+                                            .child(glyph(Icon::Mark, 15.0, colors().bar_ink))
+                                            .child(
+                                                label("Ferro", 13.0, colors().bar_ink)
+                                                    .font_weight(FontWeight::Bold),
+                                            ),
                                     ),
                             )
                             .child(menu(Scene::Applications, "Applications"))
@@ -281,7 +287,7 @@ fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element
                             .child(menu(Scene::Appearance, "Appearance")),
                     )
                     .child(
-                        label("", 12.0, "#FBF4FF")
+                        label("", 12.0, colors().bar_ink)
                             .grid_column(1)
                             .text(move || time_text(clock.get())),
                     ),
@@ -293,29 +299,29 @@ fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element
                 .vertical_alignment(V::Center)
                 .horizontal_alignment(H::Center)
                 .corner_radius(19)
-                .border_brush("#70F7E9FF")
+                .border_brush(colors().bar_edge)
                 .border_thickness(1)
                 .padding(5)
-                .background("#CA514B59")
+                .background(colors().bar)
                 .child(
                     row(7.0)
                         .child(dock_tile(
                             Scene::Applications,
                             "Applications",
                             Icon::Applications,
-                            "#635BA4",
+                            colors().dock_tiles[0],
                         ))
                         .child(dock_tile(
                             Scene::Workspaces,
                             "Mission Control",
                             Icon::Workspaces,
-                            "#3185B1",
+                            colors().dock_tiles[1],
                         ))
                         .child(dock_tile(
                             Scene::Appearance,
                             "Appearance settings",
                             Icon::Appearance,
-                            "#81617E",
+                            colors().dock_tiles[2],
                         ))
                         .child(running_clients(state)),
                 ),
@@ -342,7 +348,7 @@ fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
             )
     };
     grid()
-        .row_definitions("*,72")
+        .row_definitions(&format!("*,{}", state.themes.current().insets().1))
         .child(
             stack_panel()
                 .margin((34.0, 32.0))
@@ -362,7 +368,7 @@ fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
         .child(
             border()
                 .grid_row(1)
-                .background("#F41D3027")
+                .background(colors().bar)
                 .padding((12.0, 3.0))
                 .child(
                     grid()
@@ -384,7 +390,7 @@ fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                                 .width(82.0)
                                 .height(3.0)
                                 .corner_radius(2)
-                                .background("#BDD4C2"),
+                                .background(colors().bar_ink),
                         ),
                 ),
         )
@@ -392,13 +398,18 @@ fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
 }
 
 pub(super) fn popup_frame() -> El<Border> {
+    let (top, bottom) = look().insets();
     match look().layout() {
-        Layout::Taskbar => panel()
-            .vertical_alignment(V::Bottom)
-            .margin((12.0, 10.0, 12.0, 61.0)),
-        Layout::MenuBarDock => panel()
-            .vertical_alignment(V::Center)
-            .margin((20.0, 39.0, 20.0, 68.0)),
+        Layout::Taskbar => {
+            panel()
+                .vertical_alignment(V::Bottom)
+                .margin((12.0, 10.0, 12.0, bottom + 9.0))
+        }
+        Layout::MenuBarDock => {
+            panel()
+                .vertical_alignment(V::Center)
+                .margin((20.0, top + 5.0, 20.0, bottom + 4.0))
+        }
         Layout::BottomNavigation => panel()
             .vertical_alignment(V::Bottom)
             .margin((8.0, 12.0, 8.0, 7.0)),
@@ -407,7 +418,7 @@ pub(super) fn popup_frame() -> El<Border> {
 
 pub(super) fn picker(state: &Rc<Shell>) -> Element {
     let mut options = stack_panel().spacing(6.0);
-    for (number, appearance) in Appearance::ALL.into_iter().enumerate() {
+    for (number, appearance) in Appearance::ALL.iter().copied().enumerate() {
         let shell = state.clone();
         let selected = appearance == state.themes.current();
         let description = match appearance.layout() {
@@ -415,8 +426,14 @@ pub(super) fn picker(state: &Rc<Shell>) -> Element {
             Layout::MenuBarDock => "Menu bar, floating Dock and Spotlight-style search",
             Layout::BottomNavigation => "Touch navigation and bottom sheets",
         };
-        let color = palette(appearance);
+        let color = appearance.palette();
         let name = appearance.name();
+        let hint = match (selected, number < 9) {
+            (true, true) => format!("Active  ·  {}", number + 1),
+            (true, false) => "Active".to_owned(),
+            (false, true) => (number + 1).to_string(),
+            (false, false) => String::new(),
+        };
         let focus = NodeRef::<Button>::new();
         options = options.child(
             action(&format!("Use {name} appearance"), move || {
@@ -455,17 +472,9 @@ pub(super) fn picker(state: &Rc<Shell>) -> Element {
                             .child(label(description, 11.0, Ink::Secondary)),
                     )
                     .child(
-                        label(
-                            &if selected {
-                                format!("Active  ·  {}", number + 1)
-                            } else {
-                                format!("{}", number + 1)
-                            },
-                            12.0,
-                            Ink::Accent,
-                        )
-                        .grid_column(2)
-                        .horizontal_alignment(H::Right),
+                        label(&hint, 12.0, Ink::Accent)
+                            .grid_column(2)
+                            .horizontal_alignment(H::Right),
                     ),
             ),
         );
@@ -477,7 +486,7 @@ pub(super) fn picker(state: &Rc<Shell>) -> Element {
             stack_panel()
                 .spacing(14.0)
                 .child(popup_header("Appearance", "PERSONALIZATION", state))
-                .child(options)
+                .child(scroll_viewer().max_height(360.0).child(options))
                 .child(feedback(state.status)),
         )
         .into()

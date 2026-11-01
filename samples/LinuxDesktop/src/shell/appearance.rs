@@ -1,6 +1,7 @@
 //! Shell appearances pair desktop geometry with a real FerroUI control theme.
 //! A descriptor owns its factory and reserved screen edges. The host and the
 //! settings picker both consume this registry.
+use ferroui_base::media::Color;
 use ferroui_base::styling::{IStyle, ThemeVariant};
 use ferroui_base::Ref;
 use ferroui_controls::Application;
@@ -12,13 +13,33 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
 
-struct Descriptor {
-    id: &'static str,
-    name: &'static str,
-    insets: (f64, f64),
-    layout: Layout,
-    style: fn() -> Rc<dyn IStyle>,
-    variant: fn() -> ThemeVariant,
+#[derive(Clone, Copy)]
+pub struct Descriptor {
+    pub id: &'static str,
+    pub name: &'static str,
+    pub insets: (f64, f64),
+    pub layout: Layout,
+    pub palette: Palette,
+    pub tint: fn(Color) -> Color,
+    pub style: fn() -> Rc<dyn IStyle>,
+    pub variant: fn() -> ThemeVariant,
+}
+
+#[derive(Clone, Copy)]
+pub struct Palette {
+    pub text: &'static str,
+    pub muted: &'static str,
+    pub accent: &'static str,
+    pub edge: &'static str,
+    pub surface: &'static str,
+    pub tile: &'static str,
+    pub selected: &'static str,
+    pub on_selected: &'static str,
+    pub radius: i32,
+    pub bar: &'static str,
+    pub bar_edge: &'static str,
+    pub bar_ink: &'static str,
+    pub dock_tiles: [&'static str; 3],
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -38,6 +59,22 @@ impl Appearance {
         name: "Windows 11",
         insets: (0.0, 52.0),
         layout: Layout::Taskbar,
+        palette: Palette {
+            text: "#1C2025",
+            muted: "#555E69",
+            accent: "#005FB8",
+            edge: "#C3CBD6",
+            surface: "#F2F5FA",
+            tile: "#E7EDF5",
+            selected: "#D1E8FC",
+            on_selected: "#003868",
+            radius: 9,
+            bar: "#F5EAF0F7",
+            bar_edge: "#F2FFFFFF",
+            bar_ink: "#1C2025",
+            dock_tiles: ["#0078D4", "#326AAA", "#465E78"],
+        },
+        tint: |c| Color::from_rgb(c.r.saturating_sub(12), c.b, c.g.saturating_add(49)),
         style: || ferroui_themes_winui::WinUITheme::new().as_style(),
         variant: ThemeVariant::light,
     });
@@ -46,6 +83,22 @@ impl Appearance {
         name: "macOS",
         insets: (34.0, 64.0),
         layout: Layout::MenuBarDock,
+        palette: Palette {
+            text: "#FBF7FE",
+            muted: "#D4CADA",
+            accent: "#DFC2FE",
+            edge: "#716477",
+            surface: "#342F3C",
+            tile: "#423C4B",
+            selected: "#78519B",
+            on_selected: "#FFFFFF",
+            radius: 19,
+            bar: "#E8383044",
+            bar_edge: "#70F7E9FF",
+            bar_ink: "#FBF4FF",
+            dock_tiles: ["#635BA4", "#3185B1", "#81617E"],
+        },
+        tint: |c| Color::from_rgb(c.g.saturating_add(30), c.r, c.b.saturating_add(24)),
         style: || ferroui_themes_macos::MacOSTheme::new().as_style(),
         variant: ThemeVariant::dark,
     });
@@ -54,14 +107,41 @@ impl Appearance {
         name: "Material 3",
         insets: (0.0, 72.0),
         layout: Layout::BottomNavigation,
+        palette: Palette {
+            text: "#EFF4E9",
+            muted: "#B9C9B9",
+            accent: "#A0D5B7",
+            edge: "#41564D",
+            surface: "#182922",
+            tile: "#253A30",
+            selected: "#385D48",
+            on_selected: "#DBFFE3",
+            radius: 28,
+            bar: "#F41D3027",
+            bar_edge: "#41564D",
+            bar_ink: "#D4E7D9",
+            dock_tiles: ["#385D48", "#526557", "#546960"],
+        },
+        tint: |c| c,
         style: || ferroui_themes_material::MaterialTheme::new().as_style(),
         variant: ThemeVariant::dark,
     });
-    pub const ALL: [Self; 3] = [Self::Windows, Self::MacOS, Self::Material];
+    pub const ALL: &'static [Self] = &[Self::Windows, Self::MacOS, Self::Material];
+
+    pub const fn new(descriptor: &'static Descriptor) -> Self {
+        Self(descriptor)
+    }
+    pub const fn descriptor(self) -> &'static Descriptor {
+        self.0
+    }
 
     pub fn parse(id: &str) -> Option<Self> {
-        Self::ALL
-            .into_iter()
+        Self::find(Self::ALL, id)
+    }
+    pub fn find(registry: &[Self], id: &str) -> Option<Self> {
+        registry
+            .iter()
+            .copied()
             .find(|appearance| appearance.id() == id)
     }
     pub fn id(self) -> &'static str {
@@ -72,6 +152,12 @@ impl Appearance {
     }
     pub fn layout(self) -> Layout {
         self.0.layout
+    }
+    pub const fn palette(self) -> Palette {
+        self.0.palette
+    }
+    pub fn tint(self, color: Color) -> Color {
+        (self.0.tint)(color)
     }
     pub fn insets(self) -> (f64, f64) {
         self.0.insets
@@ -189,7 +275,7 @@ mod tests {
         let dir = env::temp_dir().join(format!("ferro-desktop-appearance-{}", std::process::id()));
         fs::create_dir(&dir).unwrap();
         let path = dir.join("appearance");
-        for appearance in Appearance::ALL {
+        for &appearance in Appearance::ALL {
             save_preference(&path, appearance).unwrap();
             assert_eq!(
                 Appearance::parse(fs::read_to_string(&path).unwrap().trim()),
@@ -199,5 +285,29 @@ mod tests {
         assert!(Appearance::parse("missing").is_none());
         assert_eq!(fs::read_dir(&dir).unwrap().count(), 1);
         fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn fourth_descriptor_supplies_its_own_palette_on_an_existing_layout() {
+        const CUSTOM: Appearance = Appearance::new(&Descriptor {
+            id: "night-shift",
+            name: "Night shift",
+            insets: (0.0, 62.0),
+            palette: Palette {
+                accent: "#FF7700",
+                ..Appearance::Windows.palette()
+            },
+            ..*Appearance::Windows.descriptor()
+        });
+        let registry = [
+            Appearance::Windows,
+            Appearance::MacOS,
+            Appearance::Material,
+            CUSTOM,
+        ];
+        let resolved = Appearance::find(&registry, "night-shift").unwrap();
+        assert_eq!(resolved.palette().accent, "#FF7700");
+        assert_eq!(resolved.insets(), (0.0, 62.0));
+        assert_eq!(resolved.layout(), Layout::Taskbar);
     }
 }

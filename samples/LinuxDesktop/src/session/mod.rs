@@ -75,6 +75,7 @@ pub struct Session {
     root_subscription: Cell<u64>,
     changed: RefCell<Option<Rc<dyn Fn()>>>,
     revealed: RefCell<Option<Rc<dyn Fn()>>>,
+    hidden: RefCell<Option<Rc<dyn Fn()>>>,
     desktop: Cell<XID>,
     showing: Cell<bool>,
     screens_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
@@ -96,6 +97,7 @@ impl Session {
             root_subscription: Cell::new(0),
             changed: RefCell::default(),
             revealed: RefCell::default(),
+            hidden: RefCell::default(),
             desktop: Cell::new(0),
             showing: Cell::new(false),
             screens_subscription: RefCell::default(),
@@ -123,6 +125,10 @@ impl Session {
     }
     pub fn on_reveal(&self, revealed: impl Fn() + 'static) {
         self.revealed.replace(Some(Rc::new(revealed)));
+    }
+
+    pub fn on_hidden(&self, hidden: impl Fn() + 'static) {
+        self.hidden.replace(Some(Rc::new(hidden)));
     }
 
     fn root_changed(self: &Rc<Self>, atom: Atom) {
@@ -224,8 +230,9 @@ impl Session {
         }
         if dirty.showing {
             let showing = self.number(root, a._NET_SHOWING_DESKTOP, a.CARDINAL) == Some(1);
-            if !self.showing.replace(showing) && showing && self.desktop.get() != 0 {
-                if let Some(callback) = self.revealed.borrow().clone() {
+            if self.showing.replace(showing) != showing && self.desktop.get() != 0 {
+                let callback = if showing { &self.revealed } else { &self.hidden };
+                if let Some(callback) = callback.borrow().clone() {
                     callback();
                 }
             }

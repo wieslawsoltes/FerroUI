@@ -190,6 +190,17 @@ pub fn view(
             }
         });
         let weak = Rc::downgrade(&state);
+        session.on_hidden({
+            let shell = Rc::downgrade(&state);
+            move || {
+                if let Some(state) = shell.upgrade().filter(|s| s.owner.is_alive()) {
+                    state.scene.set_if_changed(Scene::Desktop);
+                    if let Some(control) = state.desktop_focus.get_untracked() {
+                        control.focus();
+                    }
+                }
+            }
+        });
         session.on_reveal(move || {
             if let Some(state) = weak.upgrade().filter(|s| s.owner.is_alive()) {
                 if state.scene.get_untracked() == Scene::Desktop {
@@ -222,11 +233,13 @@ pub fn view(
             (key, modifiers)
                 if current.get_untracked() == Scene::Appearance
                     && modifiers.is_empty()
-                    && (Key::D1 as i32..=Key::D3 as i32).contains(&(key as i32)) =>
+                    && (Key::D1 as i32..=Key::D9 as i32).contains(&(key as i32)) =>
             {
-                root_state
-                    .select_appearance(Appearance::ALL[(key as i32 - Key::D1 as i32) as usize]);
-                event.set_handled(true);
+                let index = (key as i32 - Key::D1 as i32) as usize;
+                if let Some(appearance) = Appearance::ALL.get(index).copied() {
+                    root_state.select_appearance(appearance);
+                    event.set_handled(true);
+                }
             }
             (Key::OemComma, KeyModifiers::CONTROL) => {
                 root_state.open(Scene::Appearance);

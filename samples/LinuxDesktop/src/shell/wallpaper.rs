@@ -1,6 +1,6 @@
 //! Resolution-independent wallpaper. The curves and gradient stops are created once at
 //! mount; the compositor retains the drawing while shell controls change independently.
-use super::appearance::{Appearance, Layout};
+use super::appearance::Appearance;
 use ferroui_base::media::{Color, Geometry, GradientStop, IBrush, LinearGradientBrush, Stretch};
 use ferroui_view::prelude::*;
 use std::fmt::Write;
@@ -10,15 +10,7 @@ fn gradient(look: Appearance, stops: &[(f64, &str)]) -> Rc<dyn IBrush> {
     let brush = LinearGradientBrush::new();
     for &(offset, value) in stops {
         let tint = Color::parse(value).expect("wallpaper color");
-        let color = match look.layout() {
-            Layout::Taskbar => {
-                Color::from_rgb(tint.r.saturating_sub(12), tint.b, tint.g.saturating_add(49))
-            }
-            Layout::MenuBarDock => {
-                Color::from_rgb(tint.g.saturating_add(30), tint.r, tint.b.saturating_add(24))
-            }
-            Layout::BottomNavigation => tint,
-        };
+        let color = look.tint(tint);
         brush
             .gradient_stops()
             .add(GradientStop::with_color_and_offset(color, offset));

@@ -5,60 +5,9 @@ use ferroui_base::media::{FontWeight, Geometry, Stretch, TextTrimming};
 use ferroui_controls::{Border, Button, StackPanel, TextBlock};
 use ferroui_view::prelude::*;
 
-use super::appearance::{Appearance, Layout};
+use super::appearance::{Appearance, Palette};
 use ferroui_markup_xaml::markup_extensions::DynamicResourceExtension;
 use std::rc::Rc;
-
-#[derive(Clone, Copy)]
-pub(super) struct Palette {
-    pub text: &'static str,
-    pub muted: &'static str,
-    pub accent: &'static str,
-    pub edge: &'static str,
-    pub surface: &'static str,
-    pub tile: &'static str,
-    pub selected: &'static str,
-    pub on_selected: &'static str,
-    pub radius: i32,
-}
-
-pub(super) fn palette(look: Appearance) -> Palette {
-    match look.layout() {
-        Layout::Taskbar => Palette {
-            text: "#1C2025",
-            muted: "#555E69",
-            accent: "#005FB8",
-            edge: "#C3CBD6",
-            surface: "#F2F5FA",
-            tile: "#E7EDF5",
-            selected: "#D1E8FC",
-            on_selected: "#003868",
-            radius: 9,
-        },
-        Layout::MenuBarDock => Palette {
-            text: "#FBF7FE",
-            muted: "#D4CADA",
-            accent: "#DFC2FE",
-            edge: "#716477",
-            surface: "#342F3C",
-            tile: "#423C4B",
-            selected: "#78519B",
-            on_selected: "#FFFFFF",
-            radius: 19,
-        },
-        Layout::BottomNavigation => Palette {
-            text: "#EFF4E9",
-            muted: "#B9C9B9",
-            accent: "#A0D5B7",
-            edge: "#41564D",
-            surface: "#182922",
-            tile: "#253A30",
-            selected: "#385D48",
-            on_selected: "#DBFFE3",
-            radius: 28,
-        },
-    }
-}
 
 pub(super) fn look() -> Appearance {
     use_context::<Signal<Appearance>>()
@@ -66,7 +15,7 @@ pub(super) fn look() -> Appearance {
         .get_untracked()
 }
 pub(super) fn colors() -> Palette {
-    palette(look())
+    look().palette()
 }
 
 #[derive(Clone, Copy)]
