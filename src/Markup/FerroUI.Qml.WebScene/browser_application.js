@@ -154,8 +154,13 @@ export function serveQmlApplication(create) {
         function fail(e) {
             clearTimeout(timer);
             removeEventListener(wakeEvent,wake);
-            model?.free(); model = null;
-            port.postMessage({fatal:String(e?.message || e)}); port.close();
+            const failed = model;
+            model = null;
+            // A trapped Wasm instance may also fail during cleanup. Always
+            // deliver the original terminal error so the page can terminate it.
+            try { failed?.free(); } catch { /* The page terminates the worker. */ }
+            port.postMessage({fatal:String(e?.message || e)});
+            port.close();
         }
         function advance() {
             let retry = false;

@@ -5,6 +5,12 @@ if (new URL(self.location.href).searchParams.has("application")) {
     serveQmlApplication(async () => {
         if (new URL(self.location.href).searchParams.has("fail")) throw new Error("fixture initialization failed");
         const model = await application_model();
+        if (new URL(self.location.href).searchParams.has("trap")) {
+            return {
+                pump() { throw new WebAssembly.RuntimeError("fixture Wasm trap"); },
+                free() { model.free(); throw new Error("fixture cleanup error"); }
+            };
+        }
         const data = JSON.parse(model.dispatch("get","","rows",""));
         if (data.t !== "Array" || data.v[0].t !== "Object")
             throw new Error("ListModel snapshot exposed a worker identity");

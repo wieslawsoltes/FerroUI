@@ -17,6 +17,12 @@ try {
         await openQmlApplication("./owner.js?application&fail");
         throw Error("missing startup failure");
     } catch(e) { if (!String(e).includes("fixture initialization failed")) throw e; }
+    let terminalError;
+    const terminal = new Promise(resolve => { terminalError=resolve; });
+    const trapped = await openQmlApplication("./owner.js?application&trap",{onError:terminalError});
+    if (!(await terminal).message.includes("fixture Wasm trap")) throw new Error("lost original Wasm trap");
+    try { await trapped.get("seed"); throw Error("request accepted after trap"); }
+    catch(e) { if (!String(e).includes("fixture Wasm trap")) throw e; }
     let notifyError;
     const reportedError = new Promise(resolve => { notifyError=resolve; });
     const app = await openQmlApplication("./owner.js?application",{onError:notifyError});
