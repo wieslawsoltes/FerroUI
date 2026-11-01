@@ -121,3 +121,28 @@ fn compiled_and_source_v8_allocate_live_objects() {
     );
     exercise(Instance::with_engine(&guest::compiled_qml(), &reg, BTreeMap::new(), engine).unwrap());
 }
+
+#[cfg(feature = "webscene")]
+#[test]
+fn initial_bindings_run_before_completion() {
+    mod compiled {
+        include!(concat!(env!("OUT_DIR"), "/component_properties.rs"));
+    }
+    let file = Path::new(env!("CARGO_MANIFEST_DIR")).join("creation/Initial.qml");
+    let reg = TypeRegistry::new();
+    let engine = std::rc::Rc::new(ferroui_qml_webscene::WebSceneEngine::from_env().unwrap());
+    let file = ferroui_qml_build::Compiler::new()
+        .with_javascript()
+        .load(file)
+        .unwrap();
+    let source =
+        Instance::with_engine(&file.document, &reg, Default::default(), engine.clone()).unwrap();
+    let built =
+        Instance::with_engine(&compiled::compiled_qml(), &reg, Default::default(), engine).unwrap();
+    for mut app in [source, built] {
+        assert_eq!(
+            app.call(app.root(), "probe", vec![]).unwrap(),
+            Value::String("7/15/false/true/5,9".into())
+        );
+    }
+}

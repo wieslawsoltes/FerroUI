@@ -8,6 +8,8 @@ mod connections;
 mod deferred;
 mod dynamic;
 mod lifetime;
+mod initial;
+pub use initial::InitialProperty;
 pub use compiled::{CompiledComponent, ComponentSource};
 mod enums;
 pub use enums::Namespace;

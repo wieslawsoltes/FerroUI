@@ -832,24 +832,11 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
 }
 
 impl Instance {
-    pub(crate) fn allocate_template(&mut self,root:ObjectId,parent:Option<ObjectId>,initial:BTreeMap<String,Value>,template:&dynamic::Template,registry:&TypeRegistry)->Result<(),Error>{
-        let first=self.slots.len();
+    pub(crate) fn allocate_template(&mut self,root:ObjectId,parent:Option<ObjectId>,template:&dynamic::Template,registry:&TypeRegistry)->Result<BTreeSet<SlotId>,Error>{
         let mut builder=Builder{context:Some(root),scopes:template.scopes.clone(),instance:self,registry,imports:&template.imports,assigned:Default::default(),aliases:vec![],implicit:vec![],read_candidates:vec![]};
         builder.object(&template.object,parent)?;
         builder.link_aliases()?;
         builder.default_children()?;
-        for (name,value) in initial{
-            let key=builder.instance.write_target(builder.instance.public_key(root,&name)?)?;
-            if key<first{return Err(Error::new("initial properties cannot modify objects outside the new component"));}
-            builder.instance.slots[key].value=builder.instance.typed(&builder.instance.properties[key].ty,value)?;
-            builder.instance.slots[key].binding=None;
-            builder.instance.slots[key].dirty=false;
-            builder.assigned.insert(key);
-        }
-        for (slot,p) in builder.instance.properties.iter().enumerate().skip(first){
-            if p.required && !builder.assigned.contains(&slot){return Err(Error::new(format!("required property '{}' was not initialized",p.name)));}
-        }
-        for slot in builder.assigned{builder.instance.slots[slot].assigned=true;}
-        Ok(())
+        Ok(builder.assigned)
     }
 }

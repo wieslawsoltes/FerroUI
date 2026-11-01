@@ -286,6 +286,10 @@ impl ScriptContext<'_, '_> {
             .unwrap_or_default();
         params.iter().map(|p| p.ty.as_deref()).collect()
     }
+    pub fn create_with_properties(&mut self,factory:ObjectId,parent:Option<ObjectId>,props:BTreeMap<String,InitialProperty>)->Result<Value,Error>{
+        let result=self.tx.try_create_with_properties(factory,parent,props).map(|id|id.map(Value::Object).unwrap_or(Value::Null));
+        self.tx.host_result(result)
+    }
     pub fn is_component(&self, object:ObjectId)->bool{self.tx.model.is_component(object)}
     pub fn is_worker_script(&self, id: ObjectId) -> bool {
         self.tx.model.workers.contains(id)

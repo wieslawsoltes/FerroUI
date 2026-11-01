@@ -178,19 +178,60 @@ impl crate::transaction::Transaction<'_> {
         parent: Option<ObjectId>,
         initial: BTreeMap<String, Value>,
     ) -> Result<ObjectId, Error> {
-        if self.in_binding() {
-            return Err(Error::new("a binding cannot create objects"));
-        }
-        if parent.is_some_and(|p| self.model.node(p).is_none()) {
-            return Err(Error::new("invalid component parent"));
-        }
+        self.create_with_properties(
+            component,
+            parent,
+            initial
+                .into_iter()
+                .map(|(k, v)| (k, InitialProperty::Value(v)))
+                .collect(),
+        )
+    }
+    pub(crate) fn create_with_properties(
+        &mut self,
+        component: ObjectId,
+        parent: Option<ObjectId>,
+        properties: BTreeMap<String, InitialProperty>,
+    ) -> Result<ObjectId, Error> {
         let template = self
             .model
             .dynamic
             .templates
             .get(&component)
-            .ok_or_else(|| Error::new("expected a Component"))?
+            .ok_or_else(|| Error::new("not a ready Component"))?
             .clone();
+        if self.model.get(component, "status")? != Value::Number(1.) {
+            return Err(Error::new("not a ready Component"));
+        }
+        self.build_object(component, parent, properties, &template)
+    }
+    pub(crate) fn try_create_with_properties(
+        &mut self,
+        component: ObjectId,
+        parent: Option<ObjectId>,
+        properties: BTreeMap<String, InitialProperty>,
+    ) -> Result<Option<ObjectId>, Error> {
+        let rev = self.model.structure_revision();
+        match self.create_with_properties(component, parent, properties) {
+            Ok(id) => Ok(Some(id)),
+            Err(_) if self.model.structure_revision() == rev => Ok(None),
+            Err(err) => Err(err),
+        }
+    }
+    pub(crate) fn build_object(
+        &mut self,
+        declaration: ObjectId,
+        parent: Option<ObjectId>,
+        initial: BTreeMap<String, InitialProperty>,
+        template: &Template,
+    ) -> Result<ObjectId, Error> {
+        if self.in_binding() {
+            return Err(Error::new("a binding cannot create objects"));
+        }
+        if parent.is_some_and(|id| self.model.node(id).is_none()) {
+            return Err(Error::new("invalid component parent"));
+        }
+        let before = self.model.checkpoint();
         let registry = self.model.dynamic.registry.clone().expect("type registry");
         let root = self.model.next_object();
         let first = self.model.slots.len();
@@ -203,12 +244,18 @@ impl crate::transaction::Transaction<'_> {
         self.model.dynamic.contexts.insert(
             root,
             Context {
-                declaration: component,
+                declaration,
                 ids: Default::default(),
             },
         );
-        self.model
-            .allocate_template(root, parent, initial, &template, &registry)?;
+        let prepared = self
+            .model
+            .allocate_template(root, parent, template, &registry)
+            .and_then(|assigned| self.apply_initial(root, first, assigned, initial));
+        if let Err(error) = prepared {
+            self.model.rollback_creation(before);
+            return Err(error);
+        }
         if let Some(parent) = parent {
             if self.model.nodes[root.index].visual_children.is_some() {
                 if let Some(name) = self.model.nodes[parent.index].visual_children.clone() {

@@ -174,7 +174,7 @@ impl Realm {
             .into_iter()
             .map(mode)
             .collect::<Vec<_>>();
-        if ctx.is_component(object) && key=="createObject" {signature=vec![None,Some("data")];}
+        if ctx.is_component(object) && key=="createObject" {signature=vec![None,Some("initial")];}
         if ctx.is_worker_script(object) && key == "sendMessage" {
             signature = vec![Some("data")];
         }
@@ -236,6 +236,17 @@ impl Realm {
                 ctx.call_later(owner, function, arguments)?;
             }
             return Ok(Json::Null);
+        }
+        if op=="construct"{
+            let Value::Object(factory)=self.lookup(ctx,id)? else{return Err(Error::new("invalid Component"))};
+            let parent=match self.decode(ctx,field(v,2)?)?{Value::Object(id)=>Some(id),Value::Null|Value::Undefined=>None,_=>return Err(Error::new("invalid parent"))};
+            let mut properties=BTreeMap::new();for p in field(v,3)?.as_array().ok_or_else(||Error::new("invalid initial properties"))?{
+                let pair=p.as_array().ok_or_else(||Error::new("invalid initial property"))?;
+                let value=self.decode(ctx,field(pair,2)?)?;
+                let entry=match field(pair,1)?.as_bool(){Some(true)=>{let Value::External(callback)=value else{return Err(Error::new("expected binding closure"))};ferroui_qml::InitialProperty::Binding(callback)},Some(false)=>ferroui_qml::InitialProperty::Value(value),_=>return Err(Error::new("invalid binding flag"))};
+                properties.insert(text(pair,0)?.into(),entry);
+            }
+            let value=ctx.create_with_properties(factory,parent,properties)?;return self.encode(instance,&value);
         }
         if matches!(op, "resolve" | "assign" | "scopeMode" | "bindScope") {
             let scope = self

@@ -1,4 +1,5 @@
 fn main() {
+    #[cfg(feature="webscene")] ferroui_qml_build::Compiler::new().with_javascript().compile_file("creation/Initial.qml","component_properties.rs").expect("compile initial bindings");
     ferroui_qml_build::compile_file("creation/Main.qml","dynamic_component.rs").expect("compile dynamic component");
     #[cfg(feature="webscene")] ferroui_qml_build::Compiler::new().with_javascript().compile_file("creation/Main.qml","dynamic_guest.rs").expect("compile guest dynamic component");
     #[cfg(feature = "webscene")]
