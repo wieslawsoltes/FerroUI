@@ -12,7 +12,7 @@ enum Key {
     Method(MethodRef),
 }
 
-pub(crate) enum Task {
+pub(crate) enum DeferredWork {
     Incubator(Record, Option<Box<incubation::Preparation>>),
     CancelIncubator(Record),
     Loader(ObjectId, Option<Box<incubation::Preparation>>),
@@ -26,7 +26,7 @@ pub(crate) enum Task {
     },
 }
 
-impl Task {
+impl DeferredWork {
     fn key(&self) -> Key {
         match self {
             Self::Incubator(handle, _) | Self::CancelIncubator(handle) => {
@@ -41,17 +41,20 @@ impl Task {
 }
 
 #[derive(Default)]
-pub(crate) struct Queue {
+pub(crate) struct DeferredQueue {
     sequence: u64,
-    jobs: BTreeMap<u64, Task>,
+    jobs: BTreeMap<u64, DeferredWork>,
     positions: BTreeMap<Key, u64>,
 }
 
-impl Queue {
-    pub(crate) fn post(&mut self, tasks: Vec<Task>) {
+impl DeferredQueue {
+    pub(crate) fn post(&mut self, tasks: Vec<DeferredWork>) {
         for task in tasks {
             let key = task.key();
-            if matches!(task, Task::CancelLoader(_) | Task::CancelIncubator(_)) {
+            if matches!(
+                task,
+                DeferredWork::CancelLoader(_) | DeferredWork::CancelIncubator(_)
+            ) {
                 if let Some(previous) = self.positions.remove(&key) {
                     self.jobs.remove(&previous);
                 }
@@ -73,14 +76,14 @@ impl Queue {
     pub(crate) fn retire(&mut self, dead: &BTreeSet<ObjectId>) {
         self.jobs.retain(|_, task| {
             let (owner, arguments) = match task {
-                Task::Incubator(_, _) | Task::CancelIncubator(_) => return true,
-                Task::Binding(owner) | Task::Loader(owner, _) | Task::CancelLoader(owner) => {
-                    (*owner, None)
-                }
-                Task::Call {
+                DeferredWork::Incubator(_, _) | DeferredWork::CancelIncubator(_) => return true,
+                DeferredWork::Binding(owner)
+                | DeferredWork::Loader(owner, _)
+                | DeferredWork::CancelLoader(owner) => (*owner, None),
+                DeferredWork::Call {
                     owner, arguments, ..
                 } => (*owner, Some(arguments)),
-                Task::Method(method, arguments) => (method.receiver(), Some(arguments)),
+                DeferredWork::Method(method, arguments) => (method.receiver(), Some(arguments)),
             };
             if dead.contains(&owner) {
                 self.positions.remove(&task.key());
@@ -97,7 +100,7 @@ impl Queue {
         });
     }
 
-    fn pop(&mut self, boundary: u64) -> Option<Task> {
+    fn pop(&mut self, boundary: u64) -> Option<DeferredWork> {
         if *self.jobs.first_key_value()?.0 > boundary {
             return None;
         }
@@ -118,16 +121,17 @@ impl Instance {
             .deferred
             .jobs
             .values()
-            .any(|job| matches!(job, Task::Loader(_, Some(_))))
+            .any(|job| matches!(job, DeferredWork::Loader(_, Some(_))))
     }
 
     /// Whether private construction storage spans multiple owner turns.
     pub fn has_incubating_work(&self) -> bool {
-        self.javascript
-            .deferred
-            .jobs
-            .values()
-            .any(|job| matches!(job, Task::Incubator(_, Some(_)) | Task::Loader(_, Some(_))))
+        self.javascript.deferred.jobs.values().any(|job| {
+            matches!(
+                job,
+                DeferredWork::Incubator(_, Some(_)) | DeferredWork::Loader(_, Some(_))
+            )
+        })
     }
 
     /// Execute work enqueued before this turn began. Each job has a separate
@@ -151,10 +155,10 @@ impl Instance {
                 break;
             };
             match task {
-                Task::Loader(owner, preparation) => {
+                DeferredWork::Loader(owner, preparation) => {
                     self.advance_loader(owner, preparation, &mut has_time)?
                 }
-                Task::Incubator(handle, preparation) => {
+                DeferredWork::Incubator(handle, preparation) => {
                     self.advance_incubator(handle, preparation, &mut has_time)?
                 }
                 task => self.transaction(|tx| tx.dispatch_deferred(task))?,
@@ -166,9 +170,11 @@ impl Instance {
 }
 
 impl Transaction<'_> {
-    fn dispatch_deferred(&mut self, task: Task) -> Result<(), Error> {
+    fn dispatch_deferred(&mut self, task: DeferredWork) -> Result<(), Error> {
         match task {
-            Task::Method(method, arguments) if self.model.node(method.receiver()).is_some() => {
+            DeferredWork::Method(method, arguments)
+                if self.model.node(method.receiver()).is_some() =>
+            {
                 self.invoke(
                     method.receiver(),
                     method.name(),
@@ -177,8 +183,10 @@ impl Transaction<'_> {
                 )?;
                 Ok(())
             }
-            Task::Binding(owner) if self.model.node(owner).is_some() => self.publish_delayed(owner),
-            Task::Call {
+            DeferredWork::Binding(owner) if self.model.node(owner).is_some() => {
+                self.publish_delayed(owner)
+            }
+            DeferredWork::Call {
                 owner,
                 function,
                 arguments,

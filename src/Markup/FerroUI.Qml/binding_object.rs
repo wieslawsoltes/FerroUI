@@ -207,8 +207,9 @@ impl Transaction<'_> {
             Some(Delivery::Watching | Delivery::Queued)
         ) {
             self.set_group_delivery(key, Delivery::Queued);
-            self.deferred
-                .push(deferred::Task::Binding(self.model.properties[key].owner));
+            self.deferred.push(deferred::DeferredWork::Binding(
+                self.model.properties[key].owner,
+            ));
         }
     }
 

@@ -116,7 +116,7 @@ pub(crate) struct Graph {
     bytes: usize,
 }
 
-enum Progress {
+enum LoadStep {
     Fetch(Url),
     Ready(Template, BTreeMap<String, ir::ScriptResource>),
 }
@@ -194,7 +194,7 @@ impl Instance {
             let types = self.dynamic.registry.as_ref().expect("type registry");
             let step = graph.receive(result, types, self.javascript.engine.is_some());
             match step {
-                Ok(Progress::Fetch(url)) => {
+                Ok(LoadStep::Fetch(url)) => {
                     graph.pending = url.clone();
                     self.network.request(
                         types
@@ -208,7 +208,7 @@ impl Instance {
                 done => {
                     self.network.retire(id);
                     let result = done.and_then(|progress| match progress {
-                        Progress::Ready(template, scripts) => {
+                        LoadStep::Ready(template, scripts) => {
                             #[cfg(feature = "javascript")]
                             self.install_remote_scripts(id, scripts)?;
                             #[cfg(not(feature = "javascript"))]
@@ -245,7 +245,7 @@ impl Graph {
         result: Response,
         types: &TypeRegistry,
         javascript: bool,
-    ) -> Result<Progress, String> {
+    ) -> Result<LoadStep, String> {
         let url = &self.pending;
         let bytes = match result {
             Err(ResourceError::NotFound) if url != &self.entry => None,
@@ -309,7 +309,7 @@ impl Graph {
                 if count >= MAX_DOCUMENTS {
                     return Err(format!("{}: too many QML dependencies", self.entry));
                 }
-                return Ok(Progress::Fetch(next));
+                return Ok(LoadStep::Fetch(next));
             }
             count
         };
@@ -329,7 +329,7 @@ impl Graph {
             if count >= MAX_DOCUMENTS {
                 return Err(format!("{}: too many QML dependencies", self.entry));
             }
-            return Ok(Progress::Fetch(next));
+            return Ok(LoadStep::Fetch(next));
         }
         let doc = linked.map_err(|e| e.to_string())?;
         // Validate native contracts without instantiating the component or running user code.
@@ -342,7 +342,7 @@ impl Graph {
         #[cfg(not(feature = "javascript"))]
         let scripts = BTreeMap::new();
         Template::from_object(doc.root, &doc.imports)
-            .map(|template| Progress::Ready(template, scripts))
+            .map(|template| LoadStep::Ready(template, scripts))
             .map_err(|e| e.to_string())
     }
 }

@@ -103,7 +103,10 @@ impl Instance {
                 Ok(false) => {
                     self.javascript
                         .deferred
-                        .post(vec![deferred::Task::Incubator(handle, Some(preparation))]);
+                        .post(vec![deferred::DeferredWork::Incubator(
+                            handle,
+                            Some(preparation),
+                        )]);
                     return Ok(());
                 }
                 Ok(true) => Some(preparation.into_nodes()),
@@ -176,7 +179,7 @@ impl Transaction<'_> {
             self.complete_incubator(&handle, Default::default(), false, false)?;
         } else {
             self.deferred
-                .push(deferred::Task::Incubator(handle.clone(), None));
+                .push(deferred::DeferredWork::Incubator(handle.clone(), None));
         }
         Ok(Some(Incubator(handle)))
     }
@@ -285,7 +288,7 @@ impl Transaction<'_> {
             Some(Value::Number(if result.is_some() { 1. } else { 3. })),
         )?;
         self.deferred
-            .push(deferred::Task::CancelIncubator(handle.clone()));
+            .push(deferred::DeferredWork::CancelIncubator(handle.clone()));
         Ok(true)
     }
 

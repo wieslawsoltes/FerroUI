@@ -335,9 +335,9 @@ impl Frame<'_, '_> {
                     Some(Value::Method(method)) => self
                         .tx
                         .deferred
-                        .push(deferred::Task::Method(method, args.collect())),
+                        .push(deferred::DeferredWork::Method(method, args.collect())),
                     Some(Value::External(function)) => {
-                        self.tx.deferred.push(deferred::Task::Call {
+                        self.tx.deferred.push(deferred::DeferredWork::Call {
                             owner: self.owner,
                             function,
                             arguments: args.collect(),

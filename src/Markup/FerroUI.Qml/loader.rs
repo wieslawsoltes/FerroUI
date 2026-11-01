@@ -107,7 +107,7 @@ impl Instance {
             Ok(false) => {
                 self.javascript
                     .deferred
-                    .post(vec![deferred::Task::Loader(id, Some(preparation))]);
+                    .post(vec![deferred::DeferredWork::Loader(id, Some(preparation))]);
                 Ok(())
             }
             Ok(true) => {
@@ -242,7 +242,7 @@ impl Transaction<'_> {
     }
 
     fn select_loader(&mut self, id: ObjectId, selection: Selection) {
-        self.deferred.push(deferred::Task::CancelLoader(id));
+        self.deferred.push(deferred::DeferredWork::CancelLoader(id));
         let state = self.loader_state(id);
         state.selection = Some(selection);
         state.initial = Default::default();
@@ -389,11 +389,11 @@ impl Transaction<'_> {
             }
         };
         if !active {
-            self.deferred.push(deferred::Task::CancelLoader(id));
+            self.deferred.push(deferred::DeferredWork::CancelLoader(id));
             return self.publish_status(id, 0, None);
         }
         let Some(component) = component else {
-            self.deferred.push(deferred::Task::CancelLoader(id));
+            self.deferred.push(deferred::DeferredWork::CancelLoader(id));
             return self.publish_status(id, 0, Some(0.));
         };
         match self.model.get(component, "status")? {
@@ -412,13 +412,13 @@ impl Transaction<'_> {
             match phase {
                 Phase::Select => {
                     self.publish_status(id, 2, Some(0.))?;
-                    self.deferred.push(deferred::Task::Loader(id, None));
+                    self.deferred.push(deferred::DeferredWork::Loader(id, None));
                     return Ok(());
                 }
                 Phase::Activate(nodes) => nodes,
             }
         } else {
-            self.deferred.push(deferred::Task::CancelLoader(id));
+            self.deferred.push(deferred::DeferredWork::CancelLoader(id));
             Default::default()
         };
         let revision = self.model.structure_revision();

@@ -31,7 +31,7 @@ pub(crate) struct Transaction<'a> {
     pub(crate) depth: usize,
     steps: usize,
     pub(crate) connection_changes: signal_callbacks::Journal,
-    pub(crate) deferred: Vec<deferred::Task>,
+    pub(crate) deferred: Vec<deferred::DeferredWork>,
     pub(crate) structure: dynamic::Checkpoint,
     pub(crate) worker_sources: BTreeSet<ObjectId>,
     pub(crate) network_loads: Vec<(ObjectId, url::Url)>,
@@ -723,8 +723,9 @@ impl Transaction<'_> {
                 .as_ref()
                 .is_some_and(|o| o.is_delayed(key))
             {
-                self.deferred
-                    .push(deferred::Task::Binding(self.model.properties[key].owner));
+                self.deferred.push(deferred::DeferredWork::Binding(
+                    self.model.properties[key].owner,
+                ));
             } else if self.model.slots[target]
                 .overlay
                 .as_ref()

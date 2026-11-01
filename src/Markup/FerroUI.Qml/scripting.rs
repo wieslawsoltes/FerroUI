@@ -176,7 +176,7 @@ pub trait ScriptEngine {
 
 #[derive(Default)]
 pub(crate) struct ScriptState {
-    pub(crate) deferred: deferred::Queue,
+    pub(crate) deferred: deferred::DeferredQueue,
     pub(crate) connections: signal_callbacks::SignalCallbacks,
     pub(crate) engine: Option<Rc<dyn ScriptEngine>>,
     pub(crate) resources: std::sync::Arc<BTreeMap<String, ir::ScriptResource>>,
@@ -518,7 +518,7 @@ impl ScriptContext<'_, '_> {
         }
         self.tx
             .deferred
-            .push(deferred::Task::Method(method, arguments));
+            .push(deferred::DeferredWork::Method(method, arguments));
         Ok(())
     }
 
@@ -535,7 +535,7 @@ impl ScriptContext<'_, '_> {
         for value in &arguments {
             self.tx.model.validate_handles(value)?;
         }
-        self.tx.deferred.push(deferred::Task::Call {
+        self.tx.deferred.push(deferred::DeferredWork::Call {
             owner,
             function,
             arguments,
