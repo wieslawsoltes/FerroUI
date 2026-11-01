@@ -29,6 +29,8 @@ mod loader;
 pub mod network;
 pub use list_model::RowId;
 mod promises;
+mod quick_buttons;
+mod quick_ranges;
 mod records;
 #[cfg(feature = "javascript")]
 mod remote_scripts;
@@ -132,6 +134,11 @@ struct Property {
 
 #[derive(Clone)]
 enum InstalledBinding {
+    InheritedMirroring,
+    PositionerDirection {
+        direction: SlotId,
+        mirror: SlotId,
+    },
     Expression(Rc<Binding>),
     GeometryFields {
         base: Geometry,

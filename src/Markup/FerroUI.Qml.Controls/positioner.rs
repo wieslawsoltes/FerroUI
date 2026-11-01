@@ -6,12 +6,13 @@ use ferroui_base::{
     input::InputElementImpl,
     instantiate,
     interactivity::InteractiveImpl,
-    layout::{LayoutableImpl, Orientation},
+    layout::{LayoutableImpl, LayoutableImplExt, Orientation},
     AttachedProperty, FerroObjectImpl, FerroProperty, Rect, Ref, Size, StyledElementImpl,
     VisualImpl,
 };
 use ferroui_controls::{
     Canvas, Control, ControlImpl, Panel, PanelImpl, StackPanel, StackPanelImpl, StackPanelImplExt,
+    WrapPanel,
 };
 
 #[repr(C)]
@@ -23,6 +24,9 @@ ferro_impl_classes!(Positioner: FerroObjectImpl, StyledElementImpl, VisualImpl, 
     InputElementImpl, ControlImpl, PanelImpl);
 
 ferro_properties! { impl Positioner {
+    fn reversed_property() -> AttachedProperty<bool> {
+        FerroProperty::register_attached::<Positioner, Control, _>("QuickReversed",false)
+    }
     fn quick_item_property() -> AttachedProperty<bool> {
         FerroProperty::register_attached::<Positioner, Control, _>("QuickItem",false)
     }
@@ -44,6 +48,13 @@ impl Positioner {
         panel.upcast()
     }
 
+    pub(super) fn set_reversed(panel: &Control, reversed: bool) {
+        if panel.get_value(Self::reversed_property()) != reversed {
+            panel.set_value(Self::reversed_property(), reversed);
+            panel.invalidate_arrange();
+        }
+    }
+
     pub(super) fn mark_item(child: &Control) {
         child.set_value(Self::quick_item_property(), true);
     }
@@ -57,6 +68,10 @@ impl StackPanelImpl for Positioner {
         available: Size,
         orientation: Orientation,
     ) {
+        let mut slot = slot;
+        if orientation == Orientation::Horizontal && this.get_value(Self::reversed_property()) {
+            slot.x = available.width - slot.right();
+        }
         if !child.get_value(Self::quick_item_property()) {
             // Reflected and application-native children keep their own alignment.
             Self::parent_arrange_child(this, child, slot, available, orientation);
@@ -72,5 +87,36 @@ impl StackPanelImpl for Positioner {
             }
         };
         child.arrange(rect);
+    }
+}
+
+/// The native wrap panel measures and wraps the QML Flow. Reverse each
+/// arranged line in place so input, focus and declaration order stay intact.
+#[repr(C)]
+pub struct Flow {
+    base: WrapPanel,
+}
+ferro_class!(Flow: WrapPanel);
+ferro_impl_classes!(Flow: FerroObjectImpl, StyledElementImpl, VisualImpl, InteractiveImpl, InputElementImpl, ControlImpl, PanelImpl);
+
+impl Flow {
+    pub(super) fn create() -> Ref<WrapPanel> {
+        instantiate(Self {
+            base: WrapPanel::construct(),
+        })
+        .upcast()
+    }
+}
+impl LayoutableImpl for Flow {
+    fn arrange_override(this: &Self, size: Size) -> Size {
+        let arranged = Self::parent_arrange_override(this, size);
+        if this.get_value(Positioner::reversed_property()) {
+            for child in this.children().snapshot().iter().filter(|c| c.is_visible()) {
+                let mut rect = child.bounds();
+                rect.x = size.width - rect.right();
+                child.arrange(rect);
+            }
+        }
+        arranged
     }
 }

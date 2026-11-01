@@ -533,6 +533,65 @@ fn state_transition_samples_the_original_native_peer_on_the_view_clock() {
 }
 
 #[test]
+fn mirrored_positioners_keep_declaration_order_and_wrap_each_line() {
+    use ferroui_base::layout::ILayoutManager;
+    use ferroui_controls::Window;
+    let _scope = UnitTestApplication::start(TestServices::styled_window());
+    let view = mount(include_str!(
+        "../../../tests/QmlCompiled/anchors/Positioners.qml"
+    ));
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(view.root())));
+    window.show();
+    window.layout_manager().execute_initial_layout_pass();
+    let positions = || {
+        window.layout_manager().execute_layout_pass();
+        ["first", "second", "a", "b", "c"]
+            .map(|name| view.control(view.id(name).unwrap()).unwrap().bounds().x)
+    };
+    assert_eq!(positions(), [70., 48., 30., 18., 10.]);
+    view.call(view.root_id(), "reverseDirections", vec![])
+        .unwrap();
+    assert_eq!(
+        view.get(view.id("row").unwrap(), "effectiveLayoutDirection")
+            .unwrap(),
+        Value::Number(0.)
+    );
+    assert_eq!(positions(), [0., 12., 0., 22., 0.]);
+    window.close();
+}
+
+#[test]
+fn baseline_and_mirrored_anchor_geometry_match_qt() {
+    use ferroui_base::{Rect, Size};
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let view = mount(include_str!(
+        "../../../tests/QmlCompiled/anchors/Mirrored.qml"
+    ));
+    let root = view.root();
+    let frames = || {
+        root.measure(Size::new(101., 60.));
+        root.arrange(Rect::new(0., 0., 101., 60.));
+        let bounds = |name| view.control(view.id(name).unwrap()).unwrap().bounds();
+        let label = bounds("label");
+        let inset = bounds("inset");
+        [label.x, label.y, inset.x, inset.width, bounds("middle").x]
+    };
+    assert_eq!(frames(), [-2., 19., 7., 92., 42.]);
+    view.call(view.root_id(), "change", vec![]).unwrap();
+    assert_eq!(frames(), [32., 21., 2., 92., 50.]);
+    let label = view.id("label").unwrap();
+    assert!(view
+        .set(
+            label,
+            "anchors.top",
+            Value::AnchorLine(view.root_id(), ferroui_qml::AnchorEdge::Top)
+        )
+        .is_err());
+    assert_eq!(frames(), [32., 21., 2., 92., 50.]);
+}
+
+#[test]
 fn sibling_anchor_order_margins_and_failed_cycles_are_transactional() {
     use ferroui_base::{Rect, Size};
     use ferroui_qml::AnchorEdge;
@@ -721,4 +780,112 @@ fn network_completion_wakes_a_mounted_loader_on_its_dispatcher() {
             .as_deref(),
         Some("Fetched and mounted")
     );
+}
+
+#[test]
+fn native_toggles_share_qml_groups_and_accessible_activation() {
+    use ferroui_controls::{
+        automation::{peers::ToggleButtonAutomationPeer, AutomationProperties},
+        CheckBox, RadioButton, ToggleSwitch,
+    };
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let view = mount(include_str!("../../../tests/QmlCompiled/buttons/Main.qml"));
+    let root = view.root_id();
+    let report = || view.call(root, "report", vec![]).unwrap();
+    let call = |name| view.call(root, name, vec![]).unwrap();
+    assert_eq!(
+        report(),
+        Value::String("2/false/0/false/false/false/0/0/".into())
+    );
+    call("choose");
+    call("choose");
+    assert_eq!(
+        report(),
+        Value::String("2/true/1/true/false/false/0/0/TCGCG".into())
+    );
+    call("setSecond");
+    let first = view
+        .control(view.id("first").unwrap())
+        .unwrap()
+        .cast::<RadioButton>()
+        .unwrap();
+    let second = view
+        .control(view.id("second").unwrap())
+        .unwrap()
+        .cast::<RadioButton>()
+        .unwrap();
+    assert_eq!(first.is_checked(), Some(false));
+    assert_eq!(second.is_checked(), Some(true));
+    let check = view
+        .control(view.id("mixed").unwrap())
+        .unwrap()
+        .cast::<CheckBox>()
+        .unwrap();
+    ToggleButtonAutomationPeer::new(&check).toggle().unwrap();
+    assert_eq!(check.is_checked(), None);
+    assert_eq!(
+        report(),
+        Value::String("2/false/1/false/true/false/1/0/TCGCGK".into())
+    );
+    call("nextCheck");
+    assert_eq!(check.is_checked(), Some(true));
+    let switch = view
+        .control(view.id("power").unwrap())
+        .unwrap()
+        .cast::<ToggleSwitch>()
+        .unwrap();
+    assert_eq!(
+        AutomationProperties::get_name(&switch).as_deref(),
+        Some("Main power")
+    );
+    ToggleButtonAutomationPeer::new(&switch).toggle().unwrap();
+    assert_eq!(switch.is_checked(), Some(true));
+    call("groupAll");
+    assert_eq!(first.is_checked(), Some(true));
+    assert_eq!(second.is_checked(), Some(true));
+    assert_eq!(
+        report(),
+        Value::String("2/false/2/true/true/true/2/1/TCGCGKKS".into())
+    );
+}
+
+#[test]
+fn native_ranges_preserve_descending_bounds_and_propagate_user_input() {
+    use ferroui_base::{layout::Orientation, utilities::Decimal};
+    use ferroui_controls::{NumericUpDown, ProgressBar, Slider};
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let view = mount(include_str!("../../../tests/QmlCompiled/ranges/Main.qml"));
+    let level = view
+        .control(view.id("level").unwrap())
+        .unwrap()
+        .cast::<Slider>()
+        .unwrap();
+    let bar = view
+        .control(view.id("progress").unwrap())
+        .unwrap()
+        .cast::<ProgressBar>()
+        .unwrap();
+    let spin = view
+        .control(view.id("spin").unwrap())
+        .unwrap()
+        .cast::<NumericUpDown>()
+        .unwrap();
+    assert_eq!(level.orientation(), Orientation::Vertical);
+    assert!(level.is_direction_reversed());
+    assert_eq!(
+        (level.minimum(), level.maximum(), level.value()),
+        (0., 10., 6.)
+    );
+    assert_eq!(spin.increment(), Decimal::from(-3));
+    level.set_range_value(4.);
+    spin.set_numeric_value(Some(Decimal::from(2)));
+    assert_eq!(bar.value(), 4.);
+    let id = view.root_id();
+    assert_eq!(view.get(id, "moves").unwrap(), Value::Number(1.));
+    assert_eq!(view.get(id, "edits").unwrap(), Value::Number(1.));
+    view.call(id, "step", vec![]).unwrap();
+    assert_eq!(level.value(), 7.);
+    assert_eq!(bar.value(), 7.);
+    assert_eq!(spin.value(), Some(Decimal::from(10)));
+    assert_eq!(view.get(id, "moves").unwrap(), Value::Number(1.));
 }

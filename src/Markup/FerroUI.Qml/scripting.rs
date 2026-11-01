@@ -417,6 +417,16 @@ impl ScriptContext<'_, '_> {
         if let Some(shape) = self.tx.model.geometry_snapshot(base)? {
             return Ok(shape.fields().iter().map(|v| v.to_string()).collect());
         }
+        if let Some((owner, group)) = base.item_group() {
+            let prefix = format!("{group}.");
+            return Ok(self
+                .tx
+                .model
+                .property_names(owner)
+                .into_iter()
+                .filter_map(|p| p.strip_prefix(&prefix).map(str::to_owned))
+                .collect());
+        }
         Ok(match base {
             Value::Object(o) => self.members(*o),
             Value::Record(r) => self.record_keys(r)?,
@@ -426,13 +436,6 @@ impl ScriptContext<'_, '_> {
                 .collect(),
             Value::ModelRow(row) => self.tx.model.model_keys(*row)?,
             Value::DelegateRow(owner) => self.tx.model.delegate_row(*owner)?.keys(),
-            Value::AnchorGroup(owner) => self
-                .tx
-                .model
-                .property_names(*owner)
-                .into_iter()
-                .filter_map(|p| p.strip_prefix("anchors.").map(str::to_owned))
-                .collect(),
             Value::Namespace(namespace) => namespace.names().map(str::to_owned).collect(),
             _ => Vec::new(),
         })
@@ -524,6 +527,14 @@ impl ScriptContext<'_, '_> {
             arguments,
         });
         Ok(())
+    }
+
+    pub(crate) fn step_range(&mut self, increase: bool) -> Result<Value, Error> {
+        self.tx.step_quick_range(self.owner, increase)
+    }
+
+    pub(crate) fn quick_button_call(&mut self, name: &str, args: &[Value]) -> Result<Value, Error> {
+        self.tx.button_call(self.owner, name, args)
     }
 
     pub(crate) fn list_view_call(&mut self, name: &str, args: &[Value]) -> Result<Value, Error> {
@@ -811,15 +822,18 @@ impl ScriptContext<'_, '_> {
         }
         self.tx.model.validate_handles(base)?;
         self.tx.model.validate_handles(&value)?;
+        if let Some((owner, group)) = base.item_group() {
+            return self.write_key(
+                self.tx.scoped_key(owner, &format!("{group}.{name}"))?,
+                value,
+            );
+        }
         let result = match base {
             Value::Object(object) => {
                 return self.write_key(self.tx.scoped_key(*object, name)?, value)
             }
             Value::ModelRow(row) => self.tx.write_role(*row, name, value),
             Value::DelegateRow(owner) => self.tx.write_delegate_role(*owner, name, value),
-            Value::AnchorGroup(id) => {
-                return self.write_key(self.tx.scoped_key(*id, &format!("anchors.{name}"))?, value)
-            }
             Value::Record(record) => self.tx.set_record_field(record, name, value),
             Value::External(external) => {
                 self.tx

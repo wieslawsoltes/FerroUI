@@ -233,6 +233,9 @@ impl Transaction<'_> {
         name: &str,
         reads: &mut BTreeSet<SlotId>,
     ) -> Result<Value, Error> {
+        if let Some((owner, group)) = base.item_group() {
+            return self.read(self.model.key(owner, &format!("{group}.{name}"))?, reads);
+        }
         match base {
             Value::External(ref value) => {
                 self.with_external(self.model.root(), value, reads, |engine, ctx| {
@@ -241,9 +244,7 @@ impl Transaction<'_> {
             }
             Value::ModelRow(row) => self.read_role(row, name, reads),
             Value::DelegateRow(owner) => self.read_delegate_role(owner, name, reads),
-            Value::AnchorGroup(id) => {
-                self.read(self.model.key(id, &format!("anchors.{name}"))?, reads)
-            }
+
             Value::Geometry(shape) => Ok(shape.field(name).map_or(Value::Undefined, Value::Number)),
             Value::Record(record) if record.is_geometry() => {
                 self.geometry_member(&record, name, reads)

@@ -37,6 +37,8 @@ pub(crate) struct Transaction<'a> {
     pub(crate) network_loads: Vec<(ObjectId, url::Url)>,
     pub(crate) worker_actions: Vec<workers::Action>,
     pub(crate) loader_changes: loader::Changes,
+    pub(crate) range_pending: BTreeSet<ObjectId>,
+    pub(crate) quick_buttons: quick_buttons::Changes,
     pub(crate) repeater_changes: repeater::Changes,
     pub(crate) timer_changes: timers::TimerChanges,
 }
@@ -103,6 +105,8 @@ impl Instance {
             connection_changes: Default::default(),
             deferred: Vec::new(),
             loader_changes: Default::default(),
+            range_pending: Default::default(),
+            quick_buttons: Default::default(),
             repeater_changes: Default::default(),
             timer_changes: Default::default(),
             network_loads: Vec::new(),
@@ -259,6 +263,8 @@ impl Transaction<'_> {
         self.initializing = true;
         self.initialize_workers(first);
         self.initialize_states(first);
+        self.initialize_quick_buttons(first)?;
+        self.initialize_ranges(first);
         self.initialize_loaders(first);
         self.repeater_changes.pending.extend(
             self.model
@@ -329,7 +335,11 @@ impl Transaction<'_> {
                 self.update_binding(binding)?;
                 continue;
             }
-            if self.stage_repeater()? || self.stage_loader()? {
+            if self.stage_range()?
+                || self.stage_button()?
+                || self.stage_repeater()?
+                || self.stage_loader()?
+            {
                 continue;
             }
             if self.release_finished_values() {
@@ -425,9 +435,10 @@ impl Transaction<'_> {
             InstalledBinding::GeometryFields { fields, .. } => {
                 return fields.first().map(|(_, key)| *key)
             }
-            InstalledBinding::Guest { .. } | InstalledBinding::StateExpression { .. } => {
-                return None
-            }
+            InstalledBinding::PositionerDirection { direction, .. } => return Some(*direction),
+            InstalledBinding::InheritedMirroring
+            | InstalledBinding::Guest { .. }
+            | InstalledBinding::StateExpression { .. } => return None,
         };
         let Binding::Expr(expr) = binding.as_ref() else {
             return None;
@@ -516,6 +527,14 @@ impl Transaction<'_> {
                     .clone()
                     .ok_or_else(|| Error::new("missing dirty binding"))?;
                 match binding {
+                    InstalledBinding::PositionerDirection { direction, mirror } => {
+                        let rtl = self.read(direction, &mut reads)? == Value::Number(1.);
+                        let mirror = self.read(mirror, &mut reads)? == Value::Bool(true);
+                        Value::Number(f64::from(u8::from(rtl ^ mirror)))
+                    }
+                    InstalledBinding::InheritedMirroring => {
+                        self.inherited_mirroring(owner, &mut reads)?
+                    }
                     InstalledBinding::PropertyRead(source) => self.read(source, &mut reads)?,
                     InstalledBinding::GeometryFields { mut base, fields } => {
                         for &(name, input) in fields.iter() {
@@ -575,6 +594,23 @@ impl Transaction<'_> {
         self.evaluating.remove(&key);
         self.set_value(key, value);
         Ok(())
+    }
+
+    fn inherited_mirroring(
+        &mut self,
+        owner: ObjectId,
+        reads: &mut BTreeSet<SlotId>,
+    ) -> Result<Value, Error> {
+        let mut next = self.model.parent(owner);
+        while let Some(id) = next {
+            if let Ok(inherit) = self.model.key(id, "LayoutMirroring.childrenInherit") {
+                if self.read(inherit, reads)? == Value::Bool(true) {
+                    return self.read(self.model.key(id, "LayoutMirroring.enabled")?, reads);
+                }
+            }
+            next = self.model.parent(id);
+        }
+        Ok(Value::Bool(false))
     }
 
     fn binding_value(
@@ -643,6 +679,8 @@ impl Transaction<'_> {
                 self.loader_write(property.owner, name, &value);
             }
         }
+        self.observe_quick_button(key);
+        self.observe_range(key);
         self.touched(key).value = value;
         self.observe_states(key);
         self.observe_animation(key);
@@ -699,6 +737,7 @@ impl Transaction<'_> {
                     | "currentIndex"
                     | "spacing"
                     | "orientation"
+                    | "LayoutMirroring.enabled"
                     | "layoutDirection"
                     | "verticalLayoutDirection"
                     | "reuseItems"
@@ -809,6 +848,16 @@ impl Transaction<'_> {
                 self.pending.remove(input);
             }
         }
+        if value == Value::Undefined && self.model.properties[key].name == "LayoutMirroring.enabled"
+        {
+            self.replace_reads(key, BTreeSet::new());
+            let slot = self.touched(key);
+            slot.binding = Some(InstalledBinding::InheritedMirroring);
+            slot.dirty = true;
+            slot.assigned = false;
+            self.pending.insert(key);
+            return Ok(());
+        }
         let fallback = self.loader_dimension_assignment(key, value == Value::Undefined);
         let reset = fallback.is_some();
         let value = self
@@ -830,6 +879,9 @@ impl Transaction<'_> {
         slot.dirty = false;
         self.pending.remove(&key);
         self.set_value(key, value);
+        // Later statements in the same handler can read the new group membership
+        // or checked state before the transaction delivers notifications.
+        while self.stage_range()? || self.stage_button()? {}
         Ok(())
     }
 

@@ -201,3 +201,49 @@ fn overlay_header_and_footer_reserve_room_for_the_positioned_row() {
         Value::String("62/62/98".into())
     );
 }
+
+#[test]
+fn sticky_next_label_follows_the_last_visible_group() {
+    let mut ui = view(
+        r#"import QtQuick
+        ListView {width:100;height:61;cacheBuffer:0;model:["A","A","B","B","C","D","E","F"]
+            section.property:"modelData"
+            section.labelPositioning: ViewSection.InlineLabels | ViewSection.CurrentLabelAtStart | ViewSection.NextLabelAtEnd
+            section.delegate: Item {property string label:section; width:10;height:5}
+            delegate:Item {width:10;height:10}
+        }"#,
+    );
+    let id = ui.root();
+    for (offset, want) in [
+        (0., vec![("A", 0.), ("B", 25.), ("C", 50.), ("D", 56.)]),
+        (8., vec![("A", 8.), ("B", 25.), ("C", 50.), ("D", 64.)]),
+        (
+            15.,
+            vec![("A", 15.), ("B", 25.), ("C", 50.), ("D", 65.), ("E", 71.)],
+        ),
+    ] {
+        ui.set(id, "contentY", Value::Number(offset)).unwrap();
+        let Value::List(items) = ui.get(id, "data").unwrap() else {
+            panic!("view children")
+        };
+        let labels = items
+            .into_iter()
+            .filter_map(|o| {
+                let Value::Object(o) = o else { return None };
+                let Value::String(label) = ui.get(o, "label").ok()? else {
+                    return None;
+                };
+                let Value::Number(y) = ui.get(o, "y").ok()? else {
+                    return None;
+                };
+                Some((label, y))
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            labels,
+            want.into_iter()
+                .map(|(s, y)| (s.to_owned(), y))
+                .collect::<Vec<_>>()
+        );
+    }
+}

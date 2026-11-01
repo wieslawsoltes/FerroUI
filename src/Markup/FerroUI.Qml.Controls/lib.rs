@@ -9,6 +9,8 @@ mod clock;
 mod composition;
 mod list_view;
 mod positioner;
+mod quick_buttons;
+mod quick_ranges;
 mod reflected;
 mod tree;
 mod worker_dispatch;

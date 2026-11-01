@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod anchors;
 #[cfg(test)]
+mod buttons;
+#[cfg(test)]
 mod delegates;
 #[cfg(test)]
 mod geometry;
@@ -8,6 +10,8 @@ mod geometry;
 mod incubators;
 #[cfg(test)]
 mod nested_roles;
+#[cfg(test)]
+mod ranges;
 #[cfg(test)]
 mod remote_scripts;
 #[cfg(test)]

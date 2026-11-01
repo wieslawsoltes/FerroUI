@@ -69,14 +69,19 @@ impl Sections {
             0.
         }
     }
-    fn rebuild(&mut self, model: &Instance, source: &Source) -> Result<(), Error> {
-        let count = source.len(model);
+    fn rebuild(
+        &mut self,
+        tx: &mut Transaction<'_>,
+        owner: ObjectId,
+        source: &Source,
+    ) -> Result<(), Error> {
+        let count = source.len(tx.model);
         self.indexed = 0;
         let mut groups = Vec::new();
         if !self.role.is_empty() && count != 0 {
             if matches!(source, Source::Count(_)) {
                 if self.role != "modelData" && self.role != "index" {
-                    groups.push((0, String::new()));
+                    // A leading empty section has no label.
                 } else if self.first_character {
                     groups.push((0, "0".into()));
                     let mut power: usize = 1;
@@ -96,22 +101,37 @@ impl Sections {
             } else {
                 let mut prev = None;
                 for i in 0..count {
-                    let (_, row) = source.at(model, i).expect("valid row");
+                    let (_, row) = source.at(tx.model, i).expect("valid row");
                     let field = match &row {
-                        Value::ModelRow(row) => model.model_role(*row, &self.role)?,
+                        Value::ModelRow(row) if self.role == "modelData" => {
+                            match tx.model.dynamic.repeaters[&owner].roles.as_deref() {
+                                Some([role]) => tx.model.model_role(*row, role)?,
+                                _ => Value::Undefined,
+                            }
+                        }
+                        Value::ModelRow(row) => tx.model.model_role(*row, &self.role)?,
                         _ if self.role == "modelData" => row,
-                        Value::Record(r) => model
+                        Value::Record(r) => tx
+                            .model
                             .record_entries(r)?
                             .get(&self.role)
                             .cloned()
                             .unwrap_or(Value::Undefined),
-                        Value::Object(o) => model.get(*o, &self.role).unwrap_or(Value::Undefined),
+                        Value::External(value) => {
+                            tx.with_external(owner, value, &mut BTreeSet::new(), |engine, ctx| {
+                                engine.get_external(ctx, value, &self.role)
+                            })?
+                        }
+                        Value::Object(o) => {
+                            tx.model.get(*o, &self.role).unwrap_or(Value::Undefined)
+                        }
                         _ => Value::Undefined,
                     };
-                    let name = if matches!(field, Value::Undefined | Value::Null) {
-                        String::new()
-                    } else {
-                        model.value_string(&field)?
+                    let name = match field {
+                        Value::Bool(_) | Value::Number(_) | Value::String(_) => {
+                            tx.model.value_string(&field)?
+                        }
+                        _ => String::new(),
                     };
                     let name = if self.first_character {
                         name.chars().take(1).collect()
@@ -119,7 +139,7 @@ impl Sections {
                         name
                     };
                     let folded = name.to_lowercase();
-                    if prev.as_ref() != Some(&folded) {
+                    if prev.as_deref().unwrap_or("") != folded {
                         prev = Some(folded);
                         groups.push((i, name));
                     }
@@ -281,7 +301,7 @@ impl Transaction<'_> {
             sections.role = role;
             sections.first_character = first;
             sections.factory = next;
-            sections.rebuild(self.model, &state.source)?;
+            sections.rebuild(self, id, &state.source)?;
         }
         Ok(())
     }
@@ -337,9 +357,17 @@ impl Transaction<'_> {
         if flags & 2 != 0 {
             wanted.extend(current);
         }
-        if flags & 4 != 0 {
-            wanted.extend(next);
-        }
+        // Pin the group following the last row that fits above the trailing
+        // label. Several other section headers can still fit in the viewport.
+        let trailing = if flags & 4 != 0 {
+            let bottom = offset + viewport - state.sections.nominal.unwrap_or(0.);
+            let last_row = state.lower_index(bottom, count, spacing);
+            let group = state.sections.preceding(last_row.saturating_add(1));
+            (group < state.sections.len()).then_some(group)
+        } else {
+            None
+        };
+        wanted.extend(trailing);
         let removed: Vec<_> = state
             .sections
             .labels
@@ -374,8 +402,11 @@ impl Transaction<'_> {
                         state.start(next, spacing) - state.sections.label_extent(next) - extent,
                     );
                 }
-            } else if next == Some(g) && flags & 4 != 0 {
+            } else if trailing == Some(g) {
                 position = position.min(offset + viewport - extent);
+                if state.sections.inline && g > 0 {
+                    position = position.max(state.start(state.sections.boundary(g - 1), spacing));
+                }
             }
             self.list_property(
                 item,

@@ -14,6 +14,7 @@ enum Key {
     Row(RowId),
     DelegateRow(ferroui_qml::ObjectId),
     AnchorGroup(ferroui_qml::ObjectId),
+    PropertyGroup(ferroui_qml::ObjectId, Rc<str>),
     Anchor(ferroui_qml::ObjectId, ferroui_qml::AnchorEdge),
     Namespace(usize),
 }
@@ -23,6 +24,7 @@ impl Key {
             Value::Record(record) => Ok(Self::Record(record.clone())),
             Value::ModelRow(id) => Ok(Self::Row(*id)),
             Value::DelegateRow(id) => Ok(Self::DelegateRow(*id)),
+            Value::PropertyGroup(id, group) => Ok(Self::PropertyGroup(*id, group.clone())),
             Value::AnchorGroup(id) => Ok(Self::AnchorGroup(*id)),
             Value::AnchorLine(id, edge) => Ok(Self::Anchor(*id, *edge)),
             Value::Namespace(namespace) => Ok(Self::Namespace(Rc::as_ptr(namespace) as usize)),

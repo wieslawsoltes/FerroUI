@@ -51,3 +51,37 @@ fn webscene_can_read_and_reassign_anchor_groups() {
     let engine = std::rc::Rc::new(ferroui_qml_webscene::WebSceneEngine::from_env().unwrap());
     check(Instance::with_engine(&src.document, &types(), Default::default(), engine).unwrap());
 }
+
+mod mirror {
+    include!(concat!(env!("OUT_DIR"), "/mirrored.rs"));
+}
+
+fn mirror_changes(mut ui: Instance) {
+    let root = ui.root();
+    let inherited = |app: &mut Instance| app.call(root, "inherited", vec![]).unwrap();
+    assert_eq!(inherited(&mut ui), Value::String("true/false/true".into()));
+    ui.call(root, "inheritLocal", vec![]).unwrap();
+    assert_eq!(inherited(&mut ui), Value::String("true/false/false".into()));
+    ui.call(root, "resetLocal", vec![]).unwrap();
+    assert_eq!(inherited(&mut ui), Value::String("true/true/true".into()));
+    ui.call(root, "change", vec![]).unwrap();
+    assert_eq!(
+        inherited(&mut ui),
+        Value::String("false/false/false".into())
+    );
+}
+#[test]
+fn native_mirroring_inherits_and_can_reset_an_explicit_override() {
+    mirror_changes(Instance::new(&mirror::compiled_qml(), &types(), Default::default()).unwrap());
+}
+#[cfg(feature = "webscene")]
+#[test]
+fn guest_mirroring_reads_and_writes_the_attached_properties() {
+    let doc = ferroui_qml_build::Compiler::new()
+        .with_javascript()
+        .load("anchors/Mirrored.qml")
+        .unwrap()
+        .document;
+    let guest = std::rc::Rc::new(ferroui_qml_webscene::WebSceneEngine::from_env().unwrap());
+    mirror_changes(Instance::with_engine(&doc, &types(), Default::default(), guest).unwrap());
+}

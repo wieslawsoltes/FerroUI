@@ -169,8 +169,11 @@ impl Frame<'_, '_> {
             }
             if base == "Qt" {
                 match name {
-                    "Asynchronous" | "LeftToRight" => return Ok(Value::Number(0.)),
-                    "Synchronous" | "RightToLeft" => return Ok(Value::Number(1.)),
+                    "Checked" | "Vertical" => return Ok(Value::Number(2.)),
+                    "Asynchronous" | "Unchecked" | "LeftToRight" => return Ok(Value::Number(0.)),
+                    "Synchronous" | "Horizontal" | "PartiallyChecked" | "RightToLeft" => {
+                        return Ok(Value::Number(1.))
+                    }
                     _ => {}
                 }
             }
@@ -381,9 +384,9 @@ impl Frame<'_, '_> {
                 .validate_handles(&Value::External(value.clone()))?;
             return Ok(self.target(Location::External(value, name.into())));
         }
-        if let Value::AnchorGroup(id) = base {
+        if let Some((id, group)) = base.item_group() {
             return Ok(self.target(Location::Property(
-                self.tx.scoped_key(id, &format!("anchors.{name}"))?,
+                self.tx.scoped_key(id, &format!("{group}.{name}"))?,
             )));
         }
         if let Value::DelegateRow(owner) = base {

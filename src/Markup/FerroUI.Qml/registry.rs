@@ -53,6 +53,11 @@ impl TypeDefinition {
         self
     }
 
+    /// Expose registered dotted properties as a live grouped object to QML scripts.
+    pub fn property_group(self, name: &str) -> Self {
+        self.readonly_property(name, "$qml:propertyGroup", Value::Undefined)
+    }
+
     /// Register Qt Quick Item anchor lines and their assignable grouped properties.
     pub fn quick_anchors(mut self) -> Self {
         for edge in crate::AnchorEdge::ALL {
@@ -68,6 +73,15 @@ impl TypeDefinition {
             self = self.property(&format!("anchors.{side}Margin"), "var", Value::Undefined);
         }
         self.readonly_property("anchors", "$qml:anchorGroup", Value::Undefined)
+            .property_group("LayoutMirroring")
+            .property("LayoutMirroring.enabled", "bool", Value::Bool(false))
+            .property(
+                "LayoutMirroring.childrenInherit",
+                "bool",
+                Value::Bool(false),
+            )
+            .property("baselineOffset", "real", Value::Number(0.))
+            .property("anchors.baselineOffset", "real", Value::Number(0.))
             .property("anchors.alignWhenCentered", "bool", Value::Bool(true))
             .property("anchors.fill", "Item", Value::Null)
             .property("anchors.centerIn", "Item", Value::Null)

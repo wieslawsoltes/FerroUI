@@ -19,6 +19,7 @@ impl TypeDefinition {
             .property("orientation", "int", number(2.))
             .property("reuseItems", "bool", Value::Bool(false))
             .property("layoutDirection", "int", number(0.))
+            .readonly_property("effectiveLayoutDirection", "int", number(0.))
             .property("verticalLayoutDirection", "int", number(0.))
             .property("headerPositioning", "int", number(0.))
             .property("footerPositioning", "int", number(0.))
@@ -42,6 +43,7 @@ impl TypeDefinition {
             .expect("Qt footer modes")
             .property("header", "Component", Value::Null)
             .property("footer", "Component", Value::Null)
+            .property_group("section")
             .property("section.property", "string", Value::String(String::new()))
             .property("section.criteria", "int", number(0.))
             .property("section.delegate", "Component", Value::Null)
@@ -531,15 +533,18 @@ impl Transaction<'_> {
         let viewport = state.dimension(self.model, id, axis);
         let spacing = real(self.model, id, "spacing").max(0.);
         let cache = real(self.model, id, "cacheBuffer").max(0.);
-        let reversed = real(
-            self.model,
+        let mirrored = self.model.get(id, "LayoutMirroring.enabled") == Ok(Value::Bool(true));
+        let rtl = (real(self.model, id, "layoutDirection") == 1.) ^ mirrored;
+        self.list_property(
             id,
-            if horizontal {
-                "layoutDirection"
-            } else {
-                "verticalLayoutDirection"
-            },
-        ) == 1.;
+            "effectiveLayoutDirection",
+            Value::Number(f64::from(rtl)),
+        )?;
+        let reversed = if horizontal {
+            rtl
+        } else {
+            real(self.model, id, "verticalLayoutDirection") == 1.
+        };
         let old_header = state.header.extent;
         self.update_decoration(id, "header", axis, &mut state.header)?;
         self.update_decoration(id, "footer", axis, &mut state.footer)?;

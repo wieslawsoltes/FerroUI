@@ -52,7 +52,10 @@ pub(super) struct Candidate {
 
 pub(super) fn affects_layout(peer: &dyn NativeObject, property: &str) -> bool {
     peer.children_property() == Some(property)
-        || (peer.uses_item_anchors() && property.starts_with("anchors."))
+        || (peer.uses_item_anchors()
+            && (property.starts_with("anchors.")
+                || property == "baselineOffset"
+                || property == "LayoutMirroring.enabled"))
 }
 
 impl Inner {

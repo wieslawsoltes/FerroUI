@@ -80,6 +80,7 @@ pub(crate) fn release_value(v: &Value, dead: &BTreeSet<ObjectId>) -> Option<Valu
     match v {
         Value::Object(id)
         | Value::DelegateRow(id)
+        | Value::PropertyGroup(id, _)
         | Value::AnchorGroup(id)
         | Value::AnchorLine(id, _)
             if dead.contains(id) =>

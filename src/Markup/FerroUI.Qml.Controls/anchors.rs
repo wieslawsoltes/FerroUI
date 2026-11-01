@@ -10,7 +10,7 @@ use ferroui_base::{
     layout::{Layoutable, LayoutableImpl, LayoutableImplExt},
     FerroObjectImpl, Rect, Size, StyledElementImpl, VisualImpl,
 };
-use ferroui_controls::{Canvas, CanvasImpl, ControlImpl, PanelImpl};
+use ferroui_controls::{Canvas, CanvasImpl, ControlImpl, PanelImpl, TextBlock};
 use ferroui_qml::AnchorEdge;
 use std::collections::HashMap;
 
@@ -19,6 +19,16 @@ enum Side {
     Start,
     End,
     Center,
+    Baseline,
+}
+impl Side {
+    fn mirrored(self, mirror: bool) -> Self {
+        match (self, mirror) {
+            (Side::Start, true) => Side::End,
+            (Side::End, true) => Side::Start,
+            _ => self,
+        }
+    }
 }
 fn axis_side(edge: AnchorEdge) -> (usize, Side) {
     use AnchorEdge::*;
@@ -29,6 +39,7 @@ fn axis_side(edge: AnchorEdge) -> (usize, Side) {
         Top => (1, Side::Start),
         Bottom => (1, Side::End),
         VerticalCenter => (1, Side::Center),
+        Baseline => (1, Side::Baseline),
     }
 }
 #[derive(Clone, PartialEq)]
@@ -36,6 +47,8 @@ struct Line {
     target: Option<Ref<Control>>,
     side: Side,
     offset: f64,
+    target_text: Option<Ref<TextBlock>>,
+    child_text: Option<Ref<TextBlock>>,
     align: bool,
 }
 #[derive(Clone, Default, PartialEq)]
@@ -144,11 +157,19 @@ fn resolve(line: &Line, frames: &Frames, parent: Rect, axis: usize) -> f64 {
         .unwrap_or(parent);
     let (pos, extent) = component(rect, axis);
     pos + match line.side {
-        Side::Start => 0.,
+        Side::Start | Side::Baseline => 0.,
         Side::End => extent,
         Side::Center => half(extent, line.align),
     } + line.offset
+        + text_baseline(&line.target_text)
+        - text_baseline(&line.child_text)
 }
+fn text_baseline(text: &Option<Ref<TextBlock>>) -> f64 {
+    text.as_ref().map_or(0., |text| {
+        text.padding().top + text.text_layout().baseline()
+    })
+}
+
 fn solve(rules: &Rules, frames: &mut Frames, size: Size, axis: usize) {
     let parent = Rect::new(0., 0., size.width, size.height);
     for child in &rules.order[axis] {
@@ -349,6 +370,11 @@ pub(super) fn read(
     let parent = parents.get(&child).copied();
     let align = |id| instance.get(id, "anchors.alignWhenCentered").ok() != Some(Value::Bool(false));
     let margin = scalar("margins", 0.)?;
+    let mirrored = instance.get(child, "LayoutMirroring.enabled")? == Value::Bool(true);
+    let baseline = |id| match instance.get(id, "baselineOffset")? {
+        Value::Number(n) if n.is_finite() => Ok(n),
+        _ => Err(Error::new("baselineOffset must be finite")),
+    };
     let mut anchor = Anchor {
         axes: Default::default(),
         align: align(child),
@@ -361,10 +387,10 @@ pub(super) fn read(
             Value::AnchorLine(id, target_edge) => Some((id, target_edge)),
             _ => return Err(Error::new("expected an Item anchor line")),
         };
-        let shorthand = if matches!(side, Side::Center) {
-            center
-        } else {
-            fill
+        let shorthand = match side {
+            Side::Center => center,
+            Side::Baseline => None,
+            _ => fill,
         };
         if explicit.is_some() && (fill.is_some() || center.is_some()) {
             return Err(Error::new(
@@ -392,38 +418,61 @@ pub(super) fn read(
                 "anchor target must be the item's visual parent or sibling",
             ));
         };
-        let (slot, offset) = match side {
-            Side::Start => (
-                &mut anchor.axes[axis].start,
-                scalar(if axis == 0 { "leftMargin" } else { "topMargin" }, margin)?,
-            ),
-            Side::End => (
-                &mut anchor.axes[axis].end,
-                -scalar(
-                    if axis == 0 {
-                        "rightMargin"
-                    } else {
-                        "bottomMargin"
-                    },
-                    margin,
-                )?,
-            ),
-            Side::Center => (
-                &mut anchor.axes[axis].center,
-                scalar(
-                    if axis == 0 {
-                        "horizontalCenterOffset"
-                    } else {
-                        "verticalCenterOffset"
-                    },
-                    0.,
-                )?,
-            ),
+        let mirror = mirrored && axis == 0;
+        let authored_offset = match side {
+            Side::Start => scalar(if axis == 0 { "leftMargin" } else { "topMargin" }, margin)?,
+            Side::End => -scalar(
+                if axis == 0 {
+                    "rightMargin"
+                } else {
+                    "bottomMargin"
+                },
+                margin,
+            )?,
+            Side::Center => scalar(
+                if axis == 0 {
+                    "horizontalCenterOffset"
+                } else {
+                    "verticalCenterOffset"
+                },
+                0.,
+            )?,
+            Side::Baseline => {
+                if anchor.axes[axis].lines().next().is_some() {
+                    return Err(Error::new(
+                        "baseline cannot be combined with another vertical anchor",
+                    ));
+                }
+                scalar("baselineOffset", 0.)? - baseline(child)?
+            }
+        };
+        let offset = if mirror {
+            -authored_offset
+        } else {
+            authored_offset
+        };
+        let slot = match side.mirrored(mirror) {
+            Side::Start | Side::Baseline => &mut anchor.axes[axis].start,
+            Side::End => &mut anchor.axes[axis].end,
+            Side::Center => &mut anchor.axes[axis].center,
+        };
+        let measured_text = |id, side| {
+            if side == Side::Baseline && !instance.is_assigned(id, "baselineOffset") {
+                nodes.get(&id)?.control().cast::<TextBlock>()
+            } else {
+                None
+            }
         };
         *slot = Some(Line {
+            target_text: measured_text(id, target_side),
+            child_text: measured_text(child, side),
             target,
-            side: target_side,
-            offset,
+            side: target_side.mirrored(mirror),
+            offset: if target_side == Side::Baseline {
+                offset + baseline(id)?
+            } else {
+                offset
+            },
             align: align(id),
         });
         anchored = true;

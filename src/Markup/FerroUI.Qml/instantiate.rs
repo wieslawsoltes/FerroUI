@@ -217,7 +217,9 @@ impl Instance {
             }
             Value::ModelRow(row) => self.model_role(*row, "").map(|_| ()),
             Value::DelegateRow(owner) => self.delegate_row(*owner).map(|_| ()),
-            Value::AnchorGroup(id) | Value::AnchorLine(id, _) if self.node(*id).is_none() => {
+            Value::AnchorGroup(id) | Value::PropertyGroup(id, _) | Value::AnchorLine(id, _)
+                if self.node(*id).is_none() =>
+            {
                 Err(Error::new("stale anchor target"))
             }
             Value::Method(method) if self.node(method.receiver()).is_none() => {
@@ -578,6 +580,9 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             self.instance.nodes[parent.index].children.push(id);
         }
         for mut property in shell.properties {
+            if property.ty == "$qml:propertyGroup" {
+                property.slot.value = Value::PropertyGroup(id, Rc::from(property.name.as_str()));
+            }
             if property.ty == "$qml:anchorGroup" {
                 property.slot.value = Value::AnchorGroup(id);
             }
@@ -799,6 +804,21 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                 })?;
             let key = self.instance.key(id, &name)?;
             self.implicit.push((key, implicit));
+        }
+        if module == "QtQuick" && matches!(name, "Row" | "Flow") {
+            if let Ok(key) = self.instance.key(id, "effectiveLayoutDirection") {
+                let direction = self.instance.key(id, "layoutDirection")?;
+                let mirror = self.instance.key(id, "LayoutMirroring.enabled")?;
+                self.instance.slots[key].binding =
+                    Some(InstalledBinding::PositionerDirection { direction, mirror });
+                self.instance.slots[key].dirty = true;
+            }
+        }
+        if let Ok(key) = self.instance.key(id, "LayoutMirroring.enabled") {
+            if !self.assigned.contains(&key) && parent.is_some() {
+                self.instance.slots[key].binding = Some(InstalledBinding::InheritedMirroring);
+                self.instance.slots[key].dirty = true;
+            }
         }
         Ok(id)
     }
@@ -1093,12 +1113,16 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         } else if name == "Component.onCompleted" {
             ("Component.completed".to_owned(), Vec::new())
         } else {
-            let raw = name
+            let (group, handler) = name.rsplit_once('.').unwrap_or(("", name));
+            let raw = handler
                 .strip_prefix("on")
                 .filter(|s| !s.is_empty())
                 .ok_or_else(|| Error::new(format!("invalid handler '{name}'")))?;
             let mut chars = raw.chars();
-            let signal = format!("{}{}", chars.next().unwrap().to_lowercase(), chars.as_str());
+            let mut signal = format!("{}{}", chars.next().unwrap().to_lowercase(), chars.as_str());
+            if !group.is_empty() {
+                signal = format!("{group}.{signal}");
+            }
             let formal = if let Some(parameters) = node.signals.get(&signal) {
                 parameters.clone()
             } else if signal

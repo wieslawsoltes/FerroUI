@@ -22,8 +22,16 @@ fn main() {
         .with_javascript()
         .compile_file("states/Main.qml", "states_guest.rs")
         .expect("compile states and transitions for V8");
+    ferroui_qml_build::compile_file("anchors/Mirrored.qml", "mirrored.rs")
+        .expect("compile mirrored anchor fixture");
     ferroui_qml_build::compile_file("anchors/Main.qml", "anchors.rs")
         .expect("compile native anchor lines fixture");
+    ferroui_qml_build::compile_file("ranges/Main.qml", "ranges.rs")
+        .expect("compile range controls");
+    ferroui_qml_build::compile_file("buttons/Main.qml", "buttons.rs")
+        .expect("compile grouped controls");
+    ferroui_qml_build::compile_file("views/ArraySections.qml", "array_sections.rs")
+        .expect("compile sections on JavaScript object arrays");
     ferroui_qml_build::compile_file("views/Reuse.qml", "reuse.rs")
         .expect("compile delegate reuse fixture");
     ferroui_qml_build::compile_file("views/Decorated.qml", "decorated.rs")

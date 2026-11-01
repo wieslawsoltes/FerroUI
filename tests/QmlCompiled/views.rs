@@ -96,3 +96,38 @@ mod reuse {
         assert_eq!(ui.call(root, "valid", vec![]).unwrap(), Value::Bool(true));
     }
 }
+
+mod array_sections {
+    use super::*;
+    include!(concat!(env!("OUT_DIR"), "/array_sections.rs"));
+
+    fn exercise(mut ui: Instance) {
+        let id = ui.root();
+        let report = |ui: &mut Instance| ui.call(id, "report", vec![]).unwrap();
+        assert_eq!(report(&mut ui), Value::String("title//A/AB/38".into()));
+        ui.call(id, "regroup", vec![]).unwrap();
+        assert_eq!(report(&mut ui), Value::String("title//A/A/34".into()));
+    }
+    #[test]
+    fn grouped_property_on_record_array() {
+        exercise(Instance::new(&compiled_qml(), &quick_registry(), Default::default()).unwrap());
+    }
+    #[cfg(feature = "webscene")]
+    #[test]
+    fn grouped_property_on_guest_array() {
+        use std::{path::Path, rc::Rc};
+        let unit = ferroui_qml_build::Compiler::new()
+            .with_javascript()
+            .load(Path::new(env!("CARGO_MANIFEST_DIR")).join("views/ArraySections.qml"))
+            .unwrap();
+        exercise(
+            Instance::with_engine(
+                &unit.document,
+                &quick_registry(),
+                Default::default(),
+                Rc::new(ferroui_qml_webscene::WebSceneEngine::from_env().unwrap()),
+            )
+            .unwrap(),
+        );
+    }
+}

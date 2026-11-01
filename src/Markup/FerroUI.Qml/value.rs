@@ -8,7 +8,7 @@ pub struct ObjectId {
     pub(crate) index: usize,
 }
 
-/// One of the six visual Item lines used in edge and center anchor expressions.
+/// A visual Item line used in edge and center anchor expressions.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum AnchorEdge {
     Left,
@@ -17,16 +17,18 @@ pub enum AnchorEdge {
     Top,
     Bottom,
     VerticalCenter,
+    Baseline,
 }
 
 impl AnchorEdge {
-    pub const ALL: [Self; 6] = [
+    pub const ALL: [Self; 7] = [
         Self::Left,
         Self::Right,
         Self::HorizontalCenter,
         Self::Top,
         Self::Bottom,
         Self::VerticalCenter,
+        Self::Baseline,
     ];
     pub fn name(self) -> &'static str {
         match self {
@@ -35,6 +37,7 @@ impl AnchorEdge {
             Self::HorizontalCenter => "horizontalCenter",
             Self::Top => "top",
             Self::Bottom => "bottom",
+            Self::Baseline => "baseline",
             Self::VerticalCenter => "verticalCenter",
         }
     }
@@ -71,6 +74,8 @@ pub enum Value {
     DelegateRow(ObjectId),
     AnchorLine(ObjectId, AnchorEdge),
     AnchorGroup(ObjectId),
+    /// A live view of an item's registered dotted properties.
+    PropertyGroup(ObjectId, std::rc::Rc<str>),
     Geometry(crate::Geometry),
     Record(crate::Record),
     Namespace(std::rc::Rc<crate::Namespace>),
@@ -78,6 +83,14 @@ pub enum Value {
 }
 
 impl Value {
+    pub(crate) fn item_group(&self) -> Option<(ObjectId, &str)> {
+        match self {
+            Self::AnchorGroup(id) => Some((*id, "anchors")),
+            Self::PropertyGroup(id, group) => Some((*id, group)),
+            _ => None,
+        }
+    }
+
     pub(crate) fn truthy(&self) -> bool {
         match self {
             Self::Undefined | Self::Null => false,
@@ -87,6 +100,7 @@ impl Value {
             Self::External(_)
             | Self::Method(_)
             | Self::Geometry(_)
+            | Self::PropertyGroup(_, _)
             | Self::AnchorGroup(_)
             | Self::AnchorLine(_, _)
             | Self::DelegateRow(_)
@@ -109,6 +123,7 @@ impl Value {
             Self::External(_)
             | Self::Method(_)
             | Self::Geometry(_)
+            | Self::PropertyGroup(_, _)
             | Self::AnchorGroup(_)
             | Self::AnchorLine(_, _)
             | Self::DelegateRow(_)
@@ -137,6 +152,7 @@ impl Value {
             Self::Geometry(shape) => shape.to_string(),
             Self::Method(method) => format!("function {}() {{ [native code] }}", method.name),
             Self::External(_)
+            | Self::PropertyGroup(_, _)
             | Self::AnchorGroup(_)
             | Self::AnchorLine(_, _)
             | Self::DelegateRow(_)

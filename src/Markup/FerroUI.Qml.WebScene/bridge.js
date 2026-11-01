@@ -46,7 +46,7 @@
         return Object.seal(result);
     }
     Object.defineProperty(globalThis, "Qt", {value: Object.freeze({
-        Asynchronous: 0, Synchronous: 1, LeftToRight: 0, RightToLeft: 1,
+        Asynchronous: 0, Synchronous: 1, LeftToRight: 0, RightToLeft: 1, Unchecked: 0, PartiallyChecked: 1, Checked: 2, Horizontal: 1, Vertical: 2,
         point(...args){return geometry("point",args);},
         size(...args){return geometry("size",args);},
         rect(...args){return geometry("rect",args);},
