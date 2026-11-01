@@ -9,7 +9,7 @@ pub(crate) const MODULE: &str = "QtQml.Models";
 const REVISION: &str = "$qml:rows";
 type Roles = BTreeMap<String, Value>;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct RowId {
     model: ObjectId,
     serial: u64,
@@ -117,6 +117,9 @@ impl Model {
         self.dynamic = Some(false);
         self.insert(self.order.len(), fields);
         Ok(())
+    }
+    pub(crate) fn row_ids(&self, model: ObjectId) -> impl Iterator<Item = RowId> + '_ {
+        self.order.iter().map(move |&serial| RowId { model, serial })
     }
     pub(crate) fn len(&self) -> usize {
         self.order.len()
@@ -321,6 +324,9 @@ impl Transaction<'_> {
         };
         self.set_value(size, Value::Number(count as f64));
         self.set_value(revision, Value::Number(previous + 1.));
+        self.repeater_changes.pending.extend(self.model.dynamic.repeaters.keys().filter(|repeater| {
+            self.model.get(**repeater, "model").ok() == Some(Value::Object(id))
+        }));
         self.settle()
     }
     fn model_dict(&self, value: &Value) -> Result<Roles, Error> {

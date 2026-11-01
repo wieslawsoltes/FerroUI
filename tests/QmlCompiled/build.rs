@@ -1,4 +1,11 @@
 fn main() {
+    ferroui_qml_build::compile_file("delegates/Main.qml", "delegates.rs")
+        .expect("compile the delegate fixture");
+    #[cfg(feature = "webscene")]
+    ferroui_qml_build::Compiler::new()
+        .with_javascript()
+        .compile_file("delegates/Main.qml", "delegates_js.rs")
+        .expect("compile the WebScene delegate fixture");
     #[cfg(feature = "webscene")]
     ferroui_qml_build::Compiler::new()
         .with_javascript()

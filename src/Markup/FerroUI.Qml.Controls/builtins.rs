@@ -15,6 +15,7 @@ use ferroui_controls::{
 enum Kind {
     Item,
     Loader,
+    Repeater,
     Rectangle,
     Row,
     Column,
@@ -34,6 +35,7 @@ pub(super) fn register(registry: &mut ControlRegistry) -> Result<(), Error> {
             &[
                 ("Item", Item),
                 ("Loader", Loader),
+                ("Repeater", Repeater),
                 ("Rectangle", Rectangle),
                 ("Row", Row),
                 ("Column", Column),
@@ -107,6 +109,7 @@ impl Kind {
         match self {
             Self::Item => ty,
             Self::Loader => TypeDefinition::quick_loader(),
+            Self::Repeater => TypeDefinition::quick_repeater(),
             Self::Rectangle => ty
                 .property("color", "color", Value::String("white".into()))
                 .property("border.color", "color", Value::String("black".into()))
@@ -127,6 +130,7 @@ impl Kind {
 
     fn create(self) -> Peer {
         match self {
+            Self::Repeater => Peer::Repeater(Canvas::new()),
             Self::Item | Self::Loader => Peer::Canvas(super::anchors::AnchorCanvas::create()),
             Self::Row | Self::Column => {
                 let stack = super::positioner::Positioner::create(if matches!(self, Self::Row) {
@@ -164,6 +168,7 @@ impl Kind {
 }
 
 enum Peer {
+    Repeater(Ref<Canvas>),
     Canvas(Ref<Canvas>),
     Stack(Ref<StackPanel>),
     Flow(Ref<WrapPanel>),
@@ -181,7 +186,7 @@ enum Peer {
 impl NativeObject for Peer {
     fn control(&self) -> Ref<Control> {
         match self {
-            Self::Canvas(c) => c.clone().upcast(),
+            Self::Canvas(c) | Self::Repeater(c) => c.clone().upcast(),
             Self::Stack(c) => c.clone().upcast(),
             Self::Flow(c) => c.clone().upcast(),
             Self::Rectangle { root, .. } => root.clone().upcast(),
@@ -258,6 +263,8 @@ impl NativeObject for Peer {
             "height" => control.set_height(number(property, value)?.max(0.0)),
             "x" => Canvas::set_left(&control, number(property, value)?),
             "y" => Canvas::set_top(&control, number(property, value)?),
+            // A Repeater supplies siblings and occupies no slot in a positioner.
+            "visible" if matches!(self, Self::Repeater(_)) => control.set_is_visible(false),
             "visible" => control.set_is_visible(boolean(property, value)?),
             "enabled" => control.set_is_enabled(boolean(property, value)?),
             "opacity" => control.set_opacity(number(property, value)?.clamp(0.0, 1.0)),

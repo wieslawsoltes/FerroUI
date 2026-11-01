@@ -26,6 +26,7 @@ impl Transaction<'_> {
     ) -> Result<SlotId, Error> {
         self.scoped_key(owner, name)
             .or_else(|_| self.scoped_key(root, name))
+            .or_else(|error| self.model.delegate_context_key(owner, name).ok_or(error))
             .or_else(|_| self.scoped_key(self.model.root(), name))
     }
 

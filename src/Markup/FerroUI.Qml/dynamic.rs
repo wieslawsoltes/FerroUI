@@ -8,11 +8,13 @@ pub(crate) struct Template {
     pub scopes: enums::Scopes,
 }
 pub(crate) struct Context {
+    pub delegate_inputs: Option<BTreeMap<String, SlotId>>,
     pub declaration: ObjectId,
     pub ids: BTreeMap<String, ObjectId>,
 }
 #[derive(Default)]
 pub(crate) struct Components {
+    pub repeaters: BTreeMap<ObjectId, crate::repeater::State>,
     pub loaders: BTreeMap<ObjectId, crate::loader::State>,
     pub serial: u64,
     pub revision: u64,
@@ -167,6 +169,7 @@ impl Instance {
         self.dynamic.created.truncate(c.created);
         self.dynamic.revision = c.revision;
         self.dynamic.loaders.retain(|id, _| id.index < c.nodes);
+        self.dynamic.repeaters.retain(|id, _| id.index < c.nodes);
         self.models.retain(|id, _| id.index < c.nodes);
         self.bindings.retain(|id, _| id.index < c.nodes);
         self.timers.truncate(c.nodes);
@@ -242,7 +245,14 @@ impl crate::transaction::Transaction<'_> {
         initial: BTreeMap<String, InitialProperty>,
         template: &Template,
     ) -> Result<ObjectId, Error> {
-        self.construct_object(declaration, parent, template, initial, Default::default())
+        self.construct_object(
+            declaration,
+            parent,
+            template,
+            initial,
+            None,
+            Default::default(),
+        )
     }
 
     pub(crate) fn construct_object(
@@ -251,6 +261,7 @@ impl crate::transaction::Transaction<'_> {
         parent: Option<ObjectId>,
         template: &Template,
         initial: BTreeMap<String, InitialProperty>,
+        delegate_inputs: Option<&BTreeMap<String, Value>>,
         prepared: incubation::PreparedNodes,
     ) -> Result<ObjectId, Error> {
         if self.in_binding() {
@@ -273,18 +284,24 @@ impl crate::transaction::Transaction<'_> {
             root,
             Context {
                 declaration,
+                delegate_inputs: delegate_inputs.map(|_| BTreeMap::new()),
                 ids: Default::default(),
             },
         );
         let prepared = self
             .model
             .allocate_prepared(root, parent, template, &registry, prepared)
-            .and_then(|assigned| self.apply_initial(root, first, assigned, initial));
+            .and_then(|mut assigned| {
+                if let Some(inputs) = delegate_inputs {
+                    self.initialize_delegate(root, inputs, &mut assigned)?;
+                }
+                self.apply_initial(root, first, assigned, initial)
+            });
         if let Err(error) = prepared {
             self.model.rollback_creation(before);
             return Err(error);
         }
-        if let Some(parent) = parent {
+        if let Some(parent) = parent.filter(|_| delegate_inputs.is_none()) {
             if self.model.nodes[root.index].visual_children.is_some() {
                 if let Some(name) = self.model.nodes[parent.index].visual_children.clone() {
                     let key = self.model.key(parent, &name)?;

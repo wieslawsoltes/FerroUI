@@ -1,4 +1,5 @@
-use ferroui_qml::{ComponentSource, Instance, TypeDefinition, TypeRegistry, Value};
+use super::quick_registry;
+use ferroui_qml::{ComponentSource, Instance, Value};
 use ferroui_qml_build::Compiler;
 use std::path::Path;
 
@@ -12,30 +13,6 @@ mod compiled_js {
 #[cfg(feature = "webscene")]
 mod js_bindings {
     include!(concat!(env!("OUT_DIR"), "/loader_initial_bindings.rs"));
-}
-
-fn registry() -> TypeRegistry {
-    let mut types = TypeRegistry::new();
-    types
-        .register(
-            "QtQuick",
-            "Item",
-            TypeDefinition::default()
-                .inherits("QtQml", "QtObject")
-                .property("width", "real", Value::Undefined)
-                .property("height", "real", Value::Undefined)
-                .property("implicitWidth", "real", Value::Number(0.))
-                .property("implicitHeight", "real", Value::Number(0.))
-                .property("data", "list<QtObject>", Value::List(vec![]))
-                .default_property("data")
-                .visual_children("data"),
-        )
-        .unwrap();
-    types
-        .register("QtQuick", "Loader", TypeDefinition::quick_loader())
-        .unwrap();
-    types.reexport("QtQuick", "QtQml").unwrap();
-    types
 }
 
 fn exercise(mut app: Instance) {
@@ -75,7 +52,7 @@ fn linked_source_and_rust_generation_switch_loader_sources_and_initial_propertie
     let linked = Compiler::new().load(path).unwrap();
     assert!(linked.dependencies.iter().any(|p| p.ends_with("Tile.qml")));
     fn make(s: &impl ComponentSource) -> Instance {
-        Instance::new(s, &registry(), Default::default()).unwrap()
+        Instance::new(s, &quick_registry(), Default::default()).unwrap()
     }
     exercise(make(&linked.document));
     exercise(make(&compiled::compiled_qml()));
@@ -89,7 +66,7 @@ fn v8_loaders_use_the_same_lifecycle_and_keep_initial_binding_closures_live() {
     fn make(s: &impl ComponentSource) -> Instance {
         Instance::with_engine(
             s,
-            &registry(),
+            &quick_registry(),
             Default::default(),
             Rc::new(WebSceneEngine::from_env().unwrap()),
         )

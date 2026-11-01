@@ -90,14 +90,21 @@ fn validate_object<'a>(
             }
             MemberKind::Binding { name, value } => {
                 assign(&mut bindings, name.clone(), source, span)?;
-                binding(value, ids, source)?;
+                if object.type_name.rsplit('.').next() == Some("Repeater") && name == "delegate" {
+                    binding(value, &mut HashSet::new(), source)?;
+                } else {
+                    binding(value, ids, source)?;
+                }
             }
             MemberKind::Group { name, members } => {
                 group(name, members, &mut bindings, ids, source)?
             }
             MemberKind::Handler { name, .. } => assign(&mut bindings, name.clone(), source, span)?,
             MemberKind::Child(child)
-                if object.type_name.rsplit('.').next() == Some("Component") =>
+                if matches!(
+                    object.type_name.rsplit('.').next(),
+                    Some("Component" | "Repeater")
+                ) =>
             {
                 validate_object(child, &mut HashSet::new(), source)?;
             }

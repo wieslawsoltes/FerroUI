@@ -1,0 +1,176 @@
+use ferroui_qml::{ir::parse, Error, Instance, ObjectId, TypeDefinition, TypeRegistry, Value};
+
+fn instance(source: &str) -> Result<Instance, Error> {
+    let mut registry = TypeRegistry::new();
+    registry.register(
+        "QtQuick",
+        "Item",
+        TypeDefinition::default()
+            .inherits("QtQml", "QtObject")
+            .property("data", "list<QtObject>", Value::List(vec![]))
+            .default_property("data")
+            .visual_children("data"),
+    )?;
+    registry.register("QtQuick", "Repeater", TypeDefinition::quick_repeater())?;
+    registry.reexport("QtQuick", "QtQml")?;
+    let doc = parse(source).unwrap();
+    registry.check(&doc)?;
+    Instance::new(&doc, &registry, Default::default())
+}
+
+fn item(engine: &mut Instance, repeater: ObjectId, index: i32) -> Option<ObjectId> {
+    match engine
+        .call(repeater, "itemAt", vec![Value::Number(index as f64)])
+        .unwrap()
+    {
+        Value::Object(id) => Some(id),
+        Value::Null => None,
+        other => panic!("invalid itemAt result {other:?}"),
+    }
+}
+
+#[test]
+fn implicit_delegate_scope_and_stacking_follow_the_model() {
+    let mut engine = instance(
+        r#"import QtQuick
+        Item { id: root
+            property int size: 3
+            property int adds: 0
+            property int removes: 0
+            Item { id: first }
+            Repeater { id: rep
+                model: root.size
+                onItemAdded: (i, child) => { if (rep.itemAt(i) === child && rep.itemAt(i + 1) === null) root.adds++ }
+                onItemRemoved: (i, child) => { if (rep.itemAt(i) === child) root.removes++ }
+                Item { id: localItem; property int value: modelData + index }
+            }
+            Item { id: last }
+        }"#,
+    )
+    .unwrap();
+    let root = engine.root();
+    let rep = engine.id("rep").unwrap();
+    let delegates = (0..3)
+        .map(|i| item(&mut engine, rep, i).unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(
+        engine.get(delegates[2], "value").unwrap(),
+        Value::Number(4.)
+    );
+    assert!(engine.id("localItem").is_none());
+    assert!(engine.get(delegates[0], "index").is_err());
+    assert_eq!(engine.parent(delegates[0]), Some(root));
+    let mut visual = vec![engine.id("first").unwrap(), rep];
+    visual.extend_from_slice(&delegates);
+    visual.push(engine.id("last").unwrap());
+    assert_eq!(
+        engine.get(root, "data").unwrap(),
+        Value::List(visual.into_iter().map(Value::Object).collect())
+    );
+    assert_eq!(engine.get(root, "adds").unwrap(), Value::Number(3.));
+    assert_eq!(item(&mut engine, rep, -1), None);
+    engine.set(root, "size", Value::Number(1.)).unwrap();
+    assert_eq!(engine.get(root, "removes").unwrap(), Value::Number(3.));
+    assert_eq!(engine.get(root, "adds").unwrap(), Value::Number(4.));
+    assert_eq!(engine.get(rep, "count").unwrap(), Value::Number(1.));
+    assert!(delegates.iter().all(|id| engine.type_name(*id).is_none()));
+    assert_eq!(item(&mut engine, rep, 1), None);
+}
+
+#[test]
+fn list_model_moves_keep_item_identity_and_role_edits_roll_back() {
+    let mut engine = instance(
+        r#"import QtQuick
+        import QtQml.Models
+        Item {
+            ListModel { id: rows; ListElement { title:"A" } ListElement { title:"B" } }
+            Repeater { id: rep; model: rows
+                delegate: Item {
+                    required property int index
+                    required property string title
+                    property string label: index + ":" + title
+                }
+            }
+            function change() { rows.move(1,0,1); rows.setProperty(0, "title", "C") }
+            function broken() { rows.remove(0); rows.append({title:"X"}); missing() }
+        }"#,
+    )
+    .unwrap();
+    let root = engine.root();
+    let rep = engine.id("rep").unwrap();
+    let a = item(&mut engine, rep, 0).unwrap();
+    let b = item(&mut engine, rep, 1).unwrap();
+    engine.call(root, "change", vec![]).unwrap();
+    assert_eq!(item(&mut engine, rep, 0), Some(b));
+    assert_eq!(item(&mut engine, rep, 1), Some(a));
+    assert_eq!(engine.get(b, "label").unwrap(), Value::String("0:C".into()));
+    assert_eq!(engine.get(a, "label").unwrap(), Value::String("1:A".into()));
+    let visual = engine.get(root, "data").unwrap();
+    let revision = engine.structure_revision();
+    assert!(engine.call(root, "broken", vec![]).is_err());
+    assert_eq!(engine.structure_revision(), revision);
+    assert_eq!(engine.get(root, "data").unwrap(), visual);
+    assert_eq!(item(&mut engine, rep, 0), Some(b));
+    assert_eq!(engine.get(b, "label").unwrap(), Value::String("0:C".into()));
+}
+
+#[test]
+fn detached_repeaters_have_a_count_without_instantiated_delegates() {
+    let mut engine = instance(
+        r#"import QtQuick
+       Repeater { model: ["A","B"]; delegate: Item { required property string modelData } }"#,
+    )
+    .unwrap();
+    let rep = engine.root();
+    assert_eq!(engine.get(rep, "count").unwrap(), Value::Number(2.));
+    assert_eq!(item(&mut engine, rep, 0), None);
+}
+
+#[test]
+fn failing_to_supply_a_delegate_input_preserves_the_mounted_instances() {
+    let mut engine = instance(
+        r#"import QtQuick
+      Item { id: root
+        Component { id: good; Item {required property string modelData} }
+        Component { id: bad; Item {required property int unavailable} }
+        Repeater { id: rep; model: ["A","B"]; delegate: good }
+      }"#,
+    )
+    .unwrap();
+    let rep = engine.id("rep").unwrap();
+    let a = item(&mut engine, rep, 0).unwrap();
+    let bad = engine.id("bad").unwrap();
+    assert!(engine.set(rep, "delegate", Value::Object(bad)).is_err());
+    assert_eq!(item(&mut engine, rep, 0), Some(a));
+    assert_eq!(
+        engine.get(a, "modelData").unwrap(),
+        Value::String("A".into())
+    );
+}
+
+#[test]
+fn destroying_a_dynamic_repeater_retires_its_siblings_and_rejects_direct_delegate_destruction() {
+    let mut engine = instance(
+        r#"import QtQuick
+        Item { id: root
+            Component { id: factory; Repeater { model: 2; Item {} } }
+        }"#,
+    )
+    .unwrap();
+    let root = engine.root();
+    let factory = engine.id("factory").unwrap();
+    let rep = engine
+        .create_object(factory, Some(root), Default::default())
+        .unwrap();
+    let a = item(&mut engine, rep, 0).unwrap();
+    assert!(engine.destroy_object(a).is_err());
+    assert!(engine.call(a, "destroy", vec![]).is_err());
+    assert_eq!(item(&mut engine, rep, 0), Some(a));
+    engine.destroy_object(rep).unwrap();
+    assert_eq!(
+        engine.get(root, "data").unwrap(),
+        Value::List(vec![Value::Object(factory)])
+    );
+    assert!(engine.type_name(a).is_none());
+    assert_eq!(engine.children(root), &[factory]);
+}

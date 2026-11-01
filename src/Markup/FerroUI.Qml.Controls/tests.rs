@@ -425,3 +425,87 @@ fn native_loader_sizes_and_disconnects_a_retained_loaded_control() {
         Value::Number(1.)
     );
 }
+
+#[test]
+fn repeater_moves_native_peers_in_place_and_retires_removed_button_handlers() {
+    use ferroui_base::{Rect, Size};
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let view = mount(
+        r#"
+        import QtQuick
+        import QtQuick.Controls
+        import QtQml.Models
+        Column {
+            id: page
+            spacing: 7
+            property string clickedTitle: ""
+            ListModel {
+                id: rows
+                ListElement { title: "A" }
+                ListElement { title: "B" }
+            }
+            Item { height: 10; width: 20 }
+            Repeater {
+                id: entries
+                model: rows
+                Button {
+                    required property string title
+                    width: 20; height: 12
+                    text: title
+                    onClicked: page.clickedTitle = title
+                }
+            }
+            Item { id: footer; height: 14; width: 20 }
+            function reorder() { rows.move(0, 1, 1) }
+            function removeFirst() { rows.remove(0) }
+        }"#,
+    );
+    let column = view.root().cast::<StackPanel>().unwrap();
+    let entries = view.id("entries").unwrap();
+    let item_at = |index| {
+        let Value::Object(item) = view
+            .call(entries, "itemAt", vec![Value::Number(index)])
+            .unwrap()
+        else {
+            panic!("expected a live delegate");
+        };
+        item
+    };
+    let first = item_at(0.);
+    let second = item_at(1.);
+    let a = view.control(first).unwrap().cast::<Button>().unwrap();
+    let b = view.control(second).unwrap().cast::<Button>().unwrap();
+    let footer = view.control(view.id("footer").unwrap()).unwrap();
+    let layout = || {
+        column.measure(Size::new(100., 100.));
+        column.arrange(Rect::new(0., 0., 100., 100.));
+    };
+    layout();
+    assert_eq!(
+        (a.bounds().y, b.bounds().y, footer.bounds().y),
+        (17., 36., 55.)
+    );
+    view.call(view.root_id(), "reorder", vec![]).unwrap();
+    assert_eq!(item_at(0.), second);
+    assert_eq!(view.control(second).unwrap(), b);
+    layout();
+    assert_eq!(
+        (b.bounds().y, a.bounds().y, footer.bounds().y),
+        (17., 36., 55.)
+    );
+    b.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    assert_eq!(
+        view.get(view.root_id(), "clickedTitle").unwrap(),
+        Value::String("B".into())
+    );
+    view.call(view.root_id(), "removeFirst", vec![]).unwrap();
+    assert!(view.control(second).is_none());
+    layout();
+    assert_eq!((a.bounds().y, footer.bounds().y), (17., 36.));
+    a.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    b.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    assert_eq!(
+        view.get(view.root_id(), "clickedTitle").unwrap(),
+        Value::String("A".into())
+    );
+}

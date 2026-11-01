@@ -129,6 +129,11 @@ impl Preparation {
                 self.prepared.insert(std::ptr::from_ref(source), shell);
                 if (module, name) != ("QtQml", "Component")
                     && (module, name) != (list_model::MODULE, "ListModel")
+                    && !((module, name) == ("QtQuick", "Repeater")
+                        || definition
+                            .lineage
+                            .iter()
+                            .any(|(m, n)| m == "QtQuick" && n == "Repeater"))
                     && !source.members.is_empty()
                 {
                     *next = Some(0);

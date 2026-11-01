@@ -22,6 +22,7 @@ mod loader;
 pub use list_model::RowId;
 mod promises;
 mod records;
+mod repeater;
 pub use promises::PromiseState;
 mod registry;
 pub use records::Record;

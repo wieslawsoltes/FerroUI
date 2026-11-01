@@ -98,6 +98,17 @@ pub trait ScriptEngine {
         true
     }
 
+    /// Snapshot the elements of a guest array while retaining object elements by
+    /// identity. Return None for non-arrays or backends without array projection.
+    fn array_elements(
+        &self,
+        _context: &mut ScriptContext<'_, '_>,
+        _value: &ExternalValue,
+        _limit: usize,
+    ) -> Result<Option<Vec<Value>>, Error> {
+        Ok(None)
+    }
+
     /// Optional interop when the built-in evaluator reads a foreign JS object.
     fn get_external(
         &self,
@@ -444,6 +455,10 @@ impl ScriptContext<'_, '_> {
         Ok(())
     }
 
+    pub(crate) fn repeated_item(&mut self, index: i32) -> Result<Value, Error> {
+        self.tx.repeated_item(self.owner, index, self.reads)
+    }
+
     pub fn consume_work(&mut self) -> Result<(), Error> {
         self.tx.budget()
     }
@@ -454,6 +469,7 @@ impl ScriptContext<'_, '_> {
         let mut names = BTreeSet::from(["parent".to_owned()]);
         names.extend(self.locals.keys().cloned());
         self.tx.model.lexical_names(self.owner, &mut names);
+        self.tx.model.delegate_context_names(self.owner, &mut names);
         if let Some(ids) = self.ids {
             names.extend(ids.keys().filter(|n| !private(n)).cloned());
         }

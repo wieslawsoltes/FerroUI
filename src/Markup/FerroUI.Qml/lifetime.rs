@@ -19,6 +19,7 @@ impl Instance {
         }
         self.dynamic.created.retain(|id| !dead.contains(id));
         self.dynamic.loaders.retain(|id, _| !dead.contains(id));
+        self.dynamic.repeaters.retain(|id, _| !dead.contains(id));
         self.javascript.connections.retire(dead);
         self.javascript.deferred.retire(dead);
         self.listeners.retain(|_, list| {
@@ -99,6 +100,9 @@ impl crate::transaction::Transaction<'_> {
                 "only a live dynamically created root can be destroyed",
             ));
         }
+        if self.model.dynamic.contexts[&id].delegate_inputs.is_some() {
+            return Err(Error::new("delegate lifetime is managed by its Repeater"));
+        }
         Ok(())
     }
     pub(crate) fn schedule_destroy(&mut self, id: ObjectId, delay: Duration) -> Result<(), Error> {
@@ -137,14 +141,26 @@ impl crate::transaction::Transaction<'_> {
     }
     pub(crate) fn destroy_object(&mut self, id: ObjectId) -> Result<(), Error> {
         self.dynamic_root(id)?;
+        self.destroy_subtrees(&[id])
+    }
+
+    /// Retire a group of sibling delegates with one pass over the arena. Each
+    /// root is already released by its owner before this operation starts.
+    pub(crate) fn destroy_subtrees(&mut self, roots: &[ObjectId]) -> Result<(), Error> {
+        if roots.is_empty() {
+            return Ok(());
+        }
         let mut dead = BTreeSet::new();
-        let mut stack = vec![id];
+        let mut stack: Vec<_> = roots.iter().rev().copied().collect();
         while let Some(object) = stack.pop() {
             if dead.insert(object) {
                 self.budget()?;
                 self.dispatch(object, "Component.destruction", vec![])?;
                 self.settle()?;
                 stack.extend_from_slice(self.model.children(object));
+                if let Some(repeater) = self.model.dynamic.repeaters.get(&object) {
+                    stack.extend(repeater.items());
+                }
             }
         }
         for &object in &dead {
@@ -162,7 +178,11 @@ impl crate::transaction::Transaction<'_> {
                 }
             }
         }
-        if let Some(parent) = self.model.parent(id) {
+        let parents: BTreeSet<_> = roots
+            .iter()
+            .filter_map(|id| self.model.parent(*id))
+            .collect();
+        for parent in parents {
             let children = &mut self.model.nodes[parent.index].children;
             self.structure
                 .children

@@ -66,6 +66,9 @@
         const bound = methodOwners.get(value);
         if (bound) return ["bound", bound.id, bound.key];
         if (proxyIds.has(value)) return ["h",proxyIds.get(value)];
+        if (mode === "elements") {
+            return ["a", Array.from({length: value.length}, (_, index) => encode(value[index]))];
+        }
         if (mode && typeof value === "object") {
             if (seen.has(value)) throw new TypeError("A cyclic object cannot initialize a typed QML collection");
             seen.add(value);
@@ -288,6 +291,15 @@
         }
         const target = decode(command.target);
         switch (command.op) {
+            case "arrayElements": {
+                if (!Array.isArray(target)) return undefined;
+                const length = target.length;
+                if (!Number.isSafeInteger(length) || length < 0 || length > command.limit)
+                    throw new RangeError("Repeater model exceeds the row limit");
+                const snapshot = [];
+                for (let i = 0; i < length; i++) snapshot.push(target[i]);
+                return snapshot;
+            }
             case "get": return target[command.name];
             case "set":
                 target[command.name] = decode(command.value);

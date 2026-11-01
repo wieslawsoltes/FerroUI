@@ -31,6 +31,7 @@ pub(crate) struct Transaction<'a> {
     pub(crate) worker_sources: BTreeSet<ObjectId>,
     pub(crate) worker_actions: Vec<workers::Action>,
     pub(crate) loader_changes: loader::Changes,
+    pub(crate) repeater_changes: repeater::Changes,
     pub(crate) timer_changes: timers::TimerChanges,
 }
 
@@ -65,6 +66,7 @@ impl Instance {
             connection_changes: Default::default(),
             deferred: Vec::new(),
             loader_changes: Default::default(),
+            repeater_changes: Default::default(),
             timer_changes: Default::default(),
             worker_actions: Default::default(),
             worker_sources: Default::default(),
@@ -116,6 +118,7 @@ impl Instance {
                 .records
                 .rollback(std::mem::take(&mut tx.record_changes));
             std::mem::take(&mut tx.loader_changes).rollback(tx.model);
+            std::mem::take(&mut tx.repeater_changes).rollback(tx.model);
             tx.timer_changes.rollback(&mut tx.model.timers);
             for (key, old) in tx.original {
                 tx.model.slots[key] = old;
@@ -205,6 +208,13 @@ impl Transaction<'_> {
         self.initializing = true;
         self.initialize_workers(first);
         self.initialize_loaders(first);
+        self.repeater_changes.pending.extend(
+            self.model
+                .dynamic
+                .repeaters
+                .keys()
+                .filter(|id| id.index >= first),
+        );
         self.model_modes.extend(
             self.model
                 .models
@@ -254,7 +264,7 @@ impl Transaction<'_> {
                 self.update_binding(binding)?;
                 continue;
             }
-            if self.stage_loader()? {
+            if self.stage_repeater()? || self.stage_loader()? {
                 continue;
             }
             if !self.worker_sources.is_empty() {
@@ -560,6 +570,23 @@ impl Transaction<'_> {
         let property = &self.model.properties[key];
         if property.name == "source" && self.model.workers.contains(property.owner) {
             self.worker_sources.insert(property.owner);
+        }
+        if matches!(property.name.as_str(), "model" | "delegate")
+            && self.model.dynamic.repeaters.contains_key(&property.owner)
+        {
+            self.repeater_changes.pending.insert(property.owner);
+        }
+        if !self.model.dynamic.repeaters.is_empty()
+            && self.model.nodes[property.owner.index]
+                .visual_children
+                .as_ref()
+                == Some(&property.name)
+        {
+            let candidates = self.model.children(property.owner).iter().filter(|id| {
+                self.model.dynamic.repeaters.contains_key(id)
+                    && !self.repeater_changes.busy.contains(id)
+            });
+            self.repeater_changes.pending.extend(candidates);
         }
         if property.name == "dynamicRoles" && self.model.models.contains_key(&property.owner) {
             self.model_modes.insert(property.owner);

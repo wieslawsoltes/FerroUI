@@ -409,13 +409,14 @@ impl Transaction<'_> {
         };
         let revision = self.model.structure_revision();
         let initial = (*self.model.dynamic.loaders[&id].initial).clone();
-        let item = match self.construct_object(component, Some(id), &template, initial, prepared) {
-            Ok(item) => item,
-            Err(_) if self.model.structure_revision() == revision => {
-                return self.publish_status(id, 3, Some(1.));
-            }
-            Err(error) => return Err(error),
-        };
+        let item =
+            match self.construct_object(component, Some(id), &template, initial, None, prepared) {
+                Ok(item) => item,
+                Err(_) if self.model.structure_revision() == revision => {
+                    return self.publish_status(id, 3, Some(1.));
+                }
+                Err(error) => return Err(error),
+            };
         self.publish_loader_property(id, "item", Value::Object(item))?;
         self.size_loader(id, Axis::Width, true)?;
         self.size_loader(id, Axis::Height, true)?;

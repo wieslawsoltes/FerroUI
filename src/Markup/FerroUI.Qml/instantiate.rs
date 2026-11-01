@@ -35,6 +35,24 @@ impl Slot {
 }
 
 impl Instance {
+    pub(crate) fn allocate_property(
+        &mut self,
+        property: Property,
+        value: Value,
+    ) -> Result<SlotId, Error> {
+        let key = self.properties.len();
+        let node = &mut self.nodes[property.owner.index];
+        if node.properties.insert(property.name.clone(), key).is_some() {
+            return Err(Error::new(format!(
+                "duplicate property '{}'",
+                property.name
+            )));
+        }
+        self.properties.push(property);
+        self.slots.push(Slot::initial(value));
+        Ok(key)
+    }
+
     /// Allocates the complete object and id table before evaluating any binding.
     /// Required root properties can be supplied by the Rust caller.
     pub fn new(
@@ -292,6 +310,7 @@ impl TypeRegistry {
             builder.instance.dynamic.contexts.insert(
                 id,
                 dynamic::Context {
+                    delegate_inputs: None,
                     declaration,
                     ids: Default::default(),
                 },
@@ -453,20 +472,6 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         })
     }
 
-    fn property(&mut self, property: Property, value: Value) -> Result<SlotId, Error> {
-        let key = self.instance.properties.len();
-        let node = &mut self.instance.nodes[property.owner.index];
-        if node.properties.insert(property.name.clone(), key).is_some() {
-            return Err(Error::new(format!(
-                "duplicate property '{}'",
-                property.name
-            )));
-        }
-        self.instance.properties.push(property);
-        self.instance.slots.push(Slot::initial(value));
-        Ok(key)
-    }
-
     fn object(&mut self, source: &Object, parent: Option<ObjectId>) -> Result<ObjectId, Error> {
         let imports = source.type_imports.as_deref().unwrap_or(self.imports);
         let (mut shell, module, name, definition) = if let Some(shell) =
@@ -531,6 +536,17 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         {
             self.instance.dynamic.loaders.insert(id, Default::default());
         }
+        let is_repeater = (module == "QtQuick" && name == "Repeater")
+            || definition
+                .lineage
+                .iter()
+                .any(|(m, n)| m == "QtQuick" && n == "Repeater");
+        if is_repeater {
+            self.instance
+                .dynamic
+                .repeaters
+                .insert(id, Default::default());
+        }
         let model = module == list_model::MODULE && name == "ListModel";
         if model {
             self.instance.models.insert(id, Default::default());
@@ -588,16 +604,18 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                             "readonly property '{name}' requires an initializer"
                         )));
                     }
-                    let key = self.property(
+                    let value_type = self.canonical_type(imports, ty)?;
+                    let default_value = self.default_value(imports, ty)?;
+                    let key = self.instance.allocate_property(
                         Property {
                             owner: id,
                             name: name.clone(),
-                            ty: self.canonical_type(imports, ty)?,
+                            ty: value_type,
                             readonly: modifiers.readonly,
                             required: modifiers.required,
                             alias: None,
                         },
-                        self.default_value(imports, ty)?,
+                        default_value,
                     )?;
                     if ty == "alias" {
                         let Some(Binding::Expr(expr)) = value else {
@@ -670,6 +688,14 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                             "Component requires exactly one object definition",
                         ));
                     }
+                }
+                MemberKind::Child(child) if is_repeater => {
+                    self.bind(
+                        id,
+                        "delegate",
+                        &Binding::Object(child.clone()),
+                        member.scope,
+                    )?;
                 }
                 MemberKind::Child(child) if model => {
                     let child_imports = child.type_imports.as_deref().unwrap_or(imports);
@@ -896,7 +922,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             ));
         }
         let when = self.instance.key(owner, "when")?;
-        let input = self.property(
+        let input = self.instance.allocate_property(
             Property {
                 owner,
                 name: format!("$qml:binding:{path}"),

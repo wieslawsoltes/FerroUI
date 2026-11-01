@@ -166,6 +166,7 @@ impl Transaction<'_> {
             id,
             Context {
                 declaration: owner,
+                delegate_inputs: None,
                 ids: Default::default(),
             },
         );

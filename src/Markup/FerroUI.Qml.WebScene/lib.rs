@@ -224,6 +224,26 @@ impl ScriptEngine for WebSceneEngine {
     ) -> Result<Value, Error> {
         self.realm(ctx.instance()).evaluate(ctx, script)
     }
+    fn array_elements(
+        &self,
+        ctx: &mut ScriptContext<'_, '_>,
+        value: &ExternalValue,
+        limit: usize,
+    ) -> Result<Option<Vec<Value>>, Error> {
+        let realm = self.realm(ctx.instance());
+        let result = realm.invoke(ctx, json!({
+            "op": "arrayElements",
+            "target": ["js", realm.handle(value)?],
+            "limit": limit,
+            "mode": "elements"
+        }))?;
+        match result {
+            Value::Undefined => Ok(None),
+            Value::List(values) => Ok(Some(values)),
+            _ => Err(Error::new("invalid guest array snapshot")),
+        }
+    }
+
     fn get_external(
         &self,
         ctx: &mut ScriptContext<'_, '_>,
