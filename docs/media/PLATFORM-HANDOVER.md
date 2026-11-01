@@ -71,6 +71,7 @@ copy or commit.
 | Metal completion and direct import | `src/Skia/FerroUI.Skia/gpu/metal/`; `gpu/graphite/graphite_gr_context.rs` |
 | Ganesh completion hook and GL borrowed texture import | `gpu/ganesh/ganesh_gr_context.rs`; `gpu/open_gl/gl_skia_external_objects_feature.rs`; `FerroUI.OpenGL/shared_frame_texture.rs` |
 | Existing Vulkan importer requiring a new direct route | `src/Skia/FerroUI.Skia/gpu/vulkan/vulkan_skia_external_objects_feature.rs` |
+| Bounded native resource preparation and scoped file ownership | `src/FerroUI.Media.Video/native_source.rs` |
 | MediaPlayer/MediaSource/session and native provider traits | `src/FerroUI.Media.Video/player.rs` |
 | Camera discovery/capture/session/photo and native provider traits | `src/FerroUI.Media.Camera/lib.rs` |
 | Camera preview and weak/owned session attachment | `src/FerroUI.Media.Camera.Controls/` |
@@ -219,6 +220,7 @@ They are functional evidence, not a frozen performance acceptance profile.
 | Android container geometry | A pre-fix reflected-track negative control exposed Media3's missing reflection. Bounded inspection of the existing encoded stream now preserves the full orthogonal transform and integral clean aperture. The 16 KiB emulator passed independent projected colours, natural size, seek/Stop and source/renderer retirement for the reflected/cropped fixture; zero preview CPU transfers. Host JVM contracts separately cover fragmented/ranged reads, extended boxes, malformed metadata, cancellation and output-crop mapping. |
 | Apple playback geometry | macOS and iOS simulator runs decoded rotated/mirrored and off-centre clean-aperture fixtures. The native crop `(10,6,144,80)`, natural size, cardinal rotation/reflection and independent projected quadrant colour probes passed, with zero preview CPU transfers and final source/renderer retirement. Two Rust geometry contracts separately exercise affine point mapping and rejection. |
 | Paused producer saturation | Android 16 KiB and iOS 27.0 simulator runs retained three real source leases across a paused seek, observed pending work after 1.5 seconds, then published the sought frame after release. Stop/frame-zero and zero retained source frames passed; preview CPU counters stayed zero. A UI contract test separately checks polling beyond the settling interval and idle shutdown. |
+| Source preparation | Three ownership/cancellation/saturation contracts plus the existing 20 player contracts pass. Native macOS, iOS simulator and Android 16 KiB resource playback, transformed pixels and cleanup passed through the shared worker path. Windows/Linux Rust binding checks passed with native compilation explicitly skipped. |
 | Integration sample restart | Camera restart preserves the requested 3D state across temporary source absence. Android 16 KiB run observed replacement capture generation 3 feeding a new renderer generation, continuing QR/JPEG, then Stop with renderer frames zero and no camera-service clients. Strict transformed-video smokes passed again on Android and iOS. |
 | Renderer scheduling | Four mailbox notification/lifetime tests and two UI scheduling tests cover worker dispatch, disposal, static idle, ancestor visibility and continuous work. macOS/iOS native playback/Metal projection and Android 16 KiB playback/GLES projection and teardown passed again. Android camera + QR + JPEG also continued through rotation and released hardware/output after Stop. |
 | Native alias contracts | Three GL producer/retirement unit tests passed, including retention through consumer completion, queued native cleanup and lost-context quarantine; this does not prove a native DMA-BUF/DXGI import |
@@ -278,7 +280,10 @@ and `renderer-notification-browser-regression.log`, `pending-frame-ui-tests.log`
 `android-mp4-geometry-contracts.log`, `android-output-crop-contracts.log`,
 `android-mp4-saturation-regression.log`, `android-mp4-camera-qr-regression.log`,
 `mobile-navigation-android-camera.log`, `mobile-navigation-android-video.log` and
-`mobile-navigation-ios-video.log`. Re-run applicable gates on the receiving host.
+`mobile-navigation-ios-video.log`, `native-source-preparation-contracts-final-2.log`,
+`native-source-preparation-macos.log`, `native-source-preparation-android.log`,
+`native-source-preparation-ios.log`, `native-source-preparation-windows-bindings.log`
+and `native-source-preparation-linux-bindings.log`. Re-run applicable gates on the receiving host.
 
 Useful commands, from the repository root:
 

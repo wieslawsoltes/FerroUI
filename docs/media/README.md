@@ -275,3 +275,14 @@ remaining rotation stay in shared frame metadata. Ordinary preview performs no
 CPU pixel transfer. Native Android rendered-colour evidence includes a 16 KiB
 emulator; network/ranged SDK behavior beyond the parser contract still needs
 separate application-policy evidence.
+
+Native video providers share `MediaSource::prepare_native`. Encoded resources are
+written lazily on bounded workers rather than the UI thread. Four preparation
+slots are shared across providers; canceled writes retain their slot until they
+finish and check cancellation between 64 KiB chunks. Private temporary files
+retire with their source, including output arriving after cancellation. Windows
+transfers cleanup to the native reader worker once it accepts ownership. Native
+resource materialization has a 256 MiB encoded-input limit; larger inputs should
+use a file or URL. Resource content types select safe container extensions.
+These encoded-source operations are separate from decoded preview pixel
+transfers and do not provide a CPU preview path.

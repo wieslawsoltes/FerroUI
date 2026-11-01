@@ -11,56 +11,17 @@ use ferroui_media_android::{
 use ferroui_media_video::{frames::*, *};
 use std::{cell::Cell, path::PathBuf, rc::Rc, task::Poll, time::Duration};
 
-struct ResourceFile(PathBuf);
-impl Drop for ResourceFile {
-    fn drop(&mut self) {
-        let _ = std::fs::remove_file(&self.0);
-    }
-}
-fn resolve(source: MediaSource) -> Result<(String, Option<ResourceFile>), MediaError> {
-    match source {
-        MediaSource::Url(url)
-            if url.starts_with("https://")
-                || url.starts_with("http://")
-                || url.starts_with("file://") =>
-        {
-            Ok((url, None))
-        }
-        MediaSource::Url(_) => Err(MediaError::new(
-            MediaErrorKind::InvalidSource,
-            "Unsupported Android media URL",
-        )),
-        MediaSource::File(path) => path
-            .to_str()
-            .map(|v| (v.to_owned(), None))
-            .ok_or_else(|| native_error("Media path is not UTF-8")),
-        MediaSource::Resource { encoded, .. } => {
-            use std::io::Write;
-            use std::os::unix::fs::OpenOptionsExt;
-            static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
-            let context = FerroAndroidApplication::context();
-            let directory = call_object(&context, "getCacheDir", "()Ljava/io/File;", &[])
-                .ok_or_else(|| native_error("No private resource cache"))?;
-            let directory = call_object(&directory, "getAbsolutePath", "()Ljava/lang/String;", &[])
-                .map(|v| string_of(&v))
-                .ok_or_else(|| native_error("No cache path"))?;
-            let path = PathBuf::from(directory).join(format!(
-                "ferroui-media-{}-{}.mp4",
-                std::process::id(),
-                NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
-            ));
-            let mut file = std::fs::OpenOptions::new()
-                .mode(0o600)
-                .create_new(true)
-                .write(true)
-                .open(&path)
-                .map_err(|e| native_error(e.to_string()))?;
-            let owner = ResourceFile(path);
-            file.write_all(&encoded)
-                .map_err(|e| native_error(e.to_string()))?;
-            Ok((owner.0.to_string_lossy().into_owned(), Some(owner)))
-        }
-    }
+fn resource_directory() -> Result<PathBuf, MediaError> {
+    let directory = call_object(
+        &FerroAndroidApplication::context(),
+        "getCacheDir",
+        "()Ljava/io/File;",
+        &[],
+    )
+    .ok_or_else(|| native_error("No private resource cache"))?;
+    call_object(&directory, "getAbsolutePath", "()Ljava/lang/String;", &[])
+        .map(|v| PathBuf::from(string_of(&v)))
+        .ok_or_else(|| native_error("No cache path"))
 }
 pub struct AndroidVideoProvider {
     pub frames: NativeGlFrameProducer,
@@ -93,11 +54,25 @@ impl MediaPlayerProvider for AndroidVideoProvider {
         _: PresentationPolicy,
     ) -> MediaFuture<Rc<dyn NativeMediaSession>> {
         let producer = self.frames.clone();
-        let initial = resolve(source);
+        let directory = if matches!(&source, MediaSource::Resource { .. }) {
+            resource_directory().map(Some)
+        } else {
+            Ok(None)
+        };
         // Resolve custom classes on the application class loader, before GL jobs.
         let class = JavaClass::find("org/ferroui/media/video/VideoPlayer");
         Box::pin(async move {
-            let (source, resource) = initial?;
+            let PreparedMediaSource {
+                location,
+                temporary: resource,
+            } = source.prepare_native(directory?).await?;
+            let source = match location {
+                NativeMediaLocation::Url(url) => url,
+                NativeMediaLocation::File(path) => path
+                    .to_str()
+                    .map(str::to_owned)
+                    .ok_or_else(|| native_error("Media path is not UTF-8"))?,
+            };
             let surface = AndroidSurfaceSource::create(&producer).await?;
             let java = new_object(
                 &class,
@@ -135,7 +110,7 @@ impl MediaPlayerProvider for AndroidVideoProvider {
 struct AndroidSession {
     java: JavaObject,
     stream: AndroidFrameStream,
-    _resource: Option<ResourceFile>,
+    _resource: Option<TemporaryMediaFile>,
     seek: Cell<i64>,
 }
 impl AndroidSession {

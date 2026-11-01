@@ -11,80 +11,10 @@ pub use ferroui_media_apple::AppleTextureImporter;
 use ferroui_media_video::{frames::*, *};
 use std::{
     cell::{Cell, RefCell},
-    path::PathBuf,
     rc::Rc,
     task::Poll,
     time::Duration,
 };
-struct ResourceFile(PathBuf);
-impl Drop for ResourceFile {
-    fn drop(&mut self) {
-        let _ = std::fs::remove_file(&self.0);
-    }
-}
-fn resolve(source: MediaSource) -> Result<(String, Option<ResourceFile>), MediaError> {
-    match source {
-        MediaSource::Url(url)
-            if url.starts_with("https://")
-                || url.starts_with("http://")
-                || url.starts_with("file://") =>
-        {
-            Ok((url, None))
-        }
-        MediaSource::Url(_) => Err(MediaError::new(
-            MediaErrorKind::InvalidSource,
-            "Unsupported media URL scheme",
-        )),
-        MediaSource::File(path) => path.to_str().map(|s| (s.to_owned(), None)).ok_or_else(|| {
-            MediaError::new(MediaErrorKind::InvalidSource, "Media path is not UTF-8")
-        }),
-        MediaSource::Resource {
-            encoded,
-            content_type,
-            ..
-        } => {
-            use std::io::Write;
-            use std::os::unix::fs::OpenOptionsExt;
-            static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
-            let suffix = if content_type == "video/mp4" {
-                "mp4"
-            } else {
-                "media"
-            };
-            let path = std::env::temp_dir().join(format!(
-                "ferroui-media-{}-{}.{suffix}",
-                std::process::id(),
-                NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
-            ));
-            let mut file = std::fs::OpenOptions::new()
-                .mode(0o600)
-                .create_new(true)
-                .write(true)
-                .open(&path)
-                .map_err(|_| {
-                    MediaError::new(
-                        MediaErrorKind::NativeFailure,
-                        "Cannot create media resource file",
-                    )
-                })?;
-            let owner = ResourceFile(path);
-            file.write_all(&encoded).map_err(|_| {
-                MediaError::new(
-                    MediaErrorKind::NativeFailure,
-                    "Cannot write media resource file",
-                )
-            })?;
-            let text = owner
-                .0
-                .to_str()
-                .ok_or_else(|| {
-                    MediaError::new(MediaErrorKind::InvalidSource, "Resource path is not UTF-8")
-                })?
-                .to_owned();
-            Ok((text, Some(owner)))
-        }
-    }
-}
 /// Configure with the admitted compositor device identity, not a new private
 /// device. Decode acceleration remains Unknown unless independently profiled.
 pub struct AppleVideoProvider {
@@ -103,10 +33,23 @@ impl MediaPlayerProvider for AppleVideoProvider {
         let device = self.device.clone();
         let budget = self.budget.clone();
         let device_generation = self.device_generation;
-        let initial = resolve(source).and_then(|(url, resource)| {
-            native::Player::new(&url).map(|player| AppleSession {
-                player,
-                _resource: resource,
+        Box::pin(async move {
+            let PreparedMediaSource {
+                location,
+                temporary,
+            } = source.prepare_native(None).await?;
+            let url = match location {
+                NativeMediaLocation::Url(url) => url,
+                NativeMediaLocation::File(path) => {
+                    path.to_str().map(str::to_owned).ok_or_else(|| {
+                        MediaError::new(MediaErrorKind::InvalidSource, "Media path is not UTF-8")
+                    })?
+                }
+            };
+            // AVPlayer stays on the UI thread after filesystem work completes.
+            let mut session = Some(AppleSession {
+                player: native::Player::new(&url)?,
+                _resource: temporary,
                 device,
                 budget,
                 id,
@@ -115,31 +58,24 @@ impl MediaPlayerProvider for AppleVideoProvider {
                 sequence: Cell::new(0),
                 retrying: Cell::new(false),
                 pending: RefCell::new(None),
-            })
-        });
-        let mut initial = Some(initial);
-        let mut session = None;
-        wait(move || {
-            if let Some(result) = initial.take() {
-                match result {
-                    Ok(value) => session = Some(value),
-                    Err(error) => return Poll::Ready(Err(error)),
+            });
+            wait(move || {
+                let native = session.as_ref().unwrap();
+                match native.player.state().state {
+                    0 => Poll::Pending,
+                    5 => Poll::Ready(Err(native.player.error())),
+                    _ => Poll::Ready(Ok(
+                        Rc::new(session.take().unwrap()) as Rc<dyn NativeMediaSession>
+                    )),
                 }
-            }
-            let native = session.as_ref().expect("pending native owner");
-            match native.player.state().state {
-                0 => Poll::Pending,
-                5 => Poll::Ready(Err(native.player.error())),
-                _ => Poll::Ready(Ok(
-                    Rc::new(session.take().unwrap()) as Rc<dyn NativeMediaSession>
-                )),
-            }
+            })
+            .await
         })
     }
 }
 struct AppleSession {
     player: native::Player,
-    _resource: Option<ResourceFile>,
+    _resource: Option<TemporaryMediaFile>,
     device: DeviceIdentity,
     budget: FrameBudget,
     id: u64,

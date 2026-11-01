@@ -6,48 +6,10 @@ pub use ferroui_media_linux::NativeGlTextureImporter;
 use ferroui_media_linux::{admitted_caps, poll_native, LinuxFrameStream, NativeSession};
 use ferroui_media_opengl::NativeGlFrameProducer;
 use ferroui_media_video::{frames::*, *};
-use std::{io::Write, path::PathBuf, rc::Rc, task::Poll, time::Duration};
+use std::{path::PathBuf, rc::Rc, task::Poll, time::Duration};
 
 pub struct LinuxVideoProvider {
     pub frames: NativeGlFrameProducer,
-}
-// Canceled filesystem preparation retains its slot until the actual write
-// finishes. Repeated source replacement cannot accumulate unbounded workers.
-static PREPARING: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
-struct SourceWork;
-impl SourceWork {
-    fn acquire() -> Result<Self, MediaError> {
-        use std::sync::atomic::Ordering;
-        let mut count = PREPARING.load(Ordering::Acquire);
-        loop {
-            if count >= 4 {
-                return Err(MediaError::new(
-                    MediaErrorKind::NativeFailure,
-                    "Native source preparation slots are saturated",
-                ));
-            }
-            match PREPARING.compare_exchange_weak(
-                count,
-                count + 1,
-                Ordering::AcqRel,
-                Ordering::Acquire,
-            ) {
-                Ok(_) => return Ok(Self),
-                Err(current) => count = current,
-            }
-        }
-    }
-}
-impl Drop for SourceWork {
-    fn drop(&mut self) {
-        PREPARING.fetch_sub(1, std::sync::atomic::Ordering::AcqRel);
-    }
-}
-struct Resource(PathBuf);
-impl Drop for Resource {
-    fn drop(&mut self) {
-        let _ = std::fs::remove_file(&self.0);
-    }
 }
 fn error(message: impl Into<String>) -> MediaError {
     MediaError::new(MediaErrorKind::InvalidSource, message)
@@ -71,39 +33,9 @@ fn file_uri(path: PathBuf) -> Result<String, MediaError> {
     }
     Ok(uri)
 }
-fn resolve(source: MediaSource) -> Result<(String, Option<Resource>), MediaError> {
-    match source {
-        MediaSource::File(path) => Ok((file_uri(path)?, None)),
-        MediaSource::Url(url)
-            if ["https://", "http://", "file://"]
-                .iter()
-                .any(|scheme| url.starts_with(scheme)) =>
-        {
-            Ok((url, None))
-        }
-        MediaSource::Url(_) => Err(error("Unsupported network URL scheme")),
-        MediaSource::Resource { encoded, .. } => {
-            use std::os::unix::fs::OpenOptionsExt;
-            let path = std::env::temp_dir().join(format!(
-                "ferroui-resource-{}-{}.media",
-                std::process::id(),
-                ferroui_media::allocate_source_id()
-            ));
-            let mut file = std::fs::OpenOptions::new()
-                .mode(0o600)
-                .create_new(true)
-                .write(true)
-                .open(&path)
-                .map_err(|e| error(e.to_string()))?;
-            let owner = Resource(path);
-            file.write_all(&encoded).map_err(|e| error(e.to_string()))?;
-            Ok((file_uri(owner.0.clone())?, Some(owner)))
-        }
-    }
-}
 struct Session {
     stream: LinuxFrameStream,
-    _resource: Option<Resource>,
+    _resource: Option<TemporaryMediaFile>,
 }
 impl MediaPlayerProvider for LinuxVideoProvider {
     fn open(
@@ -116,22 +48,14 @@ impl MediaPlayerProvider for LinuxVideoProvider {
         let frames = self.frames.clone();
         Box::pin(async move {
             let caps = admitted_caps(&frames, None).await?;
-            // Resource materialization can be large and must not block the UI.
-            let (send, receive) = std::sync::mpsc::sync_channel(1);
-            let permit = SourceWork::acquire()?;
-            std::thread::Builder::new()
-                .name("FerroUI.Media.Source".into())
-                .spawn(move || {
-                    let _permit = permit;
-                    let _ = send.send(resolve(source));
-                })
-                .map_err(|e| MediaError::new(MediaErrorKind::NativeFailure, e.to_string()))?;
-            let (url, resource) = poll_native(move || match receive.try_recv() {
-                Ok(v) => Poll::Ready(v),
-                Err(std::sync::mpsc::TryRecvError::Empty) => Poll::Pending,
-                Err(_) => Poll::Ready(Err(error("Source preparation worker failed"))),
-            })
-            .await?;
+            let PreparedMediaSource {
+                location,
+                temporary: resource,
+            } = source.prepare_native(None).await?;
+            let url = match location {
+                NativeMediaLocation::Url(url) => url,
+                NativeMediaLocation::File(path) => file_uri(path)?,
+            };
             let native = NativeSession::open(&url, &caps, 0, -1, 0)?;
             let mut session = Some(Session {
                 stream: LinuxFrameStream::new(native, frames, id, generation),
