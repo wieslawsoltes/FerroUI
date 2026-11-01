@@ -56,6 +56,7 @@ jobs:
           "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/webscene/qt_reference.py
           "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/workers/qt_reference.py
           "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/creation/qt_reference.py
+          QT_QPA_PLATFORM=offscreen "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/loader/qt_reference.py
 
   portability:
     name: Rust 1.89 and Emscripten
