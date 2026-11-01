@@ -56,6 +56,7 @@ pub struct Button {
     hotkey: Cell<Option<KeyGesture>>,
     is_flyout_open: Cell<bool>,
     is_pressed: Cell<bool>,
+    space_pressed: Cell<bool>,
     /// The subscriptions to the `Opened` and `Closed` events of the flyout.
     flyout_events: RefCell<Option<(Rc<dyn IDisposable>, Rc<dyn IDisposable>)>>,
 }
@@ -153,6 +154,7 @@ impl FerroObjectImpl for Button {
         } else if property == InputElement::is_effectively_enabled_property().as_property()
             && !change.get_new_value::<bool>()
         {
+            this.space_pressed.set(false);
             this.set_is_pressed(false);
         }
     }
@@ -267,6 +269,7 @@ impl InputElementImpl for Button {
                 // Avoid handling Space if the button isn't focused: a child
                 // text box might need it for text input.
                 if this.is_focused() {
+                    this.space_pressed.set(true);
                     if this.click_mode() == ClickMode::Press {
                         this.on_click();
                     }
@@ -286,9 +289,9 @@ impl InputElementImpl for Button {
     }
 
     fn on_key_up(this: &Self, e: &KeyEventArgs) {
-        // Avoid handling Space if the button isn't focused: a child text
-        // box might need it for text input.
-        if e.key == Key::Space && this.is_focused() {
+        // A window-manager shortcut can move focus here between press and release.
+        // A pointer press also sets IsPressed, but cannot arm a keyboard click.
+        if e.key == Key::Space && this.is_focused() && this.space_pressed.replace(false) {
             if this.click_mode() == ClickMode::Release {
                 this.on_click();
             }
@@ -349,6 +352,7 @@ impl InputElementImpl for Button {
     fn on_lost_focus(this: &Self, e: &FocusChangedEventArgs) {
         Self::parent_on_lost_focus(this, e);
 
+        this.space_pressed.set(false);
         this.set_is_pressed(false);
     }
 }
@@ -548,6 +552,7 @@ impl Button {
             hotkey: Cell::new(None),
             is_flyout_open: Cell::new(false),
             is_pressed: Cell::new(false),
+            space_pressed: Cell::new(false),
             flyout_events: RefCell::new(None),
         }
     }
