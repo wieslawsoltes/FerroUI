@@ -21,6 +21,7 @@ pub(crate) struct Transaction<'a> {
     pending_bindings: BTreeSet<ObjectId>,
     evaluating: BTreeSet<SlotId>,
     notifications: VecDeque<(ObjectId, String)>,
+    hold_notifications: bool,
     initializing: bool,
     scope: Option<u32>,
     pub(crate) depth: usize,
@@ -36,6 +37,25 @@ pub(crate) struct Transaction<'a> {
 }
 
 impl Instance {
+    /// A failed asynchronous job has already rolled back its subtree. Its
+    /// terminal status must survive an exception in an error observer. Settle
+    /// and validate the status first, then deliver its changes transactionally.
+    pub(crate) fn report_loader_failure(&mut self, id: ObjectId) -> Result<(), Error> {
+        let notifications = self.transaction(|tx| {
+            tx.hold_notifications = true;
+            tx.fail_loader(id)?;
+            tx.settle()?;
+            Ok(std::mem::take(&mut tx.notifications))
+        })?;
+        if notifications.is_empty() {
+            return Ok(());
+        }
+        self.transaction(|tx| {
+            tx.notifications = notifications;
+            Ok(())
+        })
+    }
+
     pub(crate) fn transaction<T>(
         &mut self,
         operation: impl FnOnce(&mut Transaction<'_>) -> Result<T, Error>,
@@ -59,6 +79,7 @@ impl Instance {
             pending_bindings: BTreeSet::new(),
             evaluating: BTreeSet::new(),
             notifications: VecDeque::new(),
+            hold_notifications: false,
             initializing: false,
             scope: None,
             depth: 0,
@@ -278,6 +299,9 @@ impl Transaction<'_> {
                     self.schedule_timer(timer)?;
                     continue;
                 }
+            }
+            if self.hold_notifications {
+                break;
             }
             let Some((object, name)) = self.notifications.pop_front() else {
                 break;

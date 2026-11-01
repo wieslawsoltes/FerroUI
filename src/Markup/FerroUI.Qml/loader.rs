@@ -115,12 +115,16 @@ impl Instance {
                 if let Err(error) = self.transaction(|tx| tx.finish_loader(id, prepared)) {
                     // Activation rolled back. Notify the host of the original
                     // fault after observers can see that incubation terminated.
-                    self.transaction(|tx| tx.fail_loader(id))?;
+                    if let Err(reporting) = self.report_loader_failure(id) {
+                        return Err(Error::new(format!(
+                            "{error} (reporting Loader.Error: {reporting})"
+                        )));
+                    }
                     return Err(error);
                 }
                 Ok(())
             }
-            Err(_) => self.transaction(|tx| tx.fail_loader(id)),
+            Err(_) => self.report_loader_failure(id),
         }
     }
 }

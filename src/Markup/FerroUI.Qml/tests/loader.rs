@@ -443,3 +443,24 @@ fn a_loaded_component_captures_delegate_inputs_only_from_its_declaration() {
         }
     }
 }
+
+#[test]
+fn a_throwing_error_observer_cannot_leave_a_failed_loader_permanently_loading() {
+    let mut app = model(
+        r#"import QtQuick
+        Item { id: page; property int writes: 0
+            Loader { id: slot; asynchronous: true
+                sourceComponent: Item { Component.onCompleted: page.failActivation() }
+                onStatusChanged: { if (slot.status === Loader.Error) { page.writes++; page.failObserver() } }
+            }
+        }"#,
+    );
+    let loader = app.id("slot").unwrap();
+    let error = app.process_deferred(1).unwrap_err();
+    assert_eq!(app.get(loader, "status").unwrap(), Value::Number(3.));
+    assert_eq!(app.get(loader, "item").unwrap(), Value::Null);
+    assert_eq!(app.get(app.root(), "writes").unwrap(), Value::Number(0.));
+    assert!(error.message.contains("failActivation"));
+    assert!(error.message.contains("failObserver"));
+    assert!(!app.has_deferred_work());
+}
