@@ -276,3 +276,77 @@ fn an_async_completion_exception_rolls_back_before_the_loader_reports_error() {
     assert_eq!(app.objects().count(), before);
     assert!(!app.has_deferred_work());
 }
+
+#[test]
+fn a_host_can_interrupt_one_loader_before_starting_the_next_queued_job() {
+    let mut app = model(
+        r#"import QtQuick
+        Item { Component { id: tile; Item {width:17} }
+            Loader { id: a; asynchronous:true; sourceComponent:tile }
+            Loader { id: b; asynchronous:true; sourceComponent:tile }
+        }"#,
+    );
+    let mut probes = 0;
+    let ran = app
+        .process_deferred_while(10, || {
+            probes += 1;
+            probes == 1
+        })
+        .unwrap();
+    assert_eq!(ran, 1);
+    assert!(app.has_incubating_loader());
+    for name in ["a", "b"] {
+        assert_eq!(app.get(app.id(name).unwrap(), "item").unwrap(), Value::Null);
+    }
+    assert_eq!(app.process_deferred(10).unwrap(), 2);
+    for name in ["a", "b"] {
+        let id = item(&app, app.id(name).unwrap());
+        assert_eq!(app.get(id, "width").unwrap(), Value::Number(17.));
+    }
+    assert!(!app.has_deferred_work());
+}
+
+#[test]
+fn destroying_a_dynamic_loader_discards_its_prepared_subtree_and_private_ids() {
+    let source = format!(
+        "import QtQuick\nItem {{ Component {{ id: host;
+            Loader {{ asynchronous: true; sourceComponent: Item {{ id: privateRoot; {} }} }}
+        }} }}",
+        "Item {}\n".repeat(96)
+    );
+    let mut app = model(&source);
+    let before = app.objects().count();
+    let loader = app
+        .create_object(
+            app.id("host").unwrap(),
+            Some(app.root()),
+            Default::default(),
+        )
+        .unwrap();
+    app.process_deferred(1).unwrap();
+    assert!(app.has_incubating_loader());
+    app.destroy_object(loader).unwrap();
+    assert_eq!(app.objects().count(), before);
+    assert!(app.id("privateRoot").is_none());
+    assert!(!app.has_deferred_work());
+}
+
+#[test]
+fn cancelling_inside_an_aborted_transaction_preserves_the_inflight_preparation() {
+    let source = format!(
+        "import QtQuick\nItem {{ id: page; function cancelThenFail() {{ slot.active = false; page.unknownMethod() }}
+            Loader {{ id: slot; asynchronous: true; sourceComponent: Item {{ {} }} }}
+        }}", "Item {}\n".repeat(96)
+    );
+    let mut app = model(&source);
+    let loader = app.id("slot").unwrap();
+    app.process_deferred(1).unwrap();
+    assert!(app.has_incubating_loader());
+    assert!(app.call(app.root(), "cancelThenFail", Vec::new()).is_err());
+    assert!(app.has_incubating_loader());
+    while app.has_deferred_work() {
+        app.process_deferred(1).unwrap();
+    }
+    assert_eq!(app.get(loader, "status").unwrap(), Value::Number(1.));
+    assert_eq!(app.children(item(&app, loader)).len(), 96);
+}

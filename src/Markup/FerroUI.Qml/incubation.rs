@@ -92,6 +92,17 @@ impl Preparation {
         registry: &TypeRegistry,
         has_time: &mut impl FnMut() -> bool,
     ) -> Result<bool, Error> {
+        // Resolve the saved path once per slice, then descend and unwind the
+        // borrowed branch in linear time even for deeply nested layouts.
+        let mut source = self.template.object.as_ref();
+        let mut branch = vec![source];
+        for &edge in &self.path {
+            let MemberKind::Child(child) = &source.members[edge].kind else {
+                unreachable!("incubation cursor follows default children")
+            };
+            source = child;
+            branch.push(source);
+        }
         for step in 0..SLICE_STEPS {
             if step > 0 && !has_time() {
                 return Ok(false);
@@ -99,17 +110,12 @@ impl Preparation {
             let Some(next) = self.next_member.last_mut() else {
                 return Ok(true);
             };
-            let mut source = self.template.object.as_ref();
-            for &edge in &self.path {
-                let MemberKind::Child(child) = &source.members[edge].kind else {
-                    unreachable!("incubation cursor follows default children")
-                };
-                source = child;
-            }
+            let source = *branch.last().expect("current incubation node");
             if let Some(index) = *next {
                 if let Some(member) = source.members.get(index) {
                     *next = Some(index + 1);
-                    if matches!(member.kind, MemberKind::Child(_)) {
+                    if let MemberKind::Child(child) = &member.kind {
+                        branch.push(child);
                         self.path.push(index);
                         self.next_member.push(None);
                     }
@@ -140,6 +146,7 @@ impl Preparation {
                     continue;
                 }
             }
+            branch.pop();
             self.path.pop();
             self.next_member.pop();
         }
