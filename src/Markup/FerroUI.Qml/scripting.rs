@@ -749,20 +749,26 @@ impl Transaction<'_> {
             return Err(Error::new("foreign JavaScript value"));
         }
         let engine = self.script_engine()?;
+        self.with_receiver_context(owner, reads, |context| op(engine.as_ref(), context))
+    }
+
+    pub(crate) fn with_receiver_context<T>(
+        &mut self,
+        owner: ObjectId,
+        reads: &mut BTreeSet<SlotId>,
+        op: impl FnOnce(&mut ScriptContext<'_, '_>) -> Result<T, Error>,
+    ) -> Result<T, Error> {
         let root = self.model.root();
         self.with_stack(4, |tx| {
-            op(
-                engine.as_ref(),
-                &mut ScriptContext {
-                    tx,
-                    owner,
-                    root,
-                    script: None,
-                    ids: None,
-                    locals: &mut Locals::new(),
-                    reads,
-                },
-            )
+            op(&mut ScriptContext {
+                tx,
+                owner,
+                root,
+                script: None,
+                ids: None,
+                locals: &mut Locals::new(),
+                reads,
+            })
         })
     }
 }

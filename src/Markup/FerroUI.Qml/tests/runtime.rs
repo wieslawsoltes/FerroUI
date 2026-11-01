@@ -388,3 +388,52 @@ fn ids_take_precedence_over_object_properties_and_parameters_take_precedence_ove
         Value::Number(3.)
     );
 }
+
+#[test]
+fn rust_context_methods_track_receiver_reads_and_share_the_qml_transaction() {
+    use std::{cell::Cell, rc::Rc};
+    let invocations = Rc::new(Cell::new(0));
+    let observed = invocations.clone();
+    let mut registry = TypeRegistry::new();
+    registry
+        .register(
+            "Host",
+            "Meter",
+            TypeDefinition::default()
+                .inherits("QtQml", "QtObject")
+                .property("input", "int", Value::Number(2.))
+                .signal("changedByRust", vec![])
+                .context_method("double", vec![], "int", move |ctx, _| {
+                    observed.set(observed.get() + 1);
+                    let Value::Number(n) = ctx.get(ctx.owner(), "input")? else {
+                        unreachable!()
+                    };
+                    Ok(Value::Number(n * 2.))
+                })
+                .context_method("trigger", vec![], "int", |ctx, _| {
+                    ctx.set(ctx.owner(), "input", Value::Number(10.))?;
+                    ctx.call(ctx.owner(), "changedByRust", vec![])?;
+                    ctx.get(ctx.owner(), "output")
+                })
+                .context_method("abort", vec![], "int", |ctx, _| {
+                    ctx.set(ctx.owner(), "input", Value::Number(100.))?;
+                    Err(ferroui_qml::Error::new("abort from Rust"))
+                }),
+        )
+        .unwrap();
+    let doc = ferroui_qml::ir::parse(
+        "import Host\nMeter { property int output: double(); onChangedByRust: input = input + 1 }",
+    )
+    .unwrap();
+    let mut instance = Instance::new(&doc, &registry, Default::default()).unwrap();
+    let root = instance.root();
+    assert_eq!(instance.get(root, "output").unwrap(), Value::Number(4.));
+    assert_eq!(
+        instance.call(root, "trigger", vec![]).unwrap(),
+        Value::Number(22.)
+    );
+    assert!(instance.call(root, "abort", vec![]).is_err());
+    assert_eq!(instance.get(root, "input").unwrap(), Value::Number(11.));
+    assert_eq!(instance.get(root, "output").unwrap(), Value::Number(22.));
+    assert!(invocations.get() >= 2);
+}

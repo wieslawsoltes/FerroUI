@@ -1,5 +1,5 @@
 use super::{Error, Parameter, Value};
-use crate::Namespace;
+use crate::{Namespace, ScriptContext};
 use ferroui_qml_compiler::Import;
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -8,11 +8,28 @@ use std::{
 
 pub type NativeCallback = fn(&[Value]) -> Result<Value, Error>;
 
+type ContextCallback = dyn Fn(&mut ScriptContext<'_, '_>, &[Value]) -> Result<Value, Error>;
+
+#[derive(Clone)]
+pub(crate) enum Implementation {
+    Pure(NativeCallback),
+    Context(Rc<ContextCallback>),
+}
+
+impl std::fmt::Debug for Implementation {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(match self {
+            Self::Pure(_) => "Pure",
+            Self::Context(_) => "Context",
+        })
+    }
+}
+
 #[derive(Clone, Debug)]
 pub(crate) struct NativeMethod {
     pub(crate) parameters: Vec<Parameter>,
     pub(crate) result: String,
-    pub(crate) callback: NativeCallback,
+    pub(crate) callback: Implementation,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -74,7 +91,28 @@ impl TypeDefinition {
             NativeMethod {
                 parameters,
                 result: result.into(),
-                callback,
+                callback: Implementation::Pure(callback),
+            },
+        );
+        self
+    }
+
+    /// Register a method with access to its QML receiver. Property reads contribute
+    /// to the active binding. Property writes, signal delivery and nested calls use
+    /// the caller's transaction. External state captured by the closure is owned by Rust.
+    pub fn context_method(
+        mut self,
+        name: &str,
+        parameters: Vec<Parameter>,
+        result: &str,
+        callback: impl Fn(&mut ScriptContext<'_, '_>, &[Value]) -> Result<Value, Error> + 'static,
+    ) -> Self {
+        self.native.insert(
+            name.into(),
+            NativeMethod {
+                parameters,
+                result: result.into(),
+                callback: Implementation::Context(Rc::new(callback)),
             },
         );
         self

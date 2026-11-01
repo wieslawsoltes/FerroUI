@@ -175,6 +175,21 @@ FerroUI posts `Qt.callLater(function, ...args)` callbacks to the owning view's d
 
 A `Binding` with `delayed: true` applies its initial value when attached. Subsequent changes to its input coalesce until the next turn. Disabling or retargeting the binding restores its previous target immediately.
 
+Rust hosts can register a receiver-aware method with `TypeDefinition::context_method`. Its callback can capture services, read and update model properties, and call QML signals and methods through the current transaction. For example, a binding that calls the following method will update when the receiver's `gain` changes.
+
+```rust
+use ferroui_qml::{Error, TypeDefinition, Value};
+
+let meter = TypeDefinition::default()
+    .property("gain", "real", Value::Number(1.0))
+    .context_method("percent", vec![], "real", |ctx, _| {
+        let Value::Number(gain) = ctx.get(ctx.owner(), "gain")? else {
+            return Err(Error::new("gain must be numeric"));
+        };
+        Ok(Value::Number(100.0 * gain))
+    });
+```
+
 ## Compatibility with Qt QML 6.12
 
 | Area | Available in this implementation | Remaining coverage |

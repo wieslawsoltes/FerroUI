@@ -292,8 +292,20 @@ impl Transaction<'_> {
         }
         if let Some(method) = node.native.get(name) {
             let arguments = self.arguments(&method.parameters, arguments)?;
-            let value = (method.callback)(&arguments)?;
-            return self.model.typed(&method.result, value);
+            match &method.callback {
+                registry::Implementation::Pure(callback) => {
+                    let value = callback(&arguments)?;
+                    return self.model.typed(&method.result, value);
+                }
+                registry::Implementation::Context(callback) => {
+                    let callback = callback.clone();
+                    let result_type = method.result.clone();
+                    let value =
+                        self.with_receiver_context(owner, reads, |ctx| callback(ctx, &arguments))?;
+                    self.model.validate_handles(&value)?;
+                    return self.model.typed(&result_type, value);
+                }
+            }
         }
         if node.signal(name).is_some() {
             self.signal(owner, name, arguments)?;
