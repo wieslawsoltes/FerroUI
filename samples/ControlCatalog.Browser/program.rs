@@ -61,7 +61,7 @@ use ferroui_base::media::{FontFamily, FontManager, FontManagerOptions, Typeface}
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::rendering::composition::transport::CompositionBatch;
 use ferroui_base::rendering::composition::ElementComposition;
-use ferroui_base::rendering::RendererDebugOverlays;
+#[cfg(all(feature = "cdp", target_arch = "wasm32"))]
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{FerroLocator, LocatorExtensions, Point, Ref, Visual};
 use ferroui_browser::interop::canvas_helper::{RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL};
@@ -95,6 +95,7 @@ pub fn run_main(href: &str) {
         })
         .start_browser_app("out", Some(options));
 
+    #[cfg(all(feature = "cdp", target_arch = "wasm32"))]
     let _ = Dispatcher::ui_thread().invoke_local(|| {
         let lifetime = Application::current().and_then(|application| application.application_lifetime());
         if let Some(top_level) = lifetime
@@ -102,9 +103,7 @@ pub fn run_main(href: &str) {
             .and_then(|lifetime| lifetime.as_single_top_level_application_lifetime())
             .and_then(|lifetime| lifetime.top_level())
         {
-            #[cfg(all(feature = "cdp", target_arch = "wasm32"))]
             CDP_BRIDGE.with(|bridge| *bridge.borrow_mut() = Some(ferroui_devtools::BrowserBridge::install(&top_level)));
-            top_level.renderer_diagnostics().set_debug_overlays(RendererDebugOverlays::FPS);
         }
     });
 }
