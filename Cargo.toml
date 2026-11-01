@@ -370,6 +370,9 @@ smallvec = "1.16"
 # of Splat, the remote protocol and MicroCom are built on it. Without the random generator here; a
 # crate that makes random identifiers adds the feature `v4`.
 uuid = { version = "1.28", default-features = false, features = ["std"] }
+# URLs, one type for the workspace (docs/idiomatic-rust.md, section 2.2): the `Uri` of ferroui-base
+# converts to and from its `Url`.
+url = "2.5.8"
 # The bindings of the Windows API for the Windows platform backend (docs/porting/win32-platform.md,
 # section 2). Without features here: the backend names the API namespaces it calls.
 windows-sys = { version = "0.61.2" }

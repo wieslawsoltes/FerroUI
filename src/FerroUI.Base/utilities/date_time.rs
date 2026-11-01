@@ -9,6 +9,12 @@
 //! The calendar arithmetic (dates from day numbers, month lengths, leap
 //! years, days of the week) is the one of the `time` crate; the tick count,
 //! the kind, the range and the rules of the `add_` members are the .NET ones.
+//!
+//! At the edges the type converts from and to [`std::time::SystemTime`]
+//! (`TryFrom` both ways): a system time is a UTC instant, and a value of
+//! local or unspecified kind is converted to UTC with the local offset of
+//! [`TimeZoneInfo`] first. The conversions never read the clock
+//! (`SystemTime::now()` is not available on `wasm32-unknown-unknown`).
 
 use super::date_time_format::{self, Parsed};
 use super::{
@@ -24,6 +30,7 @@ use std::hash::{Hash, Hasher};
 use std::ops::{Add, AddAssign, Sub, SubAssign};
 use std::rc::Rc;
 use std::str::FromStr;
+use std::time::{Duration, SystemTime};
 
 /// Gives the current UTC time.
 pub type UtcNowProvider = Rc<dyn Fn() -> DateTime>;
@@ -730,3 +737,94 @@ impl FromStr for DateTime {
         DateTime::parse(s, &CultureInfo::current_culture())
     }
 }
+
+// --- std::time::SystemTime ---
+
+/// The ticks of 1970-01-01T00:00:00, the epoch of [`SystemTime`].
+const UNIX_EPOCH_TICKS: i64 = DAYS_TO_1970 * TICKS_PER_DAY;
+
+impl TryFrom<SystemTime> for DateTime {
+    type Error = SystemTimeRangeError;
+
+    /// The UTC date and time of a system time, of kind [`DateTimeKind::Utc`].
+    ///
+    /// A system time has a resolution of up to one nanosecond; the value is
+    /// rounded down to a whole tick of 100 nanoseconds (toward the past, also
+    /// before 1970), so that converting back gives an instant that is never
+    /// later. A system time outside of the years 1 to 9999 is an error.
+    fn try_from(value: SystemTime) -> Result<Self, Self::Error> {
+        let since_epoch = match value.duration_since(SystemTime::UNIX_EPOCH) {
+            Ok(after) => (after.as_nanos() / 100) as i128,
+            Err(before) => -(before.duration().as_nanos().div_ceil(100) as i128),
+        };
+        i64::try_from(since_epoch + UNIX_EPOCH_TICKS as i128)
+            .ok()
+            .and_then(|ticks| DateTime::try_from_ticks(ticks, DateTimeKind::Utc))
+            .ok_or(SystemTimeRangeError::OutsideDateTimeRange)
+    }
+}
+
+impl TryFrom<DateTime> for SystemTime {
+    type Error = SystemTimeRangeError;
+
+    /// The instant of the value: a UTC value as it is; a local or an
+    /// unspecified value is taken as local time and converted with the
+    /// offset of [`TimeZoneInfo::get_utc_offset_of_local_time`], as .NET
+    /// does for `ToUniversalTime` and `new DateTimeOffset(DateTime)`. Unlike
+    /// [`to_universal_time`](DateTime::to_universal_time), an instant a few
+    /// hours outside of the range of `DateTime` is not clamped.
+    ///
+    /// Every tick is a whole number of nanoseconds, so the instant is exact.
+    /// It is an error only where the platform's `SystemTime` cannot hold it:
+    /// on targets without a system clock (`wasm32-unknown-unknown`) a system
+    /// time cannot be earlier than 1970.
+    fn try_from(value: DateTime) -> Result<Self, Self::Error> {
+        let utc_ticks = match value.kind {
+            DateTimeKind::Utc => value.ticks,
+            DateTimeKind::Local | DateTimeKind::Unspecified => {
+                value.ticks - TimeZoneInfo::get_utc_offset_of_local_time(value).ticks()
+            }
+        };
+        system_time_of_utc_ticks(utc_ticks)
+    }
+}
+
+/// The system time of an instant given in ticks since 0001-01-01T00:00:00 UTC.
+pub(super) fn system_time_of_utc_ticks(ticks: i64) -> Result<SystemTime, SystemTimeRangeError> {
+    let since_epoch = ticks as i128 - UNIX_EPOCH_TICKS as i128;
+    let ticks = since_epoch.unsigned_abs();
+    let ticks_per_second = TimeSpan::TICKS_PER_SECOND as u128;
+    let seconds = u64::try_from(ticks / ticks_per_second).map_err(|_| SystemTimeRangeError::OutsideSystemTimeRange)?;
+    let duration = Duration::new(seconds, ((ticks % ticks_per_second) * 100) as u32);
+    let time = if since_epoch >= 0 {
+        SystemTime::UNIX_EPOCH.checked_add(duration)
+    } else {
+        SystemTime::UNIX_EPOCH.checked_sub(duration)
+    };
+    time.ok_or(SystemTimeRangeError::OutsideSystemTimeRange)
+}
+
+/// The error of a conversion between [`DateTime`] or
+/// [`DateTimeOffset`](super::DateTimeOffset) and [`SystemTime`] whose
+/// instant the target type cannot hold.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SystemTimeRangeError {
+    /// The system time is outside of the years 1 to 9999 of `DateTime`.
+    OutsideDateTimeRange,
+    /// The platform's `SystemTime` cannot hold the instant (on
+    /// `wasm32-unknown-unknown`, an instant before 1970).
+    OutsideSystemTimeRange,
+}
+
+impl fmt::Display for SystemTimeRangeError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
+            SystemTimeRangeError::OutsideDateTimeRange => {
+                "The system time is outside of the range of DateTime, the years 1 to 9999."
+            }
+            SystemTimeRangeError::OutsideSystemTimeRange => "The instant cannot be represented as a SystemTime on this platform.",
+        })
+    }
+}
+
+impl std::error::Error for SystemTimeRangeError {}

@@ -7,6 +7,10 @@
 //! [`CultureInfo::date_time_format`]; see
 //! [`DateTimeFormatInfo`](super::DateTimeFormatInfo) for the cultures that
 //! have data of their own.
+//!
+//! At the edges the type converts from and to the ICU4X
+//! [`Locale`](icu_locale_core::Locale) by its name: the invariant culture is
+//! the unknown locale `und`.
 
 use super::{DateTimeFormatInfo, GregorianCalendar, ICultureDataProvider, NumberFormatInfo};
 use crate::{FerroLocator, LocatorExtensions};
@@ -325,6 +329,41 @@ impl fmt::Debug for CultureInfo {
     }
 }
 
+impl TryFrom<&CultureInfo> for icu_locale_core::Locale {
+    type Error = icu_locale_core::ParseError;
+
+    /// The locale of the name of the culture. The invariant culture, whose
+    /// name is empty, is the unknown locale `und`
+    /// ([`Locale::UNKNOWN`](icu_locale_core::Locale::UNKNOWN)), the locale
+    /// ICU4X formats with its root data.
+    ///
+    /// [`CultureInfo::get_culture_info`] takes any name, so a name that is
+    /// not a well-formed BCP-47 tag is an error: a .NET sort-order name such
+    /// as `es-ES_tradnl` (ICU4X does not take `_` as a separator) or a
+    /// private-use name such as `x-custom`. The case of the subtags is
+    /// normalized (`EN-us` is `en-US`).
+    fn try_from(value: &CultureInfo) -> Result<Self, Self::Error> {
+        if value.is_invariant() {
+            return Ok(icu_locale_core::Locale::UNKNOWN);
+        }
+        icu_locale_core::Locale::try_from_str(value.name())
+    }
+}
+
+impl From<&icu_locale_core::Locale> for CultureInfo {
+    /// The culture of the BCP-47 text of the locale
+    /// ([`CultureInfo::get_culture_info`]); the unknown locale `und` is the
+    /// invariant culture. Extensions stay in the name
+    /// (`en-US-u-hc-h12`), and the culture has the Windows language
+    /// identifier of its name where one is known.
+    fn from(value: &icu_locale_core::Locale) -> Self {
+        if *value == icu_locale_core::Locale::UNKNOWN {
+            return CultureInfo::invariant_culture();
+        }
+        CultureInfo::get_culture_info(&value.to_string())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -369,5 +408,52 @@ mod tests {
         assert_eq!(CultureInfo::get_culture_info("zh-CN").parent().name(), "zh-Hans");
         assert_eq!(CultureInfo::get_culture_info("zh-TW").parent().name(), "zh-Hant");
         assert_eq!(CultureInfo::get_culture_info("zh-Hant").parent().name(), "zh");
+    }
+
+    #[test]
+    fn converts_to_and_from_icu_locales() {
+        use icu_locale_core::Locale;
+
+        for name in ["en-US", "de-DE", "zh-Hant-TW", "ja", "en-US-u-hc-h12"] {
+            let culture = CultureInfo::get_culture_info(name);
+            let locale = Locale::try_from(&culture).unwrap();
+            assert_eq!(locale.to_string(), name);
+            let back = CultureInfo::from(&locale);
+            assert_eq!(back.name(), name);
+            assert_eq!(back, culture);
+            assert_eq!(back.lcid(), culture.lcid());
+        }
+
+        let locale = Locale::try_from(&CultureInfo::get_culture_info("zh-Hant-TW")).unwrap();
+        assert_eq!(locale.id.language.as_str(), "zh");
+        assert_eq!(locale.id.script.as_ref().map(|script| script.as_str()), Some("Hant"));
+        assert_eq!(locale.id.region.as_ref().map(|region| region.as_str()), Some("TW"));
+        assert_eq!(CultureInfo::from(&Locale::try_from_str("de-DE").unwrap()).lcid(), 0x0407);
+
+        // The case of the subtags is normalized.
+        let locale = Locale::try_from(&CultureInfo::get_culture_info("EN-us")).unwrap();
+        assert_eq!(locale.to_string(), "en-US");
+    }
+
+    #[test]
+    fn the_invariant_culture_is_the_unknown_locale() {
+        use icu_locale_core::Locale;
+
+        assert_eq!(Locale::try_from(&CultureInfo::invariant_culture()), Ok(Locale::UNKNOWN));
+        let culture = CultureInfo::from(&Locale::UNKNOWN);
+        assert!(culture.is_invariant());
+        assert_eq!(culture.lcid(), INVARIANT_LCID);
+        assert!(CultureInfo::from(&Locale::try_from_str("und").unwrap()).is_invariant());
+        // Only `und` alone: with a region it names a culture.
+        assert_eq!(CultureInfo::from(&Locale::try_from_str("und-US").unwrap()).name(), "und-US");
+    }
+
+    #[test]
+    fn names_that_are_not_language_tags_are_not_locales() {
+        use icu_locale_core::Locale;
+
+        for name in ["es-ES_tradnl", "x-custom", "zh-CHT"] {
+            assert!(Locale::try_from(&CultureInfo::get_culture_info(name)).is_err(), "{name}");
+        }
     }
 }

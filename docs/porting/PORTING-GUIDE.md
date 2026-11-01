@@ -95,7 +95,7 @@ The owner's decision of 2026-10-31 for every port and for the 0.5 cleanup ([#423
 | `IList<T>`, `List<T>` | `Vec<T>` for values and snapshots; observable collections, and any list a get-only property exposes by reference → `FerroList<T>` (a shared handle, see "Collections are handles") |
 | exceptions on parse/validation paths | `Result<_, XError>` with `XError` implementing `std::error::Error` (named `...Error`, never `...Exception`); programmer errors → `panic!` |
 | `TimeSpan` | `std::time::Duration` (a signed duration newtype only where negative spans are needed) |
-| `DateTime` / `DateTimeOffset` | `std::time::SystemTime` and the calendar type chosen in #423 |
+| `DateTime` / `DateTimeOffset` | `std::time::SystemTime` at the edges, with the port types of `ferroui-base` underneath for the calendar and the .NET formats (no new crate: decided in C2 of #423, [idiomatic-rust.md](../idiomatic-rust.md), section 7.1) |
 | `Uri` | `url::Url` |
 | `CultureInfo` | the ICU4X `Locale` (with the formatting data FerroUI uses) |
 | `Guid` | `uuid::Uuid` |
