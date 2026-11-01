@@ -1,5 +1,5 @@
 // Private per-worker V8 state. Host capabilities cross only the component transaction.
-(function (modules,observePromise,controlKey,hostLeases) {
+(function (modules,observePromise,controlKey,hostLeases,turns) {
     "use strict";
     let activeCalls=0;
     let resources = Object.create(null);
@@ -71,11 +71,11 @@
     }
 
     function transport(request) {
-        return JSON.parse(fetchText("https://qml.invalid/rpc/"+controlKey+"/"+(++serial)+"/"+encodeURIComponent(JSON.stringify(request))));
+        return JSON.parse(fetchText("https://qml.invalid/rpc/"+controlKey+"/"+turns.dispatch()+"/"+(++serial)+"/"+encodeURIComponent(JSON.stringify(request))));
     }
     function rpc(request) {
-        if (!activeCalls) throw new Error("QML host access outside a synchronous JavaScript invocation");
-        let msg = transport(request);
+        turns.check();
+        let msg = transport(activeCalls ? request : ["continuation",request]);
         // During a host call a dependent property or QML method can itself run
         // JavaScript. Enter it on this stack in the same V8 realm, then resume.
         while (msg.nested) msg = transport(["returned",execute(msg.nested)]);
@@ -272,11 +272,13 @@
     }
 
     function execute(command) {
+        turns.begin(command);
         activeCalls++;
         try {
             release(command);
-            return hostLeases.complete({ok: encode(perform(command), command.mode)});
+            return hostLeases.complete({ok: encode(turns.call(perform, command), command.mode)});
         } catch (error) {
+            if (activeCalls === 1) turns.fail();
             return hostLeases.complete({error: String(error?.stack || error)});
         } finally {
             activeCalls--;
@@ -294,9 +296,10 @@
         },
         preparation(key){authorize(key);return preparing},
         sweepHosts(key){authorize(key);return JSON.stringify(hostLeases.sweep())},
+        collectLeases(key){authorize(key);return JSON.stringify(hostLeases.complete({}))},
         run(key,c){authorize(key);return JSON.stringify(execute(c))},
         promise(key,c){
-            authorize(key); release(c);
+            authorize(key); turns.begin(c); release(c);
             try {
                 const {state,value}=observePromise(decode(c.target));
                 return JSON.stringify({ok:["a",[["s",state],encode(value)]]});

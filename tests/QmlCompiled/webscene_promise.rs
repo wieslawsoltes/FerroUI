@@ -61,27 +61,90 @@ fn promises(source: &impl ComponentSource) {
         PromiseState::Fulfilled(n(37.))
     );
 
+    assert_eq!(
+        app.call_and_await(root, "immediate", vec![n(2.)], deadline)
+            .unwrap(),
+        n(30.)
+    );
+    let err = app
+        .call_and_await(root, "rejectAfterAwait", vec![], deadline)
+        .unwrap_err();
+    assert!(err.message.contains("asynchronous failure"), "{err}");
+    assert_eq!(app.get(root, "left").unwrap(), n(10.));
+    assert_eq!(app.get(root, "checksum").unwrap(), n(30.));
+    assert_eq!(
+        app.call_and_await(root, "captureThis", vec![n(5.)], deadline)
+            .unwrap(),
+        n(15.)
+    );
+    assert_eq!(
+        app.call_and_await(root, "moduleContinuations", vec![], deadline)
+            .unwrap(),
+        n(31.)
+    );
+    let retained = Value::String("retained".into());
+    assert_eq!(
+        app.call_and_await(root, "retainRow", vec![], deadline)
+            .unwrap(),
+        retained
+    );
+    assert_eq!(app.call(root, "readRetainedRow", vec![]).unwrap(), retained);
+    app.call_and_await(root, "outOfTurn", vec![], deadline)
+        .unwrap();
+    assert_eq!(app.get(root, "left").unwrap(), n(89.));
+    let Value::Object(child) = app.get(root, "child").unwrap() else {
+        panic!("child")
+    };
+    let Value::External(job) = app.call(child, "suspendChild", vec![]).unwrap() else {
+        panic!("promise")
+    };
+    app.call(root, "resumeChild", vec![]).unwrap();
+    assert_eq!(app.settle_promise(&job, deadline).unwrap(), n(105.));
+    assert_eq!(app.get(root, "left").unwrap(), n(89.));
+    let Value::External(aborted) = app.call(child, "suspendChild", vec![]).unwrap() else {
+        panic!("promise")
+    };
     assert!(app
-        .call_and_await(root, "outOfTurn", vec![], deadline)
+        .call(root, "abortWakeChild", vec![])
         .unwrap_err()
         .message
-        .contains("outside a synchronous"));
+        .contains("resolver aborted"));
+    assert!(
+        matches!(app.promise_state(&aborted).unwrap(), PromiseState::Rejected(reason) if reason.contains("rolled back"))
+    );
+    assert_eq!(app.get(child, "left").unwrap(), n(105.));
     assert!(app
         .call(root, "failedOuter", vec![])
         .unwrap_err()
         .message
         .contains("outer failed"));
     let Value::External(after) = app.call(root, "afterFailure", vec![]).unwrap() else {
-        panic!("missing later job")
+        panic!("promise")
     };
     assert!(
-        matches!(app.promise_state(&after).unwrap(), PromiseState::Rejected(reason) if reason.contains("outside a synchronous"))
+        matches!(app.promise_state(&after).unwrap(), PromiseState::Rejected(reason) if reason.contains("rolled back"))
     );
-    assert_eq!(app.get(root, "left").unwrap(), n(8.));
+    assert!(app
+        .call(root, "abandonPending", vec![])
+        .unwrap_err()
+        .message
+        .contains("cancel suspended work"));
+    assert!(app
+        .call_and_await(root, "wakeAbandoned", vec![], deadline)
+        .unwrap_err()
+        .message
+        .contains("rolled back"));
+    let started = Instant::now();
+    let runaway = app
+        .call_and_await(root, "spinAfterAwait", vec![], Duration::from_millis(150))
+        .unwrap_err();
+    assert!(runaway.message.contains("deadline"), "{runaway}");
+    assert!(started.elapsed() < Duration::from_secs(3));
+    assert_eq!(app.get(root, "left").unwrap(), n(89.));
 }
 
 #[test]
-fn v8_promises_settle_with_bounds_rollback_and_no_late_qml_callbacks() {
+fn v8_continuations_reenter_the_owner_thread_with_bounded_and_revocable_transactions() {
     let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("webscene/Async.qml");
     promises(
         &Compiler::new()

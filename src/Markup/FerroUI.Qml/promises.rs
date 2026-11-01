@@ -1,7 +1,7 @@
 //! Explicit, bounded Promise interop from the Rust owner thread. A retained
 //! Promise belongs to one QML engine realm.
 use super::*;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 /// A rejected value is rendered by its JavaScript backend with available stack context.
 #[derive(Clone, Debug, PartialEq)]
@@ -27,11 +27,14 @@ impl Instance {
         timeout: Duration,
     ) -> Result<Value, Error> {
         let owner = self.root();
-        self.transaction(|tx| finish(tx.promise(owner, promise, timeout)?, timeout, None))
+        self.transaction(|tx| {
+            tx.set_promise_deadline(timeout);
+            finish(tx.promise(owner, promise, timeout)?, timeout, None)
+        })
     }
 
-    /// Call and settle in one transaction. A rejection also reverts synchronous
-    /// QML writes performed before the method returned its Promise. Ordinary
+    /// Call and settle in one transaction. A rejection reverts synchronous and
+    /// asynchronous QML writes. A positive timeout bounds the whole VM call. Ordinary
     /// return values pass through directly.
     pub fn call_and_await(
         &mut self,
@@ -41,6 +44,7 @@ impl Instance {
         timeout: Duration,
     ) -> Result<Value, Error> {
         self.transaction(|tx| {
+            tx.set_promise_deadline(timeout);
             let result = tx.invoke(owner, method, args, &mut BTreeSet::new())?;
             tx.model.validate_handles(&result)?;
             match &result {
@@ -73,6 +77,13 @@ fn finish(
 }
 
 impl transaction::Transaction<'_> {
+    fn set_promise_deadline(&mut self, timeout: Duration) {
+        // Zero requests immediate inspection, which still requires one VM round trip.
+        if !timeout.is_zero() {
+            self.script_deadline = Instant::now().checked_add(timeout);
+        }
+    }
+
     fn promise(
         &mut self,
         owner: ObjectId,

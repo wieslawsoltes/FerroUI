@@ -15,7 +15,11 @@ impl Realm {
         }
         // Allow the worker to deliver its final status before the outer hard
         // deadline. The hard deadline also covers a runaway V8 microtask.
-        let available = self.timeout.saturating_sub(Duration::from_millis(5));
+        let remaining = ctx
+            .deadline()
+            .map(|limit| limit.saturating_duration_since(Instant::now()));
+        let budget = remaining.map_or(self.timeout, |left| self.timeout.min(left));
+        let available = budget.saturating_sub(Duration::from_millis(5));
         let milliseconds = timeout.min(available).as_millis().min(u64::MAX as u128) as u64;
         let command =
             json!({"op":"await","target":["js",self.handle(value)?],"waitMs":milliseconds});

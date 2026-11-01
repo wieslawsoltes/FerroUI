@@ -203,6 +203,31 @@ impl ScriptContext<'_, '_> {
         })
     }
 
+    /// Absolute deadline shared by a bounded call, including nested guest jobs.
+    pub fn deadline(&self) -> Option<std::time::Instant> {
+        self.tx.script_deadline
+    }
+
+    /// Execute a microtask on the current owner thread. Captured QML scope is
+    /// restored by name resolution; reads belong to this continuation.
+    pub fn in_continuation<T>(
+        &mut self,
+        op: impl FnOnce(&mut ScriptContext<'_, '_>) -> Result<T, Error>,
+    ) -> Result<T, Error> {
+        let root = self.tx.model.root();
+        self.tx.with_scope(None, |tx| {
+            op(&mut ScriptContext {
+                tx,
+                owner: root,
+                root,
+                script: None,
+                ids: None,
+                locals: &mut Locals::new(),
+                reads: &mut BTreeSet::new(),
+            })
+        })
+    }
+
     pub fn instance(&self) -> ScriptInstance {
         self.tx.model.script_instance()
     }

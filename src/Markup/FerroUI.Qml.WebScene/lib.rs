@@ -97,6 +97,9 @@ struct Realm {
     deadline: Cell<Option<Instant>>,
     tables: RefCell<Tables>,
     generation: Cell<u64>,
+    turn: Cell<u64>,
+    delivered: Cell<u64>,
+    revoked: Cell<Option<u64>>,
     handles: RefCell<BTreeMap<u64, Weak<GuestHandle>>>,
     pending: Rc<RefCell<Vec<(u64, u64)>>>,
     identity: Rc<()>,
@@ -169,6 +172,9 @@ impl WebSceneEngine {
                     deadline: Cell::new(None),
                     tables: Default::default(),
                     generation: Cell::new(1),
+                    turn: Cell::new(0),
+                    delivered: Cell::new(0),
+                    revoked: Cell::new(None),
                     handles: Default::default(),
                     pending: Default::default(),
                     identity: Rc::new(()),
@@ -179,6 +185,26 @@ impl WebSceneEngine {
 }
 
 impl ScriptEngine for WebSceneEngine {
+    fn begin_transaction(&self, instance: ScriptInstance) -> Result<(), Error> {
+        let realm = self.realm(instance);
+        let next = realm
+            .turn
+            .get()
+            .checked_add(1)
+            .ok_or_else(|| Error::new("WebScene turn limit exceeded"))?;
+        realm.turn.set(next);
+        Ok(())
+    }
+    fn end_transaction(&self, instance: ScriptInstance, committed: bool) {
+        if !committed {
+            if let Some(realm) = self.realms.borrow().get(&instance) {
+                if realm.delivered.get() == realm.turn.get() {
+                    realm.revoked.set(Some(realm.turn.get()));
+                }
+            }
+        }
+    }
+
     fn evaluate(
         &self,
         ctx: &mut ScriptContext<'_, '_>,
@@ -298,9 +324,15 @@ impl Realm {
                 .checked_add(self.timeout)
                 .unwrap_or_else(Instant::now)
         });
+        let deadline = ctx.deadline().map_or(deadline, |limit| limit.min(deadline));
         self.ensure_worker(deadline)?;
         if outer.is_none() {
             self.deadline.set(Some(deadline));
+            self.delivered.set(self.turn.get());
+            command["turn"] = json!(self.turn.get().to_string());
+            if let Some(revoked) = self.revoked.take() {
+                command["revoke"] = json!(revoked.to_string());
+            }
             let released = self
                 .pending
                 .take()
@@ -349,7 +381,16 @@ impl Realm {
                             .ok_or_else(|| Error::new("missing nested result"))?,
                     );
                 }
-                let answer = match self.host(ctx, host) {
+                let result = if host.first().and_then(Json::as_str) == Some("continuation") {
+                    let request = host
+                        .get(1)
+                        .and_then(Json::as_array)
+                        .ok_or_else(|| Error::new("invalid WebScene continuation request"))?;
+                    ctx.in_continuation(|scope| self.host(scope, request))
+                } else {
+                    self.host(ctx, host)
+                };
+                let answer = match result {
                     Ok(value) => json!({"ok":value}),
                     Err(e) => json!({"error":e.message}),
                 };

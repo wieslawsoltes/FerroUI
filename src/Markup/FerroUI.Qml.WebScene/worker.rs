@@ -18,7 +18,8 @@ const MODULES: &str = "https://qml.invalid/modules/";
 #[derive(Default)]
 struct Resources {
     files: BTreeMap<String, String>,
-    rpc_enabled: bool,
+    active_turn: Option<String>,
+    continuation_used: bool,
     rpc_key: String,
     // The ABI may retry an oversized response. Do not invoke the host twice.
     retry: Option<(String, Vec<u8>)>,
@@ -33,13 +34,17 @@ impl Resources {
             b"<!doctype html><html></html>".to_vec()
         } else if let Some(text) = url.strip_prefix(RPC) {
             let (key, message) = text.split_once('/').unwrap_or(("", ""));
+            let (turn, message) = message.split_once('/').unwrap_or(("", ""));
             let response = if key != self.rpc_key || self.rpc_key.is_empty() {
                 json!({"error":"invalid private RPC capability"})
-            } else if self.rpc_enabled {
+            } else if self.active_turn.as_deref() == Some(turn) {
                 let (_, encoded) = message.split_once('/')?;
                 let request: Value =
                     serde_json::from_slice(&percent_decode_str(encoded).collect::<Vec<_>>())
                         .ok()?;
+                if request.get(0).and_then(Value::as_str) == Some("continuation") {
+                    self.continuation_used = true;
+                }
                 exchange(&json!({"host":request})).ok()?
             } else {
                 json!({"error":"QML host access outside an active transaction"})
@@ -153,7 +158,7 @@ fn run(library: &Path) -> Result<(), String> {
         include_str!("modules.js"),
         include_str!("vendor/systemjs-core.js")
     );
-    let bootstrap=format!("Object.defineProperty(globalThis,'__ferroQml',{{value:({})({},{},{key},{}),writable:false,configurable:false}}); 'ready'",include_str!("bridge.js"),module_runtime,include_str!("promise.js"),include_str!("leases.js"));
+    let bootstrap=format!("Object.defineProperty(globalThis,'__ferroQml',{{value:({})({},{},{key},{},{}),writable:false,configurable:false}}); 'ready'",include_str!("bridge.js"),module_runtime,include_str!("promise.js"),include_str!("leases.js"),include_str!("turns.js"));
     if engine.eval(&bootstrap)? != "ready" {
         return Err("WebScene bootstrap failed".into());
     }
@@ -194,21 +199,46 @@ fn run(library: &Path) -> Result<(), String> {
                     std::thread::sleep(std::time::Duration::from_millis(1));
                 }
             }
-            if command.get("op").and_then(Value::as_str) == Some("await") {
-                return observe_promise(&engine, &command, &key);
+            {
+                let mut state = resources.lock().map_err(|_| "poisoned resource state")?;
+                state.active_turn = Some(
+                    command["turn"]
+                        .as_str()
+                        .ok_or("missing QML turn")?
+                        .to_owned(),
+                );
+                state.continuation_used = false;
             }
-            resources
-                .lock()
-                .map_err(|_| "poisoned resource state")?
-                .rpc_enabled = true;
-            let script = format!("__ferroQml.run({key},{command})");
-            let result = engine.eval(&script);
-            resources
-                .lock()
-                .map_err(|_| "poisoned resource state")?
-                .rpc_enabled = false;
-            let answer = result?;
-            let mut response: Value = serde_json::from_str(&answer).map_err(|e| e.to_string())?;
+            let result = if command.get("op").and_then(Value::as_str) == Some("await") {
+                observe_promise(&engine, &command, &key)
+            } else {
+                let answer = engine.eval(&format!("__ferroQml.run({key},{command})"));
+                answer.and_then(|s| serde_json::from_str(&s).map_err(|e| e.to_string()))
+            };
+            let continuation_used = {
+                let mut state = resources.lock().map_err(|_| "poisoned resource state")?;
+                state.active_turn = None;
+                state.continuation_used
+            };
+            let mut response: Value = result?;
+            if continuation_used {
+                // Microtasks run after the synchronous result was encoded. Include
+                // every native lease acquired before the checkpoint finished.
+                let leases = engine.eval(&format!("__ferroQml.collectLeases({key})"))?;
+                let mut leases: Value = serde_json::from_str(&leases).map_err(|e| e.to_string())?;
+                if let Some(more) = leases["hostLeases"].as_array_mut() {
+                    if response.get("hostLeases").is_none() {
+                        response["hostLeases"] = json!([]);
+                    }
+                    response["hostLeases"]
+                        .as_array_mut()
+                        .ok_or("invalid host leases")?
+                        .append(more);
+                }
+                if leases["collectHosts"] == Value::Bool(true) {
+                    response["collectHosts"] = Value::Bool(true);
+                }
+            }
             if response.get("collectHosts") == Some(&Value::Bool(true)) {
                 // Between JS jobs, never while a reentrant invocation is active.
                 engine.notify_low_memory();
