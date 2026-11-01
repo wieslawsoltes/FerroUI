@@ -494,7 +494,9 @@ impl Transaction<'_> {
         }
         let property = &self.model.properties[key];
         if !self.model.dynamic.loaders.is_empty() {
-            self.loader_write(property.owner, &property.name.clone(), &value);
+            if let Some(name) = loader::observed_property(&property.name) {
+                self.loader_write(property.owner, name, &value);
+            }
         }
         self.touched(key).value = value;
         if let Some(target) = self.model.slots[key].active_target {

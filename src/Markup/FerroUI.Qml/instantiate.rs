@@ -794,7 +794,23 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         self.assign_once(key)?;
         self.instance.slots[key].scope = scope;
         let value = match binding {
-            Binding::Object(child) => Value::Object(self.object(child, Some(owner))?),
+            Binding::Object(child) => {
+                let ty=&self.instance.properties[key].ty;
+                let imports=child.type_imports.as_deref().unwrap_or(self.imports);
+                let is_component=|name:&str|self.registry.resolve(imports,name).is_ok_and(|(module,ty,_)|module=="QtQml" && ty=="Component");
+                if is_component(ty) && !is_component(&child.type_name) {
+                    // A Component-valued property owns a definition here. Its object and
+                    // private ids come into existence each time the factory is invoked.
+                    let mut scope=imports.to_vec();
+                    scope.push(Import {uri:"QtQml".into(),is_path:false,version:None,alias:Some("$qml_component".into()),span:child.span});
+                    let wrapper=Object {
+                        type_name:"$qml_component.Component".into(),source_url:child.source_url.clone(),
+                        shadows:Vec::new(),composite_types:Vec::new(),type_imports:Some(scope),span:child.span,
+                        members:vec![Member {kind:MemberKind::Child(child.clone()),scope:None,span:child.span}],
+                    };
+                    Value::Object(self.object(&wrapper,Some(owner))?)
+                } else { Value::Object(self.object(child,Some(owner))?) }
+            },
             Binding::Objects(children) => Value::List(
                 children
                     .iter()

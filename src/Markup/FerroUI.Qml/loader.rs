@@ -3,6 +3,22 @@
 use super::*;
 use crate::transaction::Transaction;
 
+// A hot-path slot write only needs the borrowed name if the Loader contract observes it.
+pub(crate) fn observed_property(name: &str) -> Option<&'static str> {
+    match name {
+        "source" => Some("source"),
+        "sourceComponent" => Some("sourceComponent"),
+        "active" => Some("active"),
+        "asynchronous" => Some("asynchronous"),
+        "status" => Some("status"),
+        "width" => Some("width"),
+        "height" => Some("height"),
+        "implicitWidth" => Some("implicitWidth"),
+        "implicitHeight" => Some("implicitHeight"),
+        _ => None,
+    }
+}
+
 impl TypeDefinition {
     /// Native registration for QtQuick.Loader. The host supplies QtQuick.Item.
     pub fn quick_loader() -> Self {
