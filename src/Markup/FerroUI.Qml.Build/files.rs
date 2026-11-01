@@ -6,6 +6,7 @@ use std::rc::Rc;
 
 pub(crate) struct Files {
     project: PathBuf,
+    package: Option<PathBuf>,
     component_entries: BTreeMap<String, PathBuf>,
     #[cfg(feature = "javascript")]
     resources: Option<crate::javascript::Resources>,
@@ -18,6 +19,7 @@ impl Files {
     pub(crate) fn new(roots: Vec<PathBuf>) -> Self {
         Self {
             project: PathBuf::new(),
+            package: None,
             component_entries: BTreeMap::new(),
             #[cfg(feature = "javascript")]
             resources: None,
@@ -37,6 +39,10 @@ impl Files {
             .map_err(|e| format!("{}: {e}", input.display()))?;
         let root = input.parent().ok_or("component needs a parent directory")?;
         self.project = root.to_owned();
+        self.package = root
+            .ancestors()
+            .find(|p| p.join("Cargo.toml").is_file())
+            .map(Path::to_owned);
         for entry in entries {
             if entry.is_absolute() || entry.has_root() {
                 return Err(format!(
@@ -160,13 +166,13 @@ impl ComponentResolver for Files {
         let key = self.modules.type_key(path).unwrap_or_else(|| {
             // Different entry directories in one Cargo package can each have a
             // Foo.qml. The package-relative name survives moving the checkout.
-            if let (Ok(manifest), Ok(package)) = (
-                std::env::var("CARGO_MANIFEST_DIR"),
-                std::env::var("CARGO_PKG_NAME"),
-            ) {
-                if let Ok(relative) = path.strip_prefix(manifest) {
+            if let Some(package) = &self.package {
+                if let (Some(name), Ok(relative)) =
+                    (package.file_name(), path.strip_prefix(package))
+                {
                     return format!(
-                        "cargo:{package}/{}",
+                        "cargo:{}/{}",
+                        name.to_string_lossy(),
                         relative.to_string_lossy().replace('\\', "/")
                     );
                 }

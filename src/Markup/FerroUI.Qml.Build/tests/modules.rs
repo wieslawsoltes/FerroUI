@@ -29,3 +29,32 @@ fn qualified_reexports_use_the_requested_version_and_internal_type() {
         .dependencies
         .contains(&fixture.join("local/other.qml").canonicalize().unwrap()));
 }
+
+#[test]
+fn type_keys_are_identical_in_cargo_and_standalone_processes() {
+    use std::{path::Path, process::Command};
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../tests/QmlCompiled");
+    let compile = |inside_cargo: bool| {
+        let mut command = Command::new(env!("CARGO_BIN_EXE_ferroui-qmlc"));
+        command
+            .current_dir(&root)
+            .args(["-I", "singletons/imports", "singletons/Main.qml"]);
+        if inside_cargo {
+            command
+                .env("CARGO_PKG_NAME", "qml-compiled-tests")
+                .env("CARGO_MANIFEST_DIR", root.canonicalize().unwrap());
+        } else {
+            command
+                .env_remove("CARGO_PKG_NAME")
+                .env_remove("CARGO_MANIFEST_DIR");
+        }
+        let result = command.output().unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        result.stdout
+    };
+    assert_eq!(compile(true), compile(false));
+}
