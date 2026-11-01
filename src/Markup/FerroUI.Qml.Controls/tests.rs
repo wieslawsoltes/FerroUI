@@ -910,3 +910,31 @@ fn ancestor_disabled_suppresses_click_and_toggle_still_changes_a_plain_button() 
     assert_eq!(view.get(button, "checked").unwrap(), Value::Bool(true));
     assert_eq!(view.get(button, "checkable").unwrap(), Value::Bool(false));
 }
+
+#[test]
+fn sampling_rotation_updates_the_retained_native_transform() {
+    use ferroui_base::media::RotateTransform;
+    use std::time::Duration;
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let view = mount(
+        r#"import QtQuick
+        Item { RotationAnimation on rotation { from: 350; to: 10; direction: RotationAnimation.Clockwise; duration: 100 } }"#,
+    );
+    let angle = || {
+        view.root()
+            .render_transform()
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .to_ref()
+            .cast::<RotateTransform>()
+            .unwrap()
+    };
+    let transform = angle();
+    assert_eq!(transform.angle(), 350.);
+    view.advance_time(Duration::from_millis(50)).unwrap();
+    assert_eq!(angle(), transform);
+    assert_eq!(transform.angle(), 360.);
+    view.advance_time(Duration::from_millis(50)).unwrap();
+    assert_eq!(transform.angle(), 10.);
+}

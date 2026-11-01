@@ -42,16 +42,39 @@ pub(crate) fn register(registry: &mut TypeRegistry) -> Result<(), Error> {
             .property("property", "string", Value::String(String::new()))
             .property("properties", "string", Value::String(String::new()))
     };
-    for (name, ty) in [("NumberAnimation", "real"), ("ColorAnimation", "color")] {
-        registry.register(
-            "QtQuick",
-            name,
-            targeted()
-                .property("from", ty, Value::Undefined)
-                .property("to", ty, Value::Undefined)
-                .property("duration", "int", Value::Number(250.))
-                .property("easing.type", "int", Value::Number(0.)),
-        )?;
+    registry.register(
+        "QtQuick",
+        "PropertyAnimation",
+        targeted()
+            .property("exclude", "list<QtObject>", Value::List(vec![]))
+            .property("from", "var", Value::Undefined)
+            .property("to", "var", Value::Undefined)
+            .property("duration", "int", Value::Number(250.))
+            .property("easing.type", "int", Value::Number(0.)),
+    )?;
+    for (name, ty) in [
+        ("NumberAnimation", "real"),
+        ("ColorAnimation", "color"),
+        ("RotationAnimation", "real"),
+    ] {
+        let mut definition = TypeDefinition::default()
+            .inherits("QtQuick", "PropertyAnimation")
+            .property("from", ty, Value::Undefined)
+            .property("to", ty, Value::Undefined);
+        if name == "RotationAnimation" {
+            definition = definition
+                .property("direction", "int", Value::Number(0.))
+                .enumeration(
+                    "RotationDirection",
+                    &[
+                        ("Numerical", 0),
+                        ("Shortest", 1),
+                        ("Clockwise", 2),
+                        ("Counterclockwise", 3),
+                    ],
+                )?;
+        }
+        registry.register("QtQuick", name, definition)?;
     }
     registry.register(
         "QtQuick",
@@ -178,6 +201,12 @@ impl Instance {
 
     fn animation_matches(&self, driver: ObjectId, target: SlotId) -> bool {
         let property = &self.properties[target];
+        if self
+            .state_objects(driver, "exclude")
+            .contains(&property.owner)
+        {
+            return false;
+        }
         let mut targets = self.state_objects(driver, "targets");
         if let Ok(Value::Object(id)) = self.get(driver, "target") {
             targets.push(id)

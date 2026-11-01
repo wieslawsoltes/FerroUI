@@ -1,4 +1,11 @@
 fn main() {
+    ferroui_qml_build::compile_file("states/PropertyTracks.qml", "property_tracks.rs")
+        .expect("compile property animation fixture");
+    #[cfg(feature = "webscene")]
+    ferroui_qml_build::Compiler::new()
+        .with_javascript()
+        .compile_file("states/PropertyTracks.qml", "property_tracks_guest.rs")
+        .expect("compile V8 property animation fixture");
     ferroui_qml_build::Compiler::new()
         .import_path("plugins/modules")
         .static_plugin(ferroui_qml::ir::qmldir::StaticPlugin::new(

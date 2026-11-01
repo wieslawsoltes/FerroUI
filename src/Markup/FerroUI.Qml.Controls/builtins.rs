@@ -107,6 +107,7 @@ impl Kind {
                 .property("y", "real", Number(0.0))
                 .property("clip", "bool", Bool(false))
                 .property("opacity", "real", Number(1.0))
+                .property("rotation", "real", Number(0.0))
                 .quick_anchors()
                 .property("data", "list<QtObject>", List(vec![]))
                 .default_property("data")
@@ -283,7 +284,7 @@ impl NativeObject for Peer {
             return Ok(());
         }
         match (self, property) {
-            (_, "width" | "height" | "x" | "y" | "opacity")
+            (_, "width" | "height" | "x" | "y" | "opacity" | "rotation")
             | (Self::Rectangle { .. }, "border.width" | "radius")
             | (Self::Flow(_) | Self::Stack(_), "spacing")
             | (
@@ -333,6 +334,18 @@ impl NativeObject for Peer {
                 );
             }
             "clip" => control.set_clip_to_bounds(boolean(property, value)?),
+            "rotation" => {
+                use ferroui_base::media::RotateTransform;
+                let angle = number(property, value)?;
+                if let Some(rotate) = control
+                    .render_transform()
+                    .and_then(|t| t.as_object()?.to_ref().cast::<RotateTransform>())
+                {
+                    rotate.set_angle(angle);
+                } else if angle != 0. {
+                    control.set_render_transform(Some(RotateTransform::with_angle(angle).into()));
+                }
+            }
             _ => match (self, property) {
                 (
                     Self::ListView(v),

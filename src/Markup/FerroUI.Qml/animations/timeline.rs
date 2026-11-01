@@ -15,9 +15,109 @@ pub(super) struct Timeline {
 enum Kind {
     Gap,
     Point(Value),
-    Linear(f64, f64, u8, bool),
-    Color([u8; 4], [u8; 4], u8, bool),
+    Interpolate {
+        range: Range,
+        curve: u8,
+        reversed: bool,
+    },
     Group(Vec<(Duration, Timeline)>),
+}
+
+#[derive(Clone)]
+enum Range {
+    Number {
+        start: f64,
+        delta: f64,
+        integral: bool,
+    },
+    Color([u8; 4], [u8; 4]),
+    Geometry(Geometry, Geometry),
+}
+
+impl Range {
+    fn sample(&self, t: f64) -> Value {
+        let lerp = |a: f64, b: f64| a + (b - a) * t;
+        match *self {
+            Self::Number {
+                start,
+                delta,
+                integral,
+            } => {
+                let v = start + delta * t;
+                Value::Number(if integral { v.trunc() } else { v })
+            }
+            Self::Color(a, b) => {
+                let [r, g, b, a] =
+                    std::array::from_fn(|i| lerp(f64::from(a[i]), f64::from(b[i])) as u8);
+                Value::String(if a == 255 {
+                    format!("#{r:02x}{g:02x}{b:02x}")
+                } else {
+                    format!("#{a:02x}{r:02x}{g:02x}{b:02x}")
+                })
+            }
+            Self::Geometry(a, b) => {
+                // The target type coerced both endpoints to the same geometry.
+                // Only the named storage fields are interpolated; rectangle edges are derived.
+                use Geometry::*;
+                Value::Geometry(match (a, b) {
+                    (Point { x, y }, Point { x: xx, y: yy }) => Point {
+                        x: lerp(x, xx),
+                        y: lerp(y, yy),
+                    },
+                    (
+                        Size { width, height },
+                        Size {
+                            width: w,
+                            height: h,
+                        },
+                    ) => Size {
+                        width: lerp(width, w),
+                        height: lerp(height, h),
+                    },
+                    (
+                        Rect {
+                            x,
+                            y,
+                            width,
+                            height,
+                        },
+                        Rect {
+                            x: xx,
+                            y: yy,
+                            width: w,
+                            height: h,
+                        },
+                    ) => Rect {
+                        x: lerp(x, xx),
+                        y: lerp(y, yy),
+                        width: lerp(width, w),
+                        height: lerp(height, h),
+                    },
+                    _ => unreachable!("matched target geometry"),
+                })
+            }
+        }
+    }
+}
+
+fn rotation_delta(delta: f64, direction: i32) -> Result<f64, Error> {
+    Ok(match direction {
+        0 => delta,
+        1 => {
+            let turn = delta % 360.;
+            if turn > 180. {
+                turn - 360.
+            } else if turn < -180. {
+                turn + 360.
+            } else {
+                turn
+            }
+        }
+        2 if delta < 0. => delta.rem_euclid(360.),
+        3 if delta > 0. => -(-delta).rem_euclid(360.),
+        2 | 3 => delta,
+        _ => return Err(Error::new("invalid RotationAnimation direction")),
+    })
 }
 
 impl Timeline {
@@ -59,22 +159,11 @@ impl Timeline {
                     ))
                 })
             }
-            Kind::Linear(a, b, curve, reverse) => {
-                let progress = progress(*curve, *reverse, t, self.period);
-                Some(Value::Number(a + (b - a) * progress))
-            }
-            Kind::Color(a, b, curve, reverse) => {
-                let progress = progress(*curve, *reverse, t, self.period);
-                let [r, g, b, a]: [u8; 4] = std::array::from_fn(|i| {
-                    let from = f64::from(a[i]);
-                    (from + (f64::from(b[i]) - from) * progress) as u8
-                });
-                Some(Value::String(if a == 255 {
-                    format!("#{r:02x}{g:02x}{b:02x}")
-                } else {
-                    format!("#{a:02x}{r:02x}{g:02x}{b:02x}")
-                }))
-            }
+            Kind::Interpolate {
+                range,
+                curve,
+                reversed,
+            } => Some(range.sample(progress(*curve, *reversed, t, self.period))),
         }
     }
 }
@@ -115,6 +204,8 @@ impl Instance {
                 && matches!(
                     n.name.as_str(),
                     "NumberAnimation"
+                        | "RotationAnimation"
+                        | "PropertyAnimation"
                         | "ColorAnimation"
                         | "SequentialAnimation"
                         | "ParallelAnimation"
@@ -148,11 +239,43 @@ impl Instance {
 
     fn accepts_leaf(&self, id: ObjectId, key: SlotId) -> bool {
         let ty = self.properties[key].ty.as_str();
-        self.animation_matches(id, key)
-            && (self.quick_kind(id, "PropertyAction")
-                || self.quick_kind(id, "ColorAnimation") && ty == "color"
-                || self.quick_kind(id, "NumberAnimation")
-                    && matches!(ty, "int" | "real" | "float" | "double"))
+        let numeric = matches!(ty, "int" | "real" | "float" | "double");
+        if !self.animation_matches(id, key) {
+            return false;
+        }
+        match self.type_name(id) {
+            Some("PropertyAction") => true,
+            Some("NumberAnimation") => numeric,
+            Some("ColorAnimation") => ty == "color",
+            Some("PropertyAnimation") => {
+                numeric || matches!(ty, "color" | "point" | "size" | "rect")
+            }
+            Some("RotationAnimation") => {
+                numeric
+                    && (matches!(self.properties[key].name.as_str(), "rotation" | "angle")
+                        || ["property", "properties"].iter().any(
+                            |p| matches!(self.get(id,p),Ok(Value::String(s)) if !s.is_empty()),
+                        )
+                        || self.inherits_animation_target(id))
+            }
+            _ => false,
+        }
+    }
+
+    fn inherits_animation_target(&self, mut id: ObjectId) -> bool {
+        while let Some(parent) = self.parent(id) {
+            if self.quick_kind(parent, "Behavior") {
+                return true;
+            }
+            if !self.is_group(parent) {
+                break;
+            }
+            if matches!(self.get(parent,"$qml:onProperty"),Ok(Value::String(s)) if !s.is_empty()) {
+                return true;
+            }
+            id = parent;
+        }
+        false
     }
 
     pub(super) fn playback_targets(
@@ -203,7 +326,18 @@ impl Instance {
                 );
             }
         }
+        let excluded = self.state_objects(id, "exclude");
         for t in targets {
+            if excluded.contains(&t) {
+                continue;
+            }
+            if properties.is_empty() && self.quick_kind(id, "RotationAnimation") {
+                for name in ["rotation", "angle"] {
+                    if let Ok(slot) = self.key(t, name) {
+                        keys.insert(self.write_target(slot)?);
+                    }
+                }
+            }
             for p in &properties {
                 keys.insert(self.write_target(self.key(t, p)?)?);
             }
@@ -311,12 +445,42 @@ impl Instance {
             Kind::Point(end.clone())
         } else {
             let curve = self.numeric(driver, "easing.type").unwrap_or(0.) as u8;
-            if self.quick_kind(driver, "ColorAnimation") {
-                Kind::Color(color(&start)?, color(&end)?, curve, reversed)
-            } else if let (Value::Number(a), Value::Number(b)) = (&start, &end) {
-                Kind::Linear(*a, *b, curve, reversed)
+            let ty = &self.properties[key].ty;
+            let generic = self.quick_kind(driver, "PropertyAnimation");
+            let start = if generic {
+                self.typed(ty, start)?
             } else {
-                return Err(Error::new("NumberAnimation requires numeric endpoints"));
+                start
+            };
+            let range = match (&start, &end) {
+                (Value::Number(a), Value::Number(b)) => {
+                    let mut delta = b - a;
+                    if self.quick_kind(driver, "RotationAnimation") {
+                        let direction = self.numeric(driver, "direction").unwrap_or(0.) as i32;
+                        delta = if reversed {
+                            -rotation_delta(-delta, direction)?
+                        } else {
+                            rotation_delta(delta, direction)?
+                        };
+                    }
+                    Range::Number {
+                        start: *a,
+                        delta,
+                        integral: generic && ty == "int",
+                    }
+                }
+                (Value::Geometry(a), Value::Geometry(b)) if generic => Range::Geometry(*a, *b),
+                _ if ty == "color" => Range::Color(color(&start)?, color(&end)?),
+                _ => {
+                    return Err(Error::new(format!(
+                        "invalid animation endpoints for '{ty}'"
+                    )))
+                }
+            };
+            Kind::Interpolate {
+                range,
+                curve,
+                reversed,
             }
         };
         Ok(Timeline::new(kind, duration, loops, Some(end)))
