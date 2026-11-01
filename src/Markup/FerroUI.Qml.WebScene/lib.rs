@@ -1,6 +1,8 @@
 //! WebScene.NativeEngine ABI 3 backend for QML. One bounded worker owns the V8
 //! realm. QML reads, writes, calls and notifications execute on the original
 //! FerroUI transaction thread, including nested evaluations on the same stack.
+#[cfg(target_arch = "wasm32")]
+mod browser_application;
 #[cfg(not(target_arch = "wasm32"))]
 mod framing;
 mod host;
@@ -18,6 +20,8 @@ mod script_actor;
 #[path = "browser_actor.rs"]
 mod script_actor;
 mod worker_program;
+#[cfg(target_arch = "wasm32")]
+pub use browser_application::{browser_application_module, BrowserApplication};
 use ferroui_qml::{
     ir, Error, ExternalValue, ObjectId, ScriptContext, ScriptEngine, ScriptInstance, ScriptScope,
     Value,
@@ -311,6 +315,17 @@ impl ScriptEngine for WebSceneEngine {
         Ok(())
     }
 
+    fn copy_external_data(
+        &self,
+        ctx: &mut ScriptContext<'_, '_>,
+        value: &ExternalValue,
+    ) -> Result<Value, Error> {
+        let realm = self.realm(ctx.instance());
+        realm.invoke(
+            ctx,
+            json!({"op":"copyData","target":["js",realm.handle(value)?],"mode":"data"}),
+        )
+    }
     fn get_external(
         &self,
         ctx: &mut ScriptContext<'_, '_>,

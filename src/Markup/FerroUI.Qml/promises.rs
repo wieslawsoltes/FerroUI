@@ -44,17 +44,7 @@ impl Instance {
         args: Vec<Value>,
         timeout: Duration,
     ) -> Result<Value, Error> {
-        self.transaction(|tx| {
-            tx.set_promise_deadline(timeout);
-            let result = tx.invoke(owner, method, args, &mut BTreeSet::new())?;
-            tx.model.validate_handles(&result)?;
-            match &result {
-                Value::External(handle) => {
-                    finish(tx.promise(owner, handle, timeout)?, timeout, Some(result))
-                }
-                _ => Ok(result),
-            }
-        })
+        self.transaction(|tx| tx.invoke_await(owner, method, args, timeout))
     }
 }
 
@@ -78,6 +68,24 @@ fn finish(
 }
 
 impl transaction::Transaction<'_> {
+    pub(crate) fn invoke_await(
+        &mut self,
+        owner: ObjectId,
+        method: &str,
+        args: Vec<Value>,
+        timeout: Duration,
+    ) -> Result<Value, Error> {
+        self.set_promise_deadline(timeout);
+        let result = self.invoke(owner, method, args, &mut BTreeSet::new())?;
+        self.model.validate_handles(&result)?;
+        match &result {
+            Value::External(handle) => {
+                finish(self.promise(owner, handle, timeout)?, timeout, Some(result))
+            }
+            _ => Ok(result),
+        }
+    }
+
     fn set_promise_deadline(&mut self, timeout: Duration) {
         // Zero requests immediate inspection, which still requires one VM round trip.
         if !timeout.is_zero() {

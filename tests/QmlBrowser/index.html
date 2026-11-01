@@ -3,7 +3,7 @@
 <title>FerroUI QML browser conformance</title>
 <pre id="result">Running</pre>
 <script type="module">
-import init, {has_browser_host} from "./pkg/qml_browser_tests.js";
+import init, {has_browser_host, qmlApplicationModule} from "./pkg/qml_browser_tests.js";
 const result = document.querySelector("#result");
 const report = async value => {
     result.textContent = value;
@@ -12,6 +12,42 @@ const report = async value => {
 try {
     await init();
     if (has_browser_host()) throw Error("UI thread accepted a blocking QML worker");
+    const {openQmlApplication} = await import(qmlApplicationModule());
+    try {
+        await openQmlApplication("./owner.js?application&fail");
+        throw Error("missing startup failure");
+    } catch(e) { if (!String(e).includes("fixture initialization failed")) throw e; }
+    const app = await openQmlApplication("./owner.js?application");
+    function check(ok, label) { if (!ok) throw new Error(label); }
+    check(await app.get("caption","nested") === "native child","id-addressed child");
+    const totals = [];
+    const stop = await app.watch("total", n => totals.push(n));
+    const [set, total, bumped] = await Promise.all([app.set("seed",4),app.get("total"),app.call("bump",[2])]);
+    check(set === undefined && total === 13 && bumped === 17 && totals.join(",") === "13,17","concurrent FIFO requests and committed changes");
+    await stop();
+    const result = await app.call("copied",[{items:[true,undefined,"λ"]}]);
+    check(result.nested.items[0] && result.nested.items[1] === undefined && result.nested.items[2] === "λ"
+        && Object.is(result.numbers[0],-0) && Number.isNaN(result.numbers[1]) && result.numbers[2] === Infinity && result.empty === null,"typed round trip");
+    const values = [];
+    const unwatchModel = await app.watch("rows", rows => values.push(rows[0].n));
+    check((await app.get("rows"))[0].n === 2,"ListModel snapshot");
+    await app.call("rowEdit");
+    check(values.join(",") === "5","ListModel role edit notification");
+    await unwatchModel();
+    const ticks = [];
+    await app.watch("ticks",n=>ticks.push(n));
+    await app.call("startTimer");
+    for (let i=0; !ticks.length && i<150; i++) await new Promise(r=>setTimeout(r,10));
+    check(ticks[0] === 1,"asynchronous Timer change");
+    try { await app.call("fail"); throw Error("missing exception"); } catch(e) { check(String(e).includes("browser rollback"),"exception propagation"); }
+    try { await app.call("uncopyable"); throw Error("exported function"); } catch(e) { check(String(e).includes("plain"),"non-data result"); }
+    check(await app.get("seed") === 6 && totals.length === 2,"rollback and unsubscribe");
+    check(await app.call("later") === 21,"Promise result");
+    const pending = app.call("spin").then(()=>false,e=>String(e).includes("disposed"));
+    const queued = app.get("seed").then(()=>false,e=>String(e).includes("disposed"));
+    await new Promise(resolve=>requestAnimationFrame(resolve));
+    app.dispose();
+    check(await pending && await queued,"responsive page and disposal with pending calls");
     const owner = new Worker("./owner.js",{type:"module"});
     owner.onmessage = ({data}) => {owner.terminate();report(data);};
     owner.onerror = e => report(e.message);

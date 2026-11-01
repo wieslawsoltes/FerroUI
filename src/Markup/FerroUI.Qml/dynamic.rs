@@ -21,6 +21,7 @@ pub(crate) struct Components {
     pub loaders: BTreeMap<ObjectId, crate::loader::State>,
     pub serial: u64,
     pub revision: u64,
+    pub model_revision: u64,
     pub registry: Option<Rc<TypeRegistry>>,
     pub contexts: BTreeMap<ObjectId, Context>,
     pub created: Vec<ObjectId>,

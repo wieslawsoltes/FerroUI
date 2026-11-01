@@ -118,6 +118,17 @@ pub trait ScriptEngine {
     }
 
     /// Optional interop when the built-in evaluator reads a foreign JS object.
+    /// Materialize a plain object or array without exporting a guest heap handle.
+    fn copy_external_data(
+        &self,
+        _ctx: &mut ScriptContext<'_, '_>,
+        _value: &ExternalValue,
+    ) -> Result<Value, Error> {
+        Err(Error::new(
+            "this script engine cannot copy an external value",
+        ))
+    }
+
     fn get_external(
         &self,
         _context: &mut ScriptContext<'_, '_>,

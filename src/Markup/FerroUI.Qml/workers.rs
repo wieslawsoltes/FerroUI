@@ -363,6 +363,45 @@ pub(crate) fn register(types: &mut TypeRegistry) -> Result<(), Error> {
     types.reexport("QtQml", "QtQml.WorkerScript")
 }
 impl Instance {
+    /// Copy application data out of its owning realm, including ListModel
+    /// snapshots. QObject pointers, methods and functions cannot cross this boundary.
+    pub fn copy_data(&mut self, owner: ObjectId, value: Value) -> Result<WorkerValue, Error> {
+        self.transaction(|tx| tx.copy_data(owner, value))
+    }
+
+    /// Decode a copied value and assign it in the same transaction.
+    pub fn set_data(
+        &mut self,
+        owner: ObjectId,
+        name: &str,
+        data: WorkerValue,
+    ) -> Result<(), Error> {
+        let key = self.public_key(owner, name)?;
+        self.transaction(|tx| {
+            let value = tx.import_worker(None, data, 0)?;
+            tx.write(key, value)
+        })
+    }
+
+    /// Decode, call, settle and copy the result as one transaction. A result
+    /// containing an untransferable function rolls back the method's QML writes.
+    pub fn call_data(
+        &mut self,
+        owner: ObjectId,
+        method: &str,
+        args: Vec<WorkerValue>,
+        timeout: std::time::Duration,
+    ) -> Result<WorkerValue, Error> {
+        self.transaction(|tx| {
+            let args = args
+                .into_iter()
+                .map(|v| tx.import_worker(None, v, 0))
+                .collect::<Result<Vec<_>, _>>()?;
+            let value = tx.invoke_await(owner, method, args, timeout)?;
+            tx.copy_data(owner, value)
+        })
+    }
+
     pub fn has_worker_scripts(&self) -> bool {
         !self.workers.entries.is_empty()
     }
@@ -406,7 +445,7 @@ impl Instance {
                 match event {
                     WorkerEvent::Ready => self.transaction(|tx| tx.worker_ready(id, true))?,
                     WorkerEvent::Message(v) => self.transaction(|tx| {
-                        let input = tx.import_worker(id, v, 0)?;
+                        let input = tx.import_worker(Some(id), v, 0)?;
                         tx.signal(id, "message", vec![input])
                     })?,
                     WorkerEvent::Sync {
@@ -503,7 +542,7 @@ impl Instance {
                     let args = edit
                         .args
                         .into_iter()
-                        .map(|v| tx.import_worker(worker, v, 0))
+                        .map(|v| tx.import_worker(Some(worker), v, 0))
                         .collect::<Result<Vec<_>, _>>()?;
                     tx.model_call(id, &edit.method, &args, &mut BTreeSet::new())?;
                 }
@@ -647,6 +686,21 @@ impl Transaction<'_> {
         self.worker_actions.push(Action::Send(id, value, grants));
         Ok(Value::Undefined)
     }
+    fn copy_data(&mut self, owner: ObjectId, value: Value) -> Result<WorkerValue, Error> {
+        let value = if let Value::External(handle) = &value {
+            self.with_external(owner, handle, &mut BTreeSet::new(), |engine, ctx| {
+                engine.copy_external_data(ctx, handle)
+            })?
+        } else {
+            value
+        };
+        let data = self.export_worker(&value, 0, &mut BTreeMap::new())?;
+        if data.estimated_bytes() > BYTE_LIMIT {
+            return Err(Error::new("copied QML value exceeds 32 MiB"));
+        }
+        Ok(data)
+    }
+
     fn export_worker(
         &mut self,
         input: &Value,
@@ -724,7 +778,7 @@ impl Transaction<'_> {
     }
     fn import_worker(
         &mut self,
-        worker: ObjectId,
+        worker: Option<ObjectId>,
         input: WorkerValue,
         depth: usize,
     ) -> Result<Value, Error> {
@@ -734,6 +788,8 @@ impl Transaction<'_> {
         }
         Ok(match input {
             WorkerValue::Model { id, .. } => {
+                let worker =
+                    worker.ok_or_else(|| Error::new("a copied value cannot grant model access"))?;
                 let object = *self.model.workers.entries[&worker]
                     .models
                     .get(&id)

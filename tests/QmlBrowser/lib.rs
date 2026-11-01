@@ -126,3 +126,23 @@ pub async fn probe_fetch(url: String) -> Result<(), JsValue> {
     }
     Ok(())
 }
+
+#[wasm_bindgen]
+pub async fn application_model() -> Result<ferroui_qml_webscene::BrowserApplication, JsValue> {
+    let error = |e: ferroui_qml::Error| JsValue::from_str(&e.to_string());
+    let timeout = Duration::from_secs(3);
+    let engine = Rc::new(
+        WebSceneEngine::browser()
+            .map_err(error)?
+            .with_timeout(timeout),
+    );
+    engine.prepare_browser_instance().await.map_err(error)?;
+    let model = Instance::with_engine(
+        &compiled_qml(),
+        &TypeRegistry::new(),
+        Default::default(),
+        engine,
+    )
+    .map_err(error)?;
+    ferroui_qml_webscene::BrowserApplication::new(model, timeout).map_err(error)
+}

@@ -21,6 +21,52 @@ pub async fn load(
 
 Call `prepare_browser_instance().await` once per new scripting instance when sharing an engine. An overdue guest operation terminates the worker. Prewarm a replacement before the next script operation on the affected instance. Rust-managed QML state survives rollback, and JavaScript objects belonging to the terminated worker expire. Dropping the instance terminates its worker. Dropping the engine also terminates unused prewarmed workers.
 
+## Calling QML from a page
+
+The packaged `browser_application.js` module lets window code call a compiled application while the Rust instance and its JavaScript guests run in dedicated workers. Serve the module alongside the application's worker entry. An application that already loads the generated Wasm package can also obtain the module URL from the exported `qmlApplicationModule()` function after initialization.
+
+```js
+// page.js
+import {openQmlApplication} from "./browser_application.js";
+
+const app = await openQmlApplication(new URL("./owner.js", import.meta.url));
+const stop = await app.watch("total", value => { output.textContent = value; });
+await app.set("seed", 4);
+const result = await app.call("bump", [2]);
+const title = await app.get("caption", "nested"); // a QML id
+await stop();
+app.dispose();
+```
+
+The worker entry installs its factory. The handshake completes after the factory returns a `BrowserApplication`.
+
+```js
+// owner.js
+import {serveQmlApplication} from "./browser_application.js";
+import init, {createModel} from "./pkg/my_app.js";
+
+serveQmlApplication(async () => {
+    await init();
+    return createModel();
+});
+```
+
+Export the factory from the application's Wasm crate. The `load` function above constructs the compiled QML instance.
+
+```rust
+#[wasm_bindgen::prelude::wasm_bindgen(js_name = createModel)]
+pub async fn create_model() -> Result<ferroui_qml_webscene::BrowserApplication, wasm_bindgen::JsValue> {
+    let model = load(&compiled_qml(), &ferroui_qml::TypeRegistry::new()).await
+        .map_err(|err| wasm_bindgen::JsValue::from_str(&err.to_string()))?;
+    ferroui_qml_webscene::BrowserApplication::new(model, std::time::Duration::from_secs(5))
+        .map_err(|err| wasm_bindgen::JsValue::from_str(&err.to_string()))
+}
+```
+
+`get`, `set`, `call` and `watch` address the root by default and accept a QML id as their last argument. Values cross the boundary by copy, including plain records, arrays, strings, booleans, numbers, null and undefined. Reading a ListModel yields an array of role records. Watching its property reports committed row edits, including changes to nested models. Other watches report committed property changes. `watch` resolves to an unsubscribe function. Calls await returned Promises. Exceptions, rejection and untransferable results roll back the call's QML writes.
+
+Each client owns one application and executes requests in order. Up to 256 pending requests share a 32 MiB input budget. The default client deadline is 15 seconds per request. Pass `{timeout, signal, onError}` when opening the application to configure the deadline in milliseconds, cancel its lifetime, or receive asynchronous errors. Disposal, cancellation and request timeout terminate the application worker and reject pending requests. The owner delivers timer, deferred, fetch and WorkerScript events between requests. [Application module](../src/Markup/FerroUI.Qml.WebScene/browser_application.js) · [Chromium fixture](../tests/QmlBrowser/index.html)
+
 ## Hosting
 
 The page must be in a secure context with cross-origin isolation enabled. Serve `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` or compatible isolation headers. The application creates a nested worker from a Blob and compiles packaged JavaScript functions at runtime. The page's Content Security Policy must allow those operations. The script worker runs trusted application code with its origin's worker permissions.

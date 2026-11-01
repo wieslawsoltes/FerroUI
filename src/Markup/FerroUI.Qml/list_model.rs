@@ -260,6 +260,11 @@ impl Instance {
         }
         None
     }
+    /// Changes after a transaction commits edits to any ListModel in the instance.
+    pub fn models_revision(&self) -> u64 {
+        self.dynamic.model_revision
+    }
+
     pub(crate) fn worker_model_snapshot(
         &self,
         id: ObjectId,

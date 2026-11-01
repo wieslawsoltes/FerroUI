@@ -168,6 +168,9 @@ impl Instance {
             }
             tx.model.rollback_creation(tx.structure);
         } else {
+            if !tx.model_edits.is_empty() {
+                tx.model.dynamic.model_revision = tx.model.dynamic.model_revision.wrapping_add(1);
+            }
             tx.model
                 .javascript
                 .deferred
