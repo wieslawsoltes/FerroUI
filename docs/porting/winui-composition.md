@@ -254,10 +254,11 @@ What a connected animation needs, and the `ElementCompositionPreview` statics.
    clip and cross-fade animations, the gravity, direct and basic configurations,
    `IsScaleAnimationEnabled`, `SetAnimationComponent`, coordinated elements, the timeout,
    `Cancel`, `Completed`) behind the upstream service's API.
-6. **Catalog**: a "Composition (WinUI)" page with a list and a detail view joined by a connected
-   animation, implicit show and hide animations, a pointer-driven light-like effect from the
-   pointer position property set and a parallax header from the scroll viewer property set.
-   Verified on macOS with the Skia and Vello backends.
+6. **Catalog**: a list and a detail view joined by a connected animation, implicit show and
+   hide animations, a pointer-driven light-like effect from the pointer position property set and
+   a parallax header from the scroll viewer property set (first one "Composition (WinUI)" page,
+   now the pages "Connected animations", "Implicit animations", "Pointer position" and "Parallax"
+   of the section "Composition", section 8). Verified on macOS with the Skia and Vello backends.
 
 ### Phase 2: visuals, brushes and shapes
 
@@ -626,27 +627,32 @@ Missing). `DEVIATIONS.md` points here for this area.
 
 ## 8. Verification in the catalog
 
-The page "Composition (WinUI)" of the ControlCatalog (`samples/ControlCatalog/Pages/winui_composition_page.rs`) shows a connected animation between a list of cards and a detail view, the implicit show and hide animations, a light that follows the pointer (the pointer position property set) and a parallax header (the manipulation property set of a scroll viewer).
+The ControlCatalog has a section "Composition", after "Media & Graphics", with one page per feature (`samples/ControlCatalog/Pages/winui_composition_pages.rs`; the upstream page "Composition" stays in "Media & Graphics"). Each page shows its demo at once, under a title that names the API it uses and a description. The pages of the WinUI materials are in the same section (`winui-materials.md`, section 10). The pages of the composition API, and the page "Reveal" of the materials, which replaces a section of the earlier single page:
 
-Below them, one section per later phase (`samples/ControlCatalog/Pages/winui_composition_phases.rs`). Each section names the API it uses; its demo is built the first time its expander opens, so the page stays light until then:
-
-| Section | Phase | What it shows |
+| Page | Phase | What it shows |
 |---|---|---|
+| Connected animations | 1 | a connected animation between a list of cards and a detail view (`winui_composition_page.rs`), with the gravity, direct and basic configurations and the scale animation switched on and off |
+| Implicit animations | 1 | the implicit show and hide animations of `ElementCompositionPreview` on a box whose `IsVisible` toggles and on chips added to and removed from a panel |
+| Pointer position | 1 | a light that follows the pointer: a sprite whose `Offset` is an expression of the pointer position property set |
+| Parallax | 1 | a parallax header: an expression of the manipulation property set of its scroll viewer moves its `Translation` |
 | Visuals | 2 | a `SpriteVisual` with a colour brush and a child turned by `RotationAngleInDegrees`; a `ShapeVisual` with rounded rectangle, ellipse and path geometries, the path animating `TrimEnd`; a `LayerVisual` whose `Effect` blurs its children as one; a `RedirectVisual` whose `Source` is the visual of a live element, drawn as its reflection |
-| Brushes | 2 | linear and radial gradient brushes with the WinUI members (`StartPoint`, `EndPoint`, `EllipseCenter`, `EllipseRadius`, `GradientOriginOffset`); a nine-grid brush over a `LoadedImageSurface` beside the same image stretched; a mask brush (a gradient through a radial mask) |
-| Animations | 3 | spring scalar (`Offset.X`) and vector (`Offset`) animations with sliders for `DampingRatio` and `Period`; one key frame animation per `CompositionEasingFunction` curve, side by side; a `CompositionAnimationGroup` started in a `CompositionScopedBatch` whose `Completed` reports the elapsed time |
+| Composition brushes | 2 | linear and radial gradient brushes with the WinUI members (`StartPoint`, `EndPoint`, `EllipseCenter`, `EllipseRadius`, `GradientOriginOffset`); a nine-grid brush over a `LoadedImageSurface` beside the same image stretched; a mask brush (a gradient through a radial mask) |
+| Spring and key frame animations | 3 | spring scalar (`Offset.X`) and vector (`Offset`) animations with sliders for `DampingRatio` and `Period`; one key frame animation per `CompositionEasingFunction` curve, side by side; a `CompositionAnimationGroup` started in a `CompositionScopedBatch` whose `Completed` reports the elapsed time |
 | Shadows and lights | 5 | a `DropShadow` with sliders for `BlurRadius` and `Offset` and buttons for `Color`; an `AmbientLight`, a `DistantLight`, a `PointLight` whose `Offset` animates and a `SpotLight`, each over its own scene |
 | InteractionTracker | 4 | a surface dragged through a `VisualInteractionSource` (`TryRedirectForManipulation` on pointer press), with inertia within `MinPosition` and `MaxPosition`, an expression animation of the content reading `tracker.Position`, the owner callbacks writing the state and the position, and buttons for `TryUpdatePositionWithAdditionalVelocity` and `TryUpdatePosition` |
-| Effects | 6 | effect brushes from `CompositionEffectFactory` over a checkerboard surface: `GaussianBlurEffect` (its `Blur.BlurAmount` from a slider), `OpacityEffect`, `CrossFadeEffect` (its `Crossfade.Weight` animated), `CompositeEffect` over a `ColorSourceEffect`, and a `ColorSourceEffect` alone |
-| Shadows of an alpha mask | 7 | the trace pointer of the Windows Calculator (`AddTracePointerShadow`: a `DropShadow` with `BlurRadius` 6, `Opacity` 0.33, `Offset` (2, 2, 0) and the `Mask` of `CursorPath.GetAlphaMask()`, on a sprite set with `SetElementChildVisual` on the element under the path), scaled by a slider, with a button that changes the geometry of the path; the shadows of `TextBlock.GetAlphaMask` and `Image.GetAlphaMask`; a sprite turned about the X axis whose shadow has an `Offset` of (0, 0, 30) |
+| Effect brushes | 6 | effect brushes from `CompositionEffectFactory` over a checkerboard surface: `GaussianBlurEffect` (its `Blur.BlurAmount` from a slider), `OpacityEffect`, `CrossFadeEffect` (its `Crossfade.Weight` animated), `CompositeEffect` over a `ColorSourceEffect`, and a `ColorSourceEffect` alone |
+| Reveal | materials | the Reveal brushes lit by the XAML lights of WinUI (the page of the materials, `winui-materials.md`; it replaces the section "Reveal and XAML lights" of the single page, whose three tiles were a part of it) |
+| Alpha mask shadows | 7 | the trace pointer of the Windows Calculator (`AddTracePointerShadow`: a `DropShadow` with `BlurRadius` 6, `Opacity` 0.33, `Offset` (2, 2, 0) and the `Mask` of `CursorPath.GetAlphaMask()`, on a sprite set with `SetElementChildVisual` on the element under the path), scaled by a slider, with a button that changes the geometry of the path; the shadows of `TextBlock.GetAlphaMask` and `Image.GetAlphaMask`; a sprite turned about the X axis whose shadow has an `Offset` of (0, 0, 30) |
 | ThemeShadow | 7 | five cards with a `ThemeShadow` at `Translation.Z` 16, 32, 40, 64 and 128, in the light or dark theme (a button switches the theme variant of their scope) |
-| Zoom and the manipulation property set | 7 | a `ScrollViewer` with `ZoomMode` `Enabled` (Ctrl and the wheel, buttons calling `ChangeView`), and over it a sprite whose `Offset` and `Scale` are expressions of the `Translation` and `Scale` of its manipulation property set, pinned to a dot of the content |
+| Zoom and manipulation | 7 | a `ScrollViewer` with `ZoomMode` `Enabled` (Ctrl and the wheel, buttons calling `ChangeView`), and over it a sprite whose `Offset` and `Scale` are expressions of the `Translation` and `Scale` of its manipulation property set, pinned to a dot of the content |
 
-A screenshot run of the desktop entry point drives it without a person and saves the frames the compositor draws:
+The demos of phases 2 to 7 are in `winui_composition_phases.rs` and `winui_composition_phase7.rs`. Until the catalog had the section, they were sections of one page "Composition (WinUI)", each built the first time its expander opened.
+
+A screenshot run of the desktop entry point drives the pages without a person and saves the frames the compositor draws:
 
 ```sh
-FERROUI_SMOKE_SCREENSHOTS=<directory> FERROUI_SMOKE_SCREENSHOT_PAGES="Composition (WinUI)" \
-FERROUI_SMOKE_PAGES=13000 FERROUI_SMOKE_WINUI_FLIGHT=0 cargo run -p control-catalog-desktop --features vello
+FERROUI_SMOKE_SCREENSHOTS=<directory> FERROUI_SMOKE_SCREENSHOT_PAGES="Connected animations" \
+FERROUI_SMOKE_PAGES=22000 FERROUI_SMOKE_WINUI_FLIGHT=0 cargo run -p control-catalog-desktop --features vello
 ```
 
-`FERROUI_SMOKE_WINUI_FLIGHT` chooses the configuration (0 gravity, 1 direct, 2 basic); the run opens the first card (`flight-NN-<ms>.png` during the flight there and back), then hides and shows the box of the implicit animations and scrolls the parallax scroller (`steps-<ms>.png`). At 5 s it opens the expanders of the later sections, then brings each into view in turn, runs its demo as its buttons do (the springs, the easings, the group, a bigger shadow, a fling of the tracker, a stronger blur) and saves the window (`section-N-<ms>.png`, N from 0 for Visuals to 8 for the zoom); `FERROUI_SMOKE_WINUI_SECTION_MS` sets the time between two sections (1200 ms by default, with `FERROUI_SMOKE_PAGES` raised to match) and `FERROUI_SMOKE_WINUI_FIRST_SECTION` the first section shown (6 for the sections of phase 7). The six sections were checked this way on macOS with Skia (a debug build) and with Vello (a release build: in a debug build each saved Vello frame holds the compositor up for seconds, so the user interface falls behind the timers and the later frames repeat the same state). `FERROUI_RENDERER=vello` selects the Vello backend; with a debug build `FERROUI_SMOKE_WINUI_FLIGHT_FEW=1` saves fewer frames, because the encoding of a picture blocks the thread of the compositor for long enough to shift the later frames. The flights, the implicit animations and the parallax were checked this way with Skia and Vello on macOS.
+`FERROUI_SMOKE_WINUI_FLIGHT` chooses the configuration (0 gravity, 1 direct, 2 basic); the run opens the first card (`flight-NN-<ms>.png` during the flight there and back), then selects the page "Implicit animations", hides and shows its box, selects the page "Parallax" and scrolls its scroller (`steps-<ms>.png`). From 5.4 s it selects the pages of the demos of the later phases in turn, runs each demo as its buttons do half a second after the selection (the springs, the easings, the group, a bigger shadow, a fling of the tracker, a stronger blur) and saves the window (`section-N-<ms>.png`, N from 0 for Visuals to 9 for the zoom, in the order of the sections of the earlier single page: Visuals, Composition brushes, Spring and key frame animations, Shadows and lights, InteractionTracker, Effect brushes, Reveal, Alpha mask shadows, ThemeShadow, Zoom and manipulation; `control_catalog::pages::smoke_section_header`). `FERROUI_SMOKE_WINUI_SECTION_MS` sets the time between two pages (1600 ms by default, at least 1400, with `FERROUI_SMOKE_PAGES` raised to match) and `FERROUI_SMOKE_WINUI_FIRST_SECTION` the first one shown (7 for the pages of phase 7). The pictures the screenshot run takes at the end of the interval of its first page show the last page the flight selected. The sections were checked this way on macOS with Skia (a debug build) and with Vello (a release build: in a debug build each saved Vello frame holds the compositor up for seconds, so the user interface falls behind the timers and the later frames repeat the same state), when they were sections of the single page. `FERROUI_RENDERER=vello` selects the Vello backend; with a debug build `FERROUI_SMOKE_WINUI_FLIGHT_FEW=1` saves fewer frames, because the encoding of a picture blocks the thread of the compositor for long enough to shift the later frames. The flights, the implicit animations and the parallax were checked this way with Skia and Vello on macOS.

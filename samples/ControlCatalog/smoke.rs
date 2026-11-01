@@ -38,6 +38,25 @@ pub fn pages(view_model: &MainWindowViewModel) -> Vec<Rc<PageItem>> {
     pages
 }
 
+/// Navigates to the page of the catalog whose header is `header` (compared without regard to
+/// case), as a click on its entry does. Returns whether there is a main view model and a page with
+/// that header; the navigation itself completes later. Used by the smoke runs of the pages of the
+/// section "Composition", which go from one page to the next (`pages::smoke_show_section`).
+pub fn select_page(header: &str) -> bool {
+    let Some(view_model) = main_view_model() else { return false };
+    match pages(&view_model).into_iter().find(|item| item.header().eq_ignore_ascii_case(header)) {
+        Some(item) => {
+            println!("Selecting {}", item.header());
+            view_model.navigate_to_item(&item);
+            true
+        }
+        None => {
+            println!("No page has the header {header:?}");
+            false
+        }
+    }
+}
+
 /// Navigates to the pages of the catalog whose headers are given, in that
 /// order, each for `interval`. `shown` is called with the index and the
 /// header of a page when its interval is over (the page has been laid out
