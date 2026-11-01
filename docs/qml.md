@@ -327,6 +327,8 @@ An application can enable remote QML on its type registry. HTTP transfers run of
 
 ## Verification
 
+Compiler, runtime, layout and editor benchmark commands and the measured workloads are in the [performance guide](qml-performance.md).
+
 ```sh
 cargo test --locked -p ferroui-qml-compiler -p ferroui-qml -p ferroui-qml-build -p qml-compiled-tests
 cargo test --locked -p ferroui-qml-controls
