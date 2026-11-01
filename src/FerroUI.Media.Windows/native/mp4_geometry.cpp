@@ -58,15 +58,23 @@ static Box child(const Bytes &b, Box parent, uint32_t kind, int &budget) {
   require(count == 1);
   return found;
 }
-static double ratio(const Bytes &b, size_t p, bool sign = false) {
-  auto d = u32(b, p + 4);
-  require(d != 0);
-  return (sign ? double(int32_t(u32(b, p))) : double(u32(b, p))) / d;
+static uint32_t extent(const Bytes &b, size_t p) {
+  auto n = u32(b, p), d = u32(b, p + 4);
+  require(d != 0 && n % d == 0 && n / d > 0 && n / d <= 8192);
+  return n / d;
 }
-static uint32_t integral(double v) {
-  require(std::isfinite(v) && v >= 0 && v <= 8192 &&
-          std::abs(v - std::round(v)) < 1e-6);
-  return uint32_t(std::round(v));
+static uint32_t origin(const Bytes &b, size_t p, uint32_t coded,
+                       uint32_t clean) {
+  int64_t d = u32(b, p + 4);
+  require(d != 0);
+  // Exact rational arithmetic: (coded-clean)/2 + signed_offset/d.
+  // With admitted extents <=8192 and 32-bit rational fields this fits i64.
+  int64_t numerator =
+      (int64_t(coded) - clean) * d + 2 * int64_t(int32_t(u32(b, p)));
+  int64_t denominator = 2 * d;
+  require(numerator >= 0 && numerator % denominator == 0 &&
+          numerator / denominator <= 8192);
+  return uint32_t(numerator / denominator);
 }
 static Geometry parse(const Bytes &b) {
   int budget = 4096;
@@ -123,11 +131,10 @@ static Geometry parse(const Bytes &b) {
       if (field.kind == tag('c', 'l', 'a', 'p')) {
         require(!clean && field.end - field.payload == 32);
         clean = true;
-        double w = ratio(b, field.payload), h = ratio(b, field.payload + 8);
-        g.x = integral((g.width - w) / 2 + ratio(b, field.payload + 16, true));
-        g.y = integral((g.height - h) / 2 + ratio(b, field.payload + 24, true));
-        g.w = integral(w);
-        g.h = integral(h);
+        g.w = extent(b, field.payload);
+        g.h = extent(b, field.payload + 8);
+        g.x = origin(b, field.payload + 16, g.width, g.w);
+        g.y = origin(b, field.payload + 24, g.height, g.h);
         require(g.w > 0 && g.h > 0 && g.x + g.w <= g.width &&
                 g.y + g.h <= g.height);
       } else if (field.kind == tag('p', 'a', 's', 'p')) {
@@ -161,8 +168,9 @@ static void read(File &file, uint64_t at, uint8_t *out, DWORD size) {
             : HRESULT_FROM_WIN32(GetLastError()));
   require(n == size);
 }
-static Geometry inspect(const std::wstring &path,
-                        const std::atomic<bool> &cancelled) {
+template <typename IsCancelled>
+static Geometry inspect_file(const std::wstring &path,
+                             IsCancelled is_cancelled) {
   // Network containers remain Source Reader-owned; this parser does not
   // download or buffer remote media, nor make reflection claims for that
   // profile.
@@ -185,7 +193,7 @@ static Geometry inspect(const std::wstring &path,
   bool iso = false;
   int budget = 4096;
   while (at < end) {
-    if (cancelled.load())
+    if (is_cancelled())
       throw Failure{E_ABORT};
     require(--budget >= 0);
     if (end - at < 8) {
@@ -217,11 +225,17 @@ static Geometry inspect(const std::wstring &path,
       require(n <= 8 * 1024 * 1024);
       Bytes metadata(size_t(n), 0);
       read(file, at, metadata.data(), DWORD(n));
+      if (is_cancelled())
+        throw Failure{E_ABORT};
       return parse(metadata);
     }
     at += n;
   }
   require(!iso);
   return {};
+}
+static Geometry inspect(const std::wstring &path,
+                        const std::atomic<bool> &cancelled) {
+  return inspect_file(path, [&] { return cancelled.load(); });
 }
 } // namespace mp4

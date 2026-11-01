@@ -1,4 +1,5 @@
 // Independent encoded metadata fixtures, including malformed-input boundaries.
+#include <winioctl.h>
 namespace mp4_test {
 using mp4::Bytes;
 static void put(Bytes &b, size_t at, uint32_t n) {
@@ -70,6 +71,140 @@ static void reject(const Bytes &b) {
   require(failed);
 }
 } // namespace mp4_test
+namespace mp4_file_test {
+using namespace mp4_test;
+struct Temp {
+  wchar_t path[MAX_PATH]{};
+  Temp() {
+    wchar_t directory[MAX_PATH]{};
+    auto length = GetTempPathW(MAX_PATH, directory);
+    require(length > 0 && length < MAX_PATH);
+    require(GetTempFileNameW(directory, L"fmg", 0, path) != 0);
+  }
+  ~Temp() { DeleteFileW(path); }
+  void write(const Bytes &bytes, uint64_t offset = 0) {
+    mp4::File file;
+    file.handle = CreateFileW(path, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS,
+                              FILE_ATTRIBUTE_NORMAL, nullptr);
+    require(file.handle != INVALID_HANDLE_VALUE);
+    if (offset) {
+      DWORD returned = 0;
+      require(DeviceIoControl(file.handle, FSCTL_SET_SPARSE, nullptr, 0,
+                              nullptr, 0, &returned, nullptr) != 0);
+      // A real extended-size mdat crossing 32-bit offsets, with no payload
+      // allocated/read. Sparse is mandatory, never create a dense 4 GiB file.
+      Bytes header(16);
+      put(header, 0, 1);
+      put(header, 4, mp4::tag('m', 'd', 'a', 't'));
+      put(header, 8, uint32_t(offset >> 32));
+      put(header, 12, uint32_t(offset));
+      DWORD written = 0;
+      require(WriteFile(file.handle, header.data(), DWORD(header.size()),
+                        &written, nullptr) &&
+              written == header.size());
+      LARGE_INTEGER position;
+      position.QuadPart = offset;
+      require(SetFilePointerEx(file.handle, position, nullptr, FILE_BEGIN) !=
+              0);
+    }
+    DWORD written = 0;
+    require(WriteFile(file.handle, bytes.data(), DWORD(bytes.size()), &written,
+                      nullptr) &&
+            written == bytes.size());
+  }
+};
+static void reject_file(Temp &file, const Bytes &bytes) {
+  file.write(bytes);
+  std::atomic<bool> cancelled{false};
+  bool rejected = false;
+  try {
+    rejected = !mp4::inspect(file.path, cancelled).known;
+  } catch (Failure e) {
+    require(e.hr == E_NOTIMPL);
+    rejected = true;
+  }
+  require(rejected);
+  // inspect's RAII must close the handle on success and every exception.
+  mp4::File exclusive;
+  exclusive.handle = CreateFileW(file.path, GENERIC_WRITE, 0, nullptr,
+                                 OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+  require(exclusive.handle != INVALID_HANDLE_VALUE);
+}
+static void run() {
+  Temp file;
+  std::atomic<bool> cancelled{false};
+  auto valid = join({box("ftyp", {}), fixture(5, 1, true, clean())});
+  file.write(valid);
+  auto g = mp4::inspect(file.path, cancelled);
+  require(g.known && g.rotation == 90 && g.mirror == 1 && g.x == 10 &&
+          g.y == 6);
+  for (size_t n = 0; n < valid.size(); n++)
+    reject_file(file, Bytes(valid.begin(), valid.begin() + n));
+  auto nested = fixture();
+  for (int i = 0; i < 4096; i++) {
+    auto free = box("free", {});
+    nested.insert(nested.end(), free.begin(), free.end());
+  }
+  put(nested, 0, uint32_t(nested.size()));
+  reject_file(file, nested);
+  Bytes top;
+  for (int i = 0; i < 4096; i++) {
+    auto free = box("free", {});
+    top.insert(top.end(), free.begin(), free.end());
+  }
+  auto movie = fixture();
+  // Exactly 4,096 top-level boxes is admitted, the next box is not.
+  Bytes boundary(top.begin(), top.end() - 8);
+  boundary.insert(boundary.end(), movie.begin(), movie.end());
+  file.write(boundary);
+  require(mp4::inspect(file.path, cancelled).known);
+  top.insert(top.end(), movie.begin(), movie.end());
+  reject_file(file, top);
+  auto metadata_limit = fixture();
+  auto padding =
+      box("free", Bytes(8 * 1024 * 1024 - metadata_limit.size() - 8));
+  metadata_limit.insert(metadata_limit.end(), padding.begin(), padding.end());
+  put(metadata_limit, 0, uint32_t(metadata_limit.size()));
+  file.write(metadata_limit);
+  require(mp4::inspect(file.path, cancelled).known);
+  Bytes oversized(8 * 1024 * 1024 + 1);
+  put(oversized, 0, uint32_t(oversized.size()));
+  put(oversized, 4, mp4::tag('m', 'o', 'o', 'v'));
+  reject_file(file, oversized);
+  auto malformed = valid;
+  put(malformed, 0, 1);
+  reject_file(file, malformed);
+  file.write(valid);
+  cancelled = true;
+  bool aborted = false;
+  try {
+    mp4::inspect(file.path, cancelled);
+  } catch (Failure e) {
+    aborted = e.hr == E_ABORT;
+  }
+  require(aborted);
+  cancelled = false;
+  // Deterministic cancellation after real metadata I/O, before parsing it.
+  // Uses the same file inspection path with a cancellation predicate instead
+  // of racing the test scheduler against an 8 MiB ReadFile.
+  file.write(fixture());
+  size_t checkpoints = 0;
+  aborted = false;
+  try {
+    mp4::inspect_file(file.path, [&] { return ++checkpoints == 2; });
+  } catch (Failure e) {
+    aborted = e.hr == E_ABORT;
+  }
+  require(aborted && checkpoints == 2);
+  file.write(fixture(7, 0, true, clean()), (1ull << 32) + 4096);
+  g = mp4::inspect(file.path, cancelled);
+  require(g.known && g.rotation == 270 && g.mirror == 1 && g.x == 10);
+  puts("NATIVE_MP4_FILE_PASS truncation=all top_box_limit=true "
+       "nested_box_limit=true exact_limits=admitted oversized_moov=rejected "
+       "cancellation=before_scan_and_after_read "
+       "sparse_mdat_over_4GiB=skipped handles=closed");
+}
+} // namespace mp4_file_test
 extern "C" int ferro_windows_test_mp4_geometry() {
   using namespace mp4_test;
   try {
@@ -92,7 +227,20 @@ extern "C" int ferro_windows_test_mp4_geometry() {
     reject(fixture(0, 0, false, join({clean(), clean()})));
     reject(
         fixture(0, 0, false, clean(143, 2))); // fractional clean width / offset
-    reject(fixture(0, 0, false, clean(144, 0)));          // zero denominator
+    reject(fixture(0, 0, false, clean(144, 0))); // zero denominator
+    reject(fixture(
+        0, 0, false,
+        clean(144u * 16777216 + 1,
+              16777216))); // tiny fraction must not round into admission
+    auto fractional_offset = clean();
+    put(fractional_offset, 24, 1073741825);
+    put(fractional_offset, 28, 536870912);
+    reject(fixture(0, 0, false, fractional_offset));
+    auto integral_offset = clean(143);
+    put(integral_offset, 24, 3);
+    put(integral_offset, 28, 2);
+    auto odd = mp4::parse(fixture(0, 0, false, integral_offset));
+    require(odd.x == 10 && odd.w == 143);
     reject(fixture(0, 0, false, clean(144, 1, 80, -99))); // crop outside image
     Bytes aspect(8);
     put(aspect, 0, 2);
@@ -109,6 +257,7 @@ extern "C" int ferro_windows_test_mp4_geometry() {
     corrupt = valid;
     put(corrupt, tkhd.payload + 48, 1);
     reject(corrupt);
+    mp4_file_test::run();
     puts("NATIVE_MP4_GEOMETRY_PASS orientations=8 versions=2 "
          "extended_boxes=true truncation=all malformed=rejected");
     return 0;
