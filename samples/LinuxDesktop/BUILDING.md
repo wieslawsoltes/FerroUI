@@ -52,3 +52,13 @@ To reproduce the managed-session screenshots, the capture mode opens an ImageMag
 ```sh
 samples/LinuxDesktop/tests/session.sh capture target/release/ferro-desktop /tmp/ferro-frames
 ```
+
+## Measure launcher latency and idle CPU
+
+The launcher benchmark starts its own Xvfb display, Openbox session and fixed application catalog. It warms the Start panel, injects keyboard input with XTest and polls a window pixel with XGetImage. The JSON output includes individual open and close latencies, their medians, the process CPU tick count and the measured idle interval.
+
+```sh
+python3 samples/LinuxDesktop/tests/benchmark-launcher.py target/release/ferro-desktop
+```
+
+For comparisons, use the same compiler profile, Vulkan driver, display resolution and system load. The probe measures input to the first changed X11 window pixel. Physical display scanout and client application startup are separate measurements.

@@ -122,7 +122,10 @@ capture() {
 capture desktop
 xdotool key --clearmodifiers ctrl+k
 capture applications desktop
-xdotool type --clearmodifiers --delay 20 'ferro color study'
+# Reopening must restore keyboard focus and retain the partially typed query.
+xdotool type --clearmodifiers --delay 20 'ferro color'
+xdotool key --clearmodifiers Escape ctrl+k
+xdotool type --clearmodifiers --delay 20 ' study'
 xdotool key --clearmodifiers Return
 viewer=$(await_window '^Color study - ImageMagick$')
 [[ "$viewer" != "$shell_window" ]]
