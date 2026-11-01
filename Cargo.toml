@@ -363,6 +363,9 @@ icu_locale = "2.4"
 icu_decimal = { version = "2.4", features = ["alloc"] }
 icu_calendar = { version = "2.4", default-features = false, features = ["compiled_data"] }
 icu_datetime = { version = "2.4", default-features = false, features = ["compiled_data"] }
+# Maps and sets that enumerate in the order of insertion, where a caller depends on that order
+# (docs/idiomatic-rust.md, section 2.2); std's HashMap and HashSet everywhere else.
+indexmap = "2.14"
 # A fast hasher for maps keyed by identities and short keys (the TreeDataGrid's recycle pools).
 rustc-hash = "2.1"
 smallvec = "1.16"

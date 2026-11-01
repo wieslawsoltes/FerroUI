@@ -46,7 +46,7 @@ from the reference, or nothing is drawn).
 | Reveal focus and border lights | as the scene lighting | as the scene lighting | as the scene lighting |
 | Connected-animation cross-fade | GPU: the frozen image of the source (made once, at `prepare_to_animate`) drawn with an animated opacity | the same | - (no pixel test) |
 | Noise and tiled-surface brushes | GPU: an image shader with repeat tiling; the image is made once | GPU: a tiled image | `a_border_effect_tiles_a_surface_brush` |
-| Image brushes | GPU: an image shader; a raster image is uploaded once and cached by the GPU context | GPU: an image of the scene, uploaded once per image | `tests/FerroUI.RenderTests/media/image_brush_tests.rs`, `tile_brush_tests.rs` |
+| Image brushes, `draw_bitmap` | GPU: an image shader or image draw; a raster image is uploaded once and kept by the resource cache of the GPU context while it fits the budget (128 MiB, next section) | GPU: an image of the scene, uploaded once per image | `tests/FerroUI.RenderTests/media/image_brush_tests.rs`, `tile_brush_tests.rs` |
 | Render target bitmaps (`RenderTargetBitmap`) | made by the application, not per frame | the same | - |
 | The visual cache (`CacheMode`) | a GPU layer kept while the content is the same | the same | - (no pixel test) |
 
@@ -95,6 +95,23 @@ afterwards; the first paint is not delayed (prewarming in the first frame cost a
 tasks on a cold cache). On the Store no lighting, blender or noise program is linked during the
 first scroll afterwards; the draws of content under a coverage clip (an image, a circle) still
 make programs of their own when first seen, as any new kind of draw does in Ganesh.
+
+## The image textures of Ganesh (the RGBA uploads)
+
+Ganesh uploads a raster image (`ImmutableBitmap`) to a texture when it is first drawn and keeps the
+texture in the resource cache of the context, keyed by the image, until the cache needs the room.
+`SkiaOptions::max_gpu_resource_size_bytes` is the budget of that cache. Upstream sets 29.5 MB
+(`1024 * 600 * 4 * 12`), which the port kept until 0.4.0. The Ferro Store's Discover page draws
+four screenshots of 1.3 to 6.1 MB as textures, plus icons, layers and the glyph atlas: more than the budget, so
+the textures of the screenshots that scrolled out of view were evicted and uploaded again when they
+scrolled back in. Measured in the browser (WebGL2, a 375 by 812 viewport, two passes down and up the
+page after a warm-up pass): 52 texture uploads of 23 MB per two passes, all through
+`GrMakeCachedBitmapProxyView` from `ImmutableBitmap::draw`.
+
+The default is now 128 MiB (`DEFAULT_MAX_GPU_RESOURCE_SIZE_BYTES`), the budget of the image
+textures of Vello (`scene/image_textures.rs`): the same passes make no upload, and the frame times
+stay at the display's interval (99th percentile 10.3 ms at 120 Hz). An application that has to
+hold less sets the option lower. Skia's own default (`None`) is 256 MiB.
 
 ## Vello: what is missing and the GPU route
 

@@ -4,7 +4,7 @@ use super::{
     dock_helpers::DockHelpers, dock_manager_state::DockManagerState,
     drag_preview_helper::DragPreviewHelper, event_type::EventType,
     managed_window_registry::ManagedWindowRegistry,
-    services::i_global_docking_service::IGlobalDockingService,
+    services::global_docking_service::GlobalDockingService,
 };
 use crate::{
     controls::{
@@ -90,7 +90,7 @@ impl ManagedHostWindowState {
     pub(crate) fn new(
         manager: Rc<dyn IDockManager>,
         host: Rc<ManagedHostWindow>,
-        global: Option<Rc<dyn IGlobalDockingService>>,
+        global: Option<Rc<GlobalDockingService>>,
     ) -> Rc<Self> {
         Rc::new(Self {
             base: DockManagerState::new(manager, global),

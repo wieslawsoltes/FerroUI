@@ -1,0 +1,74 @@
+# The map from upstream names to the Rust names that replace them (docs/idiomatic-rust.md,
+# section 5). Only names whose Rust form differs from the mechanical one (snake_case of the
+# upstream name, the same type name) are listed; a control member that keeps its name is not. Each
+# pull request that replaces a type or a trait adds its rows.
+#
+#   upstream    the upstream name: namespace and type, or type.member
+#   rust        the Rust path that replaces it
+#   kind        type | trait | member | mechanism
+#   phase       the phase of #423 that made the change
+#   pull        the pull request
+#   deprecated  the old Rust path, while it remains (optional)
+#   behaviour   same | test | deviation: how the behaviour is kept
+#   notes       optional
+
+# C1: internal interfaces with one implementation, which never surface in the public API, are the
+# concrete types that implemented them. Their members are inherent methods of the same names.
+
+[[name]]
+upstream = "Avalonia.Platform.Internal.IAssetDescriptor"
+rust = "ferroui_base::platform::internal::EmbeddedAssetDescriptor"
+kind = "trait"
+phase = "C1"
+pull = 452
+behaviour = "same"
+notes = "Upstream has two implementations (embedded resources and assets by path); the port has had one type for both since the port of the asset loader."
+
+[[name]]
+upstream = "Avalonia.Headless.IHeadlessWindow"
+rust = "ferroui_headless::headless_window_impl::HeadlessWindowImpl"
+kind = "trait"
+phase = "C1"
+pull = 452
+behaviour = "same"
+
+[[name]]
+upstream = "Avalonia.Skia.IGlSkiaFboProvider"
+rust = "ferroui_skia::GlSkiaExternalObjectsFeature"
+kind = "trait"
+phase = "C1"
+pull = 452
+behaviour = "same"
+notes = "`Fbo` is the private method `fbo` of the feature."
+
+[[name]]
+upstream = "Avalonia.DesignerSupport.Remote.ITransportWithEnforcedMethod"
+rust = "ferroui_designer_support::remote::file_watcher_transport::FileWatcherTransport"
+kind = "trait"
+phase = "C1"
+pull = 452
+behaviour = "same"
+
+[[name]]
+upstream = "DynamicData.Experimental.ISubjectWithRefCount`1"
+rust = "ferroui_dynamic_data::experimental::SubjectWithRefCount"
+kind = "trait"
+phase = "C1"
+pull = 452
+behaviour = "same"
+
+[[name]]
+upstream = "Dock.Avalonia.Internal.IGlobalDockingService"
+rust = "ferrodock_ferro::internal::services::global_docking_service::GlobalDockingService"
+kind = "trait"
+phase = "C1"
+pull = 452
+behaviour = "same"
+
+[[name]]
+upstream = "Dock.Avalonia.Services.IDockControlFactoryService"
+rust = "ferrodock_ferro::services::DockControlFactoryService"
+kind = "trait"
+phase = "C1"
+pull = 452
+behaviour = "same"

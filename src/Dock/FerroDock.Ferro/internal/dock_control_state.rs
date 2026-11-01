@@ -5,7 +5,7 @@ use super::{
     dock_helpers::DockHelpers, dock_manager_state::DockManagerState,
     drag_dockable_resolver::DragDockableResolver as Resolver,
     drag_preview_helper::DragPreviewHelper, event_type::EventType,
-    services::i_global_docking_service::IGlobalDockingService,
+    services::global_docking_service::GlobalDockingService,
 };
 use crate::{
     contract::IDragOffsetCalculator,
@@ -62,7 +62,7 @@ impl DockControlState {
     pub(crate) fn new(
         manager: Rc<dyn IDockManager>,
         calculator: Rc<dyn IDragOffsetCalculator>,
-        global: Option<Rc<dyn IGlobalDockingService>>,
+        global: Option<Rc<GlobalDockingService>>,
     ) -> Rc<Self> {
         Rc::new_cyclic(|runtime| Self {
             runtime: runtime.clone(),

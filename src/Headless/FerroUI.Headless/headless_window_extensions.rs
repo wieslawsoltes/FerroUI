@@ -5,7 +5,6 @@ use crate::ferro_headless_platform::FerroHeadlessPlatform;
 use crate::headless_platform_render_interface::HeadlessPlatformRenderInterface;
 use crate::headless_window_impl::HeadlessWindowImpl;
 use crate::i_headless_touch_pointer::IHeadlessTouchPointer;
-use crate::i_headless_window::IHeadlessWindow;
 use ferroui_base::input::raw::{RawDragEventType, RawPointerEventType};
 use ferroui_base::input::{DragDropEffects, IDataTransfer, Key, MouseButton, PhysicalKey, RawInputModifiers};
 use ferroui_base::media::imaging::WriteableBitmap;

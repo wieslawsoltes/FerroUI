@@ -1,6 +1,8 @@
 // Copyright (c) Wiesław Šoltés. All rights reserved.
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
-use super::i_global_docking_service::IGlobalDockingService;
+//! Original global-target resolution and operation policy (`GlobalDockingService`). Upstream
+//! declares the contract as the internal interface `IGlobalDockingService`, which has this one
+//! implementation; the port has the concrete type (docs/porting/data/upstream-names.toml).
 use crate::{controls::DockControl, model_projection};
 use ferrodock_model::core::{DockOperation, IDock, IDockable};
 use ferrodock_settings::{DockGlobalDockingPreset, DockSettings};
@@ -8,11 +10,11 @@ use ferroui_base::ferro_thread_local;
 use ferroui_controls::Control;
 use std::rc::Rc;
 ferro_thread_local! {
-    static INSTANCE: Rc<dyn IGlobalDockingService> = Rc::new(GlobalDockingService);
+    static INSTANCE: Rc<GlobalDockingService> = Rc::new(GlobalDockingService);
 }
 pub(crate) struct GlobalDockingService;
 impl GlobalDockingService {
-    pub(crate) fn instance() -> Rc<dyn IGlobalDockingService> {
+    pub(crate) fn instance() -> Rc<GlobalDockingService> {
         INSTANCE.with(Clone::clone)
     }
     fn resolve_outermost_global_target_dock(
@@ -37,9 +39,8 @@ impl GlobalDockingService {
             .active_dockable()?
             .as_dock()
     }
-}
-impl IGlobalDockingService for GlobalDockingService {
-    fn resolve_global_target_dock(&self, control: Option<&Control>) -> Option<Rc<dyn IDock>> {
+    /// The dock a global drop targets (`IGlobalDockingService.ResolveGlobalTargetDock`).
+    pub(crate) fn resolve_global_target_dock(&self, control: Option<&Control>) -> Option<Rc<dyn IDock>> {
         if DockSettings::global_docking_preset() == DockGlobalDockingPreset::LocalFirst {
             if let Some(item) =
                 control.and_then(|c| model_projection::dockable(c.data_context().as_ref()))
@@ -64,7 +65,8 @@ impl IGlobalDockingService for GlobalDockingService {
         }
         None
     }
-    fn should_use_global_operation(
+    /// Whether the global operation wins over the local one (`ShouldUseGlobalOperation`).
+    pub(crate) fn should_use_global_operation(
         &self,
         has_local: bool,
         local: DockOperation,
@@ -81,7 +83,8 @@ impl IGlobalDockingService for GlobalDockingService {
         }
         true
     }
-    fn try_apply_global_docking_proportion(
+    /// Applies the proportion of a global dock (`TryApplyGlobalDockingProportion`).
+    pub(crate) fn try_apply_global_docking_proportion(
         &self,
         source: Rc<dyn IDockable>,
         source_root: Option<Rc<dyn IDockable>>,

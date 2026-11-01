@@ -63,7 +63,7 @@ impl GlSkiaExternalObjectsFeature {
         })
     }
 
-    fn fbo_provider(&self) -> Rc<dyn IGlSkiaFboProvider> {
+    fn fbo_provider(&self) -> Rc<GlSkiaExternalObjectsFeature> {
         self.this.upgrade().expect("a feature that is called is alive")
     }
 }
@@ -172,7 +172,10 @@ impl IExternalObjectsRenderInterfaceContextFeature for GlSkiaExternalObjectsFeat
     }
 }
 
-impl IGlSkiaFboProvider for GlSkiaExternalObjectsFeature {
+impl GlSkiaExternalObjectsFeature {
+    /// The framebuffer object the imported images copy their textures with, made on first use
+    /// (`IGlSkiaFboProvider.Fbo`: an internal interface upstream that has this one implementation;
+    /// docs/porting/data/upstream-names.toml).
     fn fbo(&self) -> i32 {
         if self.fbo.get() == 0 {
             self.fbo.set(self.gl_context.gl_interface().gen_framebuffer());
@@ -180,12 +183,6 @@ impl IGlSkiaFboProvider for GlSkiaExternalObjectsFeature {
 
         self.fbo.get()
     }
-}
-
-/// Hands out the framebuffer object the imported images copy their textures
-/// with.
-pub(crate) trait IGlSkiaFboProvider {
-    fn fbo(&self) -> i32;
 }
 
 /// The shared texture behind an image of a context of the share group (the
@@ -257,7 +254,7 @@ enum ImportedImageSource {
 pub struct GlSkiaImportedImage {
     gr_context: Rc<GaneshGrContext>,
     gl_context: Rc<dyn IGlContext>,
-    fbo_provider: Rc<dyn IGlSkiaFboProvider>,
+    fbo_provider: Rc<GlSkiaExternalObjectsFeature>,
     source: ImportedImageSource,
 }
 
@@ -265,7 +262,7 @@ impl GlSkiaImportedImage {
     fn new(
         gr_context: Rc<GaneshGrContext>,
         gl_context: Rc<dyn IGlContext>,
-        fbo_provider: Rc<dyn IGlSkiaFboProvider>,
+        fbo_provider: Rc<GlSkiaExternalObjectsFeature>,
         source: ImportedImageSource,
     ) -> Self {
         Self { gr_context, gl_context, fbo_provider, source }

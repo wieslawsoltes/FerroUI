@@ -1,6 +1,8 @@
 // Copyright (c) Wiesław Šoltés. All rights reserved.
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
-use super::i_dock_control_factory_service::IDockControlFactoryService;
+//! The control recycling and factory caches of a dock control (`DockControlFactoryService`).
+//! Upstream declares the contract as the internal interface `IDockControlFactoryService`, which has
+//! this one implementation; the port has the concrete type (docs/porting/data/upstream-names.toml).
 use crate::{controls::DockControl, model_projection};
 use ferrodock_controls_recycling::{
     ControlRecycling, ControlRecyclingDataTemplate, IControlRecycling,
@@ -11,6 +13,7 @@ use ferrodock_model::{
 };
 use ferroui_base::{data::core::ValueTypes, BoxedValue, Ref};
 use ferroui_system::collections::generic::Dictionary;
+use indexmap::IndexSet;
 use std::{
     any::TypeId,
     cell::RefCell,
@@ -20,12 +23,15 @@ use std::{
 type RecyclingEntry = (Weak<dyn IFactory>, Rc<dyn IControlRecycling>);
 // Access pruning cannot reproduce CLR ephemeron GC when a value retains its factory key.
 ferroui_base::ferro_thread_local! { static CONTROL_RECYCLING:RefCell<HashMap<usize,RecyclingEntry>>=RefCell::new(HashMap::new()); }
-// Add-only .NET HashSet traversal uses insertion slots. Shared Dictionary preserves that
-// order and retains the original references; no mirror model tree or random HashMap order.
-type Dockables = Dictionary<Option<Rc<dyn IDockable>>, ()>;
+// Add-only .NET HashSet traversal uses insertion slots: an `IndexSet`, which nothing is removed
+// from, enumerates in that order and retains the original references; no mirror model tree or
+// random HashSet order.
+type Dockables = IndexSet<Option<Rc<dyn IDockable>>>;
 pub(crate) struct DockControlFactoryService;
-impl IDockControlFactoryService for DockControlFactoryService {
-    fn initialize_control_recycling(&self, control: &DockControl) {
+impl DockControlFactoryService {
+    /// Shares the control recycling of the factory of the layout of `control`
+    /// (`IDockControlFactoryService.InitializeControlRecycling`).
+    pub(crate) fn initialize_control_recycling(&self, control: &DockControl) {
         let Some(factory) = control.layout().and_then(|l| l.factory()) else {
             return;
         };
@@ -50,7 +56,8 @@ impl IDockControlFactoryService for DockControlFactoryService {
             }
         });
     }
-    fn cleanup_factory(&self, owner: &DockControl, layout: Rc<dyn IDock>) {
+    /// Prunes the caches of the factory of `layout` when `owner` leaves it (`CleanupFactory`).
+    pub(crate) fn cleanup_factory(&self, owner: &DockControl, layout: Rc<dyn IDock>) {
         let Some(factory) = layout.factory() else {
             return;
         };
@@ -59,8 +66,6 @@ impl IDockControlFactoryService for DockControlFactoryService {
         }
         Self::release_factory_defaults(factory, owner);
     }
-}
-impl DockControlFactoryService {
     pub(crate) fn new() -> Self {
         Self
     }
@@ -129,7 +134,7 @@ impl DockControlFactoryService {
         let keys: Vec<_> = dictionary
             .borrow()
             .keys()
-            .filter(|key| dockables.contains_key(&Some((*key).clone())))
+            .filter(|key| dockables.contains(&Some((*key).clone())))
             .cloned()
             .collect();
         for key in keys {
@@ -147,16 +152,16 @@ impl DockControlFactoryService {
         else {
             return;
         };
-        for dockable in dockables.keys() {
+        for dockable in dockables {
             let value = dockable.clone().map(model_projection::to_dockable_value);
             recycling.remove(value.as_ref());
         }
     }
     fn collect_all_dockables(item: Option<Rc<dyn IDockable>>, dockables: &mut Dockables) {
-        if dockables.contains_key(&item) {
+        if dockables.contains(&item) {
             return;
         }
-        dockables.insert(item.clone(), ());
+        dockables.insert(item.clone());
         let Some(item) = item else { return };
         if let Some(root) = item.clone().as_root_dock() {
             Self::add_dockables_all(root.hidden_dockables(), dockables);

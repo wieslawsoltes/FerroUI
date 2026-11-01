@@ -1,5 +1,6 @@
 use super::internal::{
-    AssemblyDescriptor, AssemblyDescriptorResolver, IAssemblyDescriptor, IAssemblyDescriptorResolver, IAssetDescriptor,
+    AssemblyDescriptor, AssemblyDescriptorResolver, EmbeddedAssetDescriptor, IAssemblyDescriptor,
+    IAssemblyDescriptorResolver,
 };
 use super::{AssetAssembly, AssetStream, IAssetLoader, ASSET_SCHEME};
 use crate::utilities::{Uri, UriExtensions};
@@ -47,7 +48,7 @@ impl StandardAssetLoader {
         std::io::Error::new(std::io::ErrorKind::NotFound, format!("The resource {uri} could not be found."))
     }
 
-    fn try_get_asset(&self, uri: &Uri, base_uri: Option<&Uri>) -> Option<Rc<dyn IAssetDescriptor>> {
+    fn try_get_asset(&self, uri: &Uri, base_uri: Option<&Uri>) -> Option<Rc<EmbeddedAssetDescriptor>> {
         if UriExtensions::is_absolute_resm(uri) {
             let assembly = self
                 .try_get_assembly(Some(uri))

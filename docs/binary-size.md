@@ -385,8 +385,8 @@ default, with software rendering as the fallback, the order upstream uses
 (`Win32RenderingMode::AngleEgl`, `Software`; WGL and Vulkan on request). ANGLE comes from the crate
 `mozangle`, which builds it from source and links it statically, so it is inside the executable,
 where upstream ships it as a DLL beside its assemblies; it is 6.6 MB of the 162 MB release
-executable of the catalog (section 3.3). Skia uses its Ganesh backend on that OpenGL context with the GPU resource cache limited to 29.5 MB (`1024 * 600 * 4 * 12`
-bytes), the limit upstream sets.
+executable of the catalog (section 3.3). Skia uses its Ganesh backend on that OpenGL context with the GPU resource cache limited to 128 MiB (`SkiaOptions`; upstream sets 29.5 MB, which
+evicted the textures of images that scrolled out of view: docs/porting/gpu-rendering.md).
 
 **Memory, measured on macOS** (the catalog showing its home page, three launches each, median;
 not measured on Windows, where the hosted runners have no GPU and the virtual machine was not
