@@ -108,6 +108,11 @@ fn running_openbox_redecorates_the_same_native_client() {
     let extents = || session.longs(id, a._NET_FRAME_EXTENTS, a.CARDINAL, 4);
     let theme_name = || session.bytes(root, theme, a.UTF8_STRING);
     let base = std::fs::read(state.join("base.xml")).unwrap();
+    let before = std::fs::read(state.join("openbox.xml")).unwrap();
+    // Even when the host inherits the supervisor environment, an ordinary windowed shell must
+    // leave the surrounding manager alone.
+    session.set_window_appearance(Appearance::Material).unwrap();
+    assert_eq!(std::fs::read(state.join("openbox.xml")).unwrap(), before);
     let mut heights = Vec::new();
     for appearance in [Appearance::Windows, Appearance::MacOS, Appearance::Material] {
         let previous = theme_name();
