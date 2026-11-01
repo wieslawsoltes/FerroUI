@@ -853,8 +853,10 @@ mod imp {
         /// Extent for renderers drawing without a layout scene. XDG configures describe
         /// window geometry in logical units, excluding the shadows of the client.
         pub(crate) fn negotiated_scene(&self) -> Option<RenderTargetSceneInfo> {
+            // Layer-shell configures the entire surface, not the XDG window geometry.
+            let shadows = if self.xdg_surface.is_some() { self.shadow_extents() } else { Thickness::default() };
             let logical_size = crate::window_impl::configured_client_size(
-                self.acknowledged_geometry?, self.client_logical_size, self.shadow_extents(),
+                self.acknowledged_geometry?, self.client_logical_size, shadows,
             );
             let scaling = self.surface.current_scale();
             let size = PixelSize::from_size_ceiling(logical_size, scaling);
@@ -1549,6 +1551,7 @@ mod imp {
 
             self.shell.pending_ack_serial = None;
             self.shell.configure_serials.clear();
+            self.shell.offered_geometry = PixelSize::default();
             self.shell.acknowledged_geometry = None;
             self.shell.mapped = false;
             self.shell.last_window_geometry = None;
