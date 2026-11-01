@@ -193,6 +193,9 @@ impl Session {
     pub fn set_window_appearance(&self, appearance: Appearance) -> io::Result<()> {
         match &self.backend {
             Backend::X11(x) => x.set_window_appearance(appearance),
+            Backend::Wayland(w) if self.wayland_commands.borrow().is_some() => {
+                w.set_window_appearance(appearance)
+            }
             Backend::Wayland(_) => Ok(()),
         }
     }

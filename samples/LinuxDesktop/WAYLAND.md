@@ -2,6 +2,8 @@
 
 Ferro Desktop uses the native FerroUI Wayland backend and Skia. In a managed login session Sway is the wlroots compositor. It owns DRM/KMS, input seats, output configuration, stacking and workspaces. The desktop shell owns the layer surfaces, launcher, settings and notification UI. Independent Wayland applications connect to the same compositor. Xwayland is optional for legacy applications.
 
+Changing appearance updates the wallpaper, panels and controls on all outputs. Sway also recolors the titlebars and borders it draws for existing clients. Applications with client-side decorations draw their own titlebars.
+
 ## Install or run
 
 Build the release with `samples/LinuxDesktop/build.sh`. Install Sway, the D-Bus session tools, Mesa or another Vulkan driver, and xkbcommon. For screen sharing, install PipeWire, a PipeWire session manager, xdg-desktop-portal, xdg-desktop-portal-wlr and xdg-desktop-portal-gtk. Install swaylock for the lock shortcut and swayidle for automatic locking. A graphical login needs a working logind/seatd seat and access to the GPU.

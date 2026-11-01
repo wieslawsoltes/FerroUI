@@ -9,17 +9,24 @@ open_appearance() {
 }
 
 exercise_appearances() {
-    local key profile
+    local key profile color tx ty
     for profile in macos material windows; do
-        case "$profile" in macos) key=2 ;; material) key=3 ;; windows) key=1 ;; esac
+        case "$profile" in macos) key=2; color=342F3C ;; material) key=3; color=182922 ;; windows) key=1; color=F2F5FA ;; esac
         wtype -M logo -k space -m logo
         wait_for is_scene applications
         wait_for open_appearance
         wtype -k "$key"
+        wait_for test -s "$XDG_CONFIG_HOME/ferro-desktop/appearance"
         wait_for grep -qx "$profile" "$XDG_CONFIG_HOME/ferro-desktop/appearance"
         wtype -k Escape
         wait_for is_scene desktop
         wait_for focused org.ferroui.WaylandClient
         capture "$profile-client"
+        # The same focused terminal remains mapped. Test its compositor-drawn
+        # titlebar, sampling away from the text and frame edges.
+        read -r tx ty < <(tree | jq -r '.. | objects | select(.app_id?=="org.ferroui.WaylandClient") | [(.rect.x+.rect.width-25),(.rect.y-(.deco_rect.height/2|floor))] | @tsv')
+        local pixel
+        pixel=$(convert "$output/$profile-client.png" -format "%[hex:p{$tx,$ty}]" info:)
+        [[ ${pixel:0:6} == "$color" ]] || fail "$profile terminal titlebar was $pixel, expected $color"
     done
 }

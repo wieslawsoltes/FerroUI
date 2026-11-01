@@ -71,8 +71,8 @@ impl VulkanKhrRenderTarget {
     }
 
     fn destroy_image(&self) {
-        let _ = self.context.device_api().device_wait_idle(self.context.device_handle());
         if let Some(image) = self.image.borrow_mut().take() {
+            let _ = self.context.device_api().device_wait_idle(self.context.device_handle());
             image.dispose();
         }
     }

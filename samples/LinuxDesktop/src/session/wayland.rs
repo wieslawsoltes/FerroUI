@@ -240,6 +240,33 @@ impl WaylandSession {
         }
     }
 
+    /// Change only Sway's server-side frames. GTK and Qt may draw their own titlebars.
+    pub fn set_window_appearance(
+        &self,
+        appearance: crate::shell::appearance::Appearance,
+    ) -> io::Result<()> {
+        let p = appearance.palette();
+        let rgba = |value: &str| -> io::Result<String> {
+            let c = ferroui_base::media::Color::try_parse(value)
+                .ok_or_else(|| io::Error::other("Invalid window decoration color"))?;
+            Ok(format!("#{:02x}{:02x}{:02x}{:02x}", c.r, c.g, c.b, c.a))
+        };
+        let (accent, surface, text) = (rgba(p.accent)?, rgba(p.surface)?, rgba(p.text)?);
+        let (edge, tile, muted) = (rgba(p.edge)?, rgba(p.tile)?, rgba(p.muted)?);
+        let colors = format!(
+            "client.focused {accent} {surface} {text} {accent} {accent}; \
+             client.focused_inactive {edge} {tile} {muted} {edge} {edge}; \
+             client.unfocused {edge} {tile} {muted} {edge} {edge}"
+        );
+        if self.command(colors) {
+            Ok(())
+        } else {
+            Err(io::Error::other(
+                "Sway rejected the window decoration colors",
+            ))
+        }
+    }
+
     fn refresh_after_geometry(&self) {
         // Floating moves/resizes do not emit a window event on every Sway
         // version. A tick orders a background snapshot after our commands.
