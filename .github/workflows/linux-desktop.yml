@@ -38,6 +38,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             libfontconfig-dev libfreetype-dev libharfbuzz-dev fonts-dejavu-core \
+            libglib2.0-dev libglib2.0-bin pulseaudio pulseaudio-utils \
             mesa-vulkan-drivers vulkan-validationlayers xvfb xauth openbox xdotool dbus-x11 imagemagick x11-utils x11-xserver-utils
       - name: Build and test the Graphite desktop
         run: |
@@ -50,8 +51,14 @@ jobs:
         run: |
           samples/LinuxDesktop/tests/smoke.sh target/debug/ferro-desktop desktop-captures
           if grep -E 'Validation Error|SYNC-HAZARD|VUID-' desktop-captures/desktop.log; then exit 1; fi
+      - name: Exercise pins, notifications and device controls
+        run: |
+          samples/LinuxDesktop/tests/favorites.sh target/debug/ferro-desktop desktop-captures/favorites
+          samples/LinuxDesktop/tests/notifications.sh target/debug/ferro-desktop desktop-captures/notifications
+          samples/LinuxDesktop/tests/system-controls.sh target/debug/ferro-desktop desktop-captures/system
       - name: Test and capture a managed login session
         run: |
+          samples/LinuxDesktop/tests/shortcuts.sh target/debug/ferro-desktop desktop-captures/shortcuts
           samples/LinuxDesktop/tests/session.sh test
           samples/LinuxDesktop/tests/session.sh capture target/debug/ferro-desktop desktop-captures/session
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

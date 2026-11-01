@@ -62,3 +62,17 @@ python3 samples/LinuxDesktop/tests/benchmark-launcher.py target/release/ferro-de
 ```
 
 For comparisons, use the same compiler profile, Vulkan driver, display resolution and system load. The probe measures input to the first changed X11 window pixel. Physical display scanout and client application startup are separate measurements.
+
+
+## Exercise desktop services
+
+The native suites create private X displays, settings directories and D-Bus sessions. The device-controls suite also starts an isolated PulseAudio daemon with a null sink and exports NetworkManager and UPower test objects. It verifies the sink volume, mute state and radio writes through the same interfaces used by the shell. Physical backlight access depends on the active logind session and hardware.
+
+```sh
+samples/LinuxDesktop/tests/favorites.sh target/release/ferro-desktop /tmp/ferro-favorites
+samples/LinuxDesktop/tests/notifications.sh target/release/ferro-desktop /tmp/ferro-notifications
+samples/LinuxDesktop/tests/system-controls.sh target/release/ferro-desktop /tmp/ferro-system
+samples/LinuxDesktop/tests/shortcuts.sh target/release/ferro-desktop /tmp/ferro-shortcuts
+```
+
+For the search benchmark, use `samples/LinuxDesktop/build.sh test benchmark_catalog_search -- --ignored --nocapture`. For the X11 window-title benchmark, run `samples/LinuxDesktop/tests/session.sh benchmark`.

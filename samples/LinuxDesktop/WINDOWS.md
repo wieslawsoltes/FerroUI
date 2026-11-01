@@ -10,6 +10,10 @@ The managed login session handles these shortcuts even while another application
 
 | Shortcut | Action |
 | --- | --- |
+| Super+Space | Show or dismiss the launcher |
+| Super+A | Show or dismiss Quick Settings |
+| Super+N | Show or dismiss Notifications |
+| Super+Tab | Show or dismiss the window and workspace overview |
 | Alt+Tab / Alt+Shift+Tab | Switch forward / backward through windows |
 | Super+Left / Super+Right | Snap to the current monitor's left / right half |
 | Super+Up / Super+Down | Toggle maximize / minimize |
@@ -17,3 +21,8 @@ The managed login session handles these shortcuts even while another application
 | Alt+F4 | Ask the application to close its window |
 
 Run the live integration checks with `samples/LinuxDesktop/tests/session.sh test`. The optional `samples/LinuxDesktop/tests/session.sh benchmark` runs 32 independent X11 clients and 200 title changes on a private display. It reports the shell connection's protocol request count and the time to dispatch a ready X11 event and publish the updated client list.
+
+
+The global shortcuts send a fixed scene command to the managed shell's per-screen X11 selection. Run `ferro-desktop --show=settings`, `--show=notifications`, `--show=workspaces` or `--show=applications` to invoke the same action on the current display. The sender exits before starting the renderer. `ferro-desktop --current-scene` reads the managed shell’s published scene ID from its selection owner. Repeating an action dismisses its surface. Escape returns control to the previous client on the same workspace.
+
+Run `samples/LinuxDesktop/tests/shortcuts.sh target/debug/ferro-desktop /tmp/ferro-shortcuts` to check the reported scene, rendered frame, X11 workspace and input focus for every global shortcut on a private X server. The test also checks that a preview does not claim the command endpoint and a second managed shell cannot replace its owner.

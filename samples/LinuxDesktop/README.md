@@ -45,6 +45,21 @@ samples/LinuxDesktop/build.sh run -- --theme=material --scene=applications
 
 **Ctrl+K** opens applications. Type a name or part of a description, then press **Enter** to launch the first match. **Ctrl+W** opens the workspace and window overview. **Ctrl+Alt+1–9** selects a workspace where the window manager provides it. **Esc** dismisses the open surface.
 
+## Everyday controls
+
+| In the shell | Action |
+| --- | --- |
+| Ctrl+K or Ctrl+Space | Open the launcher. Pin an installed application to put it on the taskbar, Dock or Material home screen. |
+| Ctrl+P / Ctrl+Shift+P in search | Pin or unpin the first result on the page / switch between all applications and pins. In the pinned list, Alt+Left or Alt+Right moves the entry. |
+| Ctrl+W | Switch or create workspaces, arrange a client, or move it to a named workspace. The overview exposes actions supported by the window manager. |
+| Ctrl+N | Read or dismiss notifications, invoke actions and toggle Do Not Disturb. Banners leave the active application's keyboard focus intact. |
+| Ctrl+Shift+Q | Open Quick Settings. Adjust default audio output, toggle Wi-Fi and control available backlights. While open, M toggles mute, + and − change volume, and W toggles the wireless radio. |
+| Ctrl+Shift+C, or the date and time | Open the native FerroUI calendar and browse months with the mouse or keyboard. |
+
+The managed login session can provide the freedesktop notification service. Windowed previews share the surrounding desktop and leave its notification service alone. See [Notifications](NOTIFICATIONS.md) and [Windows and workspaces](WINDOWS.md).
+
+Quick Settings reads the current default sink using WirePlumber or PulseAudio, including PipeWire's PulseAudio compatibility server. NetworkManager supplies radio state and the active connection. UPower supplies the display battery. Brightness uses the kernel backlight class and the current logind session's `SetBrightness` method. Device operations run outside the UI dispatcher. The panel refreshes while visible and reconciles changes with the provider's response.
+
 ## Login session
 
 With Openbox in the session's PATH, install the release binary and choose **Ferro Desktop** from an X11 display manager.
@@ -54,12 +69,12 @@ samples/LinuxDesktop/build.sh
 sudo samples/LinuxDesktop/session/install.sh target/release/ferro-desktop
 ```
 
-The supervisor starts Openbox and the shell on the login display. The shell covers the primary screen and reserves space for the active appearance's panels. **Super+Space** reveals the launcher even when a client is maximized. The shell also updates the titlebars of windows decorated by the managed Openbox instance. Applications that draw their own titlebars control those pixels. Windowed mode leaves the surrounding desktop's work area alone.
+The supervisor starts Openbox and the shell on the login display. The shell covers the primary screen and reserves space for the active appearance's panels. **Super+Space** reveals Start, **Super+A** opens Quick Settings, **Super+N** opens notifications, and **Super+Tab** opens the overview. These shortcuts work over a maximized client. Escape restores focus. The shell also updates the titlebars of windows decorated by the managed Openbox instance. Applications that draw their own titlebars control those pixels. Windowed mode leaves the surrounding desktop's work area alone.
 
 ## Renderer and validation
 
 The build wrapper selects Skia Graphite on Vulkan for the shell. The recorder wraps a device-local FerroUI Vulkan image, restores its layout on the graphics queue and submits it to the existing swapchain presenter. Normal frames stay on the GPU. Pass `--software` to run the same visual tree using Skia raster.
 
-The application catalog indexes XDG metadata once per shell startup. Search pages mount a bounded number of controls. The window tracker coalesces X11 property notifications before updating the view. The clock schedules its next update at a minute boundary. Set `FERROUI_FRAME_TIMES=1` to collect the compositor's render-time distribution when the window closes.
+The application catalog builds a trigram index for larger catalogs. Substring verification preserves match order and short, multiword and Unicode queries. Search pages mount a bounded number of controls. The window tracker coalesces X11 property notifications before updating the view. The clock schedules its next update at a minute boundary. Set `FERROUI_FRAME_TIMES=1` to collect the compositor's render-time distribution when the window closes.
 
 For build prerequisites, the checked header download and local tests, see [Building](BUILDING.md). For details on adding a profile, see [Appearance profiles](APPEARANCE.md).
