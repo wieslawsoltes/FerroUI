@@ -142,7 +142,7 @@ impl Session {
                         .any(|w| w.workspace == Some(snapshot.workspace_names.len() - 1))
             }
             Backend::Wayland(w) => w.can_remove_last(),
-            Backend::Composed(_) => false,
+            Backend::Composed(c) => c.can_remove_last(),
         }
     }
     pub fn subscribe(&self, callback: impl Fn() + 'static) {

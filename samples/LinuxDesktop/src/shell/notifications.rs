@@ -380,13 +380,24 @@ pub(super) fn composed_banner(shell: Rc<Shell>) -> Element {
             shell.notifications.service.hide_banner();
             return Element::Empty;
         }
-        let Some(notice) = shell.notifications.service.banner() else { return Element::Empty };
-        border().width(356.0).max_height(210.0)
+        let Some(notice) = shell.notifications.service.banner() else {
+            return Element::Empty;
+        };
+        border()
+            .width(356.0)
+            .max_height(210.0)
             .horizontal_alignment(ferroui_base::layout::HorizontalAlignment::Right)
             .vertical_alignment(ferroui_base::layout::VerticalAlignment::Top)
-            .margin((12.0, top+12.0, 12.0, 0.0))
-            .child(card(&notice,&shell.notifications.service,shell.notifications.revision,true)).into_element()
-    }).into_element()
+            .margin((12.0, top + 12.0, 12.0, 0.0))
+            .child(card(
+                &notice,
+                &shell.notifications.service,
+                shell.notifications.revision,
+                true,
+            ))
+            .into_element()
+    })
+    .into_element()
 }
 
 pub(super) fn attach(shell: &Rc<Shell>) {

@@ -167,13 +167,20 @@ impl Shell {
         self.launching.set(true);
         self.status.set(format!("Opening {}…", application.name));
         let application = application.clone();
-        let display = self.session.as_ref().and_then(|s| s.compositor()).map(|c| c.display());
+        let display = self
+            .session
+            .as_ref()
+            .and_then(|s| s.compositor())
+            .map(|c| c.display());
         let weak = Rc::downgrade(self);
         let _task = tasks::spawn_local(async move {
-            let result = tasks::run(move || Ok(match display {
-                Some(name) => application.launch_on_display(&name)?,
-                None => application.launch()?,
-            })).await;
+            let result = tasks::run(move || {
+                Ok(match display {
+                    Some(name) => application.launch_on_display(&name)?,
+                    None => application.launch()?,
+                })
+            })
+            .await;
             if let Some(shell) = weak.upgrade().filter(|shell| shell.owner.is_alive()) {
                 shell.launching.set(false);
                 match result {
@@ -314,7 +321,12 @@ fn create(
         search_box: Default::default(),
     });
 
-    if state.session.as_ref().and_then(|s| s.compositor()).is_none() {
+    if state
+        .session
+        .as_ref()
+        .and_then(|s| s.compositor())
+        .is_none()
+    {
         notifications::attach(&state);
     }
     if let Some(session) = &state.session {
@@ -485,6 +497,76 @@ fn shortcut(shell: &Rc<Shell>, event: &ferroui_base::input::KeyEventArgs) {
     }
 }
 
+fn composed_shortcut(shell: &Rc<Shell>, event: &ferroui_base::input::KeyEventArgs) {
+    let Some(session) = shell.session.as_ref() else {
+        return;
+    };
+    let Some(host) = session.compositor() else {
+        return;
+    };
+    let key = event.key;
+    let mods = event.key_modifiers;
+    let active = || {
+        shell
+            .snapshot
+            .with_untracked(|s| s.windows.iter().find(|w| w.active).map(|w| w.id))
+    };
+    if mods == KeyModifiers::META {
+        let target = match key {
+            Key::Space => Some(Scene::Applications),
+            Key::A => Some(Scene::QuickSettings),
+            Key::N => Some(Scene::Notifications),
+            Key::Tab => Some(Scene::Workspaces),
+            _ => None,
+        };
+        if let Some(target) = target {
+            if shell.scene.get_untracked() == target {
+                shell.cancel()
+            } else {
+                shell.open(target)
+            }
+            event.set_handled(true);
+            return;
+        }
+    }
+    if (Key::D1 as i32..=Key::D9 as i32).contains(&(key as i32)) {
+        let index = (key as i32 - Key::D1 as i32) as usize;
+        let switched = if mods == KeyModifiers::META {
+            session.switch_workspace(index)
+        } else if mods == (KeyModifiers::META | KeyModifiers::SHIFT) {
+            active().is_some_and(|id| session.move_to_workspace(id, index))
+        } else {
+            false
+        };
+        if switched {
+            event.set_handled(true);
+            return;
+        }
+    }
+    let handled = match (key, mods) {
+        (Key::F, KeyModifiers::META) => active().is_some_and(|id| session.toggle_fullscreen(id)),
+        (Key::Up, KeyModifiers::META) => active().is_some_and(|id| session.toggle_maximized(id)),
+        (Key::Down, KeyModifiers::META) => active().is_some_and(|id| session.minimize(id)),
+        (Key::Left | Key::Right, KeyModifiers::META) => active().is_some_and(|id| {
+            session.snap(
+                id,
+                if key == Key::Left {
+                    crate::session::SnapSide::Left
+                } else {
+                    crate::session::SnapSide::Right
+                },
+            )
+        }),
+        (Key::F4, KeyModifiers::ALT) => active().is_some_and(|id| session.close(id)),
+        _ => false,
+    };
+    if handled {
+        event.set_handled(true);
+    } else if shell.scene.get_untracked() != Scene::Desktop || !host.client_has_focus() {
+        shortcut(shell, event);
+    }
+}
+
 fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
     let appearance = state.appearance;
     let viewport_width = state.viewport_width;
@@ -492,7 +574,11 @@ fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
     let current = state.scene;
     let compositor = state.session.as_ref().and_then(|s| s.compositor()).cloned();
     let composed = compositor.is_some();
-    let banner = if composed { notifications::composed_banner(state.clone()) } else { Element::Empty };
+    let banner = if composed {
+        notifications::composed_banner(state.clone())
+    } else {
+        Element::Empty
+    };
     let desktop = if include_desktop {
         let clients = compositor.as_ref().map_or(Element::Empty, |c| c.element());
         desktop::surface(&state, clock(), clients)
@@ -524,23 +610,13 @@ fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
             let shell = state.clone();
             move |grid| {
                 if composed {
-                    grid.add_handler_with(ferroui_base::input::InputElement::key_down_event(),
-                        move |_, e| {
-                            if e.key_modifiers == KeyModifiers::META {
-                                let target=match e.key { Key::Space => Some(Scene::Applications), Key::A => Some(Scene::QuickSettings),
-                                    Key::N => Some(Scene::Notifications), Key::Tab => Some(Scene::Workspaces), _ => None };
-                                if let Some(target)=target {
-                                    if shell.scene.get_untracked()==target {shell.cancel()} else {shell.open(target)}
-                                    e.set_handled(true);
-                                    return;
-                                }
-                            }
-                            // Keep editor and terminal accelerators owned by the focused external client.
-                            if shell.scene.get_untracked()!=Scene::Desktop ||
-                                !shell.session.as_ref().and_then(|s|s.compositor()).is_some_and(|c|c.client_has_focus()) {
-                                shortcut(&shell, e);
-                            }
-                        }, ferroui_base::interactivity::RoutingStrategies::TUNNEL, false);
+                    let shell = shell.clone();
+                    grid.add_handler_with(
+                        ferroui_base::input::InputElement::key_down_event(),
+                        move |_, e| composed_shortcut(&shell, e),
+                        ferroui_base::interactivity::RoutingStrategies::TUNNEL,
+                        false,
+                    );
                 }
             }
         })

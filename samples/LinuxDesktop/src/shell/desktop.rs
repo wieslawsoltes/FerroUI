@@ -40,15 +40,31 @@ pub(super) fn panel(
     }
 }
 
-pub(super) fn surface(state: &Rc<Shell>, clock: Signal<OffsetDateTime>, clients: Element) -> Element {
+pub(super) fn surface(
+    state: &Rc<Shell>,
+    clock: Signal<OffsetDateTime>,
+    clients: Element,
+) -> Element {
     let scene = state.scene;
     let bg = state.clone();
+    let hosted = state
+        .session
+        .as_ref()
+        .and_then(|s| s.compositor())
+        .is_some();
+    let snapshot = state.snapshot;
+    let panels_visible = memo(move |_| {
+        !hosted || !snapshot.with(|s| s.windows.iter().any(|w| w.active && w.fullscreen))
+    });
+
     let edge = |top: bool| {
         let state = state.clone();
         dynamic(move || {
             let appearance = state.appearance.get();
             let (upper, lower) = appearance.insets();
-            border().height(if top { upper } else { lower })
+            border()
+                .is_visible(move || panels_visible.get())
+                .height(if top { upper } else { lower })
                 .vertical_alignment(if top { V::Top } else { V::Bottom })
                 .child(panel(&state, clock, appearance, top))
         })

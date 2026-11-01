@@ -38,16 +38,27 @@ impl Desktop {
     // Pixel commits should not rebuild taskbar buttons or workspace controls.
     fn update_windows(&self, frame: &Scene) {
         let mut model = self.windows.borrow_mut();
-        let matching = model.windows.len() == frame.windows.len()
+        let matching = model.current_workspace == frame.current_workspace
+            && model.workspace_names.len() == frame.workspace_count
+            && model.windows.len() == frame.windows.len()
             && model.windows.iter().zip(&frame.windows).all(|(a, b)| {
                 u64::from(a.id) == b.id
                     && a.title == b.title
                     && a.active == b.focused
                     && a.minimized == b.minimized
                     && a.maximized == b.maximized
+                    && a.fullscreen == b.fullscreen
+                    && a.above == b.above
+                    && a.workspace == Some(b.workspace)
             });
         if matching {
             return;
+        }
+        model.current_workspace = frame.current_workspace;
+        if model.workspace_names.len() != frame.workspace_count {
+            model.workspace_names = (1..=frame.workspace_count)
+                .map(|i| format!("Workspace {i}"))
+                .collect();
         }
         model.windows = frame
             .windows
@@ -56,19 +67,19 @@ impl Desktop {
                 Some(ClientWindow {
                     id: u32::try_from(w.id).ok()?,
                     title: w.title.clone(),
-                    workspace: Some(0),
+                    workspace: Some(w.workspace),
                     active: w.focused,
                     minimized: w.minimized,
                     maximized: w.maximized,
                     partially_maximized: false,
-                    fullscreen: false,
-                    can_fullscreen: false,
-                    above: false,
-                    can_raise: false,
+                    fullscreen: w.fullscreen,
+                    can_fullscreen: true,
+                    above: w.above,
+                    can_raise: true,
                     last_activation: u64::from(w.focused),
                     can_maximize: true,
                     can_snap: true,
-                    can_move_workspace: false,
+                    can_move_workspace: true,
                     can_minimize: true,
                     can_close: true,
                 })
@@ -119,25 +130,46 @@ impl Desktop {
         self.request(id, Input::Maximize)
     }
 
-    // This output exposes one workspace. Advertise only operations supported
-    // by the private server in the shell's capability model.
-    pub fn toggle_fullscreen(&self, _: u32) -> bool {
-        false
+    pub fn toggle_fullscreen(&self, id: u32) -> bool {
+        self.request(id, Input::Fullscreen)
     }
-    pub fn toggle_above(&self, _: u32) -> bool {
-        false
+    pub fn toggle_above(&self, id: u32) -> bool {
+        self.request(id, Input::AlwaysOnTop)
     }
     pub fn add_workspace(&self) -> bool {
-        false
+        if self.windows.borrow().workspace_names.len() >= 256 {
+            return false;
+        }
+        self.server.send(Input::AddWorkspace);
+        true
+    }
+    pub fn can_remove_last(&self) -> bool {
+        let model = self.windows.borrow();
+        model.workspace_names.len() > 1
+            && !model
+                .windows
+                .iter()
+                .any(|w| w.workspace == Some(model.workspace_names.len() - 1))
     }
     pub fn remove_empty_last_workspace(&self) -> bool {
-        false
+        if !self.can_remove_last() {
+            return false;
+        }
+        self.server.send(Input::RemoveWorkspace);
+        true
     }
     pub fn switch_workspace(&self, i: usize) -> bool {
-        i == 0
+        if i >= self.windows.borrow().workspace_names.len() {
+            return false;
+        }
+        self.server.send(Input::SwitchWorkspace(i));
+        true
     }
-    pub fn move_to_workspace(&self, _: u32, _: usize) -> bool {
-        false
+    pub fn move_to_workspace(&self, id: u32, workspace: usize) -> bool {
+        if workspace >= self.windows.borrow().workspace_names.len() {
+            return false;
+        }
+        self.request(id, |id| Input::MoveToWorkspace { id, workspace })
     }
 
     pub fn resize(&self, width: i32, height: i32) {
