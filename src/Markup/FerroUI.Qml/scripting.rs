@@ -235,7 +235,7 @@ impl ScriptContext<'_, '_> {
     }
 
     /// Absolute deadline shared by a bounded call, including nested guest jobs.
-    pub fn deadline(&self) -> Option<std::time::Instant> {
+    pub fn deadline(&self) -> Option<web_time::Instant> {
         self.tx.script_deadline
     }
 

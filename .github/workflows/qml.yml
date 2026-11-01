@@ -10,6 +10,7 @@ on:
       - 'Cargo.lock'
       - 'samples/QmlGallery/**'
       - 'tests/QmlCompiled/**'
+      - 'tests/QmlBrowser/**'
       - 'scripts/qml/**'
       - '.github/workflows/qml.yml'
   workflow_dispatch:
@@ -63,6 +64,35 @@ jobs:
           "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/creation/qt_reference.py
           QT_QPA_PLATFORM=offscreen "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/states/qt_reference.py
           QT_QPA_PLATFORM=offscreen "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/loader/qt_reference.py
+
+  browser:
+    name: Browser JavaScript (Chromium / Wasm)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d
+        with:
+          toolchain: stable
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: qml-browser
+      - name: Build and run a compiled QML application in a dedicated worker
+        run: |
+          cargo build --locked -p qml-browser-tests --target wasm32-unknown-unknown
+          version="$(sed -n 's/^wasm-bindgen = "=\(.*\)"$/\1/p' Cargo.toml)"
+          archive="wasm-bindgen-$version-x86_64-unknown-linux-musl"
+          curl --fail --silent --show-error --location \
+            "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/$version/$archive.tar.gz" \
+            -o "$RUNNER_TEMP/bindgen.tar.gz"
+          echo "82d12bb940e2d4e72e0d5605387fc1b8ca179044e012b620f0ce4e7440e8320e  $RUNNER_TEMP/bindgen.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/bindgen.tar.gz" -C "$RUNNER_TEMP" "$archive/wasm-bindgen"
+          mkdir -p "$RUNNER_TEMP/qml-site/pkg"
+          cp tests/QmlBrowser/{index.html,owner.js} "$RUNNER_TEMP/qml-site/"
+          "$RUNNER_TEMP/$archive/wasm-bindgen" --target web --no-typescript --out-dir "$RUNNER_TEMP/qml-site/pkg" \
+            target/wasm32-unknown-unknown/debug/qml_browser_tests.wasm
+          python3 tests/QmlBrowser/run.py --chrome google-chrome --site "$RUNNER_TEMP/qml-site"
 
   portability:
     name: Rust 1.89 and Emscripten

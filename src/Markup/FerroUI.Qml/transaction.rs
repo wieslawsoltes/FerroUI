@@ -10,7 +10,7 @@ pub(crate) struct Transaction<'a> {
     pub(crate) guest_return_type: Option<String>,
     pub(crate) guest_parameters: Vec<String>,
     pub(crate) used_engine: bool,
-    pub(crate) script_deadline: Option<std::time::Instant>,
+    pub(crate) script_deadline: Option<web_time::Instant>,
     pub(crate) failed_host_call: Option<Error>,
     pub(crate) nested_retirements: Vec<ObjectId>,
     pub(crate) model_edits: Vec<(ObjectId, list_model::Undo)>,

@@ -187,7 +187,7 @@ impl Engine {
             if len == 0 {
                 return Ok(&[]);
             }
-            if ptr.is_null() || len > crate::framing::LIMIT {
+            if ptr.is_null() || len > super::framing::LIMIT {
                 return Err("invalid WebScene byte range".into());
             }
             Ok(unsafe { std::slice::from_raw_parts(ptr, len) })

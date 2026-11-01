@@ -1,6 +1,9 @@
 //! Private worker executable. Its stdout is exclusively the framed protocol.
+#[path = "abi.rs"]
 mod abi;
+#[path = "framing.rs"]
 mod framing;
+#[path = "script_vm.rs"]
 mod script_vm;
 use percent_encoding::percent_decode_str;
 use serde_json::{json, Value};
@@ -269,7 +272,7 @@ fn run(library: &Path, isolated: bool) -> Result<(), String> {
     }
     Ok(())
 }
-fn main() {
+pub(super) fn main() {
     let mut args = std::env::args_os().skip(1);
     let Some(library) = args.next() else {
         eprintln!("missing WebScene native library path");

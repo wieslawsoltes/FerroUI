@@ -1,12 +1,18 @@
 //! WebScene.NativeEngine ABI 3 backend for QML. One bounded worker owns the V8
 //! realm. QML reads, writes, calls and notifications execute on the original
 //! FerroUI transaction thread, including nested evaluations on the same stack.
+#[cfg(not(target_arch = "wasm32"))]
 mod framing;
 mod host;
 mod leases;
 mod modules;
+#[cfg(not(target_arch = "wasm32"))]
+mod process;
+#[cfg(target_arch = "wasm32")]
+#[path = "browser_process.rs"]
 mod process;
 mod promise;
+#[cfg(not(target_arch = "wasm32"))]
 mod script_actor;
 use ferroui_qml::{
     ir, Error, ExternalValue, ObjectId, ScriptContext, ScriptEngine, ScriptInstance, ScriptScope,
@@ -16,10 +22,13 @@ use serde_json::{json, Value as Json};
 use std::{
     cell::{Cell, RefCell},
     collections::BTreeMap,
-    path::{Path, PathBuf},
     rc::{Rc, Weak},
-    time::{Duration, Instant},
+    time::Duration,
 };
+
+#[cfg(not(target_arch = "wasm32"))]
+use std::path::{Path, PathBuf};
+use web_time::Instant;
 
 #[derive(Default)]
 struct Tables {
@@ -84,19 +93,27 @@ impl Tables {
 /// Explicit worker and native library paths make application packaging independent
 /// of the current directory, platform DLL search paths and build-time network access.
 pub struct WebSceneEngine {
+    #[cfg(not(target_arch = "wasm32"))]
     executable: PathBuf,
+    #[cfg(not(target_arch = "wasm32"))]
     library: PathBuf,
     timeout: Duration,
+    #[cfg(target_arch = "wasm32")]
+    pool: Rc<RefCell<Vec<process::Worker>>>,
     realms: RefCell<BTreeMap<ScriptInstance, Rc<Realm>>>,
 }
 
 // Worker-global V8 state (including ESM bindings, host proxies, pending jobs
 // and native code caches) belongs to one QML instance.
 struct Realm {
+    #[cfg(not(target_arch = "wasm32"))]
     executable: PathBuf,
+    #[cfg(not(target_arch = "wasm32"))]
     library: PathBuf,
     timeout: Duration,
     worker: RefCell<Option<process::Worker>>,
+    #[cfg(target_arch = "wasm32")]
+    pool: Rc<RefCell<Vec<process::Worker>>>,
     deadline: Cell<Option<Instant>>,
     tables: RefCell<Tables>,
     generation: Cell<u64>,
@@ -121,6 +138,7 @@ impl Drop for GuestHandle {
     }
 }
 impl WebSceneEngine {
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn new(worker: impl AsRef<Path>, library: impl AsRef<Path>) -> Result<Self, Error> {
         let file = |path: &Path| {
             path.canonicalize()
@@ -142,6 +160,7 @@ impl WebSceneEngine {
     }
     /// Read FERROUI_WEBSCENE_LIBRARY and optionally FERROUI_WEBSCENE_WORKER.
     /// By default the worker is located beside the application executable.
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn from_env() -> Result<Self, Error> {
         let library = std::env::var_os("FERROUI_WEBSCENE_LIBRARY").ok_or_else(|| {
             Error::new("set FERROUI_WEBSCENE_LIBRARY to the WebScene native library")
@@ -157,6 +176,27 @@ impl WebSceneEngine {
         };
         Self::new(worker, library)
     }
+    /// Create a guest worker per QML instance. The Wasm owner must run in
+    /// a cross-origin-isolated DedicatedWorker where synchronous waits are legal.
+    #[cfg(target_arch = "wasm32")]
+    pub fn browser() -> Result<Self, Error> {
+        process::available()?;
+        Ok(Self {
+            timeout: Duration::from_secs(10),
+            realms: Default::default(),
+            pool: Default::default(),
+        })
+    }
+
+    /// Start a realm before the next instance's synchronous initial bindings.
+    /// A browser must be allowed to complete worker startup on its event loop.
+    #[cfg(target_arch = "wasm32")]
+    pub async fn prepare_browser_instance(&self) -> Result<(), Error> {
+        let worker = process::Worker::spawn(self.timeout).await?;
+        self.pool.borrow_mut().push(worker);
+        Ok(())
+    }
+
     pub fn with_timeout(mut self, timeout: Duration) -> Self {
         self.timeout = timeout;
         self
@@ -168,10 +208,14 @@ impl WebSceneEngine {
             .entry(id)
             .or_insert_with(|| {
                 Rc::new(Realm {
+                    #[cfg(not(target_arch = "wasm32"))]
                     executable: self.executable.clone(),
+                    #[cfg(not(target_arch = "wasm32"))]
                     library: self.library.clone(),
                     timeout: self.timeout,
                     worker: Default::default(),
+                    #[cfg(target_arch = "wasm32")]
+                    pool: self.pool.clone(),
                     deadline: Cell::new(None),
                     tables: Default::default(),
                     generation: Cell::new(1),
@@ -208,6 +252,7 @@ impl ScriptEngine for WebSceneEngine {
         }
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     fn start_worker(
         &self,
         resources: std::sync::Arc<BTreeMap<String, ir::ScriptResource>>,
@@ -374,7 +419,15 @@ impl Realm {
         if self.worker.borrow().is_some() {
             return Ok(());
         }
-        *self.worker.borrow_mut() = Some(process::Worker::spawn(&self.executable, &self.library)?);
+        #[cfg(not(target_arch = "wasm32"))]
+        let worker = process::Worker::spawn(&self.executable, &self.library)?;
+        #[cfg(target_arch = "wasm32")]
+        let worker = self.pool.borrow_mut().pop().ok_or_else(|| {
+            Error::new(
+                "await prepare_browser_instance before starting or replacing a QML browser realm",
+            )
+        })?;
+        *self.worker.borrow_mut() = Some(worker);
         let hello = self.read(deadline)?;
         if hello["ready"] != true {
             return Err(self.poison(Error::new(

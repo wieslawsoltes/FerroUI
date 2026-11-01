@@ -23,6 +23,7 @@ http = ["dep:ureq"]
 ureq = { version = "2.12.1", default-features = false, features = ["tls"], optional = true }
 
 [dependencies]
+web-time = "1.1"
 color = "0.3.3"
 serde = { workspace = true, features = ["derive"] }
 url = "2"

@@ -1,7 +1,8 @@
 //! Explicit, bounded Promise interop from the Rust owner thread. A retained
 //! Promise belongs to one QML engine realm.
 use super::*;
-use std::time::{Duration, Instant};
+use std::time::Duration;
+use web_time::Instant;
 
 /// A rejected value is rendered by its JavaScript backend with available stack context.
 #[derive(Clone, Debug, PartialEq)]

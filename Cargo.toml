@@ -81,6 +81,7 @@ members = [
     "src/Markup/FerroUI.Qml.WebScene",
     "samples/QmlGallery",
     "tests/QmlCompiled",
+    "tests/QmlBrowser",
     "src/Markup/FerroUI.Markup",
     "src/Markup/FerroUI.Markup.Xaml",
     "src/Markup/FerroUI.Markup.Xaml.WinUI",

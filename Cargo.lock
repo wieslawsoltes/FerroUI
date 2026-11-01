@@ -2362,6 +2362,7 @@ dependencies = [
  "serde",
  "ureq",
  "url",
+ "web-time",
 ]
 
 [[package]]
@@ -2420,6 +2421,9 @@ dependencies = [
  "serde_json",
  "tempfile",
  "unicode-ident",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-time",
 ]
 
 [[package]]
@@ -4912,6 +4916,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d595e54a326bc53c1c197b32d295e14b169e3cfeaa8dc82b529f947fba6bcf5"
 
 [[package]]
+name = "qml-browser-tests"
+version = "0.5.0-preview.1"
+dependencies = [
+ "ferroui-qml",
+ "ferroui-qml-build",
+ "ferroui-qml-webscene",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+]
+
+[[package]]
 name = "qml-compiled-tests"
 version = "0.5.0-preview.1"
 dependencies = [
@@ -7208,6 +7223,16 @@ name = "web-sys"
 version = "0.3.106"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "88261b9deccee56594c11a3460c462c41f58d148598fe70ad77070126a68aba4"
+dependencies = [
+ "js-sys",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "web-time"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a6580f308b1fad9207618087a65c04e7a10bc77e02c8e84e9b00dd4b12fa0bb"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
