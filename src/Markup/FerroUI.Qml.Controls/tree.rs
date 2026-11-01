@@ -44,3 +44,92 @@ impl Drop for Subscriptions {
         }
     }
 }
+
+pub(super) struct Candidate {
+    pub revision: u64,
+    pub peers: Peers,
+}
+
+pub(super) fn affects_layout(peer: &dyn NativeObject, property: &str) -> bool {
+    peer.children_property() == Some(property)
+        || (peer.uses_item_anchors() && property.starts_with("anchors."))
+}
+
+impl Inner {
+    pub(super) fn validate(
+        &self,
+        model: &Instance,
+        changes: &[ferroui_qml::Change],
+    ) -> Result<(), Error> {
+        let current = self.nodes.borrow();
+        let topology_changed = self.revision.get() != model.structure_revision();
+        let next = if topology_changed {
+            Some(prepare(model, model.objects(), &current, &self.factories)?)
+        } else {
+            None
+        };
+        let peers = next.as_ref().unwrap_or(&current);
+        let mut layout_changed = topology_changed;
+        for change in changes {
+            if let Some(peer) = peers.get(&change.object) {
+                peer.validate(&change.property, &change.value)?;
+                layout_changed |= affects_layout(&**peer, &change.property);
+            }
+        }
+        if layout_changed {
+            composition::plan(model, peers)?;
+        }
+        if let Some(peers) = next {
+            self.candidate.replace(Some(Candidate {
+                revision: model.structure_revision(),
+                peers,
+            }));
+        }
+        Ok(())
+    }
+}
+
+impl QmlView {
+    pub(super) fn accept_topology(&self) -> bool {
+        let revision = self.0.instance.borrow().structure_revision();
+        if revision == self.0.revision.get() {
+            return false;
+        }
+        let next = self
+            .0
+            .candidate
+            .take()
+            .expect("committed topology was validated");
+        debug_assert_eq!(next.revision, revision);
+        let added: Vec<_> = {
+            let old = self.0.nodes.borrow();
+            next.peers
+                .iter()
+                .filter(|(id, _)| !old.contains_key(id))
+                .map(|(&id, peer)| (id, peer.clone()))
+                .collect()
+        };
+        let old = self.0.nodes.replace(next.peers);
+        self.0.revision.set(revision);
+        for (id, peer) in old {
+            if self.0.nodes.borrow().contains_key(&id) {
+                continue;
+            }
+            let subscriptions = self.0.subscriptions.borrow_mut().remove(&id);
+            drop(subscriptions);
+            if let Some((_, children)) = peer.content() {
+                children.clear();
+            }
+            if let Some(canvas) = peer
+                .anchor_host()
+                .and_then(|host| host.cast::<anchors::AnchorCanvas>())
+            {
+                canvas.update(Default::default());
+            }
+        }
+        for (id, peer) in added {
+            self.connect_peer(id, &*peer);
+        }
+        true
+    }
+}

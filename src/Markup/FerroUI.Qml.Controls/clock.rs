@@ -5,7 +5,6 @@ use std::{cell::Cell, rc::Rc, time::Duration};
 pub(crate) struct ViewClock {
     timer: Rc<DispatcherTimer>,
     sample_ms: Cell<i64>,
-    manual: Cell<bool>,
     _subscription: crate::tree::Subscriptions,
 }
 
@@ -16,10 +15,7 @@ impl ViewClock {
 }
 
 impl QmlView {
-    pub(crate) fn install_clock(&self) {
-        if !self.0.instance.borrow().has_timers() {
-            return;
-        }
+    fn install_clock(&self) {
         let timer = DispatcherTimer::with_priority(DispatcherPriority::RENDER);
         // QML timers are animation-clock participants. A single dispatcher
         // subscription services every timer in the component on every backend.
@@ -44,20 +40,22 @@ impl QmlView {
             .set(ViewClock {
                 timer,
                 sample_ms: Cell::new(0),
-                manual: Cell::new(false),
                 _subscription: crate::tree::Subscriptions(vec![subscription]),
             })
             .ok()
             .expect("one view clock");
-        self.refresh_clock();
     }
 
     pub(crate) fn refresh_clock(&self) {
-        let Some(clock) = self.0.clock.get() else {
-            return;
-        };
+        if self.0.clock.get().is_none() {
+            if !self.0.instance.borrow().has_timers() || self.0.manual_clock.get() {
+                return;
+            }
+            self.install_clock();
+        }
+        let clock = self.0.clock.get().expect("installed view clock");
         let active =
-            !clock.manual.get() && self.0.instance.borrow().next_timer_deadline().is_some();
+            !self.0.manual_clock.get() && self.0.instance.borrow().next_timer_deadline().is_some();
         if active && !clock.timer.is_enabled() {
             clock.sample_ms.set(clock.timer.dispatcher().now());
             clock.timer.start();
@@ -101,8 +99,8 @@ impl QmlView {
     /// Advance the component from a deterministic clock. The first call takes
     /// ownership of ticking from the dispatcher for the lifetime of this view.
     pub fn advance_time(&self, elapsed: Duration) -> Result<(), Error> {
+        self.0.manual_clock.set(true);
         if let Some(clock) = self.0.clock.get() {
-            clock.manual.set(true);
             clock.stop();
         }
         self.step_clock(elapsed)

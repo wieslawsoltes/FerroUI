@@ -17,7 +17,7 @@ use ferroui_qml::{
     ComponentSource, Error, Instance, ObjectId, ScriptEngine, TypeDefinition, TypeRegistry, Value,
 };
 use std::{
-    cell::RefCell,
+    cell::{Cell, RefCell},
     collections::BTreeMap,
     rc::{Rc, Weak},
 };
@@ -155,9 +155,15 @@ impl NativeEndpoint {
 
 struct Inner {
     clock: std::cell::OnceCell<clock::ViewClock>,
+    manual_clock: Cell<bool>,
     deferred_posted: std::cell::Cell<bool>,
     instance: RefCell<Instance>,
     nodes: RefCell<tree::Peers>,
+    factories: tree::Factories,
+    revision: Cell<u64>,
+    candidate: RefCell<Option<tree::Candidate>>,
+    flushing: Cell<bool>,
+    flush_again: Cell<bool>,
     root: Ref<Control>,
     subscriptions: RefCell<BTreeMap<ObjectId, tree::Subscriptions>>,
     on_error: Box<dyn Fn(Error)>,
@@ -230,13 +236,13 @@ impl QmlView {
         registry: &ControlRegistry,
         on_error: impl Fn(Error) + 'static,
     ) -> Result<Self, Error> {
-        let mut pending = vec![instance.root()];
-        let mut objects = Vec::new();
-        while let Some(object) = pending.pop() {
-            pending.extend_from_slice(instance.children(object));
-            objects.push(object);
-        }
-        let nodes = tree::prepare(&instance, objects, &BTreeMap::new(), &registry.factories)?;
+        let nodes = tree::prepare(
+            &instance,
+            instance.objects(),
+            &BTreeMap::new(),
+            &registry.factories,
+        )?;
+        let revision = instance.structure_revision();
         let root = nodes
             .get(&instance.root())
             .ok_or_else(|| Error::new("component root has no native visual factory"))?
@@ -245,9 +251,15 @@ impl QmlView {
         instance.drain_changes();
         let view = Self(Rc::new(Inner {
             clock: std::cell::OnceCell::new(),
+            manual_clock: Cell::new(false),
             deferred_posted: std::cell::Cell::new(false),
             instance: RefCell::new(instance),
             nodes: RefCell::new(nodes),
+            factories: registry.factories.clone(),
+            revision: Cell::new(revision),
+            candidate: RefCell::default(),
+            flushing: Cell::new(false),
+            flush_again: Cell::new(false),
             root,
             subscriptions: RefCell::default(),
             on_error: Box::new(on_error),
@@ -260,27 +272,13 @@ impl QmlView {
                 let Some(inner) = weak.upgrade() else {
                     return Ok(());
                 };
-                let nodes = inner.nodes.borrow();
-                let mut layout_changed = false;
-                for change in changes {
-                    if let Some(node) = nodes.get(&change.object) {
-                        node.validate(&change.property, &change.value)?;
-                        layout_changed |= node.children_property()
-                            == Some(change.property.as_str())
-                            || (node.uses_item_anchors()
-                                && change.property.starts_with("anchors."));
-                    }
-                }
-                if layout_changed {
-                    composition::plan(instance, &nodes)?;
-                }
-                Ok(())
+                inner.validate(instance, changes)
             });
         let peers = view.0.nodes.borrow().clone();
         for (object, node) in peers {
             view.connect_peer(object, &*node);
         }
-        view.install_clock();
+        view.refresh_clock();
         view.post_deferred();
         Ok(view)
     }
@@ -324,6 +322,28 @@ impl QmlView {
         self.flush()
     }
 
+    /// Instantiate a QML Component and attach its native subtree after validation.
+    pub fn create_object(
+        &self,
+        component: ObjectId,
+        parent: Option<ObjectId>,
+        initial: BTreeMap<String, Value>,
+    ) -> Result<ObjectId, Error> {
+        let object = self
+            .0
+            .instance
+            .borrow_mut()
+            .create_object(component, parent, initial)?;
+        self.flush()?;
+        Ok(object)
+    }
+
+    /// Destroy a dynamic object and disconnect input on its native descendants.
+    pub fn destroy_object(&self, object: ObjectId) -> Result<(), Error> {
+        self.0.instance.borrow_mut().destroy_object(object)?;
+        self.flush()
+    }
+
     pub fn emit(&self, object: ObjectId, signal: &str, arguments: Vec<Value>) -> Result<(), Error> {
         self.0
             .instance
@@ -352,13 +372,40 @@ impl QmlView {
     }
 
     fn flush_from(&self, source: Option<(ObjectId, &str, &Value)>) -> Result<(), Error> {
+        if self.0.flushing.replace(true) {
+            self.0.flush_again.set(true);
+            return Ok(());
+        }
+        struct FlushGuard<'a>(&'a Cell<bool>);
+        impl Drop for FlushGuard<'_> {
+            fn drop(&mut self) {
+                self.0.set(false);
+            }
+        }
+        let _guard = FlushGuard(&self.0.flushing);
+        let mut source = source;
+        loop {
+            self.0.flush_again.set(false);
+            self.apply_changes(source.take())?;
+            if !self.0.flush_again.get() {
+                break;
+            }
+        }
+        self.refresh_clock();
+        self.post_deferred();
+        Ok(())
+    }
+
+    fn apply_changes(&self, source: Option<(ObjectId, &str, &Value)>) -> Result<(), Error> {
         let changes = self.0.instance.borrow_mut().drain_changes();
-        let mut layout_changed = false;
+        let mut layout_changed = self.accept_topology();
         for change in changes {
             if let Some(node) = self.peer(change.object) {
-                layout_changed |= node.children_property() == Some(change.property.as_str())
-                    || (node.uses_item_anchors() && change.property.starts_with("anchors."));
+                layout_changed |= tree::affects_layout(&*node, &change.property);
                 // A native subscriber can synchronously update a later slot in this batch.
+                if self.0.instance.borrow().type_name(change.object).is_none() {
+                    continue;
+                }
                 let latest = self.get(change.object, &change.property)?;
                 // Preserve the native source's priority (e.g. an inherited style)
                 // unless a handler produced a different final value.
@@ -369,12 +416,11 @@ impl QmlView {
                 }
             }
         }
-        if layout_changed {
+        if layout_changed && self.0.revision.get() == self.0.instance.borrow().structure_revision()
+        {
             let plan = composition::plan(&self.0.instance.borrow(), &self.0.nodes.borrow())?;
             composition::apply(plan);
         }
-        self.refresh_clock();
-        self.post_deferred();
         Ok(())
     }
 }

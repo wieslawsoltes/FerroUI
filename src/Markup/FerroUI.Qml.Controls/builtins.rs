@@ -87,6 +87,7 @@ impl Kind {
                 .property("anchors.verticalCenterOffset", "real", Number(0.0))
                 .property("data", "list<QtObject>", List(vec![]))
                 .default_property("data")
+                .visual_children("data")
         } else {
             TypeDefinition::default().inherits("QtQuick", "Item")
         };

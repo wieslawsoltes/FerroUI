@@ -321,3 +321,60 @@ fn positioners_keep_quick_item_cross_axis_geometry_and_native_alignment_on_resiz
     root.arrange(Rect::new(0., 0., 190., 100.));
     assert_eq!(top.bounds().x, 11.);
 }
+
+#[test]
+fn dynamic_visual_lifetime_validates_before_mount_and_disconnects_before_retirement() {
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let view = mount(
+        r#"
+        import QtQuick
+        import QtQuick.Controls
+        Column {
+            id: app
+            property int activations: 0
+            Component {
+                id: factory
+                Rectangle {
+                    required property string paint
+                    color: paint
+                    Button { text: "Run"; onClicked: app.activations++ }
+                }
+            }
+        }
+    "#,
+    );
+    let column = view.root().cast::<StackPanel>().unwrap();
+    let factory = view.id("factory").unwrap();
+    let paint = |value: &str| BTreeMap::from([("paint".into(), Value::String(value.into()))]);
+    assert_eq!(column.children().count(), 0);
+    let child = view
+        .create_object(factory, Some(view.root_id()), paint("red"))
+        .unwrap();
+    let peer = view.control(child).unwrap();
+    assert_eq!(column.children().get(0), peer);
+    let button = {
+        let instance = view.0.instance.borrow();
+        view.control(instance.children(child)[0])
+            .unwrap()
+            .cast::<Button>()
+            .unwrap()
+    };
+    button.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    assert_eq!(
+        view.get(view.root_id(), "activations").unwrap(),
+        Value::Number(1.0)
+    );
+    assert!(view
+        .create_object(factory, Some(view.root_id()), paint("invalid paint"))
+        .is_err());
+    assert_eq!(column.children().count(), 1);
+    assert_eq!(column.children().get(0), peer);
+    view.destroy_object(child).unwrap();
+    assert_eq!(column.children().count(), 0);
+    assert!(view.control(child).is_none());
+    button.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    assert_eq!(
+        view.get(view.root_id(), "activations").unwrap(),
+        Value::Number(1.0)
+    );
+}

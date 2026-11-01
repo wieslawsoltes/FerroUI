@@ -167,7 +167,8 @@ impl ControlRegistry {
         if Panel::TYPE.is_assignable_from(ty) {
             definition = definition
                 .property("children", "list<QtObject>", Value::List(vec![]))
-                .default_property("children");
+                .default_property("children")
+                .visual_children("children");
         }
         if Button::TYPE.is_assignable_from(ty) {
             definition = definition.signal("click", vec![]);
