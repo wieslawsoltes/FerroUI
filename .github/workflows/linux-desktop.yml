@@ -8,6 +8,7 @@ on:
       - 'src/FerroUI.Vulkan/**'
       - 'src/FerroUI.X11/**'
       - 'src/FerroUI.Wayland/**'
+      - 'src/FerroUI.Base/rendering/composition/**'
       - 'src/FerroUI.Themes.*/**'
       - '.github/workflows/linux-desktop.yml'
   workflow_dispatch:
@@ -41,7 +42,7 @@ jobs:
             libfontconfig-dev libfreetype-dev libharfbuzz-dev fonts-dejavu-core \
             libglib2.0-dev libglib2.0-bin pulseaudio pulseaudio-utils \
             mesa-vulkan-drivers vulkan-validationlayers xvfb xauth openbox xdotool dbus-x11 imagemagick x11-utils x11-xserver-utils \
-            libwayland-dev libwayland-egl1 sway swaylock foot grim wl-clipboard wtype wayland-utils jq xwayland \
+            libwayland-dev libwayland-egl1 libxkbcommon-dev xkb-data python3-pil python3-gi-cairo gir1.2-gtk-3.0 sway swaylock foot grim wl-clipboard wtype wayland-utils jq xwayland \
             xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk gtk-3-examples python3-gi python3-pyqt5 qtwayland5 \
             pipewire-bin wireplumber swayidle weston
       - name: Build and test the Graphite desktop
@@ -76,6 +77,14 @@ jobs:
             samples/LinuxDesktop/tests/wayland-session.sh target/debug/ferro-desktop desktop-captures/wayland
           samples/LinuxDesktop/tests/wayland-session.sh --xwayland target/debug/ferro-desktop desktop-captures/wayland-mixed
           if grep -E 'Validation Error|SYNC-HAZARD|VUID-' desktop-captures/wayland*/session.log; then exit 1; fi
+      - name: Test native client surfaces inside the FerroUI compositor
+        if: ${{ !cancelled() && steps.desktop_build.outcome == 'success' }}
+        env:
+          VK_INSTANCE_LAYERS: VK_LAYER_KHRONOS_validation
+          VK_LAYER_ENABLES: VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT
+        run: |
+          samples/LinuxDesktop/tests/wayland-session.sh --ferro target/debug/ferro-desktop desktop-captures/composed-login
+          if grep -E 'Validation Error|SYNC-HAZARD|VUID-' desktop-captures/composed-login/session.log; then exit 1; fi
       - name: Test xdg-shell previews on an independent compositor
         if: ${{ !cancelled() && steps.desktop_build.outcome == 'success' }}
         run: samples/LinuxDesktop/tests/weston-preview.sh target/debug/ferro-desktop desktop-captures/weston

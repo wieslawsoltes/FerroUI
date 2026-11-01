@@ -2,6 +2,8 @@
 
 Ferro Desktop is a Linux desktop session built from FerroUI controls. The shell owns the desktop surface, application launcher and workspace overview. The Wayland login uses Sway to composite independent applications. The X11 login uses Openbox. Both use the same FerroUI application catalog, appearance profiles, notifications, device controls and workspace overview.
 
+The **FerroUI compositor** can also host applications on its own Wayland display. Their surfaces, the shell and its WinUI flyouts are composed together in FerroUI. Launch it with `samples/LinuxDesktop/build.sh run -- --compositor=ferro` or select **Ferro Desktop (FerroUI Compositor)** at login. [Architecture, controls and protocol coverage](COMPOSITION.md)
+
 ## Screenshots
 
 These Wayland captures come from a managed Sway session running Skia Graphite on Mesa Lavapipe. The first shows independent native GTK and Qt windows. The next two show the same terminal after switching the running desktop’s appearance.
@@ -33,7 +35,7 @@ The Quick Settings capture uses a real PulseAudio null sink and isolated Network
 | --- | --- |
 | Shell | Share one model across the wallpaper, panels and active overlay. Dispatch actions from buttons, search and keyboard input. |
 | Applications | Discover the signed-in user's desktop entries and launch through Linux application services. |
-| Window management | Observe Sway IPC or X11 EWMH events. Delegate client placement and focus to the session window manager. |
+| Window management | Manage clients on the FerroUI compositor’s own display, or observe Sway IPC and X11 EWMH events in the delegated sessions. |
 | Presentation | Use FerroUI layout, text shaping, input, accessibility and the Skia compositor. Keep native graphics selection in the host. |
 
 Windowed mode runs inside an existing Wayland or X11 desktop. Login-session mode installs a desktop surface below application windows and uses the session window manager. The two modes share the same shell and application catalog.

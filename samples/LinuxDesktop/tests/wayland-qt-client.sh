@@ -35,19 +35,7 @@ command_ok "[con_id=$gtk] floating enable, resize set width $((width/2-38)) px h
 
 # This is the stock Qt Widgets colour chooser; Qt owns the swatches, palette,
 # native Wayland surface, text inputs and event loop independently of Ferro.
-env -u DISPLAY QT_QPA_PLATFORM=wayland /usr/bin/python3 -u - >"$dest/qt.log" 2>&1 <<'PY' &
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QApplication, QColorDialog
-
-app = QApplication(["ferro-qt-interop"])
-assert app.platformName() == "wayland", app.platformName()
-app.setDesktopFileName("org.ferroui.NativeQtColor")
-dialog = QColorDialog(QColor("#427CAD"))
-dialog.setOption(QColorDialog.DontUseNativeDialog)
-dialog.setWindowTitle("Select Color — Qt Widgets")
-dialog.show()
-app.exec()
-PY
+env -u DISPLAY QT_QPA_PLATFORM=wayland /usr/bin/python3 -u "$(dirname -- "$0")/qt-color-dialog.py" >"$dest/qt.log" 2>&1 &
 qt=$!
 qt_node=
 for ((i=0;i<110;i++)); do

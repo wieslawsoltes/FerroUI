@@ -4,9 +4,9 @@ set -euo pipefail
 script=$(realpath "$0")
 here=$(dirname "$script")
 mode=native
-if [[ ${1:-} == --xwayland ]]; then mode=mixed; shift; fi
+case ${1:-} in --xwayland) mode=mixed; shift;; --ferro) mode=composed; shift;; esac
 if [[ ${1:-} != --private ]]; then
-    if (( $# != 2 )); then echo "Usage: $0 [--xwayland] /path/to/ferro-desktop output-dir" >&2; exit 2; fi
+    if (( $# != 2 )); then echo "Usage: $0 [--xwayland|--ferro] /path/to/ferro-desktop output-dir" >&2; exit 2; fi
     binary=$(realpath "$1")
     [[ -x $binary ]] || { echo "Missing executable: $binary" >&2; exit 2; }
     mkdir -p "$2"; output=$(realpath "$2")
@@ -24,6 +24,7 @@ if [[ ${1:-} != --private ]]; then
         install -m644 "$here/wayland-screencast.py" "$scratch/tests/"
         if [[ ${FERRO_TEST_BENCHMARK:-0} == 1 ]]; then install -m644 "$here/wayland-benchmark.py" "$scratch/tests/"; fi
         if [[ ${FERRO_TEST_NESTED:-0} == 1 ]]; then install -m755 "$here/wayland-nested.sh" "$scratch/tests/"; fi
+        if [[ ${FERRO_TEST_QT:-0} == 1 || $mode == composed ]]; then install -m644 "$here/qt-color-dialog.py" "$scratch/tests/"; fi
         if [[ ${FERRO_TEST_QT:-0} == 1 ]]; then install -m755 "$here/wayland-qt-client.sh" "$scratch/tests/"; fi
         if [[ ${FERRO_TEST_OUTPUT_HOTPLUG:-0} == 1 ]]; then install -m755 "$here/wayland-output-hotplug.sh" "$scratch/tests/"; fi
         cp -a "$here/../session/." "$scratch/session/"
@@ -37,7 +38,7 @@ if [[ ${1:-} != --private ]]; then
             export FERRO_TEST_WLR_PORTAL=$scratch/test-wlr-portal
         fi
         chown -R nobody:"$(id -gn nobody)" "$scratch"
-        args=(); [[ $mode == native ]] || args+=(--xwayland)
+        args=(); case $mode in mixed) args+=(--xwayland);; composed) args+=(--ferro);; esac
         status=0
         (cd "$scratch" && setpriv --reuid=nobody --regid="$(id -g nobody)" --clear-groups \
             -- "$scratch/tests/wayland-session.sh" "${args[@]}" "$scratch/ferro-desktop" "$scratch/res") || status=$?
@@ -70,16 +71,31 @@ export WLR_BACKENDS=headless WLR_HEADLESS_OUTPUTS=2 WLR_RENDERER=pixman WLR_LIBI
 export FERRO_DESKTOP_BINARY="$binary" XDG_SESSION_TYPE=wayland XDG_SESSION_DESKTOP=ferro-desktop-wayland XDG_CURRENT_DESKTOP=FerroDesktop:sway
 if [[ $mode == mixed ]]; then export FERRO_DESKTOP_XWAYLAND=1; else export FERRO_DESKTOP_XWAYLAND=0; fi
 export FERRO_DESKTOP_SWAY_CONFIG="$XDG_CONFIG_HOME/test-sway.conf"
-cat "$here/../session/sway.conf" > "$FERRO_DESKTOP_SWAY_CONFIG"
+policy=sway.conf; session_args=()
+if [[ $mode == composed ]]; then
+    policy=ferro-composition.conf; session_args+=(--ferro)
+    export WLR_HEADLESS_OUTPUTS=1
+    # The global terminal binding runs in Sway's environment. Record what
+    # the real supervisor passes to a client before connecting foot.
+    mkdir -p "$XDG_CONFIG_HOME/bin"
+    cat >"$XDG_CONFIG_HOME/bin/xdg-terminal-exec" <<'TERMINAL'
+#!/bin/sh
+printf '%s\n' "$WAYLAND_DISPLAY" "${SWAYSOCK-unset}" "${DISPLAY-unset}" >"$XDG_RUNTIME_DIR/terminal-env"
+exec foot --app-id=org.ferroui.ComposedTerminal --title='FerroUI compositor terminal' sh -c 'printf "\n Native terminal on FerroUI\n"; exec sleep 90'
+TERMINAL
+    chmod +x "$XDG_CONFIG_HOME/bin/xdg-terminal-exec"
+    export PATH="$XDG_CONFIG_HOME/bin:$PATH"
+fi
+cat "$here/../session/$policy" > "$FERRO_DESKTOP_SWAY_CONFIG"
 cat >> "$FERRO_DESKTOP_SWAY_CONFIG" <<'CONFIG'
 output HEADLESS-1 mode 1280x800 pos 0 0 scale 1
 output HEADLESS-2 mode 960x720 pos 1280 0 scale 1.5
 workspace 1 output HEADLESS-1
 workspace 2 output HEADLESS-2
 CONFIG
-supervisor= terminal= gtk= pw= wp= damage= keyboard=
+supervisor= terminal= gtk= qt= pw= wp= damage= keyboard=
 cleanup() {
-    for pid in "$keyboard" "$damage" "$gtk" "$terminal" "$supervisor" "$wp" "$pw"; do [[ -z $pid ]] || kill "$pid" 2>/dev/null || :; done
+    for pid in "$keyboard" "$damage" "$qt" "$gtk" "$terminal" "$supervisor" "$wp" "$pw"; do [[ -z $pid ]] || kill "$pid" 2>/dev/null || :; done
     wait || :
 }
 trap cleanup EXIT
@@ -94,7 +110,7 @@ if [[ ${FERRO_TEST_PORTALS:-0} == 1 || ${FERRO_TEST_SCREENCAST:-0} == 1 ]]; then
     wait_for test -S "$XDG_RUNTIME_DIR/pipewire-0"
     wireplumber > "$output/wireplumber.log" 2>&1 & wp=$!
 fi
-"$here/../session/ferro-desktop-wayland" > "$output/session.log" 2>&1 &
+"$here/../session/ferro-desktop-wayland" "${session_args[@]}" > "$output/session.log" 2>&1 &
 supervisor=$!
 shopt -s nullglob
 for ((i=0;i<200;i++)); do
@@ -138,6 +154,41 @@ capture() {
     fail "$name did not produce a stable rendered Wayland frame"
 }
 wait_for is_scene desktop
+if [[ $mode == composed ]]; then
+    inner=$(sed -n 's/^FerroUI compositor ready. WAYLAND_DISPLAY=//p' "$output/session.log" | tail -1)
+    [[ -n $inner && $inner != "$WAYLAND_DISPLAY" && -S $XDG_RUNTIME_DIR/$inner ]]
+    WAYLAND_DISPLAY=$inner "$binary" --platform=wayland --current-scene | grep -qx desktop
+    wait_for focused org.ferroui.Desktop.Compositor
+    capture composed-desktop
+    wtype -M logo -k Return -m logo
+    wait_for test -s "$XDG_RUNTIME_DIR/terminal-env"
+    diff -u <(printf '%s\nunset\nunset\n' "$inner") "$XDG_RUNTIME_DIR/terminal-env"
+    capture composed-terminal HEADLESS-1 "$output/composed-desktop.png"
+    [[ $(tree | jq '[..|objects|select(.shell?=="xdg_shell")]|length') == 1 ]] || fail 'External client escaped the FerroUI compositor'
+    wtype -M logo -k n -m logo
+    wait_for is_scene notifications
+    capture composed-notifications HEADLESS-1 "$output/composed-terminal.png"
+    wtype -k Escape
+    wait_for is_scene desktop
+    wtype -M logo -k 2 -m logo
+    inner_client() { env -u SWAYSOCK -u DISPLAY -u WAYLAND_SOCKET WAYLAND_DISPLAY="$inner" "$@"; }
+    inner_client GDK_BACKEND=wayland WAYLAND_DEBUG=client gtk3-demo >"$output/composed-gtk.log" 2>&1 & gtk=$!
+    wait_for grep -Eq 'wl_surface[@#][0-9]+\.attach\(wl_buffer' "$output/composed-gtk.log"
+    wtype -M logo -k Left -m logo
+    capture composed-gtk HEADLESS-1 "$output/composed-desktop.png"
+    inner_client QT_QPA_PLATFORM=wayland WAYLAND_DEBUG=client /usr/bin/python3 "$here/qt-color-dialog.py" >"$output/composed-qt.log" 2>&1 & qt=$!
+    wait_for grep -Eq 'wl_surface[@#][0-9]+\.attach\(wl_buffer' "$output/composed-qt.log"
+    wtype -M logo -k Right -m logo
+    capture composed-toolkit-windows HEADLESS-1 "$output/composed-gtk.png"
+    # The shell overview is drawn in the same surface over both native clients.
+    wtype -M logo -k Tab -m logo; wait_for is_scene workspaces
+    capture composed-overview HEADLESS-1 "$output/composed-toolkit-windows.png"
+    [[ $(tree | jq '[..|objects|select(.shell?=="xdg_shell")]|length') == 1 ]]
+    swaymsg exit >/dev/null || :
+    wait "$supervisor" || :; supervisor=
+    echo 'Verified installed FerroUI compositor policy, fullscreen presenter, private terminal and global shell commands.'
+    exit
+fi
 # Explicit inherited sockets take priority over a conflicting named display.
 python3 - "$binary" <<'PYTHON'
 import os, socket, subprocess, sys

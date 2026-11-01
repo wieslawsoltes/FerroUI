@@ -1,6 +1,6 @@
 # Build and run Ferro Desktop
 
-Use a native Linux Rust toolchain (the workspace declares Rust 1.89 or later), a C++17 compiler, pkg-config, fontconfig development files, and the development dependencies for FerroUI’s X11, Wayland (including libwayland-client and libwayland-egl) and Skia backends. The header fetch uses Bash, curl, GNU tar, sha256sum and flock. Running the accelerated session requires a Vulkan loader and a Vulkan 1.1 driver that can present to the current Wayland or X11 display.
+Use a native Linux Rust toolchain (the workspace declares Rust 1.89 or later), a C++17 compiler, pkg-config, fontconfig development files, and the development dependencies for FerroUI’s X11, Wayland (including libwayland-client and libwayland-egl) and Skia backends. The compositor seat uses libxkbcommon (on Debian/Ubuntu install `libxkbcommon-dev` and `xkb-data`). The header fetch uses Bash, curl, GNU tar, sha256sum and flock. Running the accelerated session requires a Vulkan loader and a Vulkan 1.1 driver that can present to the current Wayland or X11 display.
 
 From the repository root, build a release binary or start the shell inside your current desktop.
 

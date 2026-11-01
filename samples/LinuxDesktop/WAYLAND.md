@@ -4,6 +4,8 @@ Ferro Desktop uses the native FerroUI Wayland backend and Skia. In a managed log
 
 Changing appearance updates the wallpaper, panels and controls on all outputs. Sway also recolors the titlebars and borders it draws for existing clients. Applications with client-side decorations draw their own titlebars.
 
+For a login where FerroUI also composes native clients, see [FerroUI desktop composition](COMPOSITION.md).
+
 ## Install or run
 
 Build the release with `samples/LinuxDesktop/build.sh`. Install Sway, the D-Bus session tools, Mesa or another Vulkan driver, and xkbcommon. For screen sharing, install PipeWire, a PipeWire session manager, xdg-desktop-portal, xdg-desktop-portal-wlr and xdg-desktop-portal-gtk. Install swaylock for the lock shortcut and swayidle for automatic locking. A graphical login needs a working logind/seatd seat and access to the GPU.
