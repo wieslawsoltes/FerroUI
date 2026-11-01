@@ -100,6 +100,38 @@ impl Mixer {
         Ok(())
     }
 
+    pub fn set_level(self, percent: u16) -> io::Result<()> {
+        let percent = percent.min(100);
+        match self {
+            Self::WirePlumber => command(
+                "wpctl",
+                &[
+                    "set-volume",
+                    "-l",
+                    "1.0",
+                    "@DEFAULT_AUDIO_SINK@",
+                    &format!("{percent}%"),
+                ],
+            )?,
+            Self::PulseAudio => {
+                // A relative change preserves the channel balance of stereo sinks.
+                let current = self
+                    .read()
+                    .ok_or_else(|| io::Error::other("Default audio output disappeared"))?
+                    .percent;
+                command(
+                    "pactl",
+                    &[
+                        "set-sink-volume",
+                        "@DEFAULT_SINK@",
+                        &format!("{:+}%", i32::from(percent) - i32::from(current)),
+                    ],
+                )?
+            }
+        };
+        Ok(())
+    }
+
     pub fn step(self, increase: bool) -> io::Result<()> {
         match self {
             Self::WirePlumber => command(

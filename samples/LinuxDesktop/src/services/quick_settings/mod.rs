@@ -38,6 +38,7 @@ pub enum Change {
     Refresh,
     Mute(Mixer, bool),
     Volume(Mixer, bool),
+    SetLevel(Mixer, u16),
     Wifi(bool),
     Brightness(String, bool),
 }
@@ -164,6 +165,7 @@ pub fn update(change: Change) -> (Snapshot, Option<String>) {
             Change::Refresh => Ok(()),
             Change::Mute(mixer, value) => mixer.set_mute(value),
             Change::Volume(mixer, increase) => mixer.step(increase),
+            Change::SetLevel(mixer, value) => mixer.set_level(value),
             Change::Wifi(value) => proxy(connected()?, NETWORK, NETWORK_PATH, NETWORK)
                 .map_err(io::Error::other)?
                 .set_property("WirelessEnabled", value)

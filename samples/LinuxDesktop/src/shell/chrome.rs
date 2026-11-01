@@ -40,7 +40,6 @@ pub(super) enum Icon {
     Maximize,
     RestoreWindow,
     More,
-    Move,
     Appearance,
 }
 
@@ -69,7 +68,6 @@ pub(super) fn glyph(icon: Icon, size: f64, color: &'static str) -> Element {
         Icon::More => "M1 10 H5 V14 H1 Z M10 10 H14 V14 H10 Z M19 10 H23 V14 H19 Z",
         Icon::Minimize => "M2 10 H22 V13 H2 Z",
         Icon::Appearance => "M12 1 A11 11 0 1 0 12 23 A11 11 0 1 0 12 1 Z M12 4 A8 8 0 0 1 12 20 Z",
-        Icon::Move => "M1 11 H16 L11 6 L13 4 L21 12 L13 20 L11 18 L16 13 H1 Z",
     };
     // Path controls can share a geometry. The parsed glyph never changes and
     // all of its consumers live on the UI thread.

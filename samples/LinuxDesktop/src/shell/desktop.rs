@@ -501,6 +501,24 @@ fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
         .into()
 }
 
+/// System flyouts open at the status area for the active desktop layout.
+pub(super) fn system_frame(shell: &Shell, preferred_width: f64) -> El<Border> {
+    let width = shell.viewport_width;
+    let (top, bottom) = look().insets();
+    match look().layout() {
+        Layout::Taskbar => shell_panel()
+            .horizontal_alignment(H::Right)
+            .vertical_alignment(V::Bottom)
+            .margin((10.0, 10.0, 10.0, bottom + 10.0)),
+        Layout::MenuBarDock => shell_panel()
+            .horizontal_alignment(H::Right)
+            .vertical_alignment(V::Top)
+            .margin((10.0, top + 8.0, 10.0, 10.0)),
+        Layout::BottomNavigation => popup_frame(),
+    }
+    .width(move || (width.get() - 24.0).clamp(0.0, preferred_width))
+}
+
 pub(super) fn popup_frame() -> El<Border> {
     let (top, bottom) = look().insets();
     match look().layout() {

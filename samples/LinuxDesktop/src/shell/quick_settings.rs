@@ -4,6 +4,7 @@ use super::chrome::*;
 use super::{feedback, popup_header, Shell};
 use crate::services::quick_settings::{self, Change, Snapshot};
 use ferroui_base::input::{Key, KeyModifiers};
+use ferroui_base::interactivity::RoutingStrategies;
 use ferroui_base::layout::{HorizontalAlignment as H, VerticalAlignment as V};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_controls::{Button, Grid};
@@ -16,6 +17,7 @@ pub(super) struct Settings {
     values: Signal<Option<Snapshot>>,
     busy: Signal<bool>,
     error: Signal<String>,
+    pending_level: std::cell::Cell<Option<u16>>,
 }
 
 impl Settings {
@@ -24,6 +26,7 @@ impl Settings {
             values: signal(None),
             busy: signal(false),
             error: signal(String::new()),
+            pending_level: Default::default(),
         }
     }
 }
@@ -54,6 +57,9 @@ fn request(shell: &Rc<Shell>, change: Change) {
                 }
                 settings.busy.set(false);
             });
+            if let Some(value) = settings.pending_level.take() {
+                apply_volume(&state, value);
+            }
         }
         Ok(())
     });
@@ -84,6 +90,76 @@ pub(super) fn handle_key(shell: &Rc<Shell>, key: Key, modifiers: KeyModifiers) -
     } else {
         false
     }
+}
+
+fn apply_volume(shell: &Rc<Shell>, percent: u16) {
+    if shell.settings.busy.get_untracked() {
+        shell.settings.pending_level.set(Some(percent));
+        return;
+    }
+    let audio = shell
+        .settings
+        .values
+        .with_untracked(|s| s.as_ref().and_then(|s| s.audio));
+    if let Some(audio) = audio.filter(|a| a.percent != percent) {
+        request(shell, Change::SetLevel(audio.mixer, percent));
+    }
+}
+
+/// Commit an interactive edit on release so a pointer drag never floods the audio server.
+/// The slider stays mounted and keeps keyboard focus when the device state is read back.
+fn volume_slider(shell: &Rc<Shell>) -> Element {
+    let values = shell.settings.values;
+    let state = shell.clone();
+    slider()
+        .name("OutputVolume")
+        .automation_properties_name("Output volume")
+        .minimum(0.0)
+        .maximum(100.0)
+        .small_change(1.0)
+        .large_change(10.0)
+        .value(move || {
+            values.with(|s| {
+                s.as_ref()
+                    .and_then(|s| s.audio)
+                    .map_or(0.0, |a| f64::from(a.percent.min(100)))
+            })
+        })
+        .is_visible(move || values.with(|s| s.as_ref().is_some_and(|s| s.audio.is_some())))
+        .with(move |slider| {
+            let commit = {
+                let weak = slider.downgrade();
+                let state = Rc::downgrade(&state);
+                move || {
+                    if let (Some(slider), Some(state)) = (weak.upgrade(), state.upgrade()) {
+                        apply_volume(&state, slider.value().round() as u16);
+                    }
+                }
+            };
+            let pointer_up = ferroui_base::input::InputElement::pointer_released_event();
+            let key_up = ferroui_base::input::InputElement::key_up_event();
+            let commit_pointer = commit.clone();
+            let mouse = slider.add_handler_with(
+                pointer_up,
+                move |_, _| commit_pointer(),
+                RoutingStrategies::BUBBLE,
+                true,
+            );
+            let keyboard = slider.add_handler_with(
+                key_up,
+                move |_, _| commit(),
+                RoutingStrategies::BUBBLE,
+                true,
+            );
+            let weak = slider.downgrade();
+            on_cleanup(move || {
+                if let Some(slider) = weak.upgrade() {
+                    slider.remove_handler(pointer_up, mouse);
+                    slider.remove_handler(key_up, keyboard);
+                }
+            });
+        })
+        .into()
 }
 
 fn section(icon: Icon, title: &str, detail: &str, controls: Element) -> El<Grid> {
@@ -126,8 +202,8 @@ fn control(
         .child(shell_text(content, 13.0, Ink::Primary))
 }
 
-fn device_rows(state: &Rc<Shell>, values: &Snapshot) -> Element {
-    let mut rows = stack_panel().spacing(7.0);
+fn audio_row(state: &Rc<Shell>, values: &Snapshot) -> Element {
+    let mut rows = stack_panel();
     if let Some(audio) = values.audio {
         let detail = if audio.muted {
             format!("Muted · {}%", audio.percent)
@@ -165,6 +241,11 @@ fn device_rows(state: &Rc<Shell>, values: &Snapshot) -> Element {
             Element::Empty,
         ));
     }
+    rows.into()
+}
+
+fn device_rows(state: &Rc<Shell>, values: &Snapshot) -> Element {
+    let mut rows = stack_panel().spacing(7.0);
     if let Some(wifi) = &values.wifi {
         let enabled = wifi.enabled;
         let detail = if !wifi.hardware_enabled {
@@ -239,15 +320,22 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     ferroui_view::on_cleanup(move || timer.dispose());
     let state = shell.clone();
     let refresh = shell.clone();
+    let audio_state = shell.clone();
     let busy = shell.settings.busy;
     let values = shell.settings.values;
-    super::desktop::popup_frame()
-        .max_width(440)
+    super::desktop::system_frame(shell, 440.0)
         .padding(18)
         .child(
             stack_panel()
                 .spacing(12.0)
                 .child(popup_header("Quick settings", "SYSTEM CONTROLS", shell))
+                .child(dynamic(move || {
+                    values.with(|s| {
+                        s.as_ref()
+                            .map_or(Element::Empty, |snapshot| audio_row(&audio_state, snapshot))
+                    })
+                }))
+                .child(volume_slider(shell))
                 .child(scroll_viewer().max_height(300).child(dynamic(move || {
                     values.with(|snapshot| match snapshot {
                         Some(snapshot) => device_rows(&state, snapshot),
@@ -268,8 +356,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
 }
 
 pub(super) fn calendar_view(shell: &Rc<Shell>) -> Element {
-    super::desktop::popup_frame()
-        .max_width(390)
+    super::desktop::system_frame(shell, 390.0)
         .padding(16)
         .child(
             stack_panel()

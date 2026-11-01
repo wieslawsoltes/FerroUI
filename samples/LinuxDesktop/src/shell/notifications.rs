@@ -51,7 +51,7 @@ impl Notifications {
     }
 }
 
-fn card(notice: &Notice, service: &Rc<Service>, banner: bool) -> Element {
+fn card(notice: &Notice, service: &Rc<Service>, revision: Signal<u64>, banner: bool) -> Element {
     let id = notice.id;
     let close = service.clone();
     let app = if notice.app.is_empty() {
@@ -109,9 +109,14 @@ fn card(notice: &Notice, service: &Rc<Service>, banner: bool) -> Element {
                 title
             }
             .to_owned();
+            let enabled = service.clone();
             let service = service.clone();
             buttons = buttons.child(
                 action(&label, move || service.invoke(id, &key))
+                    .is_enabled(move || {
+                        revision.get();
+                        enabled.accepts_actions()
+                    })
                     .margin((0.0, 3.0, 6.0, 0.0))
                     .padding((10.0, 3.0))
                     .child(shell_text(&label, 12.0, Ink::Primary)),
@@ -161,7 +166,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
         let index = page.get().min(last);
         let mut list = stack_panel().spacing(8);
         for item in notices.page(index * PAGE, PAGE) {
-            list = list.child(card(&item, &notices, false));
+            list = list.child(card(&item, &notices, revision, false));
         }
         if last > 0 {
             list = list.child(
@@ -190,8 +195,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     let quiet = shell.notifications.service.clone();
     let quiet_button = NodeRef::<ferroui_controls::Button>::new();
     let count = shell.notifications.service.clone();
-    super::desktop::popup_frame()
-        .max_width(470)
+    super::desktop::system_frame(shell, 470.0)
         .max_height(640)
         .padding(18)
         .child(
@@ -288,7 +292,12 @@ impl Banner {
                     scroll_viewer()
                         .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
                         .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
-                        .child(card(notice, &shell.notifications.service, true)),
+                        .child(card(
+                            notice,
+                            &shell.notifications.service,
+                            shell.notifications.revision,
+                            true,
+                        )),
                 )
                 .into_element()
                 .mount()
