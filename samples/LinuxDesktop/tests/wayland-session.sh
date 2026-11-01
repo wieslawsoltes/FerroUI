@@ -154,6 +154,8 @@ capture() {
     fail "$name did not produce a stable rendered Wayland frame"
 }
 wait_for is_scene desktop
+printf -v bus_name 'org.ferroui.Desktop.Wayland.d%x_%x' \
+    "$(stat -c %d "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY")" "$(stat -c %i "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY")"
 if [[ $mode == composed ]]; then
     inner=$(sed -n 's/^FerroUI compositor ready. WAYLAND_DISPLAY=//p' "$output/session.log" | tail -1)
     [[ -n $inner && $inner != "$WAYLAND_DISPLAY" && -S $XDG_RUNTIME_DIR/$inner ]]
@@ -180,6 +182,9 @@ if [[ $mode == composed ]]; then
     wait_for grep -Eq 'wl_surface[@#][0-9]+\.attach\(wl_buffer' "$output/composed-qt.log"
     wtype -M logo -k Right -m logo
     capture composed-toolkit-windows HEADLESS-1 "$output/composed-gtk.png"
+    if [[ ${FERRO_TEST_BENCHMARK:-0} == 1 ]]; then
+        /usr/bin/python3 "$here/wayland-benchmark.py" "$binary" "$output" "$bus_name"
+    fi
     # The shell overview is drawn in the same surface over both native clients.
     wtype -M logo -k Tab -m logo; wait_for is_scene workspaces
     capture composed-overview HEADLESS-1 "$output/composed-toolkit-windows.png"
@@ -199,8 +204,6 @@ with socket.socket(socket.AF_UNIX) as peer:
                                      env=env, pass_fds=(peer.fileno(),), text=True)
     assert current.strip() == "desktop"
 PYTHON
-printf -v bus_name 'org.ferroui.Desktop.Wayland.d%x_%x' \
-    "$(stat -c %d "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY")" "$(stat -c %i "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY")"
 duplicate_status=0
 timeout 8 "$binary" --platform=wayland --session >"$output/duplicate.log" 2>&1 || duplicate_status=$?
 [[ $duplicate_status == 1 ]] && grep -q 'already owns this Wayland display' "$output/duplicate.log" ||

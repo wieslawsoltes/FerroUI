@@ -84,7 +84,7 @@ jobs:
           VK_LAYER_ENABLES: VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT
         run: |
           samples/LinuxDesktop/tests/ferro-compositor.sh target/debug/ferro-desktop desktop-captures/ferro-compositor
-          samples/LinuxDesktop/tests/wayland-session.sh --ferro target/debug/ferro-desktop desktop-captures/composed-login
+          FERRO_TEST_BENCHMARK=1 samples/LinuxDesktop/tests/wayland-session.sh --ferro target/debug/ferro-desktop desktop-captures/composed-login
           if grep -E 'Validation Error|SYNC-HAZARD|VUID-' desktop-captures/composed-login/session.log; then exit 1; fi
       - name: Test xdg-shell previews on an independent compositor
         if: ${{ !cancelled() && steps.desktop_build.outcome == 'success' }}

@@ -42,8 +42,8 @@ def main(binary, directory, bus_name):
                 return pixels
         raise TimeoutError("The compositor did not present the expected launcher frame")
 
-    # Establish references on the same empty workspace, with no external windows
-    # obscuring the desktop. Wait for two visually stable, distinct launcher frames.
+    # Calibrate against the current workspace. In the unified compositor
+    # fixture this includes two static native application windows.
     desktop = read_frame()
     toggle()
     previous = until(lambda frame: sum(difference(a, b) > 40 for a, b in zip(desktop, frame)) > len(frame) / 10)
@@ -92,6 +92,7 @@ def main(binary, directory, bus_name):
     banner = next(line for line in (directory / "session.log").read_text().splitlines()
                   if line.startswith("Ferro Desktop / "))
     result = {
+        "scene_composition": "FerroUI" if "FerroUI compositor ready." in (Path(directory) / "session.log").read_text() else "Sway",
         "shell": banner, "compositor": subprocess.check_output(["sway", "--version"], text=True).strip(),
         "compositor_renderer": os.environ["WLR_RENDERER"], "output": "HEADLESS-1",
         "method": "Warm CLI toggle to a quarter-scale grim frame matching >=90% of discriminating pixels "
