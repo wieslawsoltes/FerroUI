@@ -216,3 +216,6 @@ mod webscene;
 
 #[cfg(all(test, feature = "webscene"))]
 mod direct_reads;
+
+#[cfg(test)]
+mod native_host;

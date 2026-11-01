@@ -41,6 +41,13 @@ fn main() {
         .with_javascript()
         .compile_file("webscene/App.qml", "webscene.rs")
         .expect("compile the WebScene components and JavaScript module graph");
+    ferroui_qml_build::compile_file("host/Main.qml", "native_host.rs")
+        .expect("compile Rust host callback fixture");
+    #[cfg(feature = "webscene")]
+    ferroui_qml_build::Compiler::new()
+        .with_javascript()
+        .compile_file("host/Main.qml", "webscene_host.rs")
+        .expect("embed Rust host callback fixture");
     ferroui_qml_build::compile_file("models/Inventory.qml", "inventory.rs")
         .expect("compile list model");
     ferroui_qml_build::compile_file("shadows/Final.qml", "shadow.rs")
