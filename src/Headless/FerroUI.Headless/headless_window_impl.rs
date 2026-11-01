@@ -4,7 +4,6 @@
 use crate::ferro_headless_platform::{FerroHeadlessPlatform, SharedOptions};
 use crate::headless_platform_stubs::HeadlessScreensStub;
 use crate::headless_window_surface::HeadlessWindowSurface;
-use crate::i_headless_window::IHeadlessWindow;
 use ferroui_base::input::platform::IClipboard;
 use ferroui_base::input::raw::{
     IDragDropDevice, IRawInputEventArgs, RawDragEvent, RawDragEventType, RawKeyEventArgs, RawKeyEventType,
@@ -212,7 +211,7 @@ impl HeadlessWindowImpl {
             position_changed(position);
         }
         if self.surface.render_scaling() != scaling {
-            IHeadlessWindow::set_render_scaling(self, scaling);
+            self.set_render_scaling(scaling);
         }
         self.do_resize(size, WindowResizeReason::Unspecified);
     }
@@ -661,12 +660,15 @@ impl IPopupImpl for HeadlessWindowImpl {
     fn set_hit_test_visible(&self, _is_hit_test_visible: bool) {}
 }
 
-impl IHeadlessWindow for HeadlessWindowImpl {
-    fn get_last_rendered_frame(&self) -> Option<WriteableBitmap> {
+/// What the input and rendering extensions of a top-level need from the platform implementation of
+/// a headless window (upstream's internal interface `IHeadlessWindow`, which has this one
+/// implementation; docs/porting/data/upstream-names.toml).
+impl HeadlessWindowImpl {
+    pub(crate) fn get_last_rendered_frame(&self) -> Option<WriteableBitmap> {
         self.surface.get_last_rendered_frame()
     }
 
-    fn key_press(&self, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<&str>) {
+    pub(crate) fn key_press(&self, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<&str>) {
         self.invoke_input(Rc::new(RawKeyEventArgs::new(
             self.keyboard_device(),
             self.timestamp(),
@@ -680,7 +682,7 @@ impl IHeadlessWindow for HeadlessWindowImpl {
         )));
     }
 
-    fn key_release(&self, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<&str>) {
+    pub(crate) fn key_release(&self, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<&str>) {
         self.invoke_input(Rc::new(RawKeyEventArgs::new(
             self.keyboard_device(),
             self.timestamp(),
@@ -694,7 +696,7 @@ impl IHeadlessWindow for HeadlessWindowImpl {
         )));
     }
 
-    fn text_input(&self, text: &str) {
+    pub(crate) fn text_input(&self, text: &str) {
         let Some(input_root) = self.input_root() else {
             return;
         };
@@ -702,7 +704,7 @@ impl IHeadlessWindow for HeadlessWindowImpl {
         self.invoke_input(Rc::new(RawTextInputEventArgs::new(self.keyboard_device(), 0, input_root, text)));
     }
 
-    fn mouse_down(&self, point: Point, button: MouseButton, modifiers: RawInputModifiers) {
+    pub(crate) fn mouse_down(&self, point: Point, button: MouseButton, modifiers: RawInputModifiers) {
         self.invoke_input(Rc::new(RawPointerEventArgs::new(
             self.mouse_input_device(),
             self.timestamp(),
@@ -720,7 +722,7 @@ impl IHeadlessWindow for HeadlessWindowImpl {
         )));
     }
 
-    fn mouse_move(&self, point: Point, modifiers: RawInputModifiers) {
+    pub(crate) fn mouse_move(&self, point: Point, modifiers: RawInputModifiers) {
         self.invoke_input(Rc::new(RawPointerEventArgs::new(
             self.mouse_input_device(),
             self.timestamp(),
@@ -731,7 +733,7 @@ impl IHeadlessWindow for HeadlessWindowImpl {
         )));
     }
 
-    fn mouse_up(&self, point: Point, button: MouseButton, modifiers: RawInputModifiers) {
+    pub(crate) fn mouse_up(&self, point: Point, button: MouseButton, modifiers: RawInputModifiers) {
         self.invoke_input(Rc::new(RawPointerEventArgs::new(
             self.mouse_input_device(),
             self.timestamp(),
@@ -749,7 +751,7 @@ impl IHeadlessWindow for HeadlessWindowImpl {
         )));
     }
 
-    fn mouse_wheel(&self, point: Point, delta: Vector, modifiers: RawInputModifiers) {
+    pub(crate) fn mouse_wheel(&self, point: Point, delta: Vector, modifiers: RawInputModifiers) {
         self.invoke_input(Rc::new(RawMouseWheelEventArgs::new(
             self.mouse_input_device(),
             self.timestamp(),
@@ -760,7 +762,7 @@ impl IHeadlessWindow for HeadlessWindowImpl {
         )));
     }
 
-    fn touch(&self, point: Point, touch_point_id: i64, type_: RawPointerEventType, modifiers: RawInputModifiers) {
+    pub(crate) fn touch(&self, point: Point, touch_point_id: i64, type_: RawPointerEventType, modifiers: RawInputModifiers) {
         let device: Rc<dyn IInputDevice> = self.touch_device.clone();
         self.invoke_input(Rc::new(RawTouchEventArgs::new(
             device,
@@ -773,7 +775,7 @@ impl IHeadlessWindow for HeadlessWindowImpl {
         )));
     }
 
-    fn drag_drop(
+    pub(crate) fn drag_drop(
         &self,
         point: Point,
         type_: RawDragEventType,
@@ -793,7 +795,7 @@ impl IHeadlessWindow for HeadlessWindowImpl {
         )));
     }
 
-    fn set_render_scaling(&self, scaling: f64) {
+    pub(crate) fn set_render_scaling(&self, scaling: f64) {
         if scaling <= 0.0 {
             panic!("Scaling must be greater than zero. (Parameter 'scaling')");
         }

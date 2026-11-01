@@ -17,7 +17,7 @@ use crate::{
     },
     model_projection,
     selectors::{DockSelectorItem, DockSelectorMode, IDockSelectorService},
-    services::{DockControlFactoryService, IDockControlFactoryService},
+    services::DockControlFactoryService,
 };
 use ferrodock_controls_recycling::{from_recycling_value, to_recycling_value};
 use ferrodock_model::core::DockFloatingWindowHostMode;
@@ -82,7 +82,7 @@ pub struct DockControl {
     dock_manager_options: Rc<DockManagerOptions>,
     dock_manager: Rc<DockManager>,
     dock_control_state: Rc<DockControlState>,
-    factory_service: Rc<dyn IDockControlFactoryService>,
+    factory_service: Rc<DockControlFactoryService>,
     is_initialized: Cell<bool>,
     content_control: RefCell<Option<Ref<Control>>>,
     managed_window_layer: RefCell<Option<Ref<ManagedWindowLayer>>>,

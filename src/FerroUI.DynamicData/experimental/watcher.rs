@@ -1,6 +1,6 @@
 //! `Watcher<TObject, TKey>` (`Experimental/Watcher.cs`).
 
-use super::{ISubjectWithRefCount, IWatcher, SubjectWithRefCount};
+use super::{IWatcher, SubjectWithRefCount};
 use crate::cache::{Change, ChangeReason, ChangeSet, IConnectableCache, IObservableCache, IntermediateCache, ObservableCache, ObservableCacheEx};
 use ferroui_reactive::concurrency::{IScheduler, SchedulerExt};
 use ferroui_reactive::disposables::Disposable;
