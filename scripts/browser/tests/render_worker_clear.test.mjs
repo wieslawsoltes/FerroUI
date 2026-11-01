@@ -1,6 +1,7 @@
 // Behaviour tests of steps B2.1, B2.3 and B2.5 of the render worker on the render_worker_clear example,
-// in headless Chrome: a canvas whose control is transferred to a thread of the module is drawn to
-// there, without the compositor. The page is cross-origin isolated either by the headers of the
+// in headless Chrome: a thread of the module draws the frames of a canvas, without the compositor,
+// and hands them to the page, which shows them (docs/porting/browser-render-worker.md, "Cooperative
+// resize"). The page is cross-origin isolated either by the headers of the
 // server or by the service worker of the threaded mode.
 //
 //   scripts/browser/setup.sh --threads && source .tools/env.sh
@@ -85,9 +86,10 @@ async function expectFrameInCanvas(page, { width = 200, height = 120, animated =
     assert(await page.evaluate("document.querySelectorAll('#view canvas').length") === 1, "the view does not hold one canvas");
     const box = JSON.parse(await page.evaluate("JSON.stringify(document.querySelector('#view canvas').getBoundingClientRect())"));
     assert(box.width === width && box.height === height, `the canvas is ${box.width} x ${box.height}, not ${width} x ${height}`);
-    // The control of the canvas is with the worker: the page cannot draw to it or size it.
-    assert(await page.evaluate("(() => { try { document.querySelector('#view canvas').getContext('2d'); return false; } catch { return true; } })()") === true,
-        "the page can still take a context of the canvas: its control was not transferred");
+    // The worker draws to a canvas of its own and the page shows its frames (`CanvasPresenter`): the
+    // canvas of the page has a bitmaprenderer context and no other.
+    assert(await page.evaluate("(c => c.getContext('bitmaprenderer') !== null && c.getContext('2d') === null)(document.querySelector('#view canvas'))") === true,
+        "the canvas of the page does not show the frames of the worker through a bitmaprenderer context");
     const at = ([x, y]) => [Math.round(box.x + x), Math.round(box.y + y)];
     const inside = [
         [box.width / 2, box.height / 2],
