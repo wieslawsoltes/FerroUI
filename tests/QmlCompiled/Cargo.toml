@@ -10,12 +10,14 @@ publish = false
 path = "lib.rs"
 
 [features]
-webscene = ["dep:ferroui-qml-webscene", "dep:ferroui-qml-build", "ferroui-qml-build/javascript"]
+webscene = ["dep:ferroui-qml-webscene", "ferroui-qml-build/javascript"]
 
 [dependencies]
 ferroui-qml-webscene = { workspace = true, optional = true }
-ferroui-qml-build = { workspace = true, optional = true }
 ferroui-qml.workspace = true
+
+[dev-dependencies]
+ferroui-qml-build.workspace = true
 
 [build-dependencies]
 ferroui-qml.workspace = true

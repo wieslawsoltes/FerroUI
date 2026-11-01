@@ -381,8 +381,9 @@ fn dynamic_visual_lifetime_validates_before_mount_and_disconnects_before_retirem
 
 #[test]
 fn native_loader_sizes_and_disconnects_a_retained_loaded_control() {
-    use ferroui_base::{Rect, Size};
-    let _scope = UnitTestApplication::start(TestServices::new());
+    use ferroui_base::Rect;
+    use ferroui_controls::Window;
+    let _scope = UnitTestApplication::start(TestServices::styled_window());
     let view = mount(
         r#"
         import QtQuick
@@ -399,14 +400,16 @@ fn native_loader_sizes_and_disconnects_a_retained_loaded_control() {
         panic!("loaded button")
     };
     let button = view.control(item).unwrap().cast::<Button>().unwrap();
-    let root = view.root();
-    root.measure(Size::new(120., 80.));
-    root.arrange(Rect::new(0., 0., 120., 80.));
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(view.root())));
+    window.show();
+    window.layout_manager().execute_initial_layout_pass();
     assert_eq!(host.bounds(), Rect::new(0., 0., 40., 24.));
     assert_eq!(button.bounds(), Rect::new(0., 0., 40., 24.));
     view.set(id, "width", Value::Number(75.)).unwrap();
-    root.measure(Size::new(120., 80.));
-    root.arrange(Rect::new(0., 0., 120., 80.));
+    assert_eq!(view.get(item, "width").unwrap(), Value::Number(75.));
+    assert_eq!(button.width(), 75.);
+    window.layout_manager().execute_layout_pass();
     assert_eq!(button.bounds().width, 75.);
     button.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
     assert_eq!(
