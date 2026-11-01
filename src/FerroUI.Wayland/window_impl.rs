@@ -30,7 +30,7 @@ use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider, PlatformThemeVariant};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::Compositor;
-use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, Point, Rect, Size, Thickness};
+use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, PixelSize, Point, Rect, Size, Thickness};
 use ferroui_controls::platform::{
     IPlatformHandle, IPopupImpl, IScreenImpl, ITopLevelImpl, IWaylandOptionsToplevelImplFeature, IWindowBaseImpl,
     IWindowIconImpl, IWindowImpl, PlatformRequestedDrawnDecoration,
@@ -62,6 +62,7 @@ pub struct WindowImpl {
     can_resize: Cell<bool>,
     restore_bounds: Cell<Size>,
     shadow_extents: Cell<Thickness>,
+    constrained_geometry: Cell<PixelSize>,
     min_size: Cell<Option<Size>>,
     max_size: Cell<Option<Size>>,
     // Sticky-CSD latch on the UI side. Set true the first time the
@@ -95,6 +96,14 @@ pub(crate) struct ConfigureOutcome {
     pub client_size: Option<Size>,
 }
 
+/// A positive configured dimension names the window geometry, excluding CSD shadows.
+fn configured_client_size(geometry: PixelSize, fallback: Size, shadows: Thickness) -> Size {
+    Size::new(
+        if geometry.width > 0 { f64::from(geometry.width) + shadows.left + shadows.right } else { fallback.width },
+        if geometry.height > 0 { f64::from(geometry.height) + shadows.top + shadows.bottom } else { fallback.height },
+    )
+}
+
 /// Works out what a configure changes (the computation of `ApplyConfigureBatch`).
 pub(crate) fn evaluate_configure(
     batch: &XdgConfigureBatch,
@@ -122,11 +131,8 @@ pub(crate) fn evaluate_configure(
     // Resize: configure size is window geometry (excluding shadows).
     // Add shadow extents to get full surface size for the UI thread.
     let mut new_client_size = None;
-    if batch.size.width > 0 && batch.size.height > 0 {
-        let size = Size::new(
-            f64::from(batch.size.width) + shadow_extents.left + shadow_extents.right,
-            f64::from(batch.size.height) + shadow_extents.top + shadow_extents.bottom,
-        );
+    if batch.size.width > 0 || batch.size.height > 0 {
+        let size = configured_client_size(batch.size, client_size, shadow_extents);
         if size != client_size {
             new_client_size = Some(size);
         }
@@ -209,6 +215,7 @@ impl WindowImpl {
             can_resize: Cell::new(true),
             restore_bounds: Cell::new(Size::default()),
             shadow_extents: Cell::new(Thickness::default()),
+            constrained_geometry: Cell::new(PixelSize::default()),
             min_size: Cell::new(None),
             max_size: Cell::new(None),
             csd_sticky: Cell::new(false),
@@ -306,6 +313,11 @@ impl WindowImpl {
             self.shadow_extents.get(),
         );
         self.restore_bounds.set(outcome.restore_bounds);
+        // The client may choose unconstrained dimensions. A compositor-enforced size
+        // must survive application Width/Height, including the first Show layout.
+        let constrained = self.layer_role.borrow().is_some()
+            || matches!(outcome.window_state, WindowState::Maximized | WindowState::FullScreen);
+        self.constrained_geometry.set(if constrained { batch.size } else { PixelSize::default() });
 
         if old_window_state != outcome.window_state {
             self.window_state.set(outcome.window_state);
@@ -968,9 +980,6 @@ impl IWindowImpl for WindowImpl {
     }
 
     fn resize(&self, client_size: Size, reason: WindowResizeReason) {
-        // The layer configure is authoritative, including after a Window is shown. A layout
-        // pass must never replace it with the application's preferred (or default) size.
-        if self.layer_role.borrow().is_some() { return; }
         // There is some bug on the x-plat side of things that increments the size by 0.000001 or smth and causes
         // a stack overflow
         // So we check for recursion depth and for nearly equal values here.
@@ -992,7 +1001,10 @@ impl IWindowImpl for WindowImpl {
         }
         let _depth = Depth(&self.resize_stack_depth);
 
-        // Size is just a number, the actual resizing is done by the compositor when submitting a frame
+        // Window.show applies its preferred size before this call. Report the actual
+        // size back even if it equals the previous platform value, so layout and
+        // rendering agree with the compositor before we ack and attach a buffer.
+        let client_size = configured_client_size(self.constrained_geometry.get(), client_size, self.shadow_extents.get());
         self.base.set_client_size(client_size);
         if let Some(resized) = get(&self.base.resized) {
             resized(client_size, reason);
@@ -1030,10 +1042,18 @@ impl IWindowImpl for WindowImpl {
 mod tests {
     // Not from the reference, which has no tests for this file.
     use super::*;
-    use ferroui_base::PixelSize;
 
     fn batch(width: i32, height: i32, states: XdgToplevelStates) -> XdgConfigureBatch {
         XdgConfigureBatch { size: PixelSize::new(width, height), states, ..Default::default() }
+    }
+
+    #[test]
+    fn partial_geometry_keeps_only_the_unconstrained_axis_at_the_preferred_size() {
+        let preferred = Size::new(1280.0, 800.0);
+        let shadows = Thickness::new(3.0, 4.0, 5.0, 6.0);
+        assert_eq!(configured_client_size(PixelSize::new(960, 0), preferred, shadows), Size::new(968.0, 800.0));
+        assert_eq!(configured_client_size(PixelSize::new(0, 640), preferred, shadows), Size::new(1280.0, 650.0));
+        assert_eq!(configured_client_size(PixelSize::default(), preferred, shadows), preferred);
     }
 
     #[test]

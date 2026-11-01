@@ -43,7 +43,7 @@ jobs:
             mesa-vulkan-drivers vulkan-validationlayers xvfb xauth openbox xdotool dbus-x11 imagemagick x11-utils x11-xserver-utils \
             libwayland-dev libwayland-egl1 sway swaylock foot grim wl-clipboard wtype wayland-utils jq xwayland \
             xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk gtk-3-examples python3-gi python3-pyqt5 qtwayland5 \
-            pipewire-bin wireplumber swayidle
+            pipewire-bin wireplumber swayidle weston
       - name: Build and test the Graphite desktop
         run: |
           samples/LinuxDesktop/build.sh build --profile dev
@@ -74,6 +74,8 @@ jobs:
             samples/LinuxDesktop/tests/wayland-session.sh target/debug/ferro-desktop desktop-captures/wayland
           samples/LinuxDesktop/tests/wayland-session.sh --xwayland target/debug/ferro-desktop desktop-captures/wayland-mixed
           if grep -E 'Validation Error|SYNC-HAZARD|VUID-' desktop-captures/wayland*/session.log; then exit 1; fi
+      - name: Test xdg-shell previews on an independent compositor
+        run: samples/LinuxDesktop/tests/weston-preview.sh target/debug/ferro-desktop desktop-captures/weston
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
