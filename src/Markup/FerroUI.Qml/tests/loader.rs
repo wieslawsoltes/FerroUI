@@ -73,3 +73,44 @@ fn inactive_and_replaced_deferred_loaders_do_not_publish_stale_items() {
     model.process_deferred(8).unwrap();
     assert_eq!(model.get(loader, "status").unwrap(), Value::Number(1.));
 }
+
+#[test]
+fn explicit_and_content_driven_loader_axes_follow_qt_sizing_rules() {
+    let mut model = model(
+        r#"import QtQuick
+        Loader { id: host; sourceComponent: Component { Item {width:40; height:12; property real implicitWidth:25 } } }
+    "#,
+    );
+    let root = model.root();
+    let child = item(&model, root);
+    let n = Value::Number;
+    assert_eq!(model.get(root, "width").unwrap(), n(40.));
+    model.set(child, "width", n(33.)).unwrap();
+    assert_eq!(model.get(root, "implicitWidth").unwrap(), n(33.));
+    model.set(root, "width", n(77.)).unwrap();
+    assert_eq!(model.get(child, "width").unwrap(), n(77.));
+    assert_eq!(model.get(root, "implicitWidth").unwrap(), n(25.));
+    assert_eq!(model.get(root, "height").unwrap(), n(12.));
+    model.set(child, "width", n(31.)).unwrap();
+    assert_eq!(model.get(child, "width").unwrap(), n(31.));
+    assert_eq!(model.get(root, "width").unwrap(), n(77.));
+    model.set(root, "width", Value::Undefined).unwrap();
+    assert_eq!(model.get(root, "width").unwrap(), n(31.));
+    model.set(root, "active", Value::Bool(false)).unwrap();
+    assert_eq!(model.get(root, "width").unwrap(), n(31.));
+}
+
+#[test]
+fn missing_required_input_reports_error_without_retaining_a_failed_instance() {
+    let model = model(
+        r#"import QtQuick
+        Loader { sourceComponent: Component { Item {required property int amount} } }
+    "#,
+    );
+    assert_eq!(
+        model.get(model.root(), "status").unwrap(),
+        Value::Number(3.)
+    );
+    assert_eq!(model.get(model.root(), "item").unwrap(), Value::Null);
+    assert_eq!(model.objects().count(), 2);
+}

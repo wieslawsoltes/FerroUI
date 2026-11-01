@@ -541,7 +541,9 @@ impl Transaction<'_> {
             ));
         }
         let key = self.model.write_target(key)?;
-        let value = self.model.typed(&self.model.properties[key].ty, value)?;
+        let fallback=self.loader_dimension_assignment(key, value==Value::Undefined);
+        let reset=fallback.is_some();
+        let value = self.model.typed(&self.model.properties[key].ty, fallback.unwrap_or(value))?;
         let inputs = self.model.slots[key]
             .overlay
             .as_ref()
@@ -550,7 +552,7 @@ impl Transaction<'_> {
             .collect();
         self.replace_reads(key, inputs);
         let slot = self.touched(key);
-        slot.assigned = true;
+        slot.assigned = !reset;
         slot.binding = None;
         if let Some(overlay) = &mut slot.overlay {
             overlay.superseded = false;

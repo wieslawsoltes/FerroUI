@@ -78,6 +78,8 @@ impl Kind {
                 .property("enabled", "bool", Bool(true))
                 .property("width", "real", Undefined)
                 .property("height", "real", Undefined)
+                .property("implicitWidth", "real", Number(0.0))
+                .property("implicitHeight", "real", Number(0.0))
                 .property("x", "real", Number(0.0))
                 .property("y", "real", Number(0.0))
                 .property("clip", "bool", Bool(false))
