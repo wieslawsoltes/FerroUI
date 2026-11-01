@@ -21,6 +21,7 @@ ferroui-opengl.workspace = true
 cc.workspace = true
 pkg-config = "=0.3.34"
 [features]
+native-frame-tests = []
 controls = ["ferroui-media-opengl/controls"]
 [package.metadata.release]
 group = "platforms"

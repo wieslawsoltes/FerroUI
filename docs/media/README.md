@@ -49,7 +49,7 @@ The packages are independently installable and use the `FerroUI.Media.*` family:
 | `FerroUI.Media.Windows` | `ferroui-media-windows` | Retained MF/DXGI storage and compatible ANGLE device import; native build pending |
 | `FerroUI.Media.Video.Windows` | `ferroui-media-video-windows` | MF source reader, WASAPI audio/clock, shared video leases |
 | `FerroUI.Media.Camera.Windows` | `ferroui-media-camera-windows` | Metadata discovery, explicit MF capture and JPEG preview snapshots |
-| `FerroUI.Media.Linux` | `ferroui-media-linux` | System GStreamer, negotiated DMA-BUF storage and EGL import; native build pending |
+| `FerroUI.Media.Linux` | `ferroui-media-linux` | System GStreamer, negotiated DMA-BUF storage and EGL import; [Linux/WSL verification](LINUX-VERIFICATION.md) |
 | `FerroUI.Media.Video.Linux` | `ferroui-media-video-linux` | One native GStreamer video/audio pipeline |
 | `FerroUI.Media.Camera.Linux` | `ferroui-media-camera-linux` | Separate portal/PipeWire dependencies, explicit V4L2 profiles, JPEG snapshots |
 | `FerroUI.Media.Camera.Browser` | `ferroui-media-camera-browser` | Explicit video-only acquisition, preview and owned JPEG capture |

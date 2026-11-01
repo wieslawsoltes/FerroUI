@@ -1,4 +1,15 @@
 use ferroui_media::{frames::*, *};
+
+#[cfg(all(test, feature = "native-frame-tests"))]
+mod native_frame_tests {
+    extern "C" {
+        fn ferro_linux_test_frame_contracts() -> i32;
+    }
+    #[test]
+    fn native_descriptor_extents_and_ownership() {
+        assert_eq!(unsafe { ferro_linux_test_frame_contracts() }, 0);
+    }
+}
 use ferroui_media_opengl::{NativeGlFrameProducer, NativeTextureView, ReadyGlFrame};
 use ferroui_opengl::IGlContext;
 use std::{

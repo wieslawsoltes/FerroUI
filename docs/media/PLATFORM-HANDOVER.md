@@ -178,6 +178,11 @@ keyboard/UI Automation evidence separately from implementation.
 
 ## Linux agent
 
+Receiving-host update: [LINUX-VERIFICATION.md](LINUX-VERIFICATION.md) records
+native compilation/linking fixes, descriptor bounds tests and actual WSL
+capability rejection. Its hardware EGL display lacks DMA-BUF import, so the
+positive GPU and physical camera gates below still require another profile.
+
 Provider source is now present in `FerroUI.Media.Linux`,
 `FerroUI.Media.Video.Linux` and `FerroUI.Media.Camera.Linux`. The desktop harness
 explicitly selects EGL/GLES on X11. Rust FFI/provider checks passed on the

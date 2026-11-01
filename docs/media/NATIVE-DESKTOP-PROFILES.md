@@ -2,10 +2,11 @@
 
 The Windows and Linux provider source, shared native-alias route and desktop
 sample routing are present. Native C/C++ compilation, linking, packaging and
-runtime verification are **pending on the native hosts**. Rust cross-checks
+runtime evidence are tracked separately in the platform sections below. Rust cross-checks
 validate the provider bindings; they do not establish that the SDK bridges
-compile or that codecs/drivers negotiate an admitted GPU route. The full Windows
-sample cross-check stopped at a missing MinGW C compiler on the Mac.
+compile or that codecs/drivers negotiate an admitted GPU route. The initial Windows
+sample cross-check stopped at a missing MinGW C compiler on the Mac; receiving-host
+evidence supersedes that initial build status for the profiles actually exercised.
 
 The implementation plan remains in chat. This document records implemented
 interfaces, build dependencies and current limitations.
@@ -22,7 +23,7 @@ GPU-only both reject a missing admitted GPU route in these profiles.
 | Profile | Implemented source route | Still open |
 | --- | --- | --- |
 | Windows ANGLE/EGL + GLES3 | Active D3D11 device → MF DXGI manager/Source Reader → retained RGB32 DXGI sample → EGL texture alias → leased direct sampling | Native SDK build, codec/driver negotiation, packaging and all runtime gates |
-| Linux EGL + GLES3 | Exact DMA_DRM caps from the active display → retained GStreamer DMA-BUF → direct XRGB/XBGR alias, or counted NV12 GPU conversion → leased sampling | Native build/plugins, implicit-fence behavior and all runtime gates |
+| Linux EGL + GLES3 | Exact DMA_DRM caps from the active display → retained GStreamer DMA-BUF → direct XRGB/XBGR alias, or counted NV12 GPU conversion → leased sampling | Native build passed; WSL lacks DMA-BUF import; positive GPU/runtime gates remain open |
 | Linux EGL + desktop GL | Explicitly negotiated XRGB/XBGR direct aliases | NV12 conversion shader profile and native verification |
 | Linux default X11 GLX, Vulkan; Windows WGL/Vulkan | No direct media route added | Completion/import implementation and profile acceptance |
 
@@ -95,6 +96,10 @@ occupied until that call returns. Verify cancellation/retirement latency on the
 receiving host.
 
 ## Linux
+
+Native WSL build, descriptor/ownership tests and capability rejection results
+are recorded in [LINUX-VERIFICATION.md](LINUX-VERIFICATION.md). This WSL display
+lacks DMA-BUF import; positive native GPU/camera gates remain open.
 
 The media capability profile requires system GStreamer 1.24+ development/runtime
 packages, its app/video/allocators libraries, EGL/GLES and appropriate native

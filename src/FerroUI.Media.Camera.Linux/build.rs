@@ -13,6 +13,7 @@ fn main() {
     let mut build = cc::Build::new();
     for (package, version) in [("gio-unix-2.0", "2.56"), ("libpipewire-0.3", "0.3")] {
         let lib = pkg_config::Config::new()
+            .cargo_metadata(false)
             .atleast_version(version)
             .probe(package)
             .unwrap_or_else(|e| panic!("Linux portal camera needs {package}: {e}"));
@@ -24,4 +25,9 @@ fn main() {
         .file("native/portal.c")
         .flag_if_supported("-std=c11")
         .compile("ferroui_media_linux_portal");
+    for package in ["gio-unix-2.0", "libpipewire-0.3"] {
+        pkg_config::Config::new()
+            .probe(package)
+            .expect("already probed Linux camera dependency");
+    }
 }

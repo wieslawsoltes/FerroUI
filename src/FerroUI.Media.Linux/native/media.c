@@ -4,7 +4,7 @@
 #include <gst/app/gstappsink.h>
 #include <gst/allocators/gstdmabuf.h>
 #include <gst/video/video.h>
-#include <gst/video/video-info-dma-drm.h>
+#include <gst/video/video-info-dma.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES3/gl3.h>
@@ -87,16 +87,33 @@ static FerroLinuxFrame *admit_sample(GstSample *sample) {
     struct stat identities[4]; guint unique = 0;
     for (guint p = 0; p < meta->n_planes; p++) {
         guint index, count; gsize skip;
-        if (!gst_buffer_find_memory(buffer, meta->offset[p], 1, &index, &count, &skip) || count != 1) goto bad;
+        if (meta->stride[p] <= 0) goto bad;
+        /* Linear planes must fit in both the visible GstMemory range and the
+         * FD allocation. Checking just the first byte admits truncated rows.
+         * Nonlinear layouts remain the exact negotiated modifier's contract. */
+        uint64_t extent = 1;
+        if (drm.drm_modifier == 0) {
+            uint64_t rows = meta->height, row_bytes = (uint64_t)meta->width * 4;
+            if (drm.drm_fourcc == DRM_NV12) {
+                rows = p == 0 ? meta->height : ((uint64_t)meta->height + 1) / 2;
+                row_bytes = p == 0 ? meta->width : ((uint64_t)meta->width + 1) / 2 * 2;
+            }
+            if ((uint64_t)meta->stride[p] < row_bytes) goto bad;
+            extent = (rows - 1) * (uint64_t)meta->stride[p] + row_bytes;
+            if (extent > FRAME_LIMIT) goto bad;
+        }
+        if (!gst_buffer_find_memory(buffer, meta->offset[p], (gsize)extent, &index, &count, &skip) || count != 1) goto bad;
         GstMemory *mem = gst_buffer_peek_memory(buffer, index);
-        if (!mem || !gst_is_dmabuf_memory(mem) || meta->stride[p] <= 0) goto bad;
-        gsize base, maxsize; gst_memory_get_sizes(mem, &base, &maxsize);
+        if (!mem || !gst_is_dmabuf_memory(mem)) goto bad;
+        gsize base, maxsize; gsize visible = gst_memory_get_sizes(mem, &base, &maxsize);
         int fd = gst_dmabuf_memory_get_fd(mem);
-        if (fd < 0 || base + skip > UINT32_MAX || maxsize > FRAME_LIMIT) goto bad;
+        if (fd < 0 || maxsize > FRAME_LIMIT || base > maxsize
+            || visible > maxsize - base || skip > visible || base + skip > INT32_MAX) goto bad;
         struct stat st;
         if (fstat(fd, &st)) goto bad;
         uint64_t bytes = st.st_size > 0 ? (uint64_t)st.st_size : maxsize;
-        if (!bytes || bytes > FRAME_LIMIT || base + skip >= bytes) goto bad;
+        if (!bytes || bytes > FRAME_LIMIT || base + skip >= bytes
+            || skip > visible || extent > visible - skip || extent > bytes - (base + skip)) goto bad;
         int found = 0;
         for (guint i = 0; i < unique; i++) if (identities[i].st_dev == st.st_dev && identities[i].st_ino == st.st_ino) found = 1;
         if (!found) { identities[unique++] = st; f->info.bytes += bytes; }
@@ -393,6 +410,10 @@ int ferro_linux_convert(FerroLinuxFrame *f, intptr_t display, uint32_t output) {
     glDeleteFramebuffers(1,&framebuffer); glDeleteVertexArrays(1,&vao); glDeleteProgram(program); ferro_linux_alias_release(a,1);
     return ok;
 }
+
+#ifdef FERROUI_NATIVE_FRAME_TESTS
+#include "frame_tests.c"
+#endif
 
 #include <sys/mman.h>
 #include <sys/ioctl.h>
