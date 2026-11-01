@@ -1,4 +1,4 @@
-"""Exercise the shared Loader fixture on the published Qt Quick engine without a display."""
+"""Exercise the shared Loader and Repeater fixtures on the published Qt Quick engine without a display."""
 import os
 from pathlib import Path
 
@@ -13,10 +13,15 @@ def main():
     assert qVersion() == "6.12.0", qVersion()
     app = QGuiApplication([])
     engine = QQmlEngine()
-    component = QQmlComponent(engine, QUrl.fromLocalFile(str(Path(__file__).with_name("Main.qml").resolve())))
-    root = component.create()
-    if root is None:
-        raise RuntimeError("\n".join(e.toString() for e in component.errors()))
+    def load(path):
+        component = QQmlComponent(engine, QUrl.fromLocalFile(str(path.resolve())))
+        root = component.create()
+        if root is None:
+            raise RuntimeError("\n".join(e.toString() for e in component.errors()))
+        return component, root
+
+    folder = Path(__file__).parent
+    component, root = load(folder / "Main.qml")
     assert root.report() == "0/0/0/0/0"
     root.inlineOn()
     assert root.report() == "1/40/12/3/1"
@@ -32,6 +37,22 @@ def main():
     root.removeItem()
     assert root.report() == "0/30/20/0/3"
     print("Qt 6.12.0 Loader lifecycle and geometry reference passed")
+    component, root = load(folder.parent / "delegates/Main.qml")
+    assert root.summary() == "3/2/2/0=one/1=two"
+    root.enableEdit()
+    assert root.summary() == "30/4/2/0=one/1=two"
+    root.changeSeed()
+    assert root.summary() == "50/6/2/0=one/1=two"
+    root.disableEdit()
+    assert root.summary() == "5/2/2/0=one/1=two"
+    root.remember()
+    root.moveRow()
+    assert root.savedAt(1) and root.summary() == "5/2/2/0=two/1=one"
+    root.renameRow()
+    assert root.savedAt(1) and root.summary() == "5/2/2/0=two/1=updated"
+    root.eraseRow()
+    assert root.savedAt(0) and root.summary() == "5/2/1/0=updated/-"
+    print("Qt 6.12.0 multi-target Binding, Repeater order and delegate identity passed")
     del root, component, engine, app
 
 
