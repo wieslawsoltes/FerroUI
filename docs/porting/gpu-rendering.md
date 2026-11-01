@@ -68,11 +68,33 @@ The fix (#457): on GPU surfaces such a clip is a clip shader, an SkSL coverage o
 rectangle in the coordinates of the drawing (`composition_effects::rounded_rect_coverage`: the
 distance to the edge, or to first order to the arc of a corner, in device pixels through the
 inverse transpose of the transform, ramped over a pixel as Ganesh's analytic clips are), which
-Ganesh and Graphite apply per pixel without a mask. The raster backend keeps Skia's clip. Against
-the exact coverage of each pixel (16 by 16 samples) the coverage shader is within 14 levels at the
-edge and 2 to 4 on average; Skia's raster clip, which flattens the arcs, is 8 to 13 off on average
-(`coverage_clip_tests.rs`). A clip of a geometry (`push_geometry_clip`) that is not a convex path
-of a few edges stays a software mask on Ganesh without MSAA (gap).
+Ganesh and Graphite apply per pixel without a mask. Measured on the Store a second time, a 322 by
+408 mask was still uploaded on each scroll frame with upright cards: the card and the picture in it
+both clip to rounded corners and share their right edge, and Ganesh merges the two clip elements
+into one rounded rectangle with different corners, which none of its analytic effects takes (it
+also stops at four analytic elements a draw). So a rounded clip is an element of the clip stack
+only when it is upright, its radii are not complex and no other rounded element is in the stack
+(the drawing context tracks them by save count); otherwise it is a clip shader. Single upright
+clips, the common case, stay elements: a clip shader makes the programs of the draws under it
+programs of their own (with every rounded clip a shader the Store linked 29 programs on its first
+scroll instead of 4).
+
+The raster backend keeps Skia's clip. Against the exact coverage of each pixel (16 by 16 samples)
+the coverage shader is within 14 levels at the edge and 2 to 4 on average; Skia's raster clip,
+which flattens the arcs, is 8 to 13 off on average (`coverage_clip_tests.rs`). A clip of a geometry
+(`push_geometry_clip`) that is not a convex path of a few edges stays a software mask on Ganesh
+without MSAA (gap).
+
+**Programs.** The GPU links the program of a draw the first time it draws it; on WebGL ANGLE
+translates and links it, tens to hundreds of milliseconds each on a cold cache (a 737 ms frame was
+measured on the first scroll of the Store; the SkSL compiles themselves take about a millisecond).
+A GPU render target prewarms the runtime effects with its second frame
+(`DrawingContextImpl::prewarm_runtime_effects`): every SkSL program compiles and each effect is
+drawn once, in the forms the drawing context draws it, into a corner of the target that is cleared
+afterwards; the first paint is not delayed (prewarming in the first frame cost about 1.2 s of long
+tasks on a cold cache). On the Store no lighting, blender or noise program is linked during the
+first scroll afterwards; the draws of content under a coverage clip (an image, a circle) still
+make programs of their own when first seen, as any new kind of draw does in Ganesh.
 
 ## Vello: what is missing and the GPU route
 
