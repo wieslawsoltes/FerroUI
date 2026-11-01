@@ -7,7 +7,7 @@ binary=$(realpath -- "$1")
 mkdir -p -- "$2"; output=$(realpath -- "$2")
 here=$(cd -- "$(dirname -- "$0")" && pwd)
 if [[ -z ${FERRO_NOTICE_PRIVATE_DISPLAY:-} || ${DISPLAY:-} != "$FERRO_NOTICE_PRIVATE_DISPLAY" ]]; then
-  exec timeout 90s xvfb-run -a -s '-screen 0 1280x800x24 -nolisten tcp' dbus-run-session -- \
+  exec timeout 90s env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET xvfb-run -a -s '-screen 0 1280x800x24 -nolisten tcp' dbus-run-session -- \
     bash -c 'export FERRO_NOTICE_PRIVATE_DISPLAY=$DISPLAY; exec "$@"' bash "$0" "$binary" "$output"
 fi
 scratch=$(mktemp -d)

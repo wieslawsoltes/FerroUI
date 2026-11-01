@@ -24,7 +24,7 @@ case ${1:-test} in
     *) echo "Usage: $0 [test | benchmark | capture /path/to/ferro-desktop output-directory]" >&2; exit 2 ;;
 esac
 if [[ -z ${FERRO_TEST_PRIVATE_DISPLAY:-} || ${DISPLAY:-} != "$FERRO_TEST_PRIVATE_DISPLAY" ]]; then
-    exec xvfb-run -a -s '-screen 0 1440x960x24 -nolisten tcp' dbus-run-session -- \
+    exec env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET xvfb-run -a -s '-screen 0 1440x960x24 -nolisten tcp' dbus-run-session -- \
         bash -c 'export FERRO_TEST_PRIVATE_DISPLAY=$DISPLAY; exec "$@"' bash "$here/session.sh" "$@"
 fi
 scratch=$(mktemp -d)

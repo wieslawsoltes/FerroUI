@@ -7,7 +7,7 @@ if [[ ${1:-} != --fixture ]]; then
     binary=$(realpath "${1:?Supply a ferro-desktop binary}")
     output=$(realpath -m "${2:?Supply a capture directory}")
     mkdir -p -- "$output"
-    exec timeout 120s xvfb-run -a -s '-screen 0 1440x960x24 -nolisten tcp' \
+    exec timeout 120s env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET xvfb-run -a -s '-screen 0 1440x960x24 -nolisten tcp' \
         dbus-run-session -- bash -c 'export FERRO_SYSTEM_FIXTURE_DISPLAY=$DISPLAY; exec "$@"' bash \
         "$here/system-controls.sh" --fixture "$binary" "$output" "${@:3}"
 fi

@@ -6,7 +6,7 @@ if [[ ${1:-} != --fixture ]]; then
     binary=$(realpath "${1:?Supply a ferro-desktop binary}")
     output=$(realpath -m "${2:-/tmp/ferro-desktop-favorites}")
     mkdir -p "$output"
-    exec timeout 100s xvfb-run -a -s '-screen 0 1440x960x24 -nolisten tcp' \
+    exec timeout 100s env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET xvfb-run -a -s '-screen 0 1440x960x24 -nolisten tcp' \
         dbus-run-session -- bash -c 'export FERRO_FAVORITES_FIXTURE_DISPLAY=$DISPLAY; exec "$@"' \
         bash "$0" --fixture "$binary" "$output" "${@:3}"
 fi

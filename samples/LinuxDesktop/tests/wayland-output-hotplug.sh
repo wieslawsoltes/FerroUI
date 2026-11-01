@@ -63,6 +63,16 @@ fraction_changed() {
     changed=$(changed_pixels "$before" "$after")
     awk -v d="$changed" -v p="$pixels" 'BEGIN { print d/p }'
 }
+# The Windows Quick Settings sheet is anchored at the bottom right in logical
+# coordinates. Compare its real rendered interior against a captured reference.
+# Live taskbar/window-list repaints elsewhere cannot impersonate a second sheet.
+overlay_interior() { convert "$1" -gravity SouthEast -crop 230x125+42+83 +repage "$2"; }
+matches_overlay() {
+    local changed
+    overlay_interior "$1" "$scratch/candidate.png"
+    changed=$(changed_pixels "$scratch/overlay-template.png" "$scratch/candidate.png")
+    (( changed < 230*125/6 ))
+}
 different() { local f; f=$(fraction_changed "$1" "$2"); awk -v f="$f" 'BEGIN { exit !(f > .025) }'; }
 similar() { local f; f=$(fraction_changed "$1" "$2"); awk -v f="$f" 'BEGIN { exit !(f < .025) }'; }
 
@@ -91,6 +101,8 @@ wallpaper_colors=$(convert "$frames/attached.png" -gravity Center -crop 82%x72%+
 "$binary" --platform=wayland --show=settings
 wait_for scene_is settings
 capture "$head" "$frames/settings.png"
+overlay_interior "$frames/settings.png" "$scratch/overlay-template.png"
+if matches_overlay "$frames/attached.png"; then fail 'Settings reference is indistinguishable from wallpaper'; fi
 different "$frames/attached.png" "$frames/settings.png" || fail 'Overlay did not draw on the newly focused monitor'
 
 command_ok "output $head mode 1280x960 position -768 0 scale 1.25 transform 90"
@@ -100,6 +112,8 @@ wait_for reserved "$head"
 capture "$head" "$frames/rotated-settings.png"
 wtype -s 250 -k Escape; wait_for scene_is desktop
 capture "$head" "$frames/rotated-desktop.png"
+matches_overlay "$frames/rotated-settings.png" || fail 'Rotated monitor did not show the same settings sheet'
+if matches_overlay "$frames/rotated-desktop.png"; then fail 'Settings sheet remained visible after dismissal'; fi
 different "$frames/rotated-settings.png" "$frames/rotated-desktop.png" || fail 'Reconfigured monitor lost its overlay'
 "$binary" --platform=wayland --show=settings
 wait_for scene_is settings
@@ -113,7 +127,8 @@ wait_for scene_is settings
 migrated=0
 for i in 0 1; do
     capture "${original[i]}" "$frames/remaining-$i.png"
-    if different "$scratch/base-$i.png" "$frames/remaining-$i.png"; then migrated=$((migrated+1)); fi
+    if matches_overlay "$scratch/base-$i.png"; then fail "Original monitor already showed Quick Settings"; fi
+    if matches_overlay "$frames/remaining-$i.png"; then migrated=$((migrated+1)); fi
 done
 (( migrated == 1 )) || fail "Expected one migrated overlay, found $migrated"
 command_ok "output $head enable"
@@ -127,7 +142,10 @@ head=
 wtype -s 250 -k Escape; wait_for scene_is desktop
 for i in 0 1; do
     capture "${original[i]}" "$frames/finished-$i.png"
-    similar "$scratch/base-$i.png" "$frames/finished-$i.png" || fail "Surviving output ${original[i]} did not return to its desktop"
+    if matches_overlay "$frames/finished-$i.png"; then fail "Overlay remained on ${original[i]}"; fi
+    wait_for reserved "${original[i]}"
+    colors=$(convert "$frames/finished-$i.png" -gravity Center -crop 82%x72%+0+0 +repage -format '%k' info:)
+    (( colors > 60 )) || fail "Surviving output ${original[i]} did not repaint its wallpaper"
 done
 outputs > "$frames/after.json"
 echo 'Verified virtual output creation, rotation, fractional scale, disable, overlay migration, restoration and unplug using compositor pixels.'

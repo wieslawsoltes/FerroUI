@@ -6,7 +6,7 @@ set -euo pipefail
 here=$(cd -- "$(dirname -- "$0")" && pwd)
 binary=$(realpath "$1"); mkdir -p "$2"; output=$(realpath "$2")
 if [[ -z ${FERRO_SHORTCUT_PRIVATE_DISPLAY:-} || $FERRO_SHORTCUT_PRIVATE_DISPLAY != "${DISPLAY:-}" ]]; then
-    exec timeout 90s xvfb-run -a -s '-screen 0 1280x800x24 -nolisten tcp' dbus-run-session -- \
+    exec timeout 90s env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET xvfb-run -a -s '-screen 0 1280x800x24 -nolisten tcp' dbus-run-session -- \
         bash -c 'export FERRO_SHORTCUT_PRIVATE_DISPLAY=$DISPLAY; exec "$@"' bash "$here/shortcuts.sh" "$binary" "$output"
 fi
 scratch=$(mktemp -d)

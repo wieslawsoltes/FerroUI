@@ -59,7 +59,7 @@ wm_pid=$!
     read -r _ < "$FERRO_DESKTOP_READY_PIPE"
     unset FERRO_DESKTOP_READY_PIPE
     export FERRO_DESKTOP_SESSION_DIR=$state
-    exec "$binary" --session
+    exec "$binary" --session --platform=x11
 ) &
 shell_pid=$!
 wait -n "$wm_pid" "$shell_pid"

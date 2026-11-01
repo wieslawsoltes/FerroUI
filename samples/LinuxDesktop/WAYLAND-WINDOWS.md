@@ -27,9 +27,9 @@ Use a private display to test workspace actions. The ignored test launches an in
 From the repository root, run the build first, then start the test as an ordinary user.
 
 ```sh
-cargo test --locked -p ferro-desktop --no-run
+samples/LinuxDesktop/build.sh test --no-run
 FERRO_WAYLAND_PRIVATE_TEST=1 scripts/wayland/sway-run.sh --size 1365x768 -- \
-  cargo test --locked -p ferro-desktop sway_native_client_lifecycle -- --ignored --test-threads=1
+  samples/LinuxDesktop/build.sh test sway_native_client_lifecycle -- --ignored --test-threads=1
 ```
 
 Protocol details are available in [Sway IPC](https://github.com/swaywm/sway/blob/master/sway/sway-ipc.7.scd).

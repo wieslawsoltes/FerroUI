@@ -19,7 +19,7 @@ fi
 # Always create a private display and bus. An accidental invocation from a
 # real session must not focus its applications or move its workspaces.
 if [[ "${FERRO_DESKTOP_PRIVATE_DISPLAY:-}" != "${DISPLAY:-}" || -z "${DISPLAY:-}" ]]; then
-    exec timeout 150s xvfb-run -a -s '-screen 0 1440x960x24 -nolisten tcp' \
+    exec timeout 150s env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET xvfb-run -a -s '-screen 0 1440x960x24 -nolisten tcp' \
         dbus-run-session -- bash -c 'export FERRO_DESKTOP_PRIVATE_DISPLAY=$DISPLAY; exec "$@"' \
         bash "$0" "$binary" "$output" "$@"
 fi

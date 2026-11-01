@@ -16,8 +16,11 @@ if [[ ${1:-} != --private ]]; then
     if (( EUID == 0 )); then
         mkdir -p "$scratch"/{tests,session,res}
         install -m755 "$script" "$scratch/tests/wayland-session.sh"
-        if [[ $mode == native ]]; then install -m644 "$here/wayland-appearances.sh" "$scratch/tests/"; fi
+        if [[ $mode == native ]]; then
+            install -m644 "$here/wayland-appearances.sh" "$here/wayland-notifications.sh" "$scratch/tests/"
+        fi
         install -m644 "$here/wayland-screencast.py" "$scratch/tests/"
+        if [[ ${FERRO_TEST_BENCHMARK:-0} == 1 ]]; then install -m644 "$here/wayland-benchmark.py" "$scratch/tests/"; fi
         if [[ ${FERRO_TEST_QT:-0} == 1 ]]; then install -m755 "$here/wayland-qt-client.sh" "$scratch/tests/"; fi
         if [[ ${FERRO_TEST_OUTPUT_HOTPLUG:-0} == 1 ]]; then install -m755 "$here/wayland-output-hotplug.sh" "$scratch/tests/"; fi
         cp -a "$here/../session/." "$scratch/session/"
@@ -154,12 +157,19 @@ capture desktop
 # solid compositor clear color. Sample well outside taskbar and shortcut text.
 wallpaper_colors=$(convert "$output/desktop.png" -crop 600x400+320+145 +repage -format '%k' info:)
 [[ $wallpaper_colors -gt 100 ]] || fail "Wallpaper layer did not cover the compositor background"
+if [[ ${FERRO_TEST_BENCHMARK:-0} == 1 ]]; then
+    /usr/bin/python3 "$here/wayland-benchmark.py" "$binary" "$output" "$bus_name"
+fi
 foot --app-id=org.ferroui.WaylandClient --title='Terminal — native Wayland' sh -c \
     'printf "\n   Ferro Desktop\n   Native Wayland terminal\n\n   compositor: Sway\n   graphics:   Skia Graphite / Vulkan\n"; exec sleep 120' > "$output/terminal.log" 2>&1 &
 terminal=$!
 wait_for focused org.ferroui.WaylandClient
 swaymsg '[app_id="org.ferroui.WaylandClient"] floating enable, resize set 600 350, move position 100 145' >/dev/null
 capture native-client
+if [[ $mode == native ]]; then
+    source "$here/wayland-notifications.sh"
+    exercise_notifications
+fi
 # Keyboard bindings are delivered by Sway's virtual keyboard protocol.
 for spec in 'space applications' 'a settings' 'n notifications' 'Tab workspaces'; do
     read -r key name <<< "$spec"
@@ -224,7 +234,11 @@ if [[ ${FERRO_TEST_LOCK:-0} == 1 ]]; then
     WAYLAND_DEBUG=1 timeout 10 "$here/../session/ferro-desktop-wayland" --lock >"$output/lock.log" 2>&1
     grep -Eq 'ext_session_lock_v1[@#][0-9]+\.locked\(' "$output/lock.log" || fail "Missing compositor lock acknowledgement"
     wtype -M logo -k a -m logo
-    [[ $(scene) == "$before_lock" ]] || fail "Global launcher binding escaped the session lock"
+    # A global binding spawns its own asynchronous command client.
+    for ((i=0;i<8;i++)); do
+        [[ $(scene) == "$before_lock" ]] || fail "Global launcher binding escaped the session lock"
+        sleep .075
+    done
 fi
 # Graceful compositor shutdown must terminate the managed login supervisor.
 swaymsg exit >/dev/null || :

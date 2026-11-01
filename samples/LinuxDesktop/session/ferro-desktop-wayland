@@ -5,7 +5,9 @@ set -euo pipefail
 case ${1:-} in
     --ready)
         : "${WAYLAND_DISPLAY:?}" "${SWAYSOCK:?}" "${FERRO_DESKTOP_WAYLAND_READY:?}"
-        printf '%s\0' "$WAYLAND_DISPLAY" "$SWAYSOCK" "${DISPLAY:-}" >"$FERRO_DESKTOP_WAYLAND_READY"
+        legacy_display=${DISPLAY:-}
+        [[ ${FERRO_DESKTOP_XWAYLAND:-auto} != 0 ]] || legacy_display=
+        printf '%s\0' "$WAYLAND_DISPLAY" "$SWAYSOCK" "$legacy_display" >"$FERRO_DESKTOP_WAYLAND_READY"
         exit ;;
     --show=applications|--show=workspaces|--show=settings|--show=notifications)
         exec "${FERRO_DESKTOP_BINARY:-ferro-desktop}" --platform=wayland "$1" ;;
@@ -44,6 +46,9 @@ fi
 [[ -r $config ]] || { echo "Cannot read Sway configuration: $config" >&2; exit 1; }
 export FERRO_DESKTOP_SWAY_CONFIG
 FERRO_DESKTOP_SWAY_CONFIG=$(realpath -- "$config")
+# A display-manager/tty login owns its seat. Only the explicit nested launcher
+# inherits a parent display for Sway's Wayland/X11 output backend.
+if [[ -z ${FERRO_DESKTOP_NESTED:-} ]]; then unset DISPLAY WAYLAND_DISPLAY WAYLAND_SOCKET SWAYSOCK; fi
 state=$(mktemp -d -- "$XDG_RUNTIME_DIR/ferro-wayland.XXXXXXXX")
 compositor= shell=
 cleanup() {
@@ -58,9 +63,13 @@ export FERRO_DESKTOP_WAYLAND_READY=$state/ready
 mkfifo -m 600 -- "$state/ready"
 case ${FERRO_DESKTOP_XWAYLAND:-auto} in
     auto) if command -v Xwayland >/dev/null; then xwayland=enable; else xwayland=disable; fi ;;
-    1) xwayland=enable ;; 0) xwayland=disable ;;
+    1)
+        command -v Xwayland >/dev/null || { echo 'FERRO_DESKTOP_XWAYLAND=1 requires Xwayland.' >&2; exit 1; }
+        xwayland=enable ;;
+    0) xwayland=disable ;;
     *) echo 'FERRO_DESKTOP_XWAYLAND must be auto, 0 or 1.' >&2; exit 2 ;;
 esac
+if [[ $xwayland == disable ]]; then export FERRO_DESKTOP_XWAYLAND=0; fi
 # A real include preserves relative includes in the user's own config. Sway's include
 # directive performs shell-style filename expansion after parsing the argument.
 printf 'xwayland %s\n%s\n%s\n' "$xwayland" 'include "$FERRO_DESKTOP_SWAY_CONFIG"' \

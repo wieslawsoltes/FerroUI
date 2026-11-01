@@ -162,6 +162,9 @@ if __name__ == "__main__":
         sys.exit(__doc__)
     # The public entry point always allocates its own display and session bus.
     entry = "import runpy,sys; runpy.run_path(sys.argv[1])['isolated_run'](sys.argv[2])"
+    child_env = os.environ.copy()
+    child_env.pop("WAYLAND_DISPLAY", None)
+    child_env.pop("WAYLAND_SOCKET", None)
     sys.exit(subprocess.call(["xvfb-run", "-a", "-s", "-screen 0 1440x960x24 -nolisten tcp",
                               "dbus-run-session", "--", sys.executable, "-c", entry,
-                              str(Path(__file__).resolve()), str(Path(sys.argv[1]).resolve())]))
+                              str(Path(__file__).resolve()), str(Path(sys.argv[1]).resolve())], env=child_env))
