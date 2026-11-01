@@ -9,10 +9,7 @@ pub(super) struct Plan {
     anchors: Vec<(Ref<super::anchors::AnchorCanvas>, super::anchors::Rules)>,
 }
 
-pub(super) fn plan(
-    instance: &Instance,
-    nodes: &BTreeMap<ObjectId, Box<dyn NativeObject>>,
-) -> Result<Plan, Error> {
+pub(super) fn plan(instance: &Instance, nodes: &tree::Peers) -> Result<Plan, Error> {
     let mut parents = BTreeMap::new();
     let mut plan = Vec::new();
     for (&parent, node) in nodes {
@@ -125,10 +122,7 @@ pub(super) fn apply(plan: Plan) {
     }
 }
 
-pub(super) fn reconcile(
-    instance: &Instance,
-    nodes: &BTreeMap<ObjectId, Box<dyn NativeObject>>,
-) -> Result<(), Error> {
+pub(super) fn reconcile(instance: &Instance, nodes: &tree::Peers) -> Result<(), Error> {
     apply(plan(instance, nodes)?);
     Ok(())
 }

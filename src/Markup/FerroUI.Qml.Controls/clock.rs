@@ -6,6 +6,7 @@ pub(crate) struct ViewClock {
     timer: Rc<DispatcherTimer>,
     sample_ms: Cell<i64>,
     manual: Cell<bool>,
+    _subscription: crate::tree::Subscriptions,
 }
 
 impl ViewClock {
@@ -38,13 +39,13 @@ impl QmlView {
                 (view.0.on_error)(error);
             }
         });
-        self.0.subscriptions.borrow_mut().push(subscription);
         self.0
             .clock
             .set(ViewClock {
                 timer,
                 sample_ms: Cell::new(0),
                 manual: Cell::new(false),
+                _subscription: crate::tree::Subscriptions(vec![subscription]),
             })
             .ok()
             .expect("one view clock");

@@ -9,6 +9,7 @@ mod clock;
 mod composition;
 mod positioner;
 mod reflected;
+mod tree;
 
 use ferroui_base::{reactive::IDisposable, Ref};
 use ferroui_controls::{Control, Controls};
@@ -61,12 +62,12 @@ pub trait NativeObject {
     }
 }
 
-type Factory = Box<dyn Fn() -> Box<dyn NativeObject>>;
+type Factory = Rc<dyn Fn() -> Box<dyn NativeObject>>;
 
 /// A type registry with optional native factories. Pure model types need no factory.
 pub struct ControlRegistry {
     types: TypeRegistry,
-    factories: BTreeMap<String, BTreeMap<String, Factory>>,
+    factories: tree::Factories,
 }
 
 impl Default for ControlRegistry {
@@ -100,7 +101,7 @@ impl ControlRegistry {
         self.factories
             .entry(module.into())
             .or_default()
-            .insert(name.into(), Box::new(factory));
+            .insert(name.into(), Rc::new(factory));
         Ok(())
     }
 }
@@ -126,7 +127,7 @@ impl NativeEndpoint {
                 if let Err(error) = outcome {
                     // A failed handler or native validator rolls back the model.
                     // Restore the originating widget as well.
-                    if let Some(node) = view.0.nodes.get(&self.object) {
+                    if let Some(node) = view.peer(self.object) {
                         node.apply(name, &previous)?;
                     }
                     return Err(error);
@@ -156,9 +157,9 @@ struct Inner {
     clock: std::cell::OnceCell<clock::ViewClock>,
     deferred_posted: std::cell::Cell<bool>,
     instance: RefCell<Instance>,
-    nodes: BTreeMap<ObjectId, Box<dyn NativeObject>>,
+    nodes: RefCell<tree::Peers>,
     root: Ref<Control>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<BTreeMap<ObjectId, tree::Subscriptions>>,
     on_error: Box<dyn Fn(Error)>,
 }
 
@@ -167,9 +168,7 @@ impl Drop for Inner {
         if let Some(clock) = self.clock.get() {
             clock.stop();
         }
-        for subscription in self.subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
+        self.subscriptions.get_mut().clear();
     }
 }
 
@@ -232,23 +231,12 @@ impl QmlView {
         on_error: impl Fn(Error) + 'static,
     ) -> Result<Self, Error> {
         let mut pending = vec![instance.root()];
-        let mut nodes = BTreeMap::new();
+        let mut objects = Vec::new();
         while let Some(object) = pending.pop() {
             pending.extend_from_slice(instance.children(object));
-            let factory = instance
-                .module(object)
-                .and_then(|module| registry.factories.get(module))
-                .and_then(|types| types.get(instance.type_name(object)?));
-            if let Some(factory) = factory {
-                let node = factory();
-                for name in instance.property_names(object) {
-                    let value = instance.get(object, &name)?;
-                    node.validate(&name, &value)?;
-                    node.apply_initial(&name, &value, instance.is_assigned(object, &name))?;
-                }
-                nodes.insert(object, node);
-            }
+            objects.push(object);
         }
+        let nodes = tree::prepare(&instance, objects, &BTreeMap::new(), &registry.factories)?;
         let root = nodes
             .get(&instance.root())
             .ok_or_else(|| Error::new("component root has no native visual factory"))?
@@ -259,7 +247,7 @@ impl QmlView {
             clock: std::cell::OnceCell::new(),
             deferred_posted: std::cell::Cell::new(false),
             instance: RefCell::new(instance),
-            nodes,
+            nodes: RefCell::new(nodes),
             root,
             subscriptions: RefCell::default(),
             on_error: Box::new(on_error),
@@ -272,9 +260,10 @@ impl QmlView {
                 let Some(inner) = weak.upgrade() else {
                     return Ok(());
                 };
+                let nodes = inner.nodes.borrow();
                 let mut layout_changed = false;
                 for change in changes {
-                    if let Some(node) = inner.nodes.get(&change.object) {
+                    if let Some(node) = nodes.get(&change.object) {
                         node.validate(&change.property, &change.value)?;
                         layout_changed |= node.children_property()
                             == Some(change.property.as_str())
@@ -283,23 +272,35 @@ impl QmlView {
                     }
                 }
                 if layout_changed {
-                    composition::plan(instance, &inner.nodes)?;
+                    composition::plan(instance, &nodes)?;
                 }
                 Ok(())
             });
-        for (&object, node) in &view.0.nodes {
-            let endpoint = NativeEndpoint {
-                inner: Rc::downgrade(&view.0),
-                object,
-            };
-            view.0
-                .subscriptions
-                .borrow_mut()
-                .extend(node.connect(endpoint));
+        let peers = view.0.nodes.borrow().clone();
+        for (object, node) in peers {
+            view.connect_peer(object, &*node);
         }
         view.install_clock();
         view.post_deferred();
         Ok(view)
+    }
+
+    fn connect_peer(&self, object: ObjectId, peer: &dyn NativeObject) {
+        let endpoint = NativeEndpoint {
+            inner: Rc::downgrade(&self.0),
+            object,
+        };
+        let subscriptions = peer.connect(endpoint);
+        if !subscriptions.is_empty() {
+            self.0
+                .subscriptions
+                .borrow_mut()
+                .insert(object, tree::Subscriptions(subscriptions));
+        }
+    }
+
+    fn peer(&self, object: ObjectId) -> Option<Rc<dyn NativeObject>> {
+        self.0.nodes.borrow().get(&object).cloned()
     }
 
     pub fn root(&self) -> Ref<Control> {
@@ -312,7 +313,7 @@ impl QmlView {
         self.0.instance.borrow().id(name)
     }
     pub fn control(&self, id: ObjectId) -> Option<Ref<Control>> {
-        self.0.nodes.get(&id).map(|node| node.control())
+        self.peer(id).map(|node| node.control())
     }
     pub fn get(&self, object: ObjectId, property: &str) -> Result<Value, Error> {
         self.0.instance.borrow().get(object, property)
@@ -354,7 +355,7 @@ impl QmlView {
         let changes = self.0.instance.borrow_mut().drain_changes();
         let mut layout_changed = false;
         for change in changes {
-            if let Some(node) = self.0.nodes.get(&change.object) {
+            if let Some(node) = self.peer(change.object) {
                 layout_changed |= node.children_property() == Some(change.property.as_str())
                     || (node.uses_item_anchors() && change.property.starts_with("anchors."));
                 // A native subscriber can synchronously update a later slot in this batch.
@@ -369,7 +370,7 @@ impl QmlView {
             }
         }
         if layout_changed {
-            let plan = composition::plan(&self.0.instance.borrow(), &self.0.nodes)?;
+            let plan = composition::plan(&self.0.instance.borrow(), &self.0.nodes.borrow())?;
             composition::apply(plan);
         }
         self.refresh_clock();
