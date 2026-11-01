@@ -198,9 +198,12 @@ QtObject {
         .values()
         .find(|r| r.source.contains("++counter"))
         .unwrap();
-    assert!(module.executable.starts_with("System.register("));
+    assert!(module.executable.contains("System.register("));
     assert!(module.executable.contains(".meta.url"));
-    assert!(module.executable.contains("execute: async function"));
+    // An async execute body is driven by observable Promise reactions. SWC
+    // emits the generator helper before the module's System.register call.
+    assert!(module.executable.contains("yield Promise.resolve()"));
+    assert!(!module.executable.contains("execute: async function"));
     assert!(!module.executable.contains("import.meta"));
     let MemberKind::Binding {
         value: Binding::Expr(Expr::JavaScript(script)),
