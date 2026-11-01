@@ -31,4 +31,4 @@ pub use weak_observer_subscription::WeakObserverSubscription;
 
 /// The interfaces of push-based notification of .NET (`System.IObservable<T>`, `System.IObserver<T>`,
 /// `System.IDisposable`), shared with the reusable libraries (`ferroui-system`).
-pub use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
+pub use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError, Subscription};

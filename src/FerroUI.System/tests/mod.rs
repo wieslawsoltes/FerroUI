@@ -6,3 +6,4 @@ mod synchronization_context_tests;
 mod dictionary_tests;
 mod property_path_tests;
 mod observable_collection_tests;
+mod subscription_tests;
