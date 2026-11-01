@@ -20,7 +20,7 @@ To open a normal application window inside an existing Wayland desktop, run the 
 samples/LinuxDesktop/build.sh run -- --platform=wayland
 ```
 
-For an independent development session inside an existing compositor, use the installed `ferro-desktop-wayland --nested`. It starts a new Sway instance and a private session bus. For a direct seat login the supervisor uses the login bus or starts a private bus when there is none. It obtains the real Wayland/Xwayland and IPC addresses from Sway, exports them for D-Bus activation, and waits for both shell and compositor. A direct login clears inherited display addresses before acquiring the seat. A native-only session exports no parent X display to its shell. A normal session ending or a component exiting tears down the other component.
+For an independent development session inside an existing compositor, use the installed `ferro-desktop-wayland --nested`. It creates the first nested Wayland output after Sway starts its event loop, which also works on software-rendered Sway and Weston hosts. It starts a new Sway instance and a private session bus. For a direct seat login the supervisor uses the login bus or starts a private bus when there is none. It obtains the real Wayland/Xwayland and IPC addresses from Sway, exports them for D-Bus activation, and waits for both shell and compositor. A direct login clears inherited display addresses before acquiring the seat. A native-only session exports no parent X display to its shell. A normal session ending or a component exiting tears down the other component.
 
 ## Session policy
 
@@ -57,10 +57,10 @@ samples/LinuxDesktop/tests/wayland-session.sh target/release/ferro-desktop /tmp/
 samples/LinuxDesktop/tests/wayland-session.sh --xwayland target/release/ferro-desktop /tmp/ferro-mixed
 ```
 
-Optional fixtures exercise output hotplug, independent Qt Widgets and GTK clients on screen together, the compositor-confirmed screen lock and the public portal. The private session grants its test identity permission to take a screenshot. It creates a screencast session and selects a monitor through the public ScreenCast API. User permission stores and sharing preferences stay on the login bus.
+Optional fixtures exercise a dedicated nested desktop with its own display and bus, output hotplug, independent Qt Widgets and GTK clients on screen together, the compositor-confirmed screen lock and the public portal. The private session grants its test identity permission to take a screenshot. It creates a screencast session and selects a monitor through the public ScreenCast API. User permission stores and sharing preferences stay on the login bus.
 
 ```sh
-FERRO_TEST_OUTPUT_HOTPLUG=1 FERRO_TEST_QT=1 FERRO_TEST_LOCK=1 FERRO_TEST_PORTALS=1 \
+FERRO_TEST_NESTED=1 FERRO_TEST_OUTPUT_HOTPLUG=1 FERRO_TEST_QT=1 FERRO_TEST_LOCK=1 FERRO_TEST_PORTALS=1 \
   samples/LinuxDesktop/tests/wayland-session.sh target/release/ferro-desktop /tmp/ferro-wayland
 ```
 

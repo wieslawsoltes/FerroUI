@@ -70,7 +70,7 @@ jobs:
           VK_INSTANCE_LAYERS: VK_LAYER_KHRONOS_validation
           VK_LAYER_ENABLES: VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT
         run: |
-          FERRO_TEST_BENCHMARK=1 FERRO_TEST_QT=1 FERRO_TEST_PORTALS=1 FERRO_TEST_OUTPUT_HOTPLUG=1 FERRO_TEST_LOCK=1 \
+          FERRO_TEST_BENCHMARK=1 FERRO_TEST_NESTED=1 FERRO_TEST_QT=1 FERRO_TEST_PORTALS=1 FERRO_TEST_OUTPUT_HOTPLUG=1 FERRO_TEST_LOCK=1 \
             samples/LinuxDesktop/tests/wayland-session.sh target/debug/ferro-desktop desktop-captures/wayland
           samples/LinuxDesktop/tests/wayland-session.sh --xwayland target/debug/ferro-desktop desktop-captures/wayland-mixed
           if grep -E 'Validation Error|SYNC-HAZARD|VUID-' desktop-captures/wayland*/session.log; then exit 1; fi

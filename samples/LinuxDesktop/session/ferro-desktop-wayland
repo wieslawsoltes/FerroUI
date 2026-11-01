@@ -27,6 +27,11 @@ case ${1:-} in
         # Give a development compositor a private bus so its notification and portal
         # services can coexist with the parent login.
         export FERRO_DESKTOP_NESTED=1
+        if [[ -n ${WAYLAND_DISPLAY:-}${WAYLAND_SOCKET:-} && ${WLR_BACKENDS:-wayland} == wayland && -z ${WLR_WL_OUTPUTS+x} ]]; then
+            # wlroots can block creating its first nested output during backend
+            # startup. Create the window once Sway's event loop is running.
+            export WLR_BACKENDS=wayland WLR_WL_OUTPUTS=0 FERRO_DESKTOP_CREATE_WL_OUTPUT=1
+        fi
         exec dbus-run-session -- "$0" ;;
     '') ;;
     *) echo "Usage: ferro-desktop-wayland [--nested]" >&2; exit 2 ;;
@@ -48,7 +53,8 @@ export FERRO_DESKTOP_SWAY_CONFIG
 FERRO_DESKTOP_SWAY_CONFIG=$(realpath -- "$config")
 # A display-manager/tty login owns its seat. Only the explicit nested launcher
 # inherits a parent display for Sway's Wayland/X11 output backend.
-if [[ -z ${FERRO_DESKTOP_NESTED:-} ]]; then unset DISPLAY WAYLAND_DISPLAY WAYLAND_SOCKET SWAYSOCK; fi
+unset SWAYSOCK I3SOCK
+if [[ -z ${FERRO_DESKTOP_NESTED:-} ]]; then unset DISPLAY WAYLAND_DISPLAY WAYLAND_SOCKET; fi
 state=$(mktemp -d -- "$XDG_RUNTIME_DIR/ferro-wayland.XXXXXXXX")
 compositor= shell=
 cleanup() {
@@ -74,6 +80,9 @@ if [[ $xwayland == disable ]]; then export FERRO_DESKTOP_XWAYLAND=0; fi
 # directive performs shell-style filename expansion after parsing the argument.
 printf 'xwayland %s\n%s\n%s\n' "$xwayland" 'include "$FERRO_DESKTOP_SWAY_CONFIG"' \
     'exec ferro-desktop-wayland --ready' >"$state/sway.conf"
+if [[ ${FERRO_DESKTOP_CREATE_WL_OUTPUT:-} == 1 ]]; then
+    printf '%s\n' 'exec swaymsg create_output' >>"$state/sway.conf"
+fi
 sway --config "$state/sway.conf" &
 compositor=$!
 (

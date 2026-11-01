@@ -21,6 +21,7 @@ if [[ ${1:-} != --private ]]; then
         fi
         install -m644 "$here/wayland-screencast.py" "$scratch/tests/"
         if [[ ${FERRO_TEST_BENCHMARK:-0} == 1 ]]; then install -m644 "$here/wayland-benchmark.py" "$scratch/tests/"; fi
+        if [[ ${FERRO_TEST_NESTED:-0} == 1 ]]; then install -m755 "$here/wayland-nested.sh" "$scratch/tests/"; fi
         if [[ ${FERRO_TEST_QT:-0} == 1 ]]; then install -m755 "$here/wayland-qt-client.sh" "$scratch/tests/"; fi
         if [[ ${FERRO_TEST_OUTPUT_HOTPLUG:-0} == 1 ]]; then install -m755 "$here/wayland-output-hotplug.sh" "$scratch/tests/"; fi
         cp -a "$here/../session/." "$scratch/session/"
@@ -228,6 +229,7 @@ fi
 if [[ ${FERRO_TEST_OUTPUT_HOTPLUG:-0} == 1 ]]; then
     "$here/wayland-output-hotplug.sh" "$binary" "$output"
 fi
+if [[ ${FERRO_TEST_NESTED:-0} == 1 ]]; then "$here/wayland-nested.sh" "$output"; fi
 if [[ ${FERRO_TEST_LOCK:-0} == 1 ]]; then
     # Only run on this script's throwaway compositor. A successful --daemonize
     # returns after the compositor confirms all outputs are covered.
