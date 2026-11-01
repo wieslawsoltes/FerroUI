@@ -50,7 +50,7 @@ Each component entry is relative to the input QML file's directory. Native expre
 
 ## Driving incubation
 
-Native views run deferred work at background priority with a four-millisecond cooperative budget. A partially prepared tree resumes on a timer targeting the next 16 ms interval, leaving the dispatcher available for input and rendering. A single native type preparation, a callback, or the final activation and native mount may exceed that budget.
+Native views run deferred work at background priority with a four-millisecond cooperative budget. A partially prepared tree resumes on a timer targeting the next 16 ms interval, leaving the dispatcher available for input and rendering. Type declarations, property expressions and signal handler installation consume separate preparation steps. A single step, live binding evaluation, completion handlers and native mounting may exceed that budget.
 
 Headless hosts can call `Instance::process_deferred(limit)` once per owner turn or supply their own clock through `Instance::process_deferred_while(limit, has_time)`. The predicate is checked between jobs and between preparation steps. Newly queued continuations wait until the next call. While `has_deferred_work()` is true, the host must schedule another turn.
 

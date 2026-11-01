@@ -514,7 +514,8 @@ impl TypeRegistry {
 impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
     fn object(&mut self, source: &Object, parent: Option<ObjectId>) -> Result<ObjectId, Error> {
         let imports = source.type_imports.as_deref().unwrap_or(self.imports);
-        let (mut shell, module, name, definition) = if let Some(shell) =
+        let mut live_members = None;
+        let (mut shell, module, name, definition) = if let Some(mut shell) =
             self.prepared.remove(&std::ptr::from_ref(source))
         {
             // Module and type names were resolved against this immutable registry
@@ -523,6 +524,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                 .registry
                 .modules
                 .get_key_value(&shell.node.module)
+            live_members = Some(std::mem::take(&mut shell.live_members));
                 .expect("prepared module");
             let (name, definition) = types
                 .get_key_value(&shell.node.name)
@@ -585,6 +587,12 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             }
             if property.ty == "$qml:anchorGroup" {
                 property.slot.value = Value::AnchorGroup(id);
+            }
+            if property.slot.assigned {
+                self.assigned.insert(self.instance.slots.len());
+                if property.slot.binding.is_none() {
+                    property.slot.value = self.instance.typed(&property.ty, property.slot.value)?;
+                }
             }
             if property.ty == "$qml:anchorLine" && property.readonly {
                 if let Some(edge) = AnchorEdge::ALL
@@ -662,7 +670,12 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             self.instance.timers.register(id);
         }
         let mut implicit = Vec::new();
-        for member in &source.members {
+        let count = live_members.as_ref().map_or(source.members.len(), Vec::len);
+        for index in 0..count {
+            let index = live_members
+                .as_ref()
+                .map_or(index, |members| members[index]);
+            let member = &source.members[index];
             match &member.kind {
                 MemberKind::Child(child) if module == "QtQml" && name == "Component" => {
                     let definition = dynamic::Template {
@@ -776,7 +789,9 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                     name,
                     parameters,
                     body,
-                } => self.handler(id, name, parameters, body, member.scope)?,
+                } => {
+                    self.instance.nodes[id.index].install_handler(name, parameters, body, member)?
+                }
                 _ => (),
             }
         }
@@ -1013,18 +1028,16 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                     .map(|c| self.object(c, Some(owner)).map(Value::Object))
                     .collect::<Result<_, _>>()?,
             ),
-            Binding::Expr(expr) if expr.as_literal().is_some() => {
-                Value::from(expr.as_literal().expect("matched a literal"))
-            }
-            expr => {
-                if matches!(expr,Binding::Expr(Expr::JavaScript(script)) if script.property_read.is_some())
-                {
-                    self.read_candidates.push(key);
-                }
-                self.instance.slots[key].binding =
-                    Some(InstalledBinding::Expression(Rc::new(expr.clone())));
-                self.instance.slots[key].dirty = true;
-                return Ok(());
+            expression => {
+                let slot = &mut self.instance.slots[key];
+                let Some(value) = slot.install_expression(expression) else {
+                    if matches!(expression, Binding::Expr(Expr::JavaScript(script)) if script.property_read.is_some())
+                    {
+                        self.read_candidates.push(key);
+                    }
+                    return Ok(());
+                };
+                value
             }
         };
         self.instance.slots[key].value = self
@@ -1091,78 +1104,6 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                 target,
                 target_owner,
             });
-        }
-        Ok(())
-    }
-
-    fn handler(
-        &mut self,
-        owner: ObjectId,
-        name: &str,
-        parameters: &[String],
-        body: &[Stmt],
-        scope: Option<u32>,
-    ) -> Result<(), Error> {
-        let node = &mut self.instance.nodes[owner.index];
-        let (signal, formal) = if name == "Component.onDestruction" {
-            ("Component.destruction".to_owned(), Vec::new())
-        } else if name == "ListView.onPooled" {
-            ("ListView.pooled".to_owned(), Vec::new())
-        } else if name == "ListView.onReused" {
-            ("ListView.reused".to_owned(), Vec::new())
-        } else if name == "Component.onCompleted" {
-            ("Component.completed".to_owned(), Vec::new())
-        } else {
-            let (group, handler) = name.rsplit_once('.').unwrap_or(("", name));
-            let raw = handler
-                .strip_prefix("on")
-                .filter(|s| !s.is_empty())
-                .ok_or_else(|| Error::new(format!("invalid handler '{name}'")))?;
-            let mut chars = raw.chars();
-            let mut signal = format!("{}{}", chars.next().unwrap().to_lowercase(), chars.as_str());
-            if !group.is_empty() {
-                signal = format!("{group}.{signal}");
-            }
-            let formal = if let Some(parameters) = node.signals.get(&signal) {
-                parameters.clone()
-            } else if signal
-                .strip_suffix("Changed")
-                .is_some_and(|p| node.properties.contains_key(p))
-            {
-                Vec::new()
-            } else {
-                return Err(Error::new(format!("unknown signal for handler '{name}'")));
-            };
-            (signal, formal)
-        };
-        if parameters.len() > formal.len() {
-            return Err(Error::new(format!("too many parameters for '{name}'")));
-        }
-        let parameters = if parameters.is_empty() {
-            formal
-        } else {
-            parameters
-                .iter()
-                .map(|name| Parameter {
-                    name: name.clone(),
-                    ty: None,
-                })
-                .collect()
-        };
-        if node
-            .handlers
-            .insert(
-                signal,
-                Rc::new(Procedure {
-                    scope,
-                    parameters,
-                    result: None,
-                    body: body.to_vec(),
-                }),
-            )
-            .is_some()
-        {
-            return Err(Error::new(format!("duplicate handler '{name}'")));
         }
         Ok(())
     }

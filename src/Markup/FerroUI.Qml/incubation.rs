@@ -15,6 +15,9 @@ pub(crate) struct PreparedNode {
     pub properties: Vec<PropertySlot>,
     pub id: Option<String>,
     pub aliases: Vec<(usize, Expr, Option<u32>)>,
+    // These entries still need an owner ID or a neighboring object at publication.
+    pub live_members: Vec<usize>,
+    native_properties: usize,
     eager_children: bool,
 }
 
@@ -71,6 +74,8 @@ impl PreparedNode {
             properties: slots,
             id: None,
             aliases: Vec::new(),
+            live_members: Vec::new(),
+            native_properties: definition.properties.len(),
             eager_children: !matches!(
                 (module, name),
                 ("QtQml", "Component")
@@ -174,6 +179,156 @@ impl PreparedNode {
     }
 }
 
+impl Slot {
+    /// Install an expression without reading the creation context. The final
+    /// transaction coerces literal values and evaluates dirty bindings.
+    pub(super) fn install_expression(&mut self, binding: &Binding) -> Option<Value> {
+        if let Binding::Expr(expr) = binding {
+            if let Some(value) = expr.as_literal() {
+                return Some(Value::from(value));
+            }
+        }
+        self.binding = Some(InstalledBinding::Expression(Rc::new(binding.clone())));
+        self.dirty = true;
+        None
+    }
+}
+
+impl PreparedNode {
+    fn stage(&mut self, index: usize, member: &Member) -> Result<(), Error> {
+        let (name, binding) = match &member.kind {
+            MemberKind::Handler {
+                name,
+                parameters,
+                body,
+            } => {
+                if self.node.module != "QtQml"
+                    || self.node.name != "Connections"
+                    || name.starts_with("Component.on")
+                {
+                    self.node.install_handler(name, parameters, body, member)?;
+                }
+                return Ok(());
+            }
+            MemberKind::Property {
+                name,
+                value: Some(binding),
+                ..
+            }
+            | MemberKind::Binding {
+                name,
+                value: binding,
+            } => (name, binding),
+            MemberKind::Child(_) | MemberKind::Group { .. } | MemberKind::OnProperty { .. } => {
+                self.live_members.push(index);
+                return Ok(());
+            }
+            _ => return Ok(()),
+        };
+        let Some(&local) = self.node.properties.get(name) else {
+            self.live_members.push(index);
+            return Ok(());
+        };
+        let property = &mut self.properties[local];
+        if !matches!(binding, Binding::Expr(_) | Binding::Script(_))
+            || property.ty.starts_with("$qml:")
+            || (self.node.module == "QtQml" && self.node.name == "Connections" && name == "target")
+        {
+            self.live_members.push(index);
+            return Ok(());
+        }
+        if local < self.native_properties
+            && property.readonly
+            && matches!(member.kind, MemberKind::Binding { .. })
+        {
+            return Err(Error::new(format!(
+                "cannot initialize readonly native property '{name}'"
+            )));
+        }
+        if property.slot.assigned {
+            return Err(Error::new(format!("duplicate assignment to '{name}'")));
+        }
+        property.slot.scope = member.scope;
+        property.slot.assigned = true;
+        if let Some(value) = property.slot.install_expression(binding) {
+            property.slot.value = value;
+        }
+        Ok(())
+    }
+}
+
+impl Node {
+    pub(super) fn install_handler(
+        &mut self,
+        name: &str,
+        parameters: &[String],
+        body: &[Stmt],
+        member: &Member,
+    ) -> Result<(), Error> {
+        let (signal, formal) = if name == "Component.onDestruction" {
+            ("Component.destruction".to_owned(), Vec::new())
+        } else if name == "ListView.onPooled" {
+            ("ListView.pooled".to_owned(), Vec::new())
+        } else if name == "ListView.onReused" {
+            ("ListView.reused".to_owned(), Vec::new())
+        } else if name == "Component.onCompleted" {
+            ("Component.completed".to_owned(), Vec::new())
+        } else {
+            let (group, handler) = name.rsplit_once('.').unwrap_or(("", name));
+            let raw = handler
+                .strip_prefix("on")
+                .filter(|s| !s.is_empty())
+                .ok_or_else(|| Error::new(format!("invalid handler '{name}'")))?;
+            let mut chars = raw.chars();
+            let mut signal = format!("{}{}", chars.next().unwrap().to_lowercase(), chars.as_str());
+            if !group.is_empty() {
+                signal = format!("{group}.{signal}");
+            }
+            let formal = if let Some(parameters) = self.signals.get(&signal) {
+                parameters.clone()
+            } else if signal
+                .strip_suffix("Changed")
+                .is_some_and(|p| self.properties.contains_key(p))
+            {
+                Vec::new()
+            } else {
+                return Err(Error::new(format!("unknown signal for handler '{name}'")));
+            };
+            (signal, formal)
+        };
+        if parameters.len() > formal.len() {
+            return Err(Error::new(format!("too many parameters for '{name}'")));
+        }
+        let parameters = if parameters.is_empty() {
+            formal
+        } else {
+            parameters
+                .iter()
+                .map(|name| Parameter {
+                    name: name.clone(),
+                    ty: None,
+                })
+                .collect()
+        };
+        if self
+            .handlers
+            .insert(
+                signal,
+                Rc::new(Procedure {
+                    scope: member.scope,
+                    parameters,
+                    result: None,
+                    body: body.to_vec(),
+                }),
+            )
+            .is_some()
+        {
+            return Err(Error::new(format!("duplicate handler '{name}'")));
+        }
+        Ok(())
+    }
+}
+
 #[derive(Clone, Copy)]
 struct Edge {
     member: usize,
@@ -234,8 +389,8 @@ impl Edge {
 
 enum Cursor {
     Start,
-    Declare { member: usize, has_children: bool },
-    Children(Edge),
+    Declare(usize),
+    Stage(Edge),
 }
 
 pub(crate) struct Preparation {
@@ -302,43 +457,34 @@ impl Preparation {
                         PreparedNode::new(source, module, name, definition, scope),
                     );
                     if !source.members.is_empty() {
-                        *cursor = Cursor::Declare {
-                            member: 0,
-                            has_children: false,
-                        };
+                        *cursor = Cursor::Declare(0);
                         continue;
                     }
                 }
-                Cursor::Declare {
-                    member,
-                    has_children,
-                } => {
+                Cursor::Declare(member) => {
                     let shell = self
                         .prepared
                         .get_mut(&key)
                         .expect("prepared incubation node");
                     shell.declare(registry, imports, &source.members[*member])?;
-                    *has_children |= Edge {
-                        member: *member,
-                        element: 0,
-                    }
-                    .object(source)
-                    .is_some();
                     *member += 1;
-                    if *member < source.members.len() {
-                        continue;
-                    }
-                    if *has_children {
-                        *cursor = Cursor::Children(Edge {
+                    if *member == source.members.len() {
+                        *cursor = Cursor::Stage(Edge {
                             member: 0,
                             element: 0,
                         });
-                        continue;
                     }
+                    continue;
                 }
-                Cursor::Children(edge) => {
+                Cursor::Stage(edge) => {
                     if edge.member < source.members.len() {
-                        let shell = &self.prepared[&key];
+                        let shell = self
+                            .prepared
+                            .get_mut(&key)
+                            .expect("prepared incubation node");
+                        if edge.element == 0 {
+                            shell.stage(edge.member, &source.members[edge.member])?;
+                        }
                         if let Some(child) =
                             edge.eager(source, shell, registry, &self.template.imports)
                         {
@@ -358,7 +504,9 @@ impl Preparation {
             self.path.pop();
             self.cursors.pop();
         }
-        Ok(self.cursors.is_empty())
+        // If preparation finished on the final step, ask the host before
+        // entering the indivisible live transaction in this same turn.
+        Ok(self.cursors.is_empty() && has_time())
     }
 
     pub(crate) fn into_nodes(self) -> PreparedNodes {
@@ -390,6 +538,56 @@ mod tests {
             .collect::<BTreeSet<_>>();
         assert_eq!(ids, BTreeSet::from(["one", "two", "three", "factory"]));
         assert_eq!(preparation.prepared.len(), 5);
+    }
+
+    #[test]
+    fn a_budget_boundary_suspends_binding_and_handler_installation_in_the_private_node() {
+        let properties = (0..80)
+            .map(|n| format!("property int p{n}: p0 + 1\n"))
+            .collect::<String>();
+        let doc = ir::parse(&format!(
+            "import QtQml\nQtObject {{ onPulse: {{ p1 = 4 }}; signal pulse(); {properties} }}"
+        ))
+        .unwrap();
+        let template = dynamic::Template::from_object(doc.root, &doc.imports).unwrap();
+        let root = std::ptr::from_ref(template.object.as_ref());
+        let mut job = Preparation::new(template);
+        let registry = TypeRegistry::new();
+        loop {
+            assert!(!job.advance(&registry, &mut || false).unwrap());
+            let node = &job.prepared[&root];
+            if node.node.handlers.contains_key("pulse")
+                && node.properties[node.node.properties["p1"]].slot.dirty
+            {
+                assert!(!node.properties[node.node.properties["p79"]].slot.assigned);
+                break;
+            }
+        }
+        while !job.advance(&registry, &mut || true).unwrap() {}
+        let node = &job.prepared[&root];
+        assert!(node.properties[node.node.properties["p79"]].slot.dirty);
+        assert!(node.live_members.is_empty());
+    }
+
+    #[test]
+    fn a_budget_expiring_on_the_last_staged_member_defers_publication() {
+        // One entry step, 31 declarations, 31 initializers, one unwind.
+        let members = (0..31)
+            .map(|n| format!("property int p{n}: {n}\n"))
+            .collect::<String>();
+        let doc = ir::parse(&format!("import QtQml\nQtObject {{ {members} }}")).unwrap();
+        let mut job =
+            Preparation::new(dynamic::Template::from_object(doc.root, &doc.imports).unwrap());
+        let registry = TypeRegistry::new();
+        let mut checks = 0;
+        assert!(!job
+            .advance(&registry, &mut || {
+                checks += 1;
+                checks < SLICE_STEPS
+            })
+            .unwrap());
+        assert!(job.cursors.is_empty());
+        assert!(job.advance(&registry, &mut || true).unwrap());
     }
 
     #[test]

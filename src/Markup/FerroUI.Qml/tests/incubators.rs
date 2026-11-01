@@ -188,3 +188,83 @@ fn a_component_typed_source_property_defers_its_implicit_child_definition() {
     assert_eq!(job.status(&app).unwrap(), IncubationStatus::Ready);
     assert_eq!(app.get(root, "completions").unwrap(), Value::Number(1.));
 }
+
+#[test]
+fn staged_callbacks_read_current_owner_values_and_rollback_signals_and_deferred_work_together() {
+    let padding = (0..72)
+        .map(|n| format!("property int p{n}: root.seed + {n}\n"))
+        .collect::<String>();
+    let mut app = instance(&format!(
+        r#"import QtQml
+        QtObject {{ id: root
+            property int seed: 1
+            property int seen: 0
+            property bool reject: true
+            signal observed(int amount)
+            function later() {{ root.seen = 999 }}
+            property Component part: Component {{
+                QtObject {{ id: stage
+                    {padding}
+                    property QtObject child: QtObject {{
+                        Component.onCompleted: {{
+                            root.seen = stage.p0
+                            root.observed(root.seen)
+                            Qt.callLater(root.later)
+                        }}
+                    }}
+                    Component.onCompleted: {{ if (root.reject) root.missing() }}
+                }}
+            }}
+        }}"#
+    ));
+    let root = app.root();
+    app.watch_signal(root, "observed").unwrap();
+    let Value::Object(factory) = app.get(root, "part").unwrap() else {
+        panic!("factory")
+    };
+    let before = app.objects().count();
+    let start = |app: &mut Instance| {
+        app.incubate_object(
+            factory,
+            Some(root),
+            BTreeMap::new(),
+            IncubationMode::Asynchronous,
+        )
+        .unwrap()
+        .unwrap()
+    };
+    let rejected = start(&mut app);
+    let failure = loop {
+        match app.process_deferred(1) {
+            Err(error) => break error,
+            Ok(1) => assert_eq!(rejected.status(&app).unwrap(), IncubationStatus::Loading),
+            result => panic!("activation did not finish: {result:?}"),
+        }
+    };
+    assert!(failure.message.contains("missing"), "{failure}");
+    assert_eq!(rejected.status(&app).unwrap(), IncubationStatus::Error);
+    assert!(rejected.object(&app).unwrap().is_none());
+    assert_eq!(app.objects().count(), before);
+    assert_eq!(app.get(root, "seen").unwrap(), Value::Number(0.));
+    assert!(app.drain_signals().is_empty());
+    assert!(!app.has_deferred_work());
+
+    app.set(root, "reject", Value::Bool(false)).unwrap();
+    let accepted = start(&mut app);
+    // The first two slices declare the slots and install some bindings.
+    for _ in 0..2 {
+        assert_eq!(app.process_deferred(1).unwrap(), 1);
+        assert_eq!(app.objects().count(), before);
+        assert!(accepted.object(&app).unwrap().is_none());
+    }
+    app.set(root, "seed", Value::Number(17.)).unwrap();
+    while accepted.status(&app).unwrap() == IncubationStatus::Loading {
+        assert_eq!(app.process_deferred(1).unwrap(), 1);
+    }
+    assert_eq!(app.get(root, "seen").unwrap(), Value::Number(17.));
+    let signals = app.drain_signals();
+    assert_eq!(signals.len(), 1);
+    assert_eq!(signals[0].arguments, vec![Value::Number(17.)]);
+    app.process_deferred(1).unwrap();
+    assert_eq!(app.get(root, "seen").unwrap(), Value::Number(999.));
+}
