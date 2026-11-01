@@ -147,7 +147,27 @@ fn declared_camera_color() -> Option<FrameColor> {
         None
     }
 }
+static SMOKE_FAILED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static RENDERER_PROBE_PASSED: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
 fn report(value: &str) {
+    use std::sync::atomic::Ordering;
+    let tag = value.split_whitespace().next().unwrap_or("");
+    if value.starts_with("RESULT: FAIL")
+        || value.starts_with("NATIVE_QR FAIL")
+        || tag.ends_with("_FAIL")
+        || tag.ends_with("_ERROR")
+    {
+        SMOKE_FAILED.store(true, Ordering::SeqCst);
+    }
+    if value.starts_with("RENDERER_PIXELS_PASS") {
+        RENDERER_PROBE_PASSED.store(true, Ordering::SeqCst);
+    }
+    let value = if value.starts_with("RESULT: PASS") && SMOKE_FAILED.load(Ordering::SeqCst) {
+        "RESULT: FAIL an earlier smoke check failed; cleanup completed"
+    } else {
+        value
+    };
     println!("{value}");
     #[cfg(target_os = "ios")]
     let directory = std::path::PathBuf::from(std::env::var("HOME").unwrap()).join("Documents");
@@ -589,6 +609,12 @@ fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
                 {
                     return true;
                 }
+                if renderer_smoke()
+                    && !RENDERER_PROBE_PASSED.load(std::sync::atomic::Ordering::SeqCst)
+                    && !SMOKE_FAILED.load(std::sync::atomic::Ordering::SeqCst)
+                {
+                    return true;
+                }
                 report("RESULT: PASS playback pause seek resume stop frame-zero detach retained=0");
                 return false;
             }
@@ -987,7 +1013,8 @@ fn renderer_action(
     host.set_height(220.);
     host.set_horizontal_alignment(HorizontalAlignment::Right);
     host.set_vertical_alignment(VerticalAlignment::Bottom);
-    host.set_is_visible(renderer_smoke());
+    host.set_is_visible(false);
+    let requested = Rc::new(Cell::new(renderer_smoke()));
     #[cfg(target_os = "ios")]
     let importer = Rc::new(ferroui_media_video_apple::AppleTextureImporter)
         as Rc<dyn ferroui_media_controls::TextureFrameImporter>;
@@ -1006,6 +1033,7 @@ fn renderer_action(
     let last_message = RefCell::new(String::new());
     let probed = Cell::new(false);
     let retiring = Cell::new(false);
+    let wanted = requested.clone();
     let last_report = Cell::new(Instant::now());
     DispatcherTimer::run(
         move || {
@@ -1013,7 +1041,16 @@ fn renderer_action(
             let Some(host) = weak.upgrade() else {
                 return false;
             };
-            if !host.is_visible() {
+            if !wanted.get() {
+                if host.is_visible() {
+                    host.set_is_visible(false);
+                    retiring.set(true);
+                }
+                if current.borrow().is_some() {
+                    retiring.set(true);
+                    host.set_inputs(Vec::new());
+                    current.replace(None);
+                }
                 if retiring.get() && budget.usage().frames == 0 {
                     report("RENDERER_RETIRED frames=0");
                     retiring.set(false);
@@ -1039,13 +1076,22 @@ fn renderer_action(
                 _ => true,
             };
             if changed {
-                if input.is_none() {
-                    host.set_is_visible(false);
-                    retiring.set(true);
-                }
                 host.set_inputs(input.iter().cloned().collect());
                 current.replace(input);
             }
+            if current.borrow().is_none() {
+                if host.is_visible() {
+                    host.set_is_visible(false);
+                    retiring.set(true);
+                }
+                if retiring.get() && budget.usage().frames == 0 {
+                    report("RENDERER_RETIRED frames=0");
+                    retiring.set(false);
+                }
+                return true;
+            }
+            retiring.set(false);
+            host.set_is_visible(true);
             let input = current.borrow().as_ref().and_then(|s| s.latest());
             let output = host.output().and_then(|s| s.latest());
             if !probed.get() && is_smoke() && input.is_some() {
@@ -1095,8 +1141,11 @@ fn renderer_action(
     let weak = host.downgrade();
     button.click(move |_, _| {
         if let Some(host) = weak.upgrade() {
-            host.set_is_visible(!host.is_visible());
-            report(if host.is_visible() {
+            requested.set(!requested.get());
+            if !requested.get() {
+                host.set_is_visible(false);
+            }
+            report(if requested.get() {
                 "RENDERER_ENABLED"
             } else {
                 "RENDERER_DISABLED"

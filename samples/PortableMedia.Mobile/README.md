@@ -150,3 +150,9 @@ javac -d /tmp/media-geometry-tests \
 java -cp /tmp/media-geometry-tests Mp4GeometryContract tests/media/fixtures
 java -cp /tmp/media-geometry-tests FrameOrientationContract
 ```
+
+The 3D toggle records requested state separately from temporary source
+availability. Stop retires its output; restarting/replacing the camera restores
+the requested renderer when the replacement input becomes available. Native
+smoke completion requires the renderer probe when enabled, and any earlier
+reported smoke failure prevents a final success result.
