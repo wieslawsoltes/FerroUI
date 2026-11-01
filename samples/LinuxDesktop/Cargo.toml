@@ -1,0 +1,23 @@
+[package]
+name = "ferro-desktop"
+description = "FerroUI Linux desktop session and application launcher"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[target.'cfg(target_os = "linux")'.dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-harfbuzz.workspace = true
+ferroui-markup-xaml.workspace = true
+ferroui-skia.workspace = true
+ferroui-system.workspace = true
+ferroui-themes-macos.workspace = true
+ferroui-themes-material.workspace = true
+ferroui-themes-winui.workspace = true
+ferroui-view.workspace = true
+ferroui-x11.workspace = true
+time = { workspace = true, features = ["local-offset"] }
