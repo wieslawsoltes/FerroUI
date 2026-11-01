@@ -51,7 +51,7 @@ pub mod workers;
 
 pub use ferroui_qml_compiler as ir;
 pub use ferroui_qml_compiler::{Document, Parameter};
-pub use registry::{NativeCallback, TypeDefinition, TypeRegistry};
+pub use registry::{NativeCallback, ToolingMetadata, TypeDefinition, TypeRegistry};
 pub use value::{AnchorEdge, Error, MethodRef, ObjectId, Value};
 
 use ferroui_qml_compiler::{Binding, Stmt};

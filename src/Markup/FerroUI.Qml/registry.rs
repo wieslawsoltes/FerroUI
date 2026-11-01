@@ -513,3 +513,7 @@ impl TypeRegistry {
         )))
     }
 }
+
+#[path = "registry_metadata.rs"]
+mod metadata;
+pub use metadata::ToolingMetadata;

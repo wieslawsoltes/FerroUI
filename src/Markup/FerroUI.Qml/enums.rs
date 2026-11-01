@@ -11,6 +11,13 @@ pub struct Namespace {
 }
 
 impl Namespace {
+    pub(crate) fn enumerations(&self) -> impl Iterator<Item = (&str, &[(String, i32)])> {
+        self.members.iter().filter_map(|(name, value)| match value {
+            Value::Namespace(group) => Some((name.as_str(), group.keys.as_deref()?)),
+            _ => None,
+        })
+    }
+
     pub(crate) fn names(&self) -> impl Iterator<Item = &str> {
         self.members.keys().map(String::as_str)
     }
