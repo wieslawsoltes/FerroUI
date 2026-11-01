@@ -4,6 +4,13 @@
 use super::*;
 use crate::transaction::Transaction;
 
+#[derive(Clone, Copy)]
+pub(crate) struct Declaration {
+    pub(crate) input: SlotId,
+    pub(crate) target: SlotId,
+    pub(crate) target_owner: ObjectId,
+}
+
 #[derive(Clone)]
 pub(crate) struct Overlay {
     source_value: Value,
@@ -55,29 +62,40 @@ impl Transaction<'_> {
     pub(crate) fn update_binding(&mut self, object: ObjectId) -> Result<(), Error> {
         self.budget()?;
         let delayed = self.model.get(object, "delayed")? == Value::Bool(true);
-        let input = self.model.key(object, "value")?;
-        let old = self.model.slots[input].active_target;
-        let target = match (
-            self.model.get(object, "when")?,
-            self.model.get(object, "target")?,
-        ) {
-            (Value::Bool(true), Value::Object(target)) => {
-                let Value::String(name) = self.model.get(object, "property")? else {
-                    return Err(Error::new("Binding.property must be a property name"));
-                };
-                let property = self.model.key(object, "property")?;
-                let scope = self.model.slots[property].scope;
-                Some(
-                    self.model
-                        .write_target(self.model.key_in(target, &name, scope)?)?,
-                )
-            }
-            _ => None,
-        };
         let mode = match self.model.get(object, "restoreMode")? {
             Value::Number(n) if (0.0..=3.0).contains(&n) && n.fract() == 0.0 => n as u8,
             _ => return Err(Error::new("invalid Binding.restoreMode")),
         };
+        let enabled = self.model.get(object, "when")? == Value::Bool(true);
+        if self.model.bindings[&object].is_empty() {
+            let input = self.model.key(object, "value")?;
+            let target = match (enabled, self.model.get(object, "target")?) {
+                (true, Value::Object(target)) => {
+                    let Value::String(name) = self.model.get(object, "property")? else {
+                        return Err(Error::new("Binding.property must be a property name"));
+                    };
+                    let property = self.model.key(object, "property")?;
+                    let scope = self.model.slots[property].scope;
+                    Some(
+                        self.model
+                            .write_target(self.model.key_in(target, &name, scope)?)?,
+                    )
+                }
+                _ => None,
+            };
+            self.update_overlay(input, target, delayed, mode);
+        }
+        for index in 0..self.model.bindings[&object].len() {
+            let declaration = self.model.bindings[&object][index];
+            let live = self.model.node(declaration.target_owner).is_some();
+            let target = (enabled && live).then_some(declaration.target);
+            self.update_overlay(declaration.input, target, delayed, mode);
+        }
+        Ok(())
+    }
+
+    fn update_overlay(&mut self, input: SlotId, target: Option<SlotId>, delayed: bool, mode: u8) {
+        let old = self.model.slots[input].active_target;
         if old == target {
             if let Some(target) = target {
                 let value = self.model.slots[input].value.clone();
@@ -93,13 +111,16 @@ impl Transaction<'_> {
                     }
                 }
             }
-            return Ok(());
+            return;
         }
         if let Some(old) = old {
             self.remove_overlay(old, input, mode);
         }
         self.touched(input).active_target = target;
         if let Some(target) = target {
+            // The displaced expression no longer controls this slot. Detach it
+            // before evaluating any of the sibling declarations in this group.
+            self.replace_reads(target, BTreeSet::new());
             let frozen = delayed.then(|| self.model.slots[input].value.clone());
             let slot = self.touched(target);
             let overlay = slot.overlay.get_or_insert_with(|| {
@@ -116,34 +137,43 @@ impl Transaction<'_> {
             slot.assigned = true;
             self.invalidate_overlay(target);
         }
-        Ok(())
     }
 
     pub(crate) fn publish_delayed(&mut self, object: ObjectId) -> Result<(), Error> {
         let input = self.model.key(object, "value")?;
+        self.publish_input(input);
+        for index in 0..self.model.bindings[&object].len() {
+            self.publish_input(self.model.bindings[&object][index].input);
+        }
+        Ok(())
+    }
+
+    fn publish_input(&mut self, input: SlotId) {
         let Some(target) = self.model.slots[input].active_target else {
-            return Ok(());
+            return;
         };
-        let value = self.model.slots[input].value.clone();
+        let value = &self.model.slots[input].value;
+        let overlay = self.model.slots[target]
+            .overlay
+            .as_ref()
+            .expect("active overlay");
+        let Some(index) = overlay.stack.iter().position(|entry| {
+            entry.input == input && entry.frozen.as_ref().is_some_and(|v| !v.unchanged(value))
+        }) else {
+            return;
+        };
+        let value = value.clone();
         let overlay = self
             .touched(target)
             .overlay
             .as_mut()
             .expect("active overlay");
-        let top = overlay.input() == input;
-        if let Some(entry) = overlay
-            .stack
-            .iter_mut()
-            .find(|entry| entry.input == input && entry.frozen.is_some())
-        {
-            entry.frozen = Some(value);
-            if top {
-                overlay.superseded = false;
-                self.touched(target).binding = None;
-                self.invalidate_overlay(target);
-            }
+        overlay.stack[index].frozen = Some(value);
+        if index + 1 == overlay.stack.len() {
+            overlay.superseded = false;
+            self.touched(target).binding = None;
+            self.invalidate_overlay(target);
         }
-        Ok(())
     }
 
     fn invalidate_overlay(&mut self, key: SlotId) {

@@ -118,6 +118,10 @@ struct Property {
 #[derive(Clone)]
 enum InstalledBinding {
     Expression(Rc<Binding>),
+    Guarded {
+        when: SlotId,
+        expression: Rc<Binding>,
+    },
     PropertyRead(SlotId),
     Guest {
         callback: ExternalValue,
@@ -163,7 +167,7 @@ pub struct Instance {
     models: BTreeMap<ObjectId, list_model::Model>,
     records: records::Heap,
     native_first_reads: &'static [compiled::FirstRead],
-    bindings: BTreeSet<ObjectId>,
+    bindings: BTreeMap<ObjectId, Vec<binding_object::Declaration>>,
     native_scripts: &'static [compiled::Script],
     native_functions: &'static [compiled::Evaluator],
     workers: workers::Workers,

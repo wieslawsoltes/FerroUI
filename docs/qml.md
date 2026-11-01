@@ -178,7 +178,22 @@ A QML method or signal can be stored in a `var`, passed as an argument, or captu
 
 FerroUI posts `Qt.callLater(function, ...args)` callbacks to the owning view's dispatcher. Reposting a function moves it to the end and replaces its arguments. Callbacks scheduled by callbacks execute on a subsequent event turn. A failed transaction discards its postings. Headless Rust hosts can inspect `Instance::has_deferred_work()` and deliver a bounded turn through `Instance::process_deferred(limit)`.
 
-A `Binding` with `delayed: true` applies its initial value when attached. Subsequent changes to its input coalesce until the next turn. Disabling or retargeting the binding restores its previous target immediately.
+One `Binding` can control several properties across different objects. The target names resolve in the component's ID scope, including forward references and aliases. A registered grouped property such as `font.pixelSize` can be written as a dotted path or a nested group.
+
+```qml
+Binding {
+    when: panel.selection !== null
+    heading {
+        text: panel.selection.title
+        font.pixelSize: 18
+    }
+    subtitle.text: panel.selection.description
+}
+```
+
+The grouped and dotted forms evaluate their expressions only while `when` is true. The explicit `target`, `property` and `value` form evaluates `value` independently of `when`. Each target saves its previous binding or value according to `restoreMode`. A conversion failure rolls back the whole update.
+
+With `delayed: true`, FerroUI applies each initial value on attachment and coalesces subsequent input changes into one owner-loop job per controller. Disabling the controller restores its targets immediately. This last detail differs from Qt 6.12.0 for grouped, delayed declarations. In a QQmlEngine probe, disabling such a controller retained the last published values.
 
 Rust hosts can register a receiver-aware method with `TypeDefinition::context_method`. Its callback can capture services, read and update model properties, and call QML signals and methods through the current transaction. For example, a binding that calls the following method will update when the receiver's `gain` changes.
 
@@ -211,7 +226,7 @@ The native `Loader` mounts and replaces the visual subtree of a bundled QML file
 | Object model | Required, readonly and default properties, lexical source property shadowing with virtual, override and final declarations, aliases, typed signals and methods, property change handlers, `Component.onCompleted`, source and registered enums, `Component.onDestruction` and bound method identity | Complete Qt value-type library, attached properties, interception, aliasing and inheritance edge cases, including overriding properties supplied by native Rust types |
 | Built-in Rust scripting | Numeric, boolean and string expressions, object and array literals with identity, indexed reads and writes, function and signal calls, local declarations, assignment, branching, loops and returns | Closures, prototypes, exceptions, Promises and local script modules require an external engine. |
 | WebScene scripting | V8 built-ins, closures, classes, prototypes, exceptions, Promises, classic scripts and local ES modules. Both the file loader and Cargo-generated components use the same engine. | Qt WorkerScript, host access from uncompiled native-await resumptions and browser-side V8 deployment |
-| Reactive infrastructure | Dependency tracking, signal connections, conditional Binding overlays with restoration, delayed bindings, Qt.callLater and Timer with a deterministic clock and native dispatcher integration | Multi-target Binding forms, the complete Qt global object, network and resource loading |
+| Reactive infrastructure | Dependency tracking, signal connections, single- and multi-target conditional Binding overlays with restoration, delayed bindings, Qt.callLater and Timer with a deterministic clock and native dispatcher integration | The complete Qt global object, network and resource loading |
 | Models | `QtQml.Models.ListModel` and flat `ListElement` declarations, WorkerScript model synchronization, fixed and dynamic role types, insertion, moves, removal, role edits, row handles and rollback | Nested list roles, function-valued roles, model/view delegates and proxy models |
 | Native visuals | Item, Rectangle, Row, Column, Flow, Text, TextInput and TextEdit. The Controls module supplies Label, Button, CheckBox, TextField and TextArea. Parent fill and center anchors participate in native arrangement. | Sibling and edge anchors, complete implicit geometry, visual delegates, animation/state systems and the rest of Qt Quick and Controls |
 | FerroUI API | Register Rust types, properties, signals, enums, pure methods and receiver-aware methods with reactive reads. Register visual factories or expose supported scalar styled properties with `register_ferro_control`. | Property types outside the reflected scalar set require an explicit native adapter |

@@ -148,14 +148,17 @@ impl crate::transaction::Transaction<'_> {
             }
         }
         for &object in &dead {
-            if self.model.bindings.contains(&object) {
-                let input = self.model.key(object, "value")?;
-                if let Some(target) = self.model.slots[input].active_target {
-                    let Value::Number(mode) = self.model.get(object, "restoreMode")? else {
-                        unreachable!()
-                    };
-                    self.remove_overlay(target, input, mode as u8);
-                    self.touched(input).active_target = None;
+            if let Some(declarations) = self.model.bindings.get(&object) {
+                let mut inputs: Vec<_> = declarations.iter().map(|d| d.input).collect();
+                inputs.push(self.model.key(object, "value")?);
+                let Value::Number(mode) = self.model.get(object, "restoreMode")? else {
+                    unreachable!()
+                };
+                for input in inputs {
+                    if let Some(target) = self.model.slots[input].active_target {
+                        self.remove_overlay(target, input, mode as u8);
+                        self.touched(input).active_target = None;
+                    }
                 }
             }
         }
@@ -220,6 +223,12 @@ impl crate::transaction::Transaction<'_> {
                 self.touched(key).binding = None;
                 self.touched(key).dirty = false;
                 self.pending.remove(&key);
+            }
+            if self.model.slots[key]
+                .active_target
+                .is_some_and(|target| dead.contains(&self.model.properties[target].owner))
+            {
+                self.touched(key).active_target = None;
             }
             if self.model.slots[key].overlay.is_some() {
                 if let Some(overlay) = &mut self.touched(key).overlay {

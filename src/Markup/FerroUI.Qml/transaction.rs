@@ -215,7 +215,7 @@ impl Transaction<'_> {
         self.pending_bindings.extend(
             self.model
                 .bindings
-                .iter()
+                .keys()
                 .copied()
                 .filter(|id| id.index >= first),
         );
@@ -335,6 +335,7 @@ impl Transaction<'_> {
         let binding = match self.model.slots[key].binding.as_ref()? {
             InstalledBinding::PropertyRead(source) => return Some(*source),
             InstalledBinding::Expression(binding) => binding,
+            InstalledBinding::Guarded { when, .. } => return Some(*when),
             InstalledBinding::Guest { .. } => return None,
         };
         let Binding::Expr(expr) = binding.as_ref() else {
@@ -438,24 +439,47 @@ impl Transaction<'_> {
                         self.check_binding_edges(key, &reads)?;
                         value
                     }
-                    InstalledBinding::Expression(binding) => match binding.as_ref() {
-                        Binding::Expr(expr) => {
-                            self.expr(owner, expr, &mut Locals::new(), &mut reads)?
+                    InstalledBinding::Guarded { when, expression } => {
+                        if self.read(when, &mut reads)? == Value::Bool(true) {
+                            let value = self.binding_value(owner, &expression, &mut reads)?;
+                            self.check_binding_edges(key, &reads)?;
+                            value
+                        } else {
+                            // Retain the previous input until the overlay is detached.
+                            // Only the guard remains subscribed while disabled.
+                            self.model.slots[key].value.clone()
                         }
-                        Binding::Script(body) => self
-                            .statements(owner, body, &mut Locals::new(), &mut reads)?
-                            .value()?,
-                        _ => return Err(Error::new("unresolved object-valued binding")),
-                    },
+                    }
+                    InstalledBinding::Expression(binding) => {
+                        self.binding_value(owner, &binding, &mut reads)?
+                    }
                 }
             }
         };
+        if self.model.slots[key].overlay.is_some() {
+            self.check_binding_edges(key, &reads)?;
+        }
         let value = self.model.typed(&self.model.properties[key].ty, value)?;
         self.replace_reads(key, reads);
         self.touched(key).dirty = false;
         self.evaluating.remove(&key);
         self.set_value(key, value);
         Ok(())
+    }
+
+    fn binding_value(
+        &mut self,
+        owner: ObjectId,
+        binding: &Binding,
+        reads: &mut BTreeSet<SlotId>,
+    ) -> Result<Value, Error> {
+        match binding {
+            Binding::Expr(expr) => self.expr(owner, expr, &mut Locals::new(), reads),
+            Binding::Script(body) => self
+                .statements(owner, body, &mut Locals::new(), reads)?
+                .value(),
+            _ => Err(Error::new("unresolved object-valued binding")),
+        }
     }
 
     // A cached alias or derived property can read cleanly during installation
@@ -540,7 +564,7 @@ impl Transaction<'_> {
         if property.name == "dynamicRoles" && self.model.models.contains_key(&property.owner) {
             self.model_modes.insert(property.owner);
         }
-        if self.model.bindings.contains(&property.owner)
+        if self.model.bindings.contains_key(&property.owner)
             && matches!(
                 property.name.as_str(),
                 "when" | "target" | "property" | "restoreMode" | "delayed"

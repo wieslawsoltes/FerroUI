@@ -13,6 +13,7 @@ struct Builder<'a, I = Box<Instance>> {
     assigned: BTreeSet<SlotId>,
     aliases: Vec<(SlotId, Expr, Option<u32>)>,
     implicit: Vec<(SlotId, Vec<Value>)>,
+    binding_targets: Vec<(SlotId, String)>,
     read_candidates: Vec<SlotId>,
 }
 
@@ -337,7 +338,7 @@ impl<'a> Builder<'a> {
                 javascript: Default::default(),
                 records: Default::default(),
                 models: BTreeMap::new(),
-                bindings: BTreeSet::new(),
+                bindings: BTreeMap::new(),
                 native_functions: source.evaluators(),
                 native_first_reads: source.first_reads(),
                 native_scripts: source.scripts(),
@@ -359,6 +360,7 @@ impl<'a> Builder<'a> {
             assigned: BTreeSet::new(),
             aliases: Vec::new(),
             implicit: Vec::new(),
+            binding_targets: vec![],
             read_candidates: Vec::new(),
         };
         for (url, shape) in &document.components {
@@ -374,6 +376,7 @@ impl<'a> Builder<'a> {
             builder.object(singleton, None)?;
         }
         builder.link_aliases()?;
+        builder.link_binding_targets()?;
         builder.default_children()?;
         Ok(builder)
     }
@@ -519,7 +522,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             return Err(Error::new("ListElement must appear inside ListModel"));
         }
         if module == "QtQml" && name == "Binding" {
-            self.instance.bindings.insert(id);
+            self.instance.bindings.insert(id, Vec::new());
         }
         let connections = module == "QtQml" && name == "Connections";
         if connections {
@@ -669,7 +672,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                 }
                 MemberKind::OnProperty { name, object } => {
                     let child = self.object(object, Some(id))?;
-                    if !self.instance.bindings.contains(&child) {
+                    if !self.instance.bindings.contains_key(&child) {
                         return Err(Error::new(format!(
                             "'{}' is not a supported property value source",
                             object.type_name
@@ -790,6 +793,12 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         binding: &Binding,
         scope: Option<u32>,
     ) -> Result<(), Error> {
+        if name.contains('.')
+            && self.instance.bindings.contains_key(&owner)
+            && self.instance.key(owner, name).is_err()
+        {
+            return self.binding_input(owner, name, binding, scope);
+        }
         let key = self.instance.key(owner, name)?;
         self.assign_once(key)?;
         self.instance.slots[key].scope = scope;
@@ -854,6 +863,68 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         self.instance.slots[key].value = self
             .instance
             .typed(&self.instance.properties[key].ty, value)?;
+        Ok(())
+    }
+
+    fn binding_input(
+        &mut self,
+        owner: ObjectId,
+        path: &str,
+        binding: &Binding,
+        scope: Option<u32>,
+    ) -> Result<(), Error> {
+        if !matches!(binding, Binding::Expr(_) | Binding::Script(_)) {
+            return Err(Error::new(
+                "a declarative Binding target requires an expression or script",
+            ));
+        }
+        let when = self.instance.key(owner, "when")?;
+        let input = self.property(
+            Property {
+                owner,
+                name: format!("$qml:binding:{path}"),
+                ty: "var".into(),
+                readonly: true,
+                required: false,
+                alias: None,
+            },
+            Value::Undefined,
+        )?;
+        let slot = &mut self.instance.slots[input];
+        slot.scope = scope;
+        slot.binding = Some(InstalledBinding::Guarded {
+            when,
+            expression: Rc::new(binding.clone()),
+        });
+        slot.dirty = true;
+        self.binding_targets.push((input, path.to_owned()));
+        Ok(())
+    }
+
+    fn link_binding_targets(&mut self) -> Result<(), Error> {
+        for (input, path) in &self.binding_targets {
+            let owner = self.instance.properties[*input].owner;
+            let (id, property) = path.split_once('.').expect("qualified binding target");
+            let object = self
+                .instance
+                .lexical_id(owner, id)
+                .ok_or_else(|| Error::new(format!("unknown Binding target id '{id}'")))?;
+            let slot = self
+                .instance
+                .key_in(object, property, self.instance.slots[*input].scope)?;
+            let target = self.instance.write_target(slot)?;
+            let target_owner = self.instance.properties[target].owner;
+            let declarations = self
+                .instance
+                .bindings
+                .get_mut(&owner)
+                .expect("Binding controller");
+            declarations.push(binding_object::Declaration {
+                input: *input,
+                target,
+                target_owner,
+            });
+        }
         Ok(())
     }
 
@@ -992,10 +1063,12 @@ impl Instance {
             assigned: Default::default(),
             aliases: vec![],
             implicit: vec![],
+            binding_targets: vec![],
             read_candidates: vec![],
         };
         builder.object(&template.object, parent)?;
         builder.link_aliases()?;
+        builder.link_binding_targets()?;
         builder.default_children()?;
         Ok(builder.assigned)
     }

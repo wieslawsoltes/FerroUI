@@ -20,7 +20,22 @@ pub(super) fn isolate(root: &mut Object, serial: usize, root_id: &str, scope: u3
         });
     }
     visit_objects(root, &mut |object| {
+        let binding = object.type_name.rsplit('.').next() == Some("Binding");
         for member in &mut object.members {
+            if binding {
+                // The first segment names an object in the declaration's id scope.
+                let name = match &mut member.kind {
+                    MemberKind::Binding { name, .. } if name.contains('.') => Some(name),
+                    MemberKind::Group { name, .. } => Some(name),
+                    _ => None,
+                };
+                if let Some(name) = name {
+                    let id = name.split('.').next().expect("nonempty binding target");
+                    if let Some(private) = ids.get(id) {
+                        name.replace_range(..id.len(), private);
+                    }
+                }
+            }
             rewrite(member, &ids, root_id, scope);
         }
     });

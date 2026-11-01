@@ -168,7 +168,7 @@ impl Instance {
         self.dynamic.revision = c.revision;
         self.dynamic.loaders.retain(|id, _| id.index < c.nodes);
         self.models.retain(|id, _| id.index < c.nodes);
-        self.bindings.retain(|id| id.index < c.nodes);
+        self.bindings.retain(|id, _| id.index < c.nodes);
         self.timers.truncate(c.nodes);
         self.workers.truncate(c.nodes);
         self.listeners.retain(|_, handlers| {
