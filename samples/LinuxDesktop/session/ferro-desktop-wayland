@@ -4,6 +4,15 @@
 set -euo pipefail
 if [[ ${1:-} == --ferro ]]; then export FERRO_DESKTOP_COMPOSITION=ferro; shift; fi
 case ${1:-} in
+    --publish-client-display)
+        # Only the dedicated supervisor sets this name. The shell calls back
+        # after bind, when a newly D-Bus-activated client can actually connect.
+        : "${FERRO_DESKTOP_CHILD_DISPLAY:?}"
+        [[ -S $XDG_RUNTIME_DIR/$FERRO_DESKTOP_CHILD_DISPLAY ]] || exit 1
+        command -v dbus-update-activation-environment >/dev/null || exit 0
+        args=()
+        if [[ -z ${FERRO_DESKTOP_NESTED:-} && -S $XDG_RUNTIME_DIR/systemd/private ]]; then args+=(--systemd); fi
+        exec dbus-update-activation-environment "${args[@]}" "WAYLAND_DISPLAY=$FERRO_DESKTOP_CHILD_DISPLAY" SWAYSOCK= DISPLAY= ;;
     --ready)
         : "${WAYLAND_DISPLAY:?}" "${SWAYSOCK:?}" "${FERRO_DESKTOP_WAYLAND_READY:?}"
         legacy_display=${DISPLAY:-}
@@ -107,16 +116,7 @@ compositor=$!
     if command -v dbus-update-activation-environment >/dev/null; then
         sync_args=()
         if [[ -z ${FERRO_DESKTOP_NESTED:-} && -S $XDG_RUNTIME_DIR/systemd/private ]]; then sync_args+=(--systemd); fi
-        activation_display=$WAYLAND_DISPLAY
-        activation_sway=$SWAYSOCK
-        if [[ -n ${FERRO_DESKTOP_CHILD_DISPLAY:-} ]]; then
-            # D-Bus-activated GUI applications belong on the same child display
-            # as applications spawned by the launcher. Lock and output helpers
-            # are started by Sway with its original connection environment.
-            activation_display=$FERRO_DESKTOP_CHILD_DISPLAY
-            activation_sway=
-        fi
-        dbus-update-activation-environment "${sync_args[@]}" "WAYLAND_DISPLAY=$activation_display" "SWAYSOCK=$activation_sway" DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP || :
+        dbus-update-activation-environment "${sync_args[@]}" WAYLAND_DISPLAY SWAYSOCK DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP || :
     fi
     [[ -n $DISPLAY ]] || unset DISPLAY
     exec "$binary" --session --platform=wayland "${shell_args[@]}"

@@ -191,7 +191,10 @@ impl Desktop {
         }
     }
     pub fn snap(&self, id: u32, side: SnapSide) -> bool {
-        self.request(id, |id| Input::Snap { id, right: side == SnapSide::Right })
+        self.request(id, |id| Input::Snap {
+            id,
+            right: side == SnapSide::Right,
+        })
     }
 }
 
@@ -241,6 +244,18 @@ pub(crate) fn run(
     if let Some(lease) = lease {
         lease.include_child(host.server.socket_name())?;
         session.claim_commands(Some(lease))?;
+        if std::env::var_os("FERRO_DESKTOP_CHILD_DISPLAY").as_deref()
+            == Some(host.server.socket_name())
+        {
+            let status = std::process::Command::new("ferro-desktop-wayland")
+                .arg("--publish-client-display")
+                .status()?;
+            if !status.success() {
+                return Err(io::Error::other(
+                    "Could not publish the compositor display for D-Bus activation",
+                ));
+            }
+        }
     }
     let window = Window::new();
     window.set_title(Some("Ferro Desktop — FerroUI compositor".into()));
