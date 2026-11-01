@@ -1,6 +1,6 @@
 use super::{buffers, ClientWindow, Input, Pixels, Scene, Surface};
 use smithay::{
-    delegate_compositor, delegate_output, delegate_shm, delegate_xdg_shell,
+    delegate_compositor, delegate_output, delegate_shm, delegate_xdg_shell, delegate_xdg_decoration,
     desktop::{PopupKind, PopupManager},
     input::{Seat, SeatState},
     output::{Mode, Output, PhysicalProperties, Scale, Subpixel},
@@ -32,6 +32,8 @@ use smithay::{
         shm::{ShmHandler, ShmState},
     },
 };
+use smithay::reexports::wayland_protocols::xdg::decoration::zv1::server::zxdg_toplevel_decoration_v1::Mode as DecorationMode;
+use smithay::wayland::shell::xdg::decoration::{XdgDecorationState, XdgDecorationHandler};
 use std::{
     collections::{HashMap, VecDeque},
     io,
@@ -114,6 +116,7 @@ impl State {
         );
         output.create_global::<Self>(dh);
         let _manager = OutputManagerState::new_with_xdg_output::<Self>(dh);
+        XdgDecorationState::new::<Self>(dh);
         let mode = Mode {
             size: (width, height).into(),
             refresh: 60_000,
@@ -372,7 +375,9 @@ impl State {
                 });
             }
         });
-        w.role.send_configure();
+        if w.role.is_initial_configure_sent() {
+            w.role.send_pending_configure();
+        }
         self.dirty = true;
     }
 
@@ -401,6 +406,11 @@ impl State {
             let Some(idx) = self.windows.iter().position(|w| w.id == id) else {
                 return;
             };
+            if idx + 1 != self.windows.len() {
+                // A batched native activate + pointer event must observe the new
+                // stacking order even before the next snapshot reaches FerroUI.
+                self.hits.sort_by_key(|hit| hit.view.window == id);
+            }
             let mut window = self.windows.remove(idx);
             window.hidden = false;
             self.windows.push(window);
@@ -414,7 +424,9 @@ impl State {
                     s.states.unset(xdg_toplevel::State::Activated);
                 }
             });
-            w.role.send_pending_configure();
+            if w.role.is_initial_configure_sent() {
+                w.role.send_pending_configure();
+            }
         }
         if let Some(keyboard) = self.seat.get_keyboard() {
             let surface = id.and_then(|id| {
@@ -560,12 +572,20 @@ impl CompositorHandler for State {
         }
         if let Some(w) = self.windows.iter().find(|w| w.role.wl_surface() == surface) {
             let mapped = self.images.contains_key(surface);
-            if !w.role.is_initial_configure_sent() {
+            let id = w.id;
+            if !mapped && previously_mapped {
+                w.role.reset_initial_configure_sent();
+                if self.focused == Some(id) {
+                    self.focus_last();
+                }
+            } else if mapped {
+                if !w.role.ensure_configured() {
+                    self.images.remove(surface);
+                } else if !previously_mapped {
+                    self.focus(Some(id));
+                }
+            } else if !w.role.is_initial_configure_sent() {
                 w.role.send_configure();
-            } else if mapped && !previously_mapped {
-                self.focus(Some(w.id));
-            } else if !mapped && previously_mapped && self.focused == Some(w.id) {
-                self.focus_last();
             }
         } else if let Some(popup) = self
             .shell
@@ -573,11 +593,29 @@ impl CompositorHandler for State {
             .iter()
             .find(|p| p.wl_surface() == surface)
         {
-            if !popup.is_initial_configure_sent() {
+            let mapped = self.images.contains_key(surface);
+            if previously_mapped && !mapped {
+                popup.reset_initial_configure_sent();
+            } else if mapped {
+                if !popup.ensure_configured() {
+                    self.images.remove(surface);
+                }
+            } else if !popup.is_initial_configure_sent() {
                 let _ = popup.send_configure();
             }
         }
-        self.dirty = true;
+        // Idle cursor/drag-icon clients do not invalidate the output. Their
+        // buffers still have the same release and lifetime guarantees.
+        if matches!(
+            smithay::wayland::compositor::get_role(surface),
+            Some(
+                smithay::wayland::shell::xdg::XDG_TOPLEVEL_ROLE
+                    | smithay::wayland::shell::xdg::XDG_POPUP_ROLE
+                    | smithay::wayland::compositor::SUBSURFACE_ROLE
+            )
+        ) {
+            self.dirty = true;
+        }
     }
     fn destroyed(&mut self, surface: &WlSurface) {
         self.images.remove(surface);
@@ -688,6 +726,23 @@ impl State {
     }
 }
 
+impl XdgDecorationHandler for State {
+    fn new_decoration(&mut self, role: ToplevelSurface) {
+        self.unset_mode(role);
+    }
+    fn request_mode(&mut self, role: ToplevelSurface, _: DecorationMode) {
+        self.unset_mode(role);
+    }
+    fn unset_mode(&mut self, role: ToplevelSurface) {
+        // The client draws its frame; the FerroUI window overview provides
+        // independent access to move, maximize, minimize and close.
+        role.with_pending_state(|s| s.decoration_mode = Some(DecorationMode::ClientSide));
+        if role.is_initial_configure_sent() {
+            role.send_pending_configure();
+        }
+    }
+}
+delegate_xdg_decoration!(State);
 delegate_compositor!(State);
 delegate_shm!(State);
 delegate_output!(State);

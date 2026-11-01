@@ -76,6 +76,9 @@ pub(super) fn oriented(source: &Arc<Pixels>, transform: Transform, revision: u64
     if transform == Transform::Normal {
         return source.clone();
     }
+    // wl_surface.set_buffer_transform describes the transform the client
+    // applied when drawing. Undo it to produce logical surface orientation.
+    let transform = transform.invert();
     let size: Size<i32, Buffer> = (source.width, source.height).into();
     let target = transform.transform_size(size);
     // Transforming pixel centers is equivalent to transforming integer sample

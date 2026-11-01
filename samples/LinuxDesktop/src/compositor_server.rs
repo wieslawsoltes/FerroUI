@@ -148,6 +148,22 @@ impl Server {
                         .bytes()
                         .all(|c| c.is_ascii_alphanumeric() || matches!(c, b'-' | b'_' | b'.')) =>
             {
+                let dir = std::env::var_os("XDG_RUNTIME_DIR").ok_or_else(|| {
+                    io::Error::new(
+                        io::ErrorKind::NotFound,
+                        "XDG_RUNTIME_DIR is required for a child display",
+                    )
+                })?;
+                match std::fs::symlink_metadata(std::path::Path::new(&dir).join(name)) {
+                    Ok(_) => {
+                        return Err(io::Error::new(
+                            io::ErrorKind::AddrInUse,
+                            "Private display path already exists",
+                        ))
+                    }
+                    Err(e) if e.kind() == io::ErrorKind::NotFound => {}
+                    Err(e) => return Err(e),
+                }
                 ListeningSocketSource::with_name(name)
             }
             Some(_) => {
