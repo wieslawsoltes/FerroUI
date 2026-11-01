@@ -144,7 +144,10 @@ impl PreparedNode {
             }
             MemberKind::Signal { name, parameters } => {
                 let signature = registry.parameters(imports, parameters)?;
-                if self.node.signals.insert(name.clone(), signature).is_some() {
+                if Rc::make_mut(&mut self.node.signals)
+                    .insert(name.clone(), signature)
+                    .is_some()
+                {
                     return Err(Error::new(format!("duplicate signal '{name}'")));
                 }
             }

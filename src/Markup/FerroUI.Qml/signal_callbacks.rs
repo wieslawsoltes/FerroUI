@@ -28,6 +28,10 @@ enum Edit {
 }
 
 impl SignalCallbacks {
+    pub(crate) fn is_empty(&self) -> bool {
+        self.by_signal.is_empty()
+    }
+
     pub(crate) fn retire(&mut self, dead: &BTreeSet<ObjectId>) {
         self.by_signal.retain(|(sender, _), listeners| {
             listeners

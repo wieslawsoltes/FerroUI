@@ -437,3 +437,69 @@ fn rust_context_methods_track_receiver_reads_and_share_the_qml_transaction() {
     assert_eq!(instance.get(root, "output").unwrap(), Value::Number(22.));
     assert!(invocations.get() >= 2);
 }
+
+#[test]
+fn signal_dispatch_observes_later_retargets_and_rolls_them_back_on_failure() {
+    let mut model = component(
+        "
+        id: root
+        signal ping()
+        property bool moved: false
+        property int hits: 0
+        property QtObject child: QtObject { id: other; signal ping() }
+        property QtObject invalidTarget: QtObject {}
+        property Connections first: Connections {
+            target: root
+            function onPing() { root.moved = true }
+        }
+        property Connections second: Connections {
+            target: root.moved ? root : other
+            function onPing() { root.hits++ }
+        }
+        function fail() { second.target = invalidTarget }
+        ",
+    )
+    .unwrap();
+    let root = model.root();
+    model.emit(root, "ping", vec![]).unwrap();
+    assert_eq!(model.get(root, "hits").unwrap(), Value::Number(1.));
+    assert!(model.call(root, "fail", vec![]).is_err());
+    model.emit(root, "ping", vec![]).unwrap();
+    assert_eq!(model.get(root, "hits").unwrap(), Value::Number(2.));
+    model.set(root, "moved", Value::Bool(false)).unwrap();
+    model
+        .emit(model.id("other").unwrap(), "ping", vec![])
+        .unwrap();
+    assert_eq!(model.get(root, "hits").unwrap(), Value::Number(3.));
+}
+
+#[test]
+fn registry_snapshots_preserve_transitive_import_priority_after_late_reexports() {
+    let mut types = TypeRegistry::new();
+    types
+        .register(
+            "Leaf",
+            "Marker",
+            TypeDefinition::default().property("v", "int", Value::Number(1.)),
+        )
+        .unwrap();
+    types.reexport("Middle", "QtQml").unwrap();
+    types.reexport("Top", "Middle").unwrap();
+    let before = types.clone();
+    types.reexport("Middle", "Leaf").unwrap();
+    let doc = ir::parse("import Top\nMarker {}").unwrap();
+    assert!(Instance::new(&doc, &before, Default::default()).is_err());
+    let model = Instance::new(&doc, &types, Default::default()).unwrap();
+    assert_eq!(model.get(model.root(), "v").unwrap(), Value::Number(1.));
+    types
+        .register(
+            "Other",
+            "Marker",
+            TypeDefinition::default().property("v", "int", Value::Number(2.)),
+        )
+        .unwrap();
+    types.reexport("Top", "Other").unwrap();
+    let model = Instance::new(&doc, &types, Default::default()).unwrap();
+    assert_eq!(model.get(model.root(), "v").unwrap(), Value::Number(2.));
+    assert!(types.reexport("Leaf", "Top").is_err());
+}

@@ -228,13 +228,13 @@ impl Export<'_> {
             }
         }
         self.fields(groups.remove("").unwrap_or_default(), definition, true)?;
-        for (signal, parameters) in &definition.signals {
+        for (signal, parameters) in definition.signals.iter() {
             if inherited.is_some_and(|base| base.signals.get(signal) == Some(parameters)) {
                 continue;
             }
             self.routine("Signal", signal, None, parameters, definition)?;
         }
-        for (method, native) in &definition.native {
+        for (method, native) in definition.native.iter() {
             if inherited.is_some_and(|base| {
                 base.native
                     .get(method)
@@ -358,7 +358,6 @@ impl Export<'_> {
                     let module = self
                         .registry
                         .module_order(self.uri)
-                        .into_iter()
                         .chain(
                             definition
                                 .lineage

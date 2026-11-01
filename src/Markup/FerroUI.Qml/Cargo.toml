@@ -38,3 +38,7 @@ ferroui-qml-compiler.workspace = true
 
 [package.metadata.release]
 group = "markup"
+
+[[bench]]
+name = "runtime"
+harness = false

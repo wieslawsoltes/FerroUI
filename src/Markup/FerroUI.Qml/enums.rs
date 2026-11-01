@@ -86,11 +86,12 @@ impl Namespace {
     }
 }
 
-type ScopeKey = Vec<(String, Option<String>)>;
+type ScopeKey = Rc<[(String, Option<String>)]>;
 
 #[derive(Clone, Default)]
 pub(crate) struct Scopes {
     by_imports: BTreeMap<ScopeKey, Rc<Namespace>>,
+    last: Option<(ScopeKey, Rc<Namespace>)>,
     local: Option<(String, Value)>,
 }
 
@@ -100,22 +101,34 @@ impl Scopes {
         let local = name.map(|name| (name.into(), namespace.value()));
         Ok(Self {
             by_imports: BTreeMap::new(),
+            last: None,
             local,
         })
     }
 
     pub(crate) fn imports(&mut self, imports: &[Import], registry: &TypeRegistry) -> Rc<Namespace> {
+        if let Some((key, scope)) = &self.last {
+            if imports.len() == key.len()
+                && imports
+                    .iter()
+                    .zip(key.iter())
+                    .all(|(i, (uri, alias))| i.uri == *uri && i.alias == *alias)
+            {
+                return scope.clone();
+            }
+        }
         let key = imports
             .iter()
             .map(|i| (i.uri.clone(), i.alias.clone()))
             .collect::<ScopeKey>();
-        self.by_imports
-            .entry(key)
+        let scope = self
+            .by_imports
+            .entry(key.clone())
             .or_insert_with(|| {
                 let mut scope = Namespace::default();
                 for import in imports {
                     let mut module = Namespace::default();
-                    for uri in registry.module_order(&import.uri).into_iter().rev() {
+                    for uri in registry.module_order(&import.uri).rev() {
                         if let Some(types) = registry.modules.get(uri) {
                             for (name, ty) in types {
                                 if !ty.enums.members.is_empty() {
@@ -137,7 +150,9 @@ impl Scopes {
                 }
                 Rc::new(scope)
             })
-            .clone()
+            .clone();
+        self.last = Some((key, scope.clone()));
+        scope
     }
 }
 

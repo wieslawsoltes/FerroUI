@@ -17,12 +17,12 @@ pub(crate) struct Transaction<'a> {
     model_modes: BTreeSet<ObjectId>,
     pub(crate) record_changes: records::Journal,
     pub(crate) model: &'a mut Instance,
-    original: BTreeMap<SlotId, Slot>,
+    original: Vec<(SlotId, Slot)>,
     emitted: Vec<SignalEmission>,
     pub(crate) pending: BTreeSet<SlotId>,
     pending_bindings: BTreeSet<ObjectId>,
     pub(crate) state_pending: BTreeMap<ObjectId, bool>,
-    evaluating: BTreeSet<SlotId>,
+    evaluating: usize,
     notifications: VecDeque<(ObjectId, String)>,
     hold_notifications: bool,
     pub(crate) initializing: bool,
@@ -30,6 +30,7 @@ pub(crate) struct Transaction<'a> {
     scope: Option<u32>,
     pub(crate) depth: usize,
     steps: usize,
+    pub(crate) connection_targets_changed: bool,
     pub(crate) connection_changes: signal_callbacks::Journal,
     pub(crate) deferred: Vec<deferred::DeferredWork>,
     pub(crate) structure: dynamic::Checkpoint,
@@ -44,6 +45,16 @@ pub(crate) struct Transaction<'a> {
 }
 
 impl Instance {
+    fn has_signal_observers(&self, owner: ObjectId, signal: &str) -> bool {
+        self.nodes[owner.index].handlers.contains_key(signal)
+            || self.listeners.contains_key(signal)
+            || self.javascript.connections.has(owner, signal)
+            || self
+                .watched
+                .get(&owner)
+                .is_some_and(|names| names.contains(signal))
+    }
+
     /// A failed asynchronous job has already rolled back its subtree. Its
     /// terminal status must survive an exception in an error observer. Settle
     /// and validate the status first, then deliver its changes transactionally.
@@ -89,12 +100,12 @@ impl Instance {
             nested_retirements: Vec::new(),
             model_edits: Vec::new(),
             model_modes: BTreeSet::new(),
-            original: BTreeMap::new(),
+            original: Vec::new(),
             emitted: Vec::new(),
             pending: BTreeSet::new(),
             pending_bindings: BTreeSet::new(),
             state_pending: Default::default(),
-            evaluating: BTreeSet::new(),
+            evaluating: 0,
             notifications: VecDeque::new(),
             hold_notifications: false,
             initializing: false,
@@ -103,6 +114,7 @@ impl Instance {
             depth: 0,
             steps: 0,
             connection_changes: Default::default(),
+            connection_targets_changed: false,
             deferred: Vec::new(),
             loader_changes: Default::default(),
             range_pending: Default::default(),
@@ -118,9 +130,15 @@ impl Instance {
             if let Some(error) = tx.failed_host_call.take() {
                 return Err(error);
             }
-            tx.model.validate_connections()?;
+            let targets = if tx.connection_targets_changed || tx.model.listener_targets.is_none() {
+                Some(tx.model.index_connections()?)
+            } else {
+                None
+            };
             tx.model.validate_model_modes(&tx.model_modes)?;
             if let Some(validate) = &tx.model.validator {
+                // Native validation observes changes in the original slot order.
+                tx.original.sort_unstable_by_key(|(key, _)| *key);
                 let changes = tx
                     .original
                     .iter()
@@ -145,6 +163,9 @@ impl Instance {
                     })
                     .collect::<Vec<_>>();
                 validate(tx.model, &changes)?;
+            }
+            if let Some(index) = targets {
+                tx.model.listener_targets = Some(index);
             }
             Ok(value)
         });
@@ -179,6 +200,7 @@ impl Instance {
                 .commit_workers(std::mem::take(&mut tx.worker_actions));
             tx.model.emissions.append(&mut tx.emitted);
             for (key, old) in tx.original {
+                tx.model.slots[key].journal_index = old.journal_index;
                 let value = &tx.model.slots[key].value;
                 if tx.model.node(tx.model.properties[key].owner).is_none()
                     || tx.model.properties[key].name.starts_with("$qml:")
@@ -235,10 +257,31 @@ impl Transaction<'_> {
     }
 
     pub(crate) fn touched(&mut self, key: SlotId) -> &mut Slot {
-        self.original
-            .entry(key)
-            .or_insert_with(|| self.model.slots[key].clone());
-        &mut self.model.slots[key]
+        let slot = &mut self.model.slots[key];
+        if self
+            .original
+            .get(slot.journal_index)
+            .is_none_or(|(saved, _)| *saved != key)
+        {
+            // A binding can dirty a target before its value is read. From that
+            // moment onward, a reentrant emission must observe live targets.
+            let property = &self.model.properties[key];
+            if !self.model.listeners.is_empty()
+                && matches!(
+                    property.name.as_str(),
+                    "target" | "enabled" | "ignoreUnknownSignals"
+                )
+            {
+                self.connection_targets_changed |= self.model.nodes[property.owner.index]
+                    .data
+                    .as_deref()
+                    .is_some_and(|node| node.module == "QtQml" && node.name == "Connections");
+            }
+            let index = self.original.len();
+            self.original.push((key, slot.clone()));
+            slot.journal_index = index;
+        }
+        slot
     }
 
     pub(crate) fn budget(&mut self) -> Result<(), Error> {
@@ -315,12 +358,15 @@ impl Transaction<'_> {
         // incubator requested from onCompleted can therefore finish immediately.
         let was_incubating = std::mem::take(&mut self.incubating);
         let result = (first..end).rev().try_for_each(|index| {
-            self.dispatch(
-                self.model.nodes[index].id,
-                "Component.completed",
-                Vec::new(),
-            )?;
-            self.settle()
+            let owner = self.model.nodes[index].id;
+            if self
+                .model
+                .has_signal_observers(owner, "Component.completed")
+            {
+                self.dispatch(owner, "Component.completed", Vec::new())?;
+                self.settle()?;
+            }
+            Ok(())
         });
         self.incubating = was_incubating;
         result
@@ -397,25 +443,27 @@ impl Transaction<'_> {
     /// Only the first mandatory property read is scheduled ahead of its owner.
     /// Every expression and Rust callback still runs exactly once.
     fn evaluate_chain(&mut self, mut key: SlotId) -> Result<(), Error> {
-        let mut chain = Vec::new();
+        let mut parents = Vec::new();
         loop {
             self.budget()?;
-            if !self.evaluating.insert(key) {
+            if self.model.slots[key].evaluating {
                 return Err(Error::new(format!(
                     "binding cycle at '{}'",
                     self.model.properties[key].name
                 )));
             }
-            chain.push(key);
+            self.touched(key).evaluating = true;
+            self.evaluating += 1;
             let Some(next) = self
                 .first_dependency(key)
                 .filter(|next| self.model.slots[*next].dirty)
             else {
                 break;
             };
+            parents.push(key);
             key = next;
         }
-        for key in chain.into_iter().rev() {
+        for key in std::iter::once(key).chain(parents.into_iter().rev()) {
             let previous = self.current_binding.replace(key);
             let result = self.with_scope(self.model.slots[key].scope, |tx| tx.evaluate_one(key));
             self.current_binding = previous;
@@ -622,8 +670,10 @@ impl Transaction<'_> {
         }
         let value = self.model.typed(&self.model.properties[key].ty, value)?;
         self.replace_reads(key, reads);
-        self.touched(key).dirty = false;
-        self.evaluating.remove(&key);
+        let slot = self.touched(key);
+        slot.dirty = false;
+        slot.evaluating = false;
+        self.evaluating -= 1;
         self.set_value(key, value);
         Ok(())
     }
@@ -665,7 +715,9 @@ impl Transaction<'_> {
     // becomes a cycle, including when the computed value would stay unchanged.
     fn check_binding_edges(&mut self, key: SlotId, reads: &BTreeSet<SlotId>) -> Result<(), Error> {
         let slot = &self.model.slots[key];
-        if slot.dependents.is_empty() || reads.is_subset(&slot.reads) {
+        if matches!(slot.dependents, Edges::Empty)
+            || reads.iter().all(|dep| slot.reads.contains(dep))
+        {
             return Ok(());
         }
         let mut stack: Vec<_> = slot.dependents.iter().copied().collect();
@@ -679,20 +731,24 @@ impl Transaction<'_> {
                         self.model.properties[key].name
                     )));
                 }
-                stack.extend(&self.model.slots[dep].dependents);
+                stack.extend(self.model.slots[dep].dependents.iter().copied());
             }
         }
         Ok(())
     }
 
     pub(crate) fn replace_reads(&mut self, key: SlotId, reads: BTreeSet<SlotId>) {
-        let old = std::mem::replace(&mut self.touched(key).reads, reads.clone());
-        for dep in old.difference(&reads) {
+        if self.model.slots[key].reads.matches(&reads) {
+            return;
+        }
+        let old = std::mem::take(&mut self.touched(key).reads);
+        for dep in old.iter().filter(|dep| !reads.contains(dep)) {
             self.touched(*dep).dependents.remove(&key);
         }
-        for dep in reads.difference(&old) {
+        for dep in reads.iter().filter(|dep| !old.contains(dep)) {
             self.touched(*dep).dependents.insert(key);
         }
+        self.model.slots[key].reads = reads.into();
     }
 
     pub(crate) fn set_value(&mut self, key: SlotId, value: Value) {
@@ -740,7 +796,7 @@ impl Transaction<'_> {
         // read a derived value before the outer transaction is settled.
         let mut stack: Vec<_> = self.model.slots[key].dependents.iter().copied().collect();
         while let Some(dep) = stack.pop() {
-            if !self.model.slots[dep].dirty && !self.evaluating.contains(&dep) {
+            if !self.model.slots[dep].dirty && !self.model.slots[dep].evaluating {
                 let slot = self.touched(dep);
                 slot.dirty = true;
                 stack.extend(slot.dependents.iter().copied());
@@ -841,21 +897,15 @@ impl Transaction<'_> {
             {
                 self.timer_changes.pending.insert(property.owner);
             }
-            let signal = format!("{}Changed", property.name);
-            if self.model.nodes[property.owner.index]
-                .handlers
-                .contains_key(&signal)
-                || self.model.listeners.contains_key(&signal)
-                || self
-                    .model
-                    .javascript
-                    .connections
-                    .has(property.owner, &signal)
-                || self
-                    .model
-                    .watched
-                    .contains(&(property.owner, signal.clone()))
+            if self.model.nodes[property.owner.index].handlers.is_empty()
+                && self.model.listeners.is_empty()
+                && self.model.javascript.connections.is_empty()
+                && !self.model.watched.contains_key(&property.owner)
             {
+                return;
+            }
+            let signal = format!("{}Changed", property.name);
+            if self.model.has_signal_observers(property.owner, &signal) {
                 self.notifications.push_back((property.owner, signal));
             }
         }
@@ -952,7 +1002,7 @@ impl Transaction<'_> {
     }
 
     pub(crate) fn in_binding(&self) -> bool {
-        !self.evaluating.is_empty()
+        self.evaluating != 0
     }
 
     pub(crate) fn signal(
@@ -1004,8 +1054,11 @@ impl Transaction<'_> {
         arguments: Vec<Value>,
     ) -> Result<(), Error> {
         let boundary = self.model.javascript.connections.boundary();
-        if !self.model.watched.is_empty()
-            && self.model.watched.contains(&(owner, signal.to_owned()))
+        if self
+            .model
+            .watched
+            .get(&owner)
+            .is_some_and(|names| names.contains(signal))
         {
             self.emitted.push(SignalEmission {
                 object: owner,

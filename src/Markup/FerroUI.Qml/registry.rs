@@ -37,10 +37,10 @@ pub struct TypeDefinition {
     pub(crate) readonly: BTreeSet<String>,
     pub(crate) enums: Rc<Namespace>,
     base: Option<(String, String)>,
-    pub(crate) lineage: Vec<(String, String)>,
+    pub(crate) lineage: Rc<Vec<(String, String)>>,
     pub(crate) properties: BTreeMap<String, (String, Value)>,
-    pub(crate) signals: BTreeMap<String, Vec<Parameter>>,
-    pub(crate) native: BTreeMap<String, NativeMethod>,
+    pub(crate) signals: Rc<BTreeMap<String, Vec<Parameter>>>,
+    pub(crate) native: Rc<BTreeMap<String, NativeMethod>>,
     pub(crate) visual_children: Option<String>,
     pub(crate) default_property: Option<String>,
 }
@@ -126,7 +126,7 @@ impl TypeDefinition {
         self.property(name, ty, default)
     }
     pub fn signal(mut self, name: &str, parameters: Vec<Parameter>) -> Self {
-        self.signals.insert(name.into(), parameters);
+        Rc::make_mut(&mut self.signals).insert(name.into(), parameters);
         self
     }
 
@@ -139,7 +139,7 @@ impl TypeDefinition {
         result: &str,
         callback: NativeCallback,
     ) -> Self {
-        self.native.insert(
+        Rc::make_mut(&mut self.native).insert(
             name.into(),
             NativeMethod {
                 parameters,
@@ -160,7 +160,7 @@ impl TypeDefinition {
         result: &str,
         callback: impl Fn(&mut ScriptContext<'_, '_>, &[Value]) -> Result<Value, Error> + 'static,
     ) -> Self {
-        self.native.insert(
+        Rc::make_mut(&mut self.native).insert(
             name.into(),
             NativeMethod {
                 parameters,
@@ -190,7 +190,8 @@ pub struct TypeRegistry {
     pub(crate) component_import_paths: Vec<url::Url>,
     pub(crate) component_transport: Option<Rc<dyn crate::network::ComponentTransport>>,
     imports: BTreeMap<String, Vec<String>>,
-    pub(crate) modules: BTreeMap<String, BTreeMap<String, TypeDefinition>>,
+    import_order: Rc<BTreeMap<String, Vec<String>>>,
+    pub(crate) modules: Rc<BTreeMap<String, BTreeMap<String, TypeDefinition>>>,
     versions: BTreeMap<(String, u16), u16>,
 }
 
@@ -271,7 +272,8 @@ impl TypeRegistry {
             component_transport: None,
             component_import_paths: Vec::new(),
             imports: BTreeMap::new(),
-            modules: BTreeMap::new(),
+            import_order: Rc::default(),
+            modules: Rc::default(),
             versions: BTreeMap::new(),
         };
         let qt_object = TypeDefinition::default().property(
@@ -279,8 +281,7 @@ impl TypeRegistry {
             "string",
             Value::String(String::new()),
         );
-        registry
-            .modules
+        Rc::make_mut(&mut registry.modules)
             .entry("QtQml".into())
             .or_default()
             .insert("QtObject".into(), qt_object);
@@ -359,32 +360,56 @@ impl TypeRegistry {
                 "unknown re-exported module '{dependency}'"
             )));
         }
-        if self.module_order(dependency).contains(&module) {
+        if self.module_order(dependency).any(|uri| uri == module) {
             return Err(Error::new(format!(
                 "cyclic module import {module} -> {dependency}"
             )));
         }
-        self.modules.entry(module.to_owned()).or_default();
+        Rc::make_mut(&mut self.modules)
+            .entry(module.to_owned())
+            .or_default();
         let imports = self.imports.entry(module.to_owned()).or_default();
         if !imports.iter().any(|uri| uri == dependency) {
             imports.push(dependency.to_owned());
+            // Transitive re-exports can affect previously registered importers.
+            // Recompute on registration, so object construction never walks the graph.
+            self.import_order = Rc::new(
+                self.imports
+                    .keys()
+                    .map(|uri| {
+                        let mut pending = self.imports[uri]
+                            .iter()
+                            .map(String::as_str)
+                            .collect::<Vec<_>>();
+                        let mut order = Vec::new();
+                        let mut seen = BTreeSet::new();
+                        while let Some(current) = pending.pop() {
+                            if seen.insert(current) {
+                                order.push(current.to_owned());
+                                if let Some(more) = self.imports.get(current) {
+                                    pending.extend(more.iter().map(String::as_str));
+                                }
+                            }
+                        }
+                        (uri.clone(), order)
+                    })
+                    .collect(),
+            );
         }
         Ok(())
     }
 
-    pub(crate) fn module_order<'a>(&'a self, uri: &'a str) -> Vec<&'a str> {
-        let mut pending = vec![uri];
-        let mut order = Vec::new();
-        let mut seen = BTreeSet::new();
-        while let Some(current) = pending.pop() {
-            if seen.insert(current) {
-                order.push(current);
-                if let Some(more) = self.imports.get(current) {
-                    pending.extend(more.iter().map(String::as_str));
-                }
-            }
-        }
-        order
+    pub(crate) fn module_order<'a>(
+        &'a self,
+        uri: &'a str,
+    ) -> impl DoubleEndedIterator<Item = &'a str> {
+        std::iter::once(uri).chain(
+            self.import_order
+                .get(uri)
+                .into_iter()
+                .flatten()
+                .map(String::as_str),
+        )
     }
 
     /// Permit versioned imports of this major up to the given minor version.
@@ -407,15 +432,19 @@ impl TypeRegistry {
                     Error::new(format!("unknown base type {base_module}.{base_name}"))
                 })?;
             let mut merged = base.clone();
-            merged.lineage.push((base_module, base_name));
+            Rc::make_mut(&mut merged.lineage).push((base_module, base_name));
             Rc::make_mut(&mut merged.enums).inherit(&definition.enums);
             merged.readonly.append(&mut definition.readonly);
             merged.properties.append(&mut definition.properties);
             if definition.visual_children.is_some() {
                 merged.visual_children = definition.visual_children;
             }
-            merged.signals.append(&mut definition.signals);
-            merged.native.append(&mut definition.native);
+            if !definition.signals.is_empty() {
+                Rc::make_mut(&mut merged.signals).extend(Rc::unwrap_or_clone(definition.signals));
+            }
+            if !definition.native.is_empty() {
+                Rc::make_mut(&mut merged.native).extend(Rc::unwrap_or_clone(definition.native));
+            }
             if definition.default_property.is_some() {
                 merged.default_property = definition.default_property;
             }
@@ -428,7 +457,9 @@ impl TypeRegistry {
                 )));
             }
         }
-        let types = self.modules.entry(module.to_owned()).or_default();
+        let types = Rc::make_mut(&mut self.modules)
+            .entry(module.to_owned())
+            .or_default();
         if types.contains_key(name) {
             return Err(Error::new(format!("duplicate type {module}.{name}")));
         }
@@ -479,7 +510,6 @@ impl TypeRegistry {
     /// Names visible through this module, including its transitive exports.
     pub fn exported_types(&self, uri: &str) -> BTreeSet<&str> {
         self.module_order(uri)
-            .into_iter()
             .filter_map(|m| self.modules.get(m))
             .flat_map(|types| types.keys().map(String::as_str))
             .collect()

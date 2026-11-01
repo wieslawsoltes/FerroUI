@@ -214,10 +214,7 @@ impl Instance {
         self.bindings.retain(|id, _| id.index < c.nodes);
         self.timers.truncate(c.nodes);
         self.workers.truncate(c.nodes);
-        self.listeners.retain(|_, handlers| {
-            handlers.retain(|h| h.receiver.index < c.nodes);
-            !handlers.is_empty()
-        });
+        self.retain_connections(|listener| listener.receiver.index < c.nodes);
     }
     pub fn drain_created(&mut self) -> Vec<ObjectId> {
         std::mem::take(&mut self.dynamic.created)

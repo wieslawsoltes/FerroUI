@@ -21,6 +21,8 @@ struct Builder<'a, I = Box<Instance>> {
 impl Slot {
     pub(super) fn initial(value: Value) -> Self {
         Self {
+            journal_index: usize::MAX,
+            evaluating: false,
             #[cfg(feature = "diagnostics")]
             span: None,
             scope: None,
@@ -31,8 +33,8 @@ impl Slot {
             value,
             binding: None,
             dirty: false,
-            reads: BTreeSet::new(),
-            dependents: BTreeSet::new(),
+            reads: Edges::Empty,
+            dependents: Edges::Empty,
         }
     }
 }
@@ -416,8 +418,9 @@ impl<'a> Builder<'a> {
                 workers: Default::default(),
                 timers: timers::Timers::default(),
                 listeners: BTreeMap::new(),
+                listener_targets: Some(Default::default()),
                 validator: None,
-                watched: BTreeSet::new(),
+                watched: BTreeMap::new(),
                 emissions: Vec::new(),
                 nodes: Vec::new(),
                 ids: BTreeMap::new(),

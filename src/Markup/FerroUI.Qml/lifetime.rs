@@ -23,11 +23,8 @@ impl Instance {
         self.dynamic.repeaters.retain(|id, _| !dead.contains(id));
         self.javascript.connections.retire(dead);
         self.javascript.deferred.retire(dead);
-        self.listeners.retain(|_, list| {
-            list.retain(|e| !dead.contains(&e.receiver));
-            !list.is_empty()
-        });
-        self.watched.retain(|(id, _)| !dead.contains(id));
+        self.retain_connections(|listener| !dead.contains(&listener.receiver));
+        self.watched.retain(|id, _| !dead.contains(id));
         self.changes
             .retain(|p, _| !dead.contains(&self.properties[*p].owner));
         if dead.iter().any(|id| self.models.contains_key(id)) {
@@ -54,8 +51,8 @@ impl Instance {
                 s.value = Value::Undefined;
                 s.binding = None;
                 s.overlay = None;
-                s.reads.clear();
-                s.dependents.clear();
+                s.reads = Edges::Empty;
+                s.dependents = Edges::Empty;
                 let p = &mut self.properties[slot];
                 p.alias = None;
                 p.name.clear();
@@ -227,10 +224,10 @@ impl crate::transaction::Transaction<'_> {
             for key in keys {
                 self.replace_reads(key, BTreeSet::new());
                 self.pending.remove(&key);
-                for dep in self.model.slots[key].dependents.clone() {
+                for &dep in self.model.slots[key].dependents.clone().iter() {
                     self.touched(dep).reads.remove(&key);
                 }
-                self.touched(key).dependents.clear();
+                self.touched(key).dependents = Edges::Empty;
             }
         }
         for key in 0..self.model.slots.len() {

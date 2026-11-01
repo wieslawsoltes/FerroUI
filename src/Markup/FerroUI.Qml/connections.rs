@@ -4,6 +4,10 @@ use super::*;
 use crate::transaction::Transaction;
 use ferroui_qml_compiler::{MemberKind, Object};
 
+/// Positions in declaration order. Dispatch can resume the ordinary traversal
+/// at its next position if a handler retargets a later listener.
+pub(crate) type TargetIndex = BTreeMap<String, BTreeMap<ObjectId, Rc<Vec<usize>>>>;
+
 #[derive(Clone)]
 pub(crate) struct Listener {
     pub(crate) receiver: ObjectId,
@@ -69,6 +73,7 @@ impl Instance {
             let Some(name) = signal_name(name) else {
                 continue;
             };
+            self.listener_targets = None;
             self.listeners.entry(name).or_default().push(Listener {
                 receiver,
                 target,
@@ -81,12 +86,26 @@ impl Instance {
         Ok(())
     }
 
-    pub(crate) fn validate_connections(&self) -> Result<(), Error> {
+    pub(crate) fn retain_connections(&mut self, mut keep: impl FnMut(&Listener) -> bool) {
+        self.listeners.retain(|_, list| {
+            let previous = list.len();
+            list.retain(&mut keep);
+            if list.len() != previous {
+                self.listener_targets = None;
+            }
+            !list.is_empty()
+        });
+    }
+
+    pub(crate) fn index_connections(&self) -> Result<TargetIndex, Error> {
+        let mut index = TargetIndex::new();
         for (signal, listeners) in &self.listeners {
-            for listener in listeners {
+            let mut targets = BTreeMap::<ObjectId, Vec<usize>>::new();
+            for (position, listener) in listeners.iter().enumerate() {
                 let Value::Object(target) = self.slots[listener.target].value else {
                     continue;
                 };
+                targets.entry(target).or_default().push(position);
                 if self.slots[listener.ignore_unknown].value == Value::Bool(true) {
                     continue;
                 }
@@ -103,8 +122,15 @@ impl Instance {
                     )));
                 }
             }
+            index.insert(
+                signal.clone(),
+                targets
+                    .into_iter()
+                    .map(|(id, entries)| (id, Rc::new(entries)))
+                    .collect(),
+            );
         }
-        Ok(())
+        Ok(index)
     }
 }
 
@@ -115,10 +141,27 @@ impl Transaction<'_> {
         signal: &str,
         arguments: &[Value],
     ) -> Result<(), Error> {
-        let Some(listeners) = self.model.listeners.get(signal).cloned() else {
+        let Some(listeners) = self.model.listeners.get(signal) else {
             return Ok(());
         };
-        for listener in listeners {
+        let end = listeners.len();
+        let matching = self
+            .model
+            .listener_targets
+            .as_ref()
+            .and_then(|index| index.get(signal)?.get(&sender))
+            .cloned();
+        let mut matches = matching.iter().flat_map(|indices| indices.iter().copied());
+        let mut next = 0;
+        while next < end {
+            if !self.connection_targets_changed && self.model.listener_targets.is_some() {
+                let Some(position) = matches.next() else {
+                    break;
+                };
+                next = position;
+            }
+            let listener = self.model.listeners[signal][next].clone();
+            next += 1;
             let mut reads = BTreeSet::new();
             if self.read(listener.enabled, &mut reads)? != Value::Bool(true)
                 || self.read(listener.target, &mut reads)? != Value::Object(sender)

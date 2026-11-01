@@ -11,6 +11,8 @@ mod deferred;
 #[cfg(feature = "diagnostics")]
 pub mod diagnostics;
 mod dynamic;
+mod edges;
+use edges::Edges;
 mod incubation;
 mod incubator;
 pub use incubator::{IncubationMode, IncubationStatus, Incubator};
@@ -99,14 +101,14 @@ struct Node {
     type_scope: Rc<Namespace>,
     module: String,
     name: String,
-    lineage: Vec<(String, String)>,
+    lineage: Rc<Vec<(String, String)>>,
     composite_types: Vec<String>,
     parent: Option<ObjectId>,
     children: Vec<ObjectId>,
     properties: BTreeMap<String, SlotId>,
     default_property: Option<String>,
-    signals: BTreeMap<String, Vec<Parameter>>,
-    native: BTreeMap<String, registry::NativeMethod>,
+    signals: Rc<BTreeMap<String, Vec<Parameter>>>,
+    native: Rc<BTreeMap<String, registry::NativeMethod>>,
     methods: BTreeMap<String, Rc<Procedure>>,
     handlers: BTreeMap<String, Rc<Procedure>>,
 }
@@ -169,6 +171,10 @@ enum InstalledBinding {
 
 #[derive(Clone)]
 struct Slot {
+    /// Position of this slot's last undo snapshot. A transaction checks the key
+    /// at this position before using it, including during reentrant calls.
+    journal_index: usize,
+    evaluating: bool,
     #[cfg(feature = "diagnostics")]
     span: Option<ir::SourceSpan>,
     delegate_local: bool,
@@ -179,8 +185,8 @@ struct Slot {
     value: Value,
     binding: Option<InstalledBinding>,
     dirty: bool,
-    reads: BTreeSet<SlotId>,
-    dependents: BTreeSet<SlotId>,
+    reads: Edges,
+    dependents: Edges,
 }
 
 /// A settled property value ready for a native host to apply.
@@ -219,8 +225,9 @@ pub struct Instance {
     workers: workers::Workers,
     timers: timers::Timers,
     listeners: BTreeMap<String, Vec<connections::Listener>>,
+    listener_targets: Option<connections::TargetIndex>,
     validator: Option<Validator>,
-    watched: BTreeSet<(ObjectId, String)>,
+    watched: BTreeMap<ObjectId, BTreeSet<String>>,
     emissions: Vec<SignalEmission>,
     nodes: Vec<NodeEntry>,
     ids: BTreeMap<String, ObjectId>,
@@ -364,12 +371,20 @@ impl Instance {
         if name.starts_with("$qml:") || node.signal(name).is_none() {
             return Err(Error::new(format!("unknown signal '{name}'")));
         }
-        self.watched.insert((object, name.to_owned()));
+        self.watched
+            .entry(object)
+            .or_default()
+            .insert(name.to_owned());
         Ok(())
     }
 
     pub fn unwatch_signal(&mut self, object: ObjectId, name: &str) {
-        self.watched.remove(&(object, name.to_owned()));
+        if let Some(names) = self.watched.get_mut(&object) {
+            names.remove(name);
+            if names.is_empty() {
+                self.watched.remove(&object);
+            }
+        }
     }
 
     pub fn drain_signals(&mut self) -> Vec<SignalEmission> {
