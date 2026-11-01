@@ -370,6 +370,25 @@ impl Drop for Banner {
     }
 }
 
+/// In the FerroUI compositor the banner is part of the same output and can
+/// appear above an external surface without creating another platform window.
+pub(super) fn composed_banner(shell: Rc<Shell>) -> Element {
+    dynamic(move || {
+        shell.notifications.revision.get();
+        let (top, _) = shell.appearance.get().insets();
+        if shell.scene.get() == Scene::Notifications {
+            shell.notifications.service.hide_banner();
+            return Element::Empty;
+        }
+        let Some(notice) = shell.notifications.service.banner() else { return Element::Empty };
+        border().width(356.0).max_height(210.0)
+            .horizontal_alignment(ferroui_base::layout::HorizontalAlignment::Right)
+            .vertical_alignment(ferroui_base::layout::VerticalAlignment::Top)
+            .margin((12.0, top+12.0, 12.0, 0.0))
+            .child(card(&notice,&shell.notifications.service,shell.notifications.revision,true)).into_element()
+    }).into_element()
+}
+
 pub(super) fn attach(shell: &Rc<Shell>) {
     let banner = Rc::new(RefCell::new(None::<Banner>));
     let mounted = banner.clone();

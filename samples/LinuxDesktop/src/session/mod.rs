@@ -18,7 +18,7 @@ pub struct ClientWindow {
     pub active: bool,
     pub minimized: bool,
     pub maximized: bool,
-    partially_maximized: bool,
+    pub(crate) partially_maximized: bool,
     pub fullscreen: bool,
     pub can_fullscreen: bool,
     pub above: bool,
@@ -63,6 +63,7 @@ pub enum ShortcutOrigin {
 enum Backend {
     X11(Rc<x11::Session>),
     Wayland(Rc<wayland::WaylandSession>),
+    Composed(Rc<crate::compositor::Desktop>),
 }
 
 pub struct Session {
@@ -78,6 +79,7 @@ macro_rules! dispatch {
             match &self.backend {
                 Backend::X11(x) => x.$name($($arg),*),
                 Backend::Wayland(w) => w.$name($($arg),*),
+                Backend::Composed(c) => c.$name($($arg),*),
             }
         }
     )*}
@@ -97,6 +99,18 @@ impl Session {
         }))
     }
 
+    pub fn composed(manager: Rc<crate::compositor::Desktop>) -> Rc<Self> {
+        Rc::new(Self {
+            backend: Backend::Composed(manager),
+            wayland_commands: RefCell::default(),
+        })
+    }
+    pub fn compositor(&self) -> Option<&Rc<crate::compositor::Desktop>> {
+        match &self.backend {
+            Backend::Composed(c) => Some(c),
+            _ => None,
+        }
+    }
     dispatch! {
         fn snapshot(&self) -> Snapshot;
         fn activate(&self, id: u32) -> bool;
@@ -115,6 +129,7 @@ impl Session {
         match &self.backend {
             Backend::X11(_) => None,
             Backend::Wayland(w) => w.focused_output(),
+            Backend::Composed(_) => None,
         }
     }
     pub fn can_remove_empty_last_workspace(&self, snapshot: &Snapshot) -> bool {
@@ -127,18 +142,20 @@ impl Session {
                         .any(|w| w.workspace == Some(snapshot.workspace_names.len() - 1))
             }
             Backend::Wayland(w) => w.can_remove_last(),
+            Backend::Composed(_) => false,
         }
     }
     pub fn subscribe(&self, callback: impl Fn() + 'static) {
         match &self.backend {
             Backend::X11(x) => x.subscribe(callback),
             Backend::Wayland(w) => w.subscribe(callback),
+            Backend::Composed(c) => c.subscribe(callback),
         }
     }
     pub fn claim_commands(&self, lease: Option<wayland_commands::DisplayLease>) -> io::Result<()> {
         match &self.backend {
             Backend::X11(x) => x.claim_commands(),
-            Backend::Wayland(_) => {
+            Backend::Wayland(_) | Backend::Composed(_) => {
                 self.wayland_commands
                     .replace(Some(wayland_commands::Endpoint::bind(lease.ok_or_else(
                         || io::Error::other("Wayland display ownership required"),
@@ -150,7 +167,7 @@ impl Session {
     pub fn publish_scene(&self, name: &str) {
         match &self.backend {
             Backend::X11(x) => x.publish_scene(name),
-            Backend::Wayland(_) => {
+            Backend::Wayland(_) | Backend::Composed(_) => {
                 if let Some(endpoint) = self.wayland_commands.borrow().as_ref() {
                     endpoint.publish_scene(name);
                 }
@@ -160,7 +177,7 @@ impl Session {
     pub fn on_command(&self, f: impl Fn(commands::Command) + 'static) {
         match &self.backend {
             Backend::X11(x) => x.on_command(f),
-            Backend::Wayland(_) => {
+            Backend::Wayland(_) | Backend::Composed(_) => {
                 if let Some(endpoint) = self.wayland_commands.borrow().as_ref() {
                     endpoint.set_handler(Rc::new(f));
                 }
@@ -171,6 +188,7 @@ impl Session {
         match &self.backend {
             Backend::X11(x) => x.shortcut_origin().map(ShortcutOrigin::X11),
             Backend::Wayland(w) => w.shortcut_origin().map(ShortcutOrigin::Wayland),
+            Backend::Composed(_) => None,
         }
     }
     pub fn restore_shortcut_origin(&self, origin: ShortcutOrigin) {
@@ -188,8 +206,10 @@ impl Session {
         }
     }
     pub fn set_panel_insets(&self, top: f64, bottom: f64) {
-        if let Backend::X11(x) = &self.backend {
-            x.set_panel_insets(top, bottom);
+        match &self.backend {
+            Backend::X11(x) => x.set_panel_insets(top, bottom),
+            Backend::Composed(c) => c.set_panel_insets(top, bottom),
+            Backend::Wayland(_) => {}
         }
     }
     pub fn set_window_appearance(&self, appearance: Appearance) -> io::Result<()> {
@@ -198,7 +218,7 @@ impl Session {
             Backend::Wayland(w) if self.wayland_commands.borrow().is_some() => {
                 w.set_window_appearance(appearance)
             }
-            Backend::Wayland(_) => Ok(()),
+            Backend::Wayland(_) | Backend::Composed(_) => Ok(()),
         }
     }
     pub fn on_reveal(&self, f: impl Fn() + 'static) {
@@ -214,13 +234,13 @@ impl Session {
     pub fn reveal_desktop(&self) -> bool {
         match &self.backend {
             Backend::X11(x) => x.reveal_desktop(),
-            Backend::Wayland(_) => true,
+            Backend::Wayland(_) | Backend::Composed(_) => true,
         }
     }
     pub fn restore_windows(&self) -> bool {
         match &self.backend {
             Backend::X11(x) => x.restore_windows(),
-            Backend::Wayland(_) => true,
+            Backend::Wayland(_) | Backend::Composed(_) => true,
         }
     }
 }

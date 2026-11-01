@@ -153,7 +153,9 @@ impl Shell {
         if let Some(session) = &self.session {
             session.restore_windows();
         }
-        if let Some(control) = self.desktop_focus.get_untracked() {
+        if let Some(host) = self.session.as_ref().and_then(|s| s.compositor()) {
+            host.focus_client();
+        } else if let Some(control) = self.desktop_focus.get_untracked() {
             control.focus();
         }
     }
@@ -165,9 +167,13 @@ impl Shell {
         self.launching.set(true);
         self.status.set(format!("Opening {}…", application.name));
         let application = application.clone();
+        let display = self.session.as_ref().and_then(|s| s.compositor()).map(|c| c.display());
         let weak = Rc::downgrade(self);
         let _task = tasks::spawn_local(async move {
-            let result = tasks::run(move || Ok(application.launch()?)).await;
+            let result = tasks::run(move || Ok(match display {
+                Some(name) => application.launch_on_display(&name)?,
+                None => application.launch()?,
+            })).await;
             if let Some(shell) = weak.upgrade().filter(|shell| shell.owner.is_alive()) {
                 shell.launching.set(false);
                 match result {
@@ -308,7 +314,9 @@ fn create(
         search_box: Default::default(),
     });
 
-    notifications::attach(&state);
+    if state.session.as_ref().and_then(|s| s.compositor()).is_none() {
+        notifications::attach(&state);
+    }
     if let Some(session) = &state.session {
         let weak = Rc::downgrade(&state);
         if managed {
@@ -482,10 +490,12 @@ fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
     let viewport_width = state.viewport_width;
     let pin_limit = state.pin_limit;
     let current = state.scene;
+    let compositor = state.session.as_ref().and_then(|s| s.compositor()).cloned();
+    let composed = compositor.is_some();
+    let banner = if composed { notifications::composed_banner(state.clone()) } else { Element::Empty };
     let desktop = if include_desktop {
-        let state = state.clone();
-        let clock = clock();
-        dynamic(move || desktop::surface(&state, clock, appearance.get())).into_element()
+        let clients = compositor.as_ref().map_or(Element::Empty, |c| c.element());
+        desktop::surface(&state, clock(), clients)
     } else {
         Element::Empty
     };
@@ -497,6 +507,9 @@ fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
         .name("DesktopShell")
         .on_size_changed(move |event| {
             let width = event.new_size().width;
+            if let Some(manager) = &compositor {
+                manager.resize(width.round() as i32, event.new_size().height.round() as i32);
+            }
             viewport_width.set_if_changed(width);
             pin_limit.set_if_changed(if width >= 1024.0 {
                 4
@@ -507,8 +520,32 @@ fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
             });
         })
         .clip_to_bounds(true)
+        .with({
+            let shell = state.clone();
+            move |grid| {
+                if composed {
+                    grid.add_handler_with(ferroui_base::input::InputElement::key_down_event(),
+                        move |_, e| {
+                            if e.key_modifiers == KeyModifiers::META {
+                                let target=match e.key { Key::Space => Some(Scene::Applications), Key::A => Some(Scene::QuickSettings),
+                                    Key::N => Some(Scene::Notifications), Key::Tab => Some(Scene::Workspaces), _ => None };
+                                if let Some(target)=target {
+                                    if shell.scene.get_untracked()==target {shell.cancel()} else {shell.open(target)}
+                                    e.set_handled(true);
+                                    return;
+                                }
+                            }
+                            // Keep editor and terminal accelerators owned by the focused external client.
+                            if shell.scene.get_untracked()!=Scene::Desktop ||
+                                !shell.session.as_ref().and_then(|s|s.compositor()).is_some_and(|c|c.client_has_focus()) {
+                                shortcut(&shell, e);
+                            }
+                        }, ferroui_base::interactivity::RoutingStrategies::TUNNEL, false);
+                }
+            }
+        })
         .on_key_down(move |event| {
-            if include_desktop {
+            if include_desktop && !composed {
                 shortcut(&root_state, event);
             }
         })
@@ -556,6 +593,7 @@ fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
                     _ => Element::Empty,
                 })),
         )
+        .child(banner)
         .into()
 }
 

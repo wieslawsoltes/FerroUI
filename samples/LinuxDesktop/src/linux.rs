@@ -14,10 +14,12 @@ use ferroui_x11::{FerroX11PlatformExtensions, X11PlatformOptions, X11RenderingMo
 use std::process::ExitCode;
 use std::rc::Rc;
 
-const HELP: &str = "Usage: ferro-desktop [--platform=wayland|x11|auto] [--session] [--software] [--theme=windows|macos|material] [--scene=desktop|applications|workspaces|notifications|settings|calendar]
+const HELP: &str = "Usage: ferro-desktop [--platform=wayland|x11|auto] [--session] [--compositor=ferro] [--socket=NAME] [--software] [--theme=windows|macos|material] [--scene=desktop|applications|workspaces|notifications|settings|calendar]
 
 By default the shell opens a native window on the current Wayland or X11 display using Skia Graphite over Vulkan.
 --session   Run desktop services and panels in a dedicated Sway or Openbox session.
+--compositor=ferro  Compose native clients and the shell in a single FerroUI output.
+--socket=NAME  Name of the new private Wayland display (automatically allocated by default).
 --software  Use Skia's CPU rasterizer explicitly.
 --theme     Start with this appearance (otherwise use the saved preference).
 --scene     Select the initial shell view.
@@ -47,6 +49,8 @@ impl Platform {
 
 struct Options {
     session: bool,
+    compose: bool,
+    socket: Option<String>,
     software: bool,
     scene: Scene,
     theme: Option<Appearance>,
@@ -56,6 +60,8 @@ impl Options {
     fn parse(args: &[String]) -> Result<Self, String> {
         let mut options = Self {
             session: false,
+            compose: false,
+            socket: None,
             software: false,
             scene: Scene::Desktop,
             theme: None,
@@ -64,8 +70,13 @@ impl Options {
             if let Some(id) = arg.strip_prefix("--theme=") {
                 options.theme =
                     Some(Appearance::parse(id).ok_or_else(|| format!("Unknown theme '{id}'"))?);
+            } else if let Some(name) = arg.strip_prefix("--socket=") {
+                if name.is_empty() || options.socket.replace(name.to_owned()).is_some() {
+                    return Err("Specify one nonempty private display name".into());
+                }
             } else {
                 match arg.as_str() {
+                    "--compositor=ferro" => options.compose = true,
                     "--session" => options.session = true,
                     "--software" => options.software = true,
                     "--scene=notifications" => options.scene = Scene::Notifications,
@@ -77,6 +88,9 @@ impl Options {
                     _ => return Err(format!("Unknown argument '{arg}'")),
                 }
             }
+        }
+        if options.socket.is_some() && !options.compose {
+            return Err("--socket requires --compositor=ferro".into());
         }
         Ok(options)
     }
@@ -154,6 +168,10 @@ pub fn run() -> ExitCode {
             return ExitCode::from(2);
         }
     };
+    if options.compose && options.session && platform != Platform::Wayland {
+        eprintln!("The managed FerroUI compositor requires a Wayland output host");
+        return ExitCode::FAILURE;
+    }
     if !options.software && !ferroui_skia::gpu::GRAPHITE_VULKAN {
         eprintln!("This Skia build lacks Vulkan Graphite. Install the Graphite build or start ferro-desktop --software.");
         return ExitCode::FAILURE;
@@ -199,7 +217,14 @@ pub fn run() -> ExitCode {
         }
         Platform::Wayland => {
             let wayland = WaylandPlatformOptions {
-                app_id: Some("org.ferroui.Desktop".into()),
+                app_id: Some(
+                    if options.compose {
+                        "org.ferroui.Desktop.Compositor"
+                    } else {
+                        "org.ferroui.Desktop"
+                    }
+                    .into(),
+                ),
                 rendering_mode: if options.software {
                     WaylandRenderingMode::Software
                 } else {
@@ -216,25 +241,30 @@ pub fn run() -> ExitCode {
         .with_material_fonts()
         .start(
             move |app, _| {
-                let session = match platform {
-                    Platform::X11 => Session::connect(),
-                    Platform::Wayland => match Session::connect_wayland() {
-                        Ok(session) => Some(session),
-                        Err(error) if options.session => {
-                            eprintln!("Wayland login session: {error}");
-                            result.set(ExitCode::FAILURE);
-                            return;
-                        }
-                        Err(_) => None, // Ordinary xdg-shell clients do not need compositor IPC.
-                    },
+                let session = if options.compose {
+                    None
+                } else {
+                    match platform {
+                        Platform::X11 => Session::connect(),
+                        Platform::Wayland => match Session::connect_wayland() {
+                            Ok(session) => Some(session),
+                            Err(error) if options.session => {
+                                eprintln!("Wayland login session: {error}");
+                                result.set(ExitCode::FAILURE);
+                                return;
+                            }
+                            Err(_) => None, // Ordinary xdg-shell clients do not need compositor IPC.
+                        },
+                    }
                 };
-                if options.session {
+                let mut lease = wayland_lease;
+                if options.session && !options.compose {
                     let Some(manager) = session.as_ref() else {
                         eprintln!("The session window manager is unavailable");
                         result.set(ExitCode::FAILURE);
                         return;
                     };
-                    if let Err(error) = manager.claim_commands(wayland_lease) {
+                    if let Err(error) = manager.claim_commands(lease.take()) {
                         eprintln!("{error}");
                         result.set(ExitCode::FAILURE);
                         return;
@@ -261,7 +291,22 @@ pub fn run() -> ExitCode {
                         "Skia Graphite Vulkan"
                     }
                 );
-                if platform == Platform::Wayland && options.session {
+                if options.compose {
+                    if let Err(e) = owner.with(|| {
+                        crate::compositor::run(
+                            app,
+                            options.scene,
+                            catalog,
+                            themes,
+                            options.socket.as_deref(),
+                            options.session,
+                            lease,
+                        )
+                    }) {
+                        eprintln!("FerroUI compositor: {e}");
+                        result.set(ExitCode::FAILURE);
+                    }
+                } else if platform == Platform::Wayland && options.session {
                     let session = session.expect("managed Wayland session initialized");
                     if let Err(e) = owner
                         .with(|| shell::wayland::run(app, options.scene, catalog, session, themes))

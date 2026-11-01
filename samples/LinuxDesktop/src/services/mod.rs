@@ -23,12 +23,16 @@ impl DesktopApplication {
     /// selection, the working directory and field codes. No shell is involved.
     pub fn launch(&self) -> io::Result<()> {
         #[cfg(target_os = "linux")]
-        return gio::launch(&self.id);
+        return gio::launch(&self.id, None);
         #[cfg(not(target_os = "linux"))]
         Err(io::Error::new(
             io::ErrorKind::Unsupported,
             "Application activation requires Linux",
         ))
+    }
+    #[cfg(target_os = "linux")]
+    pub fn launch_on_display(&self, display: &std::ffi::OsStr) -> io::Result<()> {
+        gio::launch(&self.id, Some(display))
     }
 }
 

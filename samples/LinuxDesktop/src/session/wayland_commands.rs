@@ -61,6 +61,10 @@ fn display_name() -> io::Result<String> {
     let display = inherited_display()?.unwrap_or_else(|| {
         PathBuf::from(env::var_os("WAYLAND_DISPLAY").unwrap_or_else(|| "wayland-0".into()))
     });
+    name_for_display(display)
+}
+
+fn name_for_display(display: PathBuf) -> io::Result<String> {
     let path = if display.is_absolute() {
         display
     } else {
@@ -173,9 +177,20 @@ impl DisplayLease {
             .method_timeout(Duration::from_secs(4))
             .build()
             .map_err(io::Error::other)?;
-        let name = display_name()?;
-        match bus.request_name_with_flags(name.as_str(), RequestNameFlags::DoNotQueue.into()) {
-            Ok(RequestNameReply::PrimaryOwner | RequestNameReply::AlreadyOwner) => Ok(Self(bus)),
+        let lease = Self(bus);
+        lease.reserve(&display_name()?)?;
+        Ok(lease)
+    }
+    pub(crate) fn include_child(&self, display: &std::ffi::OsStr) -> io::Result<()> {
+        self.reserve(&name_for_display(PathBuf::from(display))?)
+    }
+
+    fn reserve(&self, name: &str) -> io::Result<()> {
+        match self
+            .0
+            .request_name_with_flags(name, RequestNameFlags::DoNotQueue.into())
+        {
+            Ok(RequestNameReply::PrimaryOwner | RequestNameReply::AlreadyOwner) => Ok(()),
             Ok(_) | Err(zbus::Error::NameTaken) => Err(io::Error::new(
                 io::ErrorKind::AlreadyExists,
                 "Ferro Desktop already owns this Wayland display",

@@ -69,7 +69,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                 }
             })
             .margin((0.0, 0.0, 5.0, 5.0))
-            .is_enabled(picker_shell.session.is_some() && names.len() < 256)
+            .is_enabled(picker_shell.session.as_ref().is_some_and(|s| s.compositor().is_none()) && names.len() < 256)
             .child(shell_text("+", 14.0, Ink::Primary));
             let state = picker_shell.clone();
             let remove = action("Remove empty last workspace", move || {

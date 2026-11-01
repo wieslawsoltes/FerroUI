@@ -40,28 +40,26 @@ pub(super) fn panel(
     }
 }
 
-pub(super) fn surface(
-    state: &Rc<Shell>,
-    clock: Signal<OffsetDateTime>,
-    appearance: Appearance,
-) -> Element {
+pub(super) fn surface(state: &Rc<Shell>, clock: Signal<OffsetDateTime>, clients: Element) -> Element {
     let scene = state.scene;
-    let (top, bottom) = appearance.insets();
+    let bg = state.clone();
+    let edge = |top: bool| {
+        let state = state.clone();
+        dynamic(move || {
+            let appearance = state.appearance.get();
+            let (upper, lower) = appearance.insets();
+            border().height(if top { upper } else { lower })
+                .vertical_alignment(if top { V::Top } else { V::Bottom })
+                .child(panel(&state, clock, appearance, top))
+        })
+    };
+    // Keep the native client visual tree alive across appearance changes.
     grid()
         .is_hit_test_visible(move || scene.get() == Scene::Desktop)
-        .child(background(state, clock, appearance))
-        .child(
-            border()
-                .height(top)
-                .vertical_alignment(V::Top)
-                .child(panel(state, clock, appearance, true)),
-        )
-        .child(
-            border()
-                .height(bottom)
-                .vertical_alignment(V::Bottom)
-                .child(panel(state, clock, appearance, false)),
-        )
+        .child(dynamic(move || background(&bg, clock, bg.appearance.get())))
+        .child(clients)
+        .child(edge(true))
+        .child(edge(false))
         .into()
 }
 

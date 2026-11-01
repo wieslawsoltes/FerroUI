@@ -33,6 +33,9 @@ ferroui_base::native_functions! {
         gio::g_app_info_get_icon: unsafe extern "C" fn(*mut c_void) -> *mut c_void;
         gio::g_icon_to_string: unsafe extern "C" fn(*mut c_void) -> *mut c_char;
         gio::g_desktop_app_info_new: unsafe extern "C" fn(*const c_char) -> *mut c_void;
+        gio::g_app_launch_context_new: unsafe extern "C" fn() -> *mut c_void;
+        gio::g_app_launch_context_setenv: unsafe extern "C" fn(*mut c_void, *const c_char, *const c_char);
+        gio::g_app_launch_context_unsetenv: unsafe extern "C" fn(*mut c_void, *const c_char);
         gio::g_app_info_launch: unsafe extern "C" fn(*mut c_void, *mut GList, *mut c_void, *mut *mut GError) -> c_int;
         object::g_object_unref: DestroyNotify;
         glib::g_list_free_full: unsafe extern "C" fn(*mut GList, Option<DestroyNotify>);
@@ -102,7 +105,9 @@ pub(super) fn applications() -> io::Result<Vec<DesktopApplication>> {
     Ok(result)
 }
 
-pub(super) fn launch(id: &str) -> io::Result<()> {
+pub(super) fn launch(id: &str, display: Option<&std::ffi::OsStr>) -> io::Result<()> {
+    use std::os::unix::ffi::OsStrExt;
+    let display = display.map(|d| CString::new(d.as_bytes())).transpose()?;
     let api = gio()?;
     let id = CString::new(id)?;
     // SAFETY: the ID is a terminated string. new returns a reference or
@@ -124,7 +129,37 @@ pub(super) fn launch(id: &str) -> io::Result<()> {
             ));
         }
         let mut error = ptr::null_mut();
-        let launched = (api.g_app_info_launch)(info, ptr::null_mut(), ptr::null_mut(), &mut error);
+        let context = if let Some(display) = display {
+            // Keep the shell's presentation connection on the outer display.
+            // GIO applies this environment only to the process it launches.
+            let context = (api.g_app_launch_context_new)();
+            (api.g_app_launch_context_setenv)(
+                context,
+                c"WAYLAND_DISPLAY".as_ptr(),
+                display.as_ptr(),
+            );
+            (api.g_app_launch_context_setenv)(
+                context,
+                c"XDG_SESSION_TYPE".as_ptr(),
+                c"wayland".as_ptr(),
+            );
+            for key in [
+                c"WAYLAND_SOCKET",
+                c"DISPLAY",
+                c"SWAYSOCK",
+                c"XDG_ACTIVATION_TOKEN",
+                c"DESKTOP_STARTUP_ID",
+            ] {
+                (api.g_app_launch_context_unsetenv)(context, key.as_ptr());
+            }
+            context
+        } else {
+            ptr::null_mut()
+        };
+        let launched = (api.g_app_info_launch)(info, ptr::null_mut(), context, &mut error);
+        if !context.is_null() {
+            (api.g_object_unref)(context);
+        }
         (api.g_object_unref)(info);
         if launched != 0 {
             return Ok(());
