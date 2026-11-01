@@ -20323,6 +20323,18 @@
     ]
   },
   {
+    "name": "SolidColorBrushTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::SolidColorBrushTransition",
+    "base": "TransitionBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Animation",
+      "clr-namespace:FerroUI.Animation;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "Span",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::documents::Span",

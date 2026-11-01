@@ -4,6 +4,7 @@
 
 use ferroui_splat::Guid;
 use std::time::Duration;
+use uuid::Uuid;
 
 /// `True` or `False` (`Boolean.ToString`).
 pub(crate) fn format_bool(value: bool) -> String {
@@ -26,24 +27,6 @@ pub(crate) fn parse_bool(text: &str) -> Option<bool> {
 /// `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` in lower case (`Guid.ToString("D")`).
 pub(crate) fn format_guid(value: Guid) -> String {
     value.to_string()
-}
-
-/// 32 hexadecimal digits, or `None`.
-fn parse_hex_32(text: &str) -> Option<u128> {
-    if text.len() != 32 || !text.bytes().all(|byte| byte.is_ascii_hexdigit()) {
-        return None;
-    }
-    u128::from_str_radix(text, 16).ok()
-}
-
-/// The `D` format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`.
-fn parse_guid_d(text: &str) -> Option<u128> {
-    let bytes = text.as_bytes();
-    if bytes.len() != 36 || [8, 13, 18, 23].iter().any(|&index| bytes[index] != b'-') {
-        return None;
-    }
-    let digits: String = text.chars().filter(|&ch| ch != '-').collect();
-    parse_hex_32(&digits)
 }
 
 /// One field of the `X` format: `0x` and 1 to `max_digits` hexadecimal digits.
@@ -77,20 +60,17 @@ fn parse_guid_x(text: &str) -> Option<u128> {
 
 /// An identifier in any of the formats of `Guid.TryParse`: `N` (32 digits), `D` (with hyphens),
 /// `B` (`D` in braces), `P` (`D` in parentheses) or `X` (the fields in hexadecimal), with white
-/// space around it.
+/// space around it. `N`, `D`, `B` and `P` are read by `uuid::Uuid`, the identifier type of the workspace.
 pub(crate) fn parse_guid(text: &str) -> Option<Guid> {
     let text = text.trim();
     let bytes = text.as_bytes();
-    let value = match bytes.len() {
-        32 => parse_hex_32(text),
-        36 => parse_guid_d(text),
-        38 if (bytes[0] == b'{' && bytes[37] == b'}') || (bytes[0] == b'(' && bytes[37] == b')') => {
-            parse_guid_d(&text[1..37])
-        }
-        _ if bytes.first() == Some(&b'{') => parse_guid_x(text),
-        _ => None,
-    }?;
-    Some(Guid::from_u128(value))
+    let digits = match bytes.len() {
+        32 | 36 => text,
+        38 if (bytes[0] == b'{' && bytes[37] == b'}') || (bytes[0] == b'(' && bytes[37] == b')') => &text[1..37],
+        _ if bytes.first() == Some(&b'{') => return parse_guid_x(text).map(Guid::from_u128),
+        _ => return None,
+    };
+    Uuid::try_parse(digits).ok().map(Guid::from)
 }
 
 const SECONDS_PER_DAY: u64 = 86_400;

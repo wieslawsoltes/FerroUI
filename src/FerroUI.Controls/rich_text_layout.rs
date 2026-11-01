@@ -6,7 +6,6 @@ use crate::documents::{
     RichTextDocument, TextHighlightRegion, Typography,
 };
 use crate::text_block::InlinesTextSource;
-use crate::RichTextBlockImplExt;
 use ferroui_base::media::text_formatting::TextRun;
 use ferroui_base::media::text_formatting::{
     FontFamilyLineMetrics, GenericTextParagraphProperties, GenericTextRunProperties,

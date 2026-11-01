@@ -544,6 +544,7 @@ pub struct MockPlatformRenderInterface {
     log: DrawingLog,
     backend_context_factory: std::sync::OnceLock<BackendContextFactory>,
     compositing_layers: std::sync::atomic::AtomicBool,
+    pixel_bitmaps: std::sync::atomic::AtomicUsize,
 }
 
 impl MockPlatformRenderInterface {
@@ -552,7 +553,15 @@ impl MockPlatformRenderInterface {
             log,
             backend_context_factory: std::sync::OnceLock::new(),
             compositing_layers: std::sync::atomic::AtomicBool::new(false),
+            pixel_bitmaps: std::sync::atomic::AtomicUsize::new(0),
         })
+    }
+
+    /// How many bitmaps were made of pixels (`load_bitmap_from_pixels`) or
+    /// created to be drawn into (`create_render_target_bitmap`): what a
+    /// GPU backend would upload or read back.
+    pub fn pixel_bitmap_count(&self) -> usize {
+        self.pixel_bitmaps.load(std::sync::atomic::Ordering::Relaxed)
     }
 
     /// Enables the recording capability. Tests replaying such recordings must
@@ -685,6 +694,7 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
         MockGeometryImpl::new(g1.bounds().union(g2.bounds()))
     }
     fn create_render_target_bitmap(&self, size: PixelSize, dpi: Vector) -> std::sync::Arc<dyn IRenderTargetBitmapImpl> {
+        self.pixel_bitmaps.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         std::sync::Arc::new(MockRenderTargetBitmapImpl::new(self.log.clone(), size, dpi))
     }
     fn create_writeable_bitmap(
@@ -757,6 +767,7 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
         _dpi: Vector,
         _stride: i32,
     ) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
+        self.pixel_bitmaps.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         std::sync::Arc::new(MockDrawingContextLayerImpl::new(self.log.clone(), size))
     }
     fn create_backend_context(

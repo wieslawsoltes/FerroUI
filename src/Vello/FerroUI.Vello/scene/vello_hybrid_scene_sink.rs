@@ -1,4 +1,5 @@
 use crate::gpu::{log_render_failure, premultiplied_rgba, VelloGpuTexture, VelloWgpuDevice};
+use crate::scene::image_textures::{release_unused_textures, rgba_bytes, IMAGE_TEXTURE_LIFETIME};
 use crate::scene::vello_cpu_scene_sink::{axis_aligned_rect, prepare, stroke_outline, ALIASING_THRESHOLD};
 use crate::scene::{
     IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneFilter, VelloSceneFilterCapabilities,
@@ -17,11 +18,6 @@ use vello_gpu::{
     TargetInit, TextureBindings, TextureId,
 };
 
-/// The number of renders the texture of an image that is no longer drawn is
-/// kept for: an image that is drawn every frame is uploaded once, and one
-/// that left the scene is released soon after.
-const IMAGE_TEXTURE_LIFETIME: u64 = 16;
-
 /// A renderer of the hybrid mode for targets of one format, with what it
 /// keeps between frames.
 struct FormatRenderer {
@@ -29,10 +25,11 @@ struct FormatRenderer {
     resources: Resources,
 }
 
-/// The texture of an image and the render it was last drawn in.
+/// The texture of an image, the render it was last drawn in and its bytes.
 struct ImageTexture {
     view: wgpu::TextureView,
     last_used: u64,
+    bytes: u64,
 }
 
 /// What the hybrid mode keeps on a device: a renderer for each format of a
@@ -228,7 +225,11 @@ impl VelloHybridSceneSink {
                 for (id, image) in images {
                     let texture = state.images.entry(*id).or_insert_with(|| {
                         let texture = device.create_image_texture(image.width, image.height, &premultiplied_rgba(image));
-                        ImageTexture { view: texture.create_view(&wgpu::TextureViewDescriptor::default()), last_used: 0 }
+                        ImageTexture {
+                            view: texture.create_view(&wgpu::TextureViewDescriptor::default()),
+                            last_used: 0,
+                            bytes: rgba_bytes(image.width, image.height),
+                        }
                     });
                     texture.last_used = render_count;
                     bindings.insert(TextureId(*id), texture.view.clone());
@@ -280,7 +281,7 @@ impl VelloHybridSceneSink {
                 );
                 device.queue().submit([encoder.finish()]);
 
-                state.images.retain(|_, texture| render_count - texture.last_used < IMAGE_TEXTURE_LIFETIME);
+                release_unused_textures(&mut state.images, render_count, |texture| (texture.last_used, texture.bytes), drop);
 
                 result.map_err(|error| error.to_string())
             },

@@ -43,3 +43,4 @@ control-catalog = { path = "../../samples/ControlCatalog" }
 
 [dev-dependencies]
 ferroui-remote-protocol.workspace = true
+uuid = { workspace = true, features = ["v4"] }

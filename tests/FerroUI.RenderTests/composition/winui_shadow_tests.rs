@@ -225,6 +225,9 @@ fn the_mask_follows_a_change_of_the_path() {
     // The top left half is empty now and has no shadow: the shadow moved right and down.
     assert!(darkness(at(4.0, 4.0)) < 6, "no shadow over the empty half: {:?}", at(4.0, 4.0));
     assert!(darkness(at(41.5, 38.0)) > 12, "the shadow of the new path: {:?}", at(41.5, 38.0));
+    // The alpha mask of the path holds its compositor: the scene is dropped while the dispatcher of
+    // the test is still the UI thread, as the scenes of the other tests are.
+    drop((scene, cursor_path, cursor_shadow));
     end_test(scope);
 }
 
@@ -254,5 +257,8 @@ fn a_theme_shadow_is_drawn_around_its_caster() {
     assert!(below > above, "the shadow is moved down: {below} > {above}");
     assert!(darkness(pixel(&image, 1.0, 100.0, 60.0)) < 3, "the card is drawn over its shadow");
     assert!(darkness(pixel(&image, 1.0, 5.0, 5.0)) < 2, "no shadow far from the card");
+    // The shadow holds its compositor: the scene is dropped while the dispatcher of the test is
+    // still the UI thread.
+    drop(scene);
     end_test(scope);
 }

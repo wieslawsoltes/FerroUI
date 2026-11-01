@@ -1,12 +1,17 @@
+/// The default of [`SkiaOptions::max_gpu_resource_size_bytes`]: 128 MiB.
+pub const DEFAULT_MAX_GPU_RESOURCE_SIZE_BYTES: i64 = 128 * 1024 * 1024;
+
 /// Options for the Skia rendering subsystem.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct SkiaOptions {
     /// The maximum number of bytes for video memory to store textures and
     /// resources.
     ///
-    /// This is set by default to the minimum value that seems to make
-    /// rendering comfortable on a range of hardware. `None` means the Skia
-    /// default.
+    /// 128 MiB by default, the budget of the image textures of Vello
+    /// (upstream's 28 MiB evicted the textures of images that scrolled out
+    /// of view, which were uploaded again when they came back:
+    /// docs/porting/gpu-rendering.md, "The image textures of Ganesh").
+    /// `None` means the Skia default.
     pub max_gpu_resource_size_bytes: Option<i64>,
 
     /// Use a save layer to apply opacity, so that every visual is rendered to
@@ -21,8 +26,7 @@ pub struct SkiaOptions {
 impl Default for SkiaOptions {
     fn default() -> Self {
         Self {
-            // ~28mb: 12x 1024 x 600 textures.
-            max_gpu_resource_size_bytes: Some(1024 * 600 * 4 * 12),
+            max_gpu_resource_size_bytes: Some(DEFAULT_MAX_GPU_RESOURCE_SIZE_BYTES),
             use_opacity_save_layer: false,
             use_stencil_buffers: None,
         }

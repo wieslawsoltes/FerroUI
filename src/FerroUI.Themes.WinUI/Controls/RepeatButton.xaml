@@ -65,7 +65,7 @@
                           RecognizesAccessKey="True">
           <ContentPresenter.Transitions>
             <Transitions>
-              <BrushTransition Property="Background" Duration="0:0:0.083" />
+              <SolidColorBrushTransition Property="Background" Duration="0:0:0.083" />
             </Transitions>
           </ContentPresenter.Transitions>
         </ContentPresenter>

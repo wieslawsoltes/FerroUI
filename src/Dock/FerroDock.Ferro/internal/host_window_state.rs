@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
 use super::{
     dock_helpers::DockHelpers, dock_manager_state::DockManagerState, event_type::EventType,
-    services::i_global_docking_service::IGlobalDockingService,
+    services::global_docking_service::GlobalDockingService,
 };
 use crate::{
     controls::{DockControl, DockTarget, GlobalDockTarget, HostWindow},
@@ -87,7 +87,7 @@ impl HostWindowState {
     pub(crate) fn new(
         manager: Rc<dyn IDockManager>,
         host: Ref<HostWindow>,
-        global: Option<Rc<dyn IGlobalDockingService>>,
+        global: Option<Rc<GlobalDockingService>>,
     ) -> Rc<Self> {
         Rc::new(Self {
             base: DockManagerState::new(manager, global),

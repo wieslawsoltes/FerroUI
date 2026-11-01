@@ -8,6 +8,8 @@
 //! feature of the crate (`hybrid`, `gpu`) and in need of a graphics device.
 
 mod i_vello_scene_sink;
+#[cfg(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl", test))]
+pub(crate) mod image_textures;
 mod vello_cpu_scene_sink;
 #[cfg(feature = "gpu")]
 mod vello_gpu_scene_sink;

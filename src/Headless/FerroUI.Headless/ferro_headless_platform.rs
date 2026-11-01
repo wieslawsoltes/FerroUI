@@ -14,7 +14,7 @@ use ferroui_base::platform::{DefaultPlatformSettings, ICursorFactory, IPlatformS
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::rendering::{IRenderLoop, IRenderTimer, RenderLoop, SleepLoopRenderTimer};
 use ferroui_base::threading::{Dispatcher, DispatcherFrame};
-use ferroui_base::{FerroLocator, LocatorExtensions};
+use ferroui_base::FerroLocator;
 use ferroui_controls::platform::{IPlatformIconLoader, ITopLevelImpl, ITrayIconImpl, IWindowImpl, IWindowingPlatform};
 use ferroui_controls::AppBuilder;
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;

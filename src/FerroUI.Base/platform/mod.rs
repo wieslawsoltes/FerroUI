@@ -126,6 +126,7 @@ pub use platform_handle::PlatformHandle;
 mod asset_loader;
 mod i_asset_loader;
 mod i_drawing_context_impl_with_effects;
+mod gpu_effects;
 mod i_drawing_context_impl_with_fragments;
 mod i_drawing_context_impl_with_layer_effects;
 mod i_drawing_context_with_acrylic_like_support;
@@ -138,6 +139,7 @@ mod standard_runtime_platform_services;
 pub use asset_loader::{AssetLoader, ASSET_SCHEME};
 pub use i_asset_loader::{AssetAssembly, AssetStream, IAssetLoader};
 pub use i_drawing_context_impl_with_effects::IDrawingContextImplWithEffects;
+pub use gpu_effects::{LightingParameters, PixelOperation, PositionedLight};
 pub use i_drawing_context_impl_with_fragments::{
     IDrawingContextImplWithFragments, IDrawingFragment,
 };

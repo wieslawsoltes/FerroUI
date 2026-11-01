@@ -17,7 +17,7 @@ use ferroui_base::media::{
 };
 use ferroui_base::platform::IGeometryImpl;
 use ferroui_base::rendering::scene_graph::ICustomDrawOperation;
-use ferroui_base::{Matrix, Point, Rect, Ref, RoundedRect, Size, Thickness, Visual};
+use ferroui_base::{Matrix, Point, Rect, Ref, RoundedRect, Thickness, Visual};
 use std::rc::Rc;
 use std::sync::Arc;
 

@@ -5,7 +5,6 @@ use super::{ITypeDescriptorContext, TypeConverter};
 use crate::{ServiceProviderExtensions, XamlLoadException};
 use ferroui_base::data::core::ValueType;
 use ferroui_base::media::imaging::Bitmap;
-use ferroui_base::media::IImage;
 use ferroui_base::platform::IAssetLoader;
 use ferroui_base::utilities::{CultureInfo, Uri, UriExtensions, UriKind};
 use ferroui_base::{BoxedValue, FerroLocator, LocatorExtensions};

@@ -10,7 +10,13 @@
     the Panel PART_PaneRoot that FerroUI's SplitView requires (it clips the pane and its bounds
     are the area of the light dismiss), holding a Border PaneRoot of the width of the open pane
     with the background, border and corner radius; the BrushTransition is a transition of the
-    background of the border (150 ms, the default duration of a BrushTransition).
+    background of the border (150 ms, the default duration of a BrushTransition). WinUI's
+    BrushTransition interpolates only solid colour brushes and changes any other brush at once: it
+    is a SolidColorBrushTransition (FerroUI's BrushTransition switches a brush it cannot
+    interpolate half-way, which left the acrylic background of an overlaying NavigationView pane
+    out for the first 75 ms of the opening while the content of the pane was already shown). The
+    transition is set by styles, so that an overlay pane keeps its background while it closes
+    (DEVIATIONS.md, SPV-7).
   - The states of DisplayModeStates (Closed, ClosedCompactLeft, OpenOverlayLeft, OpenInlineLeft,
     OpenCompactOverlayLeft and the Right ones) are the pseudo-classes FerroUI's SplitView sets:
     the display mode (:inline, :compactinline, :overlay, :compactoverlay), the state of the pane
@@ -75,11 +81,6 @@
                     BackgroundSizing="InnerBorderEdge"
                     BorderThickness="{TemplateBinding BorderThickness}"
                     CornerRadius="{TemplateBinding CornerRadius}">
-              <Border.Transitions>
-                <Transitions>
-                  <BrushTransition Property="Background" Duration="0:0:0.15" />
-                </Transitions>
-              </Border.Transitions>
               <Panel>
                 <ContentPresenter x:Name="PART_PanePresenter"
                                   Content="{TemplateBinding Pane}"
@@ -151,11 +152,6 @@
                       BackgroundSizing="InnerBorderEdge"
                       BorderThickness="{TemplateBinding BorderThickness}"
                       CornerRadius="{TemplateBinding CornerRadius}">
-                <Border.Transitions>
-                  <Transitions>
-                    <BrushTransition Property="Background" Duration="0:0:0.15" />
-                  </Transitions>
-                </Border.Transitions>
                 <Panel>
                   <ContentPresenter x:Name="PART_PanePresenter"
                                     Content="{TemplateBinding Pane}"
@@ -221,11 +217,6 @@
                       BackgroundSizing="InnerBorderEdge"
                       BorderThickness="{TemplateBinding BorderThickness}"
                       CornerRadius="{TemplateBinding CornerRadius}">
-                <Border.Transitions>
-                  <Transitions>
-                    <BrushTransition Property="Background" Duration="0:0:0.15" />
-                  </Transitions>
-                </Border.Transitions>
                 <Panel>
                   <ContentPresenter x:Name="PART_PanePresenter"
                                     Content="{TemplateBinding Pane}"
@@ -292,11 +283,6 @@
                       BackgroundSizing="InnerBorderEdge"
                       BorderThickness="{TemplateBinding BorderThickness}"
                       CornerRadius="{TemplateBinding CornerRadius}">
-                <Border.Transitions>
-                  <Transitions>
-                    <BrushTransition Property="Background" Duration="0:0:0.15" />
-                  </Transitions>
-                </Border.Transitions>
                 <Panel>
                   <ContentPresenter x:Name="PART_PanePresenter"
                                     Content="{TemplateBinding Pane}"
@@ -388,6 +374,28 @@
         <Transitions>
           <DoubleTransition Property="Width" Duration="0:0:0.12" Easing="0.1,0.9,0.2,1.0" />
           <DoubleTransition Property="Height" Duration="0:0:0.12" Easing="0.1,0.9,0.2,1.0" />
+        </Transitions>
+      </Setter>
+    </Style>
+
+    <!-- The BackgroundTransition of the Grid PaneRoot (a BrushTransition of 150 ms, the default
+         duration): solid colour brushes are interpolated, any other change of the background (to or
+         from the acrylic of an overlaying NavigationView pane) is immediate, as in WinUI. -->
+    <Style Selector="^ /template/ Border#PaneRoot">
+      <Setter Property="Transitions">
+        <Transitions>
+          <SolidColorBrushTransition Property="Background" Duration="0:0:0.15" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <!-- Not in WinUI (DEVIATIONS.md, SPV-7): an overlay pane keeps its background while it closes
+         (120 ms, the closing transition), so the content of the pane is not drawn over the content
+         without a background. WinUI changes the background at once (NavigationView's
+         PaneNotOverlaying) and slides the pane out over the content. -->
+    <Style Selector="^:overlay:closed /template/ Border#PaneRoot, ^:compactoverlay:closed /template/ Border#PaneRoot">
+      <Setter Property="Transitions">
+        <Transitions>
+          <SolidColorBrushTransition Property="Background" Delay="0:0:0.12" Duration="0:0:0" />
         </Transitions>
       </Setter>
     </Style>

@@ -125,6 +125,7 @@ The rules of the port hold in the application as well, and its CI checks them:
 - Thread-local variables are declared with `ferroui_base::ferro_thread_local!`, never with
   `thread_local!` (docs/porting/android-platform.md, section 5.1).
 - Every cargo command of CI runs with `--locked`.
+- Application code uses Rust and std types (`Duration`, std collections, `Result` with `...Error` types, futures, `Drop`/RAII), while the FerroUI APIs it calls keep their .NET-like names (docs/porting/PORTING-GUIDE.md, "API shape: .NET names, Rust types").
 - `NOTICE.md` keeps the license and copyright of the work the application is derived from; the
   application itself is MIT (`LICENSE`).
 

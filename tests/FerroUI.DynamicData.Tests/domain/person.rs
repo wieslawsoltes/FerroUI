@@ -1,6 +1,6 @@
 //! `Person` and `Color` (`Domain/Person.cs`).
 
-use super::{AnimalFamily, FakeEnum, Guid};
+use super::{new_guid, AnimalFamily, FakeEnum};
 use ferroui_dynamic_data::binding::AbstractNotifyPropertyChanged;
 use ferroui_system::component_model::INotifyPropertyChanged;
 use ferroui_system::events::Event;
@@ -54,7 +54,7 @@ impl Person {
             notify: AbstractNotifyPropertyChanged::new(),
             name,
             gender,
-            unique_key: unique_key.unwrap_or_else(|| Guid::new_guid().to_string_b()),
+            unique_key: unique_key.unwrap_or_else(|| new_guid().braced().to_string()),
             age: Cell::new(age),
             age_nullable: Cell::new(age_nullable),
             favorite_color: Cell::new(Color::NotSpecified),

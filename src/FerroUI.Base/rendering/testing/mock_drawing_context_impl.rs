@@ -93,6 +93,12 @@ pub struct MockDrawingContextImpl {
     /// `PushColorMatrixLayer <bounds>` / `PopColorMatrixLayer`). Off by
     /// default.
     pub supports_layer_effects: bool,
+    /// Whether the context (with layer effects) evaluates the lights and the
+    /// pixel operations itself (`DrawLighting <rect> <lights>`,
+    /// `PushLightingMultiplyLayer <bounds> <lights>`,
+    /// `PushPixelOperation <bounds> <operation>` / `NextPixelOperationSource`
+    /// / `PopPixelOperation`), as a GPU backend does. Off by default.
+    pub supports_gpu_effects: bool,
     /// Whether pushed render options are recorded with their values
     /// (`PushRenderOptions <text> <interpolation> <edge> <blending>
     /// <full opacity>`) rather than as `PushRenderOptions`. Off by default.
@@ -110,6 +116,7 @@ impl MockDrawingContextImpl {
             log_effects: false,
             supports_acrylic: false,
             supports_layer_effects: false,
+            supports_gpu_effects: false,
             log_render_options: false,
         }
     }
@@ -379,6 +386,42 @@ impl crate::platform::IDrawingContextImplWithLayerEffects for MockDrawingContext
 
     fn pop_multiply_layer(&mut self) {
         self.log.push("PopMultiplyLayer");
+    }
+
+    fn draw_lighting(&mut self, rect: Rect, lighting: &crate::platform::LightingParameters) -> bool {
+        if self.supports_gpu_effects {
+            self.log.push(format!("DrawLighting {rect} {}", lighting.lights.len()));
+        }
+        self.supports_gpu_effects
+    }
+
+    fn push_lighting_multiply_layer(&mut self, bounds: Rect, lighting: &crate::platform::LightingParameters) -> bool {
+        if self.supports_gpu_effects {
+            self.log.push(format!("PushLightingMultiplyLayer {bounds} {}", lighting.lights.len()));
+        }
+        self.supports_gpu_effects
+    }
+
+    fn push_pixel_operation(&mut self, bounds: Rect, operation: &crate::platform::PixelOperation) -> bool {
+        if self.supports_gpu_effects {
+            let operation = match operation {
+                crate::platform::PixelOperation::Blend { mode, noise_grid, noise_size } => {
+                    format!("Blend {mode:?} {noise_grid} {noise_size}")
+                }
+                crate::platform::PixelOperation::Arithmetic { k } => format!("Arithmetic {k:?}"),
+                crate::platform::PixelOperation::MaskInvert => "MaskInvert".to_string(),
+            };
+            self.log.push(format!("PushPixelOperation {bounds} {operation}"));
+        }
+        self.supports_gpu_effects
+    }
+
+    fn next_pixel_operation_source(&mut self) {
+        self.log.push("NextPixelOperationSource");
+    }
+
+    fn pop_pixel_operation(&mut self) {
+        self.log.push("PopPixelOperation");
     }
 }
 

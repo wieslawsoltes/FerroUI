@@ -9,6 +9,7 @@
 //! Built with the features `hybrid` and `gpu` of the crate.
 
 mod device_surface_render_target;
+pub(crate) mod effect_passes;
 mod i_vello_gpu;
 #[cfg(target_os = "macos")]
 pub mod metal;
@@ -89,6 +90,8 @@ pub fn create_gpu(graphics_context: &Rc<dyn IPlatformGraphicsContext>) -> Option
 
 #[cfg(all(test, feature = "hybrid"))]
 mod layer_tests;
+#[cfg(all(test, feature = "hybrid"))]
+mod effect_pass_tests;
 #[cfg(test)]
 mod fragment_tests;
 #[cfg(test)]

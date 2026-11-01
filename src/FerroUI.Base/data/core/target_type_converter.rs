@@ -63,7 +63,7 @@ mod tests {
     use crate::input::ICommand;
     use crate::metadata::{MarkupDelegate, MarkupType, MarkupTyped};
     use crate::data::converters::IValueConverter as _;
-    use crate::{ferro_markup_type, FerroObject, FerroProperty, ObjectType as _, Ref};
+    use crate::{ferro_markup_type, FerroObject, FerroProperty, Ref};
     use std::cell::Cell;
     use std::rc::Rc;
 

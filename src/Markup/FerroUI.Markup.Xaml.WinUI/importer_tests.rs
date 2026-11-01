@@ -403,7 +403,7 @@ fn feedback_control_xaml_constructs_live_native_contracts_and_item_info() {
     use ferroui_base::Ref;
     use ferroui_controls::{FontIconSource, InfoBadge, ProgressRing, RatingControl, RatingItemFontInfo};
     use ferroui_controls::Control;
-    use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
+    
     let input = source("<InfoBadge x:Name='Badge' Value='7'><InfoBadge.IconSource><FontIconSource Glyph='A'/></InfoBadge.IconSource></InfoBadge><ProgressRing x:Name='Progress' IsIndeterminate='False' Maximum='200' Value='42'/><RatingControl x:Name='Rating' Caption='Ratings' PlaceholderValue='2.5'><RatingControl.ItemInfo><RatingItemFontInfo Glyph='B' UnsetGlyph='C'/></RatingControl.ItemInfo></RatingControl>");
     let root: Ref<Control> = crate::parse_winui_as(&input, None, &WinUIXamlOptions::default()).unwrap();
     let badge = root.get_control::<InfoBadge>("Badge");
@@ -953,7 +953,7 @@ fn migrated_xbind_stays_dormant_until_the_host_initializes_the_document() {
     use ferroui_base::data::BindingPriority;
     use ferroui_base::{BoxedValue, FerroPropertyRegistry};
     use crate::WinUIBindings;
-    use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
+    
     use std::rc::Rc;
     let input = format!("<TextBlock xmlns='{WINUI_PRESENTATION_NAMESPACE}' xmlns:x='{XAML_NAMESPACE}' Tag='initial' Text='{{x:Bind Tag}}'/>");
     let value = crate::parse_winui(&input, None, &xbind_options()).unwrap();

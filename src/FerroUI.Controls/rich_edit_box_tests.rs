@@ -2475,7 +2475,7 @@ fn rich_edit_caret_scroll_keeps_template_chrome_fixed_and_ime_geometry_in_owner_
 #[test]
 fn rich_edit_selection_focus_brushes_restore_inline_format_and_observe_mutable_transparency() {
     use crate::documents::{Paragraph, Run};
-    use crate::RichTextBlockImplExt;
+    
     use ferroui_base::input::{FocusChangedEventArgs, InputElement};
     use ferroui_base::media::text_formatting::{ITextSource, TextRunProperties};
     use ferroui_base::media::{Brushes, Colors, IBrush, SolidColorBrush};
@@ -2601,7 +2601,7 @@ fn rich_edit_handled_embedded_control_pointer_input_does_not_move_selection() {
     use crate::documents::{InlineUIContainer, Paragraph};
     use crate::Border;
     use ferroui_base::input::{
-        InputElementImplExt, KeyModifiers, Pointer, PointerPointProperties,
+        KeyModifiers, Pointer, PointerPointProperties,
         PointerPressedEventArgs, PointerType, PointerUpdateKind,
     };
 
@@ -2764,7 +2764,7 @@ fn rich_edit_flyout_fixture() -> (
 
 #[test]
 fn rich_edit_owned_context_flyout_preserves_focused_selection_and_owner_identity() {
-    use crate::flyouts::FlyoutBaseImplExt;
+    
     use ferroui_base::input::InputElement;
     use ferroui_base::media::text_formatting::testing::TextTestScope;
     use ferroui_base::media::{Brushes, Colors};
@@ -2830,7 +2830,7 @@ fn rich_edit_owned_context_flyout_preserves_focused_selection_and_owner_identity
 
 #[test]
 fn rich_edit_context_flyout_defers_composition_blur_until_focus_leaves_its_content() {
-    use crate::flyouts::FlyoutBaseImplExt;
+    
     use ferroui_base::media::text_formatting::testing::TextTestScope;
     use std::cell::Cell;
     use std::rc::Rc;
@@ -2875,7 +2875,7 @@ fn rich_edit_context_flyout_defers_composition_blur_until_focus_leaves_its_conte
 
 #[test]
 fn rich_edit_context_flyout_focus_checks_actual_target_and_redirected_destination() {
-    use crate::flyouts::FlyoutBaseImplExt;
+    
     use ferroui_base::input::{FocusChangingEventArgs, InputElement};
     use ferroui_base::media::text_formatting::testing::TextTestScope;
 
@@ -2912,7 +2912,7 @@ fn rich_edit_context_flyout_focus_checks_actual_target_and_redirected_destinatio
 
 #[test]
 fn rich_edit_canceled_flyout_focus_keeps_editor_state_and_replacement_ends_retention() {
-    use crate::flyouts::FlyoutBaseImplExt;
+    
     use ferroui_base::input::{FocusChangingEventArgs, InputElement};
     use ferroui_base::media::text_formatting::testing::TextTestScope;
 

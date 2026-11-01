@@ -1036,3 +1036,117 @@ fn date_time_offset_parses_the_stated_offset_or_the_local_one() {
     assert!(DateTimeOffset::try_parse("2024-03-05T14:30:15+02:00", &invariant).is_some());
 }
 
+
+// --- std::time::SystemTime ---
+
+/// The system time `seconds` and `nanos` after 1970, or before it when
+/// `seconds` is negative; `None` where the platform cannot hold it.
+fn system_time(seconds: i64, nanos: u32) -> Option<std::time::SystemTime> {
+    use std::time::{Duration, SystemTime};
+    let duration = Duration::new(seconds.unsigned_abs(), nanos);
+    if seconds < 0 {
+        SystemTime::UNIX_EPOCH.checked_sub(duration)
+    } else {
+        SystemTime::UNIX_EPOCH.checked_add(duration)
+    }
+}
+
+#[test]
+fn date_time_converts_to_and_from_system_time() {
+    use super::SystemTimeRangeError;
+    use std::time::{Duration, SystemTime};
+
+    let epoch = DateTime::try_from(SystemTime::UNIX_EPOCH).unwrap();
+    assert_eq!(epoch, DateTime::UNIX_EPOCH);
+    assert_eq!(epoch.kind(), DateTimeKind::Utc);
+    assert_eq!(epoch.ticks(), 621_355_968_000_000_000);
+
+    let value = DateTime::new_with_time(2024, 3, 5, 12, 30, 15).specify_kind(DateTimeKind::Utc);
+    let time = SystemTime::try_from(value).unwrap();
+    assert_eq!(time, system_time(1_709_641_815, 0).unwrap());
+    assert_eq!(DateTime::try_from(time).unwrap(), value);
+    assert_eq!(DateTime::try_from(time).unwrap().kind(), DateTimeKind::Utc);
+
+    // Whole ticks are exact; below a tick the system time is rounded down.
+    let precise = SystemTime::try_from(value.add_ticks(1)).unwrap();
+    assert_eq!(precise.duration_since(time).unwrap(), Duration::from_nanos(100));
+    assert_eq!(DateTime::try_from(system_time(1_709_641_815, 199).unwrap()).unwrap(), value.add_ticks(1));
+    assert_eq!(DateTime::try_from(system_time(1_709_641_815, 99).unwrap()).unwrap(), value);
+
+    // The largest value round trips; a system time from the year 10000 on is out of range.
+    let max = DateTime::MAX_VALUE.specify_kind(DateTimeKind::Utc);
+    assert_eq!(DateTime::try_from(SystemTime::try_from(max).unwrap()).unwrap(), max);
+    assert_eq!(
+        DateTime::try_from(system_time(253_402_300_800, 0).unwrap()),
+        Err(SystemTimeRangeError::OutsideDateTimeRange)
+    );
+    assert_eq!(DateTime::try_from(system_time(253_402_300_799, 999_999_999).unwrap()).unwrap(), max);
+}
+
+#[test]
+fn date_time_before_1970_converts_where_the_platform_can_hold_it() {
+    use super::SystemTimeRangeError;
+    use std::time::{Duration, SystemTime};
+
+    let min = DateTime::MIN_VALUE.specify_kind(DateTimeKind::Utc);
+    match system_time(-62_135_596_800, 0) {
+        Some(year_one) => {
+            assert_eq!(SystemTime::try_from(min), Ok(year_one));
+            assert_eq!(DateTime::try_from(year_one).unwrap(), min);
+            // Before 1970 a system time is rounded down too: toward the past. (Windows keeps
+            // system times in whole ticks, so 150 ns before 1970 is 100 ns there.)
+            let before_epoch = SystemTime::UNIX_EPOCH.checked_sub(Duration::from_nanos(150)).unwrap();
+            let converted = DateTime::try_from(before_epoch).unwrap();
+            assert!(converted < DateTime::UNIX_EPOCH);
+            assert!(SystemTime::try_from(converted).unwrap() <= before_epoch);
+            assert!(SystemTime::try_from(converted.add_ticks(1)).unwrap() > before_epoch);
+            assert_eq!(
+                DateTime::try_from(system_time(-62_135_596_801, 0).unwrap()),
+                Err(SystemTimeRangeError::OutsideDateTimeRange)
+            );
+        }
+        None => assert_eq!(SystemTime::try_from(min), Err(SystemTimeRangeError::OutsideSystemTimeRange)),
+    }
+}
+
+#[test]
+fn local_and_unspecified_date_times_are_local_time_for_system_time() {
+    use std::time::SystemTime;
+
+    TimeZoneInfo::set_local_utc_offset_provider(Some(Rc::new(|_| TimeSpan::from_hours(-5.0))));
+    let clock = DateTime::new_with_time(2024, 6, 1, 10, 0, 0);
+    let instant = system_time(1_717_254_000, 0).unwrap();
+    assert_eq!(SystemTime::try_from(clock), Ok(instant));
+    assert_eq!(SystemTime::try_from(clock.specify_kind(DateTimeKind::Local)), Ok(instant));
+    assert_eq!(SystemTime::try_from(clock.specify_kind(DateTimeKind::Utc)), Ok(system_time(1_717_236_000, 0).unwrap()));
+    // Back from a system time, the value is UTC.
+    let back = DateTime::try_from(instant).unwrap();
+    assert_eq!(back, DateTime::new_with_time(2024, 6, 1, 15, 0, 0));
+    assert_eq!(back.kind(), DateTimeKind::Utc);
+    // An instant a few hours after the range of DateTime is not clamped.
+    let late = DateTime::MAX_VALUE.specify_kind(DateTimeKind::Local);
+    assert_eq!(SystemTime::try_from(late), Ok(system_time(253_402_318_799, 999_999_900).unwrap()));
+    TimeZoneInfo::set_local_utc_offset_provider(None);
+}
+
+#[test]
+fn date_time_offset_converts_to_and_from_system_time() {
+    use std::time::SystemTime;
+
+    let value = DateTimeOffset::new(2024, 3, 5, 14, 30, 15, TimeSpan::from_hours(2.0));
+    let time = SystemTime::try_from(value).unwrap();
+    assert_eq!(time, system_time(1_709_641_815, 0).unwrap());
+
+    // The instant comes back with the offset zero.
+    let back = DateTimeOffset::try_from(time).unwrap();
+    assert_eq!(back, value);
+    assert!(!back.equals_exact(value));
+    assert_eq!(back.offset(), TimeSpan::ZERO);
+    assert_eq!(back.utc_date_time(), value.utc_date_time());
+    assert!(back.equals_exact(value.to_universal_time()));
+
+    assert!(DateTimeOffset::try_from(SystemTime::UNIX_EPOCH).unwrap().equals_exact(DateTimeOffset::UNIX_EPOCH));
+    let max = DateTimeOffset::MAX_VALUE;
+    assert!(DateTimeOffset::try_from(SystemTime::try_from(max).unwrap()).unwrap().equals_exact(max));
+    assert!(DateTimeOffset::try_from(system_time(253_402_300_800, 0).unwrap()).is_err());
+}

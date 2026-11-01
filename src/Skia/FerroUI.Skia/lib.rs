@@ -14,6 +14,7 @@ pub mod helpers;
 pub mod metal;
 
 mod combined_geometry_impl;
+mod composition_effects;
 mod drawing_context_impl;
 mod ellipse_geometry_impl;
 mod font_manager_impl;
@@ -29,6 +30,7 @@ mod locked_framebuffer;
 mod picture_render_target;
 mod platform_render_interface;
 mod rectangle_geometry_impl;
+mod runtime_effects;
 mod render_target_bitmap_impl;
 mod sk_cache_base;
 mod sk_paint_cache;
@@ -73,7 +75,7 @@ pub use sk_round_rect_cache::SkRoundRectCache;
 pub use sk_text_blob_builder_cache::SkTextBlobBuilderCache;
 pub use skia_backend_context::SkiaContext;
 pub use skia_application_extensions::SkiaApplicationExtensions;
-pub use skia_options::SkiaOptions;
+pub use skia_options::{DEFAULT_MAX_GPU_RESOURCE_SIZE_BYTES, SkiaOptions};
 pub use text_rendering_override::{
     set_text_rendering_override, startup_text_rendering_override, text_rendering_override, TextRenderingOverride,
     TEXT_OVERRIDE_ENV_PREFIX, TEXT_OVERRIDE_KEYS,
@@ -91,6 +93,10 @@ pub use writeable_bitmap_impl::WriteableBitmapImpl;
 
 #[cfg(test)]
 mod layer_effect_tests;
+#[cfg(test)]
+mod composition_effect_tests;
+#[cfg(test)]
+mod coverage_clip_tests;
 #[cfg(test)]
 mod tests;
 #[cfg(test)]

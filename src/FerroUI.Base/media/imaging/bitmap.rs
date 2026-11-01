@@ -2,7 +2,7 @@ use crate::media::imaging::bitmap_memory::BitmapMemory;
 use crate::media::imaging::pixel_format_transcoder::PixelFormatTranscoder;
 use crate::media::imaging::{BitmapEncoderOptions, BitmapInterpolationMode, IBitmap};
 use crate::media::{DrawingContext, IImage, IImageBrushSource};
-use crate::platform::{self, AlphaFormat, IBitmapImpl, ILockedFramebuffer, PixelFormat};
+use crate::platform::{self, AlphaFormat, ILockedFramebuffer, PixelFormat};
 use crate::utilities::{RefCountable, RefCounted};
 use crate::{PixelRect, PixelSize, Rect, Size, Vector};
 use std::any::Any;

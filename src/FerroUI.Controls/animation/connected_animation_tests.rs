@@ -603,7 +603,7 @@ mod overlay_flight {
     use ferroui_base::media::Brushes;
     use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
     use ferroui_base::threading::Dispatcher;
-    use ferroui_base::{FerroLocator, LocatorExtensions};
+    use ferroui_base::FerroLocator;
 
     /// The global clock of the test: pulsed by the test.
     struct TestClock {

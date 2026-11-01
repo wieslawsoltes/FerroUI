@@ -280,7 +280,7 @@
     {
       "source": "src/Dock.Avalonia/Services/IDockControlFactoryService.cs",
       "targets": [
-        "src/Dock/FerroDock.Ferro/services/i_dock_control_factory_service.rs",
+        "src/Dock/FerroDock.Ferro/services/dock_control_factory_service.rs",
         "docs/porting/dock/CONTINUATION.md",
         "src/Dock/FerroDock.Ferro/NOTICE.md"
       ],
@@ -363,7 +363,7 @@
     {
       "source": "src/Dock.Avalonia/Internal/Services/IGlobalDockingService.cs",
       "targets": [
-        "src/Dock/FerroDock.Ferro/internal/services/i_global_docking_service.rs"
+        "src/Dock/FerroDock.Ferro/internal/services/global_docking_service.rs"
       ],
       "status": "ported",
       "members": [

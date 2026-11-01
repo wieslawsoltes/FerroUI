@@ -1,6 +1,12 @@
 use std::fmt;
 
+use uuid::Uuid;
+
 /// Binary-compatible with the `GUID` struct declared in `com.h`.
+///
+/// The layout is the one of the system; the value is a [`Uuid`] of the `uuid` crate, the
+/// identifier type of the workspace (docs/idiomatic-rust.md), and the two convert into each other
+/// with `From`.
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct Guid {
@@ -29,14 +35,15 @@ impl Guid {
         }
     }
 
-    /// Parses `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` (braces optional).
+    /// Parses `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`, optionally in one pair of braces, with white
+    /// space around it.
     pub fn parse(s: &str) -> Option<Guid> {
-        let s = s.trim().trim_start_matches('{').trim_end_matches('}');
-        let hex: String = s.chars().filter(|c| *c != '-').collect();
-        if hex.len() != 32 || s.len() != 36 {
+        let s = s.trim();
+        let s = s.strip_prefix('{').and_then(|inner| inner.strip_suffix('}')).unwrap_or(s);
+        if s.len() != 36 {
             return None;
         }
-        u128::from_str_radix(&hex, 16).ok().map(Guid::from_u128)
+        Uuid::try_parse(s).ok().map(Guid::from)
     }
 
     /// The value native libraries built before the `com.h` fix materialize for this IID.
@@ -57,14 +64,22 @@ impl Guid {
     }
 }
 
+impl From<Uuid> for Guid {
+    fn from(value: Uuid) -> Self {
+        let (data1, data2, data3, data4) = value.as_fields();
+        Guid { data1, data2, data3, data4: *data4 }
+    }
+}
+
+impl From<Guid> for Uuid {
+    fn from(value: Guid) -> Self {
+        Uuid::from_fields(value.data1, value.data2, value.data3, &value.data4)
+    }
+}
+
 impl fmt::Display for Guid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let d = &self.data4;
-        write!(
-            f,
-            "{:08x}-{:04x}-{:04x}-{:02x}{:02x}-{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}",
-            self.data1, self.data2, self.data3, d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7]
-        )
+        fmt::Display::fmt(&Uuid::from(*self).hyphenated(), f)
     }
 }
 

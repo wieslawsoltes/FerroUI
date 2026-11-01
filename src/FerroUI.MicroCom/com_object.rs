@@ -468,5 +468,19 @@ mod tests {
         assert_eq!(g, Guid::from_u128(0x809c652e_7396_11d2_9771_00a0c9b4d50c));
         assert_eq!(g.to_string(), "809c652e-7396-11d2-9771-00a0c9b4d50c");
         assert_eq!(g.as_com_h_materialized().data4, [0x97, 0x71, 0x71, 0x71, 0x71, 0x71, 0x71, 0x71]);
+        assert_eq!(Guid::parse(" {809C652E-7396-11D2-9771-00A0C9B4D50C} "), Some(g));
+        assert_eq!(Guid::from(uuid::Uuid::from(g)), g);
+        assert_eq!(uuid::Uuid::from(g).to_string(), g.to_string());
+    }
+
+    // The text is read as `Guid.Parse` reads it (`uuid`, #423 C1): the hyphens in their places and
+    // one pair of braces. The parser before it only counted the characters.
+    #[test]
+    fn guid_parse_rejects_misplaced_hyphens_and_unpaired_braces() {
+        assert_eq!(Guid::parse("809c652e7-396-11d2-9771-00a0c9b4d50c"), None);
+        assert_eq!(Guid::parse("{809c652e-7396-11d2-9771-00a0c9b4d50c"), None);
+        assert_eq!(Guid::parse("{{809c652e-7396-11d2-9771-00a0c9b4d50c}}"), None);
+        assert_eq!(Guid::parse("+09c652e-7396-11d2-9771-00a0c9b4d50c"), None);
+        assert_eq!(Guid::parse("809c652e739611d2977100a0c9b4d50c"), None);
     }
 }

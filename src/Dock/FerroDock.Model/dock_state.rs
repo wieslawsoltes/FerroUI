@@ -5,11 +5,11 @@ use crate::collections::ListHandle;
 use crate::controls::*;
 use crate::core::*;
 use crate::BoxedValue;
-use ferroui_system::collections::generic::Dictionary;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 
-type StateMap<T> = RefCell<Dictionary<String, Option<T>>>;
+type StateMap<T> = RefCell<HashMap<String, Option<T>>>;
 
 /// Preserves tool/document content and dock templates by source ID across layout restoration.
 /// Hidden/pinned/preview/window and split-view children follow the original traversal order.

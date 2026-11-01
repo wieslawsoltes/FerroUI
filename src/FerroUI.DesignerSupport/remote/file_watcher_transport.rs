@@ -120,8 +120,11 @@ impl FileWatcherTransport {
     }
 }
 
-impl ITransportWithEnforcedMethod for FileWatcherTransport {
-    fn previewer_method(&self) -> &'static str {
+impl FileWatcherTransport {
+    /// The method of the previewer this transport decides itself
+    /// (`ITransportWithEnforcedMethod.PreviewerMethod`, an internal interface upstream that has
+    /// this one implementation; docs/porting/data/upstream-names.toml).
+    pub(crate) fn previewer_method(&self) -> &'static str {
         methods::HTML
     }
 }
@@ -160,11 +163,6 @@ impl IFerroRemoteTransportConnection for FileWatcherTransport {
             .spawn(move || Self::updater_thread(this))
             .expect("failed to start the file watcher thread");
     }
-}
-
-/// A transport that decides the method of the previewer itself.
-pub(crate) trait ITransportWithEnforcedMethod {
-    fn previewer_method(&self) -> &'static str;
 }
 
 #[cfg(test)]

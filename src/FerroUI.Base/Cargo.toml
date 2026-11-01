@@ -63,6 +63,10 @@ bitflags.workspace = true
 paste.workspace = true
 rust_decimal.workspace = true
 time.workspace = true
+# The types of the edges of the API (docs/idiomatic-rust.md, section 2.2): `Uri` converts to and
+# from `url::Url`, `CultureInfo` to and from the ICU4X `Locale` (parsing it needs `alloc`).
+url.workspace = true
+icu_locale_core = { workspace = true, features = ["alloc"] }
 
 # The loader of libraries opened at run time (`platform::native_library`), which the backends of
 # Unix systems share.

@@ -21,8 +21,8 @@ name = "ferroui-xaml-lsp"
 path = "main.rs"
 
 [dependencies]
-ferroui-designer-core = { version = "=0.4.0", path = "../FerroUI.Designer.Core" }
-ferroui-designer-project = { version = "=0.4.0", path = "../FerroUI.Designer.Project" }
+ferroui-designer-core = { workspace = true }
+ferroui-designer-project = { workspace = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 

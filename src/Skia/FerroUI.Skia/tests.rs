@@ -30,7 +30,7 @@ use ferroui_base::{
     RoundedRect, Size, Vector,
 };
 use std::any::{Any, TypeId};
-use std::cell::{Cell, RefCell};
+use std::cell::Cell;
 use std::rc::Rc;
 use std::sync::Arc;
 

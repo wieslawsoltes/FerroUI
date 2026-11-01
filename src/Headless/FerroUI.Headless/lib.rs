@@ -27,7 +27,6 @@ mod headless_window_extensions;
 mod headless_window_impl;
 mod headless_window_surface;
 mod i_headless_touch_pointer;
-mod i_headless_window;
 
 pub use ferro_headless_platform::{FerroHeadlessPlatform, FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions};
 pub use ferro_test_application_attribute::FerroTestApplicationAttribute;

@@ -6,12 +6,11 @@ use crate::platform::{
     FeedbackAction, FeedbackType, IPlatformFeedback, IPopupImpl, ITopLevelImpl, PlatformFeedback,
 };
 use crate::primitives::popup_positioning::{IPopupPositioner, PopupPositionerParameters};
-use crate::primitives::FlyoutBaseImplExt;
 use crate::testing::{
     MockWindowingPlatform, TestServices, UnitTestApplication, UnitTestApplicationScope,
 };
 use crate::{
-    Border, ContextMenu, ContextMenuEventArgs, Control, Flyout, FlyoutShowMode, MenuBaseImplExt,
+    Border, ContextMenu, ContextMenuEventArgs, Control, Flyout, FlyoutShowMode,
     PlacementMode, RichTextBlock, RichTextBlockOverflow, StackPanel, Window,
 };
 use ferroui_base::data::core::ValueType;

@@ -24,6 +24,7 @@ pub fn classes() -> Vec<(&'static ::ferroui_base::TypeInfo, &'static str)> {
         (<::ferroui_base::animation::PointTransition as ::ferroui_base::StaticType>::TYPE, "ferroui_base::animation::PointTransition"),
         (<::ferroui_base::animation::RelativePointTransition as ::ferroui_base::StaticType>::TYPE, "ferroui_base::animation::RelativePointTransition"),
         (<::ferroui_base::animation::SizeTransition as ::ferroui_base::StaticType>::TYPE, "ferroui_base::animation::SizeTransition"),
+        (<::ferroui_base::animation::SolidColorBrushTransition as ::ferroui_base::StaticType>::TYPE, "ferroui_base::animation::SolidColorBrushTransition"),
         (<::ferroui_base::animation::ThicknessTransition as ::ferroui_base::StaticType>::TYPE, "ferroui_base::animation::ThicknessTransition"),
         (<::ferroui_base::animation::TransformOperationsTransition as ::ferroui_base::StaticType>::TYPE, "ferroui_base::animation::TransformOperationsTransition"),
         (<::ferroui_base::animation::TransitionBase as ::ferroui_base::StaticType>::TYPE, "ferroui_base::animation::TransitionBase"),

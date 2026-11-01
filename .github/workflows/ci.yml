@@ -97,6 +97,15 @@ jobs:
       # library (docs/porting/android-platform.md, section 5.1). The allow-list is in the script.
       - name: No thread_local! outside of ferro_thread_local!
         run: python3 scripts/android/convert-thread-locals.py --check
+      # The types and mechanisms of the API become idiomatic Rust and std, under the .NET names of
+      # the control API (docs/idiomatic-rust.md, #423): a new declaration of a .NET-shaped
+      # infrastructure type (a `...Exception`, or a port of a `System.*` type such as `TimeSpan`,
+      # `Uri`, `Guid` or `Dictionary`) beyond scripts/idioms/baseline.json fails, and the baseline
+      # only shrinks.
+      - name: Tests of the idioms inventory
+        run: python3 -m unittest discover -s scripts/idioms -p 'test_*.py'
+      - name: No new .NET-shaped infrastructure types
+        run: python3 scripts/idioms/inventory.py --check
       # The crates that are published stay publishable (docs/release.md): the manifests state what
       # crates.io needs, the crates of the workspace are pinned to one another at the version of the
       # workspace, every package is assembled and is below the size limit, and the crate table of the
@@ -108,8 +117,9 @@ jobs:
 
   # The API gate (docs/release.md, "API stability"): within 0.4 the public API of the published
   # crates only grows. cargo-semver-checks compares the rustdoc JSON of each published crate with
-  # that of the sources of 0.4.0 (scripts/api-gate/semver_checks.py: the tag, or the commit of the
-  # release while there is no tag), with the release type `minor`. The script documents all the
+  # that of the sources of 0.4.0 (scripts/api-gate/semver_checks.py: the tag v0.4.0), with the
+  # release type `minor`. While the workspace is at a preview of 0.5.0 it passes without building:
+  # the previews may change the API, and the release of 0.5.0 moves the baseline to it. The script documents all the
   # crates in one `cargo doc` for each side, so the dependencies are checked once and not once per
   # crate, and the documentation of the baseline is cached under the baseline commit and the rustc
   # version: a run documents the pull request only. It runs when a pull request changes the sources
@@ -132,6 +142,10 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
+          if [ "$(python3 scripts/api-gate/semver_checks.py --applies)" != true ]; then
+            python3 scripts/api-gate/semver_checks.py
+            echo "run=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
           if [ -z "$BASE_SHA" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; exit 0; fi
           git fetch --no-tags --depth=1 origin "$BASE_SHA"
           if git diff --name-only "$BASE_SHA" HEAD | grep -qE '^(src/|Cargo\.toml$|Cargo\.lock$|scripts/api-gate/)'; then

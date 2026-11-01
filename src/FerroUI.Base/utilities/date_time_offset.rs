@@ -1,13 +1,22 @@
 //! A point in time as a date and time of day together with its offset from
 //! UTC (.NET `System.DateTimeOffset`).
+//!
+//! At the edges the type converts from and to [`std::time::SystemTime`]
+//! (`TryFrom` both ways): the instant is kept, the offset is not (a system
+//! time has none, and a value made from one has the offset zero).
 
 use super::date_time_format;
-use super::{CultureInfo, DateTime, DateTimeFormatProvider, DateTimeKind, DayOfWeek, FormatError, TimeZoneInfo};
+use super::date_time::system_time_of_utc_ticks;
+use super::{
+    CultureInfo, DateTime, DateTimeFormatProvider, DateTimeKind, DayOfWeek, FormatError, SystemTimeRangeError,
+    TimeZoneInfo,
+};
 use crate::animation::TimeSpan;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::ops::{Add, AddAssign, Sub, SubAssign};
+use std::time::SystemTime;
 
 const OUT_OF_RANGE: &str = "The UTC time represented when the offset is applied must be between year 0 and 10,000.";
 
@@ -408,6 +417,29 @@ impl From<DateTime> for DateTimeOffset {
     #[track_caller]
     fn from(value: DateTime) -> Self {
         DateTimeOffset::from_date_time(value)
+    }
+}
+
+impl TryFrom<SystemTime> for DateTimeOffset {
+    type Error = SystemTimeRangeError;
+
+    /// The instant of a system time with the offset zero, rounded down to a
+    /// whole tick as for [`DateTime`]. A system time outside of the years 1
+    /// to 9999 is an error.
+    fn try_from(value: SystemTime) -> Result<Self, Self::Error> {
+        let utc = DateTime::try_from(value)?;
+        Ok(DateTimeOffset { utc: utc.specify_kind(DateTimeKind::Unspecified), offset_minutes: 0 })
+    }
+}
+
+impl TryFrom<DateTimeOffset> for SystemTime {
+    type Error = SystemTimeRangeError;
+
+    /// The UTC instant of the value; the offset is dropped. Exact, and an
+    /// error only where the platform's `SystemTime` cannot hold the instant
+    /// (on `wasm32-unknown-unknown`, before 1970).
+    fn try_from(value: DateTimeOffset) -> Result<Self, Self::Error> {
+        system_time_of_utc_ticks(value.utc.ticks())
     }
 }
 

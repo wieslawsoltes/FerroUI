@@ -8,8 +8,8 @@
 
   Translation notes (docs/porting/winui-theme.md, section 4):
   - The Grid RootGrid draws the background, the border and the padding: it is a Border of the
-    same name around the Grid of the two columns; Grid.BackgroundTransition is a BrushTransition
-    of its Background.
+    same name around the Grid of the two columns; Grid.BackgroundTransition is a
+    SolidColorBrushTransition of its Background (WinUI's BrushTransition, BTN-3).
   - ContentPresenter is PART_ContentPresenter.
   - The chevron is an AnimatedIcon (AnimatedChevronDownSmallVisualSource) of 12 x 12 with the
     fallback glyph E96E (ChevronDownSmall) of the symbol font at 8 px: a Path of
@@ -69,7 +69,7 @@
                 BackgroundSizing="{TemplateBinding BackgroundSizing}">
           <Border.Transitions>
             <Transitions>
-              <BrushTransition Property="Background" Duration="0:0:0.083" />
+              <SolidColorBrushTransition Property="Background" Duration="0:0:0.083" />
             </Transitions>
           </Border.Transitions>
           <Grid ColumnDefinitions="*,Auto">

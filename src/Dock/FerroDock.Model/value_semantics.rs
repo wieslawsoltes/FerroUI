@@ -182,8 +182,8 @@ mod tests {
     use super::*;
     use crate::core::factory_parameter_tests::RecordingFactory;
     use crate::test_support::{TestCommand, TestNode};
-    use ferroui_system::collections::generic::Dictionary;
     use std::collections::hash_map::DefaultHasher;
+    use std::collections::HashMap;
 
     fn same_hash_and_lookup<T: Clone + 'static>(value: T) {
         let left = SourceItemKey(Rc::new(value.clone()));
@@ -194,7 +194,7 @@ mod tests {
         left.hash(&mut a);
         right.hash(&mut b);
         assert_eq!(a.finish(), b.finish());
-        let mut map = Dictionary::new();
+        let mut map = HashMap::new();
         map.insert(left, 42);
         assert_eq!(map.get(&right), Some(&42));
     }
@@ -267,7 +267,7 @@ mod tests {
         let right: BoxedValue = Rc::new(ReferenceClass);
         assert!(boxed_values_equal(&left, &left.clone()));
         assert!(!boxed_values_equal(&left, &right));
-        let mut map = Dictionary::new();
+        let mut map = HashMap::new();
         map.insert(SourceItemKey(left.clone()), 42);
         assert_eq!(map.get(&SourceItemKey(left)), Some(&42));
         assert_eq!(map.get(&SourceItemKey(right)), None);

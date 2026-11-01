@@ -1,6 +1,5 @@
 use crate::media::ref_adapter::RefAdapter;
 use crate::media::{Brush, ITileBrush, ImageBrush};
-use crate::platform::IBitmapImpl;
 use crate::utilities::RefCounted;
 use crate::{ObjectType, Upcast};
 use std::rc::Rc;

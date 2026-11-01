@@ -6,7 +6,6 @@ use crate::collections::ListHandle;
 use crate::core::IDockable;
 use crate::value_semantics::SourceItemKey;
 use crate::BoxedValue;
-use ferroui_system::collections::generic::Dictionary;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::{Rc, Weak};
@@ -23,7 +22,7 @@ type ContainerList = ListHandle<Option<Rc<dyn IDockable>>>;
 pub(super) struct ItemsSourceTracking {
     owners: RefCell<HashMap<usize, WeakEntry<Rc<dyn IDockable>>>>,
     items: RefCell<HashMap<usize, WeakEntry<SourceItemKey>>>,
-    by_item: RefCell<Dictionary<SourceItemKey, ContainerList>>,
+    by_item: RefCell<HashMap<SourceItemKey, ContainerList>>,
 }
 
 fn identity(dockable: &Rc<dyn IDockable>) -> usize {

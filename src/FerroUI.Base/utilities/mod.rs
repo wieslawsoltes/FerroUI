@@ -35,7 +35,7 @@ pub use span_string_tokenizer::{FormatError, SpanStringTokenizer};
 
 mod uri;
 
-pub use uri::{Uri, UriFormatError, UriKind};
+pub use uri::{Uri, UriFormatError, UriKind, UriToUrlError};
 
 mod disposable_lock;
 mod ref_countable;
@@ -128,7 +128,7 @@ mod date_time_net_tests;
 #[cfg(test)]
 mod date_time_tests;
 
-pub use date_time::{DateTime, UtcNowProvider};
+pub use date_time::{DateTime, SystemTimeRangeError, UtcNowProvider};
 pub use date_time_format_info::{CalendarWeekRule, DateTimeFormatInfo, DateTimeFormatInfoRef, DateTimeFormatProvider};
 pub use date_time_kind::DateTimeKind;
 pub use date_time_offset::DateTimeOffset;

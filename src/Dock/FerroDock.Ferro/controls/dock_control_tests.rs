@@ -154,7 +154,7 @@ fn selector_traversal_keeps_original_scope_order_model_identity_and_cycle_dedupl
         Some(root.clone()),
     ])));
     let mut items = Vec::new();
-    let mut visited = Dictionary::new();
+    let mut visited = std::collections::HashSet::new();
     collect_dockables(Some(root.clone()), &mut items, &mut visited);
     let expected = [
         hidden,
@@ -183,7 +183,7 @@ fn selector_traversal_retains_models_and_visits_a_shared_split_pane_only_once() 
     split.set_pane_dockable(Some(model.clone()));
     split.set_content_dockable(Some(model.clone()));
     let mut items = Vec::new();
-    let mut visited = Dictionary::new();
+    let mut visited = std::collections::HashSet::new();
     collect_dockables(Some(split.clone()), &mut items, &mut visited);
     assert_eq!(items.len(), 1);
     assert!(Rc::ptr_eq(&items[0], &model));

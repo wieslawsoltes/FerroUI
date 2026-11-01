@@ -6,7 +6,7 @@ use super::{paint_composition_brush, ServerCompositionSurfaceBrush};
 use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::imaging::BitmapBlendingMode;
 use crate::media::{BoxShadows, Color, ColorMatrix, ColorMatrixAlphaMode, EffectExtensions, IEffect, ImmutableBlurEffect};
-use crate::platform::{AlphaFormat, IDrawingContextImpl, PixelFormat, PixelFormats};
+use crate::platform::{AlphaFormat, IDrawingContextImpl, PixelFormat, PixelFormats, PixelOperation};
 use crate::rendering::composition::effects::{
     blur_amount_to_radius, BlendEffectMode, EffectColor, EffectGraph, EffectMatrix, EffectNode, EffectNodeKind,
     EffectScalar, PixelOp,
@@ -540,6 +540,36 @@ impl ServerCompositionEffectBrush {
             ((rect.width * scale_x).ceil() as i32).clamp(1, 4096),
             ((rect.height * scale_y).ceil() as i32).clamp(1, 4096),
         );
+        // A blend and an arithmetic composite have two sources.
+        let count = if matches!(op, PixelOp::MaskInvert) { sources.len() } else { sources.len().min(2) };
+        // The operation done by the drawing context (on the GPU) on the
+        // sources drawn one after the other, without bitmaps.
+        let operation = match op {
+            PixelOp::Blend(mode) => PixelOperation::Blend { mode: *mode, noise_grid: rect, noise_size: size },
+            PixelOp::Arithmetic { multiply, source1, source2, offset } => PixelOperation::Arithmetic {
+                k: [self.scalar(multiply), self.scalar(source1), self.scalar(source2), self.scalar(offset)].map(|k| k as f32),
+            },
+            PixelOp::MaskInvert => PixelOperation::MaskInvert,
+        };
+        if canvas
+            .as_drawing_context_impl_with_layer_effects()
+            .is_some_and(|layers| layers.push_pixel_operation(rect, &operation))
+        {
+            for (index, source) in sources[..count].iter().enumerate() {
+                if index > 0 {
+                    if let Some(layers) = canvas.as_drawing_context_impl_with_layer_effects() {
+                        layers.next_pixel_operation_source();
+                    }
+                }
+                self.paint_node(source, canvas, rect);
+            }
+            if let Some(layers) = canvas.as_drawing_context_impl_with_layer_effects() {
+                layers.pop_pixel_operation();
+            }
+            return;
+        }
+        // The CPU path: each source drawn into a bitmap of its own, the pixels
+        // read back and combined here, the result drawn as a bitmap.
         let mut images = Vec::with_capacity(sources.len());
         for source in sources {
             match self.render_node_pixels(source, canvas, rect, size) {
@@ -550,19 +580,8 @@ impl ServerCompositionEffectBrush {
         let mut images = images.into_iter();
         let Some(mut result) = images.next() else { return };
         let width = size.width as usize;
-        for (index, other) in images.enumerate() {
-            match op {
-                PixelOp::Blend(mode) => blend_pixels(*mode, &mut result, &other, width),
-                PixelOp::Arithmetic { multiply, source1, source2, offset } => {
-                    let k = [self.scalar(multiply), self.scalar(source1), self.scalar(source2), self.scalar(offset)];
-                    arithmetic_pixels(k.map(|k| k as f32), &mut result, &other);
-                }
-                PixelOp::MaskInvert => mask_invert_pixels(&mut result, &other),
-            }
-            // A blend and an arithmetic composite have two sources.
-            if !matches!(op, PixelOp::MaskInvert) && index == 0 {
-                break;
-            }
+        for other in images.take(count.saturating_sub(1)) {
+            operation.apply_to_premultiplied_rgba8(&mut result, &other, width);
         }
         let Some(compositor) = self.base.compositor() else { return };
         let bitmap = compositor.render_interface().with_platform_render_interface(|render_interface| {
@@ -1180,7 +1199,7 @@ fn dissolve_noise(index: usize) -> f32 {
 /// one of the modes of Direct2D's blend effect that the blend layers do not
 /// have; the result is composed as a separable blend is:
 /// `(1 - as) ab Cb + (1 - ab) as Cs + as ab B(Cb, Cs)`.
-fn blend_pixels(mode: BlendEffectMode, background: &mut [u8], foreground: &[u8], width: usize) {
+pub(crate) fn blend_pixels(mode: BlendEffectMode, background: &mut [u8], foreground: &[u8], width: usize) {
     let _ = width;
     for (index, (back, fore)) in background.chunks_exact_mut(4).zip(foreground.chunks_exact(4)).enumerate() {
         let (cb, ab) = unpremultiply(back);
@@ -1266,7 +1285,7 @@ fn blend_pixels(mode: BlendEffectMode, background: &mut [u8], foreground: &[u8],
 /// `k1 * s1 * s2 + k2 * s1 + k3 * s2 + k4` of premultiplied pixels, per
 /// channel, clamped to 0..1 and the colour to the alpha (Direct2D's
 /// arithmetic composite).
-fn arithmetic_pixels(k: [f32; 4], first: &mut [u8], second: &[u8]) {
+pub(crate) fn arithmetic_pixels(k: [f32; 4], first: &mut [u8], second: &[u8]) {
     for (one, two) in first.chunks_exact_mut(4).zip(second.chunks_exact(4)) {
         let mut out = [0.0f32; 4];
         for channel in 0..4 {
@@ -1286,7 +1305,7 @@ fn arithmetic_pixels(k: [f32; 4], first: &mut [u8], second: &[u8]) {
 /// `destination`: the colour of the destination inverted where the source
 /// covers it (`as (ad - Cd) + (1 - as) Cd`), the alpha of the destination
 /// kept.
-fn mask_invert_pixels(destination: &mut [u8], source: &[u8]) {
+pub(crate) fn mask_invert_pixels(destination: &mut [u8], source: &[u8]) {
     for (dest, src) in destination.chunks_exact_mut(4).zip(source.chunks_exact(4)) {
         let source_alpha = f32::from(src[3]) / 255.0;
         let dest_alpha = f32::from(dest[3]) / 255.0;

@@ -17,7 +17,6 @@ use ferroui_remote_protocol::viewport::{ClientSupportedPixelFormatsMessage, Clie
 use ferroui_remote_protocol::{
     message_handler, BsonTcpTransport, Guid, IFerroRemoteTransportConnection, Message, TcpTransportBase,
 };
-use std::hash::{BuildHasher, Hasher};
 use std::io::Read;
 use std::net::{IpAddr, Ipv4Addr};
 use std::path::{Path, PathBuf};
@@ -28,14 +27,7 @@ use std::time::Duration;
 
 /// `Guid.NewGuid()`: a random identifier of version four.
 fn new_guid() -> Guid {
-    let mut bytes = [0u8; 16];
-    for chunk in bytes.chunks_mut(8) {
-        let random = std::collections::hash_map::RandomState::new().build_hasher().finish();
-        chunk.copy_from_slice(&random.to_le_bytes());
-    }
-    bytes[7] = (bytes[7] & 0x0F) | 0x40;
-    bytes[8] = (bytes[8] & 0x3F) | 0x80;
-    Guid::from_byte_array(&bytes).expect("sixteen bytes are an identifier")
+    Guid::from(uuid::Uuid::new_v4())
 }
 
 /// The root of the repository.

@@ -9,88 +9,48 @@
 use std::fmt;
 use std::str::FromStr;
 
+use uuid::Uuid;
+
 use crate::error::Error;
 
 /// A 128-bit identifier.
+///
+/// It is a [`Uuid`] of the `uuid` crate, the identifier type of the workspace
+/// (docs/idiomatic-rust.md): the two convert into each other with `From`, and
+/// the layout of [`Guid::to_byte_array`] is [`Uuid::to_bytes_le`].
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Guid {
-    a: u32,
-    b: u16,
-    c: u16,
-    d: [u8; 8],
-}
-
-const fn hex_digit(b: u8) -> Option<u8> {
-    match b {
-        b'0'..=b'9' => Some(b - b'0'),
-        b'a'..=b'f' => Some(b - b'a' + 10),
-        b'A'..=b'F' => Some(b - b'A' + 10),
-        _ => None,
-    }
-}
+pub struct Guid(Uuid);
 
 impl Guid {
     /// The identifier whose bits are all zero.
-    pub const EMPTY: Guid = Guid { a: 0, b: 0, c: 0, d: [0; 8] };
+    pub const EMPTY: Guid = Guid(Uuid::nil());
 
     /// The identifier with the given groups.
     pub const fn new(a: u32, b: u16, c: u16, d: [u8; 8]) -> Guid {
-        Guid { a, b, c, d }
+        Guid(Uuid::from_fields(a, b, c, &d))
     }
 
     /// Parses the forms `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` and the same
     /// thirty-two digits without hyphens, either of them optionally in braces
     /// or parentheses. The digits may be of either case.
     const fn try_parse_bytes(s: &[u8]) -> Option<Guid> {
-        let mut start = 0;
-        let mut end = s.len();
-        if end >= 2 && ((s[0] == b'{' && s[end - 1] == b'}') || (s[0] == b'(' && s[end - 1] == b')')) {
-            start = 1;
-            end -= 1;
-        }
-        let hyphens = match end - start {
-            36 => true,
-            32 => false,
-            _ => return None,
-        };
-        let mut digits = [0u8; 32];
-        let mut count = 0;
-        let mut i = start;
-        while i < end {
-            let position = i - start;
-            if hyphens && (position == 8 || position == 13 || position == 18 || position == 23) {
-                if s[i] != b'-' {
-                    return None;
-                }
-            } else {
-                match hex_digit(s[i]) {
-                    Some(digit) => {
-                        if count == 32 {
-                            return None;
-                        }
-                        digits[count] = digit;
-                        count += 1;
-                    }
-                    None => return None,
-                }
+        let mut inner = s;
+        if s.len() >= 2 {
+            if let (b'{', b'}') | (b'(', b')') = (s[0], s[s.len() - 1]) {
+                let (_, rest) = s.split_at(1);
+                let (middle, _) = rest.split_at(rest.len() - 1);
+                inner = middle;
             }
-            i += 1;
         }
-        if count != 32 {
-            return None;
+        // `Uuid` reads 32 digits, or 36 characters with the hyphens in their places; its other
+        // forms (a URN, braces of its own) are not forms of `Guid.Parse` and are left out here.
+        match inner.len() {
+            32 | 36 => match Uuid::try_parse_ascii(inner) {
+                Ok(uuid) => Some(Guid(uuid)),
+                Err(_) => None,
+            },
+            _ => None,
         }
-        let mut bytes = [0u8; 16];
-        let mut k = 0;
-        while k < 16 {
-            bytes[k] = (digits[2 * k] << 4) | digits[2 * k + 1];
-            k += 1;
-        }
-        Some(Guid {
-            a: u32::from_be_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]),
-            b: u16::from_be_bytes([bytes[4], bytes[5]]),
-            c: u16::from_be_bytes([bytes[6], bytes[7]]),
-            d: [bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]],
-        })
     }
 
     /// `Guid.Parse` for a constant: a text that is not an identifier fails
@@ -111,49 +71,35 @@ impl Guid {
     /// `new Guid(byte[])`: the layout of [`Guid::to_byte_array`]. Anything
     /// but sixteen bytes is an `ArgumentException`.
     pub fn from_byte_array(bytes: &[u8]) -> Result<Guid, Error> {
-        if bytes.len() != 16 {
-            return Err(Error::Argument("Byte array for Guid must be exactly 16 bytes long.".to_string()));
-        }
-        let mut d = [0u8; 8];
-        d.copy_from_slice(&bytes[8..16]);
-        Ok(Guid {
-            a: u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]),
-            b: u16::from_le_bytes([bytes[4], bytes[5]]),
-            c: u16::from_le_bytes([bytes[6], bytes[7]]),
-            d,
-        })
+        let bytes: [u8; 16] = bytes
+            .try_into()
+            .map_err(|_| Error::Argument("Byte array for Guid must be exactly 16 bytes long.".to_string()))?;
+        Ok(Guid(Uuid::from_bytes_le(bytes)))
     }
 
     /// `Guid.ToByteArray`: the first three groups little-endian, then the
     /// last eight bytes in the order of the text.
     pub fn to_byte_array(&self) -> [u8; 16] {
-        let mut bytes = [0u8; 16];
-        bytes[0..4].copy_from_slice(&self.a.to_le_bytes());
-        bytes[4..6].copy_from_slice(&self.b.to_le_bytes());
-        bytes[6..8].copy_from_slice(&self.c.to_le_bytes());
-        bytes[8..16].copy_from_slice(&self.d);
-        bytes
+        self.0.to_bytes_le()
+    }
+}
+
+impl From<Uuid> for Guid {
+    fn from(value: Uuid) -> Self {
+        Guid(value)
+    }
+}
+
+impl From<Guid> for Uuid {
+    fn from(value: Guid) -> Self {
+        value.0
     }
 }
 
 /// `Guid.ToString()`: the hyphenated form in lower case.
 impl fmt::Display for Guid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{:08x}-{:04x}-{:04x}-{:02x}{:02x}-{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}",
-            self.a,
-            self.b,
-            self.c,
-            self.d[0],
-            self.d[1],
-            self.d[2],
-            self.d[3],
-            self.d[4],
-            self.d[5],
-            self.d[6],
-            self.d[7]
-        )
+        fmt::Display::fmt(&self.0.hyphenated(), f)
     }
 }
 
@@ -198,5 +144,22 @@ mod tests {
         assert!(matches!(Guid::parse("6E3C5310+E2B1-4C3D-8688-01183AA48C5B"), Err(Error::Format(_))));
         assert!(matches!(Guid::parse("6E3C5310-E2B1-4C3D-8688-01183AA48C5G"), Err(Error::Format(_))));
         assert!(matches!(Guid::from_byte_array(&[0; 15]), Err(Error::Argument(_))));
+        assert!(matches!(Guid::from_byte_array(&[0; 17]), Err(Error::Argument(_))));
+        // Forms of `Uuid` that are not forms of `Guid.Parse`.
+        assert!(matches!(Guid::parse("urn:uuid:6e3c5310-e2b1-4c3d-8688-01183aa48c5b"), Err(Error::Format(_))));
+        assert!(matches!(Guid::parse("6E3C5310-E2B14C3D-8688-01183AA48C5B-"), Err(Error::Format(_))));
+    }
+
+    #[test]
+    fn the_groups_and_the_order_are_those_of_the_text() {
+        let guid = Guid::new(0x6E3C5310, 0xE2B1, 0x4C3D, [0x86, 0x88, 0x01, 0x18, 0x3A, 0xA4, 0x8C, 0x5B]);
+        assert_eq!(guid, Guid::parse_const("6E3C5310-E2B1-4C3D-8688-01183AA48C5B"));
+        assert_eq!(Guid::parse("(6E3C5310-E2B1-4C3D-8688-01183AA48C5B)").unwrap(), guid);
+        assert_eq!(Guid::parse("{6E3C5310E2B14C3D868801183AA48C5B}").unwrap(), guid);
+        assert_eq!(Uuid::from(guid).to_string(), guid.to_string());
+        assert_eq!(Guid::from(Uuid::from(guid)), guid);
+        assert_eq!(Guid::EMPTY, Guid::default());
+        assert!(Guid::new(1, 0, 0, [0; 8]) > Guid::new(0, 0xFFFF, 0xFFFF, [0xFF; 8]));
+        assert!(Guid::new(0, 0, 0, [0, 0, 0, 0, 0, 0, 0, 1]) > Guid::EMPTY);
     }
 }

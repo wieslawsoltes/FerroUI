@@ -1,6 +1,7 @@
-//! `SubjectWithRefCount<T>` (`Experimental/SubjectWithRefCount.cs`).
+//! `SubjectWithRefCount<T>` (`Experimental/SubjectWithRefCount.cs`), with the member of its
+//! internal interface `ISubjectWithRefCount<T>` (`Experimental/ISubjectWithRefCount.cs`), which has no
+//! other implementation (docs/porting/data/upstream-names.toml).
 
-use super::ISubjectWithRefCount;
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::subjects::{ISubject, Subject};
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
@@ -26,8 +27,9 @@ impl<T: Clone + 'static> SubjectWithRefCount<T> {
     }
 }
 
-impl<T: 'static> ISubjectWithRefCount<T> for SubjectWithRefCount<T> {
-    fn ref_count(&self) -> usize {
+impl<T> SubjectWithRefCount<T> {
+    /// The number of subscriptions not yet disposed (`ISubjectWithRefCount<T>.RefCount`).
+    pub(crate) fn ref_count(&self) -> usize {
         self.ref_count.get()
     }
 }

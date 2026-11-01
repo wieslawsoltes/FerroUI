@@ -121,6 +121,7 @@ const TYPES: &[&TypeInfo] = types![
     crate::animation::PointTransition,
     crate::animation::RelativePointTransition,
     crate::animation::SizeTransition,
+    crate::animation::SolidColorBrushTransition,
     crate::animation::ThicknessTransition,
     crate::animation::TransformOperationsTransition,
     crate::animation::VectorTransition,

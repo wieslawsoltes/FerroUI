@@ -117,6 +117,15 @@ jobs:
             echo "::warning::the tests of the Vello backend or the comparison of the render backends failed in attempt $attempt"
           done
           exit 1
+      # The test builds fill the disk of the runner, and building every crate from its package
+      # needs as much again: the test executables are not used again, nor is the Android SDK of the
+      # image (the package builds of 0.4.0 ran out of space otherwise).
+      - name: Free the disk for the package builds
+        run: |
+          df -h /
+          find target/debug/deps -type f -perm -u+x ! -name '*.*' -delete
+          rm -rf target/debug/incremental "$HOME/Library/Android"
+          df -h /
       - name: Package every crate and build each from its package
         run: scripts/release/publish.sh --dry-run
 

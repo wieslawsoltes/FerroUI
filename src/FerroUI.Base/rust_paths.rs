@@ -26,6 +26,7 @@ crate::ferro_rust_paths! {
         crate::animation::PointTransition,
         crate::animation::RelativePointTransition,
         crate::animation::SizeTransition,
+        crate::animation::SolidColorBrushTransition,
         crate::animation::ThicknessTransition,
         crate::animation::TransformOperationsTransition,
         crate::animation::TransitionBase,

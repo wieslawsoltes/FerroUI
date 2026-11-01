@@ -7,7 +7,7 @@
 //! `Person`" (every item) is the whole cache. The test spies (`TestSpy`) only write to the output
 //! of the test and are left out.
 
-use crate::domain::{Faker, FakerContext, Guid, Randomizer};
+use crate::domain::{new_guid, Faker, FakerContext, Randomizer};
 use crate::utilities::assert_equivalent;
 use ferroui_dynamic_data::cache::testing::ChangeSetAggregator;
 use ferroui_dynamic_data::cache::{IConnectableCache, IObservableCache, ObservableCacheEx, SourceCache, SourceCacheEx};
@@ -34,7 +34,7 @@ struct Person {
 impl Person {
     /// `Person(string Name)`: a new identifier.
     fn new(name: String) -> Rc<Self> {
-        Self::with_id(name, Guid::new_guid().to_string())
+        Self::with_id(name, new_guid().to_string())
     }
 
     fn with_id(name: String, id: String) -> Rc<Self> {
@@ -53,7 +53,7 @@ struct CatPerson {
 impl CatPerson {
     /// `CatPerson(string Name, string CatName)`: a new identifier.
     fn new(name: String, cat_name: String) -> Rc<Self> {
-        Self::with_id(name, cat_name, Guid::new_guid().to_string())
+        Self::with_id(name, cat_name, new_guid().to_string())
     }
 
     fn with_id(name: String, cat_name: String, id: String) -> Rc<Self> {

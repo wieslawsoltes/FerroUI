@@ -22,6 +22,7 @@ ferroui-base.workspace = true
 ferroui-controls.workspace = true
 ferroui-markup-xaml.workspace = true
 ferroui-system.workspace = true
+indexmap.workspace = true
 ferroui-reactiveui.workspace = true
 ferroui-reactiveui-controls.workspace = true
 ferrodock-model.workspace = true

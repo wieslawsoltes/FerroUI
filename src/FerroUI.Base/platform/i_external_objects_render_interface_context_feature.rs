@@ -1,5 +1,5 @@
 use super::{
-    IBitmapImpl, IPlatformHandle, PlatformGraphicsDrmFormat,
+    IPlatformHandle, PlatformGraphicsDrmFormat,
     PlatformGraphicsExternalImageProperties,
 };
 use crate::rendering::composition::{

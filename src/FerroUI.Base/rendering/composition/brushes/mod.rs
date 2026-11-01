@@ -37,6 +37,7 @@ pub use server_composition_effect_brush::{
 };
 
 pub use server_simple_content_brush::ServerCompositionSimpleContentBrush;
+pub(crate) use server_composition_effect_brush::{arithmetic_pixels, blend_pixels, mask_invert_pixels};
 pub use server_simple_image_brush::ServerCompositionSimpleImageBrush;
 pub use server_xaml_composition_brush::ServerXamlCompositionBrush;
 

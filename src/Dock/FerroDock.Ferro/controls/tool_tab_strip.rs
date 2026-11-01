@@ -28,9 +28,9 @@ use ferroui_controls::{
     templates::IDataTemplate,
     Border, Control, ControlImpl, ItemsControlImpl, ItemsControlImplExt, ScrollViewer,
 };
-use ferroui_system::collections::generic::Dictionary;
 use std::{
     cell::{Cell, RefCell},
+    collections::HashMap,
     rc::Rc,
 };
 type Subscriptions = Vec<Rc<dyn IDisposable>>;
@@ -43,7 +43,7 @@ struct ContainerEvents {
 #[repr(C)]
 pub struct ToolTabStrip {
     base: TabStrip,
-    container_observables: RefCell<Dictionary<Ref<ToolTabStripItem>, Subscriptions>>,
+    container_observables: RefCell<HashMap<Ref<ToolTabStripItem>, Subscriptions>>,
     template_observables: RefCell<Subscriptions>,
     template_version: Cell<u32>,
     container_events: RefCell<Vec<ContainerEvents>>,
@@ -200,7 +200,7 @@ impl ToolTabStrip {
     pub fn construct() -> Self {
         Self {
             base: TabStrip::construct(),
-            container_observables: RefCell::new(Dictionary::new()),
+            container_observables: RefCell::new(HashMap::new()),
             template_observables: RefCell::new(Vec::new()),
             template_version: Cell::new(0),
             container_events: RefCell::new(Vec::new()),
