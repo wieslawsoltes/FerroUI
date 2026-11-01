@@ -1,5 +1,6 @@
 //! Route FerroUI input to the native seat in logical output coordinates.
 use super::{state::State, Input};
+use smithay::input::keyboard::{KeyboardTarget, Layout, SerializedMods};
 use smithay::{
     backend::input::{Axis, AxisSource, ButtonState, KeyState},
     delegate_data_device, delegate_seat,
@@ -29,7 +30,14 @@ use smithay::{
         shell::xdg::{PopupSurface, SurfaceCachedState, ToplevelSurface},
     },
 };
-use std::os::fd::OwnedFd;
+use std::{os::fd::OwnedFd, sync::Arc};
+
+#[derive(Default)]
+pub(super) struct HostKeyboard {
+    keymap: Option<Arc<str>>,
+    valid: bool,
+    last_report: Option<(WlSurface, SerializedMods)>,
+}
 
 pub(super) struct Drag {
     id: u64,
@@ -146,6 +154,75 @@ impl State {
                 pointer.axis(self, frame);
                 pointer.frame(self);
             }
+            Input::WaylandKey {
+                event,
+                pressed,
+                time,
+            } => {
+                if event.repeat || event.code > 0x2ff {
+                    return;
+                }
+                if let Some(map) = event.keymap {
+                    if self
+                        .host_keyboard
+                        .keymap
+                        .as_ref()
+                        .is_none_or(|last| !Arc::ptr_eq(last, &map))
+                    {
+                        self.host_keyboard.valid = keyboard
+                            .set_keymap_from_string(self, map.to_string())
+                            .is_ok();
+                        self.host_keyboard.keymap = Some(map);
+                        self.host_keyboard.last_report = None;
+                    }
+                    if !self.host_keyboard.valid {
+                        return;
+                    }
+                }
+                let mods = event.modifiers;
+                let wire = SerializedMods {
+                    depressed: mods.depressed,
+                    latched: mods.latched,
+                    locked: mods.locked,
+                    layout_effective: mods.group,
+                };
+                if keyboard.modifier_state().serialized.layout_effective != mods.group {
+                    keyboard.with_xkb_state(self, |mut ctx| ctx.set_layout(Layout(mods.group)));
+                }
+                // The host may already hold a modifier when keyboard focus enters this
+                // output. Its mask is authoritative at this wire event; those earlier
+                // presses need not have passed through the nested keyboard device.
+                if let Some(target) = keyboard.current_focus() {
+                    if self
+                        .host_keyboard
+                        .last_report
+                        .as_ref()
+                        .is_none_or(|(last, state)| last != &target || *state != wire)
+                    {
+                        let mut report = keyboard.modifier_state();
+                        report.serialized = wire;
+                        let seat = self.seat.clone();
+                        target.modifiers(&seat, self, report, SERIAL_COUNTER.next_serial());
+                        self.host_keyboard.last_report = Some((target, wire));
+                    }
+                }
+                let before = keyboard.modifier_state().serialized;
+                keyboard.input::<(), _>(
+                    self,
+                    (event.code + 8).into(),
+                    if pressed {
+                        KeyState::Pressed
+                    } else {
+                        KeyState::Released
+                    },
+                    SERIAL_COUNTER.next_serial(),
+                    time,
+                    |_, _, _| FilterResult::Forward,
+                );
+                if before != keyboard.modifier_state().serialized {
+                    self.host_keyboard.last_report = None;
+                }
+            }
             Input::Key {
                 code,
                 pressed,
@@ -167,6 +244,7 @@ impl State {
                 }
             }
             Input::KeyboardLeave { time } => {
+                self.host_keyboard.last_report = None;
                 for code in keyboard.pressed_keys() {
                     keyboard.input::<(), _>(
                         self,

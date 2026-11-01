@@ -1089,6 +1089,8 @@ dependencies = [
  "serde_json",
  "smithay",
  "time",
+ "wayland-client",
+ "wayland-protocols",
  "zbus",
 ]
 

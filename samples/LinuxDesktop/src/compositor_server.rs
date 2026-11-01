@@ -79,7 +79,7 @@ impl Default for Scene {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub enum Input {
     Motion {
         x: f64,
@@ -104,6 +104,11 @@ pub enum Input {
     },
     Key {
         code: u32,
+        pressed: bool,
+        time: u32,
+    },
+    WaylandKey {
+        event: ferroui_wayland::WaylandKeyEvent,
         pressed: bool,
         time: u32,
     },
@@ -296,3 +301,6 @@ impl Drop for Server {
         }
     }
 }
+
+#[cfg(test)]
+mod tests;

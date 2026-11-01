@@ -29,3 +29,7 @@ roxmltree.workspace = true
 serde_json.workspace = true
 zbus.workspace = true
 time = { workspace = true, features = ["local-offset"] }
+
+[target.'cfg(target_os = "linux")'.dev-dependencies]
+wayland-client.workspace = true
+wayland-protocols.workspace = true
