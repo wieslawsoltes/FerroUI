@@ -8,6 +8,7 @@ pub mod compiled;
 mod connections;
 mod deferred;
 mod dynamic;
+mod incubation;
 mod initial;
 mod lifetime;
 pub use compiled::{CompiledComponent, ComponentSource};

@@ -59,6 +59,11 @@ enum Selection {
     Component(Option<ObjectId>),
 }
 
+enum Phase {
+    Select,
+    Activate(incubation::PreparedNodes),
+}
+
 #[derive(Default)]
 pub(crate) struct Changes {
     sizing: BTreeMap<(ObjectId, Axis), bool>,
@@ -72,6 +77,50 @@ impl Changes {
     pub(crate) fn rollback(self, model: &mut Instance) {
         for (id, state) in self.before {
             model.dynamic.loaders.insert(id, state);
+        }
+    }
+}
+
+impl Instance {
+    pub(crate) fn advance_loader(
+        &mut self,
+        id: ObjectId,
+        previous: Option<Box<incubation::Preparation>>,
+        has_time: &mut impl FnMut() -> bool,
+    ) -> Result<(), Error> {
+        if self.node(id).is_none() || self.get(id, "status")? != Value::Number(2.) {
+            return Ok(());
+        }
+        let Value::Object(component) = self.get(id, "sourceComponent")? else {
+            return Ok(());
+        };
+        let Some(template) = self.dynamic.templates.get(&component) else {
+            return Ok(());
+        };
+        let mut preparation = previous
+            .filter(|p| p.matches(template))
+            .unwrap_or_else(|| Box::new(incubation::Preparation::new(template.clone())));
+        // A private slice touches no live slots, event queues or user code.
+        // Native tree validation runs once at publication, not once per slice.
+        let registry = self.dynamic.registry.as_ref().expect("type registry");
+        match preparation.advance(registry, has_time) {
+            Ok(false) => {
+                self.javascript
+                    .deferred
+                    .post(vec![deferred::Task::Loader(id, Some(preparation))]);
+                Ok(())
+            }
+            Ok(true) => {
+                let prepared = preparation.into_nodes();
+                if let Err(error) = self.transaction(|tx| tx.finish_loader(id, prepared)) {
+                    // Activation rolled back. Notify the host of the original
+                    // fault after observers can see that incubation terminated.
+                    self.transaction(|tx| tx.fail_loader(id))?;
+                    return Err(error);
+                }
+                Ok(())
+            }
+            Err(_) => self.transaction(|tx| tx.fail_loader(id)),
         }
     }
 }
@@ -189,6 +238,7 @@ impl Transaction<'_> {
     }
 
     fn select_loader(&mut self, id: ObjectId, selection: Selection) {
+        self.deferred.push(deferred::Task::CancelLoader(id));
         let state = self.loader_state(id);
         state.selection = Some(selection);
         state.initial = Default::default();
@@ -235,24 +285,35 @@ impl Transaction<'_> {
         self.loader_changes.pending.remove(&id);
         if self.model.node(id).is_some() {
             self.loader_changes.busy.insert(id);
-            let result = self.with_stack(4, |tx| tx.refresh_loader(id, false));
+            let result = self.with_stack(4, |tx| tx.refresh_loader(id, Phase::Select));
             self.loader_changes.busy.remove(&id);
             result?;
         }
         Ok(true)
     }
 
-    pub(crate) fn finish_loader(&mut self, id: ObjectId) -> Result<(), Error> {
+    pub(crate) fn fail_loader(&mut self, id: ObjectId) -> Result<(), Error> {
+        if self.model.node(id).is_some() && self.model.get(id, "status")? == Value::Number(2.) {
+            self.publish_status(id, 3, Some(1.))?;
+        }
+        Ok(())
+    }
+
+    pub(crate) fn finish_loader(
+        &mut self,
+        id: ObjectId,
+        prepared: incubation::PreparedNodes,
+    ) -> Result<(), Error> {
         if self.model.node(id).is_none() || self.model.get(id, "status")? != Value::Number(2.) {
             return Ok(());
         }
         self.loader_changes.busy.insert(id);
-        let result = self.with_stack(4, |tx| tx.refresh_loader(id, true));
+        let result = self.with_stack(4, |tx| tx.refresh_loader(id, Phase::Activate(prepared)));
         self.loader_changes.busy.remove(&id);
         result
     }
 
-    fn refresh_loader(&mut self, id: ObjectId, finish: bool) -> Result<(), Error> {
+    fn refresh_loader(&mut self, id: ObjectId, phase: Phase) -> Result<(), Error> {
         self.budget()?;
         let active = self.model.get(id, "active")? == Value::Bool(true);
         let mut selection = self.model.dynamic.loaders[&id].selection.clone();
@@ -314,9 +375,11 @@ impl Transaction<'_> {
             }
         };
         if !active {
+            self.deferred.push(deferred::Task::CancelLoader(id));
             return self.publish_status(id, 0, None);
         }
         let Some(component) = component else {
+            self.deferred.push(deferred::Task::CancelLoader(id));
             return self.publish_status(id, 0, Some(0.));
         };
         match self.model.get(component, "status")? {
@@ -324,18 +387,34 @@ impl Transaction<'_> {
             Value::Number(2.) => return self.publish_status(id, 2, Some(0.)),
             _ => return self.publish_status(id, 3, Some(1.)),
         }
-        if self.model.get(id, "asynchronous")? == Value::Bool(true) && !finish {
-            self.publish_status(id, 2, Some(0.))?;
-            self.deferred.push(deferred::Task::Loader(id));
-            return Ok(());
-        }
-        let Some(item) = self.try_create_with_properties(
-            component,
-            Some(id),
-            (*self.model.dynamic.loaders[&id].initial).clone(),
-        )?
-        else {
-            return self.publish_status(id, 3, Some(1.));
+        let template = self
+            .model
+            .dynamic
+            .templates
+            .get(&component)
+            .ok_or_else(|| Error::new("not a ready Component"))?
+            .clone();
+        let prepared = if self.model.get(id, "asynchronous")? == Value::Bool(true) {
+            match phase {
+                Phase::Select => {
+                    self.publish_status(id, 2, Some(0.))?;
+                    self.deferred.push(deferred::Task::Loader(id, None));
+                    return Ok(());
+                }
+                Phase::Activate(nodes) => nodes,
+            }
+        } else {
+            self.deferred.push(deferred::Task::CancelLoader(id));
+            Default::default()
+        };
+        let revision = self.model.structure_revision();
+        let initial = (*self.model.dynamic.loaders[&id].initial).clone();
+        let item = match self.construct_object(component, Some(id), &template, initial, prepared) {
+            Ok(item) => item,
+            Err(_) if self.model.structure_revision() == revision => {
+                return self.publish_status(id, 3, Some(1.));
+            }
+            Err(error) => return Err(error),
         };
         self.publish_loader_property(id, "item", Value::Object(item))?;
         self.size_loader(id, Axis::Width, true)?;

@@ -5,6 +5,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 static NEXT_INSTANCE: AtomicU64 = AtomicU64::new(1);
 
 struct Builder<'a, I = Box<Instance>> {
+    prepared: incubation::PreparedNodes,
     context: Option<ObjectId>,
     scopes: enums::Scopes,
     instance: I,
@@ -15,6 +16,22 @@ struct Builder<'a, I = Box<Instance>> {
     implicit: Vec<(SlotId, Vec<Value>)>,
     binding_targets: Vec<(SlotId, String)>,
     read_candidates: Vec<SlotId>,
+}
+
+impl Slot {
+    pub(super) fn initial(value: Value) -> Self {
+        Self {
+            scope: None,
+            overlay: None,
+            active_target: None,
+            assigned: false,
+            value,
+            binding: None,
+            dirty: false,
+            reads: BTreeSet::new(),
+            dependents: BTreeSet::new(),
+        }
+    }
 }
 
 impl Instance {
@@ -328,6 +345,7 @@ impl<'a> Builder<'a> {
             )));
         }
         let mut builder = Self {
+            prepared: Default::default(),
             context: None,
             scopes: enums::Scopes::named(name, &document.root)?,
             instance: Box::new(Instance {
@@ -445,66 +463,65 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             )));
         }
         self.instance.properties.push(property);
-        self.instance.slots.push(Slot {
-            scope: None,
-            overlay: None,
-            active_target: None,
-            assigned: false,
-            value,
-            binding: None,
-            dirty: false,
-            reads: BTreeSet::new(),
-            dependents: BTreeSet::new(),
-        });
+        self.instance.slots.push(Slot::initial(value));
         Ok(key)
     }
 
     fn object(&mut self, source: &Object, parent: Option<ObjectId>) -> Result<ObjectId, Error> {
         let imports = source.type_imports.as_deref().unwrap_or(self.imports);
-        if source.type_imports.is_some() {
-            self.registry.validate_imports(imports)?;
-        }
-        let (module, name, definition) = self.registry.resolve(imports, &source.type_name)?;
+        let (mut shell, module, name, definition) = if let Some(shell) =
+            self.prepared.remove(&std::ptr::from_ref(source))
+        {
+            // Module and type names were resolved against this immutable registry
+            // during preparation, including validation of versioned imports.
+            let (module, types) = self
+                .registry
+                .modules
+                .get_key_value(&shell.node.module)
+                .expect("prepared module");
+            let (name, definition) = types
+                .get_key_value(&shell.node.name)
+                .expect("prepared type");
+            (shell, module.as_str(), name.as_str(), definition)
+        } else {
+            if source.type_imports.is_some() {
+                self.registry.validate_imports(imports)?;
+            }
+            let (module, name, definition) = self.registry.resolve(imports, &source.type_name)?;
+            let scope = self.scopes.imports(imports, self.registry);
+            (
+                incubation::PreparedNode::new(source, module, name, definition, scope),
+                module,
+                name,
+                definition,
+            )
+        };
         let id = self.instance.next_object();
         self.instance.dynamic.serial += 1;
+        let offset = self.instance.slots.len();
+        for slot in shell.node.properties.values_mut() {
+            *slot += offset;
+        }
+        shell.node.context = self.context;
+        shell.node.parent = parent;
         self.instance.nodes.push(NodeEntry {
             id,
             live: true,
-            data: Some(Box::new(Node {
-                source_url: source.source_url.clone(),
-                context: self.context,
-                visual_children: definition.visual_children.clone(),
-                shadows: source.shadows.clone(),
-                type_scope: self.scopes.imports(imports, self.registry),
-                composite_types: source.composite_types.clone(),
-                lineage: definition.lineage.clone(),
-                module: module.into(),
-                name: name.into(),
-                parent,
-                children: Vec::new(),
-                properties: BTreeMap::new(),
-                default_property: definition.default_property.clone(),
-                native: definition.native.clone(),
-                signals: definition.signals.clone(),
-                handlers: BTreeMap::new(),
-                methods: BTreeMap::new(),
-            })),
+            data: Some(shell.node),
         });
         if let Some(parent) = parent {
             self.instance.nodes[parent.index].children.push(id);
         }
-        for (name, (ty, default)) in &definition.properties {
-            self.property(
-                Property {
-                    owner: id,
-                    name: name.clone(),
-                    ty: ty.clone(),
-                    readonly: definition.readonly.contains(name),
-                    required: false,
-                    alias: None,
-                },
-                default.clone(),
-            )?;
+        for (name, ty, readonly, slot) in shell.defaults {
+            self.instance.properties.push(Property {
+                owner: id,
+                name,
+                ty,
+                readonly,
+                required: false,
+                alias: None,
+            });
+            self.instance.slots.push(slot);
         }
         if (module == "QtQuick" && name == "Loader")
             || definition
@@ -1054,7 +1071,19 @@ impl Instance {
         template: &dynamic::Template,
         registry: &TypeRegistry,
     ) -> Result<BTreeSet<SlotId>, Error> {
+        self.allocate_prepared(root, parent, template, registry, Default::default())
+    }
+
+    pub(crate) fn allocate_prepared(
+        &mut self,
+        root: ObjectId,
+        parent: Option<ObjectId>,
+        template: &dynamic::Template,
+        registry: &TypeRegistry,
+        prepared: incubation::PreparedNodes,
+    ) -> Result<BTreeSet<SlotId>, Error> {
         let mut builder = Builder {
+            prepared,
             context: Some(root),
             scopes: template.scopes.clone(),
             instance: self,

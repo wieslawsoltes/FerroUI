@@ -242,6 +242,17 @@ impl crate::transaction::Transaction<'_> {
         initial: BTreeMap<String, InitialProperty>,
         template: &Template,
     ) -> Result<ObjectId, Error> {
+        self.construct_object(declaration, parent, template, initial, Default::default())
+    }
+
+    pub(crate) fn construct_object(
+        &mut self,
+        declaration: ObjectId,
+        parent: Option<ObjectId>,
+        template: &Template,
+        initial: BTreeMap<String, InitialProperty>,
+        prepared: incubation::PreparedNodes,
+    ) -> Result<ObjectId, Error> {
         if self.in_binding() {
             return Err(Error::new("a binding cannot create objects"));
         }
@@ -267,7 +278,7 @@ impl crate::transaction::Transaction<'_> {
         );
         let prepared = self
             .model
-            .allocate_template(root, parent, template, &registry)
+            .allocate_prepared(root, parent, template, &registry, prepared)
             .and_then(|assigned| self.apply_initial(root, first, assigned, initial));
         if let Err(error) = prepared {
             self.model.rollback_creation(before);

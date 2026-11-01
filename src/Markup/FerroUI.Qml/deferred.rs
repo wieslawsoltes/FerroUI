@@ -12,7 +12,8 @@ enum Key {
 }
 
 pub(crate) enum Task {
-    Loader(ObjectId),
+    Loader(ObjectId, Option<Box<incubation::Preparation>>),
+    CancelLoader(ObjectId),
     Method(MethodRef, Vec<Value>),
     Binding(ObjectId),
     Call {
@@ -25,7 +26,7 @@ pub(crate) enum Task {
 impl Task {
     fn key(&self) -> Key {
         match self {
-            Self::Loader(owner) => Key::Loader(*owner),
+            Self::Loader(owner, _) | Self::CancelLoader(owner) => Key::Loader(*owner),
             Self::Binding(owner) => Key::Binding(*owner),
             Self::Method(method, _) => Key::Method(method.clone()),
             Self::Call { function, .. } => Key::Function(function.id()),
@@ -44,6 +45,12 @@ impl Queue {
     pub(crate) fn post(&mut self, tasks: Vec<Task>) {
         for task in tasks {
             let key = task.key();
+            if matches!(task, Task::CancelLoader(_)) {
+                if let Some(previous) = self.positions.remove(&key) {
+                    self.jobs.remove(&previous);
+                }
+                continue;
+            }
             if let Some(previous) = self.positions.get(&key) {
                 if matches!(key, Key::Binding(_) | Key::Loader(_)) {
                     continue;
@@ -60,7 +67,9 @@ impl Queue {
     pub(crate) fn retire(&mut self, dead: &BTreeSet<ObjectId>) {
         self.jobs.retain(|_, task| {
             let (owner, arguments) = match task {
-                Task::Binding(owner) | Task::Loader(owner) => (*owner, None),
+                Task::Binding(owner) | Task::Loader(owner, _) | Task::CancelLoader(owner) => {
+                    (*owner, None)
+                }
                 Task::Call {
                     owner, arguments, ..
                 } => (*owner, Some(arguments)),
@@ -96,16 +105,40 @@ impl Instance {
         !self.javascript.deferred.jobs.is_empty()
     }
 
+    /// Whether a Loader has partially prepared a private subtree for a later turn.
+    pub fn has_incubating_loader(&self) -> bool {
+        self.javascript
+            .deferred
+            .jobs
+            .values()
+            .any(|job| matches!(job, Task::Loader(_, Some(_))))
+    }
+
     /// Execute work enqueued before this turn began. Each job has a separate
     /// transaction. Failure preserves the remaining jobs for the next turn.
     pub fn process_deferred(&mut self, limit: usize) -> Result<usize, Error> {
+        self.process_deferred_while(limit, || true)
+    }
+
+    /// Run already queued work while the host has idle time. The predicate is
+    /// checked between jobs and units of Loader preparation. User callbacks and
+    /// the final activation transaction run to completion.
+    pub fn process_deferred_while(
+        &mut self,
+        limit: usize,
+        mut has_time: impl FnMut() -> bool,
+    ) -> Result<usize, Error> {
         let boundary = self.javascript.deferred.sequence;
         let mut processed = 0;
-        while processed < limit {
+        while processed < limit && has_time() {
             let Some(task) = self.javascript.deferred.pop(boundary) else {
                 break;
             };
-            self.transaction(|tx| tx.dispatch_deferred(task))?;
+            if let Task::Loader(owner, preparation) = task {
+                self.advance_loader(owner, preparation, &mut has_time)?;
+            } else {
+                self.transaction(|tx| tx.dispatch_deferred(task))?;
+            }
             processed += 1;
         }
         Ok(processed)
@@ -124,7 +157,6 @@ impl Transaction<'_> {
                 )?;
                 Ok(())
             }
-            Task::Loader(owner) => self.finish_loader(owner),
             Task::Binding(owner) if self.model.node(owner).is_some() => self.publish_delayed(owner),
             Task::Call {
                 owner,

@@ -158,6 +158,7 @@ struct Inner {
     clock: std::cell::OnceCell<clock::ViewClock>,
     manual_clock: Cell<bool>,
     deferred_posted: std::cell::Cell<bool>,
+    deferred_resume: RefCell<Option<Rc<dyn IDisposable>>>,
     worker_wake: std::cell::OnceCell<async_channel::Sender<()>>,
     instance: RefCell<Instance>,
     nodes: RefCell<tree::Peers>,
@@ -175,6 +176,9 @@ impl Drop for Inner {
     fn drop(&mut self) {
         if let Some(clock) = self.clock.get() {
             clock.stop();
+        }
+        if let Some(timer) = self.deferred_resume.get_mut().take() {
+            timer.dispose();
         }
         if let Some(wake) = self.worker_wake.get() {
             wake.close();
@@ -259,6 +263,7 @@ impl QmlView {
             clock: std::cell::OnceCell::new(),
             manual_clock: Cell::new(false),
             deferred_posted: std::cell::Cell::new(false),
+            deferred_resume: Default::default(),
             worker_wake: Default::default(),
             instance: RefCell::new(instance),
             nodes: RefCell::new(nodes),

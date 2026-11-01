@@ -178,3 +178,101 @@ fn an_aborted_reload_restores_the_previously_loaded_identity_and_selection() {
         Value::Bool(false)
     );
 }
+
+fn wide_loader() -> Instance {
+    let row = "Item { Item { Component.onCompleted: page.completions++ } }\n";
+    model(&format!(
+        "import QtQuick\nItem {{ id: page; property int completions: 0
+            Component {{ id: wide; Item {{ {} }} }}
+            Component {{ id: small; Item {{ width: 10 }} }}
+            Loader {{ id: slot; asynchronous: true; sourceComponent: wide }}
+        }}",
+        row.repeat(96)
+    ))
+}
+
+#[test]
+fn preparing_a_large_async_loader_hides_objects_and_runs_completion_only_at_publication() {
+    let mut app = wide_loader();
+    let root = app.root();
+    let loader = app.id("slot").unwrap();
+    let before = app.objects().count();
+    let revision = app.structure_revision();
+    assert_eq!(app.process_deferred_while(16, || false).unwrap(), 0);
+    let mut turns = 0;
+    while app.get(loader, "item").unwrap() == Value::Null {
+        assert_eq!(app.objects().count(), before);
+        assert_eq!(app.structure_revision(), revision);
+        assert_eq!(app.get(root, "completions").unwrap(), Value::Number(0.));
+        assert_eq!(app.get(loader, "status").unwrap(), Value::Number(2.));
+        assert_eq!(app.process_deferred(usize::MAX).unwrap(), 1);
+        turns += 1;
+        assert!(turns < 1000);
+    }
+    assert!(turns > 1);
+    assert_eq!(app.objects().count(), before + 193);
+    assert_eq!(app.get(root, "completions").unwrap(), Value::Number(96.));
+    assert_eq!(app.get(loader, "status").unwrap(), Value::Number(1.));
+    assert!(!app.has_deferred_work());
+}
+
+#[test]
+fn cancellation_replacement_and_synchronous_completion_discard_private_preparations() {
+    let mut app = wide_loader();
+    let loader = app.id("slot").unwrap();
+    let before = app.objects().count();
+
+    assert_eq!(app.process_deferred(1).unwrap(), 1);
+    app.set(loader, "active", Value::Bool(false)).unwrap();
+    assert!(!app.has_deferred_work());
+    assert_eq!(app.objects().count(), before);
+
+    app.set(loader, "active", Value::Bool(true)).unwrap();
+    app.process_deferred(1).unwrap();
+    let small = app.id("small").unwrap();
+    app.set(loader, "sourceComponent", Value::Object(small))
+        .unwrap();
+    app.process_deferred(1).unwrap();
+    assert_eq!(
+        app.get(item(&app, loader), "width").unwrap(),
+        Value::Number(10.)
+    );
+    assert_eq!(
+        app.get(app.root(), "completions").unwrap(),
+        Value::Number(0.)
+    );
+
+    let wide = app.id("wide").unwrap();
+    app.set(loader, "sourceComponent", Value::Object(wide))
+        .unwrap();
+    app.process_deferred(1).unwrap();
+    app.set(loader, "asynchronous", Value::Bool(false)).unwrap();
+    assert!(!app.has_deferred_work());
+    assert_eq!(app.get(loader, "status").unwrap(), Value::Number(1.));
+    assert_eq!(
+        app.get(app.root(), "completions").unwrap(),
+        Value::Number(96.)
+    );
+}
+
+#[test]
+fn an_async_completion_exception_rolls_back_before_the_loader_reports_error() {
+    let mut app = model(
+        r#"import QtQuick
+        Item { id: page; property int calls: 0
+            Loader { id: slot; asynchronous: true
+                sourceComponent: Item {
+                    Component.onCompleted: { page.calls++; page.unknownMethod() }
+                }
+            }
+        }"#,
+    );
+    let loader = app.id("slot").unwrap();
+    let before = app.objects().count();
+    assert!(app.process_deferred(1).is_err());
+    assert_eq!(app.get(app.root(), "calls").unwrap(), Value::Number(0.));
+    assert_eq!(app.get(loader, "status").unwrap(), Value::Number(3.));
+    assert_eq!(app.get(loader, "item").unwrap(), Value::Null);
+    assert_eq!(app.objects().count(), before);
+    assert!(!app.has_deferred_work());
+}
