@@ -381,7 +381,7 @@ fn dynamic_visual_lifetime_validates_before_mount_and_disconnects_before_retirem
 
 #[test]
 fn native_loader_sizes_and_disconnects_a_retained_loaded_control() {
-    use ferroui_base::Rect;
+    use ferroui_base::{layout::ILayoutManager, Rect};
     use ferroui_controls::Window;
     let _scope = UnitTestApplication::start(TestServices::styled_window());
     let view = mount(
