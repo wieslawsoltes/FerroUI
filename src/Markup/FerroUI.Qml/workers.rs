@@ -116,6 +116,9 @@ struct Event {
 #[derive(Default)]
 struct Inbox {
     queue: VecDeque<Event>,
+    // An overflowing generation gets one terminal marker at its exact output
+    // boundary. Markers are separately bounded by the number of live workers.
+    data_count: usize,
     bytes: usize,
     active: BTreeMap<ObjectId, u64>,
     stopped: BTreeSet<(ObjectId, u64)>,
@@ -128,6 +131,7 @@ impl Inbox {
             self.queue.retain(|event| {
                 if event.id == id {
                     self.bytes -= event.bytes;
+                    self.data_count -= usize::from(event.bytes != 0);
                     false
                 } else {
                     true
@@ -139,20 +143,13 @@ impl Inbox {
         }
     }
     fn pending(&self) -> bool {
-        !self.queue.is_empty() || !self.stopped.is_empty()
+        !self.queue.is_empty()
     }
     fn pop(&mut self) -> Option<Event> {
-        if let Some(event) = self.queue.pop_front() {
-            self.bytes -= event.bytes;
-            return Some(event);
-        }
-        self.stopped.pop_first().map(|(id, generation)| Event {
-            id,
-            generation,
-            event: WorkerEvent::Stopped("worker output limit exceeded".into()),
-            bytes: 0,
-            ack: None,
-        })
+        let event = self.queue.pop_front()?;
+        self.bytes -= event.bytes;
+        self.data_count -= usize::from(event.bytes != 0);
+        Some(event)
     }
 }
 
@@ -212,8 +209,9 @@ impl WorkerDelivery {
             }),
             WorkerEvent::Ready => 0,
         });
-        let fits = q.queue.len() < EVENT_LIMIT && q.bytes.saturating_add(bytes) <= BYTE_LIMIT;
+        let fits = q.data_count < EVENT_LIMIT && q.bytes.saturating_add(bytes) <= BYTE_LIMIT;
         if fits {
+            q.data_count += 1;
             q.bytes += bytes;
             q.queue.push_back(Event {
                 id: self.id,
@@ -224,6 +222,13 @@ impl WorkerDelivery {
             });
         } else {
             q.stopped.insert((self.id, self.generation));
+            q.queue.push_back(Event {
+                id: self.id,
+                generation: self.generation,
+                bytes: 0,
+                ack: None,
+                event: WorkerEvent::Stopped("worker output limit exceeded".into()),
+            });
         }
         let wake = q.wake.clone();
         drop(q);
@@ -525,6 +530,32 @@ impl Transaction<'_> {
         let [input] = args else {
             return Err(Error::new("WorkerScript.sendMessage expects one message"));
         };
+        // An imperative method can select a replacement source and send to it
+        // in one transaction. Preserve that order in the post-commit actions.
+        if self.worker_sources.contains(&id) {
+            self.stage_workers()?;
+        }
+        let entry = &self.model.workers.entries[&id];
+        let restarting = self
+            .worker_actions
+            .iter()
+            .any(|a| matches!(a, Action::Load(owner, _) if *owner == id));
+        if !restarting
+            && self
+                .model
+                .workers
+                .inbox
+                .as_ref()
+                .expect("registered worker")
+                .lock()
+                .unwrap_or_else(|e| e.into_inner())
+                .stopped
+                .contains(&(id, entry.generation))
+        {
+            return Err(Error::new(
+                "WorkerScript stopped after reaching its output limit",
+            ));
+        }
         let mut grants = BTreeMap::new();
         let value = self.export_worker(input, 0, &mut grants)?;
         self.worker_actions.push(Action::Send(id, value, grants));
@@ -654,6 +685,55 @@ impl Transaction<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn overflow_follows_accepted_deliveries_without_waiting_for_other_workers_to_go_idle() {
+        let doc = ir::parse(
+            r#"
+            import QtQml
+            import QtQml.WorkerScript
+            QtObject {
+                property WorkerScript first: WorkerScript { id: firstActor }
+                property WorkerScript next: WorkerScript { id: secondActor }
+            }
+        "#,
+        )
+        .unwrap();
+        let mut app = Instance::new(&doc, &TypeRegistry::new(), Default::default()).unwrap();
+        let a = app.id("firstActor").unwrap();
+        let b = app.id("secondActor").unwrap();
+        let delivery = |id| WorkerDelivery {
+            inbox: Arc::downgrade(app.workers.inbox.as_ref().unwrap()),
+            id,
+            generation: app.workers.entries[&id].generation,
+        };
+        let first = delivery(a);
+        let second = delivery(b);
+        assert!(first.publish(WorkerEvent::Ready));
+        assert!(second.publish(WorkerEvent::Ready));
+        app.poll_worker_scripts(2).unwrap();
+        let message = || WorkerEvent::Message(WorkerValue::Undefined);
+        for _ in 0..EVENT_LIMIT {
+            assert!(first.publish(message()));
+        }
+        assert!(!first.publish(message()));
+        for _ in 0..EVENT_LIMIT {
+            assert_eq!(app.poll_worker_scripts(1).unwrap(), 1);
+            // This later delivery keeps the inbox nonempty across every poll.
+            assert!(second.publish(message()));
+        }
+        assert_eq!(app.get(a, "ready").unwrap(), Value::Bool(true));
+        assert!(app
+            .poll_worker_scripts(1)
+            .unwrap_err()
+            .message
+            .contains("output limit"));
+        assert_eq!(app.get(a, "ready").unwrap(), Value::Bool(false));
+        assert_eq!(app.get(b, "ready").unwrap(), Value::Bool(true));
+        assert!(!first.publish(message()));
+        assert!(app.call(a, "sendMessage", vec![Value::Number(1.)]).is_err());
+        assert_eq!(app.poll_worker_scripts(EVENT_LIMIT).unwrap(), EVENT_LIMIT);
+    }
 
     #[test]
     fn dropping_a_sync_waiter_revokes_unstarted_edits() {
