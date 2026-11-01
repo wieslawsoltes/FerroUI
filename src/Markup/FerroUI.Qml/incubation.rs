@@ -173,12 +173,76 @@ impl PreparedNode {
     }
 }
 
+#[derive(Clone, Copy)]
+struct Edge {
+    member: usize,
+    element: usize,
+}
+
+impl Edge {
+    fn object(self, source: &Object) -> Option<&Object> {
+        match &source.members.get(self.member)?.kind {
+            MemberKind::Child(child) | MemberKind::OnProperty { object: child, .. }
+                if self.element == 0 =>
+            {
+                Some(child)
+            }
+            MemberKind::Property {
+                value: Some(binding),
+                ..
+            }
+            | MemberKind::Binding { value: binding, .. } => match binding {
+                Binding::Object(child) if self.element == 0 => Some(child),
+                Binding::Objects(items) => items.get(self.element),
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+
+    fn eager<'a>(
+        self,
+        source: &'a Object,
+        shell: &PreparedNode,
+        registry: &TypeRegistry,
+        template_imports: &[Import],
+    ) -> Option<&'a Object> {
+        let child = self.object(source)?;
+        match &source.members[self.member].kind {
+            MemberKind::Child(_) if !shell.eager_children => None,
+            MemberKind::Property {
+                name,
+                value: Some(Binding::Object(_)),
+                ..
+            }
+            | MemberKind::Binding {
+                name,
+                value: Binding::Object(_),
+            } => {
+                // A Component-valued slot may synthesize a factory around the
+                // definition. The factory does not construct its defined child.
+                let slot = *shell.node.properties.get(name)?;
+                let imports = child.type_imports.as_deref().unwrap_or(template_imports);
+                (!registry.wraps_component(&shell.properties[slot].ty, imports, &child.type_name))
+                    .then_some(child)
+            }
+            _ => Some(child),
+        }
+    }
+}
+
+enum Cursor {
+    Start,
+    Declare { member: usize, has_children: bool },
+    Children(Edge),
+}
+
 pub(crate) struct Preparation {
     template: dynamic::Template,
     // Member indices from the root to the cursor. The sibling position for
     // each ancestor lets the traversal resume without rescanning visited nodes.
-    path: Vec<usize>,
-    next_member: Vec<Option<usize>>,
+    path: Vec<Edge>,
+    cursors: Vec<Cursor>,
     prepared: PreparedNodes,
 }
 
@@ -187,7 +251,7 @@ impl Preparation {
         Self {
             template,
             path: Vec::new(),
-            next_member: vec![None],
+            cursors: vec![Cursor::Start],
             prepared: PreparedNodes::new(),
         }
     }
@@ -196,9 +260,8 @@ impl Preparation {
         Rc::ptr_eq(&self.template.object, &template.object)
     }
 
-    /// Visit the static default-child tree. Component definitions and ListModel
-    /// rows are data rather than live children. Object-valued property bindings
-    /// may implicitly wrap a definition and use the regular allocator at activation.
+    /// Prepare eager children, value sources, object-valued properties and
+    /// object lists. A separate declaration pass handles forward-declared slots.
     pub(crate) fn advance(
         &mut self,
         registry: &TypeRegistry,
@@ -209,17 +272,14 @@ impl Preparation {
         let mut source = self.template.object.as_ref();
         let mut branch = vec![source];
         for &edge in &self.path {
-            let MemberKind::Child(child) = &source.members[edge].kind else {
-                unreachable!("incubation cursor follows default children")
-            };
-            source = child;
+            source = edge.object(source).expect("saved incubation child");
             branch.push(source);
         }
         for step in 0..SLICE_STEPS {
             if step > 0 && !has_time() {
                 return Ok(false);
             }
-            let Some(next) = self.next_member.last_mut() else {
+            let Some(cursor) = self.cursors.last_mut() else {
                 return Ok(true);
             };
             let source = *branch.last().expect("current incubation node");
@@ -228,41 +288,76 @@ impl Preparation {
                 .as_deref()
                 .unwrap_or(&self.template.imports);
             let key = std::ptr::from_ref(source);
-            if let Some(index) = *next {
-                if let Some(member) = source.members.get(index) {
-                    *next = Some(index + 1);
+            match cursor {
+                Cursor::Start => {
+                    if source.type_imports.is_some() {
+                        registry.validate_imports(imports)?;
+                    }
+                    let (module, name, definition) =
+                        registry.resolve(imports, &source.type_name)?;
+                    let scope = self.template.scopes.imports(imports, registry);
+                    self.prepared.insert(
+                        key,
+                        PreparedNode::new(source, module, name, definition, scope),
+                    );
+                    if !source.members.is_empty() {
+                        *cursor = Cursor::Declare {
+                            member: 0,
+                            has_children: false,
+                        };
+                        continue;
+                    }
+                }
+                Cursor::Declare {
+                    member,
+                    has_children,
+                } => {
                     let shell = self
                         .prepared
                         .get_mut(&key)
                         .expect("prepared incubation node");
-                    shell.declare(registry, imports, member)?;
-                    if shell.eager_children {
-                        if let MemberKind::Child(child) = &member.kind {
-                            branch.push(child);
-                            self.path.push(index);
-                            self.next_member.push(None);
-                        }
+                    shell.declare(registry, imports, &source.members[*member])?;
+                    *has_children |= Edge {
+                        member: *member,
+                        element: 0,
                     }
-                    continue;
+                    .object(source)
+                    .is_some();
+                    *member += 1;
+                    if *member < source.members.len() {
+                        continue;
+                    }
+                    if *has_children {
+                        *cursor = Cursor::Children(Edge {
+                            member: 0,
+                            element: 0,
+                        });
+                        continue;
+                    }
                 }
-            } else {
-                if source.type_imports.is_some() {
-                    registry.validate_imports(imports)?;
-                }
-                let (module, name, definition) = registry.resolve(imports, &source.type_name)?;
-                let scope = self.template.scopes.imports(imports, registry);
-                let shell = PreparedNode::new(source, module, name, definition, scope);
-                self.prepared.insert(key, shell);
-                if !source.members.is_empty() {
-                    *next = Some(0);
-                    continue;
+                Cursor::Children(edge) => {
+                    if edge.member < source.members.len() {
+                        let shell = &self.prepared[&key];
+                        if let Some(child) =
+                            edge.eager(source, shell, registry, &self.template.imports)
+                        {
+                            self.path.push(*edge);
+                            edge.element += 1;
+                            branch.push(child);
+                            self.cursors.push(Cursor::Start);
+                        } else {
+                            edge.member += 1;
+                            edge.element = 0;
+                        }
+                        continue;
+                    }
                 }
             }
             branch.pop();
             self.path.pop();
-            self.next_member.pop();
+            self.cursors.pop();
         }
-        Ok(self.next_member.is_empty())
+        Ok(self.cursors.is_empty())
     }
 
     pub(crate) fn into_nodes(self) -> PreparedNodes {
@@ -273,6 +368,28 @@ impl Preparation {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn eager_object_properties_and_lists_prepare_without_entering_component_definitions() {
+        let doc = ir::parse(r#"import QtQml
+            QtObject {
+                property QtObject child: QtObject { id: one }
+                property list<QtObject> rows: [QtObject { id: two }, QtObject { id: three }]
+                property Component implicitFactory: QtObject { id: deferredImplicit }
+                property Component explicitFactory: Component { id: factory; QtObject { id: deferredExplicit } }
+            }"#).unwrap();
+        let template = dynamic::Template::from_object(doc.root, &doc.imports).unwrap();
+        let mut preparation = Preparation::new(template);
+        let registry = TypeRegistry::new();
+        while !preparation.advance(&registry, &mut || true).unwrap() {}
+        let ids = preparation
+            .prepared
+            .values()
+            .filter_map(|shell| shell.id.as_deref())
+            .collect::<BTreeSet<_>>();
+        assert_eq!(ids, BTreeSet::from(["one", "two", "three", "factory"]));
+        assert_eq!(preparation.prepared.len(), 5);
+    }
 
     #[test]
     fn a_property_heavy_node_yields_with_real_declarations_in_private_storage() {

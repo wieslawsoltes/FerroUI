@@ -423,6 +423,19 @@ impl<'a> Builder<'a> {
 }
 
 impl TypeRegistry {
+    pub(super) fn wraps_component(
+        &self,
+        property_type: &str,
+        imports: &[Import],
+        object_type: &str,
+    ) -> bool {
+        let component = |ty: &str| {
+            self.resolve(imports, ty)
+                .is_ok_and(|(module, name, _)| module == "QtQml" && name == "Component")
+        };
+        (property_type == "QtQml.Component" || component(property_type)) && !component(object_type)
+    }
+
     pub(super) fn canonical_type(&self, imports: &[Import], ty: &str) -> Result<String, Error> {
         if let Some(element) = list_element(ty) {
             return Ok(format!("list<{}>", self.canonical_type(imports, element)?));
@@ -785,12 +798,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             Binding::Object(child) => {
                 let ty = &self.instance.properties[key].ty;
                 let imports = child.type_imports.as_deref().unwrap_or(self.imports);
-                let is_component = |name: &str| {
-                    self.registry
-                        .resolve(imports, name)
-                        .is_ok_and(|(module, ty, _)| module == "QtQml" && ty == "Component")
-                };
-                if is_component(ty) && !is_component(&child.type_name) {
+                if self.registry.wraps_component(ty, imports, &child.type_name) {
                     // A Component-valued property owns a definition here. Its object and
                     // private ids come into existence each time the factory is invoked.
                     let mut scope = imports.to_vec();

@@ -159,3 +159,32 @@ fn the_requested_parent_is_weak_while_creation_is_pending() {
     assert_eq!(job.status(&app).unwrap(), IncubationStatus::Ready);
     assert_eq!(app.parent(job.object(&app).unwrap().unwrap()), None);
 }
+
+#[test]
+fn a_component_typed_source_property_defers_its_implicit_child_definition() {
+    let mut app = instance(
+        r#"import QtQml
+        QtObject { id: root; property int completions: 0
+            property Component part: QtObject { id: privateChild; Component.onCompleted: root.completions++ }
+        }"#,
+    );
+    let root = app.root();
+    let Value::Object(factory) = app.get(root, "part").unwrap() else {
+        panic!("factory")
+    };
+    assert!(app.is_component(factory));
+    assert_eq!(app.get(root, "completions").unwrap(), Value::Number(0.));
+    assert!(app.id("privateChild").is_none());
+    let job = app
+        .incubate_object(
+            factory,
+            None,
+            Default::default(),
+            IncubationMode::Asynchronous,
+        )
+        .unwrap()
+        .unwrap();
+    app.process_deferred(1).unwrap();
+    assert_eq!(job.status(&app).unwrap(), IncubationStatus::Ready);
+    assert_eq!(app.get(root, "completions").unwrap(), Value::Number(1.));
+}
