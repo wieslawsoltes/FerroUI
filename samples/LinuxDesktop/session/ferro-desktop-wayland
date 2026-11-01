@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# Launch a dedicated Sway compositor and its native Ferro Desktop shell. Both are
+# children of this supervisor, so a login, logout or compositor failure has one lifetime.
+set -euo pipefail
+case ${1:-} in
+    --ready)
+        : "${WAYLAND_DISPLAY:?}" "${SWAYSOCK:?}" "${FERRO_DESKTOP_WAYLAND_READY:?}"
+        printf '%s\0' "$WAYLAND_DISPLAY" "$SWAYSOCK" "${DISPLAY:-}" >"$FERRO_DESKTOP_WAYLAND_READY"
+        exit ;;
+    --show=applications|--show=workspaces|--show=settings|--show=notifications)
+        exec "${FERRO_DESKTOP_BINARY:-ferro-desktop}" --platform=wayland "$1" ;;
+    --lock) exec swaylock -f -c 182332 ;;
+    --terminal)
+        for terminal in xdg-terminal-exec foot kgx gnome-terminal konsole; do
+            if command -v "$terminal" >/dev/null; then exec "$terminal"; fi
+        done
+        echo "No supported terminal emulator is installed." >&2; exit 1 ;;
+    --nested)
+        # Give a development compositor a private bus so its notification and portal
+        # services can coexist with the parent login.
+        export FERRO_DESKTOP_NESTED=1
+        exec dbus-run-session -- "$0" ;;
+    '') ;;
+    *) echo "Usage: ferro-desktop-wayland [--nested]" >&2; exit 2 ;;
+esac
+if [[ -z ${DBUS_SESSION_BUS_ADDRESS:-} ]]; then exec dbus-run-session -- "$0"; fi
+: "${XDG_RUNTIME_DIR:?A display-manager or logind session must supply XDG_RUNTIME_DIR}"
+here=$(cd -- "$(dirname -- "$0")" && pwd)
+export PATH="$here:$PATH"
+export XDG_SESSION_TYPE=wayland XDG_SESSION_DESKTOP=ferro-desktop-wayland XDG_CURRENT_DESKTOP=FerroDesktop:sway
+binary=${FERRO_DESKTOP_BINARY:-ferro-desktop}
+for command in sway "$binary"; do command -v "$command" >/dev/null || { echo "Missing $command" >&2; exit 1; }; done
+config=${FERRO_DESKTOP_SWAY_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/ferro-desktop/sway.conf}
+if [[ ! -r $config && -z ${FERRO_DESKTOP_SWAY_CONFIG:-} ]]; then
+    config=$here/../share/ferro-desktop/sway.conf
+    [[ -r $config ]] || config=$here/sway.conf
+fi
+[[ -r $config ]] || { echo "Cannot read Sway configuration: $config" >&2; exit 1; }
+export FERRO_DESKTOP_SWAY_CONFIG
+FERRO_DESKTOP_SWAY_CONFIG=$(realpath -- "$config")
+state=$(mktemp -d -- "$XDG_RUNTIME_DIR/ferro-wayland.XXXXXXXX")
+compositor= shell=
+cleanup() {
+    for pid in "$shell" "$compositor"; do [[ -z $pid ]] || kill "$pid" 2>/dev/null || :; done
+    wait || :
+    rm -rf -- "$state"
+}
+trap cleanup EXIT
+trap 'exit 143' TERM
+trap 'exit 130' INT HUP
+export FERRO_DESKTOP_WAYLAND_READY=$state/ready
+mkfifo -m 600 -- "$state/ready"
+case ${FERRO_DESKTOP_XWAYLAND:-auto} in
+    auto) if command -v Xwayland >/dev/null; then xwayland=enable; else xwayland=disable; fi ;;
+    1) xwayland=enable ;; 0) xwayland=disable ;;
+    *) echo 'FERRO_DESKTOP_XWAYLAND must be auto, 0 or 1.' >&2; exit 2 ;;
+esac
+# A real include preserves relative includes in the user's own config. Sway's include
+# directive performs shell-style filename expansion after parsing the argument.
+printf 'xwayland %s\n%s\n%s\n' "$xwayland" 'include "$FERRO_DESKTOP_SWAY_CONFIG"' \
+    'exec ferro-desktop-wayland --ready' >"$state/sway.conf"
+sway --config "$state/sway.conf" &
+compositor=$!
+(
+    # Receive the compositor's actual socket names; never guess wayland-0 or use
+    # another session's SWAYSOCK. A broken startup without an exec fails explicitly.
+    mapfile -d '' -t address < <(timeout 30s cat -- "$state/ready")
+    if (( ${#address[@]} != 3 )); then echo 'Sway did not publish its session environment.' >&2; exit 1; fi
+    export WAYLAND_DISPLAY=${address[0]} SWAYSOCK=${address[1]} DISPLAY=${address[2]}
+    unset FERRO_DESKTOP_WAYLAND_READY
+    if command -v dbus-update-activation-environment >/dev/null; then
+        sync_args=()
+        if [[ -z ${FERRO_DESKTOP_NESTED:-} && -S $XDG_RUNTIME_DIR/systemd/private ]]; then sync_args+=(--systemd); fi
+        dbus-update-activation-environment "${sync_args[@]}" WAYLAND_DISPLAY SWAYSOCK DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP || :
+    fi
+    [[ -n $DISPLAY ]] || unset DISPLAY
+    exec "$binary" --session --platform=wayland
+) &
+shell=$!
+wait -n "$compositor" "$shell"
