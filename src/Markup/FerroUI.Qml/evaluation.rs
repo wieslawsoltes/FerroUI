@@ -62,7 +62,18 @@ impl Transaction<'_> {
         if let Some(value) = self.model.nodes[owner.index].type_scope.member(name) {
             return Ok(value);
         }
-        self.read(self.lookup_property(owner, root, name)?, reads)
+        match self.lookup_property(owner, root, name) {
+            Ok(key) => self.read(key, reads),
+            Err(error) => {
+                let receiver = [owner, root, self.model.root()]
+                    .into_iter()
+                    .find(|&receiver| self.model.script_method(receiver, name));
+                match receiver {
+                    Some(receiver) => self.model.method(receiver, name).map(Value::Method),
+                    None => Err(error),
+                }
+            }
+        }
     }
 
     pub(crate) fn scope_id(&self, name: &str) -> Result<ObjectId, Error> {
@@ -243,7 +254,14 @@ impl Transaction<'_> {
                 .parent(id)
                 .map(Value::Object)
                 .unwrap_or(Value::Null)),
-            Value::Object(id) => self.read(self.scoped_key(id, name)?, reads),
+            Value::Object(id) => match self.scoped_key(id, name) {
+                Ok(key) => self.read(key, reads),
+                Err(error) => self
+                    .model
+                    .method(id, name)
+                    .map(Value::Method)
+                    .map_err(|_| error),
+            },
             Value::List(values) if name == "length" => Ok(Value::Number(values.len() as f64)),
             Value::List(values) => Ok(name
                 .parse::<usize>()
@@ -318,10 +336,16 @@ impl Transaction<'_> {
             return self.timer_method(owner, name, &arguments);
         }
         if let Ok(key) = self.scoped_key(owner, name) {
-            if let Value::External(value) = self.read(key, reads)? {
-                return self.with_external(owner, &value, reads, |engine, ctx| {
-                    engine.call_external(ctx, &value, Value::Object(owner), arguments)
-                });
+            match self.read(key, reads)? {
+                Value::External(value) => {
+                    return self.with_external(owner, &value, reads, |engine, ctx| {
+                        engine.call_external(ctx, &value, Value::Object(owner), arguments)
+                    })
+                }
+                Value::Method(method) => {
+                    return self.invoke(method.receiver(), method.name(), arguments, reads)
+                }
+                _ => {}
             }
         }
         Err(Error::new(format!("unknown method or signal '{name}'")))
@@ -707,6 +731,7 @@ pub fn unary(op: &str, value: Value) -> Result<Value, Error> {
         "~" => Value::Number(f64::from(!int32(value.number()?))),
         "typeof" => Value::String(
             match value {
+                Value::Method(_) => "function",
                 Value::Number(_) => "number",
                 Value::Bool(_) => "boolean",
                 Value::String(_) => "string",

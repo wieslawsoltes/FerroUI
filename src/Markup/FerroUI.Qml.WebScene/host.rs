@@ -36,6 +36,13 @@ impl Realm {
                     n.to_string()
                 }
             ]),
+            Value::Method(method) => json!([
+                "bound",
+                self.tables
+                    .borrow_mut()
+                    .object_id(instance, method.receiver()),
+                method.name()
+            ]),
             Value::External(v) => json!(["js", self.handle(v)?]),
             Value::List(items) => json!([
                 "a",
@@ -124,6 +131,12 @@ impl Realm {
                 }
                 ctx.record(fields)?
             }
+            "bound" => {
+                let Value::Object(owner) = self.lookup(ctx, number(v, 1)?)? else {
+                    return Err(Error::new("invalid bound method receiver"));
+                };
+                Value::Method(ctx.bound_method(owner, text(v, 2)?)?)
+            }
             "js" => {
                 let id = number(v, 1)?;
                 let mut handles = self.handles.borrow_mut();
@@ -202,9 +215,6 @@ impl Realm {
                 };
                 Some(owner)
             };
-            let Value::External(function) = self.decode(ctx, field(v, 2)?)? else {
-                return Err(Error::new("Qt.callLater expects a guest function"));
-            };
             let encoded = field(v, 3)?
                 .as_array()
                 .ok_or_else(|| Error::new("invalid deferred arguments"))?;
@@ -212,7 +222,15 @@ impl Realm {
                 .iter()
                 .map(|value| self.decode(ctx, value))
                 .collect::<Result<_, _>>()?;
-            ctx.call_later(owner, function, arguments)?;
+            if let (Some(owner), Some(name)) = (owner, field(v, 2)?.as_str()) {
+                let method = ctx.bound_method(owner, name)?;
+                ctx.defer_method(method, arguments)?;
+            } else {
+                let Value::External(function) = self.decode(ctx, field(v, 2)?)? else {
+                    return Err(Error::new("Qt.callLater expects a guest function"));
+                };
+                ctx.call_later(owner, function, arguments)?;
+            }
             return Ok(Json::Null);
         }
         if matches!(op, "resolve" | "assign" | "scopeMode" | "bindScope") {

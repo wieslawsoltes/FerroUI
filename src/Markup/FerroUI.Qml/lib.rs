@@ -28,7 +28,7 @@ mod value;
 pub use ferroui_qml_compiler as ir;
 pub use ferroui_qml_compiler::{Document, Parameter};
 pub use registry::{NativeCallback, TypeDefinition, TypeRegistry};
-pub use value::{Error, ObjectId, Value};
+pub use value::{Error, MethodRef, ObjectId, Value};
 
 use ferroui_qml_compiler::{Binding, Stmt};
 use std::collections::{BTreeMap, BTreeSet};
@@ -237,6 +237,20 @@ impl Instance {
     pub fn is_assigned(&self, object: ObjectId, property: &str) -> bool {
         self.public_key(object, property)
             .is_ok_and(|key| self.slots[key].assigned)
+    }
+
+    /// Obtain a bound method that can be stored in a var, passed to Rust or
+    /// posted with Qt.callLater. Its receiver belongs to this instance.
+    pub fn method(&self, object: ObjectId, name: &str) -> Result<MethodRef, Error> {
+        if name.starts_with("$qml:") || !self.script_method(object, name) {
+            return Err(Error::new(format!(
+                "unknown public method or signal '{name}'"
+            )));
+        }
+        Ok(MethodRef {
+            receiver: object,
+            name: name.into(),
+        })
     }
 
     pub fn get(&self, object: ObjectId, property: &str) -> Result<Value, Error> {

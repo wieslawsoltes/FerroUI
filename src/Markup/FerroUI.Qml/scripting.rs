@@ -311,6 +311,23 @@ impl ScriptContext<'_, '_> {
         }
     }
     /// Schedule a function on the owner thread after the current transaction commits.
+    pub fn bound_method(&self, receiver: ObjectId, name: &str) -> Result<MethodRef, Error> {
+        self.tx.model.method(receiver, name)
+    }
+
+    pub fn defer_method(&mut self, method: MethodRef, arguments: Vec<Value>) -> Result<(), Error> {
+        self.tx
+            .model
+            .validate_handles(&Value::Method(method.clone()))?;
+        for argument in &arguments {
+            self.tx.model.validate_handles(argument)?;
+        }
+        self.tx
+            .deferred
+            .push(deferred::Task::Method(method, arguments));
+        Ok(())
+    }
+
     pub fn call_later(
         &mut self,
         owner: Option<ObjectId>,

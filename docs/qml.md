@@ -171,6 +171,8 @@ Each instance owns its object arena. Object references carry an instance identit
 
 When a binding runs, the runtime tracks the properties it actually reads. A conditional binding can therefore stop listening to the discarded branch. Imperative assignment detaches the existing binding. A failing transaction restores the previous values and dependency edges and discards pending host notifications. Native Rust functions used in bindings must be deterministic with respect to their declared arguments. Application-owned side effects inside a callback are outside the transaction.
 
+A QML method or signal can be stored in a `var`, passed as an argument, or captured in Rust as `Value::Method` via `Instance::method`. Invoking the reference calls its original receiver in both Rust and V8.
+
 FerroUI posts `Qt.callLater(function, ...args)` callbacks to the owning view's dispatcher. Reposting a function moves it to the end and replaces its arguments. Callbacks scheduled by callbacks execute on a subsequent event turn. A failed transaction discards its postings. Headless Rust hosts can inspect `Instance::has_deferred_work()` and deliver a bounded turn through `Instance::process_deferred(limit)`.
 
 A `Binding` with `delayed: true` applies its initial value when attached. Subsequent changes to its input coalesce until the next turn. Disabling or retargeting the binding restores its previous target immediately.

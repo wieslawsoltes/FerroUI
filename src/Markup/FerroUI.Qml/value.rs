@@ -7,10 +7,27 @@ pub struct ObjectId {
     pub(crate) index: usize,
 }
 
+/// A callable QML method or signal together with its original receiver.
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct MethodRef {
+    pub(crate) receiver: ObjectId,
+    pub(crate) name: std::rc::Rc<str>,
+}
+
+impl MethodRef {
+    pub fn receiver(&self) -> ObjectId {
+        self.receiver
+    }
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Value {
     Undefined,
     External(crate::ExternalValue),
+    Method(MethodRef),
     Null,
     Bool(bool),
     Number(f64),
@@ -30,6 +47,7 @@ impl Value {
             Self::Number(value) => *value != 0.0 && !value.is_nan(),
             Self::String(value) => !value.is_empty(),
             Self::External(_)
+            | Self::Method(_)
             | Self::ModelRow(_)
             | Self::Record(_)
             | Self::Object(_)
@@ -47,6 +65,7 @@ impl Value {
             Self::String(s) if s.trim().is_empty() => 0.0,
             Self::String(s) => s.trim().parse().unwrap_or(f64::NAN),
             Self::External(_)
+            | Self::Method(_)
             | Self::ModelRow(_)
             | Self::Record(_)
             | Self::Object(_)
@@ -69,6 +88,7 @@ impl Value {
             Self::Bool(b) => b.to_string(),
             Self::Null => "null".into(),
             Self::Undefined => "undefined".into(),
+            Self::Method(method) => format!("function {}() {{ [native code] }}", method.name),
             Self::External(_)
             | Self::ModelRow(_)
             | Self::Record(_)

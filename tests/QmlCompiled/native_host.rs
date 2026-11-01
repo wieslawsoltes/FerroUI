@@ -68,6 +68,22 @@ fn check(mut instance: Instance, calls: Rc<Cell<usize>>) {
         .set(root, "chooseFirst", Value::Bool(false))
         .unwrap();
     assert_eq!(instance.get(root, "selected").unwrap(), Value::Number(700.));
+    let Value::Object(first) = instance.get(root, "first").unwrap() else {
+        unreachable!()
+    };
+    instance.call(root, "schedule", vec![]).unwrap();
+    let method = instance.method(first, "commitValue").unwrap();
+    assert_eq!(
+        instance.get(root, "pending").unwrap(),
+        Value::Method(method.clone())
+    );
+    assert_eq!(instance.process_deferred(16).unwrap(), 1);
+    assert_eq!(instance.get(first, "input").unwrap(), Value::Number(10.));
+    instance
+        .set(root, "pending", Value::Method(method))
+        .unwrap();
+    instance.call(root, "runSaved", vec![]).unwrap();
+    assert_eq!(instance.get(first, "input").unwrap(), Value::Number(11.));
 }
 
 #[test]

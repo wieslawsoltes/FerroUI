@@ -23,7 +23,8 @@
     Object.defineProperty(globalThis, "Qt", {value: Object.freeze({
         callLater(fn, ...args) {
             if (typeof fn !== "function") throw new TypeError("Qt.callLater expects a function");
-            rpc(["callLater", methodOwners.get(fn) || 0, atom(fn), args.map(value => encode(value))]);
+            const method = methodOwners.get(fn);
+            rpc(["callLater", method ? method.id : 0, method ? method.key : atom(fn), args.map(value => encode(value))]);
         },
         binding(fn) {
             if (arguments.length !== 1 || typeof fn !== "function") {
@@ -53,6 +54,8 @@
             case "boolean": return ["b",value];
             case "string": return ["s",value];
         }
+        const bound = methodOwners.get(value);
+        if (bound) return ["bound", bound.id, bound.key];
         if (proxyIds.has(value)) return ["h",proxyIds.get(value)];
         if (mode && typeof value === "object") {
             if (seen.has(value)) throw new TypeError("A cyclic object cannot initialize a typed QML collection");
@@ -88,7 +91,7 @@
         if(!slots){slots=new Map();boundMethods.set(id,slots);}
         if(slots.has(key)) return slots.get(key);
         const bound=(...args)=>decode(rpc(["call",id,key,args.map((v,i)=>encode(v,signature[i]))]));
-        methodOwners.set(bound, id);
+        methodOwners.set(bound, {id, key});
         callbackAdapters.set(bound,(...args)=>bound(...args.slice(0,signature.length)));
         if(isSignal){
             function change(action,args){
@@ -118,6 +121,7 @@
                 if (!objects.has(value[1])) throw new ReferenceError("Released JavaScript reference");
                 return objects.get(value[1]);
             case "h": return proxy(value[1],value[2]);
+            case "bound": return decode(rpc(["get", value[1], value[2]]));
             case "fn": return method(value);
             default: throw new Error("Unknown QML value tag");
         }

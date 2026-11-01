@@ -2,6 +2,7 @@
 //! Reads performed by either backend pass through the same transaction.
 use crate::evaluation::{math, object};
 use crate::transaction::Transaction;
+use crate::{deferred, MethodRef};
 use crate::{Document, Error, Locals, ObjectId, SlotId, Value};
 use std::collections::BTreeSet;
 
@@ -82,6 +83,7 @@ pub struct Frame<'a, 'model> {
 }
 
 pub enum Receiver {
+    Bound(MethodRef),
     External(crate::ExternalValue),
     Callable(crate::ExternalValue),
     Array(crate::Record),
@@ -143,6 +145,7 @@ impl Frame<'_, '_> {
         if let Some(local) = self.locals.get(name) {
             return match local {
                 Value::External(value) => Ok(Receiver::Callable(value.clone())),
+                Value::Method(method) => Ok(Receiver::Bound(method.clone())),
                 _ => Err(Error::new(format!("'{name}' is not callable"))),
             };
         }
@@ -170,6 +173,10 @@ impl Frame<'_, '_> {
         args: Vec<Value>,
     ) -> Result<Value, Error> {
         match receiver {
+            Receiver::Bound(method) => {
+                self.tx
+                    .invoke(method.receiver(), method.name(), args, self.reads)
+            }
             Receiver::Callable(value) => {
                 self.tx
                     .with_external(self.owner, &value, self.reads, |engine, ctx| {
@@ -192,6 +199,24 @@ impl Frame<'_, '_> {
             )),
             Receiver::ArrayConstructor => Err(Error::new(format!("unsupported Array.{name}"))),
             Receiver::Object(id) => self.tx.invoke(id, name, args, self.reads),
+            Receiver::Qt if name == "callLater" => {
+                let mut args = args.into_iter();
+                match args.next() {
+                    Some(Value::Method(method)) => self
+                        .tx
+                        .deferred
+                        .push(deferred::Task::Method(method, args.collect())),
+                    Some(Value::External(function)) => {
+                        self.tx.deferred.push(deferred::Task::Call {
+                            owner: self.owner,
+                            function,
+                            arguments: args.collect(),
+                        })
+                    }
+                    _ => return Err(Error::new("Qt.callLater expects a function")),
+                }
+                Ok(Value::Undefined)
+            }
             Receiver::Qt => crate::enums::qt(name, &args),
             Receiver::Math => math(name, &args),
         }

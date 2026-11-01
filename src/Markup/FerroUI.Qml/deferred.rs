@@ -3,13 +3,15 @@
 use super::*;
 use crate::transaction::Transaction;
 
-#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd)]
 enum Key {
     Binding(ObjectId),
     Function(u64),
+    Method(MethodRef),
 }
 
 pub(crate) enum Task {
+    Method(MethodRef, Vec<Value>),
     Binding(ObjectId),
     Call {
         owner: ObjectId,
@@ -22,6 +24,7 @@ impl Task {
     fn key(&self) -> Key {
         match self {
             Self::Binding(owner) => Key::Binding(*owner),
+            Self::Method(method, _) => Key::Method(method.clone()),
             Self::Call { function, .. } => Key::Function(function.id()),
         }
     }
@@ -85,6 +88,15 @@ impl Instance {
 impl Transaction<'_> {
     fn dispatch_deferred(&mut self, task: Task) -> Result<(), Error> {
         match task {
+            Task::Method(method, arguments) if self.model.node(method.receiver()).is_some() => {
+                self.invoke(
+                    method.receiver(),
+                    method.name(),
+                    arguments,
+                    &mut BTreeSet::new(),
+                )?;
+                Ok(())
+            }
             Task::Binding(owner) if self.model.node(owner).is_some() => self.publish_delayed(owner),
             Task::Call {
                 owner,
