@@ -4,7 +4,15 @@ Ferro Desktop is a Linux desktop session built from FerroUI controls. The shell 
 
 ## Screenshots
 
-These captures come from an X11 session running Skia Graphite on Mesa Lavapipe. The bottom row follows one ImageMagick window across three live appearance changes. The viewer displays a Julia set produced by the included test fixture.
+These Wayland captures come from a managed Sway session running Skia Graphite on Mesa Lavapipe. The first shows independent native GTK and Qt windows. The next two show the same terminal after switching the running desktop’s appearance.
+
+| Windows 11 · GTK and Qt | macOS · terminal | Material 3 · terminal |
+| --- | --- | --- |
+| ![GTK and Qt on the Windows desktop](screenshots/wayland-gtk-qt.webp) | ![Wayland terminal and macOS Dock](screenshots/wayland-macos.webp) | ![Wayland terminal and Material navigation](screenshots/wayland-material.webp) |
+
+[Application launcher](screenshots/wayland-launcher.webp) · [Passive notification over a focused terminal](screenshots/wayland-notification.webp) · [Quick Settings after rotating a monitor](screenshots/wayland-rotated.webp)
+
+The following X11 captures use Skia Graphite on Mesa Lavapipe. The bottom row follows one ImageMagick window across three live appearance changes. The viewer displays a Julia set produced by the included test fixture.
 
 | Windows 11 · WinUI 3 | macOS | Android · Material 3 |
 | --- | --- | --- |
