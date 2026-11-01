@@ -5,6 +5,17 @@
     const data = new Uint8Array(buffer, 8);
     const encoder = new TextEncoder(), decoder = new TextDecoder("utf-8", {fatal:true});
     const limit = 32 * 1024 * 1024;
+    // Browser versions differ on whether Web IDL accepts a shared buffer
+    // for these codecs. Probe once per channel, then reuse private storage
+    // on engines that require it.
+    let encodeShared = true, decodeShared = true, scratch;
+    try { encoder.encodeInto("", data); } catch { encodeShared = false; }
+    try { decoder.decode(data.subarray(0, 0)); } catch { decodeShared = false; }
+    function privateBytes(length) {
+        if (!scratch || scratch.length < length)
+            scratch = new Uint8Array(Math.min(data.length, Math.max(256, 2 ** Math.ceil(Math.log2(length || 1)))));
+        return scratch;
+    }
     function waitFor(empty, until) {
         for (;;) {
             const state = Atomics.load(words, 0);
@@ -24,7 +35,9 @@
             // string fits, encode directly into the exclusively owned slot.
             if (text.length <= Math.floor(Math.min(limit, data.length) / 3)) {
                 waitFor(true, until);
-                const {written} = encoder.encodeInto(text, data);
+                const target = encodeShared ? data : privateBytes(text.length * 3);
+                const {written} = encoder.encodeInto(text, target);
+                if (!encodeShared) data.set(target.subarray(0, written));
                 Atomics.store(words, 1, written);
                 publish(2);
                 return;
@@ -50,8 +63,13 @@
                 if ((state !== 1 && state !== 2) || length < 0 || length > data.length || (total += length) > limit)
                     throw new Error("Invalid QML browser frame");
                 if (state === 2 && !chunks.length) {
-                    try { return decoder.decode(data.subarray(0, length)); }
-                    finally { publish(0); }
+                    try {
+                        const bytes = data.subarray(0, length);
+                        if (decodeShared) return decoder.decode(bytes);
+                        const local = privateBytes(length).subarray(0, length);
+                        local.set(bytes);
+                        return decoder.decode(local);
+                    } finally { publish(0); }
                 }
                 const chunk = data.slice(0, length);
                 publish(0);
