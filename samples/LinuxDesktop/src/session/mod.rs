@@ -71,6 +71,12 @@ impl Dirty {
     }
 }
 
+#[derive(Clone, Copy)]
+pub struct ShortcutOrigin {
+    workspace: usize,
+    window: XID,
+}
+
 pub struct Session {
     commands: RefCell<Option<Rc<commands::Endpoint>>>,
     platform: Rc<FerroX11Platform>,
@@ -152,6 +158,37 @@ impl Session {
     pub fn claim_commands(&self) -> std::io::Result<()> {
         self.commands.replace(Some(commands::Endpoint::claim(&self.platform)?));
         Ok(())
+    }
+
+    /// The EWMH focus at the time a global shortcut was invoked. Query the root, since a
+    /// just-focused client can precede our next coalesced snapshot. Include transient clients.
+    pub fn shortcut_origin(&self) -> Option<ShortcutOrigin> {
+        let info = self.platform.info();
+        let a = info.atoms();
+        let active = self.number(info.root_window(), a._NET_ACTIVE_WINDOW, a.WINDOW)?;
+        if active == self.desktop.get() || !self.order.borrow().contains(&active) {
+            return None;
+        }
+        let workspace = self.number(info.root_window(), a._NET_CURRENT_DESKTOP, a.CARDINAL)? as usize;
+        Some(ShortcutOrigin { workspace, window: active })
+    }
+
+    pub fn restore_shortcut_origin(&self, origin: ShortcutOrigin) {
+        let ShortcutOrigin { workspace, window: id } = origin;
+        if !self.known_workspace(workspace) || !self.order.borrow().contains(&id) {
+            return;
+        }
+        let info = self.platform.info();
+        let a = info.atoms();
+        // If the application closed or was moved deliberately, do not chase it on another desk.
+        let assigned = self.number(id, a._NET_WM_DESKTOP, a.CARDINAL);
+        if !assigned.is_some_and(|desk| desk as usize == workspace || desk as u32 == u32::MAX) {
+            return;
+        }
+        if self.number(info.root_window(), a._NET_CURRENT_DESKTOP, a.CARDINAL) != Some(workspace as XID) {
+            self.switch_workspace(workspace);
+        }
+        self.message(id, a._NET_ACTIVE_WINDOW, &[2, info.last_activity_timestamp(), self.desktop.get()]);
     }
 
     pub fn publish_scene(&self, name: &str) {

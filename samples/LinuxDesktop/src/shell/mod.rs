@@ -55,6 +55,7 @@ struct Shell {
     launching: Signal<bool>,
     owner: Owner,
     desktop_focus: NodeRef<ferroui_controls::Button>,
+    shortcut_origin: std::cell::Cell<Option<crate::session::ShortcutOrigin>>,
     // First use mounts the launcher. Keep its template, layout and search input until the theme changes.
     cached_launcher: Signal<Option<Appearance>>,
     search_box: std::cell::RefCell<Option<ferroui_base::WeakRef<ferroui_controls::TextBox>>>,
@@ -116,7 +117,16 @@ impl Shell {
         );
     }
 
+    fn cancel(&self) {
+        let origin = self.shortcut_origin.take();
+        self.dismiss();
+        if let (Some(session), Some(origin)) = (&self.session, origin) {
+            session.restore_shortcut_origin(origin);
+        }
+    }
+
     fn dismiss(&self) {
+        self.shortcut_origin.set(None);
         self.scene.set_if_changed(Scene::Desktop);
         if let Some(session) = &self.session {
             session.restore_windows();
@@ -268,6 +278,7 @@ pub fn view(
         launching: signal(false),
         owner: Owner::current().expect("desktop view must be mounted in a FerroUI owner"),
         desktop_focus: NodeRef::new(),
+        shortcut_origin: Default::default(),
         cached_launcher: signal(
             (initial == Scene::Applications).then_some(appearance.get_untracked()),
         ),
@@ -297,8 +308,11 @@ pub fn view(
                 Command::Notifications => Scene::Notifications,
             };
             if state.scene.get_untracked() == scene {
-                state.dismiss();
+                state.cancel();
             } else {
+                if state.shortcut_origin.get().is_none() {
+                    state.shortcut_origin.set(state.session.as_ref().and_then(|s| s.shortcut_origin()));
+                }
                 state.open(scene);
             }
         });
@@ -315,6 +329,7 @@ pub fn view(
             let shell = Rc::downgrade(&state);
             move || {
                 if let Some(state) = shell.upgrade().filter(|s| s.owner.is_alive()) {
+                    state.shortcut_origin.set(None);
                     state.scene.set_if_changed(Scene::Desktop);
                     if let Some(control) = state.desktop_focus.get_untracked() {
                         control.focus();
@@ -353,7 +368,7 @@ pub fn view(
         .clip_to_bounds(true)
         .on_key_down(move |event| match (event.key, event.key_modifiers) {
             (Key::Escape, _) if current.get_untracked() != Scene::Desktop => {
-                root_state.dismiss();
+                root_state.cancel();
                 event.set_handled(true);
             }
             (Key::Space, KeyModifiers::CONTROL) | (Key::K, KeyModifiers::CONTROL) => {
