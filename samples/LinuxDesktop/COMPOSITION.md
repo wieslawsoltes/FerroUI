@@ -35,6 +35,10 @@ The input seat targets the topmost eligible client surface, including its popups
 
 Open Appearance in the Windows profile to select Light, Dark, High Contrast or Compact density. The shell uses FerroUI’s compiled WinUI theme dictionaries, semantic brushes, controls and flyout composition resources. macOS and Material remain independent profiles. GTK and Qt clients draw their content and client-side decorations with their own toolkits. See [appearance profiles and extension points](APPEARANCE.md).
 
+The dark WinUI personalization flyout below samples the actual GTK and Qt surfaces in the same output. These are independent application processes.
+
+![Dark WinUI acrylic over native GTK and Qt clients](screenshots/compositor-winui-acrylic.webp)
+
 ## Scope
 
 The child compositor exposes one logical output, native xdg-shell clients and shared-memory buffer import. Direct DMA-BUF import, DRM/KMS scanout, Xwayland, touch/tablet seats and a child screen-capture portal remain outside this mode. The Sway-managed login remains available for native multi-output management, Xwayland and portal integration. See [Wayland sessions](WAYLAND.md).
