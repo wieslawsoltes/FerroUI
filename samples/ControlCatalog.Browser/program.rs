@@ -385,6 +385,7 @@ fn json_string(text: &str) -> String {
 pub fn build_ferro_app() -> AppBuilder {
     App::with_theme_fonts(AppBuilder::configure::<App>()).with_inter_font().with(Rc::new(FontManagerOptions {
         default_family_name: Some("fonts:Inter#Inter".to_string()),
+        font_fallbacks: Some(App::font_fallbacks()),
         ..Default::default()
     }))
 }
