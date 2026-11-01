@@ -102,3 +102,12 @@ wakes that thread. The WSL render-thread suite passes all 15 tests, including
 UI/third-thread release and stopped-loop confinement; the native sample rebuild
 also passes (`linux-owner-drop-tests.log`, `linux-geometry-final-build.log`).
 This shared lifecycle fix adds no DMA-BUF capability or CPU preview fallback.
+
+The Windows verification runner subsequently caught an asynchronous EOF restart
+race in the shared `MediaPlayerElement`. Its polling timer now gives an old
+Ended snapshot the same bounded command-settling allowance as Paused, while
+settled EOF still stops polling. All nine video-control contracts pass natively
+under WSL, including a deterministic delayed-state regression
+(`linux-ended-control-tests.log`). The Windows verification runner can also run
+this suite and rebuild the native Linux sample with `-IncludeWsl`; these are
+control/build results and do not establish DMA-BUF presentation.

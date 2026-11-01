@@ -22,6 +22,9 @@ use std::{
 static FAILED: AtomicBool = AtomicBool::new(false);
 #[path = "camera.rs"]
 mod camera;
+#[cfg(all(windows, feature = "synthetic-camera"))]
+#[path = "lifecycle_stress.rs"]
+mod lifecycle_stress;
 #[cfg(all(windows, feature = "native-pixel-tests"))]
 #[path = "native_pixels.rs"]
 mod native_pixels;
@@ -166,6 +169,13 @@ impl ApplicationImpl for App {
                                 providers::importer(),
                             ))
                         })));
+                        #[cfg(all(windows, feature = "synthetic-camera"))]
+                        if std::env::args().any(|a| a.starts_with("--lifecycle-stress-cycles=")) {
+                            if let Some(window) = weak_window.upgrade() {
+                                lifecycle_stress::run(window, source, provider, budget).await;
+                            }
+                            return;
+                        }
                         #[cfg(target_os = "macos")]
                         let pending = if std::env::args().any(|a| a == "--source-uri") {
                             view.set_source_uri(Some(uri));
@@ -508,6 +518,17 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
     );
 }
 pub fn run() -> std::process::ExitCode {
+    if std::env::args().any(|a| a.starts_with("--lifecycle-stress-cycles="))
+        && !std::env::args().any(|a| a == "--synthetic-camera")
+    {
+        eprintln!("Lifecycle stress requires explicit --synthetic-camera");
+        return std::process::ExitCode::FAILURE;
+    }
+    #[cfg(not(all(windows, feature = "synthetic-camera")))]
+    if std::env::args().any(|a| a.starts_with("--lifecycle-stress-cycles=")) {
+        eprintln!("Lifecycle stress requires Windows and --features synthetic-camera");
+        return std::process::ExitCode::FAILURE;
+    }
     if std::env::args().any(|a| a == "--video-lifecycle-pixels")
         && !std::env::args().any(|a| a == "--video-pixel-smoke")
     {

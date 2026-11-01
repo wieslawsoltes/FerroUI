@@ -58,6 +58,25 @@ extern "C" int ferro_windows_fixture_process_stats(void* device,uint64_t* out){
     }
     return 1;
 }
+// Read-only attribution, opt-in fixture only. Do not enumerate/dereference
+// arbitrary process heaps: a native worker could destroy one concurrently.
+extern "C" void ferro_windows_fixture_memory_stats(uint64_t* out){
+    struct Summary {DWORD cb;SIZE_T allocated,committed,reserved,max_reserve;};
+    using HeapSummaryFn=BOOL(WINAPI*)(HANDLE,DWORD,Summary*);
+    auto summarize=(HeapSummaryFn)GetProcAddress(GetModuleHandleW(L"kernel32.dll"),"HeapSummary");
+    Summary heap{};heap.cb=sizeof(heap);out[0]=out[1]=UINT64_MAX;
+    if(summarize&&summarize(GetProcessHeap(),0,&heap)){out[0]=heap.allocated;out[1]=heap.committed;}
+    out[2]=out[3]=out[4]=0;
+    MEMORY_BASIC_INFORMATION region{};uintptr_t at=0;
+    while(VirtualQuery((void*)at,&region,sizeof(region))==sizeof(region)){
+        if(region.State==MEM_COMMIT){
+            if(region.Type==MEM_PRIVATE)out[2]+=region.RegionSize;
+            if(region.Type==MEM_MAPPED)out[3]+=region.RegionSize;
+            if(region.Type==MEM_IMAGE)out[4]+=region.RegionSize;
+        }
+        auto next=(uintptr_t)region.BaseAddress+region.RegionSize;if(next<=at)break;at=next;
+    }
+}
 extern "C" void ferro_windows_fixture_retirement_stats(void* ptr,uint32_t* out){
     out[0]=fixture_frames.load();out[1]=fixture_aliases.load();
     ComPtr<ID3D11DeviceContext> context;((ID3D11Device*)ptr)->GetImmediateContext(&context);

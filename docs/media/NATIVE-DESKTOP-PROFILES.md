@@ -99,6 +99,16 @@ destruction after source resources are released; this is not a GPU-completion
 substitute and does not release unknown-completion quarantine. Commands,
 measured results and limits are in [WINDOWS-VERIFICATION.md](WINDOWS-VERIFICATION.md).
 
+The file inspector uses exact integer rational arithmetic for clean extents and
+origins: tiny fractions are not rounded into this integral profile. Native file
+tests exercise cancellation after metadata I/O, exact size/count boundaries and
+sparse media-data seeking beyond 4 GiB. Opt-in `memory-audit` sample builds add
+Rust allocation/default-heap diagnostics; these are excluded from default builds.
+`tests/media/verify-windows.ps1` reproduces the memory comparisons, native tests,
+pixel matrix, cancellation races and default-profile regressions in one command.
+Native allocation call-site attribution remains incomplete under this machine's
+non-elevated ETW permissions; observed growth is not a leak-free acceptance claim.
+
 Camera discovery enumerates MF activation metadata without activating capture.
 Start activates only the selected video device; microphone access is not
 requested. Consent/privacy failures come from native acquisition. Formats report

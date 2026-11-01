@@ -4983,9 +4983,11 @@ dependencies = [
  "ferroui-media-video-windows",
  "ferroui-media-windows",
  "ferroui-opengl",
+ "ferroui-skia",
  "ferroui-themes-fluent",
  "ferroui-x11",
  "image",
+ "skia-safe",
 ]
 
 [[package]]

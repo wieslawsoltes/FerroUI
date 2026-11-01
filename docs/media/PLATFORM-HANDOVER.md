@@ -380,6 +380,22 @@ Flush as completion or weakening quarantine. The shared compositor ownership
 fix and the soak's exact process-memory limits/results are recorded in
 [WINDOWS-VERIFICATION.md](WINDOWS-VERIFICATION.md). WSL still lacks DMA-BUF import.
 
+A further follow-up adds allocation/heap attribution with six isolated memory
+workloads, actual secondary-window cancellation races, file-level MP4 boundary
+tests and `tests/media/verify-windows.ps1` with retained machine-readable/human
+reports. Exact rational crop admission replaces a tolerance that accepted tiny
+fractions. Rust live allocations remain essentially flat in the 20-cycle memory
+comparisons, while native heap growth remains in both capture/reset workloads;
+ETW heap-stack capture was denied by this session's Windows token. See the
+Windows verification note for measurements, replay commands and remaining limits.
+
+That runner also caught an intermittent EOF restart in the shared
+`MediaPlayerElement`: its timer stopped on an old Ended snapshot before native
+Play reached Playing. Ended now receives the existing bounded command-settling
+allowance, with a deterministic delayed-state regression and repeated native
+restart checks. This is a necessary shared control fix discovered on Windows;
+settled EOF still stops polling.
+
 - Windows and Linux provider source is implemented for the explicitly described
   profiles. Receiving-host native builds now pass on both platforms; Windows
   playback and synthetic camera/presentation/recovery evidence is recorded in

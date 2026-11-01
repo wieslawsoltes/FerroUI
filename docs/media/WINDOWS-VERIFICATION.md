@@ -393,3 +393,158 @@ Logs/artifacts are outside Git beside this worktree:
 `windows-geometry-default-ended.log`, `windows-geometry-default-rejection.log`,
 `windows-video-pixel-only-build.log`, `windows-video-pixel-only.log`
 and `linux-geometry-final-build.log`.
+
+## Memory attribution, cancellation races and automated verification
+
+The opt-in sample `memory-audit` feature wraps the unchanged Rust `System`
+allocator with allocation-free atomic counters for requested live bytes/blocks,
+logical peak bytes and cumulative requested growth. It does not capture native
+allocations, allocator padding, stack/inline storage, or transient duplication
+inside `realloc`; concurrent snapshots are not an atomic heap census. Its
+alignment/zeroing/grow/shrink test passes. The implementation follows the
+[GlobalAlloc contract](https://doc.rust-lang.org/std/alloc/trait.GlobalAlloc.html),
+including avoiding allocation, logging, locks and unwinding inside the hooks.
+
+The native fixture additionally reads the default process heap's allocated and
+committed bytes through dynamically resolved
+[HeapSummary](https://learn.microsoft.com/en-us/windows/win32/api/heapapi/nf-heapapi-heapsummary),
+and classifies committed virtual regions with `VirtualQuery`. Unavailable heap
+statistics use `u64::MAX`. Only the stable default heap is summarized; arbitrary
+native heaps are not enumerated/dereferenced while workers could destroy them.
+These figures overlap Rust allocations and must not be added together.
+
+Six separate processes each completed 20 cycles: the full recovery workload
+with both values of quiet output × PNG processing, then capture-only and UI
+compositor-reset workloads without capture. All retirement checkpoints remained
+zero. The table shows final minus cycle-5 values, in bytes:
+
+| Workload | Rust live | Default heap allocated | Default heap committed |
+| --- | ---: | ---: | ---: |
+| Verbose, PNG | 0 | 1,945,033 | 6,701,056 |
+| Verbose, raw snapshot | -80 | 1,935,715 | 5,918,720 |
+| Quiet, PNG | 80 | 1,905,882 | 6,864,896 |
+| Quiet, raw snapshot | 0 | 1,839,395 | 5,693,440 |
+| Capture only | 128 | 929,889 | 1,556,480 |
+| UI compositor resets, no capture | 128 | 1,087,418 | 2,637,824 |
+
+The full workloads kept live Rust allocations near 2.96 MB. Removing PNG reduced
+cumulative requested Rust allocation growth over 20 cycles from about 3.52 GB
+to 2.34 GB, but did not remove native heap growth. Quiet output did not remove
+it either. Both capture-only and reset-only workloads retained native heap
+growth. This localizes the observed growth outside tracked Rust objects and
+shows some additional committed heap capacity; it does not identify native
+allocation call sites or prove cache retention rather than leaks. A process-only
+Xperf heap-stack attachment was attempted without registry changes and returned
+`Access is denied (0x5)` under the current non-elevated token. No trace session
+was started. Further native call-site attribution remains open.
+
+`--quiet-diagnostics` suppresses routine sample prints while retaining errors
+and stress/memory measurements. `--no-png-diagnostics` reads the existing Skia
+raster composition snapshot directly instead of encoding/decoding/saving PNGs.
+All the same pixel assertions still run, and both snapshot/read operations are
+counted as Diagnostic transfers. Preview source textures are never CPU-mapped.
+The default build uses no audit allocator and no extra Skia diagnostic dependency.
+
+The new `--lifecycle-stress-cycles=N --synthetic-camera` mode uses real native
+work, not only mock or unpolled futures. Each cycle:
+
+- Waits for native video opening to begin before clearing its source, then
+  repeats with an in-flight source replacement and observes Cancelled.
+- Overlaps twelve polled seeks, verifies cancellation and the newest 700 ms
+  result, then replaces a source during a seek. An old frame lease survives the
+  replacement; the new mailbox must publish a newer generation.
+- Closes an actual secondary camera window during native opening, observing
+  cancellation and resource retirement while the owner window stays alive.
+- Starts a real native photo job, resets the compositor and closes its window
+  on context creation before queued recovery can reacquire the camera. Photo
+  delivery must be Cancelled, the session stopped and factory/activation counts
+  unchanged. All frame/read/quarantine/native resources retire to zero.
+
+The file-level MP4 suite now runs the actual file inspector through every
+truncation, exact/over-limit 4,096-box and 8 MiB boundaries, malformed extended
+headers, cancellation before scanning and deterministically after metadata I/O,
+and a sparse extended `mdat` beyond 4 GiB. Exclusive reopen verifies exception
+paths close file handles. Sparse marking is mandatory before that large seek;
+no dense multi-gigabyte file is created. This tests metadata seeking, not native
+decoding of a multi-gigabyte movie.
+
+New rational edge cases exposed an admission defect: the former `1e-6` rounding
+tolerance accepted tiny fractional aperture widths/origins in the integral-only
+profile. Extents and final origins now use exact, overflow-bounded integer
+rational arithmetic. Fractions are rejected even when visually negligible;
+fractional offsets that mathematically resolve an odd-sized aperture to an
+integral origin remain valid. The failing pre-fix test is preserved, and all
+three native geometry/D3D11/ANGLE tests pass after the correction. The three
+native-source preparation contracts also pass, covering bounded filesystem
+workers, cancellation during a write and removal of late output.
+
+The complete Windows verification command (PowerShell 7, Rust/Node on PATH) is:
+
+```powershell
+./tests/media/verify-windows.ps1 -TargetDirectory F:\build-cache\ferroui-portable-media-windows
+```
+
+It builds and freezes an audited executable, runs the six memory workloads,
+native/allocator/source contracts, all 16 video geometry/seek/recovery cases,
+cancellation races and a camera soak, then builds/tests default playback and
+fixture rejection. Each child has a timeout, streamed stdout/stderr logs,
+required pass markers and checked exit status. Soaks require every ordered
+zero-resource checkpoint. The runner's own positive/negative controls prove
+handling of expected rejection, missing evidence, wrong exits and timeouts.
+Arguments/output paths containing spaces are supported. JSON and Markdown
+reports retain commands, timings, binary SHA-256 and changed-source hashes.
+Failure preserves evidence and exits nonzero; a fresh output directory prevents
+mixing old pass markers into a new run. The runner restores environment settings.
+
+Optional arguments include `-MemoryCycles`, `-RaceCycles`, `-StressCycles`,
+`-EndedRestartRuns` (five by default),
+`-Section Memory`, `-Section HarnessSelfTest`, `-OutputDirectory`, `-Node`, and
+`-IncludeWsl -WslTargetDirectory /home/danw/build-cache/ferroui-portable-media`.
+WSL inclusion builds the native Linux sample and runs shared video-control
+contracts; it does not claim DMA-BUF pixels.
+Use the WSL cache path appropriate to the host. The default workload counts are
+20; memory workloads require at least six cycles to retain five warm-up samples.
+
+Evidence beside the worktree includes `windows-memory-comparison-final/report.json`
+and its per-workload logs, `windows-heap-trace-start.log`,
+`windows-lifecycle-stress-pilot-2.log`, `windows-mp4-fractional-before.log`,
+`windows-mp4-file-tests-exact.log`, `windows-source-preparation-tests.log`,
+`windows-allocation-audit-tests.log` and `windows-runner self test final/report.md`.
+The first end-to-end run correctly stopped at an intermittent default-build EOF
+restart failure and preserved `windows verification complete/report.json`.
+Native Play completed, but the source/renderer mailboxes remained at their final
+pre-restart frame until the smoke timed out. `MediaPlayerElement` gave delayed
+native state changes a bounded settling allowance while Paused, but immediately
+stopped polling if the old state was still Ended. Play could restart the timer,
+then lose it before the asynchronous native command reached Playing.
+
+The shared control now gives Ended the same bounded allowance, preserving both
+fresh-frame polling and the settled-EOF shutdown. A deterministic delayed-state
+regression fails before the fix; all nine Windows video-control tests and all
+nine corresponding WSL tests pass afterward. The final runner includes that test
+and five fresh native EOF restart processes. `windows-ended-polling-before.log` and
+`windows-ended-polling-fixed.log` preserve this result.
+
+The final end-to-end rerun passes all 45 stages in approximately 8 min 45 s,
+including all 16 video cases, three race cycles (36 overlapping seeks), six
+full camera soak cycles / 36 resets, all five native EOF restarts, default
+recovery/rejection and both WSL steps. The native suite passes three tests,
+allocator suite one, source preparation three, and Windows/WSL video controls
+nine each. Every race/soak retirement checkpoint is zero. Earlier six-cycle
+races and ten-cycle soak also passed before the EOF failure was isolated; those
+partial-run successes do not turn the original failed report into a pass.
+
+```powershell
+./tests/media/verify-windows.ps1 -MemoryCycles 6 -StressCycles 6 -RaceCycles 3 `
+  -EndedRestartRuns 5 -IncludeWsl `
+  -WslTargetDirectory /home/danw/build-cache/ferroui-portable-media `
+  -TargetDirectory F:\build-cache\ferroui-portable-media-windows `
+  -OutputDirectory '..\windows verification final'
+```
+
+The final reports/logs are in `windows verification final/report.json` and
+`report.md` beside the worktree. That successful run uses six-cycle memory
+smokes; the separate six × 20-cycle attribution evidence above remains the
+longer comparison. `windows-runner strict self test/report.md` also records
+successful harness checks under PowerShell StrictMode. Physical/native driver
+acceptance and native heap call-site attribution remain open as described above.

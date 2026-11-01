@@ -7,7 +7,8 @@ rust-version.workspace = true
 license.workspace = true
 publish = false
 [features]
-native-pixel-tests = ["image/png"]
+memory-audit = ["synthetic-camera"]
+native-pixel-tests = ["image/png", "dep:ferroui-skia", "dep:skia-safe"]
 synthetic-camera = ["ferroui-media-camera-windows/synthetic-camera", "dep:ferroui-media-camera-controls", "native-pixel-tests"]
 [[bin]]
 name = "portable-media"
@@ -31,6 +32,8 @@ ferroui-media-video-apple = {workspace=true,features=["controls"]}
 ferroui-media-camera-apple = {workspace=true,features=["controls"]}
 
 [target.'cfg(windows)'.dependencies]
+ferroui-skia = {workspace=true,optional=true}
+skia-safe = {workspace=true,optional=true}
 ferroui-media-camera-controls = {workspace=true,optional=true}
 ferroui-opengl.workspace = true
 ferroui-media-windows = {workspace=true,features=["controls"]}

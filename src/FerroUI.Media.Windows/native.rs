@@ -167,6 +167,17 @@ impl Drop for Device {
 #[derive(Clone)]
 pub struct NativeDevice(Arc<Device>);
 impl NativeDevice {
+    /// Default-process-heap allocated/committed bytes (MAX if unavailable),
+    /// then VirtualQuery private/mapped/image committed regions. Not all heaps.
+    #[cfg(feature = "synthetic-camera")]
+    pub fn fixture_memory_stats() -> [u64; 5] {
+        extern "C" {
+            fn ferro_windows_fixture_memory_stats(out: *mut u64);
+        }
+        let mut values = [0; 5];
+        unsafe { ferro_windows_fixture_memory_stats(values.as_mut_ptr()) };
+        values
+    }
     #[cfg(feature = "synthetic-camera")]
     pub fn fixture_retirement_stats(&self) -> [u32; 3] {
         extern "C" {

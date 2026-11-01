@@ -26,7 +26,14 @@ async fn exercise(
     let mut baseline = None;
     let mut peak = [0u64; 4];
     let mut last = [0; 4];
-    println!("CAMERA_STRESS_BEGIN cycles={cycles} resets_per_cycle=6 warmup_cycles=5 private_growth_limit=134217728 gpu_growth_limit=134217728 handle_growth_limit=64");
+    let workload = std::env::args()
+        .find_map(|a| a.strip_prefix("--memory-workload=").map(str::to_owned))
+        .unwrap_or("full".into());
+    if !matches!(workload.as_str(), "full" | "capture" | "reset") {
+        return Err("Memory workload must be full, capture or reset".into());
+    }
+    let resets = if workload == "capture" { 0 } else { 6 };
+    std::println!("CAMERA_STRESS_BEGIN cycles={cycles} workload={workload} resets_per_cycle={resets} warmup_cycles=5 private_growth_limit=134217728 gpu_growth_limit=134217728 handle_growth_limit=64 quiet={} png={}",crate::QUIET.load(Ordering::Relaxed),!std::env::args().any(|a|a=="--no-png-diagnostics"));
     for cycle in 0..cycles {
         let weak = window.downgrade();
         let _watchdog = Watchdog(DispatcherTimer::run_once(
@@ -56,8 +63,30 @@ async fn exercise(
             providers::camera(&*interop, budget.clone()).map_err(|e| e.to_string())?,
         );
         state.interop.replace(Some(interop));
-        super::exercise(state.clone(), budget.clone()).await?;
-        super::recovery::exercise(state.clone(), window.clone(), budget.clone()).await?;
+        if workload != "reset" {
+            super::exercise(state.clone(), budget.clone()).await?;
+        }
+        if workload == "full" {
+            super::recovery::exercise(state.clone(), window.clone(), budget.clone()).await?;
+        }
+        if workload == "reset" {
+            for _ in 0..6 {
+                let job = compositor.invoke_server_job_async(
+                    |server| {
+                        server.reset_all_gpu_resources();
+                        server.render_interface().value();
+                        Ok(())
+                    },
+                    false,
+                );
+                super::wait(move || match job.take_result() {
+                    Some(r) => r.map(Some).map_err(|e| e.to_string()),
+                    None => Ok(None),
+                })
+                .await?;
+                super::delay().await?;
+            }
+        }
         let interop = compositor
             .try_get_composition_gpu_interop()
             .await
@@ -74,7 +103,13 @@ async fn exercise(
             }
         }
         last = sample;
-        println!("CAMERA_STRESS_SAMPLE cycle={} elapsed_ms={} private_bytes={} working_set_bytes={} local_gpu_bytes={} handles={} frames={} reads={} quarantine={} native={:?}",cycle+1,started.elapsed().as_millis(),sample[0],sample[1],sample[2],sample[3],budget.usage().frames,budget.gpu_reads(),budget.quarantined_reads(),NativeSession::synthetic_usage());
+        std::println!("CAMERA_STRESS_SAMPLE cycle={} elapsed_ms={} private_bytes={} working_set_bytes={} local_gpu_bytes={} handles={} frames={} reads={} quarantine={} native={:?}",cycle+1,started.elapsed().as_millis(),sample[0],sample[1],sample[2],sample[3],budget.usage().frames,budget.gpu_reads(),budget.quarantined_reads(),NativeSession::synthetic_usage());
+        #[cfg(feature = "memory-audit")]
+        {
+            let rust = crate::memory_audit::snapshot();
+            let native = NativeDevice::fixture_memory_stats();
+            std::println!("CAMERA_MEMORY_SAMPLE cycle={} rust_live_bytes={} rust_live_blocks={} rust_peak_bytes={} rust_requested_growth_bytes={} default_heap_allocated={} default_heap_committed={} private_committed={} mapped_committed={} image_committed={}",cycle+1,rust[0],rust[1],rust[2],rust[3],native[0],native[1],native[2],native[3],native[4]);
+        }
         if cycle == 4 {
             baseline = Some(sample);
         }
@@ -91,7 +126,7 @@ async fn exercise(
             }
         }
     }
-    println!("CAMERA_STRESS_PASS cycles={cycles} resets={} elapsed_ms={} baseline={baseline:?} last={last:?} peak={peak:?} preview={:?}",cycles*6,started.elapsed().as_millis(),budget.counters().snapshot().preview);
+    std::println!("CAMERA_STRESS_PASS cycles={cycles} resets={} workload={workload} elapsed_ms={} baseline={baseline:?} last={last:?} peak={peak:?} preview={:?}",cycles*resets,started.elapsed().as_millis(),budget.counters().snapshot().preview);
     Ok(())
 }
 pub async fn run(state: Rc<State>, window: Ref<Window>, budget: FrameBudget) {

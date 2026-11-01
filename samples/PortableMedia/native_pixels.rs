@@ -143,6 +143,43 @@ pub async fn composition(
         None => Ok(None),
     })
     .await?;
+    if std::env::args().any(|a| a == "--no-png-diagnostics") {
+        // Keep the same composition pixels and assertions, avoiding both PNG
+        // encoding and decoding. This remains an explicit diagnostic read.
+        let size = bitmap.pixel_size();
+        // Composition returns an immutable raster Skia image, whose public
+        // Bitmap locking route need not exist. Read that diagnostic snapshot
+        // directly; never touch or map the native preview source texture.
+        let platform = bitmap.platform_impl().item();
+        let image = platform
+            .as_any()
+            .downcast_ref::<ferroui_skia::ImmutableBitmap>()
+            .ok_or("Raw diagnostics require a Skia snapshot")?
+            .image();
+        let info = image
+            .image_info()
+            .with_color_type(skia_safe::ColorType::RGBA8888)
+            .with_alpha_type(skia_safe::AlphaType::Unpremul);
+        let mut bytes = vec![0; size.width as usize * size.height as usize * 4];
+        counters
+            .cpu_transfer(
+                PixelTransferPurpose::Diagnostic,
+                bytes.len() as u64,
+                PresentationRoute::SharedTexture,
+            )
+            .map_err(|e| e.to_string())?;
+        if !image.read_pixels(
+            &info,
+            &mut bytes,
+            size.width as usize * 4,
+            (0, 0),
+            skia_safe::image::CachingHint::Disallow,
+        ) {
+            return Err("Raw snapshot read failed".into());
+        }
+        return RgbaImage::from_raw(size.width as u32, size.height as u32, bytes)
+            .ok_or("Invalid raw snapshot".into());
+    }
     let mut encoded = Vec::new();
     bitmap
         .save(
