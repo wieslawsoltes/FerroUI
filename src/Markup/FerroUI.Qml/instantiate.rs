@@ -518,13 +518,13 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         let (mut shell, module, name, definition) = if let Some(mut shell) =
             self.prepared.remove(&std::ptr::from_ref(source))
         {
+            live_members = Some(std::mem::take(&mut shell.live_members));
             // Module and type names were resolved against this immutable registry
             // during preparation, including validation of versioned imports.
             let (module, types) = self
                 .registry
                 .modules
                 .get_key_value(&shell.node.module)
-            live_members = Some(std::mem::take(&mut shell.live_members));
                 .expect("prepared module");
             let (name, definition) = types
                 .get_key_value(&shell.node.name)
