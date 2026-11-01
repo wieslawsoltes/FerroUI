@@ -405,7 +405,7 @@ impl<T: PropertyValue> SelectionModel<T> {
     }
 
     /// Begins a batch update that ends when the returned operation is
-    /// disposed.
+    /// disposed or dropped.
     pub fn batch_update(&self) -> BatchUpdateOperation {
         BatchUpdateOperation::new(self.this.upgrade().expect("the selection model is alive"))
     }
