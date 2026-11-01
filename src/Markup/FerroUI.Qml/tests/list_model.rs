@@ -88,3 +88,31 @@ fn append_and_insert_batches_preserve_order_and_roll_back_failed_role_conversion
     assert!(engine.call(root, "bad", vec![]).is_err());
     assert_eq!(engine.get(root, "count").unwrap(), Value::Number(4.));
 }
+
+#[test]
+fn copied_rows_own_independent_nested_models_and_invalid_role_updates_roll_back() {
+    let mut app = model(
+        r#"
+        ListElement { title:"root"; entries: ListElement { n:1 } }
+        function copy(){append(get(0));get(1).entries.setProperty(0,"n",7)}
+        function report(){return get(0).entries.get(0).n + "/" + get(1).entries.get(0).n}
+        function invalid(){set(0,{entries:[{n:3},4]})}
+        function replace(){get(0).entries=[{n:2}]}
+    "#,
+    )
+    .unwrap();
+    let root = app.root();
+    app.call(root, "copy", vec![]).unwrap();
+    assert_eq!(
+        app.call(root, "report", vec![]).unwrap(),
+        Value::String("1/7".into())
+    );
+    let before = app.structure_revision();
+    assert!(app.call(root, "invalid", vec![]).is_err());
+    assert_eq!(app.structure_revision(), before);
+    app.call(root, "replace", vec![]).unwrap();
+    assert_eq!(
+        app.call(root, "report", vec![]).unwrap(),
+        Value::String("2/7".into())
+    );
+}

@@ -32,7 +32,7 @@
             case "number": return {t: "Number", v: Object.is(value, -0) ? "-0" : String(value)};
         }
         const model = modelIds.get(value);
-        if (model) return {t: "Model", v: {id: model.id, revision: model.revision, rows: []}};
+        if (model) return {t: "Model", v: {id: model.id, revision: model.revision, reference: true, rows: []}};
         if (typeof value !== "object" || (!Array.isArray(value) &&
             Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)) {
             throw new TypeError("a WorkerScript message must contain plain transferable values");
@@ -61,6 +61,7 @@
 
     function loadModel(snapshot) {
         let state = models.get(snapshot.id)?.deref();
+        if (snapshot.reference && state) return state.proxy;
         if (!state) {
             state = {id: snapshot.id, revision: snapshot.revision, rows: [], edits: [], conflict: false};
             state.proxy = modelApi(state);
@@ -71,6 +72,7 @@
         }
         if ((state.conflict || !state.edits.length) && snapshot.revision >= state.revision) {
             state.revision = snapshot.revision;
+            state.mayHaveNested = snapshot.rows.some(row => Object.values(row).some(v => v.t === "Model"));
             state.rows = snapshot.rows.map(row => decode({t:"Object",v:row}));
             state.edits = [];
             state.conflict = false;
@@ -93,6 +95,7 @@
         function row(value) {
             const encoded = encode(value);
             if (encoded.t !== "Object") throw new TypeError("ListModel expects a role object");
+            if (!state.mayHaveNested) state.mayHaveNested = Object.values(encoded.v).some(v => v.t === "Model");
             return decode(encoded);
         }
         function edit(method, ...args) {
@@ -132,17 +135,34 @@
             setProperty(i, name, value) {
                 check(i);
                 if (typeof name !== "string") throw new TypeError("invalid ListModel role");
+                if (modelIds.has(value)) state.mayHaveNested = true;
                 state.rows[i][name] = decode(encode(value));
                 edit("setProperty",i,name,value);
             },
             sync() {
-                if (!state.edits.length) return;
+                // Root sync commits all reachable dirty model snapshots together.
+                // Keep the root revision in the batch even when only children changed.
+                if (!dirty.size) return;
+                const pending = [state], visited = new Set(), changed = [];
+                while (pending.length) {
+                    const next = pending.pop();
+                    if (visited.has(next)) continue;
+                    visited.add(next);
+                    if (next === state || next.edits.length) changed.push(next);
+                    if (!next.mayHaveNested) continue;
+                    for (const row of next.rows) for (const value of Object.values(row)) {
+                        const child = modelIds.get(value);
+                        if (child) pending.push(child);
+                    }
+                }
+                if (!changed.some(m => m.edits.length)) return;
                 try {
-                    state.revision = post({t:"Sync",v:{id:state.id,revision:state.revision,edits:state.edits}});
-                    state.edits = [];
-                    dirty.delete(state.id);
+                    const revisions = post({t:"SyncTree",v:changed.map(m=>({id:m.id,revision:m.revision,edits:m.edits}))});
+                    changed.forEach((m,i) => {
+                        m.revision = revisions[i]; m.edits = []; dirty.delete(m.id);
+                    });
                 } catch (error) {
-                    state.conflict = true;
+                    changed.forEach(m => { m.conflict = true; });
                     throw error;
                 }
             }

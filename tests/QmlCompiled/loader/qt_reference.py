@@ -68,6 +68,17 @@ def main():
     assert root.geometry() == "3/52/192/42/94/33", root.geometry()
     print("Qt 6.12.0 sibling anchor geometry passed")
 
+    component, root = load(folder.parent / "nested_roles/Main.qml")
+    root.remember()
+    root.edit()
+    assert root.nestedEdit() == "2/A/BB/true/7", root.nestedEdit()
+    root.replace()
+    root.addNested()
+    root.appendGroup()
+    assert root.replaced() == "2/X/Y/true/9", root.replaced()
+    root.clearData()
+    print("Qt 6.12.0 nested role identity, replacement and delegates passed")
+
     from PySide6.QtQuick import QQuickWindow
     component, root = load(folder.parent / "views/Main.qml")
     window = QQuickWindow()

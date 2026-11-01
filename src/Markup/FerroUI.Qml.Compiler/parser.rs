@@ -281,7 +281,31 @@ impl<'s> Parser<'s> {
                 "expected an uppercase QML type name",
             ));
         }
-        let members = self.members()?;
+        let mut members = self.members()?;
+        if type_name.rsplit('.').next() == Some("ListElement") {
+            // Preserve [] as a declarative empty list in Rust and JavaScript
+            // compilation. Arrays elsewhere still evaluate as JavaScript values.
+            for member in &mut members {
+                let MemberKind::Binding { value, .. } = &mut member.kind else {
+                    continue;
+                };
+                let Binding::Expr(expression) = value else {
+                    continue;
+                };
+                let empty = match expression {
+                    Expr::Array(items) => items.is_empty(),
+                    Expr::JavaScript(script) => tokenize(script.code()).is_ok_and(|tokens| {
+                        tokens.len() == 3
+                            && token_is(&tokens[0].kind, "[")
+                            && token_is(&tokens[1].kind, "]")
+                    }),
+                    _ => false,
+                };
+                if empty {
+                    *value = Binding::Objects(Vec::new());
+                }
+            }
+        }
         Ok(Object {
             source_url: None,
             source_layers: vec![],

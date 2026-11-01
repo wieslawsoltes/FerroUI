@@ -109,6 +109,14 @@ impl crate::transaction::Transaction<'_> {
                 "only a live dynamically created root can be destroyed",
             ));
         }
+        if self
+            .model
+            .models
+            .get(&id)
+            .is_some_and(|m| m.role_owner.is_some())
+        {
+            return Err(Error::new("a nested ListModel is owned by its row"));
+        }
         if self.model.dynamic.contexts[&id].delegate_inputs.is_some() {
             return Err(Error::new("delegate lifetime is managed by its Repeater"));
         }

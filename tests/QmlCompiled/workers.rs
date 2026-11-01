@@ -215,3 +215,35 @@ fn replacing_source_settles_bindings_on_ready_before_returning_to_rust() {
     assert_eq!(app.get(actor, "ready").unwrap(), Value::Bool(false));
     assert_eq!(app.get(root, "observedReady").unwrap(), Value::Bool(false));
 }
+
+#[test]
+fn a_worker_can_edit_and_sync_an_owned_nested_model() {
+    let mut app = construct(&generated::compiled_qml());
+    let root = app.root();
+    app.call(root, "syncChild", vec![]).unwrap();
+    app.call(root, "localChildEdit", vec![]).unwrap();
+    until(
+        &mut app,
+        |ui| matches!(ui.get(root,"answer").unwrap(),Value::String(s) if s.starts_with("nested-conflict:")),
+    );
+    assert_eq!(
+        app.call(root, "groupTitle", vec![]).unwrap(),
+        Value::String("original".into())
+    );
+    assert_eq!(
+        app.call(root, "childReport", vec![]).unwrap(),
+        Value::String("1/51".into())
+    );
+    app.call(root, "syncChild", vec![]).unwrap();
+    until(&mut app, |ui| {
+        ui.get(root, "answer").unwrap() == Value::String("nested-2".into())
+    });
+    assert_eq!(
+        app.call(root, "groupTitle", vec![]).unwrap(),
+        Value::String("updated".into())
+    );
+    assert_eq!(
+        app.call(root, "childReport", vec![]).unwrap(),
+        Value::String("2/17".into())
+    );
+}

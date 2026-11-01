@@ -400,11 +400,15 @@ impl Realm {
                 ctx.write_member(&value, text(v, 2)?, input)?;
                 Ok(Json::Null)
             }
-            "mode" => Ok(json!(if let Value::Object(obj) = value {
-                mode(ctx.property_type(obj, text(v, 2)?))
-            } else {
-                None
-            })),
+            "mode" => Ok(json!(
+                if matches!(value, Value::ModelRow(_) | Value::DelegateRow(_)) {
+                    Some("data")
+                } else if let Value::Object(obj) = value {
+                    mode(ctx.property_type(obj, text(v, 2)?))
+                } else {
+                    None
+                }
+            )),
             "call" => {
                 let Value::Object(object) = value else {
                     return Err(Error::new("method receiver is not a QML object"));

@@ -139,41 +139,49 @@ impl Supervisor {
                 .ok_or_else(|| Error::new("invalid WorkerScript frame"))?;
             let event: WorkerEvent = serde_json::from_value(wire.clone())
                 .map_err(|e| Error::new(format!("invalid WorkerScript event: {e}")))?;
-            let reply = match event {
+            let sync = match event {
                 WorkerEvent::Sync {
                     id,
                     revision,
                     edits,
-                } => {
-                    let ack = self.delivery.synchronize(id, revision, edits)?;
-                    loop {
-                        if self.cancelled.load(Ordering::Acquire) {
-                            return Err(Error::new("WorkerScript stopped"));
-                        }
-                        match ack.recv_timeout(
-                            deadline
-                                .saturating_duration_since(Instant::now())
-                                .min(Duration::from_millis(25)),
-                        ) {
-                            Ok(Ok(revision)) => break json!({"ok":revision}),
-                            Ok(Err(e)) => break json!({"error":e.message}),
-                            Err(mpsc::RecvTimeoutError::Timeout) if Instant::now() < deadline => {
-                                continue
-                            }
-                            Err(_) => {
-                                return Err(Error::new(
-                                    "WorkerScript.sync owner delivery timed out",
-                                ))
-                            }
-                        }
-                    }
+                } => Some((self.delivery.synchronize(id, revision, edits)?, true)),
+                WorkerEvent::SyncTree(models) => {
+                    Some((self.delivery.synchronize_tree(models)?, false))
                 }
                 event => {
                     if !self.delivery.publish(event) {
                         return Err(Error::new("WorkerScript receiver unavailable"));
                     }
-                    json!({"ok":true})
+                    None
                 }
+            };
+            let reply = match sync {
+                Some((ack, single)) => loop {
+                    if self.cancelled.load(Ordering::Acquire) {
+                        return Err(Error::new("WorkerScript stopped"));
+                    }
+                    match ack.recv_revisions(
+                        deadline
+                            .saturating_duration_since(Instant::now())
+                            .min(Duration::from_millis(25)),
+                    ) {
+                        Ok(Ok(revisions)) => {
+                            break if single {
+                                json!({"ok":revisions[0]})
+                            } else {
+                                json!({"ok":revisions})
+                            }
+                        }
+                        Ok(Err(e)) => break json!({"error":e.message}),
+                        Err(mpsc::RecvTimeoutError::Timeout) if Instant::now() < deadline => {
+                            continue
+                        }
+                        Err(_) => {
+                            return Err(Error::new("WorkerScript.sync owner delivery timed out"))
+                        }
+                    }
+                },
+                None => json!({"ok":true}),
             };
             child.send(reply, deadline)?;
         }

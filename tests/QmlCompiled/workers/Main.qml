@@ -29,6 +29,11 @@ QtObject {
         classic.sendMessage(1)
         classic.sendMessage(2)
     }
+    property ListModel groups: ListModel { ListElement { title: "original"; entries: ListElement { number: 4 } } }
+    function syncChild() { actor.sendMessage({groups:groups}) }
+    function localChildEdit() { groups.get(0).entries.setProperty(0,"number",51) }
+    function groupTitle(): string { return groups.get(0).title }
+    function childReport(): string { const child = groups.get(0).entries; return child.count + "/" + child.get(0).number }
     function syncRows() { actor.sendMessage({model: rows}) }
     function abortSend() { actor.sendMessage({items: [90]}); throw new Error("failed transaction") }
     function restart() { actor.source = ""; actor.source = "calculate.mjs" }

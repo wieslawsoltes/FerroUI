@@ -5,6 +5,18 @@ WorkerScript.onMessage = message => {
         WorkerScript.sendMessage({text: "started"})
         for (;;) {}
     }
+    if (message.groups) {
+        const child = message.groups.get(0).entries
+        message.groups.get(0).title = "updated"
+        child.get(0).number = 17
+        child.append({number: 23})
+        try { message.groups.sync() } catch(e) {
+            WorkerScript.sendMessage({text:"nested-conflict:" + e.message})
+            return
+        }
+        WorkerScript.sendMessage({text: "nested-" + child.count})
+        return
+    }
     if (message.model) {
         const model = message.model
         model.append({number: 8})

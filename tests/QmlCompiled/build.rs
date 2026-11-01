@@ -1,4 +1,6 @@
 fn main() {
+    ferroui_qml_build::compile_file("nested_roles/Main.qml", "nested_roles.rs")
+        .expect("compile nested role model fixture");
     ferroui_qml_build::compile_file("creation/Incubator.qml", "incubator.rs")
         .expect("compile Component incubator");
     #[cfg(feature = "webscene")]

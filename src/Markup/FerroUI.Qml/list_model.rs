@@ -1,4 +1,4 @@
-//! Flat ListModel storage. Row identity is independent of display order.
+//! ListModel storage with independently owned nested lists. Row identity is independent of display order.
 //! Every edit records an inverse operation in the enclosing QML transaction.
 use crate::transaction::Transaction;
 use crate::*;
@@ -21,6 +21,7 @@ enum Kind {
     Number,
     String,
     Object,
+    List,
 }
 impl Kind {
     fn of(value: &Value) -> Result<Option<Self>, Error> {
@@ -30,11 +31,9 @@ impl Kind {
             Value::String(_) => Some(Self::String),
             Value::Object(_) => Some(Self::Object),
             Value::Null | Value::Undefined => None,
-            _ => {
-                return Err(Error::new(
-                    "this ListModel supports scalar and object-reference roles",
-                ))
-            }
+            _ => return Err(Error::new(
+                "ListModel roles require scalar values, object references or lists of role records",
+            )),
         })
     }
     fn default_value(self) -> Value {
@@ -43,12 +42,14 @@ impl Kind {
             Self::Number => Value::Number(0.),
             Self::String => Value::String(String::new()),
             Self::Object => Value::Null,
+            Self::List => Value::Undefined,
         }
     }
 }
 
 #[derive(Default)]
 pub(crate) struct Model {
+    pub(crate) role_owner: Option<ObjectId>,
     worker_token: std::cell::OnceCell<u64>,
     order: Vec<u64>,
     rows: BTreeMap<u64, Roles>,
@@ -70,7 +71,12 @@ impl Model {
             }
         })
     }
-    fn prepare(&self, fields: &Roles, dynamic: bool) -> Result<Vec<(String, Kind)>, Error> {
+    fn prepare(
+        &self,
+        fields: &Roles,
+        dynamic: bool,
+        lists: &BTreeSet<String>,
+    ) -> Result<Vec<(String, Kind)>, Error> {
         if self.dynamic.is_some_and(|old| old != dynamic) {
             return Err(Error::new("set dynamicRoles before adding data"));
         }
@@ -79,7 +85,12 @@ impl Model {
             if name.is_empty() || !name.starts_with(char::is_lowercase) {
                 return Err(Error::new(format!("invalid model role '{name}'")));
             }
-            if let Some(kind) = Kind::of(value)? {
+            let kind = if lists.contains(name) {
+                Some(Kind::List)
+            } else {
+                Kind::of(value)?
+            };
+            if let Some(kind) = kind {
                 match self.roles.get(name) {
                     Some(old) if !dynamic && *old != kind => {
                         return Err(Error::new(format!(
@@ -108,24 +119,12 @@ impl Model {
             self.order[to..from + count].rotate_right(count);
         }
     }
-    pub(crate) fn static_row(&mut self, object: &ir::Object) -> Result<(), Error> {
-        let mut fields = Roles::new();
-        for member in &object.members {
-            let ir::MemberKind::Binding {
-                name,
-                value: ir::Binding::Expr(expr),
-            } = &member.kind
-            else {
-                return Err(Error::new("ListElement expects constant role assignments"));
-            };
-            let literal = expr.as_literal().ok_or_else(|| {
-                Error::new(format!(
-                    "ListElement role '{name}' requires a scalar constant"
-                ))
-            })?;
-            fields.insert(name.clone(), Value::from(literal));
-        }
-        self.roles.extend(self.prepare(&fields, false)?);
+    pub(crate) fn static_row(
+        &mut self,
+        fields: Roles,
+        lists: &BTreeSet<String>,
+    ) -> Result<(), Error> {
+        self.roles.extend(self.prepare(&fields, false, lists)?);
         self.dynamic = Some(false);
         self.insert(self.order.len(), fields);
         Ok(())
@@ -236,6 +235,14 @@ pub(crate) fn is_method(name: &str) -> bool {
 }
 
 impl Instance {
+    fn owned_role(&self, parent: ObjectId, value: &Value) -> Option<ObjectId> {
+        if let Value::Object(child) = value {
+            if self.models.get(child)?.role_owner == Some(parent) {
+                return Some(*child);
+            }
+        }
+        None
+    }
     pub(crate) fn worker_model_snapshot(
         &self,
         id: ObjectId,
@@ -367,8 +374,12 @@ impl Transaction<'_> {
         for value in fields.values() {
             self.model.validate_handles(value)?;
         }
+        let lists = fields
+            .iter()
+            .filter_map(|(name, value)| self.model.owned_role(id, value).map(|_| name.clone()))
+            .collect();
         let model = self.model.models.get_mut(&id).expect("registered model");
-        let added = model.prepare(fields, dynamic)?;
+        let added = model.prepare(fields, dynamic, &lists)?;
         if !added.is_empty() || model.dynamic.is_none() {
             self.model_edits.push((
                 id,
@@ -409,6 +420,53 @@ impl Transaction<'_> {
             _ => Err(Error::new("ListModel expects an object of role values")),
         }
     }
+    fn nested_fields(
+        &mut self,
+        parent: ObjectId,
+        mut fields: Roles,
+        dynamic: bool,
+    ) -> Result<Roles, Error> {
+        for value in fields.values_mut() {
+            let rows = match value {
+                Value::List(items) => items.clone(),
+                Value::Record(array) if array.is_array() => self.model.array_values(array)?,
+                Value::Object(child)
+                    if self
+                        .model
+                        .models
+                        .get(child)
+                        .is_some_and(|m| m.role_owner.is_some()) =>
+                {
+                    self.model.models[child]
+                        .row_ids(*child)
+                        .map(Value::ModelRow)
+                        .collect()
+                }
+                _ => continue,
+            };
+            let child = self.with_stack(4, |tx| {
+                let template = dynamic::Template::from_object(list_model_object(&[], vec![]), &[])?;
+                let initial = BTreeMap::from([(
+                    "dynamicRoles".into(),
+                    InitialProperty::Value(Value::Bool(dynamic)),
+                )]);
+                let child = tx.build_object(parent, Some(parent), initial, &template)?;
+                tx.model
+                    .models
+                    .get_mut(&child)
+                    .expect("nested ListModel")
+                    .role_owner = Some(parent);
+                for (index, row) in rows.iter().enumerate() {
+                    let fields = tx.model_dict(row)?;
+                    tx.insert_row(child, index, fields, dynamic)?;
+                }
+                tx.finish_model_edit(child, None)?;
+                Ok(child)
+            })?;
+            *value = Value::Object(child);
+        }
+        Ok(fields)
+    }
     fn insert_row(
         &mut self,
         id: ObjectId,
@@ -416,6 +474,7 @@ impl Transaction<'_> {
         fields: Roles,
         dynamic: bool,
     ) -> Result<(), Error> {
+        let fields = self.nested_fields(id, fields, dynamic)?;
         self.role_schema(id, &fields, dynamic)?;
         let serial = self.model.models.get_mut(&id).unwrap().insert(at, fields);
         self.model_edits.push((id, Undo::Insert(at, serial)));
@@ -430,6 +489,7 @@ impl Transaction<'_> {
         {
             return Err(Error::new("invalid model row"));
         }
+        let fields = self.nested_fields(row.model, fields, dynamic)?;
         self.role_schema(row.model, &fields, dynamic)?;
         let previous = self
             .model
@@ -439,7 +499,7 @@ impl Transaction<'_> {
             .rows
             .get_mut(&row.serial)
             .unwrap();
-        let changes = fields
+        let changes: Vec<_> = fields
             .into_iter()
             .filter_map(|(name, value)| {
                 if previous.get(&name).is_some_and(|old| old.unchanged(&value)) {
@@ -449,6 +509,11 @@ impl Transaction<'_> {
                 Some((name, old))
             })
             .collect();
+        self.nested_retirements.extend(
+            changes
+                .iter()
+                .filter_map(|(_, value)| self.model.owned_role(row.model, value.as_ref()?)),
+        );
         self.model_edits
             .push((row.model, Undo::Update(row.serial, changes)));
         Ok(())
@@ -465,10 +530,17 @@ impl Transaction<'_> {
         let model = self.model.models.get_mut(&id).unwrap();
         let at = range.start;
         let order: Vec<_> = model.order.drain(range).collect();
-        let removed = order
+        let removed: BTreeMap<_, _> = order
             .iter()
             .map(|row| (*row, model.rows.remove(row).unwrap()))
             .collect();
+        for fields in removed.values() {
+            self.nested_retirements.extend(
+                fields
+                    .values()
+                    .filter_map(|value| self.model.owned_role(id, value)),
+            );
+        }
         self.model_edits
             .push((id, Undo::Remove(at, order, removed)));
     }
@@ -550,6 +622,16 @@ impl Transaction<'_> {
                 }
             }
             ("setProperty", [index, Value::String(name), value]) => {
+                // Qt's fixed-role setProperty cannot replace nested lists. set()
+                // and assigning the role on a row handle both accept replacements.
+                if !dynamic && matches!(value, Value::List(_) | Value::Record(_)) {
+                    position(index, size, false)?;
+                    if matches!(value, Value::List(_))
+                        || matches!(value,Value::Record(r) if r.is_array())
+                    {
+                        return Ok(Value::Undefined);
+                    }
+                }
                 let serial = self.model.models[&id].order[position(index, size, false)?];
                 self.write_role(RowId { model: id, serial }, name, value.clone())?;
                 return Ok(Value::Undefined);
@@ -603,4 +685,34 @@ fn position(value: &Value, size: usize, end: bool) -> Result<usize, Error> {
     index_arg(value)
         .filter(|n| *n < size || (end && *n == size))
         .ok_or_else(|| Error::new("ListModel index out of range"))
+}
+
+/// A nested list is a genuine engine-owned ListModel. The private module alias
+/// works with qualified imports and cannot be shadowed by an application type.
+pub(crate) fn list_model_object(imports: &[ir::Import], items: Vec<ir::Object>) -> ir::Object {
+    let mut imports = imports.to_vec();
+    imports.push(ir::Import {
+        uri: MODULE.into(),
+        is_path: false,
+        version: None,
+        alias: Some("$qml_nested".into()),
+        span: Default::default(),
+    });
+    ir::Object {
+        type_name: "$qml_nested.ListModel".into(),
+        source_url: None,
+        source_layers: vec![],
+        shadows: vec![],
+        composite_types: vec![],
+        type_imports: Some(imports),
+        span: Default::default(),
+        members: items
+            .into_iter()
+            .map(|item| ir::Member {
+                span: item.span,
+                scope: None,
+                kind: ir::MemberKind::Child(item),
+            })
+            .collect(),
+    }
 }

@@ -670,11 +670,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                     if (module, name) != (list_model::MODULE, "ListElement") {
                         return Err(Error::new("ListModel children must be ListElement objects"));
                     }
-                    self.instance
-                        .models
-                        .get_mut(&id)
-                        .unwrap()
-                        .static_row(child)?;
+                    self.list_element(id, child, child_imports)?;
                 }
                 MemberKind::Child(child) => {
                     implicit.push(Value::Object(self.object(child, Some(id))?))
@@ -783,6 +779,47 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             self.implicit.push((key, implicit));
         }
         Ok(id)
+    }
+
+    fn list_element(
+        &mut self,
+        parent: ObjectId,
+        object: &Object,
+        imports: &[Import],
+    ) -> Result<(), Error> {
+        let mut fields = BTreeMap::new();
+        let mut lists = BTreeSet::new();
+        for member in &object.members {
+            let MemberKind::Binding { name, value } = &member.kind else {
+                return Err(Error::new("ListElement expects constant role assignments"));
+            };
+            let items = match value {
+                Binding::Object(item) => Some(vec![item.clone()]),
+                Binding::Objects(items) => Some(items.clone()),
+                _ => None,
+            };
+            let value = if let Some(items) = items {
+                let shape = list_model::list_model_object(imports, items);
+                let child = self.object(&shape, Some(parent))?;
+                self.instance
+                    .models
+                    .get_mut(&child)
+                    .expect("nested list model")
+                    .role_owner = Some(parent);
+                lists.insert(name.clone());
+                Value::Object(child)
+            } else if let Binding::Expr(expr) = value {
+                Value::from(expr.as_literal().ok_or_else(||Error::new(format!("ListElement role '{name}' requires a scalar constant or ListElement definitions")))?)
+            } else {
+                return Err(Error::new("ListElement expects constant role assignments"));
+            };
+            fields.insert(name.clone(), value);
+        }
+        self.instance
+            .models
+            .get_mut(&parent)
+            .unwrap()
+            .static_row(fields, &lists)
     }
 
     fn default_children(&mut self) -> Result<(), Error> {

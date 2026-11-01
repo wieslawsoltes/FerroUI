@@ -7,6 +7,8 @@ mod anchors;
 #[cfg(test)]
 mod delegates;
 #[cfg(test)]
+mod nested_roles;
+#[cfg(test)]
 mod views;
 #[cfg(test)]
 fn quick_registry() -> ferroui_qml::TypeRegistry {

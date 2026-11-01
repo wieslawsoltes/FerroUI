@@ -58,6 +58,12 @@ pub struct WorkerEdit {
     pub args: Vec<WorkerValue>,
 }
 #[derive(Debug, Serialize, Deserialize)]
+pub struct WorkerModelEdits {
+    pub id: u64,
+    pub revision: u64,
+    pub edits: Vec<WorkerEdit>,
+}
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "t", content = "v")]
 pub enum WorkerEvent {
     Ready,
@@ -67,6 +73,7 @@ pub enum WorkerEvent {
         revision: u64,
         edits: Vec<WorkerEdit>,
     },
+    SyncTree(Vec<WorkerModelEdits>),
     Error(String),
     Stopped(String),
 }
@@ -74,6 +81,15 @@ pub trait WorkerEndpoint {
     fn send(&self, value: WorkerValue) -> Result<(), Error>;
 }
 
+fn edit_bytes(edits: &[WorkerEdit]) -> usize {
+    edits.iter().fold(0usize, |n, e| {
+        e.args
+            .iter()
+            .fold(n.saturating_add(e.method.len() + 32), |n, v| {
+                n.saturating_add(v.estimated_bytes())
+            })
+    })
+}
 struct Entry {
     generation: u64,
     src: String,
@@ -82,14 +98,14 @@ struct Entry {
     models: BTreeMap<u64, ObjectId>,
 }
 struct ModelAck {
-    send: std::sync::mpsc::Sender<Result<u64, Error>>,
+    send: std::sync::mpsc::Sender<Result<Vec<u64>, Error>>,
     pending: Arc<std::sync::atomic::AtomicBool>,
 }
 
 /// Dropping the waiter revokes a sync request that has not yet started on the
 /// owner thread. A timeout cannot silently mutate the model on a later poll.
 pub struct WorkerSync {
-    done: std::sync::mpsc::Receiver<Result<u64, Error>>,
+    done: std::sync::mpsc::Receiver<Result<Vec<u64>, Error>>,
     pending: Arc<std::sync::atomic::AtomicBool>,
 }
 impl WorkerSync {
@@ -97,6 +113,19 @@ impl WorkerSync {
         &self,
         timeout: std::time::Duration,
     ) -> Result<Result<u64, Error>, std::sync::mpsc::RecvTimeoutError> {
+        self.recv_revisions(timeout).map(|result| {
+            result.and_then(|all| {
+                all.first()
+                    .copied()
+                    .ok_or_else(|| Error::new("empty synchronization receipt"))
+            })
+        })
+    }
+
+    pub fn recv_revisions(
+        &self,
+        timeout: std::time::Duration,
+    ) -> Result<Result<Vec<u64>, Error>, std::sync::mpsc::RecvTimeoutError> {
         self.done.recv_timeout(timeout)
     }
 }
@@ -170,22 +199,22 @@ impl WorkerDelivery {
         revision: u64,
         edits: Vec<WorkerEdit>,
     ) -> Result<WorkerSync, Error> {
+        self.synchronize_tree(vec![WorkerModelEdits {
+            id,
+            revision,
+            edits,
+        }])
+    }
+    pub fn synchronize_tree(&self, models: Vec<WorkerModelEdits>) -> Result<WorkerSync, Error> {
         let (send, done) = std::sync::mpsc::channel();
         let pending = Arc::new(std::sync::atomic::AtomicBool::new(true));
         let ack = ModelAck {
             send,
             pending: pending.clone(),
         };
-        self.enqueue(
-            WorkerEvent::Sync {
-                id,
-                revision,
-                edits,
-            },
-            Some(ack),
-        )
-        .then_some(WorkerSync { done, pending })
-        .ok_or_else(|| Error::new("WorkerScript receiver unavailable"))
+        self.enqueue(WorkerEvent::SyncTree(models), Some(ack))
+            .then_some(WorkerSync { done, pending })
+            .ok_or_else(|| Error::new("WorkerScript receiver unavailable"))
     }
     fn enqueue(&self, event: WorkerEvent, ack: Option<ModelAck>) -> bool {
         let Some(inbox) = self.inbox.upgrade() else {
@@ -200,12 +229,9 @@ impl WorkerDelivery {
         let bytes = std::mem::size_of::<Event>().saturating_add(match &event {
             WorkerEvent::Message(v) => v.estimated_bytes(),
             WorkerEvent::Error(s) | WorkerEvent::Stopped(s) => s.len(),
-            WorkerEvent::Sync { edits, .. } => edits.iter().fold(0usize, |n, e| {
-                e.args
-                    .iter()
-                    .fold(n.saturating_add(e.method.len() + 32), |n, v| {
-                        n.saturating_add(v.estimated_bytes())
-                    })
+            WorkerEvent::Sync { edits, .. } => edit_bytes(edits),
+            WorkerEvent::SyncTree(models) => models.iter().fold(0usize, |n, m| {
+                n.saturating_add(32).saturating_add(edit_bytes(&m.edits))
             }),
             WorkerEvent::Ready => 0,
         });
@@ -367,15 +393,17 @@ impl Instance {
                         revision,
                         edits,
                     } => {
-                        if let Some(ack) = ack {
-                            if ack.pending.swap(false, std::sync::atomic::Ordering::AcqRel) {
-                                let result = self.apply_worker_edits(id, model, revision, edits);
-                                let _ = ack.send.send(result);
-                            }
-                        } else {
-                            self.apply_worker_edits(id, model, revision, edits)?;
-                        }
+                        self.apply_worker_batch(
+                            id,
+                            vec![WorkerModelEdits {
+                                id: model,
+                                revision,
+                                edits,
+                            }],
+                            ack,
+                        )?;
                     }
+                    WorkerEvent::SyncTree(models) => self.apply_worker_batch(id, models, ack)?,
                     WorkerEvent::Stopped(reason) => {
                         entry.endpoint = None;
                         self.transaction(|tx| tx.worker_ready(id, false))?;
@@ -396,38 +424,75 @@ impl Instance {
         }
         result
     }
+    fn apply_worker_batch(
+        &mut self,
+        worker: ObjectId,
+        models: Vec<WorkerModelEdits>,
+        ack: Option<ModelAck>,
+    ) -> Result<(), Error> {
+        if ack
+            .as_ref()
+            .is_some_and(|a| !a.pending.swap(false, std::sync::atomic::Ordering::AcqRel))
+        {
+            return Ok(());
+        }
+        let result = self.apply_worker_edits(worker, models);
+        if let Some(ack) = ack {
+            let _ = ack.send.send(result);
+            Ok(())
+        } else {
+            result.map(drop)
+        }
+    }
+
     fn apply_worker_edits(
         &mut self,
         worker: ObjectId,
-        token: u64,
-        revision: u64,
-        edits: Vec<WorkerEdit>,
-    ) -> Result<u64, Error> {
-        let id = *self.workers.entries[&worker]
-            .models
-            .get(&token)
-            .ok_or_else(|| Error::new("unknown worker ListModel"))?;
-        if self.worker_model_revision(id)? != revision {
-            return Err(Error::new("ListModel changed before WorkerScript.sync"));
+        models: Vec<WorkerModelEdits>,
+    ) -> Result<Vec<u64>, Error> {
+        if models.is_empty() {
+            return Err(Error::new("empty worker synchronization"));
+        }
+        let grants = &self.workers.entries[&worker].models;
+        let mut unique = BTreeSet::new();
+        let mut batch = Vec::with_capacity(models.len());
+        for model in models {
+            let id = *grants
+                .get(&model.id)
+                .ok_or_else(|| Error::new("unknown worker ListModel"))?;
+            if !unique.insert(id) || self.worker_model_revision(id)? != model.revision {
+                return Err(Error::new("ListModel changed before WorkerScript.sync"));
+            }
+            batch.push((id, model.edits));
         }
         self.transaction(|tx| {
-            for edit in edits {
-                if !matches!(
-                    edit.method.as_str(),
-                    "append" | "insert" | "clear" | "move" | "remove" | "set" | "setProperty"
-                ) {
-                    return Err(Error::new("invalid worker ListModel edit"));
+            let mut participants = Vec::with_capacity(batch.len());
+            for (id, edits) in batch {
+                participants.push(id);
+                for edit in edits {
+                    if tx.model.node(id).is_none() {
+                        return Err(Error::new("worker edit targets a removed model"));
+                    }
+                    if !matches!(
+                        edit.method.as_str(),
+                        "append" | "insert" | "clear" | "move" | "remove" | "set" | "setProperty"
+                    ) {
+                        return Err(Error::new("invalid worker ListModel edit"));
+                    }
+                    let args = edit
+                        .args
+                        .into_iter()
+                        .map(|v| tx.import_worker(worker, v, 0))
+                        .collect::<Result<Vec<_>, _>>()?;
+                    tx.model_call(id, &edit.method, &args, &mut BTreeSet::new())?;
                 }
-                let args = edit
-                    .args
-                    .into_iter()
-                    .map(|v| tx.import_worker(worker, v, 0))
-                    .collect::<Result<Vec<_>, _>>()?;
-                tx.model_call(id, &edit.method, &args, &mut BTreeSet::new())?;
             }
-            Ok(())
-        })?;
-        self.worker_model_revision(id)
+            tx.settle()?;
+            participants
+                .into_iter()
+                .map(|id| tx.model.worker_model_revision(id))
+                .collect()
+        })
     }
     pub(crate) fn commit_workers(&mut self, actions: Vec<Action>) {
         for action in actions {

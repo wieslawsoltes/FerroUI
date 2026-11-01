@@ -29,6 +29,12 @@ def main():
         assert monotonic() < deadline, "model sync timed out"
         loop.processEvents()
         sleep(0.001)
+    root.syncChild()
+    while root.property("answer") != "nested-2":
+        assert monotonic() < deadline, "nested model sync timed out"
+        loop.processEvents()
+        sleep(0.001)
+    assert root.childReport() == "2/17", root.childReport()
     root.selectClassic("loose.js")
     root.control()
     while root.property("localValue") != 45:

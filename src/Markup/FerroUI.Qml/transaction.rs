@@ -12,6 +12,7 @@ pub(crate) struct Transaction<'a> {
     pub(crate) used_engine: bool,
     pub(crate) script_deadline: Option<std::time::Instant>,
     pub(crate) failed_host_call: Option<Error>,
+    pub(crate) nested_retirements: Vec<ObjectId>,
     pub(crate) model_edits: Vec<(ObjectId, list_model::Undo)>,
     model_modes: BTreeSet<ObjectId>,
     pub(crate) record_changes: records::Journal,
@@ -75,6 +76,7 @@ impl Instance {
             failed_host_call: None,
             record_changes: self.records.journal(),
             model: self,
+            nested_retirements: Vec::new(),
             model_edits: Vec::new(),
             model_modes: BTreeSet::new(),
             original: BTreeMap::new(),
@@ -324,6 +326,11 @@ impl Transaction<'_> {
                 break;
             }
             let Some((object, name)) = self.notifications.pop_front() else {
+                if !self.nested_retirements.is_empty() {
+                    let retired = std::mem::take(&mut self.nested_retirements);
+                    self.destroy_subtrees(&retired)?;
+                    continue;
+                }
                 break;
             };
             self.budget()?;
