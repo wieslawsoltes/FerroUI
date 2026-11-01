@@ -509,6 +509,18 @@ impl FerroObject {
         self.values.get_value(self, property)
     }
 
+    /// Reads a styled property's current value without cloning it. The callback
+    /// may read other properties, but must not change this property's effective
+    /// value while it is borrowed. Returning a reference to the value is not
+    /// permitted by the callback's lifetime.
+    pub fn with_value<T: PropertyValue, R>(
+        &self,
+        property: &'static StyledProperty<T>,
+        read: impl FnOnce(&T) -> R,
+    ) -> R {
+        self.values.with_value(self, property, read)
+    }
+
     /// Gets a property's base value: the value excluding animated values.
     /// Returns `None` if the value comes from inheritance or the default.
     pub fn get_base_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>) -> Option<T> {
