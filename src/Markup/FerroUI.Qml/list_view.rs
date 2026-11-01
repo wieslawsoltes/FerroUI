@@ -1,6 +1,9 @@
 //! Viewport-bounded Qt Quick list delegates. Unknown sizes use the first
 //! measured extent, and realized size differences refine the content geometry.
 use super::*;
+#[path = "list_extents.rs"]
+mod extents;
+use extents::Extents;
 
 impl TypeDefinition {
     pub fn quick_list_view() -> Self {
@@ -111,7 +114,7 @@ pub(super) struct State {
     horizontal: bool,
     // Width/height deviations are retained independently of the live delegates.
     nominal: Option<f64>,
-    sizes: Rc<BTreeMap<usize, f64>>,
+    sizes: Extents,
     realized: BTreeMap<usize, (Key, ObjectId)>,
     current: i32,
     current_row: Option<Key>,
@@ -162,19 +165,10 @@ impl State {
         self.realized.values().map(|entry| entry.1)
     }
     fn extent(&self, index: usize) -> f64 {
-        self.sizes
-            .get(&index)
-            .copied()
-            .unwrap_or(self.nominal.unwrap_or(32.))
+        self.sizes.get(index).unwrap_or(self.nominal.unwrap_or(32.))
     }
     fn start(&self, index: usize, spacing: f64) -> f64 {
-        let base = self.nominal.unwrap_or(32.);
-        index as f64 * (base + spacing)
-            + self
-                .sizes
-                .range(..index)
-                .map(|(_, extent)| *extent - base)
-                .sum::<f64>()
+        index as f64 * (self.nominal.unwrap_or(32.) + spacing) + self.sizes.before(index)
     }
     fn full_size(&self, count: usize, spacing: f64) -> f64 {
         if count == 0 {
@@ -206,11 +200,11 @@ impl State {
         if self.extent(index) == extent {
             return false;
         }
-        if Some(extent) == self.nominal {
-            Rc::make_mut(&mut self.sizes).remove(&index);
-        } else {
-            Rc::make_mut(&mut self.sizes).insert(index, extent);
-        }
+        self.sizes.set(
+            index,
+            extent,
+            self.nominal.expect("measured nominal extent"),
+        );
         true
     }
 }
