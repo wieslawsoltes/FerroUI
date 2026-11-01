@@ -54,6 +54,30 @@ impl Queue {
         }
     }
 
+    pub(crate) fn retire(&mut self, dead: &BTreeSet<ObjectId>) {
+        self.jobs.retain(|_, task| {
+            let (owner, arguments) = match task {
+                Task::Binding(owner) => (*owner, None),
+                Task::Call {
+                    owner, arguments, ..
+                } => (*owner, Some(arguments)),
+                Task::Method(method, arguments) => (method.receiver(), Some(arguments)),
+            };
+            if dead.contains(&owner) {
+                self.positions.remove(&task.key());
+                return false;
+            }
+            if let Some(arguments) = arguments {
+                for argument in arguments {
+                    if let Some(value) = lifetime::release_value(argument, dead) {
+                        *argument = value;
+                    }
+                }
+            }
+            true
+        });
+    }
+
     fn pop(&mut self, boundary: u64) -> Option<Task> {
         if *self.jobs.first_key_value()?.0 > boundary {
             return None;

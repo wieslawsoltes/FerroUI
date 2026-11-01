@@ -16,6 +16,7 @@ impl Instance {
         }
         self.dynamic.created.retain(|id| !dead.contains(id));
         self.javascript.connections.retire(dead);
+        self.javascript.deferred.retire(dead);
         self.listeners.retain(|_, list| {
             list.retain(|e| !dead.contains(&e.receiver));
             !list.is_empty()
@@ -30,6 +31,7 @@ impl Instance {
             self.models.remove(&id);
             self.bindings.remove(&id);
             self.timers.remove(id);
+            self.workers.unregister(id);
             let node = self.nodes[id.index]
                 .data
                 .take()
@@ -61,9 +63,10 @@ impl Instance {
     }
 }
 
-fn release_value(v: &Value, dead: &BTreeSet<ObjectId>) -> Option<Value> {
+pub(crate) fn release_value(v: &Value, dead: &BTreeSet<ObjectId>) -> Option<Value> {
     match v {
         Value::Object(id) if dead.contains(id) => Some(Value::Null),
+        Value::Method(method) if dead.contains(&method.receiver()) => Some(Value::Null),
         Value::List(items) => {
             let mut copy: Option<Vec<Value>> = None;
             for (index, item) in items.iter().enumerate() {

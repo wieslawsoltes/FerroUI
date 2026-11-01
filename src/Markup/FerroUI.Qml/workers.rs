@@ -157,6 +157,16 @@ pub(crate) struct Workers {
     sequence: u64,
 }
 impl Workers {
+    pub(crate) fn unregister(&mut self, id: ObjectId) {
+        if self.entries.remove(&id).is_some() {
+            if let Some(inbox) = &self.inbox {
+                inbox
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner())
+                    .replace(id, None);
+            }
+        }
+    }
     pub(crate) fn truncate(&mut self, first: usize) {
         self.entries.retain(|id, _| id.index < first);
     }
@@ -330,8 +340,14 @@ impl Transaction<'_> {
         Ok(())
     }
     pub(crate) fn initialize_workers(&mut self, first: usize) {
-        self.worker_sources
-            .extend(self.model.workers.entries.keys().copied().filter(|id| id.index >= first));
+        self.worker_sources.extend(
+            self.model
+                .workers
+                .entries
+                .keys()
+                .copied()
+                .filter(|id| id.index >= first),
+        );
     }
     pub(crate) fn stage_workers(&mut self) -> Result<(), Error> {
         while let Some(id) = self.worker_sources.pop_first() {

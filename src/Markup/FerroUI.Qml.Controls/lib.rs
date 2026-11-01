@@ -249,6 +249,7 @@ impl QmlView {
             .control();
         composition::reconcile(&instance, &nodes)?;
         instance.drain_changes();
+        instance.drain_created();
         let view = Self(Rc::new(Inner {
             clock: std::cell::OnceCell::new(),
             manual_clock: Cell::new(false),
@@ -397,7 +398,11 @@ impl QmlView {
     }
 
     fn apply_changes(&self, source: Option<(ObjectId, &str, &Value)>) -> Result<(), Error> {
-        let changes = self.0.instance.borrow_mut().drain_changes();
+        let changes = {
+            let mut instance = self.0.instance.borrow_mut();
+            instance.drain_created();
+            instance.drain_changes()
+        };
         let mut layout_changed = self.accept_topology();
         for change in changes {
             if let Some(node) = self.peer(change.object) {
