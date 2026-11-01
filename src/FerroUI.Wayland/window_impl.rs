@@ -50,6 +50,7 @@ use wayland_protocols::xdg::shell::client::xdg_toplevel::ResizeEdge;
 type SharedSurfaces = Arc<Mutex<Vec<Arc<dyn IPlatformRenderSurface>>>>;
 
 pub struct WindowImpl {
+    pub(crate) layer_role: RefCell<Option<crate::layer_shell::LayerRole>>,
     this: Weak<WindowImpl>,
     base: WindowBaseImpl,
     current_sink: RefCell<Option<Rc<WindowImplSink>>>,
@@ -190,7 +191,13 @@ impl WindowImpl {
     /// A window with its top-level on the compositor: the constructor waits for the first
     /// configure of the compositor.
     pub fn new(client: Rc<WaylandWorkerClient>, keyboard: Rc<KeyboardDevice>) -> Rc<Self> {
+        Self::try_new(client, keyboard, None).unwrap_or_else(|error| crate::FerroWaylandError::new(error).throw())
+    }
+
+    pub(crate) fn try_new(client: Rc<WaylandWorkerClient>, keyboard: Rc<KeyboardDevice>,
+        role: Option<crate::layer_shell::LayerRole>) -> Result<Rc<Self>, String> {
         let window = Rc::new_cyclic(|this| Self {
+            layer_role: RefCell::new(role),
             this: this.clone(),
             base: WindowBaseImpl::new(client, keyboard),
             current_sink: RefCell::new(None),
@@ -218,9 +225,24 @@ impl WindowImpl {
             extend_client_area_to_decorations_changed: RefCell::new(None),
             drawn_decorations_request_changed: RefCell::new(None),
         });
-        let sink = WindowImplSink::new(&window, false);
+        let sink = WindowImplSink::new(&window, false)?;
         *window.current_sink.borrow_mut() = Some(sink);
-        window
+        Ok(window)
+    }
+
+    pub(crate) fn configure_layer(&self, config: crate::layer_shell::LayerConfig) -> Result<(), String> {
+        let mut role = self.layer_role.borrow_mut();
+        let role = role.as_mut().ok_or("This window has an xdg role")?;
+        if role.config == config { return Ok(()); }
+        if let Some(proxy) = self.surface_proxy() {
+            let id = proxy.id();
+            self.base.client().invoke_oob(move |worker| {
+                worker.state.top_levels.get_mut(&id).ok_or("The layer surface has closed".to_string())?
+                    .configure_layer(config)
+            }).recv().map_err(|_| "The Wayland worker stopped")??;
+        }
+        role.config = config;
+        Ok(())
     }
 
     /// The state the window shares with a popup of the backend.
@@ -292,16 +314,8 @@ impl WindowImpl {
             }
         }
 
-        // Activation
-        let was_activated = self.is_activated.replace(outcome.is_activated);
-        if outcome.is_activated && !was_activated {
-            if let Some(activated) = get(&self.base.activated) {
-                activated();
-            }
-        } else if !outcome.is_activated && was_activated {
-            if let Some(deactivated) = get(&self.base.deactivated) {
-                deactivated();
-            }
+        if self.layer_role.borrow().is_none() {
+            self.update_activation(outcome.is_activated);
         }
 
         if let Some(new_client_size) = outcome.client_size {
@@ -309,6 +323,19 @@ impl WindowImpl {
             if let Some(resized) = get(&self.base.resized) {
                 resized(new_client_size, WindowResizeReason::Layout);
             }
+        }
+    }
+
+    fn update_activation(&self, active: bool) {
+        if self.is_activated.replace(active) == active { return; }
+        if let Some(notify) = get(if active { &self.base.activated } else { &self.base.deactivated }) {
+            notify();
+        }
+    }
+
+    pub(crate) fn layer_keyboard_focus(&self, active: bool) {
+        if self.layer_role.borrow().is_some() {
+            self.update_activation(active);
         }
     }
 
@@ -704,8 +731,17 @@ impl IWindowBaseImpl for WindowImpl {
         if self.current_sink.borrow().is_none() {
             // TODO: Re-apply window state
             if let Some(this) = self.this.upgrade() {
-                let sink = WindowImplSink::new(&this, true);
-                *self.current_sink.borrow_mut() = Some(sink);
+                match WindowImplSink::new(&this, true) {
+                    Ok(sink) => *self.current_sink.borrow_mut() = Some(sink),
+                    Err(_) if self.layer_role.borrow().is_some() => {
+                        // A named output may disappear while this window is hidden. The framework
+                        // is still inside show_core; deliver Closed after it finishes mapping.
+                        use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+                        Dispatcher::ui_thread().post_local(move || this.dispose(), DispatcherPriority::NORMAL);
+                        return;
+                    }
+                    Err(error) => crate::FerroWaylandError::new(error).throw(),
+                }
             }
         }
 
@@ -714,6 +750,7 @@ impl IWindowBaseImpl for WindowImpl {
 
     fn hide(&self) {
         self.dispose_sink();
+        self.layer_keyboard_focus(false);
     }
 
     // Not supported by Wayland: a top-level is the origin of the "screen" space.
@@ -883,7 +920,7 @@ impl IWindowImpl for WindowImpl {
     }
 
     fn needs_managed_decorations(&self) -> bool {
-        self.server_reported_mode.get() == DecorationMode::ClientSide
+        self.layer_role.borrow().is_none() && self.server_reported_mode.get() == DecorationMode::ClientSide
     }
 
     fn requested_drawn_decorations(&self) -> PlatformRequestedDrawnDecoration {
@@ -931,6 +968,9 @@ impl IWindowImpl for WindowImpl {
     }
 
     fn resize(&self, client_size: Size, reason: WindowResizeReason) {
+        // The layer configure is authoritative, including after a Window is shown. A layout
+        // pass must never replace it with the application's preferred (or default) size.
+        if self.layer_role.borrow().is_some() { return; }
         // There is some bug on the x-plat side of things that increments the size by 0.000001 or smth and causes
         // a stack overflow
         // So we check for recursion depth and for nearly equal values here.

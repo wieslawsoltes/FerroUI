@@ -278,6 +278,8 @@ pub use imp::*;
 
 #[cfg(target_os = "linux")]
 mod imp {
+    use crate::layer_shell::{LayerConfig, LayerRole};
+    use wayland_protocols_wlr::layer_shell::v1::client::zwlr_layer_surface_v1::{self, ZwlrLayerSurfaceV1};
     use super::*;
     use crate::screens::wayland_output_snapshot::WaylandOutputId;
     use crate::server::persistent::decoration_mode::DecorationMode;
@@ -647,6 +649,7 @@ mod imp {
     pub struct WXdgShellSurface {
         surface: WSurface,
         xdg_surface: Option<XdgSurface>,
+        layer_surface: Option<ZwlrLayerSurfaceV1>,
         pending_ack_serial: Option<u32>,
         /// The serials of the configure events of the current `xdg_surface` that are not
         /// acknowledged yet (not in the reference): the UI thread answers a configure with
@@ -683,6 +686,7 @@ mod imp {
             Self {
                 surface: WSurface::new(id, worker),
                 xdg_surface: None,
+                layer_surface: None,
                 pending_ack_serial: None,
                 configure_serials: Vec::new(),
                 initial_configure_acknowledged: false,
@@ -784,18 +788,22 @@ mod imp {
             self.configure_serials.push(serial);
         }
 
-        pub fn on_connected(&mut self, cx: &ConnectionContext<'_>) {
+        fn connect_base(&mut self, cx: &ConnectionContext<'_>) {
             self.surface.on_connected(cx);
             self.pending_ack_serial = None;
             self.configure_serials.clear();
             self.initial_configure_acknowledged = false;
             self.mapped = false;
+        }
 
+        pub fn on_connected(&mut self, cx: &ConnectionContext<'_>) {
+            self.connect_base(cx);
             let wl_surface = self.surface.wl_surface.as_ref().expect("the surface was just created");
             self.xdg_surface = Some(cx.globals.xdg_wm_base.get_xdg_surface(wl_surface, cx.queue_handle, self.surface.id));
         }
 
         pub fn on_disconnected(&mut self) {
+            if let Some(layer) = self.layer_surface.take() { layer.destroy(); }
             if let Some(xdg_surface) = self.xdg_surface.take() {
                 xdg_surface.destroy();
             }
@@ -834,8 +842,9 @@ mod imp {
         }
 
         pub fn on_before_new_buffer_attached(&mut self, globals: &WaylandGlobals, scene_info: &RenderTargetSceneInfo) {
-            if let (Some(serial), Some(xdg_surface)) = (self.pending_ack_serial.take(), &self.xdg_surface) {
-                xdg_surface.ack_configure(serial);
+            if let Some(serial) = self.pending_ack_serial.take() {
+                if let Some(xdg) = &self.xdg_surface { xdg.ack_configure(serial); }
+                if let Some(layer) = &self.layer_surface { layer.ack_configure(serial); }
             }
 
             self.maybe_emit_window_geometry(scene_info.size, scene_info.scaling, scene_info.logical_size);
@@ -893,6 +902,8 @@ mod imp {
         basic_init_completed: Option<Sender<Arc<XdgConfigureBatch>>>,
         basic_init_is_completed: bool,
         xdg_top_level: Option<XdgToplevel>,
+        layer_role: Option<LayerRole>,
+        layer_output: Option<u32>,
         pending_batch: XdgConfigureBatch,
         // Typed event sink for xdg_toplevel-specific events.
         top_level_event_sink: WXdgTopLevelEventSinkProxy,
@@ -921,6 +932,8 @@ mod imp {
                 basic_init_completed: Some(basic_init_completed),
                 basic_init_is_completed: false,
                 xdg_top_level: None,
+                layer_role: None,
+                layer_output: None,
                 pending_batch: XdgConfigureBatch::default(),
                 top_level_event_sink: event_sink,
                 min_size: None,
@@ -931,6 +944,74 @@ mod imp {
                 csd_sticky: false,
                 active_exports: Vec::new(),
             }
+        }
+
+        pub(crate) fn set_initial_layer_role(&mut self, role: Option<LayerRole>) {
+            self.layer_role = role;
+        }
+
+        pub(crate) fn configure_layer(&mut self, config: LayerConfig) -> Result<(), String> {
+            let role = self.layer_role.as_mut().ok_or("Not a layer surface")?;
+            if let Some(layer) = &self.shell.layer_surface {
+                config.check_version(layer.version())?;
+                if role.config.layer != config.layer {
+                    if layer.version() < 2 {
+                        return Err("Changing the layer of a mapped surface needs layer-shell v2".into());
+                    }
+                    layer.set_layer(config.layer);
+                }
+                config.apply(layer);
+                if self.shell.can_commit_out_of_band() {
+                    if let Some(surface) = self.shell.surface.wl_surface() {
+                        surface.commit();
+                    }
+                }
+            }
+            role.config = config;
+            Ok(())
+        }
+
+        fn connect_layer(&mut self, cx: &ConnectionContext<'_>) -> Result<(), String> {
+            let role = self.layer_role.as_ref().expect("layer role");
+            let manager = cx.globals.layer_shell.as_ref().ok_or("Compositor has no layer-shell protocol")?;
+            role.config.check_version(manager.version())?;
+            let output = match role.output.as_deref() {
+                None => None,
+                Some(name) => Some(cx.globals.outputs.outputs().iter().find(|output|
+                    output.output_name.as_deref() == Some(name) || output.xdg_name.as_deref() == Some(name))
+                    .ok_or_else(|| format!("Wayland output {name} is unavailable"))?),
+            };
+            self.layer_output = output.map(|output| output.name);
+            self.shell.connect_base(cx);
+            let surface = self.shell.surface.wl_surface().expect("layer wl_surface");
+            let layer = manager.get_layer_surface(surface, output.map(|output| output.wl_output()), role.config.layer, role.namespace.clone(),
+                cx.queue_handle, self.shell.surface.id);
+            role.config.apply(&layer);
+            self.shell.layer_surface = Some(layer);
+            self.pending_batch = XdgConfigureBatch::default();
+            surface.commit();
+            Ok(())
+        }
+
+        /// Named layer surfaces belong to one output, including when the server only
+        /// announces removal via the registry. Compositor-selected surfaces can migrate.
+        pub(crate) fn forget_output(&mut self, name: u32) {
+            self.shell.surface.forget_output(name);
+            if self.layer_output == Some(name) {
+                self.close_layer();
+            }
+        }
+
+        fn close_layer(&mut self) {
+            let Some(layer) = self.shell.layer_surface.take() else { return; };
+            layer.destroy();
+            self.layer_output = None;
+            self.basic_init_completed.take();
+            self.shell.configure_serials.clear();
+            self.shell.pending_ack_serial = None;
+            self.shell.initial_configure_acknowledged = false;
+            self.shell.mapped = false;
+            self.top_level_event_sink.on_layer_closed();
         }
 
         /// Worker-thread: exports this toplevel via xdg-foreign-unstable-v2, returning the
@@ -1150,6 +1231,15 @@ mod imp {
 
     impl IPersistentWaylandObject for WXdgTopLevel {
         fn on_connected(&mut self, cx: &ConnectionContext<'_>) {
+            if self.layer_role.is_some() {
+                if self.connect_layer(cx).is_err() {
+                    // Dropping the sender releases an initial synchronous constructor. On
+                    // reconnect, an output can have gone away; close only the affected window.
+                    self.basic_init_completed.take();
+                    self.top_level_event_sink.on_layer_closed();
+                }
+                return;
+            }
             self.shell.on_connected(cx);
             if cx.globals.outputs.outputs().is_empty() {
                 FerroWaylandError::new("Expected at least one wl_output at this point").throw();
@@ -1263,6 +1353,7 @@ mod imp {
     pub struct PopupParent {
         pub is_mapped: bool,
         pub xdg_surface: Option<XdgSurface>,
+        pub layer_surface: Option<ZwlrLayerSurfaceV1>,
         pub last_window_geometry: Option<(i32, i32, i32, i32)>,
     }
 
@@ -1271,6 +1362,7 @@ mod imp {
             Self {
                 is_mapped: shell.mapped,
                 xdg_surface: shell.xdg_surface.clone(),
+                layer_surface: shell.layer_surface.clone(),
                 last_window_geometry: shell.last_window_geometry,
             }
         }
@@ -1464,19 +1556,19 @@ mod imp {
                 // The parent surface is gone: the popup has nothing to attach to.
                 return PopupAttach::Done;
             };
-            let parent_xdg_surface = match &parent.xdg_surface {
-                Some(parent_xdg_surface) if parent.is_mapped => parent_xdg_surface,
-                // Parent not yet mapped — register; parent will call us back
-                // when its first buffer commits.
-                _ => return PopupAttach::ParentNotMapped,
-            };
+            if !parent.is_mapped || (parent.xdg_surface.is_none() && parent.layer_surface.is_none()) {
+                return PopupAttach::ParentNotMapped;
+            }
 
             let (positioner, geometry) = Self::build_positioner(pos, Some(parent), globals);
             self.placement.positioner = Some(geometry);
             self.placement.parent_geometry = parent.last_window_geometry;
             self.pending_batch = XdgPopupConfigureBatch::default();
-            self.xdg_popup =
-                Some(xdg_surface.get_popup(Some(parent_xdg_surface), &positioner, globals.queue_handle(), self.shell.surface.id));
+            let popup = xdg_surface.get_popup(parent.xdg_surface.as_ref(), &positioner, globals.queue_handle(), self.shell.surface.id);
+            if let Some(layer) = &parent.layer_surface {
+                layer.get_popup(&popup);
+            }
+            self.xdg_popup = Some(popup);
             positioner.destroy();
             if let Some(wl_surface) = self.shell.surface.wl_surface() {
                 wl_surface.commit();
@@ -1695,6 +1787,33 @@ mod imp {
 
     impl Dispatch<WlRegion, ()> for WaylandWorkerState {
         fn event(_: &mut Self, _: &WlRegion, _: <WlRegion as wayland_client::Proxy>::Event, _: &(), _: &Connection, _: &QueueHandle<Self>) {
+        }
+    }
+
+    impl Dispatch<ZwlrLayerSurfaceV1, WSurfaceId> for WaylandWorkerState {
+        fn event(state: &mut Self, proxy: &ZwlrLayerSurfaceV1, event: zwlr_layer_surface_v1::Event,
+            id: &WSurfaceId, _: &Connection, _: &QueueHandle<Self>) {
+            let Some(window) = state.top_levels.get_mut(id) else { return; };
+            if window.shell.layer_surface.as_ref() != Some(proxy) { return; }
+            match event {
+                zwlr_layer_surface_v1::Event::Configure { serial, width, height } => {
+                    let Some(role) = &window.layer_role else { return; };
+                    // Zero is an invitation to choose a size. Prefer the role's requested
+                    // dimension, then the named/entered output when the axis is stretched.
+                    let globals = state.globals.as_ref();
+                    let fallback = globals.and_then(|g| {
+                        let named = role.output.as_ref().and_then(|name| g.outputs.outputs().iter()
+                            .find(|o| o.output_name.as_ref() == Some(name) || o.xdg_name.as_ref() == Some(name)));
+                        named.or_else(|| window.shell.surface.outputs.last().and_then(|n| g.outputs.find(*n)))
+                            .or_else(|| g.outputs.outputs().first()).map(|o| o.logical_size())
+                    }).unwrap_or(PixelSize::new(1, 1));
+                    window.pending_batch.size = role.config.configured_size(width, height, fallback);
+                    window.shell.note_configure_serial(serial);
+                    window.on_configure_batch_complete(serial, state.globals.as_ref());
+                }
+                zwlr_layer_surface_v1::Event::Closed => window.close_layer(),
+                _ => {}
+            }
         }
     }
 

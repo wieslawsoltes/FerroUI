@@ -75,6 +75,7 @@ impl KeyboardHandler {
             wl_keyboard::Event::Enter { surface, .. } => {
                 self.focused_surface = find_surface_for_wl_surface(&surface);
                 if let Some(sink) = self.focused_surface.and_then(|surface| cx.sink_of(surface)) {
+                    sink.on_keyboard_enter();
                     sink.on_key_repeat_info(self.repeat_rate, self.repeat_delay);
                 }
                 None

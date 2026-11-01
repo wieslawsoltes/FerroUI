@@ -38,7 +38,7 @@
 //!   back to a `wl_egl_window`, which the run reports as not measured.
 //! - `--expect-scale=N`: the scale of the output, which the window has to
 //!   take.
-//! - `--skip=a,b`: phases to leave out (`screens`, `foreign`, `frames`, `input`, `popup`,
+//! - `--skip=a,b`: phases to leave out (`screens`, `foreign`, `frames`, `layers`, `input`, `popup`,
 //!   `clipboard`, `dragdrop`, `textinput`, `export`, `decorations`, `cursor`, `resize`, `state`,
 //!   `title`).
 //!
@@ -1503,6 +1503,10 @@ mod app {
                     report.phase("frames");
                     frames_checks(&report, probe, &window).await;
                 }
+                if options.runs("layers") {
+                    report.phase("layers");
+                    layer_checks(&report, probe, &window).await;
+                }
                 if options.runs("input") {
                     report.phase("input");
                     input_checks(&report, probe, &window).await;
@@ -2209,6 +2213,57 @@ mod app {
             );
             // The marker is back for the phases that follow.
             delay(Duration::from_millis(300)).await;
+        }
+
+        /// Map a panel on the output of the test window and exercise real exclusive zones,
+        /// live layer/keyboard policy, hiding and recreating the role on the same Window.
+        async fn layer_checks(report: &Report, probe: &mut Probe, window: &Ref<Window>) {
+            use ferroui_wayland::layer_shell::{LayerConfig, LayerWindow};
+
+            let size = window.client_size();
+            let name = window.screens().screen_from_window(window).and_then(|s| s.display_name());
+            let panel = match LayerWindow::new("ferroui-smoke-panel", name.as_deref(), LayerConfig::panel(true, 40)) {
+                Ok(panel) => panel,
+                Err(error) => {
+                    report.check("create panel", false, error);
+                    return;
+                }
+            };
+            let border = Border::new();
+            border.set_background(Some(brush(POPUP_FILL)));
+            panel.set_content(Some(Control::boxed(border)));
+            panel.show();
+            let reserved = wait_for(STEP_TIMEOUT, || window.client_size().height == size.height - 40.0).await;
+            report.check("exclusive zone", reserved && panel.client_size() == Size::new(size.width, 40.0),
+                format!("panel {:?}, tiled window {:?}", panel.client_size(), window.client_size()));
+            let visible = picture_with(probe, (5, 5), POPUP_FILL).await;
+            report.check("panel pixels", visible.is_ok(), format!("top-left of the output contains the panel: {}", visible.is_ok()));
+
+            if let Err(error) = LayerWindow::configure(&panel, LayerConfig::overlay()) {
+                report.check("set overlay", false, error);
+            } else {
+                let interactive = wait_for(STEP_TIMEOUT, || panel.is_active() && panel.client_size() == size
+                    && window.client_size() == size).await;
+                report.check("live overlay", interactive,
+                    format!("keyboard focus {}, size {:?}, tiled window {:?}", panel.is_active(), panel.client_size(), window.client_size()));
+            }
+
+            panel.hide();
+            let hidden = picture_with(probe, (5, 5), FILL).await.is_ok();
+            report.check("hide layer", hidden, format!("application visible again: {hidden}"));
+            if let Err(error) = LayerWindow::configure(&panel, LayerConfig::panel(false, 32)) {
+                report.check("configure hidden panel", false, error);
+            } else {
+                panel.show();
+                let reserved = wait_for(STEP_TIMEOUT, || window.client_size().height == size.height - 32.0).await;
+                let bottom = (size.height * window.render_scaling()) as u32;
+                let visible = picture_with(probe, (5, bottom.saturating_sub(5)), POPUP_FILL).await.is_ok();
+                report.check("remap bottom panel", reserved && visible,
+                    format!("restored reservation {reserved}, bottom edge visible {visible}"));
+            }
+            panel.close();
+            let restored = wait_for(STEP_TIMEOUT, || window.client_size() == size).await;
+            report.check("release exclusive zone", restored, format!("tiled window {:?}", window.client_size()));
         }
 
         /// The frames of the window as the compositor composed them.

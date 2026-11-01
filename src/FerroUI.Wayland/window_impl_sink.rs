@@ -11,7 +11,6 @@ use crate::server::persistent::i_w_surface_event_sink::{
 };
 use crate::server::persistent::i_w_xdg_top_level::{IWXdgShellSurface, IWXdgTopLevel, WXdgTopLevelProxy};
 use crate::server::persistent::xdg_configure_batch::XdgConfigureBatch;
-use crate::ferro_wayland_exception::FerroWaylandError;
 use crate::window_impl::WindowImpl;
 use crate::window_impl_base::{ISinkOwner, Sink};
 use ferroui_base::input::raw::RawPointerEventType;
@@ -32,10 +31,8 @@ pub(crate) struct WindowImplSink {
 
 impl WindowImplSink {
     /// Creates the top-level of a window on the worker and applies its first configure.
-    ///
-    /// # Panics
-    /// Panics when the worker does not answer with a configure: it is gone.
-    pub(crate) fn new(parent: &Rc<WindowImpl>, second_show: bool) -> Rc<Self> {
+    /// Returns an error if the server rejects the role or its output disappears.
+    pub(crate) fn new(parent: &Rc<WindowImpl>, second_show: bool) -> Result<Rc<Self>, String> {
         let owner: Weak<dyn ISinkOwner> = parent.this();
         let client = parent.base().client().clone();
         let sink = Rc::new(Self {
@@ -45,14 +42,24 @@ impl WindowImplSink {
             surface_proxy: RefCell::new(None),
         });
 
-        let handle = client.create_top_level_handle(WXdgTopLevelEventSinkProxy::new(sink.clone(), Dispatcher::ui_thread()));
+        let role = parent.layer_role.borrow().clone();
+        let is_layer = role.is_some();
+        let handle = client.create_window_handle(WXdgTopLevelEventSinkProxy::new(sink.clone(), Dispatcher::ui_thread()), role);
         let surface_proxy = handle.proxy;
         *sink.surface_proxy.borrow_mut() = Some(surface_proxy.clone());
         parent.set_surface(surface_proxy.clone(), handle.render_surfaces);
 
-        let initial_batch = match handle.basic_init_completed.map(|completed| completed.recv()) {
-            Some(Ok(batch)) => batch,
-            _ => FerroWaylandError::new("The Wayland worker did not configure the window: it is gone").throw(),
+        let completed = handle.basic_init_completed.expect("window has an initial configure receiver");
+        let initial_batch = if is_layer {
+            completed.recv_timeout(std::time::Duration::from_secs(5)).ok()
+        } else {
+            completed.recv().ok()
+        };
+        let Some(initial_batch) = initial_batch else {
+            sink.dispose();
+            return Err(if is_layer {
+                "Layer surface unavailable: check layer-shell support and target output".into()
+            } else { "The Wayland worker did not configure the window: it is gone".into() });
         };
         *sink.initial_batch.borrow_mut() = Some(initial_batch.clone());
         parent.apply_configure_batch(&initial_batch);
@@ -109,7 +116,7 @@ impl WindowImplSink {
         // connection is gone, and the new compositor may expose different globals.
         parent.reset_storage_provider();
 
-        sink
+        Ok(sink)
     }
 
     pub(crate) fn dispose(&self) {
@@ -197,8 +204,17 @@ impl IWSurfaceEventSink for WindowImplSink {
         self.base.on_key_up(timestamp, key, modifiers, physical_key, key_symbol);
     }
 
+    fn on_keyboard_enter(&self) {
+        if !self.base.is_disposed() {
+            if let Some(parent) = self.parent() { parent.layer_keyboard_focus(true); }
+        }
+    }
+
     fn on_keyboard_leave(&self) {
         self.base.on_keyboard_leave();
+        if !self.base.is_disposed() {
+            if let Some(parent) = self.parent() { parent.layer_keyboard_focus(false); }
+        }
     }
 
     fn on_key_repeat_info(&self, rate: i32, delay: i32) {
@@ -247,6 +263,14 @@ impl IWXdgTopLevelEventSink for WindowImplSink {
             return;
         }
         parent.apply_decoration_mode(mode);
+    }
+
+    fn on_layer_closed(&self) {
+        if !self.base.is_disposed() {
+            if let Some(parent) = self.parent() {
+                ferroui_base::reactive::IDisposable::dispose(&*parent);
+            }
+        }
     }
 
     fn on_close(&self) {

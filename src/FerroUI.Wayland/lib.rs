@@ -30,6 +30,8 @@ pub mod xkb_key_transform;
 #[cfg(target_os = "linux")]
 pub mod i_wayland_xdg_top_level_export;
 #[cfg(target_os = "linux")]
+pub mod layer_shell;
+#[cfg(target_os = "linux")]
 pub mod popup_impl;
 #[cfg(target_os = "linux")]
 mod popup_impl_sink;
@@ -76,4 +78,4 @@ pub use ferro_wayland_exception::{
 #[allow(deprecated)]
 pub use ferro_wayland_exception::FerroWaylandException;
 pub use ferro_wayland_platform_extensions::FerroWaylandPlatformExtensions;
-pub use wayland_platform_options::WaylandPlatformOptions;
+pub use wayland_platform_options::{WaylandPlatformOptions, WaylandRenderingMode};

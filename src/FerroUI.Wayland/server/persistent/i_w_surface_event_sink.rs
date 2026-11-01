@@ -52,6 +52,7 @@ pub trait IWSurfaceEventSink {
     fn on_touch_cancel(&self, touch_id: i32, position: Point);
     fn on_key_down(&self, timestamp: u64, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<String>);
     fn on_key_up(&self, timestamp: u64, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<String>);
+    fn on_keyboard_enter(&self) {}
     fn on_keyboard_leave(&self);
     fn on_key_repeat_info(&self, rate: i32, delay: i32);
 
@@ -87,6 +88,8 @@ pub trait IWSurfaceEventSink {
 pub trait IWXdgTopLevelEventSink: IWSurfaceEventSink {
     fn on_configure(&self, batch: Arc<XdgConfigureBatch>);
     fn on_close(&self);
+    /// The compositor has permanently removed a layer surface (e.g. output hot-unplug).
+    fn on_layer_closed(&self) { self.on_close(); }
     fn on_decoration_mode_changed(&self, mode: DecorationMode);
 }
 
@@ -194,6 +197,10 @@ impl WSurfaceEventSinkProxy {
         self.target.post(move |sink| sink.on_key_up(timestamp, key, modifiers, physical_key, key_symbol));
     }
 
+    pub fn on_keyboard_enter(&self) {
+        self.target.post(|sink| sink.on_keyboard_enter());
+    }
+
     pub fn on_keyboard_leave(&self) {
         self.target.post(|sink| sink.on_keyboard_leave());
     }
@@ -263,6 +270,10 @@ impl WXdgTopLevelEventSinkProxy {
 
     pub fn on_configure(&self, batch: Arc<XdgConfigureBatch>) {
         self.target.post(move |sink| sink.on_configure(batch));
+    }
+
+    pub fn on_layer_closed(&self) {
+        self.target.post(|sink| sink.on_layer_closed());
     }
 
     pub fn on_close(&self) {

@@ -58,11 +58,18 @@ impl ISkiaGpuRenderTarget for VulkanSkiaRenderTarget {
 
     fn begin_rendering_session(
         &self,
-        _scene_info: &RenderTargetSceneInfo,
+        scene_info: &RenderTargetSceneInfo,
         surface_props: &skia_safe::SurfaceProps,
     ) -> Rc<dyn ISkiaGpuRenderSession> {
-        // TODO: use expectedPixelSize
-        let session = self.target.begin_draw();
+        self.try_begin_rendering_session(scene_info, surface_props).unwrap_or_else(|e| panic!("{e}"))
+    }
+
+    fn try_begin_rendering_session(
+        &self,
+        scene_info: &RenderTargetSceneInfo,
+        surface_props: &skia_safe::SurfaceProps,
+    ) -> Result<Rc<dyn ISkiaGpuRenderSession>, ferroui_base::platform::RenderTargetError> {
+        let session = self.target.try_begin_draw(scene_info)?;
         let guard = SessionGuard {
             session: session.clone(),
             success: Cell::new(false),
@@ -122,12 +129,12 @@ impl ISkiaGpuRenderTarget for VulkanSkiaRenderTarget {
 
         guard.success.set(true);
 
-        Rc::new(VulkanSkiaRenderSession::new(
+        Ok(Rc::new(VulkanSkiaRenderSession::new(
             self.gr_context.clone(),
             surface,
             session,
             self.vulkan.device().graphics_queue_family_index(),
-        ))
+        )))
     }
 
     fn state(&self) -> PlatformRenderTargetState {
