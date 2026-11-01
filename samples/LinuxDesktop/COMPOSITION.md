@@ -50,3 +50,21 @@ samples/LinuxDesktop/build.sh build --profile dev
 samples/LinuxDesktop/tests/ferro-compositor.sh target/debug/ferro-desktop /tmp/ferro-compositor
 samples/LinuxDesktop/tests/wayland-session.sh --ferro target/debug/ferro-desktop /tmp/ferro-composed-login
 ```
+
+## Launch the WinUI Control Gallery
+
+The existing Linux `control-catalog-desktop` sample can be installed as a separate application. Supply its executable as the installer’s optional second argument.
+
+```sh
+cargo build --release --locked -p control-catalog-desktop
+sudo samples/LinuxDesktop/session/install.sh target/release/ferro-desktop target/release/control-catalog-desktop
+```
+
+Open Start and search for **FerroUI WinUI Gallery**. The desktop entry selects the catalog’s WinUI theme and native Wayland shared-memory presentation. The shell passes its child display to the launched process and composes the catalog’s buffers with Graphite. Controls inside that window belong to the catalog.
+
+To reproduce the gallery capture, point the compositor test at both built executables. The test drives the production launcher, verifies the private socket and checks the stable external catalog on the parent output.
+
+```sh
+FERRO_TEST_CATALOG=target/release/control-catalog-desktop \
+  samples/LinuxDesktop/tests/ferro-compositor.sh target/release/ferro-desktop /tmp/ferro-catalog-captures
+```
