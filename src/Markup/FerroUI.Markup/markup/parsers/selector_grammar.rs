@@ -1,6 +1,6 @@
 //! The grammar of style selectors (`Button.foo > :is(Control)#name /template/ ^[Foo=bar]`).
 
-use ferroui_base::data::core::ExpressionParseException;
+use ferroui_base::data::core::ExpressionParseError;
 use ferroui_base::utilities::character_reader::{is_digit, is_white_space};
 use ferroui_base::utilities::span_helpers::{try_parse_int, NumberStyles};
 use ferroui_base::utilities::CharacterReader;
@@ -48,13 +48,13 @@ pub struct SelectorGrammar;
 
 impl SelectorGrammar {
     /// Parses `s` into a list of syntax elements.
-    pub fn parse(s: &str) -> Result<Vec<SelectorSyntax>, ExpressionParseException> {
+    pub fn parse(s: &str) -> Result<Vec<SelectorSyntax>, ExpressionParseError> {
         let mut r = CharacterReader::new(s);
         parse(&mut r, None)
     }
 }
 
-type ParseResult<T> = Result<T, ExpressionParseException>;
+type ParseResult<T> = Result<T, ExpressionParseError>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum State {
@@ -106,7 +106,7 @@ fn parse(r: &mut CharacterReader<'_>, end: Option<char>) -> ParseResult<Vec<Sele
         && state != State::End
         && state != State::CanHaveType
     {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Unexpected end of selector",
         ));
@@ -165,7 +165,7 @@ fn parse_colon(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<Select
     let identifier = r.parse_style_class();
 
     if identifier.is_empty() {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Expected class name, is, nth-child or nth-last-child selector after ':'.",
         ));
@@ -233,7 +233,7 @@ fn parse_traversal(r: &mut CharacterReader<'_>) -> (State, Option<SelectorSyntax
 fn parse_class(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<SelectorSyntax>)> {
     let class = r.parse_style_class();
     if class.is_empty() {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Expected a class name after '.'.",
         ));
@@ -251,12 +251,12 @@ fn parse_template(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<Sel
     let template = r.parse_identifier();
     const TEMPLATE_KEYWORD: &str = "template";
     if template != TEMPLATE_KEYWORD {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             format!("Expected 'template', got '{template}'"),
         ));
     } else if !r.take_if('/') {
-        return Err(ExpressionParseException::new(r.position(), "Expected '/'"));
+        return Err(ExpressionParseError::new(r.position(), "Expected '/'"));
     }
     Ok((State::Start, Some(SelectorSyntax::Template)))
 }
@@ -264,7 +264,7 @@ fn parse_template(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<Sel
 fn parse_name(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<SelectorSyntax>)> {
     let name = r.parse_identifier();
     if name.is_empty() {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Expected a name after '#'.",
         ));
@@ -291,7 +291,7 @@ fn parse_property(r: &mut CharacterReader<'_>) -> ParseResult<(State, Option<Sel
     if r.take_if('(') {
         return Ok((State::AttachedProperty, None));
     } else if !r.take_if('=') {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             format!("Expected '=', got '{}'", peek_text(r)),
         ));
@@ -315,28 +315,28 @@ fn parse_attached_property(
 ) -> ParseResult<(State, Option<SelectorSyntax>)> {
     let (xmlns, type_name) = parse_type(r)?;
     if !r.take_if('.') {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             format!("Expected '.', got '{}'", peek_text(r)),
         ));
     }
     let property = r.parse_identifier();
     if property.is_empty() {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             format!("Expected Attached Property Name, got '{}'", peek_text(r)),
         ));
     }
 
     if !r.take_if(')') {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             format!("Expected ')', got '{}'", peek_text(r)),
         ));
     }
 
     if !r.take_if('=') {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             format!("Expected '=', got '{}'", peek_text(r)),
         ));
@@ -364,7 +364,7 @@ fn parse_attached_property(
 fn take_close_bracket(r: &mut CharacterReader<'_>) -> ParseResult<()> {
     match r.take() {
         Some(_) => Ok(()),
-        None => Err(ExpressionParseException::new(
+        None => Err(ExpressionParseError::new(
             r.position(),
             "Expected ']', got end of selector.",
         )),
@@ -378,7 +378,7 @@ fn parse_type(r: &mut CharacterReader<'_>) -> ParseResult<(String, String)> {
     let namespace_or_type_name = r.parse_identifier();
 
     if namespace_or_type_name.is_empty() {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             format!("Expected an identifier, got '{}", peek_text(r)),
         ));
@@ -387,7 +387,7 @@ fn parse_type(r: &mut CharacterReader<'_>) -> ParseResult<(String, String)> {
     if !r.end() && r.take_if('|') {
         ns = namespace_or_type_name;
         if r.end() {
-            return Err(ExpressionParseException::new(
+            return Err(ExpressionParseError::new(
                 r.position(),
                 "Unexpected end of selector.",
             ));
@@ -412,7 +412,7 @@ fn parse_nth_child_arguments(r: &mut CharacterReader<'_>) -> ParseResult<(i32, i
             step = 2;
             offset = 1;
         } else {
-            return Err(ExpressionParseException::new(
+            return Err(ExpressionParseError::new(
                 r.position(),
                 format!("Expected nth-child(odd). Actual '{const_arg}'."),
             ));
@@ -423,7 +423,7 @@ fn parse_nth_child_arguments(r: &mut CharacterReader<'_>) -> ParseResult<(i32, i
             step = 2;
             offset = 0;
         } else {
-            return Err(ExpressionParseException::new(
+            return Err(ExpressionParseError::new(
                 r.position(),
                 format!("Expected nth-child(even). Actual '{const_arg}'."),
             ));
@@ -440,7 +440,7 @@ fn parse_nth_child_arguments(r: &mut CharacterReader<'_>) -> ParseResult<(i32, i
         } else if let Some(value) = try_parse_int(step_or_offset_str, NumberStyles::INTEGER) {
             step_or_offset = value;
         } else {
-            return Err(ExpressionParseException::new(
+            return Err(ExpressionParseError::new(
                 r.position(),
                 "Couldn't parse nth-child step or offset value. Integer was expected.",
             ));
@@ -455,7 +455,7 @@ fn parse_nth_child_arguments(r: &mut CharacterReader<'_>) -> ParseResult<(i32, i
             step = step_or_offset;
 
             if r.peek() != Some('n') {
-                return Err(ExpressionParseException::new(
+                return Err(ExpressionParseError::new(
                     r.position(),
                     "Couldn't parse nth-child step value, \"xn+y\" pattern was expected.",
                 ));
@@ -470,7 +470,7 @@ fn parse_nth_child_arguments(r: &mut CharacterReader<'_>) -> ParseResult<(i32, i
                     Some('+') => 1,
                     Some('-') => -1,
                     _ => {
-                        return Err(ExpressionParseException::new(
+                        return Err(ExpressionParseError::new(
                             r.position(),
                             "Couldn't parse nth-child sign. '+' or '-' was expected.",
                         ));
@@ -482,7 +482,7 @@ fn parse_nth_child_arguments(r: &mut CharacterReader<'_>) -> ParseResult<(i32, i
                 offset = match try_parse_int(r.take_until(')'), NumberStyles::INTEGER) {
                     Some(value) => value,
                     None => {
-                        return Err(ExpressionParseException::new(
+                        return Err(ExpressionParseError::new(
                             r.position(),
                             "Couldn't parse nth-child offset value. Integer was expected.",
                         ));
@@ -501,12 +501,12 @@ fn parse_nth_child_arguments(r: &mut CharacterReader<'_>) -> ParseResult<(i32, i
 
 fn expect(r: &mut CharacterReader<'_>, c: char) -> ParseResult<()> {
     if r.end() {
-        Err(ExpressionParseException::new(
+        Err(ExpressionParseError::new(
             r.position(),
             format!("Expected '{c}', got end of selector."),
         ))
     } else if !r.take_if(')') {
-        Err(ExpressionParseException::new(
+        Err(ExpressionParseError::new(
             r.position(),
             format!("Expected '{c}', got '{}'.", peek_text(r)),
         ))

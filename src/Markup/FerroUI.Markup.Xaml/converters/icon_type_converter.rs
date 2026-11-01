@@ -3,7 +3,7 @@
 use super::bitmap_type_converter::{asset_uri, local_file_path};
 use super::type_converter::{service_provider_of, type_converter_markup};
 use super::{ITypeDescriptorContext, TypeConverter};
-use crate::{ServiceProviderExtensions, XamlLoadException};
+use crate::{ServiceProviderExtensions, XamlLoadError};
 use ferroui_base::data::core::ValueType;
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::IImage;
@@ -17,15 +17,15 @@ use std::rc::Rc;
 /// a window icon.
 pub struct IconTypeConverter;
 
-fn io_error(e: std::io::Error) -> XamlLoadException {
-    XamlLoadException::with_inner(e.to_string(), e)
+fn io_error(e: std::io::Error) -> XamlLoadError {
+    XamlLoadError::with_inner(e.to_string(), e)
 }
 
 impl IconTypeConverter {
     fn create_icon_from_path(
         context: Option<&Rc<dyn ITypeDescriptorContext>>,
         s: &str,
-    ) -> Result<Rc<WindowIcon>, XamlLoadException> {
+    ) -> Result<Rc<WindowIcon>, XamlLoadError> {
         let uri = asset_uri(s)?;
 
         if let Some(path) = local_file_path(&uri) {
@@ -48,7 +48,7 @@ impl TypeConverter for IconTypeConverter {
         context: Option<&Rc<dyn ITypeDescriptorContext>>,
         _culture: Option<&CultureInfo>,
         value: Option<&BoxedValue>,
-    ) -> Result<Option<BoxedValue>, XamlLoadException> {
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
         if let Ok(path) = super::type_converter::text_of(value) {
             return Ok(Some(Rc::new(Self::create_icon_from_path(context, path)?)));
         }
@@ -58,7 +58,7 @@ impl TypeConverter for IconTypeConverter {
             return Ok(Some(Rc::new(WindowIcon::from_bitmap(bitmap))));
         }
 
-        Err(XamlLoadException::with_message("Specified method is not supported."))
+        Err(XamlLoadError::with_message("Specified method is not supported."))
     }
 }
 

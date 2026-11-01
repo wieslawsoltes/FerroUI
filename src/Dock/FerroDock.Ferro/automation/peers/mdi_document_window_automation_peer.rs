@@ -15,7 +15,7 @@ use ferroui_controls::automation::{
         ControlAutomationPeer, ControlAutomationPeerImpl,
     },
     provider::IInvokeProvider,
-    ElementNotEnabledException,
+    ElementNotEnabledError,
 };
 use std::rc::Rc;
 #[repr(C)]
@@ -105,7 +105,7 @@ impl IInvokeProvider for InvokeProvider {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }
-    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         let owner = self.0.owner();
         if !Helper::try_activate_dockable(model_projection::dockable(owner.data_context().as_ref()))
         {

@@ -5,7 +5,7 @@ use super::{
 };
 use crate::automation::provider::{IExpandCollapseProvider, IValueProvider, ProviderError, ProviderAdapter};
 use crate::automation::{
-    AutomationElementIdentifiers, AutomationProperties, ElementNotEnabledException, ExpandCollapsePatternIdentifiers,
+    AutomationElementIdentifiers, AutomationProperties, ElementNotEnabledError, ExpandCollapsePatternIdentifiers,
     ExpandCollapseState, ValuePatternIdentifiers,
 };
 use crate::{ComboBox, ComboBoxItem, ContentControl, Control, TextBlock};
@@ -111,11 +111,11 @@ impl IExpandCollapseProvider for ProviderAdapter<ComboBoxAutomationPeer> {
         self.0.shows_menu()
     }
 
-    fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    fn expand(&self) -> Result<(), ElementNotEnabledError> {
         self.0.expand()
     }
 
-    fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         self.0.collapse()
     }
 }
@@ -167,13 +167,13 @@ impl ComboBoxAutomationPeer {
     }
 
     /// Closes the drop-down (the expand/collapse provider contract).
-    pub fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         self.owner().set_is_drop_down_open(false);
         Ok(())
     }
 
     /// Opens the drop-down (the expand/collapse provider contract).
-    pub fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn expand(&self) -> Result<(), ElementNotEnabledError> {
         self.owner().set_is_drop_down_open(true);
         Ok(())
     }
@@ -198,7 +198,7 @@ impl ComboBoxAutomationPeer {
         }
     }
 
-    fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledException> {
+    fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledError> {
         let owner = self.owner();
         if !owner.is_editable() {
             panic!("Cannot set the value of a non-editable ComboBox.");

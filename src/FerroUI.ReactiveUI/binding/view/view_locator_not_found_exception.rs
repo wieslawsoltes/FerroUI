@@ -1,4 +1,4 @@
-//! `ViewLocatorNotFoundException` (ReactiveUI.Binding, `View/ViewLocatorNotFoundException.cs`).
+//! `ViewLocatorNotFoundError` (ReactiveUI.Binding, `View/ViewLocatorNotFoundException.cs`).
 
 use std::error::Error;
 use std::fmt;
@@ -10,18 +10,22 @@ use std::fmt;
 /// Deviation (DEVIATIONS.md, ReactiveUI): the inner exception is kept as its message, so that the
 /// error can be the payload of a panic, which has to be `Send`.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ViewLocatorNotFoundException {
+pub struct ViewLocatorNotFoundError {
     message: String,
     inner_exception: Option<String>,
 }
 
-impl Default for ViewLocatorNotFoundException {
+/// The name of [`ViewLocatorNotFoundError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `ViewLocatorNotFoundError`")]
+pub type ViewLocatorNotFoundException = ViewLocatorNotFoundError;
+
+impl Default for ViewLocatorNotFoundError {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl ViewLocatorNotFoundException {
+impl ViewLocatorNotFoundError {
     /// The exception with a message that names the builder calls registering the default locator
     /// (`ViewLocatorNotFoundException()`).
     pub fn new() -> Self {
@@ -52,10 +56,10 @@ impl ViewLocatorNotFoundException {
     }
 }
 
-impl fmt::Display for ViewLocatorNotFoundException {
+impl fmt::Display for ViewLocatorNotFoundError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
     }
 }
 
-impl Error for ViewLocatorNotFoundException {}
+impl Error for ViewLocatorNotFoundError {}

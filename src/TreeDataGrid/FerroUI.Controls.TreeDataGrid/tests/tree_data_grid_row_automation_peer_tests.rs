@@ -17,7 +17,7 @@ use ferroui_controls::automation::peers::AutomationControlType;
 use ferroui_controls::automation::provider::{
     IExpandCollapseProvider, ISelectionItemProvider, IToggleProvider, IValueProvider, ToggleState,
 };
-use ferroui_controls::automation::{ElementNotEnabledException, ExpandCollapseState};
+use ferroui_controls::automation::{ElementNotEnabledError, ExpandCollapseState};
 use ferroui_treedatagrid_core::models::{IExpander, IRow, RowRef, RowsChangedHandler};
 use ferroui_treedatagrid_core::{GridLength, ITreeDataGridSource, IndexPath};
 use std::any::Any;
@@ -94,7 +94,7 @@ fn toggle_should_throw_when_row_is_disabled() {
     let toggle_provider = peer.get_provider::<dyn IToggleProvider>().expect("a toggle provider");
 
     // `Assert.Throws<ElementNotEnabledException>`: the error of the provider's result.
-    let result: Result<(), ElementNotEnabledException> = toggle_provider.toggle();
+    let result: Result<(), ElementNotEnabledError> = toggle_provider.toggle();
     assert!(result.is_err());
 }
 

@@ -15,7 +15,7 @@ use ferroui_controls::automation::{
         ContentControlAutomationPeer, ControlAutomationPeerImpl,
     },
     provider::{IExpandCollapseProvider, IInvokeProvider},
-    ElementNotEnabledException, ExpandCollapseState,
+    ElementNotEnabledError, ExpandCollapseState,
 };
 use std::rc::Rc;
 #[repr(C)]
@@ -110,7 +110,7 @@ impl IInvokeProvider for Provider {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }
-    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         if !Helper::try_activate_dockable(self.0.active_dockable()) {
             self.0.owner.focus();
         }
@@ -131,13 +131,13 @@ impl IExpandCollapseProvider for Provider {
     fn shows_menu(&self) -> bool {
         true
     }
-    fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    fn expand(&self) -> Result<(), ElementNotEnabledError> {
         if let Some(flyout) = self.0.owner.tool_flyout().filter(|f| !f.is_open()) {
             flyout.show_at(&self.0.owner);
         }
         Ok(())
     }
-    fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         if let Some(flyout) = self.0.owner.tool_flyout().filter(|f| f.is_open()) {
             flyout.hide();
         }

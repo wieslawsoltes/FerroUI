@@ -1,6 +1,6 @@
 use super::egl_consts::*;
 use super::{EglConfigProbeCallback, EglDisplayCreationOptions, EglInterface};
-use crate::{GlProfileType, GlVersion, OpenGlException};
+use crate::{GlProfileType, GlVersion, OpenGlError};
 use std::rc::Rc;
 
 pub(crate) struct EglDisplayUtils;
@@ -27,13 +27,13 @@ struct VersionConfig {
 }
 
 impl EglDisplayUtils {
-    pub fn create_display(options: &EglDisplayCreationOptions) -> Result<isize, OpenGlException> {
+    pub fn create_display(options: &EglDisplayCreationOptions) -> Result<isize, OpenGlError> {
         let egl = required_egl(&options.base.egl);
         let display = match options.platform_type {
             None => egl.get_display(0),
             Some(platform_type) => {
                 if !egl.is_get_platform_display_ext_available() {
-                    return Err(OpenGlException::new("eglGetPlatformDisplayEXT is not supported by libegl"));
+                    return Err(OpenGlError::new("eglGetPlatformDisplayEXT is not supported by libegl"));
                 }
 
                 egl.get_platform_display_ext(
@@ -45,7 +45,7 @@ impl EglDisplayUtils {
         };
 
         if display == 0 {
-            return Err(OpenGlException::get_formatted_exception_for_egl("eglGetDisplay", &egl));
+            return Err(OpenGlError::get_formatted_exception_for_egl("eglGetDisplay", &egl));
         }
         Ok(display)
     }
@@ -84,10 +84,10 @@ impl EglDisplayUtils {
         versions: Option<&[GlVersion]>,
         probe_config: Option<&EglConfigProbeCallback>,
         allow_pbuffer_only_configs: bool,
-    ) -> Result<EglConfigInfo, OpenGlException> {
+    ) -> Result<EglConfigInfo, OpenGlError> {
         let (mut major, mut minor) = (0, 0);
         if !egl.initialize(display, &mut major, &mut minor) {
-            return Err(OpenGlException::get_formatted_exception_for_egl("eglInitialize", egl));
+            return Err(OpenGlError::get_formatted_exception_for_egl("eglInitialize", egl));
         }
 
         let default_versions = [GlVersion::new(GlProfileType::OpenGLES, 3, 0), GlVersion::new(GlProfileType::OpenGLES, 2, 0)];
@@ -190,7 +190,7 @@ impl EglDisplayUtils {
             }
         }
 
-        Err(OpenGlException::new("No suitable EGL config was found"))
+        Err(OpenGlError::new("No suitable EGL config was found"))
     }
 }
 

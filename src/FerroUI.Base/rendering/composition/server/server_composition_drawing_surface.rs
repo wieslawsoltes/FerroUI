@@ -1,5 +1,5 @@
 use super::{IServerCompositionSurface, IServerObject, ServerCompositor, ServerCompositionSurfaceChanged};
-use crate::platform::{IBitmapImpl, IPlatformRenderInterfaceContext, PlatformGraphicsContextLostException};
+use crate::platform::{IBitmapImpl, IPlatformRenderInterfaceContext, PlatformGraphicsContextLostError};
 use crate::rendering::composition::{IServerGpuImportedObject, ServerImportedGpuImage, ServerImportedGpuSemaphore};
 use crate::utilities::{RefCountable, RefCounted};
 use std::any::Any;
@@ -22,7 +22,7 @@ impl std::error::Error for DrawingSurfaceUpdateError {}
 type UpdateResult = Result<(), crate::rendering::composition::ServerJobError>;
 
 fn context_lost() -> crate::rendering::composition::ServerJobError {
-    Arc::new(PlatformGraphicsContextLostException)
+    Arc::new(PlatformGraphicsContextLostError)
 }
 
 /// The server-side counterpart of a

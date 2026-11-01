@@ -3,7 +3,7 @@ use super::{
     SplitButtonAutomationPeer,
 };
 use crate::automation::provider::{IToggleProvider, ProviderAdapter, ToggleState};
-use crate::automation::{ElementNotEnabledException, TogglePatternIdentifiers};
+use crate::automation::{ElementNotEnabledError, TogglePatternIdentifiers};
 use crate::ToggleSplitButton;
 use ferroui_base::{
     ferro_class, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt, FerroPropertyChangedEventArgs, Ref,
@@ -55,7 +55,7 @@ impl IToggleProvider for ProviderAdapter<ToggleSplitButtonAutomationPeer> {
         ToggleSplitButtonAutomationPeer::to_state(self.0.owner().is_checked())
     }
 
-    fn toggle(&self) -> Result<(), ElementNotEnabledException> {
+    fn toggle(&self) -> Result<(), ElementNotEnabledError> {
         self.0.ensure_enabled()?;
         self.0.owner().toggle_for_automation();
         Ok(())

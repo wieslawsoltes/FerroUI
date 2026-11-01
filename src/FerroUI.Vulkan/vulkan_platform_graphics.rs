@@ -1,7 +1,7 @@
 use crate::interop::{VulkanDevice, VulkanInstance};
 use crate::vulkan_context::VulkanContext;
 use crate::{
-    IVulkanDevice, IVulkanInstance, VulkanDeviceCreationOptions, VulkanException, VulkanOptions,
+    IVulkanDevice, IVulkanInstance, VulkanDeviceCreationOptions, VulkanError, VulkanOptions,
     VulkanPlatformSpecificOptions,
 };
 use ferroui_base::logging::{LogEventLevel, Logger};
@@ -35,7 +35,7 @@ pub trait IVulkanDeviceFactory: Send + Sync {
     fn create_device(
         &self,
         platform_options: &VulkanPlatformSpecificOptions,
-    ) -> Result<Arc<dyn IVulkanDevice>, VulkanException>;
+    ) -> Result<Arc<dyn IVulkanDevice>, VulkanError>;
 }
 
 struct DefaultDeviceFactory {
@@ -55,7 +55,7 @@ impl IVulkanDeviceFactory for DefaultDeviceFactory {
     fn create_device(
         &self,
         platform_options: &VulkanPlatformSpecificOptions,
-    ) -> Result<Arc<dyn IVulkanDevice>, VulkanException> {
+    ) -> Result<Arc<dyn IVulkanDevice>, VulkanError> {
         VulkanDevice::create(self.instance.clone(), &self.device_options, platform_options)
     }
 }
@@ -76,7 +76,7 @@ impl IVulkanDeviceFactory for CustomSharedDeviceFactory {
     fn create_device(
         &self,
         _platform_options: &VulkanPlatformSpecificOptions,
-    ) -> Result<Arc<dyn IVulkanDevice>, VulkanException> {
+    ) -> Result<Arc<dyn IVulkanDevice>, VulkanError> {
         panic!("Specified method is not supported.");
     }
 }
@@ -100,7 +100,7 @@ impl VulkanPlatformGraphics {
             )));
         }
 
-        let create = || -> Result<Arc<Self>, VulkanException> {
+        let create = || -> Result<Arc<Self>, VulkanError> {
             let instance = VulkanInstance::create(&options.vulkan_instance_creation_options, &platform_options)?;
 
             let dev_opts = options.vulkan_device_creation_options.clone();

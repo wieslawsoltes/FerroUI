@@ -1,5 +1,5 @@
 use crate::{
-    IVulkanKhrSurfacePlatformSurface, IVulkanPlatformGraphicsContext, VulkanException, VulkanResultExtensions,
+    IVulkanKhrSurfacePlatformSurface, IVulkanPlatformGraphicsContext, VulkanError, VulkanResultExtensions,
 };
 use ash::vk;
 use ferroui_base::PixelSize;
@@ -26,7 +26,7 @@ impl VulkanKhrSurface {
         self.handle.get()
     }
 
-    pub fn can_surface_present(&self) -> Result<bool, VulkanException> {
+    pub fn can_surface_present(&self) -> Result<bool, VulkanError> {
         self.context
             .instance_api()
             .get_physical_device_surface_support_khr(
@@ -37,7 +37,7 @@ impl VulkanKhrSurface {
             .throw_on_error("vkGetPhysicalDeviceSurfaceSupportKHR")
     }
 
-    pub fn get_surface_format(&self) -> Result<vk::SurfaceFormatKHR, VulkanException> {
+    pub fn get_surface_format(&self) -> Result<vk::SurfaceFormatKHR, VulkanError> {
         let surface_formats = self
             .context
             .instance_api()
@@ -64,9 +64,9 @@ impl VulkanKhrSurface {
 /// surface has it or leaves the choice open, else its first format.
 pub(crate) fn select_surface_format(
     surface_formats: &[vk::SurfaceFormatKHR],
-) -> Result<vk::SurfaceFormatKHR, VulkanException> {
+) -> Result<vk::SurfaceFormatKHR, VulkanError> {
     if surface_formats.is_empty() {
-        return Err(VulkanException::new("vkGetPhysicalDeviceSurfaceFormatsKHR returned 0 formats"));
+        return Err(VulkanError::new("vkGetPhysicalDeviceSurfaceFormatsKHR returned 0 formats"));
     }
 
     if surface_formats.len() == 1 && surface_formats[0].format == vk::Format::UNDEFINED {

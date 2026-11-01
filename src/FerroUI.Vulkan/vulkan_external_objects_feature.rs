@@ -1,7 +1,7 @@
 use crate::interop::{VulkanCommandBufferPool, VulkanImageBase, VulkanMemoryHelper, VulkanSemaphore};
 use crate::{
     IVulkanContextExternalObjectsFeature, IVulkanExternalImage, IVulkanExternalSemaphore,
-    IVulkanPlatformGraphicsContext, VulkanException, VulkanExceptionExtensions, VulkanImageInfo,
+    IVulkanPlatformGraphicsContext, VulkanError, VulkanExceptionExtensions, VulkanImageInfo,
     VulkanResultExtensions,
 };
 use ash::vk;
@@ -93,7 +93,7 @@ impl VulkanExternalObjectsFeature {
 
     /// Creates the feature of `context`, whose instance and device have the
     /// required extensions.
-    pub fn new(context: Rc<dyn IVulkanPlatformGraphicsContext>) -> Result<Self, VulkanException> {
+    pub fn new(context: Rc<dyn IVulkanPlatformGraphicsContext>) -> Result<Self, VulkanError> {
         let (supported_image_handle_types, supported_semaphore_types) = Self::supported_types_for(cfg!(windows));
 
         let mut physical_device_id_properties = vk::PhysicalDeviceIDProperties::default();
@@ -254,7 +254,7 @@ struct ImportedSemaphore {
 }
 
 impl ImportedSemaphore {
-    fn submit_semaphore(&self, wait: bool, signal: bool) -> Result<(), VulkanException> {
+    fn submit_semaphore(&self, wait: bool, signal: bool) -> Result<(), VulkanError> {
         let sem = self.sem.borrow();
         let buf = self.pool.create_command_buffer()?;
         buf.begin_recording()?;
@@ -305,7 +305,7 @@ impl ImportedImage {
         command_buffer_pool: Rc<VulkanCommandBufferPool>,
         import_handle: Rc<dyn IPlatformHandle>,
         properties: PlatformGraphicsExternalImageProperties,
-    ) -> Result<Self, VulkanException> {
+    ) -> Result<Self, VulkanError> {
         let base = VulkanImageBase::new(
             context.clone(),
             command_buffer_pool,
@@ -321,7 +321,7 @@ impl ImportedImage {
             let handle = &import_handle;
 
             if properties.memory_offset != 0 || properties.memory_size != size {
-                return Err(VulkanException::new("Invalid memory size"));
+                return Err(VulkanError::new("Invalid memory size"));
             }
 
             let mut dedicated = vk::MemoryDedicatedAllocateInfo::default().image(image);

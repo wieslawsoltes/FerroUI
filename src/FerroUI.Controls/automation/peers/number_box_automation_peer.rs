@@ -7,7 +7,7 @@ use super::{
     ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{IRangeValueProvider, ProviderAdapter};
-use crate::automation::{ElementNotEnabledException, RangeValuePatternIdentifiers};
+use crate::automation::{ElementNotEnabledError, RangeValuePatternIdentifiers};
 use crate::NumberBox;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::{
@@ -92,7 +92,7 @@ impl IRangeValueProvider for ProviderAdapter<NumberBoxAutomationPeer> {
         self.0.owner().large_change()
     }
 
-    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledException> {
+    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledError> {
         self.0.owner().set_numeric_value(value);
         Ok(())
     }

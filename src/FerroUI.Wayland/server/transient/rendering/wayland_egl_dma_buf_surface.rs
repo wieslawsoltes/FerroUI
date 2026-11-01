@@ -17,14 +17,14 @@ use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSu
 use ferroui_base::platform::{PlatformRenderTargetState, RenderTargetError, RenderTargetSceneInfo};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::utilities::ThreadBound;
-use ferroui_base::{PixelSize, RenderTargetNotReadyException};
+use ferroui_base::{PixelSize, RenderTargetNotReadyError};
 use ferroui_opengl::egl::egl_consts::*;
 use ferroui_opengl::egl::{
     EglContext, EglGlPlatformImageSurfaceBase, EglImage, EglPlatformImageSurfaceRenderTarget,
     EglPlatformImageSurfaceRenderTargetBase,
 };
 use ferroui_opengl::surfaces::{IGlPlatformSurface, IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession};
-use ferroui_opengl::{IGlContext, OpenGlException};
+use ferroui_opengl::{IGlContext, OpenGlError};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::ffi::c_void;
@@ -146,7 +146,7 @@ impl RenderTarget {
         WaylandRenderSurfaceTarget::Surface(self.surface)
     }
 
-    fn ensure_swapchain(&self, size: PixelSize) -> Result<(), OpenGlException> {
+    fn ensure_swapchain(&self, size: PixelSize) -> Result<(), OpenGlError> {
         if self.slots.borrow().is_some() && self.current_size.get() == size {
             return Ok(());
         }
@@ -175,10 +175,10 @@ impl RenderTarget {
             .backend()
             .upgrade()
             .map(Connection::from_backend)
-            .ok_or_else(|| OpenGlException::new("The Wayland connection of the swapchain is gone"))?;
+            .ok_or_else(|| OpenGlError::new("The Wayland connection of the swapchain is gone"))?;
         let queue_handle = with_worker_thread(|worker| worker.state.globals.as_ref().map(|globals| globals.queue_handle().clone()))
             .flatten()
-            .ok_or_else(|| OpenGlException::new("The Wayland connection of the swapchain is gone"))?;
+            .ok_or_else(|| OpenGlError::new("The Wayland connection of the swapchain is gone"))?;
 
         for _ in 0..SWAPCHAIN_SIZE {
             let slot = Rc::new(BufferSlot::new(self.native, format));
@@ -205,7 +205,7 @@ impl RenderTarget {
         modifiers: &[u64],
         connection: &Connection,
         queue_handle: &QueueHandle<WaylandWorkerState>,
-    ) -> Result<(), OpenGlException> {
+    ) -> Result<(), OpenGlError> {
         let native = self.native;
         let gbm_device = self.wayland_display.gbm_device();
 
@@ -235,7 +235,7 @@ impl RenderTarget {
         }
 
         if bo.is_null() {
-            return Err(OpenGlException::new("Failed to create GBM buffer object"));
+            return Err(OpenGlError::new("Failed to create GBM buffer object"));
         }
 
         slot.gbm_bo.set(bo as usize);
@@ -256,7 +256,7 @@ impl RenderTarget {
             // SAFETY: the descriptor of the render node the buffer object was allocated on; a
             // handle is read as the 32 bits the call takes, as the reference reads it.
             if unsafe { native.drm_prime_handle_to_fd(self.wayland_display.drm_fd(), handle.u32, 0, &mut prime_fd) } != 0 {
-                return Err(OpenGlException::new(format!("drmPrimeHandleToFD failed for plane {p}")));
+                return Err(OpenGlError::new(format!("drmPrimeHandleToFD failed for plane {p}")));
             }
             // SAFETY: the call succeeded, so this is an open descriptor nobody else owns.
             let prime_fd = unsafe { OwnedFd::from_raw_fd(prime_fd) };
@@ -299,7 +299,7 @@ impl RenderTarget {
         );
 
         if image_handle == 0 {
-            return Err(OpenGlException::new("eglCreateImageKHR failed"));
+            return Err(OpenGlError::new("eglCreateImageKHR failed"));
         }
 
         *slot.egl_image.borrow_mut() = Some(EglImage::new(egl_display, image_handle));
@@ -316,7 +316,7 @@ impl RenderTarget {
             .wayland_display
             .linux_dmabuf()
             .send_constructor(zwp_linux_dmabuf_v1::Request::CreateParams {}, result.clone())
-            .map_err(|_| OpenGlException::new("The Wayland connection of the swapchain is gone"))?;
+            .map_err(|_| OpenGlError::new("The Wayland connection of the swapchain is gone"))?;
         if let Some(fds) = slot.dma_buf_fds.borrow().as_ref() {
             for (p, (fd, (offset, stride))) in fds.iter().zip(planes.iter().map(|(_, offset, stride)| (*offset, *stride))).enumerate() {
                 let modifier = slot.modifier.get();
@@ -326,10 +326,10 @@ impl RenderTarget {
         args.create(size.width, size.height, format, zwp_linux_buffer_params_v1::Flags::empty());
         let roundtrip = connection.roundtrip();
         args.destroy();
-        roundtrip.map_err(|error| OpenGlException::new(error.to_string()))?;
+        roundtrip.map_err(|error| OpenGlError::new(error.to_string()))?;
         let buffer = result.buffer.lock().unwrap_or_else(PoisonError::into_inner).take();
         let Some(buffer) = buffer.and_then(|id| WlBuffer::from_id(connection, id).ok()) else {
-            return Err(OpenGlException::new("Unable to create DMA-BUF on Wayland server side"));
+            return Err(OpenGlError::new("Unable to create DMA-BUF on Wayland server side"));
         };
         *slot.wl_buffer.borrow_mut() = Some(buffer);
         Ok(())
@@ -379,7 +379,7 @@ impl RenderTarget {
         scene_info: &RenderTargetSceneInfo,
     ) -> Result<Rc<dyn IGlPlatformSurfaceRenderingSession>, RenderTargetError> {
         if self.disposed.get() || !target_state(self.target()).is_ready {
-            return Err(RenderTargetError::NotReady(RenderTargetNotReadyException::default()));
+            return Err(RenderTargetError::NotReady(RenderTargetNotReadyError::default()));
         }
 
         let size = scene_info.size;
@@ -560,7 +560,7 @@ fn add_plane_attribs(
     offset: u32,
     stride: u32,
     modifier: u64,
-) -> Result<(), OpenGlException> {
+) -> Result<(), OpenGlError> {
     let (base_fd, base_offset, base_pitch, base_mod_lo, base_mod_hi) = match plane {
         0 => (
             EGL_DMA_BUF_PLANE0_FD_EXT,
@@ -590,7 +590,7 @@ fn add_plane_attribs(
             EGL_DMA_BUF_PLANE3_MODIFIER_LO_EXT,
             EGL_DMA_BUF_PLANE3_MODIFIER_HI_EXT,
         ),
-        _ => return Err(OpenGlException::new("Specified argument was out of the range of valid values. (Parameter 'plane')")),
+        _ => return Err(OpenGlError::new("Specified argument was out of the range of valid values. (Parameter 'plane')")),
     };
 
     attribs.push(base_fd);

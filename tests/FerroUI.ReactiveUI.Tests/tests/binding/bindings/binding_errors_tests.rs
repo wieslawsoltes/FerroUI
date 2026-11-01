@@ -1,6 +1,6 @@
 //! `BindingErrorsTests` (`ReactiveUI.Binding.Tests/Bindings/BindingErrorsTests.cs`).
 //!
-//! A rethrown fault is a panic with a `TargetInvocationException` payload, which the test catches;
+//! A rethrown fault is a panic with a `TargetInvocationError` payload, which the test catches;
 //! the inner error is kept as its message.
 
 use ferroui_reactive::subjects::Subject;
@@ -84,7 +84,7 @@ fn subscribe_when_source_faults_with_inner_exception_rethrows_as_target_invocati
     let outcome = catch_unwind(AssertUnwindSafe(|| subject.on_error(error)));
 
     let payload = outcome.expect_err("the fault is raised again");
-    let thrown = payload.downcast_ref::<TargetInvocationException>().expect("a TargetInvocationException");
+    let thrown = payload.downcast_ref::<TargetInvocationError>().expect("a TargetInvocationException");
     assert_eq!(thrown.inner_exception(), Some("the setter threw"));
     assert!(thrown.message().contains(BOUND_EXPRESSION));
 }

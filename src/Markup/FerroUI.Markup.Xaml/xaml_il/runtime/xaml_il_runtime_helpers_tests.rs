@@ -301,7 +301,7 @@ fn builders_compare_by_identity() {
     let b = a.clone();
     assert!(a == b);
     assert!(a != button_builder());
-    let shared: Rc<dyn Fn(&Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, crate::XamlLoadException>> =
+    let shared: Rc<dyn Fn(&Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, crate::XamlLoadError>> =
         Rc::new(|_| Ok(None));
     assert!(DeferredContentBuilder::from_rc(shared.clone()) == DeferredContentBuilder::from_rc(shared));
 }
@@ -592,12 +592,12 @@ fn a_document_loaded_on_its_own_has_the_application_as_its_parent() {
 #[test]
 fn a_failing_builder_is_the_error_of_the_instantiation() {
     use crate::templates::{ControlTemplate, TemplateContent};
-    use crate::XamlLoadException;
+    use crate::XamlLoadError;
     use ferroui_base::metadata::MarkupInvokeError;
 
     register_types();
     let provider = declaration_context(vec![], boxed(Border::new()), None);
-    let builder = DeferredContentBuilder::try_new(|_| Err(XamlLoadException::with_message("Static resource 'x' not found.")));
+    let builder = DeferredContentBuilder::try_new(|_| Err(XamlLoadError::with_message("Static resource 'x' not found.")));
     let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder.clone(), &provider);
 
     assert_eq!(content.try_build_with(None).err().unwrap().message(), "Static resource 'x' not found.");
@@ -625,7 +625,7 @@ fn a_failing_builder_is_the_error_of_the_instantiation() {
     let flaky = DeferredContentBuilder::try_new(move |_| {
         counter.set(counter.get() + 1);
         if counter.get() == 1 {
-            Err(XamlLoadException::with_message("first"))
+            Err(XamlLoadError::with_message("first"))
         } else {
             Ok(Some(boxed(Button::new())))
         }
@@ -640,7 +640,7 @@ fn a_failing_builder_is_the_error_of_the_instantiation() {
 #[should_panic(expected = "deferred resource failed")]
 fn a_failing_builder_panics_through_the_infallible_contract() {
     let provider = declaration_context(vec![], boxed(Border::new()), None);
-    let builder = DeferredContentBuilder::try_new(|_| Err(crate::XamlLoadException::with_message("deferred resource failed")));
+    let builder = DeferredContentBuilder::try_new(|_| Err(crate::XamlLoadError::with_message("deferred resource failed")));
     let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &provider);
     let _ = content.as_deferred_content().build(None);
 }

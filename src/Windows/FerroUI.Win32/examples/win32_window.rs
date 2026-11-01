@@ -1872,7 +1872,7 @@ mod windows {
         // device context is not given to a swap chain.
         let windowing_platform = FerroLocator::current().get_required_service::<dyn IWindowingPlatform>();
 
-        type Create = fn(&Win32AngleEglInterface) -> Result<AngleWin32EglDisplay, ferroui_opengl::OpenGlException>;
+        type Create = fn(&Win32AngleEglInterface) -> Result<AngleWin32EglDisplay, ferroui_opengl::OpenGlError>;
         let displays: [(&str, bool, Create); 2] = [
             ("Direct3D 11", true, AngleWin32EglDisplay::create_shared_d3d11_display),
             ("Direct3D 9", false, AngleWin32EglDisplay::create_d3d9_display),

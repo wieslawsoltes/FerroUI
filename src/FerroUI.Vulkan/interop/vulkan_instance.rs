@@ -2,7 +2,7 @@ use super::VulkanDebugLogger;
 use crate::unmanaged_interop::vulkan_global_api::{fixed_name, proc_loader};
 use crate::unmanaged_interop::{Utf8BufferArray, VulkanGlobalApi, VulkanInstanceApi};
 use crate::{
-    IVulkanInstance, VkGetInstanceProcAddressDelegate, VulkanException, VulkanExternalObjectsFeature, VulkanHelpers,
+    IVulkanInstance, VkGetInstanceProcAddressDelegate, VulkanError, VulkanExternalObjectsFeature, VulkanHelpers,
     VulkanInstanceCreationOptions, VulkanPlatformSpecificOptions, VulkanResultExtensions,
 };
 use ash::vk;
@@ -40,12 +40,12 @@ impl VulkanInstance {
     pub fn create(
         options: &VulkanInstanceCreationOptions,
         platform_options: &VulkanPlatformSpecificOptions,
-    ) -> Result<Arc<dyn IVulkanInstance>, VulkanException> {
+    ) -> Result<Arc<dyn IVulkanInstance>, VulkanError> {
         let get_proc_address = options
             .custom_get_proc_address_delegate
             .clone()
             .or_else(|| platform_options.get_proc_address_delegate.clone())
-            .ok_or_else(|| VulkanException::new("No VkGetInstanceProcAddr provided"))?;
+            .ok_or_else(|| VulkanError::new("No VkGetInstanceProcAddr provided"))?;
 
         let name = c_string(options.application_name.as_deref().unwrap_or(DEFAULT_NAME));
         let engine_name = c_string(DEFAULT_NAME);
@@ -107,14 +107,14 @@ impl VulkanInstance {
         Ok(instance)
     }
 
-    fn is_layer_available(api: &VulkanGlobalApi, layer_name: &str) -> Result<bool, VulkanException> {
+    fn is_layer_available(api: &VulkanGlobalApi, layer_name: &str) -> Result<bool, VulkanError> {
         let layer_properties =
             api.enumerate_instance_layer_properties().throw_on_error("vkEnumerateInstanceLayerProperties")?;
 
         Ok(layer_properties.iter().any(|properties| fixed_name(&properties.layer_name) == layer_name))
     }
 
-    fn get_supported_extensions(api: &VulkanGlobalApi) -> Result<HashSet<String>, VulkanException> {
+    fn get_supported_extensions(api: &VulkanGlobalApi) -> Result<HashSet<String>, VulkanError> {
         let properties = api
             .vk_enumerate_instance_extension_properties()
             .throw_on_error("vkEnumerateInstanceExtensionProperties")?;

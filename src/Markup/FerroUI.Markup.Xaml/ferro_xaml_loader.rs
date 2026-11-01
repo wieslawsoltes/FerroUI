@@ -1,6 +1,6 @@
 //! Port of `FerroXamlLoader.cs`: loads markup documents by URI.
 
-use crate::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadException};
+use crate::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError};
 use ferroui_base::metadata::{IServiceProvider, MarkupAssembly};
 use ferroui_base::platform::IAssetLoader;
 use ferroui_base::utilities::Uri;
@@ -18,7 +18,7 @@ pub trait IRuntimeXamlLoader {
         &self,
         document: RuntimeXamlLoaderDocument,
         configuration: RuntimeXamlLoaderConfiguration,
-    ) -> Result<BoxedValue, XamlLoadException>;
+    ) -> Result<BoxedValue, XamlLoadError>;
 
     /// Populates `instance` (an object whose class names a document with
     /// `x:Class`) from the markup of its class, when no compiled markup is
@@ -29,7 +29,7 @@ pub trait IRuntimeXamlLoader {
         &self,
         instance: &BoxedValue,
         service_provider: Option<&Rc<dyn IServiceProvider>>,
-    ) -> Result<(), XamlLoadException> {
+    ) -> Result<(), XamlLoadError> {
         let _ = service_provider;
         Err(FerroXamlLoader::no_precompiled_xaml_for_object(instance))
     }
@@ -45,7 +45,7 @@ pub trait IRuntimeXamlLoader {
 /// original finds by reflection (whose `null` is `Ok(None)` and whose
 /// exception is the error).
 pub type CompiledXamlLoader =
-    fn(service_provider: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadException>;
+    fn(service_provider: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadError>;
 
 fn compiled_loaders() -> &'static RwLock<HashMap<String, CompiledXamlLoader>> {
     static LOADERS: OnceLock<RwLock<HashMap<String, CompiledXamlLoader>>> = OnceLock::new();
@@ -87,7 +87,7 @@ impl FerroXamlLoader {
     /// compiled markup the call is rewritten to the generated populate
     /// method of the class. Reaching it at run time means that no compiled
     /// markup exists for the type of `obj`, which is the error it reports.
-    pub fn load_object(obj: &BoxedValue) -> Result<(), XamlLoadException> {
+    pub fn load_object(obj: &BoxedValue) -> Result<(), XamlLoadError> {
         Self::load_object_with_service_provider(None, obj)
     }
 
@@ -96,7 +96,7 @@ impl FerroXamlLoader {
     pub fn load_object_with_service_provider(
         sp: Option<&Rc<dyn IServiceProvider>>,
         obj: &BoxedValue,
-    ) -> Result<(), XamlLoadException> {
+    ) -> Result<(), XamlLoadError> {
         if let Some(object) = crate::object_casts::as_object(obj) {
             if let Some(populate) = Self::populate_override(object.get_type()) {
                 return populate(sp, obj);
@@ -110,12 +110,12 @@ impl FerroXamlLoader {
         }
     }
 
-    pub(crate) fn no_precompiled_xaml_for_object(obj: &BoxedValue) -> XamlLoadException {
+    pub(crate) fn no_precompiled_xaml_for_object(obj: &BoxedValue) -> XamlLoadError {
         let type_name = match crate::object_casts::as_object(obj) {
             Some(object) => object.get_type().full_name(),
             None => (**obj).type_name().to_string(),
         };
-        XamlLoadException::with_message(format!(
+        XamlLoadError::with_message(format!(
             "No precompiled XAML found for {type_name}, make sure to specify x:Class and include your XAML file as FerroResource"
         ))
     }
@@ -124,7 +124,7 @@ impl FerroXamlLoader {
     ///
     /// `base_uri` is the URI `uri` is relative to; it is required when
     /// `uri` is relative.
-    pub fn load(uri: &Uri, base_uri: Option<&Uri>) -> Result<BoxedValue, XamlLoadException> {
+    pub fn load(uri: &Uri, base_uri: Option<&Uri>) -> Result<BoxedValue, XamlLoadError> {
         Self::load_with_service_provider(None, uri, base_uri)
     }
 
@@ -138,7 +138,7 @@ impl FerroXamlLoader {
         sp: Option<&Rc<dyn IServiceProvider>>,
         uri: &Uri,
         base_uri: Option<&Uri>,
-    ) -> Result<BoxedValue, XamlLoadException> {
+    ) -> Result<BoxedValue, XamlLoadError> {
         if FerroLocator::current().get_service::<dyn IAssetLoader>().is_none() {
             panic!("{NO_ASSET_LOADER}");
         }
@@ -156,9 +156,9 @@ impl FerroXamlLoader {
         sp: Option<&Rc<dyn IServiceProvider>>,
         uri: &Uri,
         base_uri: Option<&Uri>,
-    ) -> Result<BoxedValue, XamlLoadException> {
+    ) -> Result<BoxedValue, XamlLoadError> {
         let Some(asset_locator) = FerroLocator::current().get_service::<dyn IAssetLoader>() else {
-            return Err(XamlLoadException::with_message(NO_ASSET_LOADER));
+            return Err(XamlLoadError::with_message(NO_ASSET_LOADER));
         };
 
         let absolute_uri = if uri.is_absolute_uri() {
@@ -166,7 +166,7 @@ impl FerroXamlLoader {
         } else {
             match base_uri {
                 Some(base_uri) => Uri::combine(base_uri, uri),
-                None => return Err(XamlLoadException::with_message(RELATIVE_WITHOUT_BASE)),
+                None => return Err(XamlLoadError::with_message(RELATIVE_WITHOUT_BASE)),
             }
         };
 
@@ -175,10 +175,10 @@ impl FerroXamlLoader {
         // to the old document. Scoped snapshots also work in release designers.
         #[cfg(feature = "source-overlays")]
         if let Some(source) = crate::source_overlay::try_source(absolute_uri.absolute_uri())
-            .map_err(XamlLoadException::with_message)?
+            .map_err(XamlLoadError::with_message)?
         {
             let runtime = FerroLocator::current().get_service::<dyn IRuntimeXamlLoader>()
-                .ok_or_else(|| XamlLoadException::with_message("A source overlay requires the runtime XAML loader"))?;
+                .ok_or_else(|| XamlLoadError::with_message("A source overlay requires the runtime XAML loader"))?;
             let mut document = RuntimeXamlLoaderDocument::with_base_uri(Some(absolute_uri), &source);
             document.service_provider = sp.cloned();
             let mut configuration = RuntimeXamlLoaderConfiguration::default();
@@ -202,7 +202,7 @@ impl FerroXamlLoader {
         // This is intended for unit-tests only
         if let Some(runtime_loader) = FerroLocator::current().get_service::<dyn IRuntimeXamlLoader>() {
             let (stream, assembly) = asset_locator.open_and_get_assembly(uri, base_uri).map_err(|e| {
-                XamlLoadException::with_inner(format!("Could not open the XAML document {uri} (baseUri: {}): {e}", display(base_uri)), e)
+                XamlLoadError::with_inner(format!("Could not open the XAML document {uri} (baseUri: {}): {e}", display(base_uri)), e)
             })?;
             let stream: Box<dyn Read> = Box::new(stream);
             let mut document = RuntimeXamlLoaderDocument::from_stream_with_base_uri(Some(absolute_uri), stream);
@@ -212,15 +212,15 @@ impl FerroXamlLoader {
             return runtime_loader.load(document, configuration);
         }
 
-        Err(XamlLoadException::with_message(format!(
+        Err(XamlLoadError::with_message(format!(
             "No precompiled XAML found for {uri} (baseUri: {}), make sure to specify x:Class and include your XAML file as FerroResource",
             display(base_uri)
         )))
     }
 }
 
-fn null_checked(obj: Option<BoxedValue>) -> Result<BoxedValue, XamlLoadException> {
-    obj.ok_or_else(|| XamlLoadException::with_message("Value cannot be null. (Parameter 'obj')"))
+fn null_checked(obj: Option<BoxedValue>) -> Result<BoxedValue, XamlLoadError> {
+    obj.ok_or_else(|| XamlLoadError::with_message("Value cannot be null. (Parameter 'obj')"))
 }
 
 fn display(uri: Option<&Uri>) -> String {

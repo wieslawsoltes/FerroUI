@@ -192,10 +192,10 @@ impl HotReloadSession {
         let populate: ferroui_markup_xaml::PopulateOverride = Rc::new(move |sp, root| {
             let sources = sources.borrow().clone();
             let text = sources.get(&uri).ok_or_else(|| {
-                ferroui_markup_xaml::XamlLoadException::with_message("Reload document was removed")
+                ferroui_markup_xaml::XamlLoadError::with_message("Reload document was removed")
             })?;
             let prepared = crate::identity::runtime_source(text).map_err(|error| {
-                ferroui_markup_xaml::XamlLoadException::with_message(format!("{error:?}"))
+                ferroui_markup_xaml::XamlLoadError::with_message(format!("{error:?}"))
             })?;
             let mut document = RuntimeXamlLoaderDocument::with_base_uri_and_root_instance(
                 Some(base.clone()),

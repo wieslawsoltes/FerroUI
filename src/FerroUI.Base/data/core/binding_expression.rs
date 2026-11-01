@@ -5,7 +5,7 @@ use super::{
 };
 use crate::data::converters::{composite_format, IValueConverter};
 use crate::data::{
-    BindingChainException, BindingError, BindingErrorType, BindingMode, BindingNotification, BindingOperations,
+    BindingChainError, BindingError, BindingErrorType, BindingMode, BindingNotification, BindingOperations,
     BindingPriority, UpdateSourceTrigger,
 };
 use crate::logging::{LogArea, LogEventLevel, Logger};
@@ -353,7 +353,7 @@ impl BindingExpression {
 
         // Clear the current value and publish the error.
         let binding_error = ExpressionError::new(
-            BindingError::new(BindingChainException::with_expression(error, self.description(), error_point)),
+            BindingError::new(BindingChainError::with_expression(error, self.description(), error_point)),
             BindingErrorType::Error,
         );
         self.convert_and_publish_value(Some(FerroProperty::unset_value()), Some(binding_error), false);

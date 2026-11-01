@@ -3,7 +3,7 @@
 use super::test_support::*;
 use ferroui_base::data::core::expression_nodes::CastTarget;
 use ferroui_base::data::core::parsers::TypeResolver;
-use ferroui_base::data::core::{ExpressionParseException, ObservableSink, ValueTypes};
+use ferroui_base::data::core::{ExpressionParseError, ObservableSink, ValueTypes};
 use ferroui_base::*;
 use std::rc::Rc;
 
@@ -60,7 +60,7 @@ fn build(
     source: &Ref<Class1>,
     path: &str,
     type_resolver: &TypeResolver,
-) -> Result<Rc<ObservableSink>, ExpressionParseException> {
+) -> Result<Rc<ObservableSink>, ExpressionParseError> {
     let source: BoxedValue = Rc::new(source.clone().upcast::<FerroObject>());
     Ok(build_expression(Some(source), path, Some(type_resolver), false)?.to_observable(None))
 }

@@ -1,4 +1,4 @@
-//! `BindingErrors`, and the `TargetInvocationException` it raises.
+//! `BindingErrors`, and the `TargetInvocationError` it raises.
 
 use ferroui_splat::{AppLocator, ILogManager, LogHost};
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
@@ -11,7 +11,7 @@ use std::rc::Rc;
 /// A faulted write has no caller stack to surface on: it arrives wherever the change notification
 /// was raised. Every fault is logged against the bound expression. A fault that carries an inner
 /// error (its [`source`](Error::source)), a setter that failed, is raised again as a
-/// [`TargetInvocationException`] panic. A fault with none is the sequence itself ending in error,
+/// [`TargetInvocationError`] panic. A fault with none is the sequence itself ending in error,
 /// and is only logged. Completion is ignored.
 pub struct BindingErrors;
 
@@ -35,7 +35,7 @@ impl<T> IObserver<T> for BindingObserver<T> {
         (self.on_next)(value);
     }
 
-    /// Logs the fault, and raises a [`TargetInvocationException`] when it carries an inner error.
+    /// Logs the fault, and raises a [`TargetInvocationError`] when it carries an inner error.
     fn on_error(&self, error: ObservableError) {
         let message = format!("{} Binding received an Exception!", self.binding_expression);
         if let Some(log_manager) = AppLocator::get_service::<dyn ILogManager>() {
@@ -44,7 +44,7 @@ impl<T> IObserver<T> for BindingObserver<T> {
         let Some(inner) = error.source() else {
             return;
         };
-        std::panic::panic_any(TargetInvocationException::with_inner(message, inner));
+        std::panic::panic_any(TargetInvocationError::with_inner(message, inner));
     }
 
     fn on_completed(&self) {}
@@ -58,12 +58,16 @@ impl<T> IObserver<T> for BindingObserver<T> {
 /// the payload of a panic (`std::panic::panic_any`), which has to be `Send`, and the errors of the
 /// reactive libraries (`Rc<dyn Error>`) are not.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct TargetInvocationException {
+pub struct TargetInvocationError {
     message: String,
     inner_exception: Option<String>,
 }
 
-impl TargetInvocationException {
+/// The name of [`TargetInvocationError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `TargetInvocationError`")]
+pub type TargetInvocationException = TargetInvocationError;
+
+impl TargetInvocationError {
     /// The exception with `message`, caused by `inner_exception`
     /// (`TargetInvocationException(string, Exception)`).
     pub fn with_inner(message: impl Into<String>, inner_exception: &dyn Error) -> Self {
@@ -81,7 +85,7 @@ impl TargetInvocationException {
     }
 }
 
-impl fmt::Display for TargetInvocationException {
+impl fmt::Display for TargetInvocationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.inner_exception {
             Some(inner) => write!(f, "{} ({inner})", self.message),
@@ -90,4 +94,4 @@ impl fmt::Display for TargetInvocationException {
     }
 }
 
-impl Error for TargetInvocationException {}
+impl Error for TargetInvocationError {}

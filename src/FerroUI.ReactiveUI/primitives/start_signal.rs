@@ -7,7 +7,7 @@
 //! execution is subscribed.
 
 use crate::internal::scheduler_extensions::is_immediate;
-use crate::PanicException;
+use crate::PanicError;
 use ferroui_reactive::concurrency::{IScheduler, SchedulerExt};
 use ferroui_reactive::disposables::Disposable;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
@@ -18,7 +18,7 @@ use std::rc::Rc;
 ///
 /// Upstream catches the exception of the function and notifies it; here the function returns a
 /// `Result`, whose `Err` is notified, and a panic of the function is caught and notified as a
-/// [`PanicException`].
+/// [`PanicError`].
 pub(crate) struct StartSignal<T> {
     function: Rc<dyn Fn() -> Result<T, ObservableError>>,
     scheduler: Rc<dyn IScheduler>,
@@ -31,7 +31,7 @@ impl<T: 'static> StartSignal<T> {
     }
 
     fn run(function: &Rc<dyn Fn() -> Result<T, ObservableError>>, observer: &Rc<dyn IObserver<T>>) {
-        match PanicException::catch(|| function()) {
+        match PanicError::catch(|| function()) {
             Ok(Ok(value)) => {
                 observer.on_next(value);
                 observer.on_completed();

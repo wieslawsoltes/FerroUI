@@ -22,10 +22,10 @@ impl VulkanGlobalApi {
     /// know: a lookup that is not that of a Vulkan loader (or a loader that
     /// could not be opened) fails here, where the reference fails to fill
     /// its table.
-    pub fn try_new(vk_get_proc_address: VkGetInstanceProcAddressDelegate) -> Result<Self, crate::VulkanException> {
+    pub fn try_new(vk_get_proc_address: VkGetInstanceProcAddressDelegate) -> Result<Self, crate::VulkanError> {
         for name in ["vkEnumerateInstanceLayerProperties", "vkCreateInstance", "vkEnumerateInstanceExtensionProperties"] {
             if vk_get_proc_address(0, name) == 0 {
-                return Err(crate::VulkanException::new(format!("Unable to find the entry point {name}")));
+                return Err(crate::VulkanError::new(format!("Unable to find the entry point {name}")));
             }
         }
         Ok(Self::new(vk_get_proc_address))

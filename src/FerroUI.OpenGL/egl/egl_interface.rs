@@ -1,5 +1,5 @@
 use crate::entry_points::{gl_entry_points, GetProcAddress};
-use crate::OpenGlException;
+use crate::OpenGlError;
 use std::ffi::{c_char, c_void, CStr, CString};
 use std::ptr;
 use std::rc::Rc;
@@ -134,14 +134,14 @@ fn attrs_ptr(attrs: Option<&[i32]>) -> *const i32 {
 
 /// The library `EglInterface()` loads (`Load()`): the EGL library of Linux or
 /// of Android; another system has none.
-fn default_library() -> Result<&'static str, OpenGlException> {
+fn default_library() -> Result<&'static str, OpenGlError> {
     if cfg!(target_os = "linux") {
         Ok("libEGL.so.1")
     } else if cfg!(target_os = "android") {
         Ok("libEGL.so")
     } else {
         // The message of `PlatformNotSupportedException`.
-        Err(OpenGlException::new("Operation is not supported on this platform."))
+        Err(OpenGlError::new("Operation is not supported on this platform."))
     }
 }
 
@@ -150,16 +150,16 @@ type EglGetProcAddress = unsafe extern "system" fn(*const c_char) -> *const c_vo
 
 /// Loads `library` and returns a loader that resolves a name with its
 /// `eglGetProcAddress` (`Load(string library)`).
-fn load(library: &str) -> Result<GetProcAddress, OpenGlException> {
+fn load(library: &str) -> Result<GetProcAddress, OpenGlError> {
     let Some(handle) = native_library::load(library) else {
         // The message of the `DllNotFoundException` of `NativeLibrary.Load`.
-        return Err(OpenGlException::new(format!(
+        return Err(OpenGlError::new(format!(
             "Unable to load shared library '{library}' or one of its dependencies."
         )));
     };
     let address = native_library::export(handle, "eglGetProcAddress");
     if address.is_null() {
-        return Err(OpenGlException::new(format!("{library} doesn't expose eglGetProcAddress")));
+        return Err(OpenGlError::new(format!("{library} doesn't expose eglGetProcAddress")));
     }
     // SAFETY: the address is that of the export `eglGetProcAddress` of an EGL library,
     // whose C declaration is the signature of the type.
@@ -267,7 +267,7 @@ impl EglInterface {
     ///
     /// # Panics
     /// Panics when a required entry point cannot be resolved.
-    pub fn from_library(library: &str) -> Result<Self, OpenGlException> {
+    pub fn from_library(library: &str) -> Result<Self, OpenGlError> {
         let get_proc_address = load(library)?;
         // SAFETY: the loader asks `eglGetProcAddress` of the library, which returns null or
         // the address of the entry point of that name; the library is never unloaded, so
@@ -281,7 +281,7 @@ impl EglInterface {
     ///
     /// # Panics
     /// Panics when a required entry point cannot be resolved.
-    pub fn new_default() -> Result<Self, OpenGlException> {
+    pub fn new_default() -> Result<Self, OpenGlError> {
         Self::from_library(default_library()?)
     }
 

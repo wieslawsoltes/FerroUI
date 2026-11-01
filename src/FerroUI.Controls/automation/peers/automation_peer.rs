@@ -3,7 +3,7 @@ use crate::automation::provider::{
 };
 use crate::automation::{
     AutomationLiveSetting, AutomationProperty, AutomationPropertyChangedEventArgs,
-    ElementNotEnabledException, IAutomationEventSink,
+    ElementNotEnabledError, IAutomationEventSink,
 };
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::reactive::{Disposable, IDisposable};
@@ -748,9 +748,9 @@ impl AutomationPeer {
 
     /// Returns the error of an element that is not enabled unless the
     /// element of the peer is enabled.
-    pub fn ensure_enabled(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn ensure_enabled(&self) -> Result<(), ElementNotEnabledError> {
         if !self.is_enabled() {
-            return Err(ElementNotEnabledException::new());
+            return Err(ElementNotEnabledError::new());
         }
         Ok(())
     }

@@ -2,7 +2,7 @@ use crate::automation::peers::AutomationPeer;
 use ferroui_base::Ref;
 
 /// The error of [`IValueProvider::set_value`]: what the setter throws in the
-/// original, which is any exception (an [`ElementNotEnabledException`](crate::automation::ElementNotEnabledException)
+/// original, which is any exception (an [`ElementNotEnabledError`](crate::automation::ElementNotEnabledError)
 /// for an element that is not enabled, a format error for text a peer cannot
 /// parse, ...). Inspect it with `downcast_ref`.
 pub type ProviderError = Box<dyn std::error::Error + Send + Sync>;

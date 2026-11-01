@@ -12,7 +12,7 @@ use ferroui_controls::automation::{
         ControlAutomationPeer, ControlAutomationPeerImpl,
     },
     provider::IInvokeProvider,
-    ElementNotEnabledException,
+    ElementNotEnabledError,
 };
 use std::rc::Rc;
 #[repr(C)]
@@ -123,7 +123,7 @@ impl IInvokeProvider for InvokeProvider {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }
-    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         let dockable = self.0.resolve_dockable_to_activate();
         if dockable.is_none() || !Helper::try_activate_dockable(dockable) {
             self.0.owner().focus();

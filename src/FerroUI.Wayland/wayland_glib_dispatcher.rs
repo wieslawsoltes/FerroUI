@@ -1,7 +1,7 @@
 //! The dispatcher of the UI thread over the main loop of GLib (the port of
 //! `WaylandGlibDispatcher.cs`).
 
-use crate::ferro_wayland_exception::FerroWaylandException;
+use crate::ferro_wayland_exception::FerroWaylandError;
 use ferroui_x11::dispatching::glib_dispatcher_impl_base::GlibDispatcherImplBase;
 use ferroui_x11::interop::glib::Glib;
 use std::any::Any;
@@ -23,9 +23,9 @@ impl WaylandGlibDispatcher {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
         external_exception_logger: Option<Rc<dyn Fn(&(dyn Any + Send))>>,
-    ) -> Result<Rc<GlibDispatcherImplBase>, FerroWaylandException> {
+    ) -> Result<Rc<GlibDispatcherImplBase>, FerroWaylandError> {
         let glib = Glib::try_get().map_err(|error| {
-            FerroWaylandException::with_inner("WaylandPlatformOptions::use_g_lib_main_loop needs GLib", error)
+            FerroWaylandError::with_inner("WaylandPlatformOptions::use_g_lib_main_loop needs GLib", error)
         })?;
         Ok(GlibDispatcherImplBase::new(glib, external_exception_logger))
     }

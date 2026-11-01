@@ -20,7 +20,7 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_base::{instantiate, BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, ObjectType, Ref, StyledElement, Visual};
 use ferroui_controls::testing::UnitTestApplicationScope;
 use ferroui_controls::{Application, Control, ItemsControl, Window};
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 
 use super::support::{start_catalog_app, start_catalog_services};
@@ -87,12 +87,12 @@ fn application() -> UnitTestApplicationScope {
 
 /// Populates `root` from the document `path` of the sample with the run-time loader: the
 /// URI of the document, the assembly, compiled bindings as the default.
-fn load(path: &str, root: BoxedValue) -> Result<(), XamlLoadException> {
+fn load(path: &str, root: BoxedValue) -> Result<(), XamlLoadError> {
     try_load_document(path, Some(root)).map(|_| ())
 }
 
 /// Populates `root` from the compiled markup of the document `path`.
-fn populate(path: &str, root: &BoxedValue) -> Result<(), XamlLoadException> {
+fn populate(path: &str, root: &BoxedValue) -> Result<(), XamlLoadError> {
     populate_compiled(path, root).unwrap_or_else(|| panic!("{path} is not compiled by the build"))
 }
 
@@ -280,7 +280,7 @@ fn every_document_the_compiler_does_not_refuse_is_compiled() {
 
 /// The class of the document `path`, populated by `populate` and shown as the content of a
 /// window, after the layout pass of the window: the dump of its visual tree.
-fn shown(path: &str, populate: impl Fn(&BoxedValue) -> Result<(), XamlLoadException>) -> String {
+fn shown(path: &str, populate: impl Fn(&BoxedValue) -> Result<(), XamlLoadError>) -> String {
     let class = XamlClass::find(path).unwrap_or_else(|| panic!("{path}: no class of the sample has the document"));
     let root = (class.create_uninitialized)();
     populate(&root).unwrap_or_else(|error| panic!("{path}: {}", describe(&error)));

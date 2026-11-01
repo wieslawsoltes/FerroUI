@@ -3,7 +3,7 @@
 use super::test_support::*;
 use ferroui_base::data::core::{BindingExpression, ModelRef, Value};
 use ferroui_base::data::model::Model;
-use ferroui_base::data::{BindingChainException, BindingError, BindingErrorType, BindingNotification};
+use ferroui_base::data::{BindingChainError, BindingError, BindingErrorType, BindingNotification};
 use ferroui_base::*;
 use std::rc::Rc;
 
@@ -38,7 +38,7 @@ fn should_return_binding_notification_error_for_broken_chain() {
     assert_eq!(
         result,
         &BindingNotification::with_error(
-            BindingError::new(BindingChainException::with_expression(
+            BindingError::new(BindingChainError::with_expression(
                 "Could not find a matching property accessor for 'Baz' on 'System.Int32'.".to_string(),
                 "Foo.Bar.Baz",
                 "Baz"

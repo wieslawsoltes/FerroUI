@@ -1001,7 +1001,7 @@ impl Serializer {
             // the test of the original, which then writes their properties by
             // reflection; the port has no declaration of them as classes and
             // rejects them as it rejects the other values.
-            _ => return Err(BsonException::with_message("Root type must be an object").into()),
+            _ => return Err(BsonError::with_message("Root type must be an object").into()),
         }
         let mut serializer = Serializer::new(Vec::with_capacity(250));
         serializer.write_document(&document)?;
@@ -1733,7 +1733,7 @@ impl dyn BaseWrapper {
             Type::Collection(_) | Type::Dictionary(_) => Ok(Box::new(CollectionWrapper { list: Vec::new() })),
             // a last-ditch pass: a string is an enumerable of characters.
             Type::String => Ok(Box::new(ListWrapper { list: Vec::new() })),
-            other => Err(BsonException::with_message(format!(
+            other => Err(BsonError::with_message(format!(
                 "Collection of type {} cannot be deserialized",
                 other.full_name()
             ))
@@ -1760,7 +1760,7 @@ impl BaseWrapper for ArrayWrapper {
     fn set_container(&mut self, container: Option<Value>) -> Result<(), Error> {
         if container.is_some() {
             return Err(
-                BsonException::with_message("An container cannot exist when trying to deserialize an array").into()
+                BsonError::with_message("An container cannot exist when trying to deserialize an array").into()
             );
         }
         Ok(())
@@ -2164,7 +2164,7 @@ impl<'r, 'a> Deserializer<'r, 'a> {
         if sub_type == 3 {
             return Ok(Value::Guid(Guid::from_byte_array(&self.reader.read_bytes(length)?)?));
         }
-        Err(BsonException::with_message(format!("No support for binary type: {}", sub_type)).into())
+        Err(BsonError::with_message(format!("No support for binary type: {}", sub_type)).into())
     }
 
     fn read_name(&mut self) -> Result<String, Error> {
@@ -2205,7 +2205,7 @@ impl<'r, 'a> Deserializer<'r, 'a> {
                 // a number an `int` cannot hold; the conversion here saturates.
                 Ok(self.reader.read_double()? as i32)
             }
-            _ => Err(BsonException::with_message(format!("Could not create an int from {}", stored_type)).into()),
+            _ => Err(BsonError::with_message(format!("Could not create an int from {}", stored_type)).into()),
         }
     }
 
@@ -2223,7 +2223,7 @@ impl<'r, 'a> Deserializer<'r, 'a> {
                 self.read_count(8)?;
                 Ok(self.reader.read_double()? as i64)
             }
-            _ => Err(BsonException::with_message(format!("Could not create an int64 from {}", stored_type)).into()),
+            _ => Err(BsonError::with_message(format!("Could not create an int64 from {}", stored_type)).into()),
         }
     }
 
@@ -2416,25 +2416,29 @@ pub mod configuration {
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct BsonException {
+pub struct BsonError {
     message: Option<String>,
     inner_exception: Option<Arc<dyn std::error::Error + Send + Sync>>,
 }
 
-impl BsonException {
-    pub fn new() -> BsonException {
-        BsonException::default()
+/// The name of [`BsonError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `BsonError`")]
+pub type BsonException = BsonError;
+
+impl BsonError {
+    pub fn new() -> BsonError {
+        BsonError::default()
     }
 
-    pub fn with_message(message: impl Into<String>) -> BsonException {
-        BsonException { message: Some(message.into()), inner_exception: None }
+    pub fn with_message(message: impl Into<String>) -> BsonError {
+        BsonError { message: Some(message.into()), inner_exception: None }
     }
 
     pub fn with_inner_exception(
         message: impl Into<String>,
         inner_exception: Arc<dyn std::error::Error + Send + Sync>,
-    ) -> BsonException {
-        BsonException { message: Some(message.into()), inner_exception: Some(inner_exception) }
+    ) -> BsonError {
+        BsonError { message: Some(message.into()), inner_exception: Some(inner_exception) }
     }
 
     /// `Exception.Message`.
@@ -2443,13 +2447,13 @@ impl BsonException {
     }
 }
 
-impl fmt::Display for BsonException {
+impl fmt::Display for BsonError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.message())
     }
 }
 
-impl std::error::Error for BsonException {
+impl std::error::Error for BsonError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match &self.inner_exception {
             Some(inner) => Some(&**inner),

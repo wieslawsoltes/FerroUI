@@ -1,9 +1,9 @@
 use super::egl_consts::*;
 use super::egl_external_objects_feature::EglExternalObjectsFeature;
 use super::{EglContextFeature, EglContextFeatureFactory, EglContextOptions, EglDisplay, EglInterface, EglSurface};
-use crate::{GetProcAddress, GlInterface, GlVersion, IGlContext, IGlContextExternalObjectsFeature, OpenGlException};
+use crate::{GetProcAddress, GlInterface, GlVersion, IGlContext, IGlContextExternalObjectsFeature, OpenGlError};
 use ferroui_base::logging::{LogEventLevel, Logger};
-use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphicsContext, PlatformGraphicsContextLostException};
+use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphicsContext, PlatformGraphicsContextLostError};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, OnceCell, RefCell};
@@ -47,7 +47,7 @@ impl EglContext {
         stencil_size: i32,
         dispose_callback: Option<Rc<dyn Fn()>>,
         features: HashMap<TypeId, EglContextFeatureFactory>,
-    ) -> Result<Rc<EglContext>, OpenGlException> {
+    ) -> Result<Rc<EglContext>, OpenGlError> {
         let this = Rc::new_cyclic(|this| Self {
             this: this.clone(),
             disp: display.clone(),
@@ -68,7 +68,7 @@ impl EglContext {
         let current = match this.make_current_with_surface(None) {
             Ok(current) => current,
             Err(MakeCurrentError::ContextLost) => {
-                return Err(OpenGlException::new(PlatformGraphicsContextLostException.to_string()));
+                return Err(OpenGlError::new(PlatformGraphicsContextLostError.to_string()));
             }
             Err(MakeCurrentError::OpenGl(error)) => return Err(error),
         };
@@ -171,7 +171,7 @@ impl EglContext {
                 return Err(MakeCurrentError::ContextLost);
             }
 
-            return Err(MakeCurrentError::OpenGl(OpenGlException::get_formatted_egl_exception("eglMakeCurrent", error)));
+            return Err(MakeCurrentError::OpenGl(OpenGlError::get_formatted_egl_exception("eglMakeCurrent", error)));
         }
 
         Ok(Rc::new(old))
@@ -205,13 +205,13 @@ pub enum MakeCurrentError {
     /// The context is lost (the `PlatformGraphicsContextLostException` of the original).
     ContextLost,
     /// `eglMakeCurrent` failed.
-    OpenGl(OpenGlException),
+    OpenGl(OpenGlError),
 }
 
 impl std::fmt::Display for MakeCurrentError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::ContextLost => write!(f, "{}", PlatformGraphicsContextLostException),
+            Self::ContextLost => write!(f, "{}", PlatformGraphicsContextLostError),
             Self::OpenGl(error) => write!(f, "{error}"),
         }
     }
