@@ -253,3 +253,41 @@ fn single_row_edits_invalidate_only_that_rows_delegates() {
         Value::String("three".into())
     );
 }
+
+#[test]
+fn schema_changes_refresh_all_rows_and_reentrant_role_writes_reach_their_own_delegates() {
+    let mut engine = instance(r#"import QtQuick
+        import QtQml.Models
+        Item { id: root
+            property bool editing: false
+            ListModel { id: rows; ListElement { title:"A" } ListElement { title:"B" } }
+            Repeater { id: rep; model: rows
+                Item {
+                    required property int index
+                    required property var model
+                    required property var modelData
+                    property string text: model.title
+                    onTextChanged: { if (root.editing && index === 0) rows.setProperty(1, "title", text + "!") }
+                }
+            }
+            function edit() { editing = true; rows.setProperty(0, "title","AB") }
+            function expand() { rows.setProperty(0, "other", 1) }
+        }"#).unwrap();
+    let root = engine.root();
+    let rep = engine.id("rep").unwrap();
+    let first = item(&mut engine, rep, 0).unwrap();
+    let second = item(&mut engine, rep, 1).unwrap();
+    engine.call(root, "edit", vec![]).unwrap();
+    assert_eq!(
+        engine.get(second, "text").unwrap(),
+        Value::String("AB!".into())
+    );
+    assert_eq!(
+        engine.get(second, "modelData").unwrap(),
+        Value::String("AB!".into())
+    );
+    engine.call(root, "expand", vec![]).unwrap();
+    assert_eq!(engine.get(first, "modelData").unwrap(), Value::Undefined);
+    assert_eq!(engine.get(second, "modelData").unwrap(), Value::Undefined);
+    assert_eq!(item(&mut engine, rep, 1), Some(second));
+}

@@ -231,12 +231,15 @@ impl ScriptEngine for WebSceneEngine {
         limit: usize,
     ) -> Result<Option<Vec<Value>>, Error> {
         let realm = self.realm(ctx.instance());
-        let result = realm.invoke(ctx, json!({
-            "op": "arrayElements",
-            "target": ["js", realm.handle(value)?],
-            "limit": limit,
-            "mode": "elements"
-        }))?;
+        let result = realm.invoke(
+            ctx,
+            json!({
+                "op": "arrayElements",
+                "target": ["js", realm.handle(value)?],
+                "limit": limit,
+                "mode": "elements"
+            }),
+        )?;
         match result {
             Value::Undefined => Ok(None),
             Value::List(values) => Ok(Some(values)),
