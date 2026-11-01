@@ -11,6 +11,14 @@ These captures come from an X11 session running Skia Graphite on Mesa Lavapipe. 
 | ![Windows Start with installed applications](screenshots/windows-launcher.webp) | ![macOS application search](screenshots/macos-launcher.webp) | ![Material app drawer](screenshots/material-launcher.webp) |
 | ![Windows taskbar and decorated client](screenshots/windows-session.webp) | ![macOS menu bar, Dock and decorated client](screenshots/macos-session.webp) | ![Material navigation and decorated client](screenshots/material-session.webp) |
 
+| Pinned apps | Window arrangement |
+| --- | --- |
+| ![Four installed applications pinned in Start](screenshots/favorites.webp) | ![Window actions and named workspace destinations](screenshots/window-actions.webp) |
+| **Notification banner above an active client** | **Quick Settings** |
+| ![Notification above a focused external application](screenshots/toast.webp) | ![Volume slider, wireless radio and battery state](screenshots/quick-settings.webp) |
+
+The Quick Settings capture uses a real PulseAudio null sink and isolated NetworkManager and UPower test services. See the [notification center](screenshots/notifications.webp) for actions on earlier messages.
+
 ## Architecture
 
 | Layer | Responsibility |
