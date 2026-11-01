@@ -130,10 +130,10 @@ fn lit_content_is_drawn_in_a_multiply_layer_of_the_light_map() {
     light.targets().add((*lit).clone());
     show(&s, &lit);
 
-    // A sample every second device pixel: 15 x 10 for 30 x 20 at a scale of
-    // 1, the light at half (a scale of 1).
+    // An ambient light is the same everywhere: the smallest map, the light
+    // at half (a scale of 1).
     let entries = render_with_layers(&s, &lit);
-    let push = position_starting(&entries, "PushMultiplyLayer 0, 0, 30, 20 15x10 1");
+    let push = position_starting(&entries, "PushMultiplyLayer 0, 0, 30, 20 2x2 1");
     let content = position_starting(&entries, "DrawRectangle Blue none 0, 0, 30, 20");
     let pop = position_starting(&entries, "PopMultiplyLayer");
     assert!(push < content && content < pop, "{entries:?}");
@@ -143,7 +143,83 @@ fn lit_content_is_drawn_in_a_multiply_layer_of_the_light_map() {
     light.set_intensity(3.0);
     s.run_jobs();
     let entries = render_with_layers(&s, &lit);
-    position_starting(&entries, "PushMultiplyLayer 0, 0, 30, 20 15x10 3");
+    position_starting(&entries, "PushMultiplyLayer 0, 0, 30, 20 2x2 3");
+
+    // A point light varies: a sample every second device pixel, 15 x 10
+    // for 30 x 20 at a scale of 1.
+    light.targets().remove_all();
+    let point = s.compositor.create_point_light();
+    point.set_offset(Vector3D::new(15.0, 10.0, 20.0));
+    point.targets().add((*lit).clone());
+    s.run_jobs();
+    let entries = render_with_layers(&s, &lit);
+    position_starting(&entries, "PushMultiplyLayer 0, 0, 30, 20 15x10 1");
+}
+
+/// Renders the server side of `visual` on a recording drawing context that
+/// evaluates the lights and the pixel operations itself, as a GPU backend
+/// does.
+fn render_with_gpu_effects(s: &CompositorCanvas, visual: &Rc<CompositionVisual>) -> Vec<String> {
+    let log = DrawingLog::new();
+    let mut context = MockDrawingContextImpl::new(log.clone());
+    context.supports_effects = true;
+    context.supports_layer_effects = true;
+    context.supports_gpu_effects = true;
+    s.server_object(visual.server()).render(&mut context, LtrbRect::INFINITE, None, true, false, false);
+    log.entries()
+}
+
+#[test]
+fn a_drawing_context_that_evaluates_the_lights_is_given_them_and_no_light_map() {
+    let s = CompositorCanvas::new();
+    let lit = sprite(&s, 30.0, 20.0, color_brush(&s, Colors::BLUE));
+    let point = s.compositor.create_point_light();
+    point.set_offset(Vector3D::new(15.0, 10.0, 20.0));
+    point.targets().add((*lit).clone());
+    let ambient = s.compositor.create_ambient_light();
+    ambient.set_intensity(0.25);
+    ambient.targets().add((*lit).clone());
+    show(&s, &lit);
+
+    // One point light (the ambient light is part of the constant light).
+    let entries = render_with_gpu_effects(&s, &lit);
+    let push = position_starting(&entries, "PushLightingMultiplyLayer 0, 0, 30, 20 1");
+    let content = position_starting(&entries, "DrawRectangle Blue none 0, 0, 30, 20");
+    let pop = position_starting(&entries, "PopMultiplyLayer");
+    assert!(push < content && content < pop, "{entries:?}");
+    assert!(!entries.iter().any(|e| e.starts_with("PushMultiplyLayer")), "no light map: {entries:?}");
+
+    // Without the capability the light map is sampled on the CPU.
+    let entries = render_with_layers(&s, &lit);
+    position_starting(&entries, "PushMultiplyLayer 0, 0, 30, 20 15x10");
+    assert!(!entries.iter().any(|e| e.starts_with("PushLightingMultiplyLayer")), "{entries:?}");
+}
+
+#[test]
+fn more_lights_than_a_drawing_context_evaluates_are_sampled_on_the_cpu() {
+    let s = CompositorCanvas::new();
+    let lit = sprite(&s, 30.0, 20.0, color_brush(&s, Colors::BLUE));
+    let mut lights = Vec::new();
+    for index in 0..=crate::platform::LightingParameters::MAX_LIGHTS {
+        let point = s.compositor.create_point_light();
+        point.set_offset(Vector3D::new(index as f64, 10.0, 20.0));
+        point.set_intensity(0.1);
+        point.targets().add((*lit).clone());
+        lights.push(point);
+    }
+    show(&s, &lit);
+    let entries = render_with_gpu_effects(&s, &lit);
+    position_starting(&entries, "PushMultiplyLayer 0, 0, 30, 20 15x10");
+    assert!(!entries.iter().any(|e| e.starts_with("PushLightingMultiplyLayer")), "{entries:?}");
+
+    // One fewer: the drawing context evaluates them.
+    lights.pop().unwrap().targets().remove_all();
+    s.run_jobs();
+    let entries = render_with_gpu_effects(&s, &lit);
+    position_starting(
+        &entries,
+        &format!("PushLightingMultiplyLayer 0, 0, 30, 20 {}", crate::platform::LightingParameters::MAX_LIGHTS),
+    );
 }
 
 #[test]
@@ -303,6 +379,7 @@ fn effects_without_a_blend_layer_are_drawn_from_the_pixels_of_their_sources() {
         }
         let visual = sprite(&s, 100.0, 50.0, Some(brush.brush().clone()));
         log.clear();
+        let bitmaps = s.render_interface.pixel_bitmap_count();
         show(&s, &visual);
         // The sources are drawn into bitmaps of their own (the log of the
         // render interface), and the combined pixels drawn over the brush.
@@ -312,5 +389,59 @@ fn effects_without_a_blend_layer_are_drawn_from_the_pixels_of_their_sources() {
             entries.iter().any(|e| e.starts_with("DrawBitmap 1 0, 0, 100, 50 0, 0, 100, 50")),
             "{entries:?}"
         );
+        assert!(s.render_interface.pixel_bitmap_count() > bitmaps);
+
+        // A drawing context that does the operation itself is given the
+        // sources one after the other, and no bitmap is made.
+        let bitmaps = s.render_interface.pixel_bitmap_count();
+        let entries = render_with_gpu_effects(&s, &visual);
+        let push = position_starting(&entries, "PushPixelOperation 0, 0, 100, 50");
+        let red = position_starting(&entries, "DrawRectangle Red");
+        let next = position_starting(&entries, "NextPixelOperationSource");
+        let pop = position_starting(&entries, "PopPixelOperation");
+        assert!(push < red && red < next && next < pop, "{entries:?}");
+        assert!(!entries.iter().any(|e| e.starts_with("DrawBitmap")), "{entries:?}");
+        assert_eq!(bitmaps, s.render_interface.pixel_bitmap_count());
     }
+}
+
+#[test]
+fn the_pixel_operations_carry_their_parameters() {
+    let s = CompositorCanvas::new();
+    let factory = s.compositor.create_effect_factory(ArithmeticCompositeEffect {
+        name: String::new(),
+        multiply_amount: 0.5,
+        source1_amount: 0.25,
+        source2_amount: 0.75,
+        offset: 0.125,
+        source1: parameter("a"),
+        source2: parameter("b"),
+        ..Default::default()
+    });
+    let brush = factory.create_brush();
+    brush.set_source_parameter("a", color_brush(&s, Colors::RED));
+    brush.set_source_parameter("b", color_brush(&s, Colors::BLUE));
+    let visual = sprite(&s, 100.0, 50.0, Some(brush.brush().clone()));
+    show(&s, &visual);
+    let entries = render_with_gpu_effects(&s, &visual);
+    position_starting(&entries, "PushPixelOperation 0, 0, 100, 50 Arithmetic [0.5, 0.25, 0.75, 0.125]");
+
+    let factory = s.compositor.create_effect_factory(BlendEffect {
+        name: String::new(),
+        mode: BlendEffectMode::Dissolve,
+        background: parameter("a"),
+        foreground: parameter("b"),
+    });
+    let brush = factory.create_brush();
+    brush.set_source_parameter("a", color_brush(&s, Colors::RED));
+    brush.set_source_parameter("b", color_brush(&s, Colors::BLUE));
+    let visual = sprite(&s, 100.0, 50.0, Some(brush.brush().clone()));
+    show(&s, &visual);
+    // The grid of the noise is that of the bitmaps of the CPU path: a cell
+    // per device pixel.
+    let entries = render_with_gpu_effects(&s, &visual);
+    position_starting(
+        &entries,
+        "PushPixelOperation 0, 0, 100, 50 Blend Dissolve 0, 0, 100, 50 100, 50",
+    );
 }

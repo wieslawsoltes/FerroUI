@@ -115,6 +115,7 @@ pub use i_platform_settings::IPlatformSettings;
 mod asset_loader;
 mod i_asset_loader;
 mod i_drawing_context_impl_with_effects;
+mod gpu_effects;
 mod i_drawing_context_impl_with_layer_effects;
 mod i_drawing_context_impl_with_fragments;
 mod i_drawing_context_with_acrylic_like_support;
@@ -130,6 +131,7 @@ pub use i_runtime_platform::{FormFactorType, IRuntimePlatform, RuntimePlatformIn
 pub use standard_runtime_platform::StandardRuntimePlatform;
 pub use standard_runtime_platform_services::StandardRuntimePlatformServices;
 pub use i_drawing_context_impl_with_effects::IDrawingContextImplWithEffects;
+pub use gpu_effects::{LightingParameters, PixelOperation, PositionedLight};
 pub use i_drawing_context_impl_with_layer_effects::{IDrawingContextImplWithLayerEffects, MultiplyLayerFactors};
 pub use i_drawing_context_impl_with_fragments::{IDrawingContextImplWithFragments, IDrawingFragment};
 pub use i_drawing_context_with_acrylic_like_support::IDrawingContextWithAcrylicLikeSupport;

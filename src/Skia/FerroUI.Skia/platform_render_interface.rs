@@ -313,6 +313,7 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
         dpi: Vector,
         stride: i32,
     ) -> std::sync::Arc<ferroui_base::platform::SharedBitmapImpl> {
+        crate::composition_effects::note_pixel_image();
         std::sync::Arc::new(
             ImmutableBitmap::from_pixels(size, dpi, stride, format, alpha_format, data)
                 .unwrap_or_else(|error| panic!("{error}")),

@@ -4,13 +4,19 @@
 
 Within a minor version (0.4) the public API of the published crates only grows. This script runs
 `cargo semver-checks` for every published crate that the baseline release has, with the release
-type `minor` (additions allowed, nothing removed or changed):
+type `minor` (additions allowed, nothing removed or changed). While the workspace is at a preview of
+the next minor version (0.5.0-preview.1 after the baseline 0.4.0) it compares nothing: the previews
+may change any part of the API (docs/release.md, "Version scheme"), and the release that starts the
+minor version moves the baseline to it.
+
 
     semver_checks.py                 run the gate
     semver_checks.py --list          print the baseline and the crates it checks, run nothing
     semver_checks.py --fetch         fetch the baseline into a shallow clone first (CI)
     semver_checks.py --baseline-key  print the key of the cached baseline documentation (CI)
     semver_checks.py --baseline-only document the baseline into BASELINE_DOCS, check nothing (CI)
+    semver_checks.py --applies       print `true` when the gate compares the workspace, `false` while
+                                     it is at a preview of the next minor version (CI)
 
 cargo-semver-checks compares the rustdoc JSON of a crate with that of the baseline. Left to itself
 it builds both for each crate on its own, compiling the dependencies again for every one of the
@@ -21,11 +27,9 @@ Both sides are documented the same way, with the features cargo unifies for the 
 together. The documentation of the baseline is kept in `BASELINE_DOCS` (target/api-gate/baseline),
 which CI caches under the key `--baseline-key` prints (the baseline commit and the rustc version).
 
-The baseline is the tag of the release (`v0.4.0`) when the repository has it, and otherwise
-`BASELINE_COMMIT`. 0.4.0 is not published yet (no tag, not on crates.io) and the workspace on main
-is still at 0.4.0, so the 0.4.0 that will ship is main: the baseline is the commit of main the gate
-was merged on, and it moves to the tag `v0.4.0` once that is published. A crate the baseline does
-not have (one that joined after it) is not checked.
+The baseline is the tag of the release (`v0.4.0`) when the clone has it, and otherwise
+`BASELINE_COMMIT`, the commit of that tag. A crate the baseline does not have (one that joined after
+it) is not checked.
 
 The lints `constructible_struct_adds_field` and `repr_c_plain_struct_fields_reordered` are not
 counted for the virtual tables of the classes (`*VTable` structs, which `ferro_class!` writes):
@@ -51,14 +55,11 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# The release the gate compares with, and the commit of its sources. 0.4.0 is not published (no tag,
-# not on crates.io) and main is still at 0.4.0, so the baseline is the commit of main the gate is
-# merged onto (the merge of #362, 2026-10-29: main as the gate pull request last took it in; the
-# API of main before it is the API of 0.4.0); the tag v0.4.0 replaces it once the release is
-# published (baseline_rev). Updated by the release that starts the next minor version
-# (docs/release.md, "API stability").
+# The release the gate compares with, and the commit of its sources: the tag v0.4.0 (published
+# 2026-11-01). Updated by the release that starts the next minor version (docs/release.md,
+# "API stability").
 BASELINE_VERSION = "0.4.0"
-BASELINE_COMMIT = "12db0c25f40b054f99d5573a00ecdcd710fe9a20"
+BASELINE_COMMIT = "311b5d6ae60285dbbd970e55756fff25e9f64dd8"
 
 # Lints that are not counted for the virtual tables of the classes (`*VTable` structs written by
 # `ferro_class!`): a new virtual member adds a field to the table and may move the others.
@@ -238,7 +239,32 @@ def baseline_docs(rev, names):
     return docs
 
 
+def workspace_version():
+    """The version of `[workspace.package]` of the root manifest, read without cargo."""
+    with open(os.path.join(ROOT, "Cargo.toml"), encoding="utf-8") as file:
+        section = file.read().split("[workspace.package]", 1)[1].split("\n[", 1)[0]
+    return re.search(r'^version\s*=\s*"([^"]+)"', section, re.M).group(1)
+
+
+def is_next_minor_preview(version):
+    """Whether `version` is a preview of a minor version after the baseline's (0.5.0-preview.1 after
+    0.4.0), which may change any part of the API."""
+    core, _, pre = version.partition("-")
+    return bool(pre) and tuple(map(int, core.split(".")[:2])) > tuple(map(int, BASELINE_VERSION.split(".")[:2]))
+
+
 def main(argv):
+    version = workspace_version()
+    if "--applies" in argv:
+        print("false" if is_next_minor_preview(version) else "true")
+        return 0
+    if is_next_minor_preview(version):
+        print(
+            f"The workspace is at {version}, a preview of the minor version after {BASELINE_VERSION}: the "
+            "previews may change the API, so the gate compares nothing until that release moves the "
+            "baseline (docs/release.md, \"API stability\")."
+        )
+        return 0
     if "--baseline-key" in argv:
         print(re.sub(r"[^A-Za-z0-9.-]+", "_", f"api-gate-baseline-{baseline_rev()}-{rustc_version()}").strip("_"))
         return 0

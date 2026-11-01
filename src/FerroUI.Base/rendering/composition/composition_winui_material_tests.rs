@@ -276,9 +276,61 @@ fn scene_lighting_draws_the_light_of_the_lights_that_target_the_visual() {
     let light = s.compositor.create_ambient_light();
     light.targets().add((*sprite).clone());
     show(&s, &sprite);
+    // An ambient light is the same everywhere: a solid colour, no bitmap.
+    let entries = render_with_layers(&s, &sprite);
+    let full = format!("DrawRectangle {} none 0, 0, 100, 50", Color::from_rgb(255, 255, 255));
+    position_starting(&entries, &full);
+    assert!(!entries.iter().any(|entry| entry.starts_with("DrawBitmap")), "{entries:?}");
+    assert!(crate::rendering::composition::server::SCENE_LIGHTING_DISTANCE_UNIT > 1.0);
+
+    // A point light varies: the light map, sampled every second device
+    // pixel, drawn as a bitmap.
+    light.targets().remove_all();
+    let point = s.compositor.create_point_light();
+    point.set_offset(crate::Vector3D::new(50.0, 25.0, 100.0));
+    point.targets().add((*sprite).clone());
+    s.run_jobs();
     let entries = render_with_layers(&s, &sprite);
     position_starting(&entries, "DrawBitmap 1 0, 0, 50, 25 0, 0, 100, 50");
-    assert!(crate::rendering::composition::server::SCENE_LIGHTING_DISTANCE_UNIT > 1.0);
+}
+
+/// Renders the server side of `visual` on a recording drawing context that
+/// evaluates the lights itself, as a GPU backend does.
+fn render_with_gpu_effects(s: &CompositorCanvas, visual: &Rc<CompositionVisual>) -> Vec<String> {
+    let log = DrawingLog::new();
+    let mut context = MockDrawingContextImpl::new(log.clone());
+    context.supports_effects = true;
+    context.supports_layer_effects = true;
+    context.supports_gpu_effects = true;
+    s.server_object(visual.server()).render(&mut context, LtrbRect::INFINITE, None, true, false, false);
+    log.entries()
+}
+
+#[test]
+fn scene_lighting_moving_under_its_light_makes_no_bitmap_on_a_gpu_context() {
+    let s = CompositorCanvas::new();
+    let factory = s.compositor.create_effect_factory(SceneLightingEffect::default());
+    let brush = factory.create_brush();
+    let sprite = sprite_with(&s, brush.brush());
+    let point = s.compositor.create_point_light();
+    point.set_offset(crate::Vector3D::new(50.0, 25.0, 100.0));
+    point.targets().add((*sprite).clone());
+    show(&s, &sprite);
+
+    // The frames of a scroll: the lit visual moves, the light stays.
+    let bitmaps = s.render_interface.pixel_bitmap_count();
+    for frame in 0..10 {
+        sprite.set_offset(crate::Vector3D::new(0.0, -4.0 * frame as f64, 0.0));
+        s.run_jobs();
+        let before = s.render_interface.pixel_bitmap_count();
+        let entries = render_with_gpu_effects(&s, &sprite);
+        position_starting(&entries, "DrawLighting 0, 0, 100, 50 1");
+        assert!(!entries.iter().any(|entry| entry.starts_with("DrawBitmap")), "{entries:?}");
+        assert_eq!(before, s.render_interface.pixel_bitmap_count(), "frame {frame} made a bitmap");
+    }
+    // The frames of the compositor itself are drawn on the CPU-only mock:
+    // there the map is a new bitmap every frame.
+    assert!(s.render_interface.pixel_bitmap_count() > bitmaps);
 }
 
 // --- the backdrop ----------------------------------------------------------------------
