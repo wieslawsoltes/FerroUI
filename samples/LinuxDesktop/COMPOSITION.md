@@ -29,7 +29,7 @@ The shell launcher uses a GIO launch context with the child display. Directly sp
 | Presentation | The UI dispatcher coalesces commits. The renderer reports completion of the FerroUI composition batch to the protocol worker, which completes the matching Wayland frame callbacks. Skia Graphite on Vulkan is the default output renderer. `--software` selects raster explicitly. |
 | Shell | The wallpaper sits below the clients. The taskbar, Dock, menus, launcher and passive notification banners sit above them. Fullscreen clients use the whole output. Appearance changes keep the client connections and visual layer alive. |
 
-The input seat targets the topmost eligible client surface, including its popups and subsurfaces. Use **Alt+primary drag** to move and **Alt+secondary drag** to resize a client. The task overview exposes activate, close, minimize, maximize, restore, snap, fullscreen and workspace operations. **Super+1–9** switches to an existing workspace and **Super+Shift+1–9** moves the focused client. **Super+Left/Right**, **Super+Up/Down** and **Super+F** control snap, maximize/minimize and fullscreen. A windowed host may reserve system shortcuts. Its shell controls provide the same operations. With a child focused, its own shortcuts, including Ctrl+W, go to that application.
+The input seat targets the topmost eligible client surface, including its popups and subsurfaces. On a native Wayland host, the seat receives the parent’s current XKB map, layout group, modifier state and evdev codes. The X11-hosted preview uses the default evdev layout. Child applications exchange clipboard selections over the private display. Use **Alt+primary drag** to move and **Alt+secondary drag** to resize a client. The task overview exposes activate, close, minimize, maximize, restore, snap, fullscreen and workspace operations. **Super+1–9** switches to an existing workspace and **Super+Shift+1–9** moves the focused client. **Super+Left/Right**, **Super+Up/Down** and **Super+F** control snap, maximize/minimize and fullscreen. A windowed host may reserve system shortcuts. Its shell controls provide the same operations. With a child focused, its own shortcuts, including Ctrl+W, go to that application.
 
 ## WinUI appearance
 
@@ -39,7 +39,7 @@ Open Appearance in the Windows profile to select Light, Dark, High Contrast or C
 
 The child compositor exposes one logical output, native xdg-shell clients and shared-memory buffer import. Direct DMA-BUF import, DRM/KMS scanout, Xwayland, touch/tablet seats and a child screen-capture portal remain outside this mode. The Sway-managed login remains available for native multi-output management, Xwayland and portal integration. See [Wayland sessions](WAYLAND.md).
 
-Run the integrated compositor and login tests with a Graphite development build.
+The integration tests use Sway’s headless backend, GTK 3, PyQt5/Qt Wayland, Pillow, Weston clients, grim, wtype, jq, ImageMagick, a C compiler, libwayland development files and wayland-scanner. The pointer fixture uses the wlr protocol XML from the Cargo registry or the installed wlr-protocols package. Run the tests with a Graphite development build.
 
 ```sh
 samples/LinuxDesktop/build.sh build --profile dev
