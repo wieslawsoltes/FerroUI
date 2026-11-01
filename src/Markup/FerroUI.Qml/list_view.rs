@@ -107,6 +107,7 @@ impl Source {
 pub(super) struct State {
     source: Source,
     initialized: bool,
+    viewport: Option<(f64, f64)>,
     horizontal: bool,
     // Width/height deviations are retained independently of the live delegates.
     nominal: Option<f64>,
@@ -115,7 +116,48 @@ pub(super) struct State {
     current: i32,
     current_row: Option<Key>,
 }
+impl Instance {
+    /// Supply an arranged native viewport without replacing QML width or height bindings.
+    pub fn set_list_view_viewport(
+        &mut self,
+        id: ObjectId,
+        width: f64,
+        height: f64,
+    ) -> Result<(), Error> {
+        if !width.is_finite() || !height.is_finite() || width < 0. || height < 0. {
+            return Err(Error::new("invalid ListView viewport"));
+        }
+        let size = Some((width, height));
+        let old = self
+            .dynamic
+            .repeaters
+            .get(&id)
+            .filter(|s| s.list.is_some())
+            .ok_or_else(|| Error::new("not a live ListView"))?;
+        if old.list.as_ref().unwrap().viewport == size {
+            return Ok(());
+        }
+        self.transaction(|tx| {
+            let state = tx.model.dynamic.repeaters.get_mut(&id).unwrap();
+            tx.repeater_changes
+                .before
+                .entry(id)
+                .or_insert_with(|| state.clone());
+            state.list.as_mut().unwrap().viewport = size;
+            tx.repeater_changes.pending.insert(id);
+            Ok(())
+        })
+    }
+}
+
 impl State {
+    fn dimension(&self, model: &Instance, owner: ObjectId, axis: &str) -> f64 {
+        self.viewport.map_or_else(
+            || real(model, owner, axis).max(0.),
+            |(width, height)| if axis == "width" { width } else { height },
+        )
+    }
+
     pub(super) fn items(&self) -> impl Iterator<Item = ObjectId> + '_ {
         self.realized.values().map(|entry| entry.1)
     }
@@ -249,7 +291,7 @@ impl Transaction<'_> {
         } else {
             ("height", "contentY")
         };
-        let viewport = real(self.model, id, axis).max(0.);
+        let viewport = state.dimension(self.model, id, axis);
         let spacing = real(self.model, id, "spacing").max(0.);
         let offset = real(self.model, id, offset_axis);
         let count = state.source.len(self.model);
@@ -378,7 +420,7 @@ impl Transaction<'_> {
         } else {
             ("height", "width", "y", "contentY")
         };
-        let viewport = real(self.model, id, axis).max(0.);
+        let viewport = state.dimension(self.model, id, axis);
         let spacing = real(self.model, id, "spacing").max(0.);
         let cache = real(self.model, id, "cacheBuffer").max(0.);
         let mut offset = real(self.model, id, offset_prop);
@@ -506,7 +548,7 @@ impl Transaction<'_> {
             } else {
                 "contentWidth"
             },
-            Value::Number(real(self.model, id, cross).max(0.)),
+            Value::Number(state.dimension(self.model, id, cross)),
         )?;
         if previous != state.realized {
             // The revision slot is private. Resolve directly instead of via the public getter.

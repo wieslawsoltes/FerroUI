@@ -16,6 +16,7 @@ enum Kind {
     Item,
     Loader,
     Repeater,
+    ListView,
     Rectangle,
     Row,
     Column,
@@ -37,6 +38,7 @@ pub(super) fn register(registry: &mut ControlRegistry) -> Result<(), Error> {
                 ("Item", Item),
                 ("Loader", Loader),
                 ("Repeater", Repeater),
+                ("ListView", ListView),
                 ("Rectangle", Rectangle),
                 ("Row", Row),
                 ("Column", Column),
@@ -108,6 +110,7 @@ impl Kind {
             Self::Item => ty,
             Self::Loader => TypeDefinition::quick_loader(),
             Self::Repeater => TypeDefinition::quick_repeater(),
+            Self::ListView => TypeDefinition::quick_list_view(),
             Self::Rectangle => ty
                 .property("color", "color", Value::String("white".into()))
                 .property("border.color", "color", Value::String("black".into()))
@@ -129,6 +132,7 @@ impl Kind {
     fn create(self) -> Peer {
         match self {
             Self::Repeater => Peer::Repeater(Canvas::new()),
+            Self::ListView => Peer::ListView(super::list_view::Viewport::new()),
             Self::Item | Self::Loader => Peer::Canvas(super::anchors::AnchorCanvas::create()),
             Self::Row | Self::Column => {
                 let stack = super::positioner::Positioner::create(if matches!(self, Self::Row) {
@@ -166,6 +170,7 @@ impl Kind {
 }
 
 enum Peer {
+    ListView(super::list_view::Viewport),
     Repeater(Ref<Canvas>),
     Canvas(Ref<Canvas>),
     Stack(Ref<StackPanel>),
@@ -185,6 +190,7 @@ impl NativeObject for Peer {
     fn control(&self) -> Ref<Control> {
         match self {
             Self::Canvas(c) | Self::Repeater(c) => c.clone().upcast(),
+            Self::ListView(v) => v.control.clone().upcast(),
             Self::Stack(c) => c.clone().upcast(),
             Self::Flow(c) => c.clone().upcast(),
             Self::Rectangle { root, .. } => root.clone().upcast(),
@@ -214,6 +220,7 @@ impl NativeObject for Peer {
 
     fn content(&self) -> Option<(&str, Controls)> {
         let children = match self {
+            Self::ListView(v) => v.canvas.children(),
             Self::Canvas(c) => c.children(),
             Self::Stack(c) => c.children(),
             Self::Flow(c) => c.children(),
@@ -237,6 +244,9 @@ impl NativeObject for Peer {
                 Self::Text(_) | Self::Button(_) | Self::Input(_) | Self::CheckBox(_),
                 "font.pixelSize",
             ) => {
+                number(property, value)?;
+            }
+            (Self::ListView(_), "contentX" | "contentY" | "contentWidth" | "contentHeight") => {
                 number(property, value)?;
             }
             (Self::Rectangle { .. }, "color" | "border.color")
@@ -268,6 +278,9 @@ impl NativeObject for Peer {
             "opacity" => control.set_opacity(number(property, value)?.clamp(0.0, 1.0)),
             "clip" => control.set_clip_to_bounds(boolean(property, value)?),
             _ => match (self, property) {
+                (Self::ListView(v), "contentX" | "contentY" | "contentWidth" | "contentHeight") => {
+                    v.apply(property, number(property, value)?);
+                }
                 (Self::Rectangle { paint, .. }, "color") => {
                     paint.set_background(brush(property, value)?)
                 }
@@ -357,6 +370,7 @@ impl NativeObject for Peer {
             }));
         }
         match self {
+            Self::ListView(v) => subscriptions.push(v.connect(endpoint)),
             Self::Input(input) => subscriptions.push(input.property_changed(move |args| {
                 if args.is_effective_value_change()
                     && args.property() == TextBox::text_property().as_property()

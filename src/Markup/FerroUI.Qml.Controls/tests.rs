@@ -585,3 +585,50 @@ fn sibling_anchor_order_margins_and_failed_cycles_are_transactional() {
         (Rect::new(3., 52., 192., 42.), Rect::new(94., 33., 10., 6.))
     );
 }
+
+#[test]
+fn list_view_scrolls_million_row_native_canvas_from_both_sides() {
+    use ferroui_base::{layout::ILayoutManager, Vector};
+    use ferroui_controls::{ScrollViewer, Window};
+    let _scope = UnitTestApplication::start(TestServices::styled_window());
+    // Install the same native scroll presenter template that the test theme uses for lists.
+    ferroui_controls::testing::add_autocomplete_themes(
+        &ferroui_controls::Application::current().unwrap().styles(),
+    );
+    let view = mount(
+        r#"import QtQuick
+        ListView { width: 100; height: 60; cacheBuffer: 0; model: 1000000
+            delegate: Item { required property int index; width: 100; height: 20 }
+        }"#,
+    );
+    let id = view.root_id();
+    let scroll = view.root().cast::<ScrollViewer>().unwrap();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(view.root())));
+    window.show();
+    window.layout_manager().execute_initial_layout_pass();
+    assert_eq!(scroll.extent().height, 20_000_000.);
+    assert_eq!(scroll.viewport().height, 60.);
+
+    view.call(
+        id,
+        "positionViewAtIndex",
+        vec![Value::Number(500_000.), Value::Number(0.)],
+    )
+    .unwrap();
+    window.layout_manager().execute_layout_pass();
+    assert_eq!(scroll.offset().y, 10_000_000.);
+    let Value::Object(row) = view
+        .call(id, "itemAtIndex", vec![Value::Number(500_000.)])
+        .unwrap()
+    else {
+        panic!("visible delegate")
+    };
+    assert_eq!(view.control(row).unwrap().bounds().y, 10_000_000.);
+    scroll.set_offset(Vector::new(0., 40.));
+    window.layout_manager().execute_layout_pass();
+    assert_eq!(view.get(id, "contentY").unwrap(), Value::Number(40.));
+    assert!(view.control(row).is_none());
+    assert!(matches!(view.get(id,"data").unwrap(),Value::List(items) if items.len()<12));
+    window.close();
+}

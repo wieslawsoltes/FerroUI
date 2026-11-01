@@ -5,6 +5,7 @@
 //! handles back to the view, and dropping its last owner disconnects them.
 mod anchors;
 mod builtins;
+mod list_view;
 mod clock;
 mod composition;
 mod positioner;
