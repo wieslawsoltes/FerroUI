@@ -9,7 +9,7 @@ use ferroui_base::platform::PlatformGraphicsDeviceAdapterDescription;
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_opengl::egl::egl_consts::*;
 use ferroui_opengl::egl::{EglDisplay, EglDisplayOptions, EglInterface, EglSurface};
-use ferroui_opengl::{GlVersion, OpenGlException};
+use ferroui_opengl::{GlVersion, OpenGlError};
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -41,9 +41,9 @@ pub(crate) fn choose_adapter_index(
     adapters: &[PlatformGraphicsDeviceAdapterDescription],
     selection_callback: Option<&GraphicsAdapterSelectionCallback>,
     apply_arm_adreno_blacklist: bool,
-) -> Result<(usize, bool), OpenGlException> {
+) -> Result<(usize, bool), OpenGlError> {
     if adapters.is_empty() {
-        return Err(OpenGlException::new("No adapters found"));
+        return Err(OpenGlError::new("No adapters found"));
     }
 
     // The Adreno blacklist now only moves the *default* selection away
@@ -58,7 +58,7 @@ pub(crate) fn choose_adapter_index(
         chosen_adapter_index = usize::try_from(index)
             .ok()
             .filter(|index| *index < adapters.len())
-            .ok_or_else(|| OpenGlException::new(format!("The graphics adapter selection callback chose the adapter {index} of {}", adapters.len())))?;
+            .ok_or_else(|| OpenGlError::new(format!("The graphics adapter selection callback chose the adapter {index} of {}", adapters.len())))?;
     } else if apply_arm_adreno_blacklist && adapters.len() > 1 {
         let first_non_adreno =
             adapters.iter().position(|a| !a.description.as_deref().is_some_and(|description| description.contains("adreno")));
@@ -120,7 +120,7 @@ impl AngleWin32EglDisplay {
     }
 
     /// The display of ANGLE on Direct3D 9.
-    pub fn create_d3d9_display(egl: &Win32AngleEglInterface) -> Result<AngleWin32EglDisplay, OpenGlException> {
+    pub fn create_d3d9_display(egl: &Win32AngleEglInterface) -> Result<AngleWin32EglDisplay, OpenGlError> {
         let display = egl.egl().get_platform_display_ext(
             EGL_PLATFORM_ANGLE_ANGLE,
             0,
@@ -132,7 +132,7 @@ impl AngleWin32EglDisplay {
 
     /// The display of ANGLE on Direct3D 11, with the device ANGLE creates
     /// and shares between its displays.
-    pub fn create_shared_d3d11_display(egl: &Win32AngleEglInterface) -> Result<AngleWin32EglDisplay, OpenGlException> {
+    pub fn create_shared_d3d11_display(egl: &Win32AngleEglInterface) -> Result<AngleWin32EglDisplay, OpenGlError> {
         let display = egl.egl().get_platform_display_ext(
             EGL_PLATFORM_ANGLE_ANGLE,
             0,
@@ -151,7 +151,7 @@ impl AngleWin32EglDisplay {
         egl: &Rc<Win32AngleEglInterface>,
         gl_versions: Option<Vec<GlVersion>>,
         adapter: &D3D11Adapter,
-    ) -> Result<(AngleWin32EglDisplay, Option<u64>), OpenGlException> {
+    ) -> Result<(AngleWin32EglDisplay, Option<u64>), OpenGlError> {
         use crate::direct_x::{DirectXUnmanagedMethods, IDXGIAdapter1, D3D_DRIVER_TYPE, D3D_FEATURE_LEVEL};
         use ferroui_base::logging::{LogEventLevel, Logger};
         use ferroui_microcom::ComPtr;
@@ -168,7 +168,7 @@ impl AngleWin32EglDisplay {
         ];
 
         let factory = DirectXUnmanagedMethods::create_dxgi_factory1()
-            .map_err(|error| OpenGlException::new(format!("CreateDXGIFactory1 failed: {error}")))?;
+            .map_err(|error| OpenGlError::new(format!("CreateDXGIFactory1 failed: {error}")))?;
         let mut chosen_adapter: Option<ComPtr<IDXGIAdapter1>> = None;
         let mut chosen_luid = None;
         if let Some(factory) = factory {
@@ -185,13 +185,13 @@ impl AngleWin32EglDisplay {
                 // reference to an adapter this call owns.
                 unsafe { ComPtr::from_raw(p_adapter.cast()) }
             };
-            let enumerate = || -> Result<Vec<(ComPtr<IDXGIAdapter1>, PlatformGraphicsDeviceAdapterDescription, u64)>, OpenGlException> {
+            let enumerate = || -> Result<Vec<(ComPtr<IDXGIAdapter1>, PlatformGraphicsDeviceAdapterDescription, u64)>, OpenGlError> {
                 let mut adapters = Vec::new();
                 let mut adapter_index = 0u32;
                 while let Some(adapter) = adapter_at(adapter_index) {
                     let desc = adapter
                         .get_desc1()
-                        .map_err(|error| OpenGlException::new(format!("IDXGIAdapter1::GetDesc1 failed: {error}")))?;
+                        .map_err(|error| OpenGlError::new(format!("IDXGIAdapter1::GetDesc1 failed: {error}")))?;
                     let length = desc.description.iter().position(|c| *c == 0).unwrap_or(desc.description.len());
                     let name = String::from_utf16_lossy(&desc.description[..length]).to_lowercase();
                     let luid = desc.adapter_luid.to_le_bytes().to_vec();
@@ -239,7 +239,7 @@ impl AngleWin32EglDisplay {
                         chosen_adapter = Some(adapter);
                         chosen_luid = Some(luid);
                     } else {
-                        chosen_adapter = Some(adapter_at(0).ok_or_else(|| OpenGlException::new("No adapters found"))?);
+                        chosen_adapter = Some(adapter_at(0).ok_or_else(|| OpenGlError::new("No adapters found"))?);
                     }
                 }
                 D3D11Adapter::Chosen(Some(luid)) => {
@@ -247,7 +247,7 @@ impl AngleWin32EglDisplay {
                     // gone (an adapter that was removed).
                     let mut adapters = enumerate()?;
                     if adapters.is_empty() {
-                        return Err(OpenGlException::new("No adapters found"));
+                        return Err(OpenGlError::new("No adapters found"));
                     }
                     let index = adapters.iter().position(|a| a.2 == *luid).unwrap_or(0);
                     let (adapter, _, luid) = adapters.swap_remove(index);
@@ -255,7 +255,7 @@ impl AngleWin32EglDisplay {
                     chosen_luid = Some(luid);
                 }
                 D3D11Adapter::Chosen(None) => {
-                    chosen_adapter = Some(adapter_at(0).ok_or_else(|| OpenGlException::new("No adapters found"))?);
+                    chosen_adapter = Some(adapter_at(0).ok_or_else(|| OpenGlError::new("No adapters found"))?);
                 }
             }
         }
@@ -267,11 +267,11 @@ impl AngleWin32EglDisplay {
             &feature_levels,
             7,
         )
-        .map_err(|error| OpenGlException::new(format!("D3D11CreateDevice failed: {error}")))?;
+        .map_err(|error| OpenGlError::new(format!("D3D11CreateDevice failed: {error}")))?;
         drop(chosen_adapter);
 
         let Some(d3d_device) = d3d_device else {
-            return Err(OpenGlException::new("Unable to create D3D11 Device"));
+            return Err(OpenGlError::new("Unable to create D3D11 Device"));
         };
         let p_d3d_device = d3d_device.as_ptr() as isize;
 
@@ -295,12 +295,12 @@ impl AngleWin32EglDisplay {
         let result = (|| {
             angle_device.set(egl.create_device_angle(EGL_D3D11_DEVICE_ANGLE, p_d3d_device, None));
             if angle_device.get() == 0 {
-                return Err(OpenGlException::get_formatted_exception_for_egl("eglCreateDeviceANGLE", egl.egl()));
+                return Err(OpenGlError::get_formatted_exception_for_egl("eglCreateDeviceANGLE", egl.egl()));
             }
 
             display = egl.egl().get_platform_display_ext(EGL_PLATFORM_DEVICE_EXT, angle_device.get(), None);
             if display == 0 {
-                return Err(OpenGlException::get_formatted_exception_for_egl("eglGetPlatformDisplayEXT", egl.egl()));
+                return Err(OpenGlError::get_formatted_exception_for_egl("eglGetPlatformDisplayEXT", egl.egl()));
             }
 
             let device_lost_check: Rc<dyn Fn() -> bool> = Rc::new(move || d3d_device.get_device_removed_reason() != 0);
@@ -336,9 +336,9 @@ impl AngleWin32EglDisplay {
         egl: &Rc<EglInterface>,
         options: EglDisplayOptions,
         platform_api: PlatformApi,
-    ) -> Result<AngleWin32EglDisplay, OpenGlException> {
+    ) -> Result<AngleWin32EglDisplay, OpenGlError> {
         if display == 0 {
-            return Err(OpenGlException::get_formatted_exception_for_egl("eglGetPlatformDisplayEXT", egl));
+            return Err(OpenGlError::get_formatted_exception_for_egl("eglGetPlatformDisplayEXT", egl));
         }
         let display = EglDisplay::new(display, options)?;
         let extensions = egl.query_string(display.handle(), EGL_EXTENSIONS);
@@ -358,13 +358,13 @@ impl AngleWin32EglDisplay {
 
     /// The device of Direct3D the display renders with: a pointer to its
     /// `IDirect3DDevice9` or `ID3D11Device`, which the display owns.
-    pub fn get_direct3d_device(&self) -> Result<isize, OpenGlException> {
+    pub fn get_direct3d_device(&self) -> Result<isize, OpenGlError> {
         let egl = self.display.egl_interface();
         let mut egl_device = 0;
         if !egl.is_query_display_attrib_ext_available()
             || !egl.query_display_attrib_ext(self.display.handle(), EGL_DEVICE_EXT, &mut egl_device)
         {
-            return Err(OpenGlException::new("Unable to get EGL_DEVICE_EXT"));
+            return Err(OpenGlError::new("Unable to get EGL_DEVICE_EXT"));
         }
         let mut d3d_device_handle = 0;
         if !egl.is_query_device_attrib_ext_available()
@@ -374,7 +374,7 @@ impl AngleWin32EglDisplay {
                 &mut d3d_device_handle,
             )
         {
-            return Err(OpenGlException::new("Unable to get EGL_D3D9_DEVICE_ANGLE"));
+            return Err(OpenGlError::new("Unable to get EGL_D3D9_DEVICE_ANGLE"));
         }
         Ok(d3d_device_handle)
     }
@@ -384,7 +384,7 @@ impl AngleWin32EglDisplay {
     ///
     /// # Panics
     /// Panics when the display is not a display on Direct3D 11.
-    pub fn wrap_direct3d11_texture(&self, handle: isize) -> Result<Rc<EglSurface>, OpenGlException> {
+    pub fn wrap_direct3d11_texture(&self, handle: isize) -> Result<Rc<EglSurface>, OpenGlError> {
         if self.platform_api != PlatformApi::DirectX11 {
             self.throw_invalid_platform_api();
         }
@@ -402,7 +402,7 @@ impl AngleWin32EglDisplay {
         offset_y: i32,
         width: i32,
         height: i32,
-    ) -> Result<Rc<EglSurface>, OpenGlException> {
+    ) -> Result<Rc<EglSurface>, OpenGlError> {
         if self.platform_api != PlatformApi::DirectX11 {
             self.throw_invalid_platform_api();
         }
@@ -734,7 +734,7 @@ pub(crate) mod tests {
         assert_eq!(Ok((0, false)), choose_adapter_index(&adapters, None, false));
         assert_eq!(Ok((0, false)), choose_adapter_index(&adapters, None, true));
         assert_eq!(
-            Err(OpenGlException::new("No adapters found")),
+            Err(OpenGlError::new("No adapters found")),
             choose_adapter_index(&[], None, true)
         );
     }

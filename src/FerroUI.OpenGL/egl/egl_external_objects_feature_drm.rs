@@ -5,7 +5,7 @@ use super::egl_consts::*;
 use super::egl_external_objects_feature::EglExternalObjectsFeature;
 use super::{EglContext, EglImage};
 use crate::gl_consts::*;
-use crate::{IGlContext, IGlExternalImageTexture, OpenGlException};
+use crate::{IGlContext, IGlExternalImageTexture, OpenGlError};
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::platform::{
     IPlatformGraphicsContext, IPlatformHandle, PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageDmaBufProperties,
@@ -43,8 +43,8 @@ impl DmaBufImport {
 
 /// The failure of an attribute of a plane the extension has no name for
 /// (`ArgumentOutOfRangeException(nameof(plane))`).
-fn plane_out_of_range() -> OpenGlException {
-    OpenGlException::new("Specified argument was out of the range of valid values. (Parameter 'plane')")
+fn plane_out_of_range() -> OpenGlError {
+    OpenGlError::new("Specified argument was out of the range of valid values. (Parameter 'plane')")
 }
 
 fn log_error(message: &str) {
@@ -192,17 +192,17 @@ impl EglExternalObjectsFeature {
         &self,
         handle: Rc<dyn IPlatformHandle>,
         properties: PlatformGraphicsExternalImageProperties,
-    ) -> Result<Rc<dyn IGlExternalImageTexture>, OpenGlException> {
+    ) -> Result<Rc<dyn IGlExternalImageTexture>, OpenGlError> {
         if !self.drm.dma_buf_supported {
             return Err(Self::not_supported(&*handle));
         }
 
         let Some(dma_buf) = properties.dma_buf_properties.clone() else {
-            return Err(OpenGlException::new("DmaBufProperties must be set for dma-buf imports"));
+            return Err(OpenGlError::new("DmaBufProperties must be set for dma-buf imports"));
         };
 
         let Some(context) = self.context.upgrade() else {
-            return Err(OpenGlException::new("Cannot access a disposed object. Object name: 'EglContext'."));
+            return Err(OpenGlError::new("Cannot access a disposed object. Object name: 'EglContext'."));
         };
 
         let plane_count = if dma_buf.plane_count > 0 { dma_buf.plane_count } else { 1 };
@@ -256,7 +256,7 @@ impl EglExternalObjectsFeature {
         lock.dispose();
 
         if image_handle == 0 {
-            return Err(OpenGlException::new("eglCreateImageKHR failed to import the dma-buf"));
+            return Err(OpenGlError::new("eglCreateImageKHR failed to import the dma-buf"));
         }
 
         let egl_image = EglImage::new(display, image_handle);
@@ -269,14 +269,14 @@ impl EglExternalObjectsFeature {
             // Calling an entry point the context lacks is an exception of the original,
             // which is caught below like any other.
             if !gl.is_egl_image_target_texture_2d_oes_available() {
-                return Err(OpenGlException::new("Unable to find an entry point named 'glEGLImageTargetTexture2DOES'."));
+                return Err(OpenGlError::new("Unable to find an entry point named 'glEGLImageTargetTexture2DOES'."));
             }
             // SAFETY: the image is one `eglCreateImageKHR` has just returned for the display
             // of the context, and it is alive: it is destroyed below or by the texture.
             unsafe { gl.egl_image_target_texture_2d_oes(GL_TEXTURE_2D, egl_image.handle() as *mut c_void) };
             let err = gl.get_error();
             if err != 0 {
-                return Err(OpenGlException::get_formatted_exception_for_code("glEGLImageTargetTexture2DOES", err));
+                return Err(OpenGlError::get_formatted_exception_for_code("glEGLImageTargetTexture2DOES", err));
             }
 
             // The imported texture has no mip levels; ensure it is sampling-complete.
@@ -300,7 +300,7 @@ impl EglExternalObjectsFeature {
         }))
     }
 
-    fn plane_fd_attrib(plane: i32) -> Result<i32, OpenGlException> {
+    fn plane_fd_attrib(plane: i32) -> Result<i32, OpenGlError> {
         match plane {
             0 => Ok(EGL_DMA_BUF_PLANE0_FD_EXT),
             1 => Ok(EGL_DMA_BUF_PLANE1_FD_EXT),
@@ -310,7 +310,7 @@ impl EglExternalObjectsFeature {
         }
     }
 
-    fn plane_offset_attrib(plane: i32) -> Result<i32, OpenGlException> {
+    fn plane_offset_attrib(plane: i32) -> Result<i32, OpenGlError> {
         match plane {
             0 => Ok(EGL_DMA_BUF_PLANE0_OFFSET_EXT),
             1 => Ok(EGL_DMA_BUF_PLANE1_OFFSET_EXT),
@@ -320,7 +320,7 @@ impl EglExternalObjectsFeature {
         }
     }
 
-    fn plane_pitch_attrib(plane: i32) -> Result<i32, OpenGlException> {
+    fn plane_pitch_attrib(plane: i32) -> Result<i32, OpenGlError> {
         match plane {
             0 => Ok(EGL_DMA_BUF_PLANE0_PITCH_EXT),
             1 => Ok(EGL_DMA_BUF_PLANE1_PITCH_EXT),
@@ -330,7 +330,7 @@ impl EglExternalObjectsFeature {
         }
     }
 
-    fn plane_modifier_lo_attrib(plane: i32) -> Result<i32, OpenGlException> {
+    fn plane_modifier_lo_attrib(plane: i32) -> Result<i32, OpenGlError> {
         match plane {
             0 => Ok(EGL_DMA_BUF_PLANE0_MODIFIER_LO_EXT),
             1 => Ok(EGL_DMA_BUF_PLANE1_MODIFIER_LO_EXT),
@@ -340,7 +340,7 @@ impl EglExternalObjectsFeature {
         }
     }
 
-    fn plane_modifier_hi_attrib(plane: i32) -> Result<i32, OpenGlException> {
+    fn plane_modifier_hi_attrib(plane: i32) -> Result<i32, OpenGlError> {
         match plane {
             0 => Ok(EGL_DMA_BUF_PLANE0_MODIFIER_HI_EXT),
             1 => Ok(EGL_DMA_BUF_PLANE1_MODIFIER_HI_EXT),
@@ -704,7 +704,7 @@ mod tests {
         }
     }
 
-    fn message<T>(result: Result<T, OpenGlException>) -> String {
+    fn message<T>(result: Result<T, OpenGlError>) -> String {
         match result {
             Ok(_) => panic!("the call was expected to fail"),
             Err(error) => error.message().to_string(),

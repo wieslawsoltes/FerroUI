@@ -35,7 +35,7 @@ use super::wayland_dispatch_priority::WaylandDispatchPriority;
 use super::wayland_platform_graphics::WaylandPlatformGraphics;
 use super::wayland_worker_render_timer::{RenderLoopImpl, WaylandRenderTimer};
 use crate::screens::i_wayland_outputs_sink::WaylandOutputsSinkProxy;
-use crate::ferro_wayland_exception::FerroWaylandException;
+use crate::ferro_wayland_exception::FerroWaylandError;
 use crate::wayland_platform_options::WaylandWorkerOptions;
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::platform::RenderTargetSceneInfo;
@@ -98,9 +98,9 @@ pub struct WaylandWorker {
 }
 
 impl WaylandWorker {
-    pub fn new() -> Result<Arc<Self>, FerroWaylandException> {
+    pub fn new() -> Result<Arc<Self>, FerroWaylandError> {
         let wakeup_fd = Arc::new(
-            WakeupFd::new().map_err(|error| FerroWaylandException::with_inner("Unable to create the wake-up pipe", error))?,
+            WakeupFd::new().map_err(|error| FerroWaylandError::with_inner("Unable to create the wake-up pipe", error))?,
         );
         Ok(Arc::new_cyclic(|this: &std::sync::Weak<WaylandWorker>| {
             let wake: Arc<dyn Fn() + Send + Sync> = {
@@ -204,7 +204,7 @@ impl WaylandWorker {
     }
 
     /// Connects to the display of the options. A failure is logged.
-    pub fn probe(options: &WaylandWorkerOptions) -> Result<Connection, FerroWaylandException> {
+    pub fn probe(options: &WaylandWorkerOptions) -> Result<Connection, FerroWaylandError> {
         let connected = match options.display_fd {
             Some(fd) => WaylandConnection::connect_to_fd(fd),
             None => WaylandConnection::connect(options.wl_display_name.as_deref()),
@@ -232,8 +232,8 @@ impl WaylandWorker {
         options: WaylandWorkerOptions,
         probed_connection: Connection,
         outputs_sink: Option<WaylandOutputsSinkProxy>,
-        init: Sender<Option<FerroWaylandException>>,
-    ) -> Result<(), FerroWaylandException> {
+        init: Sender<Option<FerroWaylandError>>,
+    ) -> Result<(), FerroWaylandError> {
         self.start_core(options, outputs_sink, move |worker| worker.run(probed_connection, Some(init)))
     }
 
@@ -249,12 +249,12 @@ impl WaylandWorker {
         options: WaylandWorkerOptions,
         foreign_display: Connection,
         outputs_sink: Option<WaylandOutputsSinkProxy>,
-    ) -> Result<(), FerroWaylandException> {
+    ) -> Result<(), FerroWaylandError> {
         self.start_core(options, outputs_sink, move |worker| {
             let connection = WaylandConnection::from_foreign_display(foreign_display);
             match worker.run_connection(connection, &mut None) {
                 // This is fatal
-                Ok(()) => Self::fatal(&FerroWaylandException::new("Connection lost")),
+                Ok(()) => Self::fatal(&FerroWaylandError::new("Connection lost")),
                 Err(error) => Self::fatal(&error),
             }
         })
@@ -266,7 +266,7 @@ impl WaylandWorker {
         options: WaylandWorkerOptions,
         outputs_sink: Option<WaylandOutputsSinkProxy>,
         run: impl FnOnce(&Arc<Self>) + Send + 'static,
-    ) -> Result<(), FerroWaylandException> {
+    ) -> Result<(), FerroWaylandError> {
         let worker = self.clone();
         std::thread::Builder::new()
             .name(THREAD_NAME.to_string())
@@ -289,18 +289,18 @@ impl WaylandWorker {
                 WORKER_THREAD.with(|cell| cell.borrow_mut().take());
             })
             .map(|_| ())
-            .map_err(|error| FerroWaylandException::with_inner("Unable to start the Wayland worker thread", error))
+            .map_err(|error| FerroWaylandError::with_inner("Unable to start the Wayland worker thread", error))
     }
 
     fn verify_access(&self) {
         if *self.thread.lock().unwrap_or_else(PoisonError::into_inner) != Some(std::thread::current().id()) {
-            FerroWaylandException::new("Call from invalid thread").throw();
+            FerroWaylandError::new("Call from invalid thread").throw();
         }
     }
 
     /// The connection is gone and cannot be made again: the reference lets the exception end
     /// the process. So does the port, after it said why.
-    fn fatal(error: &FerroWaylandException) -> ! {
+    fn fatal(error: &FerroWaylandError) -> ! {
         if let Some(logger) = Logger::try_get(LogEventLevel::Fatal, "Wayland") {
             logger.log_with_values(None, "The Wayland worker cannot go on: {Error}", &[error]);
         }
@@ -308,7 +308,7 @@ impl WaylandWorker {
         std::process::abort();
     }
 
-    fn run(self: &Arc<Self>, probed_connection: Connection, mut init: Option<Sender<Option<FerroWaylandException>>>) {
+    fn run(self: &Arc<Self>, probed_connection: Connection, mut init: Option<Sender<Option<FerroWaylandError>>>) {
         let reconnects_disabled =
             with_worker_thread(|worker| worker.state.options.reconnects_disabled()).unwrap_or(true);
         let mut display = probed_connection;
@@ -339,7 +339,7 @@ impl WaylandWorker {
                 logger.log(None, "Wayland connection lost");
             }
             if reconnects_disabled {
-                Self::fatal(&FerroWaylandException::new("Connection lost"));
+                Self::fatal(&FerroWaylandError::new("Connection lost"));
             }
 
             display = loop {
@@ -367,8 +367,8 @@ impl WaylandWorker {
     fn run_connection(
         self: &Arc<Self>,
         mut connection: WaylandConnection,
-        init: &mut Option<Sender<Option<FerroWaylandException>>>,
-    ) -> Result<(), FerroWaylandException> {
+        init: &mut Option<Sender<Option<FerroWaylandError>>>,
+    ) -> Result<(), FerroWaylandError> {
         self.verify_access();
         let connected = with_worker_thread(|worker| {
             let created = WaylandGlobals::create(&mut connection, &mut worker.state);
@@ -378,7 +378,7 @@ impl WaylandWorker {
         match connected {
             Some(Ok(())) => {}
             Some(Err(error)) => return Err(error),
-            None => return Err(FerroWaylandException::new("The worker thread has no state")),
+            None => return Err(FerroWaylandError::new("The worker thread has no state")),
         }
 
         // Globals are fully constructed (required globals bound, sanity checks passed),

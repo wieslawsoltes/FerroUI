@@ -7,7 +7,7 @@
 
 use crate::server::persistent::w_surface::WlSurfaceData;
 use crate::server::wayland_worker::WaylandWorkerState;
-use crate::ferro_wayland_exception::FerroWaylandException;
+use crate::ferro_wayland_exception::FerroWaylandError;
 use ferroui_base::input::StandardCursorType;
 use std::collections::HashMap;
 use wayland_client::protocol::wl_compositor::WlCompositor;
@@ -92,9 +92,9 @@ impl WaylandCursorManager {
         shm: &WlShm,
         compositor: &WlCompositor,
         queue_handle: &QueueHandle<WaylandWorkerState>,
-    ) -> Result<Self, FerroWaylandException> {
+    ) -> Result<Self, FerroWaylandError> {
         let mut theme = CursorTheme::load_from_name(display, shm.clone(), "default", 24)
-            .map_err(|_| FerroWaylandException::new("Failed to load default cursor theme"))?;
+            .map_err(|_| FerroWaylandError::new("Failed to load default cursor theme"))?;
         let mut cursors = HashMap::new();
         for cursor_type in CURSOR_TYPES {
             cursors.insert(cursor_type, Self::load_cursor(&mut theme, compositor, queue_handle, cursor_type));

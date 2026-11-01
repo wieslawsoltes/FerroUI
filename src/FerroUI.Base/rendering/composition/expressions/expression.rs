@@ -9,7 +9,7 @@ use std::collections::HashSet;
 use std::fmt;
 
 use super::expression_evaluation_context::ExpressionEvaluationContext;
-use super::expression_parse_exception::ExpressionParseException;
+use super::expression_parse_exception::ExpressionParseError;
 use super::expression_parser::ExpressionParser;
 use super::expression_variant::ExpressionVariant;
 use crate::numerics::InvariantF32;
@@ -43,7 +43,7 @@ impl Expression {
     }
 
     /// Parses an expression.
-    pub fn parse(expression: &str) -> Result<Expression, ExpressionParseException> {
+    pub fn parse(expression: &str) -> Result<Expression, ExpressionParseError> {
         ExpressionParser::parse(expression)
     }
 

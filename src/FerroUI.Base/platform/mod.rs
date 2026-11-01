@@ -45,8 +45,10 @@ pub use i_external_objects_render_interface_context_feature::{
     IPlatformRenderInterfaceImportedSemaphore,
 };
 pub use i_platform_gpu::{
-    IPlatformGraphics, IPlatformGraphicsContext, IPlatformGraphicsReadyStateFeature, PlatformGraphicsContextLostException,
+    IPlatformGraphics, IPlatformGraphicsContext, IPlatformGraphicsReadyStateFeature, PlatformGraphicsContextLostError,
 };
+#[allow(deprecated)]
+pub use i_platform_gpu::PlatformGraphicsContextLostException;
 pub use platform_graphics_external_memory::{
     KnownPlatformGraphicsExternalImageHandleTypes, KnownPlatformGraphicsExternalSemaphoreHandleTypes,
     PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageDmaBufProperties, PlatformGraphicsExternalImageFormat,

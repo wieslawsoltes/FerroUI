@@ -269,17 +269,25 @@ fn selected_date_null_should_use_placeholders() {
 /// tests throw. A panic payload has to be `Send`, which the error type of
 /// the framework (it holds shared error data) is not.
 #[derive(Debug)]
-struct ThrownDataValidationException {
+struct ThrownDataValidationError {
     message: String,
 }
+
+impl std::fmt::Display for ThrownDataValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.message)
+    }
+}
+
+impl std::error::Error for ThrownDataValidationError {}
 
 /// Runs `action` and returns the data validation failure it fails with.
 /// Fails when `action` completes or fails with anything else, as the
 /// `Assert.Throws<DataValidationException>` of the reference tests does.
-fn assert_throws_data_validation_exception(action: impl FnOnce()) -> ThrownDataValidationException {
+fn assert_throws_data_validation_exception(action: impl FnOnce()) -> ThrownDataValidationError {
     match catch_unwind(AssertUnwindSafe(action)) {
         Ok(()) => panic!("expected a data validation failure"),
-        Err(payload) => match payload.downcast::<ThrownDataValidationException>() {
+        Err(payload) => match payload.downcast::<ThrownDataValidationError>() {
             Ok(exception) => *exception,
             Err(payload) => std::panic::resume_unwind(payload),
         },
@@ -308,12 +316,12 @@ fn selected_date_enable_data_validation() {
         let max_date_time = date(2010, 1, 1);
 
         if e.new_date().is_some_and(|new_date| new_date < min_date_time) {
-            std::panic::panic_any(ThrownDataValidationException {
+            std::panic::panic_any(ThrownDataValidationError {
                 message: format!("dateTime is less than {min_date_time}"),
             });
         }
         if e.new_date().is_some_and(|new_date| new_date > max_date_time) {
-            std::panic::panic_any(ThrownDataValidationException { message: format!("dateTime is over {max_date_time}") });
+            std::panic::panic_any(ThrownDataValidationError { message: format!("dateTime is over {max_date_time}") });
         }
 
         flag.set(true);

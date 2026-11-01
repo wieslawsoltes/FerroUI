@@ -3,7 +3,7 @@ use crate::data::core::{ValueType, WeakValue};
 use crate::data::model::ModelTypes;
 use crate::data::{
     AggregateException, BindingError, BindingErrorType, BindingNotification, BindingPriority,
-    DataValidationException,
+    DataValidationError,
 };
 use crate::reactive::IDisposable;
 use crate::BoxedValue;
@@ -84,10 +84,10 @@ impl Validator {
 
 fn generate_exception(mut errors: Vec<BoxedValue>) -> BindingError {
     if errors.len() == 1 {
-        BindingError::new(DataValidationException::new(errors.pop()))
+        BindingError::new(DataValidationError::new(errors.pop()))
     } else {
         BindingError::new(AggregateException::new(
-            errors.into_iter().map(|e| DataValidationException::new(Some(e))).collect(),
+            errors.into_iter().map(|e| DataValidationError::new(Some(e))).collect(),
         ))
     }
 }

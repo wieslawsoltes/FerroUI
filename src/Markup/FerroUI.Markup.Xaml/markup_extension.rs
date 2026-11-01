@@ -1,6 +1,6 @@
 //! Port of `MarkupExtension.cs`.
 
-use crate::XamlLoadException;
+use crate::XamlLoadError;
 use ferroui_base::metadata::IServiceProvider;
 use ferroui_base::{ferro_markup_type, BoxedValue};
 use std::rc::Rc;
@@ -13,7 +13,7 @@ use std::rc::Rc;
 /// abstract base class.
 pub trait MarkupExtension {
     /// Returns the object to set on the target property. Null is `None`.
-    fn provide_value(&self, service_provider: &Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadException>;
+    fn provide_value(&self, service_provider: &Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadError>;
 }
 
 /// Markup extension handles compare by identity, so that they can be held

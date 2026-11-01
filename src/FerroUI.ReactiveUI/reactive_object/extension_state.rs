@@ -2,7 +2,7 @@
 
 use super::delayable_notification_signal::DelayableNotificationSignal;
 use super::IExtensionState;
-use crate::internal::PanicException;
+use crate::internal::PanicError;
 use crate::{RxState, ScheduledSubject};
 use ferroui_reactive::concurrency::ImmediateScheduler;
 use ferroui_reactive::disposables::Disposable;
@@ -147,7 +147,7 @@ impl ExtensionState {
     /// Sends `item` to a subject of the observables, routing a panic of a subscriber to
     /// `thrown_exceptions` once it exists and propagating it otherwise (`NotifyObservable`).
     fn notify_observable(&self, item: Rc<str>, subject: NameSignal) {
-        let Err((error, payload)) = PanicException::catch(move || subject.on_next(item)) else {
+        let Err((error, payload)) = PanicError::catch(move || subject.on_next(item)) else {
             return;
         };
         log_subscriber_exception(self.sender_type.get(), &error);

@@ -71,12 +71,21 @@ pub trait IPlatformGraphicsContext: IOptionalFeatureProvider {
 
 /// The graphics context a GPU object belongs to was lost.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct PlatformGraphicsContextLostException;
+pub struct PlatformGraphicsContextLostError;
 
-impl std::fmt::Display for PlatformGraphicsContextLostException {
+/// The name of [`PlatformGraphicsContextLostError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `PlatformGraphicsContextLostError`")]
+pub type PlatformGraphicsContextLostException = PlatformGraphicsContextLostError;
+
+/// The value of the unit struct [`PlatformGraphicsContextLostError`] under its name before 0.5.
+#[deprecated(since = "0.5.0", note = "use `PlatformGraphicsContextLostError`")]
+#[allow(non_upper_case_globals)]
+pub const PlatformGraphicsContextLostException: PlatformGraphicsContextLostError = PlatformGraphicsContextLostError;
+
+impl std::fmt::Display for PlatformGraphicsContextLostError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("The platform graphics context was lost.")
     }
 }
 
-impl std::error::Error for PlatformGraphicsContextLostException {}
+impl std::error::Error for PlatformGraphicsContextLostError {}

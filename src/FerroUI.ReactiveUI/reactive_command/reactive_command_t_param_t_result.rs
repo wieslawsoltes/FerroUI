@@ -17,7 +17,7 @@ use super::reactive_command_base::{icommand_execute, ReactiveCommandBase};
 use super::{IReactiveCommand, IReactiveCommandOf};
 use crate::internal::scheduler_extensions::SchedulerExtensions;
 use crate::primitives::broadcaster::Broadcaster;
-use crate::{IHandleObservableErrors, PanicException, RxSchedulers, RxState};
+use crate::{IHandleObservableErrors, PanicError, RxSchedulers, RxState};
 use ferroui_reactive::concurrency::IScheduler;
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::linq::Observable;
@@ -506,7 +506,7 @@ impl<P: Clone + 'static, R: Clone + 'static> Execution<P, R> {
         notify_begin(&self.owner);
         // `try { _outer = _execute(parameter).Subscribe(this); } catch (Exception ex)`: the
         // function of the command fails with an `Err`, or panics.
-        let source = match PanicException::catch(|| (self.owner.execute)(parameter)) {
+        let source = match PanicError::catch(|| (self.owner.execute)(parameter)) {
             Ok(source) => source,
             Err((error, _)) => Err(error),
         };

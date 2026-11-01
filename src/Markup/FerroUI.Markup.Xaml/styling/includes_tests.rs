@@ -6,7 +6,7 @@ use super::*;
 use crate::test_support::{boxed, uri, TestAssetLoader, TestServiceProvider};
 use crate::{
     register_types, FerroXamlLoader, IRuntimeXamlLoader, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
-    ServiceProviderExtensions, XamlLoadException, XamlResourceNode,
+    ServiceProviderExtensions, XamlLoadError, XamlResourceNode,
 };
 use ferroui_base::controls::{
     IResourceNode, IResourceProvider, IThemeVariantProvider, ResourceDictionary, ResourceHostRef, ResourceKey,
@@ -32,7 +32,7 @@ ferroui_base::ferro_thread_local! {
     static REENTRANT: RefCell<Option<Rc<ResourceInclude>>> = const { RefCell::new(None) };
 }
 
-fn compiled_resources(sp: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadException> {
+fn compiled_resources(sp: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadError> {
     LOADS.with(|loads| loads.set(loads.get() + 1));
     SEEN_PROVIDER.with(|seen| seen.set(sp.is_some()));
     let Some(name) = uri.strip_prefix("ferres://includes.resources/") else {
@@ -46,7 +46,7 @@ fn compiled_resources(sp: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Resul
     Ok(Some(boxed(dictionary)))
 }
 
-fn compiled_styles(_sp: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadException> {
+fn compiled_styles(_sp: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadError> {
     Ok(match uri {
         "ferres://includes.styles/Style.xaml" => {
             let style = Style::new();
@@ -59,7 +59,7 @@ fn compiled_styles(_sp: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<
     })
 }
 
-fn compiled_reentrant(_sp: Option<&Rc<dyn IServiceProvider>>, _uri: &str) -> Result<Option<BoxedValue>, XamlLoadException> {
+fn compiled_reentrant(_sp: Option<&Rc<dyn IServiceProvider>>, _uri: &str) -> Result<Option<BoxedValue>, XamlLoadError> {
     // While it is loading, an include answers no resource lookups.
     let include = REENTRANT.with(|include| include.borrow().clone()).unwrap();
     assert!(include.try_get_resource(&key("any"), None).is_none());
@@ -131,7 +131,7 @@ impl IRuntimeXamlLoader for RecordingRuntimeLoader {
         &self,
         document: RuntimeXamlLoaderDocument,
         configuration: RuntimeXamlLoaderConfiguration,
-    ) -> Result<BoxedValue, XamlLoadException> {
+    ) -> Result<BoxedValue, XamlLoadError> {
         let text = document.read_to_string().unwrap();
         self.seen.borrow_mut().push(format!(
             "{}|{}|{}|{}",
@@ -141,7 +141,7 @@ impl IRuntimeXamlLoader for RecordingRuntimeLoader {
             configuration.local_assembly.map_or("none", |a| a.name)
         ));
         if text.contains("fail") {
-            return Err(XamlLoadException::with_message("bad document"));
+            return Err(XamlLoadError::with_message("bad document"));
         }
         let dictionary = ResourceDictionary::new();
         dictionary.add("text", Some(boxed(text)));
@@ -443,7 +443,7 @@ fn includes_are_constructed_and_loaded_through_their_metadata() {
 fn a_compiled_document_that_fails_to_build_is_an_error_of_the_load() {
     let scope = TestAssetLoader::new().install();
     FerroXamlLoader::register_compiled_xaml("includes.failing", |_, _| {
-        Err(XamlLoadException::with_message("The document failed to build"))
+        Err(XamlLoadError::with_message("The document failed to build"))
     });
     let error = FerroXamlLoader::load(&uri("ferres://includes.failing/A.xaml"), None).unwrap_err();
     assert_eq!(error.message(), "The document failed to build");
@@ -587,15 +587,15 @@ impl IRuntimeXamlLoader for PopulatingRuntimeLoader {
         &self,
         _document: RuntimeXamlLoaderDocument,
         _configuration: RuntimeXamlLoaderConfiguration,
-    ) -> Result<BoxedValue, XamlLoadException> {
-        Err(XamlLoadException::with_message("not used"))
+    ) -> Result<BoxedValue, XamlLoadError> {
+        Err(XamlLoadError::with_message("not used"))
     }
 
     fn load_object(
         &self,
         instance: &BoxedValue,
         service_provider: Option<&Rc<dyn ferroui_base::metadata::IServiceProvider>>,
-    ) -> Result<(), XamlLoadException> {
+    ) -> Result<(), XamlLoadError> {
         match from_markup_value::<Ref<Border>>(&Some(instance.clone())) {
             Some(border) => {
                 border.set_tag(Some(boxed(format!("populated, provider: {}", service_provider.is_some()))));
@@ -614,8 +614,8 @@ impl IRuntimeXamlLoader for DefaultRuntimeLoader {
         &self,
         _document: RuntimeXamlLoaderDocument,
         _configuration: RuntimeXamlLoaderConfiguration,
-    ) -> Result<BoxedValue, XamlLoadException> {
-        Err(XamlLoadException::with_message("not used"))
+    ) -> Result<BoxedValue, XamlLoadError> {
+        Err(XamlLoadError::with_message("not used"))
     }
 }
 
@@ -727,7 +727,7 @@ fn lazy_native_includes_retain_their_explicit_source_snapshot_and_reject_unavail
 fn failed_resource_and_style_loads_do_not_latch_the_loading_flag() {
     let scope = TestAssetLoader::new().install();
     FerroXamlLoader::register_compiled_xaml("include.retry", |_, uri| {
-        if uri.ends_with("Missing.xaml") { return Err(XamlLoadException::with_message("missing")) }
+        if uri.ends_with("Missing.xaml") { return Err(XamlLoadError::with_message("missing")) }
         if uri.ends_with("Style.xaml") {
             let style = Style::new();
             style.resources().add("value", Some(boxed("style".to_owned())));

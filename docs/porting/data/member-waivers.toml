@@ -353,7 +353,7 @@ reason = "internal constructor behind `WeakEvent.Register(Func<..>)`: `register_
 project = "Avalonia.Base"
 type = "Avalonia.Data.BindingChainException"
 member = "BindingChainException(string message, string expression, string errorPoint)"
-reason = "ported as `BindingChainException::with_expression`"
+reason = "ported as `BindingChainError::with_expression`"
 
 [[waive]]
 project = "Avalonia.Base"
@@ -4137,31 +4137,31 @@ reason = "a class of extension methods: they are the functions of the module `wa
 project = "Avalonia.Wayland"
 type = "Avalonia.Wayland.AvaloniaWayland*Exception"
 member = "*innerException*"
-reason = "one error type with a kind (`FerroWaylandExceptionKind`) stands for the exception classes; an inner exception is `FerroWaylandException::with_inner`"
+reason = "one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; an inner exception is `FerroWaylandError::with_inner`"
 
 [[waive]]
 project = "Avalonia.Wayland"
 type = "Avalonia.Wayland.AvaloniaWayland*Exception"
 member = "*(string? message)"
-reason = "one error type with a kind (`FerroWaylandExceptionKind`) stands for the exception classes; a kind is made with the arguments the backend makes it with (`new` of the kind)"
+reason = "one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; a kind is made with the arguments the backend makes it with (`new` of the kind)"
 
 [[waive]]
 project = "Avalonia.Wayland"
 type = "Avalonia.Wayland.AvaloniaWayland*Exception"
 member = "*Errno errno*"
-reason = "one error type with a kind (`FerroWaylandExceptionKind`) stands for the exception classes; `from_errno` of the flush and of the read error"
+reason = "one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; `from_errno` of the flush and of the read error"
 
 [[waive]]
 project = "Avalonia.Wayland"
 type = "Avalonia.Wayland.AvaloniaWaylandProtocolErrorException"
 member = "*uint errorCode, string errorMessage*"
-reason = "one error type with a kind (`FerroWaylandExceptionKind`) stands for the exception classes; `FerroWaylandProtocolErrorException::with_code`"
+reason = "one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; `FerroWaylandProtocolErrorException::with_code`"
 
 [[waive]]
 project = "Avalonia.Wayland"
 type = "Avalonia.Wayland.AvaloniaWaylandProtocolErrorException"
 member = "Error*"
-reason = "one error type with a kind (`FerroWaylandExceptionKind`) stands for the exception classes; the code and the message of a protocol error are the fields of `FerroWaylandExceptionKind::ProtocolError`"
+reason = "one error type with a kind (`FerroWaylandErrorKind`) stands for the exception classes; the code and the message of a protocol error are the fields of `FerroWaylandErrorKind::ProtocolError`"
 
 [[waive]]
 project = "Avalonia.Wayland"

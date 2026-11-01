@@ -1,8 +1,8 @@
 //! `RxTestTests` (`ReactiveUI.Testing.Tests/RxTestTests.cs`).
 
 use crate::mocks::{delay, is_invalid_operation, yield_now, InvalidOperationException};
-use ferroui_reactive::linq::TimeoutException;
-use ferroui_reactiveui::PanicException;
+use ferroui_reactive::linq::TimeoutError;
+use ferroui_reactiveui::PanicError;
 use ferroui_reactiveui_testing::RxTest;
 use ferroui_system::threading::tasks::{block_on, Task};
 use std::cell::Cell;
@@ -55,7 +55,7 @@ fn app_builder_test_async_propagates_exceptions() {
     // the panic.
     let error = block_on(RxTest::app_builder_test_async(|| panic!("Test exception"))).expect_err("the panic of the test is passed on");
 
-    assert_eq!(error.downcast_ref::<PanicException>().map(|exception| exception.message.as_str()), Some("Test exception"));
+    assert_eq!(error.downcast_ref::<PanicError>().map(|exception| exception.message.as_str()), Some("Test exception"));
 }
 
 #[test]
@@ -132,7 +132,7 @@ fn app_builder_test_async_throws_timeout_exception_when_test_exceeds_timeout() {
     ))
     .expect_err("the test runs longer than its time limit");
 
-    assert!(error.downcast_ref::<TimeoutException>().is_some());
+    assert!(error.downcast_ref::<TimeoutError>().is_some());
 }
 
 #[test]

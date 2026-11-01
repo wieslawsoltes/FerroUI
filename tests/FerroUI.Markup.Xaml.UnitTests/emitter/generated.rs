@@ -13,7 +13,7 @@ pub const ROOT_URI: &str = "ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/";
 /// An untyped build function: the root object as the loader returns it.
 pub type BuildDocument = fn(
     ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException>;
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError>;
 
 /// The XML namespaces of documents of this file, as the compiler resolved them.
 const XML_NAMESPACES_0: rt::XmlNamespaceTable = &[
@@ -77,7 +77,7 @@ static BUILD_BORDER_EMPTY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { b
 /// Generated from `border_empty.xaml`.
 pub fn build_border_empty_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_empty.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_EMPTY_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -90,7 +90,7 @@ pub fn build_border_empty_xaml(
 
 fn build_border_empty_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_empty_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -101,7 +101,7 @@ static BUILD_BORDER_PADDING_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo {
 /// Generated from `border_padding.xaml`.
 pub fn build_border_padding_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_padding.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_PADDING_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -116,7 +116,7 @@ pub fn build_border_padding_xaml(
 
 fn build_border_padding_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_padding_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -127,7 +127,7 @@ static BUILD_BORDER_PADDING_UNIFORM_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `border_padding_uniform.xaml`.
 pub fn build_border_padding_uniform_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_padding_uniform.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_PADDING_UNIFORM_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -142,7 +142,7 @@ pub fn build_border_padding_uniform_xaml(
 
 fn build_border_padding_uniform_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_padding_uniform_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -153,7 +153,7 @@ static BUILD_BORDER_THICKNESS_AND_RADIUS_XAML_DOCUMENT: rt::DocumentInfo = rt::D
 /// Generated from `border_thickness_and_radius.xaml`.
 pub fn build_border_thickness_and_radius_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_thickness_and_radius.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_THICKNESS_AND_RADIUS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -170,7 +170,7 @@ pub fn build_border_thickness_and_radius_xaml(
 
 fn build_border_thickness_and_radius_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_thickness_and_radius_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -181,7 +181,7 @@ static BUILD_BORDER_MARGIN_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { 
 /// Generated from `border_margin.xaml`.
 pub fn build_border_margin_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_margin.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_MARGIN_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -196,7 +196,7 @@ pub fn build_border_margin_xaml(
 
 fn build_border_margin_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_margin_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -207,7 +207,7 @@ static BUILD_BORDER_SIZE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { ba
 /// Generated from `border_size.xaml`.
 pub fn build_border_size_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_size.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_SIZE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -224,7 +224,7 @@ pub fn build_border_size_xaml(
 
 fn build_border_size_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_size_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -235,7 +235,7 @@ static BUILD_BORDER_MIN_WIDTH_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo
 /// Generated from `border_min_width.xaml`.
 pub fn build_border_min_width_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_min_width.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_MIN_WIDTH_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -250,7 +250,7 @@ pub fn build_border_min_width_xaml(
 
 fn build_border_min_width_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_min_width_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -261,7 +261,7 @@ static BUILD_BORDER_OPACITY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo {
 /// Generated from `border_opacity.xaml`.
 pub fn build_border_opacity_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_opacity.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_OPACITY_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -276,7 +276,7 @@ pub fn build_border_opacity_xaml(
 
 fn build_border_opacity_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_opacity_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -287,7 +287,7 @@ static BUILD_BORDER_IS_VISIBLE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInf
 /// Generated from `border_is_visible.xaml`.
 pub fn build_border_is_visible_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_is_visible.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_IS_VISIBLE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -302,7 +302,7 @@ pub fn build_border_is_visible_xaml(
 
 fn build_border_is_visible_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_is_visible_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -313,7 +313,7 @@ static BUILD_BORDER_CLIP_TO_BOUNDS_XAML_DOCUMENT: rt::DocumentInfo = rt::Documen
 /// Generated from `border_clip_to_bounds.xaml`.
 pub fn build_border_clip_to_bounds_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_clip_to_bounds.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_CLIP_TO_BOUNDS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -328,7 +328,7 @@ pub fn build_border_clip_to_bounds_xaml(
 
 fn build_border_clip_to_bounds_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_clip_to_bounds_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -339,7 +339,7 @@ static BUILD_BORDER_Z_INDEX_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo {
 /// Generated from `border_z_index.xaml`.
 pub fn build_border_z_index_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_z_index.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_Z_INDEX_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -354,7 +354,7 @@ pub fn build_border_z_index_xaml(
 
 fn build_border_z_index_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_z_index_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -365,7 +365,7 @@ static BUILD_BORDER_HORIZONTAL_ALIGNMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::D
 /// Generated from `border_horizontal_alignment.xaml`.
 pub fn build_border_horizontal_alignment_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_horizontal_alignment.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_HORIZONTAL_ALIGNMENT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -380,7 +380,7 @@ pub fn build_border_horizontal_alignment_xaml(
 
 fn build_border_horizontal_alignment_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_horizontal_alignment_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -391,7 +391,7 @@ static BUILD_BORDER_VERTICAL_ALIGNMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::Doc
 /// Generated from `border_vertical_alignment.xaml`.
 pub fn build_border_vertical_alignment_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_vertical_alignment.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_VERTICAL_ALIGNMENT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -406,7 +406,7 @@ pub fn build_border_vertical_alignment_xaml(
 
 fn build_border_vertical_alignment_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_vertical_alignment_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -417,7 +417,7 @@ static BUILD_BORDER_LAYOUT_ROUNDING_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `border_layout_rounding.xaml`.
 pub fn build_border_layout_rounding_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_layout_rounding.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_LAYOUT_ROUNDING_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -432,7 +432,7 @@ pub fn build_border_layout_rounding_xaml(
 
 fn build_border_layout_rounding_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_layout_rounding_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -443,7 +443,7 @@ static BUILD_BORDER_INPUT_FLAGS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentIn
 /// Generated from `border_input_flags.xaml`.
 pub fn build_border_input_flags_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_input_flags.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_INPUT_FLAGS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -462,7 +462,7 @@ pub fn build_border_input_flags_xaml(
 
 fn build_border_input_flags_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_input_flags_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -473,7 +473,7 @@ static BUILD_BORDER_CHILD_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { b
 /// Generated from `border_child.xaml`.
 pub fn build_border_child_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_child.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_CHILD_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -492,7 +492,7 @@ pub fn build_border_child_xaml(
 
 fn build_border_child_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_child_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -503,7 +503,7 @@ static BUILD_BORDER_CHILD_WITH_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `border_child_with_text.xaml`.
 pub fn build_border_child_with_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_child_with_text.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_CHILD_WITH_TEXT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -526,7 +526,7 @@ pub fn build_border_child_with_text_xaml(
 
 fn build_border_child_with_text_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_child_with_text_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -537,7 +537,7 @@ static BUILD_BORDER_NESTED_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { 
 /// Generated from `border_nested.xaml`.
 pub fn build_border_nested_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_nested.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_NESTED_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -574,7 +574,7 @@ pub fn build_border_nested_xaml(
 
 fn build_border_nested_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_nested_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -585,7 +585,7 @@ static BUILD_TEXT_BLOCK_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo 
 /// Generated from `text_block_text.xaml`.
 pub fn build_text_block_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadError> {
     // text_block_text.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_TEXT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
@@ -600,7 +600,7 @@ pub fn build_text_block_text_xaml(
 
 fn build_text_block_text_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_text_block_text_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -611,7 +611,7 @@ static BUILD_TEXT_BLOCK_EMPTY_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::Documen
 /// Generated from `text_block_empty_text.xaml`.
 pub fn build_text_block_empty_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadError> {
     // text_block_empty_text.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_EMPTY_TEXT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
@@ -626,7 +626,7 @@ pub fn build_text_block_empty_text_xaml(
 
 fn build_text_block_empty_text_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_text_block_empty_text_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -637,7 +637,7 @@ static BUILD_TEXT_BLOCK_FONT_SIZE_XAML_DOCUMENT: rt::DocumentInfo = rt::Document
 /// Generated from `text_block_font_size.xaml`.
 pub fn build_text_block_font_size_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadError> {
     // text_block_font_size.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_FONT_SIZE_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
@@ -652,7 +652,7 @@ pub fn build_text_block_font_size_xaml(
 
 fn build_text_block_font_size_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_text_block_font_size_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -663,7 +663,7 @@ static BUILD_STACK_PANEL_PROPERTIES_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `stack_panel_properties.xaml`.
 pub fn build_stack_panel_properties_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // stack_panel_properties.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_STACK_PANEL_PROPERTIES_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -680,7 +680,7 @@ pub fn build_stack_panel_properties_xaml(
 
 fn build_stack_panel_properties_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_stack_panel_properties_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -691,7 +691,7 @@ static BUILD_DOCK_PANEL_LAST_CHILD_FILL_XAML_DOCUMENT: rt::DocumentInfo = rt::Do
 /// Generated from `dock_panel_last_child_fill.xaml`.
 pub fn build_dock_panel_last_child_fill_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::DockPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::DockPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // dock_panel_last_child_fill.xaml(1,2) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_DOCK_PANEL_LAST_CHILD_FILL_XAML_DOCUMENT, rt::to_value(dock_panel_0.clone()));
@@ -706,7 +706,7 @@ pub fn build_dock_panel_last_child_fill_xaml(
 
 fn build_dock_panel_last_child_fill_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_dock_panel_last_child_fill_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -717,7 +717,7 @@ static BUILD_BUTTON_CONTENT_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentI
 /// Generated from `button_content_text.xaml`.
 pub fn build_button_content_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadError> {
     // button_content_text.xaml(1,2) Button
     let button_0 = ::ferroui_controls::Button::new();
     let context = rt::populate_context(service_provider, &BUILD_BUTTON_CONTENT_TEXT_XAML_DOCUMENT, rt::to_value(button_0.clone()));
@@ -732,7 +732,7 @@ pub fn build_button_content_text_xaml(
 
 fn build_button_content_text_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_button_content_text_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -743,7 +743,7 @@ static BUILD_USER_CONTROL_CONTENT_ELEMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::
 /// Generated from `user_control_content_element.xaml`.
 pub fn build_user_control_content_element_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadError> {
     // user_control_content_element.xaml(1,2) UserControl
     let user_control_0 = ::ferroui_controls::UserControl::new();
     let context = rt::populate_context(service_provider, &BUILD_USER_CONTROL_CONTENT_ELEMENT_XAML_DOCUMENT, rt::to_value(user_control_0.clone()));
@@ -764,7 +764,7 @@ pub fn build_user_control_content_element_xaml(
 
 fn build_user_control_content_element_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_user_control_content_element_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -775,7 +775,7 @@ static BUILD_CONTROL_TAG_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { ba
 /// Generated from `control_tag.xaml`.
 pub fn build_control_tag_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // control_tag.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_CONTROL_TAG_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -790,7 +790,7 @@ pub fn build_control_tag_xaml(
 
 fn build_control_tag_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_control_tag_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -801,7 +801,7 @@ static BUILD_ATTACHED_GRID_POSITION_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `attached_grid_position.xaml`.
 pub fn build_attached_grid_position_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // attached_grid_position.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_ATTACHED_GRID_POSITION_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -824,7 +824,7 @@ pub fn build_attached_grid_position_xaml(
 
 fn build_attached_grid_position_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_attached_grid_position_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -835,7 +835,7 @@ static BUILD_ATTACHED_DOCK_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { 
 /// Generated from `attached_dock.xaml`.
 pub fn build_attached_dock_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // attached_dock.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_ATTACHED_DOCK_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -856,7 +856,7 @@ pub fn build_attached_dock_xaml(
 
 fn build_attached_dock_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_attached_dock_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -867,7 +867,7 @@ static BUILD_ATTACHED_CANVAS_LEFT_XAML_DOCUMENT: rt::DocumentInfo = rt::Document
 /// Generated from `attached_canvas_left.xaml`.
 pub fn build_attached_canvas_left_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // attached_canvas_left.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_ATTACHED_CANVAS_LEFT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -888,7 +888,7 @@ pub fn build_attached_canvas_left_xaml(
 
 fn build_attached_canvas_left_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_attached_canvas_left_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -899,7 +899,7 @@ static BUILD_X_NULL_CHILD_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { b
 /// Generated from `x_null_child.xaml`.
 pub fn build_x_null_child_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // x_null_child.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_X_NULL_CHILD_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -914,7 +914,7 @@ pub fn build_x_null_child_xaml(
 
 fn build_x_null_child_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_x_null_child_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -925,7 +925,7 @@ static BUILD_X_STATIC_ENUM_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { 
 /// Generated from `x_static_enum.xaml`.
 pub fn build_x_static_enum_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // x_static_enum.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_X_STATIC_ENUM_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -940,7 +940,7 @@ pub fn build_x_static_enum_xaml(
 
 fn build_x_static_enum_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_x_static_enum_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -951,7 +951,7 @@ static BUILD_BORDER_MANY_PROPERTIES_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `border_many_properties.xaml`.
 pub fn build_border_many_properties_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_many_properties.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_MANY_PROPERTIES_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -990,7 +990,7 @@ pub fn build_border_many_properties_xaml(
 
 fn build_border_many_properties_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_many_properties_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1001,7 +1001,7 @@ static BUILD_PANEL_CHILDREN_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo {
 /// Generated from `panel_children.xaml`.
 pub fn build_panel_children_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // panel_children.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_PANEL_CHILDREN_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -1030,7 +1030,7 @@ pub fn build_panel_children_xaml(
 
 fn build_panel_children_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_panel_children_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1041,7 +1041,7 @@ static BUILD_NAMED_ELEMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { 
 /// Generated from `named_element.xaml`.
 pub fn build_named_element_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // named_element.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_NAMED_ELEMENT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -1057,7 +1057,7 @@ pub fn build_named_element_xaml(
 
 fn build_named_element_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_named_element_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1068,7 +1068,7 @@ static BUILD_NAME_PROPERTY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { 
 /// Generated from `name_property.xaml`.
 pub fn build_name_property_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // name_property.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_NAME_PROPERTY_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -1090,7 +1090,7 @@ pub fn build_name_property_xaml(
 
 fn build_name_property_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_name_property_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1101,7 +1101,7 @@ static BUILD_BINDING_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_u
 /// Generated from `binding.xaml`.
 pub fn build_binding_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadError> {
     // binding.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let context = rt::populate_context(service_provider, &BUILD_BINDING_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
@@ -1120,7 +1120,7 @@ pub fn build_binding_xaml(
 
 fn build_binding_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_binding_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1131,7 +1131,7 @@ static BUILD_STYLE_WITH_SELECTOR_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentI
 /// Generated from `style_with_selector.xaml`.
 pub fn build_style_with_selector_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // style_with_selector.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_STYLE_WITH_SELECTOR_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -1154,7 +1154,7 @@ pub fn build_style_with_selector_xaml(
 
 fn build_style_with_selector_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_style_with_selector_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1165,7 +1165,7 @@ static BUILD_CONTROL_TEMPLATE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo
 /// Generated from `control_template.xaml`.
 pub fn build_control_template_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadError> {
     // control_template.xaml(1,2) Button
     let button_0 = ::ferroui_controls::Button::new();
     let context = rt::populate_context(service_provider, &BUILD_CONTROL_TEMPLATE_XAML_DOCUMENT, rt::to_value(button_0.clone()));
@@ -1185,7 +1185,7 @@ pub fn build_control_template_xaml(
 /// Builds the deferred content at `control_template.xaml(1,134)` (a template or a deferred resource).
 fn build_control_template_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROL_TEMPLATE_XAML_DOCUMENT);
     // control_template.xaml(1,134) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -1197,7 +1197,7 @@ fn build_control_template_xaml_deferred_0(
 
 fn build_control_template_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_control_template_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1208,7 +1208,7 @@ static BUILD_BRUSH_FROM_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo 
 /// Generated from `brush_from_text.xaml`.
 pub fn build_brush_from_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // brush_from_text.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BRUSH_FROM_TEXT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -1223,7 +1223,7 @@ pub fn build_brush_from_text_xaml(
 
 fn build_brush_from_text_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_brush_from_text_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1234,7 +1234,7 @@ static BUILD_RESOURCES_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base
 /// Generated from `resources.xaml`.
 pub fn build_resources_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // resources.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_RESOURCES_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -1250,7 +1250,7 @@ pub fn build_resources_xaml(
 
 fn build_resources_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_resources_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1261,7 +1261,7 @@ static BUILD_TEXT_BLOCK_FONT_STYLE_WEIGHT_XAML_DOCUMENT: rt::DocumentInfo = rt::
 /// Generated from `text_block_font_style_weight.xaml`.
 pub fn build_text_block_font_style_weight_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadError> {
     // text_block_font_style_weight.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_FONT_STYLE_WEIGHT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
@@ -1281,7 +1281,7 @@ pub fn build_text_block_font_style_weight_xaml(
 
 fn build_text_block_font_style_weight_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_text_block_font_style_weight_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1292,7 +1292,7 @@ static BUILD_TEXT_BLOCK_TEXT_LAYOUT_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `text_block_text_layout.xaml`.
 pub fn build_text_block_text_layout_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadError> {
     // text_block_text_layout.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_TEXT_LAYOUT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
@@ -1315,7 +1315,7 @@ pub fn build_text_block_text_layout_xaml(
 
 fn build_text_block_text_layout_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_text_block_text_layout_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1326,7 +1326,7 @@ static BUILD_TEXT_BLOCK_PADDING_FONT_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 /// Generated from `text_block_padding_font.xaml`.
 pub fn build_text_block_padding_font_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadError> {
     // text_block_padding_font.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_PADDING_FONT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
@@ -1345,7 +1345,7 @@ pub fn build_text_block_padding_font_xaml(
 
 fn build_text_block_padding_font_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_text_block_padding_font_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1356,7 +1356,7 @@ static BUILD_TEXT_BLOCK_UNICODE_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 /// Generated from `text_block_unicode_text.xaml`.
 pub fn build_text_block_unicode_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadError> {
     // text_block_unicode_text.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_UNICODE_TEXT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
@@ -1371,7 +1371,7 @@ pub fn build_text_block_unicode_text_xaml(
 
 fn build_text_block_unicode_text_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_text_block_unicode_text_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1382,7 +1382,7 @@ static BUILD_TEXT_BLOCK_MULTILINE_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::Doc
 /// Generated from `text_block_multiline_text.xaml`.
 pub fn build_text_block_multiline_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadError> {
     // text_block_multiline_text.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_MULTILINE_TEXT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
@@ -1397,7 +1397,7 @@ pub fn build_text_block_multiline_text_xaml(
 
 fn build_text_block_multiline_text_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_text_block_multiline_text_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1408,7 +1408,7 @@ static BUILD_BORDER_EXPONENT_NUMBERS_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 /// Generated from `border_exponent_numbers.xaml`.
 pub fn build_border_exponent_numbers_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_exponent_numbers.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_EXPONENT_NUMBERS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -1425,7 +1425,7 @@ pub fn build_border_exponent_numbers_xaml(
 
 fn build_border_exponent_numbers_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_exponent_numbers_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1436,7 +1436,7 @@ static BUILD_BORDER_NEGATIVE_MARGIN_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `border_negative_margin.xaml`.
 pub fn build_border_negative_margin_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_negative_margin.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_NEGATIVE_MARGIN_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -1451,7 +1451,7 @@ pub fn build_border_negative_margin_xaml(
 
 fn build_border_negative_margin_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_negative_margin_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1462,7 +1462,7 @@ static BUILD_BORDER_AUTO_SIZE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo
 /// Generated from `border_auto_size.xaml`.
 pub fn build_border_auto_size_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // border_auto_size.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_BORDER_AUTO_SIZE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -1481,7 +1481,7 @@ pub fn build_border_auto_size_xaml(
 
 fn build_border_auto_size_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_border_auto_size_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1492,7 +1492,7 @@ static BUILD_CONTENT_CONTROL_ALIGNMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::Doc
 /// Generated from `content_control_alignment.xaml`.
 pub fn build_content_control_alignment_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadError> {
     // content_control_alignment.xaml(1,2) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
     let context = rt::populate_context(service_provider, &BUILD_CONTENT_CONTROL_ALIGNMENT_XAML_DOCUMENT, rt::to_value(content_control_0.clone()));
@@ -1509,7 +1509,7 @@ pub fn build_content_control_alignment_xaml(
 
 fn build_content_control_alignment_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_content_control_alignment_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1520,7 +1520,7 @@ static BUILD_CONTENT_CONTROL_ELEMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 /// Generated from `content_control_element.xaml`.
 pub fn build_content_control_element_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadError> {
     // content_control_element.xaml(1,2) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
     let context = rt::populate_context(service_provider, &BUILD_CONTENT_CONTROL_ELEMENT_XAML_DOCUMENT, rt::to_value(content_control_0.clone()));
@@ -1541,7 +1541,7 @@ pub fn build_content_control_element_xaml(
 
 fn build_content_control_element_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_content_control_element_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1552,7 +1552,7 @@ static BUILD_BUTTON_CONTENT_ELEMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `button_content_element.xaml`.
 pub fn build_button_content_element_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadError> {
     // button_content_element.xaml(1,2) Button
     let button_0 = ::ferroui_controls::Button::new();
     let context = rt::populate_context(service_provider, &BUILD_BUTTON_CONTENT_ELEMENT_XAML_DOCUMENT, rt::to_value(button_0.clone()));
@@ -1573,7 +1573,7 @@ pub fn build_button_content_element_xaml(
 
 fn build_button_content_element_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_button_content_element_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1584,7 +1584,7 @@ static BUILD_BUTTON_CONTENT_PROPERTY_ELEMENT_XAML_DOCUMENT: rt::DocumentInfo = r
 /// Generated from `button_content_property_element.xaml`.
 pub fn build_button_content_property_element_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadError> {
     // button_content_property_element.xaml(1,2) Button
     let button_0 = ::ferroui_controls::Button::new();
     let context = rt::populate_context(service_provider, &BUILD_BUTTON_CONTENT_PROPERTY_ELEMENT_XAML_DOCUMENT, rt::to_value(button_0.clone()));
@@ -1605,7 +1605,7 @@ pub fn build_button_content_property_element_xaml(
 
 fn build_button_content_property_element_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_button_content_property_element_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1616,7 +1616,7 @@ static BUILD_CONTENT_TAG_NULL_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo
 /// Generated from `content_tag_null.xaml`.
 pub fn build_content_tag_null_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadError> {
     // content_tag_null.xaml(1,2) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
     let context = rt::populate_context(service_provider, &BUILD_CONTENT_TAG_NULL_XAML_DOCUMENT, rt::to_value(content_control_0.clone()));
@@ -1633,7 +1633,7 @@ pub fn build_content_tag_null_xaml(
 
 fn build_content_tag_null_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_content_tag_null_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1644,7 +1644,7 @@ static BUILD_CONTENT_X_STATIC_ENUM_XAML_DOCUMENT: rt::DocumentInfo = rt::Documen
 /// Generated from `content_x_static_enum.xaml`.
 pub fn build_content_x_static_enum_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadError> {
     // content_x_static_enum.xaml(1,2) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
     let context = rt::populate_context(service_provider, &BUILD_CONTENT_X_STATIC_ENUM_XAML_DOCUMENT, rt::to_value(content_control_0.clone()));
@@ -1659,7 +1659,7 @@ pub fn build_content_x_static_enum_xaml(
 
 fn build_content_x_static_enum_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_content_x_static_enum_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1670,7 +1670,7 @@ static BUILD_ATTACHED_DOCK_X_STATIC_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `attached_dock_x_static.xaml`.
 pub fn build_attached_dock_x_static_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // attached_dock_x_static.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_ATTACHED_DOCK_X_STATIC_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -1691,7 +1691,7 @@ pub fn build_attached_dock_x_static_xaml(
 
 fn build_attached_dock_x_static_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_attached_dock_x_static_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1702,7 +1702,7 @@ static BUILD_ATTACHED_GRID_SPANS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentI
 /// Generated from `attached_grid_spans.xaml`.
 pub fn build_attached_grid_spans_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // attached_grid_spans.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_ATTACHED_GRID_SPANS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -1727,7 +1727,7 @@ pub fn build_attached_grid_spans_xaml(
 
 fn build_attached_grid_spans_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_attached_grid_spans_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1738,7 +1738,7 @@ static BUILD_NAMED_NESTED_ELEMENTS_XAML_DOCUMENT: rt::DocumentInfo = rt::Documen
 /// Generated from `named_nested_elements.xaml`.
 pub fn build_named_nested_elements_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // named_nested_elements.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_NAMED_NESTED_ELEMENTS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -1774,7 +1774,7 @@ pub fn build_named_nested_elements_xaml(
 
 fn build_named_nested_elements_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_named_nested_elements_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1785,7 +1785,7 @@ static BUILD_NAMED_CONTENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { 
 /// Generated from `named_content.xaml`.
 pub fn build_named_content_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadError> {
     // named_content.xaml(1,2) UserControl
     let user_control_0 = ::ferroui_controls::UserControl::new();
     let context = rt::populate_context(service_provider, &BUILD_NAMED_CONTENT_XAML_DOCUMENT, rt::to_value(user_control_0.clone()));
@@ -1810,7 +1810,7 @@ pub fn build_named_content_xaml(
 
 fn build_named_content_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_named_content_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1821,7 +1821,7 @@ static BUILD_DUPLICATE_NAME_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo {
 /// Generated from `duplicate_name.xaml`.
 pub fn build_duplicate_name_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // duplicate_name.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_DUPLICATE_NAME_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -1846,7 +1846,7 @@ pub fn build_duplicate_name_xaml(
 
 fn build_duplicate_name_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_duplicate_name_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1857,7 +1857,7 @@ static BUILD_NAME_AND_X_NAME_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo 
 /// Generated from `name_and_x_name.xaml`.
 pub fn build_name_and_x_name_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // name_and_x_name.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_NAME_AND_X_NAME_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -1884,7 +1884,7 @@ pub fn build_name_and_x_name_xaml(
 
 fn build_name_and_x_name_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_name_and_x_name_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1895,7 +1895,7 @@ static BUILD_DEEP_NESTING_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { b
 /// Generated from `deep_nesting.xaml`.
 pub fn build_deep_nesting_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // deep_nesting.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_DEEP_NESTING_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -1940,7 +1940,7 @@ pub fn build_deep_nesting_xaml(
 
 fn build_deep_nesting_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_deep_nesting_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1951,7 +1951,7 @@ static BUILD_LAYOUT_TRANSFORM_CONTROL_XAML_DOCUMENT: rt::DocumentInfo = rt::Docu
 /// Generated from `layout_transform_control.xaml`.
 pub fn build_layout_transform_control_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::LayoutTransformControl>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::LayoutTransformControl>, ::ferroui_markup_xaml::XamlLoadError> {
     // layout_transform_control.xaml(1,2) LayoutTransformControl
     let layout_transform_control_0 = ::ferroui_controls::LayoutTransformControl::new();
     let context = rt::populate_context(service_provider, &BUILD_LAYOUT_TRANSFORM_CONTROL_XAML_DOCUMENT, rt::to_value(layout_transform_control_0.clone()));
@@ -1970,7 +1970,7 @@ pub fn build_layout_transform_control_xaml(
 
 fn build_layout_transform_control_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_layout_transform_control_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -1981,7 +1981,7 @@ static BUILD_USER_CONTROL_PROPERTIES_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 /// Generated from `user_control_properties.xaml`.
 pub fn build_user_control_properties_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadError> {
     // user_control_properties.xaml(1,2) UserControl
     let user_control_0 = ::ferroui_controls::UserControl::new();
     let context = rt::populate_context(service_provider, &BUILD_USER_CONTROL_PROPERTIES_XAML_DOCUMENT, rt::to_value(user_control_0.clone()));
@@ -2012,7 +2012,7 @@ pub fn build_user_control_properties_xaml(
 
 fn build_user_control_properties_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_user_control_properties_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2023,7 +2023,7 @@ static BUILD_MULTILINE_DOCUMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentIn
 /// Generated from `multiline_document.xaml`.
 pub fn build_multiline_document_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // multiline_document.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_MULTILINE_DOCUMENT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -2060,7 +2060,7 @@ pub fn build_multiline_document_xaml(
 
 fn build_multiline_document_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_multiline_document_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2071,7 +2071,7 @@ static BUILD_MULTILINE_DUPLICATE_NAME_XAML_DOCUMENT: rt::DocumentInfo = rt::Docu
 /// Generated from `multiline_duplicate_name.xaml`.
 pub fn build_multiline_duplicate_name_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // multiline_duplicate_name.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_MULTILINE_DUPLICATE_NAME_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -2102,7 +2102,7 @@ pub fn build_multiline_duplicate_name_xaml(
 
 fn build_multiline_duplicate_name_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_multiline_duplicate_name_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2113,7 +2113,7 @@ static BUILD_END_INIT_FAILURE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo
 /// Generated from `end_init_failure.xaml`.
 pub fn build_end_init_failure_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // end_init_failure.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_END_INIT_FAILURE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -2134,7 +2134,7 @@ pub fn build_end_init_failure_xaml(
 
 fn build_end_init_failure_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_end_init_failure_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2145,7 +2145,7 @@ static BUILD_GRID_DEFINITIONS_ELEMENTS_XAML_DOCUMENT: rt::DocumentInfo = rt::Doc
 /// Generated from `grid_definitions_elements.xaml`.
 pub fn build_grid_definitions_elements_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Grid>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Grid>, ::ferroui_markup_xaml::XamlLoadError> {
     // grid_definitions_elements.xaml(1,2) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     let context = rt::populate_context(service_provider, &BUILD_GRID_DEFINITIONS_ELEMENTS_XAML_DOCUMENT, rt::to_value(grid_0.clone()));
@@ -2188,7 +2188,7 @@ pub fn build_grid_definitions_elements_xaml(
 
 fn build_grid_definitions_elements_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_grid_definitions_elements_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2199,7 +2199,7 @@ static BUILD_GRID_DEFINITIONS_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::Documen
 /// Generated from `grid_definitions_text.xaml`.
 pub fn build_grid_definitions_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Grid>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Grid>, ::ferroui_markup_xaml::XamlLoadError> {
     // grid_definitions_text.xaml(1,2) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     let context = rt::populate_context(service_provider, &BUILD_GRID_DEFINITIONS_TEXT_XAML_DOCUMENT, rt::to_value(grid_0.clone()));
@@ -2235,7 +2235,7 @@ pub fn build_grid_definitions_text_xaml(
 
 fn build_grid_definitions_text_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_grid_definitions_text_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2246,7 +2246,7 @@ static BUILD_CANVAS_CHILDREN_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo 
 /// Generated from `canvas_children.xaml`.
 pub fn build_canvas_children_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Canvas>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Canvas>, ::ferroui_markup_xaml::XamlLoadError> {
     // canvas_children.xaml(1,2) Canvas
     let canvas_0 = ::ferroui_controls::Canvas::new();
     let context = rt::populate_context(service_provider, &BUILD_CANVAS_CHILDREN_XAML_DOCUMENT, rt::to_value(canvas_0.clone()));
@@ -2283,7 +2283,7 @@ pub fn build_canvas_children_xaml(
 
 fn build_canvas_children_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_canvas_children_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2294,7 +2294,7 @@ static BUILD_DOCK_PANEL_CHILDREN_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentI
 /// Generated from `dock_panel_children.xaml`.
 pub fn build_dock_panel_children_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::DockPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::DockPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // dock_panel_children.xaml(1,2) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_DOCK_PANEL_CHILDREN_XAML_DOCUMENT, rt::to_value(dock_panel_0.clone()));
@@ -2327,7 +2327,7 @@ pub fn build_dock_panel_children_xaml(
 
 fn build_dock_panel_children_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_dock_panel_children_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2338,7 +2338,7 @@ static BUILD_NESTED_PANELS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { 
 /// Generated from `nested_panels.xaml`.
 pub fn build_nested_panels_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // nested_panels.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_NESTED_PANELS_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -2392,7 +2392,7 @@ pub fn build_nested_panels_xaml(
 
 fn build_nested_panels_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_nested_panels_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2403,7 +2403,7 @@ static BUILD_CLASSES_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { b
 /// Generated from `classes_text.xaml`.
 pub fn build_classes_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // classes_text.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_CLASSES_TEXT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -2422,7 +2422,7 @@ pub fn build_classes_text_xaml(
 
 fn build_classes_text_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_classes_text_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2433,7 +2433,7 @@ static BUILD_TEXT_BLOCK_INLINES_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentIn
 /// Generated from `text_block_inlines.xaml`.
 pub fn build_text_block_inlines_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadError> {
     // text_block_inlines.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_INLINES_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
@@ -2474,7 +2474,7 @@ pub fn build_text_block_inlines_xaml(
 
 fn build_text_block_inlines_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_text_block_inlines_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2485,7 +2485,7 @@ static BUILD_TEXT_BLOCK_TEXT_CONTENT_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 /// Generated from `text_block_text_content.xaml`.
 pub fn build_text_block_text_content_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadError> {
     // text_block_text_content.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let context = rt::populate_context(service_provider, &BUILD_TEXT_BLOCK_TEXT_CONTENT_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
@@ -2501,7 +2501,7 @@ pub fn build_text_block_text_content_xaml(
 
 fn build_text_block_text_content_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_text_block_text_content_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2512,7 +2512,7 @@ static BUILD_ITEMS_CONTROL_ITEMS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentI
 /// Generated from `items_control_items.xaml`.
 pub fn build_items_control_items_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ItemsControl>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ItemsControl>, ::ferroui_markup_xaml::XamlLoadError> {
     // items_control_items.xaml(1,2) ItemsControl
     let items_control_0 = ::ferroui_controls::ItemsControl::new();
     let context = rt::populate_context(service_provider, &BUILD_ITEMS_CONTROL_ITEMS_XAML_DOCUMENT, rt::to_value(items_control_0.clone()));
@@ -2541,7 +2541,7 @@ pub fn build_items_control_items_xaml(
 
 fn build_items_control_items_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_items_control_items_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2552,7 +2552,7 @@ static BUILD_FONT_WEIGHT_NUMBER_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentIn
 /// Generated from `font_weight_number.xaml`.
 pub fn build_font_weight_number_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadError> {
     // font_weight_number.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let context = rt::populate_context(service_provider, &BUILD_FONT_WEIGHT_NUMBER_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
@@ -2568,7 +2568,7 @@ pub fn build_font_weight_number_xaml(
 
 fn build_font_weight_number_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_font_weight_number_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2579,7 +2579,7 @@ static BUILD_USER_CONTROL_NAMED_CHILDREN_XAML_DOCUMENT: rt::DocumentInfo = rt::D
 /// Generated from `user_control_named_children.xaml`.
 pub fn build_user_control_named_children_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::UserControl>, ::ferroui_markup_xaml::XamlLoadError> {
     // user_control_named_children.xaml(1,2) UserControl
     let user_control_0 = ::ferroui_controls::UserControl::new();
     let context = rt::populate_context(service_provider, &BUILD_USER_CONTROL_NAMED_CHILDREN_XAML_DOCUMENT, rt::to_value(user_control_0.clone()));
@@ -2621,7 +2621,7 @@ pub fn build_user_control_named_children_xaml(
 
 fn build_user_control_named_children_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_user_control_named_children_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2632,7 +2632,7 @@ static BUILD_PANEL_CHILDREN_X_NULL_TAG_XAML_DOCUMENT: rt::DocumentInfo = rt::Doc
 /// Generated from `panel_children_x_null_tag.xaml`.
 pub fn build_panel_children_x_null_tag_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // panel_children_x_null_tag.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_PANEL_CHILDREN_X_NULL_TAG_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -2663,7 +2663,7 @@ pub fn build_panel_children_x_null_tag_xaml(
 
 fn build_panel_children_x_null_tag_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_panel_children_x_null_tag_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2674,7 +2674,7 @@ static BUILD_DIRECT_SELECTED_INDEX_XAML_DOCUMENT: rt::DocumentInfo = rt::Documen
 /// Generated from `direct_selected_index.xaml`.
 pub fn build_direct_selected_index_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ListBox>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ListBox>, ::ferroui_markup_xaml::XamlLoadError> {
     // direct_selected_index.xaml(1,2) ListBox
     let list_box_0 = ::ferroui_controls::ListBox::new();
     let context = rt::populate_context(service_provider, &BUILD_DIRECT_SELECTED_INDEX_XAML_DOCUMENT, rt::to_value(list_box_0.clone()));
@@ -2689,7 +2689,7 @@ pub fn build_direct_selected_index_xaml(
 
 fn build_direct_selected_index_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_direct_selected_index_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2700,7 +2700,7 @@ static BUILD_DIRECT_SELECTED_ITEM_NULL_XAML_DOCUMENT: rt::DocumentInfo = rt::Doc
 /// Generated from `direct_selected_item_null.xaml`.
 pub fn build_direct_selected_item_null_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ListBox>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ListBox>, ::ferroui_markup_xaml::XamlLoadError> {
     // direct_selected_item_null.xaml(1,2) ListBox
     let list_box_0 = ::ferroui_controls::ListBox::new();
     let context = rt::populate_context(service_provider, &BUILD_DIRECT_SELECTED_ITEM_NULL_XAML_DOCUMENT, rt::to_value(list_box_0.clone()));
@@ -2715,7 +2715,7 @@ pub fn build_direct_selected_item_null_xaml(
 
 fn build_direct_selected_item_null_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_direct_selected_item_null_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2726,7 +2726,7 @@ static BUILD_DIRECT_SELECTED_ITEM_TEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::Doc
 /// Generated from `direct_selected_item_text.xaml`.
 pub fn build_direct_selected_item_text_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ComboBox>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ComboBox>, ::ferroui_markup_xaml::XamlLoadError> {
     // direct_selected_item_text.xaml(1,2) ComboBox
     let combo_box_0 = ::ferroui_controls::ComboBox::new();
     let context = rt::populate_context(service_provider, &BUILD_DIRECT_SELECTED_ITEM_TEXT_XAML_DOCUMENT, rt::to_value(combo_box_0.clone()));
@@ -2741,7 +2741,7 @@ pub fn build_direct_selected_item_text_xaml(
 
 fn build_direct_selected_item_text_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_direct_selected_item_text_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2752,7 +2752,7 @@ static BUILD_BINDING_ELEMENT_NAME_XAML_DOCUMENT: rt::DocumentInfo = rt::Document
 /// Generated from `binding_element_name.xaml`.
 pub fn build_binding_element_name_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // binding_element_name.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_BINDING_ELEMENT_NAME_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -2792,7 +2792,7 @@ pub fn build_binding_element_name_xaml(
 
 fn build_binding_element_name_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_binding_element_name_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2803,7 +2803,7 @@ static BUILD_BINDING_DATA_CONTEXT_XAML_DOCUMENT: rt::DocumentInfo = rt::Document
 /// Generated from `binding_data_context.xaml`.
 pub fn build_binding_data_context_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // binding_data_context.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_BINDING_DATA_CONTEXT_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -2833,7 +2833,7 @@ pub fn build_binding_data_context_xaml(
 
 fn build_binding_data_context_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_binding_data_context_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2844,7 +2844,7 @@ static BUILD_BINDING_MODE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { b
 /// Generated from `binding_mode.xaml`.
 pub fn build_binding_mode_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // binding_mode.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_BINDING_MODE_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -2895,7 +2895,7 @@ pub fn build_binding_mode_xaml(
 
 fn build_binding_mode_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_binding_mode_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2906,7 +2906,7 @@ static BUILD_DYNAMIC_RESOURCE_UNRESOLVED_XAML_DOCUMENT: rt::DocumentInfo = rt::D
 /// Generated from `dynamic_resource_unresolved.xaml`.
 pub fn build_dynamic_resource_unresolved_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // dynamic_resource_unresolved.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_DYNAMIC_RESOURCE_UNRESOLVED_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -2923,7 +2923,7 @@ pub fn build_dynamic_resource_unresolved_xaml(
 
 fn build_dynamic_resource_unresolved_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_dynamic_resource_unresolved_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2934,7 +2934,7 @@ static BUILD_TYPE_EXTENSION_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo {
 /// Generated from `type_extension.xaml`.
 pub fn build_type_extension_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // type_extension.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_TYPE_EXTENSION_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -2949,7 +2949,7 @@ pub fn build_type_extension_xaml(
 
 fn build_type_extension_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_type_extension_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -2967,7 +2967,7 @@ static BUILD_STATIC_RESOURCE_LOCAL_XAML_DOCUMENT: rt::DocumentInfo = rt::Documen
 /// Generated from `static_resource_local.xaml`.
 pub fn build_static_resource_local_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // static_resource_local.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_STATIC_RESOURCE_LOCAL_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -3021,7 +3021,7 @@ pub fn build_static_resource_local_xaml(
 /// Builds the deferred content at `static_resource_local.xaml(1,118)` (a template or a deferred resource).
 fn build_static_resource_local_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_STATIC_RESOURCE_LOCAL_XAML_DOCUMENT);
     // static_resource_local.xaml(1,118) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -3034,14 +3034,14 @@ fn build_static_resource_local_xaml_deferred_0(
 /// Builds the deferred content at `static_resource_local.xaml(1,163)` (a template or a deferred resource).
 fn build_static_resource_local_xaml_deferred_1(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     // static_resource_local.xaml(1,266) ResourceKey
     rt::static_resource_content(service_provider, &rt::DocumentInfo { base_uri: BUILD_STATIC_RESOURCE_LOCAL_XAML_DOCUMENT.base_uri, namespaces: BUILD_STATIC_RESOURCE_LOCAL_XAML_XML_NAMESPACES_0 }, "Accent", 1, 163)
 }
 
 fn build_static_resource_local_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_static_resource_local_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3052,7 +3052,7 @@ static BUILD_DYNAMIC_RESOURCE_LOCAL_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `dynamic_resource_local.xaml`.
 pub fn build_dynamic_resource_local_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // dynamic_resource_local.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_DYNAMIC_RESOURCE_LOCAL_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -3082,7 +3082,7 @@ pub fn build_dynamic_resource_local_xaml(
 /// Builds the deferred content at `dynamic_resource_local.xaml(1,118)` (a template or a deferred resource).
 fn build_dynamic_resource_local_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_DYNAMIC_RESOURCE_LOCAL_XAML_DOCUMENT);
     // dynamic_resource_local.xaml(1,118) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -3094,7 +3094,7 @@ fn build_dynamic_resource_local_xaml_deferred_0(
 
 fn build_dynamic_resource_local_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_dynamic_resource_local_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3105,7 +3105,7 @@ static BUILD_STATIC_RESOURCE_MISSING_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 /// Generated from `static_resource_missing.xaml`.
 pub fn build_static_resource_missing_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // static_resource_missing.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_STATIC_RESOURCE_MISSING_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -3135,7 +3135,7 @@ pub fn build_static_resource_missing_xaml(
 
 fn build_static_resource_missing_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_static_resource_missing_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3146,7 +3146,7 @@ static BUILD_X_STATIC_CONVERTER_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentIn
 /// Generated from `x_static_converter.xaml`.
 pub fn build_x_static_converter_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadError> {
     // x_static_converter.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let context = rt::populate_context(service_provider, &BUILD_X_STATIC_CONVERTER_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
@@ -3162,7 +3162,7 @@ pub fn build_x_static_converter_xaml(
 
 fn build_x_static_converter_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_x_static_converter_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3173,7 +3173,7 @@ static BUILD_X_STATIC_TEXT_TRIMMING_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `x_static_text_trimming.xaml`.
 pub fn build_x_static_text_trimming_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TextBlock>, ::ferroui_markup_xaml::XamlLoadError> {
     // x_static_text_trimming.xaml(1,2) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     let context = rt::populate_context(service_provider, &BUILD_X_STATIC_TEXT_TRIMMING_XAML_DOCUMENT, rt::to_value(text_block_0.clone()));
@@ -3189,7 +3189,7 @@ pub fn build_x_static_text_trimming_xaml(
 
 fn build_x_static_text_trimming_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_x_static_text_trimming_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3200,7 +3200,7 @@ static BUILD_RESOURCES_MANY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo {
 /// Generated from `resources_many.xaml`.
 pub fn build_resources_many_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // resources_many.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_RESOURCES_MANY_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -3229,7 +3229,7 @@ pub fn build_resources_many_xaml(
 /// Builds the deferred content at `resources_many.xaml(1,182)` (a template or a deferred resource).
 fn build_resources_many_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_RESOURCES_MANY_XAML_DOCUMENT);
     // resources_many.xaml(1,182) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -3241,7 +3241,7 @@ fn build_resources_many_xaml_deferred_0(
 
 fn build_resources_many_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_resources_many_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3252,7 +3252,7 @@ static BUILD_RESOURCE_DICTIONARY_ROOT_XAML_DOCUMENT: rt::DocumentInfo = rt::Docu
 /// Generated from `resource_dictionary_root.xaml`.
 pub fn build_resource_dictionary_root_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>, ::ferroui_markup_xaml::XamlLoadError> {
     // resource_dictionary_root.xaml(1,2) ResourceDictionary
     let resource_dictionary_0 = ::ferroui_base::controls::ResourceDictionary::new();
     let context = rt::populate_context(service_provider, &BUILD_RESOURCE_DICTIONARY_ROOT_XAML_DOCUMENT, rt::to_value(resource_dictionary_0.clone()));
@@ -3275,7 +3275,7 @@ pub fn build_resource_dictionary_root_xaml(
 /// Builds the deferred content at `resource_dictionary_root.xaml(1,144)` (a template or a deferred resource).
 fn build_resource_dictionary_root_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_RESOURCE_DICTIONARY_ROOT_XAML_DOCUMENT);
     // resource_dictionary_root.xaml(1,144) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -3287,7 +3287,7 @@ fn build_resource_dictionary_root_xaml_deferred_0(
 
 fn build_resource_dictionary_root_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_resource_dictionary_root_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3298,7 +3298,7 @@ static BUILD_TRANSITIONS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { ba
 /// Generated from `transitions.xaml`.
 pub fn build_transitions_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // transitions.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_TRANSITIONS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -3323,7 +3323,7 @@ pub fn build_transitions_xaml(
 
 fn build_transitions_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_transitions_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3334,7 +3334,7 @@ static BUILD_CONTROL_THEME_RESOURCES_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 /// Generated from `control_theme_resources.xaml`.
 pub fn build_control_theme_resources_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // control_theme_resources.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_CONTROL_THEME_RESOURCES_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -3367,7 +3367,7 @@ pub fn build_control_theme_resources_xaml(
 /// Builds the deferred content at `control_theme_resources.xaml(1,118)` (a template or a deferred resource).
 fn build_control_theme_resources_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_RESOURCES_XAML_DOCUMENT);
     // control_theme_resources.xaml(1,118) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -3380,7 +3380,7 @@ fn build_control_theme_resources_xaml_deferred_0(
 /// Builds the deferred content at `control_theme_resources.xaml(1,163)` (a template or a deferred resource).
 fn build_control_theme_resources_xaml_deferred_1(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_RESOURCES_XAML_DOCUMENT);
     // control_theme_resources.xaml(1,163) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -3394,7 +3394,7 @@ fn build_control_theme_resources_xaml_deferred_1(
 /// Builds the deferred content at `control_theme_resources.xaml(1,265)` (a template or a deferred resource).
 fn build_control_theme_resources_xaml_deferred_2(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_RESOURCES_XAML_DOCUMENT);
     // control_theme_resources.xaml(1,265) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -3420,7 +3420,7 @@ fn build_control_theme_resources_xaml_deferred_2(
 
 fn build_control_theme_resources_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_control_theme_resources_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3431,7 +3431,7 @@ static BUILD_COMPILED_BINDING_ELEMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::Docu
 /// Generated from `compiled_binding_element.xaml`.
 pub fn build_compiled_binding_element_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // compiled_binding_element.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_COMPILED_BINDING_ELEMENT_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -3479,7 +3479,7 @@ pub fn build_compiled_binding_element_xaml(
 
 fn build_compiled_binding_element_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_compiled_binding_element_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3490,7 +3490,7 @@ static BUILD_COMPILED_BINDING_DATA_TYPE_XAML_DOCUMENT: rt::DocumentInfo = rt::Do
 /// Generated from `compiled_binding_data_type.xaml`.
 pub fn build_compiled_binding_data_type_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // compiled_binding_data_type.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_COMPILED_BINDING_DATA_TYPE_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -3533,7 +3533,7 @@ pub fn build_compiled_binding_data_type_xaml(
 
 fn build_compiled_binding_data_type_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_compiled_binding_data_type_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3544,7 +3544,7 @@ static BUILD_COMPILED_BINDING_PARENT_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 /// Generated from `compiled_binding_parent.xaml`.
 pub fn build_compiled_binding_parent_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // compiled_binding_parent.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_COMPILED_BINDING_PARENT_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -3581,7 +3581,7 @@ pub fn build_compiled_binding_parent_xaml(
 
 fn build_compiled_binding_parent_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_compiled_binding_parent_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3592,7 +3592,7 @@ static BUILD_COMPILED_BINDING_PLAIN_PROPERTY_XAML_DOCUMENT: rt::DocumentInfo = r
 /// Generated from `compiled_binding_plain_property.xaml`.
 pub fn build_compiled_binding_plain_property_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // compiled_binding_plain_property.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_COMPILED_BINDING_PLAIN_PROPERTY_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -3665,7 +3665,7 @@ pub fn build_compiled_binding_plain_property_xaml(
 
 fn build_compiled_binding_plain_property_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_compiled_binding_plain_property_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3676,7 +3676,7 @@ static BUILD_ON_PLATFORM_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { ba
 /// Generated from `on_platform.xaml`.
 pub fn build_on_platform_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // on_platform.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_ON_PLATFORM_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -3740,7 +3740,7 @@ pub fn build_on_platform_xaml(
 
 fn build_on_platform_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_on_platform_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3751,7 +3751,7 @@ static BUILD_ON_PLATFORM_WITHOUT_DEFAULT_XAML_DOCUMENT: rt::DocumentInfo = rt::D
 /// Generated from `on_platform_without_default.xaml`.
 pub fn build_on_platform_without_default_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // on_platform_without_default.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_ON_PLATFORM_WITHOUT_DEFAULT_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -3798,7 +3798,7 @@ pub fn build_on_platform_without_default_xaml(
 
 fn build_on_platform_without_default_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_on_platform_without_default_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3809,7 +3809,7 @@ static BUILD_FONT_FAMILY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { ba
 /// Generated from `font_family.xaml`.
 pub fn build_font_family_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // font_family.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_FONT_FAMILY_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -3840,7 +3840,7 @@ pub fn build_font_family_xaml(
 
 fn build_font_family_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_font_family_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3851,7 +3851,7 @@ static BUILD_FLAGS_VALUE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { ba
 /// Generated from `flags_value.xaml`.
 pub fn build_flags_value_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // flags_value.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_FLAGS_VALUE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -3869,7 +3869,7 @@ pub fn build_flags_value_xaml(
 /// Builds the deferred content at `flags_value.xaml(1,162)` (a template or a deferred resource).
 fn build_flags_value_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_FLAGS_VALUE_XAML_DOCUMENT);
     let corner_radius_filter_converter_0 = ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_new_0();
     // flags_value.xaml(1,162) Filter
@@ -3879,7 +3879,7 @@ fn build_flags_value_xaml_deferred_0(
 
 fn build_flags_value_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_flags_value_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3890,7 +3890,7 @@ static BUILD_CONTROL_TEMPLATE_PARTS_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `control_template_parts.xaml`.
 pub fn build_control_template_parts_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Button>, ::ferroui_markup_xaml::XamlLoadError> {
     // control_template_parts.xaml(1,2) Button
     let button_0 = ::ferroui_controls::Button::new();
     let context = rt::populate_context(service_provider, &BUILD_CONTROL_TEMPLATE_PARTS_XAML_DOCUMENT, rt::to_value(button_0.clone()));
@@ -3912,7 +3912,7 @@ pub fn build_control_template_parts_xaml(
 /// Builds the deferred content at `control_template_parts.xaml(1,151)` (a template or a deferred resource).
 fn build_control_template_parts_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROL_TEMPLATE_PARTS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // control_template_parts.xaml(1,151) Border
@@ -3949,7 +3949,7 @@ fn build_control_template_parts_xaml_deferred_0(
 
 fn build_control_template_parts_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_control_template_parts_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -3960,7 +3960,7 @@ static BUILD_DATA_TEMPLATE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { 
 /// Generated from `data_template.xaml`.
 pub fn build_data_template_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ItemsControl>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ItemsControl>, ::ferroui_markup_xaml::XamlLoadError> {
     // data_template.xaml(1,2) ItemsControl
     let items_control_0 = ::ferroui_controls::ItemsControl::new();
     let context = rt::populate_context(service_provider, &BUILD_DATA_TEMPLATE_XAML_DOCUMENT, rt::to_value(items_control_0.clone()));
@@ -3984,7 +3984,7 @@ pub fn build_data_template_xaml(
 /// Builds the deferred content at `data_template.xaml(1,147)` (a template or a deferred resource).
 fn build_data_template_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_DATA_TEMPLATE_XAML_DOCUMENT);
     // data_template.xaml(1,147) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
@@ -4002,7 +4002,7 @@ fn build_data_template_xaml_deferred_0(
 
 fn build_data_template_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_data_template_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4013,7 +4013,7 @@ static BUILD_CONTROL_THEME_TEMPLATE_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `control_theme_template.xaml`.
 pub fn build_control_theme_template_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // control_theme_template.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_CONTROL_THEME_TEMPLATE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -4031,7 +4031,7 @@ pub fn build_control_theme_template_xaml(
 /// Builds the deferred content at `control_theme_template.xaml(1,118)` (a template or a deferred resource).
 fn build_control_theme_template_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_TEMPLATE_XAML_DOCUMENT);
     // control_theme_template.xaml(1,118) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -4051,7 +4051,7 @@ fn build_control_theme_template_xaml_deferred_0(
 /// Builds the deferred content at `control_theme_template.xaml(1,211)` (a template or a deferred resource).
 fn build_control_theme_template_xaml_deferred_1(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_TEMPLATE_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // control_theme_template.xaml(1,211) Border
@@ -4083,7 +4083,7 @@ fn build_control_theme_template_xaml_deferred_1(
 
 fn build_control_theme_template_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_control_theme_template_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4094,7 +4094,7 @@ static BUILD_STYLE_SELECTORS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo 
 /// Generated from `style_selectors.xaml`.
 pub fn build_style_selectors_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // style_selectors.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_STYLE_SELECTORS_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -4226,7 +4226,7 @@ pub fn build_style_selectors_xaml(
 
 fn build_style_selectors_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_style_selectors_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4237,7 +4237,7 @@ static BUILD_STYLE_NESTED_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { b
 /// Generated from `style_nested.xaml`.
 pub fn build_style_nested_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // style_nested.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_STYLE_NESTED_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -4281,7 +4281,7 @@ pub fn build_style_nested_xaml(
 
 fn build_style_nested_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_style_nested_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4292,7 +4292,7 @@ static BUILD_STYLE_RESOURCES_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo 
 /// Generated from `style_resources.xaml`.
 pub fn build_style_resources_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // style_resources.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_STYLE_RESOURCES_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -4332,7 +4332,7 @@ pub fn build_style_resources_xaml(
 /// Builds the deferred content at `style_resources.xaml(1,118)` (a template or a deferred resource).
 fn build_style_resources_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_STYLE_RESOURCES_XAML_DOCUMENT);
     // style_resources.xaml(1,118) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -4344,7 +4344,7 @@ fn build_style_resources_xaml_deferred_0(
 
 fn build_style_resources_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_style_resources_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4355,7 +4355,7 @@ static BUILD_TYPE_CONVERTER_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo {
 /// Generated from `type_converter.xaml`.
 pub fn build_type_converter_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // type_converter.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_TYPE_CONVERTER_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -4420,7 +4420,7 @@ pub fn build_type_converter_xaml(
 
 fn build_type_converter_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_type_converter_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4431,7 +4431,7 @@ static BUILD_TYPE_CONVERTER_FAILURE_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `type_converter_failure.xaml`.
 pub fn build_type_converter_failure_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // type_converter_failure.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_TYPE_CONVERTER_FAILURE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -4459,7 +4459,7 @@ pub fn build_type_converter_failure_xaml(
 
 fn build_type_converter_failure_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_type_converter_failure_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4470,7 +4470,7 @@ static BUILD_TYPE_CONVERTER_CAST_FAILURE_XAML_DOCUMENT: rt::DocumentInfo = rt::D
 /// Generated from `type_converter_cast_failure.xaml`.
 pub fn build_type_converter_cast_failure_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // type_converter_cast_failure.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_TYPE_CONVERTER_CAST_FAILURE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -4498,7 +4498,7 @@ pub fn build_type_converter_cast_failure_xaml(
 
 fn build_type_converter_cast_failure_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_type_converter_cast_failure_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4509,7 +4509,7 @@ static BUILD_TYPE_CONVERTER_BASE_URI_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 /// Generated from `type_converter_base_uri.xaml`.
 pub fn build_type_converter_base_uri_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // type_converter_base_uri.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_TYPE_CONVERTER_BASE_URI_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -4537,7 +4537,7 @@ pub fn build_type_converter_base_uri_xaml(
 
 fn build_type_converter_base_uri_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_type_converter_base_uri_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4548,7 +4548,7 @@ static BUILD_IMAGE_SOURCE_MISSING_ASSET_XAML_DOCUMENT: rt::DocumentInfo = rt::Do
 /// Generated from `image_source_missing_asset.xaml`.
 pub fn build_image_source_missing_asset_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // image_source_missing_asset.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_IMAGE_SOURCE_MISSING_ASSET_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -4576,7 +4576,7 @@ pub fn build_image_source_missing_asset_xaml(
 
 fn build_image_source_missing_asset_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_image_source_missing_asset_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4587,7 +4587,7 @@ static BUILD_IMAGE_BRUSH_SOURCE_MISSING_ASSET_XAML_DOCUMENT: rt::DocumentInfo = 
 /// Generated from `image_brush_source_missing_asset.xaml`.
 pub fn build_image_brush_source_missing_asset_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // image_brush_source_missing_asset.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_IMAGE_BRUSH_SOURCE_MISSING_ASSET_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -4615,7 +4615,7 @@ pub fn build_image_brush_source_missing_asset_xaml(
 
 fn build_image_brush_source_missing_asset_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_image_brush_source_missing_asset_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4626,7 +4626,7 @@ static BUILD_IMAGE_SOURCE_ROOTED_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentI
 /// Generated from `image_source_rooted.xaml`.
 pub fn build_image_source_rooted_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
     // image_source_rooted.xaml(1,2) Border
     let border_0 = ::ferroui_controls::Border::new();
     let context = rt::populate_context(service_provider, &BUILD_IMAGE_SOURCE_ROOTED_XAML_DOCUMENT, rt::to_value(border_0.clone()));
@@ -4654,7 +4654,7 @@ pub fn build_image_source_rooted_xaml(
 
 fn build_image_source_rooted_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_image_source_rooted_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4665,7 +4665,7 @@ static BUILD_ITEMS_SOURCE_TYPED_LIST_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 /// Generated from `items_source_typed_list.xaml`.
 pub fn build_items_source_typed_list_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ItemsControl>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ItemsControl>, ::ferroui_markup_xaml::XamlLoadError> {
     // items_source_typed_list.xaml(1,2) ItemsControl
     let items_control_0 = ::ferroui_controls::ItemsControl::new();
     let context = rt::populate_context(service_provider, &BUILD_ITEMS_SOURCE_TYPED_LIST_XAML_DOCUMENT, rt::to_value(items_control_0.clone()));
@@ -4700,7 +4700,7 @@ pub fn build_items_source_typed_list_xaml(
 /// Builds the deferred content at `items_source_typed_list.xaml(6,8)` (a template or a deferred resource).
 fn build_items_source_typed_list_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_ITEMS_SOURCE_TYPED_LIST_XAML_DOCUMENT);
     // items_source_typed_list.xaml(6,8) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
@@ -4725,7 +4725,7 @@ fn build_items_source_typed_list_xaml_deferred_0(
 
 fn build_items_source_typed_list_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_items_source_typed_list_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4736,7 +4736,7 @@ static BUILD_CLASS_VALUE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { ba
 /// Generated from `class_value.xaml`.
 pub fn build_class_value_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // class_value.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_CLASS_VALUE_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -4775,7 +4775,7 @@ pub fn build_class_value_xaml(
 
 fn build_class_value_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_class_value_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4786,7 +4786,7 @@ static BUILD_CLASS_BINDING_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { 
 /// Generated from `class_binding.xaml`.
 pub fn build_class_binding_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // class_binding.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_CLASS_BINDING_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -4841,7 +4841,7 @@ pub fn build_class_binding_xaml(
 
 fn build_class_binding_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_class_binding_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4852,7 +4852,7 @@ static BUILD_CLASS_SETTER_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { b
 /// Generated from `class_setter.xaml`.
 pub fn build_class_setter_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // class_setter.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_CLASS_SETTER_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -4899,7 +4899,7 @@ pub fn build_class_setter_xaml(
 
 fn build_class_setter_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_class_setter_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4910,7 +4910,7 @@ static BUILD_LIST_TEXT_HELD_COLLECTION_XAML_DOCUMENT: rt::DocumentInfo = rt::Doc
 /// Generated from `list_text_held_collection.xaml`.
 pub fn build_list_text_held_collection_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Canvas>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Canvas>, ::ferroui_markup_xaml::XamlLoadError> {
     // list_text_held_collection.xaml(1,2) Canvas
     let canvas_0 = ::ferroui_controls::Canvas::new();
     let context = rt::populate_context(service_provider, &BUILD_LIST_TEXT_HELD_COLLECTION_XAML_DOCUMENT, rt::to_value(canvas_0.clone()));
@@ -4982,7 +4982,7 @@ pub fn build_list_text_held_collection_xaml(
 
 fn build_list_text_held_collection_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_list_text_held_collection_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -4993,7 +4993,7 @@ static BUILD_TYPE_EXTENSION_OBJECT_XAML_DOCUMENT: rt::DocumentInfo = rt::Documen
 /// Generated from `type_extension_object.xaml`.
 pub fn build_type_extension_object_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // type_extension_object.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_TYPE_EXTENSION_OBJECT_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -5039,7 +5039,7 @@ pub fn build_type_extension_object_xaml(
 /// Builds the deferred content at `type_extension_object.xaml(6,10)` (a template or a deferred resource).
 fn build_type_extension_object_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_TYPE_EXTENSION_OBJECT_XAML_DOCUMENT);
     // type_extension_object.xaml(6,10) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
@@ -5057,7 +5057,7 @@ fn build_type_extension_object_xaml_deferred_0(
 
 fn build_type_extension_object_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_type_extension_object_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -5068,7 +5068,7 @@ static BUILD_COMPILED_BINDING_UNNAMED_TYPES_XAML_DOCUMENT: rt::DocumentInfo = rt
 /// Generated from `compiled_binding_unnamed_types.xaml`.
 pub fn build_compiled_binding_unnamed_types_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // compiled_binding_unnamed_types.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_COMPILED_BINDING_UNNAMED_TYPES_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -5153,7 +5153,7 @@ pub fn build_compiled_binding_unnamed_types_xaml(
 
 fn build_compiled_binding_unnamed_types_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_compiled_binding_unnamed_types_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -5164,7 +5164,7 @@ static BUILD_RUNTIME_LISTS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { 
 /// Generated from `runtime_lists.xaml`.
 pub fn build_runtime_lists_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // runtime_lists.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_RUNTIME_LISTS_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -5240,7 +5240,7 @@ pub fn build_runtime_lists_xaml(
 
 fn build_runtime_lists_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_runtime_lists_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -5251,7 +5251,7 @@ static BUILD_METHOD_COMMAND_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo {
 /// Generated from `method_command.xaml`.
 pub fn build_method_command_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // method_command.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_METHOD_COMMAND_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -5363,7 +5363,7 @@ pub fn build_method_command_xaml(
 
 fn build_method_command_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_method_command_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -5374,7 +5374,7 @@ static BUILD_CONTAINER_QUERY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo 
 /// Generated from `container_query.xaml`.
 pub fn build_container_query_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // container_query.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_CONTAINER_QUERY_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -5460,7 +5460,7 @@ pub fn build_container_query_xaml(
 
 fn build_container_query_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_container_query_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -5471,7 +5471,7 @@ static BUILD_STATIC_RESOURCE_ELEMENT_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 /// Generated from `static_resource_element.xaml`.
 pub fn build_static_resource_element_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // static_resource_element.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_STATIC_RESOURCE_ELEMENT_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -5554,7 +5554,7 @@ pub fn build_static_resource_element_xaml(
 /// Builds the deferred content at `static_resource_element.xaml(3,6)` (a template or a deferred resource).
 fn build_static_resource_element_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_STATIC_RESOURCE_ELEMENT_XAML_DOCUMENT);
     // static_resource_element.xaml(3,6) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -5568,7 +5568,7 @@ fn build_static_resource_element_xaml_deferred_0(
 /// Builds the deferred content at `static_resource_element.xaml(6,6)` (a template or a deferred resource).
 fn build_static_resource_element_xaml_deferred_1(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_STATIC_RESOURCE_ELEMENT_XAML_DOCUMENT);
     // static_resource_element.xaml(6,6) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -5580,7 +5580,7 @@ fn build_static_resource_element_xaml_deferred_1(
 
 fn build_static_resource_element_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_static_resource_element_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -5591,7 +5591,7 @@ static BUILD_RUNTIME_LIST_OF_REFERENCES_XAML_DOCUMENT: rt::DocumentInfo = rt::Do
 /// Generated from `runtime_list_of_references.xaml`.
 pub fn build_runtime_list_of_references_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ItemsControl>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ItemsControl>, ::ferroui_markup_xaml::XamlLoadError> {
     // runtime_list_of_references.xaml(1,2) ItemsControl
     let items_control_0 = ::ferroui_controls::ItemsControl::new();
     let context = rt::populate_context(service_provider, &BUILD_RUNTIME_LIST_OF_REFERENCES_XAML_DOCUMENT, rt::to_value(items_control_0.clone()));
@@ -5613,7 +5613,7 @@ pub fn build_runtime_list_of_references_xaml(
 
 fn build_runtime_list_of_references_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_runtime_list_of_references_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -5624,7 +5624,7 @@ static BUILD_ITEMS_SOURCE_INDEXER_XAML_DOCUMENT: rt::DocumentInfo = rt::Document
 /// Generated from `items_source_indexer.xaml`.
 pub fn build_items_source_indexer_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // items_source_indexer.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_ITEMS_SOURCE_INDEXER_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -5686,7 +5686,7 @@ pub fn build_items_source_indexer_xaml(
 
 fn build_items_source_indexer_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_items_source_indexer_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -5704,7 +5704,7 @@ static BUILD_SCOPED_NAMESPACE_TYPES_XAML_DOCUMENT: rt::DocumentInfo = rt::Docume
 /// Generated from `scoped_namespace_types.xaml`.
 pub fn build_scoped_namespace_types_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // scoped_namespace_types.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_SCOPED_NAMESPACE_TYPES_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -5737,7 +5737,7 @@ pub fn build_scoped_namespace_types_xaml(
 
 fn build_scoped_namespace_types_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_scoped_namespace_types_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -5754,7 +5754,7 @@ static BUILD_SCOPED_NAMESPACE_BINDINGS_XAML_DOCUMENT: rt::DocumentInfo = rt::Doc
 /// Generated from `scoped_namespace_bindings.xaml`.
 pub fn build_scoped_namespace_bindings_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // scoped_namespace_bindings.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_SCOPED_NAMESPACE_BINDINGS_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -5833,7 +5833,7 @@ pub fn build_scoped_namespace_bindings_xaml(
 /// Builds the deferred content at `scoped_namespace_bindings.xaml(1,514)` (a template or a deferred resource).
 fn build_scoped_namespace_bindings_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_SCOPED_NAMESPACE_BINDINGS_XAML_DOCUMENT.base_uri, namespaces: BUILD_SCOPED_NAMESPACE_BINDINGS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // scoped_namespace_bindings.xaml(1,514) TextBlock
@@ -5864,7 +5864,7 @@ fn build_scoped_namespace_bindings_xaml_deferred_0(
 
 fn build_scoped_namespace_bindings_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_scoped_namespace_bindings_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -6011,7 +6011,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
 pub fn try_load(
     service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     uri: &str,
-) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadError> {
     let ::core::option::Option::Some((_, build)) = ::core::iter::Iterator::find(&mut DOCUMENTS.iter(), |(document, _)| rt::uri_equals(uri, ROOT_URI, document)) else {
         return ::core::result::Result::Ok(::core::option::Option::None);
     };

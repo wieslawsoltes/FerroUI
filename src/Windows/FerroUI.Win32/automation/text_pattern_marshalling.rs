@@ -8,11 +8,11 @@ use super::interop::{TextPatternRangeEndpoint, TextUnit, UiaCoreTypesApi};
 use super::marshalling::{ComVariant, VariantValue};
 use ferroui_base::media::Color;
 use ferroui_controls::automation::provider::{self as portable, TextAttribute, TextAttributeValue};
-use ferroui_controls::automation::ElementNotEnabledException;
+use ferroui_controls::automation::ElementNotEnabledError;
 use ferroui_microcom::{ComPtr, HResult, IUnknown, COR_E_INVALIDOPERATION, E_FAIL, E_INVALIDARG};
 
 pub(crate) fn provider_error(error: portable::ProviderError) -> HResult {
-    if error.downcast_ref::<ElementNotEnabledException>().is_some() {
+    if error.downcast_ref::<ElementNotEnabledError>().is_some() {
         return ELEMENT_NOT_ENABLED;
     }
     match error.downcast_ref::<portable::TextProviderError>() {

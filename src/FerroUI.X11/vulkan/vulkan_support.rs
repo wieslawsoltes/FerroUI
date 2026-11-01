@@ -9,7 +9,7 @@ use ferroui_controls::platform::{INativePlatformHandleSurface, IPlatformHandle};
 use ferroui_vulkan::ash::{self, vk};
 use ferroui_vulkan::{
     IVulkanInstance, IVulkanKhrSurfacePlatformSurface, IVulkanKhrSurfacePlatformSurfaceFactory,
-    IVulkanPlatformGraphicsContext, VkGetInstanceProcAddressDelegate, VulkanException, VulkanOptions,
+    IVulkanPlatformGraphicsContext, VkGetInstanceProcAddressDelegate, VulkanError, VulkanOptions,
     VulkanPlatformGraphics, VulkanPlatformSpecificOptions,
 };
 use std::any::Any;
@@ -85,18 +85,18 @@ impl VulkanSupport {
         VulkanPlatformGraphics::try_create(&options.unwrap_or_default(), platform_options)
     }
 
-    fn create_dummy_surface(display: XDisplay, instance: &dyn IVulkanInstance) -> Result<u64, VulkanException> {
+    fn create_dummy_surface(display: XDisplay, instance: &dyn IVulkanInstance) -> Result<u64, VulkanError> {
         let surf = Self::create_xlib_surface(display, OFFSCREEN_WINDOW.load(Ordering::SeqCst) as XID, instance)?;
         xlib::x_sync(display, true);
         Ok(surf)
     }
 
-    fn create_xlib_surface(display: XDisplay, window: XID, instance: &dyn IVulkanInstance) -> Result<u64, VulkanException> {
+    fn create_xlib_surface(display: XDisplay, window: XID, instance: &dyn IVulkanInstance) -> Result<u64, VulkanError> {
         let vulkan_xlib = X11VulkanInterface::new(instance);
         let create_info = VkXlibSurfaceCreateInfoKHR::default().dpy(display.as_ptr().cast()).window(window as vk::Window);
 
         let (result, surface) = vulkan_xlib.vk_create_xlib_surface_khr(instance.handle(), &create_info);
-        VulkanException::throw_on_error("vkCreateXlibSurfaceKHR", result)?;
+        VulkanError::throw_on_error("vkCreateXlibSurfaceKHR", result)?;
         Ok(surface)
     }
 }

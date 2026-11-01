@@ -3,7 +3,7 @@
 //! one arrives and skipping the `None`s.
 
 use crate::reactive_command::IReactiveCommandOf;
-use crate::PanicException;
+use crate::PanicError;
 use ferroui_reactive::disposables::{SerialDisposable, SingleAssignmentDisposable};
 use ferroui_reactive::Observer;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
@@ -194,7 +194,7 @@ impl<S: 'static, U: 'static> IObserver<Option<S>> for SwitchSink<S, U> {
     fn on_next(&self, value: Option<S>) {
         let Some(value) = value else { return };
         // `try { inner = selector(value); } catch (Exception ex) { OnError(ex); }`.
-        let inner = match PanicException::catch(|| (self.selector)(value)).unwrap_or_else(|(error, _)| Err(error)) {
+        let inner = match PanicError::catch(|| (self.selector)(value)).unwrap_or_else(|(error, _)| Err(error)) {
             Ok(inner) => inner,
             Err(error) => {
                 self.on_error(error);

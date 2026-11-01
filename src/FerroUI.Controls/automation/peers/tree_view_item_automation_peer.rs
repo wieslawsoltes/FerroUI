@@ -3,7 +3,7 @@ use super::{
     ItemsControlAutomationPeerImpl,
 };
 use crate::automation::provider::{ISelectionItemProvider, ISelectionProvider, ProviderAdapter};
-use crate::automation::ElementNotEnabledException;
+use crate::automation::ElementNotEnabledError;
 use crate::TreeViewItem;
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Ref};
 use std::rc::Rc;
@@ -40,15 +40,15 @@ impl ISelectionItemProvider for ProviderAdapter<TreeViewItemAutomationPeer> {
         self.0.selection_container()
     }
 
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.add_to_selection()
     }
 
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.remove_from_selection()
     }
 
-    fn select(&self) -> Result<(), ElementNotEnabledException> {
+    fn select(&self) -> Result<(), ElementNotEnabledError> {
         self.0.select()
     }
 }
@@ -83,7 +83,7 @@ impl TreeViewItemAutomationPeer {
 
     /// Clears any existing selection and then selects the item (the
     /// selection item provider contract).
-    pub fn select(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn select(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         if let Some(item) = self.owner().cast::<TreeViewItem>() {
@@ -98,7 +98,7 @@ impl TreeViewItemAutomationPeer {
 
     // The reference implements the two members below explicitly: they are
     // members of the selection item provider contract only.
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         if let Some(item) = self.owner().cast::<TreeViewItem>() {
@@ -108,7 +108,7 @@ impl TreeViewItemAutomationPeer {
         Ok(())
     }
 
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         if let Some(item) = self.owner().cast::<TreeViewItem>() {

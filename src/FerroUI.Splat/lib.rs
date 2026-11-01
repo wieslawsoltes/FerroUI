@@ -39,10 +39,12 @@ pub use builder::{AppBuilder, IAppBuilder, IAppInstance, IModule, ModuleExt, Spl
 pub use logging::{
     ActionLogger, ConsoleLogger, DebugLogger, DefaultLogManager, FullLoggerExt, FuncLogManager,
     IAllocationFreeErrorLogger, IAllocationFreeLogger, IEnableLogger, IFullLogger, ILogManager,
-    ILogger, IStaticFullLogger, LogHost, LogLevel, LogManagerExt, LoggingException,
+    ILogger, IStaticFullLogger, LogHost, LogLevel, LogManagerExt, LoggingError,
     MemoizingMRUCache, NullLogger, SplatLogManagerModule, SplatLoggerModule, StaticFullLogger,
     StaticFullLoggerExt, WrappingFullLogger, WrappingLogLevelLogger, WrappingPrefixLogger,
 };
+#[allow(deprecated)]
+pub use logging::LoggingException;
 pub use mode_detection::{DefaultModeDetector, IModeDetector, Mode, ModeDetector};
 pub use service_location::{
     AppLocator, DependencyResolverMixins, ErasedService, GlobalGenericFirstDependencyResolver,

@@ -1,7 +1,7 @@
 //! `RxTest` (`ReactiveUI.Testing/RxTest.cs`).
 
-use ferroui_reactive::linq::TimeoutException;
-use ferroui_reactiveui::PanicException;
+use ferroui_reactive::linq::TimeoutError;
+use ferroui_reactiveui::PanicError;
 use ferroui_splat::AppBuilder;
 use ferroui_system::threading::tasks::{run, Task, TaskCompletionSource};
 use ferroui_system::ObservableError;
@@ -116,9 +116,9 @@ impl RxTest {
     /// application builder reset before and after it, and gives a task that ends as the test does
     /// (`AppBuilderTestAsync(Func<Task>, int)`).
     ///
-    /// The task ends with a [`TimeoutException`] when the gate is not free within `max_wait_ms`
+    /// The task ends with a [`TimeoutError`] when the gate is not free within `max_wait_ms`
     /// milliseconds, or when the test runs longer than that; with the error of the test when it
-    /// fails, and with the error of a panic ([`PanicException`]) when `test_body` panics, as an
+    /// fails, and with the error of a panic ([`PanicError`]) when `test_body` panics, as an
     /// exception thrown in an `async` method faults its task.
     ///
     /// Not ported: the `ArgumentException` of a null test body - argument validation.
@@ -129,7 +129,7 @@ impl RxTest {
             // others forever.
             let gate = TestGate::current();
             if !gate.clone().wait(max_wait).await {
-                return Err(Rc::new(TimeoutException) as ObservableError);
+                return Err(Rc::new(TimeoutError) as ObservableError);
             }
 
             // Resets any previous builder state.
@@ -137,13 +137,13 @@ impl RxTest {
 
             // Runs the test with a time limit, so that it cannot hang forever, and passes on its
             // error.
-            let test_task = match PanicException::catch(test_body) {
+            let test_task = match PanicError::catch(test_body) {
                 Ok(task) => task,
                 Err((error, _payload)) => Task::from_exception(error),
             };
             let outcome = match first_of(test_task, delay(max_wait)).await {
                 First::Left(outcome) => outcome,
-                First::Right(_) => Err(Rc::new(TimeoutException) as ObservableError),
+                First::Right(_) => Err(Rc::new(TimeoutError) as ObservableError),
             };
 
             // The final reset after the test.

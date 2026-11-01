@@ -1,5 +1,5 @@
 //! Candidate-only validation of resource lookups deferred during initialization.
-use crate::XamlLoadException;
+use crate::XamlLoadError;
 use ferroui_base::{controls::ResourceKey, styling::ThemeVariant, Ref, WeakRef};
 use ferroui_controls::Control;
 use std::cell::RefCell;
@@ -30,7 +30,7 @@ pub(crate) fn record(target: &Ref<Control>, key: ResourceKey, theme: Option<Them
 /// declarations have been populated. Does not raise Initialized or invoke an
 /// application constructor. Validate while the candidate still has its parent
 /// and resource graph, before a reload adapter detaches its replacement content.
-pub fn prepare_candidate(root: &ferroui_base::StyledElement) -> Result<(), XamlLoadException> {
+pub fn prepare_candidate(root: &ferroui_base::StyledElement) -> Result<(), XamlLoadError> {
     let mut elements = vec![root.to_ref()];
     elements.extend(root.get_logical_descendants());
     let lookups = LOOKUPS.with(|slot| {
@@ -56,7 +56,7 @@ pub fn prepare_candidate(root: &ferroui_base::StyledElement) -> Result<(), XamlL
     validate_lookups(lookups)?;
     for element in elements {
         ferroui_markup::markup::data::DelayedBinding::prepare_values(&element)
-            .map_err(|error| XamlLoadException::with_message(error.to_string()))?;
+            .map_err(|error| XamlLoadError::with_message(error.to_string()))?;
     }
     Ok(())
 }
@@ -64,7 +64,7 @@ pub fn prepare_candidate(root: &ferroui_base::StyledElement) -> Result<(), XamlL
 /// Builds a root's selected template against the detached resource graph.
 /// Does not attach it, raise TemplateApplied, or replace the visible template.
 /// Custom template builders with external effects require their own reload adapter.
-pub fn validate_root_template(root: &ferroui_base::StyledElement) -> Result<(), XamlLoadException> {
+pub fn validate_root_template(root: &ferroui_base::StyledElement) -> Result<(), XamlLoadError> {
     if let Some(control) = root.to_ref().cast::<ferroui_controls::primitives::TemplatedControl>() {
         control.apply_styling();
         if let Some(template) = control.template() {
@@ -77,14 +77,14 @@ pub fn validate_root_template(root: &ferroui_base::StyledElement) -> Result<(), 
     Ok(())
 }
 
-fn validate_lookups(lookups: Vec<Lookup>) -> Result<(), XamlLoadException> {
+fn validate_lookups(lookups: Vec<Lookup>) -> Result<(), XamlLoadError> {
     for lookup in lookups {
         if let Some(target) = lookup.target.upgrade() {
             if target
                 .try_find_resource(&lookup.key, lookup.theme.as_ref())
                 .is_none()
             {
-                return Err(XamlLoadException::with_message(format!(
+                return Err(XamlLoadError::with_message(format!(
                     "Static resource '{}' not found in reload candidate.",
                     lookup.key
                 )));
@@ -112,7 +112,7 @@ impl ValidationScope {
             previous: LOOKUPS.with(|slot| slot.replace(Some(Vec::new()))),
         }
     }
-    pub fn validate(&self) -> Result<(), XamlLoadException> {
+    pub fn validate(&self) -> Result<(), XamlLoadError> {
         // Release the TLS borrow before querying resources, which may run user code.
         let lookups = LOOKUPS.with(|slot| {
             slot.borrow_mut()

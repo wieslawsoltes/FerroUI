@@ -39,13 +39,13 @@ impl ItemsPanelTemplate {
 
     /// [`build`](Self::build) without the panic: content that is not a
     /// panel is an error.
-    pub fn try_build(&self) -> Result<Option<Ref<Panel>>, crate::XamlLoadException> {
+    pub fn try_build(&self) -> Result<Option<Ref<Panel>>, crate::XamlLoadError> {
         let Some(result) = TemplateContent::try_load_as::<Ref<ferroui_controls::Control>>(self.content().as_ref())? else {
             return Ok(None);
         };
         match result.result().cast::<Panel>() {
             Some(panel) => Ok(Some(panel)),
-            None => Err(crate::XamlLoadException::with_message(format!(
+            None => Err(crate::XamlLoadError::with_message(format!(
                 "Unable to cast object of type '{}' to type 'Panel'.",
                 result.result().get_type().name()
             ))),

@@ -26,7 +26,7 @@
 //! Deviation (DEVIATIONS.md, ReactiveUI): the exception of a function goes to the execution and
 //! to `ThrownExceptions` upstream. Here the `try_` form of a factory takes a function returning a
 //! `Result`, whose `Err` takes that path; a panic of the function of any form is caught where
-//! upstream catches the exception, and takes it as a [`PanicException`](crate::PanicException). A
+//! upstream catches the exception, and takes it as a [`PanicError`](crate::PanicError). A
 //! task is a closure returning a future (a `Task<R>` is one), run as a task of the thread when the
 //! execution is subscribed (docs/porting/reactive.md, section 5.8). The null checks of the
 //! arguments (`ArgumentNullException`) have no counterpart: the arguments cannot be null.

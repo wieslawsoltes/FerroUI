@@ -1,7 +1,7 @@
 //! `ObservableMixins` (`ReactiveUI.Shared/Mixins/ObservableMixins.cs`): `WhereNotNull`, and the
 //! asynchronous executions with cancellation that the commands made from tasks run.
 
-use crate::PanicException;
+use crate::PanicError;
 use ferroui_reactive::disposables::Disposable;
 use ferroui_system::threading::tasks::Task;
 use ferroui_system::threading::{CancellationToken, CancellationTokenRegistration, CancellationTokenSource};
@@ -101,7 +101,7 @@ impl<T> IObserver<Option<T>> for WhereNotNullSink<T> {
 /// error of the factory (`DeferredValueObservable<T>`).
 ///
 /// Upstream catches the exception of the factory; here the factory returns a `Result`, whose
-/// `Err` is notified, and a panic of the factory is caught and notified as a [`PanicException`].
+/// `Err` is notified, and a panic of the factory is caught and notified as a [`PanicError`].
 #[doc(hidden)]
 pub struct DeferredValueObservable<T> {
     factory: Box<dyn Fn() -> Result<T, ObservableError>>,
@@ -116,7 +116,7 @@ impl<T> DeferredValueObservable<T> {
 
 impl<T> IObservable<T> for DeferredValueObservable<T> {
     fn subscribe(&self, observer: Rc<dyn IObserver<T>>) -> Rc<dyn IDisposable> {
-        match PanicException::catch(|| (self.factory)()) {
+        match PanicError::catch(|| (self.factory)()) {
             Ok(Ok(value)) => {
                 observer.on_next(value);
                 observer.on_completed();

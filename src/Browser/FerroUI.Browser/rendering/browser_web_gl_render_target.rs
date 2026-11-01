@@ -8,7 +8,7 @@ use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::PixelSize;
 use ferroui_opengl::gl_consts;
 use ferroui_opengl::surfaces::{IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession};
-use ferroui_opengl::{GetProcAddress, GlInterface, GlProfileType, GlVersion, IGlContext, OpenGlException};
+use ferroui_opengl::{GetProcAddress, GlInterface, GlProfileType, GlVersion, IGlContext, OpenGlError};
 #[cfg(feature = "skia")]
 use ferroui_skia::gpu::open_gl::IGlSkiaSpecificOptionsFeature;
 use std::any::{Any, TypeId};
@@ -269,7 +269,7 @@ impl WebGlContext {
     ) -> Rc<Self> {
         let old = get_current_context();
         if !make_context_current(context_id) {
-            panic!("{}", OpenGlException::new("Unable to make the context current"));
+            panic!("{}", OpenGlError::new("Unable to make the context current"));
         }
         let get_proc_address: GetProcAddress = Rc::new(|name: &str| -> *const c_void { native::get_proc_address(name) });
         // SAFETY: in the WebAssembly module the loader resolves names in the
@@ -371,7 +371,7 @@ impl IGlContext for WebGlContext {
         self.verify_access();
         let old = get_current_context();
         if !make_context_current(self.context_id) {
-            panic!("{}", OpenGlException::new("Unable to make the context current"));
+            panic!("{}", OpenGlError::new("Unable to make the context current"));
         }
         Rc::new(RestoreContext { context_id: Cell::new(Some(old)) })
     }

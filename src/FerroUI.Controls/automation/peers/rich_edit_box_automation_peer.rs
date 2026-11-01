@@ -7,7 +7,7 @@ use crate::automation::provider::{
     ProviderError, RichTextAutomationHost, RichTextAutomationPeer, RichTextAutomationState,
     TextProviderError,
 };
-use crate::automation::{ElementNotEnabledException, ValuePatternIdentifiers};
+use crate::automation::{ElementNotEnabledError, ValuePatternIdentifiers};
 use crate::RichEditBox;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::{
@@ -110,7 +110,7 @@ impl RichEditBoxAutomationPeer {
             .and_then(|owner| owner.cast::<RichEditBox>())
             .ok_or(TextProviderError::ElementNotAvailable)?;
         if !owner.is_effectively_enabled() {
-            return Err(Box::new(ElementNotEnabledException::new()));
+            return Err(Box::new(ElementNotEnabledError::new()));
         }
         if owner.is_read_only() {
             return Err(Box::new(std::io::Error::new(

@@ -5,7 +5,7 @@
 
 use super::{AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl};
 use crate::automation::provider::{IInvokeProvider, ProviderAdapter};
-use crate::automation::ElementNotEnabledException;
+use crate::automation::ElementNotEnabledError;
 use crate::AutoSuggestBox;
 use ferroui_base::{ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, Ref};
 use std::rc::Rc;
@@ -56,7 +56,7 @@ impl IInvokeProvider for ProviderAdapter<AutoSuggestBoxAutomationPeer> {
     }
 
     // AutoSuggestBoxAutomationPeer::Invoke: ProgrammaticSubmitQuery.
-    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         self.0.owner().programmatic_submit_query();
         Ok(())
     }

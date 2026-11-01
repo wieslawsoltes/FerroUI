@@ -2,7 +2,7 @@
 
 use super::{MetalDrawingSession, SharedLayer, SurfaceShared};
 use ferroui_base::platform::surfaces::IPlatformRenderSurfaceRenderTarget;
-use ferroui_base::platform::PlatformGraphicsContextLostException;
+use ferroui_base::platform::PlatformGraphicsContextLostError;
 use ferroui_base::PixelSize;
 use ferroui_metal::{IMetalDevice, IMetalPlatformSurfaceRenderTarget, IMetalPlatformSurfaceRenderingSession};
 use objc2_core_foundation::CGSize;
@@ -60,7 +60,7 @@ impl IMetalPlatformSurfaceRenderTarget for MetalRenderTarget {
         }
 
         let Some(drawable) = self.layer.0.nextDrawable() else {
-            panic!("{}", PlatformGraphicsContextLostException);
+            panic!("{}", PlatformGraphicsContextLostError);
         };
         Rc::new(MetalDrawingSession::new(
             self.device.clone(),

@@ -20,7 +20,7 @@ use super::{
 use crate::platform::{
     IExternalObjectsHandleWrapRenderInterfaceContextFeature, IExternalObjectsRenderInterfaceContextFeature,
     IExternalObjectsWrappedGpuHandle, IPlatformHandle, IPlatformRenderInterfaceContext,
-    IPlatformRenderInterfaceImportedImage, IPlatformRenderInterfaceImportedSemaphore, PlatformGraphicsContextLostException,
+    IPlatformRenderInterfaceImportedImage, IPlatformRenderInterfaceImportedSemaphore, PlatformGraphicsContextLostError,
     PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageProperties, PlatformHandle,
 };
 use std::cell::RefCell;
@@ -463,7 +463,7 @@ impl IServerGpuImportedObject for ServerImportedGpuImage {
         let result = (|| {
             // The original context was lost and the new one might have different capabilities
             if !self.base.is_current_context(server) {
-                return Err(Arc::new(PlatformGraphicsContextLostException) as ServerJobError);
+                return Err(Arc::new(PlatformGraphicsContextLostError) as ServerJobError);
             }
             if let Some(source) = &source {
                 *self.image.borrow_mut() = Some(source.import(&*self.base.feature)?);

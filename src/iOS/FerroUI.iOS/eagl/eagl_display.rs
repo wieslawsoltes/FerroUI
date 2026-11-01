@@ -2,12 +2,12 @@
 
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::platform::{
-    IOptionalFeatureProvider, IPlatformGraphics, IPlatformGraphicsContext, PlatformGraphicsContextLostException,
+    IOptionalFeatureProvider, IPlatformGraphics, IPlatformGraphicsContext, PlatformGraphicsContextLostError,
 };
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::utilities::ThreadBound;
 use ferroui_opengl::gl_consts::{GL_SAMPLES, GL_STENCIL_BITS};
-use ferroui_opengl::{GetProcAddress, GlInterface, GlProfileType, GlVersion, IGlContext, OpenGlException};
+use ferroui_opengl::{GetProcAddress, GlInterface, GlProfileType, GlVersion, IGlContext, OpenGlError};
 use objc2::rc::Retained;
 use objc2::AllocAnyThread;
 use objc2_open_gl_es::{EAGLContext, EAGLRenderingAPI, EAGLSharegroup};
@@ -89,12 +89,12 @@ impl EaglPlatformGraphics {
         GlVersion::new(GlProfileType::OpenGLES, 3, 0)
     }
 
-    fn new() -> Result<EaglPlatformGraphics, OpenGlException> {
+    fn new() -> Result<EaglPlatformGraphics, OpenGlError> {
         // SAFETY: the path is a terminated string; the mode is the one of
         // the reference (1, `RTLD_LAZY`). The library is never closed.
         let lib_gl = unsafe { libc::dlopen(PATH.as_ptr(), 1) };
         if lib_gl.is_null() {
-            return Err(OpenGlException::new(format!("Unable to load {}", PATH.to_string_lossy())));
+            return Err(OpenGlError::new(format!("Unable to load {}", PATH.to_string_lossy())));
         }
 
         let graphics = EaglPlatformGraphics { lib_gl: lib_gl as usize, context: OnceLock::new() };
@@ -108,7 +108,7 @@ impl EaglPlatformGraphics {
     }
 
     /// The interface of OpenGL ES over the library, and a context with it.
-    fn create_main_context(&self) -> Result<Rc<GlContext>, OpenGlException> {
+    fn create_main_context(&self) -> Result<Rc<GlContext>, OpenGlError> {
         let lib_gl = self.lib_gl;
         let get_proc_address: GetProcAddress = Rc::new(move |proc: &str| -> *const c_void {
             let Ok(name) = CString::new(proc) else {
@@ -179,7 +179,7 @@ impl GlContext {
     pub fn new(
         gl_interface: Rc<GlInterface>,
         sharegroup: Option<&EAGLSharegroup>,
-    ) -> Result<Rc<GlContext>, OpenGlException> {
+    ) -> Result<Rc<GlContext>, OpenGlError> {
         let api = EAGLRenderingAPI::OpenGLES3;
         // SAFETY: the initializers of a newly allocated context, with a
         // constant of the API and a share group of EAGL.
@@ -192,7 +192,7 @@ impl GlContext {
             }
         };
         let Some(context) = context else {
-            return Err(OpenGlException::new(format!(
+            return Err(OpenGlError::new(format!(
                 "Could not initialize an instance of the type 'OpenGLES.EAGLContext': the native '{initializer}' method returned nil."
             )));
         };
@@ -213,7 +213,7 @@ impl GlContext {
     /// is disposed, and when EAGL does not make it current.
     fn make_current_context(&self) -> Rc<dyn IDisposable> {
         let Some(context) = self.context() else {
-            panic!("{}", PlatformGraphicsContextLostException);
+            panic!("{}", PlatformGraphicsContextLostError);
         };
         // SAFETY: class methods of EAGL that read and set the context of
         // the calling thread. A context is current on one thread at a
@@ -223,7 +223,7 @@ impl GlContext {
         let old = unsafe { EAGLContext::currentContext() };
         // SAFETY: as above.
         if !unsafe { EAGLContext::setCurrentContext(Some(&context)) } {
-            panic!("{}", OpenGlException::new("Unable to make context current"));
+            panic!("{}", OpenGlError::new("Unable to make context current"));
         }
         Rc::new(ResetContext::new(old))
     }
@@ -279,7 +279,7 @@ impl IPlatformGraphicsContext for GlContext {
     /// is disposed, and when EAGL does not make it current.
     fn ensure_current(&self) -> Rc<dyn IDisposable> {
         let Some(context) = self.context() else {
-            panic!("{}", PlatformGraphicsContextLostException);
+            panic!("{}", PlatformGraphicsContextLostError);
         };
         if is_current(&context) {
             return Disposable::empty();
@@ -348,7 +348,7 @@ impl IGlContext for GlContext {
     /// of the reference).
     fn create_shared_context(&self, _preferred_versions: Option<&[GlVersion]>) -> Option<Rc<dyn IGlContext>> {
         let Some(context) = self.context() else {
-            panic!("{}", PlatformGraphicsContextLostException);
+            panic!("{}", PlatformGraphicsContextLostError);
         };
         // SAFETY: the share group of a context of EAGL, which every context
         // has.

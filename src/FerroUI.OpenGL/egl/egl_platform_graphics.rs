@@ -1,5 +1,5 @@
 use super::{EglDisplay, EglDisplayCreationOptions, EglDisplayOptions, EglInterface};
-use crate::OpenGlException;
+use crate::OpenGlError;
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::platform::{IPlatformGraphics, IPlatformGraphicsContext};
 use ferroui_base::utilities::ThreadBound;
@@ -51,7 +51,7 @@ impl EglPlatformGraphics {
     /// Creates the platform graphics of the display `display_factory` creates; a failure of
     /// the factory is logged and gives `None`.
     pub fn try_create(
-        display_factory: impl FnOnce() -> Result<Rc<EglDisplay>, OpenGlException>,
+        display_factory: impl FnOnce() -> Result<Rc<EglDisplay>, OpenGlError>,
     ) -> Option<EglPlatformGraphics> {
         match display_factory() {
             Ok(display) => Some(EglPlatformGraphics::new(display)),

@@ -5,7 +5,7 @@
 //! is a `B` of class `D`, and equality compares the class, as upstream's compares `GetType()`.
 //! The classes are shared with `of_type_test`, as upstream's are defined in this file.
 
-use ferroui_reactive::linq::InvalidCastException;
+use ferroui_reactive::linq::InvalidCastError;
 use ferroui_reactive::ObservableExt;
 use ferroui_reactive_testing::{assert_messages, assert_subscriptions, new_error, ReactiveTest as RT, TestScheduler};
 use std::any::Any;
@@ -176,7 +176,7 @@ fn cast_not_valid() {
         RT::on_next(210, Rc::new(B::new(0))),
         RT::on_next(220, Rc::new(D::new(1))),
         RT::on_next(240, Rc::new(B::new(2))),
-        RT::on_error_where(250, |e| e.is::<InvalidCastException>()),
+        RT::on_error_where(250, |e| e.is::<InvalidCastError>()),
     );
 
     assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 250));

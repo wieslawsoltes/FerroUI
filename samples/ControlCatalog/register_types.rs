@@ -129,6 +129,6 @@ fn register_value_types() {
 fn try_load(
     _service_provider: Option<&std::rc::Rc<dyn ferroui_base::metadata::IServiceProvider>>,
     uri: &str,
-) -> Result<Option<ferroui_base::BoxedValue>, ferroui_markup_xaml::XamlLoadException> {
+) -> Result<Option<ferroui_base::BoxedValue>, ferroui_markup_xaml::XamlLoadError> {
     Ok(classes().find(|class| uri.eq_ignore_ascii_case(&class.document_uri())).map(|class| (class.create)()))
 }

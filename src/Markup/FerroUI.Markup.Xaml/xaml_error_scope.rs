@@ -2,7 +2,7 @@
 //!
 //! The members that markup calls through metadata (the deferred construction of a resource, the
 //! invokers of markup members) have no error channel, so a fallible one throws: [`crate::throw`]
-//! panics with the message of its [`XamlLoadException`], as upstream throws. A loader that wants
+//! panics with the message of its [`XamlLoadError`], as upstream throws. A loader that wants
 //! the error itself, typed and with its inner exception (the WinUI importer of
 //! `ferroui-markup-xaml-winui`), runs its load in [`with_xaml_errors`]: inside the scope the throw
 //! records the exception and unwinds with a private token, and the scope turns the token back into
@@ -25,14 +25,14 @@
 //! - It is not a transaction: objects the load created before the error are not rolled back, so
 //!   a scope is for a load into a fresh root.
 
-use crate::XamlLoadException;
+use crate::XamlLoadError;
 use std::cell::RefCell;
 use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
 
 ferroui_base::ferro_thread_local! {
     /// The scopes that are open on the thread, innermost last, each with the exception thrown in
     /// it, if one was.
-    static SCOPES: RefCell<Vec<Option<XamlLoadException>>> = const { RefCell::new(Vec::new()) };
+    static SCOPES: RefCell<Vec<Option<XamlLoadError>>> = const { RefCell::new(Vec::new()) };
 }
 
 /// The payload of the unwinding of a throw inside a scope.
@@ -42,7 +42,7 @@ struct XamlErrorToken;
 /// instead of panicking. Panics that are not throws of the runtime continue to unwind. Scopes
 /// nest: a throw goes to the innermost.
 #[doc(hidden)]
-pub fn with_xaml_errors<T>(load: impl FnOnce() -> Result<T, XamlLoadException>) -> Result<T, XamlLoadException> {
+pub fn with_xaml_errors<T>(load: impl FnOnce() -> Result<T, XamlLoadError>) -> Result<T, XamlLoadError> {
     SCOPES.with(|scopes| scopes.borrow_mut().push(None));
     let result = catch_unwind(AssertUnwindSafe(load));
     let error = SCOPES.with(|scopes| scopes.borrow_mut().pop().flatten());
@@ -61,7 +61,7 @@ pub fn with_xaml_errors<T>(load: impl FnOnce() -> Result<T, XamlLoadException>) 
 /// Throws `error`: into the innermost open scope, or else as a panic with its message. Public
 /// for the members of `ferroui-markup-xaml-winui`, which throw as the runtime does.
 #[doc(hidden)]
-pub fn throw(error: XamlLoadException) -> ! {
+pub fn throw(error: XamlLoadError) -> ! {
     let unthrown = SCOPES.with(|scopes| match scopes.borrow_mut().last_mut() {
         Some(scope) => {
             *scope = Some(error);
@@ -82,9 +82,9 @@ mod tests {
     #[test]
     fn a_throw_in_a_scope_is_its_error_with_the_inner_exception_and_scopes_nest() {
         let result: Result<(), _> = with_xaml_errors(|| {
-            let inner: Result<(), _> = with_xaml_errors(|| crate::throw(Err(XamlLoadException::with_message("inner"))));
+            let inner: Result<(), _> = with_xaml_errors(|| crate::throw(Err(XamlLoadError::with_message("inner"))));
             assert_eq!(inner.unwrap_err().message(), "inner");
-            crate::throw(Err(XamlLoadException::with_inner("outer", XamlLoadException::with_message("cause"))))
+            crate::throw(Err(XamlLoadError::with_inner("outer", XamlLoadError::with_message("cause"))))
         });
         let error = result.unwrap_err();
         assert_eq!(error.message(), "outer");
@@ -95,7 +95,7 @@ mod tests {
     #[test]
     fn a_load_that_succeeds_returns_its_value() {
         assert_eq!(42, with_xaml_errors(|| Ok(42)).unwrap());
-        let error = with_xaml_errors::<()>(|| Err(XamlLoadException::with_message("returned"))).unwrap_err();
+        let error = with_xaml_errors::<()>(|| Err(XamlLoadError::with_message("returned"))).unwrap_err();
         assert_eq!(error.message(), "returned");
     }
 
@@ -110,14 +110,14 @@ mod tests {
 
     #[test]
     fn a_throw_without_a_scope_panics_with_its_message() {
-        let result = catch_unwind(AssertUnwindSafe(|| crate::throw::<()>(Err(XamlLoadException::with_message("ordinary")))));
+        let result = catch_unwind(AssertUnwindSafe(|| crate::throw::<()>(Err(XamlLoadError::with_message("ordinary")))));
         assert_eq!(result.unwrap_err().downcast_ref::<String>().map(String::as_str), Some("ordinary"));
     }
 
     #[test]
     fn a_throw_caught_inside_the_scope_is_handled_there() {
         let result = with_xaml_errors(|| {
-            let caught = catch_unwind(AssertUnwindSafe(|| crate::throw::<()>(Err(XamlLoadException::with_message("caught")))));
+            let caught = catch_unwind(AssertUnwindSafe(|| crate::throw::<()>(Err(XamlLoadError::with_message("caught")))));
             assert!(caught.is_err());
             Ok("carried on")
         });

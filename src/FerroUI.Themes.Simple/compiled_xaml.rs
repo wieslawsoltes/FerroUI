@@ -18,7 +18,7 @@ const XML_NAMESPACES_0: rt::XmlNamespaceTable = &[
 pub fn populate(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     root: &::ferroui_base::Ref<crate::SimpleTheme>,
-) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     ::ferroui_markup_xaml::FerroXamlLoader::track_instance(<crate::SimpleTheme as ::ferroui_base::StaticType>::TYPE, root);
     if let Some(populate) = ::ferroui_markup_xaml::FerroXamlLoader::populate_override(<crate::SimpleTheme as ::ferroui_base::StaticType>::TYPE) {
         return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));
@@ -42,7 +42,7 @@ static POPULATE_SIMPLETHEME_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo {
 pub fn populate_simpletheme_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     root: &::ferroui_base::Ref<crate::SimpleTheme>,
-) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let root = root.clone();
     let context = rt::populate_context(service_provider, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, rt::to_value(root.clone()));
     let name_scope = context.name_scope_field();
@@ -436,7 +436,7 @@ pub fn populate_simpletheme_xaml(
 /// Builds the deferred content at `SimpleTheme.xaml(24,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(24,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -461,7 +461,7 @@ fn populate_simpletheme_xaml_deferred_0(
 /// Builds the deferred content at `SimpleTheme.xaml(25,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_1(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(25,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -486,7 +486,7 @@ fn populate_simpletheme_xaml_deferred_1(
 /// Builds the deferred content at `SimpleTheme.xaml(26,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_2(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(26,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -511,7 +511,7 @@ fn populate_simpletheme_xaml_deferred_2(
 /// Builds the deferred content at `SimpleTheme.xaml(27,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_3(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(27,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -536,7 +536,7 @@ fn populate_simpletheme_xaml_deferred_3(
 /// Builds the deferred content at `SimpleTheme.xaml(28,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_4(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(28,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -561,7 +561,7 @@ fn populate_simpletheme_xaml_deferred_4(
 /// Builds the deferred content at `SimpleTheme.xaml(29,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_5(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(29,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -586,7 +586,7 @@ fn populate_simpletheme_xaml_deferred_5(
 /// Builds the deferred content at `SimpleTheme.xaml(30,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_6(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(30,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -611,7 +611,7 @@ fn populate_simpletheme_xaml_deferred_6(
 /// Builds the deferred content at `SimpleTheme.xaml(31,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_7(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(31,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -636,7 +636,7 @@ fn populate_simpletheme_xaml_deferred_7(
 /// Builds the deferred content at `SimpleTheme.xaml(32,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_8(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(32,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -661,7 +661,7 @@ fn populate_simpletheme_xaml_deferred_8(
 /// Builds the deferred content at `SimpleTheme.xaml(33,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_9(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(33,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -686,7 +686,7 @@ fn populate_simpletheme_xaml_deferred_9(
 /// Builds the deferred content at `SimpleTheme.xaml(34,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_10(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(34,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -711,7 +711,7 @@ fn populate_simpletheme_xaml_deferred_10(
 /// Builds the deferred content at `SimpleTheme.xaml(35,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_11(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(35,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -736,7 +736,7 @@ fn populate_simpletheme_xaml_deferred_11(
 /// Builds the deferred content at `SimpleTheme.xaml(36,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_12(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(36,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -761,7 +761,7 @@ fn populate_simpletheme_xaml_deferred_12(
 /// Builds the deferred content at `SimpleTheme.xaml(37,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_13(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(37,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -786,7 +786,7 @@ fn populate_simpletheme_xaml_deferred_13(
 /// Builds the deferred content at `SimpleTheme.xaml(38,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_14(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(38,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -811,7 +811,7 @@ fn populate_simpletheme_xaml_deferred_14(
 /// Builds the deferred content at `SimpleTheme.xaml(39,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_15(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(39,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -836,7 +836,7 @@ fn populate_simpletheme_xaml_deferred_15(
 /// Builds the deferred content at `SimpleTheme.xaml(41,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_16(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(41,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -849,7 +849,7 @@ fn populate_simpletheme_xaml_deferred_16(
 /// Builds the deferred content at `SimpleTheme.xaml(42,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_17(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(42,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -862,7 +862,7 @@ fn populate_simpletheme_xaml_deferred_17(
 /// Builds the deferred content at `SimpleTheme.xaml(46,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_18(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(46,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -875,7 +875,7 @@ fn populate_simpletheme_xaml_deferred_18(
 /// Builds the deferred content at `SimpleTheme.xaml(47,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_19(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(47,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -888,7 +888,7 @@ fn populate_simpletheme_xaml_deferred_19(
 /// Builds the deferred content at `SimpleTheme.xaml(48,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_20(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(48,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -901,7 +901,7 @@ fn populate_simpletheme_xaml_deferred_20(
 /// Builds the deferred content at `SimpleTheme.xaml(49,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_21(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     // SimpleTheme.xaml(49,55) ResourceKey
     rt::static_resource_content(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 }, "ThemeBackgroundBrush", 49, 8)
 }
@@ -909,7 +909,7 @@ fn populate_simpletheme_xaml_deferred_21(
 /// Builds the deferred content at `SimpleTheme.xaml(70,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_22(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(70,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -934,7 +934,7 @@ fn populate_simpletheme_xaml_deferred_22(
 /// Builds the deferred content at `SimpleTheme.xaml(71,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_23(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(71,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -959,7 +959,7 @@ fn populate_simpletheme_xaml_deferred_23(
 /// Builds the deferred content at `SimpleTheme.xaml(72,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_24(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(72,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -984,7 +984,7 @@ fn populate_simpletheme_xaml_deferred_24(
 /// Builds the deferred content at `SimpleTheme.xaml(73,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_25(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(73,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1009,7 +1009,7 @@ fn populate_simpletheme_xaml_deferred_25(
 /// Builds the deferred content at `SimpleTheme.xaml(74,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_26(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(74,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1034,7 +1034,7 @@ fn populate_simpletheme_xaml_deferred_26(
 /// Builds the deferred content at `SimpleTheme.xaml(75,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_27(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(75,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1059,7 +1059,7 @@ fn populate_simpletheme_xaml_deferred_27(
 /// Builds the deferred content at `SimpleTheme.xaml(76,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_28(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(76,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1084,7 +1084,7 @@ fn populate_simpletheme_xaml_deferred_28(
 /// Builds the deferred content at `SimpleTheme.xaml(77,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_29(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(77,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1109,7 +1109,7 @@ fn populate_simpletheme_xaml_deferred_29(
 /// Builds the deferred content at `SimpleTheme.xaml(78,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_30(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(78,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1134,7 +1134,7 @@ fn populate_simpletheme_xaml_deferred_30(
 /// Builds the deferred content at `SimpleTheme.xaml(79,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_31(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(79,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1159,7 +1159,7 @@ fn populate_simpletheme_xaml_deferred_31(
 /// Builds the deferred content at `SimpleTheme.xaml(80,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_32(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(80,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1184,7 +1184,7 @@ fn populate_simpletheme_xaml_deferred_32(
 /// Builds the deferred content at `SimpleTheme.xaml(81,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_33(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(81,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1209,7 +1209,7 @@ fn populate_simpletheme_xaml_deferred_33(
 /// Builds the deferred content at `SimpleTheme.xaml(82,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_34(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(82,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1234,7 +1234,7 @@ fn populate_simpletheme_xaml_deferred_34(
 /// Builds the deferred content at `SimpleTheme.xaml(83,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_35(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(83,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1259,7 +1259,7 @@ fn populate_simpletheme_xaml_deferred_35(
 /// Builds the deferred content at `SimpleTheme.xaml(84,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_36(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(84,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1284,7 +1284,7 @@ fn populate_simpletheme_xaml_deferred_36(
 /// Builds the deferred content at `SimpleTheme.xaml(85,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_37(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(85,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1309,7 +1309,7 @@ fn populate_simpletheme_xaml_deferred_37(
 /// Builds the deferred content at `SimpleTheme.xaml(87,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_38(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(87,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1322,7 +1322,7 @@ fn populate_simpletheme_xaml_deferred_38(
 /// Builds the deferred content at `SimpleTheme.xaml(88,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_39(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(88,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1335,7 +1335,7 @@ fn populate_simpletheme_xaml_deferred_39(
 /// Builds the deferred content at `SimpleTheme.xaml(92,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_40(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(92,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1348,7 +1348,7 @@ fn populate_simpletheme_xaml_deferred_40(
 /// Builds the deferred content at `SimpleTheme.xaml(93,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_41(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(93,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1361,7 +1361,7 @@ fn populate_simpletheme_xaml_deferred_41(
 /// Builds the deferred content at `SimpleTheme.xaml(94,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_42(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(94,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1374,7 +1374,7 @@ fn populate_simpletheme_xaml_deferred_42(
 /// Builds the deferred content at `SimpleTheme.xaml(95,8)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_43(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     // SimpleTheme.xaml(95,55) ResourceKey
     rt::static_resource_content(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 }, "ThemeBackgroundBrush", 95, 8)
 }
@@ -1382,7 +1382,7 @@ fn populate_simpletheme_xaml_deferred_43(
 /// Builds the deferred content at `SimpleTheme.xaml(98,53)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_44(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     ::core::result::Result::Ok(rt::to_value(::ferroui_base::media::FontFamily::__markup_new_1(context.base_uri(), ::std::string::String::from("fonts:Inter#Inter, $Default"))))
 }
@@ -1390,7 +1390,7 @@ fn populate_simpletheme_xaml_deferred_44(
 /// Builds the deferred content at `SimpleTheme.xaml(107,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_45(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(107,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1415,7 +1415,7 @@ fn populate_simpletheme_xaml_deferred_45(
 /// Builds the deferred content at `SimpleTheme.xaml(108,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_46(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(108,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1440,7 +1440,7 @@ fn populate_simpletheme_xaml_deferred_46(
 /// Builds the deferred content at `SimpleTheme.xaml(109,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_47(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(109,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1465,7 +1465,7 @@ fn populate_simpletheme_xaml_deferred_47(
 /// Builds the deferred content at `SimpleTheme.xaml(110,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_48(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(110,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1490,7 +1490,7 @@ fn populate_simpletheme_xaml_deferred_48(
 /// Builds the deferred content at `SimpleTheme.xaml(111,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_49(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(111,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1515,7 +1515,7 @@ fn populate_simpletheme_xaml_deferred_49(
 /// Builds the deferred content at `SimpleTheme.xaml(112,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_50(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(112,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1540,7 +1540,7 @@ fn populate_simpletheme_xaml_deferred_50(
 /// Builds the deferred content at `SimpleTheme.xaml(113,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_51(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(113,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1565,7 +1565,7 @@ fn populate_simpletheme_xaml_deferred_51(
 /// Builds the deferred content at `SimpleTheme.xaml(114,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_52(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(114,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1590,7 +1590,7 @@ fn populate_simpletheme_xaml_deferred_52(
 /// Builds the deferred content at `SimpleTheme.xaml(115,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_53(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(115,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1605,7 +1605,7 @@ fn populate_simpletheme_xaml_deferred_53(
 /// Builds the deferred content at `SimpleTheme.xaml(119,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_54(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(119,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1618,7 +1618,7 @@ fn populate_simpletheme_xaml_deferred_54(
 /// Builds the deferred content at `SimpleTheme.xaml(122,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_55(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(122,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1633,7 +1633,7 @@ fn populate_simpletheme_xaml_deferred_55(
 /// Builds the deferred content at `SimpleTheme.xaml(126,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_56(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(126,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1648,7 +1648,7 @@ fn populate_simpletheme_xaml_deferred_56(
 /// Builds the deferred content at `SimpleTheme.xaml(130,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_57(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(130,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1663,7 +1663,7 @@ fn populate_simpletheme_xaml_deferred_57(
 /// Builds the deferred content at `SimpleTheme.xaml(134,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_58(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(134,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1678,7 +1678,7 @@ fn populate_simpletheme_xaml_deferred_58(
 /// Builds the deferred content at `SimpleTheme.xaml(138,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_59(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(138,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1691,7 +1691,7 @@ fn populate_simpletheme_xaml_deferred_59(
 /// Builds the deferred content at `SimpleTheme.xaml(139,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_60(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(139,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1718,7 +1718,7 @@ fn populate_simpletheme_xaml_deferred_60(
 /// Builds the deferred content at `SimpleTheme.xaml(143,4)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_61(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_SIMPLETHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0 });
     // SimpleTheme.xaml(143,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -1786,7 +1786,7 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 /// Generated from `Controls/SimpleControls.xaml`.
 pub fn build_controls_simplecontrols_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_base::styling::Styles>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_base::styling::Styles>, ::ferroui_markup_xaml::XamlLoadError> {
     // Controls/SimpleControls.xaml(1,2) Styles
     let styles_0 = ::ferroui_base::styling::Styles::new();
     let context = rt::populate_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, rt::to_value(styles_0.clone()));
@@ -2379,7 +2379,7 @@ pub fn build_controls_simplecontrols_xaml(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -2403,7 +2403,7 @@ fn build_controls_simplecontrols_xaml_deferred_0(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(7,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_1(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(7,10) Rectangle
     let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
@@ -2430,7 +2430,7 @@ fn build_controls_simplecontrols_xaml_deferred_1(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_2(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -2527,7 +2527,7 @@ fn build_controls_simplecontrols_xaml_deferred_2(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(15,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_3(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(15,10) ContentPresenter
@@ -2572,7 +2572,7 @@ fn build_controls_simplecontrols_xaml_deferred_3(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_4(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -2703,7 +2703,7 @@ fn build_controls_simplecontrols_xaml_deferred_4(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(11,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_5(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(11,10) Grid
@@ -2846,7 +2846,7 @@ fn build_controls_simplecontrols_xaml_deferred_5(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_6(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -2915,7 +2915,7 @@ fn build_controls_simplecontrols_xaml_deferred_6(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(15,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_7(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(15,10) ContentPresenter
@@ -2960,7 +2960,7 @@ fn build_controls_simplecontrols_xaml_deferred_7(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_8(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -3076,7 +3076,7 @@ fn build_controls_simplecontrols_xaml_deferred_8(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(15,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_9(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(15,10) ContentPresenter
@@ -3121,7 +3121,7 @@ fn build_controls_simplecontrols_xaml_deferred_9(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_10(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -3238,7 +3238,7 @@ fn build_controls_simplecontrols_xaml_deferred_10(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(16,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_11(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(16,12) Border
@@ -3356,7 +3356,7 @@ fn build_controls_simplecontrols_xaml_deferred_11(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_12(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -3386,7 +3386,7 @@ fn build_controls_simplecontrols_xaml_deferred_12(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(11,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_13(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(11,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -3424,7 +3424,7 @@ fn build_controls_simplecontrols_xaml_deferred_13(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_14(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -3559,7 +3559,7 @@ fn build_controls_simplecontrols_xaml_deferred_14(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(15,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_15(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(15,10) Grid
@@ -3727,7 +3727,7 @@ fn build_controls_simplecontrols_xaml_deferred_15(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_16(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -3760,7 +3760,7 @@ fn build_controls_simplecontrols_xaml_deferred_16(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(12,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_17(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(12,10) ContentPresenter
@@ -3799,7 +3799,7 @@ fn build_controls_simplecontrols_xaml_deferred_17(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_18(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -3833,7 +3833,7 @@ fn build_controls_simplecontrols_xaml_deferred_18(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(9,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_19(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(9,10) ContentPresenter
@@ -3876,7 +3876,7 @@ fn build_controls_simplecontrols_xaml_deferred_19(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_20(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -3990,7 +3990,7 @@ fn build_controls_simplecontrols_xaml_deferred_20(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(12,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_21(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(12,10) ContentPresenter
@@ -4033,7 +4033,7 @@ fn build_controls_simplecontrols_xaml_deferred_21(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_22(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -4125,7 +4125,7 @@ fn build_controls_simplecontrols_xaml_deferred_22(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(18,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_23(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(18,10) Border
@@ -4462,7 +4462,7 @@ fn build_controls_simplecontrols_xaml_deferred_23(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(58,71)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_24(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     ::core::result::Result::Ok(rt::to_value(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32)))
 }
@@ -4470,7 +4470,7 @@ fn build_controls_simplecontrols_xaml_deferred_24(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(59,75)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_25(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     ::core::result::Result::Ok(rt::to_value(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32)))
 }
@@ -4478,7 +4478,7 @@ fn build_controls_simplecontrols_xaml_deferred_25(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_26(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -4515,7 +4515,7 @@ fn build_controls_simplecontrols_xaml_deferred_26(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(13,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_27(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(13,10) Panel
@@ -4603,7 +4603,7 @@ fn build_controls_simplecontrols_xaml_deferred_27(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_28(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -4623,7 +4623,7 @@ fn build_controls_simplecontrols_xaml_deferred_28(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(7,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_29(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(7,10) ScrollViewer
@@ -4668,7 +4668,7 @@ fn build_controls_simplecontrols_xaml_deferred_29(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_30(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -4706,7 +4706,7 @@ fn build_controls_simplecontrols_xaml_deferred_30(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(13,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_31(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(13,10) Panel
@@ -4851,7 +4851,7 @@ fn build_controls_simplecontrols_xaml_deferred_31(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_32(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -4885,7 +4885,7 @@ fn build_controls_simplecontrols_xaml_deferred_32(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(8,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_33(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(8,10) DockPanel
@@ -4974,7 +4974,7 @@ fn build_controls_simplecontrols_xaml_deferred_33(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(28,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_34(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(28,10) Canvas
     let canvas_0 = ::ferroui_controls::Canvas::new();
@@ -5038,7 +5038,7 @@ fn build_controls_simplecontrols_xaml_deferred_34(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_35(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -5078,7 +5078,7 @@ fn build_controls_simplecontrols_xaml_deferred_35(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(16,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_36(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(16,10) Border
@@ -5146,7 +5146,7 @@ fn build_controls_simplecontrols_xaml_deferred_36(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_37(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -5182,7 +5182,7 @@ fn build_controls_simplecontrols_xaml_deferred_37(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(13,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_38(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(13,10) Border
@@ -5254,7 +5254,7 @@ fn build_controls_simplecontrols_xaml_deferred_38(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_39(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -5295,7 +5295,7 @@ fn build_controls_simplecontrols_xaml_deferred_39(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(12,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_40(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(12,10) Rectangle
     let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
@@ -5312,7 +5312,7 @@ fn build_controls_simplecontrols_xaml_deferred_40(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(17,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_41(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(17,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -5333,7 +5333,7 @@ fn build_controls_simplecontrols_xaml_deferred_41(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(13,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_42(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(13,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -5421,7 +5421,7 @@ fn build_controls_simplecontrols_xaml_deferred_42(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(27,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_43(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(27,10) ContentPresenter
@@ -5466,7 +5466,7 @@ fn build_controls_simplecontrols_xaml_deferred_43(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_44(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -5486,7 +5486,7 @@ fn build_controls_simplecontrols_xaml_deferred_44(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(8,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_45(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(8,10) Border
@@ -5521,7 +5521,7 @@ fn build_controls_simplecontrols_xaml_deferred_45(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_46(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -5630,7 +5630,7 @@ fn build_controls_simplecontrols_xaml_deferred_46(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(12,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_47(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(12,10) ContentPresenter
@@ -5673,7 +5673,7 @@ fn build_controls_simplecontrols_xaml_deferred_47(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_48(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -5728,7 +5728,7 @@ fn build_controls_simplecontrols_xaml_deferred_48(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(15,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_49(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(15,10) Border
@@ -5791,7 +5791,7 @@ fn build_controls_simplecontrols_xaml_deferred_49(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_50(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -5819,7 +5819,7 @@ fn build_controls_simplecontrols_xaml_deferred_50(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(8,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_51(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(8,10) ItemsPresenter
@@ -5838,7 +5838,7 @@ fn build_controls_simplecontrols_xaml_deferred_51(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(14,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_52(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(14,10) WrapPanel
     let wrap_panel_0 = ::ferroui_controls::WrapPanel::new();
@@ -5851,7 +5851,7 @@ fn build_controls_simplecontrols_xaml_deferred_52(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_53(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -5899,7 +5899,7 @@ fn build_controls_simplecontrols_xaml_deferred_53(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(12,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_54(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(12,10) ContentPresenter
@@ -5942,7 +5942,7 @@ fn build_controls_simplecontrols_xaml_deferred_54(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_55(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -6086,7 +6086,7 @@ fn build_controls_simplecontrols_xaml_deferred_55(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(9,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_56(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(9,10) Border
@@ -6177,7 +6177,7 @@ fn build_controls_simplecontrols_xaml_deferred_56(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_57(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -6333,7 +6333,7 @@ fn build_controls_simplecontrols_xaml_deferred_57(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(13,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_58(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(13,10) ContentPresenter
@@ -6376,7 +6376,7 @@ fn build_controls_simplecontrols_xaml_deferred_58(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(8,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_59(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(8,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -6512,7 +6512,7 @@ fn build_controls_simplecontrols_xaml_deferred_59(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(18,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_60(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(18,10) StackPanel
@@ -6850,7 +6850,7 @@ fn build_controls_simplecontrols_xaml_deferred_60(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(52,26)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_61(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(52,26) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
@@ -6888,7 +6888,7 @@ fn build_controls_simplecontrols_xaml_deferred_61(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(73,34)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_62(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(73,34) Panel
@@ -6940,7 +6940,7 @@ fn build_controls_simplecontrols_xaml_deferred_62(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_63(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -6990,7 +6990,7 @@ fn build_controls_simplecontrols_xaml_deferred_63(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(16,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_64(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(16,10) LayoutTransformControl
@@ -7060,7 +7060,7 @@ fn build_controls_simplecontrols_xaml_deferred_64(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_65(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -7103,7 +7103,7 @@ fn build_controls_simplecontrols_xaml_deferred_65(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(15,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_66(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(15,10) LayoutTransformControl
@@ -7153,7 +7153,7 @@ fn build_controls_simplecontrols_xaml_deferred_66(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_67(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -7275,7 +7275,7 @@ fn build_controls_simplecontrols_xaml_deferred_67(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(9,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_68(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(9,10) ReversibleStackPanel
@@ -7316,7 +7316,7 @@ fn build_controls_simplecontrols_xaml_deferred_68(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(12,16)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_69(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(12,16) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
@@ -7376,7 +7376,7 @@ fn build_controls_simplecontrols_xaml_deferred_69(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(23,16)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_70(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(23,16) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
@@ -7398,7 +7398,7 @@ fn build_controls_simplecontrols_xaml_deferred_70(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_71(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -7432,7 +7432,7 @@ fn build_controls_simplecontrols_xaml_deferred_71(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(12,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_72(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(12,10) Panel
@@ -7500,7 +7500,7 @@ fn build_controls_simplecontrols_xaml_deferred_72(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_73(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -7520,7 +7520,7 @@ fn build_controls_simplecontrols_xaml_deferred_73(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(9,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_74(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(9,10) Panel
@@ -7586,7 +7586,7 @@ fn build_controls_simplecontrols_xaml_deferred_74(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_75(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -7624,7 +7624,7 @@ fn build_controls_simplecontrols_xaml_deferred_75(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(15,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_76(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(15,10) Border
@@ -7677,7 +7677,7 @@ fn build_controls_simplecontrols_xaml_deferred_76(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_77(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -7708,7 +7708,7 @@ fn build_controls_simplecontrols_xaml_deferred_77(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(12,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_78(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(12,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -7729,7 +7729,7 @@ fn build_controls_simplecontrols_xaml_deferred_78(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_79(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -7773,7 +7773,7 @@ fn build_controls_simplecontrols_xaml_deferred_79(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(15,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_80(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(15,10) Border
@@ -7835,7 +7835,7 @@ fn build_controls_simplecontrols_xaml_deferred_80(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(11,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_81(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(11,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -7946,7 +7946,7 @@ fn build_controls_simplecontrols_xaml_deferred_81(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(23,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_82(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(23,10) Grid
@@ -8054,7 +8054,7 @@ fn build_controls_simplecontrols_xaml_deferred_82(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(11,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_83(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(11,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -8233,7 +8233,7 @@ fn build_controls_simplecontrols_xaml_deferred_83(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(23,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_84(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(23,10) Panel
@@ -8400,7 +8400,7 @@ fn build_controls_simplecontrols_xaml_deferred_84(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(14,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_85(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(14,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -8484,7 +8484,7 @@ fn build_controls_simplecontrols_xaml_deferred_85(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(19,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_86(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(19,10) Panel
@@ -9231,7 +9231,7 @@ fn build_controls_simplecontrols_xaml_deferred_86(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(195,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_87(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(195,10) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
@@ -9261,7 +9261,7 @@ fn build_controls_simplecontrols_xaml_deferred_87(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(11,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_88(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(11,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -9295,7 +9295,7 @@ fn build_controls_simplecontrols_xaml_deferred_88(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(20,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_89(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(20,10) StackPanel
@@ -9338,7 +9338,7 @@ fn build_controls_simplecontrols_xaml_deferred_89(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(12,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_90(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(12,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -9392,7 +9392,7 @@ fn build_controls_simplecontrols_xaml_deferred_90(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(22,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_91(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(22,10) Grid
@@ -9618,7 +9618,7 @@ fn build_controls_simplecontrols_xaml_deferred_91(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(29,20)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_92(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(29,20) Grid
@@ -9841,7 +9841,7 @@ fn build_controls_simplecontrols_xaml_deferred_92(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_93(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -10181,7 +10181,7 @@ fn build_controls_simplecontrols_xaml_deferred_93(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(14,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_94(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(14,10) LayoutTransformControl
@@ -10234,7 +10234,7 @@ fn build_controls_simplecontrols_xaml_deferred_94(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_95(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -10272,7 +10272,7 @@ fn build_controls_simplecontrols_xaml_deferred_95(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(13,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_96(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(13,10) DataValidationErrors
@@ -10407,7 +10407,7 @@ fn build_controls_simplecontrols_xaml_deferred_96(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_97(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -10427,7 +10427,7 @@ fn build_controls_simplecontrols_xaml_deferred_97(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(8,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_98(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(8,10) Grid
@@ -10487,7 +10487,7 @@ fn build_controls_simplecontrols_xaml_deferred_98(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_99(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -10529,7 +10529,7 @@ fn build_controls_simplecontrols_xaml_deferred_99(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(18,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_100(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(18,10) PathIcon
@@ -10556,7 +10556,7 @@ fn build_controls_simplecontrols_xaml_deferred_100(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(27,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_101(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(27,10) Grid
@@ -10578,7 +10578,7 @@ fn build_controls_simplecontrols_xaml_deferred_101(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_102(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -10595,7 +10595,7 @@ fn build_controls_simplecontrols_xaml_deferred_102(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_103(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -10641,7 +10641,7 @@ fn build_controls_simplecontrols_xaml_deferred_103(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(10,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_104(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(10,10) Border
@@ -10755,7 +10755,7 @@ fn build_controls_simplecontrols_xaml_deferred_104(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(12,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_105(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(12,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -10783,7 +10783,7 @@ fn build_controls_simplecontrols_xaml_deferred_105(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(17,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_106(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(17,10) DockPanel
@@ -10869,7 +10869,7 @@ fn build_controls_simplecontrols_xaml_deferred_106(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(17,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_107(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(17,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -10894,7 +10894,7 @@ fn build_controls_simplecontrols_xaml_deferred_107(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(21,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_108(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(21,10) Carousel
@@ -10925,7 +10925,7 @@ fn build_controls_simplecontrols_xaml_deferred_108(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(48,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_109(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(48,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -10968,7 +10968,7 @@ fn build_controls_simplecontrols_xaml_deferred_109(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(54,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_110(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(54,10) Border
@@ -11092,7 +11092,7 @@ fn build_controls_simplecontrols_xaml_deferred_110(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(84,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_111(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(84,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -11128,7 +11128,7 @@ fn build_controls_simplecontrols_xaml_deferred_111(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(93,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_112(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(93,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -11164,7 +11164,7 @@ fn build_controls_simplecontrols_xaml_deferred_112(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(102,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_113(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(102,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -11200,7 +11200,7 @@ fn build_controls_simplecontrols_xaml_deferred_113(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(111,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_114(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(111,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -11236,7 +11236,7 @@ fn build_controls_simplecontrols_xaml_deferred_114(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(121,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_115(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(121,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -11414,7 +11414,7 @@ fn build_controls_simplecontrols_xaml_deferred_115(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(131,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_116(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(131,12) Border
@@ -11538,7 +11538,7 @@ fn build_controls_simplecontrols_xaml_deferred_116(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(163,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_117(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(163,12) Border
@@ -11662,7 +11662,7 @@ fn build_controls_simplecontrols_xaml_deferred_117(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(195,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_118(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(195,12) Border
@@ -11786,7 +11786,7 @@ fn build_controls_simplecontrols_xaml_deferred_118(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(227,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_119(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(227,12) Border
@@ -11910,7 +11910,7 @@ fn build_controls_simplecontrols_xaml_deferred_119(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(41,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_120(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(41,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -12393,7 +12393,7 @@ fn build_controls_simplecontrols_xaml_deferred_120(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(59,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_121(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(59,10) Grid
@@ -12768,7 +12768,7 @@ fn build_controls_simplecontrols_xaml_deferred_121(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(5,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_122(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(5,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -12808,7 +12808,7 @@ fn build_controls_simplecontrols_xaml_deferred_122(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(16,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_123(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(16,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -12914,7 +12914,7 @@ fn build_controls_simplecontrols_xaml_deferred_123(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(26,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_124(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(26,10) DataValidationErrors
@@ -13134,7 +13134,7 @@ fn build_controls_simplecontrols_xaml_deferred_124(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(8,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_125(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(8,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -13147,7 +13147,7 @@ fn build_controls_simplecontrols_xaml_deferred_125(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(9,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_126(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(9,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -13160,7 +13160,7 @@ fn build_controls_simplecontrols_xaml_deferred_126(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(11,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_127(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(11,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -13233,7 +13233,7 @@ fn build_controls_simplecontrols_xaml_deferred_127(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(21,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_128(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(21,10) ContentPresenter
@@ -13263,7 +13263,7 @@ fn build_controls_simplecontrols_xaml_deferred_128(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(36,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_129(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(36,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -13561,7 +13561,7 @@ fn build_controls_simplecontrols_xaml_deferred_129(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(42,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_130(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(42,10) WindowDrawnDecorationsContent
@@ -14173,7 +14173,7 @@ fn build_controls_simplecontrols_xaml_deferred_130(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,50)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_131(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("M 11.416016,10 20,1.4160156 18.583984,0 10,8.5839846 1.4160156,0 0,1.4160156 8.5839844,10 0,18.583985 1.4160156,20 10,11.416015 18.583984,20 20,18.583985 Z")), 4, 50)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
@@ -14182,7 +14182,7 @@ fn build_controls_simplecontrols_xaml_deferred_131(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(5,55)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_132(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("m10.051 7.0032c2.215 0 4.0105 1.7901 4.0105 3.9984s-1.7956 3.9984-4.0105 3.9984c-2.215 0-4.0105-1.7901-4.0105-3.9984s1.7956-3.9984 4.0105-3.9984zm0 1.4994c-1.3844 0-2.5066 1.1188-2.5066 2.499s1.1222 2.499 2.5066 2.499 2.5066-1.1188 2.5066-2.499-1.1222-2.499-2.5066-2.499zm0-5.0026c4.6257 0 8.6188 3.1487 9.7267 7.5613 0.10085 0.40165-0.14399 0.80877-0.54686 0.90931-0.40288 0.10054-0.81122-0.14355-0.91208-0.54521-0.94136-3.7492-4.3361-6.4261-8.2678-6.4261-3.9334 0-7.3292 2.6792-8.2689 6.4306-0.10063 0.40171-0.50884 0.64603-0.91177 0.54571s-0.648-0.5073-0.54737-0.90901c1.106-4.4152 5.1003-7.5667 9.728-7.5667z")), 5, 55)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
@@ -14191,7 +14191,7 @@ fn build_controls_simplecontrols_xaml_deferred_132(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(6,53)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_133(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("m0.21967 0.21965c-0.26627 0.26627-0.29047 0.68293-0.07262 0.97654l0.07262 0.08412 4.0346 4.0346c-1.922 1.3495-3.3585 3.365-3.9554 5.7495-0.10058 0.4018 0.14362 0.8091 0.54543 0.9097 0.40182 0.1005 0.80909-0.1436 0.90968-0.5455 0.52947-2.1151 1.8371-3.8891 3.5802-5.0341l1.8096 1.8098c-0.70751 0.7215-1.1438 1.71-1.1438 2.8003 0 2.2092 1.7909 4 4 4 1.0904 0 2.0788-0.4363 2.8004-1.1438l5.9193 5.9195c0.2929 0.2929 0.7677 0.2929 1.0606 0 0.2663-0.2662 0.2905-0.6829 0.0726-0.9765l-0.0726-0.0841-6.1135-6.1142 0.0012-0.0015-1.2001-1.1979-2.8699-2.8693 2e-3 -8e-4 -2.8812-2.8782 0.0012-0.0018-1.1333-1.1305-4.3064-4.3058c-0.29289-0.29289-0.76777-0.29289-1.0607 0zm7.9844 9.0458 3.5351 3.5351c-0.45 0.4358-1.0633 0.704-1.7392 0.704-1.3807 0-2.5-1.1193-2.5-2.5 0-0.6759 0.26824-1.2892 0.7041-1.7391zm1.7959-5.7655c-1.0003 0-1.9709 0.14807-2.8889 0.425l1.237 1.2362c0.5358-0.10587 1.0883-0.16119 1.6519-0.16119 3.9231 0 7.3099 2.6803 8.2471 6.4332 0.1004 0.4018 0.5075 0.6462 0.9094 0.5459 0.4019-0.1004 0.6463-0.5075 0.5459-0.9094-1.103-4.417-5.0869-7.5697-9.7024-7.5697zm0.1947 3.5093 3.8013 3.8007c-0.1018-2.0569-1.7488-3.7024-3.8013-3.8007z")), 6, 53)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
@@ -14200,7 +14200,7 @@ fn build_controls_simplecontrols_xaml_deferred_133(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(8,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_134(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(8,4) MenuFlyout
     let menu_flyout_0 = ::ferroui_controls::MenuFlyout::new();
@@ -14316,7 +14316,7 @@ fn build_controls_simplecontrols_xaml_deferred_134(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(17,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_135(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(17,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -14348,7 +14348,7 @@ fn build_controls_simplecontrols_xaml_deferred_135(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(24,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_136(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(24,12) Border
@@ -14414,7 +14414,7 @@ fn build_controls_simplecontrols_xaml_deferred_136(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(41,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_137(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(41,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -14472,7 +14472,7 @@ fn build_controls_simplecontrols_xaml_deferred_137(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(48,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_138(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(48,12) Border
@@ -14567,7 +14567,7 @@ fn build_controls_simplecontrols_xaml_deferred_138(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(82,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_139(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(82,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -14769,7 +14769,7 @@ fn build_controls_simplecontrols_xaml_deferred_139(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(97,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_140(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(97,10) Border
@@ -15102,7 +15102,7 @@ fn build_controls_simplecontrols_xaml_deferred_140(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(208,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_141(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(208,12) Button
     let button_0 = ::ferroui_controls::Button::new();
@@ -15141,7 +15141,7 @@ fn build_controls_simplecontrols_xaml_deferred_141(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(219,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_142(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(219,12) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
@@ -15219,7 +15219,7 @@ fn build_controls_simplecontrols_xaml_deferred_142(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(10,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_143(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_1 });
     let border_gap_mask_converter_0 = ::ferroui_controls::converters::BorderGapMaskConverter::__markup_new_0();
     ::core::result::Result::Ok(rt::to_value(border_gap_mask_converter_0))
@@ -15228,7 +15228,7 @@ fn build_controls_simplecontrols_xaml_deferred_143(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(12,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_144(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/SimpleControls.xaml(12,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -15283,7 +15283,7 @@ fn build_controls_simplecontrols_xaml_deferred_144(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(19,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_145(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_1 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(19,10) Grid
@@ -15523,7 +15523,7 @@ fn build_controls_simplecontrols_xaml_deferred_145(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_146(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) MenuFlyout
     let menu_flyout_0 = ::ferroui_controls::MenuFlyout::new();
@@ -15724,7 +15724,7 @@ fn build_controls_simplecontrols_xaml_deferred_146(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(17,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_147(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(17,4) MenuFlyout
     let menu_flyout_0 = ::ferroui_controls::MenuFlyout::new();
@@ -15925,7 +15925,7 @@ fn build_controls_simplecontrols_xaml_deferred_147(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(30,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_148(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(30,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -16157,7 +16157,7 @@ fn build_controls_simplecontrols_xaml_deferred_148(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(39,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_149(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(39,12) Border
@@ -16362,7 +16362,7 @@ fn build_controls_simplecontrols_xaml_deferred_149(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(96,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_150(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(96,12) Border
@@ -16567,7 +16567,7 @@ fn build_controls_simplecontrols_xaml_deferred_150(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(153,14)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_151(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(153,14) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -16582,7 +16582,7 @@ fn build_controls_simplecontrols_xaml_deferred_151(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(179,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_152(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(179,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -16597,7 +16597,7 @@ fn build_controls_simplecontrols_xaml_deferred_152(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(5,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_153(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/SimpleControls.xaml(5,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -16623,7 +16623,7 @@ fn build_controls_simplecontrols_xaml_deferred_153(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(10,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_154(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(10,10) Grid
@@ -16779,7 +16779,7 @@ fn build_controls_simplecontrols_xaml_deferred_154(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(43,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_155(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/SimpleControls.xaml(43,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -16840,7 +16840,7 @@ fn build_controls_simplecontrols_xaml_deferred_155(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(49,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_156(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(49,10) DockPanel
@@ -17068,7 +17068,7 @@ fn build_controls_simplecontrols_xaml_deferred_156(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(7,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_157(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/SimpleControls.xaml(7,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -17108,7 +17108,7 @@ fn build_controls_simplecontrols_xaml_deferred_157(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(11,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_158(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/SimpleControls.xaml(11,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -17158,7 +17158,7 @@ fn build_controls_simplecontrols_xaml_deferred_158(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(31,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_159(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/SimpleControls.xaml(31,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -17295,7 +17295,7 @@ fn build_controls_simplecontrols_xaml_deferred_159(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(37,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_160(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(37,10) StackPanel
@@ -17473,7 +17473,7 @@ fn build_controls_simplecontrols_xaml_deferred_160(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(17,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_161(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let string_format_converter_0 = ::ferroui_controls::converters::StringFormatConverter::__markup_new_0();
     ::core::result::Result::Ok(rt::to_value(string_format_converter_0))
@@ -17482,7 +17482,7 @@ fn build_controls_simplecontrols_xaml_deferred_161(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(19,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_162(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/SimpleControls.xaml(19,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -17760,7 +17760,7 @@ fn build_controls_simplecontrols_xaml_deferred_162(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(25,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_163(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(25,10) Grid
@@ -17937,7 +17937,7 @@ fn build_controls_simplecontrols_xaml_deferred_163(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(6,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_164(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(6,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -18012,7 +18012,7 @@ fn build_controls_simplecontrols_xaml_deferred_164(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(13,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_165(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(13,10) Border
@@ -18165,7 +18165,7 @@ fn build_controls_simplecontrols_xaml_deferred_165(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(25,20)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_166(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(25,20) AccessText
     let access_text_0 = ::ferroui_controls::primitives::AccessText::new();
@@ -18184,7 +18184,7 @@ fn build_controls_simplecontrols_xaml_deferred_166(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(64,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_167(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(64,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -18212,7 +18212,7 @@ fn build_controls_simplecontrols_xaml_deferred_167(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(69,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_168(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(69,10) Border
@@ -18250,7 +18250,7 @@ fn build_controls_simplecontrols_xaml_deferred_168(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(6,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_169(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     let platform_key_gesture_converter_0 = ::ferroui_controls::converters::PlatformKeyGestureConverter::__markup_new_0();
     ::core::result::Result::Ok(rt::to_value(platform_key_gesture_converter_0))
@@ -18259,7 +18259,7 @@ fn build_controls_simplecontrols_xaml_deferred_169(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(8,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_170(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/SimpleControls.xaml(8,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -18436,7 +18436,7 @@ fn build_controls_simplecontrols_xaml_deferred_170(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(15,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_171(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(15,10) Border
@@ -18752,7 +18752,7 @@ fn build_controls_simplecontrols_xaml_deferred_171(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(51,20)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_172(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/SimpleControls.xaml(51,20) AccessText
     let access_text_0 = ::ferroui_controls::primitives::AccessText::new();
@@ -18771,7 +18771,7 @@ fn build_controls_simplecontrols_xaml_deferred_172(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(90,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_173(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/SimpleControls.xaml(90,12) Separator
     let separator_0 = ::ferroui_controls::Separator::new();
@@ -18784,7 +18784,7 @@ fn build_controls_simplecontrols_xaml_deferred_173(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(117,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_174(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/SimpleControls.xaml(117,12) Path
     let path_0 = ::ferroui_controls::shapes::Path::new();
@@ -18810,7 +18810,7 @@ fn build_controls_simplecontrols_xaml_deferred_174(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(126,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_175(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/SimpleControls.xaml(126,12) Ellipse
     let ellipse_0 = ::ferroui_controls::shapes::Ellipse::new();
@@ -18838,7 +18838,7 @@ fn build_controls_simplecontrols_xaml_deferred_175(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(4,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_176(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -18867,7 +18867,7 @@ fn build_controls_simplecontrols_xaml_deferred_176(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(11,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_177(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(11,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -18882,7 +18882,7 @@ fn build_controls_simplecontrols_xaml_deferred_177(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(16,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_178(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(16,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -19022,7 +19022,7 @@ fn build_controls_simplecontrols_xaml_deferred_178(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(23,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_179(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(23,12) Grid
@@ -19188,7 +19188,7 @@ fn build_controls_simplecontrols_xaml_deferred_179(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(52,22)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_180(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(52,22) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -19220,7 +19220,7 @@ fn build_controls_simplecontrols_xaml_deferred_180(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(70,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_181(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(70,12) Grid
@@ -19383,7 +19383,7 @@ fn build_controls_simplecontrols_xaml_deferred_181(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(99,22)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_182(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(99,22) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -19415,7 +19415,7 @@ fn build_controls_simplecontrols_xaml_deferred_182(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(29,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_183(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(29,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -19495,7 +19495,7 @@ fn build_controls_simplecontrols_xaml_deferred_183(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(53,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_184(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(53,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -19577,7 +19577,7 @@ fn build_controls_simplecontrols_xaml_deferred_184(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(66,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_185(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(66,10) Border
@@ -19634,7 +19634,7 @@ fn build_controls_simplecontrols_xaml_deferred_185(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(97,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_186(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(97,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -19675,7 +19675,7 @@ fn build_controls_simplecontrols_xaml_deferred_186(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(108,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_187(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(108,10) Viewbox
     let viewbox_0 = ::ferroui_controls::Viewbox::new();
@@ -19721,7 +19721,7 @@ fn build_controls_simplecontrols_xaml_deferred_187(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(120,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_188(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(120,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -19762,7 +19762,7 @@ fn build_controls_simplecontrols_xaml_deferred_188(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(131,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_189(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(131,10) Viewbox
     let viewbox_0 = ::ferroui_controls::Viewbox::new();
@@ -19808,7 +19808,7 @@ fn build_controls_simplecontrols_xaml_deferred_189(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(44,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_190(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(44,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -19902,7 +19902,7 @@ fn build_controls_simplecontrols_xaml_deferred_190(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(49,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_191(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(49,10) ContentPresenter
@@ -19945,7 +19945,7 @@ fn build_controls_simplecontrols_xaml_deferred_191(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(80,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_192(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(80,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -20038,7 +20038,7 @@ fn build_controls_simplecontrols_xaml_deferred_192(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(91,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_193(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(91,10) DataValidationErrors
@@ -20301,7 +20301,7 @@ fn build_controls_simplecontrols_xaml_deferred_193(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(172,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_194(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(172,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -20369,7 +20369,7 @@ fn build_controls_simplecontrols_xaml_deferred_194(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(184,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_195(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(184,10) Border
@@ -20993,7 +20993,7 @@ fn build_controls_simplecontrols_xaml_deferred_195(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(43,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_196(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(43,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -21087,7 +21087,7 @@ fn build_controls_simplecontrols_xaml_deferred_196(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(48,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_197(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(48,10) ContentPresenter
@@ -21130,7 +21130,7 @@ fn build_controls_simplecontrols_xaml_deferred_197(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(79,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_198(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(79,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -21224,7 +21224,7 @@ fn build_controls_simplecontrols_xaml_deferred_198(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(90,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_199(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(90,10) DataValidationErrors
@@ -21588,7 +21588,7 @@ fn build_controls_simplecontrols_xaml_deferred_199(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(205,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_200(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(205,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -21653,7 +21653,7 @@ fn build_controls_simplecontrols_xaml_deferred_200(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(216,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_201(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(216,10) Border
@@ -22409,7 +22409,7 @@ fn build_controls_simplecontrols_xaml_deferred_201(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(23,48)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_202(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let value_0 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("0.1,0.9,0.2,1.0")), 23, 48)?;
     ::core::result::Result::Ok(rt::to_value(value_0))
@@ -22418,7 +22418,7 @@ fn build_controls_simplecontrols_xaml_deferred_202(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(27,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_203(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     // Controls/SimpleControls.xaml(27,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -23933,7 +23933,7 @@ fn build_controls_simplecontrols_xaml_deferred_203(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(37,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_204(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(37,12) Grid
@@ -24091,7 +24091,7 @@ fn build_controls_simplecontrols_xaml_deferred_204(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(118,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_205(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(118,12) Grid
@@ -24249,7 +24249,7 @@ fn build_controls_simplecontrols_xaml_deferred_205(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(199,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_206(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(199,12) Grid
@@ -24407,7 +24407,7 @@ fn build_controls_simplecontrols_xaml_deferred_206(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(282,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_207(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_0 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(282,12) Grid
@@ -24565,7 +24565,7 @@ fn build_controls_simplecontrols_xaml_deferred_207(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(7,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_208(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/SimpleControls.xaml(7,4) DrawingGroup
     let drawing_group_0 = ::ferroui_base::media::DrawingGroup::new();
@@ -24625,7 +24625,7 @@ fn build_controls_simplecontrols_xaml_deferred_208(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(16,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_209(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/SimpleControls.xaml(16,4) DrawingGroup
     let drawing_group_0 = ::ferroui_base::media::DrawingGroup::new();
@@ -24655,7 +24655,7 @@ fn build_controls_simplecontrols_xaml_deferred_209(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(22,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_210(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/SimpleControls.xaml(22,4) ResourceSelectorConverter
     let resource_selector_converter_0 = ::ferroui_dialogs::internal::ResourceSelectorConverter::new();
@@ -24797,7 +24797,7 @@ fn build_controls_simplecontrols_xaml_deferred_210(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(50,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_211(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/SimpleControls.xaml(50,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -24824,7 +24824,7 @@ fn build_controls_simplecontrols_xaml_deferred_211(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(55,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_212(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(55,10) Border
@@ -25647,7 +25647,7 @@ fn build_controls_simplecontrols_xaml_deferred_212(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(130,20)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_213(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/SimpleControls.xaml(130,20) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
@@ -25715,7 +25715,7 @@ fn build_controls_simplecontrols_xaml_deferred_213(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(203,22)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_214(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/SimpleControls.xaml(203,22) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
@@ -25911,7 +25911,7 @@ fn build_controls_simplecontrols_xaml_deferred_214(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(246,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_215(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/SimpleControls.xaml(246,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -25939,7 +25939,7 @@ fn build_controls_simplecontrols_xaml_deferred_215(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(251,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_216(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/SimpleControls.xaml(251,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -26112,7 +26112,7 @@ fn build_controls_simplecontrols_xaml_deferred_216(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(20,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_217(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let margin_multiplier_converter_0 = ::ferroui_controls::converters::MarginMultiplierConverter::__markup_new_0();
     // Controls/SimpleControls.xaml(20,4) Left
@@ -26129,7 +26129,7 @@ fn build_controls_simplecontrols_xaml_deferred_217(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(22,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_218(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let margin_multiplier_converter_0 = ::ferroui_controls::converters::MarginMultiplierConverter::__markup_new_0();
     // Controls/SimpleControls.xaml(22,4) Right
@@ -26146,7 +26146,7 @@ fn build_controls_simplecontrols_xaml_deferred_218(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(24,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_219(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let margin_multiplier_converter_0 = ::ferroui_controls::converters::MarginMultiplierConverter::__markup_new_0();
     // Controls/SimpleControls.xaml(24,4) Top
@@ -26161,7 +26161,7 @@ fn build_controls_simplecontrols_xaml_deferred_219(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(25,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_220(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let corner_radius_filter_converter_0 = ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_new_0();
     // Controls/SimpleControls.xaml(25,4) Filter
@@ -26172,7 +26172,7 @@ fn build_controls_simplecontrols_xaml_deferred_220(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(26,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_221(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let corner_radius_filter_converter_0 = ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_new_0();
     // Controls/SimpleControls.xaml(26,4) Filter
@@ -26183,7 +26183,7 @@ fn build_controls_simplecontrols_xaml_deferred_221(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(27,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_222(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let corner_radius_filter_converter_0 = ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_new_0();
     // Controls/SimpleControls.xaml(27,4) Filter
@@ -26194,7 +26194,7 @@ fn build_controls_simplecontrols_xaml_deferred_222(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(28,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_223(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let corner_radius_filter_converter_0 = ::ferroui_controls::converters::CornerRadiusFilterConverter::__markup_new_0();
     // Controls/SimpleControls.xaml(28,4) Filter
@@ -26205,7 +26205,7 @@ fn build_controls_simplecontrols_xaml_deferred_223(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(30,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_224(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/SimpleControls.xaml(30,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -26464,7 +26464,7 @@ fn build_controls_simplecontrols_xaml_deferred_224(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(33,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_225(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(33,10) ContentPresenter
@@ -26507,7 +26507,7 @@ fn build_controls_simplecontrols_xaml_deferred_225(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(116,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_226(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/SimpleControls.xaml(116,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -26597,7 +26597,7 @@ fn build_controls_simplecontrols_xaml_deferred_226(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(131,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_227(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_SIMPLECONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(131,10) Grid
@@ -26868,7 +26868,7 @@ fn build_controls_simplecontrols_xaml_deferred_227(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(13,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_228(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(13,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -26906,7 +26906,7 @@ fn build_controls_simplecontrols_xaml_deferred_228(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(5,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_229(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(5,4) DrawingImage
     let drawing_image_0 = ::ferroui_base::media::DrawingImage::new();
@@ -26940,7 +26940,7 @@ fn build_controls_simplecontrols_xaml_deferred_229(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(17,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_230(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(17,4) DrawingImage
     let drawing_image_0 = ::ferroui_base::media::DrawingImage::new();
@@ -26974,7 +26974,7 @@ fn build_controls_simplecontrols_xaml_deferred_230(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(29,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_231(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(29,4) GeometryGroup
     let geometry_group_0 = ::ferroui_base::media::GeometryGroup::new();
@@ -27006,7 +27006,7 @@ fn build_controls_simplecontrols_xaml_deferred_231(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(42,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_232(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(42,4) GeometryGroup
     let geometry_group_0 = ::ferroui_base::media::GeometryGroup::new();
@@ -27051,7 +27051,7 @@ fn build_controls_simplecontrols_xaml_deferred_232(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(62,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_233(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(62,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -27158,7 +27158,7 @@ fn build_controls_simplecontrols_xaml_deferred_233(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(71,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_234(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(71,12) Grid
@@ -27238,7 +27238,7 @@ fn build_controls_simplecontrols_xaml_deferred_234(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(24,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_235(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(24,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -27453,7 +27453,7 @@ fn build_controls_simplecontrols_xaml_deferred_235(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(35,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_236(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(35,10) Border
@@ -27547,7 +27547,7 @@ fn build_controls_simplecontrols_xaml_deferred_236(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(120,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_237(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(120,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -27781,7 +27781,7 @@ fn build_controls_simplecontrols_xaml_deferred_237(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(131,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_238(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(131,10) Border
@@ -27875,7 +27875,7 @@ fn build_controls_simplecontrols_xaml_deferred_238(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(222,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_239(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(222,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -27923,7 +27923,7 @@ fn build_controls_simplecontrols_xaml_deferred_239(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(228,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_240(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(228,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -27946,7 +27946,7 @@ fn build_controls_simplecontrols_xaml_deferred_240(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(246,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_241(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(246,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -27991,7 +27991,7 @@ fn build_controls_simplecontrols_xaml_deferred_241(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(258,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_242(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(258,10) Border
@@ -28230,7 +28230,7 @@ fn build_controls_simplecontrols_xaml_deferred_242(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(294,22)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_243(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(294,22) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
@@ -28249,7 +28249,7 @@ fn build_controls_simplecontrols_xaml_deferred_243(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(316,24)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_244(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(316,24) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
@@ -28265,7 +28265,7 @@ fn build_controls_simplecontrols_xaml_deferred_244(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(16,48)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_245(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("M3 17h18a1 1 0 0 1 .117 1.993L21 19H3a1 1 0 0 1-.117-1.993L3 17h18H3Zm0-6 18-.002a1 1 0 0 1 .117 1.993l-.117.007L3 13a1 1 0 0 1-.117-1.993L3 11l18-.002L3 11Zm0-6h18a1 1 0 0 1 .117 1.993L21 7H3a1 1 0 0 1-.117-1.993L3 5h18H3Z")), 16, 48)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
@@ -28274,7 +28274,7 @@ fn build_controls_simplecontrols_xaml_deferred_245(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(18,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_246(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(18,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -28514,7 +28514,7 @@ fn build_controls_simplecontrols_xaml_deferred_246(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(23,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_247(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(23,10) SplitView
@@ -29248,7 +29248,7 @@ fn build_controls_simplecontrols_xaml_deferred_247(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(10,50)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_248(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("M3 17h18a1 1 0 0 1 .117 1.993L21 19H3a1 1 0 0 1-.117-1.993L3 17h18H3Zm0-6 18-.002a1 1 0 0 1 .117 1.993l-.117.007L3 13a1 1 0 0 1-.117-1.993L3 11l18-.002L3 11Zm0-6h18a1 1 0 0 1 .117 1.993L21 7H3a1 1 0 0 1-.117-1.993L3 5h18H3Z")), 10, 50)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
@@ -29257,7 +29257,7 @@ fn build_controls_simplecontrols_xaml_deferred_248(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(12,50)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_249(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let value_0 = rt::invoked(::ferroui_base::media::StreamGeometry::__markup_parse(::std::string::String::from("M12.7347,4.20949 C13.0332,3.92233 13.508,3.93153 13.7952,4.23005 C14.0823,4.52857 14.0731,5.00335 13.7746,5.29051 L5.50039,13.25 L24.2532,13.25 C24.6674,13.25 25.0032,13.5858 25.0032,13.9999982 C25.0032,14.4142 24.6674,14.75 24.2532,14.75 L5.50137,14.75 L13.7746,22.7085 C14.0731,22.9957 14.0823,23.4705 13.7952,23.769 C13.508,24.0675 13.0332,24.0767 12.7347,23.7896 L3.30673,14.7202 C2.89776,14.3268 2.89776,13.6723 3.30673,13.2788 L12.7347,4.20949 Z")), 12, 50)?;
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
@@ -29266,7 +29266,7 @@ fn build_controls_simplecontrols_xaml_deferred_249(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(14,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_250(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(14,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -29280,7 +29280,7 @@ fn build_controls_simplecontrols_xaml_deferred_250(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(15,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_251(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(15,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -29294,7 +29294,7 @@ fn build_controls_simplecontrols_xaml_deferred_251(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(17,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_252(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(17,4) LinearGradientBrush
     let linear_gradient_brush_0 = ::ferroui_base::media::LinearGradientBrush::new();
@@ -29328,7 +29328,7 @@ fn build_controls_simplecontrols_xaml_deferred_252(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(22,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_253(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(22,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -29465,7 +29465,7 @@ fn build_controls_simplecontrols_xaml_deferred_253(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(50,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_254(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(50,10) Panel
@@ -30068,7 +30068,7 @@ fn build_controls_simplecontrols_xaml_deferred_254(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(17,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_255(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(17,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -30081,7 +30081,7 @@ fn build_controls_simplecontrols_xaml_deferred_255(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(18,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_256(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(18,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -30094,7 +30094,7 @@ fn build_controls_simplecontrols_xaml_deferred_256(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(19,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_257(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(19,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -30108,7 +30108,7 @@ fn build_controls_simplecontrols_xaml_deferred_257(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(20,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_258(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(20,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -30121,7 +30121,7 @@ fn build_controls_simplecontrols_xaml_deferred_258(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(21,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_259(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(21,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -30135,7 +30135,7 @@ fn build_controls_simplecontrols_xaml_deferred_259(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(22,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_260(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(22,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -30148,7 +30148,7 @@ fn build_controls_simplecontrols_xaml_deferred_260(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(23,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_261(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(23,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -30161,7 +30161,7 @@ fn build_controls_simplecontrols_xaml_deferred_261(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(26,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_262(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(26,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -30175,7 +30175,7 @@ fn build_controls_simplecontrols_xaml_deferred_262(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(27,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_263(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(27,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -30189,7 +30189,7 @@ fn build_controls_simplecontrols_xaml_deferred_263(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(28,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_264(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(28,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -30203,7 +30203,7 @@ fn build_controls_simplecontrols_xaml_deferred_264(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(48,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_265(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(48,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -30216,7 +30216,7 @@ fn build_controls_simplecontrols_xaml_deferred_265(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(51,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_266(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(51,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
@@ -30229,7 +30229,7 @@ fn build_controls_simplecontrols_xaml_deferred_266(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(56,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_267(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(56,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -30293,7 +30293,7 @@ fn build_controls_simplecontrols_xaml_deferred_267(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(64,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_268(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(64,10) DockPanel
@@ -30396,7 +30396,7 @@ fn build_controls_simplecontrols_xaml_deferred_268(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(76,20)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_269(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(76,20) UniformGrid
     let uniform_grid_0 = ::ferroui_controls::primitives::UniformGrid::new();
@@ -30412,7 +30412,7 @@ fn build_controls_simplecontrols_xaml_deferred_269(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(102,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_270(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(102,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -30713,7 +30713,7 @@ fn build_controls_simplecontrols_xaml_deferred_270(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(115,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_271(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(115,10) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -30740,7 +30740,7 @@ fn build_controls_simplecontrols_xaml_deferred_271(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(124,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_272(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(124,10) Panel
@@ -30906,7 +30906,7 @@ fn build_controls_simplecontrols_xaml_deferred_272(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(185,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_273(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(185,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -30933,7 +30933,7 @@ fn build_controls_simplecontrols_xaml_deferred_273(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(200,12)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_274(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(200,12) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -30960,7 +30960,7 @@ fn build_controls_simplecontrols_xaml_deferred_274(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(246,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_275(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(246,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -30987,7 +30987,7 @@ fn build_controls_simplecontrols_xaml_deferred_275(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(250,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_276(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(250,10) Panel
@@ -31051,7 +31051,7 @@ fn build_controls_simplecontrols_xaml_deferred_276(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(17,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_277(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(17,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -31077,7 +31077,7 @@ fn build_controls_simplecontrols_xaml_deferred_277(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(21,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_278(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(21,10) Grid
@@ -31275,7 +31275,7 @@ fn build_controls_simplecontrols_xaml_deferred_278(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(65,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_279(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(65,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -31324,7 +31324,7 @@ fn build_controls_simplecontrols_xaml_deferred_279(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(77,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_280(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(77,10) Border
@@ -31406,7 +31406,7 @@ fn build_controls_simplecontrols_xaml_deferred_280(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(7,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_281(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(7,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -31423,7 +31423,7 @@ fn build_controls_simplecontrols_xaml_deferred_281(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(14,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_282(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
@@ -31439,7 +31439,7 @@ fn build_controls_simplecontrols_xaml_deferred_282(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(15,6)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_283(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(15,6) Border
     let border_0 = ::ferroui_controls::Border::new();
@@ -31473,7 +31473,7 @@ fn build_controls_simplecontrols_xaml_deferred_283(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(22,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_284(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(22,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -31511,7 +31511,7 @@ fn build_controls_simplecontrols_xaml_deferred_284(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(30,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_285(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(30,10) Panel
@@ -31613,7 +31613,7 @@ fn build_controls_simplecontrols_xaml_deferred_285(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(7,4)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_286(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(7,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
@@ -31780,7 +31780,7 @@ fn build_controls_simplecontrols_xaml_deferred_286(
 /// Builds the deferred content at `Controls/SimpleControls.xaml(12,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_287(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/SimpleControls.xaml(12,10) Border
@@ -31824,7 +31824,7 @@ fn build_controls_simplecontrols_xaml_deferred_287(
 pub fn try_load(
     service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     uri: &str,
-) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadError> {
     if rt::uri_equals(uri, "ferres://ferroui.themes.simple/SimpleTheme.xaml", "") {
         return ::core::result::Result::Ok(::ferroui_base::metadata::into_markup_value(crate::SimpleTheme::with_service_provider(::core::option::Option::Some(::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider.cloned())))));
     }

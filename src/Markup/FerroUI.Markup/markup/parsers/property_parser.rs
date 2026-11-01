@@ -4,7 +4,7 @@
 //! XAML compiler extensions and the markup runtime use it and the compiler must not depend on
 //! the runtime library.
 
-use ferroui_base::data::core::ExpressionParseException;
+use ferroui_base::data::core::ExpressionParseError;
 use ferroui_base::utilities::CharacterReader;
 
 /// Parses a property reference: `Name`, `Owner.Name`, `ns:Owner.Name`,
@@ -16,14 +16,14 @@ pub struct PropertyParser;
 pub type PropertyReference = (Option<String>, Option<String>, String);
 
 impl PropertyParser {
-    pub fn parse(text: &str) -> Result<PropertyReference, ExpressionParseException> {
+    pub fn parse(text: &str) -> Result<PropertyReference, ExpressionParseError> {
         let r = CharacterReader::new(text);
         Self::parse_reader(r)
     }
 
-    pub fn parse_reader(mut r: CharacterReader<'_>) -> Result<PropertyReference, ExpressionParseException> {
+    pub fn parse_reader(mut r: CharacterReader<'_>) -> Result<PropertyReference, ExpressionParseError> {
         if r.end() {
-            return Err(ExpressionParseException::new(0, "Expected property name."));
+            return Err(ExpressionParseError::new(0, "Expected property name."));
         }
 
         let open_parens = r.take_if('(');
@@ -48,19 +48,19 @@ impl PropertyParser {
                 }
 
                 if open_parens {
-                    return Err(ExpressionParseException::new(r.position(), "Expected ')'."));
+                    return Err(ExpressionParseError::new(r.position(), "Expected ')'."));
                 }
 
                 let peek = r.peek().map(String::from).unwrap_or_default();
-                return Err(ExpressionParseException::new(r.position(), format!("Unexpected '{peek}'.")));
+                return Err(ExpressionParseError::new(r.position(), format!("Unexpected '{peek}'.")));
             } else if !r.end() && r.take_if(':') {
                 if ns.is_some() {
-                    return Err(ExpressionParseException::new(r.position(), "Unexpected ':'."));
+                    return Err(ExpressionParseError::new(r.position(), "Unexpected ':'."));
                 }
                 ns = Some(token.to_string());
             } else if !r.end() && r.take_if('.') {
                 if owner.is_some() {
-                    return Err(ExpressionParseException::new(r.position(), "Unexpected '.'."));
+                    return Err(ExpressionParseError::new(r.position(), "Unexpected '.'."));
                 }
                 owner = Some(token.to_string());
             } else {
@@ -73,15 +73,15 @@ impl PropertyParser {
         }
 
         let Some(name) = name else {
-            return Err(ExpressionParseException::new(0, "Expected property name."));
+            return Err(ExpressionParseError::new(0, "Expected property name."));
         };
 
         if open_parens && owner.is_none() {
-            Err(ExpressionParseException::new(1, "Expected property owner."))
+            Err(ExpressionParseError::new(1, "Expected property owner."))
         } else if open_parens && !close_parens {
-            Err(ExpressionParseException::new(r.position(), "Expected ')'."))
+            Err(ExpressionParseError::new(r.position(), "Expected ')'."))
         } else if !r.end() {
-            Err(ExpressionParseException::new(r.position(), "Expected end of expression."))
+            Err(ExpressionParseError::new(r.position(), "Expected end of expression."))
         } else {
             Ok((ns, owner, name))
         }

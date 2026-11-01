@@ -1,4 +1,4 @@
-//! `UnhandledInteractionException<TInput, TOutput>` (ReactiveUI.Binding,
+//! `UnhandledInteractionError<TInput, TOutput>` (ReactiveUI.Binding,
 //! `Interactions/UnhandledInteractionException.cs`).
 
 use super::Interaction;
@@ -7,14 +7,18 @@ use std::error::Error;
 use std::fmt;
 
 /// The error of an interaction that no handler handled (`UnhandledInteractionException<TInput, TOutput>`).
-pub struct UnhandledInteractionException<I, O> {
+pub struct UnhandledInteractionError<I, O> {
     message: String,
     inner_exception: Option<ObservableError>,
     interaction: Option<Interaction<I, O>>,
     input: Option<I>,
 }
 
-impl<I, O> UnhandledInteractionException<I, O> {
+/// The name of [`UnhandledInteractionError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `UnhandledInteractionError`")]
+pub type UnhandledInteractionException<I, O> = UnhandledInteractionError<I, O>;
+
+impl<I, O> UnhandledInteractionError<I, O> {
     /// The error of `interaction`, which no handler handled for `input`
     /// (`UnhandledInteractionException(Interaction<TInput, TOutput>, TInput)`).
     pub fn new(interaction: Interaction<I, O>, input: I) -> Self {
@@ -27,9 +31,11 @@ impl<I, O> UnhandledInteractionException<I, O> {
     }
 
     /// An error without an interaction (`UnhandledInteractionException()`), with the default
-    /// message of an exception.
+    /// message of an exception. The message names the type as it was named before 0.5
+    /// (`UnhandledInteractionException`), so that it stays the same.
     pub fn empty() -> Self {
-        Self::with_message(format!("Exception of type '{}' was thrown.", std::any::type_name::<Self>()))
+        let type_name = std::any::type_name::<Self>().replacen("UnhandledInteractionError", "UnhandledInteractionException", 1);
+        Self::with_message(format!("Exception of type '{type_name}' was thrown."))
     }
 
     /// An error with `message` (`UnhandledInteractionException(string)`).
@@ -65,13 +71,13 @@ impl<I, O> UnhandledInteractionException<I, O> {
     }
 }
 
-impl<I, O> Default for UnhandledInteractionException<I, O> {
+impl<I, O> Default for UnhandledInteractionError<I, O> {
     fn default() -> Self {
         Self::empty()
     }
 }
 
-impl<I, O> fmt::Debug for UnhandledInteractionException<I, O> {
+impl<I, O> fmt::Debug for UnhandledInteractionError<I, O> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("UnhandledInteractionException")
             .field("message", &self.message)
@@ -81,13 +87,13 @@ impl<I, O> fmt::Debug for UnhandledInteractionException<I, O> {
     }
 }
 
-impl<I, O> fmt::Display for UnhandledInteractionException<I, O> {
+impl<I, O> fmt::Display for UnhandledInteractionError<I, O> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
     }
 }
 
-impl<I, O> Error for UnhandledInteractionException<I, O> {
+impl<I, O> Error for UnhandledInteractionError<I, O> {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         self.inner_exception.as_deref()
     }

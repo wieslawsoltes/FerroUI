@@ -2,7 +2,7 @@
 
 use crate::object_casts::rc_of;
 use crate::xaml_il::runtime::DeferredContent;
-use crate::XamlLoadException;
+use crate::XamlLoadError;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::{ferro_markup_type, BoxedValue, Ref};
 use ferroui_controls::templates::TemplateResult;
@@ -39,10 +39,10 @@ impl TemplateContent {
     /// callers use.
     pub fn try_load_as<T: Clone + 'static>(
         template_content: Option<&BoxedValue>,
-    ) -> Result<Option<TemplateResult<T>>, XamlLoadException> {
+    ) -> Result<Option<TemplateResult<T>>, XamlLoadError> {
         let Some(template_content) = template_content else { return Ok(None) };
         let Some(deferred) = rc_of::<DeferredContent>(template_content) else {
-            return Err(XamlLoadException::with_message(format!(
+            return Err(XamlLoadError::with_message(format!(
                 "Unexpected content {} (Parameter 'templateContent')",
                 (**template_content).type_name()
             )));
@@ -56,7 +56,7 @@ impl TemplateContent {
         }
         match from_markup_value::<T>(&built.result) {
             Some(result) => Ok(Some(TemplateResult::new(result, built.name_scope))),
-            None => Err(XamlLoadException::with_message(format!(
+            None => Err(XamlLoadError::with_message(format!(
                 "Unable to cast object of type '{}' to type '{}'.",
                 built.result.as_ref().map_or("null", |r| (**r).type_name()),
                 std::any::type_name::<T>()

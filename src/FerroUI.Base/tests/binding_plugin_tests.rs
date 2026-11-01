@@ -11,7 +11,7 @@ use crate::data::core::plugins::{
 };
 use crate::data::core::{Value, WeakValue};
 use crate::data::model::{Event, INotifyDataErrorInfo, INotifyPropertyChanged, Model};
-use crate::data::{BindingError, BindingErrorType, BindingNotification, BindingPriority, DataValidationException};
+use crate::data::{BindingError, BindingErrorType, BindingNotification, BindingPriority, DataValidationError};
 use crate::ferro_model;
 
 /// The message of the managed "argument out of range" error for `value`.
@@ -183,7 +183,7 @@ mod indei_validation_plugin_tests {
 
     fn validation_error() -> BindingNotification {
         BindingNotification::with_error_and_fallback(
-            BindingError::new(DataValidationException::new(Some(boxed(s("Must be less than Maximum"))))),
+            BindingError::new(DataValidationError::new(Some(boxed(s("Must be less than Maximum"))))),
             BindingErrorType::DataValidationError,
             Some(boxed(6)),
         )

@@ -9,7 +9,7 @@ use super::binding_expression_tests_indexer::{
 use super::*;
 use crate::data::core::{BindingExpression, BindingExpressionOptions, UntypedBindingExpression, Value, ValueTypes};
 use crate::data::model::{BindableArray, BindableDictionary, BindableList, INotifyCollectionChanged, Model};
-use crate::data::{BindingChainException, BindingError, BindingErrorType, BindingNotification};
+use crate::data::{BindingChainError, BindingError, BindingErrorType, BindingNotification};
 use crate::reactive::AnonymousObserver;
 use crate::{ferro_model, UnsetValueType};
 
@@ -96,7 +96,7 @@ fn should_get_error_for_object_without_indexer() {
     let result = first(data.clone(), "Foo[noindexer]").expect("a notification");
 
     let expected = BindingNotification::with_error(
-        BindingError::new(BindingChainException::with_expression(
+        BindingError::new(BindingChainError::with_expression(
             "Type 'System.Int32' does not have an indexer.",
             "Foo[noindexer]",
             "[noindexer]",

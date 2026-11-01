@@ -6,12 +6,16 @@ use std::rc::Rc;
 /// The error raised when a markup document cannot be loaded, or when a
 /// member of the markup runtime fails on its input.
 #[derive(Clone, Debug, Default)]
-pub struct XamlLoadException {
+pub struct XamlLoadError {
     message: String,
     inner: Option<Rc<dyn std::error::Error>>,
 }
 
-impl XamlLoadException {
+/// The name of [`XamlLoadError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `XamlLoadError`")]
+pub type XamlLoadException = XamlLoadError;
+
+impl XamlLoadError {
     /// An error without a message.
     pub fn new() -> Self {
         Self::default()
@@ -37,19 +41,19 @@ impl XamlLoadException {
     }
 }
 
-impl fmt::Display for XamlLoadException {
+impl fmt::Display for XamlLoadError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
     }
 }
 
-impl std::error::Error for XamlLoadException {
+impl std::error::Error for XamlLoadError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         self.inner.as_deref()
     }
 }
 
-impl PartialEq for XamlLoadException {
+impl PartialEq for XamlLoadError {
     fn eq(&self, other: &Self) -> bool {
         self.message == other.message
     }
@@ -62,12 +66,12 @@ mod tests {
 
     #[test]
     fn carries_message_and_inner_error() {
-        assert_eq!(XamlLoadException::new().message(), "");
-        let e = XamlLoadException::with_message("boom");
+        assert_eq!(XamlLoadError::new().message(), "");
+        let e = XamlLoadError::with_message("boom");
         assert_eq!(e.to_string(), "boom");
         assert!(e.inner_exception().is_none());
 
-        let outer = XamlLoadException::with_inner("outer", e.clone());
+        let outer = XamlLoadError::with_inner("outer", e.clone());
         assert_eq!(outer.message(), "outer");
         assert_eq!(outer.source().unwrap().to_string(), "boom");
     }
