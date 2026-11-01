@@ -272,7 +272,7 @@ impl VisualImpl for MaterialDatePicker {
         Self::parent_on_attached_to_visual_tree(this, e);
         let weak = this.to_ref().downgrade();
         *this.visibility_subscription.borrow_mut() =
-            Some(Subscription::new(this.is_effectively_visible_changed(move || {
+            Some(this.is_effectively_visible_changed(move || {
                 if let Some(this) = weak.upgrade() {
                     if this.is_effectively_visible() {
                         this.update_clock();
@@ -281,7 +281,7 @@ impl VisualImpl for MaterialDatePicker {
                         this.stop_clock();
                     }
                 }
-            })));
+            }));
         this.update_clock();
     }
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
@@ -468,7 +468,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                         this.scroll_range_to_month();
                     }
                 }
-            }));
+            }).detach());
         let weak = this.to_ref().downgrade();
         this.subscriptions
             .borrow_mut()
@@ -483,7 +483,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                         }
                     }
                 }
-            }));
+            }).detach());
         for kind in 0..3 {
             let weak = this.to_ref().downgrade();
             let subscription = match kind {

@@ -215,7 +215,7 @@ impl CompositionPage {
                 if let Some(border) = weak.upgrade() {
                     CompositionPage::set_enable_animations(&border, true);
                 }
-            });
+            }).detach();
             return;
         };
 
@@ -291,7 +291,7 @@ impl CompositionPage {
                 .create_expression_animation_with("Vector3(this.Target.Size.X * 0.5, this.Target.Size.Y * 0.5, 1)");
             solid_visual.start_animation("CenterPoint", &*center);
             on_attached();
-        });
+        }).detach();
 
         let _bounds = v.property_changed(move |a| {
             if a.property() == Visual::bounds_property().as_property() {
@@ -339,7 +339,7 @@ impl CompositionPage {
             custom_visual.send_handler_message(CustomVisualHandler::start_message());
             this.precise_dirty_rects_checkbox_custom_visual_changed(&None, &RoutedEventArgs::new());
             on_attached();
-        });
+        }).detach();
 
         let _bounds = v.property_changed(move |a| {
             if a.property() == Visual::bounds_property().as_property() {

@@ -1125,7 +1125,7 @@ impl RichTextBlock {
                 this.invalidate_document_layout();
             }
         });
-        *self.view_subscriptions.borrow_mut() = vec![highlighters, resources, theme];
+        *self.view_subscriptions.borrow_mut() = vec![highlighters, resources.detach(), theme.detach()];
         self.refresh_default_highlight_brush_subscriptions();
     }
 

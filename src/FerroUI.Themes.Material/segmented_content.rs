@@ -88,7 +88,7 @@ impl VisualImpl for MaterialSegmentedContent {
                 this.update_clock();
             }
         });
-        if let Some(old) = this.visibility.replace(Some(Subscription::new(subscription))) {
+        if let Some(old) = this.visibility.replace(Some(subscription)) {
             old.dispose();
         }
         this.publish_frame();

@@ -413,8 +413,8 @@ fn wire_adaptive(root: &Ref<Control>) {
                 adaptive_mode(&nav, host.client_size().width);
             }
         }));
-    });
-    root.detached_from_visual_tree(move |_| subscription.clear());
+    }).detach();
+    root.detached_from_visual_tree(move |_| subscription.clear()).detach();
     let weak_root = root.downgrade();
     let weak_nav = nav.downgrade();
     root.property_changed(move |change| {

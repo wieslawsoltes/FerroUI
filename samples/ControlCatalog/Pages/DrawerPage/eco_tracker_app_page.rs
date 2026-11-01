@@ -304,7 +304,7 @@ impl EcoTrackerAppPage {
                     fill.set_width(progress_bar.bounds().width * 0.75);
                 }
             }
-        });
+        }).detach();
 
         progress_bar.children().add(fill);
         summary_stack.children().add(progress_bar);

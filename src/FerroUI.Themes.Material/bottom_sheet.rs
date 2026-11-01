@@ -159,7 +159,7 @@ impl VisualImpl for MaterialBottomSheetHost {
         Self::parent_on_attached_to_visual_tree(this, event);
         let weak = this.to_ref().downgrade();
         *this.visibility_subscription.borrow_mut() =
-            Some(Subscription::new(this.is_effectively_visible_changed(move || {
+            Some(this.is_effectively_visible_changed(move || {
                 if let Some(this) = weak.upgrade() {
                     if this.is_effectively_visible() {
                         this.request_frame();
@@ -169,7 +169,7 @@ impl VisualImpl for MaterialBottomSheetHost {
                         this.cancel_drag();
                     }
                 }
-            })));
+            }));
         if this.state() != MaterialSheetState::Hidden {
             this.transition_to(this.state(), false);
         }

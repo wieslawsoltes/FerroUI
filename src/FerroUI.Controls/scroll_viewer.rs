@@ -153,7 +153,7 @@ impl FerroObjectImpl for ScrollViewer {
             if let Some(this) = weak.upgrade() {
                 this.raise_scroll_changed();
             }
-        });
+        }).detach();
     }
 
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {

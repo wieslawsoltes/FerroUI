@@ -248,7 +248,7 @@ impl VisualImpl for MaterialExtendedFabLayout {
                 this.update_clock();
             }
         });
-        if let Some(old) = this.visibility_subscription.replace(Some(Subscription::new(subscription))) {
+        if let Some(old) = this.visibility_subscription.replace(Some(subscription)) {
             old.dispose();
         }
         this.publish_frame();

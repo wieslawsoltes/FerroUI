@@ -106,7 +106,7 @@ impl GesturePullPage {
                 if let Some(visual) = ball_composition_visual.borrow().as_ref() {
                     default_offset.set(visual.visual_props().offset());
                 }
-            });
+            }).detach();
         }
 
         {

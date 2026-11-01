@@ -65,7 +65,7 @@ impl TemplatedControlImpl for TextSelectionHandle {
                 this.indicator_layout_updated();
             }
         });
-        *this.indicator.borrow_mut() = Some((indicator, layout_updated));
+        *this.indicator.borrow_mut() = Some((indicator, layout_updated.detach()));
 
         this.update_handle_classes();
     }

@@ -192,8 +192,8 @@ fn logical_tree_attachment_follows_parent() {
     let attached = Rc::new(Cell::new(0));
     let detached = Rc::new(Cell::new(0));
     let (a, d) = (attached.clone(), detached.clone());
-    child.attached_to_logical_tree(move |_| a.set(a.get() + 1));
-    child.detached_from_logical_tree(move |_| d.set(d.get() + 1));
+    child.attached_to_logical_tree(move |_| a.set(a.get() + 1)).detach();
+    child.detached_from_logical_tree(move |_| d.set(d.get() + 1)).detach();
 
     assert!(root.is_attached_to_logical_tree());
     assert!(!child.is_attached_to_logical_tree());
@@ -217,7 +217,7 @@ fn data_context_is_inherited_through_logical_tree() {
     root.logical_children().add(child.clone().upcast());
     let changed = Rc::new(Cell::new(0));
     let c = changed.clone();
-    child.data_context_changed(move || c.set(c.get() + 1));
+    child.data_context_changed(move || c.set(c.get() + 1)).detach();
 
     let context: BoxedValue = Rc::new("context".to_string());
     root.set_data_context(Some(context.clone()));
@@ -305,7 +305,7 @@ fn invalidating_measure_queues_layout_pass_on_render() {
 
     let updated = Rc::new(Cell::new(0));
     let u = updated.clone();
-    child.layout_updated(move || u.set(u.get() + 1));
+    child.layout_updated(move || u.set(u.get() + 1)).detach();
 
     child.set_width(80.0);
     assert!(!child.is_measure_valid());

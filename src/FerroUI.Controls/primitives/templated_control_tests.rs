@@ -281,7 +281,7 @@ fn template_child_attached_to_logical_tree_should_be_raised() {
 
     let raised = Rc::new(Cell::new(false));
     let flag = raised.clone();
-    template_child.attached_to_logical_tree(move |_| flag.set(true));
+    template_child.attached_to_logical_tree(move |_| flag.set(true)).detach();
 
     target.apply_template();
     assert!(raised.get());
@@ -297,7 +297,7 @@ fn template_child_detached_from_logical_tree_should_be_raised() {
 
     let raised = Rc::new(Cell::new(false));
     let flag = raised.clone();
-    template_child.detached_from_logical_tree(move |_| flag.set(true));
+    template_child.detached_from_logical_tree(move |_| flag.set(true)).detach();
 
     root.set_child(None);
     assert!(raised.get());

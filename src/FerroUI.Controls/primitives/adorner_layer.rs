@@ -269,7 +269,7 @@ impl AdornerLayer {
             });
             visual.set_value(
                 Self::adorner_attachment_subscriptions_property(),
-                Some(AttachmentSubscriptions(Rc::new([attached, detached]))),
+                Some(AttachmentSubscriptions(Rc::new([attached.detach(), detached.detach()]))),
             );
             Self::attach(visual, &new_adorner);
         }

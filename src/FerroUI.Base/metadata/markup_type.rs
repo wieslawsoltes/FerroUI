@@ -762,6 +762,14 @@ impl<T: IDisposable + 'static> IntoMarkupSubscription for Rc<T> {
     }
 }
 
+/// A guard is detached: markup keeps the handler for the life of its element
+/// unless it removes it through the handle.
+impl IntoMarkupSubscription for crate::reactive::Subscription {
+    fn into_markup_subscription(self) -> Option<Rc<dyn IDisposable>> {
+        Some(self.detach())
+    }
+}
+
 impl IntoMarkupSubscription for Option<Rc<dyn IDisposable>> {
     fn into_markup_subscription(self) -> Option<Rc<dyn IDisposable>> {
         self

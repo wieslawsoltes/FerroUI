@@ -78,11 +78,11 @@ impl VisualImpl for MaterialSelectionMark {
         Self::parent_on_attached_to_visual_tree(this, event);
         let weak = this.to_ref().downgrade();
         *this.visibility_subscription.borrow_mut() =
-            Some(Subscription::new(this.is_effectively_visible_changed(move || {
+            Some(this.is_effectively_visible_changed(move || {
                 if let Some(this) = weak.upgrade() {
                     this.update_clock();
                 }
-            })));
+            }));
         this.retarget();
     }
     fn on_detached_from_visual_tree(this: &Self, event: &VisualTreeAttachmentEventArgs) {

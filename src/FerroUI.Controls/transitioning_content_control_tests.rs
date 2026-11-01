@@ -308,7 +308,7 @@ fn control_should_connect_to_visual_tree_once() {
     control.attached_to_visual_tree({
         let counter = counter.clone();
         move |_| counter.set(counter.get() + 1)
-    });
+    }).detach();
 
     target.set_content(Some(Control::boxed(control)));
     layout(&target);

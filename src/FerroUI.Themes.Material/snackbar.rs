@@ -302,7 +302,7 @@ impl VisualImpl for MaterialSnackbarHost {
                 this.update_activity();
             }
         });
-        if let Some(old) = this.visibility_subscription.replace(Some(Subscription::new(subscription))) {
+        if let Some(old) = this.visibility_subscription.replace(Some(subscription)) {
             old.dispose();
         }
         this.update_activity();

@@ -76,7 +76,7 @@ Each step is one pull request from main, with the callers it moves.
 | D5 | The reactive libraries: `Subscribe` keeps returning `Rc<dyn IDisposable>` (the Rx contract); an extension `subscribe_guard` returns `Subscription` for RAII callers, and the framework's own uses of the libraries move to it where they kept the handle to dispose | addition | none |
 | D6 | Samples, templates and the application repositories (`detach()` where they subscribe for the life of the source); the inventory baseline and the documentation | | |
 
-Status: D1 is merged. D3 is done for `ferroui-base` (58 fields, which are also released when their owner is dropped without its teardown); the other crates are open.
+Status: D1, D2 (the locator scope, `DispatcherProcessingDisabled`, `BatchUpdateOperation`) and D3 (245 fields in `ferroui-base`, `ferroui-controls` and the portable crates; the platform crates and the reactive libraries are open) are merged. D4 began with the element events of `Visual`, `StyledElement` and `Layoutable`; the other areas (input, bindings and property observation, the dispatcher's timers, composition) are open.
 
 D1 and D3 change no behaviour. D2 is the only step that changes what dropping a value does
 without a compiler error, so it moves one area at a time and each pull request names the types and

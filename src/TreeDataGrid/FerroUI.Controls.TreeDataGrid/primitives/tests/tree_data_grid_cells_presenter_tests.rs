@@ -109,7 +109,7 @@ fn create_target(
     root.update_layout();
     run_jobs();
 
-    Target { target, scroll, columns, _root: root, _viewport_subscription: viewport_subscription }
+    Target { target, scroll, columns, _root: root, _viewport_subscription: viewport_subscription.detach() }
 }
 
 fn default_target() -> Target {
