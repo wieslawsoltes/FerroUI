@@ -262,6 +262,7 @@ pub struct Target {
 enum Location {
     External(crate::ExternalValue, String),
     ModelRole(crate::RowId, String),
+    DelegateRole(ObjectId, String),
     Local(String),
     Property(SlotId),
     Record(crate::Record, String),
@@ -309,6 +310,9 @@ impl Frame<'_, '_> {
                 .validate_handles(&Value::External(value.clone()))?;
             return Ok(self.target(Location::External(value, name.into())));
         }
+        if let Value::DelegateRow(owner) = base {
+            return Ok(self.target(Location::DelegateRole(owner, name.to_owned())));
+        }
         if let Value::ModelRow(row) = base {
             return Ok(self.target(Location::ModelRole(row, name.to_owned())));
         }
@@ -341,6 +345,9 @@ impl Frame<'_, '_> {
                         .with_external(self.owner, value, self.reads, |engine, ctx| {
                             engine.get_external(ctx, value, name)
                         })?
+                }
+                Location::DelegateRole(owner, name) => {
+                    self.tx.read_delegate_role(*owner, name, self.reads)?
                 }
                 Location::ModelRole(row, name) => self.tx.read_role(*row, name, self.reads)?,
                 Location::Local(name) => self
@@ -393,6 +400,9 @@ impl Frame<'_, '_> {
                     })?
             }
             Location::ModelRole(row, name) => self.tx.write_role(row, &name, value)?,
+            Location::DelegateRole(owner, name) => {
+                self.tx.write_delegate_role(owner, &name, value)?
+            }
             Location::Local(name) => {
                 self.locals.insert(name, value);
             }

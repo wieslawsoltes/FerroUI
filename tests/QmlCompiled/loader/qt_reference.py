@@ -38,6 +38,13 @@ def main():
     assert root.report() == "0/30/20/0/3"
     print("Qt 6.12.0 Loader lifecycle and geometry reference passed")
     component, root = load(folder.parent / "delegates/Main.qml")
+    assert root.multipleRoles() == "A/3/true/true"
+    root.renameThroughDelegate()
+    assert root.multipleRoles() == "Z/3/true/true"
+    root.growRoles()
+    assert root.rowsSeen() == "A/undefined/B/undefined/17"
+    root.reattach()
+    assert root.rowsSeen() == "A/17/B/19/17"
     assert root.summary() == "3/2/2/0=one/1=two"
     root.enableEdit()
     assert root.summary() == "30/4/2/0=one/1=two"

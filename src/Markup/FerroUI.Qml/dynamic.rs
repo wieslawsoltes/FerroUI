@@ -8,7 +8,7 @@ pub(crate) struct Template {
     pub scopes: enums::Scopes,
 }
 pub(crate) struct Context {
-    pub row_revision: Option<(RowId, SlotId)>,
+    pub row_revision: Option<repeater::ProjectedRow>,
     pub delegate_inputs: Option<BTreeMap<String, SlotId>>,
     pub declaration: ObjectId,
     pub ids: BTreeMap<String, ObjectId>,
@@ -262,7 +262,7 @@ impl crate::transaction::Transaction<'_> {
         parent: Option<ObjectId>,
         template: &Template,
         initial: BTreeMap<String, InitialProperty>,
-        delegate_inputs: Option<&BTreeMap<String, Value>>,
+        delegate_inputs: Option<&repeater::Inputs>,
         prepared: incubation::PreparedNodes,
     ) -> Result<ObjectId, Error> {
         if self.in_binding() {

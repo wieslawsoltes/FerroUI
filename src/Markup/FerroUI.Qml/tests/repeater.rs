@@ -255,7 +255,7 @@ fn single_row_edits_invalidate_only_that_rows_delegates() {
 }
 
 #[test]
-fn schema_changes_refresh_all_rows_and_reentrant_role_writes_reach_their_own_delegates() {
+fn views_keep_their_schema_and_reentrant_role_writes_reach_their_own_delegates() {
     let mut engine = instance(r#"import QtQuick
         import QtQml.Models
         Item { id: root
@@ -287,7 +287,13 @@ fn schema_changes_refresh_all_rows_and_reentrant_role_writes_reach_their_own_del
         Value::String("AB!".into())
     );
     engine.call(root, "expand", vec![]).unwrap();
-    assert_eq!(engine.get(first, "modelData").unwrap(), Value::Undefined);
-    assert_eq!(engine.get(second, "modelData").unwrap(), Value::Undefined);
+    assert_eq!(
+        engine.get(first, "modelData").unwrap(),
+        Value::String("AB".into())
+    );
+    assert_eq!(
+        engine.get(second, "modelData").unwrap(),
+        Value::String("AB!".into())
+    );
     assert_eq!(item(&mut engine, rep, 1), Some(second));
 }

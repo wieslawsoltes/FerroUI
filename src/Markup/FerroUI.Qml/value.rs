@@ -35,6 +35,8 @@ pub enum Value {
     String(String),
     Object(ObjectId),
     ModelRow(crate::RowId),
+    /// Role projection of a ListModel row through one live Qt Quick delegate.
+    DelegateRow(ObjectId),
     Record(crate::Record),
     Namespace(std::rc::Rc<crate::Namespace>),
     List(Vec<Value>),
@@ -49,6 +51,7 @@ impl Value {
             Self::String(value) => !value.is_empty(),
             Self::External(_)
             | Self::Method(_)
+            | Self::DelegateRow(_)
             | Self::ModelRow(_)
             | Self::Record(_)
             | Self::Object(_)
@@ -67,6 +70,7 @@ impl Value {
             Self::String(s) => s.trim().parse().unwrap_or(f64::NAN),
             Self::External(_)
             | Self::Method(_)
+            | Self::DelegateRow(_)
             | Self::ModelRow(_)
             | Self::Record(_)
             | Self::Object(_)
@@ -91,6 +95,7 @@ impl Value {
             Self::Undefined => "undefined".into(),
             Self::Method(method) => format!("function {}() {{ [native code] }}", method.name),
             Self::External(_)
+            | Self::DelegateRow(_)
             | Self::ModelRow(_)
             | Self::Record(_)
             | Self::Object(_)

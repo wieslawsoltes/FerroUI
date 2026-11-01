@@ -13,6 +13,27 @@ fn fixture() -> PathBuf {
 
 fn exercise(mut instance: Instance) {
     let root = instance.root();
+    assert_eq!(
+        instance.call(root, "multipleRoles", vec![]).unwrap(),
+        Value::String("A/3/true/true".into())
+    );
+    instance
+        .call(root, "renameThroughDelegate", vec![])
+        .unwrap();
+    assert_eq!(
+        instance.call(root, "multipleRoles", vec![]).unwrap(),
+        Value::String("Z/3/true/true".into())
+    );
+    instance.call(root, "growRoles", vec![]).unwrap();
+    assert_eq!(
+        instance.call(root, "rowsSeen", vec![]).unwrap(),
+        Value::String("A/undefined/B/undefined/17".into())
+    );
+    instance.call(root, "reattach", vec![]).unwrap();
+    assert_eq!(
+        instance.call(root, "rowsSeen", vec![]).unwrap(),
+        Value::String("A/17/B/19/17".into())
+    );
     for (action, summary) in [
         (None, "3/2/2/0=one/1=two"),
         (Some("enableEdit"), "30/4/2/0=one/1=two"),

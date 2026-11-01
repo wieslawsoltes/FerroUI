@@ -45,6 +45,7 @@ enum Key {
 
 #[derive(Clone, Default)]
 pub(crate) struct State {
+    roles: Option<Rc<[String]>>,
     rows: BTreeMap<RowId, (usize, ObjectId)>,
     factory: Option<ObjectId>,
     model: Option<Value>,
@@ -67,6 +68,45 @@ pub(crate) struct Changes {
 impl Changes {
     pub(crate) fn rollback(self, model: &mut Instance) {
         model.dynamic.repeaters.extend(self.before);
+    }
+}
+
+pub(crate) struct Inputs {
+    values: BTreeMap<String, Value>,
+    roles: Option<Rc<[String]>>,
+}
+
+pub(crate) struct ProjectedRow {
+    pub(crate) source: RowId,
+    pub(crate) revision: SlotId,
+    index: SlotId,
+    required: bool,
+    roles: Rc<[String]>,
+}
+
+impl ProjectedRow {
+    pub(crate) fn keys(&self) -> Vec<String> {
+        self.roles
+            .iter()
+            .cloned()
+            .chain(
+                [
+                    "index",
+                    "row",
+                    "column",
+                    "model",
+                    "modelData",
+                    "hasModelChildren",
+                ]
+                .map(str::to_owned),
+            )
+            .collect()
+    }
+
+    fn has_role(&self, name: &str) -> bool {
+        self.roles
+            .binary_search_by(|role| role.as_str().cmp(name))
+            .is_ok()
     }
 }
 
@@ -122,33 +162,86 @@ impl Instance {
         }
     }
 
+    pub(crate) fn delegate_row(&self, owner: ObjectId) -> Result<&ProjectedRow, Error> {
+        self.node(owner)
+            .and_then(|_| self.dynamic.contexts.get(&owner)?.row_revision.as_ref())
+            .ok_or_else(|| Error::new("delegate row is no longer live"))
+    }
+
     fn delegate_inputs(
         &self,
+        repeater: ObjectId,
         index: usize,
         value: &Value,
-    ) -> Result<BTreeMap<String, Value>, Error> {
-        let mut inputs = BTreeMap::new();
+        owner: ObjectId,
+    ) -> Result<Inputs, Error> {
+        let mut values = BTreeMap::new();
+        let roles = self.dynamic.repeaters[&repeater].roles.clone();
         if let Value::ModelRow(row) = value {
-            let roles = self.model_keys(*row)?;
-            for name in &roles {
-                inputs.insert(name.clone(), self.model_role(*row, name)?);
+            let names = roles.as_deref().expect("view role schema");
+            for name in names {
+                values.insert(name.clone(), self.model_role(*row, name)?);
             }
-            let model_data = if roles.len() == 1 {
-                self.model_role(*row, &roles[0])?
-            } else {
-                Value::Undefined
+            let data = match names {
+                [role] => self.model_role(*row, role)?,
+                _ => Value::DelegateRow(owner),
             };
-            inputs.insert("modelData".into(), model_data);
-            inputs.insert("model".into(), value.clone());
+            values.insert("modelData".into(), data);
+            values.insert("model".into(), Value::ModelRow(*row));
         } else {
-            inputs.insert("modelData".into(), value.clone());
+            values.insert("modelData".into(), value.clone());
         }
-        inputs.insert("index".into(), Value::Number(index as f64));
-        Ok(inputs)
+        values.insert("index".into(), Value::Number(index as f64));
+        Ok(Inputs { values, roles })
     }
 }
 
 impl Transaction<'_> {
+    pub(crate) fn read_delegate_role(
+        &mut self,
+        owner: ObjectId,
+        name: &str,
+        reads: &mut BTreeSet<SlotId>,
+    ) -> Result<Value, Error> {
+        let projected = self.model.delegate_row(owner)?;
+        let source = projected.source;
+        let revision = projected.revision;
+        match name {
+            "index" | "row" => return self.read(projected.index, reads),
+            "column" => return Ok(Value::Number(0.)),
+            "model" => return Ok(Value::DelegateRow(owner)),
+            "hasModelChildren" => return Ok(Value::Bool(false)),
+            "modelData" => match projected.roles.as_ref() {
+                [role] => {
+                    let role = role.clone();
+                    self.read(revision, reads)?;
+                    return self.projected_field(source, &role);
+                }
+                _ if projected.required => return Ok(Value::DelegateRow(owner)),
+                _ => return Ok(Value::Undefined),
+            },
+            _ if !projected.has_role(name) => return Ok(Value::Undefined),
+            _ => {}
+        }
+        self.read(revision, reads)?;
+        self.projected_field(source, name)
+    }
+
+    pub(crate) fn write_delegate_role(
+        &mut self,
+        owner: ObjectId,
+        name: &str,
+        value: Value,
+    ) -> Result<(), Error> {
+        let projected = self.model.delegate_row(owner)?;
+        if !projected.has_role(name) {
+            return Err(Error::new(format!(
+                "unknown or readonly delegate role '{name}'"
+            )));
+        }
+        self.write_role(projected.source, name, value)
+    }
+
     pub(crate) fn repeated_item(
         &mut self,
         id: ObjectId,
@@ -166,7 +259,7 @@ impl Transaction<'_> {
     pub(crate) fn initialize_delegate(
         &mut self,
         root: ObjectId,
-        inputs: &BTreeMap<String, Value>,
+        inputs: &Inputs,
         assigned: &mut BTreeSet<SlotId>,
     ) -> Result<(), Error> {
         let node = &self.model.nodes[root.index];
@@ -182,7 +275,7 @@ impl Transaction<'_> {
             .properties
             .values()
             .any(|key| self.model.properties[*key].required);
-        if let Some(Value::ModelRow(row)) = inputs.get("model") {
+        if let Some(Value::ModelRow(row)) = inputs.values.get("model") {
             let slot = self.model.allocate_property(
                 Property {
                     owner: root,
@@ -194,14 +287,32 @@ impl Transaction<'_> {
                 },
                 Value::Number(0.),
             )?;
+            let index = self.model.allocate_property(
+                Property {
+                    owner: root,
+                    name: "$qml:delegateIndex".into(),
+                    ty: "int".into(),
+                    readonly: true,
+                    required: false,
+                    alias: None,
+                },
+                inputs.values["index"].clone(),
+            )?;
             self.model
                 .dynamic
                 .contexts
                 .get_mut(&root)
                 .expect("delegate context")
-                .row_revision = Some((*row, slot));
+                .row_revision = Some(ProjectedRow {
+                source: *row,
+                revision: slot,
+                index,
+                required,
+                roles: inputs.roles.clone().expect("view role schema"),
+            });
         }
-        for (name, value) in inputs {
+        for (name, original) in &inputs.values {
+            let value = projected_input(root, required, name, original);
             let key = if required {
                 let Some(&key) = self.model.nodes[root.index].properties.get(name) else {
                     continue;
@@ -223,9 +334,8 @@ impl Transaction<'_> {
                     Value::Undefined,
                 )?
             };
-            self.model.slots[key].value = self
-                .model
-                .typed(&self.model.properties[key].ty, value.clone())?;
+            self.model.slots[key].value =
+                self.model.typed(&self.model.properties[key].ty, value)?;
             self.model
                 .dynamic
                 .contexts
@@ -240,18 +350,24 @@ impl Transaction<'_> {
         Ok(())
     }
 
-    fn update_delegate(
-        &mut self,
-        item: ObjectId,
-        inputs: BTreeMap<String, Value>,
-    ) -> Result<(), Error> {
-        for (name, value) in inputs {
+    fn update_delegate(&mut self, item: ObjectId, inputs: Inputs) -> Result<(), Error> {
+        let row = self.model.dynamic.contexts[&item].row_revision.as_ref();
+        let required = row.is_some_and(|row| row.required);
+        if let Some(row) = row {
+            self.set_value(row.index, inputs.values["index"].clone());
+        }
+        for (name, original) in inputs.values {
             if let Some(key) = self.model.delegate_context_key(item, &name) {
+                let value = projected_input(item, required, &name, &original);
                 let value = self.model.typed(&self.model.properties[key].ty, value)?;
                 self.set_value(key, value);
             }
         }
-        if let Some((_, slot)) = self.model.dynamic.contexts[&item].row_revision {
+        if let Some(slot) = self.model.dynamic.contexts[&item]
+            .row_revision
+            .as_ref()
+            .map(|p| p.revision)
+        {
             let Value::Number(revision) = self.model.slots[slot].value else {
                 unreachable!()
             };
@@ -260,8 +376,8 @@ impl Transaction<'_> {
         Ok(())
     }
 
-    /// Role edits preserve the topology. Only structural edits, schema changes,
-    /// and writes made during construction need a complete reconciliation.
+    /// Role edits preserve the topology and the view’s captured roles. Structural
+    /// edits and writes made during construction need a full reconciliation.
     pub(crate) fn model_repeaters_changed(
         &mut self,
         model: ObjectId,
@@ -280,7 +396,9 @@ impl Transaction<'_> {
                     && !self.repeater_changes.pending.contains(&id)
                 {
                     if let Some(&(index, item)) = self.model.dynamic.repeaters[&id].rows.get(&row) {
-                        let inputs = self.model.delegate_inputs(index, &Value::ModelRow(row))?;
+                        let inputs =
+                            self.model
+                                .delegate_inputs(id, index, &Value::ModelRow(row), item)?;
                         self.update_delegate(item, inputs)?;
                     }
                     continue;
@@ -350,11 +468,11 @@ impl Transaction<'_> {
             values.clear();
         }
         let state = &self.model.dynamic.repeaters[&id];
-        let reset = state.factory != factory
-            || !state
-                .model
-                .as_ref()
-                .is_some_and(|old| old.unchanged(&model));
+        let model_changed = !state
+            .model
+            .as_ref()
+            .is_some_and(|old| old.unchanged(&model));
+        let reset = model_changed || state.factory != factory;
         let previous = state.entries.clone();
         let wanted: BTreeSet<_> = values.iter().map(|(key, _)| *key).collect();
         let mut retained = BTreeMap::new();
@@ -378,6 +496,14 @@ impl Transaction<'_> {
         self.set_value(self.model.key(id, "count")?, Value::Number(count as f64));
         let state = self.model.dynamic.repeaters.get_mut(&id).unwrap();
         state.factory = factory;
+        if model_changed {
+            state.roles = None;
+        }
+        if state.roles.is_none() && !values.is_empty() {
+            if let Value::Object(model) = model {
+                state.roles = self.model.models.get(&model).map(|m| m.view_roles());
+            }
+        }
         state.model = Some(model);
         state.entries = values
             .iter()
@@ -386,7 +512,11 @@ impl Transaction<'_> {
         if let (Some(factory), Some(slot)) = (factory, siblings) {
             let template = self.model.dynamic.templates[&factory].clone();
             for (index, (key, value)) in values.into_iter().enumerate() {
-                let inputs = self.model.delegate_inputs(index, &value)?;
+                let owner = retained
+                    .get(&key)
+                    .copied()
+                    .unwrap_or_else(|| self.model.next_object());
+                let inputs = self.model.delegate_inputs(id, index, &value, owner)?;
                 if let Some(&item) = retained.get(&key) {
                     self.update_delegate(item, inputs)?;
                 } else {
@@ -440,5 +570,13 @@ impl Transaction<'_> {
             siblings.splice(at + 1..at + 1, delegates.into_iter().map(Value::Object));
         }
         self.set_value(slot, Value::List(siblings));
+    }
+}
+
+fn projected_input(owner: ObjectId, required: bool, name: &str, value: &Value) -> Value {
+    match (name, value) {
+        ("model", Value::ModelRow(_)) => Value::DelegateRow(owner),
+        ("modelData", Value::DelegateRow(_)) if !required => Value::Undefined,
+        _ => value.clone(),
     }
 }

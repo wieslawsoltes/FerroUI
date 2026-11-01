@@ -239,6 +239,7 @@ impl Transaction<'_> {
                 })
             }
             Value::ModelRow(row) => self.read_role(row, name, reads),
+            Value::DelegateRow(owner) => self.read_delegate_role(owner, name, reads),
             Value::Record(record) => Ok(self
                 .model
                 .record_entries(&record)?

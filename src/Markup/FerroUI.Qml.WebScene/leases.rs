@@ -12,6 +12,7 @@ const MAX_HOST_PROXIES: usize = 65_536;
 enum Key {
     Record(Record),
     Row(RowId),
+    DelegateRow(ferroui_qml::ObjectId),
     Namespace(usize),
 }
 impl Key {
@@ -19,6 +20,7 @@ impl Key {
         match value {
             Value::Record(record) => Ok(Self::Record(record.clone())),
             Value::ModelRow(id) => Ok(Self::Row(*id)),
+            Value::DelegateRow(id) => Ok(Self::DelegateRow(*id)),
             Value::Namespace(namespace) => Ok(Self::Namespace(Rc::as_ptr(namespace) as usize)),
             _ => Err(Error::new("value does not have a dynamic host identity")),
         }

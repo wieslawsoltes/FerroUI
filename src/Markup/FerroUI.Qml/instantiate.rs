@@ -215,6 +215,7 @@ impl Instance {
                 Err(Error::new("foreign JavaScript value"))
             }
             Value::ModelRow(row) => self.model_role(*row, "").map(|_| ()),
+            Value::DelegateRow(owner) => self.delegate_row(*owner).map(|_| ()),
             Value::Method(method) if self.node(method.receiver()).is_none() => {
                 Err(Error::new("foreign method receiver"))
             }

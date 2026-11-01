@@ -130,6 +130,16 @@ impl Model {
         self.insert(self.order.len(), fields);
         Ok(())
     }
+    pub(crate) fn view_roles(&self) -> Rc<[String]> {
+        self.roles
+            .keys()
+            .chain(self.rows.values().flat_map(|fields| fields.keys()))
+            .cloned()
+            .collect::<BTreeSet<_>>()
+            .into_iter()
+            .collect()
+    }
+
     pub(crate) fn row_ids(&self, model: ObjectId) -> impl Iterator<Item = RowId> + '_ {
         self.order
             .iter()
@@ -302,31 +312,40 @@ impl Transaction<'_> {
         let delegate = self
             .current_binding
             .and_then(|slot| self.model.node(self.model.properties[slot].owner)?.context)
-            .and_then(|root| self.model.dynamic.contexts.get(&root)?.row_revision);
+            .and_then(|root| {
+                self.model
+                    .dynamic
+                    .contexts
+                    .get(&root)?
+                    .row_revision
+                    .as_ref()
+            })
+            .map(|p| (p.source, p.revision));
         if let Some((own_row, revision)) = delegate {
             if own_row == row {
                 self.read(revision, reads)?;
-                if !self.model.models[&row.model].rows.contains_key(&row.serial) {
-                    // Count or other dependencies can still invalidate an outgoing
-                    // delegate before its removal signal. Read its last row values.
-                    if let Some(fields) =
-                        self.model_edits
-                            .iter()
-                            .rev()
-                            .find_map(|(id, undo)| match undo {
-                                Undo::Remove(_, _, removed) if *id == row.model => {
-                                    removed.get(&row.serial)
-                                }
-                                _ => None,
-                            })
-                    {
-                        return Ok(self.model.models[&row.model].read_field(fields, name));
-                    }
-                }
-                return self.model.model_role(row, name);
+                return self.projected_field(row, name);
             }
         }
         self.read(self.model.key(row.model, REVISION)?, reads)?;
+        self.model.model_role(row, name)
+    }
+    pub(crate) fn projected_field(&self, row: RowId, name: &str) -> Result<Value, Error> {
+        if !self.model.models[&row.model].rows.contains_key(&row.serial) {
+            // Count or other dependencies can still invalidate an outgoing
+            // delegate before its removal signal. Read its last row values.
+            if let Some(fields) = self
+                .model_edits
+                .iter()
+                .rev()
+                .find_map(|(id, undo)| match undo {
+                    Undo::Remove(_, _, removed) if *id == row.model => removed.get(&row.serial),
+                    _ => None,
+                })
+            {
+                return Ok(self.model.models[&row.model].read_field(fields, name));
+            }
+        }
         self.model.model_role(row, name)
     }
     fn role_schema(&mut self, id: ObjectId, fields: &Roles, dynamic: bool) -> Result<(), Error> {
@@ -387,12 +406,7 @@ impl Transaction<'_> {
         self.model_edits.push((id, Undo::Insert(at, serial)));
         Ok(())
     }
-    fn update_row(
-        &mut self,
-        row: RowId,
-        fields: Roles,
-        dynamic: bool,
-    ) -> Result<Option<RowId>, Error> {
+    fn update_row(&mut self, row: RowId, fields: Roles, dynamic: bool) -> Result<(), Error> {
         if !self
             .model
             .models
@@ -401,7 +415,6 @@ impl Transaction<'_> {
         {
             return Err(Error::new("invalid model row"));
         }
-        let roles = self.model.models[&row.model].roles.len();
         self.role_schema(row.model, &fields, dynamic)?;
         let previous = self
             .model
@@ -423,15 +436,15 @@ impl Transaction<'_> {
             .collect();
         self.model_edits
             .push((row.model, Undo::Update(row.serial, changes)));
-        Ok((roles == self.model.models[&row.model].roles.len()).then_some(row))
+        Ok(())
     }
     pub(crate) fn write_role(&mut self, row: RowId, name: &str, value: Value) -> Result<(), Error> {
         if self.in_binding() {
             return Err(Error::new("a binding cannot modify a ListModel"));
         }
         let dynamic = self.model.get(row.model, "dynamicRoles")? == Value::Bool(true);
-        let edited = self.update_row(row, BTreeMap::from([(name.to_owned(), value)]), dynamic)?;
-        self.finish_model_edit(row.model, edited)
+        self.update_row(row, BTreeMap::from([(name.to_owned(), value)]), dynamic)?;
+        self.finish_model_edit(row.model, Some(row))
     }
     fn remove_rows(&mut self, id: ObjectId, range: Range<usize>) {
         let model = self.model.models.get_mut(&id).unwrap();
@@ -516,8 +529,8 @@ impl Transaction<'_> {
                         model: id,
                         serial: self.model.models[&id].order[at],
                     };
-                    let edited = self.update_row(row, fields, dynamic)?;
-                    self.finish_model_edit(id, edited)?;
+                    self.update_row(row, fields, dynamic)?;
+                    self.finish_model_edit(id, Some(row))?;
                     return Ok(Value::Undefined);
                 }
             }

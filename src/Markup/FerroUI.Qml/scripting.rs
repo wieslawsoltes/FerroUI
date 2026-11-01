@@ -392,6 +392,7 @@ impl ScriptContext<'_, '_> {
                 .chain(std::iter::once("length".into()))
                 .collect(),
             Value::ModelRow(row) => self.tx.model.model_keys(*row)?,
+            Value::DelegateRow(owner) => self.tx.model.delegate_row(*owner)?.keys(),
             Value::Namespace(namespace) => namespace.names().map(str::to_owned).collect(),
             _ => Vec::new(),
         })
@@ -743,6 +744,7 @@ impl ScriptContext<'_, '_> {
                 return self.write_key(self.tx.scoped_key(*object, name)?, value)
             }
             Value::ModelRow(row) => self.tx.write_role(*row, name, value),
+            Value::DelegateRow(owner) => self.tx.write_delegate_role(*owner, name, value),
             Value::Record(record) => self.tx.set_record_field(record, name, value),
             Value::External(external) => {
                 self.tx
