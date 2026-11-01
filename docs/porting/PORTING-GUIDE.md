@@ -14,7 +14,7 @@ How C# from the upstream project (Avalonia, MIT) maps to Rust in this repository
    - a test that a steady-state frame (scrolling, animating a property, moving a light) creates no new bitmaps or textures;
    - for a feature apps use on phones or in the browser, a measurement on a device or simulator (frame times, texture uploads).
 
-   A backend that cannot express a feature on its GPU yet records the gap and the plan in the porting documents of the feature; it does not fall back silently.
+   A backend that cannot express a feature on its GPU yet records the gap and the plan in [gpu-rendering.md](gpu-rendering.md); it does not fall back silently. [Rendering](#rendering-every-backend-draws-on-the-gpu) below says where the parts of this rule live.
 
 ## Scope: product behavior, not runtime emulation
 
@@ -331,12 +331,11 @@ More parts of the declaration forms:
 
 ## Rendering: every backend draws on the GPU
 
-Every rendering backend has a GPU implementation of every rendering feature, validated by tests. No backend leaves a feature on per-frame CPU rasterization, a per-frame texture upload or a readback of pixels: a frame that changes nothing but positions, uniforms or animated values makes no new bitmap or texture.
+Ground rule 6 is the rule; this section says where its parts live.
 
-- The CPU path of a feature stays as the reference implementation the GPU path is tested against, and as the fallback of raster surfaces without a GPU (and of drawing contexts without the capability). It is not the path of a GPU surface.
-- A feature the GPU path cannot draw yet is recorded as a gap in [gpu-rendering.md](gpu-rendering.md), with the route that closes it; it is not left to fall back silently.
-- Validation, for each backend: render tests that compare the GPU output with the CPU reference (with tolerances that are stated and justified), and a test that steady-state frames create no new bitmap or texture.
-- An effect is compiled once (per program and backend) and given its parameters as uniforms on each draw, as WinUI's compositor compiles an effect factory (winui-composition.md, section 5.3).
+- **Gaps:** [gpu-rendering.md](gpu-rendering.md) lists every feature that a backend's GPU path does not draw yet, with the route that closes it.
+- **Fallback by capability:** besides raster surfaces, the CPU path is the fallback of a drawing context without the capability. Such a context's `IDrawingContextImplWithLayerEffects` method reports that it did not draw, and the compositor draws the CPU reference instead. A GPU surface never takes this path for a feature the backend has.
+- **Compile once, uniforms per draw:** the model is WinUI's effect factory ([winui-composition.md](winui-composition.md), section 5.3). In Skia, `src/Skia/FerroUI.Skia/runtime_effects.rs` keeps the compiled SkSL programs and checks their uniforms, and a GPU render target prewarms them with its second frame.
 
 ## Threading model
 

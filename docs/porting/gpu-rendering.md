@@ -1,6 +1,6 @@
 # GPU rendering of the effects and rendering features
 
-The rule (PORTING-GUIDE.md, "Rendering: every backend draws on the GPU"): every backend draws every
+The rule ([PORTING-GUIDE.md](PORTING-GUIDE.md), ground rule 6): every backend draws every
 rendering feature on the GPU, validated by tests; the CPU path of a feature is the reference and
 the fallback of raster surfaces only. A frame that changes positions, uniforms or animated values
 makes no new bitmap or texture.
