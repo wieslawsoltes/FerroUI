@@ -313,7 +313,10 @@ impl VulkanImage {
         size: PixelSize,
         mip_levels: u32,
     ) -> Result<Self, VulkanError> {
-        let base = VulkanImageBase::new(context, command_buffer_pool, format, size, mip_levels);
+        let mut base = VulkanImageBase::new(context, command_buffer_pool, format, size, mip_levels);
+        // Graphite reads destination color as an input attachment. Enable this
+        // on framework frame images before allocation, leaving imports unchanged.
+        base.usage_flags |= vk::ImageUsageFlags::INPUT_ATTACHMENT;
         base.initialize(None, None)?;
         base.transition_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL, vk::AccessFlags::NONE_KHR)?;
         Ok(Self { base })

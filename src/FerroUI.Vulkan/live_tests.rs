@@ -348,6 +348,7 @@ fn frames_are_presented_through_a_swap_chain_and_the_swap_chain_follows_the_surf
         assert_ne!(info.handle, 0);
         assert_eq!(info.pixel_size, PixelSize::new(320, 200));
         assert_eq!(info.level_count, 1, "the blit source contains one presentable mip level");
+        assert!(vk::ImageUsageFlags::from_raw(info.usage_flags).contains(vk::ImageUsageFlags::INPUT_ATTACHMENT));
         assert_eq!(info.layout, vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL.as_raw() as u32);
         let expected = if session.is_rgba() { vk::Format::R8G8B8A8_UNORM } else { vk::Format::B8G8R8A8_UNORM };
         assert_eq!(info.format, expected.as_raw() as u32);

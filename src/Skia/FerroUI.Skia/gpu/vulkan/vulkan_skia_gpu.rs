@@ -81,6 +81,10 @@ impl VulkanSkiaGpu {
                 }
             };
 
+            let instance_extensions = instance.enabled_extensions();
+            let device_extensions = device.enabled_extensions();
+            let instance_names: Vec<_> = instance_extensions.iter().map(String::as_str).collect();
+            let device_names: Vec<_> = device_extensions.iter().map(String::as_str).collect();
             // SAFETY: the handles are those of the device of the context,
             // which outlives the Skia context: the GPU holds the context and
             // releases Skia's first.
@@ -100,6 +104,7 @@ impl VulkanSkiaGpu {
                     // graphics ask for by default and the least Skia accepts.
                     Some(Version::new(1, 1, 0)),
                 )
+                .with_extensions(&instance_names, &device_names)
                 .build()
             };
 
