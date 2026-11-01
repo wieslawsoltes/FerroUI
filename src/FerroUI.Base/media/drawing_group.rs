@@ -7,7 +7,7 @@ use crate::media::{
     RectangleGeometry, RenderOptions, TextOptions, Transform,
 };
 use crate::platform::{self, IGeometryImpl, IPlatformRenderInterface};
-use crate::reactive::IDisposable;
+use crate::reactive::{IDisposable, Subscription};
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{
     ferro_class, ferro_property, instantiate, DirectProperty, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -25,7 +25,7 @@ type ChildSubscription = (Ref<Drawing>, Rc<dyn IDisposable>);
 pub struct DrawingGroup {
     base: Drawing,
     children: RefCell<DrawingCollection>,
-    children_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    children_subscription: RefCell<Option<Subscription>>,
     child_subscriptions: RefCell<Vec<ChildSubscription>>,
     render_options: Cell<Option<RenderOptions>>,
     text_options: Cell<Option<TextOptions>>,
@@ -333,7 +333,7 @@ impl DrawingGroup {
 
             this.raise_invalidated();
         });
-        *self.children_subscription.borrow_mut() = Some(subscription);
+        *self.children_subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 
     fn subscribe_child(&self, child: &Ref<Drawing>) {

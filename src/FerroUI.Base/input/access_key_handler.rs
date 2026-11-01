@@ -2,7 +2,7 @@ use super::{
     FocusManager, IAccessKeyHandler, IMainMenu, InputElement, Key, KeyEventArgs, KeyModifiers, PointerPressedEventArgs,
 };
 use crate::interactivity::{RoutedEvent, RoutedEventArgs, RoutingStrategies};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::{
     ferro_property, ferro_routed_event, ferro_routed_event_args, AttachedProperty, FerroProperty, Ref,
     StyledPropertyOptions, Visual, WeakRef,
@@ -131,7 +131,7 @@ pub struct AccessKeyHandler {
     restore_focus_element: RefCell<Option<WeakRef<InputElement>>>,
     /// The window's main menu.
     main_menu: RefCell<Option<Rc<dyn IMainMenu>>>,
-    main_menu_closed: RefCell<Option<Rc<dyn IDisposable>>>,
+    main_menu_closed: RefCell<Option<Subscription>>,
 }
 
 crate::ferro_static_type!(AccessKeyHandler);
@@ -519,7 +519,7 @@ impl IAccessKeyHandler for AccessKeyHandler {
                     this.main_menu_closed();
                 }
             }));
-            *self.main_menu_closed.borrow_mut() = Some(subscription);
+            *self.main_menu_closed.borrow_mut() = Some(Subscription::new(subscription));
         }
     }
 

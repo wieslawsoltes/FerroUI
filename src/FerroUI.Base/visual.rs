@@ -4,7 +4,7 @@ use crate::media::{
     ITransform, RenderOptions, TextOptions, Transform,
 };
 use crate::rendering::composition::{CompositionDrawListVisual, CompositionVisual, Compositor};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::rendering::IPresentationSource;
 use crate::utilities::HandlerList;
 use crate::{
@@ -53,7 +53,7 @@ pub struct Visual {
     composition_extras: RefCell<Option<Box<CompositionExtras>>>,
     /// The subscription to the `changed` notification of the render
     /// transform, held while the visual is attached to a visual tree.
-    render_transform_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    render_transform_subscription: RefCell<Option<Subscription>>,
     affects_render_subscriptions: RefCell<Vec<(&'static FerroProperty, Rc<dyn IDisposable>)>>,
 }
 
@@ -90,7 +90,7 @@ struct CompositionExtras {
     /// The ids of the XAML lights that target the element (`XamlLight.AddTargetElement`), and
     /// the subscription that offers the element to those lights when it enters a tree.
     light_target_ids: Vec<String>,
-    light_target_subscription: Option<Rc<dyn IDisposable>>,
+    light_target_subscription: Option<Subscription>,
     /// The manipulation transform of the visual (see [`Visual::manipulation_transform`]).
     manipulation_transform: Option<crate::Matrix>,
     /// The theme shadow of the visual (`UIElement.Shadow`): `None` while the visual never had a
@@ -261,7 +261,7 @@ impl VisualImpl for Visual {
                         visual.render_transform_value_changed();
                     }
                 }));
-                this.set_render_transform_subscription(Some(subscription));
+                this.set_render_transform_subscription(Some(Subscription::new(subscription)));
             }
         }
 
@@ -1190,7 +1190,7 @@ impl Visual {
         });
         if added && self.read_composition_extras(|extras| extras.light_target_subscription.is_none()).unwrap_or(true) {
             let subscription = crate::media::xaml_light::track_light_target(self);
-            self.with_composition_extras(|extras| extras.light_target_subscription = Some(subscription));
+            self.with_composition_extras(|extras| extras.light_target_subscription = Some(Subscription::new(subscription)));
         }
         added
     }
@@ -1471,11 +1471,11 @@ impl Visual {
             let subscription = new_value.as_ref().and_then(|new_value| {
                 let new_transform = new_value.as_any().downcast_ref::<Transform>()?;
                 let weak = sender.to_ref().downgrade();
-                Some(new_transform.changed(move || {
+                Some(Subscription::new(new_transform.changed(move || {
                     if let Some(visual) = weak.upgrade() {
                         visual.render_transform_value_changed();
                     }
-                }))
+                })))
             });
             sender.set_render_transform_subscription(subscription);
 
@@ -1489,7 +1489,7 @@ impl Visual {
         self.invalidate_visual();
     }
 
-    fn set_render_transform_subscription(&self, value: Option<Rc<dyn IDisposable>>) {
+    fn set_render_transform_subscription(&self, value: Option<Subscription>) {
         let previous = self.render_transform_subscription.replace(value);
         if let Some(previous) = previous {
             previous.dispose();

@@ -3,7 +3,7 @@ use super::{
     PointerPressedEventArgs, PointerReleasedEventArgs, PointerType, TappedEventArgs,
 };
 use crate::interactivity::{IRoutedEventArgs, Interactive, RoutingStrategies};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::threading::{DispatcherPriority, DispatcherTimer};
 use crate::utilities::HandlerList;
 use crate::{FerroObject, Point, Rect, Ref, Size, Thickness, Visual, WeakRef};
@@ -39,7 +39,7 @@ struct GesturesData {
     last_press: RefCell<Option<WeakRef<FerroObject>>>,
     last_press_point: Cell<Point>,
     hold_cancellation_token: RefCell<Option<Rc<Cell<bool>>>>,
-    hold_timer: RefCell<Option<Rc<dyn IDisposable>>>,
+    hold_timer: RefCell<Option<Subscription>>,
 }
 
 crate::ferro_thread_local! {
@@ -222,7 +222,7 @@ impl Gestures {
                     settings.hold_wait_duration(),
                     DispatcherPriority::default(),
                 );
-                let previous = data.hold_timer.replace(Some(timer));
+                let previous = data.hold_timer.replace(Some(Subscription::new(timer)));
                 if let Some(previous) = previous {
                     previous.dispose();
                 }

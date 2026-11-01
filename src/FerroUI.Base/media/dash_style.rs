@@ -1,7 +1,7 @@
 use crate::animation::Animatable;
 use crate::media::immutable::ImmutableDashStyle;
 use crate::media::MediaCollection;
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::utilities::HandlerList;
 use crate::{
     ferro_class, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -16,7 +16,7 @@ use std::rc::Rc;
 pub struct DashStyle {
     base: Animatable,
     invalidated: HandlerList<dyn Fn()>,
-    dashes_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    dashes_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(DashStyle: Animatable);
@@ -40,7 +40,7 @@ impl FerroObjectImpl for DashStyle {
                         this.raise_invalidated();
                     }
                 });
-                *this.dashes_subscription.borrow_mut() = Some(subscription);
+                *this.dashes_subscription.borrow_mut() = Some(Subscription::new(subscription));
             }
         }
     }

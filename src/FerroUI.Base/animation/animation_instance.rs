@@ -6,7 +6,7 @@ use crate::animation::{
 };
 use crate::data::BindingPriority;
 use crate::reactive::{
-    IDisposable, IObservable, IObserver, ObservableError, SingleSubscriberObservableBase,
+    IDisposable, IObservable, IObserver, ObservableError, SingleSubscriberObservableBase, Subscription,
 };
 use crate::{Ref, Visual, WeakRef};
 use std::cell::{Cell, RefCell};
@@ -41,10 +41,10 @@ pub(crate) struct AnimationInstance<A: Animator> {
     target_control: WeakRef<Animatable>,
     visual_target: Option<WeakRef<Visual>>,
     on_complete_action: Option<Rc<dyn Fn()>>,
-    timer_sub: RefCell<Option<Rc<dyn IDisposable>>>,
-    property_changed_sub: RefCell<Option<Rc<dyn IDisposable>>>,
-    visibility_changed_sub: RefCell<Option<Rc<dyn IDisposable>>>,
-    detached_sub: RefCell<Option<Rc<dyn IDisposable>>>,
+    timer_sub: RefCell<Option<Subscription>>,
+    property_changed_sub: RefCell<Option<Subscription>>,
+    visibility_changed_sub: RefCell<Option<Subscription>>,
+    detached_sub: RefCell<Option<Subscription>>,
     base_clock: Rc<dyn IClock>,
     clock: RefCell<Option<Rc<Clock>>>,
     ease_func: RefCell<Easing>,
@@ -236,7 +236,7 @@ impl<A: Animator> AnimationInstance<A> {
             return;
         };
         let timer_sub = clock.subscribe(Rc::new(StepObserver(this)));
-        *self.timer_sub.borrow_mut() = Some(timer_sub);
+        *self.timer_sub.borrow_mut() = Some(Subscription::new(timer_sub));
 
         if let Some(visual) = self.visual_target.as_ref().and_then(WeakRef::upgrade) {
             if self.should_pause_on_invisible {
@@ -258,7 +258,7 @@ impl<A: Animator> AnimationInstance<A> {
                         clock.set_play_state(PlayState::Pause);
                     }
                 });
-                *self.visibility_changed_sub.borrow_mut() = Some(subscription);
+                *self.visibility_changed_sub.borrow_mut() = Some(Subscription::new(subscription));
 
                 // If already invisible when animation starts, pause immediately.
                 if !visual.is_effectively_visible() {
@@ -273,7 +273,7 @@ impl<A: Animator> AnimationInstance<A> {
                     this.do_complete(false);
                 }
             });
-            *self.detached_sub.borrow_mut() = Some(subscription);
+            *self.detached_sub.borrow_mut() = Some(Subscription::new(subscription));
         }
 
         if let Some(control) = self.target_control.upgrade() {
@@ -286,7 +286,7 @@ impl<A: Animator> AnimationInstance<A> {
                     }
                 }
             });
-            *self.property_changed_sub.borrow_mut() = Some(subscription);
+            *self.property_changed_sub.borrow_mut() = Some(Subscription::new(subscription));
         }
         self.update_neutral_value();
     }

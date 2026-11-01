@@ -1,4 +1,4 @@
-use super::{IDisposable, IObservable, IObserver, ObservableError};
+use super::{IDisposable, IObservable, IObserver, ObservableError, Subscription};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -6,7 +6,7 @@ use std::rc::{Rc, Weak};
 /// observer is gone.
 pub struct WeakObserverSubscription<T> {
     observer: Weak<dyn IObserver<T>>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl<T: 'static> WeakObserverSubscription<T> {
@@ -19,7 +19,7 @@ impl<T: 'static> WeakObserverSubscription<T> {
     pub fn subscribe(observable: &dyn IObservable<T>, observer: &Rc<dyn IObserver<T>>) -> Rc<dyn IDisposable> {
         let subscription = Rc::new(WeakObserverSubscription::new(observer));
         let inner = observable.subscribe(subscription.clone());
-        *subscription.subscription.borrow_mut() = Some(inner);
+        *subscription.subscription.borrow_mut() = Some(Subscription::new(inner));
         subscription
     }
 

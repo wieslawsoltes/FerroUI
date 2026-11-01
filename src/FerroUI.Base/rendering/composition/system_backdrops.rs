@@ -14,7 +14,7 @@ use crate::media::{
     acrylic_effect, luminosity_color, Color, MaterialPolicy, ACRYLIC_NOISE_OPACITY,
 };
 use crate::platform::{IPlatformSettings, PlatformThemeVariant};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::rendering::composition::effects::{
     BorderEffect, CanvasComposite, CanvasEdgeBehavior, ColorSourceEffect, CompositeEffect,
     CompositionEffectSourceParameter, OpacityEffect,
@@ -318,7 +318,7 @@ struct ControllerCore {
     configuration: RefCell<Option<(Rc<SystemBackdropConfiguration>, Rc<dyn IDisposable>)>>,
     state: Cell<SystemBackdropState>,
     state_changed: Rc<HandlerList<dyn Fn(SystemBackdropState)>>,
-    policy_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    policy_subscription: RefCell<Option<Subscription>>,
     closed: Cell<bool>,
 }
 
@@ -352,7 +352,7 @@ impl SystemBackdropController {
                 controller.update();
             }
         });
-        *controller.core.policy_subscription.borrow_mut() = Some(subscription);
+        *controller.core.policy_subscription.borrow_mut() = Some(Subscription::new(subscription));
         controller
     }
 
