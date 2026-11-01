@@ -109,7 +109,7 @@ impl FerroObjectImpl for HostWindow {
         let owner = this.to_ref();
         let _ = this.position_changed(move |_| owner.host_position_changed());
         let owner = this.to_ref();
-        let _ = this.layout_updated(move || owner.host_layout_updated());
+        let _ = this.layout_updated(move || owner.host_layout_updated()).detach();
         let owner = this.to_ref();
         let _ = this.activated(move || owner.host_activated());
         let owner = this.to_ref();

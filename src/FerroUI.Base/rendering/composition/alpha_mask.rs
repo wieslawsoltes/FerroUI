@@ -211,8 +211,8 @@ impl AlphaMask {
                 }
             })
         };
-        subscriptions.push(on_detached);
-        subscriptions.push(on_visibility);
+        subscriptions.push(on_detached.detach());
+        subscriptions.push(on_visibility.detach());
     }
 }
 

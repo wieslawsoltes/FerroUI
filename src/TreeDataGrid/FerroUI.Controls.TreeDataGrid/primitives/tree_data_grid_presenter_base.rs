@@ -915,7 +915,7 @@ impl TreeDataGridPresenterBase {
                 this.on_effective_viewport_changed(e);
             }
         });
-        if let Some(previous) = self.effective_viewport_subscription.borrow_mut().replace(Subscription::new(subscription)) {
+        if let Some(previous) = self.effective_viewport_subscription.borrow_mut().replace(subscription) {
             previous.dispose();
         }
 

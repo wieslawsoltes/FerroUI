@@ -1,5 +1,5 @@
 use super::{EffectiveViewportChangedEventArgs, ILayoutManager, LayoutHelper, MinMax};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::styling::{Container, ContainerSizing};
 use crate::utilities::{HandlerList, MathUtilities};
 use crate::{
@@ -515,7 +515,7 @@ impl Layoutable {
     pub fn effective_viewport_changed(
         &self,
         handler: impl Fn(&EffectiveViewportChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         if self.effective_viewport_changed.is_empty() && !self.is_attaching_to_visual_tree.get() {
             if let Some(root) = self.get_layout_root() {
                 root.layout_manager().register_effective_viewport_listener(self);
@@ -523,7 +523,7 @@ impl Layoutable {
         }
         let token = self.effective_viewport_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.effective_viewport_changed.remove(token);
                 if this.effective_viewport_changed.is_empty() {
@@ -532,11 +532,11 @@ impl Layoutable {
                     }
                 }
             }
-        })
+        }))
     }
 
     /// Occurs when a layout pass completes for the control.
-    pub fn layout_updated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    pub fn layout_updated(&self, handler: impl Fn() + 'static) -> Subscription {
         if self.layout_updated.is_empty() && !self.is_attaching_to_visual_tree.get() {
             if let Some(root) = self.get_layout_root() {
                 self.subscribe_layout_updated(root.layout_manager());
@@ -544,14 +544,14 @@ impl Layoutable {
         }
         let token = self.layout_updated.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.layout_updated.remove(token);
                 if this.layout_updated.is_empty() {
                     this.unsubscribe_layout_updated();
                 }
             }
-        })
+        }))
     }
 
     fn subscribe_layout_updated(&self, manager: Rc<dyn ILayoutManager>) {

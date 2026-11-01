@@ -71,9 +71,9 @@ fn adding_resource_should_call_raise_resource_changed_on_logical_children() {
 
     target.measure(Size::INFINITY);
     let r = raised_on_target.clone();
-    target.resources_changed(move |_| r.set(true));
+    target.resources_changed(move |_| r.set(true)).detach();
     let r = raised_on_child.clone();
-    child.resources_changed(move |_| r.set(true));
+    child.resources_changed(move |_| r.set(true)).detach();
 
     target.resources().add_value("foo", "bar".to_string());
 
@@ -88,7 +88,7 @@ fn adding_resource_to_styles_should_raise_resource_changed() {
     let raised = Rc::new(Cell::new(false));
 
     let r = raised.clone();
-    target.resources_changed(move |_| r.set(true));
+    target.resources_changed(move |_| r.set(true)).detach();
     target.styles().resources().add_value("foo", "bar".to_string());
 
     assert!(raised.get());
@@ -104,7 +104,7 @@ fn adding_resource_to_nested_style_should_raise_resource_changed() {
     let raised = Rc::new(Cell::new(false));
 
     let r = raised.clone();
-    target.resources_changed(move |_| r.set(true));
+    target.resources_changed(move |_| r.set(true)).detach();
     style.resources().add_value("foo", "bar".to_string());
 
     assert!(raised.get());

@@ -423,11 +423,11 @@ impl ManagedContextDragBehavior {
         ManagedDragDropService::instance().begin(&tl, Some(value), Some(this.data_format()), effects, client);
         if let Some(ao) = &associated_object {
             let behavior = this.downgrade();
-            *this.detached_subscription.borrow_mut() = Some(Subscription::new(ao.detached_from_visual_tree(move |_| {
+            *this.detached_subscription.borrow_mut() = Some(ao.detached_from_visual_tree(move |_| {
                 if let Some(behavior) = behavior.upgrade() {
                     behavior.associated_object_detached_from_visual_tree();
                 }
-            })));
+            }));
         }
         let _ = tcs.task().await;
 

@@ -24,7 +24,7 @@ impl DockDebugOverlayManager {
         let owner = this.clone();
         this.root_subscription.replace(Some(
             this.top_level
-                .layout_updated(move || owner.on_root_layout_updated()),
+                .layout_updated(move || owner.on_root_layout_updated()).detach(),
         ));
         this
     }
@@ -69,7 +69,7 @@ impl DockDebugOverlayManager {
         let subscription = dock.layout_updated(move || owner.on_dock_layout_updated(&sender));
         self.dock_subscriptions
             .borrow_mut()
-            .insert(dock, subscription);
+            .insert(dock, subscription.detach());
     }
     fn remove_overlay(&self, dock: &Ref<DockControl>) {
         let helper = self.helpers.borrow().get(dock).cloned();

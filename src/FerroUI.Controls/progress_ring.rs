@@ -104,7 +104,7 @@ impl FerroObjectImpl for ProgressRing {
                 owner.update_animation();
             }
         });
-        *this.visibility_subscription.borrow_mut() = Some(Subscription::new(subscription));
+        *this.visibility_subscription.borrow_mut() = Some(subscription);
         this.update_states();
     }
 

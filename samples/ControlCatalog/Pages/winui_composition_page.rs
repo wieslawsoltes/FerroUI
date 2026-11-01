@@ -347,7 +347,7 @@ fn connected_animation_section() -> Ref<StackPanel> {
     let keep = gallery.clone();
     let _ = content.detached_from_visual_tree(move |_| {
         let _ = &keep;
-    });
+    }).detach();
 
     section(
         "Connected animation",
@@ -423,7 +423,7 @@ fn implicit_animations_section() -> Ref<StackPanel> {
         let Some(compositor) = compositor_of(&box_) else { return };
         ElementCompositionPreview::set_implicit_show_animation(&box_, Some(show_animation(&compositor)));
         ElementCompositionPreview::set_implicit_hide_animation(&box_, Some(hide_animation(&compositor)));
-    });
+    }).detach();
 
     section(
         "Implicit show and hide animations",
@@ -482,7 +482,7 @@ fn pointer_section() -> Ref<StackPanel> {
             },
             DispatcherPriority::BACKGROUND,
         );
-    });
+    }).detach();
 
     section(
         "Pointer position property set",
@@ -532,7 +532,7 @@ fn parallax_section() -> Ref<StackPanel> {
             },
             DispatcherPriority::BACKGROUND,
         );
-    });
+    }).detach();
 
     section(
         "Scroll viewer manipulation property set",

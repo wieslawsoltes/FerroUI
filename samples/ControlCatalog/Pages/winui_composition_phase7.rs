@@ -124,7 +124,7 @@ fn on_composition<T: ferroui_base::ObjectType + ferroui_base::Upcast<Visual>>(
             },
             ferroui_base::threading::DispatcherPriority::BACKGROUND,
         );
-    });
+    }).detach();
 }
 
 /// `AddTracePointerShadow` of the Windows Calculator

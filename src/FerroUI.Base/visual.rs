@@ -838,39 +838,39 @@ impl Visual {
     pub fn attached_to_visual_tree(
         &self,
         handler: impl Fn(&VisualTreeAttachmentEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.attached_to_visual_tree.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.attached_to_visual_tree.remove(token);
             }
-        })
+        }))
     }
 
     /// Raised when the control is detached from a rooted visual tree.
     pub fn detached_from_visual_tree(
         &self,
         handler: impl Fn(&VisualTreeAttachmentEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.detached_from_visual_tree.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.detached_from_visual_tree.remove(token);
             }
-        })
+        }))
     }
 
     /// Raised when `is_effectively_visible` changes.
-    pub fn is_effectively_visible_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    pub fn is_effectively_visible_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.is_effectively_visible_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.is_effectively_visible_changed.remove(token);
             }
-        })
+        }))
     }
 
     // --- properties -------------------------------------------------------
@@ -1190,7 +1190,7 @@ impl Visual {
         });
         if added && self.read_composition_extras(|extras| extras.light_target_subscription.is_none()).unwrap_or(true) {
             let subscription = crate::media::xaml_light::track_light_target(self);
-            self.with_composition_extras(|extras| extras.light_target_subscription = Some(Subscription::new(subscription)));
+            self.with_composition_extras(|extras| extras.light_target_subscription = Some(subscription));
         }
         added
     }

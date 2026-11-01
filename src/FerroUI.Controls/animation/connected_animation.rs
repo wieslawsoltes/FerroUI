@@ -512,7 +512,7 @@ impl ConnectedAnimation {
                         }
                     }
                 });
-                *handler.borrow_mut() = Some(subscription);
+                *handler.borrow_mut() = Some(subscription.detach());
 
                 // The 500 ms timeout of the reference.
                 let timeout = DispatcherTimer::run_once(

@@ -120,7 +120,7 @@ impl DelayedBinding {
             });
             ENTRIES.with(|entries| {
                 if let Some(pending) = entries.borrow_mut().iter_mut().find(|p| p.target.points_to(&target_ref)) {
-                    pending.subscription = Some(subscription);
+                    pending.subscription = Some(subscription.detach());
                 }
             });
         }

@@ -554,8 +554,8 @@ fn adding_resource_should_raise_resources_changed_on_logical_children() {
     let raised_on_target = Rc::new(Cell::new(false));
     let raised_on_child = Rc::new(Cell::new(false));
     let (t, c) = (raised_on_target.clone(), raised_on_child.clone());
-    target.resources_changed(move |_| t.set(true));
-    child.resources_changed(move |_| c.set(true));
+    target.resources_changed(move |_| t.set(true)).detach();
+    child.resources_changed(move |_| c.set(true)).detach();
 
     target.resources().add_value("foo", "bar".to_string());
 
@@ -568,7 +568,7 @@ fn adding_resource_to_styles_should_raise_resources_changed() {
     let target = Class1::new();
     let raised = Rc::new(Cell::new(false));
     let r = raised.clone();
-    target.resources_changed(move |_| r.set(true));
+    target.resources_changed(move |_| r.set(true)).detach();
 
     target.styles().resources().add_value("foo", "bar".to_string());
 
@@ -582,7 +582,7 @@ fn adding_resource_to_nested_style_should_raise_resources_changed() {
     target.styles().add(&style);
     let raised = Rc::new(Cell::new(false));
     let r = raised.clone();
-    target.resources_changed(move |_| r.set(true));
+    target.resources_changed(move |_| r.set(true)).detach();
 
     style.resources().add_value("foo", "bar".to_string());
 
@@ -597,7 +597,7 @@ fn setting_resources_moves_the_owner() {
     new.add_value("foo", "bar".to_string());
     let raised = Rc::new(Cell::new(0));
     let r = raised.clone();
-    target.resources_changed(move |_| r.set(r.get() + 1));
+    target.resources_changed(move |_| r.set(r.get() + 1)).detach();
 
     target.set_resources(new.clone());
 
@@ -612,7 +612,7 @@ fn resources_changed_is_raised_when_attached_to_and_detached_from_logical_tree()
     let target = Class1::new();
     let raised = Rc::new(Cell::new(0));
     let r = raised.clone();
-    target.resources_changed(move |_| r.set(r.get() + 1));
+    target.resources_changed(move |_| r.set(r.get() + 1)).detach();
 
     set_child(&root, &target);
     assert_eq!(raised.get(), 1);

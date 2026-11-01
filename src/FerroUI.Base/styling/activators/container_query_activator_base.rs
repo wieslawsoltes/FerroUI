@@ -139,7 +139,7 @@ pub(crate) trait ContainerQueryActivator: StyleActivator + Sized {
                     this.container_base().de_initialize_screen_size_provider();
                 }
             });
-            *this.visual_subscriptions.borrow_mut() = vec![attached, detached];
+            *this.visual_subscriptions.borrow_mut() = vec![attached.detach(), detached.detach()];
         }
     }
 
@@ -164,7 +164,7 @@ pub(crate) trait ContainerQueryActivator: StyleActivator + Sized {
                         this.reevaluate_is_active();
                     }
                 });
-                *this.target_subscriptions.borrow_mut() = vec![attached, detached];
+                *this.target_subscriptions.borrow_mut() = vec![attached.detach(), detached.detach()];
             }
         }
 

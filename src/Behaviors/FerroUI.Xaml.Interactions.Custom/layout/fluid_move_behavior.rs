@@ -74,7 +74,7 @@ ferroui_base::ferro_overrides! {
                         behavior.on_layout_updated();
                     }
                 });
-                *this.layout_updated.borrow_mut() = Some(Subscription::new(subscription));
+                *this.layout_updated.borrow_mut() = Some(subscription);
             }
         }
 

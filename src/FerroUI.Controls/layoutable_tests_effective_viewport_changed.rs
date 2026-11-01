@@ -120,7 +120,7 @@ fn effective_viewport_changed_should_not_be_raised_twice_if_subcribed_in_attache
         move |_| {
             let raised = raised.clone();
             let token = target.upgrade().unwrap().effective_viewport_changed(move |_| raised.set(raised.get() + 1));
-            tokens.borrow_mut().push(token);
+            tokens.borrow_mut().push(token.detach());
         }
     });
 
@@ -341,7 +341,7 @@ fn execute_scroller_layout_pass(
 ) -> Rc<dyn IDisposable> {
     let token = target.effective_viewport_changed(handler);
     root.layout_manager().execute_layout_pass();
-    token
+    token.detach()
 }
 
 fn scroll_viewer_template() -> Rc<dyn IControlTemplate> {
@@ -545,7 +545,7 @@ fn event_unsubscribed_while_inside_callback() {
             }
             raised.set(raised.get() + 1);
         }
-    }));
+    }).detach());
 
     root.set_child(&target);
 

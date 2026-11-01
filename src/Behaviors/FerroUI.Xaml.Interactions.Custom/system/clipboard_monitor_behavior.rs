@@ -75,7 +75,7 @@ ferroui_base::ferro_overrides! {
                         behavior.stop_monitoring();
                     }
                 });
-                this.tree_subscriptions.borrow_mut().extend([attached, detached]);
+                this.tree_subscriptions.borrow_mut().extend([attached.detach(), detached.detach()]);
 
                 // If already attached to visual tree, start monitoring.
                 if associated_object.is_loaded() {

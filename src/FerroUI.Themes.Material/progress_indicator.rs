@@ -113,11 +113,11 @@ impl VisualImpl for MaterialProgressIndicator {
         Self::parent_on_attached_to_visual_tree(this, e);
         let weak = this.to_ref().downgrade();
         *this.visibility_subscription.borrow_mut() =
-            Some(Subscription::new(this.is_effectively_visible_changed(move || {
+            Some(this.is_effectively_visible_changed(move || {
                 if let Some(this) = weak.upgrade() {
                     this.update_clock();
                 }
-            })));
+            }));
         this.retarget_amplitude();
         this.update_clock();
     }

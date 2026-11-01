@@ -119,7 +119,7 @@ impl<T: AdornerTarget> AdornerHelper<T> {
         }) {
             let owner = self.clone();
             self.layout_subscription
-                .replace(Some(Subscription::new(host.layout_updated(move || owner.update_geometry()))));
+                .replace(Some(host.layout_updated(move || owner.update_geometry())));
             let surface = self
                 .geometry_surface
                 .borrow()
@@ -127,7 +127,7 @@ impl<T: AdornerTarget> AdornerHelper<T> {
                 .expect("source geometry surface");
             let owner = self.clone();
             self.detached_subscription.replace(Some(Subscription::new(
-                surface.detached_from_visual_tree(move |_| owner.on_geometry_detached()),
+                surface.detached_from_visual_tree(move |_| owner.on_geometry_detached()).detach(),
             )));
             self.geometry_window
                 .replace(TopLevel::get_top_level(Some(visual)).and_then(|t| t.cast::<Window>()));

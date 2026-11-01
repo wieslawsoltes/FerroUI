@@ -336,7 +336,7 @@ fn effect_tile(name: &str, effect: GraphicsEffect) -> Ref<StackPanel> {
             },
             DispatcherPriority::BACKGROUND,
         );
-    });
+    }).detach();
     let tile = column(6.0);
     tile.set_margin(Thickness::new(0.0, 0.0, 12.0, 12.0));
     tile.children().add(host.upcast::<Control>());
@@ -468,7 +468,7 @@ fn light_tile(name: &str, width: f64, height: f64, build: impl Fn(&Ref<Border>, 
             },
             DispatcherPriority::BACKGROUND,
         );
-    });
+    }).detach();
     let tile = column(6.0);
     tile.set_margin(Thickness::new(0.0, 0.0, 16.0, 12.0));
     tile.children().add(host.upcast::<Control>());
@@ -856,5 +856,5 @@ fn apply_theme(control: &Ref<Control>, key: &str) {
         {
             control.set_theme(Some(theme));
         }
-    });
+    }).detach();
 }

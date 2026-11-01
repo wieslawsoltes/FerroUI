@@ -200,7 +200,7 @@ impl Interaction {
                         HandlerSet::FromChangedEvent => Self::visual_attached_to_visual_tree_from_changed_event(&d),
                     }
                 }
-            }));
+            }).detach());
             let weak = host.clone();
             subscriptions.push(visual.detached_from_visual_tree(move |_| {
                 if let Some(d) = weak.upgrade() {
@@ -209,7 +209,7 @@ impl Interaction {
                         HandlerSet::FromChangedEvent => Self::visual_detached_from_visual_tree_from_changed_event(&d),
                     }
                 }
-            }));
+            }).detach());
         }
 
         if let Some(styled_element) = obj.downcast_ref::<StyledElement>() {
@@ -218,39 +218,39 @@ impl Interaction {
             let weak = host.clone();
             subscriptions.push(styled_element.attached_to_logical_tree(move |_| {
                 Self::with_existing_behaviors(&weak, BehaviorCollection::attached_to_logical_tree);
-            }));
+            }).detach());
             let weak = host.clone();
             subscriptions.push(styled_element.detached_from_logical_tree(move |_| {
                 Self::with_existing_behaviors(&weak, BehaviorCollection::detached_from_logical_tree);
-            }));
+            }).detach());
 
             // Initialized
 
             let weak = host.clone();
             subscriptions.push(styled_element.initialized(move || {
                 Self::with_existing_behaviors(&weak, BehaviorCollection::initialized);
-            }));
+            }).detach());
 
             // DataContextChanged
 
             let weak = host.clone();
             subscriptions.push(styled_element.data_context_changed(move || {
                 Self::with_existing_behaviors(&weak, BehaviorCollection::data_context_changed);
-            }));
+            }).detach());
 
             // ResourcesChanged
 
             let weak = host.clone();
             subscriptions.push(styled_element.resources_changed(move |_| {
                 Self::with_existing_behaviors(&weak, BehaviorCollection::resources_changed);
-            }));
+            }).detach());
 
             // ActualThemeVariantChanged
 
             let weak = host.clone();
             subscriptions.push(styled_element.actual_theme_variant_changed(move || {
                 Self::with_existing_behaviors(&weak, BehaviorCollection::actual_theme_variant_changed);
-            }));
+            }).detach());
         }
 
         if let Some(control) = obj.downcast_ref::<Control>() {

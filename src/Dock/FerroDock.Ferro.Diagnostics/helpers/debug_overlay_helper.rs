@@ -65,7 +65,7 @@ impl DebugOverlayHelper {
         self.remember(&control, SubscriptionKind::Leave, leave);
         let owner = self.clone();
         let layout = control.layout_updated(move || owner.on_layout_updated());
-        self.remember(&control, SubscriptionKind::Layout, layout);
+        self.remember(&control, SubscriptionKind::Layout, layout.detach());
     }
     pub(crate) fn remove_overlay(&self, control: &Control) {
         if self.adorner.borrow().is_none() {

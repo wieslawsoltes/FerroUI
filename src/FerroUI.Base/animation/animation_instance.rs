@@ -258,7 +258,7 @@ impl<A: Animator> AnimationInstance<A> {
                         clock.set_play_state(PlayState::Pause);
                     }
                 });
-                *self.visibility_changed_sub.borrow_mut() = Some(Subscription::new(subscription));
+                *self.visibility_changed_sub.borrow_mut() = Some(subscription);
 
                 // If already invisible when animation starts, pause immediately.
                 if !visual.is_effectively_visible() {
@@ -273,7 +273,7 @@ impl<A: Animator> AnimationInstance<A> {
                     this.do_complete(false);
                 }
             });
-            *self.detached_sub.borrow_mut() = Some(Subscription::new(subscription));
+            *self.detached_sub.borrow_mut() = Some(subscription);
         }
 
         if let Some(control) = self.target_control.upgrade() {

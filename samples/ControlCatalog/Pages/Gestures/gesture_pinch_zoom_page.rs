@@ -129,7 +129,7 @@ impl GesturePinchZoomPage {
                         current_offset.set(visual.visual_props().offset());
                     }
                 }
-            });
+            }).detach();
         }
 
         {

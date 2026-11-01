@@ -42,7 +42,7 @@ impl MainViewThemeBehavior {
                                 Self::initialize(&view);
                             }
                         });
-                        *pending.borrow_mut() = Some(subscription);
+                        *pending.borrow_mut() = Some(subscription.detach());
                     }
                 }
             });

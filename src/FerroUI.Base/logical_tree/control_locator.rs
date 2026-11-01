@@ -95,7 +95,7 @@ impl LightweightObservable<Option<Ref<StyledElement>>> for ControlTracker {
                 this.detached();
             }
         });
-        self.subscriptions.borrow_mut().extend([attached, detached]);
+        self.subscriptions.borrow_mut().extend([attached.detach(), detached.detach()]);
     }
 
     fn deinitialize(&self) {

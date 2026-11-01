@@ -109,7 +109,7 @@ impl AncestorPropertyChangesSubscription {
             let this = this.clone();
             visual.detached_from_visual_tree(move |_| this.on_detached_from_visual_tree())
         };
-        this.attachment_subscriptions.borrow_mut().extend([attached, detached]);
+        this.attachment_subscriptions.borrow_mut().extend([attached.detach(), detached.detach()]);
 
         if visual.is_attached_to_visual_tree() {
             Self::subscribe_to_ancestors(&this);

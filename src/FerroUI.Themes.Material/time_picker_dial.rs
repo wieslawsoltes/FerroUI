@@ -158,7 +158,7 @@ impl VisualImpl for MaterialTimePickerDial {
                 this.update_clock();
             }
         });
-        if let Some(old) = this.visibility_subscription.replace(Some(Subscription::new(sub))) {
+        if let Some(old) = this.visibility_subscription.replace(Some(sub)) {
             old.dispose();
         }
         this.synchronize();

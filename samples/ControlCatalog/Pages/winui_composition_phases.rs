@@ -233,7 +233,7 @@ fn on_composition(host: &Ref<Border>, build: impl Fn(&Ref<Border>, &Rc<Composito
             },
             ferroui_base::threading::DispatcherPriority::BACKGROUND,
         );
-    });
+    }).detach();
 }
 
 fn show(host: &Ref<Border>, visual: &Rc<CompositionVisual>) {
@@ -810,7 +810,7 @@ fn animations_demo() -> Demo {
         let keep = state.clone();
         let _ = content.detached_from_visual_tree(move |_| {
             let _ = &keep;
-        });
+        }).detach();
     }
     let smoke: SmokeAction = {
         let state = state.clone();
@@ -1126,7 +1126,7 @@ fn interaction_tracker_demo() -> Demo {
         let keep = state.clone();
         let _ = content.detached_from_visual_tree(move |_| {
             let _ = &keep;
-        });
+        }).detach();
     }
     Demo { content: content.upcast(), smoke: fling }
 }

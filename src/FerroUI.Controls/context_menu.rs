@@ -405,7 +405,7 @@ impl ContextMenu {
                     Self::control_detached_from_visual_tree(&control, e);
                 }
             });
-            control.context_menu_handlers().set(Some((context_requested, context_canceled, attached, detached)));
+            control.context_menu_handlers().set(Some((context_requested, context_canceled, attached.detach(), detached.detach())));
         }
 
         if control.is_attached_to_visual_tree() {
