@@ -9,25 +9,38 @@ pub(crate) struct Overlay {
     source_value: Value,
     source_binding: Option<InstalledBinding>,
     source_assigned: bool,
-    stack: Vec<SlotId>,
+    stack: Vec<Entry>,
     // An imperative binding can control the target until the overlay writes again.
     pub(crate) superseded: bool,
 }
 
+#[derive(Clone)]
+struct Entry {
+    input: SlotId,
+    frozen: Option<Value>,
+}
+
 impl Overlay {
     pub(crate) fn input(&self) -> SlotId {
-        *self.stack.last().expect("nonempty overlay stack")
+        self.stack.last().expect("nonempty overlay stack").input
+    }
+    pub(crate) fn frozen(&self) -> Option<&Value> {
+        self.stack.last()?.frozen.as_ref()
+    }
+    pub(crate) fn immediate_input(&self) -> Option<SlotId> {
+        self.frozen().is_none().then(|| self.input())
+    }
+    pub(crate) fn is_delayed(&self, input: SlotId) -> bool {
+        self.stack
+            .iter()
+            .any(|entry| entry.input == input && entry.frozen.is_some())
     }
 }
 
 impl Transaction<'_> {
     pub(crate) fn update_binding(&mut self, object: ObjectId) -> Result<(), Error> {
         self.budget()?;
-        if self.model.get(object, "delayed")? == Value::Bool(true) {
-            return Err(Error::new(
-                "delayed Binding requires an event-queue integration",
-            ));
-        }
+        let delayed = self.model.get(object, "delayed")? == Value::Bool(true);
         let input = self.model.key(object, "value")?;
         let old = self.model.slots[input].active_target;
         let target = match (
@@ -52,6 +65,20 @@ impl Transaction<'_> {
             _ => return Err(Error::new("invalid Binding.restoreMode")),
         };
         if old == target {
+            if let Some(target) = target {
+                let value = self.model.slots[input].value.clone();
+                let overlay = self
+                    .touched(target)
+                    .overlay
+                    .as_mut()
+                    .expect("active overlay");
+                if let Some(entry) = overlay.stack.iter_mut().find(|entry| entry.input == input) {
+                    if entry.frozen.is_some() != delayed {
+                        entry.frozen = delayed.then_some(value);
+                        self.invalidate_overlay(target);
+                    }
+                }
+            }
             return Ok(());
         }
         if let Some(old) = old {
@@ -59,6 +86,7 @@ impl Transaction<'_> {
         }
         self.touched(input).active_target = target;
         if let Some(target) = target {
+            let frozen = delayed.then(|| self.model.slots[input].value.clone());
             let slot = self.touched(target);
             let overlay = slot.overlay.get_or_insert_with(|| {
                 Box::new(Overlay {
@@ -70,9 +98,36 @@ impl Transaction<'_> {
                 })
             });
             overlay.superseded = false;
-            overlay.stack.push(input);
+            overlay.stack.push(Entry { input, frozen });
             slot.assigned = true;
             self.invalidate_overlay(target);
+        }
+        Ok(())
+    }
+
+    pub(crate) fn publish_delayed(&mut self, object: ObjectId) -> Result<(), Error> {
+        let input = self.model.key(object, "value")?;
+        let Some(target) = self.model.slots[input].active_target else {
+            return Ok(());
+        };
+        let value = self.model.slots[input].value.clone();
+        let overlay = self
+            .touched(target)
+            .overlay
+            .as_mut()
+            .expect("active overlay");
+        let top = overlay.input() == input;
+        if let Some(entry) = overlay
+            .stack
+            .iter_mut()
+            .find(|entry| entry.input == input && entry.frozen.is_some())
+        {
+            entry.frozen = Some(value);
+            if top {
+                overlay.superseded = false;
+                self.touched(target).binding = None;
+                self.invalidate_overlay(target);
+            }
         }
         Ok(())
     }
@@ -89,7 +144,7 @@ impl Transaction<'_> {
             .take()
             .expect("active binding has a target overlay");
         let was_top = overlay.input() == input;
-        overlay.stack.retain(|v| *v != input);
+        overlay.stack.retain(|entry| entry.input != input);
         if !overlay.stack.is_empty() {
             if was_top {
                 overlay.superseded = false;

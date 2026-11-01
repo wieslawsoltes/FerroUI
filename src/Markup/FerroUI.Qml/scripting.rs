@@ -135,6 +135,7 @@ pub trait ScriptEngine {
 
 #[derive(Default)]
 pub(crate) struct ScriptState {
+    pub(crate) deferred: deferred::Queue,
     pub(crate) connections: signal_callbacks::SignalCallbacks,
     pub(crate) engine: Option<Rc<dyn ScriptEngine>>,
     pub(crate) resources: BTreeMap<String, ir::ScriptResource>,
@@ -309,6 +310,28 @@ impl ScriptContext<'_, '_> {
             &[]
         }
     }
+    /// Schedule a function on the owner thread after the current transaction commits.
+    pub fn call_later(
+        &mut self,
+        owner: Option<ObjectId>,
+        function: ExternalValue,
+        arguments: Vec<Value>,
+    ) -> Result<(), Error> {
+        let owner = owner.unwrap_or(self.owner);
+        if self.tx.model.node(owner).is_none() || function.instance() != self.instance() {
+            return Err(Error::new("foreign or destroyed deferred callback"));
+        }
+        for value in &arguments {
+            self.tx.model.validate_handles(value)?;
+        }
+        self.tx.deferred.push(deferred::Task::Call {
+            owner,
+            function,
+            arguments,
+        });
+        Ok(())
+    }
+
     pub fn consume_work(&mut self) -> Result<(), Error> {
         self.tx.budget()
     }

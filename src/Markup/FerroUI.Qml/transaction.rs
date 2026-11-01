@@ -25,6 +25,7 @@ pub(crate) struct Transaction<'a> {
     pub(crate) depth: usize,
     steps: usize,
     pub(crate) connection_changes: signal_callbacks::Journal,
+    pub(crate) deferred: Vec<deferred::Task>,
     pub(crate) timer_changes: timers::TimerChanges,
 }
 
@@ -54,6 +55,7 @@ impl Instance {
             depth: 0,
             steps: 0,
             connection_changes: Default::default(),
+            deferred: Vec::new(),
             timer_changes: Default::default(),
         };
         let result = operation(&mut tx).and_then(|value| {
@@ -105,6 +107,10 @@ impl Instance {
                 tx.model.slots[key] = old;
             }
         } else {
+            tx.model
+                .javascript
+                .deferred
+                .post(std::mem::take(&mut tx.deferred));
             tx.model.emissions.append(&mut tx.emitted);
             for (key, old) in tx.original {
                 let value = &tx.model.slots[key].value;
@@ -269,7 +275,7 @@ impl Transaction<'_> {
 
     fn first_dependency(&self, key: SlotId) -> Option<SlotId> {
         if let Some(overlay) = &self.model.slots[key].overlay {
-            return Some(overlay.input());
+            return overlay.immediate_input();
         }
         if let Some(Alias::Slot(target)) = self.model.properties[key].alias {
             return Some(target);
@@ -341,10 +347,13 @@ impl Transaction<'_> {
     fn evaluate_one(&mut self, key: SlotId) -> Result<(), Error> {
         let owner = self.model.properties[key].owner;
         let mut reads = BTreeSet::new();
-        let overlay = self.model.slots[key].overlay.as_ref().map(|o| o.input());
-        let input = overlay
-            .map(|input| self.read(input, &mut reads))
-            .transpose()?;
+        let input = match &self.model.slots[key].overlay {
+            Some(overlay) => match overlay.frozen() {
+                Some(value) => Some(value.clone()),
+                None => Some(self.read(overlay.input(), &mut reads)?),
+            },
+            None => None,
+        };
         let superseded = self.model.slots[key]
             .overlay
             .as_ref()
@@ -441,6 +450,13 @@ impl Transaction<'_> {
             if self.model.slots[target]
                 .overlay
                 .as_ref()
+                .is_some_and(|o| o.is_delayed(key))
+            {
+                self.deferred
+                    .push(deferred::Task::Binding(self.model.properties[key].owner));
+            } else if self.model.slots[target]
+                .overlay
+                .as_ref()
                 .is_some_and(|o| o.superseded && o.input() == key)
             {
                 let slot = self.touched(target);
@@ -511,7 +527,7 @@ impl Transaction<'_> {
         let inputs = self.model.slots[key]
             .overlay
             .as_ref()
-            .map(|o| o.input())
+            .and_then(|o| o.immediate_input())
             .into_iter()
             .collect();
         self.replace_reads(key, inputs);

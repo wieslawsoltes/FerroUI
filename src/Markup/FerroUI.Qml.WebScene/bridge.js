@@ -19,7 +19,12 @@
     // Qt.binding creates a transferable marker. Only assignment to a QML
     // property installs the callback; JS containers can retain and reuse it.
     const bindingCallbacks = new WeakMap();
+    const methodOwners = new WeakMap();
     Object.defineProperty(globalThis, "Qt", {value: Object.freeze({
+        callLater(fn, ...args) {
+            if (typeof fn !== "function") throw new TypeError("Qt.callLater expects a function");
+            rpc(["callLater", methodOwners.get(fn) || 0, atom(fn), args.map(value => encode(value))]);
+        },
         binding(fn) {
             if (arguments.length !== 1 || typeof fn !== "function") {
                 throw new Error("Qt.binding expects one function");
@@ -83,6 +88,7 @@
         if(!slots){slots=new Map();boundMethods.set(id,slots);}
         if(slots.has(key)) return slots.get(key);
         const bound=(...args)=>decode(rpc(["call",id,key,args.map((v,i)=>encode(v,signature[i]))]));
+        methodOwners.set(bound, id);
         callbackAdapters.set(bound,(...args)=>bound(...args.slice(0,signature.length)));
         if(isSignal){
             function change(action,args){

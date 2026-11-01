@@ -193,6 +193,28 @@ impl Realm {
         let op = text(v, 0)?;
         let id = number(v, 1)?;
         let instance = ctx.instance();
+        if op == "callLater" {
+            let owner = if id == 0 {
+                None
+            } else {
+                let Value::Object(owner) = self.lookup(ctx, id)? else {
+                    return Err(Error::new("invalid owner of deferred method"));
+                };
+                Some(owner)
+            };
+            let Value::External(function) = self.decode(ctx, field(v, 2)?)? else {
+                return Err(Error::new("Qt.callLater expects a guest function"));
+            };
+            let encoded = field(v, 3)?
+                .as_array()
+                .ok_or_else(|| Error::new("invalid deferred arguments"))?;
+            let arguments = encoded
+                .iter()
+                .map(|value| self.decode(ctx, value))
+                .collect::<Result<_, _>>()?;
+            ctx.call_later(owner, function, arguments)?;
+            return Ok(Json::Null);
+        }
         if matches!(op, "resolve" | "assign" | "scopeMode" | "bindScope") {
             let scope = self
                 .tables

@@ -5,6 +5,7 @@ mod arrays;
 mod binding_object;
 pub mod compiled;
 mod connections;
+mod deferred;
 pub use compiled::{CompiledComponent, ComponentSource};
 mod enums;
 pub use enums::Namespace;
