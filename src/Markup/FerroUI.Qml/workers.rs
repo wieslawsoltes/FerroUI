@@ -98,7 +98,7 @@ struct Entry {
     models: BTreeMap<u64, ObjectId>,
 }
 struct ModelAck {
-    send: std::sync::mpsc::Sender<Result<Vec<u64>, Error>>,
+    complete: Box<dyn FnOnce(Result<Vec<u64>, Error>) + Send>,
     pending: Arc<std::sync::atomic::AtomicBool>,
 }
 
@@ -106,6 +106,11 @@ struct ModelAck {
 /// owner thread. A timeout cannot silently mutate the model on a later poll.
 pub struct WorkerSync {
     done: std::sync::mpsc::Receiver<Result<Vec<u64>, Error>>,
+    _request: WorkerSyncRequest,
+}
+/// Keep a request alive until the QML owner commits its model batch. Dropping
+/// it before delivery revokes the batch, including after a browser deadline.
+pub struct WorkerSyncRequest {
     pending: Arc<std::sync::atomic::AtomicBool>,
 }
 impl WorkerSync {
@@ -129,7 +134,7 @@ impl WorkerSync {
         self.done.recv_timeout(timeout)
     }
 }
-impl Drop for WorkerSync {
+impl Drop for WorkerSyncRequest {
     fn drop(&mut self) {
         self.pending
             .store(false, std::sync::atomic::Ordering::Release);
@@ -207,13 +212,29 @@ impl WorkerDelivery {
     }
     pub fn synchronize_tree(&self, models: Vec<WorkerModelEdits>) -> Result<WorkerSync, Error> {
         let (send, done) = std::sync::mpsc::channel();
+        let request = self.synchronize_tree_with(models, move |result| {
+            let _ = send.send(result);
+        })?;
+        Ok(WorkerSync {
+            done,
+            _request: request,
+        })
+    }
+
+    /// Deliver the revision receipt asynchronously on the owner thread. A
+    /// retired worker drops its completion callback and invalidates the request.
+    pub fn synchronize_tree_with(
+        &self,
+        models: Vec<WorkerModelEdits>,
+        complete: impl FnOnce(Result<Vec<u64>, Error>) + Send + 'static,
+    ) -> Result<WorkerSyncRequest, Error> {
         let pending = Arc::new(std::sync::atomic::AtomicBool::new(true));
         let ack = ModelAck {
-            send,
+            complete: Box::new(complete),
             pending: pending.clone(),
         };
         self.enqueue(WorkerEvent::SyncTree(models), Some(ack))
-            .then_some(WorkerSync { done, pending })
+            .then_some(WorkerSyncRequest { pending })
             .ok_or_else(|| Error::new("WorkerScript receiver unavailable"))
     }
     fn enqueue(&self, event: WorkerEvent, ack: Option<ModelAck>) -> bool {
@@ -438,7 +459,7 @@ impl Instance {
         }
         let result = self.apply_worker_edits(worker, models);
         if let Some(ack) = ack {
-            let _ = ack.send.send(result);
+            (ack.complete)(result);
             Ok(())
         } else {
             result.map(drop)

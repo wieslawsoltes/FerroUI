@@ -25,7 +25,11 @@ Call `prepare_browser_instance().await` once per new scripting instance when sha
 
 The page must be in a secure context with cross-origin isolation enabled. Serve `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` or compatible isolation headers. The application creates a nested worker from a Blob and compiles packaged JavaScript functions at runtime. The page's Content Security Policy must allow those operations. The script worker runs trusted application code with its origin's worker permissions.
 
-Each transport direction uses a 64 KiB shared slot. Longer UTF-8 messages stream in chunks, up to 32 MiB per frame. The application worker waits for the result with a deadline and services nested QML calls in the meantime. This backend requires blocking `Atomics.wait` support in the application worker. The window thread stays available for painting and input. `QtQml.WorkerScript` currently uses the desktop WebScene backend.
+Each transport direction uses a 64 KiB shared slot. Longer UTF-8 messages stream in chunks, up to 32 MiB per frame. The application worker waits for the result with a deadline and services nested QML calls in the meantime. This backend requires blocking `Atomics.wait` support in the application worker. The window thread stays available for painting and input.
+
+## WorkerScript
+
+Each `WorkerScript` declaration creates a separate browser worker and resolves its source against the embedded component catalog. The application worker receives replies asynchronously. Arrange for the owner event loop to call `Instance::poll_worker_scripts` when its worker waker fires. A worker calling `ListModel.sync()` waits for that transaction to commit or reject the edits. Replacing the source or destroying the object terminates the guest and cancels queued deliveries. [WorkerScript example](qml-workers.md)
 
 ## Fetching QML and ECMAScript modules
 
@@ -33,4 +37,4 @@ An application worker can fetch QML at runtime using `BrowserComponentTransport`
 
 ## Chromium verification
 
-The [browser fixture](../tests/QmlBrowser) builds the QML component with Cargo, loads real Wasm and a JavaScript module in headless Chromium, and exercises dependency updates, nested calls, imperative closure bindings, Promise settlement, rollback, multichunk UTF-8 data, instance isolation and worker timeout/recovery. [Conformance workflow](../.github/workflows/qml.yml)
+The [browser fixture](../tests/QmlBrowser) builds the QML component with Cargo, loads real Wasm and a JavaScript module in headless Chromium, and exercises dependency updates, nested calls, imperative closure bindings, Promise settlement, rollback, multichunk UTF-8 data, instance isolation and worker timeout/recovery. It also checks WorkerScript FIFO delivery, classic and ECMAScript module entry points, nested model conflicts, source replacement and object destruction. [Conformance workflow](../.github/workflows/qml.yml)

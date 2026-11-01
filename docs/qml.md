@@ -249,7 +249,7 @@ Inside an Item or Rectangle, a child can anchor its left, right, top, bottom, ce
 
 The native `Loader` mounts and replaces the visual subtree of a bundled QML file or an inline component. Its two axes size independently. Rust hosts can drive the owner event loop manually to finish deferred instantiation. [Loader lifecycle and sizing](qml-loader.md)
 
-`QtQml.WorkerScript` runs classic scripts and ES modules in independent WebScene processes. The worker sends copied values back through an owner-thread queue. A `ListModel` proxy sends a revision-checked group of edits when the worker calls `sync()`. The UI dispatcher sleeps between deliveries. [Worker scripts and Rust event-loop integration](qml-workers.md)
+`QtQml.WorkerScript` runs classic scripts and ES modules in independent WebScene processes on desktop or dedicated workers in a browser. The worker sends copied values back through an owner-thread queue. A `ListModel` proxy sends a revision-checked group of edits when the worker calls `sync()`. The UI dispatcher sleeps between deliveries. [Worker scripts and Rust event-loop integration](qml-workers.md)
 
 An application can enable remote QML on its type registry. HTTP transfers run off-thread, and fetched QML uses the same owner-thread binding and component lifecycle as embedded QML. [Network component loading](qml-network.md)
 

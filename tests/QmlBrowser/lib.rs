@@ -1,6 +1,7 @@
 //! The probe is invoked by an application Web Worker, exactly as a compiled
 //! application creates a QML instance with its browser JavaScript backend.
 #![cfg(target_arch = "wasm32")]
+mod workers;
 use ferroui_qml::{Instance, TypeRegistry, Value};
 use ferroui_qml_webscene::WebSceneEngine;
 use std::{rc::Rc, time::Duration};
@@ -79,6 +80,7 @@ async fn exercise() -> Result<String, ferroui_qml::Error> {
             == Value::String("new realm!".into()),
         "fresh worker after guest deadline",
     )?;
+    workers::check().await?;
     Ok("passed".into())
 }
 

@@ -55,7 +55,7 @@ pub(super) fn start(
     source: &str,
     delivery: WorkerDelivery,
 ) -> Result<Box<dyn WorkerEndpoint>, Error> {
-    let url = entry_url(&resources, origin, source)?;
+    let url = worker_program::entry_url(&resources, origin, source)?;
     let (input, rx) = mpsc::sync_channel(256);
     let bytes = Arc::new(AtomicUsize::new(0));
     let cancelled = Arc::new(AtomicBool::new(false));
@@ -93,24 +93,9 @@ impl Supervisor {
         inbox: mpsc::Receiver<(WorkerValue, usize)>,
         bytes: &AtomicUsize,
     ) -> Result<(), Error> {
-        let source = &resources[&url];
-        let classic = source.kind != ir::ScriptKind::Module;
-        if classic && (source.kind == ir::ScriptKind::Library || !source.imports.is_empty()) {
-            return Err(Error::new(
-                "WorkerScript plain scripts cannot use .import or .pragma library",
-            ));
-        }
-        let mut catalog = modules::Modules::prepare(&resources)?;
-        for definition in catalog
-            .manifest
-            .as_object_mut()
-            .expect("resource manifest")
-            .values_mut()
-        {
-            definition["preload"] = false.into();
-        }
+        let init = worker_program::initialization(&resources, &url)?;
         let child = process::Worker::spawn_mode(&self.worker, &self.library, true)?;
-        self.exchange(&child,json!({"url":url,"resources":catalog.manifest,"classic":classic.then_some(&source.source),"files":catalog.files}))?;
+        self.exchange(&child, init)?;
         while let Ok((value, size)) = inbox.recv() {
             bytes.fetch_sub(size, Ordering::Release);
             if self.cancelled.load(Ordering::Acquire) {
@@ -186,59 +171,4 @@ impl Supervisor {
             child.send(reply, deadline)?;
         }
     }
-}
-
-fn entry_url(
-    resources: &BTreeMap<String, ir::ScriptResource>,
-    origin: &str,
-    source: &str,
-) -> Result<String, Error> {
-    if resources.contains_key(source) {
-        return Ok(source.into());
-    }
-    let missing = || {
-        Error::new(format!(
-            "WorkerScript source '{source}' is outside the embedded catalog"
-        ))
-    };
-    let base = origin
-        .strip_prefix("https://qml.invalid/components/project/")
-        .ok_or_else(missing)?;
-    if source.starts_with('/') || source.contains([':', '?', '#', '\\']) {
-        return Err(missing());
-    }
-    let mut parts: Vec<_> = base.split('/').map(str::to_owned).collect();
-    parts.pop();
-    for piece in source.split('/') {
-        match piece {
-            "" | "." => (),
-            ".." => {
-                parts.pop().ok_or_else(missing)?;
-            }
-            raw => {
-                let name = percent_encoding::percent_decode_str(raw)
-                    .decode_utf8()
-                    .map_err(|_| missing())?;
-                if name == "." || name == ".." || name.contains(['/', '\\']) {
-                    return Err(missing());
-                }
-                const ENCODE: &percent_encoding::AsciiSet = &percent_encoding::NON_ALPHANUMERIC
-                    .remove(b'-')
-                    .remove(b'.')
-                    .remove(b'~')
-                    .remove(b'_');
-                parts.push(percent_encoding::utf8_percent_encode(&name, ENCODE).to_string());
-            }
-        }
-    }
-    for root in [
-        "https://qml.invalid/modules/classic/project/",
-        "https://qml.invalid/modules/project/",
-    ] {
-        let url = format!("{root}{}", parts.join("/"));
-        if resources.contains_key(&url) {
-            return Ok(url);
-        }
-    }
-    Err(missing())
 }

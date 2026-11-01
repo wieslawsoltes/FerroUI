@@ -14,6 +14,10 @@ mod process;
 mod promise;
 #[cfg(not(target_arch = "wasm32"))]
 mod script_actor;
+#[cfg(target_arch = "wasm32")]
+#[path = "browser_actor.rs"]
+mod script_actor;
+mod worker_program;
 use ferroui_qml::{
     ir, Error, ExternalValue, ObjectId, ScriptContext, ScriptEngine, ScriptInstance, ScriptScope,
     Value,
@@ -258,7 +262,6 @@ impl ScriptEngine for WebSceneEngine {
         }
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     fn start_worker(
         &self,
         resources: std::sync::Arc<BTreeMap<String, ir::ScriptResource>>,

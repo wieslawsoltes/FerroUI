@@ -184,14 +184,14 @@
     }
     return Object.freeze({
         load(init) {
-            invoke(async () => {
+            return invoke(async () => {
                 await modules.prepare({resources: init.resources, names: {}});
                 if (typeof init.classic === "string") (0,eval)(init.classic + "\n//# sourceURL=" + init.url);
                 else await modules.context(null, init.url).import(init.url);
                 post({t: "Ready"});
             }, true);
         },
-        receive(message) { invoke(() => typeof api.onMessage === "function" ? api.onMessage(decode(message)) : undefined); },
+        receive(message) { return invoke(() => typeof api.onMessage === "function" ? api.onMessage(decode(message)) : undefined); },
         result() { return state; }
     });
 })
