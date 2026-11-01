@@ -25,6 +25,16 @@ fn until(session: &Session, mut ready: impl FnMut() -> bool) {
     }
 }
 
+fn native_frame(session: &Session, display: xlib::XDisplay, id: XID) -> Option<PixelRect> {
+    let a = session.platform.info().atoms();
+    let (x, y, _) = xlib::x_translate_coordinates(display, id, session.platform.info().root_window(), 0, 0)?;
+    let geometry = xlib::x_get_geometry(display, id)?;
+    let frame = session.longs(id, a._NET_FRAME_EXTENTS, a.CARDINAL, 4);
+    let [left, right, top, bottom] = frame.as_slice() else { return None };
+    Some(PixelRect::new(x - *left as i32, y - *top as i32,
+        geometry.width + (*left + *right) as i32, geometry.height + (*top + *bottom) as i32))
+}
+
 #[test]
 #[ignore = "requires a disposable X server with the Ferro Desktop Openbox configuration"]
 fn real_client_lifecycle() {
@@ -60,6 +70,46 @@ fn real_client_lifecycle() {
     until(&session, || session.snapshot().current_workspace == 1);
     assert!(session.activate(id as u32));
     until(&session, || window().is_some_and(|w| w.active));
+    assert!(window().unwrap().last_activation > 0);
+    let original = native_frame(&session, display, id).unwrap();
+    assert!(session.toggle_maximized(id as u32));
+    until(&session, || window().is_some_and(|w| w.maximized));
+    assert!(session.toggle_maximized(id as u32));
+    until(&session, || window().is_some_and(|w| !w.maximized)
+        && native_frame(&session, display, id) == Some(original));
+    // Snap directly out of maximized state. Openbox changes frame extents on restore.
+    assert!(session.toggle_maximized(id as u32));
+    until(&session, || window().is_some_and(|w| w.maximized));
+    let work = session.longs(platform.info().root_window(), a._NET_WORKAREA, a.CARDINAL, 8);
+    let [x, y, width, height] = work[4..8] else { unreachable!() };
+    let half = width / 2;
+    for (side, target) in [
+        (SnapSide::Left, PixelRect::new(x as i32, y as i32, half as i32, height as i32)),
+        (SnapSide::Right, PixelRect::new((x+half) as i32, y as i32, (width-half) as i32, height as i32)),
+    ] {
+        assert!(session.snap(id as u32, side));
+        until(&session, || native_frame(&session, display, id) == Some(target));
+        assert!(!window().unwrap().maximized);
+    }
+    assert!(session.toggle_fullscreen(id as u32));
+    until(&session, || window().is_some_and(|w| w.fullscreen));
+    assert!(!session.snap(id as u32, SnapSide::Left));
+    assert!(session.toggle_fullscreen(id as u32));
+    until(&session, || window().is_some_and(|w| !w.fullscreen));
+    assert!(session.toggle_above(id as u32));
+    until(&session, || window().is_some_and(|w| w.above));
+    assert!(session.toggle_above(id as u32));
+    until(&session, || window().is_some_and(|w| !w.above));
+    let previous_count = session.snapshot().workspace_names.len();
+    assert!(session.add_workspace());
+    until(&session, || session.snapshot().workspace_names.len() == previous_count + 1);
+    assert!(session.move_to_workspace(id as u32, previous_count));
+    until(&session, || window().is_some_and(|w| w.workspace == Some(previous_count)));
+    assert!(!session.remove_empty_last_workspace());
+    assert!(session.move_to_workspace(id as u32, 1));
+    until(&session, || window().is_some_and(|w| w.workspace == Some(1)));
+    assert!(session.remove_empty_last_workspace());
+    until(&session, || session.snapshot().workspace_names.len() == previous_count);
     assert!(session.minimize(id as u32));
     until(&session, || window().is_some_and(|w| w.minimized));
     assert!(session.activate(id as u32));

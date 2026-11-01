@@ -2,6 +2,9 @@
 //! owns focus, stacking, workspaces and client lifetime. We never reparent or draw client windows.
 
 mod decorations;
+mod placement;
+
+pub use placement::SnapSide;
 
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
@@ -24,6 +27,18 @@ pub struct ClientWindow {
     pub workspace: Option<usize>,
     pub active: bool,
     pub minimized: bool,
+    pub maximized: bool,
+    partially_maximized: bool,
+    pub fullscreen: bool,
+    pub can_fullscreen: bool,
+    pub above: bool,
+    pub can_raise: bool,
+    pub last_activation: u64,
+    pub can_maximize: bool,
+    pub can_snap: bool,
+    pub can_move_workspace: bool,
+    pub can_minimize: bool,
+    pub can_close: bool,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -35,11 +50,7 @@ pub struct Snapshot {
 
 impl Default for Snapshot {
     fn default() -> Self {
-        Self {
-            current_workspace: 0,
-            workspace_names: vec!["Workspace 1".into()],
-            windows: Vec::new(),
-        }
+        Self { current_workspace: 0, workspace_names: vec!["Workspace 1".into()], windows: Vec::new() }
     }
 }
 
@@ -50,17 +61,12 @@ struct Dirty {
     active: bool,
     showing: bool,
     clients: HashSet<XID>,
+    titles: HashSet<XID>,
 }
 
 impl Dirty {
     fn all() -> Self {
-        Self {
-            membership: true,
-            workspaces: true,
-            active: true,
-            showing: true,
-            ..Self::default()
-        }
+        Self { membership: true, workspaces: true, active: true, showing: true, ..Self::default() }
     }
 }
 
@@ -71,6 +77,13 @@ pub struct Session {
     // because a client can change its type or SKIP_TASKBAR flag after mapping.
     clients: RefCell<HashMap<XID, Option<ClientWindow>>>,
     active: Cell<XID>,
+    activation_sequence: Cell<u64>,
+    pending_snaps: RefCell<HashMap<XID, SnapSide>>,
+    move_action: Atom,
+    resize_action: Atom,
+    close_action: Atom,
+    workspace_action: Atom,
+    above_action: Atom,
     snapshot: RefCell<Snapshot>,
     dirty: RefCell<Dirty>,
     queued: Cell<bool>,
@@ -88,11 +101,19 @@ pub struct Session {
 impl Session {
     pub fn connect() -> Option<Rc<Self>> {
         let platform = FerroLocator::current().get_service::<FerroX11Platform>()?;
+        let display = platform.display();
         let session = Rc::new(Self {
             platform,
             order: RefCell::default(),
             clients: RefCell::default(),
             active: Cell::new(0),
+            activation_sequence: Cell::new(0),
+            pending_snaps: RefCell::default(),
+            move_action: xlib::x_intern_atom(display, "_NET_WM_ACTION_MOVE", false),
+            resize_action: xlib::x_intern_atom(display, "_NET_WM_ACTION_RESIZE", false),
+            close_action: xlib::x_intern_atom(display, "_NET_WM_ACTION_CLOSE", false),
+            workspace_action: xlib::x_intern_atom(display, "_NET_WM_ACTION_CHANGE_DESKTOP", false),
+            above_action: xlib::x_intern_atom(display, "_NET_WM_ACTION_ABOVE", false),
             snapshot: RefCell::default(),
             dirty: RefCell::new(Dirty::all()),
             queued: Cell::new(false),
@@ -174,11 +195,14 @@ impl Session {
         let info = self.platform.info();
         let a = info.atoms();
         let root = info.root_window();
+        let mut reorder = dirty.membership;
+        let mut windows_changed = false;
         if dirty.membership {
             let ids = self.longs(root, a._NET_CLIENT_LIST, a.WINDOW, 16_384);
             let live: HashSet<_> = ids.iter().copied().collect();
             let previous = self.order.replace(ids);
             for id in previous.into_iter().filter(|id| !live.contains(id)) {
+                self.pending_snaps.borrow_mut().remove(&id);
                 if self.clients.borrow_mut().remove(&id).is_some() {
                     self.unwatch(id);
                 }
@@ -191,13 +215,49 @@ impl Session {
             }
         }
         for id in dirty.clients {
+            dirty.titles.remove(&id);
             if self.clients.borrow().contains_key(&id) {
-                self.clients.borrow_mut().insert(id, self.read_client(id));
+                let client = self.read_client(id);
+                let ready_to_snap = client.as_ref().is_some_and(|w| !w.partially_maximized && !w.fullscreen);
+                let mut clients = self.clients.borrow_mut();
+                let slot = clients.get_mut(&id).expect("watched client");
+                reorder |= slot.is_some() != client.is_some();
+                windows_changed |= *slot != client;
+                *slot = client;
+                drop(clients);
+                if ready_to_snap {
+                    if let Some(side) = self.pending_snaps.borrow_mut().remove(&id) {
+                        self.place_half(id, side);
+                    }
+                }
+            }
+        }
+        // Editors and terminals can update their title repeatedly while typing. A title event
+        // must not query state, workspace, allowed actions and window type again.
+        for id in dirty.titles {
+            if let Some(Some(client)) = self.clients.borrow_mut().get_mut(&id) {
+                let title = self.client_title(id);
+                windows_changed |= client.title != title;
+                client.title = title;
             }
         }
         if dirty.active {
-            self.active
-                .set(self.number(root, a._NET_ACTIVE_WINDOW, a.WINDOW).unwrap_or(0));
+            let active = self.number(root, a._NET_ACTIVE_WINDOW, a.WINDOW).unwrap_or(0);
+            let previous = self.active.replace(active);
+            if previous != active {
+                let mut clients = self.clients.borrow_mut();
+                if let Some(Some(client)) = clients.get_mut(&previous) {
+                    client.active = false;
+                    windows_changed = true;
+                }
+                if let Some(Some(client)) = clients.get_mut(&active) {
+                    client.active = true;
+                    windows_changed = true;
+                    let serial = self.activation_sequence.get().saturating_add(1);
+                    self.activation_sequence.set(serial);
+                    client.last_activation = serial;
+                }
+            }
         }
         let mut snapshot = self.snapshot.borrow_mut();
         let mut changed = false;
@@ -210,20 +270,23 @@ impl Session {
             snapshot.current_workspace = current;
             snapshot.workspace_names = names;
         }
-        let clients = self.clients.borrow();
-        let windows: Vec<_> = self
-            .order
-            .borrow()
-            .iter()
-            .filter_map(|id| {
-                let mut client = clients.get(id)?.as_ref()?.clone();
-                client.active = *id == self.active.get();
-                Some(client)
-            })
-            .collect();
-        changed |= windows != snapshot.windows;
-        snapshot.windows = windows;
-        drop(clients);
+        if reorder {
+            let clients = self.clients.borrow();
+            let windows: Vec<_> = self.order.borrow().iter().filter_map(|id| clients.get(id)?.clone()).collect();
+            changed |= windows != snapshot.windows;
+            snapshot.windows = windows;
+        } else if windows_changed {
+            // Keep the list and strings of unaffected windows across title/state notifications.
+            let clients = self.clients.borrow();
+            for published in &mut snapshot.windows {
+                if let Some(Some(client)) = clients.get(&XID::from(published.id)) {
+                    if published != client {
+                        published.clone_from(client);
+                        changed = true;
+                    }
+                }
+            }
+        }
         drop(snapshot);
         if changed {
             if let Some(callback) = self.changed.borrow().clone() {
@@ -252,14 +315,12 @@ impl Session {
                     }
                     if let Some(session) = weak.upgrade() {
                         let a = session.platform.info().atoms();
-                        if [
-                            a._NET_WM_NAME,
-                            a.WM_NAME,
-                            a._NET_WM_DESKTOP,
-                            a._NET_WM_STATE,
-                            a._NET_WM_WINDOW_TYPE,
-                        ]
-                        .contains(&xlib::property_event(event).atom)
+                        let atom = xlib::property_event(event).atom;
+                        if atom == a._NET_WM_NAME || atom == a.WM_NAME {
+                            session.dirty.borrow_mut().titles.insert(id);
+                            session.queue();
+                        } else if [a._NET_WM_ALLOWED_ACTIONS, a._NET_WM_DESKTOP, a._NET_WM_STATE, a._NET_WM_WINDOW_TYPE]
+                            .contains(&atom)
                         {
                             session.dirty.borrow_mut().clients.insert(id);
                             session.queue();
@@ -275,11 +336,7 @@ impl Session {
 
     fn unwatch(&self, id: XID) {
         // A destroyed XID can be reused. Never unregister one of the framework's own top levels.
-        if self
-            .platform
-            .get_window(id)
-            .is_some_and(|entry| entry.window().is_none())
-        {
+        if self.platform.get_window(id).is_some_and(|entry| entry.window().is_none()) {
             self.platform.remove_window(id);
             xlib::x_select_input(self.platform.display(), id, 0);
         }
@@ -323,6 +380,43 @@ impl Session {
         {
             return None;
         }
+        // A missing hint leaves the decision to the WM. A present, empty list means that
+        // this particular client does not allow any window-manager operations.
+        let actions =
+            xlib::x_get_window_property(self.platform.display(), id, a._NET_WM_ALLOWED_ACTIONS, 0, 128, false, a.ATOM);
+        let allowed = (actions.actual_type == a.ATOM && actions.actual_format == 32).then(|| actions.longs());
+        let permits = |action| allowed.as_ref().is_none_or(|list| list.contains(&action));
+        let horz = states.contains(&a._NET_WM_STATE_MAXIMIZED_HORZ);
+        let vert = states.contains(&a._NET_WM_STATE_MAXIMIZED_VERT);
+        let desktop = self.number(id, a._NET_WM_DESKTOP, a.CARDINAL).unwrap_or(0) as u32;
+        Some(ClientWindow {
+            id: id as u32,
+            title: self.client_title(id),
+            workspace: (desktop != u32::MAX).then_some(desktop as usize),
+            active: self.active.get() == id,
+            minimized: states.contains(&a._NET_WM_STATE_HIDDEN),
+            maximized: horz && vert,
+            partially_maximized: horz || vert,
+            fullscreen: states.contains(&a._NET_WM_STATE_FULLSCREEN),
+            can_fullscreen: permits(a._NET_WM_ACTION_FULLSCREEN),
+            above: states.contains(&a._NET_WM_STATE_ABOVE),
+            can_raise: permits(self.above_action),
+            last_activation: self
+                .clients
+                .borrow()
+                .get(&id)
+                .and_then(Option::as_ref)
+                .map_or(0, |old| old.last_activation),
+            can_maximize: permits(a._NET_WM_ACTION_MAXIMIZE_HORZ) && permits(a._NET_WM_ACTION_MAXIMIZE_VERT),
+            can_snap: permits(self.move_action) && permits(self.resize_action),
+            can_move_workspace: permits(self.workspace_action),
+            can_minimize: permits(a._NET_WM_ACTION_MINIMIZE),
+            can_close: permits(self.close_action),
+        })
+    }
+
+    fn client_title(&self, id: XID) -> String {
+        let a = self.platform.info().atoms();
         let mut title = String::from_utf8_lossy(&self.bytes(id, a._NET_WM_NAME, a.UTF8_STRING)).into_owned();
         if title.trim().is_empty() {
             title = xlib::x_fetch_name(self.platform.display(), id).unwrap_or_default();
@@ -330,24 +424,12 @@ impl Session {
         if title.trim().is_empty() {
             title = "Untitled window".into();
         }
-        let desktop = self.number(id, a._NET_WM_DESKTOP, a.CARDINAL).unwrap_or(0) as u32;
-        Some(ClientWindow {
-            id: id as u32,
-            title,
-            workspace: (desktop != u32::MAX).then_some(desktop as usize),
-            active: false,
-            minimized: states.contains(&a._NET_WM_STATE_HIDDEN),
-        })
+        title
     }
 
     fn message(&self, id: XID, atom: Atom, data: &[XID]) -> bool {
         let info = self.platform.info();
-        if !self
-            .platform
-            .globals()
-            .net_supported()
-            .is_some_and(|atoms| atoms.contains(&atom))
-        {
+        if !self.platform.globals().net_supported().is_some_and(|atoms| atoms.contains(&atom)) {
             return false;
         }
         let mut event = xlib::new_event();
@@ -383,6 +465,34 @@ impl Session {
             )
     }
 
+    pub fn add_workspace(&self) -> bool {
+        let snapshot = self.snapshot.borrow();
+        let count = snapshot.workspace_names.len();
+        count < 256 && self.set_workspace_count(count + 1)
+    }
+
+    pub fn remove_empty_last_workspace(&self) -> bool {
+        let snapshot = self.snapshot.borrow();
+        let count = snapshot.workspace_names.len();
+        if count <= 1 || snapshot.windows.iter().any(|client| client.workspace == Some(count - 1)) {
+            return false;
+        }
+        // Skip-taskbar and transient windows are still real clients. Inspect those too before
+        // asking the WM to remove a workspace, so a hidden task cannot be moved unexpectedly.
+        let a = self.platform.info().atoms();
+        if self.order.borrow().iter().any(|&id| {
+            self.number(id, a._NET_WM_DESKTOP, a.CARDINAL) == Some((count - 1) as XID)
+        }) {
+            return false;
+        }
+        self.set_workspace_count(count - 1)
+    }
+
+    fn set_workspace_count(&self, count: usize) -> bool {
+        let info = self.platform.info();
+        self.message(info.root_window(), info.atoms()._NET_NUMBER_OF_DESKTOPS, &[count as XID])
+    }
+
     pub fn activate(&self, id: u32) -> bool {
         let info = self.platform.info();
         self.known_client(id)
@@ -396,21 +506,13 @@ impl Session {
     pub fn close(&self, id: u32) -> bool {
         let info = self.platform.info();
         self.known_client(id)
-            && self.message(
-                id.into(),
-                info.atoms()._NET_CLOSE_WINDOW,
-                &[info.last_activity_timestamp(), 2],
-            )
+            && self.message(id.into(), info.atoms()._NET_CLOSE_WINDOW, &[info.last_activity_timestamp(), 2])
     }
 
     pub fn move_to_workspace(&self, id: u32, index: usize) -> bool {
         self.known_client(id)
             && self.known_workspace(index)
-            && self.message(
-                id.into(),
-                self.platform.info().atoms()._NET_WM_DESKTOP,
-                &[index as XID, 2],
-            )
+            && self.message(id.into(), self.platform.info().atoms()._NET_WM_DESKTOP, &[index as XID, 2])
     }
 
     pub fn minimize(&self, id: u32) -> bool {
@@ -433,11 +535,7 @@ impl Session {
     fn set_showing(&self, showing: bool) -> bool {
         let info = self.platform.info();
         self.desktop.get() != 0
-            && self.message(
-                info.root_window(),
-                info.atoms()._NET_SHOWING_DESKTOP,
-                &[XID::from(showing)],
-            )
+            && self.message(info.root_window(), info.atoms()._NET_SHOWING_DESKTOP, &[XID::from(showing)])
     }
 
     /// Change decorations only on the Openbox instance that the login supervisor started.
@@ -508,12 +606,7 @@ impl Session {
         };
         let bounds = screen.bounds();
         let scale = screen.scaling().max(f64::EPSILON);
-        let root_height = screens
-            .all()
-            .iter()
-            .map(|screen| screen.bounds().bottom())
-            .max()
-            .unwrap_or(bounds.bottom());
+        let root_height = screens.all().iter().map(|screen| screen.bounds().bottom()).max().unwrap_or(bounds.bottom());
         let geometry = (bounds, scale, root_height);
         if self.screen_bounds.replace(Some(geometry)) == Some(geometry) {
             return;
@@ -552,10 +645,7 @@ impl Session {
 
 impl Drop for Session {
     fn drop(&mut self) {
-        self.platform
-            .globals()
-            .root_property_changed
-            .unsubscribe(self.root_subscription.get());
+        self.platform.globals().root_property_changed.unsubscribe(self.root_subscription.get());
         if let Some(token) = self.screens_subscription.take() {
             token.dispose();
         }
@@ -616,10 +706,7 @@ mod tests {
         let strut = panel_strut(PixelRect::new(1920, 0, 2560, 1440), 1.5, 1440, (34.0, 64.0));
         assert_eq!([strut[2], strut[8], strut[9]], [51, 1920, 4479]);
         assert_eq!([strut[3], strut[10], strut[11]], [96, 1920, 4479]);
-        assert_eq!(
-            panel_strut(PixelRect::new(0, 1080, 1280, 720), 1.0, 2160, (44.0, 52.0)),
-            [0; 12]
-        );
+        assert_eq!(panel_strut(PixelRect::new(0, 1080, 1280, 720), 1.0, 2160, (44.0, 52.0)), [0; 12]);
     }
 }
 

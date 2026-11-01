@@ -19,6 +19,8 @@
     <keybind key="A-Tab"><action name="NextWindow"/></keybind>
     <keybind key="A-S-Tab"><action name="PreviousWindow"/></keybind>
     <keybind key="A-F4"><action name="Close"/></keybind>
+    <keybind key="W-Left"><action name="Unmaximize"/><action name="MoveResizeTo"><monitor>current</monitor><x>0</x><y>0</y><width>50%</width><height>100%</height></action></keybind>
+    <keybind key="W-Right"><action name="Unmaximize"/><action name="MoveResizeTo"><monitor>current</monitor><x>-0</x><y>0</y><width>50%</width><height>100%</height></action></keybind>
     <keybind key="W-Up"><action name="ToggleMaximize"/></keybind>
     <keybind key="W-Down"><action name="Iconify"/></keybind>
     <keybind key="C-A-Delete"><action name="Exit"><prompt>yes</prompt></action></keybind>
