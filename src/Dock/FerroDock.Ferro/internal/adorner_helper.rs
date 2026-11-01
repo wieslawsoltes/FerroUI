@@ -5,7 +5,7 @@ use crate::controls::{
 };
 use crate::internal::dock_helpers::DockHelpers;
 use ferroui_base::{
-    data::core::ValueTypes, reactive::IDisposable, ObjectType, Point, Rect, Ref, Size,
+    data::core::ValueTypes, reactive::Subscription, ObjectType, Point, Rect, Ref, Size,
     StyledElement, Thickness, Upcast, Visual,
 };
 use ferroui_controls::{primitives::AdornerLayer, Control, SizeToContent, TopLevel, Window};
@@ -46,9 +46,9 @@ pub(crate) struct AdornerHelper<T: AdornerTarget> {
     geometry_window: RefCell<Option<Ref<Window>>>,
     managed_bounds: Cell<Option<Rect>>,
     updating_geometry: Cell<bool>,
-    layout_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    detached_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    position_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    layout_subscription: RefCell<Option<Subscription>>,
+    detached_subscription: RefCell<Option<Subscription>>,
+    position_subscription: RefCell<Option<Subscription>>,
 }
 impl<T: AdornerTarget> AdornerHelper<T> {
     pub(crate) fn new(use_floating_dock_adorner: bool) -> Rc<Self> {
@@ -119,24 +119,24 @@ impl<T: AdornerTarget> AdornerHelper<T> {
         }) {
             let owner = self.clone();
             self.layout_subscription
-                .replace(Some(host.layout_updated(move || owner.update_geometry())));
+                .replace(Some(Subscription::new(host.layout_updated(move || owner.update_geometry()))));
             let surface = self
                 .geometry_surface
                 .borrow()
                 .clone()
                 .expect("source geometry surface");
             let owner = self.clone();
-            self.detached_subscription.replace(Some(
+            self.detached_subscription.replace(Some(Subscription::new(
                 surface.detached_from_visual_tree(move |_| owner.on_geometry_detached()),
-            ));
+            )));
             self.geometry_window
                 .replace(TopLevel::get_top_level(Some(visual)).and_then(|t| t.cast::<Window>()));
             let window = self.geometry_window.borrow().clone();
             if let Some(window) = window {
                 let owner = self.clone();
-                self.position_subscription.replace(Some(
+                self.position_subscription.replace(Some(Subscription::new(
                     window.position_changed(move |_| owner.update_geometry()),
-                ));
+                )));
             }
             self.update_geometry();
         } else {

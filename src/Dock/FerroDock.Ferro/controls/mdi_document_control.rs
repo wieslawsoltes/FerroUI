@@ -15,7 +15,7 @@ use ferroui_base::{
     instantiate,
     interactivity::InteractiveImpl,
     layout::LayoutableImpl,
-    reactive::{AnonymousObserver, IDisposable},
+    reactive::{AnonymousObserver, Subscription},
     styling::ControlTheme,
     BoxedValue, DirectProperty, FerroObject, FerroObjectExtensions, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledElement,
@@ -44,7 +44,7 @@ pub struct MdiDocumentControl {
     dock_subscription: RefCell<Option<Subscription>>,
     dockables_subscription: RefCell<Option<Subscription>>,
     current_dock: RefCell<Option<Rc<dyn IDock>>>,
-    data_context_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    data_context_subscription: RefCell<Option<Subscription>>,
     has_visible_documents: Cell<bool>,
 }
 ferro_class!(MdiDocumentControl:TemplatedControl);
@@ -75,7 +75,7 @@ impl VisualImpl for MdiDocumentControl {
             FerroObject::get_observable(this, StyledElement::data_context_property()).subscribe(
                 Rc::new(AnonymousObserver::new(move |v| owner.on_dock_changed(v))),
             );
-        this.data_context_subscription.replace(Some(subscription));
+        this.data_context_subscription.replace(Some(Subscription::new(subscription)));
     }
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree(this, e);

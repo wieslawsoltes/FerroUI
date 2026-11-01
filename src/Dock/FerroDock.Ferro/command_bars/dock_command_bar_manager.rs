@@ -16,7 +16,7 @@ use ferroui_base::{
     data::core::{ValueType, ValueTypes},
     Ref,
 };
-use ferroui_system::IDisposable;
+use ferroui_system::Subscription;
 use std::{
     cell::{Cell, RefCell},
     rc::Rc,
@@ -28,7 +28,7 @@ pub struct DockCommandBarManager {
     layout: RefCell<Option<Rc<dyn IDock>>>,
     factory: RefCell<Option<Rc<dyn IFactory>>>,
     provider: RefCell<Option<Rc<dyn IDockCommandBarProvider>>>,
-    factory_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    factory_subscription: RefCell<Option<Subscription>>,
     provider_subscription: Cell<Option<u64>>,
 }
 impl PartialEq for DockCommandBarManager {
@@ -71,7 +71,7 @@ impl DockCommandBarManager {
             let this = self.clone();
             let subscription =
                 factory.active_dockable_changed(Rc::new(move |_| this.update_bars()));
-            self.factory_subscription.replace(Some(subscription));
+            self.factory_subscription.replace(Some(Subscription::new(subscription)));
         }
         self.update_bars();
     }
