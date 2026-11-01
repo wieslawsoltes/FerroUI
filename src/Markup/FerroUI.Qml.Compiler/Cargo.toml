@@ -27,7 +27,7 @@ swc_common = { version = "27", optional = true }
 swc_ecma_ast = { version = "30", optional = true }
 swc_ecma_parser = { version = "47", default-features = false, optional = true }
 swc_ecma_visit = { version = "30", optional = true }
-serde = { workspace = true, features = ["derive"] }
+serde = { workspace = true, features = ["derive", "rc"] }
 
 [package.metadata.release]
 group = "markup"

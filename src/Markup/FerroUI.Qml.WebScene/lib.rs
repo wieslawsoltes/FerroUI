@@ -30,10 +30,16 @@ use std::{
 use std::path::{Path, PathBuf};
 use web_time::Instant;
 
+type ScopeKey = (
+    ScriptScope,
+    String,
+    std::sync::Arc<BTreeMap<String, String>>,
+);
+
 #[derive(Default)]
 struct Tables {
     next: u64,
-    scopes: BTreeMap<(ScriptScope, String, BTreeMap<String, String>), u64>,
+    scopes: BTreeMap<ScopeKey, u64>,
     scope_values: BTreeMap<u64, (ScriptInstance, ScriptScope)>,
     scope_names: BTreeMap<u64, Rc<Vec<String>>>,
     retired_scopes: Vec<u64>,
@@ -63,7 +69,7 @@ impl Tables {
         if let Some(id) = self.scopes.get(&key) {
             return Ok((*id, self.scope_names[id].clone()));
         }
-        for (alias, target) in &script.imports {
+        for (alias, target) in script.imports.iter() {
             if !ctx.resources().contains_key(target) {
                 return Err(Error::new(format!(
                     "missing embedded script for import '{alias}'"

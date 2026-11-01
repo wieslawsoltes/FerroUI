@@ -57,6 +57,7 @@ impl Scripts {
                 key,
             );
         }
+        let aliases = std::sync::Arc::new(aliases);
         ir::javascript::visit_scripts(&mut doc.root, &mut |script| {
             ir::script_resource::attach(script, url.as_str(), &aliases, |dep| {
                 self.request(url, dep, true)

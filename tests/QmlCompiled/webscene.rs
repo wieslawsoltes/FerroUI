@@ -99,3 +99,23 @@ mod computed;
 
 #[path = "webscene_bindings.rs"]
 mod bindings;
+
+#[test]
+fn generated_bindings_intern_the_document_import_namespace() {
+    use std::collections::BTreeMap;
+    use std::sync::Arc;
+    let mut root = compiled_qml().document().root.clone();
+    let mut tables = BTreeMap::new();
+    let mut shared = 0;
+    ferroui_qml::ir::javascript::visit_scripts(&mut root, &mut |script| {
+        if !script.imports.is_empty() {
+            let entry = tables.entry((script.origin.clone(), (*script.imports).clone()));
+            let table = entry.or_insert_with(|| script.imports.clone());
+            assert!(Arc::ptr_eq(table, &script.imports));
+            shared += 1;
+        }
+        Ok::<_, ()>(())
+    })
+    .unwrap();
+    assert!(shared > tables.len());
+}

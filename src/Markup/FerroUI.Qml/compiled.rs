@@ -16,6 +16,32 @@ pub type Script = fn(&mut Frame<'_, '_>) -> Result<Flow, Error>;
 
 pub type FirstRead = Option<(&'static str, Option<&'static str>)>;
 
+type SharedImports = std::sync::Arc<std::collections::BTreeMap<String, String>>;
+
+/// Used by Cargo-generated components. Canonicalize static import slices before
+/// allocating their owned strings, so N bindings share one document namespace.
+#[doc(hidden)]
+#[derive(Default)]
+pub struct ScriptImportTables(
+    std::collections::BTreeMap<&'static [(&'static str, &'static str)], SharedImports>,
+);
+
+impl ScriptImportTables {
+    pub fn intern(&mut self, pairs: &'static [(&'static str, &'static str)]) -> SharedImports {
+        self.0
+            .entry(pairs)
+            .or_insert_with(|| {
+                std::sync::Arc::new(
+                    pairs
+                        .iter()
+                        .map(|&(name, url)| (name.to_owned(), url.to_owned()))
+                        .collect(),
+                )
+            })
+            .clone()
+    }
+}
+
 pub trait ComponentSource {
     fn first_reads(&self) -> &'static [FirstRead] {
         &[]

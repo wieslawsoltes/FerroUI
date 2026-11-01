@@ -377,6 +377,7 @@ impl Transaction<'_> {
                     key,
                 );
             }
+            let imports = std::sync::Arc::new(imports);
             ir::javascript::visit_scripts(&mut doc.root, &mut |script| {
                 script.origin.clone_from(&origin);
                 script.imports.clone_from(&imports);

@@ -102,6 +102,7 @@ impl Resources {
             imports.insert(alias.clone(), key);
         }
         let origin = resource_url("components", index, path, &self.project)?;
+        let imports = std::sync::Arc::new(imports);
         self.worker_sources(path, &mut document.root)?;
         visit_scripts(&mut document.root, &mut |script| {
             script_resource::attach(script, &origin, &imports, |specifier| {

@@ -20,6 +20,8 @@ pub(crate) fn module(mut document: Document) -> Result<String, String> {
                 use ::std::{boxed::Box, string::String, vec, vec::Vec, result::Result::Ok, option::Option::{Some, None}};
             #[allow(unused_imports)]
             use ::ferroui_qml::{compiled as c, Value as V};
+            #[allow(unused_variables, unused_mut)]
+            let mut script_imports = ::ferroui_qml::compiled::ScriptImportTables::default();
             static FUNCTIONS: &[::ferroui_qml::compiled::Evaluator] = &[#(#expressions),*];
             static SCRIPTS: &[::ferroui_qml::compiled::Script] = &[#(#scripts),*];
             static FIRST_READS: &[::ferroui_qml::compiled::FirstRead] = &[#(#first_reads),*];
@@ -67,6 +69,13 @@ impl<T: Rust> Rust for std::collections::BTreeMap<String, T> {
             quote!((#key,#value))
         });
         quote!(::std::collections::BTreeMap::from([#(#pairs),*]))
+    }
+}
+
+impl Rust for std::sync::Arc<std::collections::BTreeMap<String, String>> {
+    fn rust(&self) -> TokenStream {
+        let pairs = self.iter().map(|(alias, url)| quote!((#alias, #url)));
+        quote!(script_imports.intern(&[#(#pairs),*]))
     }
 }
 

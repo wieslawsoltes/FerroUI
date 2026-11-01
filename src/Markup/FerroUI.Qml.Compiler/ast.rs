@@ -58,7 +58,8 @@ pub struct JavaScript {
     pub origin: String,
     pub root: Option<String>,
     pub ids: BTreeMap<String, String>,
-    pub imports: BTreeMap<String, String>,
+    /// Scripts in one lexical document share the immutable import namespace.
+    pub imports: std::sync::Arc<BTreeMap<String, String>>,
 }
 
 impl JavaScript {

@@ -259,3 +259,63 @@ fn an_identified_remote_import_resolves_versioned_exports_and_rejects_missing_mo
     instance.poll_component_loads(1).unwrap();
     assert_eq!(status(&instance, factory), Value::Number(3.));
 }
+
+#[cfg(feature = "javascript")]
+#[test]
+fn remote_bindings_share_one_import_table_for_the_document() {
+    use ferroui_qml::{ir, Error, ScriptContext, ScriptEngine};
+    use std::{cell::Cell, collections::BTreeSet, sync::Arc};
+
+    #[derive(Default)]
+    struct Observer {
+        reads: Cell<usize>,
+        tables: RefCell<BTreeSet<usize>>,
+    }
+    impl ScriptEngine for Observer {
+        fn evaluate(
+            &self,
+            _: &mut ScriptContext<'_, '_>,
+            script: &ir::JavaScript,
+        ) -> Result<Value, Error> {
+            assert_eq!(script.imports.len(), 72);
+            self.tables
+                .borrow_mut()
+                .insert(Arc::as_ptr(&script.imports) as usize);
+            self.reads.set(self.reads.get() + 1);
+            Ok(Value::Number(1.))
+        }
+        fn prepare_script_resources(&self, _: &mut ScriptContext<'_, '_>) -> Result<(), Error> {
+            Ok(())
+        }
+    }
+    let mut source = String::from("import QtQml\n");
+    for i in 0..72 {
+        source.push_str(&format!("import \"logic.mjs\" as Alias{i}\n"));
+    }
+    source.push_str("QtObject {\n");
+    for i in 0..160 {
+        source.push_str(&format!("property int p{i}: Alias0.answer + {i}\n"));
+    }
+    source.push('}');
+    let transport = Rc::new(Manual::default());
+    let mut registry = TypeRegistry::new();
+    registry.set_component_transport(transport.clone());
+    let observer = Rc::new(Observer::default());
+    let doc = ir::parse_external("import QtQml\nQtObject {}").unwrap();
+    let mut model =
+        Instance::with_engine(&doc, &registry, Default::default(), observer.clone()).unwrap();
+    let prefix = format!("https://widgets.test/{}/", "a".repeat(450));
+    let entry = format!("{prefix}Card.qml");
+    let factory = model.create_component(model.root(), &entry, None).unwrap();
+    transport.take(&entry).complete(Ok(source.into_bytes()));
+    model.poll_component_loads(1).unwrap();
+    transport
+        .take(&format!("{prefix}logic.mjs"))
+        .complete(Ok(b"export const answer=1".to_vec()));
+    model.poll_component_loads(1).unwrap();
+    model
+        .create_object(factory, None, Default::default())
+        .unwrap();
+    assert_eq!(observer.reads.get(), 160);
+    assert_eq!(observer.tables.borrow().len(), 1);
+}

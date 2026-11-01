@@ -306,7 +306,11 @@ impl Transaction<'_> {
         // incubator requested from onCompleted can therefore finish immediately.
         let was_incubating = std::mem::take(&mut self.incubating);
         let result = (first..end).rev().try_for_each(|index| {
-            self.dispatch(self.model.nodes[index].id, "Component.completed", Vec::new())?;
+            self.dispatch(
+                self.model.nodes[index].id,
+                "Component.completed",
+                Vec::new(),
+            )?;
             self.settle()
         });
         self.incubating = was_incubating;

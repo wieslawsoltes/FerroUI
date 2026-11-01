@@ -30,7 +30,12 @@ impl ComponentTransport for BrowserComponentTransport {
             let response = if reply.is_pending() {
                 match fetch_component(&url, MAX_DOCUMENT_BYTES).await {
                     Ok(v) if v.is_undefined() => Err(ResourceError::NotFound),
-                    Ok(v) => Ok(js_sys::Uint8Array::new(&v).to_vec()),
+                    Ok(v) => v
+                        .dyn_into::<js_sys::Uint8Array>()
+                        .map(|bytes| bytes.to_vec())
+                        .map_err(|_| {
+                            ResourceError::Failed("invalid browser transport response".into())
+                        }),
                     Err(reason) => Err(ResourceError::Failed(
                         reason
                             .as_string()

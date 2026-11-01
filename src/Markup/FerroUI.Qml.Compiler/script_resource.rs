@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 pub fn attach(
     script: &mut JavaScript,
     origin: &str,
-    imports: &BTreeMap<String, String>,
+    imports: &std::sync::Arc<BTreeMap<String, String>>,
     mut resolve: impl FnMut(&str) -> Result<String, String>,
 ) -> Result<(), String> {
     script.origin = origin.to_owned();
