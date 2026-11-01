@@ -177,6 +177,9 @@ impl KeyRepeat {
             timer.set_interval(interval);
         }
 
+        // Routed handlers can remove focus and stop this repeat timer.
+        let symbol = self.repeat_key_symbol.borrow().clone();
+        let native = self.repeat_native.borrow().clone();
         parent.base().raise_input(Rc::new(RawKeyEventArgs::new(
             parent.base().keyboard(),
             0,
@@ -185,9 +188,9 @@ impl KeyRepeat {
             self.repeat_key.get(),
             self.repeat_modifiers.get(),
             self.repeat_physical_key.get(),
-            self.repeat_key_symbol.borrow().clone(),
+            symbol,
             KeyDeviceType::Keyboard,
-        ).with_platform_input_event_cookie(self.repeat_native.borrow().clone())));
+        ).with_platform_input_event_cookie(native)));
     }
 }
 
