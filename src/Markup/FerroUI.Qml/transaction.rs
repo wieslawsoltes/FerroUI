@@ -27,7 +27,7 @@ pub(crate) struct Transaction<'a> {
     steps: usize,
     pub(crate) connection_changes: signal_callbacks::Journal,
     pub(crate) deferred: Vec<deferred::Task>,
-    pub(crate) structure:dynamic::Checkpoint,
+    pub(crate) structure: dynamic::Checkpoint,
     pub(crate) worker_sources: BTreeSet<ObjectId>,
     pub(crate) worker_actions: Vec<workers::Action>,
     pub(crate) loader_changes: loader::Changes,
@@ -39,7 +39,7 @@ impl Instance {
         &mut self,
         operation: impl FnOnce(&mut Transaction<'_>) -> Result<T, Error>,
     ) -> Result<T, Error> {
-        let structure=self.checkpoint();
+        let structure = self.checkpoint();
         let mut tx = Transaction {
             structure,
             current_binding: None,
@@ -88,7 +88,9 @@ impl Instance {
                             return None;
                         }
                         let property = &tx.model.properties[*key];
-                        if tx.model.node(property.owner).is_none() || property.name.starts_with("$qml:") {
+                        if tx.model.node(property.owner).is_none()
+                            || property.name.starts_with("$qml:")
+                        {
                             return None;
                         }
                         Some(Change {
@@ -129,7 +131,9 @@ impl Instance {
             tx.model.emissions.append(&mut tx.emitted);
             for (key, old) in tx.original {
                 let value = &tx.model.slots[key].value;
-                if tx.model.node(tx.model.properties[key].owner).is_none() || tx.model.properties[key].name.starts_with("$qml:") {
+                if tx.model.node(tx.model.properties[key].owner).is_none()
+                    || tx.model.properties[key].name.starts_with("$qml:")
+                {
                     continue;
                 }
                 if !old.value.unchanged(value) || old.assigned != tx.model.slots[key].assigned {
@@ -189,23 +193,53 @@ impl Transaction<'_> {
     }
 
     pub(crate) fn initialize(&mut self) -> Result<(), Error> {
-        self.initialize_range(0,0)
+        self.initialize_range(0, 0)
     }
-    pub(crate) fn initialize_range(&mut self,first:usize,first_slot:usize)->Result<(),Error>{
-        let end=self.model.nodes.len();
-        let previous=self.initializing;
-        self.initializing=true;
+    pub(crate) fn initialize_range(
+        &mut self,
+        first: usize,
+        first_slot: usize,
+    ) -> Result<(), Error> {
+        let end = self.model.nodes.len();
+        let previous = self.initializing;
+        self.initializing = true;
         self.initialize_workers(first);
         self.initialize_loaders(first);
-        self.model_modes.extend(self.model.models.keys().copied().filter(|id|id.index>=first));
-        self.pending_bindings.extend(self.model.bindings.iter().copied().filter(|id|id.index>=first));
-        self.pending.extend(self.model.slots.iter().enumerate().skip(first_slot).filter(|(_,s)|s.dirty).map(|(i,_)|i));
+        self.model_modes.extend(
+            self.model
+                .models
+                .keys()
+                .copied()
+                .filter(|id| id.index >= first),
+        );
+        self.pending_bindings.extend(
+            self.model
+                .bindings
+                .iter()
+                .copied()
+                .filter(|id| id.index >= first),
+        );
+        self.pending.extend(
+            self.model
+                .slots
+                .iter()
+                .enumerate()
+                .skip(first_slot)
+                .filter(|(_, s)| s.dirty)
+                .map(|(i, _)| i),
+        );
         self.settle()?;
-        self.initializing=previous;
-        self.timer_changes.pending.extend(self.model.timers.objects().filter(|id|id.index>=first));
+        self.initializing = previous;
+        self.timer_changes
+            .pending
+            .extend(self.model.timers.objects().filter(|id| id.index >= first));
         self.settle()?;
-        for index in (first..end).rev(){
-            self.dispatch(self.model.nodes[index].id,"Component.completed",Vec::new())?;
+        for index in (first..end).rev() {
+            self.dispatch(
+                self.model.nodes[index].id,
+                "Component.completed",
+                Vec::new(),
+            )?;
             self.settle()?;
         }
         Ok(())
@@ -220,7 +254,9 @@ impl Transaction<'_> {
                 self.update_binding(binding)?;
                 continue;
             }
-            if self.stage_loader()? {continue}
+            if self.stage_loader()? {
+                continue;
+            }
             self.stage_workers()?;
             if !self.initializing {
                 if let Some(timer) = self.timer_changes.pending.pop_first() {
@@ -541,9 +577,11 @@ impl Transaction<'_> {
             ));
         }
         let key = self.model.write_target(key)?;
-        let fallback=self.loader_dimension_assignment(key, value==Value::Undefined);
-        let reset=fallback.is_some();
-        let value = self.model.typed(&self.model.properties[key].ty, fallback.unwrap_or(value))?;
+        let fallback = self.loader_dimension_assignment(key, value == Value::Undefined);
+        let reset = fallback.is_some();
+        let value = self
+            .model
+            .typed(&self.model.properties[key].ty, fallback.unwrap_or(value))?;
         let inputs = self.model.slots[key]
             .overlay
             .as_ref()

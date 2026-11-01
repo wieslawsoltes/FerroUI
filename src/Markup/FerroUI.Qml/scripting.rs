@@ -163,8 +163,12 @@ pub struct ScriptScope {
 }
 
 impl ScriptScope {
-    pub fn owner(&self) -> ObjectId { self.owner }
-    pub fn root(&self) -> ObjectId { self.root }
+    pub fn owner(&self) -> ObjectId {
+        self.owner
+    }
+    pub fn root(&self) -> ObjectId {
+        self.root
+    }
 }
 
 pub struct ScriptContext<'a, 'model> {
@@ -293,25 +297,53 @@ impl ScriptContext<'_, '_> {
             .unwrap_or_default();
         params.iter().map(|p| p.ty.as_deref()).collect()
     }
-    pub fn create_with_properties(&mut self,factory:ObjectId,parent:Option<ObjectId>,props:BTreeMap<String,InitialProperty>)->Result<Value,Error>{
-        let result=self.tx.try_create_with_properties(factory,parent,props).map(|id|id.map(Value::Object).unwrap_or(Value::Null));
+    pub fn create_with_properties(
+        &mut self,
+        factory: ObjectId,
+        parent: Option<ObjectId>,
+        props: BTreeMap<String, InitialProperty>,
+    ) -> Result<Value, Error> {
+        let result = self
+            .tx
+            .try_create_with_properties(factory, parent, props)
+            .map(|id| id.map(Value::Object).unwrap_or(Value::Null));
         self.tx.host_result(result)
     }
-    pub fn component_from_arguments(&mut self, origin:Option<&str>,args:&[Value])->Result<Value,Error>{
-        self.tx.component_call(self.owner,origin,args)
+    pub fn component_from_arguments(
+        &mut self,
+        origin: Option<&str>,
+        args: &[Value],
+    ) -> Result<Value, Error> {
+        self.tx.component_call(self.owner, origin, args)
     }
-    pub fn qml_from_arguments(&mut self,args:&[Value])->Result<Value,Error>{
-        let before=self.tx.model.structure_revision();
-        let result=self.tx.text_component_call(self.owner,args);
-        if result.is_err() && before!=self.tx.model.structure_revision(){self.tx.host_result(result)}else{result}
+    pub fn qml_from_arguments(&mut self, args: &[Value]) -> Result<Value, Error> {
+        let before = self.tx.model.structure_revision();
+        let result = self.tx.text_component_call(self.owner, args);
+        if result.is_err() && before != self.tx.model.structure_revision() {
+            self.tx.host_result(result)
+        } else {
+            result
+        }
     }
-    pub fn is_loader(&self, object:ObjectId)->bool{self.tx.model.dynamic.loaders.contains_key(&object)}
-    pub fn set_loader_source(&mut self, object:ObjectId, url:String, properties:BTreeMap<String,InitialProperty>)->Result<(),Error> {
-        let origin=self.script.map(|script|script.origin.clone()).filter(|s|!s.is_empty());
-        self.tx.set_loader_source(object,url,origin,properties)?;
+    pub fn is_loader(&self, object: ObjectId) -> bool {
+        self.tx.model.dynamic.loaders.contains_key(&object)
+    }
+    pub fn set_loader_source(
+        &mut self,
+        object: ObjectId,
+        url: String,
+        properties: BTreeMap<String, InitialProperty>,
+    ) -> Result<(), Error> {
+        let origin = self
+            .script
+            .map(|script| script.origin.clone())
+            .filter(|s| !s.is_empty());
+        self.tx.set_loader_source(object, url, origin, properties)?;
         self.tx.settle()
     }
-    pub fn is_component(&self, object:ObjectId)->bool{self.tx.model.is_component(object)}
+    pub fn is_component(&self, object: ObjectId) -> bool {
+        self.tx.model.is_component(object)
+    }
     pub fn is_worker_script(&self, id: ObjectId) -> bool {
         self.tx.model.workers.contains(id)
     }
@@ -421,7 +453,7 @@ impl ScriptContext<'_, '_> {
     pub fn names(&self) -> Vec<String> {
         let mut names = BTreeSet::from(["parent".to_owned()]);
         names.extend(self.locals.keys().cloned());
-        self.tx.model.lexical_names(self.owner,&mut names);
+        self.tx.model.lexical_names(self.owner, &mut names);
         if let Some(ids) = self.ids {
             names.extend(ids.keys().filter(|n| !private(n)).cloned());
         }
@@ -459,9 +491,15 @@ impl ScriptContext<'_, '_> {
         if self.tx.model.timers.is_timer(object) {
             names.extend(["start", "restart", "stop"].map(str::to_owned));
         }
-        if self.tx.model.dynamic.contexts.contains_key(&object){names.insert("destroy".into());}
-        if self.is_loader(object){names.insert("setSource".to_owned());}
-        if self.tx.model.is_component(object){names.extend(["createObject","errorString"].map(str::to_owned));}
+        if self.tx.model.dynamic.contexts.contains_key(&object) {
+            names.insert("destroy".into());
+        }
+        if self.is_loader(object) {
+            names.insert("setSource".to_owned());
+        }
+        if self.tx.model.is_component(object) {
+            names.extend(["createObject", "errorString"].map(str::to_owned));
+        }
         if self.tx.model.models.contains_key(&object) {
             names.extend(
                 [
@@ -487,9 +525,9 @@ impl ScriptContext<'_, '_> {
             return None;
         }
         if let Some(mapped) = self.ids.and_then(|ids| ids.get(name)) {
-            return self.tx.model.lexical_id(self.owner,mapped);
+            return self.tx.model.lexical_id(self.owner, mapped);
         }
-        self.tx.model.lexical_id(self.owner,name)
+        self.tx.model.lexical_id(self.owner, name)
     }
 
     pub fn resolve(&mut self, name: &str) -> Result<Option<Value>, Error> {
@@ -753,7 +791,10 @@ impl Instance {
             return false;
         }
         self.node(object).is_some_and(|node| {
-            (self.dynamic.loaders.contains_key(&object) && name=="setSource") || (self.dynamic.contexts.contains_key(&object)&&name=="destroy") || (self.is_component(object) && matches!(name,"createObject"|"errorString")) || node.methods.contains_key(name)
+            (self.dynamic.loaders.contains_key(&object) && name == "setSource")
+                || (self.dynamic.contexts.contains_key(&object) && name == "destroy")
+                || (self.is_component(object) && matches!(name, "createObject" | "errorString"))
+                || node.methods.contains_key(name)
                 || node.native.contains_key(name)
                 || node.signal(name).is_some()
                 || self.workers.contains(object) && name == "sendMessage"
@@ -798,9 +839,9 @@ impl Transaction<'_> {
         let root = script
             .root
             .as_deref()
-            .map(|id| self.scope_id(owner,id))
+            .map(|id| self.scope_id(owner, id))
             .transpose()?
-            .unwrap_or_else(||self.model.context_root(owner));
+            .unwrap_or_else(|| self.model.context_root(owner));
         self.budget()?;
         let value = self
             .with_stack(4, |tx| {

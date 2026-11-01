@@ -108,7 +108,10 @@ impl Frame<'_, '_> {
         self.tx.new_record(fields)
     }
     fn root(&self, root: Option<&str>) -> Result<ObjectId, Error> {
-        root.map_or_else(|| Ok(self.tx.model.context_root(self.owner)), |id| self.tx.scope_id(self.owner,id))
+        root.map_or_else(
+            || Ok(self.tx.model.context_root(self.owner)),
+            |id| self.tx.scope_id(self.owner, id),
+        )
     }
     pub fn name(&mut self, name: &str, root: Option<&str>) -> Result<Value, Error> {
         self.tx
@@ -217,8 +220,12 @@ impl Frame<'_, '_> {
                 }
                 Ok(Value::Undefined)
             }
-            Receiver::Qt if name=="createComponent"=>self.tx.component_call(self.owner,None,&args),
-            Receiver::Qt if name=="createQmlObject"=>self.tx.text_component_call(self.owner,&args),
+            Receiver::Qt if name == "createComponent" => {
+                self.tx.component_call(self.owner, None, &args)
+            }
+            Receiver::Qt if name == "createQmlObject" => {
+                self.tx.text_component_call(self.owner, &args)
+            }
             Receiver::Qt => crate::enums::qt(name, &args),
             Receiver::Math => math(name, &args),
         }

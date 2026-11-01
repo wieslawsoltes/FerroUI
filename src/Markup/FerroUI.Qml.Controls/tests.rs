@@ -383,30 +383,42 @@ fn dynamic_visual_lifetime_validates_before_mount_and_disconnects_before_retirem
 fn native_loader_sizes_and_disconnects_a_retained_loaded_control() {
     use ferroui_base::{Rect, Size};
     let _scope = UnitTestApplication::start(TestServices::new());
-    let view = mount(r#"
+    let view = mount(
+        r#"
         import QtQuick
         import QtQuick.Controls
         Item { id: app; width:120; height:80; property int clicks:0
             Component { id: factory; Button { width:40; height:24; onClicked: app.clicks++ } }
             Loader { id: dest; sourceComponent:factory }
         }
-    "#);
-    let id=view.id("dest").unwrap();
-    let host=view.control(id).unwrap().cast::<Canvas>().unwrap();
-    let Value::Object(item)=view.get(id,"item").unwrap() else {panic!("loaded button")};
-    let button=view.control(item).unwrap().cast::<Button>().unwrap();
-    let root=view.root();
-    root.measure(Size::new(120.,80.)); root.arrange(Rect::new(0.,0.,120.,80.));
-    assert_eq!(host.bounds(),Rect::new(0.,0.,40.,24.));
-    assert_eq!(button.bounds(),Rect::new(0.,0.,40.,24.));
-    view.set(id,"width",Value::Number(75.)).unwrap();
-    root.measure(Size::new(120.,80.)); root.arrange(Rect::new(0.,0.,120.,80.));
-    assert_eq!(button.bounds().width,75.);
+    "#,
+    );
+    let id = view.id("dest").unwrap();
+    let host = view.control(id).unwrap().cast::<Canvas>().unwrap();
+    let Value::Object(item) = view.get(id, "item").unwrap() else {
+        panic!("loaded button")
+    };
+    let button = view.control(item).unwrap().cast::<Button>().unwrap();
+    let root = view.root();
+    root.measure(Size::new(120., 80.));
+    root.arrange(Rect::new(0., 0., 120., 80.));
+    assert_eq!(host.bounds(), Rect::new(0., 0., 40., 24.));
+    assert_eq!(button.bounds(), Rect::new(0., 0., 40., 24.));
+    view.set(id, "width", Value::Number(75.)).unwrap();
+    root.measure(Size::new(120., 80.));
+    root.arrange(Rect::new(0., 0., 120., 80.));
+    assert_eq!(button.bounds().width, 75.);
     button.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
-    assert_eq!(view.get(view.root_id(),"clicks").unwrap(),Value::Number(1.));
-    view.set(id,"active",Value::Bool(false)).unwrap();
-    assert_eq!(host.children().count(),0);
+    assert_eq!(
+        view.get(view.root_id(), "clicks").unwrap(),
+        Value::Number(1.)
+    );
+    view.set(id, "active", Value::Bool(false)).unwrap();
+    assert_eq!(host.children().count(), 0);
     assert!(view.control(item).is_none());
     button.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
-    assert_eq!(view.get(view.root_id(),"clicks").unwrap(),Value::Number(1.));
+    assert_eq!(
+        view.get(view.root_id(), "clicks").unwrap(),
+        Value::Number(1.)
+    );
 }

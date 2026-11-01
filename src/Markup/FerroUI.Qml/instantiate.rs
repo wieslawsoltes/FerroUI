@@ -4,10 +4,10 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_INSTANCE: AtomicU64 = AtomicU64::new(1);
 
-struct Builder<'a, I=Box<Instance>> {
-    context:Option<ObjectId>,
+struct Builder<'a, I = Box<Instance>> {
+    context: Option<ObjectId>,
     scopes: enums::Scopes,
-    instance:I,
+    instance: I,
     registry: &'a TypeRegistry,
     imports: &'a [Import],
     assigned: BTreeSet<SlotId>,
@@ -154,7 +154,9 @@ impl Instance {
     pub(crate) fn write_target(&self, mut key: SlotId) -> Result<SlotId, Error> {
         loop {
             let property = &self.properties[key];
-            if self.node(property.owner).is_none(){return Err(Error::new("property belongs to a destroyed object"));}
+            if self.node(property.owner).is_none() {
+                return Err(Error::new("property belongs to a destroyed object"));
+            }
             if property.readonly {
                 return Err(Error::new(format!(
                     "property '{}' is readonly",
@@ -247,27 +249,64 @@ impl TypeRegistry {
     /// and required child properties without executing a binding, method or callback.
     /// Required properties on the root can be supplied by the eventual host.
     pub fn check(&self, document: &Document) -> Result<(), Error> {
-        let mut builder=Builder::prepare(None,document,self)?;
-        let root=builder.instance.root();
+        let mut builder = Builder::prepare(None, document, self)?;
+        let root = builder.instance.root();
         verify_required(&builder.instance, 0, root, &builder.assigned)?;
-        let mut pending:Vec<_>=builder.instance.dynamic.templates.iter().map(|(&owner,template)|(owner,template.clone())).collect();
-        pending.extend(builder.instance.dynamic.catalog.values().cloned().map(|template|(root,template)));
-        while let Some((declaration,template))=pending.pop() {
-            let id=builder.instance.next_object();
-            let first=builder.instance.slots.len();
-            builder.instance.dynamic.contexts.insert(id,dynamic::Context { declaration, ids:Default::default() });
-            let supplied=builder.instance.allocate_template(id,None,&template,self)?;
-            verify_required(&builder.instance,first,id,&supplied)?;
-            pending.extend(builder.instance.dynamic.templates.range(id..).map(|(&id,template)|(id,template.clone())));
+        let mut pending: Vec<_> = builder
+            .instance
+            .dynamic
+            .templates
+            .iter()
+            .map(|(&owner, template)| (owner, template.clone()))
+            .collect();
+        pending.extend(
+            builder
+                .instance
+                .dynamic
+                .catalog
+                .values()
+                .cloned()
+                .map(|template| (root, template)),
+        );
+        while let Some((declaration, template)) = pending.pop() {
+            let id = builder.instance.next_object();
+            let first = builder.instance.slots.len();
+            builder.instance.dynamic.contexts.insert(
+                id,
+                dynamic::Context {
+                    declaration,
+                    ids: Default::default(),
+                },
+            );
+            let supplied = builder
+                .instance
+                .allocate_template(id, None, &template, self)?;
+            verify_required(&builder.instance, first, id, &supplied)?;
+            pending.extend(
+                builder
+                    .instance
+                    .dynamic
+                    .templates
+                    .range(id..)
+                    .map(|(&id, template)| (id, template.clone())),
+            );
         }
         Ok(())
     }
 }
 
-fn verify_required(instance:&Instance, first:usize, root:ObjectId, assigned:&BTreeSet<SlotId>)->Result<(),Error>{
-    for (offset,property) in instance.properties[first..].iter().enumerate() {
-        if property.required && property.owner!=root && !assigned.contains(&(first+offset)) {
-            return Err(Error::new(format!("required property '{}' was not initialized",property.name)));
+fn verify_required(
+    instance: &Instance,
+    first: usize,
+    root: ObjectId,
+    assigned: &BTreeSet<SlotId>,
+) -> Result<(), Error> {
+    for (offset, property) in instance.properties[first..].iter().enumerate() {
+        if property.required && property.owner != root && !assigned.contains(&(first + offset)) {
+            return Err(Error::new(format!(
+                "required property '{}' was not initialized",
+                property.name
+            )));
         }
     }
     Ok(())
@@ -288,10 +327,13 @@ impl<'a> Builder<'a> {
             )));
         }
         let mut builder = Self {
-            context:None,
+            context: None,
             scopes: enums::Scopes::named(name, &document.root)?,
             instance: Box::new(Instance {
-                dynamic:dynamic::Components {registry:Some(Rc::new(registry.clone())),..Default::default()},
+                dynamic: dynamic::Components {
+                    registry: Some(Rc::new(registry.clone())),
+                    ..Default::default()
+                },
                 javascript: Default::default(),
                 records: Default::default(),
                 models: BTreeMap::new(),
@@ -319,8 +361,11 @@ impl<'a> Builder<'a> {
             implicit: Vec::new(),
             read_candidates: Vec::new(),
         };
-        for (url,shape) in &document.components{
-            builder.instance.dynamic.catalog.insert(url.clone(),dynamic::Template::from_object(shape.clone(),&document.imports)?);
+        for (url, shape) in &document.components {
+            builder.instance.dynamic.catalog.insert(
+                url.clone(),
+                dynamic::Template::from_object(shape.clone(), &document.imports)?,
+            );
         }
         builder.object(&document.root, None)?;
         // Module objects share this engine's slots and dependency graph. They
@@ -334,7 +379,7 @@ impl<'a> Builder<'a> {
     }
 }
 
-impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
+impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
     fn canonical_type(&self, imports: &[Import], ty: &str) -> Result<String, Error> {
         if let Some(element) = list_element(ty) {
             return Ok(format!("list<{}>", self.canonical_type(imports, element)?));
@@ -417,25 +462,31 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
             self.registry.validate_imports(imports)?;
         }
         let (module, name, definition) = self.registry.resolve(imports, &source.type_name)?;
-        let id=self.instance.next_object();
-        self.instance.dynamic.serial+=1;
-        self.instance.nodes.push(NodeEntry{id,live:true,data:Some(Box::new(Node {
-            source_url:source.source_url.clone(),context:self.context,visual_children:definition.visual_children.clone(),
-            shadows: source.shadows.clone(),
-            type_scope: self.scopes.imports(imports, self.registry),
-            composite_types: source.composite_types.clone(),
-            lineage: definition.lineage.clone(),
-            module: module.into(),
-            name: name.into(),
-            parent,
-            children: Vec::new(),
-            properties: BTreeMap::new(),
-            default_property: definition.default_property.clone(),
-            native: definition.native.clone(),
-            signals: definition.signals.clone(),
-            handlers: BTreeMap::new(),
-            methods: BTreeMap::new(),
-        }))});
+        let id = self.instance.next_object();
+        self.instance.dynamic.serial += 1;
+        self.instance.nodes.push(NodeEntry {
+            id,
+            live: true,
+            data: Some(Box::new(Node {
+                source_url: source.source_url.clone(),
+                context: self.context,
+                visual_children: definition.visual_children.clone(),
+                shadows: source.shadows.clone(),
+                type_scope: self.scopes.imports(imports, self.registry),
+                composite_types: source.composite_types.clone(),
+                lineage: definition.lineage.clone(),
+                module: module.into(),
+                name: name.into(),
+                parent,
+                children: Vec::new(),
+                properties: BTreeMap::new(),
+                default_property: definition.default_property.clone(),
+                native: definition.native.clone(),
+                signals: definition.signals.clone(),
+                handlers: BTreeMap::new(),
+                methods: BTreeMap::new(),
+            })),
+        });
         if let Some(parent) = parent {
             self.instance.nodes[parent.index].children.push(id);
         }
@@ -452,7 +503,12 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
                 default.clone(),
             )?;
         }
-        if (module == "QtQuick" && name == "Loader") || definition.lineage.iter().any(|(m,n)|m=="QtQuick" && n=="Loader") {
+        if (module == "QtQuick" && name == "Loader")
+            || definition
+                .lineage
+                .iter()
+                .any(|(m, n)| m == "QtQuick" && n == "Loader")
+        {
             self.instance.dynamic.loaders.insert(id, Default::default());
         }
         let model = module == list_model::MODULE && name == "ListModel";
@@ -486,7 +542,12 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
         for member in &source.members {
             match &member.kind {
                 MemberKind::Id(name) => {
-                    if has_id || self.instance.insert_scoped_id(self.context,name.clone(), id).is_some() {
+                    if has_id
+                        || self
+                            .instance
+                            .insert_scoped_id(self.context, name.clone(), id)
+                            .is_some()
+                    {
                         return Err(Error::new(format!("duplicate id '{name}'")));
                     }
                     has_id = true;
@@ -572,9 +633,23 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
         let mut implicit = Vec::new();
         for member in &source.members {
             match &member.kind {
-                MemberKind::Child(child) if module=="QtQml" && name=="Component" => {
-                    let definition=dynamic::Template{object:Rc::new(child.clone()), imports:Rc::from(imports),scopes:self.scopes.clone()};
-                    if self.instance.dynamic.templates.insert(id,definition).is_some(){return Err(Error::new("Component requires exactly one object definition"));}
+                MemberKind::Child(child) if module == "QtQml" && name == "Component" => {
+                    let definition = dynamic::Template {
+                        object: Rc::new(child.clone()),
+                        imports: Rc::from(imports),
+                        scopes: self.scopes.clone(),
+                    };
+                    if self
+                        .instance
+                        .dynamic
+                        .templates
+                        .insert(id, definition)
+                        .is_some()
+                    {
+                        return Err(Error::new(
+                            "Component requires exactly one object definition",
+                        ));
+                    }
                 }
                 MemberKind::Child(child) if model => {
                     let child_imports = child.type_imports.as_deref().unwrap_or(imports);
@@ -635,7 +710,13 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
                 _ => (),
             }
         }
-        if module=="QtQml" && name=="Component" && !self.instance.dynamic.templates.contains_key(&id) && !self.instance.dynamic.file_errors.contains_key(&id){ return Err(Error::new("Component requires an object definition")); }
+        if module == "QtQml"
+            && name == "Component"
+            && !self.instance.dynamic.templates.contains_key(&id)
+            && !self.instance.dynamic.file_errors.contains_key(&id)
+        {
+            return Err(Error::new("Component requires an object definition"));
+        }
         if model {
             let count = self.instance.key(id, "count")?;
             self.instance.slots[count].value =
@@ -749,7 +830,9 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
         scope: Option<u32>,
     ) -> Result<(), Error> {
         let node = &mut self.instance.nodes[owner.index];
-        let (signal, formal) = if name=="Component.onDestruction" {("Component.destruction".to_owned(),Vec::new())} else if name == "Component.onCompleted" {
+        let (signal, formal) = if name == "Component.onDestruction" {
+            ("Component.destruction".to_owned(), Vec::new())
+        } else if name == "Component.onCompleted" {
             ("Component.completed".to_owned(), Vec::new())
         } else {
             let raw = name
@@ -806,7 +889,8 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
         for (key, expr, scope) in &self.aliases {
             let alias = match expr {
                 Expr::Name(name) => Alias::Object(
-                    self.instance.lexical_id(self.instance.properties[*key].owner,name)
+                    self.instance
+                        .lexical_id(self.instance.properties[*key].owner, name)
                         .ok_or_else(|| Error::new(format!("unknown alias id '{name}'")))?,
                 ),
                 Expr::Member(base, name) => {
@@ -818,7 +902,9 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
                         },
                         _ => return Err(Error::new("alias requires id.property")),
                     };
-                    let obj = self.instance.lexical_id(self.instance.properties[*key].owner,id)
+                    let obj = self
+                        .instance
+                        .lexical_id(self.instance.properties[*key].owner, id)
                         .ok_or_else(|| Error::new(format!("unknown alias id '{id}'")))?;
                     let key = if let Ok(key) = self.instance.key_in(obj, &path, *scope) {
                         key
@@ -854,9 +940,25 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
 }
 
 impl Instance {
-    pub(crate) fn allocate_template(&mut self,root:ObjectId,parent:Option<ObjectId>,template:&dynamic::Template,registry:&TypeRegistry)->Result<BTreeSet<SlotId>,Error>{
-        let mut builder=Builder{context:Some(root),scopes:template.scopes.clone(),instance:self,registry,imports:&template.imports,assigned:Default::default(),aliases:vec![],implicit:vec![],read_candidates:vec![]};
-        builder.object(&template.object,parent)?;
+    pub(crate) fn allocate_template(
+        &mut self,
+        root: ObjectId,
+        parent: Option<ObjectId>,
+        template: &dynamic::Template,
+        registry: &TypeRegistry,
+    ) -> Result<BTreeSet<SlotId>, Error> {
+        let mut builder = Builder {
+            context: Some(root),
+            scopes: template.scopes.clone(),
+            instance: self,
+            registry,
+            imports: &template.imports,
+            assigned: Default::default(),
+            aliases: vec![],
+            implicit: vec![],
+            read_candidates: vec![],
+        };
+        builder.object(&template.object, parent)?;
         builder.link_aliases()?;
         builder.default_children()?;
         Ok(builder.assigned)

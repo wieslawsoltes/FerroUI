@@ -53,7 +53,7 @@ impl Transaction<'_> {
             "Infinity" => return Ok(Value::Number(f64::INFINITY)),
             _ => (),
         }
-        if let Some(id) = self.model.lexical_id(owner,name) {
+        if let Some(id) = self.model.lexical_id(owner, name) {
             return Ok(Value::Object(id));
         }
         if let Ok(key) = self.scoped_key(owner, name) {
@@ -76,8 +76,9 @@ impl Transaction<'_> {
         }
     }
 
-    pub(crate) fn scope_id(&self, owner:ObjectId, name: &str) -> Result<ObjectId, Error> {
-        self.model.lexical_id(owner,name)
+    pub(crate) fn scope_id(&self, owner: ObjectId, name: &str) -> Result<ObjectId, Error> {
+        self.model
+            .lexical_id(owner, name)
             .ok_or_else(|| Error::new(format!("unknown component scope '{name}'")))
     }
 
@@ -123,7 +124,7 @@ impl Transaction<'_> {
             String(s) => Value::String(s.clone()),
             Name(name) => self.name(owner, self.model.context_root(owner), name, locals, reads)?,
             ScopedName { name, root } => {
-                self.name(owner, self.scope_id(owner,root)?, name, locals, reads)?
+                self.name(owner, self.scope_id(owner, root)?, name, locals, reads)?
             }
             Record(fields) => {
                 let mut values = BTreeMap::new();
@@ -275,7 +276,9 @@ impl Transaction<'_> {
     pub(crate) fn call_receiver(&self, owner: ObjectId, root: ObjectId, name: &str) -> ObjectId {
         for object in [owner, root] {
             let node = &self.model.nodes[object.index];
-            if (self.model.dynamic.loaders.contains_key(&object)&&name=="setSource") || (self.model.dynamic.contexts.contains_key(&object) && name=="destroy") || node.methods.contains_key(name)
+            if (self.model.dynamic.loaders.contains_key(&object) && name == "setSource")
+                || (self.model.dynamic.contexts.contains_key(&object) && name == "destroy")
+                || node.methods.contains_key(name)
                 || node.signals.contains_key(name)
                 || node.native.contains_key(name)
                 || self.scoped_key(object, name).is_ok()
@@ -323,10 +326,25 @@ impl Transaction<'_> {
                 }
             }
         }
-        if name=="destroy"{return self.destroy_method(owner,&arguments);}
-        if self.model.dynamic.loaders.contains_key(&owner) && name=="setSource" {return self.loader_call(owner,&arguments);}
-        if self.model.is_component(owner) && name=="errorString" && arguments.is_empty(){return Ok(Value::String(self.model.dynamic.file_errors.get(&owner).cloned().unwrap_or_default()));}
-        if self.model.is_component(owner) && name=="createObject" {return self.create_method(owner,&arguments);}
+        if name == "destroy" {
+            return self.destroy_method(owner, &arguments);
+        }
+        if self.model.dynamic.loaders.contains_key(&owner) && name == "setSource" {
+            return self.loader_call(owner, &arguments);
+        }
+        if self.model.is_component(owner) && name == "errorString" && arguments.is_empty() {
+            return Ok(Value::String(
+                self.model
+                    .dynamic
+                    .file_errors
+                    .get(&owner)
+                    .cloned()
+                    .unwrap_or_default(),
+            ));
+        }
+        if self.model.is_component(owner) && name == "createObject" {
+            return self.create_method(owner, &arguments);
+        }
         if node.signal(name).is_some() {
             self.signal(owner, name, arguments)?;
             return Ok(Value::Undefined);

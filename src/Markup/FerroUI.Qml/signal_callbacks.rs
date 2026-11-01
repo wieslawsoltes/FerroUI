@@ -27,10 +27,11 @@ enum Edit {
     Removed(SignalKey, Vec<(u64, Callback)>),
 }
 
-impl SignalCallbacks{
-    pub(crate) fn retire(&mut self, dead:&BTreeSet<ObjectId>){
-        self.by_signal.retain(|(sender,_),listeners|{
-            listeners.retain(|_,cb|!matches!(cb.receiver,Value::Object(id) if dead.contains(&id)));
+impl SignalCallbacks {
+    pub(crate) fn retire(&mut self, dead: &BTreeSet<ObjectId>) {
+        self.by_signal.retain(|(sender, _), listeners| {
+            listeners
+                .retain(|_, cb| !matches!(cb.receiver,Value::Object(id) if dead.contains(&id)));
             !dead.contains(sender) && !listeners.is_empty()
         });
     }

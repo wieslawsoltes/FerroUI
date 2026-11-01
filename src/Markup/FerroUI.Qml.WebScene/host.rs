@@ -174,8 +174,12 @@ impl Realm {
             .into_iter()
             .map(mode)
             .collect::<Vec<_>>();
-        if ctx.is_loader(object) && key=="setSource" {signature=vec![None,Some("loaderInitial")];}
-        if ctx.is_component(object) && key=="createObject" {signature=vec![None,Some("initial")];}
+        if ctx.is_loader(object) && key == "setSource" {
+            signature = vec![None, Some("loaderInitial")];
+        }
+        if ctx.is_component(object) && key == "createObject" {
+            signature = vec![None, Some("initial")];
+        }
         if ctx.is_worker_script(object) && key == "sendMessage" {
             signature = vec![Some("data")];
         }
@@ -238,32 +242,77 @@ impl Realm {
             }
             return Ok(Json::Null);
         }
-        if matches!(op,"createComponent"|"createQmlObject"){
-            let args=field(v,2)?.as_array().ok_or_else(||Error::new("invalid factory args"))?.iter().map(|arg|self.decode(ctx,arg)).collect::<Result<Vec<_>,_>>()?;
-            let value=if op=="createQmlObject"{ctx.qml_from_arguments(&args)?}else if id==0{
-                ctx.component_from_arguments(v.get(3).and_then(Json::as_str).or(Some("https://qml.invalid/components/project/")),&args)?
-            }else{
-                let scope=self.tables.borrow().scope_values.get(&id).filter(|(owner,_)|*owner==instance).map(|(_,scope)|scope.clone()).ok_or_else(||Error::new("expired component scope"))?;
-                ctx.in_scope(&scope,|ctx|ctx.component_from_arguments(v.get(3).and_then(Json::as_str),&args))?
+        if matches!(op, "createComponent" | "createQmlObject") {
+            let args = field(v, 2)?
+                .as_array()
+                .ok_or_else(|| Error::new("invalid factory args"))?
+                .iter()
+                .map(|arg| self.decode(ctx, arg))
+                .collect::<Result<Vec<_>, _>>()?;
+            let value = if op == "createQmlObject" {
+                ctx.qml_from_arguments(&args)?
+            } else if id == 0 {
+                ctx.component_from_arguments(
+                    v.get(3)
+                        .and_then(Json::as_str)
+                        .or(Some("https://qml.invalid/components/project/")),
+                    &args,
+                )?
+            } else {
+                let scope = self
+                    .tables
+                    .borrow()
+                    .scope_values
+                    .get(&id)
+                    .filter(|(owner, _)| *owner == instance)
+                    .map(|(_, scope)| scope.clone())
+                    .ok_or_else(|| Error::new("expired component scope"))?;
+                ctx.in_scope(&scope, |ctx| {
+                    ctx.component_from_arguments(v.get(3).and_then(Json::as_str), &args)
+                })?
             };
-            return self.encode(instance,&value);
+            return self.encode(instance, &value);
         }
-        if matches!(op,"loaderSource"|"construct"){
-            let Value::Object(factory)=self.lookup(ctx,id)? else{return Err(Error::new("invalid Component"))};
-            let target=self.decode(ctx,field(v,2)?)?;
-            let mut properties=BTreeMap::new();for p in field(v,3)?.as_array().ok_or_else(||Error::new("invalid initial properties"))?{
-                let pair=p.as_array().ok_or_else(||Error::new("invalid initial property"))?;
-                let value=self.decode(ctx,field(pair,2)?)?;
-                let entry=match field(pair,1)?.as_bool(){Some(true)=>{let Value::External(callback)=value else{return Err(Error::new("expected binding closure"))};ferroui_qml::InitialProperty::Binding(callback)},Some(false)=>ferroui_qml::InitialProperty::Value(value),_=>return Err(Error::new("invalid binding flag"))};
-                properties.insert(text(pair,0)?.into(),entry);
+        if matches!(op, "loaderSource" | "construct") {
+            let Value::Object(factory) = self.lookup(ctx, id)? else {
+                return Err(Error::new("invalid Component"));
+            };
+            let target = self.decode(ctx, field(v, 2)?)?;
+            let mut properties = BTreeMap::new();
+            for p in field(v, 3)?
+                .as_array()
+                .ok_or_else(|| Error::new("invalid initial properties"))?
+            {
+                let pair = p
+                    .as_array()
+                    .ok_or_else(|| Error::new("invalid initial property"))?;
+                let value = self.decode(ctx, field(pair, 2)?)?;
+                let entry = match field(pair, 1)?.as_bool() {
+                    Some(true) => {
+                        let Value::External(callback) = value else {
+                            return Err(Error::new("expected binding closure"));
+                        };
+                        ferroui_qml::InitialProperty::Binding(callback)
+                    }
+                    Some(false) => ferroui_qml::InitialProperty::Value(value),
+                    _ => return Err(Error::new("invalid binding flag")),
+                };
+                properties.insert(text(pair, 0)?.into(), entry);
             }
-            if op=="loaderSource" {
-                let Value::String(url)=target else{return Err(Error::new("Loader.setSource expects a URL"))};
-                ctx.set_loader_source(factory,url,properties)?;
-                return self.encode(instance,&Value::Undefined);
+            if op == "loaderSource" {
+                let Value::String(url) = target else {
+                    return Err(Error::new("Loader.setSource expects a URL"));
+                };
+                ctx.set_loader_source(factory, url, properties)?;
+                return self.encode(instance, &Value::Undefined);
             }
-            let parent=match target{Value::Object(id)=>Some(id),Value::Null|Value::Undefined=>None,_=>return Err(Error::new("invalid parent"))};
-            let value=ctx.create_with_properties(factory,parent,properties)?;return self.encode(instance,&value);
+            let parent = match target {
+                Value::Object(id) => Some(id),
+                Value::Null | Value::Undefined => None,
+                _ => return Err(Error::new("invalid parent")),
+            };
+            let value = ctx.create_with_properties(factory, parent, properties)?;
+            return self.encode(instance, &value);
         }
         if matches!(op, "resolve" | "assign" | "scopeMode" | "bindScope") {
             let scope = self

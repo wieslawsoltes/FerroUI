@@ -84,9 +84,16 @@ pub fn link(
     let mut root = source.document.root.clone();
     linker.object(&context, &mut root)?;
     let mut components = BTreeMap::new();
-    while let Some((url, entry)) = linker.resolver.next_component().map_err(|why| context.error(root.span, why))? {
+    while let Some((url, entry)) = linker
+        .resolver
+        .next_component()
+        .map_err(|why| context.error(root.span, why))?
+    {
         if !entry.document.pragmas.is_empty() {
-            return Err(context.error(entry.document.root.span, "component entries must be instantiable QML documents"));
+            return Err(context.error(
+                entry.document.root.span,
+                "component entries must be instantiable QML documents",
+            ));
         }
         let scope = Context::new(entry.key.clone(), &entry.document, linker.resolver)?;
         let mut object = entry.document.root.clone();

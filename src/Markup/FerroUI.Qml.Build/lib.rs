@@ -2,10 +2,10 @@
 //! The generated code requires `ferroui-qml` as an application dependency.
 mod emit;
 mod files;
-mod loader_sources;
 mod identified;
 #[cfg(feature = "javascript")]
 mod javascript;
+mod loader_sources;
 mod native;
 mod scripts;
 #[cfg(feature = "javascript")]

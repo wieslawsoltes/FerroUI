@@ -3,15 +3,15 @@
 //! Public mutations settle bindings and handlers atomically before exposing changes.
 mod arrays;
 mod binding_object;
+mod catalog;
 pub mod compiled;
 mod connections;
 mod deferred;
 mod dynamic;
-mod catalog;
-mod lifetime;
 mod initial;
-pub use initial::InitialProperty;
+mod lifetime;
 pub use compiled::{CompiledComponent, ComponentSource};
+pub use initial::InitialProperty;
 mod enums;
 pub use enums::Namespace;
 mod evaluation;
@@ -52,18 +52,28 @@ struct Procedure {
     body: Vec<Stmt>,
 }
 
-struct NodeEntry {id:ObjectId, live:bool, data:Option<Box<Node>>}
-impl std::ops::Deref for NodeEntry{
-    type Target=Node;
-    fn deref(&self)->&Node{self.data.as_deref().expect("access to retired QML object")}
+struct NodeEntry {
+    id: ObjectId,
+    live: bool,
+    data: Option<Box<Node>>,
 }
-impl std::ops::DerefMut for NodeEntry{
-    fn deref_mut(&mut self)->&mut Node{self.data.as_deref_mut().expect("access to retired QML object")}
+impl std::ops::Deref for NodeEntry {
+    type Target = Node;
+    fn deref(&self) -> &Node {
+        self.data.as_deref().expect("access to retired QML object")
+    }
+}
+impl std::ops::DerefMut for NodeEntry {
+    fn deref_mut(&mut self) -> &mut Node {
+        self.data
+            .as_deref_mut()
+            .expect("access to retired QML object")
+    }
 }
 struct Node {
-    source_url:Option<String>,
-    context:Option<ObjectId>,
-    visual_children:Option<String>,
+    source_url: Option<String>,
+    context: Option<ObjectId>,
+    visual_children: Option<String>,
     shadows: Vec<ir::PropertyShadow>,
     type_scope: Rc<Namespace>,
     module: String,
@@ -148,7 +158,7 @@ pub struct SignalEmission {
 }
 
 pub struct Instance {
-    dynamic:dynamic::Components,
+    dynamic: dynamic::Components,
     javascript: scripting::ScriptState,
     models: BTreeMap<ObjectId, list_model::Model>,
     records: records::Heap,
@@ -174,7 +184,7 @@ impl Instance {
     pub fn root(&self) -> ObjectId {
         ObjectId {
             index: 0,
-            serial:0,
+            serial: 0,
             instance: self.identity,
         }
     }
@@ -189,7 +199,9 @@ impl Instance {
     fn node(&self, object: ObjectId) -> Option<&Node> {
         (object.instance == self.identity)
             .then(|| self.nodes.get(object.index))
-            .flatten().filter(|n|n.live && n.id==object).and_then(|n|n.data.as_deref())
+            .flatten()
+            .filter(|n| n.live && n.id == object)
+            .and_then(|n| n.data.as_deref())
     }
 
     pub fn type_name(&self, object: ObjectId) -> Option<&str> {

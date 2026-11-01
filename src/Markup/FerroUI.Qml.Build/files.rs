@@ -17,7 +17,7 @@ pub(crate) struct Files {
 impl Files {
     pub(crate) fn new(roots: Vec<PathBuf>) -> Self {
         Self {
-            project:PathBuf::new(),
+            project: PathBuf::new(),
             component_entries: BTreeMap::new(),
             #[cfg(feature = "javascript")]
             resources: None,
@@ -94,20 +94,33 @@ impl Files {
             };
             #[cfg(not(feature = "javascript"))]
             let document = parse(&text).map_err(|e| format!("{}:{e}", path.display()))?;
-            let mut document=document;
-            if let Ok(path)=path.strip_prefix(&self.project){document.root.set_source_url(&project_url(path));}
-            { let root=&self.project;
+            let mut document = document;
+            if let Ok(path) = path.strip_prefix(&self.project) {
+                document.root.set_source_url(&project_url(path));
+            }
+            {
+                let root = &self.project;
                 for relative in crate::loader_sources::sources(&document) {
                     // URLs outside the embedded application catalog retain runtime Error status.
-                    if relative.is_empty() || relative.contains([':', '?', '#', '\\']) || relative.starts_with('/') { continue; }
-                    let file=path.parent().expect("document directory").join(relative);
-                    if let Ok(target)=file.canonicalize() {
-                        if target.is_file() && target.extension().and_then(|e|e.to_str())==Some("qml") {
-                            if let Ok(within)=target.strip_prefix(root){
-                                self.component_entries.insert(project_url(within),target);
+                    if relative.is_empty()
+                        || relative.contains([':', '?', '#', '\\'])
+                        || relative.starts_with('/')
+                    {
+                        continue;
+                    }
+                    let file = path.parent().expect("document directory").join(relative);
+                    if let Ok(target) = file.canonicalize() {
+                        if target.is_file()
+                            && target.extension().and_then(|e| e.to_str()) == Some("qml")
+                        {
+                            if let Ok(within) = target.strip_prefix(root) {
+                                self.component_entries.insert(project_url(within), target);
                             }
                         }
-                    } else if let Some(directory)=file.parent().filter(|dir|dir.is_dir() && dir.starts_with(root)){
+                    } else if let Some(directory) = file
+                        .parent()
+                        .filter(|dir| dir.is_dir() && dir.starts_with(root))
+                    {
                         self.directories.insert(directory.to_owned());
                     }
                 }

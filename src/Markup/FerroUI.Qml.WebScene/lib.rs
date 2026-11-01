@@ -280,18 +280,32 @@ impl ScriptEngine for WebSceneEngine {
             .get(&value.instance())
             .is_some_and(|realm| realm.handle(value).is_ok())
     }
-    fn release_objects(&self, instance: ScriptInstance, dead: &std::collections::BTreeSet<ObjectId>) {
+    fn release_objects(
+        &self,
+        instance: ScriptInstance,
+        dead: &std::collections::BTreeSet<ObjectId>,
+    ) {
         let realms = self.realms.borrow();
-        let Some(realm) = realms.get(&instance) else { return; };
+        let Some(realm) = realms.get(&instance) else {
+            return;
+        };
         let mut tables = realm.tables.borrow_mut();
-        let Tables { scopes, scope_values, scope_names, retired_scopes, .. } = &mut *tables;
+        let Tables {
+            scopes,
+            scope_values,
+            scope_names,
+            retired_scopes,
+            ..
+        } = &mut *tables;
         scopes.retain(|(scope, _, _), id| {
             if dead.contains(&scope.owner()) || dead.contains(&scope.root()) {
                 scope_values.remove(id);
                 scope_names.remove(id);
                 retired_scopes.push(*id);
                 false
-            } else { true }
+            } else {
+                true
+            }
         });
         for object in dead {
             if let Some(id) = tables.objects.remove(object) {

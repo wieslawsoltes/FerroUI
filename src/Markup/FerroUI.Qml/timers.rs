@@ -12,8 +12,12 @@ pub(crate) struct Timers {
 }
 
 impl Timers {
-    pub(crate) fn remove(&mut self,id:ObjectId){self.deadlines.remove(&id); }
-    pub(crate) fn truncate(&mut self,index:usize){self.deadlines.retain(|id,_|id.index<index);}
+    pub(crate) fn remove(&mut self, id: ObjectId) {
+        self.deadlines.remove(&id);
+    }
+    pub(crate) fn truncate(&mut self, index: usize) {
+        self.deadlines.retain(|id, _| id.index < index);
+    }
     pub(crate) fn register(&mut self, object: ObjectId) {
         self.deadlines.insert(object, None);
     }
@@ -44,17 +48,22 @@ impl TimerChanges {
 impl Instance {
     /// Elapsed time until the earliest active timer should be serviced.
     pub fn next_timer_deadline(&self) -> Option<Duration> {
-        if !self.dynamic.loading.is_empty(){return Some(Duration::ZERO);}
+        if !self.dynamic.loading.is_empty() {
+            return Some(Duration::ZERO);
+        }
         self.timers
             .deadlines
             .values()
-            .flatten().chain(self.dynamic.deadlines.values())
+            .flatten()
+            .chain(self.dynamic.deadlines.values())
             .min()
             .map(|deadline| deadline.saturating_sub(self.timers.now))
     }
 
     pub fn has_timers(&self) -> bool {
-        !self.timers.deadlines.is_empty() || !self.dynamic.deadlines.is_empty() || !self.dynamic.loading.is_empty()
+        !self.timers.deadlines.is_empty()
+            || !self.dynamic.deadlines.is_empty()
+            || !self.dynamic.loading.is_empty()
     }
 
     /// A deterministic dispatcher tick. A delayed host delivers at most one
@@ -136,11 +145,19 @@ impl Transaction<'_> {
             .checked_add(elapsed)
             .ok_or_else(|| Error::new("component clock overflow"))?;
         self.model.timers.now = now;
-        for id in std::mem::take(&mut self.model.dynamic.loading){
+        for id in std::mem::take(&mut self.model.dynamic.loading) {
             self.structure.loaded.insert(id);
-            if self.model.node(id).is_some(){self.finish_factory(id)?;}
+            if self.model.node(id).is_some() {
+                self.finish_factory(id)?;
+            }
         }
-        let pending_destroy:Vec<_>=self.model.dynamic.deadlines.iter().filter_map(|(&id,&due)|(due<=now).then_some(id)).collect();
+        let pending_destroy: Vec<_> = self
+            .model
+            .dynamic
+            .deadlines
+            .iter()
+            .filter_map(|(&id, &due)| (due <= now).then_some(id))
+            .collect();
         let due: Vec<_> = self
             .model
             .timers
@@ -162,7 +179,11 @@ impl Transaction<'_> {
             self.signal(id, "triggered", Vec::new())?;
             self.settle()?;
         }
-        for id in pending_destroy{if self.model.node(id).is_some(){self.destroy_object(id)?;}}
+        for id in pending_destroy {
+            if self.model.node(id).is_some() {
+                self.destroy_object(id)?;
+            }
+        }
         Ok(())
     }
 }

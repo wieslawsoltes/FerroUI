@@ -283,7 +283,7 @@ impl<'s> Parser<'s> {
         }
         let members = self.members()?;
         Ok(Object {
-            source_url:None,
+            source_url: None,
             shadows: Vec::new(),
             type_imports: None,
             composite_types: Vec::new(),
