@@ -9,7 +9,7 @@ mod wallpaper;
 mod workspaces;
 
 use self::chrome::*;
-use crate::services::{ApplicationCatalog, DesktopApplication};
+use crate::services::{ApplicationCatalog, ApplicationIcons, DesktopApplication};
 use crate::session::{Session, Snapshot};
 use ferroui_base::input::{Key, KeyModifiers};
 use ferroui_base::layout::VerticalAlignment as V;
@@ -37,6 +37,7 @@ struct Shell {
     query: Signal<String>,
     page: Signal<usize>,
     catalog: Rc<ApplicationCatalog>,
+    icons: ApplicationIcons,
     session: Option<Rc<Session>>,
     snapshot: Signal<Snapshot>,
     status: Signal<String>,
@@ -172,6 +173,7 @@ pub fn view(
         query: signal(String::new()),
         page: signal(0),
         catalog,
+        icons: ApplicationIcons::default(),
         snapshot: signal(session.as_ref().map(|s| s.snapshot()).unwrap_or_default()),
         session,
         status: signal(String::new()),

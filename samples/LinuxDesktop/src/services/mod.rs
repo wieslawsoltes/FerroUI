@@ -5,6 +5,10 @@ use std::io;
 
 #[cfg(target_os = "linux")]
 mod gio;
+#[cfg(target_os = "linux")]
+mod icons;
+#[cfg(target_os = "linux")]
+pub use icons::ApplicationIcons;
 
 #[derive(Clone, Debug)]
 pub struct DesktopApplication {

@@ -74,7 +74,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                         .child(
                             stack_panel()
                                 .spacing(5.0)
-                                .child(monogram(application))
+                                .child(app_icon(&result_shell, application))
                                 .child(
                                     label(name, 12.0, Ink::Primary).horizontal_alignment(H::Center),
                                 ),
@@ -221,7 +221,7 @@ fn result_button(shell: &Rc<Shell>, index: usize) -> Element {
     .child(
         grid()
             .column_definitions("32,*,18")
-            .child(monogram(application))
+            .child(app_icon(shell, application))
             .child(
                 stack_panel()
                     .grid_column(1)
@@ -242,7 +242,18 @@ fn result_button(shell: &Rc<Shell>, index: usize) -> Element {
     .into()
 }
 
-fn monogram(application: &DesktopApplication) -> Element {
+fn app_icon(shell: &Shell, application: &DesktopApplication) -> Element {
+    if let Some(bitmap) = shell.icons.get(application) {
+        let source: Rc<dyn ferroui_base::media::IImage> = bitmap;
+        return image()
+            .source(source)
+            .width(32.0)
+            .height(32.0)
+            .stretch(ferroui_base::media::Stretch::Uniform)
+            .is_hit_test_visible(false)
+            .into();
+    }
+
     const COLORS: [(&str, &str); 5] = [
         ("#264943", "#A9E5CA"),
         ("#35394F", "#CAC8F5"),
