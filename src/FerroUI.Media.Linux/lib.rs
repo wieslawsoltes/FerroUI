@@ -114,6 +114,7 @@ pub struct LinuxFrameStream {
     epoch: Rc<std::cell::Cell<u64>>,
     pending: RefCell<Option<MediaFuture<Option<ReadyGlFrame>>>>,
     ready: RefCell<Option<ReadyGlFrame>>,
+    retry: RefCell<Option<NativeFrame>>,
 }
 impl LinuxFrameStream {
     pub fn new(
@@ -130,12 +131,19 @@ impl LinuxFrameStream {
             epoch: Rc::new(std::cell::Cell::new(1)),
             pending: RefCell::new(None),
             ready: RefCell::new(None),
+            retry: RefCell::new(None),
         }
     }
     pub fn retire(&self, epoch: u64) {
         self.epoch.set(epoch);
         self.pending.borrow_mut().take();
         self.ready.borrow_mut().take();
+        self.retry.borrow_mut().take();
+    }
+    pub fn has_pending_frame_work(&self) -> bool {
+        self.pending.borrow().is_some()
+            || self.ready.borrow().is_some()
+            || self.retry.borrow().is_some()
     }
     pub fn take_frame(&self) -> Result<Option<FrameLease>, MediaError> {
         if self.producer.budget().quarantined_reads() != 0 {
@@ -159,12 +167,27 @@ impl LinuxFrameStream {
                 Poll::Pending => return Ok(None),
                 Poll::Ready(result) => {
                     pending.take();
-                    self.ready.replace(result?);
+                    match result {
+                        Ok(Some(frame)) => {
+                            self.retry.borrow_mut().take();
+                            self.ready.replace(Some(frame));
+                        }
+                        Ok(None) => {} // Keep one native sample until budget admission.
+                        Err(error) => {
+                            self.retry.borrow_mut().take();
+                            return Err(error);
+                        }
+                    }
                     return Ok(None);
                 }
             }
         }
-        let Some(frame) = self.native.take_frame()? else {
+        if let Some(frame) = self.native.take_frame()? {
+            if frame.info().epoch == self.epoch.get() {
+                self.retry.replace(Some(frame));
+            }
+        }
+        let Some(frame) = self.retry.borrow().clone() else {
             return Ok(None);
         };
         let info = frame.info();

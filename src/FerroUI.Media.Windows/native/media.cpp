@@ -247,7 +247,18 @@ static void run(const std::shared_ptr<Session> &owner){
         }
     }catch(Failure f){s.fail(f.hr);}catch(...){s.fail(E_FAIL,"Native media worker failed");}
     s.closed=true;
-    if(s.audio)s.audio->Stop();if(s.reader)s.reader->Flush(MF_SOURCE_READER_ALL_STREAMS);s.reader.Reset();s.callback.Reset();
+    if(s.audio)s.audio->Stop();
+    if(s.reader){
+        {std::lock_guard<std::mutex> guard(s.lock);s.flushed=false;}
+        // Flush is asynchronous even during teardown. Keep the callback and
+        // source owner until the acknowledgement (bounded wait on this worker).
+        HRESULT flush=s.reader->Flush(MF_SOURCE_READER_ALL_STREAMS);
+        if(SUCCEEDED(flush)){
+            std::unique_lock<std::mutex> guard(s.lock);
+            s.changed.wait_for(guard,std::chrono::seconds(5),[&]{return s.flushed;});
+        }
+    }
+    s.reader.Reset();s.callback.Reset();
     if(s.camera_source)s.camera_source->Shutdown();s.camera_source.Reset();
     s.video.clear();s.pcm.clear();{std::lock_guard<std::mutex> guard(s.lock);s.latest.reset();s.packet={};s.packet_ready=false;}s.render.Reset();s.audio_clock.Reset();s.audio_volume.Reset();s.audio.Reset();s.manager.Reset();s.context.Reset();
     if(s.resource_file)DeleteFileW(s.source.c_str());

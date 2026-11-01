@@ -151,6 +151,9 @@ impl MediaPlayerProvider for LinuxVideoProvider {
     }
 }
 impl NativeMediaSession for Session {
+    fn has_pending_frame_work(&self) -> bool {
+        self.stream.has_pending_frame_work()
+    }
     fn state(&self) -> Result<MediaPlaybackSession, MediaError> {
         let s = self.stream.native.state()?;
         Ok(MediaPlaybackSession {

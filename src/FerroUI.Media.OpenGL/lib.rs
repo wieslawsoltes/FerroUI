@@ -182,6 +182,12 @@ impl NativeGlFrameProducer {
         {
             return Box::pin(async { Err(unsupported("Incompatible native GL frame metadata")) });
         }
+        if self.budget.limits().frames == 0 || metadata.retained_bytes > self.budget.limits().bytes
+        {
+            return Box::pin(async {
+                Err(unsupported("Frame exceeds the configured storage budget"))
+            });
+        }
         let reservation = match self.budget.reserve(metadata.clone()) {
             Ok(value) => value,
             Err(FrameError::BudgetExceeded) => return Box::pin(async { Ok(None) }),

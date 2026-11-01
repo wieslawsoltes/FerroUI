@@ -8,7 +8,13 @@ use ferroui_media_apple::poll_native as wait;
 #[cfg(feature = "controls")]
 pub use ferroui_media_apple::AppleTextureImporter;
 use ferroui_media_video::{frames::*, *};
-use std::{cell::Cell, path::PathBuf, rc::Rc, task::Poll, time::Duration};
+use std::{
+    cell::{Cell, RefCell},
+    path::PathBuf,
+    rc::Rc,
+    task::Poll,
+    time::Duration,
+};
 struct ResourceFile(PathBuf);
 impl Drop for ResourceFile {
     fn drop(&mut self) {
@@ -106,6 +112,8 @@ impl MediaPlayerProvider for AppleVideoProvider {
                 generation,
                 device_generation,
                 sequence: Cell::new(0),
+                retrying: Cell::new(false),
+                pending: RefCell::new(None),
             })
         });
         let mut initial = Some(initial);
@@ -137,6 +145,8 @@ struct AppleSession {
     generation: u64,
     device_generation: u64,
     sequence: Cell<u64>,
+    retrying: Cell<bool>,
+    pending: RefCell<Option<(ferroui_media_apple::PixelBuffer, f64)>>,
 }
 fn duration(seconds: f64) -> Option<Duration> {
     if seconds.is_finite() && seconds >= 0. {
@@ -146,6 +156,9 @@ fn duration(seconds: f64) -> Option<Duration> {
     }
 }
 impl NativeMediaSession for AppleSession {
+    fn has_pending_frame_work(&self) -> bool {
+        self.retrying.get()
+    }
     fn state(&self) -> Result<MediaPlaybackSession, MediaError> {
         if self.budget.quarantined_reads() > 0 {
             return Err(MediaError::new(
@@ -187,6 +200,8 @@ impl NativeMediaSession for AppleSession {
         Ok(())
     }
     fn seek(&self, position: Duration) -> MediaFuture<Duration> {
+        self.pending.borrow_mut().take();
+        self.retrying.set(false);
         match self.player.seek(position.as_secs_f64()) {
             Err(error) => Box::pin(async move { Err(error) }),
             Ok(request) => wait(move || match request.poll() {
@@ -206,10 +221,23 @@ impl NativeMediaSession for AppleSession {
         Ok(())
     }
     fn take_frame(&self) -> Result<Option<FrameLease>, MediaError> {
+        self.retrying.set(false);
+        if self.budget.limits().frames == 0 {
+            return Err(MediaError::new(
+                MediaErrorKind::Unsupported,
+                "Frame budget admits no frames",
+            ));
+        }
         if self.budget.usage().frames >= self.budget.limits().frames {
+            self.retrying.set(true);
             return Ok(None);
         }
-        let Some((buffer, timestamp)) = self.player.frame() else {
+        let Some((buffer, timestamp)) = self
+            .pending
+            .borrow_mut()
+            .take()
+            .or_else(|| self.player.frame())
+        else {
             return Ok(None);
         };
         let (width, height, stride, bytes, color) = buffer.info();
@@ -266,9 +294,19 @@ impl NativeMediaSession for AppleSession {
             }],
             retained_bytes: bytes,
         };
-        match self.budget.lease(metadata, buffer) {
-            Ok(frame) => Ok(Some(frame)),
-            Err(FrameError::BudgetExceeded) => Ok(None),
+        if bytes > self.budget.limits().bytes {
+            return Err(MediaError::new(
+                MediaErrorKind::Unsupported,
+                "Native frame exceeds the retained byte budget",
+            ));
+        }
+        match self.budget.reserve(metadata) {
+            Ok(reservation) => Ok(Some(reservation.lease(buffer))),
+            Err(FrameError::BudgetExceeded) => {
+                self.pending.replace(Some((buffer, timestamp)));
+                self.retrying.set(true);
+                Ok(None)
+            }
             Err(error) => Err(MediaError::new(
                 MediaErrorKind::Unsupported,
                 error.to_string(),

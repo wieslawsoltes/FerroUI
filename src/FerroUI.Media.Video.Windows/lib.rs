@@ -81,9 +81,23 @@ fn resolve(source: MediaSource) -> Result<(String, Option<Resource>), MediaError
             Ok((url, None))
         }
         MediaSource::Url(_) => Err(error("Unsupported network URL scheme")),
-        MediaSource::Resource { encoded, .. } => {
+        MediaSource::Resource {
+            encoded,
+            content_type,
+            ..
+        } => {
+            // Preserve the declared container for native source resolution.
+            let suffix = match content_type.as_str() {
+                "video/mp4" | "audio/mp4" => "mp4",
+                "video/quicktime" => "mov",
+                "audio/mpeg" => "mp3",
+                "audio/wav" | "audio/x-wav" => "wav",
+                "video/x-ms-wmv" => "wmv",
+                "audio/x-ms-wma" => "wma",
+                _ => "media",
+            };
             let path = std::env::temp_dir().join(format!(
-                "ferroui-resource-{}-{}.media",
+                "ferroui-resource-{}-{}.{suffix}",
                 std::process::id(),
                 ferroui_media::allocate_source_id()
             ));
@@ -154,6 +168,9 @@ impl MediaPlayerProvider for WindowsVideoProvider {
     }
 }
 impl NativeMediaSession for Session {
+    fn has_pending_frame_work(&self) -> bool {
+        self.stream.has_pending_frame_work()
+    }
     fn state(&self) -> Result<MediaPlaybackSession, MediaError> {
         let s = self.stream.native.state()?;
         Ok(MediaPlaybackSession {

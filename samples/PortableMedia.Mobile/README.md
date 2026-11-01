@@ -103,3 +103,14 @@ option None unless they have an independently known source contract. Untagged
 sources are rejected by default, and tagged HDR/wide-gamut sources remain outside
 this SDR profile. Native dataspace discovery requires Android 33; an explicitly
 known source profile can be supplied on earlier framework-supported versions.
+
+## Paused saturation regression
+
+Add `--saturation-smoke` to the iOS `--smoke` launch, or add
+`--ez saturationSmoke true` to the Android `mediaSmoke` launch. Keep renderer
+smoke disabled for this case. The sample retains three distinct source leases,
+pauses and seeks to 750 ms with the frame budget full. It checks pending work
+past 1.5 seconds, releases the leases after two seconds and requires a new paused
+frame before resuming. Stop must still present frame zero and teardown must
+retire all source storage. This tests real provider saturation, separately from
+mocked completion or a diagnostic GPU readback.

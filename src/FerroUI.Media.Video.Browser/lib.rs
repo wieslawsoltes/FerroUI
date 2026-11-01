@@ -120,6 +120,9 @@ struct Session {
     stream: BrowserFrameStream,
 }
 impl NativeMediaSession for Session {
+    fn has_pending_frame_work(&self) -> bool {
+        self.stream.has_pending_frame_work()
+    }
     fn state(&self) -> Result<MediaPlaybackSession, MediaError> {
         let video = &self.video.0;
         let state = match video.state() {

@@ -93,6 +93,7 @@ impl WebGlFrameProducer {
             generation,
             last_sequence: Cell::new(0),
             pending: RefCell::new(None),
+            retrying: Cell::new(false),
         }
     }
     pub fn is_current(&self) -> bool {
@@ -186,6 +187,9 @@ impl WebGlFrameProducer {
             // decoder-owned storage are not observable through WebGL.
             retained_bytes: bytes,
         };
+        if self.budget.limits().frames == 0 || bytes > self.budget.limits().bytes {
+            return Err(unsupported("Frame exceeds the configured storage budget"));
+        }
         let reservation = match self.budget.reserve(metadata) {
             Ok(v) => v,
             Err(FrameError::BudgetExceeded) => return Ok(None),
@@ -235,12 +239,17 @@ pub struct BrowserFrameStream {
     generation: u64,
     last_sequence: Cell<u64>,
     pending: RefCell<Option<PendingWebGlFrame>>,
+    retrying: Cell<bool>,
 }
 impl BrowserFrameStream {
     /// Retire queued producer output on seek/stop. Submitted GPU storage is
     /// still held by its completion; the last native sequence stays rejected.
     pub fn clear(&self) {
         self.pending.borrow_mut().take();
+        self.retrying.set(false);
+    }
+    pub fn has_pending_frame_work(&self) -> bool {
+        self.pending.borrow().is_some() || self.retrying.get()
     }
     pub fn poll(
         &self,
@@ -279,6 +288,9 @@ impl BrowserFrameStream {
         )? {
             self.last_sequence.set(sample.sequence);
             *self.pending.borrow_mut() = Some(pending);
+            self.retrying.set(false);
+        } else {
+            self.retrying.set(true);
         }
         Ok(frame)
     }

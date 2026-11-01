@@ -91,6 +91,12 @@ impl Default for MediaPlayerOptions {
 /// Implementations must release native resources on Drop and keep returned frame
 /// allocations immutable until the last lease/GPU completion releases them.
 pub trait NativeMediaSession {
+    /// A producer/import is still pending, including a ready native image
+    /// waiting for bounded GPU storage. Presentation must keep polling even
+    /// while native playback is paused or ended; submission is not readiness.
+    fn has_pending_frame_work(&self) -> bool {
+        false
+    }
     fn state(&self) -> Result<MediaPlaybackSession, MediaError>;
     fn play(&self) -> MediaFuture<()>;
     fn pause(&self) -> Result<(), MediaError>;
@@ -234,6 +240,13 @@ impl MediaPlayer {
     }
     pub fn frames(&self) -> Arc<FrameMailbox> {
         self.0.frames.clone()
+    }
+    pub fn has_pending_frame_work(&self) -> bool {
+        self.0
+            .native
+            .borrow()
+            .as_ref()
+            .is_some_and(|native| native.has_pending_frame_work())
     }
     pub fn requested_state(&self) -> PlaybackIntent {
         self.0.intent.get()

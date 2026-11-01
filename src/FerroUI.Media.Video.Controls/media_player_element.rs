@@ -358,14 +358,18 @@ impl MediaPlayerElement {
                 let settling = view.settling_ticks.get();
                 view.settling_ticks.set(settling.saturating_sub(1));
                 let state = player.playback_session().state;
-                // Bounded readiness/seek retry; static/paused images never keep a
-                // full-rate timer alive. A later Play/seek starts another interval.
+                // Settled paused images stop polling. Producer/import work keeps
+                // its bounded storage alive until readiness or a reported failure.
                 let keep = matches!(
                     state,
                     MediaPlaybackState::Playing
                         | MediaPlaybackState::Buffering
                         | MediaPlaybackState::Opening
-                ) || (settling > 0 && state == MediaPlaybackState::Paused);
+                ) || (settling > 0 && state == MediaPlaybackState::Paused)
+                    || (matches!(
+                        state,
+                        MediaPlaybackState::Paused | MediaPlaybackState::Ended
+                    ) && player.has_pending_frame_work());
                 if !keep {
                     view.timer.borrow_mut().take();
                 }
@@ -387,5 +391,107 @@ impl MediaPlayerElement {
         };
         self.start_polling();
         player.play()
+    }
+}
+
+#[cfg(test)]
+mod readiness_tests {
+    use super::*;
+    use ferroui_controls::{
+        testing::{TestServices, UnitTestApplication},
+        Window,
+    };
+    use ferroui_media_video::{frames::FrameLease, MediaPlaybackSession, NativeMediaSession};
+    struct Native {
+        pending: Cell<bool>,
+        reads: Cell<u32>,
+    }
+    impl NativeMediaSession for Native {
+        fn has_pending_frame_work(&self) -> bool {
+            self.pending.get()
+        }
+        fn state(&self) -> Result<MediaPlaybackSession, MediaError> {
+            Ok(MediaPlaybackSession {
+                state: MediaPlaybackState::Paused,
+                ..Default::default()
+            })
+        }
+        fn play(&self) -> MediaFuture<()> {
+            Box::pin(async { Ok(()) })
+        }
+        fn pause(&self) -> Result<(), MediaError> {
+            Ok(())
+        }
+        fn seek(&self, position: Duration) -> MediaFuture<Duration> {
+            Box::pin(async move { Ok(position) })
+        }
+        fn set_audio(&self, _: f64, _: bool) -> Result<(), MediaError> {
+            Ok(())
+        }
+        fn take_frame(&self) -> Result<Option<FrameLease>, MediaError> {
+            self.reads.set(self.reads.get() + 1);
+            Ok(None)
+        }
+    }
+    struct Provider(Rc<Native>);
+    impl MediaPlayerProvider for Provider {
+        fn open(
+            &self,
+            _: MediaSource,
+            _: u64,
+            _: u64,
+            _: ferroui_media_video::frames::PresentationPolicy,
+        ) -> MediaFuture<Rc<dyn NativeMediaSession>> {
+            let native: Rc<dyn NativeMediaSession> = self.0.clone();
+            Box::pin(async move { Ok(native) })
+        }
+    }
+    fn tick() {
+        Dispatcher::ui_thread().run_jobs(None);
+        for timer in Dispatcher::timers_for_unit_tests() {
+            Dispatcher::force_fire_timer_for_unit_tests(&timer);
+        }
+        Dispatcher::ui_thread().run_jobs(None);
+    }
+    #[test]
+    fn paused_producer_outlives_settling_interval_then_sleeps() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let native = Rc::new(Native {
+            pending: Cell::new(true),
+            reads: Cell::new(0),
+        });
+        let player = MediaPlayer::new(Rc::new(Provider(native.clone())));
+        let mut open =
+            player.set_source(MediaSource::Url("https://example.invalid/video.mp4".into()));
+        let mut cx = std::task::Context::from_waker(std::task::Waker::noop());
+        assert!(open.as_mut().poll(&mut cx).is_ready());
+        let view = MediaPlayerElement::new();
+        view.set_media_player(Some(&player), None);
+        let window = Window::new();
+        window.set_content(Some(Control::boxed(view.clone())));
+        window.show();
+        for _ in 0..65 {
+            tick();
+        }
+        assert!(
+            view.timer.borrow().is_some(),
+            "pending GPU work must survive the settling timeout"
+        );
+        let reads = native.reads.get();
+        tick();
+        assert!(native.reads.get() > reads);
+        native.pending.set(false);
+        tick();
+        assert!(
+            view.timer.borrow().is_none(),
+            "a settled paused image must stop polling"
+        );
+        let reads = native.reads.get();
+        for _ in 0..4 {
+            tick();
+        }
+        assert_eq!(native.reads.get(), reads);
+        window.close();
+        tick();
     }
 }

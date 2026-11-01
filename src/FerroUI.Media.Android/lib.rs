@@ -247,6 +247,16 @@ impl AndroidFrameStream {
         self.pending.borrow_mut().take();
         self.source.borrow_mut().take();
     }
+    pub fn has_pending_frame_work(&self) -> bool {
+        !self.stopped.get()
+            && (self.job.borrow().is_some()
+                || self.pending.borrow().is_some()
+                || self
+                    .source
+                    .borrow()
+                    .as_ref()
+                    .is_some_and(|source| call_boolean(&source.0.java, "pending", "()Z", &[])))
+    }
     pub fn take_frame(&self, width: u32, height: u32) -> Result<Option<FrameLease>, MediaError> {
         self.take_oriented_frame(width, height, FrameRotation::None, false)
     }
@@ -343,7 +353,7 @@ impl AndroidFrameStream {
             let Some((sequence, timestamp, swaps_axes)) = acquired else {
                 return Ok(None);
             };
-            if sequence <= last.swap(sequence, std::sync::atomic::Ordering::AcqRel) {
+            if sequence <= last.load(std::sync::atomic::Ordering::Acquire) {
                 return Ok(None);
             }
             identity.sequence = if capture_identity {
@@ -463,7 +473,7 @@ impl AndroidFrameStream {
             let normalize_color = call_boolean(&source.0.java, "colorConversion", "()Z", &[]);
             let counters = producer.budget().counters();
             let owner = source.clone();
-            producer
+            let output = producer
                 .produce_owned(metadata, owner, move |_, output| {
                     counters.gpu_conversion(GpuTransferReason::PixelFormatConversion);
                     if normalize_color {
@@ -487,7 +497,11 @@ impl AndroidFrameStream {
                         Err(native_error(error))
                     }
                 })
-                .await
+                .await?;
+            if output.is_some() {
+                last.store(sequence, std::sync::atomic::Ordering::Release);
+            }
+            Ok(output)
         })));
         Ok(None)
     }

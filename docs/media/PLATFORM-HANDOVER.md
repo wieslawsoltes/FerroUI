@@ -127,7 +127,11 @@ clients still own scenes, rendering libraries and hit testing.
 Video implements `MediaPlayerProvider::open` and `NativeMediaSession`: actual
 state, play/pause/stop, native achieved seek, audio controls and shared frames.
 Core code handles preparation-time intent, superseded commands, source epochs,
-looping and caller ownership. Its default native `stop` pauses; override it when
+looping and caller ownership. `has_pending_frame_work` keeps paused/ended
+presentation polling while an import/fence or a bounded native retry slot is
+pending. Do not advance source sequence admission on budget saturation. Desktop
+streams retain at most one additional retry sample, replacing it with newer
+native output. Its default native `stop` pauses; override it when
 pending producer output needs retirement. The player separately requests zero
 for seekable media. Report real seek ranges, not merely a nonempty range list.
 
@@ -212,6 +216,7 @@ They are functional evidence, not a frozen performance acceptance profile.
 | Check | Result and limit |
 | --- | --- |
 | Windows/Linux provider adapters | Rust cross-checks passed with the native bridge deliberately skipped; C/C++ compilation, linking, codec/driver behavior and native samples remain unverified |
+| Paused producer saturation | Android 16 KiB and iOS 27.0 simulator runs retained three real source leases across a paused seek, observed pending work after 1.5 seconds, then published the sought frame after release. Stop/frame-zero and zero retained source frames passed; preview CPU counters stayed zero. A UI contract test separately checks polling beyond the settling interval and idle shutdown. |
 | Renderer scheduling | Four mailbox notification/lifetime tests and two UI scheduling tests cover worker dispatch, disposal, static idle, ancestor visibility and continuous work. macOS/iOS native playback/Metal projection and Android 16 KiB playback/GLES projection and teardown passed again. Android camera + QR + JPEG also continued through rotation and released hardware/output after Stop. |
 | Native alias contracts | Three GL producer/retirement unit tests passed, including retention through consumer completion, queued native cleanup and lost-context quarantine; this does not prove a native DMA-BUF/DXGI import |
 | Android renderer accessibility | Updated APK's native automation tree reports RendererHost focusable; camera stop again released hardware and renderer storage. Full keyboard/screen-reader acceptance remains open. |
@@ -260,7 +265,11 @@ files or automatically available on another machine. Important names include
 `frame-notification-contracts.log`, `renderer-notification-ui-tests.log`,
 `renderer-notification-macos-smoke.log`, `renderer-notification-ios-smoke.log`,
 `renderer-notification-android-smoke.log`, `renderer-notification-camera-qr.log`
-and `renderer-notification-browser-regression.log`. Re-run applicable gates on the receiving host.
+and `renderer-notification-browser-regression.log`, `pending-frame-ui-tests.log`,
+`pending-frame-contracts.log`, `pending-frame-ios-saturation.log` and
+`pending-frame-android-saturation.log`, `pending-frame-macos-smoke.log`,
+`pending-frame-browser-regression.log`, `pending-frame-windows-bindings.log` and
+`pending-frame-linux-bindings.log`. Re-run applicable gates on the receiving host.
 
 Useful commands, from the repository root:
 

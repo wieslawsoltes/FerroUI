@@ -22,3 +22,5 @@ ferroui-media-video.workspace = true
 ferroui-build-scan.workspace = true
 [package.metadata.release]
 group = "controls"
+[dev-dependencies]
+ferroui-controls = {workspace=true,features=["testing"]}

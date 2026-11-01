@@ -27,6 +27,9 @@ public final class SurfaceFrames {
     private int external, program, vao, framebuffer;
     private long sequence, timestamp;
     private volatile boolean closed;
+    // A latched native image remains retryable when Rust cannot reserve an
+    // immutable output yet. New callbacks coalesce into this single slot.
+    private volatile boolean latched;
     private String error = "";
     private int surfaceUsers;
     private boolean orphaned;
@@ -92,7 +95,7 @@ public final class SurfaceFrames {
     }
     public synchronized Surface surface() { return surface; }
     public String error() { return error; }
-    public boolean pending() { return pending.get() && !closed; }
+    public boolean pending() { return (pending.get() || latched) && !closed; }
     public long sequence() { return sequence; }
     public long timestamp() { return timestamp; }
     public boolean swapsAxes() { return Math.abs(transform[1])>Math.abs(transform[0]) && Math.abs(transform[4])>Math.abs(transform[5]); }
@@ -110,6 +113,7 @@ public final class SurfaceFrames {
             if(!pending.getAndSet(false)) return "";
             source.updateTexImage(); source.getTransformMatrix(transform);
             timestamp=source.getTimestamp(); sequence++;
+            latched=true;
             if(cameraColorMode){
                 dataSpace=android.os.Build.VERSION.SDK_INT>=33?source.getDataSpace():0;
                 if(colorTag!=dataSpace){cameraColor=CameraColor.from(dataSpace,untaggedColor);colorTag=dataSpace;}
@@ -173,6 +177,7 @@ public final class SurfaceFrames {
             GLES30.glUniformMatrix4fv(GLES30.glGetUniformLocation(program,"imageTransform"),1,false,transform,0);
             GLES30.glDrawArrays(GLES30.GL_TRIANGLES,0,3);
             int error = GLES30.glGetError();
+            if(error == GLES30.GL_NO_ERROR) latched=false;
             return error == GLES30.GL_NO_ERROR ? "" : "Surface conversion GL error " + error;
         } catch (RuntimeException failure) { return failure.toString(); }
         finally {
@@ -196,7 +201,7 @@ public final class SurfaceFrames {
     public synchronized boolean release(boolean validContext) {
         if (closed) return true;
         if(surfaceUsers>0) { if(!validContext) orphaned=true; return !validContext; }
-        closed=true; pending.set(false);
+        closed=true; pending.set(false); latched=false;
         if (surface!=null) { surface.release(); surface=null; }
         if (source!=null) { source.setOnFrameAvailableListener(null); source.release(); source=null; }
         if(counted) {counted=false;LIVE.decrementAndGet();}

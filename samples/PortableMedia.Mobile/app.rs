@@ -96,6 +96,34 @@ fn is_smoke() -> bool {
             })
     }
 }
+fn saturation_smoke() -> bool {
+    #[cfg(target_os = "ios")]
+    return std::env::args().any(|v| v == "--saturation-smoke");
+    #[cfg(target_os = "android")]
+    {
+        use ferroui_android::{interop::java::*, FerroActivity};
+        FerroActivity::current_main_activity()
+            .and_then(|v| {
+                call_object(
+                    v.java_object(),
+                    "getIntent",
+                    "()Landroid/content/Intent;",
+                    &[],
+                )
+            })
+            .is_some_and(|v| {
+                call_boolean(
+                    &v,
+                    "getBooleanExtra",
+                    "(Ljava/lang/String;Z)Z",
+                    &[
+                        JavaValue::String("saturationSmoke"),
+                        JavaValue::Boolean(false),
+                    ],
+                )
+            })
+    }
+}
 fn renderer_smoke() -> bool {
     #[cfg(target_os = "ios")]
     return std::env::args().any(|v| v == "--renderer-smoke");
@@ -558,6 +586,10 @@ fn camera_actions(
     root.children().add(actions);
 }
 fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
+    let saturation = saturation_smoke();
+    let held = std::cell::RefCell::new(Vec::<FrameLease>::new());
+    let released = Cell::new(false);
+    let checked = Cell::new(false);
     let weak = view.downgrade();
     let stage = Rc::new(Cell::new(0));
     let changed = Cell::new(Instant::now());
@@ -595,8 +627,40 @@ fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
                 report(&format!("RESULT: FAIL {:?}", state.error));
                 return false;
             }
+            if saturation && stage.get() == 0 {
+                if let Some(frame) = player.frames().latest() {
+                    if !held
+                        .borrow()
+                        .iter()
+                        .any(|v| v.metadata().identity == frame.metadata().identity)
+                    {
+                        held.borrow_mut().push(frame);
+                    }
+                }
+            }
+            if saturation && matches!(stage.get(), 2 | 3) {
+                let elapsed = changed.get().elapsed();
+                if !checked.get() && elapsed > Duration::from_millis(1500) {
+                    if !player.has_pending_frame_work()
+                        || player.frames().latest().is_some_and(|frame| {
+                            frame.metadata().timestamp >= Duration::from_millis(700)
+                        })
+                    {
+                        report("RESULT: FAIL saturated paused seek lost pending work");
+                        return false;
+                    }
+                    report(&format!("SATURATION_PENDING retained={:?}", budget.usage()));
+                    checked.set(true);
+                }
+                if !released.get() && elapsed > Duration::from_secs(2) {
+                    held.borrow_mut().clear();
+                    released.set(true);
+                    report("SATURATION_RELEASED");
+                }
+            }
             match stage.get() {
-                0 if state.position > Duration::from_millis(200)
+                0 if (!saturation || held.borrow().len() == 3)
+                    && state.position > Duration::from_millis(200)
                     && budget.counters().snapshot().gpu_imports > 0 =>
                 {
                     let counts = budget.counters().snapshot();
@@ -622,6 +686,7 @@ fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
                 }
                 1 if changed.get().elapsed() > Duration::from_millis(200) => {
                     stage.set(2);
+                    changed.set(Instant::now());
                     let stage = stage.clone();
                     let seek = player.seek(Duration::from_millis(750));
                     Dispatcher::ui_thread().invoke_async_task_local(move || async move {
@@ -634,7 +699,15 @@ fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
                         }
                     });
                 }
-                3 => {
+                3 if !saturation
+                    || (released.get()
+                        && player.frames().latest().is_some_and(|v| {
+                            v.metadata().timestamp >= Duration::from_millis(700)
+                        })) =>
+                {
+                    if saturation {
+                        report("SATURATION_RECOVERED_PAUSED_FRAME");
+                    }
                     stage.set(4);
                     let play = player.play();
                     Dispatcher::ui_thread().invoke_async_task_local(move || async move {

@@ -155,6 +155,9 @@ impl Drop for AndroidSession {
     }
 }
 impl NativeMediaSession for AndroidSession {
+    fn has_pending_frame_work(&self) -> bool {
+        self.stream.has_pending_frame_work()
+    }
     fn state(&self) -> Result<MediaPlaybackSession, MediaError> {
         self.check()?;
         let state = match call_int(&self.java, "state", "()I", &[]) {
