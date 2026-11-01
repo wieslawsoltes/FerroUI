@@ -83,6 +83,7 @@ fn recognize_admitted(analysis: &QrAnalysis) -> Result<Vec<QrCandidate>, QrError
             Ok(QrCandidate {
                 frame: metadata.identity,
                 timestamp: metadata.timestamp,
+                frame_geometry: metadata.into(),
                 text: value["text"].as_str().map(String::from),
                 codewords: (!codewords.is_empty()).then_some(codewords),
                 byte_segments: Vec::new(),

@@ -1,7 +1,9 @@
 //! Optional QR recognition; callers borrow native analysis planes and retain
 //! the source frame while decoding. Preview never depends on this package.
 #![forbid(unsafe_code)]
-use ferroui_media::frames::{FrameIdentity, FrameLease, FrameTransferCounters};
+use ferroui_media::frames::{
+    FrameIdentity, FrameLease, FrameMetadata, FrameRegion, FrameRotation, FrameTransferCounters,
+};
 use std::{
     sync::{Arc, Mutex},
     time::Duration,
@@ -75,10 +77,50 @@ pub enum GeometryQuality {
     EstimatedFromFinderPatterns,
     NativeCorners,
 }
+/// Geometry captured with the analyzed image, in the same logical top-left
+/// texture plane as result corners. It owns no native storage or frame lease.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct QrFrameGeometry {
+    pub width: u32,
+    pub height: u32,
+    pub visible: FrameRegion,
+    pub rotation: FrameRotation,
+    pub mirrored: bool,
+    pub top_left_origin: bool,
+}
+impl From<&FrameMetadata> for QrFrameGeometry {
+    fn from(frame: &FrameMetadata) -> Self {
+        Self {
+            width: frame.width,
+            height: frame.height,
+            visible: frame.visible,
+            rotation: frame.rotation,
+            mirrored: frame.mirrored,
+            top_left_origin: frame.top_left_origin,
+        }
+    }
+}
+impl QrFrameGeometry {
+    pub fn validate(&self) -> Result<(), QrError> {
+        let r = self.visible;
+        if self.width == 0
+            || self.height == 0
+            || r.width == 0
+            || r.height == 0
+            || r.x.checked_add(r.width).is_none_or(|x| x > self.width)
+            || r.y.checked_add(r.height).is_none_or(|y| y > self.height)
+        {
+            Err(QrError::InvalidPlane)
+        } else {
+            Ok(())
+        }
+    }
+}
 #[derive(Clone, Debug)]
 pub struct QrCandidate {
     pub frame: FrameIdentity,
     pub timestamp: Duration,
+    pub frame_geometry: QrFrameGeometry,
     pub text: Option<String>,
     /// Decoder's corrected QR codewords, not mislabeled payload bytes.
     pub codewords: Option<Vec<u8>>,

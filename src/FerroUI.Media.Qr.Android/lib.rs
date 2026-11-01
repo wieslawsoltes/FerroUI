@@ -4,10 +4,10 @@
 #![forbid(unsafe_code)]
 use base64::Engine;
 use ferroui_android::interop::java::*;
-use ferroui_media::frames::FrameIdentity;
+use ferroui_media::frames::{FrameIdentity, FrameRegion, FrameRotation};
 use ferroui_media_camera::CameraSession;
 use ferroui_media_camera_android::AndroidCameraContext;
-use ferroui_media_qr::{GeometryQuality, QrCandidate, QrError, QrOptions};
+use ferroui_media_qr::{GeometryQuality, QrCandidate, QrError, QrFrameGeometry, QrOptions};
 use std::{rc::Rc, time::Duration};
 pub struct AndroidQrAnalyzer {
     camera: AndroidCameraContext,
@@ -91,6 +91,43 @@ impl AndroidQrAnalyzer {
         let value: serde_json::Value =
             serde_json::from_str(&text).map_err(|_| QrError::DecodeFailure)?;
         let timestamp = value["timestamp"].as_u64().ok_or(QrError::DecodeFailure)?;
+        let fields = value["frameGeometry"]
+            .as_array()
+            .filter(|v| v.len() == 8)
+            .ok_or(QrError::DecodeFailure)?;
+        let fields = fields
+            .iter()
+            .map(|v| {
+                v.as_u64()
+                    .and_then(|v| u32::try_from(v).ok())
+                    .ok_or(QrError::DecodeFailure)
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        let frame_geometry = QrFrameGeometry {
+            width: fields[0],
+            height: fields[1],
+            visible: FrameRegion {
+                x: fields[2],
+                y: fields[3],
+                width: fields[4],
+                height: fields[5],
+            },
+            rotation: match fields[6] {
+                0 => FrameRotation::None,
+                90 => FrameRotation::Clockwise90,
+                180 => FrameRotation::Clockwise180,
+                270 => FrameRotation::Clockwise270,
+                _ => return Err(QrError::DecodeFailure),
+            },
+            mirrored: match fields[7] {
+                0 => false,
+                1 => true,
+                _ => return Err(QrError::DecodeFailure),
+            },
+            top_left_origin: false,
+        };
+        frame_geometry.validate()?;
+
         value["symbols"]
             .as_array()
             .ok_or(QrError::DecodeFailure)?
@@ -119,6 +156,7 @@ impl AndroidQrAnalyzer {
                         sequence: timestamp,
                     },
                     timestamp: Duration::from_nanos(timestamp),
+                    frame_geometry,
                     text: v["text"].as_str().map(str::to_owned),
                     codewords: None,
                     byte_segments: Vec::new(),

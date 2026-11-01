@@ -246,6 +246,12 @@ public final class CameraController implements LifecycleOwner,Application.Activi
         if(analyzer==expected && !closed) setAnalyzer(null);
     }
     public long geometryEpoch() {synchronized(geometryLock){return (geometryEpoch<<32)^frames.geometryEpoch();}}
+    public int[] analysisFrameGeometry(long expectedEpoch){
+        synchronized(geometryLock){
+            if(closed || previewSensorToBuffer==null || expectedEpoch!=geometryEpoch())return null;
+            return frames.frameGeometry(width,height,desiredRotation,desiredMirror);
+        }
+    }
     public float[] mapAnalysisPoints(ImageProxy image,float[] points,long expectedEpoch) {
         android.graphics.Matrix rawToSensor=new android.graphics.Matrix();
         if(!image.getImageInfo().getSensorToBufferTransformMatrix().invert(rawToSensor)) return null;

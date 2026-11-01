@@ -152,6 +152,7 @@ pub fn decode(
         output.push(QrCandidate {
             frame: analysis.frame.metadata().identity,
             timestamp: analysis.frame.metadata().timestamp,
+            frame_geometry: analysis.frame.metadata().into(),
             text: (!result.getText().contains('\u{fffd}')).then(|| result.getText().to_owned()),
             codewords: Some(result.getRawBytes().clone()),
             byte_segments: result.getByteSegments().clone(),

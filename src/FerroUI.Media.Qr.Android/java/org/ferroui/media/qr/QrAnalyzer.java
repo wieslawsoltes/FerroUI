@@ -35,6 +35,9 @@ public final class QrAnalyzer implements FrameAnalyzer {
     }
     @Override public void analyze(ImageProxy image,CameraController controller) {
         long now=SystemClock.elapsedRealtime();
+        long epoch=controller.geometryEpoch();
+        int[] frameGeometry=controller.analysisFrameGeometry(epoch);
+        if(frameGeometry==null){synchronized(this){dropped++;}image.close();return;}
         synchronized(this) {
             if(closed || !image.getCropRect().equals(new android.graphics.Rect(0,0,image.getWidth(),image.getHeight())) || image.getWidth()>maxWidth || image.getHeight()>maxHeight ||
                 (lastStart>=0 && now-lastStart<intervalMs) || !NATIVE_BUSY.compareAndSet(false,true)) {
@@ -42,7 +45,6 @@ public final class QrAnalyzer implements FrameAnalyzer {
             }
             busy.set(true);lastStart=now;analyzed++;
         }
-        long epoch=controller.geometryEpoch();
         try {
             if(image.getImage()==null) {finish(image);return;}
             // Rotation 0 preserves the raw analysis-buffer coordinate system.
@@ -72,7 +74,8 @@ public final class QrAnalyzer implements FrameAnalyzer {
                             if(bytes!=null && bytes.length<=65536) candidate.put("bytes",android.util.Base64.encodeToString(bytes,android.util.Base64.NO_WRAP));
                             output.put(candidate);
                         }
-                        String value=new JSONObject().put("timestamp",image.getImageInfo().getTimestamp()).put("symbols",output).toString();
+                        JSONArray snapshot=new JSONArray();for(int field:frameGeometry)snapshot.put(field);
+                        String value=new JSONObject().put("timestamp",image.getImageInfo().getTimestamp()).put("frameGeometry",snapshot).put("symbols",output).toString();
                         if(value.length()<=1024*1024) synchronized(this) {
                             if(!closed && !controller.closed() && controller.geometryEpoch()==epoch) {
                                 latest=value;resultAt=now;resultEpoch=epoch;resultController=new java.lang.ref.WeakReference<>(controller);

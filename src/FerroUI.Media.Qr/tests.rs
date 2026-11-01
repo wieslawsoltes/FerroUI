@@ -120,6 +120,11 @@ fn actual_qr_decode_borrows_packed_pixels_and_counts_strided_repacking() {
         )
         .unwrap();
         assert_eq!(results.len(), 1);
+        assert_eq!(
+            results[0].frame_geometry,
+            QrFrameGeometry::from(active.frame.metadata())
+        );
+        results[0].frame_geometry.validate().unwrap();
         assert_eq!(results[0].text.as_deref(), Some("ferroui-shared-texture"));
         assert!(results[0]
             .corners
@@ -158,4 +163,50 @@ fn malformed_strides_and_oversize_are_rejected_before_decode() {
         plane.validate(QrOptions::default()),
         Err(QrError::InputTooLarge)
     );
+}
+
+#[test]
+fn result_geometry_preserves_crop_and_orientation_without_retaining_storage() {
+    let source = frame(160, 90, 1);
+    let mut metadata = source.metadata().clone();
+    metadata.visible = FrameRegion {
+        x: 10,
+        y: 6,
+        width: 144,
+        height: 80,
+    };
+    metadata.rotation = FrameRotation::Clockwise90;
+    metadata.mirrored = true;
+    let geometry = QrFrameGeometry::from(&metadata);
+    drop(source);
+    assert_eq!((geometry.width, geometry.height), (160, 90));
+    assert_eq!(
+        (
+            geometry.visible.x,
+            geometry.visible.y,
+            geometry.visible.width,
+            geometry.visible.height
+        ),
+        (10, 6, 144, 80)
+    );
+    assert_eq!(geometry.rotation, FrameRotation::Clockwise90);
+    assert!(geometry.mirrored);
+    geometry.validate().unwrap();
+    assert!(QrFrameGeometry {
+        visible: FrameRegion {
+            x: u32::MAX,
+            y: 0,
+            width: 2,
+            height: 1
+        },
+        ..geometry
+    }
+    .validate()
+    .is_err());
+    assert!(QrFrameGeometry {
+        height: 0,
+        ..geometry
+    }
+    .validate()
+    .is_err());
 }

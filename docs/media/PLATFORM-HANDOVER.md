@@ -239,6 +239,7 @@ They are functional evidence, not a frozen performance acceptance profile.
 | Android foundation | Native EGL render-thread jobs, nonblocking GL fences and deferred native surface retirement. On an API 35 ARM64 emulator with a verified 16,384-byte kernel page size, one independent texture fed two views and retired; zero preview CPU transfers and zero GPU copies. |
 | Android camera | Separate CameraX 1.5.2 provider and camera preview controls. Emulator permission denial/grant, live GPU preview, native JPEG independently decoded at 1856×1392, and Stop returning camera-service active clients to an empty list. The request-owned/background-copy version also produced a decoded native JPEG and rejected capture completion after Stop. Host JVM contracts check independent photo bytes and late cancellation. |
 | Renderer host | Normal composition control plus client-owned Metal/GLES adapters and projected-plane examples. macOS and iOS 27.0 simulator runs checked transparent coverage/alpha, playback/seek/Stop and renderer-frame retirement. Android GLES ran the corresponding video/plane and counted diagnostic pixel probe on the 16 KiB emulator. Pure Rust/JVM contracts cover input replacement, detach/reattach, queued-job rollback, unknown completion, crop/orientation/mirror and planar QR projection. |
+| QR result geometry | Results own a geometry snapshot without retaining native input. Six Rust contracts cover lifetime, crop/orientation and invalid bounds; macOS Vision and iOS simulator fixtures passed. Android live CameraX analysis ran alongside preview, 3D and independently decoded JPEG on the 16 KiB emulator, then Stop retired renderer frames. |
 | Native QR | macOS Vision decoded two synthetic symbols from retained CoreVideo input; iOS 27.0 simulator did so using the revision-1 CPU analysis profile. Android bundled ML Kit 17.3.0 decoded the same two symbols and checked geometry/raw bytes with network services disabled on the 16 KiB emulator. CameraX live analysis ran at about 10 Hz, dropped excess frames and allowed a separately decoded native JPEG; Stop returned active camera clients to an empty list. Native SDK internal copies remain opaque. |
 | Android playback | Separate Media3 1.8.0 provider with native decoder/audio timing, a bounded presentation-time table, coalesced commands and a dedicated player looper. API 35/16 KiB run passed independent GPU sharing, playback, pause, achieved seek, resume, Stop/frame zero, frame retirement and native surface/player cleanup. Earlier failing runs remain separate evidence; fixes address surface-clock mapping, async command settling and obsolete queued acquisition. |
 
@@ -283,7 +284,9 @@ and `renderer-notification-browser-regression.log`, `pending-frame-ui-tests.log`
 `mobile-navigation-ios-video.log`, `native-source-preparation-contracts-final-2.log`,
 `native-source-preparation-macos.log`, `native-source-preparation-android.log`,
 `native-source-preparation-ios.log`, `native-source-preparation-windows-bindings.log`
-and `native-source-preparation-linux-bindings.log`. Re-run applicable gates on the receiving host.
+and `native-source-preparation-linux-bindings.log`, `qr-frame-geometry-contracts-final.log`,
+`qr-frame-geometry-apple-final.log`, `qr-frame-geometry-android-camera.log` and
+`qr-frame-geometry-ios.log`. Re-run applicable gates on the receiving host.
 
 Useful commands, from the repository root:
 

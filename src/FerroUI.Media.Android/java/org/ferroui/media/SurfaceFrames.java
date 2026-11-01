@@ -130,6 +130,15 @@ public final class SurfaceFrames {
     public int[] remainingOrientation(int rotation,boolean mirror) {
         synchronized(geometryLock) {return hasGeometry && !closed?FrameOrientation.remaining(publishedTransform,rotation,mirror):null;}
     }
+    public int[] frameGeometry(int width,int height,int rotation,boolean mirror){
+        synchronized(geometryLock){
+            if(!hasGeometry || closed || width<=0 || height<=0)return null;
+            int[] remaining=FrameOrientation.remaining(publishedTransform,rotation,mirror);if(remaining==null)return null;
+            boolean swap=Math.abs(publishedTransform[1])>Math.abs(publishedTransform[0]) && Math.abs(publishedTransform[4])>Math.abs(publishedTransform[5]);
+            int w=swap?height:width,h=swap?width:height;
+            return new int[]{w,h,0,0,w,h,remaining[0],remaining[1]};
+        }
+    }
     public int[] videoCrop(int width,int height,int x,int y,int w,int h){
         synchronized(geometryLock){return hasGeometry && !closed?FrameOrientation.outputCrop(publishedTransform,width,height,x,y,w,h):null;}
     }

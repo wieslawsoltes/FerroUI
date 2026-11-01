@@ -123,7 +123,11 @@ ImageAnalysis only when explicitly attached. It borrows native YUV images,
 closes every ImageProxy after actual task completion, keeps only the latest
 queued image and globally limits recognition to one task at 10 Hz. Results expire
 after 250 ms. Sensor/buffer and SurfaceTexture transforms map corners to the
-preview texture without applying orientation twice. Non-full analysis crops are
+preview texture without applying orientation twice. Each candidate carries the
+immutable geometry of its analyzed frame, including dimensions, crop, orientation,
+reflection and texture origin. Overlays can map that snapshot after native input
+storage has retired; they must not substitute the current preview geometry.
+Non-full analysis crops are
 rejected. Native SDK internal copies are opaque; zero framework transfer counters
 do not establish zero internal copying. The optional ML Kit artifact is bundled
 in the APK; no model installation/download metadata is added.
