@@ -54,6 +54,7 @@ jobs:
           "$RUNNER_TEMP/qt-reference/bin/pip" install --only-binary=:all: PySide6-Essentials==6.12.0
           "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/reference/qt_reference.py
           "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/webscene/qt_reference.py
+          "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/workers/qt_reference.py
 
   portability:
     name: Rust 1.89 and Emscripten
