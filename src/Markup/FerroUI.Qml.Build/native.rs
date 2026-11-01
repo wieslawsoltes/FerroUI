@@ -3,9 +3,17 @@
 use ferroui_qml_compiler::{Binding, Document, Expr, Member, MemberKind, Stmt};
 use proc_macro2::TokenStream;
 use quote::quote;
+use std::collections::HashMap;
+
+type FirstRead = Option<(String, Option<String>)>;
 
 #[derive(Default)]
 pub(crate) struct Functions {
+    // Native closures take the receiver and lexical environment from the call
+    // frame. Share identical emitted bodies, retaining the scheduling hint as
+    // part of an evaluator's identity. Source locations stay on the IR member.
+    evaluators: HashMap<(String, FirstRead), usize>,
+    procedures: HashMap<String, usize>,
     pub expressions: Vec<TokenStream>,
     pub first_reads: Vec<TokenStream>,
     pub scripts: Vec<TokenStream>,
@@ -59,22 +67,34 @@ fn statements(body: &mut Vec<Stmt>, out: &mut Functions) -> Result<(), String> {
         return Ok(());
     }
     let code = super::scripts::body(body)?;
-    let index = out.scripts.len();
-    out.scripts.push(quote!(|frame| { let _ = &frame; #code }));
+    let index = *out.procedures.entry(code.to_string()).or_insert_with(|| {
+        let index = out.scripts.len();
+        out.scripts.push(quote!(|frame| { let _ = &frame; #code }));
+        index
+    });
     *body = vec![Stmt::Native(index)];
     Ok(())
 }
 
 fn replace(expr: &mut Expr, out: &mut Functions) -> Result<(), String> {
     let code = emit(expr)?;
-    out.first_reads.push(match expr.first_read() {
-        Some((name, Some(root))) => quote!(Some((#name,Some(#root)))),
-        Some((name, None)) => quote!(Some((#name,None))),
-        None => quote!(None),
+    let read = expr.first_read();
+    let key = (
+        code.to_string(),
+        read.map(|(name, root)| (name.to_owned(), root.map(str::to_owned))),
+    );
+    let index = *out.evaluators.entry(key).or_insert_with(|| {
+        let index = out.expressions.len();
+        out.first_reads.push(match read {
+            Some((name, Some(root))) => quote!(Some((#name,Some(#root)))),
+            Some((name, None)) => quote!(Some((#name,None))),
+            None => quote!(None),
+        });
+        out.expressions
+            .push(quote!(|frame| { let _ = &frame; Ok(#code) }));
+        index
     });
-    *expr = Expr::Native(out.expressions.len());
-    out.expressions
-        .push(quote!(|frame| { let _ = &frame; Ok(#code) }));
+    *expr = Expr::Native(index);
     Ok(())
 }
 
@@ -172,4 +192,41 @@ pub(super) fn emit(expr: &Expr) -> Result<TokenStream, String> {
             quote!({ let receiver=#receiver; let args=vec![#(#args),*]; frame.invoke(receiver,#method,args)? })
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn lowering_reuses_equivalent_evaluators_and_script_bodies() {
+        let mut document = ferroui_qml_compiler::parse(
+            r#"import QtQml
+            QtObject {
+                property int a: input + 1
+                property int b: input + 1
+                property int c: input - 1
+                function f() { return input }
+                function g() { return input }
+            }"#,
+        )
+        .unwrap();
+        let functions = lower(&mut document).unwrap();
+        assert_eq!(functions.expressions.len(), 2);
+        assert_eq!(functions.first_reads.len(), 2);
+        assert_eq!(functions.scripts.len(), 1);
+        let indices: Vec<_> = document
+            .root
+            .members
+            .iter()
+            .filter_map(|member| match &member.kind {
+                MemberKind::Property {
+                    value: Some(Binding::Expr(Expr::Native(index))),
+                    ..
+                } => Some(*index),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(indices, [0, 0, 1]);
+    }
 }

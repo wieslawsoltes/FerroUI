@@ -38,3 +38,7 @@ required-features = ["diagnostics"]
 
 [package.metadata.release]
 group = "markup"
+
+[[bench]]
+name = "compiler"
+harness = false

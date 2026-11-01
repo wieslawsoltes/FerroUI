@@ -4,7 +4,28 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
+/// The linker asks the same source file for its native and composite types
+/// at every instantiation. Cache hits and misses inside a single load, after
+/// its first lookup has registered the Cargo dependencies.
+#[derive(Default)]
+struct Resolutions {
+    identified: bool,
+    imports: Vec<Import>,
+    components: BTreeMap<String, Option<ComponentSource>>,
+    singletons: BTreeMap<String, Option<ComponentSource>>,
+}
+
+impl Resolutions {
+    fn entries(&mut self, kind: Lookup) -> &mut BTreeMap<String, Option<ComponentSource>> {
+        match kind {
+            Lookup::Component => &mut self.components,
+            Lookup::Singleton => &mut self.singletons,
+        }
+    }
+}
+
 pub(crate) struct Files {
+    resolutions: BTreeMap<String, Resolutions>,
     project: PathBuf,
     package: Option<PathBuf>,
     component_entries: BTreeMap<String, PathBuf>,
@@ -21,6 +42,7 @@ impl Files {
         plugins: BTreeSet<ferroui_qml_compiler::qmldir::StaticPlugin>,
     ) -> Self {
         Self {
+            resolutions: BTreeMap::new(),
             project: PathBuf::new(),
             package: None,
             component_entries: BTreeMap::new(),
@@ -267,6 +289,36 @@ impl ComponentResolver for Files {
 
 impl Files {
     fn lookup(
+        &mut self,
+        from: &str,
+        imports: &[Import],
+        ty: &str,
+        kind: Lookup,
+    ) -> Result<Option<ComponentSource>, String> {
+        let identified = self.modules.has_origin(Path::new(from));
+        let cache = self.resolutions.entry(from.to_owned()).or_default();
+        // A file may first be found via a directory import and later acquire
+        // private names/version selection from an identified module.
+        if cache.identified != identified || cache.imports != imports {
+            *cache = Resolutions {
+                identified,
+                imports: imports.to_vec(),
+                ..Default::default()
+            };
+        }
+        if let Some(cached) = cache.entries(kind).get(ty) {
+            return Ok(cached.clone());
+        }
+        let resolved = self.find(from, imports, ty, kind)?;
+        self.resolutions
+            .get_mut(from)
+            .expect("source cache")
+            .entries(kind)
+            .insert(ty.to_owned(), resolved.clone());
+        Ok(resolved)
+    }
+
+    fn find(
         &mut self,
         from: &str,
         imports: &[Import],

@@ -113,6 +113,15 @@ impl<'a> Compiler<'a> {
         self
     }
 
+    /// Check linkage, host validation and executable lowering without rendering
+    /// the generated Rust source. This reports the same unsupported expressions
+    /// or statements as compilation.
+    pub fn check(&self, input: impl AsRef<Path>) -> Result<(), BuildError> {
+        let mut linked = self.load(input)?;
+        native::lower(&mut linked.document).map_err(BuildError)?;
+        Ok(())
+    }
+
     pub fn compile(&self, input: impl AsRef<Path>) -> Result<Output, BuildError> {
         let linked = self.load(input)?;
         Ok(Output {

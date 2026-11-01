@@ -72,8 +72,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             return Err(USAGE.into());
         }
     }
-    let output = compiler.compile(PathBuf::from(input.ok_or(USAGE)?))?;
-    if !check {
+    let input = PathBuf::from(input.ok_or(USAGE)?);
+    if check {
+        compiler.check(input)?;
+    } else {
+        let output = compiler.compile(input)?;
         use std::io::Write;
         std::io::stdout().lock().write_all(output.rust.as_bytes())?;
     }

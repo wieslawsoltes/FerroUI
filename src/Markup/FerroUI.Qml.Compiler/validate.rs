@@ -1,5 +1,6 @@
 //! Source-level invariants shared by interpreted and Cargo-compiled components.
 use crate::{Binding, Diagnostic, Document, Expr, Member, MemberKind, Object, SourceSpan};
+use std::borrow::Cow;
 use std::collections::HashSet;
 
 /// Validate declarations and assignments before creating any runtime objects.
@@ -84,12 +85,12 @@ fn validate_object<'a>(
                     ));
                 }
                 if let Some(value) = value {
-                    assign(&mut bindings, name.clone(), source, span)?;
+                    assign(&mut bindings, Cow::Borrowed(name), source, span)?;
                     binding(value, ids, source)?;
                 }
             }
             MemberKind::Binding { name, value } => {
-                assign(&mut bindings, name.clone(), source, span)?;
+                assign(&mut bindings, Cow::Borrowed(name), source, span)?;
                 if matches!(
                     object.type_name.rsplit('.').next(),
                     Some("Repeater" | "ListView")
@@ -105,7 +106,9 @@ fn validate_object<'a>(
             MemberKind::Group { name, members } => {
                 group(name, members, &mut bindings, ids, source)?
             }
-            MemberKind::Handler { name, .. } => assign(&mut bindings, name.clone(), source, span)?,
+            MemberKind::Handler { name, .. } => {
+                assign(&mut bindings, Cow::Borrowed(name), source, span)?
+            }
             MemberKind::Child(child)
                 if matches!(
                     object.type_name.rsplit('.').next(),
@@ -124,34 +127,38 @@ fn validate_object<'a>(
     Ok(())
 }
 
-fn assign(
-    bindings: &mut HashSet<String>,
-    name: String,
+fn assign<'a>(
+    bindings: &mut HashSet<Cow<'a, str>>,
+    name: Cow<'a, str>,
     source: &str,
     span: SourceSpan,
 ) -> Result<(), Diagnostic> {
-    if bindings.contains(&name) {
+    if let Some(name) = bindings.replace(name) {
         return Err(Diagnostic::new(
             source,
             span,
             format!("duplicate binding for '{name}'"),
         ));
     }
-    bindings.insert(name);
     Ok(())
 }
 
 fn group<'a>(
     prefix: &str,
     members: &'a [Member],
-    bindings: &mut HashSet<String>,
+    bindings: &mut HashSet<Cow<'a, str>>,
     ids: &mut HashSet<&'a str>,
     source: &str,
 ) -> Result<(), Diagnostic> {
     for member in members {
         match &member.kind {
             MemberKind::Binding { name, value } => {
-                assign(bindings, format!("{prefix}.{name}"), source, member.span)?;
+                assign(
+                    bindings,
+                    Cow::Owned(format!("{prefix}.{name}")),
+                    source,
+                    member.span,
+                )?;
                 binding(value, ids, source)?;
             }
             MemberKind::Group { name, members } => {

@@ -71,6 +71,10 @@ impl IdentifiedModules {
         }
     }
 
+    pub(crate) fn has_origin(&self, path: &Path) -> bool {
+        self.origins.contains_key(path)
+    }
+
     pub(crate) fn type_key(&self, path: &Path) -> Option<String> {
         let module = self.origins.get(path)?;
         // The directory suffix distinguishes versioned module directories.

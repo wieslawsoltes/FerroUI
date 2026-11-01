@@ -148,9 +148,12 @@ impl<'s> Scanner<'s> {
     }
 
     fn take_while(&mut self, predicate: impl Fn(char) -> bool) {
-        while self.peek().is_some_and(&predicate) {
-            self.next();
-        }
+        let len = self
+            .remaining()
+            .char_indices()
+            .find(|(_, ch)| !predicate(*ch))
+            .map_or(self.remaining().len(), |(index, _)| index);
+        self.pos += len;
     }
 
     fn error(&self, start: usize, message: &str) -> Diagnostic {
@@ -214,6 +217,14 @@ impl<'s> Scanner<'s> {
         }
         if ch == '"' || ch == '\'' {
             return self.string(ch).map(Kind::String);
+        }
+        // Structural punctuation never starts a multi-character operator.
+        if matches!(
+            ch,
+            '{' | '}' | '[' | ']' | '(' | ')' | ';' | ':' | ',' | '.' | '~'
+        ) {
+            self.pos += 1;
+            return Ok(Kind::Symbol(&self.source[start..self.pos]));
         }
         const OPERATORS: &[&str] = &[
             ">>>=", "===", "!==", "**=", "<<=", ">>=", ">>>", "??=", "&&=", "||=", "=>", "==",
