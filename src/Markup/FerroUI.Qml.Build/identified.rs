@@ -48,6 +48,7 @@ pub(crate) enum Lookup {
 }
 
 pub(crate) struct IdentifiedModules {
+    plugins: BTreeSet<ferroui_qml_compiler::qmldir::StaticPlugin>,
     roots: Vec<PathBuf>,
     manifests: BTreeMap<PathBuf, Option<Rc<ModuleDefinition>>>,
     /// An exported source may have a filename unrelated to its public type name.
@@ -57,8 +58,12 @@ pub(crate) struct IdentifiedModules {
 }
 
 impl IdentifiedModules {
-    pub(crate) fn new(roots: Vec<PathBuf>) -> Self {
+    pub(crate) fn new(
+        roots: Vec<PathBuf>,
+        plugins: BTreeSet<ferroui_qml_compiler::qmldir::StaticPlugin>,
+    ) -> Self {
         Self {
+            plugins,
             roots,
             manifests: BTreeMap::new(),
             origins: BTreeMap::new(),
@@ -91,8 +96,11 @@ impl IdentifiedModules {
         }
         let loaded = match fs::read_to_string(&path) {
             Ok(source) => {
-                let definition = parse_directory_manifest(&source)
+                let mut definition = parse_directory_manifest(&source)
                     .map_err(|error| format!("{}:{error}", path.display()))?;
+                definition
+                    .bind_static_plugins(&self.plugins)
+                    .map_err(|e| format!("{}: {e}", path.display()))?;
                 self.watched.insert(canonical(&path)?);
                 Some(Rc::new(definition))
             }
@@ -114,12 +122,6 @@ impl IdentifiedModules {
         manifest: Rc<ModuleDefinition>,
         request: RequestedVersion,
     ) -> Result<Module> {
-        if let Some(plugin) = manifest.plugins.iter().find(|p| !p.optional) {
-            return Err(format!(
-                "QML module '{}' requires unsupported native Qt plugin '{}'",
-                manifest.uri, plugin.name
-            ));
-        }
         let version = manifest.select(request)?.version;
         Ok(Module {
             dir: canonical(dir)?,
@@ -228,8 +230,37 @@ impl IdentifiedModules {
             self.visit(&item, result, seen, stack)?;
         }
         stack.remove(&import.uri);
+        if module.manifest.has_native_exports() {
+            result.push(Dependency::Native(import.clone()));
+        }
         result.push(Dependency::Module(module));
         Ok(())
+    }
+
+    pub(crate) fn implicit_native(&self, from: &Path) -> Option<Import> {
+        let module = self.origins.get(from)?;
+        module.manifest.has_native_exports().then(|| Import {
+            uri: module.manifest.uri.clone(),
+            version: module.version.map(|v| v.to_string()),
+            is_path: false,
+            alias: None,
+            span: Default::default(),
+        })
+    }
+
+    pub(crate) fn directory_native(
+        &mut self,
+        dir: &Path,
+        import: &Import,
+    ) -> Result<Option<Import>> {
+        let Some(manifest) = self.manifest(&canonical(dir)?)? else {
+            return Ok(None);
+        };
+        Ok(manifest.has_native_exports().then(|| Import {
+            uri: manifest.uri.clone(),
+            is_path: false,
+            ..import.clone()
+        }))
     }
 
     pub(crate) fn native_imports(&mut self, import: &Import) -> Result<Vec<Import>> {

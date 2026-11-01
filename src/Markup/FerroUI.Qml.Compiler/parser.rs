@@ -371,6 +371,7 @@ impl<'s> Parser<'s> {
                 let start = p.token().span.start;
                 let kind = p.member()?;
                 members.push(Member {
+                    annotation_imports: None,
                     scope: None,
                     kind,
                     span: p.span(start),

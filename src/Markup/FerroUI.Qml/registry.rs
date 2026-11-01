@@ -186,6 +186,7 @@ impl TypeDefinition {
 /// A registry explicitly owns the modules visible to a QML component.
 #[derive(Clone)]
 pub struct TypeRegistry {
+    pub(crate) plugins: BTreeSet<crate::ir::qmldir::StaticPlugin>,
     pub(crate) component_import_paths: Vec<url::Url>,
     pub(crate) component_transport: Option<Rc<dyn crate::network::ComponentTransport>>,
     imports: BTreeMap<String, Vec<String>>,
@@ -200,6 +201,38 @@ impl Default for TypeRegistry {
 }
 
 impl TypeRegistry {
+    /// Install a host plugin atomically. A failed initializer leaves the original registry
+    /// intact. Reinstalling the same module/name/version does not rerun its initializer.
+    pub fn install_plugin(
+        &mut self,
+        plugin: crate::ir::qmldir::StaticPlugin,
+        initialize: impl FnOnce(&mut TypeRegistry) -> Result<(), Error>,
+    ) -> Result<(), Error> {
+        if self.plugins.contains(&plugin) {
+            return Ok(());
+        }
+        let mut staged = self.clone();
+        staged.plugins.insert(plugin.clone());
+        initialize(&mut staged)?;
+        if !staged.modules.contains_key(&plugin.module) {
+            return Err(Error::new(format!(
+                "plugin '{}' registered no module '{}'",
+                plugin.name, plugin.module
+            )));
+        }
+        let maximum = staged
+            .versions
+            .entry((plugin.module, plugin.version.major))
+            .or_default();
+        *maximum = (*maximum).max(plugin.version.minor);
+        *self = staged;
+        Ok(())
+    }
+
+    pub fn static_plugins(&self) -> impl Iterator<Item = &crate::ir::qmldir::StaticPlugin> {
+        self.plugins.iter()
+    }
+
     /// Add a directory in which to look up identified modules for remote QML.
     /// The first matching same-origin module wins (e.g. Lab.Widgets/qmldir
     /// is located under Lab/Widgets/ in this directory).
@@ -234,6 +267,7 @@ impl TypeRegistry {
 
     pub fn new() -> Self {
         let mut registry = Self {
+            plugins: BTreeSet::new(),
             component_transport: None,
             component_import_paths: Vec::new(),
             imports: BTreeMap::new(),

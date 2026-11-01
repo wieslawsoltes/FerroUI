@@ -34,6 +34,7 @@ pub struct Compiler<'a> {
     worker_entries: BTreeSet<PathBuf>,
     validate: Option<Validate<'a>>,
     import_paths: Vec<PathBuf>,
+    plugins: BTreeSet<ferroui_qml_compiler::qmldir::StaticPlugin>,
     component_entries: BTreeSet<PathBuf>,
 }
 
@@ -88,6 +89,12 @@ impl<'a> Compiler<'a> {
         self
     }
 
+    /// Supply a qmldir plugin that the application registers in its TypeRegistry.
+    pub fn static_plugin(mut self, plugin: ferroui_qml_compiler::qmldir::StaticPlugin) -> Self {
+        self.plugins.insert(plugin);
+        self
+    }
+
     /// Add a directory containing URI modules such as `Acme/Controls/qmldir`.
     pub fn import_path(mut self, path: impl Into<PathBuf>) -> Self {
         self.import_paths.push(path.into());
@@ -116,7 +123,7 @@ impl<'a> Compiler<'a> {
 
     /// Parse, resolve and validate without generating a Rust module.
     pub fn load(&self, input: impl AsRef<Path>) -> Result<LinkedDocument, BuildError> {
-        let mut files = files::Files::new(self.import_paths.clone());
+        let mut files = files::Files::new(self.import_paths.clone(), self.plugins.clone());
         #[cfg(feature = "javascript")]
         if self.javascript {
             files

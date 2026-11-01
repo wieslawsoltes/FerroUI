@@ -274,10 +274,15 @@ impl Graph {
             #[cfg(feature = "javascript")]
             self.scripts.receive(url, text)?;
         } else if url != &self.entry && url.path().ends_with("/qmldir") {
-            let manifest = text
+            let mut manifest = text
                 .map(ir::qmldir::parse_directory_manifest)
                 .transpose()
                 .map_err(|e| format!("{url}: {e}"))?;
+            if let Some(manifest) = &mut manifest {
+                manifest
+                    .bind_static_plugins(&types.plugins)
+                    .map_err(|e| format!("{url}: {e}"))?;
+            }
             self.manifests.insert(url.clone(), manifest);
         } else {
             let doc = text
@@ -369,6 +374,17 @@ struct Resolver<'a> {
 }
 
 impl Resolver<'_> {
+    fn plugin_import(&self, descriptor: &Url, alias: Option<String>) -> Option<ir::Import> {
+        let module = self.manifests.get(descriptor)?.as_ref()?;
+        module.has_native_exports().then(|| ir::Import {
+            uri: module.uri.clone(),
+            is_path: false,
+            version: None,
+            alias,
+            span: Default::default(),
+        })
+    }
+
     fn dependency(
         &mut self,
         base: &Url,
@@ -393,11 +409,6 @@ impl Resolver<'_> {
                     "{descriptor}: expected module {}, found {}",
                     identified.unwrap().uri,
                     manifest.uri
-                ));
-            }
-            if manifest.plugins.iter().any(|p| !p.optional) {
-                return Err(format!(
-                    "{descriptor}: a remote module cannot load a native plugin"
                 ));
             }
             let version = import
@@ -440,8 +451,31 @@ impl ir::ComponentResolver for Resolver<'_> {
         imports: &[ir::Import],
     ) -> Result<Vec<ir::Import>, String> {
         let base = Url::parse(from).map_err(|e| e.to_string())?;
-        let mut native = Vec::new();
-        for import in imports.iter().filter(|i| !i.is_path) {
+        let own_manifest = base.join("qmldir").map_err(|e| e.to_string())?;
+        let mut native: Vec<_> = self
+            .plugin_import(&own_manifest, None)
+            .into_iter()
+            .collect();
+        for import in imports.iter().filter(|i| !i.is_script()) {
+            if import.is_path {
+                if self.types.plugins.is_empty() {
+                    continue;
+                }
+                let descriptor = base
+                    .join(&format!("{}/qmldir", import.uri.trim_end_matches('/')))
+                    .map_err(|e| e.to_string())?;
+                if base.origin() != descriptor.origin() {
+                    return Err(format!(
+                        "{base}: cross-origin component dependency {descriptor}"
+                    ));
+                }
+                if !self.manifests.contains_key(&descriptor) {
+                    self.missing = Some(descriptor);
+                    return Err("pending directory manifest".into());
+                }
+                native.extend(self.plugin_import(&descriptor, import.alias.clone()));
+                continue;
+            }
             if self.types.modules.contains_key(&import.uri) {
                 native.push(import.clone());
                 continue;
@@ -474,11 +508,6 @@ impl ir::ComponentResolver for Resolver<'_> {
                             .transpose()?
                             .unwrap_or(RequestedVersion::Latest);
                         manifest.select(version)?;
-                        if manifest.plugins.iter().any(|p| !p.optional) {
-                            return Err(format!(
-                                "{descriptor}: a remote module cannot load a native plugin"
-                            ));
-                        }
                         found = true;
                         break;
                     }
@@ -503,6 +532,12 @@ impl ir::ComponentResolver for Resolver<'_> {
             .split_once('.')
             .map_or((None, name), |(ns, ty)| (Some(ns), ty));
         let base = Url::parse(from).map_err(|e| e.to_string())?;
+        let own_manifest = base.join("qmldir").map_err(|e| e.to_string())?;
+        if let Some(plugin) = self.plugin_import(&own_manifest, None) {
+            if self.types.resolve(&[plugin], name).is_ok() {
+                return Ok(None);
+            }
+        }
         let mut candidates = Vec::new();
         if namespace.is_none() {
             let local = base.join(".").map_err(|e| e.to_string())?;
@@ -517,7 +552,9 @@ impl ir::ComponentResolver for Resolver<'_> {
                     .join(&format!("{}/", import.uri.trim_end_matches('/')))
                     .map_err(|e| e.to_string())?;
                 candidates.extend(self.dependency(&base, &directory, ty, Some(import))?);
-            } else if !self.types.modules.contains_key(&import.uri) {
+            } else if !self.types.modules.contains_key(&import.uri)
+                || self.types.plugins.iter().any(|p| p.module == import.uri)
+            {
                 for root in &self.types.component_import_paths {
                     if root.origin() != base.origin() {
                         continue;

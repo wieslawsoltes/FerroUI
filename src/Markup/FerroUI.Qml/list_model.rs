@@ -727,6 +727,7 @@ pub(crate) fn list_model_object(imports: &[ir::Import], items: Vec<ir::Object>) 
         members: items
             .into_iter()
             .map(|item| ir::Member {
+                annotation_imports: None,
                 span: item.span,
                 scope: None,
                 kind: ir::MemberKind::Child(item),

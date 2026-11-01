@@ -79,11 +79,30 @@ pub struct Plugin {
     pub optional: bool,
 }
 
+/// Identity and available version of a plugin implemented by a statically linked host.
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct StaticPlugin {
+    pub module: String,
+    pub name: String,
+    pub version: ModuleVersion,
+}
+
+impl StaticPlugin {
+    pub fn new(module: &str, name: &str, major: u16, minor: u16) -> Self {
+        Self {
+            module: module.into(),
+            name: name.into(),
+            version: ModuleVersion { major, minor },
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct ModuleDefinition {
     pub uri: String,
     /// Actual versions exported by this manifest.
     versions: BTreeSet<ModuleVersion>,
+    native_versions: BTreeMap<u16, u16>,
     exports: BTreeMap<String, BTreeMap<Option<ModuleVersion>, Export>>,
     pub internal: BTreeMap<String, String>,
     pub imports: Vec<ModuleImport>,
@@ -98,10 +117,39 @@ pub struct ModuleDefinition {
 }
 
 impl ModuleDefinition {
+    /// Resolve manifest plugin names against host registrations. An absent optional
+    /// plugin contributes no exports. This never loads a file named by the manifest.
+    pub fn bind_static_plugins(&mut self, plugins: &BTreeSet<StaticPlugin>) -> Result<(), String> {
+        let mut versions = BTreeMap::<u16, u16>::new();
+        for entry in &self.plugins {
+            let mut matches = plugins
+                .iter()
+                .filter(|p| p.module == self.uri && p.name == entry.name)
+                .peekable();
+            if matches.peek().is_none() && !entry.optional {
+                return Err(format!("QML module '{}' requires unsupported native Qt plugin '{}'; register a matching static implementation", self.uri, entry.name));
+            }
+            for plugin in matches {
+                let maximum = versions.entry(plugin.version.major).or_default();
+                *maximum = (*maximum).max(plugin.version.minor);
+            }
+        }
+        self.native_versions = versions;
+        Ok(())
+    }
+
+    pub fn has_native_exports(&self) -> bool {
+        !self.native_versions.is_empty()
+    }
+
     /// Select an import once, before resolving any individual type.
     pub fn select(&self, request: RequestedVersion) -> Result<ModuleView<'_>, String> {
         let version = match request {
-            RequestedVersion::Latest => self.versions.last().copied(),
+            RequestedVersion::Latest => self.versions.last().copied().max(
+                self.native_versions
+                    .last_key_value()
+                    .map(|(&major, &minor)| ModuleVersion { major, minor }),
+            ),
             RequestedVersion::Major(major) => {
                 let first = ModuleVersion { major, minor: 0 };
                 let last = ModuleVersion {
@@ -109,10 +157,15 @@ impl ModuleDefinition {
                     minor: u16::MAX,
                 };
                 Some(
-                    *self
-                        .versions
+                    self.versions
                         .range(first..=last)
                         .next_back()
+                        .copied()
+                        .max(
+                            self.native_versions
+                                .get(&major)
+                                .map(|&minor| ModuleVersion { major, minor }),
+                        )
                         .ok_or_else(|| {
                             format!(
                                 "module '{}' does not provide major version {major}",
@@ -122,7 +175,12 @@ impl ModuleDefinition {
                 )
             }
             RequestedVersion::Exact(version) => {
-                if !self.versions.contains(&version) {
+                if !self.versions.contains(&version)
+                    && !self
+                        .native_versions
+                        .get(&version.major)
+                        .is_some_and(|max| version.minor <= *max)
+                {
                     return Err(format!(
                         "module '{}' does not export version {version}",
                         self.uri
@@ -413,5 +471,26 @@ mod tests {
         }
         let e = parse_qmldir("# first\r\n module A\r\n   Unknown @\r\n").unwrap_err();
         assert_eq!((e.line, e.column), (3, 4));
+    }
+}
+
+#[cfg(test)]
+mod static_plugin_tests {
+    use super::*;
+    #[test]
+    fn static_registration_is_scoped_to_the_declared_module_and_minor_range() {
+        let mut manifest = parse_qmldir(
+            "module Lab.Device\nplugin devices\noptional plugin style\nCard 1.1 Card.qml",
+        )
+        .unwrap();
+        let unrelated = StaticPlugin::new("Other", "devices", 1, 8);
+        assert!(manifest.bind_static_plugins(&[unrelated].into()).is_err());
+        manifest
+            .bind_static_plugins(&[StaticPlugin::new("Lab.Device", "devices", 1, 4)].into())
+            .unwrap();
+        let from_native = manifest.select("1.3".parse().unwrap()).unwrap();
+        assert_eq!(from_native.get("Card").unwrap().file, "Card.qml");
+        assert!(manifest.select("1.5".parse().unwrap()).is_err());
+        assert!(manifest.select("2".parse().unwrap()).is_err());
     }
 }

@@ -155,7 +155,7 @@ jobs:
         run: >-
           cargo test --locked -p ferroui-qml-compiler -p ferroui-qml-build
           -p ferroui-qml-webscene -p qml-compiled-tests
-          --features ferroui-qml-compiler/javascript,ferroui-qml-build/javascript,qml-compiled-tests/webscene
+          --features ferroui-qml-compiler/javascript,ferroui-qml-build/javascript,qml-compiled-tests/webscene,qml-compiled-tests/diagnostics
       - name: Test worker deadlines, reentry and isolation against V8
         run: cargo test --locked -p ferroui-qml-webscene --test backend -- --ignored
       - name: Mount and update native controls from V8

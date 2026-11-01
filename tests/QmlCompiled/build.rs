@@ -1,4 +1,14 @@
 fn main() {
+    ferroui_qml_build::Compiler::new()
+        .import_path("plugins/modules")
+        .static_plugin(ferroui_qml::ir::qmldir::StaticPlugin::new(
+            "Workshop.Gauges",
+            "gaugeplugin",
+            1,
+            3,
+        ))
+        .compile_file("plugins/Main.qml", "static_plugin.rs")
+        .expect("compile native module fixture");
     #[cfg(feature = "diagnostics")]
     ferroui_qml_build::compile_file("diagnostics/Probe.qml", "debug_probe.rs")
         .expect("compile debugger fixture");
@@ -29,7 +39,8 @@ fn main() {
         .expect("compile mirrored anchor fixture");
     ferroui_qml_build::compile_file("anchors/Main.qml", "anchors.rs")
         .expect("compile native anchor lines fixture");
-    ferroui_qml_build::compile_file("pragmas/Main.qml","pragmas.rs").expect("compile semantic pragmas");
+    ferroui_qml_build::compile_file("pragmas/Main.qml", "pragmas.rs")
+        .expect("compile semantic pragmas");
     ferroui_qml_build::compile_file("ranges/Main.qml", "ranges.rs")
         .expect("compile range controls");
     ferroui_qml_build::compile_file("buttons/Main.qml", "buttons.rs")

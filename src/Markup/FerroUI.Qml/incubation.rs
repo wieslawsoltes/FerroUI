@@ -94,6 +94,10 @@ impl PreparedNode {
         imports: &[Import],
         member: &Member,
     ) -> Result<(), Error> {
+        let imports = member
+            .annotation_imports
+            .as_ref()
+            .map_or(imports, |i| i.as_slice());
         match &member.kind {
             MemberKind::Id(name) => {
                 if self.id.replace(name.clone()).is_some() {

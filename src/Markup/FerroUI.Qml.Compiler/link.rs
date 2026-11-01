@@ -368,6 +368,16 @@ impl<R: ComponentResolver> Linker<'_, R> {
         self.object(context, &mut base)?;
         self.stack.pop();
         shadow_properties(&mut base, site, site_context, scope)?;
+        // The native constructor belongs to the base file, while annotations
+        // added at this site resolve in the file that authored those members.
+        if base.type_imports.as_deref() != Some(site_context.native_imports.as_slice()) {
+            let imports = std::sync::Arc::new(site_context.native_imports.clone());
+            for member in &mut site.members {
+                if uses_native_annotation(&member.kind) && member.annotation_imports.is_none() {
+                    member.annotation_imports = Some(imports.clone());
+                }
+            }
+        }
         merge_site(&mut base, site, site_context)?;
         if let Some(url) = &template.source_url {
             base.source_layers.push(SourceLayer {
@@ -484,6 +494,33 @@ fn shadow_properties(
         }
     }
     Ok(())
+}
+
+fn uses_native_annotation(member: &MemberKind) -> bool {
+    fn native(ty: &str) -> bool {
+        let ty = ty
+            .strip_prefix("list<")
+            .and_then(|s| s.strip_suffix('>'))
+            .unwrap_or(ty);
+        ty.starts_with(char::is_uppercase) && !ty.starts_with("Qml$Type")
+    }
+    match member {
+        MemberKind::Property { ty, .. } => native(ty),
+        MemberKind::Function {
+            parameters,
+            return_type,
+            ..
+        } => {
+            return_type.as_deref().is_some_and(native)
+                || parameters
+                    .iter()
+                    .any(|p| p.ty.as_deref().is_some_and(native))
+        }
+        MemberKind::Signal { parameters, .. } => parameters
+            .iter()
+            .any(|p| p.ty.as_deref().is_some_and(native)),
+        _ => false,
+    }
 }
 
 fn merge_site(base: &mut Object, site: &mut Object, context: &Context) -> Result<(), LinkError> {

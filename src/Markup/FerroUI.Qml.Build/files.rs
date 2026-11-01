@@ -16,14 +16,17 @@ pub(crate) struct Files {
 }
 
 impl Files {
-    pub(crate) fn new(roots: Vec<PathBuf>) -> Self {
+    pub(crate) fn new(
+        roots: Vec<PathBuf>,
+        plugins: BTreeSet<ferroui_qml_compiler::qmldir::StaticPlugin>,
+    ) -> Self {
         Self {
             project: PathBuf::new(),
             package: None,
             component_entries: BTreeMap::new(),
             #[cfg(feature = "javascript")]
             resources: None,
-            modules: IdentifiedModules::new(roots),
+            modules: IdentifiedModules::new(roots, plugins),
             documents: BTreeMap::new(),
             directories: BTreeSet::new(),
         }
@@ -205,7 +208,11 @@ impl ComponentResolver for Files {
         let base = Path::new(from)
             .parent()
             .ok_or("component has no directory")?;
-        let mut native = Vec::new();
+        let mut native: Vec<_> = self
+            .modules
+            .implicit_native(Path::new(from))
+            .into_iter()
+            .collect();
         for import in imports {
             if import.is_script() {
                 #[cfg(feature = "javascript")]
@@ -224,6 +231,9 @@ impl ComponentResolver for Files {
                         "expected a local QML import directory: {}",
                         dir.display()
                     ));
+                }
+                if let Some(native_import) = self.modules.directory_native(&dir, import)? {
+                    native.push(native_import);
                 }
                 self.directories.insert(
                     dir.canonicalize()

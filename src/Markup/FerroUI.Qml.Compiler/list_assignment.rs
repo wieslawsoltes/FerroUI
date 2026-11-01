@@ -55,6 +55,7 @@ pub(super) fn merge(base: &mut Object, site: &mut Object) {
         });
         if let Some((scope, span)) = start {
             site.members.push(Member {
+                annotation_imports: None,
                 scope,
                 span,
                 kind: MemberKind::Binding {
@@ -110,6 +111,7 @@ pub(super) fn merge(base: &mut Object, site: &mut Object) {
             }
         }
         retained.push(Member {
+            annotation_imports: member.annotation_imports.clone(),
             scope: member.scope,
             span: member.span,
             kind: MemberKind::Property {

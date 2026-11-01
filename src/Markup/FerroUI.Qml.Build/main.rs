@@ -3,7 +3,7 @@ use std::ffi::OsString;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-const USAGE: &str = "Usage: ferroui-qmlc [-I MODULE_ROOT]... [--check] [--javascript] [--qml-entry FILE.qml]... [--js-entry FILE]... [--worker-entry FILE]... INPUT.qml\nEmits a Rust module on stdout; --check only validates source and component linkage.";
+const USAGE: &str = "Usage: ferroui-qmlc [-I MODULE_ROOT]... [--check] [--static-plugin URI NAME MAJOR.MINOR]... [--javascript] [--qml-entry FILE.qml]... [--js-entry FILE]... [--worker-entry FILE]... INPUT.qml\nEmits a Rust module on stdout; --check only validates source and component linkage.";
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args_os().skip(1);
@@ -18,6 +18,22 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         if arg == "-I" {
             compiler = compiler.import_path(PathBuf::from(
                 args.next().ok_or("-I requires a module root")?,
+            ));
+        } else if arg == "--static-plugin" {
+            let mut field = || {
+                args.next()
+                    .and_then(|s| s.into_string().ok())
+                    .ok_or("--static-plugin requires URI NAME MAJOR.MINOR")
+            };
+            let module = field()?;
+            let name = field()?;
+            let version = field()?;
+            let (major, minor) = version.split_once('.').ok_or("expected MAJOR.MINOR")?;
+            compiler = compiler.static_plugin(ferroui_qml_compiler::qmldir::StaticPlugin::new(
+                &module,
+                &name,
+                major.parse()?,
+                minor.parse()?,
             ));
         } else if arg == "--javascript" {
             #[cfg(feature = "javascript")]

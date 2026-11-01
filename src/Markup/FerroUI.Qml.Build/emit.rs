@@ -72,6 +72,12 @@ impl<T: Rust> Rust for std::collections::BTreeMap<String, T> {
     }
 }
 
+impl Rust for std::sync::Arc<Vec<Import>> {
+    fn rust(&self) -> TokenStream {
+        let items = self.as_ref().rust();
+        quote!(::std::sync::Arc::new(#items))
+    }
+}
 impl Rust for std::sync::Arc<std::collections::BTreeMap<String, String>> {
     fn rust(&self) -> TokenStream {
         let pairs = self.iter().map(|(alias, url)| quote!((#alias, #url)));
@@ -204,7 +210,12 @@ structure!(Object {
     type_imports,
     composite_types
 });
-structure!(Member { scope, kind, span });
+structure!(Member {
+    annotation_imports,
+    scope,
+    kind,
+    span
+});
 structure!(Parameter { name, ty });
 structure!(Modifiers {
     required,

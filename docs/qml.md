@@ -72,6 +72,25 @@ cargo run --locked -p ferroui-qml-build --bin ferroui-qmlc -- --check samples/Qm
 cargo run --locked -p ferroui-qml-build --bin ferroui-qmlc -- samples/QmlGallery/ui/Main.qml > main_qml.rs
 ```
 
+### Use a native plugin implemented in Rust
+
+A local `qmldir` can export QML files alongside types supplied by the host. Install the Rust implementation in the application registry and give the build helper the same plugin identity. The URI, plugin name and module version determine which manifest entries it satisfies.
+
+```rust
+use ferroui_qml::{ir::qmldir::StaticPlugin, TypeDefinition, TypeRegistry, Value};
+
+let plugin = StaticPlugin::new("Workshop.Gauges", "gaugeplugin", 1, 3);
+let mut types = TypeRegistry::new();
+types.install_plugin(plugin.clone(), |registry| {
+    registry.register("Workshop.Gauges", "Gauge", TypeDefinition::default()
+        .inherits("QtQml", "QtObject").property("value", "int", Value::Number(0.0)))
+})?;
+let compiler = ferroui_qml_build::Compiler::new().import_path("modules")
+    .static_plugin(plugin).check_with(|doc| types.check(doc));
+```
+
+With `module Workshop.Gauges` and `plugin gaugeplugin` in its manifest, an application can import `Workshop.Gauges 1.2 as G` and instantiate `G.Gauge`. The CLI equivalent is `--static-plugin Workshop.Gauges gaugeplugin 1.3`. A failed registration rolls back the whole initializer. An HTTP module can use an installed plugin alongside its downloaded QML exports. Qt C++ shared libraries require a separate adapter.
+
 ### Edit QML with the language server
 
 Configure a QML-aware LSP client to launch `ferroui-qml-lsp` over stdio. To run it from a checkout, use the following command.
@@ -149,6 +168,19 @@ The compiler parses JavaScript with SWC, resolves relative files, watches the tr
 `pragma ListPropertyAssignBehavior` controls declarative object lists in source components. `Append` adds instances to the inherited list, `Replace` replaces its contents, and `ReplaceIfNotDefault` appends only to the default list. Replaced base instances retain their IDs for inherited code. An ordinary array assignment replaces a sequence.
 
 Point, size and rectangle properties accept JavaScript objects with named geometry fields. Missing fields use the Qt type defaults, including `-1` for an omitted size dimension. Typed function arguments and return values use the same conversions. [Qt and Rust fixture](../tests/QmlCompiled/pragmas/Main.qml)
+
+### Export native modules to Qt tools
+
+After registering a Rust module, call `registry.tooling_metadata("Host.Devices")?`. The result contains the `plugins.qmltypes` description and a `qmldir` for a tooling import directory such as `imports/Host/Devices/`. If the module already has a runtime `qmldir`, add `typeinfo plugins.qmltypes` to that manifest and retain its runtime declarations.
+
+The description includes base types, read-only and grouped properties, default children, list element types, signals, method parameters and results, and explicit enum values. It exports the type at minor zero for each registered major because the registry makes every member available from the start of that major. A versionless registry module receives the tooling version `0.0`. Generated module imports and dependencies allow tools to follow cross-module types.
+
+```sh
+cargo run -p ferroui-qml --example export_qmltypes -- /tmp/ferroui-imports
+qmllint -I /tmp/ferroui-imports --compiler warning --max-warnings 0 tests/QmlCompiled/tooling/Good.qml
+```
+
+Add the generated import root to Qt Creator's QML import paths to enable its type-aware completion and diagnostics. The same example drives the pinned Qt 6.12 positive and negative regression. [Rust module exporter](../src/Markup/FerroUI.Qml/examples/export_qmltypes.rs) · [Qt metadata check](../tests/QmlCompiled/tooling/qt_metadata.py) · [Qt type description files](https://doc.qt.io/qt-6/qtqml-modules-qmldir.html#type-description-files)
 
 ### Bundling modules selected at runtime
 
@@ -277,7 +309,7 @@ An application can enable remote QML on its type registry. HTTP transfers run of
 
 | Area | Available in this implementation | Remaining coverage |
 |---|---|---|
-| Components and modules | File and inline components, local modules, engine-wide singletons, independently loaded roots, dynamic factories, initial property maps and bindings, runtime QML text, owner-thread destruction, embedded URL catalogs, HTTP component and script graphs, and time-sliced node, binding and handler preparation for Loader and public incubators | Slicing live callback execution and native mounting, native module plugins and complete pragma behavior |
+| Components and modules | File and inline components, local modules, engine-wide singletons, independently loaded roots, dynamic factories, initial property maps and bindings, runtime QML text, owner-thread destruction, embedded URL catalogs, HTTP component and script graphs, and time-sliced node, binding and handler preparation for Loader and public incubators | Slicing live callback execution and native mounting, Qt C++ binary plugins and complete pragma behavior |
 | Object model | Required, readonly and default properties, lexical source property shadowing with virtual, override and final declarations, aliases, typed signals and methods, property change handlers, `Component.onCompleted`, source and registered enums, `Component.onDestruction` and bound method identity | Complete Qt value-type library, attached properties, interception, aliasing and inheritance edge cases, including overriding properties supplied by native Rust types |
 | Built-in Rust scripting | Numeric, boolean and string expressions, object and array literals with identity, indexed reads and writes, function and signal calls, local declarations, assignment, branching, loops and returns | Closures, prototypes, exceptions, Promises and local script modules require an external engine. |
 | WebScene scripting | V8 built-ins, closures, classes, prototypes, exceptions, Promises, classic scripts and local ES modules. Both the file loader and Cargo-generated components use the same engine. WorkerScript uses an isolated process on desktop and a dedicated guest in a browser. Browser application workers can also run packaged QML JavaScript. [Browser hosting](qml-browser.md) | Host access from uncompiled native-await resumptions and main-thread browser hosting |
@@ -285,7 +317,7 @@ An application can enable remote QML on its type registry. HTTP transfers run of
 | Models | `QtQml.Models.ListModel` and nested `ListElement` declarations, WorkerScript model synchronization, fixed and dynamic role types, insertion, moves, removal, role edits, row handles and rollback. Eager Repeater and viewport-bounded ListView delegates, retained row identity, reuse lifecycle, section labels, header and footer components, reversed layout and ListModel delegate access modes | Function-valued roles and proxy models |
 | Native visuals | Item, Repeater, ListView, Rectangle, Row, Column, Flow, Text, TextInput and TextEdit. The Controls module supplies Label, Button, tri-state CheckBox, RadioButton, Switch, ButtonGroup, Slider, SpinBox, ProgressBar, TextField and TextArea. Button input, keyboard activation and accessibility activation use the same transactional selection and signal delivery. Parent and sibling edge, center, baseline, fill and mirrored anchors participate in native arrangement. | Complete implicit geometry, additional animation and state operation types and the rest of Qt Quick and Controls |
 | FerroUI API | Register Rust types, properties, signals, enums, pure methods and receiver-aware methods with reactive reads. Register visual factories or expose supported scalar styled properties with `register_ferro_control`. | Property types outside the reflected scalar set require an explicit native adapter |
-| Tooling | Cargo build integration, native Rust code generation, command-line checks, source diagnostics, a stdio QML language server, declaration breakpoints and profiling, headless tests and a Qt reference harness | Designer support and Qt binary plugin/toolchain interoperability |
+| Tooling | Cargo build integration, native Rust code generation, command-line checks, source diagnostics, a stdio QML language server, declaration breakpoints and profiling, Qt Creator and qmllint type descriptions for Rust modules, headless tests and a Qt reference harness | Designer support and Qt binary plugin/toolchain interoperability |
 
 ## Verification
 

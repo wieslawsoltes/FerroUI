@@ -188,6 +188,9 @@ pub struct PropertyShadow {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Member {
+    /// Native type imports for an annotation declared on a different source layer.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub annotation_imports: Option<std::sync::Arc<Vec<Import>>>,
     /// The source type that declared this member, if it came from a template.
     #[serde(default)]
     pub scope: Option<u32>,

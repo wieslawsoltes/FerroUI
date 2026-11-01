@@ -11,6 +11,8 @@ mod incubators;
 #[cfg(test)]
 mod nested_roles;
 #[cfg(test)]
+mod plugins;
+#[cfg(test)]
 mod pragmas;
 #[cfg(test)]
 mod ranges;

@@ -319,3 +319,57 @@ fn remote_bindings_share_one_import_table_for_the_document() {
     assert_eq!(observer.reads.get(), 160);
     assert_eq!(observer.tables.borrow().len(), 1);
 }
+
+#[test]
+fn remote_module_combines_downloaded_qml_with_an_installed_static_plugin() {
+    use ferroui_qml::ir::qmldir::StaticPlugin;
+    let transport = Rc::new(Manual::default());
+    let mut registry = TypeRegistry::new();
+    registry.set_component_transport(transport.clone());
+    registry
+        .add_component_import_path(Url::parse("https://widgets.test/modules/").unwrap())
+        .unwrap();
+    registry
+        .install_plugin(
+            StaticPlugin::new("Workshop.Gauges", "gaugeplugin", 1, 3),
+            |types| {
+                types.register(
+                    "Workshop.Gauges",
+                    "Gauge",
+                    TypeDefinition::default().property("value", "int", Value::Number(12.)),
+                )
+            },
+        )
+        .unwrap();
+    let mut instance = Instance::new(
+        &parse("import QtQml\nQtObject {}").unwrap(),
+        &registry,
+        Default::default(),
+    )
+    .unwrap();
+    let component = instance
+        .create_component(instance.root(), "https://widgets.test/Main.qml", None)
+        .unwrap();
+    for (url, source) in [
+        (
+            "https://widgets.test/Main.qml",
+            "import Workshop.Gauges 1.2 as G\nG.Dial {}",
+        ),
+        (
+            "https://widgets.test/modules/Workshop/Gauges/qmldir",
+            "module Workshop.Gauges\nplugin gaugeplugin\nDial 1.0 Dial.qml",
+        ),
+        (
+            "https://widgets.test/modules/Workshop/Gauges/Dial.qml",
+            "Gauge { property int reading: value * 2 }",
+        ),
+    ] {
+        transport.take(url).complete(Ok(source.as_bytes().to_vec()));
+        instance.poll_component_loads(1).unwrap();
+    }
+    let dial = instance
+        .create_object(component, None, Default::default())
+        .unwrap();
+    assert_eq!(instance.get(dial, "reading").unwrap(), Value::Number(24.));
+    assert!(transport.0.borrow().is_empty());
+}

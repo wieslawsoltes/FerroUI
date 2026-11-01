@@ -14,6 +14,7 @@ pub(super) fn isolate(root: &mut Object, serial: usize, root_id: &str, scope: u3
         ids.insert(previous, root_id.to_owned());
     } else {
         root.members.push(Member {
+            annotation_imports: None,
             scope: Some(scope),
             kind: MemberKind::Id(root_id.to_owned()),
             span: root.span,

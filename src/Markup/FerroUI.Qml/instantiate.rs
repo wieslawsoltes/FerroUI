@@ -593,17 +593,17 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             self.instance.nodes[parent.index].children.push(id);
         }
         for mut property in shell.properties {
-            if property.ty == "$qml:propertyGroup" {
-                property.slot.value = Value::PropertyGroup(id, Rc::from(property.name.as_str()));
-            }
-            if property.ty == "$qml:anchorGroup" {
-                property.slot.value = Value::AnchorGroup(id);
-            }
             if property.slot.assigned {
                 self.assigned.insert(self.instance.slots.len());
                 if property.slot.binding.is_none() {
                     property.slot.value = self.instance.typed(&property.ty, property.slot.value)?;
                 }
+            }
+            if property.ty == "$qml:propertyGroup" {
+                property.slot.value = Value::PropertyGroup(id, Rc::from(property.name.as_str()));
+            }
+            if property.ty == "$qml:anchorGroup" {
+                property.slot.value = Value::AnchorGroup(id);
             }
             if property.ty == "$qml:anchorLine" && property.readonly {
                 if let Some(edge) = AnchorEdge::ALL
@@ -1019,6 +1019,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                         type_imports: Some(scope),
                         span: child.span,
                         members: vec![Member {
+                            annotation_imports: None,
                             kind: MemberKind::Child(child.clone()),
                             scope: None,
                             span: child.span,
