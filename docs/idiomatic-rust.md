@@ -118,7 +118,7 @@ The phases of #423, each as small pull requests from main:
 | C0 | The inventory script and its check, this page | unchanged |
 | C1 | Duplicates and internal-only types: one `Guid` (or `uuid`), internal `Dictionary` uses to `HashMap`/`IndexMap`, internal single-implementor traits to concrete types | unchanged |
 | C2 | std types at the edges: `From`/`Into` between `TimeSpan` and `Duration`, `Uri` and `url::Url`, `CultureInfo` and the ICU4X `Locale`; new APIs take the std or ICU types | additions only |
-| C3 | Resources and errors: `IDisposable` to `Drop` and RAII guards, `...Exception` to `...Error` | 0.5 |
+| C3 | Resources and errors: `IDisposable` to `Drop` and RAII guards (the steps: [idiomatic-rust-disposal.md](idiomatic-rust-disposal.md)), `...Exception` to `...Error` | 0.5 |
 | C4 | Async: `Task`, `TaskCompletionSource` and `SynchronizationContext` to futures on the dispatcher's executor; one cancellation type | 0.5 |
 | C5 | Public signatures take and return the std and chosen-crate types; the old types remain one release as deprecated aliases or conversions; migration notes | 0.5 |
 | C6 | The check is clean, the API gate has a 0.5 baseline, the samples and application repositories are updated | |
