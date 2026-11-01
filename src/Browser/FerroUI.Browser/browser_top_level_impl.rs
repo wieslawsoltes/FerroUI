@@ -6,7 +6,7 @@ use crate::clipboard_impl::ClipboardImpl;
 use crate::cursor::CssCursor;
 use crate::interop::{dom_helper, input_helper, JsObject};
 use crate::js_object_control_handle::JsObjectControlHandle;
-use crate::rendering::RenderTargetBrowserSurface;
+use crate::rendering::{RenderTargetBrowserSurface, RenderWorker};
 use crate::storage::BrowserLauncher;
 use crate::storage::BrowserStorageProvider;
 use crate::windowing_platform::BrowserWindowingPlatform;
@@ -18,6 +18,7 @@ use ferroui_base::platform::storage::{ILauncher, IStorageProvider};
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{ICursorImpl, IOptionalFeatureProvider, ISystemNavigationManagerImpl};
 use ferroui_base::reactive::IDisposable;
+use ferroui_base::media::MediaContext;
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, Point, Rect, Size};
 use ferroui_controls::platform::{
@@ -174,14 +175,38 @@ impl BrowserTopLevelImpl {
         *self.render_surfaces.lock().unwrap_or_else(PoisonError::into_inner) = surfaces;
     }
 
+    /// Called from the resize observer of the view, which the browser runs after its layout and
+    /// before it paints the frame. The resize is cooperative: the top-level is laid out at the new
+    /// size (`resized`) and then
+    ///
+    /// - when this thread renders, the frame is rendered at once (`paint`, the synchronous commit
+    ///   of the compositor, as a paint request of a desktop window does), so the browser paints the
+    ///   canvas at its new size with content of that size. Left to the next animation frame, the
+    ///   browser would first paint the frame of the old size stretched to the new one, at every
+    ///   step of a resize;
+    /// - with a render thread, the compositor is committed and the render thread is asked for a
+    ///   frame out of turn, without waiting for it: the render thread hands its frames to the page,
+    ///   which shows each at its own size (`CanvasPresenter` of the script side), so the frame of
+    ///   the new size appears as soon as it is drawn and none is shown stretched. Waiting here
+    ///   would block the page without the frame appearing sooner: the page shows it from its event
+    ///   loop.
     fn on_size_changed(&self) {
         self.publish_render_surfaces();
         if let Some(surface) = self.surface() {
+            let client_size = surface.client_size();
             let resized = self.resized.borrow().clone();
             if let Some(resized) = resized {
-                resized(surface.client_size(), WindowResizeReason::User);
+                resized(client_size, WindowResizeReason::User);
             }
             self.insets_manager.notify_safe_area_padding_changed();
+            if RenderWorker::exists() {
+                MediaContext::instance().commit_and_request_frame(&surface.compositor());
+            } else {
+                let paint = self.paint.borrow().clone();
+                if let Some(paint) = paint {
+                    paint(Rect::new(0.0, 0.0, client_size.width, client_size.height));
+                }
+            }
         }
     }
 
