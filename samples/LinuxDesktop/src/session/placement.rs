@@ -1,15 +1,9 @@
 //! EWMH client geometry is in physical root pixels. The WM applies size hints and owns
 //! decorations; clients request a rectangle using static gravity and client dimensions.
-use super::Session;
+use super::{Session, SnapSide};
 use ferroui_base::PixelRect;
 use ferroui_x11::x11_structs::Gravity;
 use ferroui_x11::xlib::{self, XID};
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum SnapSide {
-    Left,
-    Right,
-}
 
 impl Session {
     pub fn toggle_maximized(&self, id: u32) -> bool {

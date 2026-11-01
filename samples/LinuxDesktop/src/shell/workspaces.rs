@@ -14,10 +14,10 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     let picker_shell = shell.clone();
     let window_shell = shell.clone();
     // Keep keyboard focus on workspace buttons when an unrelated client changes its title.
+    let session = shell.session.clone();
     let tab_state = memo(move |_| {
         snapshot.with(|model| {
-            let last = model.workspace_names.len() - 1;
-            let removable = last > 0 && !model.windows.iter().any(|w| w.workspace == Some(last));
+            let removable = session.as_ref().is_some_and(|s| s.can_remove_empty_last_workspace(model));
             (
                 model.workspace_names.clone(),
                 model.current_workspace,
