@@ -14,9 +14,9 @@ scratch=$(mktemp -d)
 export XDG_RUNTIME_DIR="$scratch/runtime" XDG_CONFIG_HOME="$scratch/config"
 mkdir -m 700 -- "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
 export PATH="$here/../session:$PATH" FERRO_DESKTOP_BINARY="$binary"
-preview= supervisor= monitor=
+preview= supervisor= monitor= client=
 cleanup() {
-  for pid in "$monitor" "$supervisor" "$preview"; do [[ -z $pid ]] || kill "$pid" 2>/dev/null || true; done
+  for pid in "$monitor" "$client" "$supervisor" "$preview"; do [[ -z $pid ]] || kill "$pid" 2>/dev/null || true; done
   wait || true
   rm -rf -- "$scratch"
 }
@@ -49,13 +49,22 @@ call GetCapabilities | grep -q "'actions'"
 stdbuf -oL gdbus monitor --session --dest "$name" --object-path "$path" >"$output/signals.log" & monitor=$!
 until_ok signal_seen 'Monitoring signals'
 shell_window=$(timeout 20 xdotool search --onlyvisible --sync --name '^Ferro Desktop$' | head -1)
+# Keep an independent client focused while the notification is mapped and replaced.
+python3 "$here/julia.py" > "$scratch/study.ppm"
+display -immutable -title 'Ferro notification focus probe' -geometry +140+110 "$scratch/study.ppm" >"$output/client.log" 2>&1 & client=$!
+client_window=$(timeout 10 xdotool search --onlyvisible --sync --name '^Ferro notification focus probe$' | head -1)
+xdotool windowactivate --sync "$client_window"
 id=$(notify 0 'Compiling workspace' 'Compiling the desktop shell' '[]' 0)
 [[ -n $id && $id != 0 ]]
 until_ok toast >/dev/null
 window=$(toast)
 [[ $(notify "$id" 'Build succeeded' 'All targets passed on Linux.' "['open', 'Open build log']" 0) == "$id" ]]
 sleep .3
-[[ $(toast) == "$window" ]]
+[[ $(toast) == "$window" && $(xdotool getactivewindow) == "$client_window" ]]
+# Xvfb has one 1280-pixel output, sometimes without a RandR primary flag.
+geometry=$(xdotool getwindowgeometry --shell "$window")
+x=$(sed -n 's/^X=//p' <<<"$geometry"); y=$(sed -n 's/^Y=//p' <<<"$geometry")
+(( x > 850 && y < 80 )) || { echo "Unexpected banner position $x,$y" >&2; exit 1; }
 xprop -id "$window" _NET_WM_WINDOW_TYPE | grep -q '_NET_WM_WINDOW_TYPE_NOTIFICATION'
 import -window root "$output/notification-toast.png"
 # The visible action must emit ActionInvoked before NotificationClosed.
@@ -69,6 +78,7 @@ if call CloseNotification "$expired" >/dev/null 2>&1; then echo 'Expired identif
 recalled=$(notify 0 'Uploading symbols' 'Waiting for the server' '[]' 0)
 call CloseNotification "$recalled" >/dev/null
 until_ok signal_seen "NotificationClosed (uint32 $recalled, uint32 3)"
+kill "$client"; wait "$client" 2>/dev/null || true; client=
 # Opening the center focuses its first control, Do Not Disturb.
 xdotool windowfocus --sync "$shell_window" key --clearmodifiers ctrl+n
 sleep .3; xdotool key space; sleep .2

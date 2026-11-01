@@ -213,7 +213,7 @@ mod tests {
         let t = Instant::now();
         let (id, _) = h.notify(0, request(), t).unwrap();
         assert_eq!(
-            h.notify(id, request(), t + Duration::from_secs(1))
+            h.notify(id, request(), t + Duration::from_millis(500))
                 .unwrap()
                 .0,
             id
