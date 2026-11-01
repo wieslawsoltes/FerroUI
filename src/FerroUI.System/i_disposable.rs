@@ -5,7 +5,8 @@
 /// Unlike `Drop`, disposal is an explicit, idempotent operation: dropping a
 /// handle without calling [`dispose`](IDisposable::dispose) keeps the
 /// subscription alive, which is what callers that ignore the returned handle
-/// expect.
+/// expect. [`Subscription`](crate::Subscription) is the guard that disposes
+/// the handle when it is dropped.
 pub trait IDisposable {
     fn dispose(&self);
 }

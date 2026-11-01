@@ -26,11 +26,13 @@ pub mod component_model;
 pub mod events;
 pub mod ferro_thread_local;
 mod i_disposable;
+mod subscription;
 mod i_observable;
 mod i_progress;
 pub mod threading;
 
 pub use i_disposable::IDisposable;
+pub use subscription::Subscription;
 pub use i_observable::{IObservable, IObserver, ObservableError};
 pub use i_progress::IProgress;
 
