@@ -125,10 +125,13 @@ wait_for disabled "$head"
 wait_for scene_is settings
 # Exactly one remaining output should now display the migrated open overlay.
 migrated=0
+migrated_output=
 for i in 0 1; do
     capture "${original[i]}" "$frames/remaining-$i.png"
     if matches_overlay "$scratch/base-$i.png"; then fail "Original monitor already showed Quick Settings"; fi
-    if matches_overlay "$frames/remaining-$i.png"; then migrated=$((migrated+1)); fi
+    if matches_overlay "$frames/remaining-$i.png"; then
+        migrated=$((migrated+1)); migrated_output=${original[i]}
+    fi
 done
 (( migrated == 1 )) || fail "Expected one migrated overlay, found $migrated"
 command_ok "output $head enable"
@@ -139,7 +142,25 @@ similar "$frames/rotated-desktop.png" "$frames/restored.png" || fail 'Restored m
 
 command_ok "output $head unplug"; wait_for unplugged "$head"
 head=
-wtype -s 250 -k Escape; wait_for scene_is desktop
+# Sway removes the output from IPC before it has entered the replacement layer
+# with wl_keyboard. Under load the previous frame can also remain on screen.
+# First require the settings sheet on its surviving output, then deliver a real
+# Escape again only while the shell still reports Settings.
+visible_after_unplug() {
+    grim -s 1 -o "$migrated_output" "$scratch/post-unplug.png" &&
+        matches_overlay "$scratch/post-unplug.png"
+}
+wait_for visible_after_unplug
+sent_escape=false
+for ((attempt=0;attempt<8;attempt++)); do
+    current=$("$binary" --platform=wayland --current-scene) || { sleep .15; continue; }
+    if [[ $current == desktop ]]; then break; fi
+    [[ $current == settings ]] || fail "Unexpected scene after unplug: $current"
+    wtype -s 100 -k Escape; sent_escape=true
+    sleep .15
+done
+[[ $sent_escape == true ]] || fail 'Overlay dismissed without keyboard input'
+scene_is desktop || fail 'Keyboard did not dismiss the migrated overlay after unplug'
 for i in 0 1; do
     capture "${original[i]}" "$frames/finished-$i.png"
     if matches_overlay "$frames/finished-$i.png"; then fail "Overlay remained on ${original[i]}"; fi
