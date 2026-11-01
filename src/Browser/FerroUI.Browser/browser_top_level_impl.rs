@@ -6,7 +6,7 @@ use crate::clipboard_impl::ClipboardImpl;
 use crate::cursor::CssCursor;
 use crate::interop::{dom_helper, input_helper, JsObject};
 use crate::js_object_control_handle::JsObjectControlHandle;
-use crate::rendering::RenderTargetBrowserSurface;
+use crate::rendering::{RenderTargetBrowserSurface, RenderWorker};
 use crate::storage::BrowserLauncher;
 use crate::storage::BrowserStorageProvider;
 use crate::windowing_platform::BrowserWindowingPlatform;
@@ -174,14 +174,32 @@ impl BrowserTopLevelImpl {
         *self.render_surfaces.lock().unwrap_or_else(PoisonError::into_inner) = surfaces;
     }
 
+    /// Called from the resize observer of the canvas, which the browser runs after its layout and
+    /// before it paints the frame. The resize is cooperative: the top-level is laid out at the new
+    /// size (`resized`) and, when this thread renders, the frame is rendered at once (`paint`, the
+    /// synchronous commit of the compositor, as a paint request of a desktop window does), so the
+    /// browser paints the canvas at its new size with content of that size. Left to the next
+    /// animation frame, the browser would first paint the frame of the old size stretched to the
+    /// new one, at every step of a resize.
+    ///
+    /// Not with a render thread: the synchronous commit would block the page until the render
+    /// thread has rendered, and that thread may be waiting for the page. The next frame of the
+    /// render thread draws the new size there.
     fn on_size_changed(&self) {
         self.publish_render_surfaces();
         if let Some(surface) = self.surface() {
+            let client_size = surface.client_size();
             let resized = self.resized.borrow().clone();
             if let Some(resized) = resized {
-                resized(surface.client_size(), WindowResizeReason::User);
+                resized(client_size, WindowResizeReason::User);
             }
             self.insets_manager.notify_safe_area_padding_changed();
+            if !RenderWorker::exists() {
+                let paint = self.paint.borrow().clone();
+                if let Some(paint) = paint {
+                    paint(Rect::new(0.0, 0.0, client_size.width, client_size.height));
+                }
+            }
         }
     }
 
