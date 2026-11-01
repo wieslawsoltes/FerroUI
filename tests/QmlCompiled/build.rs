@@ -24,6 +24,10 @@ fn main() {
         .expect("compile states and transitions for V8");
     ferroui_qml_build::compile_file("anchors/Main.qml", "anchors.rs")
         .expect("compile native anchor lines fixture");
+    ferroui_qml_build::compile_file("views/Reuse.qml", "reuse.rs")
+        .expect("compile delegate reuse fixture");
+    ferroui_qml_build::compile_file("views/Decorated.qml", "decorated.rs")
+        .expect("compile decorated list fixture");
     ferroui_qml_build::compile_file("views/Main.qml", "views.rs")
         .expect("compile virtualized list fixture");
     ferroui_qml_build::compile_file("delegates/Main.qml", "delegates.rs")

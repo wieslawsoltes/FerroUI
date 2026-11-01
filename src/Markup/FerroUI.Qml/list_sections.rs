@@ -1,0 +1,388 @@
+//! Section boundaries depend on the model. Their delegates, like row delegates,
+//! exist only near the viewport; measured label sizes survive scrolling.
+use super::*;
+
+#[derive(Clone, Default)]
+pub(super) struct Sections {
+    role: String,
+    first_character: bool,
+    factory: Option<ObjectId>,
+    inline: bool,
+    // A numeric model grouped by its full index needs no per-index allocation.
+    indexed: usize,
+    groups: Rc<Vec<(usize, String)>>,
+    labels: BTreeMap<usize, ObjectId>,
+    nominal: Option<f64>,
+    sizes: Extents,
+}
+
+impl Sections {
+    pub(super) fn items(&self) -> impl Iterator<Item = ObjectId> + '_ {
+        self.labels.values().copied()
+    }
+    fn len(&self) -> usize {
+        self.indexed.max(self.groups.len())
+    }
+    fn preceding(&self, index: usize) -> usize {
+        if self.indexed > 0 {
+            index.min(self.indexed)
+        } else {
+            self.groups
+                .partition_point(|(boundary, _)| *boundary < index)
+        }
+    }
+    fn boundary(&self, group: usize) -> usize {
+        if self.indexed > 0 {
+            group
+        } else {
+            self.groups[group].0
+        }
+    }
+    fn at(&self, index: usize) -> String {
+        self.preceding(index + 1)
+            .checked_sub(1)
+            .map(|group| self.name(group))
+            .unwrap_or_default()
+    }
+    fn name(&self, group: usize) -> String {
+        if self.indexed > 0 {
+            group.to_string()
+        } else {
+            self.groups[group].1.clone()
+        }
+    }
+    fn size(&self, group: usize) -> f64 {
+        self.sizes.get(group).or(self.nominal).unwrap_or(0.)
+    }
+    pub(super) fn before(&self, index: usize) -> f64 {
+        if !self.inline {
+            return 0.;
+        }
+        let groups = self.preceding(index);
+        self.nominal.unwrap_or(0.) * groups as f64 + self.sizes.before(groups)
+    }
+    pub(super) fn label_extent(&self, index: usize) -> f64 {
+        let group = self.preceding(index);
+        if self.inline && group < self.len() && self.boundary(group) == index {
+            self.size(group)
+        } else {
+            0.
+        }
+    }
+    fn rebuild(&mut self, model: &Instance, source: &Source) -> Result<(), Error> {
+        let count = source.len(model);
+        self.indexed = 0;
+        let mut groups = Vec::new();
+        if !self.role.is_empty() && count != 0 {
+            if matches!(source, Source::Count(_)) {
+                if self.role != "modelData" && self.role != "index" {
+                    groups.push((0, String::new()));
+                } else if self.first_character {
+                    groups.push((0, "0".into()));
+                    let mut power: usize = 1;
+                    while power < count {
+                        for digit in 1..=9 {
+                            let index = power.saturating_mul(digit);
+                            if index >= count {
+                                break;
+                            }
+                            groups.push((index, digit.to_string()));
+                        }
+                        power = power.saturating_mul(10);
+                    }
+                } else {
+                    self.indexed = count;
+                }
+            } else {
+                let mut prev = None;
+                for i in 0..count {
+                    let (_, row) = source.at(model, i).expect("valid row");
+                    let field = match &row {
+                        Value::ModelRow(row) => model.model_role(*row, &self.role)?,
+                        _ if self.role == "modelData" => row,
+                        Value::Record(r) => model
+                            .record_entries(r)?
+                            .get(&self.role)
+                            .cloned()
+                            .unwrap_or(Value::Undefined),
+                        Value::Object(o) => model.get(*o, &self.role).unwrap_or(Value::Undefined),
+                        _ => Value::Undefined,
+                    };
+                    let name = if matches!(field, Value::Undefined | Value::Null) {
+                        String::new()
+                    } else {
+                        model.value_string(&field)?
+                    };
+                    let name = if self.first_character {
+                        name.chars().take(1).collect()
+                    } else {
+                        name
+                    };
+                    let folded = name.to_lowercase();
+                    if prev.as_ref() != Some(&folded) {
+                        prev = Some(folded);
+                        groups.push((i, name));
+                    }
+                }
+            }
+        }
+        self.groups = Rc::new(groups);
+        Ok(())
+    }
+}
+
+impl State {
+    pub(super) fn attached(
+        &self,
+        id: ObjectId,
+        index: usize,
+        count: usize,
+        selected: Option<usize>,
+    ) -> BTreeMap<String, Value> {
+        BTreeMap::from([
+            ("view".into(), Value::Object(id)),
+            ("isCurrentItem".into(), Value::Bool(Some(index) == selected)),
+            ("section".into(), Value::String(self.sections.at(index))),
+            (
+                "previousSection".into(),
+                Value::String(
+                    index
+                        .checked_sub(1)
+                        .map(|i| self.sections.at(i))
+                        .unwrap_or_default(),
+                ),
+            ),
+            (
+                "nextSection".into(),
+                Value::String(if index + 1 < count {
+                    self.sections.at(index + 1)
+                } else {
+                    String::new()
+                }),
+            ),
+        ])
+    }
+    pub(crate) fn sectioned(&self) -> bool {
+        !self.sections.role.is_empty()
+    }
+}
+
+pub(super) struct SectionLayout<'a> {
+    pub reversed: bool,
+    pub axis: &'a str,
+    pub coord: &'a str,
+    pub spacing: f64,
+    pub offset: f64,
+    pub viewport: f64,
+    pub cache: f64,
+    pub count: usize,
+}
+
+fn factory(model: &Instance, id: ObjectId, name: &str) -> Result<Option<ObjectId>, Error> {
+    Ok(match model.get(id, name)? {
+        Value::Object(o) if model.dynamic.templates.contains_key(&o) => Some(o),
+        _ => None,
+    })
+}
+fn item_size(model: &Instance, item: ObjectId, axis: &str) -> f64 {
+    if let Ok(Value::Number(n)) = model.get(item, axis) {
+        if n > 0. {
+            return n;
+        }
+    }
+    real(
+        model,
+        item,
+        if axis == "width" {
+            "implicitWidth"
+        } else {
+            "implicitHeight"
+        },
+    )
+    .max(0.)
+}
+
+impl Transaction<'_> {
+    fn create_decoration(
+        &mut self,
+        id: ObjectId,
+        factory: ObjectId,
+        section: Option<String>,
+    ) -> Result<ObjectId, Error> {
+        let template = self.model.dynamic.templates[&factory].clone();
+        let values = section
+            .into_iter()
+            .map(|s| ("section".to_owned(), Value::String(s)))
+            .collect();
+        let inputs = Inputs {
+            view: id,
+            roles: None,
+            values,
+            attached: Some(BTreeMap::from([("view".into(), Value::Object(id))])),
+        };
+        self.construct_object(
+            factory,
+            Some(id),
+            &template,
+            Default::default(),
+            Some(&inputs),
+            Default::default(),
+        )
+    }
+    pub(super) fn update_decoration(
+        &mut self,
+        id: ObjectId,
+        name: &str,
+        axis: &str,
+        deco: &mut Decoration,
+    ) -> Result<(), Error> {
+        let next = factory(self.model, id, name)?;
+        if next != deco.factory {
+            if let Some(old) = deco.item {
+                self.destroy_subtrees(&[old])?;
+            }
+            deco.item = next
+                .map(|f| self.create_decoration(id, f, None))
+                .transpose()?;
+            deco.factory = next;
+            self.list_property(
+                id,
+                &format!("{name}Item"),
+                deco.item.map_or(Value::Null, Value::Object),
+            )?;
+        }
+        deco.extent = deco.item.map_or(0., |o| item_size(self.model, o, axis));
+        Ok(())
+    }
+
+    pub(super) fn prepare_sections(
+        &mut self,
+        id: ObjectId,
+        state: &mut State,
+        dirty: bool,
+    ) -> Result<(), Error> {
+        let sections = &mut state.sections;
+        let Value::String(role) = self.model.get(id, "section.property")? else {
+            unreachable!()
+        };
+        let first = real(self.model, id, "section.criteria") == 1.;
+        let next = factory(self.model, id, "section.delegate")?;
+        sections.inline =
+            real(self.model, id, "section.labelPositioning") as i32 & 1 != 0 && next.is_some();
+        if dirty
+            || role != sections.role
+            || first != sections.first_character
+            || next != sections.factory
+        {
+            self.destroy_subtrees(&sections.items().collect::<Vec<_>>())?;
+            sections.labels.clear();
+            sections.nominal = None;
+            sections.sizes = Default::default();
+            sections.role = role;
+            sections.first_character = first;
+            sections.factory = next;
+            sections.rebuild(self.model, &state.source)?;
+        }
+        Ok(())
+    }
+
+    pub(super) fn layout_sections(
+        &mut self,
+        id: ObjectId,
+        state: &mut State,
+        layout: SectionLayout<'_>,
+    ) -> Result<bool, Error> {
+        let SectionLayout {
+            reversed,
+            axis,
+            coord,
+            spacing,
+            offset,
+            viewport,
+            cache,
+            count,
+        } = layout;
+        let first_row = state
+            .lower_index(offset, count, spacing)
+            .min(count.saturating_sub(1));
+        let current = state.sections.preceding(first_row + 1).checked_sub(1);
+        self.list_property(
+            id,
+            "currentSection",
+            Value::String(current.map(|g| state.sections.name(g)).unwrap_or_default()),
+        )?;
+        let Some(factory) = state.sections.factory else {
+            return Ok(false);
+        };
+        let flags = real(self.model, id, "section.labelPositioning") as i32;
+        let mut wanted = BTreeSet::new();
+        if state.sections.inline {
+            let first = state.lower_index(offset - cache, count, spacing);
+            let mut g = state.sections.preceding(first);
+            while g < state.sections.len() {
+                let index = state.sections.boundary(g);
+                let start = state.start(index, spacing) - state.sections.size(g);
+                if start >= offset + viewport + cache {
+                    break;
+                }
+                if start + state.sections.size(g) >= offset - cache
+                    || state.sections.nominal.is_none()
+                {
+                    wanted.insert(g);
+                }
+                g += 1;
+            }
+        }
+        let next = current.and_then(|g| (g + 1 < state.sections.len()).then_some(g + 1));
+        if flags & 2 != 0 {
+            wanted.extend(current);
+        }
+        if flags & 4 != 0 {
+            wanted.extend(next);
+        }
+        let removed: Vec<_> = state
+            .sections
+            .labels
+            .iter()
+            .filter_map(|(g, o)| (!wanted.contains(g)).then_some(*o))
+            .collect();
+        self.destroy_subtrees(&removed)?;
+        state.sections.labels.retain(|g, _| wanted.contains(g));
+        let mut measured = false;
+        for g in wanted {
+            let item = if let Some(&item) = state.sections.labels.get(&g) {
+                item
+            } else {
+                let item = self.create_decoration(id, factory, Some(state.sections.name(g)))?;
+                state.sections.labels.insert(g, item);
+                item
+            };
+            let extent = item_size(self.model, item, axis);
+            if state.sections.nominal.is_none() || state.sections.size(g) != extent {
+                let nominal = *state.sections.nominal.get_or_insert(extent);
+                state.sections.sizes.set(g, extent, nominal);
+                measured = true;
+            }
+            let boundary = state.sections.boundary(g);
+            let start = state.start(boundary, spacing) - state.sections.label_extent(boundary);
+            let mut position = start;
+            if current == Some(g) && flags & 2 != 0 {
+                position = position.max(offset);
+                if let Some(n) = next {
+                    let next = state.sections.boundary(n);
+                    position = position.min(
+                        state.start(next, spacing) - state.sections.label_extent(next) - extent,
+                    );
+                }
+            } else if next == Some(g) && flags & 4 != 0 {
+                position = position.min(offset + viewport - extent);
+            }
+            self.list_property(
+                item,
+                coord,
+                Value::Number(axis_position(reversed, position, extent)),
+            )?;
+        }
+        Ok(measured)
+    }
+}

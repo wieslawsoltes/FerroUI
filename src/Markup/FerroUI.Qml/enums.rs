@@ -7,6 +7,7 @@ use ferroui_qml_compiler::{Import, MemberKind, Object};
 pub struct Namespace {
     members: BTreeMap<String, Value>,
     keys: Option<Vec<(String, i32)>>,
+    pub(crate) list_owner: Option<ObjectId>,
 }
 
 impl Namespace {
@@ -19,6 +20,20 @@ impl Namespace {
 
     pub(crate) fn member(&self, name: &str) -> Option<Value> {
         self.members.get(name).cloned()
+    }
+
+    pub(crate) fn attach_list_view<'a>(
+        &mut self,
+        owner: ObjectId,
+        names: impl Iterator<Item = &'a String>,
+    ) {
+        if let Some(Value::Namespace(namespace)) = self.members.get_mut("ListView") {
+            let namespace = Rc::make_mut(namespace);
+            namespace.list_owner = Some(owner);
+            namespace
+                .members
+                .extend(names.map(|k| (k.clone(), Value::Undefined)));
+        }
     }
 
     fn value(self) -> Value {
@@ -46,6 +61,7 @@ impl Namespace {
             Self {
                 members: entries,
                 keys: Some(keys.to_vec()),
+                list_owner: None,
             }
             .value(),
         );

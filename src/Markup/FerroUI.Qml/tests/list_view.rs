@@ -118,3 +118,86 @@ fn delegate_access_modes_control_required_and_implicit_writes() {
         }
     }
 }
+
+#[test]
+fn reversed_sections_measure_decoration_and_react_to_model_edits() {
+    let mut ui = view(include_str!(
+        "../../../../tests/QmlCompiled/views/Decorated.qml"
+    ));
+    let root = ui.root();
+    let report = |ui: &mut Instance| ui.call(root, "report", vec![]).unwrap();
+    assert_eq!(
+        report(&mut ui),
+        Value::String("A/161/0/-154/-31/-88/0/-1/AAB/-54".into())
+    );
+    ui.call(root, "regroup", vec![]).unwrap();
+    assert_eq!(
+        report(&mut ui),
+        Value::String("A/161/0/-154/-31/-88/0/-1/ABB/-65".into())
+    );
+}
+
+#[test]
+fn pooled_items_survive_rebinding_and_failed_scroll_restores_row_source() {
+    let mut ui = view(
+        r#"import QtQuick
+    ListView { id:v; width:20; height:40; cacheBuffer:0; reuseItems:true
+        property int pooled:0; property int reused:0
+        model: ListModel {id:rows; ListElement {title:"A"} ListElement {title:"B"} ListElement {title:"C"} ListElement {title:"D"} ListElement {title:"E"} ListElement {title:"F"} }
+        delegate: Item {required property int index; required property string title; required property var model
+            width:20; height:20; property string observed:""
+            ListView.onPooled: v.pooled += 1
+            ListView.onReused: {v.reused += 1; observed = index + title + model.title}
+            function edit() {model.title = "edited"}
+        }
+        function fail(){positionViewAtEnd();missing()}
+        function at(i:int):string {return rows.get(i).title}
+    }"#,
+    );
+    let id = ui.root();
+    let Value::Object(old) = ui.call(id, "itemAtIndex", vec![Value::Number(1.)]).unwrap() else {
+        panic!("visible delegate")
+    };
+    assert!(ui.call(id, "fail", vec![]).is_err());
+    ui.call(old, "edit", vec![]).unwrap();
+    assert_eq!(
+        ui.call(id, "at", vec![Value::Number(1.)]).unwrap(),
+        Value::String("edited".into())
+    );
+    ui.call(id, "positionViewAtEnd", vec![]).unwrap();
+    assert_eq!(ui.get(id, "pooled").unwrap(), Value::Number(1.));
+    assert_eq!(ui.get(id, "reused").unwrap(), Value::Number(1.));
+    assert_eq!(
+        ui.get(old, "observed").unwrap(),
+        Value::String("4EE".into())
+    );
+    ui.call(old, "edit", vec![]).unwrap();
+    assert_eq!(
+        ui.call(id, "at", vec![Value::Number(4.)]).unwrap(),
+        Value::String("edited".into())
+    );
+}
+
+#[test]
+fn overlay_header_and_footer_reserve_room_for_the_positioned_row() {
+    let mut ui = view(
+        r#"import QtQuick
+        ListView {width:45; height:45; spacing:3; model:5
+            headerPositioning:ListView.OverlayHeader; footerPositioning:ListView.OverlayFooter
+            header:Item {width:7; height:7} footer:Item {width:9; height:9}
+            delegate:Item {width:20; height:20}
+            function jump(){positionViewAtIndex(3,ListView.Beginning)}
+            function report():string {return contentY + "/" + headerItem.y + "/" + footerItem.y}
+        }"#,
+    );
+    let id = ui.root();
+    assert_eq!(
+        ui.call(id, "report", vec![]).unwrap(),
+        Value::String("-7/-7/29".into())
+    );
+    ui.call(id, "jump", vec![]).unwrap();
+    assert_eq!(
+        ui.call(id, "report", vec![]).unwrap(),
+        Value::String("62/62/98".into())
+    );
+}

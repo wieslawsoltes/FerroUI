@@ -260,9 +260,16 @@ impl Transaction<'_> {
                 .get(name)
                 .cloned()
                 .unwrap_or(Value::Undefined)),
-            Value::Namespace(namespace) => namespace
-                .member(name)
-                .ok_or_else(|| Error::new(format!("unknown type or enum member '{name}'"))),
+            Value::Namespace(namespace) => {
+                if let Some(owner) = namespace.list_owner {
+                    if let Ok(key) = self.model.key(owner, &format!("ListView.{name}")) {
+                        return self.read(key, reads);
+                    }
+                }
+                namespace
+                    .member(name)
+                    .ok_or_else(|| Error::new(format!("unknown type or enum member '{name}'")))
+            }
             Value::Object(id) if name == "parent" => Ok(self
                 .model
                 .parent(id)

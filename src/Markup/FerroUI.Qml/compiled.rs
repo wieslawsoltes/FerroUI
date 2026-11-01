@@ -169,8 +169,8 @@ impl Frame<'_, '_> {
             }
             if base == "Qt" {
                 match name {
-                    "Asynchronous" => return Ok(Value::Number(0.)),
-                    "Synchronous" => return Ok(Value::Number(1.)),
+                    "Asynchronous" | "LeftToRight" => return Ok(Value::Number(0.)),
+                    "Synchronous" | "RightToLeft" => return Ok(Value::Number(1.)),
                     _ => {}
                 }
             }

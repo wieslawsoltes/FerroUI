@@ -7,6 +7,8 @@ use ferroui_controls::{primitives::ScrollBarVisibility, Canvas, ScrollViewer};
 pub(super) struct Viewport {
     pub control: Ref<ScrollViewer>,
     pub canvas: Ref<Canvas>,
+    extent: Ref<Canvas>,
+    origin: Rc<Cell<Vector>>,
     requested: Rc<Cell<Vector>>,
 }
 
@@ -16,18 +18,39 @@ impl Viewport {
         control.set_horizontal_scroll_bar_visibility(ScrollBarVisibility::Hidden);
         control.set_vertical_scroll_bar_visibility(ScrollBarVisibility::Hidden);
         let canvas = Canvas::new();
-        control.set_content(Some(Control::boxed(canvas.clone().upcast::<Control>())));
+        let extent = Canvas::new();
+        extent.children().add(&canvas);
+        control.set_content(Some(Control::boxed(extent.clone().upcast::<Control>())));
         Self {
             control,
             canvas,
+            extent,
+            origin: Default::default(),
             requested: Default::default(),
         }
     }
     pub fn apply(&self, name: &str, value: f64) {
         let previous = self.requested.get();
         match name {
-            "contentWidth" => self.canvas.set_width(value.max(0.)),
-            "contentHeight" => self.canvas.set_height(value.max(0.)),
+            "contentWidth" => {
+                self.canvas.set_width(value.max(0.));
+                self.extent.set_width(value.max(0.));
+            }
+            "contentHeight" => {
+                self.canvas.set_height(value.max(0.));
+                self.extent.set_height(value.max(0.));
+            }
+            "originX" | "originY" => {
+                let origin = if name == "originX" {
+                    Canvas::set_left(&self.canvas, -value);
+                    self.origin.get().with_x(value)
+                } else {
+                    Canvas::set_top(&self.canvas, -value);
+                    self.origin.get().with_y(value)
+                };
+                self.origin.set(origin);
+                self.control.set_offset(previous - origin);
+            }
             _ => {
                 let offset = if name == "contentX" {
                     previous.with_x(value)
@@ -35,13 +58,14 @@ impl Viewport {
                     previous.with_y(value)
                 };
                 self.requested.set(offset);
-                self.control.set_offset(offset);
+                self.control.set_offset(offset - self.origin.get());
             }
         }
     }
     pub fn connect(&self, endpoint: NativeEndpoint) -> Rc<dyn IDisposable> {
         let weak = self.control.downgrade();
         let requested = self.requested.clone();
+        let origin = self.origin.clone();
         let token = self.control.scroll_changed(move |_, args| {
             let Some(viewer) = weak.upgrade() else { return };
             if !args.is_source(&viewer) {
@@ -63,9 +87,9 @@ impl Viewport {
             {
                 // The first layout can coerce a requested offset while extent is still zero.
                 // Reapply it once the presenter knows the canvas dimensions.
-                viewer.set_offset(requested.get());
+                viewer.set_offset(requested.get() - origin.get());
             }
-            let offset = viewer.offset();
+            let offset = viewer.offset() + origin.get();
             requested.set(offset);
             endpoint.write("contentX", Value::Number(offset.x));
             endpoint.write("contentY", Value::Number(offset.y));

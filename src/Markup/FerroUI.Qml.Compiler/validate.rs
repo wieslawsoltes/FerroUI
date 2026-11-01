@@ -93,8 +93,10 @@ fn validate_object<'a>(
                 if matches!(
                     object.type_name.rsplit('.').next(),
                     Some("Repeater" | "ListView")
-                ) && name == "delegate"
-                {
+                ) && matches!(
+                    name.as_str(),
+                    "delegate" | "header" | "footer" | "section.delegate"
+                ) {
                     binding(value, &mut HashSet::new(), source)?;
                 } else {
                     binding(value, ids, source)?;

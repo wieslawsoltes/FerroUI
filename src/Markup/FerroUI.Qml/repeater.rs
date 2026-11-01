@@ -79,6 +79,9 @@ impl State {
 
 #[derive(Default)]
 pub(crate) struct Changes {
+    pub(crate) reveal_header: BTreeSet<ObjectId>,
+    pub(crate) section_changes: BTreeSet<ObjectId>,
+    rebound: BTreeMap<ObjectId, RowId>,
     pub(crate) list_models: BTreeSet<ObjectId>,
     pub(crate) list_structure: BTreeSet<ObjectId>,
     pub(crate) pending: BTreeSet<ObjectId>,
@@ -89,10 +92,21 @@ pub(crate) struct Changes {
 impl Changes {
     pub(crate) fn rollback(self, model: &mut Instance) {
         model.dynamic.repeaters.extend(self.before);
+        for (id, source) in self.rebound {
+            if let Some(row) = model
+                .dynamic
+                .contexts
+                .get_mut(&id)
+                .and_then(|ctx| ctx.row_revision.as_mut())
+            {
+                row.source = source;
+            }
+        }
     }
 }
 
 pub(crate) struct Inputs {
+    attached: Option<BTreeMap<String, Value>>,
     view: ObjectId,
     values: BTreeMap<String, Value>,
     roles: Option<Rc<[String]>>,
@@ -216,6 +230,7 @@ impl Instance {
         }
         values.insert("index".into(), Value::Number(index as f64));
         Ok(Inputs {
+            attached: None,
             view: repeater,
             values,
             roles,
@@ -351,6 +366,24 @@ impl Transaction<'_> {
             .properties
             .values()
             .any(|key| self.model.properties[*key].required);
+        if let Some(fields) = &inputs.attached {
+            let mut scope = (*self.model.nodes[root.index].type_scope).clone();
+            scope.attach_list_view(root, fields.keys());
+            self.model.nodes[root.index].type_scope = Rc::new(scope);
+            for (name, value) in fields {
+                self.model.allocate_property(
+                    Property {
+                        owner: root,
+                        name: format!("ListView.{name}"),
+                        ty: "var".into(),
+                        readonly: true,
+                        required: false,
+                        alias: None,
+                    },
+                    value.clone(),
+                )?;
+            }
+        }
         if let Some(Value::ModelRow(row)) = inputs.values.get("model") {
             let slot = self.model.allocate_property(
                 Property {
@@ -427,6 +460,33 @@ impl Transaction<'_> {
         Ok(())
     }
 
+    fn recycle_delegate(&mut self, item: ObjectId, inputs: Inputs) -> Result<(), Error> {
+        if let Some(Value::ModelRow(next)) = inputs.values.get("model") {
+            let row = self
+                .model
+                .dynamic
+                .contexts
+                .get_mut(&item)
+                .unwrap()
+                .row_revision
+                .as_mut()
+                .unwrap();
+            self.repeater_changes
+                .rebound
+                .entry(item)
+                .or_insert(row.source);
+            row.source = *next;
+        }
+        for name in inputs.values.keys() {
+            if let Some(key) = self.model.delegate_context_key(item, name) {
+                if self.model.slots[key].delegate_local {
+                    self.touched(key).delegate_local = false;
+                }
+            }
+        }
+        self.update_delegate(item, inputs)
+    }
+
     fn update_delegate(&mut self, item: ObjectId, inputs: Inputs) -> Result<(), Error> {
         let row = self.model.dynamic.contexts[&item].row_revision.as_ref();
         let required = row.is_some_and(|row| row.required);
@@ -471,6 +531,13 @@ impl Transaction<'_> {
             .filter_map(|(&id, state)| (state.model == Some(Value::Object(model))).then_some(id))
             .collect();
         for id in views {
+            let sectioned = self.model.dynamic.repeaters[&id]
+                .list
+                .as_ref()
+                .is_some_and(|s| s.sectioned());
+            if sectioned {
+                self.repeater_changes.section_changes.insert(id);
+            }
             if let Some(row) = edited {
                 if !self.repeater_changes.busy.contains(&id)
                     && !self.repeater_changes.pending.contains(&id)
@@ -480,6 +547,9 @@ impl Transaction<'_> {
                             self.model
                                 .delegate_inputs(id, index, &Value::ModelRow(row), item)?;
                         self.update_delegate(item, inputs)?;
+                    }
+                    if sectioned {
+                        self.repeater_changes.pending.insert(id);
                     }
                     continue;
                 }

@@ -246,7 +246,10 @@ impl NativeObject for Peer {
             ) => {
                 number(property, value)?;
             }
-            (Self::ListView(_), "contentX" | "contentY" | "contentWidth" | "contentHeight") => {
+            (
+                Self::ListView(_),
+                "contentX" | "contentY" | "contentWidth" | "contentHeight" | "originX" | "originY",
+            ) => {
                 number(property, value)?;
             }
             (Self::Rectangle { .. }, "color" | "border.color")
@@ -278,7 +281,11 @@ impl NativeObject for Peer {
             "opacity" => control.set_opacity(number(property, value)?.clamp(0.0, 1.0)),
             "clip" => control.set_clip_to_bounds(boolean(property, value)?),
             _ => match (self, property) {
-                (Self::ListView(v), "contentX" | "contentY" | "contentWidth" | "contentHeight") => {
+                (
+                    Self::ListView(v),
+                    "contentX" | "contentY" | "contentWidth" | "contentHeight" | "originX"
+                    | "originY",
+                ) => {
                     v.apply(property, number(property, value)?);
                 }
                 (Self::Rectangle { paint, .. }, "color") => {

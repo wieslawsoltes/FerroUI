@@ -4,6 +4,9 @@ use super::*;
 #[path = "list_extents.rs"]
 mod extents;
 use extents::Extents;
+#[path = "list_sections.rs"]
+mod sections;
+use sections::{SectionLayout, Sections};
 
 impl TypeDefinition {
     pub fn quick_list_view() -> Self {
@@ -14,6 +17,45 @@ impl TypeDefinition {
             .property("delegate", "Component", Value::Null)
             .property("delegateModelAccess", "int", number(0.))
             .property("orientation", "int", number(2.))
+            .property("reuseItems", "bool", Value::Bool(false))
+            .property("layoutDirection", "int", number(0.))
+            .property("verticalLayoutDirection", "int", number(0.))
+            .property("headerPositioning", "int", number(0.))
+            .property("footerPositioning", "int", number(0.))
+            .enumeration(
+                "HeaderPositioning",
+                &[
+                    ("InlineHeader", 0),
+                    ("OverlayHeader", 1),
+                    ("PullBackHeader", 2),
+                ],
+            )
+            .expect("Qt header modes")
+            .enumeration(
+                "FooterPositioning",
+                &[
+                    ("InlineFooter", 0),
+                    ("OverlayFooter", 1),
+                    ("PullBackFooter", 2),
+                ],
+            )
+            .expect("Qt footer modes")
+            .property("header", "Component", Value::Null)
+            .property("footer", "Component", Value::Null)
+            .property("section.property", "string", Value::String(String::new()))
+            .property("section.criteria", "int", number(0.))
+            .property("section.delegate", "Component", Value::Null)
+            .property("section.labelPositioning", "int", number(1.))
+            .readonly_property("headerItem", "QtQuick.Item", Value::Null)
+            .readonly_property("footerItem", "QtQuick.Item", Value::Null)
+            .readonly_property("currentSection", "string", Value::String(String::new()))
+            .readonly_property("originX", "real", number(0.))
+            .readonly_property("originY", "real", number(0.))
+            .enumeration(
+                "VerticalLayoutDirection",
+                &[("TopToBottom", 0), ("BottomToTop", 1)],
+            )
+            .expect("Qt vertical directions")
             .property("spacing", "real", number(0.))
             .property("cacheBuffer", "int", number(0.))
             .property("currentIndex", "int", number(-1.))
@@ -112,6 +154,11 @@ pub(super) struct State {
     initialized: bool,
     viewport: Option<(f64, f64)>,
     horizontal: bool,
+    reversed: bool,
+    header: Decoration,
+    footer: Decoration,
+    sections: Sections,
+    pool: Vec<ObjectId>,
     // Width/height deviations are retained independently of the live delegates.
     nominal: Option<f64>,
     sizes: Extents,
@@ -119,6 +166,22 @@ pub(super) struct State {
     current: i32,
     current_row: Option<Key>,
 }
+#[derive(Clone, Default)]
+struct Decoration {
+    factory: Option<ObjectId>,
+    item: Option<ObjectId>,
+    extent: f64,
+    position: Option<f64>,
+}
+
+fn axis_position(reversed: bool, start: f64, extent: f64) -> f64 {
+    if reversed {
+        -start - extent
+    } else {
+        start
+    }
+}
+
 impl Instance {
     /// Supply an arranged native viewport without replacing QML width or height bindings.
     pub fn set_list_view_viewport(
@@ -162,13 +225,30 @@ impl State {
     }
 
     pub(super) fn items(&self) -> impl Iterator<Item = ObjectId> + '_ {
-        self.realized.values().map(|entry| entry.1)
+        self.visual_items().chain(self.pool.iter().copied())
+    }
+    fn visual_items(&self) -> impl Iterator<Item = ObjectId> + '_ {
+        self.realized
+            .values()
+            .map(|entry| entry.1)
+            .chain(self.sections.items())
+            .chain(self.header.item)
+            .chain(self.footer.item)
+    }
+    fn bounds(&self, count: usize, spacing: f64, viewport: f64) -> (f64, f64) {
+        let begin = -self.header.extent;
+        (
+            begin,
+            (self.full_size(count, spacing) + self.footer.extent - viewport).max(begin),
+        )
     }
     fn extent(&self, index: usize) -> f64 {
         self.sizes.get(index).unwrap_or(self.nominal.unwrap_or(32.))
     }
     fn start(&self, index: usize, spacing: f64) -> f64 {
-        index as f64 * (self.nominal.unwrap_or(32.) + spacing) + self.sizes.before(index)
+        index as f64 * (self.nominal.unwrap_or(32.) + spacing)
+            + self.sizes.before(index)
+            + self.sections.before(index.saturating_add(1))
     }
     fn full_size(&self, count: usize, spacing: f64) -> f64 {
         if count == 0 {
@@ -287,11 +367,26 @@ impl Transaction<'_> {
         };
         let viewport = state.dimension(self.model, id, axis);
         let spacing = real(self.model, id, "spacing").max(0.);
-        let offset = real(self.model, id, offset_axis);
+        let offset = axis_position(state.reversed, real(self.model, id, offset_axis), viewport);
         let count = state.source.len(self.model);
         let pos = if horizontal { arg(0) } else { arg(1) };
         let cross = if horizontal { arg(1) } else { arg(0) };
-        let at = state.lower_index(pos, count, spacing);
+        let search = if state.reversed { -pos } else { pos };
+        let at = if state.reversed {
+            // The leading visual edge is inclusive even when the logical axis runs backwards.
+            let (mut lo, mut hi) = (0, count);
+            while lo < hi {
+                let mid = lo + (hi - lo) / 2;
+                if state.start(mid, spacing) + state.extent(mid) < search {
+                    lo = mid + 1
+                } else {
+                    hi = mid
+                }
+            }
+            lo
+        } else {
+            state.lower_index(search, count, spacing)
+        };
         let hits = || {
             state.realized.get(&at).filter(|(_, item)| {
                 let cross_size = real(
@@ -299,7 +394,9 @@ impl Transaction<'_> {
                     *item,
                     if horizontal { "height" } else { "width" },
                 );
-                pos >= state.start(at, spacing) && cross >= 0. && cross < cross_size
+                let start =
+                    axis_position(state.reversed, state.start(at, spacing), state.extent(at));
+                pos >= start && pos < start + state.extent(at) && cross >= 0. && cross < cross_size
             })
         };
         match name {
@@ -335,23 +432,39 @@ impl Transaction<'_> {
                 self.repeater_changes.pending.insert(id);
             }
             _ => {
-                let max = (state.full_size(count, spacing) - viewport).max(0.);
+                let (min, max) = state.bounds(count, spacing, viewport);
                 let next = match name {
-                    "positionViewAtBeginning" => 0.,
+                    "positionViewAtBeginning" => min,
                     "positionViewAtEnd" => max,
                     "positionViewAtIndex" if arg(0) >= 0. && (arg(0) as usize) < count => {
                         let i = arg(0) as usize;
-                        aligned(
-                            state.start(i, spacing),
-                            state.extent(i),
-                            offset,
-                            viewport,
-                            arg(1) as i32,
-                        )
-                        .clamp(0., max)
+                        let head = if real(self.model, id, "headerPositioning") != 0. {
+                            state.header.extent
+                        } else {
+                            0.
+                        };
+                        let foot = if real(self.model, id, "footerPositioning") != 0. {
+                            state.footer.extent
+                        } else {
+                            0.
+                        };
+                        let mode = arg(1) as i32;
+                        if mode == 0 || mode == 5 {
+                            self.repeater_changes.reveal_header.insert(id);
+                        }
+                        let label = state.sections.label_extent(i);
+                        let aligned = aligned(
+                            state.start(i, spacing) - label,
+                            state.extent(i) + label,
+                            offset + head,
+                            (viewport - head - foot).max(0.),
+                            mode,
+                        );
+                        (aligned - head).clamp(min, max)
                     }
                     _ => return Ok(Value::Undefined),
                 };
+                let next = axis_position(state.reversed, next, viewport);
                 let key = self.model.key(id, offset_axis)?;
                 self.write(key, Value::Number(next))?;
             }
@@ -370,6 +483,7 @@ impl Transaction<'_> {
             Value::Object(o) if self.model.dynamic.templates.contains_key(&o) => Some(o),
             _ => None,
         };
+        let old_items: BTreeSet<_> = state.items().collect();
         let reset = model_changed || factory != retained.factory;
         let horizontal = real(self.model, id, "orientation") == 1.;
         if reset || structural || horizontal != state.horizontal {
@@ -417,7 +531,33 @@ impl Transaction<'_> {
         let viewport = state.dimension(self.model, id, axis);
         let spacing = real(self.model, id, "spacing").max(0.);
         let cache = real(self.model, id, "cacheBuffer").max(0.);
-        let mut offset = real(self.model, id, offset_prop);
+        let reversed = real(
+            self.model,
+            id,
+            if horizontal {
+                "layoutDirection"
+            } else {
+                "verticalLayoutDirection"
+            },
+        ) == 1.;
+        let old_header = state.header.extent;
+        self.update_decoration(id, "header", axis, &mut state.header)?;
+        self.update_decoration(id, "footer", axis, &mut state.footer)?;
+        let section_dirty = self.repeater_changes.section_changes.remove(&id);
+        let retained_horizontal = state.horizontal;
+        self.prepare_sections(
+            id,
+            &mut state,
+            reset || structural || section_dirty || horizontal != retained_horizontal,
+        )?;
+        let mut offset = axis_position(reversed, real(self.model, id, offset_prop), viewport);
+        if (!state.initialized && !self.model.is_assigned(id, offset_prop))
+            || reversed != state.reversed
+            || horizontal != state.horizontal
+            || (old_header != state.header.extent && offset == -old_header)
+        {
+            offset = -state.header.extent;
+        }
         if let Some(i) =
             selected.filter(|_| state.initialized && current != state.current && !structural)
         {
@@ -429,14 +569,18 @@ impl Transaction<'_> {
                 4,
             );
         }
-        let offset = offset.clamp(0., (state.full_size(count, spacing) - viewport).max(0.));
+        let (min, max) = state.bounds(count, spacing, viewport);
+        let offset = offset.clamp(min, max);
         let mut wanted = BTreeSet::new();
         if let Some(i) = selected {
             wanted.insert(i);
         }
         if viewport > 0. {
             let mut i = state.lower_index((offset - cache).max(0.), count, spacing);
-            while i < count && state.start(i, spacing) < offset + viewport + cache {
+            while i < count
+                && state.start(i, spacing) - state.sections.label_extent(i)
+                    < offset + viewport + cache
+            {
                 if wanted.len() >= MAX_ROWS {
                     return Err(Error::new(
                         "ListView viewport exceeds the realization limit",
@@ -457,10 +601,19 @@ impl Transaction<'_> {
         let keys: BTreeSet<_> = targets.values().map(|r| r.0).collect();
         let previous = state.realized.clone();
         let mut retained = BTreeMap::new();
-        let mut removed = vec![];
+        let can_reuse =
+            self.model.get(id, "reuseItems")? == Value::Bool(true) && !reset && !structural;
+        let mut removed = if can_reuse {
+            Vec::new()
+        } else {
+            std::mem::take(&mut state.pool)
+        };
         for &(key, item) in previous.values() {
             if !reset && keys.contains(&key) {
                 retained.insert(key, item);
+            } else if can_reuse {
+                self.dispatch(item, "ListView.pooled", vec![])?;
+                state.pool.push(item);
             } else {
                 removed.push(item);
             }
@@ -471,16 +624,33 @@ impl Transaction<'_> {
         if let Some(f) = factory {
             let template = self.model.dynamic.templates[&f].clone();
             for (index, (key, value)) in targets {
-                let owner = retained
-                    .get(&key)
-                    .copied()
+                let kept = retained.get(&key).copied();
+                let recycled = if kept.is_none() {
+                    state.pool.pop()
+                } else {
+                    None
+                };
+                let owner = kept
+                    .or(recycled)
                     .unwrap_or_else(|| self.model.next_object());
-                let inputs = self.model.delegate_inputs(id, index, &value, owner)?;
+                let mut inputs = self.model.delegate_inputs(id, index, &value, owner)?;
+                let attached = state.attached(id, index, count, selected);
+                if kept.is_some() || recycled.is_some() {
+                    for (name, value) in attached {
+                        self.list_property(owner, &format!("ListView.{name}"), value)?;
+                    }
+                } else {
+                    inputs.attached = Some(attached);
+                }
                 let item = if let Some(&old) = retained.get(&key) {
                     if structural || !previous.get(&index).is_some_and(|e| e.1 == old) {
                         self.update_delegate(old, inputs)?;
                     }
                     old
+                } else if let Some(item) = recycled {
+                    self.recycle_delegate(item, inputs)?;
+                    self.dispatch(item, "ListView.reused", vec![])?;
+                    item
                 } else {
                     self.construct_object(
                         f,
@@ -504,17 +674,105 @@ impl Transaction<'_> {
                     ),
                 };
                 measured |= state.measure(index, size);
-                self.list_property(item, coord, Value::Number(state.start(index, spacing)))?;
+                self.list_property(
+                    item,
+                    coord,
+                    Value::Number(axis_position(
+                        reversed,
+                        state.start(index, spacing),
+                        state.extent(index),
+                    )),
+                )?;
                 state.realized.insert(index, (key, item));
             }
         }
-        let old_items: BTreeSet<_> = previous.values().map(|e| e.1).collect();
+        let excess = state.pool.len().saturating_sub(state.realized.len().max(1));
+        self.destroy_subtrees(&state.pool.drain(..excess).collect::<Vec<_>>())?;
+        measured |= self.layout_sections(
+            id,
+            &mut state,
+            SectionLayout {
+                reversed,
+                axis,
+                coord,
+                spacing,
+                offset,
+                viewport,
+                cache,
+                count,
+            },
+        )?;
+        let total = state.full_size(count, spacing);
+        let origin = if reversed {
+            -(total + state.footer.extent)
+        } else {
+            -state.header.extent
+        };
+        let reveal_header = self.repeater_changes.reveal_header.remove(&id);
+        let boundary = offset + viewport;
+        let header = &mut state.header;
+        let header_start = match real(self.model, id, "headerPositioning") as i32 {
+            1 => offset,
+            2 if reveal_header => offset,
+            2 => header
+                .position
+                .unwrap_or(offset)
+                .clamp(offset - header.extent, offset)
+                .max(-header.extent),
+            _ => -header.extent,
+        };
+        header.position = Some(header_start);
+        if let Some(item) = header.item {
+            self.list_property(
+                item,
+                coord,
+                Value::Number(axis_position(reversed, header_start, header.extent)),
+            )?;
+        }
+        let footer = &mut state.footer;
+        let footer_start = match real(self.model, id, "footerPositioning") as i32 {
+            1 => boundary - footer.extent,
+            2 => footer
+                .position
+                .unwrap_or(boundary)
+                .clamp(boundary - footer.extent, boundary)
+                .min(total),
+            _ => total,
+        };
+        footer.position = Some(footer_start);
+        if let Some(item) = footer.item {
+            self.list_property(
+                item,
+                coord,
+                Value::Number(axis_position(reversed, footer_start, footer.extent)),
+            )?;
+        }
+        self.list_property(
+            id,
+            if horizontal { "originX" } else { "originY" },
+            Value::Number(origin),
+        )?;
+        self.list_property(
+            id,
+            if horizontal { "originY" } else { "originX" },
+            Value::Number(0.),
+        )?;
+        if state.horizontal != horizontal {
+            self.list_property(
+                id,
+                if horizontal { "contentY" } else { "contentX" },
+                Value::Number(0.),
+            )?;
+            for item in state.visual_items() {
+                self.list_property(item, if horizontal { "y" } else { "x" }, Value::Number(0.))?;
+            }
+        }
         let data = self.model.key(id, "data")?;
         let Value::List(mut children) = self.model.slots[data].value.clone() else {
             return Err(Error::new("ListView data must be a list"));
         };
         children.retain(|v| !matches!(v,Value::Object(o) if old_items.contains(o)));
-        children.extend(state.items().map(Value::Object));
+        children.extend(state.visual_items().map(Value::Object));
         self.set_value(data, Value::List(children));
         self.list_property(id, "count", Value::Number(count as f64))?;
         self.list_property(id, "currentIndex", Value::Number(current as f64))?;
@@ -525,7 +783,11 @@ impl Transaction<'_> {
                 .and_then(|i| state.realized.get(&i))
                 .map_or(Value::Null, |e| Value::Object(e.1)),
         )?;
-        self.list_property(id, offset_prop, Value::Number(offset))?;
+        self.list_property(
+            id,
+            offset_prop,
+            Value::Number(axis_position(reversed, offset, viewport)),
+        )?;
         self.list_property(
             id,
             if horizontal {
@@ -533,7 +795,7 @@ impl Transaction<'_> {
             } else {
                 "contentHeight"
             },
-            Value::Number(state.full_size(count, spacing)),
+            Value::Number(total + state.header.extent + state.footer.extent),
         )?;
         self.list_property(
             id,
@@ -556,6 +818,7 @@ impl Transaction<'_> {
         state.current_row = selected.and_then(|i| state.realized.get(&i)).map(|e| e.0);
         state.initialized = true;
         state.horizontal = horizontal;
+        state.reversed = reversed;
         let out = self.model.dynamic.repeaters.get_mut(&id).unwrap();
         out.factory = factory;
         out.rows = state

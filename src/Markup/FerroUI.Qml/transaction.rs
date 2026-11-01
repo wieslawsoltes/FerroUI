@@ -699,6 +699,17 @@ impl Transaction<'_> {
                     | "currentIndex"
                     | "spacing"
                     | "orientation"
+                    | "layoutDirection"
+                    | "verticalLayoutDirection"
+                    | "reuseItems"
+                    | "headerPositioning"
+                    | "footerPositioning"
+                    | "header"
+                    | "footer"
+                    | "section.property"
+                    | "section.criteria"
+                    | "section.delegate"
+                    | "section.labelPositioning"
             ) {
                 self.repeater_changes.pending.insert(property.owner);
             }

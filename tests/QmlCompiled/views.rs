@@ -39,3 +39,60 @@ fn virtualized_view_with_webscene() {
         .unwrap(),
     );
 }
+
+mod decorated {
+    use super::*;
+    include!(concat!(env!("OUT_DIR"), "/decorated.rs"));
+
+    fn exercise(mut ui: Instance) {
+        let root = ui.root();
+        let report = |ui: &mut Instance| ui.call(root, "report", vec![]).unwrap();
+        assert_eq!(
+            report(&mut ui),
+            Value::String("A/161/0/-154/-31/-88/0/-1/AAB/-54".into())
+        );
+        ui.call(root, "regroup", vec![]).unwrap();
+        assert_eq!(
+            report(&mut ui),
+            Value::String("A/161/0/-154/-31/-88/0/-1/ABB/-65".into())
+        );
+    }
+
+    #[test]
+    fn decorated_sections_from_generated_rust() {
+        exercise(Instance::new(&compiled_qml(), &quick_registry(), Default::default()).unwrap());
+    }
+    #[cfg(feature = "webscene")]
+    #[test]
+    fn decorated_sections_with_webscene() {
+        use std::{path::Path, rc::Rc};
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("views/Decorated.qml");
+        let unit = ferroui_qml_build::Compiler::new()
+            .with_javascript()
+            .load(path)
+            .unwrap();
+        exercise(
+            Instance::with_engine(
+                &unit.document,
+                &quick_registry(),
+                Default::default(),
+                Rc::new(ferroui_qml_webscene::WebSceneEngine::from_env().unwrap()),
+            )
+            .unwrap(),
+        );
+    }
+}
+
+mod reuse {
+    use super::*;
+    include!(concat!(env!("OUT_DIR"), "/reuse.rs"));
+    #[test]
+    fn pooled_and_reused_handlers_see_row_before_and_after_rebinding() {
+        let mut ui = Instance::new(&compiled_qml(), &quick_registry(), Default::default()).unwrap();
+        let root = ui.root();
+        for i in [30., 80., 140., 10.] {
+            ui.call(root, "jump", vec![Value::Number(i)]).unwrap();
+        }
+        assert_eq!(ui.call(root, "valid", vec![]).unwrap(), Value::Bool(true));
+    }
+}

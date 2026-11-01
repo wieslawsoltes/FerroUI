@@ -634,6 +634,50 @@ fn list_view_scrolls_million_row_native_canvas_from_both_sides() {
 }
 
 #[test]
+fn reversed_native_list_translates_scroll_origin_and_keeps_reused_peer() {
+    use ferroui_base::{layout::ILayoutManager, Vector};
+    use ferroui_controls::{ScrollViewer, Window};
+    let _scope = UnitTestApplication::start(TestServices::styled_window());
+    ferroui_controls::testing::add_autocomplete_themes(
+        &ferroui_controls::Application::current().unwrap().styles(),
+    );
+    let view = mount(
+        r#"import QtQuick
+        ListView {width:45; height:45; orientation:ListView.Horizontal; layoutDirection:Qt.RightToLeft
+            model:5; reuseItems:true; spacing:3
+            header: Item {width:7;height:7}
+            footer: Item {width:9;height:9}
+            delegate: Item {required property int index; width:20;height:20}
+        }"#,
+    );
+    let id = view.root_id();
+    let scroll = view.root().cast::<ScrollViewer>().unwrap();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(view.root())));
+    window.show();
+    window.layout_manager().execute_initial_layout_pass();
+    assert_eq!(scroll.extent().width, 128.);
+    assert_eq!(view.get(id, "contentX").unwrap(), Value::Number(-38.));
+    assert_eq!(scroll.offset().x, 83.);
+    let Value::Object(old) = view
+        .call(id, "itemAtIndex", vec![Value::Number(1.)])
+        .unwrap()
+    else {
+        panic!("row 1")
+    };
+    let peer = view.control(old).unwrap();
+    scroll.set_offset(Vector::new(0., 0.));
+    window.layout_manager().execute_layout_pass();
+    assert_eq!(view.get(id, "contentX").unwrap(), Value::Number(-121.));
+    assert_eq!(view.get(old, "index").unwrap(), Value::Number(3.));
+    assert_eq!(view.control(old).unwrap(), peer);
+    view.call(id, "positionViewAtBeginning", vec![]).unwrap();
+    window.layout_manager().execute_layout_pass();
+    assert_eq!(scroll.offset().x, 83.);
+    window.close();
+}
+
+#[test]
 fn network_completion_wakes_a_mounted_loader_on_its_dispatcher() {
     use ferroui_base::threading::Dispatcher;
     use ferroui_qml::network::{ComponentReply, ComponentTransport, Url};

@@ -215,6 +215,23 @@ pub(crate) fn register(types: &mut TypeRegistry) -> Result<(), Error> {
     )?;
     types.register(MODULE, "ListElement", TypeDefinition::default())?;
     types.register(
+        "QtQuick",
+        "ViewSection",
+        TypeDefinition::default()
+            .enumeration(
+                "SectionCriteria",
+                &[("FullString", 0), ("FirstCharacter", 1)],
+            )?
+            .enumeration(
+                "LabelPositioning",
+                &[
+                    ("InlineLabels", 1),
+                    ("CurrentLabelAtStart", 2),
+                    ("NextLabelAtEnd", 4),
+                ],
+            )?,
+    )?;
+    types.register(
         MODULE,
         "DelegateModel",
         TypeDefinition::default().enumeration(

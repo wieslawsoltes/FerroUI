@@ -1086,6 +1086,10 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         let node = &mut self.instance.nodes[owner.index];
         let (signal, formal) = if name == "Component.onDestruction" {
             ("Component.destruction".to_owned(), Vec::new())
+        } else if name == "ListView.onPooled" {
+            ("ListView.pooled".to_owned(), Vec::new())
+        } else if name == "ListView.onReused" {
+            ("ListView.reused".to_owned(), Vec::new())
         } else if name == "Component.onCompleted" {
             ("Component.completed".to_owned(), Vec::new())
         } else {
