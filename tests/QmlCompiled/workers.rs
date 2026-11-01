@@ -130,3 +130,52 @@ fn model_sync_acknowledges_owner_transactions_and_retries_after_conflicting_edit
     assert_eq!(app.get(model, "count").unwrap(), Value::Number(2.));
     assert_eq!(app.model_role(row, "number").unwrap(), Value::Number(9.));
 }
+
+#[test]
+fn retiring_a_dynamic_worker_revokes_queued_results_before_a_replacement_starts() {
+    let mut app = construct(&generated::compiled_qml());
+    let root = app.root();
+    let Value::Object(factory) = app.get(root, "factory").unwrap() else {
+        panic!()
+    };
+    let old = app
+        .create_object(factory, Some(root), Default::default())
+        .unwrap();
+    for worker in [
+        old,
+        match app.get(root, "actor").unwrap() {
+            Value::Object(id) => id,
+            _ => panic!(),
+        },
+        match app.get(root, "classic").unwrap() {
+            Value::Object(id) => id,
+            _ => panic!(),
+        },
+    ] {
+        until(&mut app, |app| {
+            app.get(worker, "ready").unwrap() == Value::Bool(true)
+        });
+    }
+    let (tx, rx) = std::sync::mpsc::sync_channel(1);
+    app.set_worker_waker(Some(std::sync::Arc::new(move || {
+        let _ = tx.try_send(());
+    })));
+    app.call(old, "sendMessage", vec![Value::Number(30.)])
+        .unwrap();
+    rx.recv_timeout(Duration::from_secs(6)).unwrap();
+    app.destroy_object(old).unwrap();
+    let replacement = app
+        .create_object(factory, Some(root), Default::default())
+        .unwrap();
+    assert_ne!(old, replacement);
+    assert!(app.get(old, "ready").is_err());
+    until(&mut app, |app| {
+        app.get(replacement, "ready").unwrap() == Value::Bool(true)
+    });
+    assert_eq!(app.get(root, "localValue").unwrap(), Value::Number(0.));
+    app.call(replacement, "sendMessage", vec![Value::Number(3.)])
+        .unwrap();
+    until(&mut app, |app| {
+        app.get(root, "localValue").unwrap() == Value::Number(3.)
+    });
+}

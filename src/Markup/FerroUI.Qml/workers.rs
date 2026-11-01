@@ -81,12 +81,37 @@ struct Entry {
     endpoint: Option<Box<dyn WorkerEndpoint>>,
     models: BTreeMap<u64, ObjectId>,
 }
+struct ModelAck {
+    send: std::sync::mpsc::Sender<Result<u64, Error>>,
+    pending: Arc<std::sync::atomic::AtomicBool>,
+}
+
+/// Dropping the waiter revokes a sync request that has not yet started on the
+/// owner thread. A timeout cannot silently mutate the model on a later poll.
+pub struct WorkerSync {
+    done: std::sync::mpsc::Receiver<Result<u64, Error>>,
+    pending: Arc<std::sync::atomic::AtomicBool>,
+}
+impl WorkerSync {
+    pub fn recv_timeout(
+        &self,
+        timeout: std::time::Duration,
+    ) -> Result<Result<u64, Error>, std::sync::mpsc::RecvTimeoutError> {
+        self.done.recv_timeout(timeout)
+    }
+}
+impl Drop for WorkerSync {
+    fn drop(&mut self) {
+        self.pending
+            .store(false, std::sync::atomic::Ordering::Release);
+    }
+}
 struct Event {
     id: ObjectId,
     generation: u64,
     event: WorkerEvent,
     bytes: usize,
-    ack: Option<std::sync::mpsc::Sender<Result<u64, Error>>>,
+    ack: Option<ModelAck>,
 }
 #[derive(Default)]
 struct Inbox {
@@ -147,8 +172,13 @@ impl WorkerDelivery {
         id: u64,
         revision: u64,
         edits: Vec<WorkerEdit>,
-    ) -> Result<std::sync::mpsc::Receiver<Result<u64, Error>>, Error> {
-        let (ack, done) = std::sync::mpsc::channel();
+    ) -> Result<WorkerSync, Error> {
+        let (send, done) = std::sync::mpsc::channel();
+        let pending = Arc::new(std::sync::atomic::AtomicBool::new(true));
+        let ack = ModelAck {
+            send,
+            pending: pending.clone(),
+        };
         self.enqueue(
             WorkerEvent::Sync {
                 id,
@@ -157,14 +187,10 @@ impl WorkerDelivery {
             },
             Some(ack),
         )
-        .then_some(done)
+        .then_some(WorkerSync { done, pending })
         .ok_or_else(|| Error::new("WorkerScript receiver unavailable"))
     }
-    fn enqueue(
-        &self,
-        event: WorkerEvent,
-        ack: Option<std::sync::mpsc::Sender<Result<u64, Error>>>,
-    ) -> bool {
+    fn enqueue(&self, event: WorkerEvent, ack: Option<ModelAck>) -> bool {
         let Some(inbox) = self.inbox.upgrade() else {
             return false;
         };
@@ -215,6 +241,11 @@ pub(crate) struct Workers {
     sequence: u64,
 }
 impl Workers {
+    pub(crate) fn retire_model_grants(&mut self, dead: &BTreeSet<ObjectId>) {
+        for entry in self.entries.values_mut() {
+            entry.models.retain(|_, id| !dead.contains(id));
+        }
+    }
     pub(crate) fn unregister(&mut self, id: ObjectId) {
         if self.entries.remove(&id).is_some() {
             if let Some(inbox) = &self.inbox {
@@ -226,7 +257,15 @@ impl Workers {
         }
     }
     pub(crate) fn truncate(&mut self, first: usize) {
-        self.entries.retain(|id, _| id.index < first);
+        let retired: Vec<_> = self
+            .entries
+            .keys()
+            .filter(|id| id.index >= first)
+            .copied()
+            .collect();
+        for id in retired {
+            self.unregister(id);
+        }
     }
 
     pub(crate) fn register(&mut self, id: ObjectId, origin: &str) {
@@ -323,11 +362,13 @@ impl Instance {
                         revision,
                         edits,
                     } => {
-                        let result = self.apply_worker_edits(id, model, revision, edits);
                         if let Some(ack) = ack {
-                            let _ = ack.send(result);
+                            if ack.pending.swap(false, std::sync::atomic::Ordering::AcqRel) {
+                                let result = self.apply_worker_edits(id, model, revision, edits);
+                                let _ = ack.send.send(result);
+                            }
                         } else {
-                            result?;
+                            self.apply_worker_edits(id, model, revision, edits)?;
                         }
                     }
                     WorkerEvent::Stopped(reason) => {
@@ -607,5 +648,58 @@ impl Transaction<'_> {
                 self.new_record(fields)
             }
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dropping_a_sync_waiter_revokes_unstarted_edits() {
+        let doc = ir::parse(
+            r#"
+            import QtQml
+            import QtQml.WorkerScript
+            QtObject {
+                property WorkerScript task: WorkerScript { id: actor }
+                property ListModel rows: ListModel { id: numbers }
+            }
+        "#,
+        )
+        .unwrap();
+        let mut app = Instance::new(&doc, &TypeRegistry::new(), Default::default()).unwrap();
+        let worker = app.id("actor").unwrap();
+        let model = app.id("numbers").unwrap();
+        let (token, revision, _) = app.worker_model_snapshot(model).unwrap();
+        let entry = app.workers.entries.get_mut(&worker).unwrap();
+        entry.models.insert(token, model);
+        let delivery = WorkerDelivery {
+            inbox: Arc::downgrade(app.workers.inbox.as_ref().unwrap()),
+            id: worker,
+            generation: entry.generation,
+        };
+        let edits = || {
+            vec![WorkerEdit {
+                method: "append".into(),
+                args: vec![WorkerValue::Object(BTreeMap::from([(
+                    "number".into(),
+                    WorkerValue::Number("7".into()),
+                )]))],
+            }]
+        };
+        let stale = delivery.synchronize(token, revision, edits()).unwrap();
+        drop(stale);
+        app.poll_worker_scripts(10).unwrap();
+        assert_eq!(app.get(model, "count").unwrap(), Value::Number(0.));
+        let live = delivery.synchronize(token, revision, edits()).unwrap();
+        app.poll_worker_scripts(10).unwrap();
+        assert!(
+            live.recv_timeout(std::time::Duration::from_secs(1))
+                .unwrap()
+                .unwrap()
+                > revision
+        );
+        assert_eq!(app.get(model, "count").unwrap(), Value::Number(1.));
     }
 }

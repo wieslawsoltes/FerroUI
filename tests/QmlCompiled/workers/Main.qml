@@ -14,6 +14,9 @@ QtObject {
         source: "counter.js"
         onMessage: function(n) { app.localValue = n }
     }
+    property Component factory: Component {
+        WorkerScript { source: "counter.js"; onMessage: function(n) { app.localValue = n } }
+    }
     function start() {
         const input = {items: [2, 3]}
         actor.sendMessage(input)

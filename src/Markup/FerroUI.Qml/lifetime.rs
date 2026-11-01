@@ -24,6 +24,9 @@ impl Instance {
         self.watched.retain(|(id, _)| !dead.contains(id));
         self.changes
             .retain(|p, _| !dead.contains(&self.properties[*p].owner));
+        if dead.iter().any(|id| self.models.contains_key(id)) {
+            self.workers.retire_model_grants(dead);
+        }
         for &id in dead {
             self.dynamic.deadlines.remove(&id);
             self.dynamic.templates.remove(&id);
