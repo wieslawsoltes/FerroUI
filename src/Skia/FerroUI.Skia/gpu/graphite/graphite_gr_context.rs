@@ -83,6 +83,19 @@ impl GraphiteGrContext {
         self.with_state(|state| f(&mut state.recorder))
     }
 
+    /// Submits the frame on FerroUI's graphics queue and hands the wrapped image
+    /// back in the layout the platform presenter will use in its next barrier.
+    #[cfg(ferro_skia_graphite_vulkan)]
+    pub(crate) fn finish_vulkan_frame(&self, surface: &mut Surface, layout: u32, queue_family: u32) {
+        self.with_state(|state| {
+            let mut recording = state.recorder.snap().expect("Graphite could not finish the frame");
+            super::super::vulkan::graphite_frame::submit(
+                &mut state.context, &mut recording, surface, layout, queue_family,
+            );
+            state.uploaded_images.retain(|_, uploaded| uploaded.is_source_in_use());
+        });
+    }
+
     /// Releases the recorder and the context.
     pub fn dispose(&self) {
         *self.state.borrow_mut() = None;

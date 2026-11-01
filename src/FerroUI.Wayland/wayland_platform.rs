@@ -101,8 +101,8 @@ impl WaylandPlatform {
         let drag_source: Rc<dyn IPlatformDragSource> = Rc::new(WaylandDragSource::new());
 
         let keyboard = KeyboardDevice::new();
-        let windowing_platform: Rc<dyn IWindowingPlatform> =
-            Rc::new(WaylandTopLevelFactory::new(client.clone(), keyboard.clone()));
+        let factory = Rc::new(WaylandTopLevelFactory::new(client.clone(), keyboard.clone()));
+        let windowing_platform: Rc<dyn IWindowingPlatform> = factory.clone();
         let render_loop: Arc<dyn IRenderLoop> = worker.render_loop().clone();
         let keyboard_device: Rc<dyn IKeyboardDevice> = keyboard;
         let cursor_factory: Rc<dyn ICursorFactory> = Rc::new(WaylandCursorFactory::new(client.clone()));
@@ -138,6 +138,7 @@ impl WaylandPlatform {
             .to_constant(screens_impl)
             // Not in the reference: the client and the screens under their own types, for
             // code that asks the backend about itself (the example does).
+            .bind_to_self(factory)
             .bind_to_self(client)
             .bind_to_self(screens);
 

@@ -23,3 +23,6 @@ pub mod wayland_egl_wsi_platform_graphics;
 pub mod wayland_egl_wsi_surface;
 #[cfg(target_os = "linux")]
 pub mod wayland_framebuffer;
+
+#[cfg(target_os = "linux")]
+pub mod wayland_vulkan;

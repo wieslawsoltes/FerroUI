@@ -545,6 +545,32 @@ fn should_not_fire_click_event_on_space_key_when_it_is_not_focus() {
 }
 
 #[test]
+fn space_release_only_clicks_the_button_that_handled_the_press() {
+    let _app = UnitTestApplication::start(TestServices::focusable_window());
+    let button = Button::new();
+    let other = Button::new();
+    let panel = StackPanel::new();
+    panel.children().add(&button);
+    panel.children().add(&other);
+    let window = window_with_content(&panel);
+    window.show();
+    let clicks = count_clicks(&button);
+    assert!(button.focus());
+    button.raise_event(&create_key_up_event(Key::Space));
+    button.raise_event(&create_key_down_event(Key::Space, None));
+    assert!(other.focus());
+    assert!(button.focus());
+    button.raise_event(&create_key_up_event(Key::Space));
+    assert_eq!(clicks.get(), 0);
+
+    button.raise_event(&create_key_down_event(Key::Space, None));
+    button.raise_event(&create_key_up_event(Key::Space));
+    button.raise_event(&create_key_up_event(Key::Space));
+    assert_eq!(clicks.get(), 1);
+    assert!(!button.is_pressed());
+}
+
+#[test]
 fn button_unpressed_when_disabled() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let helper = MouseTestHelper::new();

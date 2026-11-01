@@ -20,6 +20,7 @@ fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rustc-check-cfg=cfg(ferro_skia_ganesh_gl)");
     println!("cargo:rustc-check-cfg=cfg(ferro_skia_vulkan)");
+    println!("cargo:rustc-check-cfg=cfg(ferro_skia_graphite_vulkan)");
     // Given by the application with `RUSTFLAGS="--cfg ferro_skia_apple_ganesh"`: the manifest then
     // builds Skia with Ganesh on OpenGL and on Metal for Apple targets instead of Graphite.
     println!("cargo:rustc-check-cfg=cfg(ferro_skia_apple_ganesh)");
@@ -32,7 +33,23 @@ fn main() {
     if env::var("CARGO_CFG_WINDOWS").is_ok() {
         println!("cargo:rustc-cfg=ferro_skia_ganesh_gl");
     }
-    if env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("linux") {
+    let linux_graphite = env::var_os("CARGO_CFG_FERRO_SKIA_GRAPHITE_VULKAN").is_some();
+    if linux_graphite {
+        const BRIDGE: &str = "gpu/vulkan/graphite_frame.cpp";
+        println!("cargo:rerun-if-env-changed=FERROUI_SKIA_HEADERS");
+        println!("cargo:rerun-if-changed={BRIDGE}");
+        let headers = env::var_os("FERROUI_SKIA_HEADERS")
+            .expect("set FERROUI_SKIA_HEADERS to the matching Skia source directory (samples/LinuxDesktop/build.sh)");
+        cc::Build::new()
+            .cpp(true)
+            .std("c++17")
+            .define("NDEBUG", None)
+            .define("SK_USE_INTERNAL_VULKAN_HEADERS", None)
+            .include(headers)
+            .file(BRIDGE)
+            .compile("ferro_graphite_frame");
+    }
+    if env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("linux") && !linux_graphite {
         println!("cargo:rustc-cfg=ferro_skia_ganesh_gl");
     }
     if env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("android") {
@@ -47,7 +64,9 @@ fn main() {
     }
 
     // Ganesh on Vulkan: always on Linux, elsewhere with the feature `vulkan` of this crate.
-    if env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("linux") || env::var("CARGO_FEATURE_VULKAN").is_ok() {
+    if !linux_graphite
+        && (env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("linux") || env::var("CARGO_FEATURE_VULKAN").is_ok())
+    {
         println!("cargo:rustc-cfg=ferro_skia_vulkan");
     }
 
@@ -67,7 +86,9 @@ fn main() {
         _ => return,
     };
 
-    let output = Command::new("clang").arg(format!("--print-file-name=lib{runtime}.a")).output();
+    let output = Command::new("clang")
+        .arg(format!("--print-file-name=lib{runtime}.a"))
+        .output();
     let Ok(output) = output else {
         return;
     };
@@ -105,7 +126,12 @@ fn build_emscripten_sjlj() {
     let version = Command::new(rustc).arg("--version").output().ok();
     let minor = version
         .as_ref()
-        .and_then(|output| String::from_utf8_lossy(&output.stdout).split_whitespace().nth(1).map(str::to_string))
+        .and_then(|output| {
+            String::from_utf8_lossy(&output.stdout)
+                .split_whitespace()
+                .nth(1)
+                .map(str::to_string)
+        })
         .and_then(|release| release.split('.').nth(1).and_then(|minor| minor.parse::<u32>().ok()));
     if let Some(minor) = minor.filter(|minor| *minor < 93) {
         panic!(

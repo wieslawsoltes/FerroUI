@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+# Launch a dedicated Sway compositor and its native Ferro Desktop shell. Both are
+# children of this supervisor, so a login, logout or compositor failure has one lifetime.
+set -euo pipefail
+if [[ ${1:-} == --ferro ]]; then export FERRO_DESKTOP_COMPOSITION=ferro; shift; fi
+case ${1:-} in
+    --publish-client-display)
+        # Only the dedicated supervisor sets this name. The shell calls back
+        # after bind, when a newly D-Bus-activated client can actually connect.
+        : "${FERRO_DESKTOP_CHILD_DISPLAY:?}"
+        [[ -S $XDG_RUNTIME_DIR/$FERRO_DESKTOP_CHILD_DISPLAY ]] || exit 1
+        command -v dbus-update-activation-environment >/dev/null || exit 0
+        args=()
+        if [[ -z ${FERRO_DESKTOP_NESTED:-} && -S $XDG_RUNTIME_DIR/systemd/private ]]; then args+=(--systemd); fi
+        exec dbus-update-activation-environment "${args[@]}" "WAYLAND_DISPLAY=$FERRO_DESKTOP_CHILD_DISPLAY" SWAYSOCK= DISPLAY= ;;
+    --ready)
+        : "${WAYLAND_DISPLAY:?}" "${SWAYSOCK:?}" "${FERRO_DESKTOP_WAYLAND_READY:?}"
+        legacy_display=${DISPLAY:-}
+        [[ ${FERRO_DESKTOP_XWAYLAND:-auto} != 0 ]] || legacy_display=
+        printf '%s\0' "$WAYLAND_DISPLAY" "$SWAYSOCK" "$legacy_display" >"$FERRO_DESKTOP_WAYLAND_READY"
+        exit ;;
+    --show=applications|--show=workspaces|--show=settings|--show=notifications)
+        exec "${FERRO_DESKTOP_BINARY:-ferro-desktop}" --platform=wayland "$1" ;;
+    --lock) exec swaylock -f -c 182332 ;;
+    --idle)
+        # Nested compositors must never subscribe to lock/suspend events on the host login.
+        [[ -z ${FERRO_DESKTOP_NESTED:-} ]] || exit 0
+        command -v swayidle >/dev/null && command -v swaylock >/dev/null || exit 0
+        exec swayidle -w timeout 600 'ferro-desktop-wayland --lock' \
+            before-sleep 'ferro-desktop-wayland --lock' lock 'ferro-desktop-wayland --lock' ;;
+    --terminal)
+        if [[ -n ${FERRO_DESKTOP_CHILD_DISPLAY:-} ]]; then
+            export WAYLAND_DISPLAY=$FERRO_DESKTOP_CHILD_DISPLAY
+            unset DISPLAY WAYLAND_SOCKET SWAYSOCK DESKTOP_STARTUP_ID XDG_ACTIVATION_TOKEN
+        fi
+        for terminal in xdg-terminal-exec foot kgx gnome-terminal konsole; do
+            if command -v "$terminal" >/dev/null; then exec "$terminal"; fi
+        done
+        echo "No supported terminal emulator is installed." >&2; exit 1 ;;
+    --nested)
+        # Give a development compositor a private bus so its notification and portal
+        # services can coexist with the parent login.
+        export FERRO_DESKTOP_NESTED=1
+        if [[ -n ${WAYLAND_DISPLAY:-}${WAYLAND_SOCKET:-} && ${WLR_BACKENDS:-wayland} == wayland && -z ${WLR_WL_OUTPUTS+x} ]]; then
+            # wlroots can block creating its first nested output during backend
+            # startup. Create the window once Sway's event loop is running.
+            export WLR_BACKENDS=wayland WLR_WL_OUTPUTS=0 FERRO_DESKTOP_CREATE_WL_OUTPUT=1
+        fi
+        exec dbus-run-session -- "$0" ;;
+    '') ;;
+    *) echo "Usage: ferro-desktop-wayland [--ferro] [--nested]" >&2; exit 2 ;;
+esac
+if [[ -z ${DBUS_SESSION_BUS_ADDRESS:-} ]]; then exec dbus-run-session -- "$0"; fi
+: "${XDG_RUNTIME_DIR:?A display-manager or logind session must supply XDG_RUNTIME_DIR}"
+here=$(cd -- "$(dirname -- "$0")" && pwd)
+export PATH="$here:$PATH"
+export XDG_SESSION_TYPE=wayland XDG_SESSION_DESKTOP=ferro-desktop-wayland XDG_CURRENT_DESKTOP=FerroDesktop:sway
+binary=${FERRO_DESKTOP_BINARY:-ferro-desktop}
+for command in sway "$binary"; do command -v "$command" >/dev/null || { echo "Missing $command" >&2; exit 1; }; done
+profile=sway.conf
+if [[ ${FERRO_DESKTOP_COMPOSITION:-} == ferro ]]; then profile=ferro-composition.conf; fi
+config=${FERRO_DESKTOP_SWAY_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/ferro-desktop/$profile}
+if [[ ! -r $config && -z ${FERRO_DESKTOP_SWAY_CONFIG:-} ]]; then
+    config=$here/../share/ferro-desktop/$profile
+    [[ -r $config ]] || config=$here/$profile
+fi
+[[ -r $config ]] || { echo "Cannot read Sway configuration: $config" >&2; exit 1; }
+export FERRO_DESKTOP_SWAY_CONFIG
+FERRO_DESKTOP_SWAY_CONFIG=$(realpath -- "$config")
+# A display-manager/tty login owns its seat. Only the explicit nested launcher
+# inherits a parent display for Sway's Wayland/X11 output backend.
+unset SWAYSOCK I3SOCK
+if [[ -z ${FERRO_DESKTOP_NESTED:-} ]]; then unset DISPLAY WAYLAND_DISPLAY WAYLAND_SOCKET; fi
+state=$(mktemp -d -- "$XDG_RUNTIME_DIR/ferro-wayland.XXXXXXXX")
+shell_args=()
+if [[ ${FERRO_DESKTOP_COMPOSITION:-} == ferro ]]; then
+    export FERRO_DESKTOP_CHILD_DISPLAY=${state##*/}-clients FERRO_DESKTOP_XWAYLAND=0
+    shell_args=(--compositor=ferro "--socket=$FERRO_DESKTOP_CHILD_DISPLAY")
+fi
+compositor= shell=
+cleanup() {
+    for pid in "$shell" "$compositor"; do [[ -z $pid ]] || kill "$pid" 2>/dev/null || :; done
+    wait || :
+    rm -rf -- "$state"
+}
+trap cleanup EXIT
+trap 'exit 143' TERM
+trap 'exit 130' INT HUP
+export FERRO_DESKTOP_WAYLAND_READY=$state/ready
+mkfifo -m 600 -- "$state/ready"
+case ${FERRO_DESKTOP_XWAYLAND:-auto} in
+    auto) if command -v Xwayland >/dev/null; then xwayland=enable; else xwayland=disable; fi ;;
+    1)
+        command -v Xwayland >/dev/null || { echo 'FERRO_DESKTOP_XWAYLAND=1 requires Xwayland.' >&2; exit 1; }
+        xwayland=enable ;;
+    0) xwayland=disable ;;
+    *) echo 'FERRO_DESKTOP_XWAYLAND must be auto, 0 or 1.' >&2; exit 2 ;;
+esac
+if [[ $xwayland == disable ]]; then export FERRO_DESKTOP_XWAYLAND=0; fi
+# A real include preserves relative includes in the user's own config. Sway's include
+# directive performs shell-style filename expansion after parsing the argument.
+printf 'xwayland %s\n%s\n%s\n' "$xwayland" 'include "$FERRO_DESKTOP_SWAY_CONFIG"' \
+    'exec ferro-desktop-wayland --ready' >"$state/sway.conf"
+if [[ ${FERRO_DESKTOP_CREATE_WL_OUTPUT:-} == 1 ]]; then
+    printf '%s\n' 'exec swaymsg create_output' >>"$state/sway.conf"
+fi
+sway --config "$state/sway.conf" &
+compositor=$!
+(
+    # Receive the compositor's actual socket names; never guess wayland-0 or use
+    # another session's SWAYSOCK. A broken startup without an exec fails explicitly.
+    mapfile -d '' -t address < <(timeout 30s cat -- "$state/ready")
+    if (( ${#address[@]} != 3 )); then echo 'Sway did not publish its session environment.' >&2; exit 1; fi
+    export WAYLAND_DISPLAY=${address[0]} SWAYSOCK=${address[1]} DISPLAY=${address[2]}
+    unset FERRO_DESKTOP_WAYLAND_READY WAYLAND_SOCKET
+    if command -v dbus-update-activation-environment >/dev/null; then
+        sync_args=()
+        if [[ -z ${FERRO_DESKTOP_NESTED:-} && -S $XDG_RUNTIME_DIR/systemd/private ]]; then sync_args+=(--systemd); fi
+        dbus-update-activation-environment "${sync_args[@]}" WAYLAND_DISPLAY SWAYSOCK DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP || :
+    fi
+    [[ -n $DISPLAY ]] || unset DISPLAY
+    exec "$binary" --session --platform=wayland "${shell_args[@]}"
+) &
+shell=$!
+wait -n "$compositor" "$shell"

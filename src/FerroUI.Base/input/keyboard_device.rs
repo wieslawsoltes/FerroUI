@@ -330,7 +330,7 @@ impl IInputDevice for KeyboardDevice {
                 RawKeyEventType::KeyUp => InputElement::key_up_event(),
             };
 
-            let mut ev = KeyEventArgs::new();
+            let mut ev = KeyEventArgs::new().with_platform_input_event_cookie(key_input.platform_input_event_cookie().cloned());
             ev.set_routed_event(Some(routed_event));
             ev.key = key_input.key();
             ev.key_modifiers = key_input.modifiers().to_key_modifiers();

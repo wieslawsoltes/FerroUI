@@ -5,10 +5,31 @@ use ferroui_opengl::{GlProfileType, GlVersion};
 use std::any::Any;
 use std::rc::Rc;
 
+/// Presentation backend selected for a Wayland connection.
+#[derive(Clone, Default)]
+pub enum WaylandRenderingMode {
+    /// Try EGL using the configured profiles, falling back to shared memory.
+    #[default]
+    Auto,
+    /// Use the platform's Vulkan image presenter with VK_KHR_wayland_surface.
+    Vulkan(ferroui_vulkan::VulkanOptions),
+    /// Present software-rendered frames using wl_shm.
+    Software,
+}
+
+impl std::fmt::Debug for WaylandRenderingMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self { Self::Auto => "Auto", Self::Vulkan(_) => "Vulkan", Self::Software => "Software" })
+    }
+}
+
 /// Platform-specific options for the Wayland windowing backend, registered
 /// with the application builder before `use_wayland`.
 #[derive(Clone)]
 pub struct WaylandPlatformOptions {
+    /// Attach native evdev, modifiers and XKB keymap snapshots to routed keyboard events.
+    pub capture_native_keyboard: bool,
+    pub rendering_mode: WaylandRenderingMode,
     /// The default AppId for Wayland windows (`xdg_toplevel.set_app_id`).
     /// If `None`, no application identifier is sent. Defaults to the file name of the executable
     /// (the reference: the name of the entry assembly).
@@ -65,6 +86,8 @@ pub struct WaylandPlatformOptions {
 impl WaylandPlatformOptions {
     pub fn new() -> Self {
         Self {
+            capture_native_keyboard: false,
+            rendering_mode: WaylandRenderingMode::Auto,
             app_id: Self::entry_app_id(),
             wl_display_name: None,
             display_fd: None,
@@ -98,6 +121,8 @@ impl WaylandPlatformOptions {
     /// What the worker thread needs of the options, as values.
     pub fn for_worker(&self) -> WaylandWorkerOptions {
         WaylandWorkerOptions {
+            capture_native_keyboard: self.capture_native_keyboard,
+            rendering_mode: self.rendering_mode.clone(),
             wl_display_name: self.wl_display_name.clone(),
             display_fd: self.display_fd,
             enable_reconnects: self.enable_reconnects,
@@ -119,6 +144,9 @@ impl Default for WaylandPlatformOptions {
 /// thread, so the worker gets the values it needs.
 #[derive(Clone, Debug)]
 pub struct WaylandWorkerOptions {
+    /// Attach native evdev, modifiers and XKB keymap snapshots to routed keyboard events.
+    pub capture_native_keyboard: bool,
+    pub rendering_mode: WaylandRenderingMode,
     pub wl_display_name: Option<String>,
     pub display_fd: Option<i32>,
     pub enable_reconnects: Option<bool>,
@@ -151,6 +179,7 @@ mod tests {
         assert_eq!(options.gl_profiles[0], GlVersion::new(GlProfileType::OpenGL, 4, 0));
         assert_eq!(options.gl_profiles[5], GlVersion::new(GlProfileType::OpenGLES, 2, 0));
         assert_eq!(options.use_dmabuf_swapchain, None);
+        assert!(!options.for_worker().capture_native_keyboard);
         assert!(!options.use_g_lib_main_loop);
         assert!(options.external_g_lib_main_loop_exception_logger.is_none());
     }

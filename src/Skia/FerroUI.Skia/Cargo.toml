@@ -69,7 +69,11 @@ skia-safe = { workspace = true, features = ["gl"] }
 # interface with, and the backend gives Skia the entry points of the context or device the
 # platform created. A binary of Skia with this feature set is published for x86-64 and for ARM64
 # (the job `x11` of CI asks). `build.rs` mirrors `vulkan` as the `ferro_skia_vulkan` configuration.
-[target.'cfg(target_os = "linux")'.dependencies]
+# Graphite and Ganesh have separate upstream binary distributions on Linux.
+[target.'cfg(all(target_os = "linux", ferro_skia_graphite_vulkan))'.dependencies]
+skia-safe = { workspace = true, features = ["graphite", "vulkan"] }
+
+[target.'cfg(all(target_os = "linux", not(ferro_skia_graphite_vulkan)))'.dependencies]
 skia-safe = { workspace = true, features = ["gl", "vulkan"] }
 
 # Android: the rendering mode the Android backend offers first is OpenGL ES through the EGL of the

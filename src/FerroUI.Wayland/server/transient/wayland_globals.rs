@@ -19,6 +19,7 @@ use ferroui_base::logging::{LogEventLevel, Logger};
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::Arc;
+use wayland_protocols_wlr::layer_shell::v1::client::zwlr_layer_shell_v1::ZwlrLayerShellV1;
 use wayland_client::backend::ObjectId;
 use wayland_client::protocol::wl_compositor::WlCompositor;
 use wayland_client::protocol::wl_data_device_manager::WlDataDeviceManager;
@@ -58,6 +59,7 @@ pub struct WaylandGlobals {
     pub shm_formats: Vec<wl_shm::Format>,
     pub wl_compositor: WlCompositor,
     pub xdg_wm_base: XdgWmBase,
+    pub layer_shell: Option<ZwlrLayerShellV1>,
     pub xdg_output_manager: Option<ZxdgOutputManagerV1>,
     pub xdg_decoration_manager: Option<ZxdgDecorationManagerV1>,
     pub fractional_scale_manager: Option<WpFractionalScaleManagerV1>,
@@ -134,6 +136,7 @@ impl WaylandGlobals {
 
         let xdg_exporter: Option<ZxdgExporterV2> = Self::bind(&registry, &known_globals, 1, 1, &queue_handle)?;
 
+        let layer_shell = Self::bind(&registry, &known_globals, 1, 4, &queue_handle)?;
         let mut globals = WaylandGlobals {
             queue_handle: queue_handle.clone(),
             connection_id: connection.id(),
@@ -144,6 +147,7 @@ impl WaylandGlobals {
             shm_formats: Vec::new(),
             wl_compositor,
             xdg_wm_base,
+            layer_shell,
             xdg_output_manager: xdg_output_manager.clone(),
             xdg_decoration_manager,
             fractional_scale_manager,
@@ -191,7 +195,12 @@ impl WaylandGlobals {
         let use_dmabuf = state.options.use_dmabuf_swapchain.unwrap_or(false);
         let has_linux_dmabuf = state.globals.as_ref().is_some_and(|globals| globals.linux_dmabuf.is_some());
         let gl_profiles = state.options.gl_profiles.clone();
-        let gpu: Option<Rc<dyn IWaylandGraphics>> = if use_dmabuf && has_linux_dmabuf {
+        let gpu: Option<Rc<dyn IWaylandGraphics>> = if let crate::WaylandRenderingMode::Vulkan(options) = &state.options.rendering_mode {
+            let globals = state.globals.as_ref().expect("globals have been bound");
+            Some(super::rendering::wayland_vulkan::WaylandVulkanGraphics::new(connection, globals, options)?)
+        } else if matches!(state.options.rendering_mode, crate::WaylandRenderingMode::Software) {
+            None
+        } else if use_dmabuf && has_linux_dmabuf {
             WaylandEglDmaBufPlatformGraphics::try_create(connection, state, &gl_profiles)
                 .map(|graphics| graphics as Rc<dyn IWaylandGraphics>)
         } else {
@@ -356,7 +365,7 @@ impl Dispatch<WlRegistry, ()> for WaylandWorkerState {
                     if globals.outputs.on_global_removed(name) {
                         // The surfaces that were on the output are not told that they left it.
                         for top_level in state.top_levels.values_mut() {
-                            top_level.shell_mut().surface_mut().forget_output(name);
+                            top_level.forget_output(name);
                         }
                         for popup in state.popups.values_mut() {
                             popup.shell_mut().surface_mut().forget_output(name);
@@ -444,3 +453,5 @@ impl Dispatch<ZxdgDecorationManagerV1, ()> for WaylandWorkerState {
     ) {
     }
 }
+
+wayland_client::delegate_noop!(WaylandWorkerState: ignore ZwlrLayerShellV1);

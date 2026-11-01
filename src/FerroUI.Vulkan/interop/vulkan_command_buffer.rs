@@ -57,6 +57,11 @@ impl VulkanCommandBuffer {
         }
     }
 
+    /// A slot may still hold a submitted buffer after the pool reaped its signalled fence.
+    pub fn wait_for_completion(&self) -> Result<(), VulkanError> {
+        if self.fence.handle() == vk::Fence::null() { Ok(()) } else { self.fence.wait() }
+    }
+
     pub fn is_finished(&self) -> bool {
         self.fence.is_signaled()
     }

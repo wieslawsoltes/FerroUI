@@ -70,6 +70,8 @@ How the model of the bindings differs from upstream's, and what the port does ab
 
 **`xkbcommon-dl` 0.4.2** (MIT; `bitflags`, `dlib`, `log`, `once_cell`, `xkeysym`) **[V]**: the C declarations of `libxkbcommon.so.0`, opened at run time, with the compose functions; it is what `winit` uses. The 20 functions and the constants of upstream's `XkbCommonNativeMethods.cs` are a subset of it, so that file is not ported: its declarations are those of the crate, as the structures of `X11Structs.cs` are those of `x11-dl`. The four small classes over it (`XkbContext`, `XkbCommonKeymap`, `XkbComposeTable`, `XkbComposeState`) are ported and are where the `unsafe` of the library is: each owns one pointer and frees it once.
 
+A compositor hosted inside a Wayland window can opt into native keyboard metadata with `WaylandPlatformOptions::capture_native_keyboard`. Downcast `KeyEventArgs::platform_input_event_cookie()` to `WaylandKeyEvent` to obtain the original evdev code, the seat's latest XKB modifier masks and group, and its validated keymap. The worker serializes the map when the seat receives a replacement. Events share that allocation, so queued events retain the layout used to translate them. Locally synthesized repeat events are marked, allowing a nested client to generate its own repeat stream. Ordinary applications leave capture disabled and use FerroUI's translated key and text events.
+
 | Alternative | Why not |
 |---|---|
 | `xkbcommon` 0.9 | Links `libxkbcommon` at build time: no check from another system, and a link-time dependency of every application that carries the backend. |
@@ -144,6 +146,10 @@ Upstream constructs `new Compositor(_renderLoop, PlatformGraphics)` in the worke
 
 ## 5. Rendering
 
+`WaylandPlatformOptions::rendering_mode` selects presentation. The default `Auto` retains EGL and shared-memory fallback. `Software` selects shared memory. `Vulkan(options)` requires a device that can present to the connected compositor. Ferro Desktop selects Vulkan for Skia Graphite.
+
+The Vulkan backend uses a temporary Wayland surface to test device presentation support. Each configured window or popup gets a swapchain through FerroUI.Vulkan on the same worker-owned connection. At presentation time the worker acknowledges the configure and sets the logical viewport, scale and frame callback before the driver commits the buffer. Loss of the native surface disposes its render target before destroying the Wayland object. See [Vulkan Wayland surface creation](https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_wayland_surface.html).
+
 | Mode | Upstream | Stage | Notes |
 |---|---|---|---|
 | Software, `wl_shm` | `WaylandFramebuffer.cs` | 1 | A frame is a file of memory (`memfd_create`, sized, mapped) that Skia draws into (BGRA, premultiplied; the format `argb8888`); when the lock is released: unmap, `wl_shm.create_pool`, one `wl_buffer` over the whole pool, the pool destroyed, the per-frame state staged (`on_before_new_buffer_attached`: `ack_configure`, the window geometry, the buffer scale or the viewport destination, the frame callback), `attach`, `damage_buffer`, `commit`. The buffer is destroyed when the compositor releases it. Always in the list of a surface, after the GPU surface. |
@@ -184,6 +190,12 @@ Upstream has no option that turns the GPU off. An empty list of profiles (`gl_pr
 - **Not on Wayland** (upstream's empty members): the position of a top-level (it is the origin of the "screen" space, its buffer-relative logical space; a popup reports its offset in it, section 7.1), activation by the client, topmost, the icon, the task bar.
 
 One addition: `xdg_toplevel.set_app_id`. Upstream never sets it, so a compositor cannot match the window to a desktop entry, and a test cannot find the window by it. `WaylandPlatformOptions::app_id` (default: the file name of the executable) is sent when the top-level is created (DEVIATIONS.md).
+
+### Desktop layers
+
+`layer_shell::LayerWindow` gives a FerroUI window a background, bottom, top or overlay role on a named output. `LayerConfig` controls anchors, logical size, margins, exclusive zones and keyboard policy. The first configure establishes the available size before rendering. A panel can change its height or keyboard policy while visible. Layer changes require protocol version 2 and on-demand keyboard focus requires version 4. A named layer closes when the compositor removes its output. Callers can watch the existing screen-change notification to establish a new role on a surviving output. [Layer-shell protocol](https://gitlab.freedesktop.org/wlroots/wlr-protocols/-/blob/master/unstable/wlr-layer-shell-unstable-v1.xml)
+
+The native Wayland example's layer smoke phase samples actual panel pixels and the working area of an independent xdg-shell client, promotes a layer to a keyboard overlay and exercises hide, remap and close. The [Linux desktop session](../../samples/LinuxDesktop/WAYLAND.md) uses these APIs for multi-monitor panels and notifications.
 
 ### 7.1 Popups
 

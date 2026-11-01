@@ -22,6 +22,8 @@ pub(crate) struct KeyboardHandler {
     compose_table: Option<XkbComposeTable>,
     xkb_context: Option<XkbContext>,
     focused_surface: Option<WSurfaceId>,
+    native_map: Option<std::sync::Arc<str>>,
+    modifiers: crate::WaylandKeyModifiers,
     repeat_rate: i32,  // keys/sec (0 = disabled)
     repeat_delay: i32, // ms before first repeat
 }
@@ -39,6 +41,8 @@ impl KeyboardHandler {
             compose_table,
             xkb_context,
             focused_surface: None,
+            native_map: None,
+            modifiers: Default::default(),
             repeat_rate: 0,
             repeat_delay: 0,
         }
@@ -53,17 +57,22 @@ impl KeyboardHandler {
         &mut self,
         event: wl_keyboard::Event,
         keyboard_modifiers: RawInputModifiers,
+        capture_native: bool,
         cx: &InputContext<'_>,
     ) -> Option<RawInputModifiers> {
         match event {
             wl_keyboard::Event::Keymap { format, fd, size } => {
                 self.compose_state = None;
                 self.keymap = None;
+                self.native_map = None;
 
                 if format == WEnum::Value(wl_keyboard::KeymapFormat::XkbV1) {
                     // If keymap creation fails, fall back to evdev-only mapping
                     if let Some(context) = &self.xkb_context {
                         if let Ok(keymap) = XkbCommonKeymap::new(context, fd, size) {
+                            if capture_native {
+                                self.native_map = keymap.serialized();
+                            }
                             self.keymap = Some(keymap);
                             self.compose_state = self.compose_table.as_ref().and_then(XkbComposeState::new);
                         }
@@ -75,6 +84,7 @@ impl KeyboardHandler {
             wl_keyboard::Event::Enter { surface, .. } => {
                 self.focused_surface = find_surface_for_wl_surface(&surface);
                 if let Some(sink) = self.focused_surface.and_then(|surface| cx.sink_of(surface)) {
+                    sink.on_keyboard_enter();
                     sink.on_key_repeat_info(self.repeat_rate, self.repeat_delay);
                 }
                 None
@@ -127,17 +137,29 @@ impl KeyboardHandler {
                     }
                 }
 
-                if pressed {
-                    sink.on_key_down(u64::from(time), key_value, mods, physical_key, key_symbol);
-                } else {
-                    sink.on_key_up(u64::from(time), key_value, mods, physical_key, key_symbol);
-                }
+                sink.on_key(crate::server::persistent::i_w_surface_event_sink::KeyboardInput {
+                    timestamp: u64::from(time),
+                    pressed,
+                    key: key_value,
+                    modifiers: mods,
+                    physical_key,
+                    symbol: key_symbol,
+                    native: capture_native.then(|| crate::WaylandKeyEvent {
+                        code: key,
+                        keymap: self.native_map.clone(),
+                        modifiers: self.modifiers,
+                        repeat: false,
+                    }),
+                });
                 None
             }
             wl_keyboard::Event::Modifiers { mods_depressed, mods_latched, mods_locked, group, .. } => {
                 if let Some(keymap) = &self.keymap {
                     keymap.update_modifiers(mods_depressed, mods_latched, mods_locked, group);
                 }
+                self.modifiers = crate::WaylandKeyModifiers {
+                    depressed: mods_depressed, latched: mods_latched, locked: mods_locked, group,
+                };
                 let effective = mods_depressed | mods_latched | mods_locked;
                 Some(modifiers_from_xkb_mask(effective))
             }
@@ -163,13 +185,14 @@ impl Dispatch<WlKeyboard, u32> for WaylandWorkerState {
         _conn: &Connection,
         _qhandle: &QueueHandle<Self>,
     ) {
+        let capture_native = state.options.capture_native_keyboard;
         with_seat(state, *data, |seat, cx| {
             if let wl_keyboard::Event::Enter { serial, .. } | wl_keyboard::Event::Key { serial, .. } = &event {
                 seat.note_input_serial(*serial);
             }
             let keyboard_modifiers = seat.keyboard_modifiers;
             if let Some(handler) = &mut seat.keyboard_handler {
-                if let Some(modifiers) = handler.on_event(event, keyboard_modifiers, cx) {
+                if let Some(modifiers) = handler.on_event(event, keyboard_modifiers, capture_native, cx) {
                     seat.keyboard_modifiers = modifiers;
                 }
             }

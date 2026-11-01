@@ -3,8 +3,8 @@
 //! The windowing platform of FerroUI for Wayland compositors: windows over
 //! `xdg_toplevel`, popups, input, screens, cursors, the clipboard and drag
 //! and drop over `wl_data_device`, input methods over `zwp_text_input_v3`,
-//! the parent handle of a portal dialog over `xdg-foreign`, and render surfaces over shared memory
-//! buffers and over EGL. `docs/porting/wayland-platform.md` has the
+//! the parent handle of a portal dialog over `xdg-foreign`, and optional desktop layers over
+//! `zwlr_layer_shell_v1`. Render surfaces support shared memory, EGL and native Vulkan WSI. `docs/porting/wayland-platform.md` has the
 //! design and the stages.
 //!
 //! A worker thread owns the connection to the compositor and renders; the UI
@@ -24,11 +24,15 @@ pub mod server;
 pub mod ferro_wayland_exception;
 pub mod text_input_options_converter;
 pub mod wayland_platform_options;
+mod wayland_key_event;
+pub use wayland_key_event::{WaylandKeyEvent, WaylandKeyModifiers};
 pub mod wayland_text_utils;
 pub mod xkb_key_transform;
 
 #[cfg(target_os = "linux")]
 pub mod i_wayland_xdg_top_level_export;
+#[cfg(target_os = "linux")]
+pub mod layer_shell;
 #[cfg(target_os = "linux")]
 pub mod popup_impl;
 #[cfg(target_os = "linux")]
@@ -76,4 +80,4 @@ pub use ferro_wayland_exception::{
 #[allow(deprecated)]
 pub use ferro_wayland_exception::FerroWaylandException;
 pub use ferro_wayland_platform_extensions::FerroWaylandPlatformExtensions;
-pub use wayland_platform_options::WaylandPlatformOptions;
+pub use wayland_platform_options::{WaylandPlatformOptions, WaylandRenderingMode};

@@ -1,0 +1,97 @@
+name: Ferro Desktop
+
+on:
+  pull_request:
+    paths:
+      - 'samples/LinuxDesktop/**'
+      - 'src/Skia/FerroUI.Skia/**'
+      - 'src/FerroUI.Vulkan/**'
+      - 'src/FerroUI.X11/**'
+      - 'src/FerroUI.Wayland/**'
+      - 'src/FerroUI.Base/rendering/composition/**'
+      - 'src/FerroUI.Themes.*/**'
+      - '.github/workflows/linux-desktop.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: linux-desktop-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  desktop:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CARGO_INCREMENTAL: 0
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+      CARGO_BUILD_JOBS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: graphite-linux-desktop
+      - name: Install native dependencies and test clients
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libfontconfig-dev libfreetype-dev libharfbuzz-dev fonts-dejavu-core \
+            libglib2.0-dev libglib2.0-bin pulseaudio pulseaudio-utils \
+            mesa-vulkan-drivers vulkan-validationlayers xvfb xauth openbox xdotool dbus-x11 imagemagick x11-utils x11-xserver-utils \
+            libwayland-dev libwayland-egl1 libxkbcommon-dev xkb-data python3-pil python3-gi-cairo gir1.2-gtk-3.0 sway swaylock foot grim wl-clipboard wtype wayland-utils jq xwayland \
+            xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk gtk-3-examples python3-gi python3-pyqt5 qtwayland5 \
+            pipewire-bin wireplumber swayidle weston
+      - name: Build and test the Graphite desktop
+        id: desktop_build
+        run: |
+          samples/LinuxDesktop/build.sh build --profile dev -p control-catalog-desktop
+          samples/LinuxDesktop/build.sh test --profile dev
+      - name: Exercise the shell and capture its three themes
+        env:
+          VK_INSTANCE_LAYERS: VK_LAYER_KHRONOS_validation
+          VK_LAYER_ENABLES: VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT
+        run: |
+          samples/LinuxDesktop/tests/smoke.sh target/debug/ferro-desktop desktop-captures
+          if grep -E 'Validation Error|SYNC-HAZARD|VUID-' desktop-captures/desktop.log; then exit 1; fi
+      - name: Exercise pins, notifications and device controls
+        run: |
+          samples/LinuxDesktop/tests/favorites.sh target/debug/ferro-desktop desktop-captures/favorites
+          samples/LinuxDesktop/tests/notifications.sh target/debug/ferro-desktop desktop-captures/notifications
+          samples/LinuxDesktop/tests/system-controls.sh target/debug/ferro-desktop desktop-captures/system
+      - name: Test and capture a managed login session
+        run: |
+          samples/LinuxDesktop/tests/shortcuts.sh target/debug/ferro-desktop desktop-captures/shortcuts
+          samples/LinuxDesktop/tests/session.sh test
+          samples/LinuxDesktop/tests/session.sh capture target/debug/ferro-desktop desktop-captures/session
+      - name: Test native Wayland login, live appearances and Xwayland interoperability
+        if: ${{ !cancelled() && steps.desktop_build.outcome == 'success' }}
+        env:
+          VK_INSTANCE_LAYERS: VK_LAYER_KHRONOS_validation
+          VK_LAYER_ENABLES: VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT
+        run: |
+          FERRO_TEST_BENCHMARK=1 FERRO_TEST_NESTED=1 FERRO_TEST_QT=1 FERRO_TEST_PORTALS=1 FERRO_TEST_OUTPUT_HOTPLUG=1 FERRO_TEST_LOCK=1 \
+            samples/LinuxDesktop/tests/wayland-session.sh target/debug/ferro-desktop desktop-captures/wayland
+          samples/LinuxDesktop/tests/wayland-session.sh --xwayland target/debug/ferro-desktop desktop-captures/wayland-mixed
+          if grep -E 'Validation Error|SYNC-HAZARD|VUID-' desktop-captures/wayland*/session.log; then exit 1; fi
+      - name: Test native client surfaces inside the FerroUI compositor
+        if: ${{ !cancelled() && steps.desktop_build.outcome == 'success' }}
+        env:
+          VK_INSTANCE_LAYERS: VK_LAYER_KHRONOS_validation
+          VK_LAYER_ENABLES: VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT
+        run: |
+          FERRO_TEST_CATALOG=target/debug/control-catalog-desktop \
+            samples/LinuxDesktop/tests/ferro-compositor.sh target/debug/ferro-desktop desktop-captures/ferro-compositor
+          FERRO_TEST_BENCHMARK=1 samples/LinuxDesktop/tests/wayland-session.sh --ferro target/debug/ferro-desktop desktop-captures/composed-login
+          if grep -E 'Validation Error|SYNC-HAZARD|VUID-' desktop-captures/composed-login/session.log; then exit 1; fi
+      - name: Test xdg-shell previews on an independent compositor
+        if: ${{ !cancelled() && steps.desktop_build.outcome == 'success' }}
+        run: samples/LinuxDesktop/tests/weston-preview.sh target/debug/ferro-desktop desktop-captures/weston
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: ferro-desktop-graphite
+          path: desktop-captures/
