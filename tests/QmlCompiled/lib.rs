@@ -222,3 +222,5 @@ mod native_host;
 
 #[cfg(test)]
 mod dynamic_components;
+#[cfg(all(test, feature = "webscene"))]
+mod workers;

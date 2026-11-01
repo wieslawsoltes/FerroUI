@@ -4,6 +4,12 @@ fn main() {
     #[cfg(feature = "webscene")]
     ferroui_qml_build::Compiler::new()
         .with_javascript()
+        .compile_file("workers/Main.qml", "workers.rs")
+        .expect("compile WorkerScript fixture");
+
+    #[cfg(feature = "webscene")]
+    ferroui_qml_build::Compiler::new()
+        .with_javascript()
         .compile_file("webscene/Bindings.qml", "webscene_bindings.rs")
         .expect("compile imperative property bindings");
 
