@@ -257,3 +257,139 @@ No camera-control production defect was found in these controlled recovery and
 pixel cases. Actual privacy/Frame Server behaviour, physical camera unplugging,
 abrupt driver removal, other capture formats, wider colour profiles and Linux
 DMA-BUF presentation still require suitable devices/hosts.
+
+## Local MP4 geometry and sustained lifecycle follow-up — 2026-11-01
+
+The old playback smoke passed rotated/reflected fixtures because it checked
+progress and transfer counters without independently checking their pixels.
+Actual presentation omitted reflection/rotation and gave the cropped fixture a
+144×80 natural size instead of 80×144. Stronger boundary probes then showed the
+native RGB processor centring/resizing a clean aperture while losing its
+off-centre offsets. The failing pixel and boundary logs are preserved.
+
+The bridge now reads local ISO-BMFF metadata on its existing worker, skips media
+payload by seeking, bounds top-level/nested scanning to 4,096 boxes per scan and
+`moov` allocation to 8 MiB, and admits one unambiguous video track/sample
+description, integral clean aperture and square pixels. It recognizes all eight
+orthogonal track matrices. Unsupported/malformed geometry fails explicitly.
+Before the first read it configures the Source Reader's video processor to
+return full coded pixels, with no native rotation, reflection or crop. The
+shared GPU layout applies the exact immutable clean aperture and transform;
+natural size is the rotated clean extent. No preview CPU pixel operation or
+framework GPU copy was introduced. Other containers and remote URLs do not
+inherit this local-MP4 matrix claim.
+
+The fixture generator changes only track-matrix bytes in checked-in encoded
+fixtures. The independent acceptance model uses known quadrant colours and
+source coordinates, not provider-reported transforms. All 16 combinations
+(eight orientations × full/off-centre crop) pass raw projected RGBA diagnostics,
+composition snapshots and window-only presentation capture, initially and after
+resize. Dense crop-boundary probes allow one decoded source pixel plus capture
+rounding; wrong-orientation and wrong-offset negative controls fail. All 16 also
+pass composition/presentation checks after seeking paused playback to 500 ms and
+after compositor recovery, preserving pause, position and geometry. Old leases
+are held across recovery, then source/renderer credits, reads, quarantine and
+native workers retire to zero. CPU preview attempts/bytes and framework GPU
+copies remain zero; native RGB conversion and explicit diagnostics are counted.
+
+```powershell
+cargo build --locked -p portable-media --features synthetic-camera --target x86_64-pc-windows-msvc
+node tests/media/make-windows-geometry-fixtures.mjs ..\windows-geometry-variants
+$app = 'F:\build-cache\ferroui-portable-media-windows\x86_64-pc-windows-msvc\debug\portable-media.exe'
+$env:FERROUI_MEDIA_EVIDENCE = 'C:\Users\Dan\.codex\worktrees\portable-media-linux\video-geometry-evidence'
+foreach ($crop in @($false, $true)) {
+    foreach ($orientation in 0..7) {
+        $suffix = if ($crop) { '-crop' } else { '' }
+        $arguments = @("..\windows-geometry-variants\orientation-$orientation$suffix.mp4", '--renderer', '--video-pixel-smoke', '--video-lifecycle-pixels', "--orientation=$orientation")
+        if ($crop) { $arguments += '--crop-smoke' }
+        & $app @arguments
+        if ($LASTEXITCODE -ne 0) { throw 'Video geometry failed' }
+    }
+}
+cargo test --locked -p ferroui-media-windows --features controls,native-frame-tests,synthetic-camera --target x86_64-pc-windows-msvc --lib -- --nocapture
+```
+
+Use a fresh fixture output directory: the generator refuses to overwrite files.
+The `native-pixel-tests` sample feature can run video checks without enabling a
+synthetic camera; `synthetic-camera` includes it and adds native retirement
+counters. Parser tests cover both track-header versions, extended box sizes,
+all truncations and malformed/ambiguous/nonorthogonal/fractional metadata. All
+three native tests pass, including independent D3D11 pixels and ANGLE aliasing.
+
+The camera stress harness repeats the complete capture/photo/disconnect suite
+and six camera-control compositor resets per cycle in one process, alternating
+window sizes. It checks zero frame credits, GPU reads, quarantine, native
+textures/sources/workers after every cycle, and records process private/working
+set bytes, DXGI local-memory usage and process handle count. After five warm-up
+cycles it guards against another 128 MiB of private or local GPU memory, or 64
+handles. Those are diagnostic growth limits, not product performance targets.
+
+The first pilot found substantial device retention despite zero frame budgets:
+private bytes grew from 286,584,832 at cycle 1 to 1,191,559,168 at cycle 6, local
+GPU bytes from 179,499,008 to 828,542,976, and handles from 1,426 to 5,297.
+`LockBound` previously leaked render-bound values dropped off the owning thread;
+an interop handle consequently retained each old backend/device. Destruction now
+queues to and wakes the owning render thread. Regression checks pass 561 Windows
+composition tests, nine Windows context-retirement manager tests and 15 WSL
+render-thread tests, including owner-thread destructor probes. A fixed eight-cycle
+pilot (48 resets) ended at 161,030,144 private bytes, 74,141,696 local GPU bytes
+and 777 handles.
+
+A longer run independently exposed one remaining native texture at idle, with
+zero frame/alias wrappers, fixture source bindings, active photos and photo
+quarantine. Disposing the context released it. D3D11 defers destruction; the
+bridge now calls Flush after worker resource cleanup and after frame release
+when its source is closed/gone. The latter checks closure after deletion to
+avoid racing the worker's last Flush. Streaming retirement adds no extra Flush.
+The zero-resource assertion remains mandatory; failure diagnostics/reset never
+turn a failed run into a pass. Flush only submits deferred work and does not
+establish completion or release quarantine. See Microsoft's
+[Flush contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-flush)
+and [Source Reader transform configuration](https://learn.microsoft.com/en-us/windows/win32/api/mfreadwrite/nf-mfreadwrite-imfsourcereaderex-gettransformforstream).
+
+```powershell
+$env:FERROUI_MEDIA_EVIDENCE = 'C:\Users\Dan\.codex\worktrees\portable-media-linux\camera-stress-evidence'
+& $app --camera --synthetic-camera --camera-smoke --camera-recovery-smoke --renderer --camera-stress-cycles=120
+```
+
+The final run passes 120 cycles / 720 resets in 1,231,338 ms (20 min 31 s).
+Every checkpoint has zero frame credits, GPU reads, quarantine and native
+textures/sources/workers; preview CPU attempts/bytes remain zero. Resource
+measurements are bytes except handles; maxima are post-cycle samples, not
+instantaneous peaks:
+
+| Measurement | Cycle 5 baseline | Cycle 120 | Maximum post-cycle sample |
+| --- | ---: | ---: | ---: |
+| Private bytes | 160,002,048 | 178,118,656 | 190,062,592 |
+| Working set bytes | 163,500,032 | 193,843,200 | 195,149,824 |
+| DXGI local GPU bytes | 74,797,056 | 65,425,408 | 76,763,136 |
+| Process handles | 780 | 774 | 788 |
+
+Private memory grew by about 17.3 MiB at the final checkpoint and peaked 28.7
+MiB above the warmed baseline. This needs heap/allocator/SDK profiling before
+any leak-free or frozen performance claim. Process memory includes opaque
+SDK/driver caches and allocator retention. The soak passes its diagnostic
+growth guards, which do not resolve that attribution. Default Windows playback
+also passes resource loading, renderer sharing, paused recovery and end-of-stream
+restart with final retained frames zero; default builds reject synthetic flags.
+The video-only pixel feature passes a cropped/reflected seek/recovery run.
+The final native WSL sample build passes. Physical cameras/privacy/hotplug,
+abrupt driver removal, other codec/colour profiles and a DMA-BUF-capable Linux
+host remain necessary.
+
+Logs/artifacts are outside Git beside this worktree:
+`windows-video-pixels-before.log`, `windows-video-pixels-boundary-tight.log`,
+`windows-video-pixels-crop-normalization-before.log`,
+`windows-video-pixels-{0..7}[-crop].log`,
+`windows-video-lifecycle-{0..7}[-crop].log`, `video-geometry-evidence/*.png`,
+`windows-video-geometry-native-tests-final.log`,
+`windows-camera-stress-pilot.log`, `windows-camera-stress-fixed-pilot.log`,
+`windows-camera-stress-retirement-failure.log`,
+`windows-camera-native-handles-diagnostic.log`,
+`windows-camera-stress-idle-flush.log`, `windows-camera-stress-binary-hash.log`,
+`camera-stress-evidence/*.png`, `windows-composition-owner-drop-tests.log`,
+`windows-context-retirement-manager-tests.log`, `linux-owner-drop-tests.log`,
+`windows-geometry-default-build.log`, `windows-geometry-default-recovery.log`,
+`windows-geometry-default-ended.log`, `windows-geometry-default-rejection.log`,
+`windows-video-pixel-only-build.log`, `windows-video-pixel-only.log`
+and `linux-geometry-final-build.log`.

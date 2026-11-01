@@ -1,6 +1,8 @@
 fn main() {
     println!("cargo:rerun-if-changed=native/media.cpp");
     println!("cargo:rerun-if-changed=native/media.h");
+    println!("cargo:rerun-if-changed=native/mp4_geometry.cpp");
+    println!("cargo:rerun-if-changed=native/mp4_geometry_tests.cpp");
     println!("cargo:rerun-if-changed=native/frame_tests.cpp");
     println!("cargo:rerun-if-changed=native/synthetic_camera.cpp");
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("windows") {

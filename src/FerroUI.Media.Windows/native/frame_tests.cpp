@@ -15,6 +15,8 @@ static std::shared_ptr<Session> test_device(D3D_DRIVER_TYPE driver) {
                           &s->context));
   s->width = 8;
   s->height = 8;
+  s->visible_w = 8;
+  s->visible_h = 8;
   s->color = 1;
   return s;
 }

@@ -369,6 +369,17 @@ were used to limit disk/memory use; the target cache is private to this worktree
 
 ## Work still open beyond these handoffs
 
+The 2026-11-01 Windows geometry/stress follow-up adds bounded local MP4 matrix
+and clean-aperture inspection, explicit untransformed native video-processor
+output, and independent pixel checks for all eight orientations with/without
+off-centre crop. All 16 cases pass through resize, seek and compositor recovery.
+The native parser/ANGLE/D3D suite passes three tests. A repeated camera soak
+also exposed deferred D3D11 texture destruction after the last idle release;
+shutdown/final-retirement Flush fixes that observed failure without treating
+Flush as completion or weakening quarantine. The shared compositor ownership
+fix and the soak's exact process-memory limits/results are recorded in
+[WINDOWS-VERIFICATION.md](WINDOWS-VERIFICATION.md). WSL still lacks DMA-BUF import.
+
 - Windows and Linux provider source is implemented for the explicitly described
   profiles. Receiving-host native builds now pass on both platforms; Windows
   playback and synthetic camera/presentation/recovery evidence is recorded in

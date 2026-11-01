@@ -8,6 +8,8 @@ use ferroui_media_windows::NativeSession;
 use std::{task::Poll, time::Instant};
 #[path = "camera_recovery.rs"]
 mod recovery;
+#[path = "camera_stress.rs"]
+mod stress;
 
 async fn wait<T: 'static>(
     check: impl FnMut() -> Result<Option<T>, String> + 'static,
@@ -71,6 +73,7 @@ fn validate_photo(photo: &CameraPhoto) -> Result<(), String> {
     Ok(())
 }
 async fn exercise(state: Rc<State>, budget: FrameBudget) -> Result<(), String> {
+    let initial_gpu_copies = budget.counters().snapshot().gpu_copies;
     if !std::env::args().any(|a| a == "--synthetic-camera") {
         return Err("--camera-smoke requires the explicit --synthetic-camera profile".into());
     }
@@ -208,7 +211,7 @@ async fn exercise(state: Rc<State>, budget: FrameBudget) -> Result<(), String> {
         if before.preview != PixelTransferCount::default() {
             return Err("CPU preview transfer".into());
         }
-        if cycle == 0 && before.gpu_copies != 0 {
+        if cycle == 0 && before.gpu_copies != initial_gpu_copies {
             return Err("GPU copy before explicit photo work".into());
         }
         println!("SYNTHETIC_CAMERA_PREVIEW_PASS cycle={cycle} generation={generation} format={:?} preview={:?}",settings.format,before.preview);
@@ -251,8 +254,8 @@ async fn exercise(state: Rc<State>, budget: FrameBudget) -> Result<(), String> {
                 && !super::super::renderer::retained())
             .then_some(()))
         })
-        .await.map_err(|e| format!("{e}; stop cycle={cycle} usage={:?} reads={} quarantine={} native={:?} renderer_retained={}",
-            budget.usage(), budget.gpu_reads(), budget.quarantined_reads(), NativeSession::synthetic_usage(), super::super::renderer::retained()))?;
+        .await.map_err(|e| format!("{e}; stop cycle={cycle} usage={:?} reads={} quarantine={} native={:?} photo={:?} renderer_retained={}",
+            budget.usage(), budget.gpu_reads(), budget.quarantined_reads(), NativeSession::synthetic_usage(), NativeSession::fixture_photo_status(), super::super::renderer::retained()))?;
         validate_photo(&completed)?; // Encoded bytes outlive capture and GPU storage.
         println!(
             "SYNTHETIC_CAMERA_STOP_PASS frames=0 native_sources=0 native_textures=0 workers=0"
@@ -310,6 +313,10 @@ async fn exercise(state: Rc<State>, budget: FrameBudget) -> Result<(), String> {
     Ok(())
 }
 pub async fn run(state: Rc<State>, window: Ref<Window>, budget: FrameBudget) {
+    if std::env::args().any(|a| a.starts_with("--camera-stress-cycles=")) {
+        stress::run(state, window, budget).await;
+        return;
+    }
     let weak = window.downgrade();
     let watchdog = DispatcherTimer::run_once(
         move || {

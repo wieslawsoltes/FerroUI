@@ -94,3 +94,11 @@ The subsequent Windows camera-recovery/presentation work also reruns the native
 WSL sample build successfully (`linux-camera-recovery-regression.log`). Its
 Windows-only fixture/control diagnostics add no Linux preview fallback and
 close none of the positive DMA-BUF gates above.
+
+The subsequent Windows soak exposed a shared compositor ownership leak:
+dropping a render-bound interop handle on the UI thread retained the old backend
+and device. `LockBound` now queues destruction for its owning render thread and
+wakes that thread. The WSL render-thread suite passes all 15 tests, including
+UI/third-thread release and stopped-loop confinement; the native sample rebuild
+also passes (`linux-owner-drop-tests.log`, `linux-geometry-final-build.log`).
+This shared lifecycle fix adds no DMA-BUF capability or CPU preview fallback.

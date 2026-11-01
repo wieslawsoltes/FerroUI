@@ -78,6 +78,27 @@ per admitted sample. Inspect the native MFT/driver path before making stronger
 zero-copy or performance claims about its internals. Unknown color tags,
 incompatible surfaces and unsupported aperture/pixel-aspect conversions fail.
 
+Local ISO-BMFF playback additionally inspects bounded container metadata on the
+existing session worker: at most 4,096 boxes and an 8 MiB `moov`, one video track
+and one visual sample description, square pixels, integral in-bounds clean
+aperture and one of eight orthogonal track matrices. Media payload is skipped by
+seeking. Unsupported, ambiguous or malformed metadata fails instead of guessing.
+The Source Reader's video processor must expose `IMFVideoProcessorControl`; it
+is configured before reading to return full coded, unrotated, unmirrored BGRA
+pixels. Crop, clockwise rotation and output-space reflection then travel as
+immutable frame metadata through the common GPU layout. Natural size reflects
+the displayed clean extent. Remote URLs and other containers remain native
+Source Reader profiles without this container-matrix verification claim.
+
+The optional Windows `native-pixel-tests` sample feature checks all eight
+orientations with and without an off-centre crop, including raw projection,
+composition, window capture, resize, seek and compositor recovery. The synthetic
+camera feature also enables a repeated lifecycle soak with process-resource
+samples. Native shutdown and final frame retirement flush deferred D3D11
+destruction after source resources are released; this is not a GPU-completion
+substitute and does not release unknown-completion quarantine. Commands,
+measured results and limits are in [WINDOWS-VERIFICATION.md](WINDOWS-VERIFICATION.md).
+
 Camera discovery enumerates MF activation metadata without activating capture.
 Start activates only the selected video device; microphone access is not
 requested. Consent/privacy failures come from native acquisition. Formats report

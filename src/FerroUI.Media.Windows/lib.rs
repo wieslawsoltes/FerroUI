@@ -153,10 +153,10 @@ impl WindowsFrameStream {
             width: info.width,
             height: info.height,
             visible: FrameRegion {
-                x: 0,
-                y: 0,
-                width: info.width,
-                height: info.height,
+                x: info.x,
+                y: info.y,
+                width: info.visible_width,
+                height: info.visible_height,
             },
             format: FrameFormat::Rgba8,
             color: if info.color == 1 {
@@ -172,7 +172,7 @@ impl WindowsFrameStream {
                 270 => FrameRotation::Clockwise270,
                 _ => return Err(unsupported("Unknown native frame rotation")),
             },
-            mirrored: false,
+            mirrored: info.mirrored != 0,
             top_left_origin: true,
             timestamp: Duration::from_nanos(info.timestamp_ns),
             device: Some(self.producer.device()),

@@ -14,9 +14,14 @@ mod native_frame_tests {
     use ferroui_opengl::IPlatformGraphicsOpenGlContextFactory;
     extern "C" {
         fn ferro_windows_test_frames() -> i32;
+        fn ferro_windows_test_mp4_geometry() -> i32;
         fn ferro_windows_test_alias(display: isize, egl: *const Egl, gl: *const isize) -> i32;
     }
 
+    #[test]
+    fn bounded_mp4_geometry() {
+        assert_eq!(unsafe { ferro_windows_test_mp4_geometry() }, 0);
+    }
     #[test]
     fn independent_d3d11_frames_and_admission() {
         assert_eq!(unsafe { ferro_windows_test_frames() }, 0);
@@ -72,6 +77,11 @@ pub struct FrameInfo {
     pub timestamp_ns: u64,
     pub sequence: u64,
     pub epoch: u64,
+    pub mirrored: u32,
+    pub x: u32,
+    pub y: u32,
+    pub visible_width: u32,
+    pub visible_height: u32,
 }
 #[repr(C)]
 struct Egl {
@@ -157,6 +167,30 @@ impl Drop for Device {
 #[derive(Clone)]
 pub struct NativeDevice(Arc<Device>);
 impl NativeDevice {
+    #[cfg(feature = "synthetic-camera")]
+    pub fn fixture_retirement_stats(&self) -> [u32; 3] {
+        extern "C" {
+            fn ferro_windows_fixture_retirement_stats(device: *mut c_void, out: *mut u32);
+        }
+        let mut counts = [0; 3];
+        unsafe { ferro_windows_fixture_retirement_stats(self.0 .0.as_ptr(), counts.as_mut_ptr()) };
+        counts
+    }
+    /// Opt-in fixture diagnostics: private bytes, working set, local GPU bytes
+    /// (u64::MAX if unavailable), and process handle count.
+    #[cfg(feature = "synthetic-camera")]
+    pub fn fixture_process_stats(&self) -> Result<[u64; 4], MediaError> {
+        extern "C" {
+            fn ferro_windows_fixture_process_stats(device: *mut c_void, out: *mut u64) -> i32;
+        }
+        let mut values = [0; 4];
+        if unsafe { ferro_windows_fixture_process_stats(self.0 .0.as_ptr(), values.as_mut_ptr()) }
+            == 0
+        {
+            return Err(failure("Cannot query fixture process resources"));
+        }
+        Ok(values)
+    }
     pub fn from_renderer(producer: &NativeGlFrameProducer) -> MediaFuture<Self> {
         producer.invoke(|context| {
             let (display, egl) = Egl::current(context)?;
@@ -179,6 +213,14 @@ impl Drop for Session {
 #[derive(Clone)]
 pub struct NativeSession(Arc<Session>);
 impl NativeSession {
+    #[cfg(feature = "synthetic-camera")]
+    pub fn fixture_photo_status() -> (bool, bool) {
+        extern "C" {
+            fn ferro_windows_fixture_photo_status() -> u32;
+        }
+        let status = unsafe { ferro_windows_fixture_photo_status() };
+        (status & 1 != 0, status & 2 != 0)
+    }
     #[cfg(feature = "synthetic-camera")]
     pub fn synthetic_pattern_epoch() -> u64 {
         extern "C" {

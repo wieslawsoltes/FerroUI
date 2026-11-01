@@ -9,6 +9,8 @@
 #include <d3d11_4.h>
 #include <cstdio>
 #include <dxgi1_2.h>
+#include <dxgi1_4.h>
+#include <psapi.h>
 #include <mmdeviceapi.h>
 #include <audioclient.h>
 #include <propvarutil.h>
@@ -25,25 +27,70 @@
 #include <algorithm>
 #include <cstring>
 #include <cmath>
+#include <set>
 using Microsoft::WRL::ComPtr;
 using Clock=std::chrono::steady_clock;
 struct Failure {HRESULT hr;};
 static void check(HRESULT hr){if(FAILED(hr))throw Failure{hr};}
 static std::atomic<int> active_sessions{0};
+#ifdef FERROUI_SYNTHETIC_CAMERA
+static std::atomic<uint32_t> fixture_frames{0},fixture_aliases{0};
+struct FixtureFrame {
+    FixtureFrame(){++fixture_frames;}FixtureFrame(const FixtureFrame&){++fixture_frames;}
+    ~FixtureFrame(){--fixture_frames;}
+};
+struct FixtureAlias {FixtureAlias(){++fixture_aliases;}~FixtureAlias(){--fixture_aliases;}};
+#endif
 static std::once_flag mf_once;
 static void runtime(){std::call_once(mf_once,[]{check(MFStartup(MF_VERSION,MFSTARTUP_FULL));});} // process lifetime; leases may outlive sessions
 static std::string utf8(const std::wstring &s){if(s.empty())return {};int n=WideCharToMultiByte(CP_UTF8,0,s.data(),(int)s.size(),nullptr,0,nullptr,nullptr);std::string v(n,'\0');WideCharToMultiByte(CP_UTF8,0,s.data(),(int)s.size(),v.data(),n,nullptr,nullptr);return v;}
 static std::string hresult(HRESULT hr){wchar_t *text=nullptr;FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS,nullptr,hr,0,(wchar_t*)&text,0,nullptr);std::string result=text?utf8(text):"Native media error";if(text)LocalFree(text);char code[32];snprintf(code,sizeof(code)," (0x%08lx)",(unsigned long)hr);return result+code;}
+#include "mp4_geometry.cpp"
 #ifdef FERROUI_SYNTHETIC_CAMERA
 #include "synthetic_camera.cpp"
+extern "C" int ferro_windows_fixture_process_stats(void* device,uint64_t* out){
+    PROCESS_MEMORY_COUNTERS_EX memory{};memory.cb=sizeof(memory);DWORD handles=0;
+    if(!GetProcessMemoryInfo(GetCurrentProcess(),(PROCESS_MEMORY_COUNTERS*)&memory,sizeof(memory))||!GetProcessHandleCount(GetCurrentProcess(),&handles))return 0;
+    out[0]=memory.PrivateUsage;out[1]=memory.WorkingSetSize;out[2]=UINT64_MAX;out[3]=handles;
+    ComPtr<IDXGIDevice> dxgi;ComPtr<IDXGIAdapter> adapter;ComPtr<IDXGIAdapter3> adapter3;
+    if(SUCCEEDED(((ID3D11Device*)device)->QueryInterface(IID_PPV_ARGS(&dxgi)))&&SUCCEEDED(dxgi->GetAdapter(&adapter))&&SUCCEEDED(adapter.As(&adapter3))){
+        DXGI_QUERY_VIDEO_MEMORY_INFO gpu{};if(SUCCEEDED(adapter3->QueryVideoMemoryInfo(0,DXGI_MEMORY_SEGMENT_GROUP_LOCAL,&gpu)))out[2]=gpu.CurrentUsage;
+    }
+    return 1;
+}
+extern "C" void ferro_windows_fixture_retirement_stats(void* ptr,uint32_t* out){
+    out[0]=fixture_frames.load();out[1]=fixture_aliases.load();
+    ComPtr<ID3D11DeviceContext> context;((ID3D11Device*)ptr)->GetImmediateContext(&context);
+    std::set<ID3D11Resource*> sources;
+    auto note=[&](ID3D11View* view){if(!view)return;ComPtr<ID3D11Resource> resource;view->GetResource(&resource);
+        IUnknown* credit=nullptr;UINT size=sizeof(credit);
+        if(SUCCEEDED(resource->GetPrivateData(texture_credit,&size,&credit))&&credit){sources.insert(resource.Get());credit->Release();}
+    };
+    ID3D11ShaderResourceView* views[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]{};
+    for(int stage=0;stage<3;stage++){
+        if(stage==0)context->VSGetShaderResources(0,D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT,views);
+        if(stage==1)context->PSGetShaderResources(0,D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT,views);
+        if(stage==2)context->CSGetShaderResources(0,D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT,views);
+        for(auto& view:views){if(view){note(view);view->Release();view=nullptr;}}
+    }
+    ID3D11RenderTargetView* targets[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT]{};
+    context->OMGetRenderTargets(D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT,targets,nullptr);
+    for(auto target:targets)if(target){note(target);target->Release();}
+    out[2]=(uint32_t)sources.size();
+}
 #endif
+struct Session;
 struct FerroWindowsFrame {
+#ifdef FERROUI_SYNTHETIC_CAMERA
+    FixtureFrame tracked;
+#endif
     ComPtr<IMFSample> sample;
     ComPtr<ID3D11Texture2D> texture;
     ComPtr<ID3D11DeviceContext> context;
     ComPtr<ID3D11Query> ready;
     UINT slice=0;
     FerroWindowsFrameInfo info{};
+    std::weak_ptr<Session> owner;
 };
 struct Packet {HRESULT status=S_OK;DWORD stream=0,flags=0;LONGLONG pts=0;uint64_t epoch=0;ComPtr<IMFSample> sample;};
 struct Session;
@@ -66,7 +113,7 @@ static int native_error_kind(HRESULT hr){
        hr==DXGI_ERROR_DEVICE_RESET||hr==DXGI_ERROR_DEVICE_HUNG)return 3;
     return 0;
 }
-struct Session {
+struct Session : std::enable_shared_from_this<Session> {
     std::mutex lock;std::condition_variable changed;std::atomic<bool> closed{false};
     FerroWindowsState state{};
     std::wstring source;bool camera=false,resource_file=false;
@@ -88,6 +135,8 @@ struct Session {
     std::deque<std::unique_ptr<FerroWindowsFrame>> video;
     std::unique_ptr<FerroWindowsFrame> latest;
     UINT color=0,rotation=0,width=0,height=0;
+    UINT mirrored=0,visible_x=0,visible_y=0,visible_w=0,visible_h=0;
+    mp4::Geometry geometry;
     void fail(HRESULT hr,const char *detail=nullptr){
         std::lock_guard<std::mutex> guard(lock);
         if(FAILED(event_error))hr=event_error;
@@ -156,9 +205,22 @@ static void video_type(Session &s){
     s.rotation=0;type->GetUINT32(MF_MT_VIDEO_ROTATION,&s.rotation);
     if(s.rotation!=0&&s.rotation!=90&&s.rotation!=180&&s.rotation!=270)throw Failure{E_NOTIMPL};
     MFVideoArea aperture{};UINT32 copied=0;
+    wchar_t geometry_diagnostic[2];
+    if(s.geometry.known&&GetEnvironmentVariableW(L"FERROUI_MEDIA_GEOMETRY_DIAGNOSTICS",geometry_diagnostic,2)){
+        fprintf(stderr,"NATIVE_GEOMETRY_OUTPUT texture=%ux%u rotation=%u encoded=%ux%u clean=%u,%u,%u,%u track=%u mirror=%u\n",s.width,s.height,s.rotation,s.geometry.width,s.geometry.height,s.geometry.x,s.geometry.y,s.geometry.w,s.geometry.h,s.geometry.rotation,s.geometry.mirror);
+    }
     if(SUCCEEDED(type->GetBlob(MF_MT_MINIMUM_DISPLAY_APERTURE,(UINT8*)&aperture,sizeof(aperture),&copied)) && (aperture.OffsetX.value||aperture.OffsetX.fract||aperture.OffsetY.value||aperture.OffsetY.fract||aperture.Area.cx!=(LONG)s.width||aperture.Area.cy!=(LONG)s.height))throw Failure{E_NOTIMPL};
+    s.visible_x=s.visible_y=s.mirrored=0;s.visible_w=s.width;s.visible_h=s.height;
+    if(s.geometry.known){
+        auto& g=s.geometry;
+        if(s.width!=g.width||s.height!=g.height)throw Failure{E_NOTIMPL};
+        // Native RGB output stays in coded coordinates. Exact clean aperture
+        // and all eight track transforms are sampled by the shared GPU path.
+        s.visible_x=g.x;s.visible_y=g.y;s.visible_w=g.w;s.visible_h=g.h;
+        s.rotation=g.rotation;s.mirrored=g.mirror;
+    }
     UINT32 fps_n=0,fps_d=1;MFGetAttributeRatio(type.Get(),MF_MT_FRAME_RATE,&fps_n,&fps_d);
-    std::lock_guard<std::mutex> guard(s.lock);s.state.width=s.width;s.state.height=s.height;s.state.fps_n=fps_n;s.state.fps_d=fps_d;
+    std::lock_guard<std::mutex> guard(s.lock);s.state.width=s.rotation%180?s.visible_h:s.visible_w;s.state.height=s.rotation%180?s.visible_w:s.visible_h;s.state.fps_n=fps_n;s.state.fps_d=fps_d;
 }
 static void prepare(const std::shared_ptr<Session> &owner){
     Session &s=*owner;runtime();
@@ -172,6 +234,7 @@ static void prepare(const std::shared_ptr<Session> &owner){
     auto create_manager=(CreateManager)GetProcAddress(GetModuleHandleW(L"mfplat.dll"),"MFCreateDXGIDeviceManager");
     if(!create_manager)throw Failure{E_NOTIMPL};
     UINT token;check(create_manager(&token,s.manager.GetAddressOf()));check(s.manager->ResetDevice(s.device.Get(),token));
+    if(!s.camera){s.operation="local MP4 geometry inspection";s.geometry=mp4::inspect(s.source,s.closed);}
     ComPtr<IMFAttributes> attributes;check(MFCreateAttributes(&attributes,8));
     s.callback.Attach(new ReaderCallback(owner));check(attributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,s.callback.Get()));
     check(attributes->SetUnknown(MF_SOURCE_READER_D3D_MANAGER,s.manager.Get()));check(attributes->SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS,TRUE));
@@ -195,12 +258,33 @@ static void prepare(const std::shared_ptr<Session> &owner){
     // ANGLE's D3D11 image import accepts BGRA, but not B8G8R8X8 storage.
     // Request ARGB32 so the native processor allocates an importable format.
     ComPtr<IMFMediaType> type;check(MFCreateMediaType(&type));check(type->SetGUID(MF_MT_MAJOR_TYPE,MFMediaType_Video));check(type->SetGUID(MF_MT_SUBTYPE,MFVideoFormat_ARGB32));
+    if(s.geometry.known){
+        check(type->SetUINT32(MF_MT_VIDEO_ROTATION,0));
+        check(MFSetAttributeSize(type.Get(),MF_MT_FRAME_SIZE,s.geometry.width,s.geometry.height));
+        MFVideoArea full{};full.Area.cx=s.geometry.width;full.Area.cy=s.geometry.height;
+        check(type->SetBlob(MF_MT_MINIMUM_DISPLAY_APERTURE,(UINT8*)&full,sizeof(full)));
+        check(type->SetBlob(MF_MT_GEOMETRIC_APERTURE,(UINT8*)&full,sizeof(full)));
+    }
     // Explicit GPU video-processor output request. Validate the negotiated tags
     // and IMFDXGIBuffer on every frame; no system-memory output is admitted.
     check(type->SetUINT32(MF_MT_VIDEO_PRIMARIES,MFVideoPrimaries_BT709));check(type->SetUINT32(MF_MT_TRANSFER_FUNCTION,MFVideoTransFunc_sRGB));check(type->SetUINT32(MF_MT_VIDEO_NOMINAL_RANGE,MFNominalRange_0_255));
     if(s.requested_w&&s.requested_h)check(MFSetAttributeSize(type.Get(),MF_MT_FRAME_SIZE,s.requested_w,s.requested_h));
     if(s.requested_n&&s.requested_d)check(MFSetAttributeRatio(type.Get(),MF_MT_FRAME_RATE,s.requested_n,s.requested_d));
-    s.operation="video output negotiation";check(s.reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,nullptr,type.Get()));s.operation="video metadata validation";video_type(s);
+    s.operation="video output negotiation";check(s.reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,nullptr,type.Get()));
+    if(s.geometry.known){
+        s.operation="native untransformed video configuration";
+        ComPtr<IMFSourceReaderEx> reader;check(s.reader.As(&reader));bool configured=false;
+        for(DWORD index=0;index<16;index++){
+            GUID category;ComPtr<IMFTransform> transform;HRESULT hr=reader->GetTransformForStream(MF_SOURCE_READER_FIRST_VIDEO_STREAM,index,&category,&transform);
+            if(hr==MF_E_INVALIDINDEX)break;check(hr);
+            ComPtr<IMFVideoProcessorControl> control;if(FAILED(transform.As(&control)))continue;
+            RECT full{0,0,(LONG)s.geometry.width,(LONG)s.geometry.height};
+            check(control->SetRotation(ROTATION_NONE));check(control->SetMirror(MIRROR_NONE));
+            check(control->SetSourceRectangle(&full));check(control->SetDestinationRectangle(&full));configured=true;
+        }
+        if(!configured)throw Failure{E_NOTIMPL};
+    }
+    s.operation="video metadata validation";video_type(s);
     if(!s.camera){
         ComPtr<IMFMediaType> native_audio;HRESULT audio=s.reader->GetNativeMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,0,&native_audio);
         if(SUCCEEDED(audio)){
@@ -221,9 +305,9 @@ static std::unique_ptr<FerroWindowsFrame> video_frame(Session &s,const Packet &p
     D3D11_TEXTURE2D_DESC desc{};f->texture->GetDesc(&desc);
     if(desc.Width!=s.width||desc.Height!=s.height||desc.MipLevels!=1||desc.SampleDesc.Count!=1||!(desc.BindFlags&D3D11_BIND_SHADER_RESOURCE)||desc.Format!=DXGI_FORMAT_B8G8R8A8_UNORM||f->slice>=desc.ArraySize)throw Failure{MF_E_UNSUPPORTED_D3D_TYPE};
     uint64_t bytes=(uint64_t)desc.Width*desc.Height*4*desc.ArraySize;if(bytes>128ull*1024*1024)throw Failure{E_OUTOFMEMORY};
-    f->sample=packet.sample;f->context=s.context;
+    f->sample=packet.sample;f->context=s.context;f->owner=s.weak_from_this();
     D3D11_QUERY_DESC query{D3D11_QUERY_EVENT,0};check(s.device->CreateQuery(&query,&f->ready));s.context->End(f->ready.Get());s.context->Flush();
-    f->info={s.width,s.height,s.color,s.rotation,bytes,(uint64_t)std::max<LONGLONG>(0,packet.pts)*100,++s.sequence,packet.epoch};return f;
+    f->info={s.width,s.height,s.color,s.rotation,bytes,(uint64_t)std::max<LONGLONG>(0,packet.pts)*100,++s.sequence,packet.epoch,s.mirrored,s.visible_x,s.visible_y,s.visible_w,s.visible_h};return f;
 }
 static bool ready(FerroWindowsFrame &f){BOOL done=FALSE;HRESULT hr=f.context->GetData(f.ready.Get(),&done,sizeof(done),D3D11_ASYNC_GETDATA_DONOTFLUSH);check(hr);return hr==S_OK&&done;}
 static void reset(Session &s,uint64_t epoch,LONGLONG target){
@@ -329,7 +413,10 @@ static void run(const std::shared_ptr<Session> &owner){
     }
     s.reader.Reset();s.callback.Reset();
     if(s.camera_source)s.camera_source->Shutdown();s.camera_source.Reset();
-    s.video.clear();s.pcm.clear();{std::lock_guard<std::mutex> guard(s.lock);s.latest.reset();s.packet={};s.packet_ready=false;}s.render.Reset();s.audio_clock.Reset();s.audio_volume.Reset();s.audio.Reset();s.manager.Reset();s.context.Reset();
+    s.video.clear();s.pcm.clear();{std::lock_guard<std::mutex> guard(s.lock);s.latest.reset();s.packet={};s.packet_ready=false;}s.render.Reset();s.audio_clock.Reset();s.audio_volume.Reset();s.audio.Reset();s.manager.Reset();
+    // D3D11 destruction is deferred. Flush after releasing source resources,
+    // when no future capture/presentation commands may arrive to do it for us.
+    if(s.context)s.context->Flush();s.context.Reset();
     if(s.resource_file)DeleteFileW(s.source.c_str());
     if(SUCCEEDED(initialized))CoUninitialize();--active_sessions;
 }
@@ -346,7 +433,16 @@ uint64_t ferro_windows_seek(FerroWindowsSession *s,uint64_t ns){std::lock_guard<
 void ferro_windows_audio(FerroWindowsSession *s,double volume,int muted){std::lock_guard<std::mutex> guard(s->value->lock);s->value->volume=volume;s->value->muted=muted!=0;}
 FerroWindowsFrame *ferro_windows_take(FerroWindowsSession *s){std::lock_guard<std::mutex> guard(s->value->lock);if(s->value->latest&&s->value->latest->info.epoch==s->value->epoch)return s->value->latest.release();return nullptr;}
 void ferro_windows_frame_info(FerroWindowsFrame *f,FerroWindowsFrameInfo *out){*out=f->info;}
-void ferro_windows_frame_release(FerroWindowsFrame *f){delete f;}
+void ferro_windows_frame_release(FerroWindowsFrame *f){
+    auto owner=f->owner.lock();auto context=f->context;
+    delete f;
+    // A consumer/photo can retire after the source worker's final Flush. This
+    // submits deferred destruction only; it does not prove GPU completion or
+    // release quarantined storage. Avoid extra per-frame flushes while streaming.
+    // Check closed after deletion: otherwise Stop's Flush could race between
+    // the check and this last release, leaving destruction deferred again.
+    if(context&&(!owner||owner->closed.load()))context->Flush();
+}
 
 // Function addresses come from the active context's loader; never load a second
 // ANGLE DLL or assume the process's default graphics adapter is compatible.
@@ -372,7 +468,11 @@ void *ferro_windows_device(intptr_t display,const FerroWindowsEgl *egl){
     ((ID3D11Device*)d3d)->AddRef();return (void*)d3d;
 }
 void ferro_windows_device_release(void *device){if(device)((ID3D11Device*)device)->Release();}
-struct Alias {FerroWindowsEgl egl;void *display=nullptr,*image=nullptr;unsigned int texture=0;};
+struct Alias {
+#ifdef FERROUI_SYNTHETIC_CAMERA
+    FixtureAlias tracked;
+#endif
+    FerroWindowsEgl egl;void *display=nullptr,*image=nullptr;unsigned int texture=0;};
 void *ferro_windows_alias(FerroWindowsFrame *f,intptr_t display,const FerroWindowsEgl *egl,uint32_t *texture){
     if(!egl)return nullptr;
     auto a=std::make_unique<Alias>();a->egl=*egl;a->display=(void*)display;
@@ -391,9 +491,29 @@ void *ferro_windows_alias(FerroWindowsFrame *f,intptr_t display,const FerroWindo
 void ferro_windows_alias_release(void *ptr,int alive){std::unique_ptr<Alias>a((Alias*)ptr);if(alive){entry<TextureArray>(a->egl,11)(1,&a->texture);entry<DestroyImage>(a->egl,3)(a->display,a->image);}}
 struct PhotoResources {ComPtr<ID3D11Texture2D> staging;ComPtr<ID3D11Query> query;std::unique_ptr<FerroWindowsFrame> input;};
 static std::atomic<bool> photo_active{false};
+#ifdef FERROUI_SYNTHETIC_CAMERA
+static std::atomic<bool> photo_quarantined{false};
+extern "C" uint32_t ferro_windows_fixture_photo_status(){return (photo_active.load()?1:0)|(photo_quarantined.load()?2:0);}
+#endif
 int ferro_windows_photo_rgb(FerroWindowsFrame *f,uint8_t *rgb,uint64_t length){
     bool idle=false;if(!photo_active.compare_exchange_strong(idle,true))return 0;
     std::unique_ptr<PhotoResources> work;bool submitted=false,completed=false;
+    auto failed=[&](HRESULT hr){
+#ifdef FERROUI_SYNTHETIC_CAMERA
+        fprintf(stderr,"SYNTHETIC_NATIVE_PHOTO_FAILURE submitted=%d completed=%d %s\n",submitted,completed,hresult(hr).c_str());
+#else
+        (void)hr;
+#endif
+        if(submitted&&!completed){
+#ifdef FERROUI_SYNTHETIC_CAMERA
+            photo_quarantined=true;
+#endif
+            // Unknown completion retains source, staging and the global slot;
+            // cancellation must never convert this into premature destruction.
+            work.release();return 2;
+        }
+        photo_active=false;return 0;
+    };
     try{
         if(f->info.width>4096||f->info.height>4096||length!=(uint64_t)f->info.width*f->info.height*3)throw Failure{E_INVALIDARG};
         work=std::make_unique<PhotoResources>();work->input=std::make_unique<FerroWindowsFrame>(*f);
@@ -412,15 +532,7 @@ int ferro_windows_photo_rgb(FerroWindowsFrame *f,uint8_t *rgb,uint64_t length){
             for(int c=0;c<3;c++){float v=in[2-c]/255.f;if(f->info.color==2){v=std::pow(v,2.4f);v=v<=.0031308f?12.92f*v:1.055f*std::pow(v,1.f/2.4f)-.055f;}out[c]=(BYTE)std::lround(std::clamp(v,0.f,1.f)*255.f);}
         }
         f->context->Unmap(work->staging.Get(),0);photo_active=false;return 1;
-    }catch(...){
-        if(submitted&&!completed){
-            // Keep both source sample and staging immutable if actual GPU
-            // completion is unknown. The native global slot stays occupied;
-            // repeated requests cannot grow this quarantine.
-            work.release();return 2;
-        }
-        photo_active=false;return 0;
-    }
+    }catch(Failure e){return failed(e.hr);}catch(...){return failed(E_FAIL);}
 }
 static std::string json_string(const std::string &text){std::string out="\"";for(unsigned char c:text){if(c=='"'||c=='\\'){out+='\\';out+=(char)c;}else if(c<32){char buf[7];snprintf(buf,sizeof(buf),"\\u%04x",c);out+=buf;}else out+=(char)c;}return out+'"';}
 char *ferro_windows_devices(void){
@@ -443,4 +555,5 @@ void ferro_windows_string_release(char *text){CoTaskMemFree(text);}
 
 #ifdef FERROUI_NATIVE_FRAME_TESTS
 #include "frame_tests.cpp"
+#include "mp4_geometry_tests.cpp"
 #endif

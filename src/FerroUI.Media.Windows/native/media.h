@@ -11,7 +11,7 @@ typedef struct {
     uint64_t position_ns,duration_ns,seek_done;
     char error[512];
 } FerroWindowsState;
-typedef struct {uint32_t width,height,color,rotation;uint64_t bytes,timestamp_ns,sequence,epoch;} FerroWindowsFrameInfo;
+typedef struct {uint32_t width,height,color,rotation;uint64_t bytes,timestamp_ns,sequence,epoch;uint32_t mirrored,x,y,visible_width,visible_height;} FerroWindowsFrameInfo;
 /* The returned device is AddRef-owned, queried from the current ANGLE display. */
 typedef struct { intptr_t functions[13]; } FerroWindowsEgl;
 void *ferro_windows_device(intptr_t display,const FerroWindowsEgl *egl);

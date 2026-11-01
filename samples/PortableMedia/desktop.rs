@@ -22,6 +22,9 @@ use std::{
 static FAILED: AtomicBool = AtomicBool::new(false);
 #[path = "camera.rs"]
 mod camera;
+#[cfg(all(windows, feature = "native-pixel-tests"))]
+#[path = "native_pixels.rs"]
+mod native_pixels;
 #[path = "providers.rs"]
 mod providers;
 #[cfg(target_os = "macos")]
@@ -30,6 +33,9 @@ mod renderer;
 #[cfg(not(target_os = "macos"))]
 #[path = "native_renderer.rs"]
 mod renderer;
+#[cfg(all(windows, feature = "native-pixel-tests"))]
+#[path = "video_pixels.rs"]
+mod video_pixels;
 #[repr(C)]
 struct App {
     base: Application,
@@ -186,7 +192,15 @@ impl ApplicationImpl for App {
                         if let (Some(root), Some(player)) =
                             (weak_root.upgrade(), view.media_player())
                         {
-                            renderer::install(&root, player.frames(), &*interop);
+                            let host = renderer::install(&root, player.frames(), &*interop);
+                            #[cfg(all(windows, feature = "native-pixel-tests"))]
+                            if std::env::args().any(|a| a == "--video-pixel-smoke") {
+                                if let Some(window) = weak_window.upgrade() {
+                                    video_pixels::run(window, view.clone(), host, budget).await;
+                                }
+                                return;
+                            }
+                            let _ = host;
                         }
 
                         if std::env::args().any(|a| a == "--smoke") {
@@ -494,6 +508,37 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
     );
 }
 pub fn run() -> std::process::ExitCode {
+    if std::env::args().any(|a| a == "--video-lifecycle-pixels")
+        && !std::env::args().any(|a| a == "--video-pixel-smoke")
+    {
+        eprintln!("--video-lifecycle-pixels requires --video-pixel-smoke");
+        return std::process::ExitCode::FAILURE;
+    }
+    if std::env::args().any(|a| a == "--video-pixel-smoke")
+        && !std::env::args().any(|a| a == "--renderer")
+    {
+        eprintln!("--video-pixel-smoke requires --renderer");
+        return std::process::ExitCode::FAILURE;
+    }
+    if std::env::args().any(|a| a.starts_with("--camera-stress-cycles="))
+        && [
+            "--camera",
+            "--synthetic-camera",
+            "--camera-smoke",
+            "--camera-recovery-smoke",
+            "--renderer",
+        ]
+        .into_iter()
+        .any(|r| !std::env::args().any(|a| a == r))
+    {
+        eprintln!("Camera stress requires --camera --synthetic-camera --camera-smoke --camera-recovery-smoke --renderer");
+        return std::process::ExitCode::FAILURE;
+    }
+    #[cfg(not(all(windows, feature = "native-pixel-tests")))]
+    if std::env::args().any(|a| a == "--video-pixel-smoke") {
+        eprintln!("Video pixel smoke requires Windows and --features native-pixel-tests");
+        return std::process::ExitCode::FAILURE;
+    }
     #[cfg(not(all(windows, feature = "synthetic-camera")))]
     if std::env::args().any(|a| {
         matches!(
