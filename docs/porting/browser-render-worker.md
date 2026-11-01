@@ -1606,15 +1606,37 @@ Visited, with what the tour could not do there: Dialogs (its pickers and windows
 **What was added to the scripts.** `catalog-pages.mjs`: `catalogPages`, `PAGE_ACTIONS`, `visitAll` (a tour that goes on when a page does not open and ends when three in a row do not). `catalog-memory.mjs`: `--all`, `--passes <n>`, `--verbose`. The tour of thirteen and its users (`control_catalog.test.mjs`, `capture-catalog.mjs`) are unchanged.
 
 
-## Cooperative resize: the page shows the frames of the render thread (2026-11-01)
+## Cooperative resize (2026-11-01)
 
-Upstream transfers the control of the canvas to the render worker (section 1, "The canvas"). The page then shows whatever the worker last committed, on the worker's schedule, while the size of the canvas element follows the layout of the page on the page's schedule. No browser API orders a commit of a worker with a layout of the page (a Chromium layout test of `OffscreenCanvas` resizing treats the size reaching the placeholder as asynchronous), so while a page is resized the browser shows frames of the old size stretched to the new one: the elastic band reported on the calculator, which the thread of the page had as well (there the frame was rendered at the next animation frame, after the paint of the resized canvas).
+Upstream transfers the control of the canvas to the render worker (section 1, "The canvas"): the page shows whatever the worker last committed, on the worker's schedule, while the size of the canvas element follows the layout of the page on the page's schedule. No browser API orders a commit of a worker with a layout of the page (Chromium's own layout test of `OffscreenCanvas` resizing treats the size reaching the placeholder as asynchronous), so while a page is resized the browser shows frames of the old size stretched to the new one. That is the elastic band reported on the calculator. The thread of the page had it as well: there the frame was rendered at the next animation frame, after the paint of the resized canvas.
 
-What the port does instead, on each path:
+What other frameworks do, and what the port does on each path, is the same pattern: asynchronous presentation in the steady state, and a presentation synchronised with the new size only while a resize lasts. Flutter on Windows blocks the platform thread on `WM_SIZE` until the raster thread presents a frame of the new size (at most 100 ms). Flutter on macOS holds the raster thread while a frame and the window disagree on the size. Metal applications present with the Core Animation transaction during a live resize only.
 
-- **The thread of the page renders.** The resize observer runs after the browser's layout and before its paint. After `resized` (whose layout pass runs at once, as upstream's `HandleResized` does) the top-level raises `paint`, the synchronous commit of the compositor that a paint request of a desktop window makes (`MediaContext::immediate_render_requested`): the frame the browser paints right after has content of the canvas's new size.
-- **A render thread renders.** The canvas is not transferred. The worker draws to an `OffscreenCanvas` of its own and, when a frame is drawn (the end of the GL session, or the blit of the software target), hands it to the page as an `ImageBitmap` (`transferToImageBitmap`, without a copy) through a `MessagePort`, with the size and the scaling it was rendered at (`WebRenderTarget.present`). The page shows it with a `bitmaprenderer` context (`transferFromImageBitmap`, without a copy) and gives the canvas element the size of that frame in the same task (`CanvasPresenter`), so no frame is ever shown at a size other than its own. The size of the view is its container's (observed in this mode instead of the canvas), and the container is the region of the view: positioned and clipping, so that a frame larger than a view that shrank does not overflow the page. On a resize the page commits the compositor and asks the render thread for a frame out of turn without waiting (`MediaContext::commit_and_request_frame`): the frame of the new size is shown as soon as it is drawn, at the latest one frame after the resize, and the frames in between are the previous frame at its own size.
+### The thread of the page renders
 
-Why the page and not the worker shows the frames: the thread of the page is the thread of the user interface (input, layout and the commit of the composition run there; the worker renders), so the frames the page shows depend on nothing that the user interface does not already depend on, and both hand-overs are zero-copy. Idle views send nothing: a frame is handed over only when one is rendered.
+The resize observer runs after the browser's layout and before its paint. After `resized` (whose layout pass runs at once, as upstream's `HandleResized` does), the top-level raises `paint`, the synchronous commit of the compositor that a paint request of a desktop window makes (`MediaContext::immediate_render_requested`). The frame the browser paints right after has content of the canvas's new size. No other frame changes.
 
-Validated by the control catalog test in both builds (`scripts/browser/tests/control_catalog.test.mjs`, "the application starts, draws ... and is laid out again on resize"): twenty steps of the viewport, and every paint of a resized canvas has a frame of the size it is shown at. On the Ferro Store (the thread of the page), before the change every paint of a 40-frame resize showed the frame of the previous step stretched; after it, none.
+### A render thread renders
+
+The canvas is transferred, as upstream does, and the worker commits its frames to it directly in the steady state. Nothing waits for the thread of the page, so what the render thread animates keeps moving while the page is busy. While the view is resized, and only then, the page shows the frames itself, each at its own size (`CanvasPresenter`):
+
+1. When the observer reports a new size, the page copies the current frame of the canvas into an overlay canvas of the frame's size (`drawImage` of the canvas, synchronous), puts the overlay over the canvas, hides the canvas and asks the worker for copies of its frames.
+2. The worker still commits each frame to its canvas, and also hands the page a copy (`createImageBitmap` of its `OffscreenCanvas`, taken when the frame is drawn) with the size and scaling it was rendered at (`WebRenderTarget.present`). The page draws the copy into the overlay and gives the overlay the size of that frame in the same task. On a resize the page also commits the compositor and asks the render thread for a frame out of turn without waiting (`MediaContext::commit_and_request_frame`).
+3. When the size has not changed for two animation frames and the canvas has a frame of the size of the view, the page removes the overlay and shows the canvas again. Both hold real frames of that size, so the switch shows no stretched or empty frame in any order of the two threads.
+
+### The experiments behind the choice
+
+Measured in Chrome 152, at a device pixel ratio of 2, with a WebGL 2 context on a worker. The harness is a page with a worker and a local server that records its reports.
+
+| Experiment | Result |
+|---|---|
+| `transferToImageBitmap` on a transferred canvas | The bitmap has the frame, but the canvas then shows an empty frame: the drawing buffer is consumed. It cannot feed both paths. |
+| `createImageBitmap` of a transferred canvas, in the worker | The page gets the frame, and the canvas still shows it. 0.16 ms per frame (median). |
+| `drawImage` of a transferred canvas, on the page | A synchronous copy of the frame it shows (about 2 ms with a pixel read back). |
+| A commit that changes the size | The size attributes of the canvas and its frame change together, as the page sees them. |
+| Direct commits with the page busy for 300 ms | Worker frames every 8.3 ms. The commits do not wait for the page. |
+| Every frame handed to the page | Worker and page costs of 0.02 ms each. But frames wait for the page: up to 300 ms of latency while the page is busy, so render-thread animations would stop. That is why the hand-over is limited to the duration of a resize. |
+
+Not measured: other browsers. A page that lacks `OffscreenCanvas` or `createImageBitmap` resizes as upstream does (`CanvasPresenter.isSupported`).
+
+Validated by the control catalog test in both builds (`scripts/browser/tests/control_catalog.test.mjs`, "the application starts, draws ... and is laid out again on resize"). It resizes the viewport in twenty steps, and every paint of the resized view shows a frame of the size it is shown at. On the Ferro Store (the thread of the page), every paint of a 40-frame resize showed the frame of the previous step stretched before the change, and none after it.

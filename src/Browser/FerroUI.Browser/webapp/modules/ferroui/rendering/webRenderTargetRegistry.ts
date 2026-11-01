@@ -27,7 +27,7 @@ export class WebRenderTargetRegistry {
     private static heldBack: Array<{
         id: number;
         canvas: OffscreenCanvas;
-        port: MessagePort;
+        port?: MessagePort;
         modes: BrowserRenderingMode[];
     }> = [];
 
@@ -40,18 +40,21 @@ export class WebRenderTargetRegistry {
             WebRenderTargetRegistry.targets[id] = WebRenderTargetRegistry.createRenderTarget(canvas, preferredModes);
             return id;
         }
-        // Not in the original, which transfers the control of the canvas to the worker. The worker
-        // draws to an offscreen canvas of its own and the page shows its frames
-        // (`CanvasPresenter`): the size of the canvas element and the frame it shows change
-        // together.
-        const offscreen = new OffscreenCanvas(Math.max(1, canvas.width), Math.max(1, canvas.height));
-        const channel = new MessageChannel();
-        const presenter = new CanvasPresenter(canvas, channel.port1);
+        // Not in the original: the page's side of the cooperative resize (`CanvasPresenter`), and the
+        // port its worker's side is given with the canvas.
+        let presenter: CanvasPresenter | undefined;
+        let port: MessagePort | undefined;
+        if (CanvasPresenter.isSupported()) {
+            const channel = new MessageChannel();
+            presenter = new CanvasPresenter(canvas, channel.port1);
+            port = channel.port2;
+        }
+        const offscreen = canvas.transferControlToOffscreen();
         if (pthreadId === WebRenderTargetRegistry.pendingThread && WebRenderTargetRegistry.workerThreadId === 0) {
             WebRenderTargetRegistry.heldBack.push({
                 id,
                 canvas: offscreen,
-                port: channel.port2,
+                port,
                 modes: preferredModes
             });
             WebRenderTargetRegistry.registry[id] = {
@@ -61,7 +64,7 @@ export class WebRenderTargetRegistry {
         } else {
             const worker = WebRenderTargetRegistry.getWorker(
                 pthreadId === WebRenderTargetRegistry.pendingThread ? WebRenderTargetRegistry.workerThreadId : pthreadId);
-            WebRenderTargetRegistry.postCanvas(worker, id, offscreen, channel.port2, preferredModes);
+            WebRenderTargetRegistry.postCanvas(worker, id, offscreen, port, preferredModes);
             WebRenderTargetRegistry.registry[id] = {
                 canvas,
                 worker,
@@ -69,6 +72,12 @@ export class WebRenderTargetRegistry {
             };
         }
         return id;
+    }
+
+    // The page's side of the cooperative resize of the canvas `id`, for a canvas whose control went
+    // to a render worker.
+    static presenterOf(id: number): CanvasPresenter | undefined {
+        return WebRenderTargetRegistry.registry[id]?.presenter;
     }
 
     // Not in the original. The thread `pthreadId` has installed its handler (`initializeWorker`):
@@ -102,14 +111,14 @@ export class WebRenderTargetRegistry {
         return worker;
     }
 
-    private static postCanvas(worker: Worker, id: number, offscreen: OffscreenCanvas, port: MessagePort, modes: BrowserRenderingMode[]) {
+    private static postCanvas(worker: Worker, id: number, offscreen: OffscreenCanvas, port: MessagePort | undefined, modes: BrowserRenderingMode[]) {
         worker.postMessage({
             ferrouiCmd: "registerCanvas",
             canvas: offscreen,
             port,
             modes,
             id
-        }, [offscreen, port]);
+        }, port != null ? [offscreen, port] : [offscreen]);
     }
 
     static initializeWorker() {
@@ -118,7 +127,7 @@ export class WebRenderTargetRegistry {
             const msg = ev;
             if (msg.data.ferrouiCmd === "registerCanvas") {
                 const target = WebRenderTargetRegistry.createRenderTarget(msg.data.canvas, msg.data.modes);
-                target.presentPort = msg.data.port;
+                if (msg.data.port != null) { target.connectPresenter(msg.data.port); }
                 WebRenderTargetRegistry.targets[msg.data.id] = target;
                 // Not in the original, which asks its registry for the target on each frame. Here
                 // the thread that created the canvas has a registry of its own, which never has
@@ -147,7 +156,7 @@ export class WebRenderTargetRegistry {
         entry?.presenter?.close();
         const held = WebRenderTargetRegistry.heldBack.findIndex(canvas => canvas.id === id);
         if (held >= 0) {
-            WebRenderTargetRegistry.heldBack[held].port.close();
+            WebRenderTargetRegistry.heldBack[held].port?.close();
             WebRenderTargetRegistry.heldBack.splice(held, 1);
             return;
         }

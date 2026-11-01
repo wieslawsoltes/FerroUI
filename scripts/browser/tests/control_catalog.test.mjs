@@ -242,8 +242,8 @@ for (const [mode, expectedContext] of [["WebGL2", "webgl2"], ["Software2D", "2d"
         console.log(`      drawn at ${FIRST_SIZE.width}x${FIRST_SIZE.height}: canvas ${first.canvas.width}x${first.canvas.height}, ${first.colours} colours`);
         let kind;
         if (page.onRenderThread) {
-            // The canvas of the page shows the frames the render thread hands it (a bitmaprenderer
-            // context): the thread that draws tells what it drew the last frame with.
+            // The canvas of the page gave its control to the render thread and has no context to
+            // ask for: the thread that draws tells what it drew the last frame with.
             const rendering = await page.rendering();
             kind = rendering.kind === "software" ? "2d" : rendering.kind === "webgl" ? (rendering.gl === "3" ? "webgl2" : "webgl") : "unknown";
             assert(rendering.other_thread === "true", `the frames were not drawn by another thread: ${JSON.stringify(rendering)}`);
@@ -267,15 +267,18 @@ for (const [mode, expectedContext] of [["WebGL2", "webgl2"], ["Software2D", "2d"
         await waitForFrame(SMALLER_SIZE, undefined, 64);
 
         // A cooperative resize: no frame is painted stretched. Each time the browser is about to
-        // paint the canvas after its size changed (a resize observer created after the platform's
-        // runs after it, before the paint), the canvas holds a frame of the size it is shown at: on
-        // the thread of the page the frame was rendered at once in the platform's observer; with a
-        // render thread the canvas is shown at the size of the frame it holds. Twenty steps of the
-        // viewport, each a frame or two apart, as a drag of the edge of a window gives.
+        // paint the view after its size changed (a resize observer created after the platform's
+        // runs after it, before the paint), what is shown holds a frame of the size it is shown at:
+        // on the thread of the page the frame was rendered at once in the platform's observer;
+        // with a render thread the page shows the frames in an overlay at their own size while the
+        // resize lasts (the canvas of the worker is hidden then). Twenty steps of the viewport,
+        // each a frame or two apart, as a drag of the edge of a window gives.
         await page.evaluate(`(() => {
-            const canvas = document.querySelector("#out canvas");
-            window.__resizeProbe = { samples: 0, stretched: [] };
+            window.__resizeProbe = { samples: 0, stretched: [], overlays: 0 };
             const sample = () => {
+                const overlay = document.querySelector("#out .ferroui-resize-overlay");
+                if (overlay) { window.__resizeProbe.overlays++; }
+                const canvas = overlay ?? document.querySelector("#out canvas");
                 const box = canvas.getBoundingClientRect();
                 const width = Math.round(box.width * devicePixelRatio);
                 const height = Math.round(box.height * devicePixelRatio);
@@ -284,7 +287,7 @@ for (const [mode, expectedContext] of [["WebGL2", "webgl2"], ["Software2D", "2d"
                     window.__resizeProbe.stretched.push(canvas.width + "x" + canvas.height + " shown at " + width + "x" + height);
                 }
             };
-            new ResizeObserver(sample).observe(canvas);
+            new ResizeObserver(sample).observe(document.querySelector("#out canvas"));
             new ResizeObserver(sample).observe(document.querySelector("#out"));
         })()`);
         for (let step = 1; step <= 20; step++) {
@@ -295,7 +298,7 @@ for (const [mode, expectedContext] of [["WebGL2", "webgl2"], ["Software2D", "2d"
         }
         await waitForFrame(LARGER_SIZE, undefined, 64);
         const probe = JSON.parse(await page.evaluate("JSON.stringify(window.__resizeProbe)"));
-        measured(`${probe.samples} paints of a resized canvas, ${probe.stretched.length} stretched`);
+        measured(`${probe.samples} paints of a resized view (${probe.overlays} with the resize overlay), ${probe.stretched.length} stretched`);
         assert(probe.samples >= 20, `the resize was not observed: ${JSON.stringify(probe)}`);
         assert(probe.stretched.length === 0, `frames were painted stretched: ${probe.stretched.slice(0, 5).join(", ")}`);
 
@@ -719,9 +722,9 @@ if (threaded) {
         assert(rendering.other_thread === "true" && rendering.frame_thread === rendering.render_thread && rendering.frame_thread !== rendering.page_thread,
             `the frames were not drawn by the render thread: ${JSON.stringify(rendering)}`);
         assert(rendering.kind === "webgl" && rendering.gl === "3", `the mode did not give a WebGL 2 target: ${JSON.stringify(rendering)}`);
-        // The page draws nothing itself: its canvas shows the frames of the render thread.
-        const context = await page.evaluate(`(c => c.getContext("bitmaprenderer") ? "bitmaprenderer" : c.getContext("2d") ? "2d" : "none")(document.querySelector("#out canvas"))`);
-        assert(context === "bitmaprenderer", `the canvas of the page has a ${context} context`);
+        // The canvas of the page gave its control away: it hands out no context.
+        const context = await page.evaluate(`(() => { try { return document.querySelector("#out canvas").getContext("2d") ? "2d" : "none"; } catch (error) { return error.name; } })()`);
+        assert(context !== "2d", "the page still owns its canvas");
         // Input reaches the view and is drawn by that thread.
         await navigate(page, "Basic Input");
         rendering = await framesAfter(page, rendering.frames);
