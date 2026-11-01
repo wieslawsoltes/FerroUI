@@ -2,7 +2,7 @@
 //! query from its text at run time.
 
 use super::{ContainerQueryGrammar, ContainerQuerySyntax};
-use ferroui_base::data::core::ExpressionParseException;
+use ferroui_base::data::core::ExpressionParseError;
 use ferroui_base::styling::{StyleQueries, StyleQuery};
 use std::fmt;
 
@@ -11,7 +11,7 @@ use std::fmt;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ContainerQueryParserError {
     /// The text is not a container query (`ExpressionParseException`).
-    Parse(ExpressionParseException),
+    Parse(ExpressionParseError),
     /// The query cannot be created from this syntax
     /// (`NotSupportedException`).
     NotSupported(String),
@@ -28,8 +28,8 @@ impl fmt::Display for ContainerQueryParserError {
 
 impl std::error::Error for ContainerQueryParserError {}
 
-impl From<ExpressionParseException> for ContainerQueryParserError {
-    fn from(error: ExpressionParseException) -> Self {
+impl From<ExpressionParseError> for ContainerQueryParserError {
+    fn from(error: ExpressionParseError) -> Self {
         ContainerQueryParserError::Parse(error)
     }
 }

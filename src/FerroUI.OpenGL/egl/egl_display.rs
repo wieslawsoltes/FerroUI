@@ -1,7 +1,7 @@
 use super::egl_consts::*;
 use super::egl_display_utils::{required_egl, EglConfigInfo, EglDisplayUtils};
 use super::{EglContext, EglContextOptions, EglDisplayCreationOptions, EglDisplayOptions, EglInterface, EglSurface};
-use crate::OpenGlException;
+use crate::OpenGlError;
 use ferroui_base::platform::IPlatformGraphicsContext;
 use ferroui_base::reactive::{Disposable, IDisposable};
 use std::cell::{Cell, RefCell};
@@ -29,7 +29,7 @@ pub struct EglDisplay {
 impl EglDisplay {
     /// The default display of the EGL library of the system (`new EglDisplay()`):
     /// the interface is [`EglInterface::new_default`].
-    pub fn new_default() -> Result<Rc<EglDisplay>, OpenGlException> {
+    pub fn new_default() -> Result<Rc<EglDisplay>, OpenGlError> {
         let egl = EglInterface::new_default()?;
         Self::new_with_creation_options(EglDisplayCreationOptions {
             base: EglDisplayOptions { egl: Some(Rc::new(egl)), ..Default::default() },
@@ -38,7 +38,7 @@ impl EglDisplay {
     }
 
     /// Creates the display the options describe (`new EglDisplay(EglDisplayCreationOptions)`).
-    pub fn new_with_creation_options(options: EglDisplayCreationOptions) -> Result<Rc<EglDisplay>, OpenGlException> {
+    pub fn new_with_creation_options(options: EglDisplayCreationOptions) -> Result<Rc<EglDisplay>, OpenGlError> {
         let display = EglDisplayUtils::create_display(&options)?;
         Self::new(display, options.base)
     }
@@ -47,7 +47,7 @@ impl EglDisplay {
     ///
     /// # Panics
     /// Panics when `display` is zero.
-    pub fn new(display: isize, options: EglDisplayOptions) -> Result<Rc<EglDisplay>, OpenGlException> {
+    pub fn new(display: isize, options: EglDisplayOptions) -> Result<Rc<EglDisplay>, OpenGlError> {
         let egl = required_egl(&options.egl);
         let supports_sharing = options.supports_context_sharing;
         if display == 0 {
@@ -107,9 +107,9 @@ impl EglDisplay {
     /// # Panics
     /// Panics when the options name a context to share with and the display does not
     /// support sharing (the `NotSupportedException` of the original).
-    pub fn create_context(&self, options: Option<EglContextOptions>) -> Result<Rc<EglContext>, OpenGlException> {
+    pub fn create_context(&self, options: Option<EglContextOptions>) -> Result<Rc<EglContext>, OpenGlError> {
         if self.single_context() && !self.contexts.borrow().is_empty() {
-            return Err(OpenGlException::new("This EGLDisplay can only have one active context"));
+            return Err(OpenGlError::new("This EGLDisplay can only have one active context"));
         }
 
         let options = options.unwrap_or_default();
@@ -127,7 +127,7 @@ impl EglDisplay {
                 // Attempt to create a PBuffer as a surface for offscreen rendering
                 // (As in the original the test combines the bits with `|`, so it never fails.)
                 if (self.config.surface_type() | EGL_PBUFFER_BIT) == 0 {
-                    return Err(OpenGlException::new(
+                    return Err(OpenGlError::new(
                         "Platform doesn't support EGL_KHR_surfaceless_context and PBUFFER surfaces",
                     ));
                 }
@@ -138,7 +138,7 @@ impl EglDisplay {
                     Some(&[EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE]),
                 );
                 if p_buffer_surface == 0 {
-                    return Err(OpenGlException::get_formatted_exception_for_egl("eglCreatePBufferSurface", &self.egl));
+                    return Err(OpenGlError::get_formatted_exception_for_egl("eglCreatePBufferSurface", &self.egl));
                 }
 
                 offscreen_surface = Some(EglSurface::new(&self.this(), p_buffer_surface));
@@ -157,7 +157,7 @@ impl EglDisplay {
             self.egl.bind_api(previous_api);
         }
         if ctx == 0 {
-            let ex = OpenGlException::get_formatted_exception_for_egl("eglCreateContext", &self.egl);
+            let ex = OpenGlError::get_formatted_exception_for_egl("eglCreateContext", &self.egl);
             if let Some(offscreen_surface) = &offscreen_surface {
                 offscreen_surface.dispose();
             }
@@ -180,15 +180,15 @@ impl EglDisplay {
         Ok(rv)
     }
 
-    pub fn create_window_surface(&self, window: isize) -> Result<Rc<EglSurface>, OpenGlException> {
+    pub fn create_window_surface(&self, window: isize) -> Result<Rc<EglSurface>, OpenGlError> {
         if window == 0 {
-            return Err(OpenGlException::new(format!("Window {window} is invalid.")));
+            return Err(OpenGlError::new(format!("Window {window} is invalid.")));
         }
 
         let lock = self.lock();
         let s = self.egl.create_window_surface(self.handle(), self.config(), window, Some(&[EGL_NONE, EGL_NONE]));
         let result = if s == 0 {
-            Err(OpenGlException::get_formatted_exception_for_egl("eglCreateWindowSurface", &self.egl))
+            Err(OpenGlError::get_formatted_exception_for_egl("eglCreateWindowSurface", &self.egl))
         } else {
             Ok(EglSurface::new(&self.this(), s))
         };
@@ -204,12 +204,12 @@ impl EglDisplay {
         buffer_type: i32,
         handle: isize,
         attribs: &[i32],
-    ) -> Result<Rc<EglSurface>, OpenGlException> {
+    ) -> Result<Rc<EglSurface>, OpenGlError> {
         let lock = self.lock();
         let s = self.egl.create_pbuffer_from_client_buffer(self.handle(), buffer_type, handle, self.config(), Some(attribs));
 
         let result = if s == 0 {
-            Err(OpenGlException::get_formatted_exception_for_egl("eglCreatePbufferFromClientBuffer", &self.egl))
+            Err(OpenGlError::get_formatted_exception_for_egl("eglCreatePbufferFromClientBuffer", &self.egl))
         } else {
             Ok(EglSurface::new(&self.this(), s))
         };

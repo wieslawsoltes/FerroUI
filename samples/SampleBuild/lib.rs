@@ -196,7 +196,7 @@ impl SampleBuild {
         text.push_str("];\n");
 
         let compiled_classes = format!(
-            "/// The documents the build compiled, by their rooted asset paths, each with the function\n/// that populates an instance of its class from its compiled markup.\npub(crate) static COMPILED: &[(&str, fn(&::ferroui_base::BoxedValue) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException>)] = &[\n{}];\n",
+            "/// The documents the build compiled, by their rooted asset paths, each with the function\n/// that populates an instance of its class from its compiled markup.\npub(crate) static COMPILED: &[(&str, fn(&::ferroui_base::BoxedValue) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError>)] = &[\n{}];\n",
             compiled.classes
         );
         // Written only when they changed, so that the crate is not rebuilt for nothing.

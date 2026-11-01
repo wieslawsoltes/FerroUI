@@ -30,7 +30,7 @@ use ferroui_controls::automation::peers::{
     ControlAutomationPeerImpl, RangeBaseAutomationPeer, RangeBaseAutomationPeerImpl,
 };
 use ferroui_controls::automation::provider::IRangeValueProvider;
-use ferroui_controls::automation::{AutomationProperties, ElementNotEnabledException};
+use ferroui_controls::automation::{AutomationProperties, ElementNotEnabledError};
 use ferroui_controls::primitives::{
     RangeBase, RangeBaseValueChangedEventArgs, TemplateAppliedEventArgs, TemplatedControl,
     TemplatedControlImpl, TemplatedControlImplExt,
@@ -812,12 +812,12 @@ impl IRangeValueProvider for RangeThumbProvider {
     fn small_change(&self) -> f64 {
         self.0.thumb().small_change()
     }
-    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledException> {
+    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledError> {
         self.0.ensure_enabled()?;
         let thumb = self.0.thumb();
-        let owner = thumb.owner().ok_or_else(ElementNotEnabledException::new)?;
+        let owner = thumb.owner().ok_or_else(ElementNotEnabledError::new)?;
         if owner.is_read_only() {
-            return Err(ElementNotEnabledException::with_message(
+            return Err(ElementNotEnabledError::with_message(
                 "Range slider is read-only.",
             ));
         }

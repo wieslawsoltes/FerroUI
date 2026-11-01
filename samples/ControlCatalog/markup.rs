@@ -17,7 +17,7 @@
 
 use crate::register_types::ASSEMBLY;
 use ferroui_base::{BoxedValue, ObjectType, Ref, TypeInfo};
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use std::rc::Rc;
 
 #[cfg(any(test, feature = "runtime-markup"))]
@@ -134,7 +134,7 @@ macro_rules! content_page_class {
 pub(crate) use content_page_class;
 
 /// A load error as text, with the error of the compiler it carries.
-pub fn describe(error: &XamlLoadException) -> String {
+pub fn describe(error: &XamlLoadError) -> String {
     match error.inner_exception() {
         Some(inner) => format!("{}\n ---> {inner}", error.message()),
         None => error.message().to_string(),
@@ -153,14 +153,14 @@ mod run_time {
     use crate::register_types::{register_types, ASSEMBLY};
     use ferroui_base::utilities::Uri;
     use ferroui_base::BoxedValue;
-    use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadException};
+    use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError};
     use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 
-    fn document(xaml: &str, path: Option<&str>) -> Result<RuntimeXamlLoaderDocument, XamlLoadException> {
+    fn document(xaml: &str, path: Option<&str>) -> Result<RuntimeXamlLoaderDocument, XamlLoadError> {
         let mut document = RuntimeXamlLoaderDocument::new(xaml);
         if let Some(path) = path {
             let uri = Uri::absolute(&document_uri(path))
-                .map_err(|e| XamlLoadException::with_message(format!("Invalid document URI for {path}: {e}")))?;
+                .map_err(|e| XamlLoadError::with_message(format!("Invalid document URI for {path}: {e}")))?;
             document.base_uri = Some(uri);
             document.document = Some(path.trim_start_matches('/').to_string());
         }
@@ -175,10 +175,10 @@ mod run_time {
         configuration
     }
 
-    pub(crate) fn embedded_text(path: &str) -> Result<&'static str, XamlLoadException> {
+    pub(crate) fn embedded_text(path: &str) -> Result<&'static str, XamlLoadError> {
         let content = crate::assets::asset(path)
-            .ok_or_else(|| XamlLoadException::with_message(format!("The resource {path} could not be found.")))?;
-        std::str::from_utf8(content).map_err(|e| XamlLoadException::with_message(format!("{path} is not UTF-8: {e}")))
+            .ok_or_else(|| XamlLoadError::with_message(format!("The resource {path} could not be found.")))?;
+        std::str::from_utf8(content).map_err(|e| XamlLoadError::with_message(format!("{path} is not UTF-8: {e}")))
     }
 
     /// Loads markup text as a document of the sample with the run-time loader;
@@ -188,7 +188,7 @@ mod run_time {
         xaml: &str,
         path: Option<&str>,
         root_instance: Option<BoxedValue>,
-    ) -> Result<BoxedValue, XamlLoadException> {
+    ) -> Result<BoxedValue, XamlLoadError> {
         register_types();
         let mut document = document(xaml, path)?;
         document.root_instance = root_instance;
@@ -197,7 +197,7 @@ mod run_time {
 
     /// Loads the embedded document with the rooted asset path `path` with the
     /// run-time loader; `root_instance` is the instance the document populates.
-    pub fn try_load_document(path: &str, root_instance: Option<BoxedValue>) -> Result<BoxedValue, XamlLoadException> {
+    pub fn try_load_document(path: &str, root_instance: Option<BoxedValue>) -> Result<BoxedValue, XamlLoadError> {
         try_load_text(embedded_text(path)?, Some(path), root_instance)
     }
 
@@ -209,7 +209,7 @@ mod run_time {
         path: &str,
         root_instance: Option<BoxedValue>,
         included: &[&str],
-    ) -> Result<BoxedValue, XamlLoadException> {
+    ) -> Result<BoxedValue, XamlLoadError> {
         let mut included_texts = Vec::new();
         for path in included {
             included_texts.push((*path, embedded_text(path)?));
@@ -225,7 +225,7 @@ mod run_time {
         path: &str,
         root_instance: Option<BoxedValue>,
         included: &[(&str, &str)],
-    ) -> Result<BoxedValue, XamlLoadException> {
+    ) -> Result<BoxedValue, XamlLoadError> {
         register_types();
         let mut root = document(xaml, Some(path))?;
         root.root_instance = root_instance;
@@ -238,7 +238,7 @@ mod run_time {
             .into_iter()
             .next()
             .flatten()
-            .ok_or_else(|| XamlLoadException::with_message(format!("The document {path} loaded no object.")))
+            .ok_or_else(|| XamlLoadError::with_message(format!("The document {path} loaded no object.")))
     }
 }
 
@@ -267,14 +267,14 @@ pub fn load_component<T: ObjectType>(this: &Ref<T>, path: &str) {
 /// does not compile (`build/compiled_documents.rs`) populates no class: the run-time loader
 /// is not linked.
 #[cfg(not(feature = "runtime-markup"))]
-fn populate(path: &str, root: BoxedValue) -> Result<(), XamlLoadException> {
+fn populate(path: &str, root: BoxedValue) -> Result<(), XamlLoadError> {
     populate_compiled(path, &root)
-        .unwrap_or_else(|| Err(XamlLoadException::with_message(format!("The document {path} is not compiled by the build of the sample."))))
+        .unwrap_or_else(|| Err(XamlLoadError::with_message(format!("The document {path} is not compiled by the build of the sample."))))
 }
 
 /// Populates `root` from the embedded document `path` with the run-time loader.
 #[cfg(feature = "runtime-markup")]
-fn populate(path: &str, root: BoxedValue) -> Result<(), XamlLoadException> {
+fn populate(path: &str, root: BoxedValue) -> Result<(), XamlLoadError> {
     try_load_document(path, Some(root)).map(|_| ())
 }
 
@@ -295,7 +295,7 @@ pub fn is_compiled(path: &str) -> bool {
 /// # Panics
 /// Panics if `root` is not the handle of the class of the document.
 #[cfg(not(feature = "runtime-markup"))]
-pub fn populate_compiled(path: &str, root: &BoxedValue) -> Option<Result<(), XamlLoadException>> {
+pub fn populate_compiled(path: &str, root: &BoxedValue) -> Option<Result<(), XamlLoadError>> {
     crate::register_types();
     COMPILED.iter().find(|(document, _)| *document == path).map(|(_, populate)| populate(root))
 }

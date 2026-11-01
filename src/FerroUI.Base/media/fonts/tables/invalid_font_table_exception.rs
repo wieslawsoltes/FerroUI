@@ -4,12 +4,16 @@ use std::fmt;
 
 /// The error font loading reports when it encounters invalid data in a table.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct InvalidFontTableException {
+pub struct InvalidFontTableError {
     message: String,
     table: String,
 }
 
-impl InvalidFontTableException {
+/// The name of [`InvalidFontTableError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `InvalidFontTableError`")]
+pub type InvalidFontTableException = InvalidFontTableError;
+
+impl InvalidFontTableError {
     /// Creates the error from the message that describes it and the table
     /// where it originated.
     pub fn new(message: impl Into<String>, table: impl Into<String>) -> Self {
@@ -27,13 +31,13 @@ impl InvalidFontTableException {
     }
 }
 
-impl fmt::Display for InvalidFontTableException {
+impl fmt::Display for InvalidFontTableError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
     }
 }
 
-impl std::error::Error for InvalidFontTableException {}
+impl std::error::Error for InvalidFontTableError {}
 
 #[cfg(test)]
 mod tests {
@@ -41,7 +45,7 @@ mod tests {
 
     #[test]
     fn carries_message_and_table() {
-        let error = InvalidFontTableException::new("bad data", "cmap");
+        let error = InvalidFontTableError::new("bad data", "cmap");
 
         assert_eq!(error.message(), "bad data");
         assert_eq!(error.table(), "cmap");

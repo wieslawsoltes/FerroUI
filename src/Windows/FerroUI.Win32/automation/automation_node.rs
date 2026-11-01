@@ -49,7 +49,7 @@ use ferroui_controls::automation::peers::{
 use ferroui_controls::automation::provider as aap;
 use ferroui_controls::automation::{
     AutomationElementIdentifiers, AutomationLiveSetting, AutomationProperty, AutomationPropertyChangedEventArgs,
-    ElementNotEnabledException, ExpandCollapsePatternIdentifiers, ExpandCollapseState, RangeValuePatternIdentifiers,
+    ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState, RangeValuePatternIdentifiers,
     ScrollPatternIdentifiers, SelectionItemPatternIdentifiers, SelectionPatternIdentifiers, TogglePatternIdentifiers,
 };
 use ferroui_microcom::{make_com_with, ComPtr, HResult, IUnknown, InterfaceEntry, E_ABORT, E_FAIL, E_INVALIDARG};
@@ -573,7 +573,7 @@ impl AutomationNode {
 
     /// The failure of an element that is not enabled as the result code of
     /// the system (`UIA_E_ELEMENTNOTENABLED`).
-    pub(crate) fn enabled<T>(result: Result<T, ElementNotEnabledException>) -> Result<T, HResult> {
+    pub(crate) fn enabled<T>(result: Result<T, ElementNotEnabledError>) -> Result<T, HResult> {
         result.map_err(|_| ELEMENT_NOT_ENABLED)
     }
 

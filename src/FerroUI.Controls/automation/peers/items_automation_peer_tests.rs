@@ -11,7 +11,7 @@ use crate::automation::provider::{
     IExpandCollapseProvider, IScrollProvider, ISelectionItemProvider, ISelectionProvider, IValueProvider,
 };
 use crate::automation::{
-    AccessibilityView, AutomationProperties, ElementNotEnabledException, IsOffscreenBehavior,
+    AccessibilityView, AutomationProperties, ElementNotEnabledError, IsOffscreenBehavior,
     ScrollPatternIdentifiers, SelectionPatternIdentifiers,
 };
 use crate::presenters::{ItemsPresenter, ScrollContentPresenter};
@@ -220,7 +220,7 @@ fn list_item_peer_selects_its_item() {
     assert_eq!(1, target.selected_index());
 
     target.set_is_enabled(false);
-    assert_eq!(Err(ElementNotEnabledException::new()), first.select());
+    assert_eq!(Err(ElementNotEnabledError::new()), first.select());
     assert!(first.add_to_selection().is_err());
     assert!(first.remove_from_selection().is_err());
 }

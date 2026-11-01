@@ -1,4 +1,4 @@
-use crate::{IVulkanPlatformGraphicsContext, VulkanException, VulkanResultExtensions};
+use crate::{IVulkanPlatformGraphicsContext, VulkanError, VulkanResultExtensions};
 use ash::vk;
 use std::cell::Cell;
 use std::rc::Rc;
@@ -11,7 +11,7 @@ pub(crate) struct VulkanSemaphore {
 
 impl VulkanSemaphore {
     /// Creates a semaphore.
-    pub fn new(context: Rc<dyn IVulkanPlatformGraphicsContext>) -> Result<Self, VulkanException> {
+    pub fn new(context: Rc<dyn IVulkanPlatformGraphicsContext>) -> Result<Self, VulkanError> {
         let info = vk::SemaphoreCreateInfo::default();
         let handle = context
             .device_api()
@@ -46,7 +46,7 @@ pub(crate) struct VulkanSemaphorePair {
 }
 
 impl VulkanSemaphorePair {
-    pub fn new(context: Rc<dyn IVulkanPlatformGraphicsContext>) -> Result<Self, VulkanException> {
+    pub fn new(context: Rc<dyn IVulkanPlatformGraphicsContext>) -> Result<Self, VulkanError> {
         let image_available_semaphore = VulkanSemaphore::new(context.clone())?;
         let render_finished_semaphore = match VulkanSemaphore::new(context) {
             Ok(semaphore) => semaphore,

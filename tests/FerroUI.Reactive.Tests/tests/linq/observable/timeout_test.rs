@@ -1,13 +1,13 @@
 //! Ported from `Tests.System.Reactive/Tests/Linq/Observable/TimeoutTest.cs` of Rx.NET.
 //! Adapted: `TimeSpan.FromTicks` is `ticks_to_duration` and `new DateTimeOffset(new DateTime(ticks),
 //! TimeSpan.Zero)` the time of the test scheduler at those ticks (`ticks_to_time`);
-//! `ex is TimeoutException` is `e.is::<TimeoutException>()`. The overloads are `timeout_on`
+//! `ex is TimeoutException` is `e.is::<TimeoutError>()`. The overloads are `timeout_on`
 //! (`Timeout(TimeSpan, IScheduler)`), `timeout_with_on` (with another sequence), `timeout_at_on` and
 //! `timeout_at_with_on` (`DateTimeOffset`), `timeout_by` and `timeout_by_with` (a timeout selector),
 //! `timeout_by_first` and `timeout_by_first_with` (a first timeout and a selector); a selector that
 //! throws is the `try_` form returning `Err`.
 
-use ferroui_reactive::linq::TimeoutException;
+use ferroui_reactive::linq::TimeoutError;
 use ferroui_reactive::ObservableExt;
 use ferroui_reactive_testing::{
     assert_messages, assert_subscriptions, new_error, ticks_to_duration, ticks_to_time, ReactiveTest as RT, TestScheduler,
@@ -52,7 +52,7 @@ fn timeout_date_time_offset_timeout_occurs_with_default_exception() {
     let (source, s) = (xs.as_observable(), scheduler.scheduler());
     let res = scheduler.start(move || source.timeout_at_on(ticks_to_time(400), s));
 
-    assert_messages!(res.messages(), RT::on_error_where::<i32>(400, |ex| ex.is::<TimeoutException>()));
+    assert_messages!(res.messages(), RT::on_error_where::<i32>(400, |ex| ex.is::<TimeoutError>()));
 
     assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 400));
 }
@@ -66,7 +66,7 @@ fn timeout_time_span_timeout_occurs_with_default_exception() {
     let (source, s) = (xs.as_observable(), scheduler.scheduler());
     let res = scheduler.start(move || source.timeout_on(ticks_to_duration(200), s));
 
-    assert_messages!(res.messages(), RT::on_error_where::<i32>(400, |ex| ex.is::<TimeoutException>()));
+    assert_messages!(res.messages(), RT::on_error_where::<i32>(400, |ex| ex.is::<TimeoutError>()));
 
     assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 400));
 }
@@ -401,7 +401,7 @@ fn timeout_duration_simple_timeout_first() {
     let (source, first, timeouts) = (xs.as_observable(), ys.as_observable(), zs.as_observable());
     let res = scheduler.start(move || source.timeout_by_first(first, move |_: &i32| timeouts.clone()));
 
-    assert_messages!(res.messages(), RT::on_error_where::<i32>(300, |ex| ex.is::<TimeoutException>()));
+    assert_messages!(res.messages(), RT::on_error_where::<i32>(300, |ex| ex.is::<TimeoutError>()));
 
     assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 300));
 
@@ -453,7 +453,7 @@ fn timeout_duration_simple_timeout_later() {
         res.messages(),
         RT::on_next(310, 1),
         RT::on_next(350, 2),
-        RT::on_error_where::<i32>(400, |ex| ex.is::<TimeoutException>()),
+        RT::on_error_where::<i32>(400, |ex| ex.is::<TimeoutError>()),
     );
 
     assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 400));
@@ -504,7 +504,7 @@ fn timeout_duration_simple_timeout_later_no_first() {
         res.messages(),
         RT::on_next(310, 1),
         RT::on_next(350, 2),
-        RT::on_error_where::<i32>(400, |ex| ex.is::<TimeoutException>()),
+        RT::on_error_where::<i32>(400, |ex| ex.is::<TimeoutError>()),
     );
 
     assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 400));
@@ -551,7 +551,7 @@ fn timeout_duration_simple_timeout_by_completion() {
         res.messages(),
         RT::on_next(310, 1),
         RT::on_next(350, 2),
-        RT::on_error_where::<i32>(400, |ex| ex.is::<TimeoutException>()),
+        RT::on_error_where::<i32>(400, |ex| ex.is::<TimeoutError>()),
     );
 
     assert_subscriptions!(xs.subscriptions(), RT::subscribe(200, 400));

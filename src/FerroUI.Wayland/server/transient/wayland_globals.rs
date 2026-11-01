@@ -14,7 +14,7 @@ use super::wayland_outputs_tracker::WaylandOutputsTracker;
 use crate::server::interop::wayland_connection::WaylandConnection;
 use crate::server::wayland_platform_graphics::IWaylandGraphics;
 use crate::server::wayland_worker::{WaylandWorker, WaylandWorkerState};
-use crate::ferro_wayland_exception::FerroWaylandException;
+use crate::ferro_wayland_exception::FerroWaylandError;
 use ferroui_base::logging::{LogEventLevel, Logger};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -79,7 +79,7 @@ pub struct WaylandGlobals {
 
 impl WaylandGlobals {
     /// Binds the globals of a connection and stores them in the state of the worker.
-    pub fn create(connection: &mut WaylandConnection, state: &mut WaylandWorkerState) -> Result<(), FerroWaylandException> {
+    pub fn create(connection: &mut WaylandConnection, state: &mut WaylandWorkerState) -> Result<(), FerroWaylandError> {
         let queue_handle = connection.queue_handle().clone();
         state.registry_bootstrap = Some(RegistryBootstrap::default());
         let registry = connection.display().display().get_registry(&queue_handle, ());
@@ -274,14 +274,14 @@ impl WaylandGlobals {
         min_version: u32,
         max_version: u32,
         queue_handle: &QueueHandle<WaylandWorkerState>,
-    ) -> Result<Option<I>, FerroWaylandException>
+    ) -> Result<Option<I>, FerroWaylandError>
     where
         I: Proxy + 'static,
         WaylandWorkerState: Dispatch<I, ()>,
     {
         let interface = I::interface();
         if interface.version < max_version {
-            return Err(FerroWaylandException::new(format!(
+            return Err(FerroWaylandError::new(format!(
                 "{} v{max_version} is not supported by current bindings",
                 interface.name
             )));
@@ -304,13 +304,13 @@ impl WaylandGlobals {
         min_version: u32,
         max_version: u32,
         queue_handle: &QueueHandle<WaylandWorkerState>,
-    ) -> Result<I, FerroWaylandException>
+    ) -> Result<I, FerroWaylandError>
     where
         I: Proxy + 'static,
         WaylandWorkerState: Dispatch<I, ()>,
     {
         Self::bind(registry, known_globals, min_version, max_version, queue_handle)?.ok_or_else(|| {
-            FerroWaylandException::new(format!(
+            FerroWaylandError::new(format!(
                 "Required wayland global {} (>={min_version}) not found",
                 I::interface().name
             ))

@@ -8,7 +8,7 @@ use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphicsContext}
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_opengl::features::ExternalObjectsOpenGlExtensionFeature;
 use ferroui_opengl::{
-    GetProcAddress, GlInterface, GlVersion, IGlContext, IGlContextExternalObjectsFeature, OpenGlException,
+    GetProcAddress, GlInterface, GlVersion, IGlContext, IGlContextExternalObjectsFeature, OpenGlError,
 };
 use std::any::{Any, TypeId};
 use std::cell::{Cell, OnceCell, RefCell};
@@ -50,7 +50,7 @@ impl GlxContext {
         stencil_size: i32,
         default_xid: XID,
         owns_p_buffer: bool,
-    ) -> Result<Rc<GlxContext>, OpenGlException> {
+    ) -> Result<Rc<GlxContext>, OpenGlError> {
         let this = Rc::new_cyclic(|this| GlxContext {
             this: this.clone(),
             handle: Cell::new(handle),
@@ -106,10 +106,10 @@ impl GlxContext {
 
     /// Makes the context current with a drawable (`MakeCurrent(IntPtr xid)`).
     /// Disposing the result restores what was current before.
-    pub fn make_current_with(&self, xid: XID) -> Result<Rc<dyn IDisposable>, OpenGlException> {
+    pub fn make_current_with(&self, xid: XID) -> Result<Rc<dyn IDisposable>, OpenGlError> {
         let old = RestoreContext::new(self.glx, self.deferred_display);
         if !self.glx.make_context_current(self.deferred_display, xid, xid, self.handle.get()) {
-            return Err(OpenGlException::new("glXMakeContextCurrent failed "));
+            return Err(OpenGlError::new("glXMakeContextCurrent failed "));
         }
 
         Ok(Rc::new(old))

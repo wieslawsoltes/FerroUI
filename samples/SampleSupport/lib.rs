@@ -15,7 +15,7 @@ use ferroui_base::platform::register_assets;
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::{BoxedValue, ObjectType, Ref, TypeInfo};
 use ferroui_controls::Application;
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use std::rc::Rc;
 use std::time::Duration;
 
@@ -35,7 +35,7 @@ pub struct XamlClass {
 
 /// The function that populates an instance of a class from the compiled markup of its
 /// document.
-pub type Populate = fn(&BoxedValue) -> Result<(), XamlLoadException>;
+pub type Populate = fn(&BoxedValue) -> Result<(), XamlLoadError>;
 
 /// What a sample states about its documents and assets.
 pub struct Sample {
@@ -94,7 +94,7 @@ impl Sample {
     ///
     /// # Panics
     /// Panics if `root` is not the handle of the class of the document.
-    pub fn populate_compiled(&self, path: &str, root: &BoxedValue) -> Option<Result<(), XamlLoadException>> {
+    pub fn populate_compiled(&self, path: &str, root: &BoxedValue) -> Option<Result<(), XamlLoadError>> {
         (self.register_types)();
         self.compiled.iter().find(|(document, _)| *document == path).map(|(_, populate)| populate(root))
     }
@@ -109,7 +109,7 @@ impl Sample {
         let root: BoxedValue = Rc::new(this.clone());
         let result = self
             .populate_compiled(path, &root)
-            .unwrap_or_else(|| Err(XamlLoadException::with_message(format!("The document {path} is not compiled by the build of the sample."))));
+            .unwrap_or_else(|| Err(XamlLoadError::with_message(format!("The document {path} is not compiled by the build of the sample."))));
         if let Err(error) = result {
             panic!("{path}: {}", describe(&error));
         }
@@ -117,7 +117,7 @@ impl Sample {
 }
 
 /// A load error as text, with the error of the compiler it carries.
-pub fn describe(error: &XamlLoadException) -> String {
+pub fn describe(error: &XamlLoadError) -> String {
     match error.inner_exception() {
         Some(inner) => format!("{}\n ---> {inner}", error.message()),
         None => error.message().to_string(),

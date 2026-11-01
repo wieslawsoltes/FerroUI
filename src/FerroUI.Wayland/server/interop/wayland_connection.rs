@@ -4,7 +4,7 @@
 use super::unsafe_native_methods::poll_two;
 use crate::server::wayland_worker::WaylandWorkerState;
 use crate::ferro_wayland_exception::{
-    FerroWaylandException, FerroWaylandFlushException, FerroWaylandPollException, FerroWaylandProtocolErrorException,
+    FerroWaylandError, FerroWaylandFlushException, FerroWaylandPollException, FerroWaylandProtocolErrorException,
     FerroWaylandReadException,
 };
 use std::ffi::c_void;
@@ -42,23 +42,23 @@ impl WaylandConnection {
     ///
     /// The result is the display alone, which any thread may hold: the event queue of the
     /// backend is made by the worker thread ([`WaylandConnection::new`]).
-    pub fn connect(path: Option<&str>) -> Result<Connection, FerroWaylandException> {
+    pub fn connect(path: Option<&str>) -> Result<Connection, FerroWaylandError> {
         let display = match path {
             None if std::env::var_os("WAYLAND_SOCKET").is_some() || std::env::var_os("WAYLAND_DISPLAY").is_some() => {
-                Connection::connect_to_env().map_err(|error| FerroWaylandException::new(error.to_string()))?
+                Connection::connect_to_env().map_err(|error| FerroWaylandError::new(error.to_string()))?
             }
             _ => {
                 let socket_path = Self::socket_path(path.unwrap_or("wayland-0"))?;
                 let stream = UnixStream::connect(&socket_path).map_err(|error| {
-                    FerroWaylandException::new(format!("Unable to connect to {}: {error}", socket_path.display()))
+                    FerroWaylandError::new(format!("Unable to connect to {}: {error}", socket_path.display()))
                 })?;
-                Connection::from_socket(stream).map_err(|error| FerroWaylandException::new(error.to_string()))?
+                Connection::from_socket(stream).map_err(|error| FerroWaylandError::new(error.to_string()))?
             }
         };
         Ok(display)
     }
 
-    fn socket_path(name: &str) -> Result<PathBuf, FerroWaylandException> {
+    fn socket_path(name: &str) -> Result<PathBuf, FerroWaylandError> {
         let name = PathBuf::from(name);
         if name.is_absolute() {
             return Ok(name);
@@ -66,20 +66,20 @@ impl WaylandConnection {
         let runtime_dir = std::env::var_os("XDG_RUNTIME_DIR")
             .map(PathBuf::from)
             .filter(|path| path.is_absolute())
-            .ok_or_else(|| FerroWaylandException::new("XDG_RUNTIME_DIR is not set or is not an absolute path"))?;
+            .ok_or_else(|| FerroWaylandError::new("XDG_RUNTIME_DIR is not set or is not an absolute path"))?;
         Ok(runtime_dir.join(name))
     }
 
     /// Connects over an open descriptor of the socket of the display (`wl_display_connect_to_fd`),
     /// which the connection owns from then on.
-    pub fn connect_to_fd(fd: i32) -> Result<Connection, FerroWaylandException> {
+    pub fn connect_to_fd(fd: i32) -> Result<Connection, FerroWaylandError> {
         if fd < 0 {
-            return Err(FerroWaylandException::new("The descriptor of the display is not valid"));
+            return Err(FerroWaylandError::new("The descriptor of the display is not valid"));
         }
         // SAFETY: the options state that the descriptor is an open socket that is handed over
         // to the backend, which is what the library call of the reference does with it.
         let stream = UnixStream::from(unsafe { OwnedFd::from_raw_fd(fd) });
-        Connection::from_socket(stream).map_err(|error| FerroWaylandException::new(error.to_string()))
+        Connection::from_socket(stream).map_err(|error| FerroWaylandError::new(error.to_string()))
     }
 
     /// The connection of a display the backend opened ([`connect`](Self::connect),
@@ -156,12 +156,12 @@ impl WaylandConnection {
     }
 
     /// Sends the pending requests and waits for the events they cause to be handled.
-    pub fn roundtrip(&mut self, state: &mut WaylandWorkerState) -> Result<(), FerroWaylandException> {
+    pub fn roundtrip(&mut self, state: &mut WaylandWorkerState) -> Result<(), FerroWaylandError> {
         self.queue.roundtrip(state).map(|_| ()).map_err(|error| Self::dispatch_error(&error))
     }
 
     /// Sends the pending requests.
-    pub fn flush(&self) -> Result<(), FerroWaylandException> {
+    pub fn flush(&self) -> Result<(), FerroWaylandError> {
         match self.display.flush() {
             Ok(()) => Ok(()),
             Err(WaylandError::Io(error)) if error.kind() == io::ErrorKind::WouldBlock => Ok(()),
@@ -169,7 +169,7 @@ impl WaylandConnection {
         }
     }
 
-    fn dispatch_error(error: &DispatchError) -> FerroWaylandException {
+    fn dispatch_error(error: &DispatchError) -> FerroWaylandError {
         match error {
             DispatchError::Backend(WaylandError::Protocol(protocol)) => {
                 FerroWaylandProtocolErrorException::with_code(protocol.code, protocol.to_string())
@@ -178,7 +178,7 @@ impl WaylandConnection {
         }
     }
 
-    fn flush_error(error: WaylandError) -> FerroWaylandException {
+    fn flush_error(error: WaylandError) -> FerroWaylandError {
         match error {
             WaylandError::Io(error) => match error.raw_os_error() {
                 Some(errno) => FerroWaylandFlushException::from_errno(errno),
@@ -200,7 +200,7 @@ impl WaylandConnection {
         &mut self,
         state: &mut WaylandWorkerState,
         wakeup_fd: BorrowedFd<'_>,
-    ) -> Result<DispatchResult, FerroWaylandException> {
+    ) -> Result<DispatchResult, FerroWaylandError> {
         // Events that were read earlier (during a round trip, or by a read that another queue
         // of the display made) are in the queue while the socket is empty: they are handed
         // out before anything waits.
@@ -278,7 +278,7 @@ impl WaylandConnection {
         }
     }
 
-    fn classify_dispatch_error(error: DispatchError) -> Result<DispatchResult, FerroWaylandException> {
+    fn classify_dispatch_error(error: DispatchError) -> Result<DispatchResult, FerroWaylandError> {
         match error {
             DispatchError::Backend(WaylandError::Io(error)) if Self::is_connection_reset(&error) => {
                 Ok(DispatchResult::ConnectionReset)

@@ -3,7 +3,7 @@ use crate::primitives::TemplatedControlImpl;
 use crate::templates::IDataTemplate;
 use crate::{ContentControl, ContentControlImpl, Control, ControlImpl};
 use ferroui_base::data::{
-    AggregateError, AggregateException, BindingChainException, BindingError, DataValidationException,
+    AggregateError, AggregateException, BindingChainError, BindingError, DataValidationError,
 };
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
@@ -319,13 +319,13 @@ impl DataValidationErrors {
             vec![exception.clone()]
         };
 
-        Some(exceptions.into_iter().filter(|x| !x.inner().is::<BindingChainException>()).collect())
+        Some(exceptions.into_iter().filter(|x| !x.inner().is::<BindingChainError>()).collect())
     }
 
     /// The error data of a data validation error (`None` when it has none),
     /// any other error as it is.
     fn unpack_data_validation_exception(exception: &BindingError) -> Option<BoxedValue> {
-        if let Some(data_validation_exception) = exception.inner().downcast_ref::<DataValidationException>() {
+        if let Some(data_validation_exception) = exception.inner().downcast_ref::<DataValidationError>() {
             return data_validation_exception.error_data().cloned();
         }
 

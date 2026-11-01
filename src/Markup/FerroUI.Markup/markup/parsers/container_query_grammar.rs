@@ -1,6 +1,6 @@
 //! The grammar of container queries (`min-width:400 and max-height:300, width:100`).
 
-use ferroui_base::data::core::ExpressionParseException;
+use ferroui_base::data::core::ExpressionParseError;
 use ferroui_base::styling::StyleQueryComparisonOperator;
 use ferroui_base::utilities::character_reader::{is_letter, is_white_space};
 use ferroui_base::utilities::CharacterReader;
@@ -44,13 +44,13 @@ pub struct ContainerQueryGrammar;
 
 impl ContainerQueryGrammar {
     /// Parses `s` into a list of syntax elements.
-    pub fn parse(s: &str) -> Result<Vec<ContainerQuerySyntax>, ExpressionParseException> {
+    pub fn parse(s: &str) -> Result<Vec<ContainerQuerySyntax>, ExpressionParseError> {
         let mut r = CharacterReader::new(s);
         parse(&mut r, None)
     }
 }
 
-type ParseResult<T> = Result<T, ExpressionParseException>;
+type ParseResult<T> = Result<T, ExpressionParseError>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum State {
@@ -86,14 +86,14 @@ fn parse_feature(r: &mut CharacterReader<'_>) -> ParseResult<Option<ContainerQue
     let identifier = r.parse_style_class();
 
     if identifier.is_empty() {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Expected query feature name.",
         ));
     }
 
     if !KEYWORDS.contains(&identifier) {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             format!("Unknown feature name found: {identifier}"),
         ));
@@ -104,7 +104,7 @@ fn parse_feature(r: &mut CharacterReader<'_>) -> ParseResult<Option<ContainerQue
         || identifier == WIDTH_KEYWORD
     {
         if !r.take_if(':') {
-            return Err(ExpressionParseException::new(
+            return Err(ExpressionParseError::new(
                 r.position(),
                 format!("Expected ':' after '{identifier}'."),
             ));
@@ -130,7 +130,7 @@ fn parse_feature(r: &mut CharacterReader<'_>) -> ParseResult<Option<ContainerQue
         || identifier == HEIGHT_KEYWORD
     {
         if !r.take_if(':') {
-            return Err(ExpressionParseException::new(
+            return Err(ExpressionParseError::new(
                 r.position(),
                 format!("Expected ':' after '{identifier}'."),
             ));
@@ -168,7 +168,7 @@ fn parse_start(
         return Ok((State::Middle, parse_feature(r)?));
     }
 
-    Err(ExpressionParseException::new(
+    Err(ExpressionParseError::new(
         r.position(),
         "Invalid syntax found",
     ))
@@ -191,7 +191,7 @@ fn parse_middle(
             return Ok((State::Start, Some(ContainerQuerySyntax::And)));
         }
     }
-    Err(ExpressionParseException::new(
+    Err(ExpressionParseError::new(
         r.position(),
         "Invalid syntax found",
     ))
@@ -201,7 +201,7 @@ fn parse_decimal(r: &mut CharacterReader<'_>) -> ParseResult<f64> {
     r.skip_whitespace();
     let number = r.parse_number();
     if number.is_empty() {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Expected a number after.",
         ));
@@ -209,7 +209,7 @@ fn parse_decimal(r: &mut CharacterReader<'_>) -> ParseResult<f64> {
 
     // Only ASCII digits form a number; other decimal digits are rejected.
     number.parse::<f64>().map_err(|_| {
-        ExpressionParseException::new(
+        ExpressionParseError::new(
             r.position(),
             format!("The input string '{number}' was not in a correct format."),
         )

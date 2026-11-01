@@ -1,6 +1,6 @@
 use super::IDrawingContextImpl;
 use crate::rendering::composition::CompositionTransparencyLevel;
-use crate::{PixelSize, RenderTargetCorruptedException, RenderTargetNotReadyException, Size};
+use crate::{PixelSize, RenderTargetCorruptedError, RenderTargetNotReadyError, Size};
 use std::any::Any;
 use std::error::Error;
 use std::fmt;
@@ -12,9 +12,9 @@ use std::fmt;
 #[derive(Clone, Debug)]
 pub enum RenderTargetError {
     /// The target cannot be drawn to yet.
-    NotReady(RenderTargetNotReadyException),
+    NotReady(RenderTargetNotReadyError),
     /// The target can no longer be drawn to.
-    Corrupted(RenderTargetCorruptedException),
+    Corrupted(RenderTargetCorruptedError),
 }
 
 impl fmt::Display for RenderTargetError {
@@ -35,14 +35,14 @@ impl Error for RenderTargetError {
     }
 }
 
-impl From<RenderTargetNotReadyException> for RenderTargetError {
-    fn from(error: RenderTargetNotReadyException) -> Self {
+impl From<RenderTargetNotReadyError> for RenderTargetError {
+    fn from(error: RenderTargetNotReadyError) -> Self {
         RenderTargetError::NotReady(error)
     }
 }
 
-impl From<RenderTargetCorruptedException> for RenderTargetError {
-    fn from(error: RenderTargetCorruptedException) -> Self {
+impl From<RenderTargetCorruptedError> for RenderTargetError {
+    fn from(error: RenderTargetCorruptedError) -> Self {
         RenderTargetError::Corrupted(error)
     }
 }

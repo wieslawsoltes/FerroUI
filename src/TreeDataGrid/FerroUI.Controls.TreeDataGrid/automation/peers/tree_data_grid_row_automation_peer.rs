@@ -15,7 +15,7 @@ use ferroui_controls::automation::provider::{
     IExpandCollapseProvider, ISelectionItemProvider, ISelectionProvider, IToggleProvider, IValueProvider, ProviderError,
     ToggleState,
 };
-use ferroui_controls::automation::{ElementNotEnabledException, ExpandCollapseState};
+use ferroui_controls::automation::{ElementNotEnabledError, ExpandCollapseState};
 use ferroui_treedatagrid_core::models::RowRef;
 use ferroui_treedatagrid_core::IndexPath;
 use std::rc::Rc;
@@ -82,7 +82,7 @@ impl IToggleProvider for ToggleProviderAdapter {
         self.0.toggle_state()
     }
 
-    fn toggle(&self) -> Result<(), ElementNotEnabledException> {
+    fn toggle(&self) -> Result<(), ElementNotEnabledError> {
         self.0.toggle()
     }
 }
@@ -123,11 +123,11 @@ impl IExpandCollapseProvider for ExpandCollapseProviderAdapter {
         self.0.shows_menu()
     }
 
-    fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    fn expand(&self) -> Result<(), ElementNotEnabledError> {
         self.0.expand()
     }
 
-    fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         self.0.collapse()
     }
 }
@@ -147,15 +147,15 @@ impl ISelectionItemProvider for SelectionItemProviderAdapter {
         self.0.selection_container()
     }
 
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.add_to_selection()
     }
 
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.remove_from_selection()
     }
 
-    fn select(&self) -> Result<(), ElementNotEnabledException> {
+    fn select(&self) -> Result<(), ElementNotEnabledError> {
         self.0.select()
     }
 }
@@ -250,7 +250,7 @@ impl TreeDataGridRowAutomationPeer {
     }
 
     /// Expands or collapses the row (`Toggle`).
-    pub fn toggle(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn toggle(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         if let Some(row) = self.toggle_expander() {
@@ -262,7 +262,7 @@ impl TreeDataGridRowAutomationPeer {
     }
 
     /// Expands the row (`Expand`).
-    pub fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn expand(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         if let Some(row) = self.toggle_expander() {
@@ -274,7 +274,7 @@ impl TreeDataGridRowAutomationPeer {
     }
 
     /// Collapses the row (`Collapse`).
-    pub fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         if let Some(row) = self.toggle_expander() {
@@ -292,7 +292,7 @@ impl TreeDataGridRowAutomationPeer {
     }
 
     /// Adds the row to the selection (`AddToSelection`).
-    pub fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         if let (Some(model_index), Some(selection)) = (self.try_get_model_index(), self.row_selection_model()) {
@@ -302,7 +302,7 @@ impl TreeDataGridRowAutomationPeer {
     }
 
     /// Removes the row from the selection (`RemoveFromSelection`).
-    pub fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         if let (Some(model_index), Some(selection)) = (self.try_get_model_index(), self.row_selection_model()) {
@@ -312,7 +312,7 @@ impl TreeDataGridRowAutomationPeer {
     }
 
     /// Selects the row alone (`Select`).
-    pub fn select(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn select(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         if let (Some(model_index), Some(selection)) = (self.try_get_model_index(), self.row_selection_model()) {

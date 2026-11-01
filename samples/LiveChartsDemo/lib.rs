@@ -15,7 +15,7 @@ use ferroui_controls_livecharts::{Chart, ChartKind};
 use ferroui_fonts_inter::AppBuilderExtension;
 use ferroui_livecharts::kernel::Coordinate;
 use ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers;
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -78,7 +78,7 @@ pub struct DemoView {
 }
 
 impl DemoView {
-    pub fn new() -> Result<Self, XamlLoadException> {
+    pub fn new() -> Result<Self, XamlLoadError> {
         register_types();
         let root = compiled_xaml::build_mainview_xaml(Some(
             XamlIlRuntimeHelpers::create_root_service_provider_v3(None),

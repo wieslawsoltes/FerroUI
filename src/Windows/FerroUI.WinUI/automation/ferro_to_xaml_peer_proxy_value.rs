@@ -4,7 +4,7 @@ mod imp {
     use crate::interop::win_rt::{borrowed_string, new_string, to_abi};
     use crate::interop::IValueProviderImpl;
     use ferroui_controls::automation::provider::IValueProvider as FerroValue;
-    use ferroui_controls::automation::ElementNotEnabledException;
+    use ferroui_controls::automation::ElementNotEnabledError;
     use ferroui_microcom::{HResult, COR_E_INVALIDOPERATION};
 
     impl IValueProviderImpl for FerroToXamlPeerProxy {
@@ -20,7 +20,7 @@ mod imp {
             let text = borrowed_string(value);
             if let Some(provider) = self.peer.get_provider::<dyn FerroValue>() {
                 provider.set_value(text.as_deref()).map_err(|error| {
-                    if error.downcast_ref::<ElementNotEnabledException>().is_some() {
+                    if error.downcast_ref::<ElementNotEnabledError>().is_some() {
                         super::super::ELEMENT_NOT_ENABLED
                     } else {
                         HResult(COR_E_INVALIDOPERATION)

@@ -1,4 +1,4 @@
-//! `LoggingException`.
+//! `LoggingError`.
 
 use std::error::Error;
 use std::fmt;
@@ -9,12 +9,16 @@ use std::fmt;
 /// Where upstream throws it, the port panics with it as the payload
 /// (`std::panic::panic_any`), so that a caller that catches the panic can tell it apart.
 #[derive(Debug)]
-pub struct LoggingException {
+pub struct LoggingError {
     message: String,
     inner: Option<Box<dyn Error + Send + Sync>>,
 }
 
-impl LoggingException {
+/// The name of [`LoggingError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `LoggingError`")]
+pub type LoggingException = LoggingError;
+
+impl LoggingError {
     /// The exception with the default message (`LoggingException()`).
     pub fn new() -> Self {
         Self { message: "Exception of type 'LoggingException' was thrown.".to_owned(), inner: None }
@@ -42,19 +46,19 @@ impl LoggingException {
     }
 }
 
-impl Default for LoggingException {
+impl Default for LoggingError {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl fmt::Display for LoggingException {
+impl fmt::Display for LoggingError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
     }
 }
 
-impl Error for LoggingException {
+impl Error for LoggingError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         self.inner.as_deref().map(|inner| inner as &(dyn Error + 'static))
     }

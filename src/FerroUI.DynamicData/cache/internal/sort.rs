@@ -2,7 +2,7 @@
 
 use super::{Comparer, IndexCalculator, KeyValueCollection, KeyValueComparer};
 use crate::cache::{ChangeAwareCache, ChangeSet, IQuery, SortOptimisations, SortReason, SortedChangeSet};
-use crate::list::SortException;
+use crate::list::SortError;
 use ferroui_reactive::{Observable, ObservableExt};
 use ferroui_system::{IObservable, IObserver};
 use std::cell::RefCell;
@@ -16,7 +16,7 @@ use std::rc::Rc;
 /// items rather than computing the indexes of each change.
 ///
 /// Deviation (DEVIATIONS.md, DynamicData): the three sources are merged without the shared
-/// delivery queue of upstream (single-threaded, section 5.1); a `SortException` ends the sequence
+/// delivery queue of upstream (single-threaded, section 5.1); a `SortError` ends the sequence
 /// with that error, as upstream's exception reaches `OnError`.
 ///
 /// # Panics
@@ -35,7 +35,7 @@ pub(crate) fn sort<T: Clone + 'static, K: Eq + Hash + Clone + 'static>(
 
         if comparer_changed.is_none() && resorter.is_none() {
             let data_sorter = sorter.clone();
-            let data_changed = source.try_select(move |changes: ChangeSet<T, K>| data_sorter.borrow_mut().sort_changes(&changes).map_err(SortException::into_error));
+            let data_changed = source.try_select(move |changes: ChangeSet<T, K>| data_sorter.borrow_mut().sort_changes(&changes).map_err(SortError::into_error));
             return where_some(data_changed).subscribe(observer);
         }
 
@@ -43,11 +43,11 @@ pub(crate) fn sort<T: Clone + 'static, K: Eq + Hash + Clone + 'static>(
         let comparer_changed = comparer_changed
             .clone()
             .unwrap_or_else(Observable::never)
-            .try_select(move |comparer: Comparer<T>| comparer_sorter.borrow_mut().sort_comparer(comparer).map_err(SortException::into_error));
+            .try_select(move |comparer: Comparer<T>| comparer_sorter.borrow_mut().sort_comparer(comparer).map_err(SortError::into_error));
         let reorder_sorter = sorter.clone();
-        let sort_again = resorter.clone().unwrap_or_else(Observable::never).try_select(move |_: ()| reorder_sorter.borrow_mut().sort_again().map_err(SortException::into_error));
+        let sort_again = resorter.clone().unwrap_or_else(Observable::never).try_select(move |_: ()| reorder_sorter.borrow_mut().sort_again().map_err(SortError::into_error));
         let data_sorter = sorter.clone();
-        let data_changed = source.try_select(move |changes: ChangeSet<T, K>| data_sorter.borrow_mut().sort_changes(&changes).map_err(SortException::into_error));
+        let data_changed = source.try_select(move |changes: ChangeSet<T, K>| data_sorter.borrow_mut().sort_changes(&changes).map_err(SortError::into_error));
         where_some(Observable::merge_all(vec![comparer_changed, data_changed, sort_again])).subscribe(observer)
     })
 }
@@ -82,22 +82,22 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> Sorter<T, K> {
     }
 
     /// Sorts the changes of the data (`Sort(IChangeSet)`).
-    fn sort_changes(&mut self, changes: &ChangeSet<T, K>) -> Result<Option<SortedChangeSet<T, K>>, SortException> {
+    fn sort_changes(&mut self, changes: &ChangeSet<T, K>) -> Result<Option<SortedChangeSet<T, K>>, SortError> {
         self.do_sort(SortReason::DataChanged, Some(changes))
     }
 
     /// Sorts with a new comparer (`Sort(IComparer<TObject>)`).
-    fn sort_comparer(&mut self, comparer: Comparer<T>) -> Result<Option<SortedChangeSet<T, K>>, SortException> {
+    fn sort_comparer(&mut self, comparer: Comparer<T>) -> Result<Option<SortedChangeSet<T, K>>, SortError> {
         self.comparer = KeyValueComparer::new(Some(comparer));
         self.do_sort(SortReason::ComparerChanged, None)
     }
 
     /// Sorts again (`Sort()`).
-    fn sort_again(&mut self) -> Result<Option<SortedChangeSet<T, K>>, SortException> {
+    fn sort_again(&mut self) -> Result<Option<SortedChangeSet<T, K>>, SortError> {
         self.do_sort(SortReason::Reorder, None)
     }
 
-    fn do_sort(&mut self, mut sort_reason: SortReason, changes: Option<&ChangeSet<T, K>>) -> Result<Option<SortedChangeSet<T, K>>, SortException> {
+    fn do_sort(&mut self, mut sort_reason: SortReason, changes: Option<&ChangeSet<T, K>>) -> Result<Option<SortedChangeSet<T, K>>, SortError> {
         let changes = changes.map(|changes| {
             crate::cache::ICache::clone_changes(&mut self.cache, changes);
             self.have_received_data = true;

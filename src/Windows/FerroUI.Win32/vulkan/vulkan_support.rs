@@ -10,7 +10,7 @@ use ferroui_controls::platform::{INativePlatformHandleSurface, IPlatformHandle};
 use ferroui_vulkan::ash::{self, vk};
 use ferroui_vulkan::{
     IVulkanInstance, IVulkanKhrSurfacePlatformSurface, IVulkanKhrSurfacePlatformSurfaceFactory,
-    IVulkanPlatformGraphicsContext, VkGetInstanceProcAddressDelegate, VulkanException, VulkanOptions,
+    IVulkanPlatformGraphicsContext, VkGetInstanceProcAddressDelegate, VulkanError, VulkanOptions,
     VulkanPlatformGraphics, VulkanPlatformSpecificOptions,
 };
 use std::any::Any;
@@ -78,12 +78,12 @@ impl VulkanSupport {
         VulkanPlatformGraphics::try_create(&options.unwrap_or_default(), platform_options)
     }
 
-    fn create_hwnd_surface(window: isize, instance: &dyn IVulkanInstance) -> Result<u64, VulkanException> {
+    fn create_hwnd_surface(window: isize, instance: &dyn IVulkanInstance) -> Result<u64, VulkanError> {
         let vulkan_win32 = Win32VulkanInterface::new(instance);
         let create_info = VkWin32SurfaceCreateInfoKHR::default().hinstance(get_module_handle(None)).hwnd(window);
 
         let (result, surface) = vulkan_win32.vk_create_win32_surface_khr(instance.handle(), &create_info);
-        VulkanException::throw_on_error("vkCreateWin32SurfaceKHR", result)?;
+        VulkanError::throw_on_error("vkCreateWin32SurfaceKHR", result)?;
         Ok(surface)
     }
 }

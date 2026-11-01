@@ -153,7 +153,7 @@ mod imp {
     use ferroui_opengl::egl::{EglContext, EglDisplay, EglDisplayCreationOptions, EglDisplayOptions, EglInterface, EglSurface};
     use ferroui_opengl::gl_consts::*;
     use ferroui_opengl::surfaces::{IGlPlatformSurface, IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession};
-    use ferroui_opengl::{GetProcAddress, IGlContext, OpenGlException};
+    use ferroui_opengl::{GetProcAddress, IGlContext, OpenGlError};
     use std::any::{Any, TypeId};
     use std::cell::Cell;
     use std::ffi::{c_char, c_int, c_uint, c_void, CString};
@@ -392,8 +392,8 @@ mod imp {
         /// The part of `Init` that creates the EGL objects, sets the mode
         /// with the first frame and swaps the buffers twice, in the
         /// reference's order.
-        fn init_egl(&self) -> Result<Rc<EglState>, OpenGlException> {
-            let get_proc_address = egl_get_proc_address().map_err(|error| OpenGlException::new(error.to_string()))?;
+        fn init_egl(&self) -> Result<Rc<EglState>, OpenGlError> {
+            let get_proc_address = egl_get_proc_address().map_err(|error| OpenGlError::new(error.to_string()))?;
             // SAFETY: the loader returns null or the address of the entry point of that name of
             // the EGL library, which stays loaded.
             let egl = Rc::new(unsafe { EglInterface::new(&get_proc_address) });
@@ -416,7 +416,7 @@ mod imp {
                 Some(&[EGL_NONE, EGL_NONE]),
             );
             if surface == 0 {
-                return Err(OpenGlException::get_formatted_exception_for_egl(
+                return Err(OpenGlError::get_formatted_exception_for_egl(
                     "eglCreateWindowSurface",
                     egl_display.egl_interface(),
                 ));
@@ -435,7 +435,7 @@ mod imp {
             let make_current = || {
                 deferred_context
                     .make_current_with_surface(Some(&egl_surface))
-                    .map_err(|error| OpenGlException::new(error.to_string()))
+                    .map_err(|error| OpenGlError::new(error.to_string()))
             };
             {
                 let current = make_current()?;
@@ -453,7 +453,7 @@ mod imp {
 
             // SAFETY: the surface of the output, whose buffers were just swapped.
             let bo = unsafe { self.lib.gbm_surface_lock_front_buffer(self.gbm_target_surface.0) };
-            let fb_id = self.get_fb_id_for_bo(bo).map_err(|error| OpenGlException::new(error.to_string()))?;
+            let fb_id = self.get_fb_id_for_bo(bo).map_err(|error| OpenGlError::new(error.to_string()))?;
             let mut connector_id = self.connector_id;
             let mut mode = self.mode;
 
@@ -461,7 +461,7 @@ mod imp {
             let res =
                 unsafe { self.lib.drm_mode_set_crtc(self.card.fd(), self.crtc_id, fb_id, 0, 0, &mut connector_id, 1, &mut mode) };
             if res != 0 {
-                return Err(OpenGlException::new(format!(
+                return Err(OpenGlError::new(format!(
                     "drmModeSetCrtc failed: {} ({res})",
                     io::Error::last_os_error()
                 )));

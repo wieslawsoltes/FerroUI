@@ -19,7 +19,7 @@ use ferroui_base::{
     DirectProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, Ref,
 };
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
 
@@ -303,7 +303,7 @@ impl MaterialTheme {
     fn load(
         sp: Option<Rc<dyn IServiceProvider>>,
         this: &Ref<Self>,
-    ) -> Result<(), XamlLoadException> {
+    ) -> Result<(), XamlLoadError> {
         register_types();
         crate::compiled_xaml::populate(sp, this)
     }

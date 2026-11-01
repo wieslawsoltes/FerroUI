@@ -45,6 +45,8 @@ pub use i_open_gl_texture_sharing_render_interface_context_feature::{
     ICompositionImportableOpenGlSharedTexture, IOpenGlTextureSharingRenderInterfaceContextFeature,
 };
 pub use i_platform_graphics_open_gl_context_factory::IPlatformGraphicsOpenGlContextFactory;
+pub use open_gl_exception::OpenGlError;
+#[allow(deprecated)]
 pub use open_gl_exception::OpenGlException;
 pub use register_types::{register_types, ASSEMBLY};
 

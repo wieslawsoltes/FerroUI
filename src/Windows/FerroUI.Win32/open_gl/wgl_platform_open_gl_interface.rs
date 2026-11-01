@@ -40,7 +40,7 @@ mod imp {
     use ferroui_base::logging::{LogEventLevel, Logger};
     use ferroui_base::platform::{IPlatformGraphics, IPlatformGraphicsContext};
     use ferroui_base::{FerroLocator, LocatorExtensions};
-    use ferroui_opengl::{GlVersion, IGlContext, OpenGlException};
+    use ferroui_opengl::{GlVersion, IGlContext, OpenGlError};
     use std::any::Any;
     use std::cell::RefCell;
     use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -65,10 +65,10 @@ mod imp {
         }
 
         /// A context of the version of the primary context (`CreateContext`).
-        pub fn create_gl_context(&self) -> Result<Rc<dyn IGlContext>, OpenGlException> {
+        pub fn create_gl_context(&self) -> Result<Rc<dyn IGlContext>, OpenGlError> {
             match WglDisplay::create_context(&[self.primary_version], None)? {
                 Some(context) => Ok(context),
-                None => Err(OpenGlException::new("Unable to create additional WGL context")),
+                None => Err(OpenGlError::new("Unable to create additional WGL context")),
             }
         }
 
@@ -122,7 +122,7 @@ mod imp {
         fn create_context(&self) -> Rc<dyn IPlatformGraphicsContext> {
             match WglDisplay::create_context(&[self.primary_version], None) {
                 Ok(Some(context)) => context,
-                Ok(None) => panic!("{}", OpenGlException::new("Unable to create additional WGL context")),
+                Ok(None) => panic!("{}", OpenGlError::new("Unable to create additional WGL context")),
                 Err(error) => panic!("{error}"),
             }
         }

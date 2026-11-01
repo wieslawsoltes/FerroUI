@@ -46,9 +46,9 @@ impl RelativeSourceExtension {
     pub fn try_provide_value(
         &self,
         _service_provider: &Rc<dyn IServiceProvider>,
-    ) -> Result<Rc<RelativeSource>, crate::XamlLoadException> {
+    ) -> Result<Rc<RelativeSource>, crate::XamlLoadError> {
         if self.ancestor_level() <= 0 {
-            return Err(crate::XamlLoadException::with_message("AncestorLevel may not be set to less than 1."));
+            return Err(crate::XamlLoadError::with_message("AncestorLevel may not be set to less than 1."));
         }
         let result = RelativeSource::new(self.mode());
         result.set_ancestor_type(self.ancestor_type());

@@ -177,7 +177,7 @@ ferro_markup_type!(class TreeDataTemplate {
                 if let Some(built) = &built {
                     built.set_data_context(data);
                 }
-                Ok::<_, crate::XamlLoadException>(built)
+                Ok::<_, crate::XamlLoadError>(built)
             },
     ],
 });

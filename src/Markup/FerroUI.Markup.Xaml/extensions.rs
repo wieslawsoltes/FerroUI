@@ -3,7 +3,7 @@
 
 use crate::object_casts::{as_object, is_data_context_provider};
 use crate::xaml_il::runtime::{IFerroXamlIlControlTemplateProvider, IFerroXamlIlParentStackProvider};
-use crate::{EagerParentStackEnumerator, FromXamlObject, IRootObjectProvider, IUriContext, IXamlTypeResolver, XamlLoadException};
+use crate::{EagerParentStackEnumerator, FromXamlObject, IRootObjectProvider, IUriContext, IXamlTypeResolver, XamlLoadError};
 use ferroui_base::controls::{INameScope, NameScopeRef};
 use ferroui_base::data::core::expression_nodes::CastTarget;
 use ferroui_base::metadata::IServiceProvider;
@@ -43,7 +43,7 @@ pub trait ServiceProviderExtensions {
     fn is_in_control_template(&self) -> bool;
 
     /// Resolves a type name with the namespaces of the document.
-    fn resolve_type(&self, namespace_prefix: Option<&str>, type_: &str) -> Result<CastTarget, XamlLoadException>;
+    fn resolve_type(&self, namespace_prefix: Option<&str>, type_: &str) -> Result<CastTarget, XamlLoadError>;
 
     /// An object from which bindings whose target is not a control can
     /// locate a data context, named controls and style resources.
@@ -114,9 +114,9 @@ impl ServiceProviderExtensions for dyn IServiceProvider + '_ {
         self.get_service_of::<Rc<dyn IFerroXamlIlControlTemplateProvider>>().is_some()
     }
 
-    fn resolve_type(&self, namespace_prefix: Option<&str>, type_: &str) -> Result<CastTarget, XamlLoadException> {
+    fn resolve_type(&self, namespace_prefix: Option<&str>, type_: &str) -> Result<CastTarget, XamlLoadError> {
         let Some(tr) = self.get_service_of::<Rc<dyn IXamlTypeResolver>>() else {
-            return Err(XamlLoadException::with_message("Service IXamlTypeResolver hasn't been registered"));
+            return Err(XamlLoadError::with_message("Service IXamlTypeResolver hasn't been registered"));
         };
         match namespace_prefix {
             Some(prefix) if !prefix.is_empty() => tr.resolve(&format!("{prefix}:{type_}")),

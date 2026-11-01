@@ -1,6 +1,6 @@
 //! The error handler of the connection (the port of `XError.cs`).
 
-use crate::x11_exception::X11Exception;
+use crate::x11_exception::X11Error;
 use crate::xlib::{self, XErrorEvent};
 use std::sync::{Mutex, PoisonError};
 
@@ -52,7 +52,7 @@ impl XError {
     /// Fails with `desc` and the code of the last error, which it clears.
     pub fn throw_last_error(desc: &str) -> ! {
         let err = std::mem::take(&mut *LAST_ERROR.lock().unwrap_or_else(PoisonError::into_inner));
-        X11Exception::new(Self::last_error_message(desc, err)).throw()
+        X11Error::new(Self::last_error_message(desc, err)).throw()
     }
 
     fn last_error_message(desc: &str, err: LastError) -> String {

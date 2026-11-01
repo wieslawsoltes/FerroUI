@@ -7,7 +7,7 @@ use super::{
 use crate::automation::peers::{
     AutomationPeer, ControlAutomationPeer, HyperlinkAutomationPeer, RichEditBoxAutomationPeer,
 };
-use crate::automation::ElementNotEnabledException;
+use crate::automation::ElementNotEnabledError;
 use crate::documents::{
     CharacterFormat, Hyperlink, InlineCollection, InlineSnapshot, InlineSnapshotKind,
     InlineUIContainer, LineBreak, Paragraph, ParagraphFormat, RichTextDocument, Run, Span,
@@ -137,7 +137,7 @@ impl RichTextAutomationHost {
     fn select(&self, range: Range<usize>) -> Result<(), ProviderError> {
         self.control()?;
         if !self.is_enabled() {
-            return Err(Box::new(ElementNotEnabledException::new()));
+            return Err(Box::new(ElementNotEnabledError::new()));
         }
         let view = self.view()?;
         if !view.is_text_selection_enabled() {

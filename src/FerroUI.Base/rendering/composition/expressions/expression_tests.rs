@@ -317,7 +317,7 @@ fn reports_parse_errors() {
 
     let error = Expression::parse("1 2").unwrap_err();
     assert_eq!(error.to_string(), "Unexpected token");
-    assert_eq!(error, ExpressionParseException::new("Unexpected token", 2));
+    assert_eq!(error, ExpressionParseError::new("Unexpected token", 2));
 }
 
 // ---------------------------------------------------------------------------
@@ -495,7 +495,7 @@ fn expressions_and_variants_are_plain_shareable_data() {
     fn assert_send_sync<T: Send + Sync + 'static>() {}
     assert_send_sync::<Expression>();
     assert_send_sync::<ExpressionVariant>();
-    assert_send_sync::<ExpressionParseException>();
+    assert_send_sync::<ExpressionParseError>();
     assert_send_sync::<BuiltInExpressionFfi>();
     assert_send_sync::<ExpressionTrackedObjects>();
 

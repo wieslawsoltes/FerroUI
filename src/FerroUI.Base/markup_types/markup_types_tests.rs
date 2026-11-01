@@ -891,7 +891,7 @@ fn the_well_known_members_work_through_metadata() {
 
 #[test]
 fn a_data_validation_exception_is_an_exception_with_its_error_data() {
-    use crate::data::{BindingError, DataValidationException};
+    use crate::data::{BindingError, DataValidationError};
 
     crate::register_types();
     let type_ = MarkupType::find("FerroUI.Data", "DataValidationException").unwrap();
@@ -909,7 +909,7 @@ fn a_data_validation_exception_is_an_exception_with_its_error_data() {
     let message = MarkupType::find("System", "Exception").unwrap().find_property("Message").unwrap().get.unwrap();
     assert_eq!(unbox::<String>(&message(&[exception.clone()]).unwrap()), "Enter a valid email address.");
     let error = unbox::<Option<BindingError>>(&exception).expect("an error");
-    let wrapped = error.inner().downcast_ref::<DataValidationException>().expect("the exception");
+    let wrapped = error.inner().downcast_ref::<DataValidationError>().expect("the exception");
     assert!(wrapped.error_data().is_some_and(|data| data.downcast_ref::<String>().is_some()));
 
     // Without error data the message is empty.

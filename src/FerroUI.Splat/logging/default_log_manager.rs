@@ -1,7 +1,7 @@
 //! `DefaultLogManager`.
 
 use super::{
-    IFullLogger, ILogManager, ILogger, LoggingException, MemoizingMRUCache, NullLogger,
+    IFullLogger, ILogManager, ILogger, LoggingError, MemoizingMRUCache, NullLogger,
     WrappingFullLogger, WrappingPrefixLogger,
 };
 use crate::service_location::{IReadonlyDependencyResolver, ReadonlyDependencyResolverExt};
@@ -20,12 +20,12 @@ pub struct DefaultLogManager {
 impl DefaultLogManager {
     /// A log manager over the loggers of `dependency_resolver`.
     ///
-    /// Getting a logger panics with a [`LoggingException`] when the resolver has no `dyn ILogger`.
+    /// Getting a logger panics with a [`LoggingError`] when the resolver has no `dyn ILogger`.
     pub fn new(dependency_resolver: Rc<dyn IReadonlyDependencyResolver>) -> Self {
         let logger_cache = MemoizingMRUCache::new(
             move |type_name: &&'static str, _context| -> Rc<dyn IFullLogger> {
                 match dependency_resolver.get_service::<dyn ILogger>() {
-                    None => std::panic::panic_any(LoggingException::with_message(
+                    None => std::panic::panic_any(LoggingError::with_message(
                         "Couldn't find an ILogger. This should never happen, your dependency resolver is probably broken.",
                     )),
                     Some(logger) => Rc::new(WrappingFullLogger::new(Rc::new(WrappingPrefixLogger::new(

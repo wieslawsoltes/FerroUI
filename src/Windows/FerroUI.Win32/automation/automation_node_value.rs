@@ -4,7 +4,7 @@ use super::automation_node::{AutomationNode, ELEMENT_NOT_ENABLED};
 use super::interop::IValueProviderImpl;
 use super::marshalling::string_to_bstr;
 use ferroui_controls::automation::provider::IValueProvider;
-use ferroui_controls::automation::ElementNotEnabledException;
+use ferroui_controls::automation::ElementNotEnabledError;
 use ferroui_microcom::{HResult, COR_E_INVALIDOPERATION};
 use std::rc::Rc;
 
@@ -31,7 +31,7 @@ impl IValueProviderImpl for AutomationNode {
             // system; any other failure of the provider (a value that is
             // read only) is an operation that is not valid.
             x.set_value(value.as_deref()).map_err(|error| {
-                if error.downcast_ref::<ElementNotEnabledException>().is_some() {
+                if error.downcast_ref::<ElementNotEnabledError>().is_some() {
                     ELEMENT_NOT_ENABLED
                 } else {
                     HResult(COR_E_INVALIDOPERATION)

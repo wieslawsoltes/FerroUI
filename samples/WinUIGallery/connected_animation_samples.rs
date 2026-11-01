@@ -25,7 +25,7 @@ use ferroui_controls::{
     Border, Button, ContentControlImpl, Control, ControlImpl, Frame, FramePage, FramePageImpl,
     Grid, Image, Panel, RadioButtons, ScrollViewer, StackPanel, TextBlock, ToolTip, TopLevel,
 };
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -676,7 +676,7 @@ fn wire_cards(root: &Ref<Control>) -> Result<(), NavigationError> {
     Ok(())
 }
 
-pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadException> {
+pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
     if root
         .find_control::<Frame>("ConnectedCollectionFrame")
         .is_none()
@@ -684,7 +684,7 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadException> {
         return Ok(());
     }
     let load_error = |error| {
-        XamlLoadException::with_inner("Could not initialize connected animation examples.", error)
+        XamlLoadError::with_inner("Could not initialize connected animation examples.", error)
     };
     wire_collection(
         root,

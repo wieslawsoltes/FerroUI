@@ -12,7 +12,7 @@ use ferroui_base::platform::{
     IPlatformGraphicsContext, PlatformRenderTargetState, RenderTargetError, RenderTargetSceneInfo,
 };
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::RenderTargetCorruptedException;
+use ferroui_base::RenderTargetCorruptedError;
 use ferroui_microcom::HResult;
 use ferroui_opengl::egl::{EglContext, EglPlatformSurfaceRenderTarget, EglPlatformSurfaceRenderTargetBase};
 use ferroui_opengl::surfaces::{IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession};
@@ -49,7 +49,7 @@ pub(crate) fn is_device_lost(error: HResult) -> bool {
 }
 
 /// Whether the cause of a corrupted render target is a lost device.
-pub(crate) fn is_caused_by_device_loss(error: &RenderTargetCorruptedException) -> bool {
+pub(crate) fn is_caused_by_device_loss(error: &RenderTargetCorruptedError) -> bool {
     error.inner_exception().and_then(|inner| inner.downcast_ref::<HResult>()).is_some_and(|inner| is_device_lost(*inner))
 }
 
@@ -245,13 +245,13 @@ mod tests {
         assert!(is_device_lost(HResult(DXGI_ERROR::DXGI_ERROR_DEVICE_RESET.0)));
         assert!(!is_device_lost(HResult::FAIL));
 
-        let lost = RenderTargetCorruptedException::new_with_inner_exception(Rc::new(HResult(
+        let lost = RenderTargetCorruptedError::new_with_inner_exception(Rc::new(HResult(
             DXGI_ERROR::DXGI_ERROR_DEVICE_HUNG.0,
         )));
         assert!(is_caused_by_device_loss(&lost));
-        assert!(!is_caused_by_device_loss(&RenderTargetCorruptedException::new_with_inner_exception(Rc::new(
+        assert!(!is_caused_by_device_loss(&RenderTargetCorruptedError::new_with_inner_exception(Rc::new(
             HResult::INVALIDARG
         ))));
-        assert!(!is_caused_by_device_loss(&RenderTargetCorruptedException::new()));
+        assert!(!is_caused_by_device_loss(&RenderTargetCorruptedError::new()));
     }
 }

@@ -7,7 +7,7 @@ use crate::automation::provider::{
     RichTextAutomationHost, RichTextAutomationState, TextProviderError,
 };
 use crate::automation::{
-    AccessibilityView, AutomationLiveSetting, AutomationProperties, ElementNotEnabledException,
+    AccessibilityView, AutomationLiveSetting, AutomationProperties, ElementNotEnabledError,
 };
 use crate::documents::Hyperlink;
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Rect, Ref, WeakRef};
@@ -250,7 +250,7 @@ impl HyperlinkAutomationPeer {
         state.range_for_child(&self.host, &container, &self.to_ref().upcast())
     }
 
-    pub fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
         if let Some(link) = self.try_owner() {
             link.navigate();
@@ -263,7 +263,7 @@ impl IInvokeProvider for ProviderAdapter<HyperlinkAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }
-    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         self.0.invoke()
     }
 }

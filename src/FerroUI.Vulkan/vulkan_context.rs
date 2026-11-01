@@ -3,7 +3,7 @@ use crate::vulkan_options::khr_surface_factory_of;
 use crate::{
     try_get_vulkan_khr_surface, try_get_vulkan_render_target_surface, IVulkanContextExternalObjectsFeature,
     IVulkanDevice, IVulkanInstance, IVulkanKhrSurfacePlatformSurfaceFactory, IVulkanPlatformGraphicsContext,
-    IVulkanRenderTarget, VulkanException, VulkanExternalObjectsFeature, VulkanKhrRenderTarget,
+    IVulkanRenderTarget, VulkanError, VulkanExternalObjectsFeature, VulkanKhrRenderTarget,
 };
 use ash::vk;
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
@@ -33,7 +33,7 @@ impl VulkanContext {
     pub fn new(
         device: Arc<dyn IVulkanDevice>,
         platform_features: &HashMap<TypeId, Arc<dyn Any + Send + Sync>>,
-    ) -> Result<Rc<Self>, VulkanException> {
+    ) -> Result<Rc<Self>, VulkanError> {
         let (instance_api, device_api, surface_factory) = {
             let lock = device.lock();
             let instance_api = VulkanInstanceApi::new(device.instance());
@@ -179,7 +179,7 @@ impl IVulkanPlatformGraphicsContext for VulkanContext {
             };
         }
 
-        panic!("{}", VulkanException::new("Unable to find a suitable platform surface"));
+        panic!("{}", VulkanError::new("Unable to find a suitable platform surface"));
     }
 }
 

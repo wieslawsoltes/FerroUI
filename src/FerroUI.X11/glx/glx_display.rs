@@ -9,7 +9,7 @@ use crate::x11_platform::X11PlatformOptions;
 use crate::xlib::{self, VisualInfo, XDisplay, XID};
 use ferroui_base::utilities::ThreadBound;
 use ferroui_base::{FerroLocator, LocatorExtensions};
-use ferroui_opengl::{GlProfileType, GlVersion, IGlContext, OpenGlException};
+use ferroui_opengl::{GlProfileType, GlVersion, IGlContext, OpenGlError};
 use std::cell::OnceCell;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex, PoisonError};
@@ -150,7 +150,7 @@ impl GlxDisplay {
         self.fbconfig
     }
 
-    pub fn new(x11: &X11Info, probe_profiles: &[GlVersion]) -> Result<Arc<GlxDisplay>, OpenGlException> {
+    pub fn new(x11: &X11Info, probe_profiles: &[GlVersion]) -> Result<Arc<GlxDisplay>, OpenGlError> {
         let glx = GlxInterface::new()?;
         let deferred_display = x11.deferred_display();
         let display_extensions = glx.get_extensions(deferred_display);
@@ -163,12 +163,12 @@ impl GlxDisplay {
         let depths: Vec<Option<i32>> = visuals.iter().map(|visual| visual.map(|visual| visual.depth)).collect();
 
         let Some(chosen) = choose_configuration(&depths) else {
-            return Err(OpenGlException::new("Unable to choose FBConfig"));
+            return Err(OpenGlError::new("Unable to choose FBConfig"));
         };
         let fbconfig = configs[chosen];
 
         let Some(visual) = visuals[chosen] else {
-            return Err(OpenGlException::new("Unable to get visual info from FBConfig"));
+            return Err(OpenGlError::new("Unable to get visual info from FBConfig"));
         };
         let sample_count = glx.get_fb_config_attrib(deferred_display, fbconfig, GlxConsts::GLX_SAMPLES).unwrap_or(0);
         let stencil_size =
@@ -203,10 +203,10 @@ impl GlxDisplay {
             let gl_interface = deferred_context.gl_interface();
             let check = (|| {
                 if gl_interface.version().is_none() {
-                    return Err(OpenGlException::new("GL version string is null, aborting"));
+                    return Err(OpenGlError::new("GL version string is null, aborting"));
                 }
                 let Some(renderer) = gl_interface.renderer() else {
-                    return Err(OpenGlException::new("GL renderer string is null, aborting"));
+                    return Err(OpenGlError::new("GL renderer string is null, aborting"));
                 };
 
                 if std::env::var(IGNORE_RENDERER_BLACKLIST_VARIABLE).ok().as_deref() != Some("1") {
@@ -215,7 +215,7 @@ impl GlxDisplay {
                         .map(|options| (*options).clone())
                         .unwrap_or_default();
                     if let Some(item) = blacklisted_by(renderer, &opts.glx_renderer_blacklist) {
-                        return Err(OpenGlException::new(format!("Renderer '{renderer}' is blacklisted by '{item}'")));
+                        return Err(OpenGlError::new(format!("Renderer '{renderer}' is blacklisted by '{item}'")));
                     }
                 }
                 Ok(())
@@ -234,13 +234,13 @@ impl GlxDisplay {
 
     /// A context with a pixel buffer of its own as its default drawable
     /// (`CreateContext()`).
-    pub fn create_context(&self) -> Result<Rc<GlxContext>, OpenGlException> {
+    pub fn create_context(&self) -> Result<Rc<GlxContext>, OpenGlError> {
         self.create_context_core(self.create_p_buffer(), None, self.sample_count, self.stencil_size, true)
     }
 
     /// A context that shares its objects with `share`
     /// (`CreateContext(IGlContext share)`).
-    pub fn create_context_shared_with(&self, share: &Rc<GlxContext>) -> Result<Rc<GlxContext>, OpenGlException> {
+    pub fn create_context_shared_with(&self, share: &Rc<GlxContext>) -> Result<Rc<GlxContext>, OpenGlError> {
         self.create_context_core(
             self.create_p_buffer(),
             Some(share.clone()),
@@ -257,7 +257,7 @@ impl GlxDisplay {
         sample_count: i32,
         stencil_size: i32,
         owns_p_buffer: bool,
-    ) -> Result<Rc<GlxContext>, OpenGlException> {
+    ) -> Result<Rc<GlxContext>, OpenGlError> {
         let sharelist = share.as_ref().map_or(0, |share| share.handle());
         let this = self.this.upgrade().expect("the display is alive");
 
@@ -307,7 +307,7 @@ impl GlxDisplay {
             }
         }
 
-        rv.ok_or_else(|| OpenGlException::new("Unable to create direct GLX context"))
+        rv.ok_or_else(|| OpenGlError::new("Unable to create direct GLX context"))
     }
 
     pub fn swap_buffers(&self, xid: XID) {

@@ -15,16 +15,16 @@ use ferroui_base::styling::{IStyle, Styles};
 use ferroui_base::utilities::Uri;
 use ferroui_base::{BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, Ref, StyledElement};
 use ferroui_controls::{Application, Control, Window};
-use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadException};
+use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use sample_support::{describe, Sample};
 use std::rc::Rc;
 
-fn document(sample: &Sample, xaml: &str, path: Option<&str>) -> Result<RuntimeXamlLoaderDocument, XamlLoadException> {
+fn document(sample: &Sample, xaml: &str, path: Option<&str>) -> Result<RuntimeXamlLoaderDocument, XamlLoadError> {
     let mut document = RuntimeXamlLoaderDocument::new(xaml);
     if let Some(path) = path {
         let uri = Uri::absolute(&sample.document_uri(path))
-            .map_err(|e| XamlLoadException::with_message(format!("Invalid document URI for {path}: {e}")))?;
+            .map_err(|e| XamlLoadError::with_message(format!("Invalid document URI for {path}: {e}")))?;
         document.base_uri = Some(uri);
         document.document = Some(path.trim_start_matches('/').to_string());
     }
@@ -39,9 +39,9 @@ fn configuration(sample: &'static Sample) -> RuntimeXamlLoaderConfiguration {
     configuration
 }
 
-fn embedded_text(sample: &Sample, path: &str) -> Result<&'static str, XamlLoadException> {
-    let content = sample.asset(path).ok_or_else(|| XamlLoadException::with_message(format!("The resource {path} could not be found.")))?;
-    std::str::from_utf8(content).map_err(|e| XamlLoadException::with_message(format!("{path} is not UTF-8: {e}")))
+fn embedded_text(sample: &Sample, path: &str) -> Result<&'static str, XamlLoadError> {
+    let content = sample.asset(path).ok_or_else(|| XamlLoadError::with_message(format!("The resource {path} could not be found.")))?;
+    std::str::from_utf8(content).map_err(|e| XamlLoadError::with_message(format!("{path} is not UTF-8: {e}")))
 }
 
 /// Loads markup text as a document of the sample with the run-time loader; `path` is the
@@ -52,7 +52,7 @@ pub fn try_load_text(
     xaml: &str,
     path: Option<&str>,
     root_instance: Option<BoxedValue>,
-) -> Result<BoxedValue, XamlLoadException> {
+) -> Result<BoxedValue, XamlLoadError> {
     (sample.register_types)();
     FerroRuntimeXamlLoader::register();
     let mut document = document(sample, xaml, path)?;
@@ -71,7 +71,7 @@ pub fn load_text(sample: &'static Sample, xaml: &str) -> BoxedValue {
 
 /// Loads the embedded document with the rooted asset path `path` with the run-time loader;
 /// `root_instance` is the instance the document populates.
-pub fn try_load_document(sample: &'static Sample, path: &str, root_instance: Option<BoxedValue>) -> Result<BoxedValue, XamlLoadException> {
+pub fn try_load_document(sample: &'static Sample, path: &str, root_instance: Option<BoxedValue>) -> Result<BoxedValue, XamlLoadError> {
     try_load_text(sample, embedded_text(sample, path)?, Some(path), root_instance)
 }
 

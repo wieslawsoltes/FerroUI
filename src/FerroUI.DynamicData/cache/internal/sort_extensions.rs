@@ -5,7 +5,7 @@
 //! The searches return .NET's result: the index of an item that compares as equal, or the bitwise
 //! complement of the index where the item would be inserted.
 
-use crate::list::SortException;
+use crate::list::SortError;
 use std::cmp::Ordering;
 
 /// A binary search of `value` in `list` (`ListEx.BinarySearch(IList<TItem>, TItem, IComparer)`):
@@ -52,14 +52,14 @@ pub(crate) fn get_current_position<I>(
     comparer: &dyn Fn(&I, &I) -> Ordering,
     use_binary_search: bool,
     equals: &dyn Fn(&I, &I) -> bool,
-) -> Result<usize, SortException> {
+) -> Result<usize, SortError> {
     let index = if use_binary_search {
         binary_search(source, item, comparer)
     } else {
         source.iter().position(|candidate| equals(item, candidate)).map_or(-1, |index| index as isize)
     };
     if index < 0 {
-        return Err(SortException::new(format!("Cannot find item: {} from {} items", std::any::type_name::<I>(), source.len())));
+        return Err(SortError::new(format!("Cannot find item: {} from {} items", std::any::type_name::<I>(), source.len())));
     }
     Ok(index as usize)
 }

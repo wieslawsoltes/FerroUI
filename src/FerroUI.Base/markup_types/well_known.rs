@@ -263,14 +263,14 @@ ferro_markup_type!(class crate::data::BindingError as "Exception" {
 
 // The exception that wraps the data of a validation error (`DataValidationException :
 // Exception`): markup creates one with the error data as the argument of its constructor.
-ferro_markup_type!(class crate::data::DataValidationException as "DataValidationException" {
+ferro_markup_type!(class crate::data::DataValidationError as "DataValidationException" {
     namespace: "FerroUI.Data",
-    handles: [crate::data::DataValidationException, Option<crate::data::DataValidationException>],
+    handles: [crate::data::DataValidationError, Option<crate::data::DataValidationError>],
     base: crate::data::BindingError,
-    constructors: [(Option<BoxedValue>) => crate::data::DataValidationException::new],
+    constructors: [(Option<BoxedValue>) => crate::data::DataValidationError::new],
     properties: [
         ErrorData: Option<BoxedValue> {
-            get: |error: &crate::data::DataValidationException| error.error_data().cloned()
+            get: |error: &crate::data::DataValidationError| error.error_data().cloned()
         },
     ],
 });
@@ -453,7 +453,7 @@ ferro_markup_type!(class FerroListConverter<Option<BoxedValue>> as "FerroListCon
 /// The types declared in this file.
 pub(super) const TYPES: &[&MarkupType] = &[
     <crate::data::BindingError as MarkupTyped>::MARKUP,
-    <crate::data::DataValidationException as MarkupTyped>::MARKUP,
+    <crate::data::DataValidationError as MarkupTyped>::MARKUP,
     <UnsetValueType as MarkupTyped>::MARKUP,
     <FerroObjectExtensionsClass as MarkupTyped>::MARKUP,
     <ClassBindingManager as MarkupTyped>::MARKUP,
@@ -488,8 +488,8 @@ pub(super) const TYPES: &[&MarkupType] = &[
 pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<crate::data::BindingError>();
     // A data validation exception is an exception: the error that wraps it.
-    ValueTypes::register_nullable::<crate::data::DataValidationException>();
-    ValueTypes::register_cast::<crate::data::DataValidationException, crate::data::BindingError>(|error| {
+    ValueTypes::register_nullable::<crate::data::DataValidationError>();
+    ValueTypes::register_cast::<crate::data::DataValidationError, crate::data::BindingError>(|error| {
         crate::data::BindingError::new(error.clone())
     });
     // A bitmap is an image and a source of image brushes.

@@ -4,7 +4,7 @@ use super::test_support::*;
 use ferroui_base::data::core::{BindingExpression, Untyped, UntypedBindingExpression, Value, ValueType};
 use ferroui_base::data::model::{Event, INotifyDataErrorInfo, Model};
 use ferroui_base::data::{
-    BindingChainException, BindingError, BindingErrorType, BindingNotification, DataValidationException,
+    BindingChainError, BindingError, BindingErrorType, BindingNotification, DataValidationError,
 };
 use ferroui_base::*;
 use std::cell::{Cell, RefCell};
@@ -94,7 +94,7 @@ fn assert_notification(result: &Option<BoxedValue>, expected: BindingNotificatio
 
 fn chain_error(message: String, expression: &str, error_point: &str) -> BindingNotification {
     BindingNotification::with_error(
-        BindingError::new(BindingChainException::with_expression(message, expression, error_point)),
+        BindingError::new(BindingChainError::with_expression(message, expression, error_point)),
         BindingErrorType::Error,
     )
 }
@@ -188,7 +188,7 @@ fn should_negate_binding_notification_error_fallback_value() {
     assert_notification(
         &result,
         BindingNotification::with_error_and_fallback(
-            BindingError::new(DataValidationException::new(Some(boxed(s("Test error"))))),
+            BindingError::new(DataValidationError::new(Some(boxed(s("Test error"))))),
             BindingErrorType::DataValidationError,
             Some(boxed(true)),
         ),

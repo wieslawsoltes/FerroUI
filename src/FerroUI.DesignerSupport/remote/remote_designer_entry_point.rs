@@ -6,7 +6,7 @@ use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority}
 use ferroui_base::utilities::{Uri, UriKind};
 use ferroui_base::Ref;
 use ferroui_controls::{AppBuilder, Design, Window};
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use ferroui_remote_protocol::designer::{
     ExceptionDetails, StartDesignerSessionMessage, UpdateXamlMessage, UpdateXamlResultMessage,
 };
@@ -443,7 +443,7 @@ impl RemoteDesignerEntryPoint {
 /// `new ExceptionDetails(e)`: the name of the class of the error, its
 /// message and, for an error of the document (an `XmlException` or a class
 /// that derives from it), its line and position.
-fn exception_details(e: &XamlLoadException) -> ExceptionDetails {
+fn exception_details(e: &XamlLoadError) -> ExceptionDetails {
     if let Some(inner) = e.inner_exception().and_then(|inner| inner.downcast_ref::<XamlError>()) {
         let line_info = inner.is_xml_exception();
         return ExceptionDetails {
