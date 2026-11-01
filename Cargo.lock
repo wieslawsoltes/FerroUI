@@ -2398,6 +2398,7 @@ dependencies = [
 name = "ferroui-qml-controls"
 version = "0.5.0-preview.1"
 dependencies = [
+ "async-channel",
  "ferroui-base",
  "ferroui-controls",
  "ferroui-qml",

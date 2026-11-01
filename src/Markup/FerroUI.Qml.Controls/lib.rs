@@ -10,6 +10,7 @@ mod composition;
 mod positioner;
 mod reflected;
 mod tree;
+mod worker_dispatch;
 
 use ferroui_base::{reactive::IDisposable, Ref};
 use ferroui_controls::{Control, Controls};
@@ -157,6 +158,7 @@ struct Inner {
     clock: std::cell::OnceCell<clock::ViewClock>,
     manual_clock: Cell<bool>,
     deferred_posted: std::cell::Cell<bool>,
+    worker_wake: std::cell::OnceCell<async_channel::Sender<()>>,
     instance: RefCell<Instance>,
     nodes: RefCell<tree::Peers>,
     factories: tree::Factories,
@@ -173,6 +175,9 @@ impl Drop for Inner {
     fn drop(&mut self) {
         if let Some(clock) = self.clock.get() {
             clock.stop();
+        }
+        if let Some(wake) = self.worker_wake.get() {
+            wake.close();
         }
         self.subscriptions.get_mut().clear();
     }
@@ -254,6 +259,7 @@ impl QmlView {
             clock: std::cell::OnceCell::new(),
             manual_clock: Cell::new(false),
             deferred_posted: std::cell::Cell::new(false),
+            worker_wake: Default::default(),
             instance: RefCell::new(instance),
             nodes: RefCell::new(nodes),
             factories: registry.factories.clone(),
@@ -281,6 +287,7 @@ impl QmlView {
         }
         view.refresh_clock();
         view.post_deferred();
+        view.install_worker_dispatch();
         Ok(view)
     }
 
@@ -394,6 +401,7 @@ impl QmlView {
         }
         self.refresh_clock();
         self.post_deferred();
+        self.install_worker_dispatch();
         Ok(())
     }
 
