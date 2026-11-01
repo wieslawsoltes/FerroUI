@@ -81,3 +81,39 @@ fn restore_masks_distinguish_scalar_initializers_from_expression_bindings() {
     assert_eq!(vm.get(root, "literal").unwrap(), Value::Number(-10.));
     assert_eq!(vm.get(root, "computed").unwrap(), Value::Number(9.));
 }
+
+#[test]
+fn delayed_binding_coalesces_inputs_and_rolls_back_failed_turns() {
+    let mut model = load(
+        r#"
+        property int source: 2
+        property int destination: 7
+        property Binding overlay: Binding { id: layer; target: root; property: "destination"; value: root.source; delayed: true }
+        function abort() { source = 100; root.missing() }
+    "#,
+    );
+    let root = model.root();
+    let layer = model.id("layer").unwrap();
+    let n = Value::Number;
+    let read = |model: &Instance| model.get(root, "destination").unwrap();
+    assert_eq!(read(&model), n(2.0));
+    assert!(!model.has_deferred_work());
+    assert!(model.call(root, "abort", vec![]).is_err());
+    assert!(!model.has_deferred_work());
+    for value in [4.0, 8.0] {
+        model.set(root, "source", n(value)).unwrap();
+    }
+    assert_eq!(read(&model), n(2.0));
+    assert_eq!(model.process_deferred(8).unwrap(), 1);
+    assert_eq!(read(&model), n(8.0));
+    model.set(root, "source", n(9.0)).unwrap();
+    model.set(layer, "when", Value::Bool(false)).unwrap();
+    assert_eq!(read(&model), n(7.0));
+    model.process_deferred(8).unwrap();
+    assert_eq!(read(&model), n(7.0));
+    model.set(layer, "when", Value::Bool(true)).unwrap();
+    assert_eq!(read(&model), n(9.0));
+    model.set(layer, "delayed", Value::Bool(false)).unwrap();
+    model.set(root, "source", n(10.0)).unwrap();
+    assert_eq!(read(&model), n(10.0));
+}

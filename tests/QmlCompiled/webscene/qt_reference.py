@@ -29,6 +29,12 @@ def main():
     sender = signals.create()
     if sender is None:
         raise RuntimeError("\n".join(issue.toString() for issue in signals.errors()))
+    sender.scheduleLater()
+    assert sender.property("laterHistory") == ""
+    app.processEvents()
+    assert sender.property("laterHistory") == "g2f3"
+    app.processEvents()
+    assert sender.property("laterHistory") == "g2f3h"
     sender.install()
     sender.reading.emit(2)
     assert sender.property("history") == "M2M2S2"

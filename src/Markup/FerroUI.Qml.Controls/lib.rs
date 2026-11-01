@@ -154,6 +154,7 @@ impl NativeEndpoint {
 
 struct Inner {
     clock: std::cell::OnceCell<clock::ViewClock>,
+    deferred_posted: std::cell::Cell<bool>,
     instance: RefCell<Instance>,
     nodes: BTreeMap<ObjectId, Box<dyn NativeObject>>,
     root: Ref<Control>,
@@ -256,6 +257,7 @@ impl QmlView {
         instance.drain_changes();
         let view = Self(Rc::new(Inner {
             clock: std::cell::OnceCell::new(),
+            deferred_posted: std::cell::Cell::new(false),
             instance: RefCell::new(instance),
             nodes,
             root,
@@ -296,6 +298,7 @@ impl QmlView {
                 .extend(node.connect(endpoint));
         }
         view.install_clock();
+        view.post_deferred();
         Ok(view)
     }
 
@@ -370,6 +373,7 @@ impl QmlView {
             composition::apply(plan);
         }
         self.refresh_clock();
+        self.post_deferred();
         Ok(())
     }
 }

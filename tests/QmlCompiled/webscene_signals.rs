@@ -8,6 +8,15 @@ fn exercise_signals(source: &impl ComponentSource) {
         Instance::with_engine(source, &TypeRegistry::new(), Default::default(), engine).unwrap();
     let root = model.root();
     let string = |s: &str| Value::String(s.into());
+    assert!(model.call(root, "abortLater", vec![]).is_err());
+    assert!(!model.has_deferred_work());
+    model.call(root, "scheduleLater", vec![]).unwrap();
+    assert_eq!(model.get(root, "laterHistory").unwrap(), string(""));
+    assert_eq!(model.process_deferred(0).unwrap(), 0);
+    assert_eq!(model.process_deferred(64).unwrap(), 2);
+    assert_eq!(model.get(root, "laterHistory").unwrap(), string("g2f3"));
+    assert_eq!(model.process_deferred(64).unwrap(), 1);
+    assert_eq!(model.get(root, "laterHistory").unwrap(), string("g2f3h"));
     let emit = |model: &mut Instance, n: f64| model.emit(root, "reading", vec![Value::Number(n)]);
     assert!(model.call(root, "connectAndFail", vec![]).is_err());
     emit(&mut model, 7.).unwrap();

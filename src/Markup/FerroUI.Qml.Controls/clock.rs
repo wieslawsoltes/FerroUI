@@ -65,6 +65,33 @@ impl QmlView {
         }
     }
 
+    pub(crate) fn post_deferred(&self) {
+        if !self.0.instance.borrow().has_deferred_work() || self.0.deferred_posted.replace(true) {
+            return;
+        }
+        let weak = Rc::downgrade(&self.0);
+        ferroui_base::threading::Dispatcher::current_dispatcher().post_local(
+            move || {
+                let Some(inner) = weak.upgrade() else {
+                    return;
+                };
+                let view = QmlView(inner);
+                view.0.deferred_posted.set(false);
+                if let Err(error) = view.process_deferred(64) {
+                    (view.0.on_error)(error);
+                }
+            },
+            DispatcherPriority::BACKGROUND,
+        );
+    }
+
+    /// Deliver one bounded turn of deferred bindings and JavaScript callbacks.
+    pub fn process_deferred(&self, limit: usize) -> Result<usize, Error> {
+        let result = self.0.instance.borrow_mut().process_deferred(limit);
+        self.flush()?;
+        result
+    }
+
     fn step_clock(&self, elapsed: Duration) -> Result<(), Error> {
         self.0.instance.borrow_mut().advance_time(elapsed)?;
         self.flush()

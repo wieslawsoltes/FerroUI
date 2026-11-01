@@ -55,4 +55,20 @@ QtObject {
     function installFailure() { reading.connect(failAfterWrite) }
     function clearFailure() { reading.disconnect(failAfterWrite) }
     function spin() { while (true) {} }
+    property string laterHistory: ""
+    function firstLater(n) {
+        laterHistory += "f" + n
+        Qt.callLater(lastLater)
+    }
+    function secondLater(n) { laterHistory += "g" + n }
+    function lastLater() { laterHistory += "h" }
+    function scheduleLater() {
+        Qt.callLater(firstLater, 1)
+        Qt.callLater(secondLater, 2)
+        Qt.callLater(firstLater, 3)
+    }
+    function abortLater() {
+        Qt.callLater(lastLater)
+        throw new Error("aborted schedule")
+    }
 }

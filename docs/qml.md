@@ -171,6 +171,10 @@ Each instance owns its object arena. Object references carry an instance identit
 
 When a binding runs, the runtime tracks the properties it actually reads. A conditional binding can therefore stop listening to the discarded branch. Imperative assignment detaches the existing binding. A failing transaction restores the previous values and dependency edges and discards pending host notifications. Native Rust functions used in bindings must be deterministic with respect to their declared arguments. Application-owned side effects inside a callback are outside the transaction.
 
+FerroUI posts `Qt.callLater(function, ...args)` callbacks to the owning view's dispatcher. Reposting a function moves it to the end and replaces its arguments. Callbacks scheduled by callbacks execute on a subsequent event turn. A failed transaction discards its postings. Headless Rust hosts can inspect `Instance::has_deferred_work()` and deliver a bounded turn through `Instance::process_deferred(limit)`.
+
+A `Binding` with `delayed: true` applies its initial value when attached. Subsequent changes to its input coalesce until the next turn. Disabling or retargeting the binding restores its previous target immediately.
+
 ## Compatibility with Qt QML 6.12
 
 | Area | Available in this implementation | Remaining coverage |
@@ -179,7 +183,7 @@ When a binding runs, the runtime tracks the properties it actually reads. A cond
 | Object model | Required, readonly and default properties, lexical source property shadowing with virtual, override and final declarations, aliases, typed signals and methods, property change handlers, `Component.onCompleted`, source and registered enums | Complete Qt value-type library, attached properties, interception, aliasing and inheritance edge cases, including overriding properties supplied by native Rust types |
 | Built-in Rust scripting | Numeric, boolean and string expressions, object and array literals with identity, indexed reads and writes, function and signal calls, local declarations, assignment, branching, loops and returns | Closures, prototypes, exceptions, Promises and local script modules require an external engine. |
 | WebScene scripting | V8 built-ins, closures, classes, prototypes, exceptions, Promises, classic scripts and local ES modules. Both the file loader and Cargo-generated components use the same engine. | Qt WorkerScript, asynchronous QML host callbacks and browser-side V8 deployment |
-| Reactive infrastructure | Dependency tracking, signal connections, conditional Binding overlays with restoration, Timer with a deterministic clock and native dispatcher integration | Delayed and multi-target Binding forms, the complete Qt global object, network and resource loading |
+| Reactive infrastructure | Dependency tracking, signal connections, conditional Binding overlays with restoration, delayed bindings, Qt.callLater and Timer with a deterministic clock and native dispatcher integration | Multi-target Binding forms, the complete Qt global object, network and resource loading |
 | Models | `QtQml.Models.ListModel` and flat `ListElement` declarations, fixed and dynamic role types, insertion, moves, removal, role edits, row handles and rollback | Nested list roles, function-valued roles, model/view delegates, proxy and worker-thread models |
 | Native visuals | Item, Rectangle, Row, Column, Flow, Text, TextInput and TextEdit. The Controls module supplies Label, Button, CheckBox, TextField and TextArea. Parent fill and center anchors participate in native arrangement. | Sibling and edge anchors, complete implicit geometry, visual delegates, animation/state systems and the rest of Qt Quick and Controls |
 | FerroUI API | Register a Rust type, properties, signals, enum values and deterministic methods. Register visual factories or expose supported scalar styled properties with `register_ferro_control`. | Property types outside the reflected scalar set require an explicit native adapter |
