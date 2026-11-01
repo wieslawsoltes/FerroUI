@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 
 
-def measure(server, properties, iterations):
+def measure(server, properties, iterations, siblings=0):
     proc = subprocess.Popen([server], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     counter = 0
 
@@ -83,6 +83,41 @@ def measure(server, properties, iterations):
                             assert len(result) >= 2 * properties
                     samples.append((time.perf_counter_ns() - start) / 1e6)
                 timings[label] = round(statistics.median(samples[1:]), 3)
+            if siblings:
+                uri = (folder / "Siblings.qml").as_uri()
+                rows = [f"Item {{ id: row{i}; property int value: {i}; property int mirrored: row{siblings-1-i}.value }}"
+                        for i in range(siblings)]
+                # One longer method also exercises the reference index of a single object.
+                reads = [f"row{i}.value;" for i in range(siblings)]
+                source = "\n".join(["import QtQuick", "Item {", *rows, "function readRows() {",
+                                    *reads, "}", "}"])
+                start = time.perf_counter_ns()
+                send("textDocument/didOpen", {"textDocument": {
+                    "uri": uri, "languageId": "qml", "text": source, "version": 1}})
+                assert receive()["params"]["diagnostics"] == []
+                timings["sibling_open"] = round((time.perf_counter_ns() - start) / 1e6, 3)
+                # Keep the first semantic query (which constructs the model lazily) separate.
+                def query_at(line, column, method):
+                    return request("textDocument/" + method, {
+                        "textDocument": {"uri": uri}, "position": {"line": line, "character": column}})
+                for label in ["sibling_hover", "sibling_definition", "method_definition"]:
+                    samples = []
+                    for k in range(iterations + 1):
+                        index = (k * (siblings // 7 + 1)) % siblings
+                        if label == "method_definition":
+                            line, column, target = 3 + siblings + index, 1, index
+                        else:
+                            line, column, target = 2 + index, rows[index].rindex("row") + 1, siblings - 1 - index
+                        start = time.perf_counter_ns()
+                        result = query_at(line, column, "hover" if label == "sibling_hover" else "definition")
+                        samples.append((time.perf_counter_ns() - start) / 1e6)
+                        if label == "sibling_hover":
+                            assert f"row{target}" in result["contents"]["value"]
+                        else:
+                            assert result["uri"] == uri and result["range"]["start"]["line"] == target + 2, result
+                    if label == "sibling_hover":
+                        timings["sibling_first_hover"] = round(samples[0], 3)
+                    timings[label] = round(statistics.median(samples[1:]), 3)
             request("shutdown", None)
             send("exit", None)
     finally:
@@ -98,5 +133,6 @@ if __name__ == "__main__":
     parser.add_argument("server")
     parser.add_argument("--properties", default=800, type=int)
     parser.add_argument("--iterations", default=11, type=int)
+    parser.add_argument("--siblings", type=int, default=0, help="also query a document with this many sibling items")
     args = parser.parse_args()
-    print(json.dumps(measure(args.server, args.properties, args.iterations), sort_keys=True))
+    print(json.dumps(measure(args.server, args.properties, args.iterations, args.siblings), sort_keys=True))

@@ -447,7 +447,7 @@ impl QmlService {
                 item(&mut items, &name, info.kind, &info.detail);
             }
             if qualifier.is_none() {
-                for id in model.nodes.iter().filter(|n| n.scope == node.scope) {
+                for id in model.scoped_ids(node.scope) {
                     if let Some((name, _)) = &id.id {
                         item(&mut items, name, 6, &id.ty);
                     }

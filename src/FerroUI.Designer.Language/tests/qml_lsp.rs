@@ -274,3 +274,29 @@ fn inherited_member_navigation_and_completion_use_the_defining_file() {
     }
     client.finish();
 }
+
+#[test]
+fn indexed_reads_and_ids_keep_inline_component_scopes() {
+    let mut client = Client::new();
+    let mut source=String::from("import QtQuick\nItem {\n Item { id: twin; property int n: 1 }\n component Tile: Item {\n  Item { id: twin; property int n: 2 }\n  property int inside: twin.n\n  property var noOuterParent: parent.outside\n }\n property int outside: twin.n\n function readRows() {\n");
+    for _ in 0..30 {
+        source.push_str("  twin.n;\n");
+    }
+    source.push_str(" }\n");
+    for i in 0..24 {
+        source.push_str(&format!(" Item {{ id: tail{i} }}\n"));
+    }
+    source.push_str("}\n");
+    client.open(URI, &source);
+    for (at, expected) in [
+        (source.find("inside: twin").unwrap() + 8, 4),
+        (source.find("outside: twin").unwrap() + 9, 2),
+        (source.rfind("twin.n;").unwrap() + 5, 2),
+    ] {
+        let result = client.at("textDocument/definition", &source, at);
+        assert_eq!(result["range"]["start"]["line"], expected, "{result}");
+    }
+    let at = source.find("parent.outside").unwrap() + "parent.".len();
+    assert!(client.at("textDocument/definition", &source, at).is_null());
+    client.finish();
+}

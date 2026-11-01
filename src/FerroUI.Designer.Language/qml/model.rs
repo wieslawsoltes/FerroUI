@@ -16,50 +16,100 @@ pub(crate) struct Symbol {
     pub children: Vec<Symbol>,
 }
 
+// An inline component is nested in the source, but its root has no outer
+// QML parent. Keep both relationships without a second index per object.
+#[derive(Clone, Copy)]
+enum Parent {
+    File,
+    Object(usize),
+    Inline(usize),
+}
+
 pub(crate) struct Node {
     pub ty: String,
     pub span: SourceSpan,
     pub type_span: SourceSpan,
     pub scope: usize,
-    pub parent: Option<usize>,
+    parent: Parent,
     pub declarations: BTreeMap<String, (String, SourceSpan)>,
     pub id: Option<(String, SourceSpan)>,
     reads: Vec<ScriptReference>,
+    indexed_reads: bool,
 }
 
 pub(crate) struct Model {
     pub imports: Vec<ferroui_qml_compiler::Import>,
     pub nodes: Vec<Node>,
     pub outline: Symbol,
+    // Handles only: ID strings and declaration spans remain on the nodes.
+    ids: Vec<usize>,
 }
 
 impl Model {
     pub fn new(source: &str, document: Document) -> Self {
         let mut nodes = Vec::new();
-        let outline = object(source, &document.root, None, None, &mut nodes);
+        let outline = object(source, &document.root, Parent::File, None, &mut nodes);
+        let mut ids: Vec<_> = (0..nodes.len())
+            .filter(|&i| nodes[i].id.is_some())
+            .collect();
+        ids.sort_unstable_by(|&a, &b| nodes[a].id_key().cmp(&nodes[b].id_key()).then(a.cmp(&b)));
         Self {
             imports: document.imports,
             nodes,
             outline,
+            ids,
         }
     }
 
     pub fn owner(&self, at: usize) -> Option<usize> {
-        self.nodes
-            .iter()
-            .rposition(|n| n.span.start <= at && at < n.span.end)
+        if self.nodes.len() <= 16 {
+            return self
+                .nodes
+                .iter()
+                .rposition(|n| n.span.start <= at && at < n.span.end);
+        }
+        // Nodes are emitted in source preorder. Start at the last object that
+        // begins before the cursor and climb out of any already closed scopes.
+        let mut index = self
+            .nodes
+            .partition_point(|n| n.span.start <= at)
+            .checked_sub(1)?;
+        loop {
+            let node = &self.nodes[index];
+            if at < node.span.end {
+                return Some(index);
+            }
+            index = match node.parent {
+                Parent::File => return None,
+                Parent::Object(i) | Parent::Inline(i) => i,
+            };
+        }
     }
 
     pub fn id(&self, owner: usize, name: &str) -> Option<usize> {
-        self.nodes.iter().position(|n| {
-            n.scope == self.nodes[owner].scope && n.id.as_ref().is_some_and(|(id, _)| id == name)
-        })
+        let key = (self.nodes[owner].scope, name);
+        let pos = self.ids.partition_point(|&i| self.nodes[i].id_key() < key);
+        self.ids
+            .get(pos)
+            .copied()
+            .filter(|&i| self.nodes[i].id_key() == key)
+    }
+
+    pub fn scoped_ids(&self, scope: usize) -> impl Iterator<Item = &Node> {
+        let start = self.ids.partition_point(|&i| self.nodes[i].scope < scope);
+        self.ids[start..]
+            .iter()
+            .map(|&i| &self.nodes[i])
+            .take_while(move |n| n.scope == scope)
     }
 
     pub fn receiver(&self, owner: usize, name: &str) -> Option<usize> {
         match name {
             "this" => Some(owner),
-            "parent" => self.nodes[owner].parent,
+            "parent" => match self.nodes[owner].parent {
+                Parent::Object(parent) => Some(parent),
+                _ => None,
+            },
             id => self.id(owner, id),
         }
     }
@@ -86,10 +136,7 @@ impl Model {
                 lexical: false,
             });
         }
-        let read = node
-            .reads
-            .iter()
-            .find(|r| contains(r.span) && r.name == name)?;
+        let read = node.read(at, name)?;
         if let Some(receiver) = &read.receiver {
             Some(Target::Member {
                 owner: self.receiver(owner, receiver)?,
@@ -106,6 +153,45 @@ impl Model {
     }
 }
 
+impl Node {
+    fn id_key(&self) -> (usize, &str) {
+        (self.scope, self.id.as_ref().expect("indexed ID").0.as_str())
+    }
+
+    fn index_reads(&mut self) {
+        // Small declarations are cheaper to scan. Leave overlapping fallback
+        // spans in AST order to retain their original lookup precedence.
+        if self.reads.len() <= 16 {
+            return;
+        }
+        if !self
+            .reads
+            .windows(2)
+            .all(|w| w[0].span.end <= w[1].span.start)
+        {
+            // Some AST visitors report an assignment's left side after its
+            // value. Check for overlapping fallback spans before reordering.
+            let mut spans: Vec<_> = self.reads.iter().map(|r| r.span).collect();
+            spans.sort_unstable_by_key(|s| s.start);
+            if spans.windows(2).any(|w| w[0].end > w[1].start) {
+                return;
+            }
+            self.reads.sort_unstable_by_key(|r| r.span.start);
+        }
+        self.indexed_reads = true;
+    }
+
+    fn read(&self, at: usize, name: &str) -> Option<&ScriptReference> {
+        let matches = |r: &ScriptReference| r.span.start <= at && at < r.span.end && r.name == name;
+        if !self.indexed_reads {
+            return self.reads.iter().find(|r| matches(r));
+        }
+        let after = self.reads.partition_point(|r| r.span.start <= at);
+        let r = &self.reads[after.checked_sub(1)?];
+        matches(r).then_some(r)
+    }
+}
+
 pub(super) enum Target {
     Id(usize),
     Member { owner: usize, lexical: bool },
@@ -114,7 +200,7 @@ pub(super) enum Target {
 fn object(
     source: &str,
     obj: &Object,
-    parent: Option<usize>,
+    parent: Parent,
     scope: Option<usize>,
     nodes: &mut Vec<Node>,
 ) -> Symbol {
@@ -129,9 +215,11 @@ fn object(
         parent,
         declarations: BTreeMap::new(),
         reads: Vec::new(),
+        indexed_reads: false,
         id: None,
     });
     let children = members(source, &obj.members, index, nodes);
+    nodes[index].index_reads();
     Symbol {
         name: nodes[index].id.as_ref().map_or_else(
             || obj.type_name.clone(),
@@ -158,12 +246,12 @@ fn members(source: &str, list: &[Member], owner: usize, nodes: &mut Vec<Node>) -
         };
         match binding {
             Some(Binding::Object(o)) => {
-                children.push(object(source, o, Some(owner), Some(scope), nodes))
+                children.push(object(source, o, Parent::Object(owner), Some(scope), nodes))
             }
             Some(Binding::Objects(objects)) => children.extend(
                 objects
                     .iter()
-                    .map(|o| object(source, o, Some(owner), Some(scope), nodes)),
+                    .map(|o| object(source, o, Parent::Object(owner), Some(scope), nodes)),
             ),
             Some(Binding::Expr(Expr::JavaScript(script))) => {
                 nodes[owner].reads.extend(script_references(script, &[]));
@@ -212,7 +300,7 @@ fn members(source: &str, list: &[Member], owner: usize, nodes: &mut Vec<Node>) -
             }
             M::Enum { name, .. } => (name, "enum", 10),
             M::Component { name, object: obj } => {
-                children.push(object(source, obj, None, None, nodes));
+                children.push(object(source, obj, Parent::Inline(owner), None, nodes));
                 (name, "component", 5)
             }
             M::Group {
@@ -225,7 +313,13 @@ fn members(source: &str, list: &[Member], owner: usize, nodes: &mut Vec<Node>) -
             M::Child(obj) | M::OnProperty { object: obj, .. } => {
                 let child_scope =
                     (nodes[owner].ty.rsplit('.').next() != Some("Component")).then_some(scope);
-                out.push(object(source, obj, Some(owner), child_scope, nodes));
+                out.push(object(
+                    source,
+                    obj,
+                    Parent::Object(owner),
+                    child_scope,
+                    nodes,
+                ));
                 continue;
             }
         };
