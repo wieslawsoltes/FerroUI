@@ -1,8 +1,8 @@
 # Build and run Ferro Desktop
 
-Use a native Linux Rust toolchain (the workspace declares Rust 1.89 or later), a C++17 compiler, pkg-config, fontconfig development files, and the development dependencies for the FerroUI X11 and Skia backends. The header fetch uses Bash, curl, GNU tar, sha256sum and flock. Running the accelerated session requires an X server, a Vulkan loader, and a driver with Vulkan 1.1 and X11 presentation support.
+Use a native Linux Rust toolchain (the workspace declares Rust 1.89 or later), a C++17 compiler, pkg-config, fontconfig development files, and the development dependencies for FerroUI’s X11, Wayland (including libwayland-client and libwayland-egl) and Skia backends. The header fetch uses Bash, curl, GNU tar, sha256sum and flock. Running the accelerated session requires a Vulkan loader and a Vulkan 1.1 driver that can present to the current Wayland or X11 display.
 
-From the repository root, build a release binary or start the shell inside your current X11 desktop.
+From the repository root, build a release binary or start the shell inside your current desktop.
 
 ```sh
 samples/LinuxDesktop/build.sh
@@ -18,6 +18,10 @@ samples/LinuxDesktop/build.sh test
 ```
 
 ## Run as a login session
+
+The same installer provides **Ferro Desktop (Wayland)** and **Ferro Desktop (X11)**. The Wayland session starts Sway, which owns input, outputs, compositing and application windows. FerroUI renders its own panels, wallpaper and overlays. See [Wayland session setup, portals and tests](WAYLAND.md).
+
+### X11 session
 
 Install Openbox 3.6 or later, Bash, D-Bus, and your distribution's Xorg display-manager support. Install the binary produced by the release build, then select **Ferro Desktop (X11)** in the login screen.
 

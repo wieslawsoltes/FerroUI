@@ -2221,8 +2221,19 @@ mod app {
             use ferroui_wayland::layer_shell::{LayerConfig, LayerWindow};
 
             let size = window.client_size();
-            let name = window.screens().screen_from_window(window).and_then(|s| s.display_name());
-            let panel = match LayerWindow::new("ferroui-smoke-panel", name.as_deref(), LayerConfig::panel(true, 40)) {
+            // On the headless seat the persistent virtual keyboard is the only device.
+            if let Err(error) = default_keymap_text().and_then(|keymap| probe.keyboard_keymap(&keymap)) {
+                report.check("layer keyboard keymap", false, error);
+                return;
+            }
+            let Some(name) = window.screens().screen_from_window(window).and_then(|screen| screen.display_name()) else {
+                report.check("output identity", false, "the tiled window has no named output".into());
+                return;
+            };
+            let absent = LayerWindow::new("ferroui-smoke-missing", Some("FerroUI-missing-output"), LayerConfig::background());
+            report.check("missing output", absent.is_err(), "request an unavailable output before creating the panel".into());
+            if let Ok(unexpected) = absent { unexpected.close(); }
+            let panel = match LayerWindow::new("ferroui-smoke-panel", Some(&name), LayerConfig::panel(true, 40)) {
                 Ok(panel) => panel,
                 Err(error) => {
                     report.check("create panel", false, error);
@@ -2232,12 +2243,18 @@ mod app {
             let border = Border::new();
             border.set_background(Some(brush(POPUP_FILL)));
             panel.set_content(Some(Control::boxed(border)));
+            let escaped = Rc::new(Cell::new(false));
+            let observed = escaped.clone();
+            panel.add_handler(&ferroui_base::input::InputElement::key_down_event(), move |_, key| {
+                if key.key == Key::Escape { observed.set(true); }
+            });
             panel.show();
             let reserved = wait_for(STEP_TIMEOUT, || window.client_size().height == size.height - 40.0).await;
             report.check("exclusive zone", reserved && panel.client_size() == Size::new(size.width, 40.0),
                 format!("panel {:?}, tiled window {:?}", panel.client_size(), window.client_size()));
-            let visible = picture_with(probe, (5, 5), POPUP_FILL).await;
-            report.check("panel pixels", visible.is_ok(), format!("top-left of the output contains the panel: {}", visible.is_ok()));
+            let visible = picture_with(probe, (5, 5), POPUP_FILL).await
+                .is_ok_and(|frame| close_to(frame.pixel(5, 5), POPUP_FILL));
+            report.check("panel pixels", visible, format!("top edge shows the panel: {visible}"));
 
             if let Err(error) = LayerWindow::configure(&panel, LayerConfig::overlay()) {
                 report.check("set overlay", false, error);
@@ -2246,10 +2263,15 @@ mod app {
                     && window.client_size() == size).await;
                 report.check("live overlay", interactive,
                     format!("keyboard focus {}, size {:?}, tiled window {:?}", panel.is_active(), panel.client_size(), window.client_size()));
+                let sent = probe.keyboard_key(1, true).and_then(|_| probe.keyboard_key(1, false));
+                let received = wait_for(STEP_TIMEOUT, || escaped.get()).await;
+                report.check("overlay key routing", sent.is_ok() && received,
+                    format!("the overlay received the Escape key: {received}"));
             }
 
             panel.hide();
-            let hidden = picture_with(probe, (5, 5), FILL).await.is_ok();
+            let hidden = picture_with(probe, (5, 5), FILL).await
+                .is_ok_and(|frame| close_to(frame.pixel(5, 5), FILL));
             report.check("hide layer", hidden, format!("application visible again: {hidden}"));
             if let Err(error) = LayerWindow::configure(&panel, LayerConfig::panel(false, 32)) {
                 report.check("configure hidden panel", false, error);
@@ -2257,7 +2279,9 @@ mod app {
                 panel.show();
                 let reserved = wait_for(STEP_TIMEOUT, || window.client_size().height == size.height - 32.0).await;
                 let bottom = (size.height * window.render_scaling()) as u32;
-                let visible = picture_with(probe, (5, bottom.saturating_sub(5)), POPUP_FILL).await.is_ok();
+                let y = bottom.saturating_sub(5);
+                let visible = picture_with(probe, (5, y), POPUP_FILL).await
+                    .is_ok_and(|frame| close_to(frame.pixel(5, y), POPUP_FILL));
                 report.check("remap bottom panel", reserved && visible,
                     format!("restored reservation {reserved}, bottom edge visible {visible}"));
             }

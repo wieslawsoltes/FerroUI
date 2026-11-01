@@ -7,6 +7,7 @@ on:
       - 'src/Skia/FerroUI.Skia/**'
       - 'src/FerroUI.Vulkan/**'
       - 'src/FerroUI.X11/**'
+      - 'src/FerroUI.Wayland/**'
       - 'src/FerroUI.Themes.*/**'
       - '.github/workflows/linux-desktop.yml'
   workflow_dispatch:
@@ -39,7 +40,10 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             libfontconfig-dev libfreetype-dev libharfbuzz-dev fonts-dejavu-core \
             libglib2.0-dev libglib2.0-bin pulseaudio pulseaudio-utils \
-            mesa-vulkan-drivers vulkan-validationlayers xvfb xauth openbox xdotool dbus-x11 imagemagick x11-utils x11-xserver-utils
+            mesa-vulkan-drivers vulkan-validationlayers xvfb xauth openbox xdotool dbus-x11 imagemagick x11-utils x11-xserver-utils \
+            libwayland-dev libwayland-egl1 sway swaylock foot grim wl-clipboard wtype wayland-utils jq xwayland \
+            xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk gtk-3-examples python3-gi python3-pyqt5 qtwayland5 \
+            pipewire-bin wireplumber swayidle
       - name: Build and test the Graphite desktop
         run: |
           samples/LinuxDesktop/build.sh build --profile dev
@@ -61,6 +65,15 @@ jobs:
           samples/LinuxDesktop/tests/shortcuts.sh target/debug/ferro-desktop desktop-captures/shortcuts
           samples/LinuxDesktop/tests/session.sh test
           samples/LinuxDesktop/tests/session.sh capture target/debug/ferro-desktop desktop-captures/session
+      - name: Test native Wayland login, live appearances and Xwayland interoperability
+        env:
+          VK_INSTANCE_LAYERS: VK_LAYER_KHRONOS_validation
+          VK_LAYER_ENABLES: VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT
+        run: |
+          FERRO_TEST_QT=1 FERRO_TEST_PORTALS=1 FERRO_TEST_OUTPUT_HOTPLUG=1 FERRO_TEST_LOCK=1 \
+            samples/LinuxDesktop/tests/wayland-session.sh target/debug/ferro-desktop desktop-captures/wayland
+          samples/LinuxDesktop/tests/wayland-session.sh --xwayland target/debug/ferro-desktop desktop-captures/wayland-mixed
+          if grep -E 'Validation Error|SYNC-HAZARD|VUID-' desktop-captures/wayland*/session.log; then exit 1; fi
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:

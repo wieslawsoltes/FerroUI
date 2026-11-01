@@ -10,6 +10,12 @@ case ${1:-} in
     --show=applications|--show=workspaces|--show=settings|--show=notifications)
         exec "${FERRO_DESKTOP_BINARY:-ferro-desktop}" --platform=wayland "$1" ;;
     --lock) exec swaylock -f -c 182332 ;;
+    --idle)
+        # Nested compositors must never subscribe to lock/suspend events on the host login.
+        [[ -z ${FERRO_DESKTOP_NESTED:-} ]] || exit 0
+        command -v swayidle >/dev/null && command -v swaylock >/dev/null || exit 0
+        exec swayidle -w timeout 600 'ferro-desktop-wayland --lock' \
+            before-sleep 'ferro-desktop-wayland --lock' lock 'ferro-desktop-wayland --lock' ;;
     --terminal)
         for terminal in xdg-terminal-exec foot kgx gnome-terminal konsole; do
             if command -v "$terminal" >/dev/null; then exec "$terminal"; fi
@@ -67,7 +73,7 @@ compositor=$!
     mapfile -d '' -t address < <(timeout 30s cat -- "$state/ready")
     if (( ${#address[@]} != 3 )); then echo 'Sway did not publish its session environment.' >&2; exit 1; fi
     export WAYLAND_DISPLAY=${address[0]} SWAYSOCK=${address[1]} DISPLAY=${address[2]}
-    unset FERRO_DESKTOP_WAYLAND_READY
+    unset FERRO_DESKTOP_WAYLAND_READY WAYLAND_SOCKET
     if command -v dbus-update-activation-environment >/dev/null; then
         sync_args=()
         if [[ -z ${FERRO_DESKTOP_NESTED:-} && -S $XDG_RUNTIME_DIR/systemd/private ]]; then sync_args+=(--systemd); fi

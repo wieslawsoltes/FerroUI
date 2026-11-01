@@ -1,6 +1,6 @@
 # Ferro Desktop
 
-Ferro Desktop is a Linux desktop session built from FerroUI controls. The shell owns the desktop surface, application launcher and workspace overview. An EWMH window manager owns placement, stacking and focus of independent X11 clients. This boundary lets existing Linux applications participate without rendering their content a second time in the shell.
+Ferro Desktop is a Linux desktop session built from FerroUI controls. The shell owns the desktop surface, application launcher and workspace overview. The Wayland login uses Sway to composite independent applications. The X11 login uses Openbox. Both use the same FerroUI application catalog, appearance profiles, notifications, device controls and workspace overview.
 
 ## Screenshots
 
@@ -23,12 +23,12 @@ The Quick Settings capture uses a real PulseAudio null sink and isolated Network
 
 | Layer | Responsibility |
 | --- | --- |
-| Shell | Mount the visual tree once. Dispatch actions from buttons, search and keyboard input. |
+| Shell | Share one model across the wallpaper, panels and active overlay. Dispatch actions from buttons, search and keyboard input. |
 | Applications | Discover the signed-in user's desktop entries and launch through Linux application services. |
-| Window management | Observe the X server and delegate operations on real client windows to the window manager. |
+| Window management | Observe Sway IPC or X11 EWMH events. Delegate client placement and focus to the session window manager. |
 | Presentation | Use FerroUI layout, text shaping, input, accessibility and the Skia compositor. Keep native graphics selection in the host. |
 
-Windowed mode runs inside an existing X11 desktop. Login-session mode installs a desktop surface below application windows and uses the session window manager. The two modes share the same shell and application catalog.
+Windowed mode runs inside an existing Wayland or X11 desktop. Login-session mode installs a desktop surface below application windows and uses the session window manager. The two modes share the same shell and application catalog.
 
 ## Run
 
@@ -70,14 +70,16 @@ Quick Settings reads the current default sink using WirePlumber or PulseAudio, i
 
 ## Login session
 
-With Openbox in the session's PATH, install the release binary and choose **Ferro Desktop** from an X11 display manager.
+Install the release binary and choose **Ferro Desktop (Wayland)** or **Ferro Desktop (X11)** at the login screen. Install Sway for Wayland or Openbox for X11.
 
 ```sh
 samples/LinuxDesktop/build.sh
 sudo samples/LinuxDesktop/session/install.sh target/release/ferro-desktop
 ```
 
-The supervisor starts Openbox and the shell on the login display. The shell covers the primary screen and reserves space for the active appearance's panels. **Super+Space** reveals Start, **Super+A** opens Quick Settings, **Super+N** opens notifications, and **Super+Tab** opens the overview. These shortcuts work over a maximized client. Escape restores focus. The shell also updates the titlebars of windows decorated by the managed Openbox instance. Applications that draw their own titlebars control those pixels. Windowed mode leaves the surrounding desktop's work area alone.
+On Wayland, each output has its own wallpaper and panels. Panels reserve space through layer-shell, and opening a launcher or overview creates a keyboard-interactive overlay on the invoking output. Native Wayland and optional Xwayland applications share the window overview. The windowed preview uses ordinary xdg-shell and automatically prefers Wayland when both displays are available. Pass `--platform=x11` or `--platform=wayland` to select a display explicitly. See [Wayland](WAYLAND.md) and [Wayland window actions](WAYLAND-WINDOWS.md).
+
+On X11, the supervisor starts Openbox and the shell on the login display. The shell covers the primary screen and reserves space for the active appearance's panels. **Super+Space** reveals Start, **Super+A** opens Quick Settings, **Super+N** opens notifications, and **Super+Tab** opens the overview. These shortcuts work over a maximized client. Escape restores focus. The shell also updates the titlebars of windows decorated by the managed Openbox instance. Applications that draw their own titlebars control those pixels. Windowed mode leaves the surrounding desktop's work area alone.
 
 ## Renderer and validation
 
