@@ -1,6 +1,6 @@
 //! Resolution-independent wallpaper. The curves and gradient stops are created once at
 //! mount; the compositor retains the drawing while shell controls change independently.
-use super::appearance::{Appearance, Wallpaper};
+use super::appearance::{Appearance, ColorMode, Wallpaper};
 use ferroui_base::media::{Color, Geometry, GradientStop, IBrush, LinearGradientBrush, Stretch};
 use ferroui_controls::Canvas;
 use ferroui_view::prelude::*;
@@ -249,6 +249,10 @@ fn garden(look: Appearance) -> El<Canvas> {
 }
 
 pub(super) fn wallpaper(look: Appearance) -> Element {
+    if look.winui().is_some_and(|s| s.mode == ColorMode::HighContrast) {
+        return border().background(super::chrome::resource("SolidBackgroundFillColorBaseBrush"))
+            .is_hit_test_visible(false).into();
+    }
     let drawing = match look.wallpaper() {
         Wallpaper::Fold => folded_sheet(look),
         Wallpaper::Horizon => horizon(look),

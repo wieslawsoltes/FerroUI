@@ -142,9 +142,14 @@ pub(super) fn row(spacing: f64) -> El<StackPanel> {
 }
 
 pub(super) fn shell_panel() -> El<Border> {
-    border()
-        .background(colors().surface)
-        .border_brush(resource("ControlStrokeColorDefaultBrush"))
+    let frame = if look().winui().is_some() {
+        border().background(resource("SolidBackgroundFillColorSecondaryBrush"))
+            .border_brush(resource("SurfaceStrokeColorFlyoutBrush"))
+    } else {
+        border().background(colors().surface)
+            .border_brush(resource("ControlStrokeColorDefaultBrush"))
+    };
+    frame
         .border_thickness(1)
         .corner_radius(colors().radius)
 }
@@ -155,12 +160,16 @@ pub(super) fn action(name: &str, callback: impl Fn() + 'static) -> El<Button> {
     } else {
         button()
     };
+    let button = if look().winui().is_some() {
+        button.padding(resource("ButtonPadding"))
+    } else {
+        button.padding((12.0, 6.0))
+    };
     button
         .automation_properties_name(name)
         .tool_tip_tip(name)
         .horizontal_content_alignment(H::Center)
         .vertical_content_alignment(V::Center)
-        .padding((12.0, 6.0))
         .on_click(move |_| callback())
 }
 

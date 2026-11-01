@@ -5,6 +5,7 @@ use ferroui_base::media::Color;
 use ferroui_base::styling::{IStyle, ThemeVariant};
 use ferroui_base::Ref;
 use ferroui_controls::Application;
+use ferroui_themes_winui::{DensityStyle, WinUITheme};
 use std::cell::{Cell, RefCell};
 #[cfg(test)]
 use std::env;
@@ -57,8 +58,86 @@ pub enum Wallpaper {
     Garden,
 }
 
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum ColorMode {
+    #[default]
+    Light,
+    Dark,
+    HighContrast,
+}
+
+impl ColorMode {
+    pub const ALL: [Self; 3] = [Self::Light, Self::Dark, Self::HighContrast];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Light => "Light",
+            Self::Dark => "Dark",
+            Self::HighContrast => "High contrast",
+        }
+    }
+
+    fn id(self) -> &'static str {
+        match self {
+            Self::Light => "light",
+            Self::Dark => "dark",
+            Self::HighContrast => "high-contrast",
+        }
+    }
+
+    fn variant(self) -> ThemeVariant {
+        match self {
+            Self::Light => ThemeVariant::light(),
+            Self::Dark => ThemeVariant::dark(),
+            Self::HighContrast => WinUITheme::high_contrast(),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct WinUISettings {
+    pub mode: ColorMode,
+    pub density: DensityStyle,
+}
+
+impl WinUISettings {
+    const DEFAULT: Self = Self { mode: ColorMode::Light, density: DensityStyle::Normal };
+
+    pub fn toggle_density(self) -> Self {
+        let density = match self.density {
+            DensityStyle::Normal => DensityStyle::Compact,
+            DensityStyle::Compact => DensityStyle::Normal,
+        };
+        Self { density, ..self }
+    }
+
+    fn decode(content: &str) -> Option<Self> {
+        let mut words = content.split_whitespace();
+        let color_id = words.next()?;
+        let mode = ColorMode::ALL.into_iter().find(|mode| mode.id() == color_id)?;
+        let density = match words.next()? {
+            "compact" => DensityStyle::Compact,
+            "normal" => DensityStyle::Normal,
+            _ => return None,
+        };
+        words.next().is_none().then_some(Self { mode, density })
+    }
+
+    fn preferred() -> Self {
+        crate::services::preferences::config_path("windows-style").ok()
+            .and_then(|p| fs::read_to_string(p).ok())
+            .and_then(|s| Self::decode(&s)).unwrap_or_default()
+    }
+
+    fn save(self) -> io::Result<()> {
+        let path = crate::services::preferences::config_path("windows-style")?;
+        let density = if self.density == DensityStyle::Compact { "compact" } else { "normal" };
+        crate::services::preferences::replace(&path, format!("{} {density}\n", self.mode.id()).as_bytes())
+    }
+}
+
 #[derive(Clone, Copy)]
-pub struct Appearance(&'static Descriptor);
+pub struct Appearance(&'static Descriptor, Option<WinUISettings>);
 
 #[allow(non_upper_case_globals)]
 impl Appearance {
@@ -86,7 +165,7 @@ impl Appearance {
         tint: |c| Color::from_rgb(c.r.saturating_sub(12), c.b, c.g.saturating_add(49)),
         style: || ferroui_themes_winui::WinUITheme::new().as_style(),
         variant: ThemeVariant::light,
-    });
+    }).with_winui(WinUISettings::DEFAULT);
     pub const MacOS: Self = Self::new(&Descriptor {
         id: "macos",
         name: "macOS",
@@ -140,8 +219,12 @@ impl Appearance {
     pub const ALL: &'static [Self] = &[Self::Windows, Self::MacOS, Self::Material];
 
     pub const fn new(descriptor: &'static Descriptor) -> Self {
-        Self(descriptor)
+        Self(descriptor, None)
     }
+    const fn with_winui(self, settings: WinUISettings) -> Self { Self(self.0, Some(settings)) }
+
+    pub fn winui(self) -> Option<WinUISettings> { self.1 }
+
     pub const fn descriptor(self) -> &'static Descriptor {
         self.0
     }
@@ -168,13 +251,33 @@ impl Appearance {
         self.0.wallpaper
     }
     pub const fn palette(self) -> Palette {
-        self.descriptor().palette
+        let base = self.descriptor().palette;
+        match self.1 {
+            Some(WinUISettings { mode: ColorMode::Dark, .. }) => Palette {
+                text: "#FFFFFF", muted: "#C8C8C8", accent: "#60CDFF",
+                edge: "#484848", surface: "#202020", tile: "#303030",
+                selected: "#244767", on_selected: "#FFFFFF",
+                bar: "#F3202020", bar_edge: "#30FFFFFF", bar_ink: "#FFFFFF",
+                dock_tiles: ["#60CDFF", "#A7CAEB", "#D0D9E1"], ..base
+            },
+            Some(WinUISettings { mode: ColorMode::HighContrast, .. }) => Palette {
+                text: "#FFFFFF", muted: "#FFFFFF", accent: "#FFFF00",
+                edge: "#FFFFFF", surface: "#000000", tile: "#000000",
+                selected: "#1AEBFF", on_selected: "#000000",
+                bar: "#000000", bar_edge: "#FFFFFF", bar_ink: "#FFFFFF",
+                dock_tiles: ["#FFFF00", "#1AEBFF", "#FFFFFF"], ..base
+            },
+            _ => base,
+        }
     }
     pub fn tint(self, color: Color) -> Color {
         (self.0.tint)(color)
     }
     pub fn insets(self) -> (f64, f64) {
-        self.0.insets
+        let (top, bottom) = self.0.insets;
+        if self.winui().is_some_and(|s| s.density == DensityStyle::Compact) {
+            (top, 42.0)
+        } else { (top, bottom) }
     }
 
     pub fn preferred() -> Self {
@@ -188,7 +291,7 @@ impl Appearance {
 
 impl PartialEq for Appearance {
     fn eq(&self, other: &Self) -> bool {
-        self.id() == other.id()
+        self.id() == other.id() && self.1 == other.1
     }
 }
 impl Eq for Appearance {}
@@ -202,17 +305,21 @@ pub struct ThemeController {
     app: Ref<Application>,
     current: Cell<Appearance>,
     installed: RefCell<Rc<dyn IStyle>>,
+    windows: Cell<WinUISettings>,
 }
 
 impl ThemeController {
     pub fn install(app: &Ref<Application>, appearance: Appearance) -> Rc<Self> {
+        let windows = WinUISettings::preferred();
+        let appearance = if appearance.winui().is_some() { appearance.with_winui(windows) } else { appearance };
         let style = (appearance.0.style)();
-        app.set_requested_theme_variant(Some((appearance.0.variant)()));
+        Self::configure(app, appearance, &style);
         app.styles().add(style.clone());
         Rc::new(Self {
             app: app.clone(),
             current: Cell::new(appearance),
             installed: RefCell::new(style),
+            windows: Cell::new(windows),
         })
     }
 
@@ -220,22 +327,53 @@ impl ThemeController {
         self.current.get()
     }
 
-    pub fn select(&self, appearance: Appearance) -> io::Result<()> {
-        if self.current.get() != appearance {
+    fn configure(app: &Application, appearance: Appearance, style: &Rc<dyn IStyle>) {
+        let variant = if let Some(options) = appearance.winui() {
+            let theme = style.as_object().and_then(|object| object.downcast_ref::<WinUITheme>())
+                .expect("Windows appearance installs WinUITheme");
+            theme.set_density_style(options.density);
+            options.mode.variant()
+        } else {
+            (appearance.0.variant)()
+        };
+        app.set_requested_theme_variant(Some(variant));
+    }
+
+    fn apply(&self, appearance: Appearance) {
+        let previous = self.current.get();
+        if previous == appearance { return; }
+        if previous.id() != appearance.id() {
             let style = (appearance.0.style)();
             let styles = self.app.styles();
-            let previous = self.installed.replace(style.clone());
-            if let Some(index) = styles.index_of(previous) {
+            let old = self.installed.replace(style.clone());
+            if let Some(index) = styles.index_of(old) {
                 styles.set(index, style);
             } else {
                 styles.add(style);
             }
-            self.app
-                .set_requested_theme_variant(Some((appearance.0.variant)()));
-            self.current.set(appearance);
         }
+        Self::configure(&self.app, appearance, &self.installed.borrow());
+        self.current.set(appearance);
+    }
+
+    pub fn select(&self, appearance: Appearance) -> io::Result<()> {
+        let appearance = if appearance.winui().is_some() {
+            appearance.with_winui(self.windows.get())
+        } else { appearance };
+        self.apply(appearance);
         save_preference(&preference_path()?, appearance)
     }
+
+    pub fn set_windows(&self, settings: WinUISettings) -> io::Result<()> {
+        let current = self.current();
+        if current.winui().is_some() {
+            self.windows.set(settings);
+            self.apply(current.with_winui(settings));
+            settings.save()?;
+        }
+        Ok(())
+    }
+
 }
 
 fn preference_path() -> io::Result<PathBuf> {

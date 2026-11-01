@@ -3,7 +3,7 @@
 pub mod appearance;
 mod chrome;
 mod desktop;
-use appearance::{Appearance, ThemeController};
+use appearance::{Appearance, ColorMode, ThemeController, WinUISettings};
 mod launcher;
 mod notifications;
 mod quick_settings;
@@ -106,7 +106,14 @@ impl Shell {
     }
 
     fn select_appearance(&self, appearance: Appearance) {
-        let result = self.themes.select(appearance);
+        self.finish_appearance(self.themes.select(appearance));
+    }
+
+    fn select_windows(&self, settings: WinUISettings) {
+        self.finish_appearance(self.themes.set_windows(settings));
+    }
+
+    fn finish_appearance(&self, result: std::io::Result<()>) {
         let applied = self.themes.current();
         let decorations = apply_session_appearance(self.session.as_deref(), applied);
         if self.appearance.get_untracked() != applied {
@@ -407,6 +414,20 @@ fn shortcut(shell: &Rc<Shell>, event: &ferroui_base::input::KeyEventArgs) {
             let index = (key as i32 - Key::D1 as i32) as usize;
             if let Some(appearance) = Appearance::ALL.get(index).copied() {
                 shell.select_appearance(appearance);
+                event.set_handled(true);
+            }
+        }
+        (key, modifiers)
+            if shell.scene.get_untracked() == Scene::Appearance && modifiers.is_empty() &&
+                matches!(key, Key::L | Key::D | Key::H | Key::C) => {
+            if let Some(mut settings) = shell.appearance.get_untracked().winui() {
+                match key {
+                    Key::L => settings.mode = ColorMode::Light,
+                    Key::D => settings.mode = ColorMode::Dark,
+                    Key::H => settings.mode = ColorMode::HighContrast,
+                    _ => settings = settings.toggle_density(),
+                }
+                shell.select_windows(settings);
                 event.set_handled(true);
             }
         }

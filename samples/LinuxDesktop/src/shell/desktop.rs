@@ -1,5 +1,6 @@
 //! Platform-specific desktop composition; scenes use the same session, catalog and input model.
-use super::appearance::{Appearance, Layout};
+use super::appearance::{Appearance, ColorMode, Layout, WinUISettings};
+use ferroui_themes_winui::DensityStyle;
 use super::chrome::*;
 use super::{feedback, popup_header, time_text, wallpaper, workspace_name, Scene, Shell};
 use ferroui_base::layout::{HorizontalAlignment as H, VerticalAlignment as V};
@@ -301,9 +302,13 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 .is_visible(move || !compact.get())
                 .child(running_clients(state)),
         );
-    border()
-        .background(colors().bar)
-        .border_brush(colors().bar_edge)
+    let panel = if look().winui().is_some() {
+        border().background(resource("SolidBackgroundFillColorBaseBrush"))
+            .border_brush(resource("CardStrokeColorDefaultBrush"))
+    } else {
+        border().background(colors().bar).border_brush(colors().bar_edge)
+    };
+    panel
         .border_thickness((0.0, 1.0, 0.0, 0.0))
         .child(
             grid()
@@ -580,11 +585,49 @@ pub(super) fn popup_frame() -> El<Border> {
     }
 }
 
+fn windows_settings(shell: &Rc<Shell>, settings: WinUISettings) -> Element {
+    let mut modes = wrap_panel().automation_properties_name("Windows color mode");
+    for mode in ColorMode::ALL {
+        let state = shell.clone();
+        modes = modes.child(radio_button()
+            .group_name("WinUIColorMode")
+            .automation_properties_name(mode.label())
+            .content(mode.label())
+            .margin((0.0, 0.0, 12.0, 0.0))
+            .is_checked(Some(mode == settings.mode))
+            .on_click(move |_| state.select_windows(WinUISettings { mode, ..settings })));
+    }
+    let state = shell.clone();
+    let compact = settings.density == DensityStyle::Compact;
+    let toggle = toggle_switch()
+        .automation_properties_name("Compact controls")
+        .off_content("Off")
+        .on_content("On")
+        .is_checked(Some(compact))
+        .on_is_checked_changed(move |e| {
+            let Some(toggle) = e.source().and_then(|source| source.downcast::<ferroui_controls::ToggleSwitch>()) else { return; };
+            let checked = toggle.is_checked() == Some(true);
+            if checked != compact { state.select_windows(settings.toggle_density()); }
+        });
+    stack_panel()
+        .spacing(4.0)
+        .margin((0.0, 8.0, 0.0, 0.0))
+        .child(eyebrow("WINDOWS PERSONALIZATION"))
+        .child(shell_text("Color mode", 14.0, Ink::Primary).font_weight(FontWeight::SemiBold))
+        .child(modes)
+        .child(grid().column_definitions("*,Auto").margin((0.0, 6.0, 0.0, 0.0))
+            .child(stack_panel().vertical_alignment(V::Center)
+                .child(shell_text("Compact controls", 14.0, Ink::Primary).font_weight(FontWeight::SemiBold))
+                .child(shell_text("Use tighter control spacing and a shorter taskbar", 11.0, Ink::Secondary)))
+            .child(toggle.grid_column(1)))
+        .into()
+}
+
 pub(super) fn picker(state: &Rc<Shell>) -> Element {
     let mut options = stack_panel().spacing(6.0);
     for (number, appearance) in Appearance::ALL.iter().copied().enumerate() {
         let shell = state.clone();
-        let selected = appearance == state.themes.current();
+        let selected = appearance.id() == state.themes.current().id();
         let description = match appearance.layout() {
             Layout::Taskbar => "Centered taskbar and Start menu",
             Layout::MenuBarDock => "Menu bar, floating Dock and Spotlight-style search",
@@ -645,6 +688,9 @@ pub(super) fn picker(state: &Rc<Shell>) -> Element {
             ),
         );
     }
+    if let Some(settings) = state.themes.current().winui() {
+        options = options.child(windows_settings(state, settings));
+    }
     popup_frame()
         .max_width(530.0)
         .padding(20)
@@ -652,7 +698,7 @@ pub(super) fn picker(state: &Rc<Shell>) -> Element {
             stack_panel()
                 .spacing(14.0)
                 .child(popup_header("Appearance", "PERSONALIZATION", state))
-                .child(scroll_viewer().max_height(360.0).child(options))
+                .child(scroll_viewer().max_height(440.0).child(options))
                 .child(feedback(state.status)),
         )
         .into()
