@@ -99,12 +99,12 @@
         let slots=boundMethods.get(id);
         if(!slots){slots=new Map();boundMethods.set(id,slots);}
         if(slots.has(key)) return slots.get(key);
-        const bound = signature[1] === "initial" ? (parent, properties, ...extra) => {
+        const bound = (signature[1] === "initial" || signature[1] === "loaderInitial") ? (parent, properties, ...extra) => {
             if (extra.length || (properties != null && (typeof properties !== "object" || Array.isArray(properties))))
-                throw new TypeError("createObject expects a parent and optional initial property map");
+                throw new TypeError(key + " expects a target and optional initial property map");
             const entries=Object.entries(properties||{}).map(([key,value]) =>
                 bindingCallbacks.has(value) ? [key,true,atom(bindingCallbacks.get(value))] : [key,false,encode(value,"data")]);
-            return decode(rpc(["construct",id,encode(parent),entries]));
+            return decode(rpc([key === "setSource" ? "loaderSource" : "construct",id,encode(parent),entries]));
         } : (...args)=>decode(rpc(["call",id,key,args.map((v,i)=>encode(v,signature[i]))]));
         methodOwners.set(bound, {id, key});
         callbackAdapters.set(bound,(...args)=>bound(...args.slice(0,signature.length)));

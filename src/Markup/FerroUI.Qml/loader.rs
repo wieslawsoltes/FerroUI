@@ -31,6 +31,9 @@ impl TypeDefinition {
 #[derive(Clone, Default)]
 pub(crate) struct State {
     selection: Option<Selection>,
+    owned_factory: Option<(String, Option<String>, ObjectId)>,
+    initial: Rc<BTreeMap<String, InitialProperty>>,
+    source_origin: Option<String>,
     reload: bool,
 }
 
@@ -95,6 +98,18 @@ impl Transaction<'_> {
                 }
             }
         }
+        if name == "status" && self.model.is_component(owner) {
+            let waiting = self
+                .model
+                .dynamic
+                .loaders
+                .keys()
+                .filter(|id| {
+                    self.model.get(**id, "sourceComponent").ok() == Some(Value::Object(owner))
+                })
+                .copied();
+            self.loader_changes.pending.extend(waiting);
+        }
         if self.loader_changes.projecting {
             return;
         }
@@ -117,9 +132,51 @@ impl Transaction<'_> {
         }
     }
 
+    pub(crate) fn set_loader_source(
+        &mut self,
+        loader: ObjectId,
+        url: String,
+        origin: Option<String>,
+        properties: BTreeMap<String, InitialProperty>,
+    ) -> Result<(), Error> {
+        if self.in_binding() || !self.model.dynamic.loaders.contains_key(&loader) {
+            return Err(Error::new("invalid Loader.setSource call"));
+        }
+        let key = self.model.key(loader, "source")?;
+        self.write(key, Value::String(url.clone()))?;
+        self.select_loader(loader, Selection::File(url));
+        let state = self.loader_state(loader);
+        state.initial = Rc::new(properties);
+        state.source_origin = origin;
+        Ok(())
+    }
+
+    pub(crate) fn loader_call(&mut self, loader: ObjectId, args: &[Value]) -> Result<Value, Error> {
+        let [Value::String(url), properties @ ..] = args else {
+            return Err(Error::new(
+                "Loader.setSource expects a URL and optional initial properties",
+            ));
+        };
+        let props = match properties {
+            [] | [Value::Undefined | Value::Null] => BTreeMap::new(),
+            [Value::Record(record)] if !record.is_array() => self
+                .model
+                .record_entries(record)?
+                .iter()
+                .map(|(k, v)| (k.clone(), InitialProperty::Value(v.clone())))
+                .collect(),
+            _ => return Err(Error::new("invalid Loader initial properties")),
+        };
+        self.set_loader_source(loader, url.clone(), None, props)?;
+        self.settle()?;
+        Ok(Value::Undefined)
+    }
+
     fn select_loader(&mut self, id: ObjectId, selection: Selection) {
         let state = self.loader_state(id);
         state.selection = Some(selection);
+        state.initial = Default::default();
+        state.source_origin = None;
         state.reload = true;
         self.loader_changes.pending.insert(id);
     }
@@ -201,17 +258,43 @@ impl Transaction<'_> {
             self.publish_loader_property(id, "item", Value::Null)?;
             self.destroy_object(item)?;
         }
-        let component = match selection.expect("selected Loader input") {
+        let selection = selection.expect("selected Loader input");
+        let state = &self.model.dynamic.loaders[&id];
+        let origin = state.source_origin.clone();
+        if let Some((old_url, old_origin, factory)) = state.owned_factory.clone() {
+            if !matches!(&selection,Selection::File(url) if *url==old_url && old_origin==origin) {
+                self.loader_state(id).owned_factory = None;
+                self.publish_loader_property(id, "sourceComponent", Value::Null)?;
+                if self.model.node(factory).is_some() {
+                    self.destroy_object(factory)?;
+                }
+            }
+        }
+        let component = match selection {
             Selection::Component(component) => {
                 self.publish_loader_property(id, "source", Value::String(String::new()))?;
                 component
             }
-            Selection::File(source) => {
+            Selection::File(url) if url.is_empty() => {
                 self.publish_loader_property(id, "sourceComponent", Value::Null)?;
-                if !source.is_empty() && active {
-                    return self.publish_status(id, 3, Some(0.));
-                }
                 None
+            }
+            Selection::File(url) => {
+                let cached = self.model.dynamic.loaders[&id]
+                    .owned_factory
+                    .as_ref()
+                    .map(|entry| entry.2)
+                    .filter(|&factory| self.model.node(factory).is_some());
+                if let Some(factory) = cached {
+                    Some(factory)
+                } else if active {
+                    let factory = self.url_factory(id, origin.as_deref(), &url, false, Some(id))?;
+                    self.loader_state(id).owned_factory = Some((url, origin, factory));
+                    self.publish_loader_property(id, "sourceComponent", Value::Object(factory))?;
+                    Some(factory)
+                } else {
+                    None
+                }
             }
         };
         if !active {
@@ -220,15 +303,21 @@ impl Transaction<'_> {
         let Some(component) = component else {
             return self.publish_status(id, 0, Some(0.));
         };
-        if !self.model.is_component(component) {
-            return self.publish_status(id, 3, Some(0.));
+        match self.model.get(component, "status")? {
+            Value::Number(1.) => {}
+            Value::Number(2.) => return self.publish_status(id, 2, Some(0.)),
+            _ => return self.publish_status(id, 3, Some(1.)),
         }
         if self.model.get(id, "asynchronous")? == Value::Bool(true) && !finish {
             self.publish_status(id, 2, Some(0.))?;
             self.deferred.push(deferred::Task::Loader(id));
             return Ok(());
         }
-        let Some(item) = self.try_create_with_properties(component, Some(id), BTreeMap::new())?
+        let Some(item) = self.try_create_with_properties(
+            component,
+            Some(id),
+            (*self.model.dynamic.loaders[&id].initial).clone(),
+        )?
         else {
             return self.publish_status(id, 3, Some(1.));
         };

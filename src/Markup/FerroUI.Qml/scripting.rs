@@ -305,6 +305,12 @@ impl ScriptContext<'_, '_> {
         let result=self.tx.text_component_call(self.owner,args);
         if result.is_err() && before!=self.tx.model.structure_revision(){self.tx.host_result(result)}else{result}
     }
+    pub fn is_loader(&self, object:ObjectId)->bool{self.tx.model.dynamic.loaders.contains_key(&object)}
+    pub fn set_loader_source(&mut self, object:ObjectId, url:String, properties:BTreeMap<String,InitialProperty>)->Result<(),Error> {
+        let origin=self.script.map(|script|script.origin.clone()).filter(|s|!s.is_empty());
+        self.tx.set_loader_source(object,url,origin,properties)?;
+        self.tx.settle()
+    }
     pub fn is_component(&self, object:ObjectId)->bool{self.tx.model.is_component(object)}
     pub fn is_worker_script(&self, id: ObjectId) -> bool {
         self.tx.model.workers.contains(id)
@@ -454,6 +460,7 @@ impl ScriptContext<'_, '_> {
             names.extend(["start", "restart", "stop"].map(str::to_owned));
         }
         if self.tx.model.dynamic.contexts.contains_key(&object){names.insert("destroy".into());}
+        if self.is_loader(object){names.insert("setSource".to_owned());}
         if self.tx.model.is_component(object){names.extend(["createObject","errorString"].map(str::to_owned));}
         if self.tx.model.models.contains_key(&object) {
             names.extend(
@@ -746,7 +753,7 @@ impl Instance {
             return false;
         }
         self.node(object).is_some_and(|node| {
-            (self.dynamic.contexts.contains_key(&object)&&name=="destroy") || (self.is_component(object) && matches!(name,"createObject"|"errorString")) || node.methods.contains_key(name)
+            (self.dynamic.loaders.contains_key(&object) && name=="setSource") || (self.dynamic.contexts.contains_key(&object)&&name=="destroy") || (self.is_component(object) && matches!(name,"createObject"|"errorString")) || node.methods.contains_key(name)
                 || node.native.contains_key(name)
                 || node.signal(name).is_some()
                 || self.workers.contains(object) && name == "sendMessage"
