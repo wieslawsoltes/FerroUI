@@ -49,6 +49,7 @@ impl Kind {
 
 #[derive(Default)]
 pub(crate) struct Model {
+    worker_token: std::cell::OnceCell<u64>,
     order: Vec<u64>,
     rows: BTreeMap<u64, Roles>,
     roles: BTreeMap<String, Kind>,
@@ -193,6 +194,38 @@ pub(crate) fn is_method(name: &str) -> bool {
 }
 
 impl Instance {
+    pub(crate) fn worker_model_snapshot(
+        &self,
+        id: ObjectId,
+    ) -> Result<(u64, u64, Vec<Roles>), Error> {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static NEXT: AtomicU64 = AtomicU64::new(1);
+        let model = self
+            .models
+            .get(&id)
+            .ok_or_else(|| Error::new("invalid ListModel"))?;
+        let token = *model
+            .worker_token
+            .get_or_init(|| NEXT.fetch_add(1, Ordering::Relaxed));
+        let rows = model
+            .order
+            .iter()
+            .map(|&serial| {
+                let row = RowId { model: id, serial };
+                self.model_keys(row)?
+                    .into_iter()
+                    .map(|name| Ok((name.clone(), self.model_role(row, &name)?)))
+                    .collect::<Result<Roles, Error>>()
+            })
+            .collect::<Result<_, _>>()?;
+        Ok((token, self.worker_model_revision(id)?, rows))
+    }
+    pub(crate) fn worker_model_revision(&self, id: ObjectId) -> Result<u64, Error> {
+        let Value::Number(revision) = self.slots[self.key(id, REVISION)?].value else {
+            return Err(Error::new("invalid ListModel revision"));
+        };
+        Ok(revision as u64)
+    }
     pub(crate) fn model_keys(&self, row: RowId) -> Result<Vec<String>, Error> {
         let model = self
             .models

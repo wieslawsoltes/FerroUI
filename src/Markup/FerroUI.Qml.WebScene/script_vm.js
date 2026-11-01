@@ -8,6 +8,12 @@
     for (const name of Object.getOwnPropertyNames(globalThis)) {
         if (name.startsWith("__webScene") || hidden.has(name)) Reflect.deleteProperty(globalThis, name);
     }
+    // A live proxy preserves its model identity. Pending edits keep the
+    // snapshot alive until synchronization, while clean snapshots can collect.
+    const models = new Map(), dirty = new Map(), modelIds = new WeakMap();
+    const collected = new FinalizationRegistry(({id, ref}) => {
+        if (models.get(id) === ref) models.delete(id);
+    });
     let sequence = 0;
     let state = "done";
 
@@ -25,6 +31,8 @@
             case "boolean": return {t: "Bool", v: value};
             case "number": return {t: "Number", v: Object.is(value, -0) ? "-0" : String(value)};
         }
+        const model = modelIds.get(value);
+        if (model) return {t: "Model", v: {id: model.id, revision: model.revision, rows: []}};
         if (typeof value !== "object" || (!Array.isArray(value) &&
             Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)) {
             throw new TypeError("a WorkerScript message must contain plain transferable values");
@@ -44,10 +52,101 @@
             case "Undefined": return undefined;
             case "Bool": case "String": return value.v;
             case "Number": return Number(value.v);
+            case "Model": return loadModel(value.v);
             case "Array": return value.v.map(decode);
             case "Object": return Object.fromEntries(Object.entries(value.v).map(([k,v]) => [k, decode(v)]));
             default: throw new TypeError("invalid WorkerScript value");
         }
+    }
+
+    function loadModel(snapshot) {
+        let state = models.get(snapshot.id)?.deref();
+        if (!state) {
+            state = {id: snapshot.id, revision: snapshot.revision, rows: [], edits: [], conflict: false};
+            state.proxy = modelApi(state);
+            modelIds.set(state.proxy, state);
+            const ref = new WeakRef(state);
+            models.set(state.id, ref);
+            collected.register(state, {id: state.id, ref});
+        }
+        if ((state.conflict || !state.edits.length) && snapshot.revision >= state.revision) {
+            state.revision = snapshot.revision;
+            state.rows = snapshot.rows.map(row => decode({t:"Object",v:row}));
+            state.edits = [];
+            state.conflict = false;
+            dirty.delete(state.id);
+        }
+        return state.proxy;
+    }
+
+    function modelApi(state) {
+        function check(i, end = false) {
+            if (!Number.isInteger(i) || i < 0 || i >= state.rows.length + (end ? 1 : 0))
+                throw new RangeError("ListModel index out of range");
+            return i;
+        }
+        function checkRange(i, n) {
+            check(i);
+            if (!Number.isInteger(n) || n < 1 || i + n > state.rows.length)
+                throw new RangeError("invalid ListModel range");
+        }
+        function row(value) {
+            const encoded = encode(value);
+            if (encoded.t !== "Object") throw new TypeError("ListModel expects a role object");
+            return decode(encoded);
+        }
+        function edit(method, ...args) {
+            state.edits.push({method, args: args.map(arg => encode(arg))});
+            dirty.set(state.id, state);
+        }
+        return Object.freeze({
+            get count() { return state.rows.length; },
+            get(i) {
+                const item = state.rows[check(i)];
+                return new Proxy(item, {
+                    set(_, key, value) {
+                        const index = state.rows.indexOf(item);
+                        if (index < 0) throw new RangeError("removed ListModel row");
+                        state.proxy.setProperty(index, key, value);
+                        return true;
+                    }
+                });
+            },
+            append(value) { const item = row(value); state.rows.push(item); edit("append", item); },
+            insert(i,value) { const item = row(value); state.rows.splice(check(i,true),0,item); edit("insert",i,item); },
+            clear() { state.rows = []; edit("clear"); },
+            remove(i,n=1) { checkRange(i,n); state.rows.splice(i,n); edit("remove",i,n); },
+            move(from,to,n) {
+                checkRange(from,n); checkRange(to,n);
+                const moved = state.rows.splice(from,n);
+                state.rows.splice(to,0,...moved);
+                edit("move",from,to,n);
+            },
+            set(i,value) {
+                check(i,true);
+                const item = row(value);
+                if (i === state.rows.length) state.rows.push(item);
+                else Object.assign(state.rows[i],item);
+                edit("set",i,item);
+            },
+            setProperty(i, name, value) {
+                check(i);
+                if (typeof name !== "string") throw new TypeError("invalid ListModel role");
+                state.rows[i][name] = decode(encode(value));
+                edit("setProperty",i,name,value);
+            },
+            sync() {
+                if (!state.edits.length) return;
+                try {
+                    state.revision = post({t:"Sync",v:{id:state.id,revision:state.revision,edits:state.edits}});
+                    state.edits = [];
+                    dirty.delete(state.id);
+                } catch (error) {
+                    state.conflict = true;
+                    throw error;
+                }
+            }
+        });
     }
 
     const api = Object.seal({onMessage: null, sendMessage(value) { post({t: "Message", v: encode(value)}); }});

@@ -139,10 +139,43 @@ impl Supervisor {
                 .ok_or_else(|| Error::new("invalid WorkerScript frame"))?;
             let event: WorkerEvent = serde_json::from_value(wire.clone())
                 .map_err(|e| Error::new(format!("invalid WorkerScript event: {e}")))?;
-            if !self.delivery.publish(event) {
-                return Err(Error::new("WorkerScript receiver unavailable"));
-            }
-            child.send(json!({"ok":true}), deadline)?;
+            let reply = match event {
+                WorkerEvent::Sync {
+                    id,
+                    revision,
+                    edits,
+                } => {
+                    let ack = self.delivery.synchronize(id, revision, edits)?;
+                    loop {
+                        if self.cancelled.load(Ordering::Acquire) {
+                            return Err(Error::new("WorkerScript stopped"));
+                        }
+                        match ack.recv_timeout(
+                            deadline
+                                .saturating_duration_since(Instant::now())
+                                .min(Duration::from_millis(25)),
+                        ) {
+                            Ok(Ok(revision)) => break json!({"ok":revision}),
+                            Ok(Err(e)) => break json!({"error":e.message}),
+                            Err(mpsc::RecvTimeoutError::Timeout) if Instant::now() < deadline => {
+                                continue
+                            }
+                            Err(_) => {
+                                return Err(Error::new(
+                                    "WorkerScript.sync owner delivery timed out",
+                                ))
+                            }
+                        }
+                    }
+                }
+                event => {
+                    if !self.delivery.publish(event) {
+                        return Err(Error::new("WorkerScript receiver unavailable"));
+                    }
+                    json!({"ok":true})
+                }
+            };
+            child.send(reply, deadline)?;
         }
     }
 }

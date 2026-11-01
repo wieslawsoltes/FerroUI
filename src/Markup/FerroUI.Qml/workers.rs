@@ -23,6 +23,11 @@ pub enum WorkerValue {
     String(String),
     Array(Vec<Self>),
     Object(BTreeMap<String, Self>),
+    Model {
+        id: u64,
+        revision: u64,
+        rows: Vec<BTreeMap<String, Self>>,
+    },
 }
 impl WorkerValue {
     pub fn estimated_bytes(&self) -> usize {
@@ -35,16 +40,33 @@ impl WorkerValue {
                 n.saturating_add(k.len() + 32)
                     .saturating_add(v.estimated_bytes())
             }),
+            Self::Model { rows, .. } => rows.iter().fold(0usize, |n, row| {
+                row.iter().fold(n, |total, (k, v)| {
+                    total
+                        .saturating_add(k.len() + 32)
+                        .saturating_add(v.estimated_bytes())
+                })
+            }),
             _ => 0,
         };
         body.saturating_add(std::mem::size_of::<Self>())
     }
 }
 #[derive(Debug, Serialize, Deserialize)]
+pub struct WorkerEdit {
+    pub method: String,
+    pub args: Vec<WorkerValue>,
+}
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "t", content = "v")]
 pub enum WorkerEvent {
     Ready,
     Message(WorkerValue),
+    Sync {
+        id: u64,
+        revision: u64,
+        edits: Vec<WorkerEdit>,
+    },
     Error(String),
     Stopped(String),
 }
@@ -57,12 +79,14 @@ struct Entry {
     src: String,
     origin: String,
     endpoint: Option<Box<dyn WorkerEndpoint>>,
+    models: BTreeMap<u64, ObjectId>,
 }
 struct Event {
     id: ObjectId,
     generation: u64,
     event: WorkerEvent,
     bytes: usize,
+    ack: Option<std::sync::mpsc::Sender<Result<u64, Error>>>,
 }
 #[derive(Default)]
 struct Inbox {
@@ -102,6 +126,7 @@ impl Inbox {
             generation,
             event: WorkerEvent::Stopped("worker output limit exceeded".into()),
             bytes: 0,
+            ack: None,
         })
     }
 }
@@ -115,6 +140,31 @@ pub struct WorkerDelivery {
 }
 impl WorkerDelivery {
     pub fn publish(&self, event: WorkerEvent) -> bool {
+        self.enqueue(event, None)
+    }
+    pub fn synchronize(
+        &self,
+        id: u64,
+        revision: u64,
+        edits: Vec<WorkerEdit>,
+    ) -> Result<std::sync::mpsc::Receiver<Result<u64, Error>>, Error> {
+        let (ack, done) = std::sync::mpsc::channel();
+        self.enqueue(
+            WorkerEvent::Sync {
+                id,
+                revision,
+                edits,
+            },
+            Some(ack),
+        )
+        .then_some(done)
+        .ok_or_else(|| Error::new("WorkerScript receiver unavailable"))
+    }
+    fn enqueue(
+        &self,
+        event: WorkerEvent,
+        ack: Option<std::sync::mpsc::Sender<Result<u64, Error>>>,
+    ) -> bool {
         let Some(inbox) = self.inbox.upgrade() else {
             return false;
         };
@@ -127,6 +177,13 @@ impl WorkerDelivery {
         let bytes = std::mem::size_of::<Event>().saturating_add(match &event {
             WorkerEvent::Message(v) => v.estimated_bytes(),
             WorkerEvent::Error(s) | WorkerEvent::Stopped(s) => s.len(),
+            WorkerEvent::Sync { edits, .. } => edits.iter().fold(0usize, |n, e| {
+                e.args
+                    .iter()
+                    .fold(n.saturating_add(e.method.len() + 32), |n, v| {
+                        n.saturating_add(v.estimated_bytes())
+                    })
+            }),
             WorkerEvent::Ready => 0,
         });
         let fits = q.queue.len() < EVENT_LIMIT && q.bytes.saturating_add(bytes) <= BYTE_LIMIT;
@@ -136,6 +193,7 @@ impl WorkerDelivery {
                 id: self.id,
                 generation: self.generation,
                 event,
+                ack,
                 bytes,
             });
         } else {
@@ -184,6 +242,7 @@ impl Workers {
                 src: String::new(),
                 origin: origin.to_owned(),
                 endpoint: None,
+                models: Default::default(),
             },
         );
     }
@@ -193,7 +252,7 @@ impl Workers {
 }
 pub(crate) enum Action {
     Load(ObjectId, String),
-    Send(ObjectId, WorkerValue),
+    Send(ObjectId, WorkerValue, BTreeMap<u64, ObjectId>),
 }
 pub(crate) fn register(types: &mut TypeRegistry) -> Result<(), Error> {
     let ty = TypeDefinition::default()
@@ -240,6 +299,7 @@ impl Instance {
                     id,
                     generation,
                     event,
+                    ack,
                     ..
                 }) = inbox.lock().unwrap_or_else(|e| e.into_inner()).pop()
                 else {
@@ -255,9 +315,21 @@ impl Instance {
                 match event {
                     WorkerEvent::Ready => self.transaction(|tx| tx.worker_ready(id, true))?,
                     WorkerEvent::Message(v) => self.transaction(|tx| {
-                        let input = tx.import_worker(v, 0)?;
+                        let input = tx.import_worker(id, v, 0)?;
                         tx.signal(id, "message", vec![input])
                     })?,
+                    WorkerEvent::Sync {
+                        id: model,
+                        revision,
+                        edits,
+                    } => {
+                        let result = self.apply_worker_edits(id, model, revision, edits);
+                        if let Some(ack) = ack {
+                            let _ = ack.send(result);
+                        } else {
+                            result?;
+                        }
+                    }
                     WorkerEvent::Stopped(reason) => {
                         entry.endpoint = None;
                         self.transaction(|tx| tx.worker_ready(id, false))?;
@@ -278,10 +350,43 @@ impl Instance {
         }
         result
     }
+    fn apply_worker_edits(
+        &mut self,
+        worker: ObjectId,
+        token: u64,
+        revision: u64,
+        edits: Vec<WorkerEdit>,
+    ) -> Result<u64, Error> {
+        let id = *self.workers.entries[&worker]
+            .models
+            .get(&token)
+            .ok_or_else(|| Error::new("unknown worker ListModel"))?;
+        if self.worker_model_revision(id)? != revision {
+            return Err(Error::new("ListModel changed before WorkerScript.sync"));
+        }
+        self.transaction(|tx| {
+            for edit in edits {
+                if !matches!(
+                    edit.method.as_str(),
+                    "append" | "insert" | "clear" | "move" | "remove" | "set" | "setProperty"
+                ) {
+                    return Err(Error::new("invalid worker ListModel edit"));
+                }
+                let args = edit
+                    .args
+                    .into_iter()
+                    .map(|v| tx.import_worker(worker, v, 0))
+                    .collect::<Result<Vec<_>, _>>()?;
+                tx.model_call(id, &edit.method, &args, &mut BTreeSet::new())?;
+            }
+            Ok(())
+        })?;
+        self.worker_model_revision(id)
+    }
     pub(crate) fn commit_workers(&mut self, actions: Vec<Action>) {
         for action in actions {
             let id = match &action {
-                Action::Load(id, _) | Action::Send(id, _) => *id,
+                Action::Load(id, _) | Action::Send(id, ..) => *id,
             };
             let Some(entry) = self.workers.entries.get_mut(&id) else {
                 continue;
@@ -293,6 +398,7 @@ impl Instance {
                 }
                 entry.endpoint = None;
                 entry.src = source.clone();
+                entry.models.clear();
                 self.workers.sequence += 1;
                 entry.generation = self.workers.sequence;
                 inbox
@@ -321,11 +427,12 @@ impl Instance {
                     })
                     .map(|actor| entry.endpoint = Some(actor)),
                 Action::Load(..) => Ok(()),
-                Action::Send(_, v) => entry
+                Action::Send(_, v, grants) => entry
                     .endpoint
                     .as_ref()
                     .ok_or_else(|| Error::new("WorkerScript has no source"))
-                    .and_then(|actor| actor.send(v)),
+                    .and_then(|actor| actor.send(v))
+                    .map(|()| entry.models.extend(grants)),
             };
             if let Err(e) = result {
                 events.publish(WorkerEvent::Error(e.message));
@@ -377,11 +484,17 @@ impl Transaction<'_> {
         let [input] = args else {
             return Err(Error::new("WorkerScript.sendMessage expects one message"));
         };
-        let value = self.export_worker(input, 0)?;
-        self.worker_actions.push(Action::Send(id, value));
+        let mut grants = BTreeMap::new();
+        let value = self.export_worker(input, 0, &mut grants)?;
+        self.worker_actions.push(Action::Send(id, value, grants));
         Ok(Value::Undefined)
     }
-    fn export_worker(&mut self, input: &Value, depth: usize) -> Result<WorkerValue, Error> {
+    fn export_worker(
+        &mut self,
+        input: &Value,
+        depth: usize,
+        grants: &mut BTreeMap<u64, ObjectId>,
+    ) -> Result<WorkerValue, Error> {
         self.budget()?;
         if depth >= 64 {
             return Err(Error::new("cyclic or deeply nested worker message"));
@@ -399,9 +512,26 @@ impl Transaction<'_> {
             Value::List(values) => WorkerValue::Array(
                 values
                     .iter()
-                    .map(|v| self.export_worker(v, depth + 1))
+                    .map(|v| self.export_worker(v, depth + 1, grants))
                     .collect::<Result<_, _>>()?,
             ),
+            Value::Object(id) if self.model.models.contains_key(id) => {
+                let (token, revision, rows) = self.model.worker_model_snapshot(*id)?;
+                grants.insert(token, *id);
+                let rows = rows
+                    .into_iter()
+                    .map(|row| {
+                        row.into_iter()
+                            .map(|(k, v)| Ok((k, self.export_worker(&v, depth + 1, grants)?)))
+                            .collect::<Result<_, Error>>()
+                    })
+                    .collect::<Result<_, _>>()?;
+                WorkerValue::Model {
+                    id: token,
+                    revision,
+                    rows,
+                }
+            }
             Value::Record(r) => {
                 let fields = self.model.record_entries(r)?.clone();
                 if r.is_array() {
@@ -411,6 +541,7 @@ impl Transaction<'_> {
                                 self.export_worker(
                                     fields.get(&i.to_string()).unwrap_or(&Value::Undefined),
                                     depth + 1,
+                                    grants,
                                 )
                             })
                             .collect::<Result<_, _>>()?,
@@ -419,7 +550,9 @@ impl Transaction<'_> {
                     WorkerValue::Object(
                         fields
                             .iter()
-                            .map(|(k, v)| Ok((k.clone(), self.export_worker(v, depth + 1)?)))
+                            .map(|(k, v)| {
+                                Ok((k.clone(), self.export_worker(v, depth + 1, grants)?))
+                            })
                             .collect::<Result<_, Error>>()?,
                     )
                 }
@@ -431,12 +564,27 @@ impl Transaction<'_> {
             }
         })
     }
-    fn import_worker(&mut self, input: WorkerValue, depth: usize) -> Result<Value, Error> {
+    fn import_worker(
+        &mut self,
+        worker: ObjectId,
+        input: WorkerValue,
+        depth: usize,
+    ) -> Result<Value, Error> {
         self.budget()?;
         if depth >= 64 {
             return Err(Error::new("deeply nested worker message"));
         }
         Ok(match input {
+            WorkerValue::Model { id, .. } => {
+                let object = *self.model.workers.entries[&worker]
+                    .models
+                    .get(&id)
+                    .ok_or_else(|| Error::new("unknown worker ListModel"))?;
+                if !self.model.models.contains_key(&object) {
+                    return Err(Error::new("retired worker ListModel"));
+                }
+                Value::Object(object)
+            }
             WorkerValue::Undefined => Value::Undefined,
             WorkerValue::Null => Value::Null,
             WorkerValue::Bool(b) => Value::Bool(b),
@@ -447,14 +595,14 @@ impl Transaction<'_> {
             WorkerValue::Array(values) => {
                 let items = values
                     .into_iter()
-                    .map(|v| self.import_worker(v, depth + 1))
+                    .map(|v| self.import_worker(worker, v, depth + 1))
                     .collect::<Result<_, _>>()?;
                 self.new_array(items)
             }
             WorkerValue::Object(values) => {
                 let fields = values
                     .into_iter()
-                    .map(|(k, v)| Ok((k, self.import_worker(v, depth + 1)?)))
+                    .map(|(k, v)| Ok((k, self.import_worker(worker, v, depth + 1)?)))
                     .collect::<Result<_, Error>>()?;
                 self.new_record(fields)
             }

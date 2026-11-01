@@ -88,3 +88,45 @@ fn worker_replies_stream_before_timeout_and_other_workers_remain_usable() {
         app.get(root, "answer").unwrap() == Value::String("1:2/3".into())
     });
 }
+
+#[test]
+fn model_sync_acknowledges_owner_transactions_and_retries_after_conflicting_edits() {
+    let mut app = construct(&generated::compiled_qml());
+    let root = app.root();
+    let Value::Object(actor) = app.get(root, "actor").unwrap() else {
+        panic!()
+    };
+    let Value::Object(model) = app.get(root, "rows").unwrap() else {
+        panic!()
+    };
+    until(&mut app, |app| {
+        app.get(actor, "ready").unwrap() == Value::Bool(true)
+    });
+    app.call(root, "syncRows", vec![]).unwrap();
+    // No event pump can commit the worker's edits before our local revision changes.
+    app.call(
+        model,
+        "setProperty",
+        vec![
+            Value::Number(0.),
+            Value::String("number".into()),
+            Value::Number(42.),
+        ],
+    )
+    .unwrap();
+    until(
+        &mut app,
+        |app| matches!(app.get(root,"answer"),Ok(Value::String(s)) if s.starts_with("conflict:")),
+    );
+    assert_eq!(app.get(model, "count").unwrap(), Value::Number(1.));
+    let Value::ModelRow(row) = app.call(model, "get", vec![Value::Number(0.)]).unwrap() else {
+        panic!()
+    };
+    assert_eq!(app.model_role(row, "number").unwrap(), Value::Number(42.));
+    app.call(root, "syncRows", vec![]).unwrap();
+    until(&mut app, |app| {
+        app.get(root, "answer").unwrap() == Value::String("synced-2".into())
+    });
+    assert_eq!(app.get(model, "count").unwrap(), Value::Number(2.));
+    assert_eq!(app.model_role(row, "number").unwrap(), Value::Number(9.));
+}
