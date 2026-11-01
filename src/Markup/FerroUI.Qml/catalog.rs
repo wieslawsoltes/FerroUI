@@ -20,6 +20,7 @@ fn shape(ty: &str, url: &str, imports: Vec<ir::Import>) -> ir::Object {
     ir::Object {
         type_name: ty.into(),
         source_url: Some(url.into()),
+        source_layers: vec![],
         shadows: vec![],
         composite_types: vec![],
         type_imports: Some(imports),
@@ -41,10 +42,9 @@ impl Template {
         })
     }
 }
-fn resolve(base: Option<&str>, spec: &str) -> Result<String, Error> {
-    let mut target = Url::parse(base.unwrap_or("https://qml.invalid/components/project/Main.qml"))
-        .and_then(|u| u.join(spec))
-        .map_err(|e| Error::new(e.to_string()))?;
+const ENGINE_BASE: &str = "https://qml.invalid/components/project/";
+
+fn project_url(mut target: Url) -> Url {
     if target.host_str() == Some("qml.invalid") {
         if let Some(rest) = target
             .path()
@@ -55,9 +55,95 @@ fn resolve(base: Option<&str>, spec: &str) -> Result<String, Error> {
             target.set_path(&path);
         }
     }
-    Ok(target.to_string())
+    target
 }
+
+fn resolve(base: Option<&str>, spec: &str) -> Result<String, Error> {
+    Url::parse(base.unwrap_or(ENGINE_BASE))
+        .map(project_url)
+        .and_then(|base| base.join(spec))
+        .map(|url| project_url(url).to_string())
+        .map_err(|e| Error::new(e.to_string()))
+}
+
+// QML's URL-to-string display preserves escaped delimiters (e.g. %2F)
+// while showing spaces, unreserved ASCII and UTF-8 path text.
+fn display_url(url: &str) -> String {
+    let bytes = url.as_bytes();
+    let mut output = Vec::with_capacity(bytes.len());
+    let mut at = 0;
+    while at < bytes.len() {
+        if bytes[at] == b'%' {
+            if let Some(byte) = url
+                .get(at + 1..at + 3)
+                .and_then(|hex| u8::from_str_radix(hex, 16).ok())
+            {
+                if !byte.is_ascii() || byte.is_ascii_alphanumeric() || b" -._~".contains(&byte) {
+                    output.push(byte);
+                } else {
+                    output.push(b'%');
+                    output.push(bytes[at + 1].to_ascii_uppercase());
+                    output.push(bytes[at + 2].to_ascii_uppercase());
+                }
+                at += 3;
+                continue;
+            }
+        }
+        output.push(bytes[at]);
+        at += 1;
+    }
+    String::from_utf8(output).unwrap_or_else(|_| url.to_owned())
+}
+
+impl Node {
+    fn scoped_url(&self, scope: Option<u32>) -> Option<&str> {
+        let layer = |scope| self.source_layers.iter().find(|layer| layer.scope == scope);
+        layer(scope)
+            .or_else(|| layer(None))
+            .map(|layer| layer.url.as_str())
+            .or(self.source_url.as_deref())
+    }
+}
+
 impl Instance {
+    pub(crate) fn url_utility(
+        &self,
+        owner: ObjectId,
+        scope: Option<u32>,
+        origin: Option<&str>,
+        name: &str,
+        args: &[Value],
+    ) -> Result<Value, Error> {
+        let Some(Value::String(spec)) = args.first() else {
+            return Err(Error::new(format!("Qt.{name} expects a URL")));
+        };
+        if name == "url" {
+            return match args {
+                [_] => Ok(Value::String(display_url(spec))),
+                _ => Err(Error::new("Qt.url expects one URL")),
+            };
+        }
+        let node_url = |id, scope| {
+            self.node(id)
+                .map(|node| node.scoped_url(scope))
+                .ok_or_else(|| Error::new("invalid URL resolution context"))
+        };
+        let base = match args {
+            [_] => origin.filter(|s| !s.is_empty()).or(node_url(owner, scope)?),
+            [_, Value::Object(id)] => node_url(*id, None)?,
+            [_, Value::Null | Value::Undefined] => Some(ENGINE_BASE),
+            _ => {
+                return Err(Error::new(
+                    "Qt.resolvedUrl expects a URL and an optional object context",
+                ))
+            }
+        };
+        if spec.is_empty() && !matches!(args, [_, Value::Null | Value::Undefined]) {
+            return Ok(Value::String(String::new()));
+        }
+        Ok(Value::String(display_url(&resolve(base, spec)?)))
+    }
+
     pub fn create_component(
         &mut self,
         owner: ObjectId,

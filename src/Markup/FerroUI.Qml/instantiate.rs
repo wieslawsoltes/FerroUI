@@ -869,6 +869,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                     let wrapper = Object {
                         type_name: "$qml_component.Component".into(),
                         source_url: child.source_url.clone(),
+                        source_layers: child.source_layers.clone(),
                         shadows: Vec::new(),
                         composite_types: Vec::new(),
                         type_imports: Some(scope),

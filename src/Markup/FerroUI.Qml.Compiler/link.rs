@@ -359,6 +359,21 @@ impl<R: ComponentResolver> Linker<'_, R> {
         self.stack.pop();
         shadow_properties(&mut base, site, site_context, scope)?;
         merge_site(&mut base, site, site_context)?;
+        if let Some(url) = &template.source_url {
+            base.source_layers.push(SourceLayer {
+                scope: Some(scope),
+                url: url.clone(),
+            });
+        }
+        if let Some(url) = &site.source_url {
+            // The object's QML context comes from the site that instantiated it.
+            // Methods inherited from its definition keep their declaration URLs.
+            base.source_layers.retain(|layer| layer.scope.is_some());
+            base.source_layers.push(SourceLayer {
+                scope: None,
+                url: url.clone(),
+            });
+        }
         base.composite_types.push(type_id);
         *site = base;
         Ok(())

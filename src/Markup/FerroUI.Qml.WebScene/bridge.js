@@ -26,6 +26,8 @@
             const method = methodOwners.get(fn);
             rpc(["callLater", method ? method.id : 0, method ? method.key : atom(fn), args.map(value => encode(value))]);
         },
+        url(...args){return decode(rpc(["url",0,args.map(v=>encode(v))]));},
+        resolvedUrl(...args){return decode(rpc(["resolvedUrl",0,args.map(v=>encode(v)),"https://qml.invalid/components/project/"]));},
         createComponent(...args){return decode(rpc(["createComponent",0,args.map(v=>encode(v))]));},
         createQmlObject(...args){
             try{return decode(rpc(["createQmlObject",0,args.map(v=>encode(v))]));}
@@ -185,9 +187,16 @@
     }
 
     function qtAt(scope, origin) {
-        return Object.freeze({...globalThis.Qt, createComponent(...args) {
-            return decode(rpc(["createComponent",scope,args.map(value=>encode(value)),origin]));
-        }});
+        const scoped = name => (...args) => decode(rpc([name,scope,args.map(value=>encode(value)),origin]));
+        const qt = Object.freeze({...globalThis.Qt, createComponent: scoped("createComponent"),
+            resolvedUrl(...args) {
+                // Detached intrinsics use the calling context, e.g. a reference
+                // returned by a method in a component defined in another file.
+                const here = this === qt;
+                return decode(rpc(["resolvedUrl",here ? scope : 0,args.map(v=>encode(v)),here ? origin : null]));
+            }
+        });
+        return qt;
     }
     function environment(c) {
         if(scopes.has(c.scope)) return scopes.get(c.scope);

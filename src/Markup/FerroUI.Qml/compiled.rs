@@ -220,6 +220,13 @@ impl Frame<'_, '_> {
                 }
                 Ok(Value::Undefined)
             }
+            Receiver::Qt if matches!(name, "url" | "resolvedUrl") => self.tx.model.url_utility(
+                self.owner,
+                self.tx.declaration_scope(),
+                None,
+                name,
+                &args,
+            ),
             Receiver::Qt if name == "createComponent" => {
                 self.tx.component_call(self.owner, None, &args)
             }

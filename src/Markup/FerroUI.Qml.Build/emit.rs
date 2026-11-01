@@ -173,8 +173,10 @@ structure!(PropertyShadow {
     name,
     storage
 });
+structure!(SourceLayer { scope, url });
 structure!(Object {
     source_url,
+    source_layers,
     shadows,
     type_name,
     members,

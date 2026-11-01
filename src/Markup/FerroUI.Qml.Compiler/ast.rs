@@ -119,6 +119,9 @@ pub struct Object {
     /// Virtual source location for declaration-relative resources.
     #[serde(default)]
     pub source_url: Option<String>,
+    /// Declaration and instantiation URLs on a flattened composite root.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub source_layers: Vec<SourceLayer>,
     /// Lexical property lookup entries introduced when flattening source inheritance.
     #[serde(default)]
     pub shadows: Vec<PropertyShadow>,
@@ -129,6 +132,12 @@ pub struct Object {
     pub type_name: String,
     pub members: Vec<Member>,
     pub span: SourceSpan,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct SourceLayer {
+    pub scope: Option<u32>,
+    pub url: String,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

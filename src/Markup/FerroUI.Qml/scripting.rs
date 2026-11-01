@@ -320,6 +320,19 @@ impl ScriptContext<'_, '_> {
             .map(|id| id.map(Value::Object).unwrap_or(Value::Null));
         self.tx.host_result(result)
     }
+    /// URL helpers share the QML declaration context with component factories.
+    pub fn url_from_arguments(
+        &self,
+        name: &str,
+        origin: Option<&str>,
+        args: &[Value],
+    ) -> Result<Value, Error> {
+        let origin = origin.or_else(|| self.script.map(|script| script.origin.as_str()));
+        self.tx
+            .model
+            .url_utility(self.owner, self.tx.declaration_scope(), origin, name, args)
+    }
+
     pub fn component_from_arguments(
         &mut self,
         origin: Option<&str>,

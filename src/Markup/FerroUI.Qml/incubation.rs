@@ -39,6 +39,7 @@ impl PreparedNode {
         Self {
             node: Box::new(Node {
                 source_url: source.source_url.clone(),
+                source_layers: source.source_layers.clone(),
                 context: None,
                 visual_children: definition.visual_children.clone(),
                 shadows: source.shadows.clone(),

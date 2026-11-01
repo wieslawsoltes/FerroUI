@@ -242,22 +242,33 @@ impl Realm {
             }
             return Ok(Json::Null);
         }
-        if matches!(op, "createComponent" | "createQmlObject") {
+        if matches!(
+            op,
+            "createComponent" | "createQmlObject" | "url" | "resolvedUrl"
+        ) {
             let args = field(v, 2)?
                 .as_array()
-                .ok_or_else(|| Error::new("invalid factory args"))?
+                .ok_or_else(|| Error::new("invalid Qt function arguments"))?
                 .iter()
                 .map(|arg| self.decode(ctx, arg))
                 .collect::<Result<Vec<_>, _>>()?;
+            let call = |ctx: &mut ScriptContext<'_, '_>, origin: Option<&str>| {
+                if op == "createComponent" {
+                    ctx.component_from_arguments(origin, &args)
+                } else {
+                    ctx.url_from_arguments(op, origin, &args)
+                }
+            };
+            let origin = v.get(3).and_then(Json::as_str);
             let value = if op == "createQmlObject" {
                 ctx.qml_from_arguments(&args)?
             } else if id == 0 {
-                ctx.component_from_arguments(
-                    v.get(3)
-                        .and_then(Json::as_str)
-                        .or(Some("https://qml.invalid/components/project/")),
-                    &args,
-                )?
+                let origin = if op == "createComponent" {
+                    origin.or(Some("https://qml.invalid/components/project/"))
+                } else {
+                    origin
+                };
+                call(ctx, origin)?
             } else {
                 let scope = self
                     .tables
@@ -267,9 +278,7 @@ impl Realm {
                     .filter(|(owner, _)| *owner == instance)
                     .map(|(_, scope)| scope.clone())
                     .ok_or_else(|| Error::new("expired component scope"))?;
-                ctx.in_scope(&scope, |ctx| {
-                    ctx.component_from_arguments(v.get(3).and_then(Json::as_str), &args)
-                })?
+                ctx.in_scope(&scope, |ctx| call(ctx, origin))?
             };
             return self.encode(instance, &value);
         }

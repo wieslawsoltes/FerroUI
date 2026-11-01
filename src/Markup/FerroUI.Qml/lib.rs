@@ -74,6 +74,7 @@ impl std::ops::DerefMut for NodeEntry {
 }
 struct Node {
     source_url: Option<String>,
+    source_layers: Vec<ir::SourceLayer>,
     context: Option<ObjectId>,
     visual_children: Option<String>,
     shadows: Vec<ir::PropertyShadow>,

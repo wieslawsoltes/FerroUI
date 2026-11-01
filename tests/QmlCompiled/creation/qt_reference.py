@@ -37,6 +37,22 @@ def main():
     component, root = load("origin/Main.qml")
     root.capture()
     assert root.run() == "73/84/95"
+    def url(path):
+        return QUrl.fromLocalFile(str(folder / path))
+    assert root.capturedUrl() == url("origin/captured.svg")
+    assert root.classicUrl() == url("origin/sub/scripts/classic.svg")
+    assert root.esmUrl() == url("origin/module.svg")
+
+    component, root = load("urls/Main.qml")
+    assert root.local() == url("urls/logo.svg").resolved(QUrl("?mode=dark#mark"))
+    assert root.relative() == QUrl("../icons/logo.svg")
+    assert root.absolute() == QUrl("qrc:/app/icons/logo.svg")
+    assert root.display().toString().endswith("/urls/icons/large café%2Fdark.svg")
+    assert root.empty().isEmpty()
+    assert root.definition() == url("urls/sub/reader.svg")
+    assert root.site() == url("urls/site.svg")
+    assert root.objectContext() == url("urls/parent.svg")
+    assert root.engineBase() == url("origin/fallback.svg")
     print("Qt 6.12.0 dynamic component, factory, binding and lifetime probes passed")
 
 if __name__ == "__main__":

@@ -241,6 +241,18 @@ fn factory_origins_survive_closures_and_script_imports() {
         Instance::with_engine(&compiled::compiled_qml(), &reg, Default::default(), engine).unwrap();
     for mut app in [source, built] {
         let root = app.root();
+        for (name, relative) in [
+            ("capturedUrl", "captured.svg"),
+            ("classicUrl", "sub/scripts/classic.svg"),
+            ("esmUrl", "module.svg"),
+        ] {
+            let expected = format!("https://qml.invalid/components/project/{relative}");
+            assert_eq!(
+                app.call(root, name, vec![]).unwrap(),
+                Value::String(expected),
+                "{name}"
+            );
+        }
         app.call(root, "capture", vec![]).unwrap();
         assert_eq!(
             app.call(root, "run", vec![]).unwrap(),
@@ -260,4 +272,65 @@ fn deferred_type_contracts_are_checked_without_running_javascript() {
         let qml=format!("import QtQml; QtObject {{ property Component deferred: Component {{ {body} }} }}");
         let doc=ferroui_qml::ir::parse(&qml).unwrap();assert_eq!(reg.check(&doc).is_ok(),valid,"{qml}");
     }
+}
+
+fn check_url_utilities(mut app: Instance) {
+    const BASE: &str = "https://qml.invalid/components/project/";
+    for (name, expected) in [
+        ("local", format!("{BASE}logo.svg?mode=dark#mark")),
+        ("relative", "../icons/logo.svg".into()),
+        ("absolute", "qrc:/app/icons/logo.svg".into()),
+        ("empty", String::new()),
+        ("display", format!("{BASE}icons/large café%2Fdark.svg")),
+        ("definition", format!("{BASE}sub/reader.svg")),
+        ("site", format!("{BASE}site.svg")),
+        ("objectContext", format!("{BASE}parent.svg")),
+        ("engineBase", format!("{BASE}fallback.svg")),
+    ] {
+        assert_eq!(
+            app.call(app.root(), name, vec![]).unwrap(),
+            Value::String(expected),
+            "{name}"
+        );
+    }
+}
+
+#[test]
+fn url_utilities_preserve_component_and_instantiation_site_origins() {
+    mod generated {
+        include!(concat!(env!("OUT_DIR"), "/url_utilities.rs"));
+    }
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("creation/urls/Main.qml");
+    let doc = ferroui_qml_build::Compiler::new()
+        .load(source)
+        .unwrap()
+        .document;
+    let reg = TypeRegistry::new();
+    check_url_utilities(Instance::new(&doc, &reg, Default::default()).unwrap());
+    check_url_utilities(
+        Instance::new(&generated::compiled_qml(), &reg, Default::default()).unwrap(),
+    );
+}
+
+#[cfg(feature = "webscene")]
+#[test]
+fn guest_url_utilities_preserve_component_and_instantiation_site_origins() {
+    mod generated {
+        include!(concat!(env!("OUT_DIR"), "/url_utilities_guest.rs"));
+    }
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("creation/urls/Main.qml");
+    let doc = ferroui_qml_build::Compiler::new()
+        .with_javascript()
+        .load(source)
+        .unwrap()
+        .document;
+    let engine = std::rc::Rc::new(ferroui_qml_webscene::WebSceneEngine::from_env().unwrap());
+    let reg = TypeRegistry::new();
+    check_url_utilities(
+        Instance::with_engine(&doc, &reg, Default::default(), engine.clone()).unwrap(),
+    );
+    check_url_utilities(
+        Instance::with_engine(&generated::compiled_qml(), &reg, Default::default(), engine)
+            .unwrap(),
+    );
 }

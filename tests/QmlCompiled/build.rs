@@ -43,6 +43,13 @@ fn main() {
         .with_javascript()
         .compile_file("creation/Initial.qml", "component_properties.rs")
         .expect("compile initial bindings");
+    ferroui_qml_build::compile_file("creation/urls/Main.qml", "url_utilities.rs")
+        .expect("compile URL utilities");
+    #[cfg(feature = "webscene")]
+    ferroui_qml_build::Compiler::new()
+        .with_javascript()
+        .compile_file("creation/urls/Main.qml", "url_utilities_guest.rs")
+        .expect("compile guest URL utilities");
     ferroui_qml_build::compile_file("creation/Main.qml", "dynamic_component.rs")
         .expect("compile dynamic component");
     #[cfg(feature = "webscene")]
