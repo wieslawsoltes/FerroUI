@@ -1,0 +1,4 @@
+module Design.Controls
+Tile 1.0 tile-old.qml
+Tile 1.2 tile.qml
+internal Base base.qml

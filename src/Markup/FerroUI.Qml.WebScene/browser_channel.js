@@ -1,0 +1,85 @@
+// One writer and one reader per direction. A bounded slot streams large JSON
+// frames in chunks. Publishing the state after the copy also publishes its bytes.
+(buffer => {
+    const words = new Int32Array(buffer, 0, 2);
+    const data = new Uint8Array(buffer, 8);
+    const encoder = new TextEncoder(), decoder = new TextDecoder("utf-8", {fatal:true});
+    const limit = 32 * 1024 * 1024;
+    // Browser versions differ on whether Web IDL accepts a shared buffer
+    // for these codecs. Probe once per channel, then reuse private storage
+    // on engines that require it.
+    let encodeShared = true, decodeShared = true, scratch;
+    try { encoder.encodeInto("", data); } catch { encodeShared = false; }
+    try { decoder.decode(data.subarray(0, 0)); } catch { decodeShared = false; }
+    function privateBytes(length) {
+        if (!scratch || scratch.length < length)
+            scratch = new Uint8Array(Math.min(data.length, Math.max(256, 2 ** Math.ceil(Math.log2(length || 1)))));
+        return scratch;
+    }
+    function waitFor(empty, until) {
+        for (;;) {
+            const state = Atomics.load(words, 0);
+            if ((state === 0) === empty) return state;
+            const left = until - performance.now();
+            if (left <= 0 || Atomics.wait(words, 0, state, left) === "timed-out")
+                throw new Error("QML browser worker deadline exceeded");
+        }
+    }
+    function publish(state) {
+        Atomics.store(words, 0, state);
+        Atomics.notify(words, 0, 1);
+    }
+    return {
+        write(text, until) {
+            // At most three UTF-8 bytes per UTF-16 unit. When the whole
+            // string fits, encode directly into the exclusively owned slot.
+            if (text.length <= Math.floor(Math.min(limit, data.length) / 3)) {
+                waitFor(true, until);
+                const target = encodeShared ? data : privateBytes(text.length * 3);
+                const {written} = encoder.encodeInto(text, target);
+                if (!encodeShared) data.set(target.subarray(0, written));
+                Atomics.store(words, 1, written);
+                publish(2);
+                return;
+            }
+            if (text.length > limit) throw new Error("QML browser frame exceeds 32 MiB");
+            const bytes = encoder.encode(text);
+            if (bytes.length > limit) throw new Error("QML browser frame exceeds 32 MiB");
+            let offset = 0;
+            do {
+                waitFor(true, until);
+                const count = Math.min(data.length, bytes.length - offset);
+                data.set(bytes.subarray(offset, offset + count));
+                Atomics.store(words, 1, count);
+                offset += count;
+                publish(offset === bytes.length ? 2 : 1);
+            } while (offset < bytes.length);
+        },
+        read(until) {
+            let total = 0;
+            const chunks = [];
+            for (;;) {
+                const state = waitFor(false, until), length = Atomics.load(words, 1);
+                if ((state !== 1 && state !== 2) || length < 0 || length > data.length || (total += length) > limit)
+                    throw new Error("Invalid QML browser frame");
+                if (state === 2 && !chunks.length) {
+                    try {
+                        const bytes = data.subarray(0, length);
+                        if (decodeShared) return decoder.decode(bytes);
+                        const local = privateBytes(length).subarray(0, length);
+                        local.set(bytes);
+                        return decoder.decode(local);
+                    } finally { publish(0); }
+                }
+                const chunk = data.slice(0, length);
+                publish(0);
+                chunks.push(chunk);
+                if (state === 2) break;
+            }
+            const result = new Uint8Array(total);
+            let at = 0;
+            for (const chunk of chunks) { result.set(chunk, at); at += chunk.length; }
+            return decoder.decode(result);
+        }
+    };
+})

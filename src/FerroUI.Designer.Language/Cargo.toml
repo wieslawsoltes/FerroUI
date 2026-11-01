@@ -20,7 +20,19 @@ path = "lib.rs"
 name = "ferroui-xaml-lsp"
 path = "main.rs"
 
+[[bin]]
+name = "ferroui-qml-lsp"
+path = "qml_main.rs"
+required-features = ["qml"]
+
+[features]
+qml = ["dep:ferroui-qml", "dep:ferroui-qml-controls", "dep:ferroui-qml-compiler", "dep:url"]
+
 [dependencies]
+ferroui-qml = { workspace = true, optional = true }
+ferroui-qml-controls = { workspace = true, optional = true }
+ferroui-qml-compiler = { workspace = true, optional = true, features = ["javascript"] }
+url = { version = "2", optional = true }
 ferroui-designer-core = { workspace = true }
 ferroui-designer-project = { workspace = true }
 serde = { version = "1", features = ["derive"] }

@@ -1,0 +1,4 @@
+module Workshop.Gauges
+plugin gaugeplugin
+optional plugin optionaltools
+Dial 1.0 Dial.qml

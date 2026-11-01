@@ -1,0 +1,44 @@
+[package]
+name = "ferroui-qml"
+description = "Native QML object, binding and signal runtime for FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[features]
+diagnostics = []
+javascript = ["ferroui-qml-compiler/javascript"]
+
+http = ["dep:ureq"]
+browser-fetch = ["dep:wasm-bindgen", "dep:wasm-bindgen-futures", "dep:js-sys"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = { workspace = true, optional = true }
+wasm-bindgen-futures = { version = "0.4", optional = true }
+js-sys = { workspace = true, optional = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+ureq = { version = "2.12.1", default-features = false, features = ["tls"], optional = true }
+
+[dependencies]
+web-time = "1.1"
+color = "0.3.3"
+serde = { workspace = true, features = ["derive"] }
+url = "2"
+ferroui-qml-compiler.workspace = true
+
+[package.metadata.release]
+group = "markup"
+
+[[bench]]
+name = "runtime"
+harness = false

@@ -1,0 +1,46 @@
+[package]
+name = "ferroui-qml-webscene"
+description = "WebScene V8 execution backend for FerroUI QML"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "ferroui-qml-webscene-worker"
+path = "worker_main.rs"
+
+[dependencies]
+ferroui-qml.workspace = true
+web-time = "1.1"
+serde_json.workspace = true
+percent-encoding = "2"
+unicode-ident = "1"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+ferroui-qml = { workspace = true, features = ["javascript"] }
+getrandom.workspace = true
+libloading = "0.8"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true, features = ["raw_value"] }
+async-channel = "2"
+wasm-bindgen.workspace = true
+wasm-bindgen-futures = "0.4"
+
+[package.metadata.release]
+group = "markup"
+
+[dev-dependencies]
+tempfile = "3"
+ferroui-qml-build = { workspace = true, features = ["javascript"] }
+ferroui-qml-compiler = { workspace = true, features = ["javascript"] }

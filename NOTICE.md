@@ -153,3 +153,7 @@ licensed under MIT. The source project credits Cheng Lou's original
 [pretext](https://github.com/chenglou/pretext). Each Pretext crate includes the
 full source MIT notice in its own `NOTICE.md`. Source mappings, native service
 adaptations and validation are documented in `docs/porting/pretext.md`.
+
+## QML JavaScript runtime
+
+The optional FerroUI QML worker embeds SystemJS 6.15.1 module-linking code under the MIT License. The worker loads the separately distributed WebScene native runtime. Its package includes the WebScene license and notices for V8, ICU and its other third-party components. The QML package installer extracts those notices alongside the native binaries. [Component notice and SystemJS attribution](src/Markup/FerroUI.Qml.WebScene/NOTICE.md)

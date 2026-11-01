@@ -1,0 +1,94 @@
+use ferroui_qml_build::Compiler;
+use std::ffi::OsString;
+use std::path::PathBuf;
+use std::process::ExitCode;
+
+const USAGE: &str = "Usage: ferroui-qmlc [-I MODULE_ROOT]... [--check] [--static-plugin URI NAME MAJOR.MINOR]... [--javascript] [--qml-entry FILE.qml]... [--js-entry FILE]... [--worker-entry FILE]... INPUT.qml\nEmits a Rust module on stdout; --check only validates source and component linkage.";
+
+fn run() -> Result<(), Box<dyn std::error::Error>> {
+    let mut args = std::env::args_os().skip(1);
+    let mut compiler = Compiler::new();
+    let mut input: Option<OsString> = None;
+    let mut check = false;
+    while let Some(arg) = args.next() {
+        if arg == "--help" || arg == "-h" {
+            println!("{USAGE}");
+            return Ok(());
+        }
+        if arg == "-I" {
+            compiler = compiler.import_path(PathBuf::from(
+                args.next().ok_or("-I requires a module root")?,
+            ));
+        } else if arg == "--static-plugin" {
+            let mut field = || {
+                args.next()
+                    .and_then(|s| s.into_string().ok())
+                    .ok_or("--static-plugin requires URI NAME MAJOR.MINOR")
+            };
+            let module = field()?;
+            let name = field()?;
+            let version = field()?;
+            let (major, minor) = version.split_once('.').ok_or("expected MAJOR.MINOR")?;
+            compiler = compiler.static_plugin(ferroui_qml_compiler::qmldir::StaticPlugin::new(
+                &module,
+                &name,
+                major.parse()?,
+                minor.parse()?,
+            ));
+        } else if arg == "--javascript" {
+            #[cfg(feature = "javascript")]
+            {
+                compiler = compiler.with_javascript();
+            }
+            #[cfg(not(feature = "javascript"))]
+            return Err("--javascript requires ferroui-qml-build's javascript feature".into());
+        } else if arg == "--qml-entry" {
+            compiler = compiler.qml_entry(PathBuf::from(
+                args.next().ok_or("--qml-entry requires a path")?,
+            ));
+        } else if arg == "--worker-entry" {
+            #[cfg(feature = "javascript")]
+            {
+                compiler = compiler.worker_script_entry(PathBuf::from(
+                    args.next()
+                        .ok_or("--worker-entry requires a relative WorkerScript path")?,
+                ));
+            }
+            #[cfg(not(feature = "javascript"))]
+            return Err("--worker-entry requires the javascript feature".into());
+        } else if arg == "--js-entry" {
+            #[cfg(feature = "javascript")]
+            {
+                compiler = compiler.javascript_entry(PathBuf::from(
+                    args.next()
+                        .ok_or("--js-entry requires a relative module path")?,
+                ));
+            }
+            #[cfg(not(feature = "javascript"))]
+            return Err("--js-entry requires ferroui-qml-build's javascript feature".into());
+        } else if arg == "--check" {
+            check = true;
+        } else if arg.to_string_lossy().starts_with('-') || input.replace(arg).is_some() {
+            return Err(USAGE.into());
+        }
+    }
+    let input = PathBuf::from(input.ok_or(USAGE)?);
+    if check {
+        compiler.check(input)?;
+    } else {
+        let output = compiler.compile(input)?;
+        use std::io::Write;
+        std::io::stdout().lock().write_all(output.rust.as_bytes())?;
+    }
+    Ok(())
+}
+
+fn main() -> ExitCode {
+    match run() {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(e) => {
+            eprintln!("{e}");
+            ExitCode::FAILURE
+        }
+    }
+}

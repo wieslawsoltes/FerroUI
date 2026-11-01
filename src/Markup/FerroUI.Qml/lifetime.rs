@@ -1,0 +1,310 @@
+//! QML lifetime changes run as owner-thread transactions. Nodes remain readable
+//! during destruction handlers; committed tombstones release the native payload.
+use super::*;
+use std::time::Duration;
+
+impl Instance {
+    pub fn destroy_object(&mut self, id: ObjectId) -> Result<(), Error> {
+        self.transaction(|tx| tx.destroy_object(id))
+    }
+    pub fn schedule_destroy(&mut self, id: ObjectId, delay: Duration) -> Result<(), Error> {
+        self.transaction(|tx| tx.schedule_destroy(id, delay))
+    }
+    pub(crate) fn retire_objects(&mut self, dead: &BTreeSet<ObjectId>) {
+        if dead.is_empty() {
+            return;
+        }
+        if let Some(engine) = &self.javascript.engine {
+            engine.release_objects(self.script_instance(), dead);
+        }
+        self.dynamic.behaviors.retain(|_, id| !dead.contains(id));
+        self.dynamic.created.retain(|id| !dead.contains(id));
+        self.dynamic.loaders.retain(|id, _| !dead.contains(id));
+        self.dynamic.repeaters.retain(|id, _| !dead.contains(id));
+        self.javascript.connections.retire(dead);
+        self.javascript.deferred.retire(dead);
+        self.retain_connections(|listener| !dead.contains(&listener.receiver));
+        self.watched.retain(|id, _| !dead.contains(id));
+        self.changes
+            .retain(|p, _| !dead.contains(&self.properties[*p].owner));
+        if dead.iter().any(|id| self.models.contains_key(id)) {
+            self.workers.retire_model_grants(dead);
+        }
+        for &id in dead {
+            self.network.retire(id);
+            self.dynamic.deadlines.remove(&id);
+            self.dynamic.file_errors.remove(&id);
+            self.dynamic.loading.remove(&id);
+            self.dynamic.templates.remove(&id);
+            self.dynamic.contexts.remove(&id);
+            self.models.remove(&id);
+            self.bindings.remove(&id);
+            self.dynamic.state_changes.remove(&id);
+            self.timers.remove(id);
+            self.workers.unregister(id);
+            let node = self.nodes[id.index]
+                .data
+                .take()
+                .expect("retiring staged object");
+            for &slot in node.properties.values() {
+                let s = &mut self.slots[slot];
+                s.value = Value::Undefined;
+                s.binding = None;
+                s.overlay = None;
+                s.reads = Edges::Empty;
+                s.dependents = Edges::Empty;
+                let p = &mut self.properties[slot];
+                p.alias = None;
+                p.name.clear();
+                p.ty.clear();
+            }
+        }
+        while self.nodes.last().is_some_and(|n| !n.live) {
+            self.nodes.pop();
+        }
+        while self
+            .properties
+            .last()
+            .is_some_and(|p| p.owner.index >= self.nodes.len())
+        {
+            self.properties.pop();
+            self.slots.pop();
+        }
+    }
+}
+
+pub(crate) fn release_value(v: &Value, dead: &BTreeSet<ObjectId>) -> Option<Value> {
+    match v {
+        Value::Object(id)
+        | Value::DelegateRow(id)
+        | Value::PropertyGroup(id, _)
+        | Value::AnchorGroup(id)
+        | Value::AnchorLine(id, _)
+            if dead.contains(id) =>
+        {
+            Some(Value::Null)
+        }
+        Value::Method(method) if dead.contains(&method.receiver()) => Some(Value::Null),
+        Value::List(items) => {
+            let mut copy: Option<Vec<Value>> = None;
+            for (index, item) in items.iter().enumerate() {
+                if let Some(v) = release_value(item, dead) {
+                    copy.get_or_insert_with(|| items.clone())[index] = v;
+                }
+            }
+            copy.map(Value::List)
+        }
+        _ => None,
+    }
+}
+
+impl crate::transaction::Transaction<'_> {
+    fn dynamic_root(&self, id: ObjectId) -> Result<(), Error> {
+        if self.in_binding() {
+            return Err(Error::new("a binding cannot destroy objects"));
+        }
+        if self.model.roots.units.contains_key(&id) {
+            return Err(Error::new(
+                "document roots and singletons have engine-managed lifetimes",
+            ));
+        }
+        if self.model.node(id).is_none() || !self.model.dynamic.contexts.contains_key(&id) {
+            return Err(Error::new(
+                "only a live dynamically created root can be destroyed",
+            ));
+        }
+        if self
+            .model
+            .models
+            .get(&id)
+            .is_some_and(|m| m.role_owner.is_some())
+        {
+            return Err(Error::new("a nested ListModel is owned by its row"));
+        }
+        if self.model.dynamic.contexts[&id].delegate_inputs.is_some() {
+            return Err(Error::new("delegate lifetime is managed by its Repeater"));
+        }
+        Ok(())
+    }
+    pub(crate) fn schedule_destroy(&mut self, id: ObjectId, delay: Duration) -> Result<(), Error> {
+        self.dynamic_root(id)?;
+        let deadline = self
+            .model
+            .timers
+            .now
+            .checked_add(delay)
+            .ok_or_else(|| Error::new("destruction deadline overflow"))?;
+        let queue = &mut self.model.dynamic.deadlines;
+        self.structure
+            .deadlines
+            .entry(id)
+            .or_insert_with(|| queue.get(&id).copied());
+        queue
+            .entry(id)
+            .and_modify(|old| *old = (*old).min(deadline))
+            .or_insert(deadline);
+        Ok(())
+    }
+    pub(crate) fn destroy_method(&mut self, id: ObjectId, args: &[Value]) -> Result<Value, Error> {
+        let delay = match args {
+            [] => Duration::ZERO,
+            [Value::Number(n)] if n.is_finite() && (0.0..=2147483647.).contains(n) => {
+                Duration::from_millis(*n as u64)
+            }
+            _ => {
+                return Err(Error::new(
+                    "destroy expects an optional nonnegative millisecond delay",
+                ))
+            }
+        };
+        self.schedule_destroy(id, delay)?;
+        Ok(Value::Undefined)
+    }
+    pub(crate) fn destroy_object(&mut self, id: ObjectId) -> Result<(), Error> {
+        self.dynamic_root(id)?;
+        self.destroy_subtrees(&[id])
+    }
+
+    /// Retire a group of sibling delegates with one pass over the arena. Each
+    /// root is already released by its owner before this operation starts.
+    pub(crate) fn destroy_subtrees(&mut self, roots: &[ObjectId]) -> Result<(), Error> {
+        if roots.is_empty() {
+            return Ok(());
+        }
+        let mut dead = BTreeSet::new();
+        let mut stack: Vec<_> = roots.iter().rev().copied().collect();
+        while let Some(object) = stack.pop() {
+            if dead.insert(object) {
+                self.budget()?;
+                self.dispatch(object, "Component.destruction", vec![])?;
+                self.settle()?;
+                stack.extend_from_slice(self.model.children(object));
+                if let Some(repeater) = self.model.dynamic.repeaters.get(&object) {
+                    stack.extend(repeater.items());
+                }
+            }
+        }
+        self.stop_dead_animations(&dead);
+        for &object in &dead {
+            if self.model.dynamic.state_changes.contains_key(&object) {
+                self.exit_change(object)?;
+            }
+            if let Some(declarations) = self.model.bindings.get(&object) {
+                let mut inputs: Vec<_> = declarations.iter().map(|d| d.input).collect();
+                inputs.push(self.model.key(object, "value")?);
+                let Value::Number(mode) = self.model.get(object, "restoreMode")? else {
+                    unreachable!()
+                };
+                for input in inputs {
+                    if let Some(target) = self.model.slots[input].active_target {
+                        self.remove_overlay(target, input, mode as u8);
+                        self.touched(input).active_target = None;
+                    }
+                }
+            }
+        }
+        let parents: BTreeSet<_> = roots
+            .iter()
+            .filter_map(|id| self.model.parent(*id))
+            .collect();
+        for parent in parents {
+            let children = &mut self.model.nodes[parent.index].children;
+            self.structure
+                .children
+                .entry(parent)
+                .or_insert_with(|| children.clone());
+            children.retain(|child| !dead.contains(child));
+        }
+        for object in &dead {
+            let keys: Vec<_> = self.model.nodes[object.index]
+                .properties
+                .values()
+                .copied()
+                .collect();
+            for key in keys {
+                self.replace_reads(key, BTreeSet::new());
+                self.pending.remove(&key);
+                for &dep in self.model.slots[key].dependents.clone().iter() {
+                    self.touched(dep).reads.remove(&key);
+                }
+                self.touched(key).dependents = Edges::Empty;
+            }
+        }
+        for key in 0..self.model.slots.len() {
+            let prop = &self.model.properties[key];
+            if dead.contains(&prop.owner) || self.model.node(prop.owner).is_none() {
+                continue;
+            }
+            let alias_dead = match prop.alias {
+                Some(Alias::Object(id)) => dead.contains(&id),
+                Some(Alias::Slot(t)) => dead.contains(&self.model.properties[t].owner),
+                None => false,
+            };
+            let visual = self.model.nodes[prop.owner.index]
+                .visual_children
+                .as_deref()
+                == Some(prop.name.as_str());
+            let value = &self.model.slots[key].value;
+            let next = if alias_dead {
+                Some(Value::Null)
+            } else if visual {
+                if let Value::List(items) = value {
+                    items.iter().any(|v|matches!(v,Value::Object(child) if dead.contains(child))).then(||Value::List(items.iter().filter(|v| !matches!(v,Value::Object(child) if dead.contains(child))).cloned().collect()))
+                } else {
+                    None
+                }
+            } else {
+                release_value(value, &dead)
+            };
+            if alias_dead {
+                let alias = self.model.properties[key]
+                    .alias
+                    .take()
+                    .expect("invalidated alias");
+                self.structure.aliases.push((key, alias));
+            }
+            let expired = match self.model.slots[key].binding {
+                Some(InstalledBinding::PropertyRead(target)) => {
+                    dead.contains(&self.model.properties[target].owner)
+                }
+                Some(InstalledBinding::StateExpression {
+                    declaration,
+                    receiver,
+                    ..
+                }) => dead.contains(&declaration) || dead.contains(&receiver),
+                _ => false,
+            };
+            if expired {
+                self.replace_reads(key, BTreeSet::new());
+                self.touched(key).binding = None;
+                self.touched(key).dirty = false;
+                self.pending.remove(&key);
+            }
+            if self.model.slots[key]
+                .active_target
+                .is_some_and(|target| dead.contains(&self.model.properties[target].owner))
+            {
+                self.touched(key).active_target = None;
+            }
+            if self.model.slots[key].overlay.is_some() {
+                if let Some(overlay) = &mut self.touched(key).overlay {
+                    overlay.clear_dead_references(&dead);
+                }
+            }
+            if let Some(value) = next {
+                self.set_value(key, value);
+            }
+        }
+        self.model.dynamic.revision = self
+            .model
+            .dynamic
+            .revision
+            .checked_add(1)
+            .ok_or_else(|| Error::new("tree revision exhausted"))?;
+        for &object in &dead {
+            self.model.nodes[object.index].live = false;
+        }
+        self.structure.removed.extend(dead);
+        Ok(())
+    }
+}

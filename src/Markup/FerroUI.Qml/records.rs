@@ -1,0 +1,363 @@
+//! Identity-bearing JavaScript data objects. The engine owns fields and cycles.
+//! Handles held by Rust callers keep their objects reachable. A mark-and-sweep
+//! pass subtracts heap-internal references to find roots without retaining cycles.
+use super::*;
+use std::rc::Weak;
+
+#[derive(Debug, PartialEq, Eq, Hash)]
+struct Identity {
+    engine: u64,
+    index: u64,
+    kind: Kind,
+}
+
+#[derive(Debug, PartialEq, Eq, Hash)]
+enum Kind {
+    Object,
+    Array,
+    Incubator,
+    Geometry(Option<(ObjectId, SlotId)>),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Record(Rc<Identity>);
+
+impl Record {
+    pub fn is_geometry(&self) -> bool {
+        matches!(self.0.kind, Kind::Geometry(_))
+    }
+    pub(crate) fn geometry_slot(&self) -> Option<(ObjectId, SlotId)> {
+        match self.0.kind {
+            Kind::Geometry(source) => source,
+            _ => None,
+        }
+    }
+    pub fn is_incubator(&self) -> bool {
+        self.0.kind == Kind::Incubator
+    }
+    pub(crate) fn index(&self) -> u64 {
+        self.0.index
+    }
+    pub fn is_array(&self) -> bool {
+        self.0.kind == Kind::Array
+    }
+}
+
+struct Entry {
+    revision: u64,
+    token: Weak<Identity>,
+    request: Option<Rc<incubator::Request>>,
+    fields: BTreeMap<String, Value>,
+}
+
+#[derive(Default)]
+pub(crate) struct Heap {
+    pub(crate) revision: u64,
+    next: u64,
+    collect_at: usize,
+    geometry_refs: BTreeMap<(ObjectId, SlotId), Weak<Identity>>,
+    entries: BTreeMap<u64, Entry>,
+}
+
+#[derive(Default)]
+pub(crate) struct Journal {
+    first_new: u64,
+    previous: BTreeMap<(u64, String), Option<Value>>,
+    removed_requests: Vec<(u64, Rc<incubator::Request>)>,
+}
+
+impl Heap {
+    pub(crate) fn revision_of(&self, id: u64) -> Option<u64> {
+        self.entries.get(&id).map(|e| e.revision)
+    }
+
+    pub(crate) fn create(
+        &mut self,
+        engine: u64,
+        array: bool,
+        fields: BTreeMap<String, Value>,
+    ) -> Record {
+        self.insert(
+            engine,
+            if array { Kind::Array } else { Kind::Object },
+            fields,
+            None,
+        )
+    }
+
+    pub(crate) fn geometry(
+        &mut self,
+        engine: u64,
+        shape: Geometry,
+        source: Option<(ObjectId, SlotId)>,
+    ) -> Record {
+        if let Some(key) = source {
+            if let Some(token) = self.geometry_refs.get(&key).and_then(Weak::upgrade) {
+                if self.entries.contains_key(&token.index) {
+                    return Record(token);
+                }
+            }
+            let record = self.insert(engine, Kind::Geometry(source), BTreeMap::new(), None);
+            self.geometry_refs.insert(key, Rc::downgrade(&record.0));
+            return record;
+        }
+        self.insert(
+            engine,
+            Kind::Geometry(None),
+            BTreeMap::from([("$qml:geometry".into(), Value::Geometry(shape))]),
+            None,
+        )
+    }
+    pub(crate) fn new_incubator(&mut self, engine: u64, request: incubator::Request) -> Record {
+        let fields = BTreeMap::from([
+            ("status".into(), Value::Number(2.)),
+            ("object".into(), Value::Null),
+            ("onStatusChanged".into(), Value::Undefined),
+        ]);
+        self.insert(engine, Kind::Incubator, fields, Some(Rc::new(request)))
+    }
+
+    fn insert(
+        &mut self,
+        engine: u64,
+        kind: Kind,
+        fields: BTreeMap<String, Value>,
+        request: Option<Rc<incubator::Request>>,
+    ) -> Record {
+        let index = self.next;
+        self.next += 1;
+        let token = Rc::new(Identity {
+            engine,
+            index,
+            kind,
+        });
+        self.entries.insert(
+            index,
+            Entry {
+                revision: self.revision,
+                token: Rc::downgrade(&token),
+                request,
+                fields,
+            },
+        );
+        Record(token)
+    }
+
+    pub(crate) fn journal(&self) -> Journal {
+        Journal {
+            first_new: self.next,
+            previous: BTreeMap::new(),
+            removed_requests: Vec::new(),
+        }
+    }
+
+    pub(crate) fn rollback(&mut self, journal: Journal) {
+        if !self.entries.split_off(&journal.first_new).is_empty() {
+            self.geometry_refs.retain(|_, token| {
+                token
+                    .upgrade()
+                    .is_some_and(|id| id.index < journal.first_new)
+            });
+        }
+        for (id, request) in journal.removed_requests {
+            self.entries
+                .get_mut(&id)
+                .expect("pending incubator")
+                .request = Some(request);
+        }
+        for ((id, key), value) in journal.previous {
+            let fields = &mut self.entries.get_mut(&id).expect("journalled object").fields;
+            if let Some(old) = value {
+                fields.insert(key, old);
+            } else {
+                fields.remove(&key);
+            }
+        }
+    }
+
+    pub(crate) fn request(&self, record: &Record) -> Option<&Rc<incubator::Request>> {
+        self.entries.get(&record.index())?.request.as_ref()
+    }
+
+    pub(crate) fn take_request(
+        &mut self,
+        record: &Record,
+        journal: &mut Journal,
+    ) -> Option<Rc<incubator::Request>> {
+        let id = record.index();
+        let request = self.entries.get_mut(&id)?.request.take()?;
+        if id < journal.first_new {
+            journal.removed_requests.push((id, request.clone()));
+        }
+        Some(request)
+    }
+
+    pub(crate) fn maybe_collect(&mut self) {
+        if self.entries.len() < self.collect_at.max(64) {
+            return;
+        }
+        self.geometry_refs.retain(|_, weak| weak.strong_count() > 0);
+        // Rc handles also appear inside records (possibly nested in a typed
+        // list). Only references outside the heap are live roots.
+        let mut internal = BTreeMap::<u64, usize>::new();
+        for entry in self.entries.values() {
+            for value in entry.fields.values() {
+                references(value, &mut |id| *internal.entry(id).or_default() += 1);
+            }
+        }
+        let mut stack = self
+            .entries
+            .iter()
+            .filter_map(|(id, e)| {
+                (e.token.strong_count() > internal.get(id).copied().unwrap_or_default())
+                    .then_some(*id)
+            })
+            .collect::<Vec<_>>();
+        let mut marked = BTreeSet::new();
+        while let Some(id) = stack.pop() {
+            if marked.insert(id) {
+                if let Some(entry) = self.entries.get(&id) {
+                    for value in entry.fields.values() {
+                        references(value, &mut |child| stack.push(child));
+                    }
+                }
+            }
+        }
+        self.entries.retain(|id, _| marked.contains(id));
+        self.collect_at = self.entries.len().saturating_mul(2).max(64);
+    }
+}
+
+fn references(value: &Value, visit: &mut impl FnMut(u64)) {
+    match value {
+        Value::Record(record) => visit(record.0.index),
+        Value::List(items) => {
+            for item in items {
+                references(item, visit);
+            }
+        }
+        _ => (),
+    }
+}
+
+impl Instance {
+    pub fn record_entries(&self, record: &Record) -> Result<&BTreeMap<String, Value>, Error> {
+        if record.0.engine != self.identity {
+            return Err(Error::new("foreign JavaScript object"));
+        }
+        self.records
+            .entries
+            .get(&record.0.index)
+            .map(|e| &e.fields)
+            .ok_or_else(|| Error::new("unknown JavaScript object"))
+    }
+
+    pub fn new_record(&mut self, fields: BTreeMap<String, Value>) -> Result<Record, Error> {
+        for value in fields.values() {
+            self.validate_handles(value)?;
+        }
+        let record = self.records.create(self.identity, false, fields);
+        self.records.maybe_collect();
+        Ok(record)
+    }
+
+    pub fn set_record_property(
+        &mut self,
+        record: &Record,
+        key: &str,
+        value: Value,
+    ) -> Result<(), Error> {
+        self.transaction(|tx| tx.set_record_field(record, key, value))
+    }
+}
+
+impl transaction::Transaction<'_> {
+    pub(crate) fn new_record(&mut self, fields: BTreeMap<String, Value>) -> Value {
+        Value::Record(
+            self.model
+                .records
+                .create(self.model.identity, false, fields),
+        )
+    }
+
+    pub(crate) fn set_record_field(
+        &mut self,
+        record: &Record,
+        key: &str,
+        value: Value,
+    ) -> Result<(), Error> {
+        self.model.validate_handles(&value)?;
+        if record.is_geometry() {
+            return self.write_geometry(record, key, value);
+        }
+        if record.is_incubator() && matches!(key, "status" | "object" | "forceCompletion") {
+            return Err(Error::new(format!(
+                "incubator property '{key}' is readonly"
+            )));
+        }
+        if key == "__proto__" {
+            return Err(Error::new("JavaScript prototype mutation is unsupported"));
+        }
+        if record.is_array() {
+            return self.write_array(record, key, value);
+        }
+        self.store_field(record, key, Some(value))
+    }
+
+    pub(crate) fn store_field(
+        &mut self,
+        record: &Record,
+        key: &str,
+        next: Option<Value>,
+    ) -> Result<(), Error> {
+        let previous = self.model.record_entries(record)?.get(key);
+        let id = record.0.index;
+        if id < self.record_changes.first_new {
+            self.record_changes
+                .previous
+                .entry((id, key.into()))
+                .or_insert_with(|| previous.cloned());
+        }
+        // A rolled-back write may conservatively invalidate a copy stamp. The
+        // subscriber compares copied values before delivering an indirect edit.
+        let records = &mut self.model.records;
+        records.revision = records.revision.wrapping_add(1);
+        let entry = records.entries.get_mut(&id).expect("validated object");
+        entry.revision = records.revision;
+        let fields = &mut entry.fields;
+        match next {
+            Some(value) => {
+                fields.insert(key.into(), value);
+            }
+            None => {
+                fields.remove(key);
+            }
+        }
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn collection_releases_cycles_but_keeps_host_roots() {
+        let doc = ir::parse("import QtQml\nQtObject {}").unwrap();
+        let mut vm = Instance::new(&doc, &TypeRegistry::new(), BTreeMap::new()).unwrap();
+        let kept = vm.new_record(BTreeMap::new()).unwrap();
+        let child = vm.new_record(BTreeMap::new()).unwrap();
+        vm.set_record_property(&kept, "child", Value::Record(child.clone()))
+            .unwrap();
+        let token = Rc::downgrade(&child.0);
+        drop(child);
+        for _ in 0..256 {
+            let garbage = vm.new_record(BTreeMap::new()).unwrap();
+            vm.set_record_property(&garbage, "self", Value::Record(garbage.clone()))
+                .unwrap();
+        }
+        assert!(token.upgrade().is_some());
+        assert!(vm.records.entries.len() < 65);
+        assert!(vm.record_entries(&kept).unwrap().contains_key("child"));
+    }
+}
