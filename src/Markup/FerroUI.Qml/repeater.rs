@@ -45,6 +45,7 @@ enum Key {
 
 #[derive(Clone, Default)]
 pub(crate) struct State {
+    rows: BTreeMap<RowId, (usize, ObjectId)>,
     factory: Option<ObjectId>,
     model: Option<Value>,
     entries: Vec<(Key, Option<ObjectId>)>,
@@ -173,6 +174,25 @@ impl Transaction<'_> {
             .properties
             .values()
             .any(|key| self.model.properties[*key].required);
+        if let Some(Value::ModelRow(row)) = inputs.get("model") {
+            let slot = self.model.allocate_property(
+                Property {
+                    owner: root,
+                    name: "$qml:delegateRevision".into(),
+                    ty: "real".into(),
+                    readonly: true,
+                    required: false,
+                    alias: None,
+                },
+                Value::Number(0.),
+            )?;
+            self.model
+                .dynamic
+                .contexts
+                .get_mut(&root)
+                .expect("delegate context")
+                .row_revision = Some((*row, slot));
+        }
         for (name, value) in inputs {
             let key = if required {
                 let Some(&key) = self.model.nodes[root.index].properties.get(name) else {
@@ -222,6 +242,43 @@ impl Transaction<'_> {
                 let value = self.model.typed(&self.model.properties[key].ty, value)?;
                 self.set_value(key, value);
             }
+        }
+        if let Some((_, slot)) = self.model.dynamic.contexts[&item].row_revision {
+            let Value::Number(revision) = self.model.slots[slot].value else {
+                unreachable!()
+            };
+            self.set_value(slot, Value::Number(revision + 1.));
+        }
+        Ok(())
+    }
+
+    /// Role edits preserve the topology. Only structural edits, schema changes,
+    /// and writes made during construction need a complete reconciliation.
+    pub(crate) fn model_repeaters_changed(
+        &mut self,
+        model: ObjectId,
+        edited: Option<RowId>,
+    ) -> Result<(), Error> {
+        let views: Vec<_> = self
+            .model
+            .dynamic
+            .repeaters
+            .iter()
+            .filter_map(|(&id, state)| (state.model == Some(Value::Object(model))).then_some(id))
+            .collect();
+        for id in views {
+            if let Some(row) = edited {
+                if !self.repeater_changes.busy.contains(&id)
+                    && !self.repeater_changes.pending.contains(&id)
+                {
+                    if let Some(&(index, item)) = self.model.dynamic.repeaters[&id].rows.get(&row) {
+                        let inputs = self.model.delegate_inputs(index, &Value::ModelRow(row))?;
+                        self.update_delegate(item, inputs)?;
+                    }
+                    continue;
+                }
+            }
+            self.repeater_changes.pending.insert(id);
         }
         Ok(())
     }
@@ -345,6 +402,16 @@ impl Transaction<'_> {
             self.place_delegates(id, slot);
         }
         if previous != self.model.dynamic.repeaters[&id].entries {
+            let state = self.model.dynamic.repeaters.get_mut(&id).unwrap();
+            state.rows = state
+                .entries
+                .iter()
+                .enumerate()
+                .filter_map(|(index, entry)| match entry {
+                    (Key::Row(row), Some(item)) => Some((*row, (index, *item))),
+                    _ => None,
+                })
+                .collect();
             let revision = self.model.key(id, REVISION)?;
             let Value::Number(n) = self.model.slots[revision].value else {
                 unreachable!()

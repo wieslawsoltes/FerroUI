@@ -1,6 +1,13 @@
 use ferroui_qml::{ir::parse, Error, Instance, ObjectId, TypeDefinition, TypeRegistry, Value};
 
 fn instance(source: &str) -> Result<Instance, Error> {
+    instrumented_instance(source, Default::default())
+}
+
+fn instrumented_instance(
+    source: &str,
+    touches: std::rc::Rc<std::cell::Cell<usize>>,
+) -> Result<Instance, Error> {
     let mut registry = TypeRegistry::new();
     registry.register(
         "QtQuick",
@@ -9,7 +16,19 @@ fn instance(source: &str) -> Result<Instance, Error> {
             .inherits("QtQml", "QtObject")
             .property("data", "list<QtObject>", Value::List(vec![]))
             .default_property("data")
-            .visual_children("data"),
+            .visual_children("data")
+            .context_method(
+                "observe",
+                vec![ferroui_qml::Parameter {
+                    name: "value".into(),
+                    ty: Some("string".into()),
+                }],
+                "string",
+                move |_, args| {
+                    touches.set(touches.get() + 1);
+                    Ok(args[0].clone())
+                },
+            ),
     )?;
     registry.register("QtQuick", "Repeater", TypeDefinition::quick_repeater())?;
     registry.reexport("QtQuick", "QtQml")?;
@@ -173,4 +192,64 @@ fn destroying_a_dynamic_repeater_retires_its_siblings_and_rejects_direct_delegat
     );
     assert!(engine.type_name(a).is_none());
     assert_eq!(engine.children(root), &[factory]);
+}
+
+#[test]
+fn removing_a_row_releases_bindings_that_read_through_its_model_handle() {
+    let mut engine = instance(
+        r#"import QtQuick
+        import QtQml.Models
+        Item {
+            ListModel { id: rows; ListElement { title:"A" } ListElement { title:"B" } }
+            Repeater { id: rep; model: rows; Item { property string label: model.title + rows.count } }
+        }"#,
+    )
+    .unwrap();
+    let rep = engine.id("rep").unwrap();
+    let rows = engine.id("rows").unwrap();
+    let b = item(&mut engine, rep, 1).unwrap();
+    engine
+        .call(rows, "remove", vec![Value::Number(0.)])
+        .unwrap();
+    assert_eq!(item(&mut engine, rep, 0), Some(b));
+    assert_eq!(engine.get(b, "label").unwrap(), Value::String("B1".into()));
+}
+
+#[test]
+fn single_row_edits_invalidate_only_that_rows_delegates() {
+    use std::{cell::Cell, rc::Rc};
+    let reads = Rc::new(Cell::new(0));
+    let rows = r#"ListElement { title: "row" }"#.repeat(1024);
+    let source = format!(
+        r#"import QtQuick
+        import QtQml.Models
+        Item {{
+            ListModel {{ id: rows; {rows} }}
+            Repeater {{ id: rep; model: rows; Item {{ property string label: observe(model.title) }} }}
+            function edit() {{ rows.setProperty(500, "title", "one") }}
+            function setRow() {{ rows.set(500, {{title: "two"}}) }}
+            function editHandle() {{ rows.get(500).title = "three" }}
+            function failedEdit() {{ rows.setProperty(500,"title","four"); missing() }}
+        }}"#
+    );
+    let mut engine = instrumented_instance(&source, reads.clone()).unwrap();
+    let root = engine.root();
+    let rep = engine.id("rep").unwrap();
+    let row = item(&mut engine, rep, 500).unwrap();
+    assert_eq!(reads.get(), 1024);
+    for (method, text) in [("edit", "one"), ("setRow", "two"), ("editHandle", "three")] {
+        reads.set(0);
+        engine.call(root, method, vec![]).unwrap();
+        assert_eq!(reads.get(), 1, "{method} reevaluated unrelated delegates");
+        assert_eq!(item(&mut engine, rep, 500), Some(row));
+        assert_eq!(
+            engine.get(row, "label").unwrap(),
+            Value::String(text.into())
+        );
+    }
+    assert!(engine.call(root, "failedEdit", vec![]).is_err());
+    assert_eq!(
+        engine.get(row, "label").unwrap(),
+        Value::String("three".into())
+    );
 }

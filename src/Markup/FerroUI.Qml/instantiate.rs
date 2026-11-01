@@ -310,6 +310,7 @@ impl TypeRegistry {
             builder.instance.dynamic.contexts.insert(
                 id,
                 dynamic::Context {
+                    row_revision: None,
                     delegate_inputs: None,
                     declaration,
                     ids: Default::default(),

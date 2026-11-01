@@ -8,6 +8,7 @@ pub(crate) struct Template {
     pub scopes: enums::Scopes,
 }
 pub(crate) struct Context {
+    pub row_revision: Option<(RowId, SlotId)>,
     pub delegate_inputs: Option<BTreeMap<String, SlotId>>,
     pub declaration: ObjectId,
     pub ids: BTreeMap<String, ObjectId>,
@@ -284,6 +285,7 @@ impl crate::transaction::Transaction<'_> {
             root,
             Context {
                 declaration,
+                row_revision: None,
                 delegate_inputs: delegate_inputs.map(|_| BTreeMap::new()),
                 ids: Default::default(),
             },

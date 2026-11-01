@@ -58,6 +58,18 @@ pub(crate) struct Model {
 }
 
 impl Model {
+    fn read_field(&self, roles: &Roles, name: &str) -> Value {
+        roles.get(name).cloned().unwrap_or_else(|| {
+            if self.dynamic == Some(false) {
+                self.roles
+                    .get(name)
+                    .map(|k| k.default_value())
+                    .unwrap_or(Value::Undefined)
+            } else {
+                Value::Undefined
+            }
+        })
+    }
     fn prepare(&self, fields: &Roles, dynamic: bool) -> Result<Vec<(String, Kind)>, Error> {
         if self.dynamic.is_some_and(|old| old != dynamic) {
             return Err(Error::new("set dynamicRoles before adding data"));
@@ -119,7 +131,9 @@ impl Model {
         Ok(())
     }
     pub(crate) fn row_ids(&self, model: ObjectId) -> impl Iterator<Item = RowId> + '_ {
-        self.order.iter().map(move |&serial| RowId { model, serial })
+        self.order
+            .iter()
+            .map(move |&serial| RowId { model, serial })
     }
     pub(crate) fn len(&self) -> usize {
         self.order.len()
@@ -129,7 +143,7 @@ impl Model {
 pub(crate) enum Undo {
     Schema(Option<bool>, Vec<String>),
     Insert(usize, u64),
-    Remove(usize, Vec<(u64, Roles)>),
+    Remove(usize, Vec<u64>, BTreeMap<u64, Roles>),
     Move {
         from: usize,
         to: usize,
@@ -151,8 +165,8 @@ impl Undo {
                 model.order.remove(at);
                 model.rows.remove(&id);
             }
-            Self::Remove(at, rows) => {
-                model.order.splice(at..at, rows.iter().map(|(id, _)| *id));
+            Self::Remove(at, order, rows) => {
+                model.order.splice(at..at, order);
                 model.rows.extend(rows);
             }
             Self::Move { from, to, count } => model.move_range(to, from, count),
@@ -262,17 +276,7 @@ impl Instance {
             .rows
             .get(&row.serial)
             .ok_or_else(|| Error::new("model row was removed"))?;
-        Ok(roles.get(name).cloned().unwrap_or_else(|| {
-            if model.dynamic == Some(false) {
-                model
-                    .roles
-                    .get(name)
-                    .map(|k| k.default_value())
-                    .unwrap_or(Value::Undefined)
-            } else {
-                Value::Undefined
-            }
-        }))
+        Ok(model.read_field(roles, name))
     }
     pub(crate) fn validate_model_modes(&self, changed: &BTreeSet<ObjectId>) -> Result<(), Error> {
         for id in changed {
@@ -293,6 +297,35 @@ impl Transaction<'_> {
         name: &str,
         reads: &mut BTreeSet<SlotId>,
     ) -> Result<Value, Error> {
+        // A delegate bound to its own row subscribes to its local revision.
+        // Other consumers retain the model-wide invalidation contract.
+        let delegate = self
+            .current_binding
+            .and_then(|slot| self.model.node(self.model.properties[slot].owner)?.context)
+            .and_then(|root| self.model.dynamic.contexts.get(&root)?.row_revision);
+        if let Some((own_row, revision)) = delegate {
+            if own_row == row {
+                self.read(revision, reads)?;
+                if !self.model.models[&row.model].rows.contains_key(&row.serial) {
+                    // Count or other dependencies can still invalidate an outgoing
+                    // delegate before its removal signal. Read its last row values.
+                    if let Some(fields) =
+                        self.model_edits
+                            .iter()
+                            .rev()
+                            .find_map(|(id, undo)| match undo {
+                                Undo::Remove(_, _, removed) if *id == row.model => {
+                                    removed.get(&row.serial)
+                                }
+                                _ => None,
+                            })
+                    {
+                        return Ok(self.model.models[&row.model].read_field(fields, name));
+                    }
+                }
+                return self.model.model_role(row, name);
+            }
+        }
         self.read(self.model.key(row.model, REVISION)?, reads)?;
         self.model.model_role(row, name)
     }
@@ -315,7 +348,7 @@ impl Transaction<'_> {
         }
         Ok(())
     }
-    fn finish_model_edit(&mut self, id: ObjectId) -> Result<(), Error> {
+    fn finish_model_edit(&mut self, id: ObjectId, row: Option<RowId>) -> Result<(), Error> {
         let count = self.model.models[&id].len();
         let size = self.model.key(id, "count")?;
         let revision = self.model.key(id, REVISION)?;
@@ -324,9 +357,7 @@ impl Transaction<'_> {
         };
         self.set_value(size, Value::Number(count as f64));
         self.set_value(revision, Value::Number(previous + 1.));
-        self.repeater_changes.pending.extend(self.model.dynamic.repeaters.keys().filter(|repeater| {
-            self.model.get(**repeater, "model").ok() == Some(Value::Object(id))
-        }));
+        self.model_repeaters_changed(id, row)?;
         self.settle()
     }
     fn model_dict(&self, value: &Value) -> Result<Roles, Error> {
@@ -356,7 +387,12 @@ impl Transaction<'_> {
         self.model_edits.push((id, Undo::Insert(at, serial)));
         Ok(())
     }
-    fn update_row(&mut self, row: RowId, fields: Roles, dynamic: bool) -> Result<(), Error> {
+    fn update_row(
+        &mut self,
+        row: RowId,
+        fields: Roles,
+        dynamic: bool,
+    ) -> Result<Option<RowId>, Error> {
         if !self
             .model
             .models
@@ -365,6 +401,7 @@ impl Transaction<'_> {
         {
             return Err(Error::new("invalid model row"));
         }
+        let roles = self.model.models[&row.model].roles.len();
         self.role_schema(row.model, &fields, dynamic)?;
         let previous = self
             .model
@@ -386,25 +423,26 @@ impl Transaction<'_> {
             .collect();
         self.model_edits
             .push((row.model, Undo::Update(row.serial, changes)));
-        Ok(())
+        Ok((roles == self.model.models[&row.model].roles.len()).then_some(row))
     }
     pub(crate) fn write_role(&mut self, row: RowId, name: &str, value: Value) -> Result<(), Error> {
         if self.in_binding() {
             return Err(Error::new("a binding cannot modify a ListModel"));
         }
         let dynamic = self.model.get(row.model, "dynamicRoles")? == Value::Bool(true);
-        self.update_row(row, BTreeMap::from([(name.to_owned(), value)]), dynamic)?;
-        self.finish_model_edit(row.model)
+        let edited = self.update_row(row, BTreeMap::from([(name.to_owned(), value)]), dynamic)?;
+        self.finish_model_edit(row.model, edited)
     }
     fn remove_rows(&mut self, id: ObjectId, range: Range<usize>) {
         let model = self.model.models.get_mut(&id).unwrap();
         let at = range.start;
-        let removed = model
-            .order
-            .drain(range)
-            .map(|row| (row, model.rows.remove(&row).unwrap()))
+        let order: Vec<_> = model.order.drain(range).collect();
+        let removed = order
+            .iter()
+            .map(|row| (*row, model.rows.remove(row).unwrap()))
             .collect();
-        self.model_edits.push((id, Undo::Remove(at, removed)));
+        self.model_edits
+            .push((id, Undo::Remove(at, order, removed)));
     }
     pub(crate) fn model_call(
         &mut self,
@@ -478,7 +516,9 @@ impl Transaction<'_> {
                         model: id,
                         serial: self.model.models[&id].order[at],
                     };
-                    self.update_row(row, fields, dynamic)?;
+                    let edited = self.update_row(row, fields, dynamic)?;
+                    self.finish_model_edit(id, edited)?;
+                    return Ok(Value::Undefined);
                 }
             }
             ("setProperty", [index, Value::String(name), value]) => {
@@ -518,7 +558,7 @@ impl Transaction<'_> {
                 )))
             }
         }
-        self.finish_model_edit(id)?;
+        self.finish_model_edit(id, None)?;
         Ok(Value::Undefined)
     }
 }
