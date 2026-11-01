@@ -1067,6 +1067,10 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             ));
         }
         let when = self.instance.key(owner, "when")?;
+        let literal = matches!(binding, Binding::Expr(expr) if expr.as_literal().is_some());
+        let delayed = (!literal)
+            .then(|| self.instance.key(owner, "delayed"))
+            .transpose()?;
         let input = self.instance.allocate_property(
             Property {
                 owner,
@@ -1082,6 +1086,8 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         slot.scope = scope;
         slot.binding = Some(InstalledBinding::Guarded {
             when,
+            delayed,
+            delivery: binding_object::Delivery::Immediate,
             expression: Rc::new(binding.clone()),
         });
         slot.dirty = true;

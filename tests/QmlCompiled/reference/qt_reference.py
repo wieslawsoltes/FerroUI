@@ -20,7 +20,10 @@ def qt_results():
     obj = component.create()
     if obj is None:
         raise RuntimeError("\n".join(e.toString() for e in component.errors()))
-    results = {case: getattr(obj, case)() for case in CASES}
+    results = {}
+    for case in CASES:
+        app.processEvents()
+        results[case] = getattr(obj, case)()
     del obj, component, engine, app
     return results
 

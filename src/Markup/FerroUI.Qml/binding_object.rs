@@ -4,6 +4,30 @@
 use super::*;
 use crate::transaction::Transaction;
 
+/// Qt's delayed multi-target form writes changed proxy properties to the target.
+/// When a queued delivery runs with when=false, the proxy keeps its pending
+/// notification until delayed mode is rebuilt. Literal targets use overlays.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Delivery {
+    Immediate,
+    Watching,
+    Queued,
+    Blocked,
+}
+
+impl Slot {
+    fn group_delivery(&self) -> Option<Delivery> {
+        match self.binding.as_ref()? {
+            InstalledBinding::Guarded {
+                delayed: Some(_),
+                delivery,
+                ..
+            } => Some(*delivery),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Clone, Copy)]
 pub(crate) struct Declaration {
     pub(crate) input: SlotId,
@@ -91,8 +115,31 @@ impl Transaction<'_> {
         for index in 0..self.model.bindings[&object].len() {
             let declaration = self.model.bindings[&object][index];
             let live = self.model.node(declaration.target_owner).is_some();
+            let input = declaration.input;
+            if let Some(delivery) = self.model.slots[input].group_delivery() {
+                if delayed {
+                    if delivery == Delivery::Immediate {
+                        self.update_overlay(input, None, false, mode);
+                        self.set_group_delivery(
+                            input,
+                            if enabled {
+                                Delivery::Watching
+                            } else {
+                                Delivery::Blocked
+                            },
+                        );
+                        if enabled && live {
+                            self.write(declaration.target, self.model.slots[input].value.clone())?;
+                        }
+                    }
+                    continue;
+                }
+                if delivery != Delivery::Immediate {
+                    self.set_group_delivery(input, Delivery::Immediate);
+                }
+            }
             let target = (enabled && live).then_some(declaration.target);
-            self.update_overlay(declaration.input, target, delayed, mode);
+            self.update_overlay(input, target, delayed, mode);
         }
         Ok(())
     }
@@ -148,11 +195,44 @@ impl Transaction<'_> {
         }
     }
 
+    fn set_group_delivery(&mut self, key: SlotId, state: Delivery) {
+        if let Some(InstalledBinding::Guarded { delivery, .. }) = &mut self.touched(key).binding {
+            *delivery = state;
+        }
+    }
+
+    pub(crate) fn queue_group_input(&mut self, key: SlotId) {
+        if matches!(
+            self.model.slots[key].group_delivery(),
+            Some(Delivery::Watching | Delivery::Queued)
+        ) {
+            self.set_group_delivery(key, Delivery::Queued);
+            self.deferred
+                .push(deferred::Task::Binding(self.model.properties[key].owner));
+        }
+    }
+
     pub(crate) fn publish_delayed(&mut self, object: ObjectId) -> Result<(), Error> {
         let input = self.model.key(object, "value")?;
         self.publish_input(input);
+        let enabled = self.model.get(object, "when")? == Value::Bool(true);
         for index in 0..self.model.bindings[&object].len() {
-            self.publish_input(self.model.bindings[&object][index].input);
+            let declaration = self.model.bindings[&object][index];
+            match self.model.slots[declaration.input].group_delivery() {
+                Some(Delivery::Queued | Delivery::Watching) if !enabled => {
+                    self.set_group_delivery(declaration.input, Delivery::Blocked);
+                }
+                Some(Delivery::Queued) => {
+                    self.set_group_delivery(declaration.input, Delivery::Watching);
+                    if self.model.node(declaration.target_owner).is_some() {
+                        self.write(
+                            declaration.target,
+                            self.model.slots[declaration.input].value.clone(),
+                        )?;
+                    }
+                }
+                _ => self.publish_input(declaration.input),
+            }
         }
         Ok(())
     }

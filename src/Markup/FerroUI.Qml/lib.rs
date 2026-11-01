@@ -150,6 +150,8 @@ enum InstalledBinding {
     },
     Guarded {
         when: SlotId,
+        delayed: Option<SlotId>,
+        delivery: binding_object::Delivery,
         expression: Rc<Binding>,
     },
     StateExpression {

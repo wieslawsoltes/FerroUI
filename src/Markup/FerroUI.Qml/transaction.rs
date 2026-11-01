@@ -586,8 +586,19 @@ impl Transaction<'_> {
                         self.check_binding_edges(key, &reads)?;
                         value
                     }
-                    InstalledBinding::Guarded { when, expression } => {
-                        if self.read(when, &mut reads)? == Value::Bool(true) {
+                    InstalledBinding::Guarded {
+                        when,
+                        delayed,
+                        expression,
+                        ..
+                    } => {
+                        // Delayed group expressions live on a proxy that continues to observe
+                        // its dependencies while the Binding is disabled.
+                        let proxy = match delayed {
+                            Some(key) => self.read(key, &mut reads)? == Value::Bool(true),
+                            None => false,
+                        };
+                        if proxy || self.read(when, &mut reads)? == Value::Bool(true) {
                             let value = self.binding_value(owner, &expression, &mut reads)?;
                             self.check_binding_edges(key, &reads)?;
                             value
@@ -702,6 +713,7 @@ impl Transaction<'_> {
         self.touched(key).value = value;
         self.observe_states(key);
         self.observe_animation(key);
+        self.queue_group_input(key);
         if let Some(target) = self.model.slots[key].active_target {
             if self.model.slots[target]
                 .overlay

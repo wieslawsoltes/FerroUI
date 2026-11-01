@@ -65,6 +65,7 @@ mod baseline {
             Instance::with_engine(source, &TypeRegistry::new(), Default::default(), engine)
                 .unwrap();
         for row in include_str!("reference/qt-6.12.0.tsv").lines() {
+            instance.process_deferred(usize::MAX).unwrap();
             let (name, expected) = row.split_once('\t').unwrap();
             // V8 preserves the trailing hole in slice(1). Qt 6.12 trims it.
             let expected = if name == "arrayIdentity" {

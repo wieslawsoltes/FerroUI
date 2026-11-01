@@ -109,4 +109,52 @@ QtObject {
         let last = copied.pop()
         return (alias === data) + "/" + (copied === data) + "/" + data.join(",") + "/" + copied.join(":") + "/" + last
     }
+
+    property bool groupEnabled: true
+    property int groupSource: 2
+    property int groupBase: 3
+    property int groupX: groupBase * 2
+    property int groupZ: 8
+    property bool coldEnabled: false
+    property int coldX: groupBase * 3
+    property Binding groupedDelay: Binding {
+        delayed: true; when: root.groupEnabled
+        root { groupX: root.groupSource; groupZ: 17 }
+    }
+    property Binding coldDelay: Binding {
+        delayed: true; when: root.coldEnabled
+        root.coldX: root.groupSource
+    }
+    function groupSnapshot(): string { return groupX + "/" + groupZ + "/" + coldX }
+    function queueGroupChange(): string {
+        groupSource = 5
+        coldEnabled = true
+        return groupSnapshot()
+    }
+    function disableGroup(): string {
+        groupEnabled = false
+        groupBase = 7
+        return groupSnapshot()
+    }
+    function resumeGroup(): string {
+        groupEnabled = true
+        groupSource = 6
+        return groupSnapshot()
+    }
+    function queueBeforeResume(): string {
+        groupEnabled = false
+        groupSource = 7
+        groupEnabled = true
+        return groupSnapshot()
+    }
+    function queueWhileDisabled(): string {
+        groupEnabled = false
+        groupSource = 8
+        return groupSnapshot()
+    }
+    function resumeAfterMissedDelivery(): string {
+        groupEnabled = true
+        groupSource = 9
+        return groupSnapshot()
+    }
 }

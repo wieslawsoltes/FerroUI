@@ -217,8 +217,8 @@ fn delayed_multi_target_coalesces_one_job_without_rewriting_unchanged_siblings()
         .set(model.id("layer").unwrap(), "when", Value::Bool(false))
         .unwrap();
     model.process_deferred(8).unwrap();
-    assert_eq!(model.get(root, "x").unwrap(), n(3.));
-    assert_eq!(model.get(root, "y").unwrap(), n(4.));
+    assert_eq!(model.get(root, "x").unwrap(), n(6.));
+    assert_eq!(model.get(root, "y").unwrap(), n(12.));
     assert_eq!(model.get(root, "z").unwrap(), n(8.));
 }
 
@@ -277,7 +277,7 @@ fn static_target_check_resolves_private_ids_in_each_composite_instance() {
 }
 
 #[test]
-fn destroying_a_delayed_controller_restores_native_groups_and_cancels_queued_work() {
+fn destroying_a_delayed_controller_retains_expression_writes_and_cancels_queued_work() {
     use ferroui_qml::TypeDefinition;
     let mut registry = TypeRegistry::new();
     registry
@@ -314,8 +314,10 @@ fn destroying_a_delayed_controller_restores_native_groups_and_cancels_queued_wor
     model.set(root, "n", n(9.)).unwrap();
     assert!(model.has_deferred_work());
     model.destroy_object(controller).unwrap();
-    assert_eq!(model.get(root, "x").unwrap(), n(10.));
-    assert_eq!(model.get(root, "font.size").unwrap(), n(12.));
+    assert_eq!(model.get(root, "x").unwrap(), n(21.));
+    assert_eq!(model.get(root, "font.size").unwrap(), n(7.));
+    model.set(root, "n", n(11.)).unwrap();
+    assert_eq!(model.get(root, "x").unwrap(), n(21.));
     assert!(!model.has_deferred_work());
 }
 
@@ -354,4 +356,53 @@ fn activating_multi_target_bindings_can_reverse_displaced_dependency_edges() {
     model.set(root, "enabled", Value::Bool(false)).unwrap();
     assert_eq!(model.get(root, "a").unwrap(), Value::Number(2.));
     assert_eq!(model.get(root, "b").unwrap(), Value::Number(2.));
+}
+
+#[test]
+fn failed_delayed_group_publication_rolls_back_all_targets_and_retries_changed_inputs() {
+    let mut model = load(
+        "
+        property int x: 0; property int y: 0
+        property int number: 1; property var scalar: 2
+        property Binding group: Binding { delayed: true; root.x: root.number; root.y: root.scalar }
+    ",
+    );
+    let root = model.root();
+    model.set(root, "number", Value::Number(8.)).unwrap();
+    model
+        .set(root, "scalar", Value::String("wrong type".into()))
+        .unwrap();
+    assert!(model.process_deferred(8).is_err());
+    assert_eq!(model.get(root, "x").unwrap(), Value::Number(1.));
+    assert_eq!(model.get(root, "y").unwrap(), Value::Number(2.));
+    model.set(root, "scalar", Value::Number(5.)).unwrap();
+    model.process_deferred(8).unwrap();
+    assert_eq!(model.get(root, "x").unwrap(), Value::Number(8.));
+    assert_eq!(model.get(root, "y").unwrap(), Value::Number(5.));
+}
+
+#[test]
+fn toggling_delayed_rebuilds_a_group_whose_notification_ran_while_disabled() {
+    let mut model = load(
+        "
+        property int source: 2; property int x: 1
+        property Binding group: Binding { id: group; delayed: true; root.x: root.source }
+    ",
+    );
+    let root = model.root();
+    let group = model.id("group").unwrap();
+    model.set(group, "when", Value::Bool(false)).unwrap();
+    model.set(root, "source", Value::Number(4.)).unwrap();
+    model.process_deferred(8).unwrap();
+    model.set(group, "when", Value::Bool(true)).unwrap();
+    model.set(root, "source", Value::Number(5.)).unwrap();
+    assert!(!model.has_deferred_work());
+    assert_eq!(model.get(root, "x").unwrap(), Value::Number(2.));
+    model.set(group, "delayed", Value::Bool(false)).unwrap();
+    assert_eq!(model.get(root, "x").unwrap(), Value::Number(5.));
+    model.set(group, "delayed", Value::Bool(true)).unwrap();
+    model.set(root, "source", Value::Number(7.)).unwrap();
+    assert_eq!(model.get(root, "x").unwrap(), Value::Number(5.));
+    model.process_deferred(8).unwrap();
+    assert_eq!(model.get(root, "x").unwrap(), Value::Number(7.));
 }

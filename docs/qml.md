@@ -207,9 +207,9 @@ Binding {
 }
 ```
 
-The grouped and dotted forms evaluate their expressions only while `when` is true. The explicit `target`, `property` and `value` form evaluates `value` independently of `when`. Each target saves its previous binding or value according to `restoreMode`. A conversion failure rolls back the whole update.
+Immediate grouped and dotted declarations evaluate their expressions while `when` is true. The explicit `target`, `property` and `value` form evaluates `value` independently of `when`. An immediate overlay saves its previous binding or value according to `restoreMode`. A conversion failure rolls back the whole update.
 
-With `delayed: true`, FerroUI applies each initial value on attachment and coalesces subsequent input changes into one owner-loop job per controller. Disabling the controller restores its targets immediately. This last detail differs from Qt 6.12.0 for grouped, delayed declarations. In a QQmlEngine probe, disabling such a controller retained the last published values.
+With `delayed: true`, the explicit target form and literal grouped declarations restore according to `restoreMode`. Grouped and dotted expressions track their inputs on a private proxy. An initially enabled group writes each expression’s first result to its target, replacing the previous binding. Later changes coalesce until the next owner turn. Disabling or destroying the group leaves its most recent expression writes in place. As in Qt 6.12, if the group starts disabled or a queued update reaches the event loop while the group is disabled, it stops delivering expression changes until delayed mode is rebuilt. [Shared Qt fixture](../tests/QmlCompiled/reference/Probe.qml)
 
 Rust hosts can register a receiver-aware method with `TypeDefinition::context_method`. Its callback can capture services, read and update model properties, and call QML signals and methods through the current transaction. For example, a binding that calls the following method will update when the receiver's `gain` changes.
 

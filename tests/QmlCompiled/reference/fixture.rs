@@ -37,6 +37,7 @@ fn backend(
 ) {
     let mut engine = Instance::new(source, &TypeRegistry::new(), Default::default()).unwrap();
     for row in include_str!("qt-6.12.0.tsv").lines() {
+        engine.process_deferred(usize::MAX).unwrap();
         let (case, expected) = row.split_once('\t').unwrap();
         let result = engine.call(engine.root(), case, Vec::new()).unwrap();
         let Value::String(actual) = result else {

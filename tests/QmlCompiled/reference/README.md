@@ -1,6 +1,6 @@
 # Qt QML behavioral reference
 
-The original `Probe.qml` component runs under the published Qt 6.12.0 engine and both FerroUI backends. Each engine loads a fresh root, then calls the same nine methods in order on that root. The returned strings record branch-dependent reads, removal of an imperative binding, direct signal delivery, private ids and aliases in two inline-component instances, loop control, short-circuit side effects, synchronous property notifications, object identity and sparse-array mutation.
+The original `Probe.qml` component runs under the published Qt 6.12.0 engine and both FerroUI backends. Each engine loads a fresh root, then calls the same methods in order on that root, pumping the owner event loop before each call. The returned strings record branch-dependent reads, removal of an imperative binding, direct signal delivery, private ids and aliases in two inline-component instances, loop control, short-circuit side effects, synchronous property notifications, object identity, sparse-array mutation and grouped delayed Binding delivery across disable and re-enable.
 
 The last probe writes a property twice and reads its change handler's accumulated value between the writes. Qt returns `3/8`. The shared transaction used by FerroUI's native and source scripts delivers the handler before each assignment completes. A separate Rust test exercises runaway feedback and verifies rollback.
 
