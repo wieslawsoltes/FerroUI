@@ -1,6 +1,7 @@
 //! Private worker executable. Its stdout is exclusively the framed protocol.
 mod abi;
 mod framing;
+mod script_vm;
 use percent_encoding::percent_decode_str;
 use serde_json::{json, Value};
 use std::{
@@ -131,7 +132,7 @@ fn observe_promise(engine: &abi::Engine, command: &Value, key: &str) -> Result<V
     }
 }
 
-fn run(library: &Path) -> Result<(), String> {
+fn run(library: &Path, isolated: bool) -> Result<(), String> {
     let resources = Mutex::new(Resources::default());
     let engine = unsafe {
         abi::Engine::open(
@@ -153,6 +154,9 @@ fn run(library: &Path) -> Result<(), String> {
         .lock()
         .map_err(|_| "poisoned resource state")?
         .rpc_key = raw_key;
+    if isolated {
+        return script_vm::run(&engine, &resources, &key);
+    }
     let module_runtime = format!(
         "({})({})",
         include_str!("modules.js"),
@@ -271,7 +275,8 @@ fn main() {
         eprintln!("missing WebScene native library path");
         std::process::exit(2)
     };
-    if let Err(error) = run(Path::new(&library)) {
+    let isolated = args.next().is_some_and(|arg| arg == "--workerscript");
+    if let Err(error) = run(Path::new(&library), isolated) {
         let _ = framing::send(&mut io::stdout().lock(), &json!({"failure":error}));
         eprintln!("WebScene worker: {error}");
         std::process::exit(1)
