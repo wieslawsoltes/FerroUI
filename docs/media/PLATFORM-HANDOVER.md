@@ -152,6 +152,12 @@ recovery, EOF restart, packaging and keyboard/UI Automation evidence. Its
 remaining physical-camera and broader profile gates are explicit; the original
 deferred status below describes the initial handoff.
 
+The subsequent opt-in synthetic MF camera run now covers provider JPEG pixels,
+native pending-start/photo cancellation, capture/renderer restart, budget
+saturation and typed native disconnection. It also fixes production device-loss
+classification. This is an in-process GPU source, separate from physical camera
+and OS virtual-camera/privacy acceptance; see the Windows verification follow-up.
+
 Provider source is now present in `FerroUI.Media.Windows`,
 `FerroUI.Media.Video.Windows` and `FerroUI.Media.Camera.Windows`. The
 `PortableMedia` desktop harness selects these providers on Windows. Native

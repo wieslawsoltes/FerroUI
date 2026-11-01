@@ -20,13 +20,50 @@ use std::{
 pub struct WindowsCameraProvider {
     pub frames: NativeGlFrameProducer,
     permission: Rc<Cell<CameraPermission>>,
+    #[cfg(feature = "synthetic-camera")]
+    synthetic: bool,
 }
 impl WindowsCameraProvider {
     pub fn new(frames: NativeGlFrameProducer) -> Self {
         Self {
             frames,
             permission: Rc::new(Cell::new(CameraPermission::NotDetermined)),
+            #[cfg(feature = "synthetic-camera")]
+            synthetic: false,
         }
+    }
+    /// Explicit in-process MF/D3D11 test source. It is not an OS device or a
+    /// fallback, and its permission state does not describe Windows privacy.
+    #[cfg(feature = "synthetic-camera")]
+    pub fn synthetic(frames: NativeGlFrameProducer) -> Self {
+        Self {
+            synthetic: true,
+            ..Self::new(frames)
+        }
+    }
+    fn discover(&self) -> CameraFuture<Vec<CameraDevice>> {
+        #[cfg(feature = "synthetic-camera")]
+        if self.synthetic {
+            return Box::pin(async {
+                Ok([
+                    "ferroui:synthetic-camera",
+                    "ferroui:synthetic-camera/disconnect",
+                ]
+                .into_iter()
+                .map(|id| CameraDevice {
+                    id: id.into(),
+                    label: Some(format!("Synthetic MF GPU camera (in process): {id}")),
+                    facing: CameraFacing::Unknown,
+                    formats: vec![CameraFormat {
+                        width: 320,
+                        height: 240,
+                        frames_per_second: 30000. / 1001.,
+                    }],
+                })
+                .collect())
+            });
+        }
+        Box::pin(async { discovery().await })
     }
 }
 fn error(kind: CameraErrorKind, s: impl Into<String>) -> CameraError {
@@ -84,7 +121,7 @@ fn discovery() -> CameraFuture<Vec<CameraDevice>> {
 }
 impl CameraProvider for WindowsCameraProvider {
     fn devices(&self) -> CameraFuture<Vec<CameraDevice>> {
-        discovery()
+        self.discover()
     }
     fn permission(&self) -> CameraPermission {
         self.permission.get()
@@ -98,6 +135,7 @@ impl CameraProvider for WindowsCameraProvider {
     ) -> CameraFuture<Rc<dyn NativeCameraSession>> {
         let frames = self.frames.with_budget(budget.clone());
         let permission = self.permission.clone();
+        let devices = self.discover();
         Box::pin(async move {
             if options.selection.exact
                 && options
@@ -110,7 +148,7 @@ impl CameraProvider for WindowsCameraProvider {
                     "This native camera profile has no facing metadata",
                 ));
             }
-            let devices = discovery().await?;
+            let devices = devices.await?;
             let device = devices
                 .into_iter()
                 .find(|d| {
@@ -190,6 +228,13 @@ struct Camera {
     budget: FrameBudget,
 }
 static PHOTO_ACTIVE: AtomicBool = AtomicBool::new(false);
+#[cfg(feature = "synthetic-camera")]
+static PHOTO_JOBS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+/// Diagnostic for checking that a canceled fixture photo reached native work.
+#[cfg(feature = "synthetic-camera")]
+pub fn synthetic_photo_jobs_started() -> u64 {
+    PHOTO_JOBS.load(Ordering::Acquire)
+}
 struct PhotoSlot;
 impl Drop for PhotoSlot {
     fn drop(&mut self) {
@@ -247,6 +292,8 @@ impl NativeCameraSession for Camera {
         match prepared {
             Err(e) => return Box::pin(async move { Err(e) }),
             Ok((frame, slot)) => {
+                #[cfg(feature = "synthetic-camera")]
+                PHOTO_JOBS.fetch_add(1, Ordering::Release);
                 std::thread::spawn(move || {
                     let _slot = slot;
                     let info = frame.info();

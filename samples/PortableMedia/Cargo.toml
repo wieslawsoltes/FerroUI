@@ -6,6 +6,8 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 publish = false
+[features]
+synthetic-camera = ["ferroui-media-camera-windows/synthetic-camera"]
 [[bin]]
 name = "portable-media"
 path = "main.rs"

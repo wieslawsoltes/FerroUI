@@ -103,3 +103,77 @@ coverage, older Windows/clean-machine installation and frozen sustained
 performance workloads remain open. WGL/Vulkan direct media routes and desktop
 native QR are not established by the exercised ANGLE/GLES profile. Functional
 passes here do not declare complete portable-media release acceptance.
+
+## Synthetic camera follow-up — 2026-11-01
+
+The optional `synthetic-camera` feature now supplies an **in-process Media
+Foundation camera source**, using the same provider, asynchronous Source Reader,
+DXGI admission, ANGLE aliases, public camera sessions and JPEG worker as capture.
+This is original fixture code using the Windows SDK; no third-party camera
+software or system device is installed. It is not a globally registered Windows
+virtual camera and makes no claim about OS privacy, Frame Server or hardware.
+The [MF source object model](https://learn.microsoft.com/en-us/windows/win32/medfound/media-source-object-model)
+describes the interfaces used; an OS-visible virtual camera additionally needs
+registration through the [virtual-camera API](https://learn.microsoft.com/en-us/windows/win32/api/mfvirtualcamera/nf-mfvirtualcamera-mfcreatevirtualcamera).
+
+Discovery exposes explicitly labeled synthetic selections only when the caller
+chooses `WindowsCameraProvider::synthetic`. Neither source creation nor worker
+acquisition occurs during discovery. The fixture generates 320×240 SDR BGRA
+quadrants using GPU clears on the exact compositor device at 30000/1001 fps.
+Every sample has fresh immutable storage. A credit retained on each D3D texture
+bounds live fixture textures to 16 across sessions; source/native worker counts
+are separately observed. Default builds exclude the fixture. The sample rejects
+synthetic-only flags if the feature or Windows target is missing.
+
+The extended native smoke verifies:
+
+- Canceling a start after its native worker has started, before commitment;
+  permission remains NotDetermined and native resources retire to zero.
+- Two successful capture generations, each feeding normal preview and a new
+  projected GLES renderer. The test waits for real renderer output in each.
+- Retaining three distinct source leases to saturate the frame budget, then
+  releasing them and observing publication resume within the same session.
+- Actual fractional negotiated frame rate and zero preview CPU transfers.
+  No GPU copy occurs before explicit photo work.
+- Independently decoded 320×240 JPEG dimensions and all four expected quadrant
+  colours, with PreviewSnapshot provenance and counted Photo transfers.
+- Stop canceling delivery after a native photo job starts, and completed JPEG
+  bytes remaining independently usable after both native and GPU teardown.
+- Zero source/renderer allocations, GPU reads, quarantined reads, native source
+  objects, fixture textures and native workers after each successful stop.
+- A third source injecting `MF_E_VIDEO_RECORDING_DEVICE_INVALIDATED` through MF.
+  The real Source Reader callback propagates `DeviceLost`, stops the public
+  session, clears its preview and retires native resources to zero.
+
+This added production error classification for removed cameras and D3D device
+removed/reset/hung errors. Failed native events are latched for the worker
+rather than silently ignored or overwritten by a normal state update.
+Fatal read callbacks also use the latched error slot, so a later normal callback
+cannot overwrite an error before the worker sees it. Frame polling checks native
+failure before waiting for pending imports or credits. Native regression checks
+exercise error-then-success callback ordering and callbacks after close. Error
+messages include the operation phase. The sample's renderer retirement probe
+also now tracks restarted hosts instead of observing only its first budget.
+
+Run the synthetic profile explicitly:
+
+```powershell
+cargo build --locked -p portable-media --features synthetic-camera --target x86_64-pc-windows-msvc
+& $app --camera --synthetic-camera --camera-smoke --renderer
+& $app --camera-discovery --synthetic-camera
+cargo test --locked -p ferroui-media-windows --features controls,native-frame-tests,synthetic-camera --target x86_64-pc-windows-msvc --lib -- --nocapture
+```
+
+Logs for this follow-up are beside the combined worktree in
+`C:\Users\Dan\.codex\worktrees\portable-media-linux\`:
+`windows-synthetic-build-final.log`, `windows-synthetic-camera.log`,
+`windows-synthetic-camera-repeat.log`, `windows-synthetic-camera-repeat-2.log`,
+`windows-synthetic-native-tests.log`,
+`windows-camera-default-discovery.log`, `windows-camera-default-regression.log`
+and `linux-synthetic-regression-build.log`.
+
+These results establish native provider/camera-session and preview-snapshot
+behaviour with controlled GPU inputs. Physical capture-format negotiation,
+YUY2/MJPEG/NV12 camera conversion, actual privacy denial, OS device hotplug,
+Frame Server registration and abrupt driver-loss recovery still need their own
+profiles. Linux's missing WSL DMA-BUF capability is unchanged by this fixture.

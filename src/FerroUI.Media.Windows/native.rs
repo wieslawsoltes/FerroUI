@@ -179,6 +179,20 @@ impl Drop for Session {
 #[derive(Clone)]
 pub struct NativeSession(Arc<Session>);
 impl NativeSession {
+    /// Diagnostic counts for the opt-in in-process camera fixture only.
+    #[cfg(feature = "synthetic-camera")]
+    pub fn synthetic_usage() -> (u32, u32, u32) {
+        extern "C" {
+            fn ferro_windows_synthetic_usage(
+                sources: *mut u32,
+                textures: *mut u32,
+                workers: *mut u32,
+            );
+        }
+        let (mut sources, mut textures, mut workers) = (0, 0, 0);
+        unsafe { ferro_windows_synthetic_usage(&mut sources, &mut textures, &mut workers) };
+        (sources, textures, workers)
+    }
     pub fn open(
         device: &NativeDevice,
         source: &str,
@@ -218,6 +232,7 @@ impl NativeSession {
                 match s.error_kind {
                     1 => MediaErrorKind::Unsupported,
                     2 => MediaErrorKind::Permission,
+                    3 => MediaErrorKind::DeviceLost,
                     _ => MediaErrorKind::NativeFailure,
                 },
                 unsafe { CStr::from_ptr(s.error.as_ptr()) }.to_string_lossy(),

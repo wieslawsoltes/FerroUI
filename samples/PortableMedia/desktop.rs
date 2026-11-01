@@ -494,6 +494,11 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
     );
 }
 pub fn run() -> std::process::ExitCode {
+    #[cfg(not(all(windows, feature = "synthetic-camera")))]
+    if std::env::args().any(|a| a == "--synthetic-camera" || a == "--camera-smoke") {
+        eprintln!("Synthetic camera requires a Windows build with --features synthetic-camera");
+        return std::process::ExitCode::FAILURE;
+    }
     if std::env::args().nth(1).is_none() {
         eprintln!("Usage: portable-media <file-or-url> [--smoke] [--resource] | --camera | --camera-discovery");
         return std::process::ExitCode::FAILURE;

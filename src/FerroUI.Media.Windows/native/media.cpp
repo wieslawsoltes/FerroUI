@@ -34,6 +34,9 @@ static std::once_flag mf_once;
 static void runtime(){std::call_once(mf_once,[]{check(MFStartup(MF_VERSION,MFSTARTUP_FULL));});} // process lifetime; leases may outlive sessions
 static std::string utf8(const std::wstring &s){if(s.empty())return {};int n=WideCharToMultiByte(CP_UTF8,0,s.data(),(int)s.size(),nullptr,0,nullptr,nullptr);std::string v(n,'\0');WideCharToMultiByte(CP_UTF8,0,s.data(),(int)s.size(),v.data(),n,nullptr,nullptr);return v;}
 static std::string hresult(HRESULT hr){wchar_t *text=nullptr;FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS,nullptr,hr,0,(wchar_t*)&text,0,nullptr);std::string result=text?utf8(text):"Native media error";if(text)LocalFree(text);char code[32];snprintf(code,sizeof(code)," (0x%08lx)",(unsigned long)hr);return result+code;}
+#ifdef FERROUI_SYNTHETIC_CAMERA
+#include "synthetic_camera.cpp"
+#endif
 struct FerroWindowsFrame {
     ComPtr<IMFSample> sample;
     ComPtr<ID3D11Texture2D> texture;
@@ -53,17 +56,26 @@ public:
     STDMETHODIMP_(ULONG) Release()override{ULONG n=--refs;if(!n)delete this;return n;}
     STDMETHODIMP OnReadSample(HRESULT status,DWORD stream,DWORD flags,LONGLONG pts,IMFSample *sample)override;
     STDMETHODIMP OnFlush(DWORD stream)override;
-    STDMETHODIMP OnEvent(DWORD stream,IMFMediaEvent *event)override{(void)stream;(void)event;return S_OK;}
+    STDMETHODIMP OnEvent(DWORD stream,IMFMediaEvent *event)override;
 };
 struct AudioChunk {std::vector<BYTE> bytes;UINT offset=0;LONGLONG pts=0;};
+static int native_error_kind(HRESULT hr){
+    if(hr==E_ACCESSDENIED)return 2;
+    if(hr==MF_E_UNSUPPORTED_D3D_TYPE||hr==E_NOTIMPL)return 1;
+    if(hr==MF_E_VIDEO_RECORDING_DEVICE_INVALIDATED||hr==DXGI_ERROR_DEVICE_REMOVED||
+       hr==DXGI_ERROR_DEVICE_RESET||hr==DXGI_ERROR_DEVICE_HUNG)return 3;
+    return 0;
+}
 struct Session {
     std::mutex lock;std::condition_variable changed;std::atomic<bool> closed{false};
     FerroWindowsState state{};
     std::wstring source;bool camera=false,resource_file=false;
+    const char *operation="native initialization";
     UINT requested_w=0,requested_h=0,requested_n=0,requested_d=1;
     int intent=0;double volume=1.;bool muted=false;
     uint64_t epoch=1,pending_seek=0,request_epoch=1,sequence=0;LONGLONG seek_target=0;
     bool in_flight=false,flushed=false,packet_ready=false;
+    HRESULT event_error=S_OK;
     Packet packet;
     ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;
     ComPtr<IMFDXGIDeviceManager> manager;ComPtr<IMFSourceReader> reader;ComPtr<IMFMediaSource> camera_source;
@@ -76,7 +88,13 @@ struct Session {
     std::deque<std::unique_ptr<FerroWindowsFrame>> video;
     std::unique_ptr<FerroWindowsFrame> latest;
     UINT color=0,rotation=0,width=0,height=0;
-    void fail(HRESULT hr,const char *detail=nullptr){std::lock_guard<std::mutex> guard(lock);state.state=5;state.error_kind=(hr==E_ACCESSDENIED)?2:(hr==MF_E_UNSUPPORTED_D3D_TYPE||hr==E_NOTIMPL)?1:0;std::string error=detail?detail:hresult(hr);strncpy_s(state.error,error.c_str(),_TRUNCATE);}
+    void fail(HRESULT hr,const char *detail=nullptr){
+        std::lock_guard<std::mutex> guard(lock);
+        if(FAILED(event_error))hr=event_error;
+        state.state=5;state.error_kind=native_error_kind(hr);
+        std::string error=detail?detail:std::string(operation)+": "+hresult(hr);
+        strncpy_s(state.error,error.c_str(),_TRUNCATE);
+    }
     LONGLONG clock_position(){
         if(!playing)return position;
         if(has_audio){if(!audio_started||!clock_based)return position;UINT64 p=0;check(audio_clock->GetPosition(&p,nullptr));return clock_base+(LONGLONG)((long double)p*10000000/audio_frequency);}
@@ -85,9 +103,37 @@ struct Session {
 };
 struct FerroWindowsSession {std::shared_ptr<Session> value;};
 STDMETHODIMP ReaderCallback::OnReadSample(HRESULT status,DWORD stream,DWORD flags,LONGLONG pts,IMFSample *sample){
-    if(auto s=session.lock()){std::lock_guard<std::mutex> guard(s->lock);if(s->closed.load())return S_OK;s->packet={status,stream,flags,pts,s->request_epoch,sample};s->packet_ready=true;s->in_flight=false;s->changed.notify_all();}return S_OK;
+    if(auto s=session.lock()){
+        std::lock_guard<std::mutex> guard(s->lock);if(s->closed.load())return S_OK;
+        // Source failures can arrive independently of the outstanding read.
+        // Latch them separately from the replaceable normal-sample slot.
+        if(FAILED(status)||(flags&MF_SOURCE_READERF_ERROR)){
+            if(SUCCEEDED(s->event_error))s->event_error=FAILED(status)?status:E_FAIL;
+        }else if(SUCCEEDED(s->event_error)){
+            s->packet={status,stream,flags,pts,s->request_epoch,sample};s->packet_ready=true;
+        }
+        s->in_flight=false;s->changed.notify_all();
+    }
+    return S_OK;
 }
 STDMETHODIMP ReaderCallback::OnFlush(DWORD stream){(void)stream;if(auto s=session.lock()){std::lock_guard<std::mutex> guard(s->lock);s->flushed=true;s->in_flight=false;s->changed.notify_all();}return S_OK;}
+STDMETHODIMP ReaderCallback::OnEvent(DWORD stream,IMFMediaEvent *event){
+    (void)stream;HRESULT status=S_OK;MediaEventType type=MEUnknown;
+    HRESULT result=event?event->GetStatus(&status):E_POINTER;if(FAILED(result))status=result;
+    if(event)event->GetType(&type);
+    if(FAILED(status)||type==MEError){
+        if(auto s=session.lock()){
+            std::lock_guard<std::mutex> guard(s->lock);
+            // Publish the first error on the worker, so concurrent normal
+            // callbacks cannot overwrite failure with Playing/Paused state.
+            if(!s->closed.load()&&SUCCEEDED(s->event_error)){
+                s->event_error=FAILED(status)?status:E_FAIL;
+                s->changed.notify_all();
+            }
+        }
+    }
+    return S_OK;
+}
 static void setup_audio(Session &s){
     ComPtr<IMMDeviceEnumerator> enumerator;check(CoCreateInstance(__uuidof(MMDeviceEnumerator),nullptr,CLSCTX_ALL,IID_PPV_ARGS(&enumerator)));
     ComPtr<IMMDevice> endpoint;check(enumerator->GetDefaultAudioEndpoint(eRender,eConsole,&endpoint));
@@ -132,9 +178,18 @@ static void prepare(const std::shared_ptr<Session> &owner){
     check(attributes->SetUINT32(MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING,TRUE));
     check(attributes->SetUINT32(MF_SOURCE_READER_DISABLE_DXVA,FALSE));
     if(s.camera){
+        s.operation="camera source activation";
+#ifdef FERROUI_SYNTHETIC_CAMERA
+        if(s.source==L"ferroui:synthetic-camera"||s.source==L"ferroui:synthetic-camera/disconnect"){
+            check(make_synthetic_camera(s.device.Get(),&s.camera_source,s.source==L"ferroui:synthetic-camera/disconnect"?30:0));
+        }else
+#endif
+        {
         ComPtr<IMFAttributes> selection;check(MFCreateAttributes(&selection,2));check(selection->SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID));
         check(selection->SetString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,s.source.c_str()));
-        check(MFCreateDeviceSource(selection.Get(),&s.camera_source));check(MFCreateSourceReaderFromMediaSource(s.camera_source.Get(),attributes.Get(),&s.reader));
+        check(MFCreateDeviceSource(selection.Get(),&s.camera_source));
+        }
+        s.operation="camera Source Reader creation";check(MFCreateSourceReaderFromMediaSource(s.camera_source.Get(),attributes.Get(),&s.reader));
     }else check(MFCreateSourceReaderFromURL(s.source.c_str(),attributes.Get(),&s.reader));
     check(s.reader->SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS,FALSE));check(s.reader->SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM,TRUE));
     // ANGLE's D3D11 image import accepts BGRA, but not B8G8R8X8 storage.
@@ -145,7 +200,7 @@ static void prepare(const std::shared_ptr<Session> &owner){
     check(type->SetUINT32(MF_MT_VIDEO_PRIMARIES,MFVideoPrimaries_BT709));check(type->SetUINT32(MF_MT_TRANSFER_FUNCTION,MFVideoTransFunc_sRGB));check(type->SetUINT32(MF_MT_VIDEO_NOMINAL_RANGE,MFNominalRange_0_255));
     if(s.requested_w&&s.requested_h)check(MFSetAttributeSize(type.Get(),MF_MT_FRAME_SIZE,s.requested_w,s.requested_h));
     if(s.requested_n&&s.requested_d)check(MFSetAttributeRatio(type.Get(),MF_MT_FRAME_RATE,s.requested_n,s.requested_d));
-    check(s.reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,nullptr,type.Get()));video_type(s);
+    s.operation="video output negotiation";check(s.reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,nullptr,type.Get()));s.operation="video metadata validation";video_type(s);
     if(!s.camera){
         ComPtr<IMFMediaType> native_audio;HRESULT audio=s.reader->GetNativeMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,0,&native_audio);
         if(SUCCEEDED(audio)){
@@ -213,10 +268,10 @@ static void present_video(Session &s,LONGLONG clock){
 static void run(const std::shared_ptr<Session> &owner){
     auto &s=*owner;HRESULT initialized=CoInitializeEx(nullptr,COINIT_MULTITHREADED);
     try{
-        check(initialized);prepare(owner);s.started=Clock::now();
+        check(initialized);prepare(owner);s.operation="native streaming";s.started=Clock::now();
         while(!s.closed.load()){
             int intent;uint64_t current_epoch=0,seek=0;LONGLONG target=0;double volume;bool muted;
-            {std::lock_guard<std::mutex> guard(s.lock);intent=s.intent;current_epoch=s.epoch;seek=s.pending_seek;target=s.seek_target;s.pending_seek=0;volume=s.volume;muted=s.muted;}
+            {std::lock_guard<std::mutex> guard(s.lock);check(s.event_error);intent=s.intent;current_epoch=s.epoch;seek=s.pending_seek;target=s.seek_target;s.pending_seek=0;volume=s.volume;muted=s.muted;}
             if(seek&&!s.camera)reset(s,seek,target);
             if(s.closed)break;
             if((intent==1)!=s.playing){
@@ -247,6 +302,7 @@ static void run(const std::shared_ptr<Session> &owner){
                     UINT padding=0;if(s.audio)check(s.audio->GetCurrentPadding(&padding));
                     if(!padding){s.state.state=4;s.intent=0;}
                 }
+                check(s.event_error);
                 bool need=s.camera||s.playing||!s.prepared_frame;
                 if(need&&!s.pending_seek&&!s.in_flight&&!s.packet_ready&&s.video.size()<3&&s.pcm_bytes<96000&&!(s.video_eos&&(!s.has_audio||s.audio_eos))){s.in_flight=true;s.request_epoch=s.epoch;request=true;}
             }

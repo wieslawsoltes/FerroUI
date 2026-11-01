@@ -20,6 +20,7 @@ ferroui-media-opengl.workspace = true
 jpeg-encoder.workspace = true
 serde_json.workspace = true
 [features]
+synthetic-camera = ["ferroui-media-windows/synthetic-camera"]
 controls = ["ferroui-media-opengl/controls"]
 [package.metadata.release]
 group = "platforms"

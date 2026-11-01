@@ -86,6 +86,9 @@ impl WindowsFrameStream {
             || self.retry.borrow().is_some()
     }
     pub fn take_frame(&self) -> Result<Option<FrameLease>, MediaError> {
+        // Capture/device errors must interrupt even a saturated or pending
+        // import; waiting for another native take can hide a disconnection.
+        self.native.state()?;
         if self.producer.budget().quarantined_reads() != 0 {
             return Err(unsupported(
                 "GPU completion is indeterminate; retained storage is quarantined",

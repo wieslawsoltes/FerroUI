@@ -141,9 +141,31 @@ extern "C" int ferro_windows_test_frames() {
       rejected = e.hr == MF_E_UNSUPPORTED_D3D_TYPE;
     }
     require(rejected);
+    stage = "asynchronous native error propagation";
+    auto failed = std::make_shared<Session>();
+    ComPtr<ReaderCallback> callback;
+    callback.Attach(new ReaderCallback(failed));
+    ComPtr<IMFMediaEvent> event;
+    check(MFCreateMediaEvent(MEError, GUID_NULL,
+                             MF_E_VIDEO_RECORDING_DEVICE_INVALIDATED, nullptr,
+                             &event));
+    check(callback->OnEvent(MF_SOURCE_READER_MEDIASOURCE, event.Get()));
+    require(failed->event_error == MF_E_VIDEO_RECORDING_DEVICE_INVALIDATED);
+    failed->fail(failed->event_error);
+    require(failed->state.error_kind == 3);
+    failed->event_error = S_OK;
+    failed->closed = true;
+    check(callback->OnEvent(MF_SOURCE_READER_MEDIASOURCE, event.Get()));
+    require(failed->event_error == S_OK);
+    failed->closed = false;
+    check(callback->OnReadSample(MF_E_VIDEO_RECORDING_DEVICE_INVALIDATED, 0,
+                                 MF_SOURCE_READERF_ERROR, 0, nullptr));
+    check(callback->OnReadSample(S_OK, 0, 0, 0, nullptr));
+    require(failed->event_error == MF_E_VIDEO_RECORDING_DEVICE_INVALIDATED &&
+            !failed->packet_ready);
     puts("NATIVE_D3D11_FRAMES_PASS gpu_quadrants=4 retained_array_slice=1 "
          "incompatible_storage=rejected software=rejected "
-         "paused_read_ahead=held");
+         "paused_read_ahead=held async_errors=DeviceLost");
     CoUninitialize();
     return 0;
   } catch (Failure e) {

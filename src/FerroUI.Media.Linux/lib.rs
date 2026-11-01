@@ -146,6 +146,9 @@ impl LinuxFrameStream {
             || self.retry.borrow().is_some()
     }
     pub fn take_frame(&self) -> Result<Option<FrameLease>, MediaError> {
+        // Report pipeline/capture failure even while an import is pending or
+        // leases saturate the budget. A new native take may never become ready.
+        self.native.state()?;
         if self.producer.budget().quarantined_reads() != 0 {
             return Err(unsupported(
                 "GPU completion is indeterminate; retained storage is quarantined",

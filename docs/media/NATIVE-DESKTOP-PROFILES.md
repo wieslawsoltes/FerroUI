@@ -88,6 +88,13 @@ worker and returns independently owned encoded bytes. Unknown GPU completion
 quarantines both source and staging and occupies the native photo slot, bounding
 repeated failures.
 
+An opt-in `synthetic-camera` feature now exercises that same native capture path
+with an in-process MF source generating immutable D3D11 GPU quadrant frames.
+JPEG pixels, saturation/resume, cancellation, restart, renderer sharing and an
+injected MF disconnection are covered in the receiving-host verification note.
+The fixture is absent from default builds and is not an OS camera registration
+or evidence of privacy/hardware behaviour.
+
 Source-file/resource preparation is limited to four filesystem workers;
 cancellation retains those slots through the actual write.
 Native worker limits are four sessions, three future video samples, one native

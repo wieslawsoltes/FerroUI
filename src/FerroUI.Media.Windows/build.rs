@@ -2,6 +2,7 @@ fn main() {
     println!("cargo:rerun-if-changed=native/media.cpp");
     println!("cargo:rerun-if-changed=native/media.h");
     println!("cargo:rerun-if-changed=native/frame_tests.cpp");
+    println!("cargo:rerun-if-changed=native/synthetic_camera.cpp");
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("windows") {
         return;
     }
@@ -11,6 +12,9 @@ fn main() {
         return;
     }
     let mut build = cc::Build::new();
+    if std::env::var_os("CARGO_FEATURE_SYNTHETIC_CAMERA").is_some() {
+        build.define("FERROUI_SYNTHETIC_CAMERA", None);
+    }
     if std::env::var_os("CARGO_FEATURE_NATIVE_FRAME_TESTS").is_some() {
         build.define("FERROUI_NATIVE_FRAME_TESTS", None);
     }

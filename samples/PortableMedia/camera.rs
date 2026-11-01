@@ -1,4 +1,7 @@
 use super::{Ordering, FAILED};
+#[cfg(all(windows, feature = "synthetic-camera"))]
+#[path = "camera_smoke.rs"]
+mod smoke;
 use ferroui_base::{
     layout::{Orientation, VerticalAlignment},
     reactive::IDisposable,
@@ -227,7 +230,7 @@ pub fn create(window: &Ref<Window>) -> Ref<Panel> {
                 let Some(state)=weak.upgrade() else{return;};
                 let budget=FrameBudget::new(Default::default());
                 let provider=match super::providers::camera(&*interop,budget.clone()){Ok(v)=>v,Err(e)=>{state.status(&format!("PROVIDER_FAILED {e}"));return;}};
-                let capture=CameraCapture::new(provider,budget);
+                let capture=CameraCapture::new(provider,budget.clone());
                 let before=capture.permission();let devices=capture.devices().await;let after=capture.permission();
                 match devices {
                     Ok(devices)=>{
@@ -242,6 +245,10 @@ pub fn create(window: &Ref<Window>) -> Ref<Panel> {
                 }
                 *state.interop.borrow_mut()=Some(interop);
                 *state.capture.borrow_mut()=Some(capture);
+                #[cfg(all(windows, feature="synthetic-camera"))]
+                if std::env::args().any(|a|a=="--camera-smoke") {
+                    if let Some(window)=weak_window.upgrade(){smoke::run(state.clone(),window,budget).await;}
+                }
             });
             }
             let session = state.session.borrow().clone();

@@ -82,3 +82,10 @@ GPU completion, two consumers, device loss, portal consent/cancellation/hotplug,
 direct V4L2, independently decoded camera JPEGs, native audio, accessibility,
 clean-machine packaging and frozen performance workloads remain unverified.
 WSL rejection evidence closes none of those positive GPU or camera gates.
+
+The synthetic-camera follow-up on Windows also identified that frame polling
+could wait on a pending import before observing a native pipeline failure. Linux
+now checks native session state first too, including during budget saturation.
+Its native build and descriptor tests are rerun for this change; positive Linux
+GPU/camera behaviour still needs a DMA-BUF-capable host. The Windows in-process
+fixture does not enable Linux camera emulation or change this WSL capability.

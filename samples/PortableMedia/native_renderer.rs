@@ -2,19 +2,22 @@ use ferroui_base::{
     layout::{HorizontalAlignment, VerticalAlignment},
     rendering::composition::{frames::*, ICompositionGpuInterop},
     threading::{DispatcherPriority, DispatcherTimer},
-    Ref,
+    Ref, WeakRef,
 };
 use ferroui_controls::Panel;
 use ferroui_media_controls::RendererHost;
-use std::{
-    sync::{Arc, OnceLock},
-    time::Duration,
-};
+use std::{cell::RefCell, sync::Arc, time::Duration};
 #[path = "gl_scene.rs"]
 mod scene;
-static BUDGET: OnceLock<FrameBudget> = OnceLock::new();
+thread_local! {
+    static BUDGETS: RefCell<Vec<(WeakRef<RendererHost>,FrameBudget)>> = const {RefCell::new(Vec::new())};
+}
 pub fn retained() -> bool {
-    BUDGET.get().is_some_and(|b| b.usage().frames != 0)
+    BUDGETS.with(|budgets| {
+        let mut budgets = budgets.borrow_mut();
+        budgets.retain(|(host, budget)| host.upgrade().is_some() || budget.usage().frames != 0);
+        budgets.iter().any(|(_, budget)| budget.usage().frames != 0)
+    })
 }
 pub fn install(
     root: &Ref<Panel>,
@@ -25,7 +28,6 @@ pub fn install(
         return None;
     }
     let budget = FrameBudget::new(Default::default());
-    let _ = BUDGET.set(budget.clone());
     let id = ferroui_media::allocate_source_id();
     let renderer =
         match ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget.clone())
@@ -44,6 +46,14 @@ pub fn install(
             }
         };
     let host = RendererHost::new();
+    // Camera restart creates a new host/budget. Track retiring generations too,
+    // rather than only the first host ever installed by this process.
+    let _ = retained();
+    BUDGETS.with(|budgets| {
+        budgets
+            .borrow_mut()
+            .push((host.downgrade(), budget.clone()))
+    });
     host.set_width(220.);
     host.set_height(220.);
     host.set_horizontal_alignment(HorizontalAlignment::Right);

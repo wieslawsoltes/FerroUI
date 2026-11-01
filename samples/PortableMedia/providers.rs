@@ -60,6 +60,14 @@ pub fn camera(
     }
     #[cfg(windows)]
     {
+        #[cfg(feature = "synthetic-camera")]
+        if std::env::args().any(|a| a == "--synthetic-camera") {
+            return Ok(Rc::new(
+                ferroui_media_camera_windows::WindowsCameraProvider::synthetic(
+                    ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget)?,
+                ),
+            ));
+        }
         Ok(Rc::new(
             ferroui_media_camera_windows::WindowsCameraProvider::new(
                 ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget)?,
