@@ -15,6 +15,12 @@ mod http;
 #[cfg(all(feature = "http", not(target_arch = "wasm32")))]
 pub use http::HttpComponentTransport;
 
+#[cfg(all(feature = "browser-fetch", target_arch = "wasm32"))]
+#[path = "network_browser.rs"]
+mod browser;
+#[cfg(all(feature = "browser-fetch", target_arch = "wasm32"))]
+pub use browser::BrowserComponentTransport;
+
 pub const MAX_DOCUMENT_BYTES: usize = 2 * 1024 * 1024;
 const MAX_GRAPH_BYTES: usize = 8 * 1024 * 1024;
 const MAX_DOCUMENTS: usize = 64;

@@ -13,6 +13,8 @@ let origin = Url::parse("https://widgets.example.org")?;
 types.set_component_transport(Rc::new(HttpComponentTransport::new(&[origin])?));
 ```
 
+For browser applications, enable the `browser-fetch` feature and register `BrowserComponentTransport::default()`. The transport reads bounded HTTP response streams from the application origin and wakes the owner when the read finishes.
+
 For native views, configure `ControlRegistry::types_mut()` in the same way. The native transport uses TLS verification, a 15-second timeout and a 16-transfer limit. It rejects redirects. A host with its own networking stack can implement `ComponentTransport::request` and complete the supplied `ComponentReply` with UTF-8 bytes or a transport error. The reply can cross threads. Its `is_pending()` method allows a transport to stop work for a retired factory.
 
 The component enters `Loading` immediately. Transfer begins after the creating QML transaction commits. Source parsing, linking, binding evaluation and status signals run on the owner thread. Imports of same-origin QML directories and sibling composite types resolve relative to the defining file. Each pending component accepts at most 64 files, 2 MiB per file and 8 MiB in total. Directory imports consult the remote `qmldir` listing. For identified modules, call `add_component_import_path` with a same-origin module root. For example, `import Lab.Widgets 1.1` looks up `Lab/Widgets/qmldir` and selects the public component file exported at that version. A required native plugin produces an error. Inline JavaScript in fetched QML uses the configured script engine.

@@ -2359,9 +2359,12 @@ version = "0.5.0-preview.1"
 dependencies = [
  "color",
  "ferroui-qml-compiler",
+ "js-sys",
  "serde",
  "ureq",
  "url",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
  "web-time",
 ]
 

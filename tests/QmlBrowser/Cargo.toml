@@ -11,7 +11,7 @@ path = "lib.rs"
 crate-type = ["cdylib"]
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-ferroui-qml.workspace = true
+ferroui-qml = { workspace = true, features = ["browser-fetch"] }
 ferroui-qml-webscene.workspace = true
 wasm-bindgen.workspace = true
 wasm-bindgen-futures = "0.4"

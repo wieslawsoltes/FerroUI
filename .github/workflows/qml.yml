@@ -89,7 +89,7 @@ jobs:
           echo "82d12bb940e2d4e72e0d5605387fc1b8ca179044e012b620f0ce4e7440e8320e  $RUNNER_TEMP/bindgen.tar.gz" | sha256sum --check
           tar -xzf "$RUNNER_TEMP/bindgen.tar.gz" -C "$RUNNER_TEMP" "$archive/wasm-bindgen"
           mkdir -p "$RUNNER_TEMP/qml-site/pkg"
-          cp tests/QmlBrowser/{index.html,owner.js} "$RUNNER_TEMP/qml-site/"
+          cp tests/QmlBrowser/{index.html,owner.js,Fetched.qml} "$RUNNER_TEMP/qml-site/"
           "$RUNNER_TEMP/$archive/wasm-bindgen" --target web --no-typescript --out-dir "$RUNNER_TEMP/qml-site/pkg" \
             target/wasm32-unknown-unknown/debug/qml_browser_tests.wasm
           python3 tests/QmlBrowser/run.py --chrome google-chrome --site "$RUNNER_TEMP/qml-site"

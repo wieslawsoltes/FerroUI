@@ -81,3 +81,37 @@ async fn exercise() -> Result<String, ferroui_qml::Error> {
     )?;
     Ok("passed".into())
 }
+
+#[wasm_bindgen(
+    inline_js = "export function nextTurn() { return new Promise(resolve => setTimeout(resolve, 1)); }"
+)]
+extern "C" {
+    #[wasm_bindgen(js_name = nextTurn)]
+    async fn next_turn();
+}
+
+#[wasm_bindgen]
+pub async fn probe_fetch(url: String) -> Result<(), JsValue> {
+    use ferroui_qml::network::BrowserComponentTransport;
+    let mut registry = TypeRegistry::new();
+    registry.set_component_transport(Rc::new(BrowserComponentTransport::default()));
+    let err = |error: ferroui_qml::Error| JsValue::from_str(&error.to_string());
+    let doc = ferroui_qml::ir::parse("import QtQml\nQtObject {}").unwrap();
+    let mut model = Instance::new(&doc, &registry, Default::default()).map_err(err)?;
+    let factory = model
+        .create_component(model.root(), &url, None)
+        .map_err(err)?;
+    while model.has_pending_component_loads() {
+        next_turn().await;
+        model.poll_component_loads(8).map_err(err)?;
+    }
+    let item = model
+        .create_object(factory, None, Default::default())
+        .map_err(err)?;
+    if model.get(item, "value").map_err(err)? != Value::Number(42.) {
+        return Err(JsValue::from_str(
+            "browser transport did not instantiate the fetched component",
+        ));
+    }
+    Ok(())
+}
