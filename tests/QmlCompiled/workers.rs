@@ -198,3 +198,20 @@ fn retiring_a_dynamic_worker_revokes_queued_results_before_a_replacement_starts(
         app.get(root, "localValue").unwrap() == Value::Number(3.)
     });
 }
+
+#[test]
+fn replacing_source_settles_bindings_on_ready_before_returning_to_rust() {
+    let mut app = construct(&generated::compiled_qml());
+    let root = app.root();
+    let Value::Object(actor) = app.get(root, "actor").unwrap() else {
+        panic!()
+    };
+    until(&mut app, |app| {
+        app.get(actor, "ready").unwrap() == Value::Bool(true)
+    });
+    assert_eq!(app.get(root, "observedReady").unwrap(), Value::Bool(true));
+    app.set(actor, "source", Value::String(String::new()))
+        .unwrap();
+    assert_eq!(app.get(actor, "ready").unwrap(), Value::Bool(false));
+    assert_eq!(app.get(root, "observedReady").unwrap(), Value::Bool(false));
+}

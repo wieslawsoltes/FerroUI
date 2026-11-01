@@ -8,6 +8,7 @@ QtObject {
     readonly property int nestedValue: pane.result
     function startNested() { pane.start() }
     property Nested.Pane pane: Nested.Pane { }
+    readonly property bool observedReady: actor.ready
     property int replies: 0
     property int localValue: 0
     property WorkerScript actor: WorkerScript {

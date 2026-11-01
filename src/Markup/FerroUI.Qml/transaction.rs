@@ -257,7 +257,12 @@ impl Transaction<'_> {
             if self.stage_loader()? {
                 continue;
             }
-            self.stage_workers()?;
+            if !self.worker_sources.is_empty() {
+                self.stage_workers()?;
+                // Loading a new source resets ready. Process its dependent
+                // bindings before validating or returning this transaction.
+                continue;
+            }
             if !self.initializing {
                 if let Some(timer) = self.timer_changes.pending.pop_first() {
                     self.schedule_timer(timer)?;
