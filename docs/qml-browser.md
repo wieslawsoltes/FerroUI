@@ -1,6 +1,6 @@
 # Running QML JavaScript in a browser
 
-Run the QML Wasm instance in a dedicated application worker. Each instance executes its JavaScript in a separate script worker with the shared QML scope, module and host-object protocol. Property reads, writes, reentrant calls and bindings run against the current Rust transaction. JavaScript modules and classic scripts come from the compiled resource catalog. A thrown exception rolls back QML writes. The backend supports Promise inspection and bounded settlement, including access to the owner after `await`.
+Run the QML Wasm instance in a dedicated application worker. Each instance executes its JavaScript in a separate script worker with the shared QML scope, module and host-object protocol. Property reads, writes, reentrant calls and bindings run against the current Rust transaction. JavaScript modules and classic scripts come from the compiled resource catalog. A thrown exception rolls back QML writes. The backend supports Promise inspection and bounded settlement, including access to the owner after `await` in compiler-lowered async functions.
 
 Compile the QML entry at build time using `ferroui_qml_build::Compiler::with_javascript()`. In the application worker, start a script worker before constructing the instance so its initial bindings can execute synchronously.
 
@@ -75,7 +75,7 @@ Each transport direction uses a 64 KiB shared slot. Longer UTF-8 messages stream
 
 ## WorkerScript
 
-Each `WorkerScript` declaration creates a separate browser worker and resolves its source against the embedded component catalog. The application worker receives replies asynchronously. Arrange for the owner event loop to call `Instance::poll_worker_scripts` when its worker waker fires. A worker calling `ListModel.sync()` waits for that transaction to commit or reject the edits. Replacing the source or destroying the object terminates the guest and cancels queued deliveries. [WorkerScript example](qml-workers.md)
+Each `WorkerScript` declaration creates a separate browser worker and resolves its source against the embedded component catalog. The application worker receives replies asynchronously. The packaged page adapter installs the waker and drains replies automatically. A custom host calls `Instance::poll_worker_scripts` when its worker waker fires. A worker calling `ListModel.sync()` waits for that transaction to commit or reject the edits. Replacing the source or destroying the object terminates the guest and cancels queued deliveries. [WorkerScript example](qml-workers.md)
 
 ## Fetching QML and ECMAScript modules
 
