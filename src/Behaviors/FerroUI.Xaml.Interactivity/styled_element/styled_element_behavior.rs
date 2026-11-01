@@ -2,7 +2,7 @@
 
 use crate::helpers::TemplatedParentHelper;
 use crate::{DisposableAction, IBehavior, IBehaviorEventsHandler};
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{IDisposable, Subscription, ObservableExt};
 use ferroui_base::{
     ferro_class, ferro_properties, BoxedValue, ElementRef, FerroObject, FerroObjectExtensions, FerroObjectImpl,
     FerroProperty, Nullable, Ref, StyledElement, StyledElementImpl, StyledProperty, WeakRef,
@@ -24,7 +24,7 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct StyledElementBehavior {
     base: StyledElement,
-    data_context_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    data_context_disposable: RefCell<Option<Subscription>>,
     // Deviation (DEVIATIONS.md, Behaviors): the host is held weakly (the host holds its
     // behaviors through its behavior collection).
     associated_object: RefCell<Option<WeakRef<FerroObject>>>,
@@ -253,7 +253,7 @@ impl StyledElementBehavior {
         };
         *self.associated_object.borrow_mut() = Some(associated_object.downgrade());
         let data_context_disposable = self.synchronize_data_context(&associated_object);
-        *self.data_context_disposable.borrow_mut() = data_context_disposable;
+        *self.data_context_disposable.borrow_mut() = data_context_disposable.map(Subscription::new);
 
         // NOTE: Special case handling for TopLevel as it does not trigger attached to logical or
         // visual tree events.

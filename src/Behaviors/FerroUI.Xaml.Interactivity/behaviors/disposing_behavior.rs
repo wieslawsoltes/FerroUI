@@ -1,7 +1,7 @@
 //! Port of `Behaviors/DisposingBehavior.cs` (`DisposingBehavior<T>`).
 
 use crate::{StyledElementBehaviorImpl, StyledElementBehaviorImplExt, StyledElementBehaviorOfT};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::{ferro_class, FerroObjectImpl, StyledElementImpl, TypeInfo};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -15,7 +15,7 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct DisposingBehavior {
     base: StyledElementBehaviorOfT,
-    disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    disposable: RefCell<Option<Subscription>>,
 }
 
 ferro_class! {
@@ -45,7 +45,7 @@ ferroui_base::ferro_overrides! {
                 previous.dispose();
             }
             let disposable = this.on_attached_override();
-            *this.disposable.borrow_mut() = Some(disposable);
+            *this.disposable.borrow_mut() = Some(Subscription::new(disposable));
         }
 
         fn on_detaching(this: &Self) {

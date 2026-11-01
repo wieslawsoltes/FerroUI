@@ -4,7 +4,7 @@ use crate::AdaptiveClassSetter;
 use ferroui_base::collections::FerroList;
 use ferroui_base::controls::IPseudoClasses;
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{IDisposable, Subscription, ObservableExt};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, DirectProperty, ElementRef, FerroObject,
     FerroObjectExtensions, FerroObjectImpl, FerroProperty, Nullable, Rect, Ref, StaticType, StyledElementImpl,
@@ -66,7 +66,7 @@ impl std::fmt::Debug for AdaptiveClassSetters {
 #[repr(C)]
 pub struct AdaptiveBehavior {
     base: StyledElementBehaviorOfT,
-    disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    disposable: RefCell<Option<Subscription>>,
     setters: OnceCell<AdaptiveClassSetters>,
 }
 
@@ -182,7 +182,7 @@ impl AdaptiveBehavior {
 
         if let Some(source_control) = source_control {
             let disposable = self.observe_bounds(&source_control);
-            *self.disposable.borrow_mut() = Some(disposable);
+            *self.disposable.borrow_mut() = Some(Subscription::new(disposable));
         }
     }
 

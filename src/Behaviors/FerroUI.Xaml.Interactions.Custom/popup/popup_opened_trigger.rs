@@ -1,6 +1,6 @@
 //! Port of `Popup/PopupOpenedTrigger.cs`.
 
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::EventArgs;
 use ferroui_base::{
     ferro_class, ferro_class_info, instantiate, BoxedValue, FerroObjectImpl, Ref, StaticType, StyledElementImpl,
@@ -17,7 +17,7 @@ use std::rc::Rc;
 pub struct PopupOpenedTrigger {
     base: StyledElementTriggerOfT,
     // The subscription of the opened event (`Opened -= OnOpened` of the reference).
-    opened: RefCell<Option<Rc<dyn IDisposable>>>,
+    opened: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(PopupOpenedTrigger: StyledElementTriggerOfT);
@@ -35,7 +35,7 @@ ferroui_base::ferro_overrides! {
                         trigger.on_opened();
                     }
                 });
-                *this.opened.borrow_mut() = Some(subscription);
+                *this.opened.borrow_mut() = Some(Subscription::new(subscription));
             }
         }
 

@@ -8,7 +8,7 @@ use ferroui_base::input::{
     PointerPressedEventArgs, PointerReleasedEventArgs,
 };
 use ferroui_base::interactivity::{Interactive, RoutingStrategies};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObject, FerroObjectImpl,
@@ -45,7 +45,7 @@ pub struct ManagedContextDragBehavior {
     calculated_preview_offset: Cell<Option<Point>>,
     handlers: RoutedHandlers,
     top_level_handlers: RoutedHandlers,
-    detached_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    detached_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(ManagedContextDragBehavior: StyledElementBehaviorOfT);
@@ -423,11 +423,11 @@ impl ManagedContextDragBehavior {
         ManagedDragDropService::instance().begin(&tl, Some(value), Some(this.data_format()), effects, client);
         if let Some(ao) = &associated_object {
             let behavior = this.downgrade();
-            *this.detached_subscription.borrow_mut() = Some(ao.detached_from_visual_tree(move |_| {
+            *this.detached_subscription.borrow_mut() = Some(Subscription::new(ao.detached_from_visual_tree(move |_| {
                 if let Some(behavior) = behavior.upgrade() {
                     behavior.associated_object_detached_from_visual_tree();
                 }
-            }));
+            })));
         }
         let _ = tcs.task().await;
 
