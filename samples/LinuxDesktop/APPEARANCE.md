@@ -4,13 +4,21 @@ The default Windows 11 appearance uses FerroUI's compiled WinUI 3 theme. Open **
 
 | Appearance | Native control theme | Shell composition |
 | --- | --- | --- |
-| Windows 11 | WinUI 3, light variant | Centered taskbar, desktop shortcuts and a Start panel with an application grid |
+| Windows 11 | WinUI 3, light by default | Centered taskbar, desktop shortcuts and a Start panel with an application grid |
 | macOS | macOS, dark variant | Top menu bar, floating Dock and a centered application search panel |
 | Material 3 | Material, dark variant with bundled Roboto | Clock home screen, bottom navigation and bottom sheets |
 
 A switch replaces the shell application's installed style in its existing style collection and changes its requested theme variant. Shell labels bind to shared theme resources such as `TextFillColorPrimaryBrush` and `ContentControlThemeFontFamily`. The appearance descriptor supplies brushes for the desktop surface, icon tiles and wallpaper. The shell rebuilds its chrome around the existing search query, catalog, workspace state and window-manager connection. In session mode it also updates the reserved screen edges so maximized clients follow the new layout.
 
 The setting persists as an appearance ID in `$XDG_CONFIG_HOME/ferro-desktop/appearance`, with `$HOME/.config` as the default configuration directory. A persistence error is shown in the chooser after the live change. `--theme=windows`, `--theme=macos` and `--theme=material` select a startup appearance explicitly. Applications launched from the shell continue to draw with their own toolkits and settings.
+
+## Windows personalization
+
+In the Windows profile, **Appearance** offers the native WinUI 3 Light, Dark and High Contrast variants. Radio buttons select the color mode, and a toggle switch sets Normal or Compact density. While the chooser has focus, **L**, **D** and **H** select the color mode and **C** toggles density. The choices persist separately in `$XDG_CONFIG_HOME/ferro-desktop/windows-style`. Returning from the macOS or Material profile restores the selected Windows settings.
+
+The shell keeps the WinUI theme instance when changing color or density. The requested theme variant selects its compiled resource dictionaries, and the theme's density property selects the compact control resources. The taskbar, popups, status messages and text resolve their brushes through those dictionaries. High Contrast also removes the decorative wallpaper. Compact mode reduces the taskbar's screen reservation from 52 to 42 logical pixels, including on managed Wayland outputs.
+
+The Windows notification indicator uses the themed InfoBadge with the actual unread count. Shell status uses InfoBar, and the initial device query in Quick Settings uses ProgressRing. GTK, Qt and other native clients continue to own their control trees.
 
 ## Register a fourth appearance
 

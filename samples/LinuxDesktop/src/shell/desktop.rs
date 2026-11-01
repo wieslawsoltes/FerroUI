@@ -180,25 +180,24 @@ fn status_button(state: &Rc<Shell>, scene: Scene, label: &str, icon: Icon) -> El
 
 fn notification_button(state: &Rc<Shell>) -> Element {
     let counter = state.clone();
+    let badge = if look().winui().is_some() {
+        let value = state.clone();
+        info_badge()
+            .value(move || value.notifications.count().min(i32::MAX as usize) as i32)
+            .automation_properties_name("Unread notifications")
+            .is_visible(move || counter.notifications.count() != 0)
+            .is_hit_test_visible(false).vertical_alignment(V::Top).horizontal_alignment(H::Right)
+            .into_element()
+    } else {
+        border().width(7).height(7).corner_radius(4)
+            .background(colors().accent).margin((0.0, 2.0, 3.0, 0.0))
+            .vertical_alignment(V::Top).horizontal_alignment(H::Right)
+            .is_hit_test_visible(false).is_visible(move || counter.notifications.count() != 0)
+            .into_element()
+    };
     grid()
-        .child(status_button(
-            state,
-            Scene::Notifications,
-            "Notification center",
-            Icon::Bell,
-        ))
-        .child(
-            border()
-                .width(7)
-                .height(7)
-                .corner_radius(4)
-                .background(colors().accent)
-                .margin((0.0, 2.0, 3.0, 0.0))
-                .vertical_alignment(V::Top)
-                .horizontal_alignment(H::Right)
-                .is_hit_test_visible(false)
-                .is_visible(move || counter.notifications.count() != 0),
-        )
+        .child(status_button(state, Scene::Notifications, "Notification center", Icon::Bell))
+        .child(badge)
         .into()
 }
 
@@ -605,7 +604,7 @@ fn windows_settings(shell: &Rc<Shell>, settings: WinUISettings) -> Element {
         .on_content("On")
         .is_checked(Some(compact))
         .on_is_checked_changed(move |e| {
-            let Some(toggle) = e.source().and_then(|source| source.downcast::<ferroui_controls::ToggleSwitch>()) else { return; };
+            let Some(toggle) = e.source().and_then(|source| source.downcast::<ferroui_controls::ToggleSwitch>().ok()) else { return; };
             let checked = toggle.is_checked() == Some(true);
             if checked != compact { state.select_windows(settings.toggle_density()); }
         });

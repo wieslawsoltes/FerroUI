@@ -406,6 +406,28 @@ mod tests {
     }
 
     #[test]
+    fn windows_style_parsing_and_panel_reservations_follow_the_selected_density() {
+        for mode in ColorMode::ALL {
+            for (name, density, height) in [
+                ("normal", DensityStyle::Normal, 52.0),
+                ("compact", DensityStyle::Compact, 42.0),
+            ] {
+                let settings = WinUISettings { mode, density };
+                let restored = WinUISettings::decode(&format!("{} {name}\n", mode.id()));
+                assert_eq!(restored, Some(settings));
+                let profile = Appearance::Windows.with_winui(settings);
+                assert_eq!(profile.id(), "windows");
+                assert_eq!(profile.insets(), (0.0, height));
+            }
+        }
+        for invalid in ["", "dark", "light compressed", "solarized compact", "dark compact extra"] {
+            assert!(WinUISettings::decode(invalid).is_none());
+        }
+        assert!(Appearance::MacOS.winui().is_none());
+        assert!(Appearance::Material.winui().is_none());
+    }
+
+    #[test]
     fn fourth_descriptor_supplies_its_own_palette_on_an_existing_layout() {
         static NIGHT_SHIFT: Descriptor = Descriptor {
             id: "night-shift",

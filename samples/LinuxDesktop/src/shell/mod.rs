@@ -18,7 +18,7 @@ use ferroui_base::input::{Key, KeyModifiers};
 use ferroui_base::layout::VerticalAlignment as V;
 use ferroui_base::media::FontWeight;
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
-use ferroui_controls::{Grid, TextBlock};
+use ferroui_controls::Grid;
 use ferroui_system::threading::tasks;
 use ferroui_view::prelude::*;
 use std::rc::Rc;
@@ -587,9 +587,17 @@ fn popup_header(title: &str, caption: &str, state: &Rc<Shell>) -> El<Grid> {
         )
 }
 
-fn feedback(status: Signal<String>) -> El<TextBlock> {
-    shell_text("", 12.0, Ink::Accent)
-        .text(status)
-        .is_visible(move || status.with(|s| !s.is_empty()))
-        .text_wrapping(ferroui_base::media::TextWrapping::Wrap)
+fn feedback(status: Signal<String>) -> El<Grid> {
+    let is_windows = look().winui().is_some();
+    grid().is_visible(move || status.with(|s| !s.is_empty()))
+        .child(dynamic(move || {
+            if status.with(String::is_empty) {
+                Element::Empty
+            } else if is_windows {
+                info_bar().is_open(true).is_closable(false).message(status).into()
+            } else {
+                shell_text("", 12.0, Ink::Accent).text(status)
+                    .text_wrapping(ferroui_base::media::TextWrapping::Wrap).into()
+            }
+        }))
 }
