@@ -217,6 +217,7 @@ pub fn run() -> ExitCode {
         }
         Platform::Wayland => {
             let wayland = WaylandPlatformOptions {
+                capture_native_keyboard: options.compose,
                 app_id: Some(
                     if options.compose {
                         "org.ferroui.Desktop.Compositor"

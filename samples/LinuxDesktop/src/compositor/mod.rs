@@ -191,22 +191,7 @@ impl Desktop {
         }
     }
     pub fn snap(&self, id: u32, side: SnapSide) -> bool {
-        let (width, height) = self.extent.get();
-        let (top, bottom) = self.work_area.get();
-        let left = width / 2;
-        let (x, w) = match side {
-            SnapSide::Left => (0, left),
-            SnapSide::Right => (left, width - left),
-        };
-        if !self.request(id, |id| Input::Move { id, x, y: top }) {
-            return false;
-        }
-        self.server.send(Input::Configure {
-            id: id.into(),
-            width: w.max(1),
-            height: (height - top - bottom).max(1),
-        });
-        true
+        self.request(id, |id| Input::Snap { id, right: side == SnapSide::Right })
     }
 }
 

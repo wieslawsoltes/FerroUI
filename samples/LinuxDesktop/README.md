@@ -6,6 +6,12 @@ The **FerroUI compositor** can also host applications on its own Wayland display
 
 ## Screenshots
 
+These two frames show the **FerroUI compositor** running a native GTK demo and a Qt Widgets color picker on its private Wayland display. The second frame opens the WinUI workspace overview over the same clients. Sway sees one fullscreen presentation window.
+
+| Native GTK and Qt composed by FerroUI | WinUI overview over the same windows |
+| --- | --- |
+| ![GTK and Qt on the FerroUI compositor](screenshots/compositor-gtk-qt.webp) | ![Two native clients listed in the WinUI overview](screenshots/compositor-overview.webp) |
+
 These Wayland captures come from a managed Sway session running Skia Graphite on Mesa Lavapipe. The first shows independent native GTK and Qt windows. The next two show the same terminal after switching the running desktop’s appearance.
 
 | Windows 11 · GTK and Qt | macOS · terminal | Material 3 · terminal |
