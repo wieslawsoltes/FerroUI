@@ -2,26 +2,26 @@ use super::*;
 
 #[test]
 fn launcher_search_matches_words_across_the_entry() {
-    let catalog = ApplicationCatalog {
-        applications: vec![
-            DesktopApplication::new(
-                "editor.desktop".into(),
-                "Éditeur".into(),
-                "Edit documents".into(),
-                String::new(),
-            ),
-            DesktopApplication::new(
-                "terminal.desktop".into(),
-                "Terminal".into(),
-                "Command line".into(),
-                String::new(),
-            ),
-        ],
-        unavailable_reason: None,
-    };
-    assert_eq!(catalog.search_indices("DOCUM ÉDI").next(), Some(0));
-    assert_eq!(catalog.search_indices("command édit").count(), 0);
-    assert_eq!(catalog.search_indices(" ").count(), 2);
+    let catalog = ApplicationCatalog::from_applications(vec![
+        DesktopApplication::new(
+            "editor.desktop".into(),
+            "Éditeur".into(),
+            "Edit documents".into(),
+            String::new(),
+        ),
+        DesktopApplication::new(
+            "terminal.desktop".into(),
+            "Terminal".into(),
+            "Command line".into(),
+            String::new(),
+        ),
+    ]);
+    assert_eq!(
+        catalog.search_indices("DOCUM ÉDI"),
+        [catalog.index_of("editor.desktop").unwrap()]
+    );
+    assert_eq!(catalog.search_indices("command édit").len(), 0);
+    assert_eq!(catalog.search_indices(" ").len(), 2);
 }
 
 #[cfg(target_os = "linux")]

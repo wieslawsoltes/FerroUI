@@ -6,12 +6,12 @@ use ferroui_base::styling::{IStyle, ThemeVariant};
 use ferroui_base::Ref;
 use ferroui_controls::Application;
 use std::cell::{Cell, RefCell};
+#[cfg(test)]
 use std::env;
-use std::fs::{self, OpenOptions};
-use std::io::{self, Write};
+use std::fs;
+use std::io;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-use std::sync::atomic::{AtomicU64, Ordering};
 
 #[derive(Clone, Copy)]
 pub struct Descriptor {
@@ -239,45 +239,11 @@ impl ThemeController {
 }
 
 fn preference_path() -> io::Result<PathBuf> {
-    let base = env::var_os("XDG_CONFIG_HOME")
-        .map(PathBuf::from)
-        .filter(|p| p.is_absolute())
-        .or_else(|| {
-            env::var_os("HOME")
-                .map(PathBuf::from)
-                .filter(|p| p.is_absolute())
-                .map(|p| p.join(".config"))
-        })
-        .ok_or_else(|| {
-            io::Error::new(io::ErrorKind::NotFound, "No user configuration directory")
-        })?;
-    Ok(base.join("ferro-desktop/appearance"))
+    crate::services::preferences::config_path("appearance")
 }
 
 fn save_preference(path: &Path, appearance: Appearance) -> io::Result<()> {
-    static NEXT: AtomicU64 = AtomicU64::new(0);
-    let dir = path
-        .parent()
-        .ok_or_else(|| io::Error::other("Missing configuration directory"))?;
-    fs::create_dir_all(dir)?;
-    let (mut file, staging) = loop {
-        let id = NEXT.fetch_add(1, Ordering::Relaxed);
-        let staging = dir.join(format!(".appearance-{}-{id}.tmp", std::process::id()));
-        match OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&staging)
-        {
-            Ok(file) => break (file, staging),
-            Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
-            Err(error) => return Err(error),
-        }
-    };
-    let result = writeln!(file, "{}", appearance.id()).and_then(|()| fs::rename(&staging, path));
-    if result.is_err() {
-        let _ = fs::remove_file(staging);
-    }
-    result
+    crate::services::preferences::replace(path, format!("{}\n", appearance.id()).as_bytes())
 }
 
 #[cfg(test)]

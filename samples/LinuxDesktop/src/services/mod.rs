@@ -3,6 +3,9 @@
 
 use std::io;
 
+pub mod notifications;
+pub mod quick_settings;
+
 #[cfg(target_os = "linux")]
 mod gio;
 #[cfg(target_os = "linux")]
@@ -10,29 +13,12 @@ mod icons;
 #[cfg(target_os = "linux")]
 pub use icons::ApplicationIcons;
 
-#[derive(Clone, Debug)]
-pub struct DesktopApplication {
-    /// The XDG desktop file ID, including its `.desktop` suffix.
-    pub id: String,
-    pub name: String,
-    pub description: String,
-    /// Serialized GIcon, usually a single theme icon name.
-    pub icon: String,
-    search_text: String,
-}
+mod catalog;
+pub mod favorites;
+pub(crate) mod preferences;
+pub use catalog::{ApplicationCatalog, DesktopApplication};
 
 impl DesktopApplication {
-    fn new(id: String, name: String, description: String, icon: String) -> Self {
-        let search_text = format!("{name}\n{id}\n{description}").to_lowercase();
-        Self {
-            id,
-            name,
-            description,
-            icon,
-            search_text,
-        }
-    }
-
     /// Requests activation, allowing GIO to handle D-Bus activation, terminal
     /// selection, the working directory and field codes. No shell is involved.
     pub fn launch(&self) -> io::Result<()> {
@@ -46,56 +32,15 @@ impl DesktopApplication {
     }
 }
 
-#[derive(Default, Debug)]
-pub struct ApplicationCatalog {
-    applications: Vec<DesktopApplication>,
-    unavailable_reason: Option<String>,
-}
-
 impl ApplicationCatalog {
     pub fn discover() -> Self {
         #[cfg(target_os = "linux")]
         match gio::applications() {
-            Ok(mut applications) => {
-                applications.sort_by_cached_key(|app| (app.name.to_lowercase(), app.id.clone()));
-                Self {
-                    applications,
-                    unavailable_reason: None,
-                }
-            }
-            Err(error) => Self {
-                unavailable_reason: Some(error.to_string()),
-                ..Self::default()
-            },
+            Ok(applications) => Self::from_applications(applications),
+            Err(error) => Self::unavailable(error.to_string()),
         }
         #[cfg(not(target_os = "linux"))]
-        Self {
-            unavailable_reason: Some("Application discovery requires Linux".into()),
-            ..Self::default()
-        }
-    }
-
-    pub fn applications(&self) -> &[DesktopApplication] {
-        &self.applications
-    }
-
-    pub fn unavailable_reason(&self) -> Option<&str> {
-        self.unavailable_reason.as_deref()
-    }
-
-    /// All words must match, in any order. Allocate once per query regardless
-    /// of the number of applications.
-    pub fn search_indices(&self, query: &str) -> impl Iterator<Item = usize> + '_ {
-        let query = query.to_lowercase();
-        self.applications
-            .iter()
-            .enumerate()
-            .filter_map(move |(index, app)| {
-                query
-                    .split_whitespace()
-                    .all(|word| app.search_text.contains(word))
-                    .then_some(index)
-            })
+        Self::unavailable("Application discovery requires Linux".into())
     }
 }
 

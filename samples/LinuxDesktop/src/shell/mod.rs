@@ -5,6 +5,8 @@ mod chrome;
 mod desktop;
 use appearance::{Appearance, ThemeController};
 mod launcher;
+mod notifications;
+mod quick_settings;
 mod wallpaper;
 mod workspaces;
 
@@ -28,12 +30,20 @@ pub enum Scene {
     Applications,
     Workspaces,
     Appearance,
+    Notifications,
+    QuickSettings,
+    Calendar,
 }
 
 struct Shell {
     scene: Signal<Scene>,
     appearance: Signal<Appearance>,
     themes: Rc<ThemeController>,
+    favorites: Signal<Vec<String>>,
+    pin_editing: Signal<bool>,
+    pin_limit: Signal<usize>,
+    notifications: notifications::Notifications,
+    settings: quick_settings::Settings,
     query: Signal<String>,
     page: Signal<usize>,
     catalog: Rc<ApplicationCatalog>,
@@ -211,6 +221,7 @@ pub fn view(
     catalog: Rc<ApplicationCatalog>,
     session: Option<Rc<Session>>,
     themes: Rc<ThemeController>,
+    managed: bool,
 ) -> Element {
     let appearance = signal(themes.current());
     ferroui_view::provide_context(appearance);
@@ -218,11 +229,30 @@ pub fn view(
         .err()
         .map(|error| format!("Could not update window decorations. {error}"))
         .unwrap_or_default();
+    let favorites = crate::services::favorites::load();
+    let initial_status = [
+        Some(initial_status),
+        favorites
+            .as_ref()
+            .err()
+            .map(|e| format!("Could not load pinned apps. {e}")),
+    ]
+    .into_iter()
+    .flatten()
+    .filter(|s| !s.is_empty())
+    .collect::<Vec<_>>()
+    .join(" ");
     if !initial_status.is_empty() {
         eprintln!("{initial_status}");
     }
+    let pin_limit = signal(4);
     let state = Rc::new(Shell {
         scene: signal(initial),
+        favorites: signal(favorites.unwrap_or_default()),
+        pin_editing: signal(false),
+        pin_limit,
+        notifications: notifications::Notifications::new(managed),
+        settings: quick_settings::Settings::new(),
         appearance,
         themes,
         query: signal(String::new()),
@@ -241,6 +271,7 @@ pub fn view(
         search_box: Default::default(),
     });
 
+    notifications::attach(&state);
     if let Some(session) = &state.session {
         let weak = Rc::downgrade(&state);
         session.subscribe(move || {
@@ -279,6 +310,16 @@ pub fn view(
     let dismiss = state.clone();
     grid()
         .name("DesktopShell")
+        .on_size_changed(move |event| {
+            let width = event.new_size().width;
+            pin_limit.set_if_changed(if width >= 1024.0 {
+                4
+            } else if width >= 800.0 {
+                2
+            } else {
+                0
+            });
+        })
         .clip_to_bounds(true)
         .on_key_down(move |event| match (event.key, event.key_modifiers) {
             (Key::Escape, _) if current.get_untracked() != Scene::Desktop => {
@@ -303,6 +344,24 @@ pub fn view(
                     root_state.select_appearance(appearance);
                     event.set_handled(true);
                 }
+            }
+            (Key::C, modifiers) if modifiers == (KeyModifiers::CONTROL | KeyModifiers::SHIFT) => {
+                root_state.open(Scene::Calendar);
+                event.set_handled(true);
+            }
+            (key, mods)
+                if current.get_untracked() == Scene::QuickSettings
+                    && quick_settings::handle_key(&root_state, key, mods) =>
+            {
+                event.set_handled(true);
+            }
+            (Key::N, KeyModifiers::CONTROL) => {
+                root_state.open(Scene::Notifications);
+                event.set_handled(true);
+            }
+            (Key::Q, modifiers) if modifiers == (KeyModifiers::CONTROL | KeyModifiers::SHIFT) => {
+                root_state.open(Scene::QuickSettings);
+                event.set_handled(true);
             }
             (Key::OemComma, KeyModifiers::CONTROL) => {
                 root_state.open(Scene::Appearance);
@@ -356,6 +415,9 @@ pub fn view(
                         })),
                 )
                 .child(dynamic(move || match (current.get(), appearance.get()) {
+                    (Scene::QuickSettings, _) => quick_settings::view(&overlays),
+                    (Scene::Calendar, _) => quick_settings::calendar_view(&overlays),
+                    (Scene::Notifications, _) => notifications::view(&overlays),
                     (Scene::Appearance, _) => desktop::picker(&overlays),
                     (Scene::Workspaces, _) => workspaces::view(&overlays),
                     _ => Element::Empty,
@@ -377,10 +439,13 @@ fn popup_header(title: &str, caption: &str, state: &Rc<Shell>) -> El<Grid> {
                 .child(shell_text(title, 28.0, Ink::Primary).font_weight(FontWeight::SemiBold)),
         )
         .child(
-            icon_action("Close overview", Icon::Close, move || dismiss.dismiss())
+            icon_action("Close panel", Icon::Close, move || dismiss.dismiss())
                 .node_ref(focus)
                 .on_loaded(move |_| {
-                    if scene.get_untracked() == Scene::Workspaces {
+                    if matches!(
+                        scene.get_untracked(),
+                        Scene::Workspaces | Scene::Calendar | Scene::QuickSettings
+                    ) {
                         if let Some(control) = focus.get_untracked() {
                             control.focus();
                         }

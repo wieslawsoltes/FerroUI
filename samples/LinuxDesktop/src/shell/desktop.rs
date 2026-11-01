@@ -132,6 +132,41 @@ fn desktop_shortcut(state: &Rc<Shell>, scene: Scene, name: &str, icon: Icon) -> 
         .into()
 }
 
+fn status_button(state: &Rc<Shell>, scene: Scene, label: &str, icon: Icon) -> El<Button> {
+    command(state, scene, label)
+        .class("text")
+        .min_width(34)
+        .height(32)
+        .padding((7.0, 4.0))
+        .background("Transparent")
+        .border_thickness(0)
+        .child(glyph(icon, 17.0, colors().bar_ink))
+}
+
+fn notification_button(state: &Rc<Shell>) -> Element {
+    let counter = state.clone();
+    grid()
+        .child(status_button(
+            state,
+            Scene::Notifications,
+            "Notification center",
+            Icon::Bell,
+        ))
+        .child(
+            border()
+                .width(7)
+                .height(7)
+                .corner_radius(4)
+                .background(colors().accent)
+                .margin((0.0, 2.0, 3.0, 0.0))
+                .vertical_alignment(V::Top)
+                .horizontal_alignment(H::Right)
+                .is_hit_test_visible(false)
+                .is_visible(move || counter.notifications.count() != 0),
+        )
+        .into()
+}
+
 fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
     let snapshot = state.snapshot;
     let start = command(state, Scene::Applications, "Open applications")
@@ -152,7 +187,7 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 .child(glyph(Icon::Search, 14.0, colors().muted))
                 .child(shell_text("Search", 13.0, Ink::Secondary)),
         );
-    let tray = stack_panel()
+    let clock_labels = stack_panel()
         .horizontal_alignment(H::Right)
         .vertical_alignment(V::Center)
         .child(
@@ -164,6 +199,22 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
             shell_text("", 11.0, Ink::Secondary)
                 .horizontal_alignment(H::Right)
                 .text(move || date(clock.get())),
+        );
+    let tray = row(2.0)
+        .horizontal_alignment(H::Right)
+        .child(status_button(
+            state,
+            Scene::QuickSettings,
+            "Quick settings",
+            Icon::Settings,
+        ))
+        .child(notification_button(state))
+        .child(
+            command(state, Scene::Calendar, "Open calendar")
+                .padding((6.0, 0.0))
+                .background("Transparent")
+                .border_thickness(0)
+                .child(clock_labels),
         );
     let center = row(5.0)
         .horizontal_alignment(H::Center)
@@ -185,6 +236,7 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 .border_thickness(0)
                 .child(glyph(Icon::Appearance, 19.0, colors().dock_tiles[2])),
         )
+        .child(super::launcher::pinned_shortcuts(state))
         .child(running_clients(state));
     grid()
         .row_definitions(&format!("*,{}", state.themes.current().insets().1))
@@ -287,9 +339,26 @@ fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element
                             .child(menu(Scene::Appearance, "Appearance")),
                     )
                     .child(
-                        shell_text("", 12.0, colors().bar_ink)
+                        row(2.0)
                             .grid_column(1)
-                            .text(move || time_text(clock.get())),
+                            .child(status_button(
+                                state,
+                                Scene::QuickSettings,
+                                "Control center",
+                                Icon::Settings,
+                            ))
+                            .child(notification_button(state))
+                            .child(
+                                command(state, Scene::Calendar, "Open calendar")
+                                    .height(28)
+                                    .padding((5.0, 0.0))
+                                    .border_thickness(0)
+                                    .background("Transparent")
+                                    .child(
+                                        shell_text("", 12.0, colors().bar_ink)
+                                            .text(move || time_text(clock.get())),
+                                    ),
+                            ),
                     ),
             ),
         )
@@ -323,6 +392,7 @@ fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element
                             Icon::Appearance,
                             colors().dock_tiles[2],
                         ))
+                        .child(super::launcher::pinned_shortcuts(state))
                         .child(running_clients(state)),
                 ),
         )
@@ -375,16 +445,25 @@ fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 .margin((34.0, 32.0))
                 .horizontal_alignment(H::Left)
                 .vertical_alignment(V::Top)
-                .child(shell_text("", 17.0, "#D4E7D9").text(move || {
-                    let t = clock.get();
-                    format!("{}, {} {}", t.weekday(), t.month(), t.day())
-                }))
+                .child(
+                    command(state, Scene::Calendar, "Open calendar")
+                        .class("text")
+                        .padding(0)
+                        .horizontal_alignment(H::Left)
+                        .background("Transparent")
+                        .border_thickness(0)
+                        .child(shell_text("", 17.0, "#D4E7D9").text(move || {
+                            let t = clock.get();
+                            format!("{}, {} {}", t.weekday(), t.month(), t.day())
+                        })),
+                )
                 .child(
                     shell_text("", 76.0, "#E1F9E7")
                         .font_weight(FontWeight::Light)
                         .letter_spacing(-3.0)
                         .text(move || time_text(clock.get())),
-                ),
+                )
+                .child(row(2.0).child(super::launcher::pinned_shortcuts(state))),
         )
         .child(
             border()
@@ -396,8 +475,8 @@ fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                         .row_definitions("*,6")
                         .child(
                             grid()
-                                .max_width(430.0)
-                                .column_definitions("*,*,*,*")
+                                .max_width(550.0)
+                                .column_definitions("*,*,*,*,*,*")
                                 .child(
                                     tab(Scene::Desktop, "Home", Icon::Mark, 0)
                                         .node_ref(state.desktop_focus)
@@ -405,7 +484,9 @@ fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                                 )
                                 .child(tab(Scene::Applications, "Apps", Icon::Applications, 1))
                                 .child(tab(Scene::Workspaces, "Overview", Icon::Workspaces, 2))
-                                .child(tab(Scene::Appearance, "Style", Icon::Appearance, 3)),
+                                .child(tab(Scene::Notifications, "Inbox", Icon::Bell, 3))
+                                .child(tab(Scene::QuickSettings, "Controls", Icon::Settings, 4))
+                                .child(tab(Scene::Appearance, "Style", Icon::Appearance, 5)),
                         )
                         .child(
                             border()

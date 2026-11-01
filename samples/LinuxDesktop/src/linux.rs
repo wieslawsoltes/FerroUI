@@ -11,7 +11,7 @@ use ferroui_x11::{FerroX11PlatformExtensions, X11PlatformOptions, X11RenderingMo
 use std::process::ExitCode;
 use std::rc::Rc;
 
-const HELP: &str = "Usage: ferro-desktop [--session] [--software] [--theme=windows|macos|material] [--scene=desktop|applications|workspaces]
+const HELP: &str = "Usage: ferro-desktop [--session] [--software] [--theme=windows|macos|material] [--scene=desktop|applications|workspaces|notifications|settings|calendar]
 
 By default the shell opens a window on DISPLAY using Skia Graphite over Vulkan.
 --session   Own the primary desktop surface in a dedicated X11 session.
@@ -42,6 +42,9 @@ impl Options {
                 match arg.as_str() {
                     "--session" => options.session = true,
                     "--software" => options.software = true,
+                    "--scene=notifications" => options.scene = Scene::Notifications,
+                    "--scene=settings" => options.scene = Scene::QuickSettings,
+                    "--scene=calendar" => options.scene = Scene::Calendar,
                     "--scene=desktop" => options.scene = Scene::Desktop,
                     "--scene=applications" => options.scene = Scene::Applications,
                     "--scene=workspaces" => options.scene = Scene::Workspaces,
@@ -87,10 +90,13 @@ pub fn run() -> ExitCode {
     let mut vulkan = ferroui_vulkan::VulkanOptions::default();
     vulkan.vulkan_instance_creation_options.application_name = Some("Ferro Desktop".into());
     // Graphite probes the two-plane 4:4:4 formats and chooses driver-specific workarounds.
-    vulkan.vulkan_device_creation_options.device_extensions.extend([
-        "VK_KHR_driver_properties".into(),
-        "VK_EXT_ycbcr_2plane_444_formats".into(),
-    ]);
+    vulkan
+        .vulkan_device_creation_options
+        .device_extensions
+        .extend([
+            "VK_KHR_driver_properties".into(),
+            "VK_EXT_ycbcr_2plane_444_formats".into(),
+        ]);
     let theme = options.theme.unwrap_or_else(Appearance::preferred);
     // Let GIO resolve the user's installed entries while X11, Skia and the
     // initial theme load. No native application handles leave the worker.
@@ -104,6 +110,15 @@ pub fn run() -> ExitCode {
         .with_material_fonts()
         .start(
             move |app, _| {
+                // System Task workers post their completions to this UI dispatcher.
+                // Without the poster, GIO launches, pin edits and settings requests finish
+                // on the worker but their continuations remain queued until shutdown.
+                let previous_context = ferroui_system::threading::current_synchronization_context();
+                ferroui_system::threading::set_synchronization_context(Some(
+                    ferroui_base::threading::FerroSynchronizationContext::with_priority(
+                        ferroui_base::threading::DispatcherPriority::NORMAL,
+                    ),
+                ));
                 let themes = ThemeController::install(app, theme);
                 let session = Session::connect();
                 let catalog = Rc::new(applications.join().expect("application discovery worker"));
@@ -118,8 +133,9 @@ pub fn run() -> ExitCode {
                         .configure_desktop(&window);
                 }
                 let owner = Owner::new_root();
-                let content =
-                    owner.with(|| shell::view(options.scene, catalog, session, themes).mount());
+                let content = owner.with(|| {
+                    shell::view(options.scene, catalog, session, themes, options.session).mount()
+                });
                 window.set_content(Some(Control::boxed(content)));
                 eprintln!(
                     "Ferro Desktop / {} / {}",
@@ -132,6 +148,7 @@ pub fn run() -> ExitCode {
                 );
                 app.run_window(window);
                 owner.dispose();
+                ferroui_system::threading::set_synchronization_context(previous_context);
             },
             &args,
         );

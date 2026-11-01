@@ -1017,6 +1017,7 @@ version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-freedesktop",
  "ferroui-harfbuzz",
  "ferroui-markup-xaml",
  "ferroui-skia",
@@ -1028,7 +1029,9 @@ dependencies = [
  "ferroui-vulkan",
  "ferroui-x11",
  "roxmltree 0.20.0",
+ "serde_json",
  "time",
+ "zbus",
 ]
 
 [[package]]
