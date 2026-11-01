@@ -695,6 +695,8 @@ impl MediaPlayerElement {
         // Native commands may be accepted on another looper before actual
         // playback changes. A paused frame must not stop polling before that
         // transition, or before a newly sought frame reaches the producer fence.
+        // Ended has the same race: Play is accepted before its native restart
+        // changes state, with no pending import yet to keep the timer alive.
         self.settling_ticks.set(30);
         if !self.is_attached_to_visual_tree() || self.timer.borrow().is_some() {
             return;
@@ -739,7 +741,8 @@ impl MediaPlayerElement {
                     MediaPlaybackState::Playing
                         | MediaPlaybackState::Buffering
                         | MediaPlaybackState::Opening
-                ) || (settling > 0 && state == MediaPlaybackState::Paused)
+                ) || (settling > 0
+                    && matches!(state, MediaPlaybackState::Paused | MediaPlaybackState::Ended))
                     || (matches!(
                         state,
                         MediaPlaybackState::Paused | MediaPlaybackState::Ended
@@ -779,6 +782,7 @@ mod readiness_tests {
     struct Native {
         pending: Cell<bool>,
         reads: Cell<u32>,
+        state: Cell<MediaPlaybackState>,
     }
     impl NativeMediaSession for Native {
         fn has_pending_frame_work(&self) -> bool {
@@ -786,7 +790,7 @@ mod readiness_tests {
         }
         fn state(&self) -> Result<MediaPlaybackSession, MediaError> {
             Ok(MediaPlaybackSession {
-                state: MediaPlaybackState::Paused,
+                state: self.state.get(),
                 ..Default::default()
             })
         }
@@ -827,6 +831,54 @@ mod readiness_tests {
         }
         Dispatcher::ui_thread().run_jobs(None);
     }
+    #[test]
+    fn ended_restart_keeps_polling_until_native_play_is_observed() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let native = Rc::new(Native {
+            pending: Cell::new(false),
+            reads: Cell::new(0),
+            state: Cell::new(MediaPlaybackState::Ended),
+        });
+        let player = MediaPlayer::new(Rc::new(Provider(native.clone())));
+        ready(player.set_source(MediaSource::Url("https://example.invalid/video.mp4".into())))
+            .unwrap();
+        let view = MediaPlayerElement::new();
+        view.set_media_player(Some(&player), None);
+        let window = Window::new();
+        window.set_content(Some(Control::boxed(view.clone())));
+        window.show();
+        for _ in 0..40 {
+            tick();
+        }
+        assert!(
+            view.timer.borrow().is_none(),
+            "settled Ended must not poll forever"
+        );
+        ready(player.play()).unwrap();
+        // Command acceptance precedes the native state change. No pending GPU
+        // job can keep this timer alive for us, and no second Play event occurs.
+        for _ in 0..3 {
+            tick();
+        }
+        assert!(
+            view.timer.borrow().is_some(),
+            "Ended must receive the command settling allowance too"
+        );
+        let reads = native.reads.get();
+        native.state.set(MediaPlaybackState::Playing);
+        for _ in 0..40 {
+            tick();
+        }
+        assert!(native.reads.get() > reads && view.timer.borrow().is_some());
+        native.state.set(MediaPlaybackState::Ended);
+        tick();
+        assert!(
+            view.timer.borrow().is_none(),
+            "settled EOF must still retire polling"
+        );
+        window.close();
+        tick();
+    }
     struct Importer;
     impl TextureFrameImporter for Importer {
         fn import(
@@ -854,6 +906,7 @@ mod readiness_tests {
         let native = Rc::new(Native {
             pending: Cell::new(false),
             reads: Cell::new(0),
+            state: Cell::new(MediaPlaybackState::Paused),
         });
         ready(view.set_source(
             MediaSource::File("initial.mp4".into()),
@@ -900,6 +953,7 @@ mod readiness_tests {
         let external = MediaPlayer::new(Rc::new(Provider(Rc::new(Native {
             pending: Cell::new(false),
             reads: Cell::new(0),
+            state: Cell::new(MediaPlaybackState::Paused),
         }))));
         ready(external.set_source(MediaSource::File("external.mp4".into()))).unwrap();
         let window = Window::new();
@@ -975,6 +1029,7 @@ mod readiness_tests {
         let external = MediaPlayer::new(Rc::new(Provider(Rc::new(Native {
             pending: Cell::new(false),
             reads: Cell::new(0),
+            state: Cell::new(MediaPlaybackState::Paused),
         }))));
         ready(external.set_source(MediaSource::File("caller.mp4".into()))).unwrap();
         view.set_media_player(Some(&external), None);
@@ -1021,6 +1076,7 @@ mod readiness_tests {
         let native = Rc::new(Native {
             pending: Cell::new(true),
             reads: Cell::new(0),
+            state: Cell::new(MediaPlaybackState::Paused),
         });
         let player = MediaPlayer::new(Rc::new(Provider(native.clone())));
         let mut open =
