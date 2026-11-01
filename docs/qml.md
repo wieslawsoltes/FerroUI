@@ -199,6 +199,8 @@ let meter = TypeDefinition::default()
 
 A `Component` retains its declaration scope. Creating an object assigns a new identity to every node, applies the initial property map, resolves bindings and emits completion within one transaction. The native view validates newly created peers before mounting them. Destroying the instance subtree releases its controls, input subscriptions, worker registrations and deferred calls. Rust can drive the same lifecycle through `QmlView::create_object` and `destroy_object`. [Components, initialization and destruction](qml-components.md)
 
+The native `Loader` mounts and replaces the visual subtree of a bundled QML file or an inline component. Its two axes size independently. Rust hosts can drive the owner event loop manually to finish deferred instantiation. [Loader lifecycle and sizing](qml-loader.md)
+
 `QtQml.WorkerScript` runs classic scripts and ES modules in independent WebScene processes. The worker sends copied values back through an owner-thread queue. A `ListModel` proxy sends a revision-checked group of edits when the worker calls `sync()`. The UI dispatcher sleeps between deliveries. [Worker scripts and Rust event-loop integration](qml-workers.md)
 
 ## Compatibility with Qt QML 6.12
