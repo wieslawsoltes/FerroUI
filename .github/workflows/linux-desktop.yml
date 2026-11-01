@@ -11,6 +11,10 @@ on:
       - '.github/workflows/linux-desktop.yml'
   workflow_dispatch:
 
+concurrency:
+  group: linux-desktop-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
