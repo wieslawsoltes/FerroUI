@@ -15,7 +15,7 @@ use crate::automation::{
     SelectionItemPatternIdentifiers,
 };
 use ferroui_base::data::core::{ValueType, ValueTypes};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{ferro_class, ferro_class_info, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt, Ref};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -29,7 +29,7 @@ const NAVIGATION_ITEM_NAME: &str = "Navigation item";
 #[repr(C)]
 pub struct NavigationViewItemAutomationPeer {
     base: ControlAutomationPeer,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 ferro_class!(NavigationViewItemAutomationPeer: ControlAutomationPeer);
 ferro_class_info!(NavigationViewItemAutomationPeer {
@@ -70,7 +70,7 @@ impl FerroObjectImpl for NavigationViewItemAutomationPeer {
                 }
             }
         });
-        *this.subscription.borrow_mut() = Some(subscription);
+        *this.subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 }
 impl ControlAutomationPeerImpl for NavigationViewItemAutomationPeer {}

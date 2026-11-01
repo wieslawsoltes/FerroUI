@@ -7,7 +7,7 @@ use super::{
 };
 use crate::Control;
 use ferroui_base::media::text_formatting::unicode::{GraphemeEnumerator, WordBreakEnumerator};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::{HandlerList, HandlerSnapshot};
 use ferroui_base::{Ref, StyledElement};
 use std::cell::{Cell, RefCell};
@@ -239,7 +239,7 @@ struct RichTextDocumentData {
     silent_depth: Cell<usize>,
     dirty: Cell<bool>,
     change_kind: Cell<Option<DocumentChangeKind>>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
     link_fields: RefCell<Vec<DocumentLinkField>>,
     next_link_field_id: Cell<u64>,
     link_allocation_floor: Cell<u64>,
@@ -336,7 +336,7 @@ impl RichTextDocument {
                 document.on_invalidated();
             }
         });
-        *document.0.subscription.borrow_mut() = Some(subscription);
+        *document.0.subscription.borrow_mut() = Some(Subscription::new(subscription));
         document
     }
 

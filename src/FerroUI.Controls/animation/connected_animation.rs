@@ -19,7 +19,7 @@ use ferroui_base::media::{
     Stretch, TransformGroup, TranslateTransform,
 };
 use ferroui_base::platform::IPlatformRenderInterface;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::styling::Setter;
 use ferroui_base::threading::{CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::HandlerList;
@@ -101,7 +101,7 @@ pub struct ConnectedAnimation {
     disposed: Cell<bool>,
 
     timeout_cts: RefCell<Option<CancellationTokenSource>>,
-    timeout_timer_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    timeout_timer_disposable: RefCell<Option<Subscription>>,
     animation_cts: RefCell<Option<CancellationTokenSource>>,
     animation_timer: RefCell<Option<Rc<DispatcherTimer>>>,
 
@@ -201,7 +201,7 @@ impl ConnectedAnimation {
             Duration::from_secs(3),
             DispatcherPriority::BACKGROUND,
         );
-        *animation.timeout_timer_disposable.borrow_mut() = Some(timeout_timer_disposable);
+        *animation.timeout_timer_disposable.borrow_mut() = Some(Subscription::new(timeout_timer_disposable));
 
         animation
     }

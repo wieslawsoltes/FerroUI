@@ -18,7 +18,7 @@ use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignmen
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::{FlowDirection, RectangleGeometry, ScaleTransform};
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt,
@@ -77,7 +77,7 @@ struct Parts {
 pub struct RatingControl {
     base: TemplatedControl,
     parts: RefCell<Parts>,
-    item_info_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    item_info_subscription: RefCell<Option<Subscription>>,
     template_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
     pointer: RefCell<Option<Weak<dyn IPointer>>>,
     /// The rating under the pointer while it is over the items (`m_isPointerOver` with
@@ -621,7 +621,7 @@ impl RatingControl {
                     this.update_rating_items_appearance();
                 }
             });
-            *self.item_info_subscription.borrow_mut() = Some(subscription);
+            *self.item_info_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
         self.stamp_out_rating_items();
     }

@@ -7,7 +7,7 @@ use ferroui_base::input::text_input::{
 };
 use ferroui_base::input::{InputElement, TappedEventArgs};
 use ferroui_base::interactivity::RoutedEventHandlerToken;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{FerroPropertyChangedEventArgs, Rect, Ref, Visual, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -28,9 +28,9 @@ pub struct TextBoxTextInputMethodClient {
     confirmed_preedit: RefCell<Option<ConfirmedPreedit>>,
     selection_changed: Cell<bool>,
     is_in_change: Cell<bool>,
-    parent_property_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+    parent_property_changed: RefCell<Option<Subscription>>,
     parent_tapped: RefCell<Option<RoutedEventHandlerToken>>,
-    caret_bounds_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+    caret_bounds_changed: RefCell<Option<Subscription>>,
 }
 
 /// Selection removal and restoration can synchronously receive IME updates.
@@ -490,7 +490,7 @@ impl TextBoxTextInputMethodClient {
                     this.on_parent_property_changed(e);
                 }
             });
-            *self.parent_property_changed.borrow_mut() = Some(property_changed);
+            *self.parent_property_changed.borrow_mut() = Some(Subscription::new(property_changed));
 
             let weak = self.this.clone();
             let tapped = parent.add_handler(InputElement::tapped_event(), move |_, _: &TappedEventArgs| {
@@ -524,7 +524,7 @@ impl TextBoxTextInputMethodClient {
                     this.on_presenter_caret_bounds_changed();
                 }
             });
-            *self.caret_bounds_changed.borrow_mut() = Some(caret_bounds_changed);
+            *self.caret_bounds_changed.borrow_mut() = Some(Subscription::new(caret_bounds_changed));
         }
 
         self.raise_text_view_visual_changed();

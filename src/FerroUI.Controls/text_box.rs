@@ -33,7 +33,7 @@ use ferroui_base::media::{
     BaselineAlignment, CharacterHit, FlowDirection, IBrush, TextAlignment, TextWrapping, Typeface,
 };
 use ferroui_base::platform::IPlatformSettings;
-use ferroui_base::reactive::{CompositeDisposable, IDisposable, IObserver, Observable, ObservableExt};
+use ferroui_base::reactive::{CompositeDisposable, IDisposable, IObserver, Observable, ObservableExt, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask};
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{
@@ -112,7 +112,7 @@ pub struct TextBox {
     is_in_touch_caret_mode: Cell<bool>,
     has_touch_selection: Cell<bool>,
     /// The subscription of `presenter_property_changed` to the presenter.
-    presenter_property_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+    presenter_property_changed: RefCell<Option<Subscription>>,
 }
 
 ferro_class! {
@@ -2175,7 +2175,7 @@ impl TextBox {
                     this.presenter_property_changed(e);
                 }
             });
-            *self.presenter_property_changed.borrow_mut() = Some(subscription);
+            *self.presenter_property_changed.borrow_mut() = Some(Subscription::new(subscription));
         }
     }
 

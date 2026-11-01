@@ -32,7 +32,7 @@ use ferroui_base::interactivity::{
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::logical_tree::LogicalTreeAttachmentEventArgs;
 use ferroui_base::utilities::WeakEvents;
-use ferroui_base::reactive::{Disposable, IDisposable, IObserver, LightweightSubject, ObservableExt};
+use ferroui_base::reactive::{Disposable, IDisposable, IObserver, LightweightSubject, ObservableExt, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_routed_event, instantiate, BoxedValue,
     FerroLocator, FerroObjectExtensions, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -48,7 +48,7 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct MenuItem {
     base: HeaderedSelectingItemsControl,
-    can_execute_change_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    can_execute_change_subscription: RefCell<Option<Subscription>>,
     is_subscribed_to_command: Cell<bool>,
     command_can_execute: Cell<bool>,
     command_binding_error: Cell<bool>,
@@ -59,7 +59,7 @@ pub struct MenuItem {
     is_embedded_in_menu: Cell<bool>,
     /// The shared size scope of the visual parent; see `constructed`.
     parent_shared_size_scope: LightweightSubject<Option<Rc<SharedSizeScope>>>,
-    parent_shared_size_scope_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    parent_shared_size_scope_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class! {
@@ -894,7 +894,7 @@ impl MenuItem {
                     DefinitionBase::private_shared_size_scope_property(),
                 )
                     .subscribe_fn(move |scope| subject.on_next(scope));
-                *self.parent_shared_size_scope_subscription.borrow_mut() = Some(subscription);
+                *self.parent_shared_size_scope_subscription.borrow_mut() = Some(Subscription::new(subscription));
             }
             None => self.parent_shared_size_scope.on_next(None),
         }
@@ -944,7 +944,7 @@ impl MenuItem {
         let subscription = WeakEvents::subscribe_command_can_execute_changed(command, &self.to_ref(), |this| {
             this.can_execute_changed()
         });
-        let old = self.can_execute_change_subscription.replace(Some(subscription));
+        let old = self.can_execute_change_subscription.replace(Some(Subscription::new(subscription)));
         if let Some(old) = old {
             old.dispose();
         }

@@ -22,7 +22,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::{FlowDirection, IBrush};
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{IDisposable, ObservableExt, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_routed_event, instantiate, BoxedValue,
     FerroObject, FerroObjectExtensions, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -54,7 +54,7 @@ pub struct DrawerPage {
     /// The pointer pressed handler of the backdrop, while it is attached.
     backdrop_pointer_pressed: Cell<Option<RoutedEventHandlerToken>>,
     swipe_start_point: Cell<Point>,
-    nav_bar_visible_sub: RefCell<Option<Rc<dyn IDisposable>>>,
+    nav_bar_visible_sub: RefCell<Option<Subscription>>,
     suppress_drawer_events: Cell<bool>,
     has_had_first_page: Cell<bool>,
     hide_top_bar: Cell<bool>,
@@ -131,7 +131,7 @@ impl FerroObjectImpl for DrawerPage {
                 if let Some(new_nav) = navigation_page_of(&new_value) {
                     new_nav.set_drawer_page(Some(this));
                     let subscription = this.observe_nav_bar_visible(&new_nav);
-                    *this.nav_bar_visible_sub.borrow_mut() = Some(subscription);
+                    *this.nav_bar_visible_sub.borrow_mut() = Some(Subscription::new(subscription));
                 }
                 this.update_detail_nav_bar_visible_pseudo_class();
             }
@@ -988,7 +988,7 @@ impl DrawerPage {
         self.dispose_nav_bar_visible_sub();
         nav.set_drawer_page(Some(self));
         let subscription = self.observe_nav_bar_visible(&nav);
-        *self.nav_bar_visible_sub.borrow_mut() = Some(subscription);
+        *self.nav_bar_visible_sub.borrow_mut() = Some(Subscription::new(subscription));
         self.update_detail_nav_bar_visible_pseudo_class();
     }
 

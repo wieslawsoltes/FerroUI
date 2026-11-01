@@ -13,7 +13,7 @@ use ferroui_base::media::{
     DrawingContext, FlowDirection, FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, TextAlignment,
     TextDecorationCollection, TextLineBounds, TextTrimming, TextWrapping, Typeface,
 };
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::{MathUtilities, ReadOnlyMemory, ValueSpan};
 use ferroui_base::{
     ferro_class, ferro_property, instantiate, AttachedProperty, DirectProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt,
@@ -32,7 +32,7 @@ pub struct TextBlock {
     constraint: Cell<Size>,
     text_runs: RefCell<Option<Rc<Vec<Rc<dyn TextRun>>>>>,
     inlines: RefCell<Option<InlineCollection>>,
-    inlines_invalidated: RefCell<Option<Rc<dyn IDisposable>>>,
+    inlines_invalidated: RefCell<Option<Subscription>>,
     inline_host: OnceCell<Rc<dyn IInlineHost>>,
     clear_text_internal: Cell<bool>,
     /// The (resolved) text alignment the cached layout was created with.
@@ -45,7 +45,7 @@ pub struct TextBlock {
     /// created on the first request.
     alpha_mask: OnceCell<Box<ferroui_base::rendering::composition::AlphaMask>>,
     /// The subscription to the changes of the `FontFeatures` collection.
-    font_features_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    font_features_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class! {
@@ -644,7 +644,7 @@ impl TextBlock {
                 }
             })
         });
-        *self.font_features_subscription.borrow_mut() = subscription;
+        *self.font_features_subscription.borrow_mut() = subscription.map(Subscription::new);
     }
 
     /// Baseline of the current measured text, without creating a layout or
@@ -1226,11 +1226,11 @@ impl TextBlock {
             new_value.set_logical_children(Some(self));
             new_value.set_inline_host(Some(self.as_inline_host()));
             let weak = self.to_ref().downgrade();
-            *self.inlines_invalidated.borrow_mut() = Some(new_value.invalidated(move || {
+            *self.inlines_invalidated.borrow_mut() = Some(Subscription::new(new_value.invalidated(move || {
                 if let Some(this) = weak.upgrade() {
                     this.invalidate_text_layout();
                 }
-            }));
+            })));
         }
     }
 

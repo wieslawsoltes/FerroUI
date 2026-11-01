@@ -2,7 +2,7 @@ use super::{IInlineHost, Inline, InlineCollection, InlineImpl, InlineUIContainer
 use crate::Control;
 use ferroui_base::media::text_formatting::TextRun;
 use ferroui_base::metadata::IAddChild;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     ferro_class, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, IntoRef, Ref, Size, StyledElementImpl, StyledProperty,
@@ -14,7 +14,7 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct Span {
     base: Inline,
-    inlines_invalidated: RefCell<Option<Rc<dyn IDisposable>>>,
+    inlines_invalidated: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(Span: Inline);
@@ -197,11 +197,11 @@ impl Span {
             new_value.set_logical_children(Some(self));
             new_value.set_inline_host(self.inline_host());
             let weak = self.to_ref().downgrade();
-            *self.inlines_invalidated.borrow_mut() = Some(new_value.invalidated(move || {
+            *self.inlines_invalidated.borrow_mut() = Some(Subscription::new(new_value.invalidated(move || {
                 if let Some(host) = weak.upgrade().and_then(|this| this.inline_host()) {
                     host.invalidate();
                 }
-            }));
+            })));
         }
     }
 

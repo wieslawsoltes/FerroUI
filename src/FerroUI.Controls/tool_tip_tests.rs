@@ -23,7 +23,7 @@ use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::media::{Geometry, GeometryHitTestResult};
 use ferroui_base::platform::IPlatformRenderInterface;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::rendering::IHitTester;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{ferro_model, FerroLocator, FerroObject, LocatorExtensions, Point, Rect, Ref, Visual};
@@ -34,7 +34,7 @@ use std::time::Duration;
 /// The state the reference test classes set up around every test.
 struct Fixture {
     overlay: bool,
-    tool_tip_open_subscription: Option<Rc<dyn IDisposable>>,
+    tool_tip_open_subscription: Option<Subscription>,
 }
 
 impl Fixture {
@@ -50,7 +50,7 @@ impl Fixture {
                 }
             })
         });
-        Fixture { overlay, tool_tip_open_subscription }
+        Fixture { overlay, tool_tip_open_subscription: tool_tip_open_subscription.map(Subscription::new) }
     }
 
     fn configure_services(&self, base_services: TestServices) -> TestServices {

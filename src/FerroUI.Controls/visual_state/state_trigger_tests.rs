@@ -7,14 +7,13 @@ use crate::test_support::{test_scope, TestRoot};
 use crate::{
     AdaptiveTrigger, Border, Control, StateTrigger, StateTriggerBase, VisualState, VisualStateGroup, VisualStateManager,
 };
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::styling::{Setter, TargetPropertyPath};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, Ref, Size, StyledProperty, Visual,
 };
 use std::cell::RefCell;
-use std::rc::Rc;
 
 /// A state named `name` that sets the opacity of `target` to `value`.
 fn opacity_state(name: &str, target: &Border, value: f64) -> Ref<VisualState> {
@@ -204,7 +203,7 @@ fn triggers_are_evaluated_when_the_element_enters_a_tree() {
 #[repr(C)]
 struct ControlSizeTrigger {
     base: StateTriggerBase,
-    size_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+    size_changed: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(ControlSizeTrigger: StateTriggerBase);
@@ -259,7 +258,7 @@ impl ControlSizeTrigger {
                 }
             }
         });
-        *self.size_changed.borrow_mut() = Some(subscription);
+        *self.size_changed.borrow_mut() = Some(Subscription::new(subscription));
         self.update_is_active(source.bounds().size());
     }
 

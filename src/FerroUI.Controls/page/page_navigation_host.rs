@@ -7,7 +7,7 @@ use crate::{ContentControl, ContentControlImpl, Control, ControlImpl, TopLevel};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventArgs, RoutedEventHandlerToken};
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Nullable, Ref, StaticType, StyledElementImpl,
@@ -40,7 +40,7 @@ pub struct PageNavigationHost {
     /// The handler added to the property-changed event of the content
     /// presenter. At most one is ever subscribed: every path that adds one
     /// removes the previous one first.
-    content_presenter_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    content_presenter_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(PageNavigationHost: ContentControl);
@@ -246,7 +246,7 @@ impl PageNavigationHost {
                     this.content_presenter_property_changed(e);
                 }
             });
-            let previous = self.content_presenter_subscription.borrow_mut().replace(subscription);
+            let previous = self.content_presenter_subscription.borrow_mut().replace(Subscription::new(subscription));
             if let Some(previous) = previous {
                 previous.dispose();
             }

@@ -12,7 +12,7 @@ use ferroui_base::media::{
     BrushImpl, Color, ColorMatrix, ColorMatrixAlphaMode, MaterialPolicy, XamlCompositionBrushBase,
     XamlCompositionBrushBaseImpl, XamlLight,
 };
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::rendering::composition::effects::{
     AlphaMaskEffect, ArithmeticCompositeEffect, BorderEffect, CanvasComposite, CanvasEdgeBehavior, ColorMatrixEffect,
     ColorSourceEffect, CompositeEffect, CompositionEffectFactory, CompositionEffectSourceParameter, GraphicsEffect,
@@ -327,8 +327,8 @@ struct RevealState {
     /// Whether the platform asks for high contrast: Reveal falls back to its
     /// colour (WinUI's high contrast theme has no Reveal).
     is_high_contrast: bool,
-    policy_subscription: Option<Rc<dyn IDisposable>>,
-    contrast_subscription: Option<Rc<dyn IDisposable>>,
+    policy_subscription: Option<Subscription>,
+    contrast_subscription: Option<Subscription>,
 }
 
 /// Whether the platform asks for high contrast.
@@ -396,7 +396,7 @@ impl XamlCompositionBrushBaseImpl for RevealBrush {
                 }
             }
         });
-        this.state.borrow_mut().policy_subscription = Some(subscription);
+        this.state.borrow_mut().policy_subscription = Some(Subscription::new(subscription));
         this.state.borrow_mut().is_high_contrast = platform_is_high_contrast();
         let settings = {
             use ferroui_base::LocatorExtensions;
@@ -416,7 +416,7 @@ impl XamlCompositionBrushBaseImpl for RevealBrush {
                     this.update_reveal_brush();
                 }
             }));
-            this.state.borrow_mut().contrast_subscription = Some(contrast);
+            this.state.borrow_mut().contrast_subscription = Some(Subscription::new(contrast));
         }
         this.update_light_targets(true);
         this.update_reveal_brush();

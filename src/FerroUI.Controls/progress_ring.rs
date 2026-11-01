@@ -16,7 +16,7 @@ use ferroui_base::animation::{Animatable, IClock, IGlobalClock, TimeSpan};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::{AnonymousObserver, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_property, instantiate, DirectProperty,
     FerroLocator, FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs,
@@ -72,8 +72,8 @@ pub struct ProgressRing {
     range_base_property_updating: Cell<bool>,
     attached: Cell<bool>,
     indicator: RefCell<Option<Ref<Arc>>>,
-    visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    animation_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    visibility_subscription: RefCell<Option<Subscription>>,
+    animation_subscription: RefCell<Option<Subscription>>,
     animation_epoch: Cell<u64>,
     animation_start: Cell<Option<TimeSpan>>,
     animation_from: Cell<f64>,
@@ -104,7 +104,7 @@ impl FerroObjectImpl for ProgressRing {
                 owner.update_animation();
             }
         });
-        *this.visibility_subscription.borrow_mut() = Some(subscription);
+        *this.visibility_subscription.borrow_mut() = Some(Subscription::new(subscription));
         this.update_states();
     }
 
@@ -435,7 +435,7 @@ impl ProgressRing {
         // A clock may emit while subscribing: a subscription that its first emission (or a
         // handler it ran) made obsolete is not kept.
         if self.animation_epoch.get() == epoch && self.wants_animation() {
-            *self.animation_subscription.borrow_mut() = Some(subscription);
+            *self.animation_subscription.borrow_mut() = Some(Subscription::new(subscription));
         } else {
             subscription.dispose();
         }

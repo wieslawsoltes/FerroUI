@@ -20,7 +20,7 @@ use ferroui_base::animation::easings::Easing;
 use ferroui_base::media::imaging::RenderTargetBitmap;
 use ferroui_base::media::{Color, Colors};
 use ferroui_base::numerics::{Vector2, Vector3};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::rendering::composition::animations::{CompositionEasingFunction, ICompositionAnimation};
 use ferroui_base::rendering::composition::{
     CompositionBatchTypes, CompositionClip, CompositionGetValueStatus,
@@ -167,8 +167,8 @@ pub(crate) struct ConnectedAnimationFlight {
     effect_property_set: RefCell<Option<Rc<CompositionPropertySet>>>,
     primary_property_set: RefCell<Option<Rc<CompositionPropertySet>>>,
     batch: RefCell<Option<Rc<CompositionScopedBatch>>>,
-    batch_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    timeout: RefCell<Option<Rc<dyn IDisposable>>>,
+    batch_subscription: RefCell<Option<Subscription>>,
+    timeout: RefCell<Option<Subscription>>,
     is_scale_animation_enabled: Cell<bool>,
     components: RefCell<[Option<Rc<dyn ICompositionAnimation>>; 4]>,
     configuration: RefCell<Option<Rc<dyn ConnectedAnimationConfiguration>>>,
@@ -228,7 +228,7 @@ impl ConnectedAnimationFlight {
             PREPARED_TIMEOUT,
             DispatcherPriority::BACKGROUND,
         );
-        *flight.timeout.borrow_mut() = Some(timeout);
+        *flight.timeout.borrow_mut() = Some(Subscription::new(timeout));
         Some(flight)
     }
 
@@ -537,7 +537,7 @@ impl ConnectedAnimationFlight {
             }
         });
         *self.batch.borrow_mut() = Some(batch);
-        *self.batch_subscription.borrow_mut() = Some(subscription);
+        *self.batch_subscription.borrow_mut() = Some(Subscription::new(subscription));
         self.state.set(FlightState::Running);
         false
     }

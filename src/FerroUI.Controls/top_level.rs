@@ -27,7 +27,7 @@ use ferroui_base::media::{Brushes, IBrush, MediaContext, SolidColorBrush};
 use ferroui_base::platform::{
     IOptionalFeatureProvider, IPlatformBehaviorInhibition, IPlatformSettings, ISystemNavigationManagerImpl,
 };
-use ferroui_base::reactive::{AnonymousObserver, Disposable, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, Disposable, IDisposable, Subscription};
 use ferroui_base::rendering::composition::CompositionTransparencyLevel;
 use ferroui_base::rendering::{IHitTester, IRenderer, RendererDiagnostics};
 use ferroui_base::styling::{
@@ -64,9 +64,9 @@ pub struct TopLevel {
     global_styles: RefCell<Option<Rc<dyn IGlobalStyles>>>,
     global_styles_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
     application_theme_host: RefCell<Option<Rc<dyn IThemeVariantHost>>>,
-    application_theme_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    back_gesture_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    resources_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    application_theme_subscription: RefCell<Option<Subscription>>,
+    back_gesture_subscription: RefCell<Option<Subscription>>,
+    resources_changed_subscription: RefCell<Option<Subscription>>,
     platform_impl_bindings: RefCell<PlatformImplBindings>,
     scaling: Cell<f64>,
     is_closed: Cell<bool>,
@@ -84,8 +84,8 @@ pub struct TopLevel {
     source: OnceCell<Rc<PresentationSource>>,
     top_level_host: OnceCell<Ref<TopLevelHost>>,
     platform_impl: RefCell<Option<Rc<dyn ITopLevelImpl>>>,
-    insets_paddings: RefCell<Option<Rc<dyn IDisposable>>>,
-    insets_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    insets_paddings: RefCell<Option<Subscription>>,
+    insets_subscription: RefCell<Option<Subscription>>,
     opened: HandlerList<dyn Fn()>,
     closed: HandlerList<dyn Fn()>,
     scaling_changed: HandlerList<dyn Fn()>,
@@ -692,7 +692,7 @@ impl TopLevel {
                     }
                 }
             }));
-            *self.application_theme_subscription.borrow_mut() = Some(subscription);
+            *self.application_theme_subscription.borrow_mut() = Some(Subscription::new(subscription));
         } else {
             ThemeVariant::update_actual_theme_variant(self);
         }
@@ -717,7 +717,7 @@ impl TopLevel {
                     }
                 }
             }));
-            *self.resources_changed_subscription.borrow_mut() = Some(subscription);
+            *self.resources_changed_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
 
         add_lost_focus(
@@ -783,7 +783,7 @@ impl TopLevel {
                     }
                 }
             })))
-        });
+        }).map(Subscription::new);
     }
 
     fn back_gesture_pre_process(&self, e: &dyn IRawInputEventArgs) {
@@ -1245,14 +1245,14 @@ impl TopLevel {
                     this.invalidate_child_insets_padding();
                 }
             }));
-            *self.insets_subscription.borrow_mut() = Some(subscription);
+            *self.insets_subscription.borrow_mut() = Some(Subscription::new(subscription));
             // lower priority, so it can be redefined by user
             let insets_paddings = child.set_value_with_priority(
                 TemplatedControl::padding_property(),
                 insets_manager.safe_area_padding(),
                 BindingPriority::Style,
             );
-            *self.insets_paddings.borrow_mut() = insets_paddings;
+            *self.insets_paddings.borrow_mut() = insets_paddings.map(Subscription::new);
         }
     }
 
