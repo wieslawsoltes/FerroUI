@@ -86,33 +86,48 @@ awk -F= '/^WIDTH/ {w=$2} /^HEIGHT/ {h=$2} END {exit !(w>=1270 && h>=710)}' <<< "
 
 names=(settings notifications workspaces applications)
 global_keys=(super+a super+n super+Tab super+space)
+# The command endpoint and X11 focus can both update while the last
+# wallpaper frame is still on screen. Sample the light WinUI sheet above
+# the taskbar, at the anchor used by this scene on our fixed 1280x800 output.
+sheet_visible() {
+    local frame=$1 name=$2 gravity=South offset=+0+82 light
+    case "$name" in settings|notifications) gravity=SouthEast; offset=+40+82 ;; esac
+    light=$(convert "$frame" -gravity "$gravity" -crop "160x32$offset" +repage \
+        -fx 'min(r,min(g,b))>.63 && max(r,max(g,b))-min(r,min(g,b))<.23' -format '%[fx:mean]' info:)
+    awk -v n="$light" 'BEGIN {exit !(n > .60)}'
+}
 capture() {
-    local previous=$scratch/previous.png frame=$scratch/frame.png changed colors attempt
-    import -window root "$previous"
+    local name=$1
+    shift
+    local previous="$scratch/previous-$name.png" frame=$scratch/frame.png changed colors attempt prior distinct
     for ((attempt=0;attempt<60;attempt++)); do
         sleep .1
         import -window root "$frame"
-        colors=$(identify -format '%k' "$frame")
-        changed=$(compare -metric AE "$previous" "$frame" null: 2>&1 || :)
-        if (( colors > 60 )) && awk -v n="$changed" 'BEGIN {exit !(n+0 < 400)}'; then
-            cp "$frame" "$1"; return
+        if sheet_visible "$frame" "$name" && [[ -f $previous ]]; then
+            colors=$(identify -format '%k' "$frame")
+            changed=$(compare -metric AE "$previous" "$frame" null: 2>&1 || :)
+            if (( colors > 60 )) && awk -v n="$changed" 'BEGIN {exit !(n+0 < 400)}'; then
+                # Two sheets share each anchor. A retained frame of an earlier
+                # sheet must also give way to the requested distinct surface.
+                distinct=true
+                for prior in "$@"; do
+                    changed=$(compare -metric AE "$output/$prior.png" "$frame" null: 2>&1 || :)
+                    if ! awk -v n="$changed" 'BEGIN {exit !(n+0 > 6000)}'; then distinct=false; break; fi
+                done
+                if [[ $distinct == true ]]; then cp "$frame" "$output/$name.png"; return; fi
+            fi
         fi
         mv "$frame" "$previous"
     done
-    echo "Scene did not settle for capture $1." >&2; exit 1
+    cp "$previous" "$output/failed-$name.png"
+    echo "Missing distinct, settled $name sheet in the compositor capture." >&2; exit 1
 }
 for i in 0 1 2 3; do
     name=${names[$i]}; key=${global_keys[$i]}
     xdotool key --clearmodifiers "$key"
     await_focus "$shell"
     await_scene "$name"
-    capture "$output/$name.png"
-    # Each published scene must produce distinct pixels. Device discovery, focus decoration
-    # and theme transitions can change details between isolated runs.
-    for ((other=0;other<i;other++)); do
-        difference=$(compare -metric AE "$output/${names[$other]}.png" "$output/$name.png" null: 2>&1 || :)
-        awk -v n="$difference" 'BEGIN {exit !(n+0 > 6000)}' || { echo "Missing rendered $name surface" >&2; exit 1; }
-    done
+    capture "$name" "${names[@]:0:i}"
     xdotool key --clearmodifiers Escape
     await_focus "$external"
     await_scene desktop
