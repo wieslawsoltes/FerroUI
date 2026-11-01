@@ -44,7 +44,7 @@ exercise_winui_style() {
     wtype -k c
     wait_for grep -sxq 'dark compact' "$windows_style"
     wait_for winui_reserved 42
-    capture winui-dark-compact
+    capture winui-dark-compact HEADLESS-1 "$output/windows-client.png"
 
     # Selecting another desktop and returning restores the Windows subprofile.
     wtype -k 2
@@ -54,7 +54,7 @@ exercise_winui_style() {
     wait_for winui_reserved 42
     wtype -k h
     wait_for grep -sxq 'high-contrast compact' "$windows_style"
-    capture winui-high-contrast
+    capture winui-high-contrast HEADLESS-1 "$output/winui-dark-compact.png"
     local black
     black=$(convert "$output/winui-high-contrast.png" -gravity Northeast -crop 200x80+40+26 +repage -colorspace gray -format '%[fx:mean]' info:)
     awk -v value="$black" 'BEGIN {exit !(value < .08)}' || fail "High-contrast desktop continued painting its colored wallpaper"

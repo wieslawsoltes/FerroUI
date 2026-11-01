@@ -118,10 +118,15 @@ focused() { tree | jq -e --arg app "$1" 'any(.. | objects; .app_id? == $app and 
 output_names() { swaymsg -rt get_outputs | jq -r '[.[] | select(.active)] | length'; }
 capture() {
     # Wait for a nonempty and approximately settled frame, not just a mapped surface.
-    local i name=$1 out=${2:-HEADLESS-1} frame="$XDG_RUNTIME_DIR/frame.png" last="$XDG_RUNTIME_DIR/previous.png"
+    local i name=$1 out=${2:-HEADLESS-1} previous_scene=${3:-} frame="$XDG_RUNTIME_DIR/frame.png" last="$XDG_RUNTIME_DIR/previous.png"
     rm -f "$last"
     for ((i=0;i<35;i++)); do
         grim -o "$out" "$frame"
+        if [[ -n $previous_scene ]]; then
+            local delta
+            delta=$(compare -fuzz 3% -metric AE "$previous_scene" "$frame" null: 2>&1 || :)
+            if ! awk -v n="$delta" 'BEGIN {exit !(n+0 > 6000)}'; then sleep .12; continue; fi
+        fi
         if [[ $(identify -format '%k' "$frame") -gt 60 && -f $last ]]; then
             local changed
             changed=$(compare -metric AE "$last" "$frame" null: 2>&1 || :)
@@ -129,7 +134,8 @@ capture() {
         fi
         mv "$frame" "$last"; sleep .12
     done
-    cp "$last" "$output/failed-$name.png"; fail "$name did not produce a stable rendered Wayland frame"
+    if [[ -f $frame ]]; then cp "$frame" "$output/failed-$name.png"; else cp "$last" "$output/failed-$name.png"; fi
+    fail "$name did not produce a stable rendered Wayland frame"
 }
 wait_for is_scene desktop
 # Explicit inherited sockets take priority over a conflicting named display.
@@ -179,7 +185,7 @@ for spec in 'space applications' 'a settings' 'n notifications' 'Tab workspaces'
     read -r key name <<< "$spec"
     wtype -M logo -k "$key" -m logo
     wait_for is_scene "$name"
-    capture "$name"
+    capture "$name" HEADLESS-1 "$output/native-client.png"
     wtype -k Escape
     wait_for is_scene desktop
     wait_for focused org.ferroui.WaylandClient

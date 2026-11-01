@@ -18,6 +18,12 @@ In the Windows profile, **Appearance** offers the native WinUI 3 Light, Dark and
 
 The shell keeps the WinUI theme instance when changing color or density. The requested theme variant selects its compiled resource dictionaries, and the theme's density property selects the compact control resources. The taskbar, popups, status messages and text resolve their brushes through those dictionaries. Shell flyouts use the WinUI flyout acrylic brush and the shared WinUI theme shadow with the same 32-unit Z translation as the control template. FerroUI applies the material policy and composition shadow recipe to the available backing surface. High Contrast also removes the decorative wallpaper. Compact mode reduces the taskbar's screen reservation from 52 to 42 logical pixels, including on managed Wayland outputs.
 
+These captures show the same managed Wayland session and native terminal.
+
+| Dark with Compact density | High Contrast with Compact density |
+| --- | --- |
+| ![Dark Windows personalization with acrylic flyout and compact taskbar](screenshots/winui-dark-compact.webp) | ![High Contrast Windows personalization and compact taskbar](screenshots/winui-high-contrast.webp) |
+
 The Windows notification indicator uses the themed InfoBadge with the actual unread count. Shell status uses InfoBar, and the initial device query in Quick Settings uses ProgressRing. GTK, Qt and other native clients continue to own their control trees.
 
 ## Register a fourth appearance
