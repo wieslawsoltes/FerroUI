@@ -268,3 +268,25 @@ fn extra_javascript_entries_are_lazy_relocatable_and_watched_with_their_literal_
         .unwrap();
     assert!(error.to_string().contains("escapes"), "{error}");
 }
+
+#[test]
+fn worker_sources_are_linked_but_execute_in_a_separate_realm() {
+    let project = Project::new();
+    project.file(
+        "Main.qml",
+        r#"import QtQml
+import QtQml.WorkerScript
+QtObject { property WorkerScript task: WorkerScript { source: "actor.mjs" } }"#,
+    );
+    project.file("actor.mjs", "import {n} from './number.mjs'; WorkerScript.onMessage = m => WorkerScript.sendMessage(n + m);");
+    project.file("number.mjs", "export const n = 2;");
+    let loaded = Compiler::new()
+        .with_javascript()
+        .load(project.0.join("Main.qml"))
+        .unwrap();
+    assert_eq!(loaded.document.scripts.len(), 2);
+    assert!(loaded.document.scripts.values().all(|s| !s.preload));
+    assert!(loaded
+        .dependencies
+        .contains(&project.0.join("number.mjs").canonicalize().unwrap()));
+}

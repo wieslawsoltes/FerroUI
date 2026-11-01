@@ -2,7 +2,7 @@
 //! URLs preserve module identity through cycles without encoding host paths.
 use ferroui_qml_compiler::{
     javascript::{import_sites, parse_resource, visit_scripts, Dependency},
-    Document, ScriptForm, ScriptKind, ScriptResource,
+    Binding, Document, Expr, Member, MemberKind, Object, ScriptForm, ScriptKind, ScriptResource,
 };
 use percent_encoding::{percent_encode, AsciiSet, NON_ALPHANUMERIC};
 use std::{
@@ -90,6 +90,7 @@ impl Resources {
             imports.insert(alias.clone(), key);
         }
         let origin = resource_url("components", index, path, &self.project)?;
+        self.worker_sources(path, &mut document.root)?;
         visit_scripts(&mut document.root, &mut |script| {
             script.origin.clone_from(&origin);
             script.imports.clone_from(&imports);
@@ -109,6 +110,68 @@ impl Resources {
             Ok::<_, String>(())
         })?;
         Ok(document)
+    }
+
+    /// A worker has an independent global scope. Discover its literal file
+    /// graph without initializing the script in the importing QML realm.
+    fn worker_sources(&mut self, file: &Path, object: &mut Object) -> Result<(), String> {
+        let worker = object.type_name.rsplit('.').next() == Some("WorkerScript");
+        self.worker_members(file, &mut object.members, worker)
+    }
+
+    fn worker_members(
+        &mut self,
+        file: &Path,
+        members: &mut [Member],
+        worker: bool,
+    ) -> Result<(), String> {
+        for member in members {
+            match &mut member.kind {
+                MemberKind::Binding {
+                    name,
+                    value: Binding::Expr(Expr::String(source)),
+                } if worker && name == "source" && !source.is_empty() => {
+                    let local = local_path(file, source)?;
+                    let url = self.load_worker(&local)?;
+                    *source = url;
+                }
+                MemberKind::Child(child)
+                | MemberKind::Component { object: child, .. }
+                | MemberKind::OnProperty { object: child, .. } => {
+                    self.worker_sources(file, child)?
+                }
+                MemberKind::Group { members, .. } => self.worker_members(file, members, false)?,
+                MemberKind::Property {
+                    value: Some(binding),
+                    ..
+                }
+                | MemberKind::Binding { value: binding, .. } => match binding {
+                    Binding::Object(child) => self.worker_sources(file, child)?,
+                    Binding::Objects(children) => {
+                        for child in children {
+                            self.worker_sources(file, child)?;
+                        }
+                    }
+                    _ => {}
+                },
+                _ => {}
+            }
+        }
+        Ok(())
+    }
+
+    fn load_worker(&mut self, file: &Path) -> Result<String, String> {
+        let url = self.load(file, 0, LoadKind::Classic)?;
+        let resource = &self.embedded[&url];
+        if resource.kind != ScriptKind::Module
+            && (resource.kind == ScriptKind::Library || !resource.imports.is_empty())
+        {
+            return Err(format!(
+                "{}: plain WorkerScript files cannot use .import or .pragma library",
+                file.display()
+            ));
+        }
+        Ok(url)
     }
 
     pub(super) fn into_embedded(mut self) -> BTreeMap<String, ScriptResource> {
