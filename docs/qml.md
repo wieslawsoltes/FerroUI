@@ -212,6 +212,14 @@ let meter = TypeDefinition::default()
     });
 ```
 
+### Qt Quick states and numeric animation
+
+`Item` and `StateGroup` accept named states and conditional `when` expressions. A state can extend another state. `PropertyChanges` supports target-relative and grouped ID declarations, reactive bindings, one-time evaluation with `explicit`, and restoration through `restoreEntryValues`. An active state's changes use the same property slots, type validation and rollback as ordinary bindings.
+
+`Transition` selects numeric animations by source and destination state and by target property. It supports wildcard and comma-separated names and reversible matches. An applicable transition takes precedence over `Behavior on property`. A behavior retargets from the current displayed value. `NumberAnimation` also runs independently or as a property value source. It supports finite and infinite loops, playback controls and linear and polynomial easing through quintic curves.
+
+A mounted view samples the tracks on its dispatcher clock. A headless caller can advance the same timeline exactly with `Instance::advance_time`. Unsupported animation types include color, spring, path, sequential and parallel groups. State script and reparent operations and the remaining Qt easing curves need separate implementations. [State and transition fixture](../tests/QmlCompiled/states/Main.qml)
+
 ### Dynamic trees and background scripts
 
 A `Component` retains its declaration scope. Creating an object assigns a new identity to every node, applies the initial property map, resolves bindings and emits completion within one transaction. The native view validates newly created peers before mounting them. Destroying the instance subtree releases its controls, input subscriptions, worker registrations and deferred calls. Rust can drive the same lifecycle through `QmlView::create_object` and `destroy_object`. [Components, initialization and destruction](qml-components.md)

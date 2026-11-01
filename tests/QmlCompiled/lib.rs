@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod incubators;
 #[cfg(test)]
+mod states;
+#[cfg(test)]
 mod delegates;
 #[cfg(test)]
 mod views;
@@ -8,11 +10,13 @@ mod views;
 fn quick_registry() -> ferroui_qml::TypeRegistry {
     use ferroui_qml::{TypeDefinition, TypeRegistry, Value};
     let mut types = TypeRegistry::new();
+    types.register_quick_states().unwrap();
     types
         .register(
             "QtQuick",
             "Item",
             TypeDefinition::default()
+                .with_quick_states()
                 .inherits("QtQml", "QtObject")
                 .property("x", "real", Value::Number(0.))
                 .property("y", "real", Value::Number(0.))

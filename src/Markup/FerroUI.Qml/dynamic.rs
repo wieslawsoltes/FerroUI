@@ -15,6 +15,8 @@ pub(crate) struct Context {
 }
 #[derive(Default)]
 pub(crate) struct Components {
+    pub behaviors: BTreeMap<SlotId, ObjectId>,
+    pub state_changes: BTreeMap<ObjectId, Vec<states::Declaration>>,
     pub repeaters: BTreeMap<ObjectId, crate::repeater::State>,
     pub loaders: BTreeMap<ObjectId, crate::loader::State>,
     pub serial: u64,
@@ -168,6 +170,10 @@ impl Instance {
         self.dynamic.templates.retain(|id, _| id.index < c.nodes);
         self.dynamic.contexts.retain(|id, _| id.index < c.nodes);
         self.dynamic.created.truncate(c.created);
+        self.dynamic.behaviors.retain(|_, id| id.index < c.nodes);
+        self.dynamic
+            .state_changes
+            .retain(|id, _| id.index < c.nodes);
         self.dynamic.revision = c.revision;
         self.dynamic.loaders.retain(|id, _| id.index < c.nodes);
         self.dynamic.repeaters.retain(|id, _| id.index < c.nodes);

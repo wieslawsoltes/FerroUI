@@ -28,6 +28,7 @@ enum Kind {
 }
 
 pub(super) fn register(registry: &mut ControlRegistry) -> Result<(), Error> {
+    registry.types_mut().register_quick_states()?;
     use Kind::*;
     for (module, types) in [
         (
@@ -75,6 +76,7 @@ impl Kind {
         use Value::{Bool, List, Number, Undefined};
         let mut ty = if matches!(self, Self::Item) {
             TypeDefinition::default()
+                .with_quick_states()
                 .inherits("QtQml", "QtObject")
                 .property("visible", "bool", Bool(true))
                 .property("enabled", "bool", Bool(true))

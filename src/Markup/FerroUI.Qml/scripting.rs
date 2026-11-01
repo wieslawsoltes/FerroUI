@@ -540,7 +540,9 @@ impl ScriptContext<'_, '_> {
         if self.is_worker_script(object) {
             names.insert("sendMessage".into());
         }
-        if self.tx.model.quick_kind(object,"NumberAnimation"){names.extend(animations::METHODS.map(str::to_owned));}
+        if self.tx.model.quick_kind(object, "NumberAnimation") {
+            names.extend(animations::METHODS.map(str::to_owned));
+        }
         if self.tx.model.timers.is_timer(object) {
             names.extend(["start", "restart", "stop"].map(str::to_owned));
         }
@@ -854,7 +856,7 @@ impl Instance {
                 || node.signal(name).is_some()
                 || self.workers.contains(object) && name == "sendMessage"
                 || self.models.contains_key(&object) && list_model::is_method(name)
-                || self.quick_kind(object,"NumberAnimation") && animations::METHODS.contains(&name)
+                || self.quick_kind(object, "NumberAnimation") && animations::METHODS.contains(&name)
                 || self.timers.is_timer(object) && matches!(name, "start" | "stop" | "restart")
         })
     }

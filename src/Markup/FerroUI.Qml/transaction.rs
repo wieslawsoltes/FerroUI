@@ -20,10 +20,12 @@ pub(crate) struct Transaction<'a> {
     emitted: Vec<SignalEmission>,
     pub(crate) pending: BTreeSet<SlotId>,
     pending_bindings: BTreeSet<ObjectId>,
+    pub(crate) state_pending: BTreeMap<ObjectId, bool>,
     evaluating: BTreeSet<SlotId>,
     notifications: VecDeque<(ObjectId, String)>,
     hold_notifications: bool,
-    initializing: bool,
+    pub(crate) initializing: bool,
+    pub(crate) animations: animations::Turn,
     scope: Option<u32>,
     pub(crate) depth: usize,
     steps: usize,
@@ -79,10 +81,12 @@ impl Instance {
             emitted: Vec::new(),
             pending: BTreeSet::new(),
             pending_bindings: BTreeSet::new(),
+            state_pending: Default::default(),
             evaluating: BTreeSet::new(),
             notifications: VecDeque::new(),
             hold_notifications: false,
             initializing: false,
+            animations: Default::default(),
             scope: None,
             depth: 0,
             steps: 0,
@@ -143,6 +147,7 @@ impl Instance {
             std::mem::take(&mut tx.loader_changes).rollback(tx.model);
             std::mem::take(&mut tx.repeater_changes).rollback(tx.model);
             tx.timer_changes.rollback(&mut tx.model.timers);
+            std::mem::take(&mut tx.animations).rollback(tx.model);
             for (key, old) in tx.original {
                 tx.model.slots[key] = old;
             }
@@ -230,6 +235,7 @@ impl Transaction<'_> {
         let previous = self.initializing;
         self.initializing = true;
         self.initialize_workers(first);
+        self.initialize_states(first);
         self.initialize_loaders(first);
         self.repeater_changes.pending.extend(
             self.model
@@ -263,6 +269,12 @@ impl Transaction<'_> {
         );
         self.settle()?;
         self.initializing = previous;
+        self.animations.pending.extend(
+            self.model.nodes[first..end]
+                .iter()
+                .map(|n| n.id)
+                .filter(|&id| self.model.standalone_animation(id)),
+        );
         self.timer_changes
             .pending
             .extend(self.model.timers.objects().filter(|id| id.index >= first));
@@ -283,11 +295,17 @@ impl Transaction<'_> {
             while let Some(key) = self.pending.pop_first() {
                 self.evaluate(key)?;
             }
+            if self.stage_state()? || self.stage_animation()? {
+                continue;
+            }
             if let Some(binding) = self.pending_bindings.pop_first() {
                 self.update_binding(binding)?;
                 continue;
             }
             if self.stage_repeater()? || self.stage_loader()? {
+                continue;
+            }
+            if self.release_finished_values() {
                 continue;
             }
             if !self.worker_sources.is_empty() {
@@ -372,7 +390,9 @@ impl Transaction<'_> {
             InstalledBinding::PropertyRead(source) => return Some(*source),
             InstalledBinding::Expression(binding) => binding,
             InstalledBinding::Guarded { when, .. } => return Some(*when),
-            InstalledBinding::Guest { .. } => return None,
+            InstalledBinding::Guest { .. } | InstalledBinding::StateExpression { .. } => {
+                return None
+            }
         };
         let Binding::Expr(expr) = binding.as_ref() else {
             return None;
@@ -458,6 +478,14 @@ impl Transaction<'_> {
                     .ok_or_else(|| Error::new("missing dirty binding"))?;
                 match binding {
                     InstalledBinding::PropertyRead(source) => self.read(source, &mut reads)?,
+                    InstalledBinding::StateExpression {
+                        receiver,
+                        expression,
+                    } => {
+                        let value = self.binding_value(receiver, &expression, &mut reads)?;
+                        self.check_binding_edges(key, &reads)?;
+                        value
+                    }
                     InstalledBinding::Guest {
                         callback,
                         receiver,
@@ -554,6 +582,12 @@ impl Transaction<'_> {
     }
 
     pub(crate) fn set_value(&mut self, key: SlotId, value: Value) {
+        if !self.intercept_animation(key, &value) {
+            self.set_value_raw(key, value);
+        }
+    }
+
+    pub(crate) fn set_value_raw(&mut self, key: SlotId, value: Value) {
         if self.model.slots[key].value.unchanged(&value) {
             return;
         }
@@ -564,6 +598,8 @@ impl Transaction<'_> {
             }
         }
         self.touched(key).value = value;
+        self.observe_states(key);
+        self.observe_animation(key);
         if let Some(target) = self.model.slots[key].active_target {
             if self.model.slots[target]
                 .overlay

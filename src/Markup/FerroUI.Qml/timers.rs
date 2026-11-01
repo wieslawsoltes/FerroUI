@@ -7,6 +7,8 @@ use std::time::Duration;
 
 #[derive(Default)]
 pub(crate) struct Timers {
+    pub(crate) held: BTreeMap<SlotId, (ObjectId, Value)>,
+    pub(crate) tracks: BTreeMap<SlotId, animations::Track>,
     pub(crate) now: Duration,
     deadlines: BTreeMap<ObjectId, Option<Duration>>,
 }
@@ -51,17 +53,21 @@ impl Instance {
         if !self.dynamic.loading.is_empty() {
             return Some(Duration::ZERO);
         }
+        let animation = (self.timers.tracks.values().any(animations::Track::ticking))
+            .then(|| self.timers.now.saturating_add(Duration::from_millis(16)));
         self.timers
             .deadlines
             .values()
             .flatten()
             .chain(self.dynamic.deadlines.values())
+            .chain(animation.iter())
             .min()
             .map(|deadline| deadline.saturating_sub(self.timers.now))
     }
 
     pub fn has_timers(&self) -> bool {
-        !self.timers.deadlines.is_empty()
+        self.timers.tracks.values().any(animations::Track::ticking)
+            || !self.timers.deadlines.is_empty()
             || !self.dynamic.deadlines.is_empty()
             || !self.dynamic.loading.is_empty()
     }
@@ -145,6 +151,7 @@ impl Transaction<'_> {
             .checked_add(elapsed)
             .ok_or_else(|| Error::new("component clock overflow"))?;
         self.model.timers.now = now;
+        self.sample_animations(now)?;
         for id in std::mem::take(&mut self.model.dynamic.loading) {
             self.structure.loaded.insert(id);
             if self.model.node(id).is_some() {

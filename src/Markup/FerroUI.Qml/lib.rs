@@ -1,6 +1,7 @@
 //! A component owns its objects, bindings, dependency graph and signal dispatch.
 //! Native integrations register their type contracts before constructing an instance.
 //! Public mutations settle bindings and handlers atomically before exposing changes.
+mod animations;
 mod arrays;
 mod binding_object;
 mod catalog;
@@ -31,6 +32,7 @@ pub use records::Record;
 mod scripting;
 mod signal_callbacks;
 pub use scripting::{ExternalValue, ScriptContext, ScriptEngine, ScriptInstance, ScriptScope};
+mod states;
 mod timers;
 mod transaction;
 mod value;
@@ -125,6 +127,10 @@ enum InstalledBinding {
     Expression(Rc<Binding>),
     Guarded {
         when: SlotId,
+        expression: Rc<Binding>,
+    },
+    StateExpression {
+        receiver: ObjectId,
         expression: Rc<Binding>,
     },
     PropertyRead(SlotId),

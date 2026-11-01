@@ -20,7 +20,10 @@ pub(super) fn isolate(root: &mut Object, serial: usize, root_id: &str, scope: u3
         });
     }
     visit_objects(root, &mut |object| {
-        let binding = object.type_name.rsplit('.').next() == Some("Binding");
+        let binding = matches!(
+            object.type_name.rsplit('.').next(),
+            Some("Binding" | "PropertyChanges")
+        );
         for member in &mut object.members {
             if binding {
                 // The first segment names an object in the declaration's id scope.

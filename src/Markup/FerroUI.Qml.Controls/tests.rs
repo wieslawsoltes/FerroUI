@@ -509,3 +509,25 @@ fn repeater_moves_native_peers_in_place_and_retires_removed_button_handlers() {
         Value::String("A".into())
     );
 }
+
+#[test]
+fn state_transition_samples_the_original_native_peer_on_the_view_clock() {
+    use std::time::Duration;
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let view = mount(
+        r#"import QtQuick
+        Item { id: scene; Rectangle { id: box; width: 20; height: 10 }
+            states: State { name: "wide"; PropertyChanges { box.width: 100 } }
+            transitions: Transition { NumberAnimation { properties: "width"; duration: 80 } }
+        }"#,
+    );
+    let id = view.id("box").unwrap();
+    let peer = view.control(id).unwrap();
+    view.set(view.root_id(), "state", Value::String("wide".into()))
+        .unwrap();
+    view.advance_time(Duration::from_millis(40)).unwrap();
+    assert_eq!(peer.width(), 60.);
+    view.advance_time(Duration::from_millis(40)).unwrap();
+    assert_eq!(view.control(id).unwrap(), peer);
+    assert_eq!(peer.width(), 100.);
+}

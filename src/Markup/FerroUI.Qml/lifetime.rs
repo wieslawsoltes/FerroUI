@@ -17,6 +17,7 @@ impl Instance {
         if let Some(engine) = &self.javascript.engine {
             engine.release_objects(self.script_instance(), dead);
         }
+        self.dynamic.behaviors.retain(|_, id| !dead.contains(id));
         self.dynamic.created.retain(|id| !dead.contains(id));
         self.dynamic.loaders.retain(|id, _| !dead.contains(id));
         self.dynamic.repeaters.retain(|id, _| !dead.contains(id));
@@ -40,6 +41,7 @@ impl Instance {
             self.dynamic.contexts.remove(&id);
             self.models.remove(&id);
             self.bindings.remove(&id);
+            self.dynamic.state_changes.remove(&id);
             self.timers.remove(id);
             self.workers.unregister(id);
             let node = self.nodes[id.index]
@@ -163,7 +165,11 @@ impl crate::transaction::Transaction<'_> {
                 }
             }
         }
+        self.stop_dead_animations(&dead);
         for &object in &dead {
+            if self.model.dynamic.state_changes.contains_key(&object) {
+                self.exit_change(object)?;
+            }
             if let Some(declarations) = self.model.bindings.get(&object) {
                 let mut inputs: Vec<_> = declarations.iter().map(|d| d.input).collect();
                 inputs.push(self.model.key(object, "value")?);

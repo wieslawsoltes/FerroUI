@@ -28,6 +28,9 @@ struct Entry {
 }
 
 impl Overlay {
+    pub(crate) fn restores_expression(&self) -> bool {
+        self.source_binding.is_some()
+    }
     pub(crate) fn input(&self) -> SlotId {
         self.stack.last().expect("nonempty overlay stack").input
     }
@@ -94,7 +97,13 @@ impl Transaction<'_> {
         Ok(())
     }
 
-    fn update_overlay(&mut self, input: SlotId, target: Option<SlotId>, delayed: bool, mode: u8) {
+    pub(crate) fn update_overlay(
+        &mut self,
+        input: SlotId,
+        target: Option<SlotId>,
+        delayed: bool,
+        mode: u8,
+    ) {
         let old = self.model.slots[input].active_target;
         if old == target {
             if let Some(target) = target {

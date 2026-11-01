@@ -664,6 +664,35 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                 }
                 MemberKind::OnProperty { name, object } => {
                     let child = self.object(object, Some(id))?;
+                    if self.instance.quick_kind(child, "Behavior") {
+                        let key = self.instance.key_in(id, name, member.scope)?;
+                        if self.instance.dynamic.behaviors.insert(key, child).is_some() {
+                            return Err(Error::new(format!("multiple Behaviors on '{name}'")));
+                        }
+                        for (property, value) in [
+                            ("targetProperty.name", Value::String(name.clone())),
+                            ("targetProperty.object", Value::Object(id)),
+                        ] {
+                            let key = self.instance.key(child, property)?;
+                            self.instance.slots[key].value = value;
+                        }
+                        continue;
+                    }
+                    if self.instance.quick_kind(child, "NumberAnimation") {
+                        let target = self.instance.key(child, "target")?;
+                        self.instance.slots[target].value = Value::Object(id);
+                        self.bind(
+                            child,
+                            "property",
+                            &Binding::Expr(Expr::String(name.clone())),
+                            member.scope,
+                        )?;
+                        let running = self.instance.key(child, "running")?;
+                        if !self.assigned.contains(&running) {
+                            self.instance.slots[running].value = Value::Bool(true);
+                        }
+                        continue;
+                    }
                     if !self.instance.bindings.contains_key(&child) {
                         return Err(Error::new(format!(
                             "'{}' is not a supported property value source",
@@ -785,6 +814,12 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         binding: &Binding,
         scope: Option<u32>,
     ) -> Result<(), Error> {
+        if self.instance.nodes[owner.index].module == "QtQuick"
+            && self.instance.nodes[owner.index].name == "PropertyChanges"
+            && self.instance.key(owner, name).is_err()
+        {
+            return self.instance.state_input(owner, name, binding, scope);
+        }
         if name.contains('.')
             && self.instance.bindings.contains_key(&owner)
             && self.instance.key(owner, name).is_err()
@@ -825,7 +860,12 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                     };
                     Value::Object(self.object(&wrapper, Some(owner))?)
                 } else {
-                    Value::Object(self.object(child, Some(owner))?)
+                    let value = Value::Object(self.object(child, Some(owner))?);
+                    if list_element(&self.instance.properties[key].ty).is_some() {
+                        Value::List(vec![value])
+                    } else {
+                        value
+                    }
                 }
             }
             Binding::Objects(children) => Value::List(
