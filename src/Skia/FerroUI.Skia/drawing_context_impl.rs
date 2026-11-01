@@ -290,6 +290,9 @@ pub struct DrawingContextImpl {
     multiply_stack: Vec<MultiplyLayer>,
     /// The pixel operations that are pushed.
     pixel_operation_stack: Vec<PixelOperationLayer>,
+    /// The save counts of the canvas at which a rounded rectangle is in the
+    /// clip stack of the canvas as a clip of its own (not a shader).
+    rounded_clip_elements: Vec<usize>,
     opacity_stack: Vec<(f64, bool)>,
     compositing_opacity_stack: Vec<f64>,
     render_options_stack: Vec<RenderOptions>,
@@ -351,6 +354,7 @@ impl DrawingContextImpl {
             mask_stack: Vec::new(),
             multiply_stack: Vec::new(),
             pixel_operation_stack: Vec::new(),
+            rounded_clip_elements: Vec::new(),
             opacity_stack: Vec::new(),
             compositing_opacity_stack: Vec::new(),
             render_options_stack: Vec::new(),
@@ -478,6 +482,8 @@ impl DrawingContextImpl {
     fn restore_canvas(&mut self) {
         let canvas = self.canvas.get();
         canvas.restore();
+        let level = canvas.save_count();
+        self.rounded_clip_elements.retain(|saved| *saved <= level);
         // Deviation (DEVIATIONS.md, Skia backend): upstream reads the
         // transform back from the canvas (`Canvas.TotalMatrix44`), post
         // transform included, so a scaled context (a render target bitmap of
@@ -2060,9 +2066,10 @@ ferroui_base::ferro_thread_local! {
     /// raster surfaces too (the tests compare them with Skia's clips).
     static COVERAGE_CLIPS_ON_RASTER: Cell<bool> = Cell::new(false);
     /// How many clips of rounded rectangles were coverage shaders, and how
-    /// many were handed to a GPU surface's clip stack under a transform or
-    /// with radii it cannot clip analytically (the clips Ganesh draws as a
-    /// software mask, rasterized on the CPU and uploaded).
+    /// many were handed to a GPU surface's clip stack under a transform, with
+    /// radii or with other rounded clips it cannot apply analytically (the
+    /// clips Ganesh draws as a software mask, rasterized on the CPU and
+    /// uploaded).
     static ROUNDED_CLIPS: Cell<(u64, u64)> = Cell::new((0, 0));
 }
 
@@ -2083,25 +2090,34 @@ pub(crate) fn rounded_clip_counts() -> (u64, u64) {
 impl DrawingContextImpl {
     /// Clips to `rrect` (anti-aliased) with `op`.
     ///
-    /// Ganesh clips a rounded rectangle analytically only in device space
-    /// (a transform that keeps rectangles on the axes) and only for radii
-    /// its rounded-rectangle effects take (not the complex ones); any other
-    /// anti-aliased one becomes a software mask on a target without MSAA,
+    /// Ganesh applies a rounded rectangle of its clip stack analytically
+    /// only in device space and only for the radii its effects take, at most
+    /// four elements a draw, and it merges the elements of the stack: two
+    /// rounded clips that share an edge (a card and the picture in it)
+    /// become one rounded rectangle with different corners, which no effect
+    /// takes. Any of those is a software mask on a target without MSAA,
     /// rasterized on the CPU and uploaded as an A8 texture each time the
     /// clip moves on the device (Graphite similarly rasterizes such clips
-    /// into an atlas). On a GPU surface such a clip is a clip shader, the
-    /// coverage of the rounded rectangle evaluated per pixel
-    /// (`composition_effects::rounded_rect_coverage`); the raster backend
-    /// keeps Skia's clip, the reference.
+    /// into an atlas). So on a GPU surface a rounded clip is an element of
+    /// the clip stack only when it is upright, its radii are not complex,
+    /// and no other rounded element is in the stack; otherwise it is a clip
+    /// shader, the coverage of the rounded rectangle evaluated per pixel
+    /// (`composition_effects::rounded_rect_coverage`), which is not merged
+    /// and has no limit. A clip shader makes the programs of the draws under
+    /// it programs of their own, so the single upright clips, the common
+    /// case, stay elements. The raster backend keeps Skia's clip, the
+    /// reference.
     fn clip_rounded_rect(&mut self, rrect: &sk::RRect, op: sk::ClipOp) {
         let canvas = self.canvas.get();
+        let level = canvas.save_count();
+        self.rounded_clip_elements.retain(|saved| *saved <= level);
         let matrix = canvas.local_to_device_as_3x3();
-        let analytic = matrix.rect_stays_rect() && rrect.get_type() != sk::rrect::Type::Complex;
+        let rounded = !matches!(rrect.get_type(), sk::rrect::Type::Empty | sk::rrect::Type::Rect);
+        let element = matrix.rect_stays_rect()
+            && rrect.get_type() != sk::rrect::Type::Complex
+            && self.rounded_clip_elements.is_empty();
         let gpu = self.gr_context.is_some();
-        if !analytic
-            && !matches!(rrect.get_type(), sk::rrect::Type::Empty | sk::rrect::Type::Rect)
-            && (gpu || COVERAGE_CLIPS_ON_RASTER.with(Cell::get))
-        {
+        if rounded && !element && (gpu || COVERAGE_CLIPS_ON_RASTER.with(Cell::get)) {
             if let Some(shader) = crate::composition_effects::rounded_rect_coverage(rrect, &matrix) {
                 canvas.clip_shader(shader, op);
                 ROUNDED_CLIPS.with(|counts| counts.set((counts.get().0 + 1, counts.get().1)));
@@ -2112,6 +2128,135 @@ impl DrawingContextImpl {
             }
         }
         canvas.clip_rrect(rrect, op, true);
+        if rounded {
+            self.rounded_clip_elements.push(level);
+        }
+    }
+
+    /// How many stages [`prewarm_runtime_effects_stage`](Self::prewarm_runtime_effects_stage) has.
+    pub(crate) const PREWARM_STAGES: usize = 7;
+
+    /// Makes the GPU programs of the runtime effects before an interactive
+    /// frame needs them: every stage of
+    /// [`prewarm_runtime_effects_stage`](Self::prewarm_runtime_effects_stage)
+    /// at once. Returns how many SkSL programs compiled.
+    pub(crate) fn prewarm_runtime_effects(&mut self) -> usize {
+        let compiled = crate::composition_effects::compile_all();
+        for stage in 0..Self::PREWARM_STAGES {
+            self.prewarm_runtime_effects_stage(stage);
+        }
+        compiled
+    }
+
+    /// One stage of the prewarm of the runtime effects: the GPU links the
+    /// program of a draw on its first draw (on WebGL, ANGLE translates and
+    /// links it: tens to hundreds of milliseconds on a cold cache), so each
+    /// stage compiles the SkSL programs and draws one effect, in the forms
+    /// the drawing context draws it, into the top left 4 by 4 device pixels
+    /// of the target, cleared to transparent afterwards. The stages are the
+    /// lighting, the multiply layer of the lights, a coverage clip (a rounded
+    /// clip inside another) over a fill, a rounded fill, a circle and an
+    /// image, and each pixel operation. A GPU render target runs them all
+    /// with its second frame (`skia_gpu_render_target::prewarm_frame`).
+    pub(crate) fn prewarm_runtime_effects_stage(&mut self, stage: usize) {
+        use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+        use ferroui_base::platform::{IDrawingContextImplWithLayerEffects, LightingParameters, PixelOperation, PositionedLight};
+        use ferroui_base::rendering::composition::effects::BlendEffectMode;
+        use ferroui_base::rendering::composition::server::{LightAttenuation, LightColor, LightSource, LightingMaterial};
+
+        self.check_lease();
+        if crate::composition_effects::compile_all() == 0 || stage >= Self::PREWARM_STAGES {
+            return;
+        }
+        let saved_opacity = std::mem::replace(&mut self.current_opacity, 1.0);
+        let corner = sk::Rect::from_wh(4.0, 4.0);
+        self.canvas.get().save();
+        self.canvas.get().reset_matrix();
+        self.canvas.get().clip_rect(corner, sk::ClipOp::Intersect, false);
+
+        let pixel = Rect::new(0.0, 0.0, 1.0, 1.0);
+        let brush = ImmutableSolidColorBrush::new(Color::from_rgb(255, 255, 255));
+        let lighting = LightingParameters {
+            constant: LightColor::new(0.1, 0.1, 0.1),
+            lights: vec![PositionedLight {
+                source: LightSource::Point {
+                    color: LightColor::WHITE,
+                    position: ferroui_base::Vector3D::new(0.5, 0.5, 10.0),
+                    attenuation: LightAttenuation::NONE,
+                },
+                to_light_space: Matrix::IDENTITY,
+            }],
+            material: LightingMaterial { ambient: 1.0, diffuse: 1.0, specular: 0.5, shine: 16.0 },
+        };
+        let grid = Rect::new(0.0, 0.0, 4.0, 4.0);
+        let operation = |stage: usize| match stage {
+            3 => PixelOperation::Blend { mode: BlendEffectMode::Subtract, noise_grid: grid, noise_size: ferroui_base::PixelSize::new(4, 4) },
+            4 => PixelOperation::Blend { mode: BlendEffectMode::Dissolve, noise_grid: grid, noise_size: ferroui_base::PixelSize::new(4, 4) },
+            5 => PixelOperation::Arithmetic { k: [0.5, 0.5, 0.5, 0.0] },
+            _ => PixelOperation::MaskInvert,
+        };
+        match stage {
+            0 => {
+                self.draw_lighting(pixel, &lighting);
+            }
+            1 => {
+                if self.push_lighting_multiply_layer(pixel, &lighting) {
+                    self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
+                    self.pop_multiply_layer();
+                }
+            }
+            2 => {
+                // A rounded clip inside another: the inner one is a coverage
+                // shader.
+                let rounded = RoundedRect::from_radius(Rect::new(0.0, 0.0, 4.0, 4.0), 1.0);
+                self.push_clip_rounded(rounded);
+                self.push_clip_rounded(rounded);
+                self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
+                self.draw_rectangle(
+                    Some(&brush),
+                    None,
+                    RoundedRect::from_radius(Rect::new(0.0, 0.0, 2.0, 2.0), 0.5),
+                    &BoxShadows::default(),
+                );
+                // A circle and an image, sampled as the bitmaps of the
+                // drawing context are.
+                let mut paint = SkPaintCache::get();
+                paint.set_anti_alias(true);
+                paint.set_color(sk::Color::WHITE);
+                self.canvas.get().draw_circle((1.0, 1.0), 1.0, &paint);
+                let info = sk::ImageInfo::new((2, 2), sk::ColorType::RGBA8888, sk::AlphaType::Premul, None);
+                if let Some(image) = sk::images::raster_from_data(&info, sk::Data::new_copy(&[255u8; 16]), 8) {
+                    let image = crate::gpu::drawable_image(self.gr_context.as_deref(), image, false);
+                    for filter in [sk::FilterMode::Nearest, sk::FilterMode::Linear] {
+                        let sampling = sk::SamplingOptions::new(filter, sk::MipmapMode::None);
+                        self.canvas.get().draw_image_rect_with_sampling_options(
+                            &image,
+                            None,
+                            sk::Rect::from_wh(2.0, 2.0),
+                            sampling,
+                            &paint,
+                        );
+                    }
+                }
+                SkPaintCache::return_reset(paint);
+                self.pop_clip();
+                self.pop_clip();
+            }
+            _ => {
+                if self.push_pixel_operation(pixel, &operation(stage)) {
+                    self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
+                    self.next_pixel_operation_source();
+                    self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
+                    self.pop_pixel_operation();
+                }
+            }
+        }
+
+        // What the stage drew goes; the frame goes on from what was there.
+        self.canvas.get().clear(sk::Color::TRANSPARENT);
+        // The transform of the context is read back from the canvas.
+        self.restore_canvas();
+        self.current_opacity = saved_opacity;
     }
 
     /// Composes the layer of the latest next source of a pixel operation,
