@@ -108,7 +108,7 @@ impl Frame<'_, '_> {
         self.tx.new_record(fields)
     }
     fn root(&self, root: Option<&str>) -> Result<ObjectId, Error> {
-        root.map_or_else(|| Ok(self.tx.model.root()), |id| self.tx.scope_id(id))
+        root.map_or_else(|| Ok(self.tx.model.context_root(self.owner)), |id| self.tx.scope_id(self.owner,id))
     }
     pub fn name(&mut self, name: &str, root: Option<&str>) -> Result<Value, Error> {
         self.tx

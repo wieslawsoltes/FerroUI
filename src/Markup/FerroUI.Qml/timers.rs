@@ -12,6 +12,7 @@ pub(crate) struct Timers {
 }
 
 impl Timers {
+    pub(crate) fn truncate(&mut self,index:usize){self.deadlines.retain(|id,_|id.index<index);}
     pub(crate) fn register(&mut self, object: ObjectId) {
         self.deadlines.insert(object, None);
     }

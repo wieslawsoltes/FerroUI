@@ -174,6 +174,7 @@ impl Realm {
             .into_iter()
             .map(mode)
             .collect::<Vec<_>>();
+        if ctx.is_component(object) && key=="createObject" {signature=vec![None,Some("data")];}
         if ctx.is_list_model(object) {
             let row = match key {
                 "append" => Some(0),

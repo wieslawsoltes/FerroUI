@@ -27,6 +27,7 @@ pub(crate) struct Transaction<'a> {
     steps: usize,
     pub(crate) connection_changes: signal_callbacks::Journal,
     pub(crate) deferred: Vec<deferred::Task>,
+    pub(crate) structure:dynamic::Checkpoint,
     pub(crate) timer_changes: timers::TimerChanges,
 }
 
@@ -35,7 +36,9 @@ impl Instance {
         &mut self,
         operation: impl FnOnce(&mut Transaction<'_>) -> Result<T, Error>,
     ) -> Result<T, Error> {
+        let structure=self.checkpoint();
         let mut tx = Transaction {
+            structure,
             current_binding: None,
             guest_return_type: None,
             guest_parameters: Vec::new(),
@@ -108,6 +111,7 @@ impl Instance {
             for (key, old) in tx.original {
                 tx.model.slots[key] = old;
             }
+            tx.model.rollback_creation(tx.structure);
         } else {
             tx.model
                 .javascript
@@ -175,27 +179,21 @@ impl Transaction<'_> {
     }
 
     pub(crate) fn initialize(&mut self) -> Result<(), Error> {
-        self.initializing = true;
-        self.model_modes.extend(self.model.models.keys().copied());
-        self.pending_bindings
-            .extend(self.model.bindings.iter().copied());
-        self.pending.extend(
-            self.model
-                .slots
-                .iter()
-                .enumerate()
-                .filter(|(_, s)| s.dirty)
-                .map(|(i, _)| i),
-        );
+        self.initialize_range(0,0)
+    }
+    pub(crate) fn initialize_range(&mut self,first:usize,first_slot:usize)->Result<(),Error>{
+        let end=self.model.nodes.len();
+        let previous=self.initializing;
+        self.initializing=true;
+        self.model_modes.extend(self.model.models.keys().copied().filter(|id|id.index>=first));
+        self.pending_bindings.extend(self.model.bindings.iter().copied().filter(|id|id.index>=first));
+        self.pending.extend(self.model.slots.iter().enumerate().skip(first_slot).filter(|(_,s)|s.dirty).map(|(i,_)|i));
         self.settle()?;
-        self.initializing = false;
-        self.timer_changes
-            .pending
-            .extend(self.model.timers.objects());
+        self.initializing=previous;
+        self.timer_changes.pending.extend(self.model.timers.objects().filter(|id|id.index>=first));
         self.settle()?;
-        for index in (0..self.model.nodes.len()).rev() {
-            let object = self.model.nodes[index].id;
-            self.dispatch(object, "Component.completed", Vec::new())?;
+        for index in (first..end).rev(){
+            self.dispatch(self.model.nodes[index].id,"Component.completed",Vec::new())?;
             self.settle()?;
         }
         Ok(())

@@ -219,3 +219,6 @@ mod direct_reads;
 
 #[cfg(test)]
 mod native_host;
+
+#[cfg(test)]
+mod dynamic_components;

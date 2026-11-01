@@ -53,8 +53,8 @@ impl Transaction<'_> {
             "Infinity" => return Ok(Value::Number(f64::INFINITY)),
             _ => (),
         }
-        if let Some(id) = self.model.ids.get(name) {
-            return Ok(Value::Object(*id));
+        if let Some(id) = self.model.lexical_id(owner,name) {
+            return Ok(Value::Object(id));
         }
         if let Ok(key) = self.scoped_key(owner, name) {
             return self.read(key, reads);
@@ -76,11 +76,8 @@ impl Transaction<'_> {
         }
     }
 
-    pub(crate) fn scope_id(&self, name: &str) -> Result<ObjectId, Error> {
-        self.model
-            .ids
-            .get(name)
-            .copied()
+    pub(crate) fn scope_id(&self, owner:ObjectId, name: &str) -> Result<ObjectId, Error> {
+        self.model.lexical_id(owner,name)
             .ok_or_else(|| Error::new(format!("unknown component scope '{name}'")))
     }
 
@@ -124,9 +121,9 @@ impl Transaction<'_> {
             Bool(b) => Value::Bool(*b),
             Number(n) => Value::Number(*n),
             String(s) => Value::String(s.clone()),
-            Name(name) => self.name(owner, self.model.root(), name, locals, reads)?,
+            Name(name) => self.name(owner, self.model.context_root(owner), name, locals, reads)?,
             ScopedName { name, root } => {
-                self.name(owner, self.scope_id(root)?, name, locals, reads)?
+                self.name(owner, self.scope_id(owner,root)?, name, locals, reads)?
             }
             Record(fields) => {
                 let mut values = BTreeMap::new();
@@ -325,6 +322,7 @@ impl Transaction<'_> {
                 }
             }
         }
+        if self.model.is_component(owner) && name=="createObject" {return self.create_method(owner,&arguments);}
         if node.signal(name).is_some() {
             self.signal(owner, name, arguments)?;
             return Ok(Value::Undefined);

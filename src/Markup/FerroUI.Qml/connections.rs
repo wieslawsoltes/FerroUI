@@ -6,7 +6,7 @@ use ferroui_qml_compiler::{MemberKind, Object};
 
 #[derive(Clone)]
 pub(crate) struct Listener {
-    receiver: ObjectId,
+    pub(crate) receiver: ObjectId,
     target: SlotId,
     enabled: SlotId,
     ignore_unknown: SlotId,

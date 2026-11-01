@@ -7,18 +7,213 @@ pub(crate) struct Template {
     pub imports: Rc<[ir::Import]>,
     pub scopes: enums::Scopes,
 }
+pub(crate) struct Context {
+    pub declaration: ObjectId,
+    pub ids: BTreeMap<String, ObjectId>,
+}
 #[derive(Default)]
 pub(crate) struct Components {
-    pub serial:u64,
-    pub revision:u64,
-    pub registry:Option<Rc<TypeRegistry>>,
-    pub templates:BTreeMap<ObjectId,Template>,
+    pub serial: u64,
+    pub revision: u64,
+    pub registry: Option<Rc<TypeRegistry>>,
+    pub contexts: BTreeMap<ObjectId, Context>,
+    pub created: Vec<ObjectId>,
+    pub templates: BTreeMap<ObjectId, Template>,
 }
-impl Instance{
-    pub(crate) fn next_object(&self)->ObjectId{
-        ObjectId{instance:self.identity,index:self.nodes.len(),serial:self.dynamic.serial}
+impl Instance {
+    pub(crate) fn next_object(&self) -> ObjectId {
+        ObjectId {
+            instance: self.identity,
+            index: self.nodes.len(),
+            serial: self.dynamic.serial,
+        }
     }
-    pub fn objects(&self)->impl Iterator<Item=ObjectId>+'_ { self.nodes.iter().map(|node|node.id) }
-    pub fn structure_revision(&self)->u64 { self.dynamic.revision }
-    pub fn is_component(&self,id:ObjectId)->bool{self.node(id).is_some() && self.dynamic.templates.contains_key(&id)}
+    pub fn objects(&self) -> impl Iterator<Item = ObjectId> + '_ {
+        self.nodes.iter().map(|node| node.id)
+    }
+    pub fn structure_revision(&self) -> u64 {
+        self.dynamic.revision
+    }
+    pub fn is_component(&self, id: ObjectId) -> bool {
+        self.node(id).is_some() && self.dynamic.templates.contains_key(&id)
+    }
+}
+pub(crate) struct Checkpoint {
+    nodes: usize,
+    slots: usize,
+    revision: u64,
+    created: usize,
+}
+impl Instance {
+    pub(crate) fn context_root(&self, id: ObjectId) -> ObjectId {
+        self.node(id)
+            .and_then(|n| n.context)
+            .unwrap_or_else(|| self.root())
+    }
+    pub(crate) fn insert_scoped_id(
+        &mut self,
+        context: Option<ObjectId>,
+        name: String,
+        id: ObjectId,
+    ) -> Option<ObjectId> {
+        match context {
+            Some(owner) => self
+                .dynamic
+                .contexts
+                .get_mut(&owner)
+                .expect("creation context")
+                .ids
+                .insert(name, id),
+            None => self.ids.insert(name, id),
+        }
+    }
+    pub(crate) fn lexical_id(&self, owner: ObjectId, name: &str) -> Option<ObjectId> {
+        let mut current = self.node(owner)?.context;
+        while let Some(root) = current {
+            let context = self.dynamic.contexts.get(&root)?;
+            if let Some(id) = context.ids.get(name) {
+                return Some(*id);
+            }
+            current = self.node(context.declaration)?.context;
+        }
+        self.ids.get(name).copied()
+    }
+    pub(crate) fn lexical_names(&self, owner: ObjectId, names: &mut BTreeSet<String>) {
+        let mut current = self.node(owner).and_then(|n| n.context);
+        while let Some(root) = current {
+            let context = &self.dynamic.contexts[&root];
+            names.extend(
+                context
+                    .ids
+                    .keys()
+                    .filter(|n| !n.starts_with("$qml:"))
+                    .cloned(),
+            );
+            current = self.node(context.declaration).and_then(|n| n.context);
+        }
+        names.extend(self.ids.keys().filter(|n| !n.starts_with("$qml:")).cloned());
+    }
+    pub(crate) fn checkpoint(&self) -> Checkpoint {
+        Checkpoint {
+            nodes: self.nodes.len(),
+            slots: self.slots.len(),
+            revision: self.dynamic.revision,
+            created: self.dynamic.created.len(),
+        }
+    }
+    pub(crate) fn rollback_creation(&mut self, c: Checkpoint) {
+        if self.nodes.len() == c.nodes && self.dynamic.revision == c.revision {
+            return;
+        }
+        for i in c.nodes..self.nodes.len() {
+            if let Some(parent) = self.nodes[i].parent.filter(|p| p.index < c.nodes) {
+                self.nodes[parent.index]
+                    .children
+                    .retain(|id| id.index < c.nodes);
+            }
+        }
+        self.nodes.truncate(c.nodes);
+        self.properties.truncate(c.slots);
+        self.slots.truncate(c.slots);
+        self.dynamic.templates.retain(|id, _| id.index < c.nodes);
+        self.dynamic.contexts.retain(|id, _| id.index < c.nodes);
+        self.dynamic.created.truncate(c.created);
+        self.dynamic.revision = c.revision;
+        self.models.retain(|id, _| id.index < c.nodes);
+        self.bindings.retain(|id| id.index < c.nodes);
+        self.timers.truncate(c.nodes);
+        self.listeners.retain(|_, handlers| {
+            handlers.retain(|h| h.receiver.index < c.nodes);
+            !handlers.is_empty()
+        });
+    }
+    pub fn drain_created(&mut self) -> Vec<ObjectId> {
+        std::mem::take(&mut self.dynamic.created)
+    }
+    pub fn create_object(
+        &mut self,
+        component: ObjectId,
+        parent: Option<ObjectId>,
+        initial: BTreeMap<String, Value>,
+    ) -> Result<ObjectId, Error> {
+        self.transaction(|tx| tx.create_object(component, parent, initial))
+    }
+}
+impl crate::transaction::Transaction<'_> {
+    pub(crate) fn create_object(
+        &mut self,
+        component: ObjectId,
+        parent: Option<ObjectId>,
+        initial: BTreeMap<String, Value>,
+    ) -> Result<ObjectId, Error> {
+        if self.in_binding() {
+            return Err(Error::new("a binding cannot create objects"));
+        }
+        if parent.is_some_and(|p| self.model.node(p).is_none()) {
+            return Err(Error::new("invalid component parent"));
+        }
+        let template = self
+            .model
+            .dynamic
+            .templates
+            .get(&component)
+            .ok_or_else(|| Error::new("expected a Component"))?
+            .clone();
+        let registry = self.model.dynamic.registry.clone().expect("type registry");
+        let root = self.model.next_object();
+        let first = self.model.slots.len();
+        self.model.dynamic.revision = self
+            .model
+            .dynamic
+            .revision
+            .checked_add(1)
+            .ok_or_else(|| Error::new("tree revision exhausted"))?;
+        self.model.dynamic.contexts.insert(
+            root,
+            Context {
+                declaration: component,
+                ids: Default::default(),
+            },
+        );
+        self.model
+            .allocate_template(root, parent, initial, &template, &registry)?;
+        if let Some(parent) = parent {
+            if self.model.nodes[root.index].visual_children.is_some() {
+                if let Some(name) = self.model.nodes[parent.index].visual_children.clone() {
+                    let key = self.model.key(parent, &name)?;
+                    let Value::List(mut children) = self.read(key, &mut BTreeSet::new())? else {
+                        return Err(Error::new("visual children must be a list"));
+                    };
+                    children.push(Value::Object(root));
+                    self.write(key, Value::List(children))?;
+                }
+            }
+        }
+        self.model.dynamic.created.push(root);
+        self.initialize_range(root.index, first)?;
+        Ok(root)
+    }
+    pub(crate) fn create_method(
+        &mut self,
+        component: ObjectId,
+        args: &[Value],
+    ) -> Result<Value, Error> {
+        let parent = match args.first() {
+            None | Some(Value::Undefined | Value::Null) => None,
+            Some(Value::Object(p)) => Some(*p),
+            _ => return Err(Error::new("invalid component parent")),
+        };
+        let initial = match args.get(1) {
+            None | Some(Value::Undefined) => BTreeMap::new(),
+            Some(Value::Record(r)) if !r.is_array() => self.model.record_entries(r)?.clone(),
+            _ => return Err(Error::new("invalid initial property map")),
+        };
+        if args.len() > 2 {
+            return Err(Error::new(
+                "createObject expects a parent and initial property map",
+            ));
+        }
+        self.create_object(component, parent, initial)
+            .map(Value::Object)
+    }
 }

@@ -277,6 +277,7 @@ impl ScriptContext<'_, '_> {
             .unwrap_or_default();
         params.iter().map(|p| p.ty.as_deref()).collect()
     }
+    pub fn is_component(&self, object:ObjectId)->bool{self.tx.model.is_component(object)}
     pub fn is_list_model(&self, object: ObjectId) -> bool {
         self.tx.model.models.contains_key(&object)
     }
@@ -383,7 +384,7 @@ impl ScriptContext<'_, '_> {
     pub fn names(&self) -> Vec<String> {
         let mut names = BTreeSet::from(["parent".to_owned()]);
         names.extend(self.locals.keys().cloned());
-        names.extend(self.tx.model.ids.keys().filter(|n| !private(n)).cloned());
+        self.tx.model.lexical_names(self.owner,&mut names);
         if let Some(ids) = self.ids {
             names.extend(ids.keys().filter(|n| !private(n)).cloned());
         }
@@ -418,6 +419,7 @@ impl ScriptContext<'_, '_> {
         if self.tx.model.timers.is_timer(object) {
             names.extend(["start", "restart", "stop"].map(str::to_owned));
         }
+        if self.tx.model.is_component(object){names.insert("createObject".into());}
         if self.tx.model.models.contains_key(&object) {
             names.extend(
                 [
@@ -443,9 +445,9 @@ impl ScriptContext<'_, '_> {
             return None;
         }
         if let Some(mapped) = self.ids.and_then(|ids| ids.get(name)) {
-            return self.tx.model.ids.get(mapped).copied();
+            return self.tx.model.lexical_id(self.owner,mapped);
         }
-        self.tx.model.id(name)
+        self.tx.model.lexical_id(self.owner,name)
     }
 
     pub fn resolve(&mut self, name: &str) -> Result<Option<Value>, Error> {
@@ -709,7 +711,7 @@ impl Instance {
             return false;
         }
         self.node(object).is_some_and(|node| {
-            node.methods.contains_key(name)
+            (self.is_component(object) && name=="createObject") || node.methods.contains_key(name)
                 || node.native.contains_key(name)
                 || node.signal(name).is_some()
                 || self.models.contains_key(&object) && list_model::is_method(name)
@@ -753,9 +755,9 @@ impl Transaction<'_> {
         let root = script
             .root
             .as_deref()
-            .map(|id| self.scope_id(id))
+            .map(|id| self.scope_id(owner,id))
             .transpose()?
-            .unwrap_or(self.model.root());
+            .unwrap_or_else(||self.model.context_root(owner));
         self.budget()?;
         let value = self
             .with_stack(4, |tx| {
@@ -800,7 +802,7 @@ impl Transaction<'_> {
         reads: &mut BTreeSet<SlotId>,
         op: impl FnOnce(&mut ScriptContext<'_, '_>) -> Result<T, Error>,
     ) -> Result<T, Error> {
-        let root = self.model.root();
+        let root = self.model.context_root(owner);
         self.with_stack(4, |tx| {
             op(&mut ScriptContext {
                 tx,
