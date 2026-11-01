@@ -120,10 +120,34 @@ fn running_openbox_redecorates_the_same_native_client() {
         until(&session, || {
             theme_name() != previous && theme_name().starts_with(b"FerroDesktop-")
         });
+        // Openbox publishes _OB_THEME before it redecorates existing clients. Wait for both
+        // the selected title bar's pixels and the native client/frame offset reported by X11.
+        // Sampling the private 24-bit TrueColor root also proves the client was really repainted.
+        let palette = appearance.palette();
+        let colors = [palette.surface, palette.tile].map(|hex| XID::from_str_radix(&hex[1..], 16).unwrap());
+        let mut observed = 0;
         until(&session, || {
-            extents().get(2).is_some_and(|h| *h > 0 && heights.last() != Some(h))
+            let Some(&top) = extents().get(2) else { return false };
+            let Some((client_x, client_y, frame)) = xlib::x_translate_coordinates(display, id, root, 0, 0) else {
+                return false;
+            };
+            if frame == 0 || frame == id || top < 3 {
+                return false;
+            }
+            let Some((_, offset_y, _)) = xlib::x_translate_coordinates(display, id, frame, 0, 0) else {
+                return false;
+            };
+            if offset_y != top as i32 {
+                return false;
+            }
+            let pixel = xlib::x_get_pixel(display, root, client_x + 110, client_y - offset_y + 2);
+            if !pixel.is_some_and(|pixel| colors.contains(&(pixel & 0x00ff_ffff))) {
+                return false;
+            }
+            observed = top;
+            true
         });
-        heights.push(extents()[2]);
+        heights.push(observed);
         assert!(session.snapshot().windows.iter().any(|w| w.id == id as u32));
         assert_eq!(std::fs::read(state.join("base.xml")).unwrap(), base);
     }
