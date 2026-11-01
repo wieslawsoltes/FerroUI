@@ -14,6 +14,7 @@ pub mod helpers;
 pub mod metal;
 
 mod combined_geometry_impl;
+mod composition_effects;
 mod drawing_context_impl;
 mod ellipse_geometry_impl;
 mod font_manager_impl;
@@ -29,6 +30,7 @@ mod locked_framebuffer;
 mod picture_render_target;
 mod platform_render_interface;
 mod rectangle_geometry_impl;
+mod runtime_effects;
 mod render_target_bitmap_impl;
 mod sk_cache_base;
 mod sk_paint_cache;
@@ -91,6 +93,10 @@ pub use writeable_bitmap_impl::WriteableBitmapImpl;
 
 #[cfg(test)]
 mod layer_effect_tests;
+#[cfg(test)]
+mod composition_effect_tests;
+#[cfg(test)]
+mod coverage_clip_tests;
 #[cfg(test)]
 mod tests;
 #[cfg(test)]

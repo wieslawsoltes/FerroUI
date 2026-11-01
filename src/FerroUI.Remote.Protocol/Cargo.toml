@@ -18,6 +18,7 @@ path = "lib.rs"
 # external crate. The two key enumerations are compiled in from the sources of
 # the base library (see `lib.rs`), as the upstream project file does.
 [dependencies]
+uuid = { workspace = true }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

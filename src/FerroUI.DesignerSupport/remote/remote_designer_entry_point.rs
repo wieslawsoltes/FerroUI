@@ -18,7 +18,6 @@ use ferroui_remote_protocol::{
     TcpTransportBase,
 };
 use std::cell::{Cell, RefCell};
-use std::hash::{BuildHasher, Hasher};
 use std::net::IpAddr;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::Arc;
@@ -69,17 +68,10 @@ pub mod methods {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct UsageError;
 
-/// `Guid.NewGuid()`: a random identifier of version four. The random bits
-/// are the keys the standard library seeds its hash maps with.
+/// `Guid.NewGuid()`: a random identifier of version four, from the random
+/// generator of the system.
 pub(crate) fn new_guid() -> Guid {
-    let mut bytes = [0u8; 16];
-    for chunk in bytes.chunks_mut(8) {
-        let random = std::collections::hash_map::RandomState::new().build_hasher().finish();
-        chunk.copy_from_slice(&random.to_le_bytes());
-    }
-    bytes[7] = (bytes[7] & 0x0F) | 0x40;
-    bytes[8] = (bytes[8] & 0x3F) | 0x80;
-    Guid::from_byte_array(&bytes).expect("sixteen bytes are an identifier")
+    Guid::from(uuid::Uuid::new_v4())
 }
 
 /// `Uri.Host` and `Uri.Port` of an absolute URI with an authority that

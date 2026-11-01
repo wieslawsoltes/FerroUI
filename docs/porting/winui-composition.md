@@ -450,6 +450,51 @@ and `AnchorPoint` are left to the application, except those whose facade on the 
 the renderer then writes them too, as WinUI writes the handoff visual from the facades. An implicit animation on `Offset` therefore animates
 every layout move of the element, as in WinUI.
 
+### 5.3 How the effects are drawn
+
+**WinUI.** `Compositor::CreateEffectFactory(IGraphicsEffect, animatableProperties)` reads the
+description once, a graph of Direct2D effect nodes known by their GUIDs
+(`IGraphicsEffectD2D1Interop`: `GetEffectId`, `GetSource`, `GetProperty`,
+`GetNamedPropertyMapping`; `microsoft.ui.private.composition.effects_impl.h`), and compiles it into
+a GPU program. The animatable and named properties become parameters of that program, set per
+brush through `CompositionEffectBrush.Properties`; an animation or a moving light changes those
+parameters only. The users (`RevealBrush.cpp`, `AcrylicBrush.cpp`, `ConnectedAnimation.cpp`)
+create a factory once per recipe and a brush per element.
+
+**FerroUI.** `CompositionEffectFactory` loads the description once into an `EffectGraph` (the
+nodes, their constant members and the keys of the animatable ones, the path to the source of a
+layer visual). `ServerCompositionEffectBrush` paints the graph per frame: it reads the animatable
+members from the property set of the brush and hands each node to the drawing context as a GPU
+primitive with those values. Nothing of a node is compiled per frame or per brush:
+
+| Node | Skia | Vello |
+|---|---|---|
+| Gaussian blur, shadow | blur image filter of a save layer | filter layer of the scene where the renderer has filters and no clip is open; otherwise the CPU renderer (gap, gpu-rendering.md) |
+| Opacity, cross-fade, composite (Porter-Duff, `Plus`), blend (the separable and non-separable modes of the layers), alpha mask | save layers with a blend mode or an opacity | layers of the scene with a blend mode |
+| Colour matrix, saturation, tint, invert, grayscale, luminance to alpha, arithmetic composite of an image and a colour | colour filter of a save layer (Skia's matrix filter, or a runtime colour filter for premultiplied colours) | the CPU renderer (gap) |
+| Blend modes the layers lack, arithmetic composite of two images, `MaskInvert` | the sources in save layers composed by runtime blenders (Skia's arithmetic blender); `Dissolve` by a noise shader and a select blender | the CPU path of the compositor (gap) |
+| Scene lighting, the lights of lit visuals | the lighting shader (a draw, or the factors of a multiply layer composed by a runtime blender) | the CPU light map (gap) |
+| Colour source, border | a fill; a tiled image shader | a fill; a tiled image |
+
+The runtime effects of the Skia backend (`ferroui-skia/runtime_effects.rs`) are compiled once per
+thread, keyed by their source, and get their parameters as uniforms checked against what the
+program declares (`composition_effects.rs` holds the programs of the compositor). That is WinUI's
+model: a program per kind of node, compiled once, with the animatable members, the lights and the
+material as uniforms. Two steps of WinUI's design are not taken yet: the nodes of a factory are
+not fused into one program per factory (a colour matrix followed by a blend is two layers, where
+Direct2D would make one pass), and the walk of the graph runs per paint on the CPU (it makes
+drawing commands, no pixels). Both are planned with the custom effects of `Visual.Effect` (the
+Effector architecture), which builds on the same runtime-effect layer.
+
+The lights reach the drawing context as plain data (`LightingParameters`: the ambient and
+distant lights summed into one constant light in double precision, the point and spot lights
+with their transforms into their spaces, the material); the Skia shader evaluates
+`LightSource::lit_at` per pixel at the point of the visual the pixel shows. The pixel operations
+are `PixelOperation`, with `apply_to_premultiplied_rgba8` as the CPU reference. Each method of
+`IDrawingContextImplWithLayerEffects` that takes them returns whether the context drew; when it
+did not (Vello, the mock and test contexts, a context without runtime effects, more than
+`LightingParameters::MAX_LIGHTS` point and spot lights) the compositor draws the same on the CPU.
+
 ## 6. Status
 
 | Phase | State | Pull request |
@@ -461,6 +506,7 @@ every layout move of the element, as in WinUI.
 | 5 | implemented (drop shadow masks and source policy; ambient, distant, point and spot lights as a light map over the content) | #304 |
 | 6 | implemented (scoped: blur, opacity, cross-fade, composite and colour source effect brushes, the layer visual effect; the backdrop brush draws nothing) | #304 |
 | 7 | implemented (the shadow of an alpha on Skia and Vello, `Offset.Z`, `GetAlphaMask`, `ThemeShadow` and its use in the WinUI theme, the zoom of `ScrollViewer` and the manipulation property set) | - |
+| GPU effects | the lights and the pixel operations evaluated on the GPU by Skia (section 5.3); Vello keeps the CPU path (gpu-rendering.md) | #456 |
 
 ## 7. Deviations
 
@@ -469,6 +515,9 @@ Missing). `DEVIATIONS.md` points here for this area.
 
 | WinUI | Port | Kind | Why | Since |
 |---|---|---|---|---|
+| The effects of a factory are compiled into one GPU program. | Each node is a GPU primitive of its own (a layer, an image filter, a colour filter, or a runtime effect compiled once per thread), with the animatable members as uniforms; the nodes are not fused into one program, and the graph is walked per paint (section 5.3). | Representation | The backends compose layers; fusing the nodes of a factory comes with the custom effects. | GPU effects |
+| The lights are evaluated per pixel on the GPU, in single precision. | Skia: per pixel, in single precision (within 1 level of the light computed in double precision, `composition_effect_tests.rs`). The CPU path, and the other backends, sample the light every second device pixel and interpolate (up to 6 levels from the exact light where it bends sharply, within half a level for smooth lights). | Representation | The CPU path is the reference and the fallback; vello has no shader hook yet. | GPU effects |
+| `Dissolve` is random per pixel. | The hash of a cell of the grid of the CPU bitmaps (a cell per device pixel of the brush); on the GPU the same hash per pixel, so the same pixels are kept where the grid falls on the device pixels, and each device pixel takes the cell its centre is in otherwise (the CPU path resamples its bitmap there). | Representation | Direct2D does not document its randomness. | GPU effects |
 | `Visual.TransformMatrix` is a `Matrix4x4`. | A 2D `Matrix`. | Representation | The renderers of FerroUI are 2D; the property is the one the compositor already had. | phase 1 |
 | `ConnectedAnimation` freezes a `CompositionVisualSurface` of the source on the next frame and keeps the source element in unloading storage until then. | The source is rendered to a bitmap when `prepare_to_animate` is called, and the bitmap is shown by a `LoadedImageSurface`. | Behaviour | A detached element's composition visual loses its content in the same batch, and the server applies every queued batch before it runs jobs, so a server-side freeze could see the detached state. The image is the same; it is taken a frame earlier. | phase 1 |
 | `SetExpressionReferenceParameter(String, IAnimationObject)`. | Takes `Rc<dyn AsCompositionObject>` and is the same as `set_reference_parameter`; an element facade passes its visual. | Representation | `IAnimationObject` and `PopulatePropertyInfo` are not ported. | phase 3 |

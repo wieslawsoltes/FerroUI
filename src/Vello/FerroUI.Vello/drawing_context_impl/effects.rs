@@ -450,4 +450,62 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         self.restore();
         self.restore();
     }
+
+    /// In a GPU mode, the lights are evaluated per pixel by a render pass of
+    /// the device into a texture the scene paints the area with
+    /// (`gpu/effect_passes.rs`); the CPU mode, WebGL2 and a scene of the CPU
+    /// renderer (inside a layer drawn on the processor) leave it to the
+    /// compositor's light map.
+    #[cfg(any(feature = "hybrid", feature = "gpu"))]
+    fn draw_lighting(&mut self, rect: Rect, lighting: &ferroui_base::platform::LightingParameters) -> bool {
+        use crate::scene::{VelloSceneBrush, VelloScenePaint, VelloSceneTexture};
+        let device = {
+            let scene = self.scene();
+            if !scene.capabilities().device_textures {
+                return false;
+            }
+            match scene.device() {
+                Some(device) => device.clone(),
+                None => return false,
+            }
+        };
+        if lighting.lights.len() > ferroui_base::platform::LightingParameters::MAX_LIGHTS {
+            return false;
+        }
+        let transform = self.device_transform();
+        let (width, height) = (f64::from(self.scene().width()), f64::from(self.scene().height()));
+        let area = (transform * rect_path(rect)).bounding_box().intersect(kurbo::Rect::new(0.0, 0.0, width, height));
+        let (x0, y0) = (area.x0.floor().max(0.0), area.y0.floor().max(0.0));
+        let (x1, y1) = (area.x1.ceil().min(width), area.y1.ceil().min(height));
+        if x1 <= x0 || y1 <= y0 {
+            // Nothing of the area is on the scene.
+            return true;
+        }
+        let Some(texture) = crate::gpu::effect_passes::lighting_texture(
+            &device,
+            (x1 - x0) as u32,
+            (y1 - y0) as u32,
+            (x0 as u32, y0 as u32),
+            transform.inverse(),
+            lighting,
+            crate::gpu::effect_passes::LightingOutput::Light,
+        ) else {
+            return false;
+        };
+        // As a bitmap of the light map would be drawn: with the opacity and
+        // the bitmap blending mode in effect, one texel per device pixel.
+        let alpha = ((255.0 * self.current_opacity) as u8) as f32 / 255.0;
+        let brush = VelloSceneBrush::Texture(VelloSceneTexture {
+            texture,
+            x_extend: peniko::Extend::Pad,
+            y_extend: peniko::Extend::Pad,
+            quality: peniko::ImageQuality::Low,
+            alpha,
+        });
+        let paint = VelloScenePaint { brush, transform: transform.inverse() * Affine::translate((x0, y0)) };
+        let blend_mode = crate::vello_extensions::to_blend_mode(self.render_options.bitmap_blending_mode);
+        let anti_alias = self.anti_alias();
+        self.sink().fill(&rect_path(rect), peniko::Fill::NonZero, transform, &paint, blend_mode, anti_alias);
+        true
+    }
 }

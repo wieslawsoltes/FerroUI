@@ -74,7 +74,14 @@ impl IRenderTarget for SkiaGpuRenderTarget {
             ..CreateInfo::default()
         };
 
-        let context = DrawingContextImpl::new(nfo, vec![Box::new(move || session.dispose())]);
+        let gr_context = session.gr_context();
+        let mut context = DrawingContextImpl::new(nfo, vec![Box::new(move || session.dispose())]);
+        // The programs of the runtime effects are made with the second frame
+        // of a GPU context (the first paint is not delayed), not with the
+        // frame that first needs them.
+        if prewarm_frame(&gr_context) {
+            context.prewarm_runtime_effects();
+        }
 
         Ok((Box::new(context), RenderTargetDrawingContextProperties::default()))
     }
@@ -85,5 +92,78 @@ impl IRenderTarget for SkiaGpuRenderTarget {
 
     fn dispose(&self) {
         self.render_target.dispose();
+    }
+}
+
+ferroui_base::ferro_thread_local! {
+    /// The GPU contexts of this thread and how many frames each drew.
+    static FRAMES: std::cell::RefCell<Vec<(std::rc::Weak<dyn super::ISkiaGrContext>, usize)>> =
+        std::cell::RefCell::new(Vec::new());
+}
+
+/// Whether the frame of `gr_context` that is beginning is the one that
+/// prewarms the runtime effects: its second frame. The first paint of the
+/// application is not delayed, and an application draws its next frames
+/// while it starts (what it loads, its animations), before a user scrolls.
+/// Rendered frames are the only time a render target has: a frame drawn
+/// only to prewarm would need the compositor to ask for it.
+pub(crate) fn prewarm_frame(gr_context: &Rc<dyn super::ISkiaGrContext>) -> bool {
+    FRAMES.with(|frames| {
+        let mut frames = frames.borrow_mut();
+        frames.retain(|(context, _)| context.strong_count() > 0);
+        let index = match frames.iter().position(|(context, _)| std::ptr::addr_eq(context.as_ptr(), Rc::as_ptr(gr_context))) {
+            Some(index) => index,
+            None => {
+                frames.push((Rc::downgrade(gr_context), 0));
+                frames.len() - 1
+            }
+        };
+        let frame = frames[index].1;
+        frames[index].1 = frame.saturating_add(1);
+        frame == 1
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::gpu::{ISkiaGrContext, SkiaGpuBackend};
+    use skia_safe::{Image, ImageInfo, Surface, SurfaceProps};
+
+    struct NoContext;
+
+    impl ISkiaGrContext for NoContext {
+        fn backend(&self) -> SkiaGpuBackend {
+            SkiaGpuBackend::Graphite
+        }
+        fn create_surface(&self, _image_info: &ImageInfo, _surface_props: &SurfaceProps) -> Option<Surface> {
+            None
+        }
+        fn max_render_target_size(&self) -> Option<i32> {
+            None
+        }
+        fn flush(&self) {}
+        fn reset_context(&self) {}
+        fn set_resource_cache_limit(&self, _max_resource_bytes: i64) {}
+        fn snapshot_to_raster(&self, _surface: &mut Surface) -> Option<Image> {
+            None
+        }
+        fn is_lost(&self) -> bool {
+            false
+        }
+        fn as_any(&self) -> &dyn std::any::Any {
+            self
+        }
+    }
+
+    #[test]
+    fn the_prewarm_runs_with_the_second_frame_of_a_context() {
+        let context: Rc<dyn ISkiaGrContext> = Rc::new(NoContext);
+        let other: Rc<dyn ISkiaGrContext> = Rc::new(NoContext);
+        let frames: Vec<_> = (0..5).map(|_| prewarm_frame(&context)).collect();
+        assert_eq!(vec![false, true, false, false, false], frames, "not the first paint, once");
+        // Each context prewarms its own programs.
+        assert!(!prewarm_frame(&other));
+        assert!(prewarm_frame(&other));
     }
 }

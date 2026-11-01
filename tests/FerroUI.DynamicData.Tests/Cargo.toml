@@ -19,3 +19,4 @@ ferroui-dynamic-data = { workspace = true }
 ferroui-reactive = { workspace = true }
 ferroui-reactive-testing = { workspace = true }
 ferroui-system = { workspace = true }
+uuid = { workspace = true }

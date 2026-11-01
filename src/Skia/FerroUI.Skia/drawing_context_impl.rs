@@ -286,9 +286,13 @@ pub struct DrawingContextImpl {
     // transform.
     intermediate_surface_dpi: Vector,
     mask_stack: Vec<(sk::M44, PaintWrapper)>,
-    /// The multiply layers that are pushed: the image of their factors, their
-    /// bounds, and whether a scaling layer is under them.
-    multiply_stack: Vec<(Option<sk::Image>, sk::Rect, bool)>,
+    /// The multiply layers that are pushed.
+    multiply_stack: Vec<MultiplyLayer>,
+    /// The pixel operations that are pushed.
+    pixel_operation_stack: Vec<PixelOperationLayer>,
+    /// The save counts of the canvas at which a rounded rectangle is in the
+    /// clip stack of the canvas as a clip of its own (not a shader).
+    rounded_clip_elements: Vec<usize>,
     opacity_stack: Vec<(f64, bool)>,
     compositing_opacity_stack: Vec<f64>,
     render_options_stack: Vec<RenderOptions>,
@@ -349,6 +353,8 @@ impl DrawingContextImpl {
             intermediate_surface_dpi: create_info.dpi,
             mask_stack: Vec::new(),
             multiply_stack: Vec::new(),
+            pixel_operation_stack: Vec::new(),
+            rounded_clip_elements: Vec::new(),
             opacity_stack: Vec::new(),
             compositing_opacity_stack: Vec::new(),
             render_options_stack: Vec::new(),
@@ -476,6 +482,8 @@ impl DrawingContextImpl {
     fn restore_canvas(&mut self) {
         let canvas = self.canvas.get();
         canvas.restore();
+        let level = canvas.save_count();
+        self.rounded_clip_elements.retain(|saved| *saved <= level);
         // Deviation (DEVIATIONS.md, Skia backend): upstream reads the
         // transform back from the canvas (`Canvas.TotalMatrix44`), post
         // transform included, so a scaled context (a render target bitmap of
@@ -1376,7 +1384,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
                     if spread != 0.0 {
                         shadow_rect.outset((spread, spread));
                     }
-                    self.canvas.get().clip_rrect(sk_round_rect, clip_operation, true);
+                    self.clip_rounded_rect(sk_round_rect, clip_operation);
 
                     let old_transform = self.transform();
                     self.set_transform(
@@ -1435,7 +1443,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
                 if spread != 0.0 {
                     shadow_rect.inset((spread, spread));
                 }
-                self.canvas.get().clip_rrect(sk_round_rect, clip_operation, true);
+                self.clip_rounded_rect(sk_round_rect, clip_operation);
 
                 let old_transform = self.transform();
                 self.set_transform(
@@ -1566,9 +1574,8 @@ impl IDrawingContextImpl for DrawingContextImpl {
         // Get a round rect from the cache.
         let round_rect = SkRoundRectCache::get_and_set_radii(&rc, &clip);
 
-        let canvas = self.canvas.get();
-        canvas.save();
-        canvas.clip_rrect(round_rect, None, true);
+        self.canvas.get().save();
+        self.clip_rounded_rect(&round_rect, sk::ClipOp::Intersect);
 
         // Should not need to reset as setting the radii overrides the values.
         SkRoundRectCache::return_item(round_rect);
@@ -1888,6 +1895,8 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         self.check_lease();
         let (width, height) = (factors.size.width.max(1), factors.size.height.max(1));
         let info = sk::ImageInfo::new((width, height), sk::ColorType::RGBA8888, sk::AlphaType::Premul, None);
+        // An image of pixels: uploaded to the GPU when drawn.
+        crate::composition_effects::note_pixel_image();
         let image = sk::images::raster_from_data(&info, sk::Data::new_copy(&factors.rgba), width as usize * 4);
         let bounds = to_sk_rect(bounds);
         let canvas = self.canvas.get();
@@ -1908,32 +1917,364 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         }
         canvas.save_layer(&SaveLayerRec::default().bounds(&bounds));
         // No image of the factors: the content is drawn unchanged.
-        self.multiply_stack.push((image, bounds, scaled));
+        self.multiply_stack.push(MultiplyLayer::Factors { image, bounds, scaled });
     }
 
     fn pop_multiply_layer(&mut self) {
         self.check_lease();
-        let Some((image, bounds, scaled)) = self.multiply_stack.pop() else {
-            panic!("The multiply layer stack is empty")
-        };
-        if let Some(image) = image {
-            // `Modulate`: each premultiplied channel of the layer times the
-            // opaque factor image; the alpha of the layer is kept.
-            let mut paint = SkPaintCache::get();
-            paint.set_blend_mode(sk::BlendMode::Modulate);
-            let sampling = sk::SamplingOptions::new(sk::FilterMode::Linear, sk::MipmapMode::None);
-            self.canvas.get().draw_image_rect_with_sampling_options(
-                &image,
-                None,
-                bounds,
-                sampling,
-                &paint,
-            );
-            SkPaintCache::return_reset(paint);
+        let Some(layer) = self.multiply_stack.pop() else { panic!("The multiply layer stack is empty") };
+        match layer {
+            MultiplyLayer::Factors { image, bounds, scaled } => {
+                if let Some(image) = image {
+                    // `Modulate`: each premultiplied channel of the layer
+                    // times the opaque factor image; the alpha of the layer
+                    // is kept.
+                    let mut paint = SkPaintCache::get();
+                    paint.set_blend_mode(sk::BlendMode::Modulate);
+                    let sampling = sk::SamplingOptions::new(sk::FilterMode::Linear, sk::MipmapMode::None);
+                    self.canvas.get().draw_image_rect_with_sampling_options(&image, None, bounds, sampling, &paint);
+                    SkPaintCache::return_reset(paint);
+                }
+                self.restore_canvas();
+                if scaled {
+                    self.restore_canvas();
+                }
+                self.restore_canvas();
+            }
+            MultiplyLayer::Lighting { shader, blender, bounds } => {
+                // The factors evaluated per pixel by the lighting shader,
+                // multiplied into the layer by the blender.
+                let mut paint = SkPaintCache::get();
+                paint.set_shader(shader);
+                paint.set_blender(blender);
+                self.canvas.get().draw_rect(bounds, &paint);
+                SkPaintCache::return_reset(paint);
+                self.restore_canvas();
+                self.restore_canvas();
+            }
         }
+    }
+
+    fn draw_lighting(&mut self, rect: Rect, lighting: &ferroui_base::platform::LightingParameters) -> bool {
+        self.check_lease();
+        let Some(shader) =
+            crate::composition_effects::lighting_shader(lighting, crate::composition_effects::LightingOutput::Light)
+        else {
+            return false;
+        };
+        // As a bitmap of the light map would be drawn.
+        let mut paint = SkPaintCache::get();
+        paint.set_shader(shader);
+        paint.set_alpha((255.0 * self.current_opacity) as u8);
+        paint.set_blend_mode(to_sk_blend_mode(self.render_options.bitmap_blending_mode));
+        paint.set_anti_alias(self.render_options.edge_mode != EdgeMode::Aliased);
+        self.canvas.get().draw_rect(to_sk_rect(rect), &paint);
+        SkPaintCache::return_reset(paint);
+        true
+    }
+
+    fn push_lighting_multiply_layer(&mut self, bounds: Rect, lighting: &ferroui_base::platform::LightingParameters) -> bool {
+        self.check_lease();
+        let Some(shader) =
+            crate::composition_effects::lighting_shader(lighting, crate::composition_effects::LightingOutput::Factors)
+        else {
+            return false;
+        };
+        let Some(blender) = crate::composition_effects::light_multiply_blender() else { return false };
+        let bounds = to_sk_rect(bounds);
+        let canvas = self.canvas.get();
+        canvas.save();
+        // Nothing outside the bounds is kept.
+        canvas.clip_rect(bounds, sk::ClipOp::Intersect, false);
+        canvas.save_layer(&SaveLayerRec::default().bounds(&bounds));
+        self.multiply_stack.push(MultiplyLayer::Lighting { shader, blender, bounds });
+        true
+    }
+
+    fn push_pixel_operation(&mut self, bounds: Rect, operation: &ferroui_base::platform::PixelOperation) -> bool {
+        self.check_lease();
+        // Every program the operation needs, before anything is pushed.
+        let Some(programs) = crate::composition_effects::pixel_operation_programs(operation) else { return false };
+        let bounds = to_sk_rect(bounds);
+        // The result is composed as a bitmap of it would be drawn: with the
+        // opacity and the bitmap blending mode in effect; the sources are
+        // drawn with full opacity.
+        let inherited_opacity = self.current_opacity;
+        let mut paint = SkPaintCache::get();
+        paint.set_alpha((255.0 * inherited_opacity) as u8);
+        paint.set_blend_mode(to_sk_blend_mode(self.render_options.bitmap_blending_mode));
+        let canvas = self.canvas.get();
+        canvas.save();
+        // Nothing outside the bounds is kept (an offset of the arithmetic
+        // composite would show everywhere else).
+        canvas.clip_rect(bounds, sk::ClipOp::Intersect, true);
+        canvas.save_layer(&SaveLayerRec::default().bounds(&bounds).paint(&paint));
+        SkPaintCache::return_reset(paint);
+        self.current_opacity = 1.0;
+        self.pixel_operation_stack.push(PixelOperationLayer { programs, bounds, source_open: false, inherited_opacity });
+        true
+    }
+
+    fn next_pixel_operation_source(&mut self) {
+        self.check_lease();
+        self.close_pixel_operation_source();
+        let Some(layer) = self.pixel_operation_stack.last_mut() else { panic!("The pixel operation stack is empty") };
+        // The next source in a layer of its own, composed onto the sources
+        // before it by the blender.
+        let mut paint = SkPaintCache::get();
+        if let crate::composition_effects::PixelOperationPrograms::Blender(blender) = &layer.programs {
+            paint.set_blender(blender.clone());
+        }
+        let bounds = layer.bounds;
+        layer.source_open = true;
+        self.canvas.get().save_layer(&SaveLayerRec::default().bounds(&bounds).paint(&paint));
+        SkPaintCache::return_reset(paint);
+    }
+
+    fn pop_pixel_operation(&mut self) {
+        self.check_lease();
+        self.close_pixel_operation_source();
+        let Some(layer) = self.pixel_operation_stack.pop() else { panic!("The pixel operation stack is empty") };
         self.restore_canvas();
-        if scaled {
-            self.restore_canvas();
+        self.restore_canvas();
+        self.current_opacity = layer.inherited_opacity;
+    }
+}
+
+/// A multiply layer that is pushed.
+enum MultiplyLayer {
+    /// Of an image of factors (sampled on the CPU): the image, the bounds,
+    /// and whether a scaling layer is under it.
+    Factors { image: Option<sk::Image>, bounds: sk::Rect, scaled: bool },
+    /// Of the lighting shader: the shader of the factors and the blender
+    /// that multiplies by them.
+    Lighting { shader: sk::Shader, blender: sk::Blender, bounds: sk::Rect },
+}
+
+/// A pixel operation that is pushed.
+struct PixelOperationLayer {
+    programs: crate::composition_effects::PixelOperationPrograms,
+    bounds: sk::Rect,
+    /// Whether the layer of a next source is open.
+    source_open: bool,
+    /// The opacity in effect when it was pushed, restored when it is popped.
+    inherited_opacity: f64,
+}
+
+ferroui_base::ferro_thread_local! {
+    /// Whether the clips of rounded rectangles are coverage shaders on
+    /// raster surfaces too (the tests compare them with Skia's clips).
+    static COVERAGE_CLIPS_ON_RASTER: Cell<bool> = Cell::new(false);
+    /// How many clips of rounded rectangles were coverage shaders, and how
+    /// many were handed to a GPU surface's clip stack under a transform, with
+    /// radii or with other rounded clips it cannot apply analytically (the
+    /// clips Ganesh draws as a software mask, rasterized on the CPU and
+    /// uploaded).
+    static ROUNDED_CLIPS: Cell<(u64, u64)> = Cell::new((0, 0));
+}
+
+/// Makes the clips of rounded rectangles coverage shaders on raster
+/// surfaces too; returns the previous setting.
+#[allow(dead_code)]
+pub(crate) fn set_coverage_clips_on_raster(value: bool) -> bool {
+    COVERAGE_CLIPS_ON_RASTER.with(|cell| cell.replace(value))
+}
+
+/// The clips of rounded rectangles of this thread: (coverage shaders,
+/// clips a GPU surface would draw as software masks).
+#[allow(dead_code)]
+pub(crate) fn rounded_clip_counts() -> (u64, u64) {
+    ROUNDED_CLIPS.with(Cell::get)
+}
+
+impl DrawingContextImpl {
+    /// Clips to `rrect` (anti-aliased) with `op`.
+    ///
+    /// Ganesh applies a rounded rectangle of its clip stack analytically
+    /// only in device space and only for the radii its effects take, at most
+    /// four elements a draw, and it merges the elements of the stack: two
+    /// rounded clips that share an edge (a card and the picture in it)
+    /// become one rounded rectangle with different corners, which no effect
+    /// takes. Any of those is a software mask on a target without MSAA,
+    /// rasterized on the CPU and uploaded as an A8 texture each time the
+    /// clip moves on the device (Graphite similarly rasterizes such clips
+    /// into an atlas). So on a GPU surface a rounded clip is an element of
+    /// the clip stack only when it is upright, its radii are not complex,
+    /// and no other rounded element is in the stack; otherwise it is a clip
+    /// shader, the coverage of the rounded rectangle evaluated per pixel
+    /// (`composition_effects::rounded_rect_coverage`), which is not merged
+    /// and has no limit. A clip shader makes the programs of the draws under
+    /// it programs of their own, so the single upright clips, the common
+    /// case, stay elements. The raster backend keeps Skia's clip, the
+    /// reference.
+    fn clip_rounded_rect(&mut self, rrect: &sk::RRect, op: sk::ClipOp) {
+        let canvas = self.canvas.get();
+        let level = canvas.save_count();
+        self.rounded_clip_elements.retain(|saved| *saved <= level);
+        let matrix = canvas.local_to_device_as_3x3();
+        let rounded = !matches!(rrect.get_type(), sk::rrect::Type::Empty | sk::rrect::Type::Rect);
+        let element = matrix.rect_stays_rect()
+            && rrect.get_type() != sk::rrect::Type::Complex
+            && self.rounded_clip_elements.is_empty();
+        let gpu = self.gr_context.is_some();
+        if rounded && !element && (gpu || COVERAGE_CLIPS_ON_RASTER.with(Cell::get)) {
+            if let Some(shader) = crate::composition_effects::rounded_rect_coverage(rrect, &matrix) {
+                canvas.clip_shader(shader, op);
+                ROUNDED_CLIPS.with(|counts| counts.set((counts.get().0 + 1, counts.get().1)));
+                return;
+            }
+            if gpu {
+                ROUNDED_CLIPS.with(|counts| counts.set((counts.get().0, counts.get().1 + 1)));
+            }
+        }
+        canvas.clip_rrect(rrect, op, true);
+        if rounded {
+            self.rounded_clip_elements.push(level);
+        }
+    }
+
+    /// How many stages [`prewarm_runtime_effects_stage`](Self::prewarm_runtime_effects_stage) has.
+    pub(crate) const PREWARM_STAGES: usize = 7;
+
+    /// Makes the GPU programs of the runtime effects before an interactive
+    /// frame needs them: every stage of
+    /// [`prewarm_runtime_effects_stage`](Self::prewarm_runtime_effects_stage)
+    /// at once. Returns how many SkSL programs compiled.
+    pub(crate) fn prewarm_runtime_effects(&mut self) -> usize {
+        let compiled = crate::composition_effects::compile_all();
+        for stage in 0..Self::PREWARM_STAGES {
+            self.prewarm_runtime_effects_stage(stage);
+        }
+        compiled
+    }
+
+    /// One stage of the prewarm of the runtime effects: the GPU links the
+    /// program of a draw on its first draw (on WebGL, ANGLE translates and
+    /// links it: tens to hundreds of milliseconds on a cold cache), so each
+    /// stage compiles the SkSL programs and draws one effect, in the forms
+    /// the drawing context draws it, into the top left 4 by 4 device pixels
+    /// of the target, cleared to transparent afterwards. The stages are the
+    /// lighting, the multiply layer of the lights, a coverage clip (a rounded
+    /// clip inside another) over a fill, a rounded fill, a circle and an
+    /// image, and each pixel operation. A GPU render target runs them all
+    /// with its second frame (`skia_gpu_render_target::prewarm_frame`).
+    pub(crate) fn prewarm_runtime_effects_stage(&mut self, stage: usize) {
+        use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+        use ferroui_base::platform::{IDrawingContextImplWithLayerEffects, LightingParameters, PixelOperation, PositionedLight};
+        use ferroui_base::rendering::composition::effects::BlendEffectMode;
+        use ferroui_base::rendering::composition::server::{LightAttenuation, LightColor, LightSource, LightingMaterial};
+
+        self.check_lease();
+        if crate::composition_effects::compile_all() == 0 || stage >= Self::PREWARM_STAGES {
+            return;
+        }
+        let saved_opacity = std::mem::replace(&mut self.current_opacity, 1.0);
+        let corner = sk::Rect::from_wh(4.0, 4.0);
+        self.canvas.get().save();
+        self.canvas.get().reset_matrix();
+        self.canvas.get().clip_rect(corner, sk::ClipOp::Intersect, false);
+
+        let pixel = Rect::new(0.0, 0.0, 1.0, 1.0);
+        let brush = ImmutableSolidColorBrush::new(Color::from_rgb(255, 255, 255));
+        let lighting = LightingParameters {
+            constant: LightColor::new(0.1, 0.1, 0.1),
+            lights: vec![PositionedLight {
+                source: LightSource::Point {
+                    color: LightColor::WHITE,
+                    position: ferroui_base::Vector3D::new(0.5, 0.5, 10.0),
+                    attenuation: LightAttenuation::NONE,
+                },
+                to_light_space: Matrix::IDENTITY,
+            }],
+            material: LightingMaterial { ambient: 1.0, diffuse: 1.0, specular: 0.5, shine: 16.0 },
+        };
+        let grid = Rect::new(0.0, 0.0, 4.0, 4.0);
+        let operation = |stage: usize| match stage {
+            3 => PixelOperation::Blend { mode: BlendEffectMode::Subtract, noise_grid: grid, noise_size: ferroui_base::PixelSize::new(4, 4) },
+            4 => PixelOperation::Blend { mode: BlendEffectMode::Dissolve, noise_grid: grid, noise_size: ferroui_base::PixelSize::new(4, 4) },
+            5 => PixelOperation::Arithmetic { k: [0.5, 0.5, 0.5, 0.0] },
+            _ => PixelOperation::MaskInvert,
+        };
+        match stage {
+            0 => {
+                self.draw_lighting(pixel, &lighting);
+            }
+            1 => {
+                if self.push_lighting_multiply_layer(pixel, &lighting) {
+                    self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
+                    self.pop_multiply_layer();
+                }
+            }
+            2 => {
+                // A rounded clip inside another: the inner one is a coverage
+                // shader.
+                let rounded = RoundedRect::from_radius(Rect::new(0.0, 0.0, 4.0, 4.0), 1.0);
+                self.push_clip_rounded(rounded);
+                self.push_clip_rounded(rounded);
+                self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
+                self.draw_rectangle(
+                    Some(&brush),
+                    None,
+                    RoundedRect::from_radius(Rect::new(0.0, 0.0, 2.0, 2.0), 0.5),
+                    &BoxShadows::default(),
+                );
+                // A circle and an image, sampled as the bitmaps of the
+                // drawing context are.
+                let mut paint = SkPaintCache::get();
+                paint.set_anti_alias(true);
+                paint.set_color(sk::Color::WHITE);
+                self.canvas.get().draw_circle((1.0, 1.0), 1.0, &paint);
+                let info = sk::ImageInfo::new((2, 2), sk::ColorType::RGBA8888, sk::AlphaType::Premul, None);
+                if let Some(image) = sk::images::raster_from_data(&info, sk::Data::new_copy(&[255u8; 16]), 8) {
+                    let image = crate::gpu::drawable_image(self.gr_context.as_deref(), image, false);
+                    for filter in [sk::FilterMode::Nearest, sk::FilterMode::Linear] {
+                        let sampling = sk::SamplingOptions::new(filter, sk::MipmapMode::None);
+                        self.canvas.get().draw_image_rect_with_sampling_options(
+                            &image,
+                            None,
+                            sk::Rect::from_wh(2.0, 2.0),
+                            sampling,
+                            &paint,
+                        );
+                    }
+                }
+                SkPaintCache::return_reset(paint);
+                self.pop_clip();
+                self.pop_clip();
+            }
+            _ => {
+                if self.push_pixel_operation(pixel, &operation(stage)) {
+                    self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
+                    self.next_pixel_operation_source();
+                    self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
+                    self.pop_pixel_operation();
+                }
+            }
+        }
+
+        // What the stage drew goes; the frame goes on from what was there.
+        self.canvas.get().clear(sk::Color::TRANSPARENT);
+        // The transform of the context is read back from the canvas.
+        self.restore_canvas();
+        self.current_opacity = saved_opacity;
+    }
+
+    /// Composes the layer of the latest next source of a pixel operation,
+    /// if one is open.
+    fn close_pixel_operation_source(&mut self) {
+        let Some(layer) = self.pixel_operation_stack.last_mut() else { return };
+        if !std::mem::replace(&mut layer.source_open, false) {
+            return;
+        }
+        if let crate::composition_effects::PixelOperationPrograms::Dissolve { noise, select } = &layer.programs {
+            // What the noise keeps of the foreground, opaque; the rest is
+            // cleared, so the background shows there.
+            let mut paint = SkPaintCache::get();
+            paint.set_shader(noise.clone());
+            paint.set_blender(select.clone());
+            let bounds = layer.bounds;
+            self.canvas.get().draw_rect(bounds, &paint);
+            SkPaintCache::return_reset(paint);
         }
         self.restore_canvas();
     }

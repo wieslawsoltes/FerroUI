@@ -65,25 +65,9 @@ impl DBusMenuExporter {
 
     /// A new object path for a menu (`GenerateDBusMenuObjPath`).
     pub fn generate_dbus_menu_obj_path() -> String {
-        format!("/org/ferroui/dbusmenu/{:032x}", random_u128())
+        // `Guid.NewGuid().ToString("N")`: 32 hexadecimal digits in lower case.
+        format!("/org/ferroui/dbusmenu/{}", uuid::Uuid::new_v4().simple())
     }
-}
-
-/// 128 bits that differ from call to call and from process to process
-/// (the reference takes a new GUID): two hashes with keys the standard
-/// library draws at random, over a counter of the process.
-fn random_u128() -> u128 {
-    use std::hash::{BuildHasher, Hasher};
-    use std::sync::atomic::{AtomicU64, Ordering};
-
-    static COUNTER: AtomicU64 = AtomicU64::new(0);
-    let half = || {
-        let mut hasher = std::collections::hash_map::RandomState::new().build_hasher();
-        hasher.write_u64(COUNTER.fetch_add(1, Ordering::Relaxed));
-        hasher.write_u32(std::process::id());
-        hasher.finish()
-    };
-    (u128::from(half()) << 64) | u128::from(half())
 }
 
 /// The object a connection exports for a menu.

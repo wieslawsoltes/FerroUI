@@ -1,4 +1,4 @@
-use super::IDrawingContextImpl;
+use super::{IDrawingContextImpl, LightingParameters, PixelOperation};
 use crate::media::imaging::BitmapBlendingMode;
 use crate::media::{ColorMatrix, ColorMatrixAlphaMode};
 use crate::{PixelSize, Rect};
@@ -44,8 +44,60 @@ pub trait IDrawingContextImplWithLayerEffects: IDrawingContextImpl {
     /// composition are drawn with (winui-materials.md).
     fn push_multiply_layer(&mut self, bounds: Rect, factors: &MultiplyLayerFactors);
 
-    /// Pops the latest multiply layer.
+    /// Pops the latest multiply layer, one pushed by
+    /// [`push_multiply_layer`](Self::push_multiply_layer) or by
+    /// [`push_lighting_multiply_layer`](Self::push_lighting_multiply_layer).
     fn pop_multiply_layer(&mut self);
+
+    // --- the lights and pixel operations evaluated by the context ----------------------
+    //
+    // A context that evaluates the lights or the pixel operations itself (on
+    // the GPU) implements these; each returns whether it did, and when it
+    // returns false it drew and pushed nothing, and the compositor draws the
+    // same on the CPU (docs/porting/winui-composition.md, "How the effects
+    // are drawn"). The defaults do nothing and return false.
+
+    /// Fills `rect` (in the coordinates of the context, those of the lit
+    /// visual) with the light `lighting` reflects at each point
+    /// ([`LightingParameters::lit_at`]), each channel clamped to 0..1,
+    /// opaque, with the opacity and the bitmap blending mode in effect: the
+    /// lighting of a scene lighting effect. Returns whether it drew.
+    fn draw_lighting(&mut self, rect: Rect, lighting: &LightingParameters) -> bool {
+        let _ = (rect, lighting);
+        false
+    }
+
+    /// Pushes a multiply layer (see
+    /// [`push_multiply_layer`](Self::push_multiply_layer)) whose factor at
+    /// each point is the light `lighting` reflects there, each channel
+    /// clamped to 0..[`LIGHT_MAP_MAX_SCALE`](crate::rendering::composition::server::LIGHT_MAP_MAX_SCALE),
+    /// evaluated at that point rather than sampled. Returns whether it
+    /// pushed; a pushed layer is popped with
+    /// [`pop_multiply_layer`](Self::pop_multiply_layer).
+    fn push_lighting_multiply_layer(&mut self, bounds: Rect, lighting: &LightingParameters) -> bool {
+        let _ = (bounds, lighting);
+        false
+    }
+
+    /// Begins an operation on the pixels of sources drawn apart: what is
+    /// drawn until [`next_pixel_operation_source`](Self::next_pixel_operation_source)
+    /// is the first source, what is drawn after each call the next one, and
+    /// [`pop_pixel_operation`](Self::pop_pixel_operation) composes the result
+    /// source-over onto what is under it, with the opacity and the bitmap
+    /// blending mode in effect. The sources are drawn with full opacity;
+    /// nothing outside `bounds` (in the coordinates of the context) is
+    /// kept. Returns whether it began; then the matching calls follow.
+    fn push_pixel_operation(&mut self, bounds: Rect, operation: &PixelOperation) -> bool {
+        let _ = (bounds, operation);
+        false
+    }
+
+    /// What is drawn from now on is the next source of the latest pixel
+    /// operation.
+    fn next_pixel_operation_source(&mut self) {}
+
+    /// Ends the latest pixel operation and composes its result.
+    fn pop_pixel_operation(&mut self) {}
 }
 
 /// The per-channel factors of a multiply layer: an opaque RGBA image whose
