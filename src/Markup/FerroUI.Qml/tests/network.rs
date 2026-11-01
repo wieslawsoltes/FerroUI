@@ -66,6 +66,10 @@ fn remote_dependencies_link_relative_to_their_source_and_initial_values_precede_
     assert_eq!(model.poll_component_loads(1).unwrap(), 1);
     assert_eq!(model.get(slot, "item").unwrap(), Value::Null);
     transport
+        .take("https://widgets.test/cards/parts/qmldir")
+        .complete(Err(ResourceError::NotFound));
+    model.poll_component_loads(1).unwrap();
+    transport
         .take("https://widgets.test/cards/parts/Badge.qml")
         .complete(Ok(
             b"import QtQuick\nItem { property int extra: 1 }".to_vec()
@@ -132,6 +136,10 @@ fn dependency_cycles_and_transport_abandonment_are_terminal_errors() {
     transport
         .take("https://widgets.test/A.qml")
         .complete(Ok(b"import QtQml\nB {}".to_vec()));
+    model.poll_component_loads(1).unwrap();
+    transport
+        .take("https://widgets.test/qmldir")
+        .complete(Err(ResourceError::NotFound));
     model.poll_component_loads(1).unwrap();
     transport
         .take("https://widgets.test/B.qml")
@@ -203,4 +211,51 @@ fn native_http_transport_loads_over_loopback_and_refuses_unlisted_origins() {
         .unwrap();
     model.poll_component_loads(1).unwrap();
     assert_eq!(status(&model, factory), Value::Number(3.));
+}
+
+#[test]
+fn an_identified_remote_import_resolves_versioned_exports_and_rejects_missing_modules() {
+    let transport = Rc::new(Manual::default());
+    let mut registry = TypeRegistry::new();
+    registry.set_component_transport(transport.clone());
+    registry
+        .add_component_import_path(Url::parse("https://widgets.test/modules").unwrap())
+        .unwrap();
+    let doc = parse("import QtQml\nQtObject {}").unwrap();
+    let mut instance = Instance::new(&doc, &registry, Default::default()).unwrap();
+    let factory = instance
+        .create_component(instance.root(), "https://widgets.test/Card.qml", None)
+        .unwrap();
+    transport.take("https://widgets.test/Card.qml").complete(Ok(
+        b"import QtQml\nimport Lab.Widgets 1.1 as L\nL.Card {}".to_vec(),
+    ));
+    instance.poll_component_loads(1).unwrap();
+    transport
+        .take("https://widgets.test/modules/Lab/Widgets/qmldir")
+        .complete(Ok(
+            b"module Lab.Widgets\nCard 1.0 First.qml\nCard 1.1 Current.qml\n".to_vec(),
+        ));
+    instance.poll_component_loads(1).unwrap();
+    transport
+        .take("https://widgets.test/modules/Lab/Widgets/Current.qml")
+        .complete(Ok(
+            b"import QtQml\nQtObject { property int generation: 2 }".to_vec()
+        ));
+    instance.poll_component_loads(1).unwrap();
+    let item = instance
+        .create_object(factory, None, Default::default())
+        .unwrap();
+    assert_eq!(instance.get(item, "generation").unwrap(), Value::Number(2.));
+    let factory = instance
+        .create_component(instance.root(), "https://widgets.test/Bad.qml", None)
+        .unwrap();
+    transport
+        .take("https://widgets.test/Bad.qml")
+        .complete(Ok(b"import QtQml\nimport Not.There\nQtObject {}".to_vec()));
+    instance.poll_component_loads(1).unwrap();
+    transport
+        .take("https://widgets.test/modules/Not/There/qmldir")
+        .complete(Err(ResourceError::NotFound));
+    instance.poll_component_loads(1).unwrap();
+    assert_eq!(status(&instance, factory), Value::Number(3.));
 }

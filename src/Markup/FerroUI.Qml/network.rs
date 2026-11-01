@@ -1,6 +1,7 @@
 //! Host-owned asynchronous QML resource loading. Transport callbacks deal only in
 //! bytes and URLs. Parsing, linking, status changes and handlers run on the owner.
 use super::{dynamic::Template, ir, Error, Instance, ObjectId, TypeRegistry};
+use ir::qmldir::{ExportKind, ModuleDefinition, RequestedVersion};
 use std::{
     collections::{BTreeMap, HashMap, HashSet, VecDeque},
     rc::Rc,
@@ -101,6 +102,7 @@ pub(crate) struct Graph {
     entry: Url,
     pending: Url,
     files: HashMap<Url, Option<Rc<ir::Document>>>,
+    manifests: HashMap<Url, Option<ModuleDefinition>>,
     bytes: usize,
 }
 
@@ -127,6 +129,7 @@ impl Network {
                 entry: url.clone(),
                 pending: url.clone(),
                 files: HashMap::new(),
+                manifests: HashMap::new(),
                 bytes: 0,
             },
         );
@@ -223,7 +226,7 @@ impl Graph {
         javascript: bool,
     ) -> Result<Progress, String> {
         let url = &self.pending;
-        let document = match result {
+        let bytes = match result {
             Err(ResourceError::NotFound) if url != &self.entry => None,
             Err(ResourceError::NotFound) => return Err(format!("{url}: resource not found")),
             Err(ResourceError::Failed(error)) => return Err(format!("{url}: {error}")),
@@ -234,14 +237,30 @@ impl Graph {
                         "{url}: QML dependency graph exceeds the size limit"
                     ));
                 }
-                let text = std::str::from_utf8(&bytes).map_err(|e| format!("{url}: {e}"))?;
-                Some(Rc::new(parse(url, text, javascript)?))
+                Some(bytes)
             }
         };
-        self.files.insert(url.clone(), document);
+        let text = bytes
+            .as_deref()
+            .map(std::str::from_utf8)
+            .transpose()
+            .map_err(|e| format!("{url}: {e}"))?;
+        if url != &self.entry && url.path().ends_with("/qmldir") {
+            let manifest = text
+                .map(ir::qmldir::parse_directory_manifest)
+                .transpose()
+                .map_err(|e| format!("{url}: {e}"))?;
+            self.manifests.insert(url.clone(), manifest);
+        } else {
+            let doc = text
+                .map(|source| parse(url, source, javascript).map(Rc::new))
+                .transpose()?;
+            self.files.insert(url.clone(), doc);
+        }
         let root = self.files[&self.entry].clone().expect("root QML document");
         let mut resolver = Resolver {
             files: &self.files,
+            manifests: &self.manifests,
             types,
             missing: None,
         };
@@ -251,7 +270,7 @@ impl Graph {
         };
         let linked = ir::link(source, &mut resolver);
         if let Some(next) = resolver.missing {
-            if self.files.len() >= MAX_DOCUMENTS {
+            if self.files.len() + self.manifests.len() >= MAX_DOCUMENTS {
                 return Err(format!("{}: too many QML dependencies", self.entry));
             }
             return Ok(Progress::Fetch(next));
@@ -296,11 +315,133 @@ fn parse(url: &Url, source: &str, _javascript: bool) -> Result<ir::Document, Str
 
 struct Resolver<'a> {
     files: &'a HashMap<Url, Option<Rc<ir::Document>>>,
+    manifests: &'a HashMap<Url, Option<ModuleDefinition>>,
     types: &'a TypeRegistry,
     missing: Option<Url>,
 }
 
+impl Resolver<'_> {
+    fn dependency(
+        &mut self,
+        base: &Url,
+        directory: &Url,
+        ty: &str,
+        import: Option<&ir::Import>,
+    ) -> Result<Option<Url>, String> {
+        if base.origin() != directory.origin() {
+            return Err(format!(
+                "{base}: cross-origin component dependency {directory}"
+            ));
+        }
+        let descriptor = directory.join("qmldir").map_err(|e| e.to_string())?;
+        let Some(manifest) = self.manifests.get(&descriptor) else {
+            self.missing = Some(descriptor);
+            return Err("pending directory manifest".into());
+        };
+        let identified = import.filter(|i| !i.is_path);
+        let file = if let Some(manifest) = manifest {
+            if identified.is_some_and(|i| i.uri != manifest.uri) {
+                return Err(format!(
+                    "{descriptor}: expected module {}, found {}",
+                    identified.unwrap().uri,
+                    manifest.uri
+                ));
+            }
+            if manifest.plugins.iter().any(|p| !p.optional) {
+                return Err(format!(
+                    "{descriptor}: a remote module cannot load a native plugin"
+                ));
+            }
+            let version = import
+                .and_then(|i| i.version.as_ref())
+                .map(|v| v.parse())
+                .transpose()?
+                .unwrap_or(RequestedVersion::Latest);
+            if let Some(export) = manifest.select(version)?.get(ty) {
+                if export.kind != ExportKind::Object {
+                    return Err(format!(
+                        "{descriptor}: {ty} is not an instantiable QML component"
+                    ));
+                }
+                export.file.clone()
+            } else if import.is_none() {
+                match manifest.internal.get(ty) {
+                    Some(file) => file.clone(),
+                    None => return Ok(None),
+                }
+            } else {
+                return Ok(None);
+            }
+        } else if identified.is_some() {
+            return Ok(None);
+        } else {
+            format!("{ty}.qml")
+        };
+        let url = directory.join(&file).map_err(|e| e.to_string())?;
+        if url.origin() != base.origin() {
+            return Err(format!("{descriptor}: cross-origin export {url}"));
+        }
+        Ok(Some(url))
+    }
+}
+
 impl ir::ComponentResolver for Resolver<'_> {
+    fn native_imports(
+        &mut self,
+        from: &str,
+        imports: &[ir::Import],
+    ) -> Result<Vec<ir::Import>, String> {
+        let base = Url::parse(from).map_err(|e| e.to_string())?;
+        let mut native = Vec::new();
+        for import in imports.iter().filter(|i| !i.is_path) {
+            if self.types.modules.contains_key(&import.uri) {
+                native.push(import.clone());
+                continue;
+            }
+            let mut found = false;
+            for root in &self.types.component_import_paths {
+                if root.origin() != base.origin() {
+                    continue;
+                }
+                let descriptor = root
+                    .join(&format!("{}/qmldir", import.uri.replace('.', "/")))
+                    .map_err(|e| e.to_string())?;
+                match self.manifests.get(&descriptor) {
+                    None => {
+                        self.missing = Some(descriptor);
+                        return Err("pending module manifest".into());
+                    }
+                    Some(None) => continue,
+                    Some(Some(manifest)) => {
+                        if manifest.uri != import.uri {
+                            return Err(format!(
+                                "{descriptor}: expected module {}, found {}",
+                                import.uri, manifest.uri
+                            ));
+                        }
+                        let version = import
+                            .version
+                            .as_deref()
+                            .map(str::parse)
+                            .transpose()?
+                            .unwrap_or(RequestedVersion::Latest);
+                        manifest.select(version)?;
+                        if manifest.plugins.iter().any(|p| !p.optional) {
+                            return Err(format!(
+                                "{descriptor}: a remote module cannot load a native plugin"
+                            ));
+                        }
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if !found {
+                return Err(format!("{from}: unknown QML module '{}'", import.uri));
+            }
+        }
+        Ok(native)
+    }
     fn resolve(
         &mut self,
         from: &str,
@@ -316,14 +457,32 @@ impl ir::ComponentResolver for Resolver<'_> {
         let base = Url::parse(from).map_err(|e| e.to_string())?;
         let mut candidates = Vec::new();
         if namespace.is_none() {
-            candidates.push(base.join(&format!("{ty}.qml")).map_err(|e| e.to_string())?);
+            let local = base.join(".").map_err(|e| e.to_string())?;
+            candidates.extend(self.dependency(&base, &local, ty, None)?);
         }
         for import in imports
             .iter()
-            .filter(|i| i.is_path && i.alias.as_deref() == namespace)
+            .filter(|i| i.alias.as_deref() == namespace && !i.is_script())
         {
-            let path = format!("{}/{ty}.qml", import.uri.trim_end_matches('/'));
-            candidates.push(base.join(&path).map_err(|e| e.to_string())?);
+            if import.is_path {
+                let directory = base
+                    .join(&format!("{}/", import.uri.trim_end_matches('/')))
+                    .map_err(|e| e.to_string())?;
+                candidates.extend(self.dependency(&base, &directory, ty, Some(import))?);
+            } else if !self.types.modules.contains_key(&import.uri) {
+                for root in &self.types.component_import_paths {
+                    if root.origin() != base.origin() {
+                        continue;
+                    }
+                    let directory = root
+                        .join(&format!("{}/", import.uri.replace('.', "/")))
+                        .map_err(|e| e.to_string())?;
+                    if let Some(file) = self.dependency(&base, &directory, ty, Some(import))? {
+                        candidates.push(file);
+                        break;
+                    }
+                }
+            }
         }
         let mut found = None;
         for url in candidates {

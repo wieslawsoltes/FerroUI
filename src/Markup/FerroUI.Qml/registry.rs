@@ -157,6 +157,7 @@ impl TypeDefinition {
 /// A registry explicitly owns the modules visible to a QML component.
 #[derive(Clone)]
 pub struct TypeRegistry {
+    pub(crate) component_import_paths: Vec<url::Url>,
     pub(crate) component_transport: Option<Rc<dyn crate::network::ComponentTransport>>,
     imports: BTreeMap<String, Vec<String>>,
     pub(crate) modules: BTreeMap<String, BTreeMap<String, TypeDefinition>>,
@@ -170,6 +171,29 @@ impl Default for TypeRegistry {
 }
 
 impl TypeRegistry {
+    /// Add a directory in which to look up identified modules for remote QML.
+    /// The first matching same-origin module wins (e.g. Lab.Widgets/qmldir
+    /// is located under Lab/Widgets/ in this directory).
+    pub fn add_component_import_path(&mut self, mut directory: url::Url) -> Result<(), Error> {
+        if !matches!(directory.scheme(), "http" | "https") || directory.host().is_none() {
+            return Err(Error::new(
+                "a network import path must be an HTTP(S) directory",
+            ));
+        }
+        directory.set_query(None);
+        directory.set_fragment(None);
+        if !directory.path().ends_with('/') {
+            directory
+                .path_segments_mut()
+                .map_err(|_| Error::new("invalid import directory"))?
+                .push("");
+        }
+        if !self.component_import_paths.contains(&directory) {
+            self.component_import_paths.push(directory);
+        }
+        Ok(())
+    }
+
     /// Configure asynchronous HTTP(S) component sources for instances built from this registry.
     /// Without a transport only bundled components are accessible.
     pub fn set_component_transport(
@@ -182,6 +206,7 @@ impl TypeRegistry {
     pub fn new() -> Self {
         let mut registry = Self {
             component_transport: None,
+            component_import_paths: Vec::new(),
             imports: BTreeMap::new(),
             modules: BTreeMap::new(),
             versions: BTreeMap::new(),

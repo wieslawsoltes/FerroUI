@@ -10,7 +10,8 @@ impl ComponentTransport for Fixtures {
     fn request(&self, url: &Url, reply: ComponentReply) {
         let text = match url.path() {
             "/Card.qml" => include_str!("network/Card.qml"),
-            "/parts/Badge.qml" => include_str!("network/parts/Badge.qml"),
+            "/parts/qmldir" => include_str!("network/parts/qmldir"),
+            "/parts/ValueBadge.qml" => include_str!("network/parts/ValueBadge.qml"),
             other => panic!("unexpected request {other}"),
         };
         reply.complete(Ok(text.as_bytes().to_vec()));
@@ -23,7 +24,7 @@ fn exercise(mut instance: Instance) {
         .create_component(root, "https://test.example/Card.qml", Some(root))
         .unwrap();
     assert_eq!(instance.get(factory, "status").unwrap(), Value::Number(2.));
-    assert_eq!(instance.poll_component_loads(10).unwrap(), 2);
+    assert_eq!(instance.poll_component_loads(10).unwrap(), 3);
     assert_eq!(instance.get(factory, "status").unwrap(), Value::Number(1.));
     let item = instance
         .create_object(
