@@ -15,7 +15,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::media::MediaContext;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::{
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, Size,
     StyledElementImpl, StyledProperty, StyledPropertyOptions, VisualImpl, VisualImplExt,
@@ -43,7 +43,7 @@ pub struct MaterialSearchView {
     results: RefCell<Option<Ref<ScrollViewer>>>,
     result_content: RefCell<Option<Ref<ContentPresenter>>>,
     subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
-    visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    visibility_subscription: RefCell<Option<Subscription>>,
     progress: RefCell<MaterialSpringState>,
     result_height: Cell<f64>,
     maximum_height: Cell<f64>,
@@ -117,7 +117,7 @@ impl VisualImpl for MaterialSearchView {
         Self::parent_on_attached_to_visual_tree(this, event);
         let weak = this.to_ref().downgrade();
         *this.visibility_subscription.borrow_mut() =
-            Some(this.is_effectively_visible_changed(move || {
+            Some(Subscription::new(this.is_effectively_visible_changed(move || {
                 if let Some(this) = weak.upgrade() {
                     if this.is_effectively_visible() {
                         this.request_frame();
@@ -125,7 +125,7 @@ impl VisualImpl for MaterialSearchView {
                         this.invalidate_frame();
                     }
                 }
-            }));
+            })));
         this.retarget();
     }
     fn on_detached_from_visual_tree(this: &Self, event: &VisualTreeAttachmentEventArgs) {

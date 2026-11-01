@@ -18,7 +18,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::{DrawingContext, IBrush, MediaContext};
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{IDisposable, ObservableExt, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_property,
     instantiate, CornerRadius, FerroObject, FerroObjectExtensions, FerroObjectImpl,
@@ -54,7 +54,7 @@ const MAX_SIMULTANEOUS_RIPPLES: usize = 16;
 pub struct MaterialRipple {
     base: Control,
     host: RefCell<Option<HostSubscriptions>>,
-    visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    visibility_subscription: RefCell<Option<Subscription>>,
     waves: RefCell<Vec<RippleWave>>,
     frame_pending: Cell<bool>,
     frame_generation: Cell<u64>,
@@ -171,13 +171,13 @@ impl VisualImpl for MaterialRipple {
         Self::parent_on_attached_to_visual_tree(this, event);
         let weak = this.to_ref().downgrade();
         *this.visibility_subscription.borrow_mut() =
-            Some(this.is_effectively_visible_changed(move || {
+            Some(Subscription::new(this.is_effectively_visible_changed(move || {
                 if let Some(this) = weak.upgrade() {
                     if !this.is_effectively_visible() {
                         this.cancel();
                     }
                 }
-            }));
+            })));
         this.connect_host();
     }
 

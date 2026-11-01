@@ -1,7 +1,7 @@
 //! Port of `Composition/ParallaxBehavior.cs`.
 
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::reactive::{Subscription, ObservableError, ObservableExt};
+use ferroui_base::reactive::{ObservableError, ObservableExt, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, ElementRef, FerroObjectExtensions, FerroObjectImpl,
     FerroProperty, Nullable, Ref, StaticType, StyledProperty, Vector,

@@ -3,7 +3,7 @@
 use crate::RxState;
 use ferroui_reactive::concurrency::{IScheduler, ImmediateScheduler, SchedulerExt};
 use ferroui_reactive::disposables::Disposable;
-use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
+use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError, Subscription};
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
 use std::rc::{Rc, Weak};
@@ -239,7 +239,7 @@ struct Core<T: 'static> {
     pending: RefCell<VecDeque<T>>,
     distinct_previous: RefCell<Option<T>>,
     delivering: Cell<bool>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
     disposed: Cell<bool>,
     activated: Cell<bool>,
     last_value: RefCell<Option<T>>,
@@ -358,7 +358,7 @@ impl<T: Clone + PartialEq + 'static> Core<T> {
             subscription.dispose();
             return;
         }
-        *self.subscription.borrow_mut() = Some(subscription);
+        *self.subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 
     fn dispose(&self) {

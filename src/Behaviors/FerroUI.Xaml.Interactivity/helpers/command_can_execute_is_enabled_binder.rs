@@ -2,7 +2,7 @@
 
 use ferroui_base::data::BindingPriority;
 use ferroui_base::input::InputElement;
-use ferroui_base::reactive::{IDisposable, Subscription, IObservable, ObservableExt};
+use ferroui_base::reactive::{IDisposable, IObservable, ObservableExt, Subscription};
 use ferroui_base::{ferro_properties, ferro_static_type, AttachedProperty, FerroProperty, Ref, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;

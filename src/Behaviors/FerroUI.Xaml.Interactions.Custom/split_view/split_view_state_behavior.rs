@@ -3,7 +3,7 @@
 use crate::SplitViewStateSetter;
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::reactive::{IDisposable, Subscription, ObservableExt};
+use ferroui_base::reactive::{IDisposable, ObservableExt, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, DirectProperty, ElementRef, FerroObject,
     FerroObjectExtensions, FerroObjectImpl, FerroProperty, Nullable, Rect, Ref, StaticType, StyledElementImpl,

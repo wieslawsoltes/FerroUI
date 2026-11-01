@@ -2,7 +2,7 @@
 
 use super::{attach_actions_to_logical_tree, detach_actions_from_logical_tree};
 use ferroui_base::logical_tree::LogicalTreeAttachmentEventArgs;
-use ferroui_base::reactive::{AnonymousObserver, Subscription, IObservable, ObservableError};
+use ferroui_base::reactive::{AnonymousObserver, IObservable, ObservableError, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt,

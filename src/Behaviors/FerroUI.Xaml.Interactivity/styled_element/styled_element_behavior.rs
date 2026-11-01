@@ -2,7 +2,7 @@
 
 use crate::helpers::TemplatedParentHelper;
 use crate::{DisposableAction, IBehavior, IBehaviorEventsHandler};
-use ferroui_base::reactive::{IDisposable, Subscription, ObservableExt};
+use ferroui_base::reactive::{IDisposable, ObservableExt, Subscription};
 use ferroui_base::{
     ferro_class, ferro_properties, BoxedValue, ElementRef, FerroObject, FerroObjectExtensions, FerroObjectImpl,
     FerroProperty, Nullable, Ref, StyledElement, StyledElementImpl, StyledProperty, WeakRef,

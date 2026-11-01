@@ -16,7 +16,7 @@
 use ferroui_base::input::{INavigableContainer, InputElement, InputElementImpl, NavigationDirection};
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{Layoutable, LayoutableImpl};
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{ObservableExt, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_property, instantiate, FerroObject,
     FerroObjectExtensions, FerroObjectImpl, FerroProperty, Rect, Ref, Size, StyledElementImpl, StyledProperty,
@@ -25,7 +25,6 @@ use ferroui_base::{
 use ferroui_controls::presenters::ScrollContentPresenter;
 use ferroui_controls::{Control, ControlImpl, Grid, ItemsControl, Panel, PanelImpl};
 use std::cell::{Cell, RefCell};
-use std::rc::Rc;
 
 /// The minimum width of a tab when the theme sets none (`c_tabMinimumWidth` of TabView, the
 /// default of `TabViewItemMinWidth`).
@@ -62,7 +61,7 @@ pub struct TabViewEqualWidthPanel {
     /// viewer (and not with a width).
     viewport_widths: Cell<Option<ViewportWidths>>,
     /// The subscription to the viewport of the scroll content presenter around the panel.
-    viewport_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    viewport_subscription: RefCell<Option<Subscription>>,
 }
 
 /// The widths the viewport of a scroll viewer offers the children of the panel.
@@ -356,7 +355,7 @@ impl TabViewEqualWidthPanel {
                     this.invalidate_measure();
                 }
             });
-        *self.viewport_subscription.borrow_mut() = Some(subscription);
+        *self.viewport_subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 
     /// The child in `direction` from `from` (the children are in one row).
