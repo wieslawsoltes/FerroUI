@@ -4,8 +4,9 @@ use std::any::{Any, TypeId};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::Arc;
 
-use crate::ast::IXamlAstNode;
+use crate::ast::{IXamlAstNode, XamlNamespaceScope};
 use crate::exceptions::{XamlError, XamlResult};
 
 /// State shared by the transformation and emit contexts: a typed item bag and the stack of
@@ -56,6 +57,11 @@ impl XamlContextBase {
     /// The parents of the current node, innermost first.
     pub fn parent_nodes(&self) -> Vec<Rc<dyn IXamlAstNode>> {
         self.parent_nodes.borrow().iter().rev().cloned().collect()
+    }
+
+    /// Resolve a synthetic node's inherited lexical scope without cloning the parent stack.
+    pub(super) fn parent_namespace_scope(&self) -> Option<Arc<XamlNamespaceScope>> {
+        self.parent_nodes.borrow().iter().rev().find_map(|parent| parent.namespace_scope())
     }
 
     /// The innermost parent: `ParentNodes().FirstOrDefault()`.
