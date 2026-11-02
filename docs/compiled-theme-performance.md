@@ -6,7 +6,7 @@ The native Rust backend uses XamlX to resolve types, overloads, namespaces and i
 
 The full editable WinUI consumer measures **28,087,224 bytes** with `--use-opt-level z --compact-unwind`, down 237,488 bytes (0.84%) from the previous best. The optional link reduces unwind metadata while preserving the reference addresses and bytes of all executable code and application data. The original ordinary release was 54,577,848 bytes. The measured build is 48.54% smaller. [Reproduction, performance and archive verification](compiled-theme-size-architecture.md#smaller-unwind-records-with-the-original-code-layout)
 
-## A further 30% from the profiled WinUI release
+## Prior source trials against the 28,324,712-byte reference
 
 The baseline for this round is the **28,324,712-byte** fully editable Linux x86-64 release. Another 30% requires a file of at most **19,827,298 bytes**. The final rebuild reproduced the original release byte for byte (SHA-256 `459ea34851eb89e3556a9539da29b3bcbc7fa5a8af34ee2c2291f393dae85f21`). Three independently linked, full-featured candidates missed the combined size and runtime-performance goal.
 
