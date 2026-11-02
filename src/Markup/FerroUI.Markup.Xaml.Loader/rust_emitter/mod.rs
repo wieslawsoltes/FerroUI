@@ -116,6 +116,8 @@ pub mod runtime_types;
 mod source;
 mod transform;
 mod theme_tables;
+mod selector_plans;
+mod style_setters;
 
 pub use compiled::{
     generate_class_file_with_binary_resources, generate_file_with_binary_resources,

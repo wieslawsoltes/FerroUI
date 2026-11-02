@@ -1,0 +1,174 @@
+//! A typed dynamic Setter.Value site and the terminal run of such sites on a child Style.
+//! Keep each original call available so any intervening user code is an ordering barrier.
+use std::collections::HashMap;
+use std::fmt::Write;
+
+use super::emitter::{is_identifier, is_plain_borrow};
+
+const STYLE: &str = "::ferroui_base::styling::Style";
+const BASE: &str = "::ferroui_base::styling::StyleBase";
+
+struct DynamicSetter {
+    receiver: String,
+    property: String,
+    key: String,
+}
+
+#[derive(Default)]
+pub(super) struct StyleSetters {
+    sites: HashMap<String, DynamicSetter>,
+    getters: HashMap<String, String>,
+    pub(super) helpers: String,
+}
+
+impl StyleSetters {
+    pub(super) fn dynamic(&mut self, receiver: &str, property: &str, key: &str) -> String {
+        let call = format!("    rt::add_dynamic_resource_setter_with_parent(&context, {receiver}, {property}, {key});");
+        // A getter invocation may initialize metadata. Keep it in the loop at its exact
+        // original point. Only parameterless static paths can be hoisted into a thunk.
+        if let Some(path) = property
+            .strip_prefix("rt::property(")
+            .and_then(|p| p.strip_suffix("())"))
+        {
+            if path.trim_start_matches("::").split("::").all(is_identifier) {
+                self.sites
+                    .entry(call.clone())
+                    .or_insert_with(|| DynamicSetter {
+                        receiver: receiver.to_owned(),
+                        property: property.to_owned(),
+                        key: key.to_owned(),
+                    });
+            }
+        }
+        call
+    }
+
+    /// Replace the exact framework Style.Add overload and, where present, the dynamic
+    /// setter run immediately preceding its pop. Nested styles and mixed setters are
+    /// boundaries. A singleton still folds its pop, fallible cast and Add into the call.
+    pub(super) fn attach(
+        &mut self,
+        document: &str,
+        lines: &mut Vec<String>,
+        start: usize,
+        child: &str,
+        call: &str,
+        line: i32,
+        column: i32,
+    ) -> Option<()> {
+        if !is_identifier(child) {
+            return None;
+        }
+        let parent = call
+            .strip_prefix(&format!("{BASE}::__markup_Add_1("))?
+            .strip_suffix(&format!(", rt::cast({child}.clone(), {line}, {column})?)"))?;
+        if !is_plain_borrow(parent) {
+            return None;
+        }
+        let ctor = format!("    let {child} = {STYLE}::new();");
+        let push = format!("    context.push_parent(rt::to_value({child}.clone()));");
+        let first = (start..lines.len()).find(|&i| !lines[i].trim_start().starts_with("// "));
+        if let Some(i) = first {
+            if lines[i] == ctor && lines.get(i + 1) == Some(&push) {
+                lines[i] = format!("    let {child} = rt::style_program::begin(&context);");
+                lines.remove(i + 1);
+            }
+        }
+
+        let receiver = format!("{child}.upcast_ref::<{BASE}>()");
+        let mut rows = Vec::new();
+        let mut boundary = lines.len();
+        if lines
+            .last()
+            .is_some_and(|l| l == "    context.pop_parent();")
+        {
+            let mut cursor = boundary - 1;
+            while cursor > start {
+                let Some(site) = self.sites.get(&lines[cursor - 1]) else {
+                    break;
+                };
+                if site.receiver != receiver {
+                    break;
+                }
+                let index = self.getters.len();
+                let getter = self
+                    .getters
+                    .entry(site.property.clone())
+                    .or_insert_with(|| {
+                        let name = format!("{document}_style_property_{index}");
+                        writeln!(
+                            self.helpers,
+                            "fn {name}() -> &'static ::ferroui_base::FerroProperty {{ {} }}",
+                            site.property
+                        )
+                        .unwrap();
+                        name
+                    });
+                let row = format!("            ({getter}, {}),", site.key);
+                cursor -= 1;
+                let end = cursor;
+                while cursor > start && lines[cursor - 1].trim_start().starts_with("// ") {
+                    cursor -= 1;
+                }
+                rows.push((cursor..end, row));
+                boundary = cursor;
+            }
+        }
+        if rows.is_empty() {
+            lines.push(format!(
+                "    rt::style_program::attach({parent}, &{child}, {line}, {column})?;"
+            ));
+        } else {
+            let mut result = vec![
+                format!("    rt::style_program::finish_dynamic(&context, {parent}, &{child}, {{"),
+                "        &[".into(),
+            ];
+            for (markers, row) in rows.into_iter().rev() {
+                result.extend(
+                    lines[markers]
+                        .iter()
+                        .map(|m| format!("            {}", m.trim_start())),
+                );
+                result.push(row);
+            }
+            result.push("        ]".into());
+            result.push(format!("    }}, {line}, {column})?;"));
+            lines.truncate(boundary);
+            lines.extend(result);
+        }
+        Some(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn adjacent_setters_share_getters_and_keep_order_and_locations() {
+        let mut setters = StyleSetters::default();
+        let receiver = format!("style_2.upcast_ref::<{BASE}>()");
+        let parent = format!("style_1.upcast_ref::<{BASE}>()");
+        let call = format!("{BASE}::__markup_Add_1({parent}, rt::cast(style_2.clone(), 3, 7)?)");
+        let property = "rt::property(::controls::Button::foreground_property())";
+        let first = setters.dynamic(&receiver, property, "\"first\"");
+        let second = setters.dynamic(&receiver, property, "\"second\"");
+        let mut lines = vec![
+            first.clone(),
+            "    custom();".into(),
+            first,
+            "    // doc(2,9) Value".into(),
+            second,
+            "    context.pop_parent();".into(),
+        ];
+        setters
+            .attach("doc", &mut lines, 0, "style_2", &call, 3, 7)
+            .unwrap();
+        assert!(lines[0].contains("add_dynamic_resource_setter_with_parent"));
+        let generated = lines[2..].join("\n");
+        assert!(generated.find("\"first\"").unwrap() < generated.find("doc(2,9)").unwrap());
+        assert!(generated.find("doc(2,9)").unwrap() < generated.find("\"second\"").unwrap());
+        assert!(generated.ends_with("}, 3, 7)?;"));
+        assert_eq!(setters.helpers.matches("fn ").count(), 1);
+    }
+}

@@ -12,6 +12,7 @@
 #[cfg(feature = "binary-resources")]
 pub mod binary_resources;
 pub mod theme_resources;
+pub mod style_program;
 
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
@@ -506,6 +507,34 @@ pub fn cast_checked(
         line,
         position,
     ))
+}
+
+/// The ordered BindingBase / styled-value overloads of a template assignment.
+/// The type and property accessors run in the same branch as the expanded
+/// setter plan. In particular a binding never initializes the value type.
+#[inline(never)]
+#[allow(clippy::too_many_arguments)]
+pub fn bind_or_set_priority<T: ferroui_base::PropertyValue>(
+    target: &Ref<FerroObject>,
+    property: fn() -> &'static ferroui_base::StyledProperty<T>,
+    value: MarkupValue,
+    priority: BindingPriority,
+    expected: fn() -> ValueType,
+    nullable: bool,
+    member: &str,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    use ferroui_base::metadata::MarkupTyped;
+    if is_instance(&value, markup_handle(<dyn BindingBase>::MARKUP)) {
+        return bind(target, property(), value, line, position);
+    }
+    if is_instance(&value, expected()) || (nullable && value.is_none()) {
+        target.set_value_with_priority(property(), exact(value, member, 1, line, position)?, priority);
+        return Ok(());
+    }
+    let name = member.rsplit('.').next().unwrap_or(member);
+    Err(no_setter(name, &value, line, position))
 }
 
 /// The error of a property assignment whose setter is chosen at run time

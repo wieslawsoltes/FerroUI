@@ -51,6 +51,8 @@ use super::emit_types::{
     DeclaredKind, EmitClass, EmitMarkup, EmitProperty, EmitTypes, FieldValue, FrameworkType, Handle, Known, MethodInfo, TypeKey,
 };
 use super::source::rust_string_literal;
+use super::selector_plans::{Op as SelectorOp, SelectorPlans};
+use super::style_setters::StyleSetters;
 use super::theme_tables::{Factory, ThemeTables};
 
 /// Why a document is not eligible for emission: the first node (or member)
@@ -104,6 +106,23 @@ enum Kind<'a> {
     SystemType { class: Option<&'a dyn EmitClass>, markup: Option<&'a dyn EmitMarkup>, primitive: Option<&'static str> },
 }
 
+/// The predicate in an ordered XamlX setter plan, after static assignability is known.
+enum SetterTest {
+    Instance(String),
+    NonNull,
+    Always,
+}
+
+impl SetterTest {
+    fn condition(&self, local: &str) -> Option<String> {
+        match self {
+            Self::Instance(handle) => Some(format!("rt::is_instance(&{local}, {handle})")),
+            Self::NonNull => Some(format!("{local}.is_some()")),
+            Self::Always => None,
+        }
+    }
+}
+
 struct Typed<'a> {
     expr: String,
     kind: Kind<'a>,
@@ -155,7 +174,7 @@ fn owned(expr: &str) -> String {
 }
 
 /// Whether `text` is a plain identifier (the name of a local).
-fn is_identifier(text: &str) -> bool {
+pub(super) fn is_identifier(text: &str) -> bool {
     let mut characters = text.chars();
     match characters.next() {
         Some(first) if first.is_ascii_alphabetic() || first == '_' => {}
@@ -349,7 +368,7 @@ fn invoked(call: String, fallible: bool, node: &Rc<dyn IXamlAstNode>) -> String 
 ///
 /// `None` (the statements are kept as they are) for any other shape: another constructor,
 /// another order of the members, a member call that can fail, a value that names the setter.
-fn fused_setter_add(types: &dyn EmitTypes, lines: &[String], call: &str) -> Option<Vec<String>> {
+fn fused_setter_add(types: &dyn EmitTypes, styles: &mut StyleSetters, lines: &[String], call: &str) -> Option<Vec<String>> {
     let setter = types.framework_path(FrameworkType::Setter)?;
     let style_base = types.framework_path(FrameworkType::StyleBase)?;
     let setter_base = types.framework_path(FrameworkType::SetterBase)?;
@@ -396,7 +415,7 @@ fn fused_setter_add(types: &dyn EmitTypes, lines: &[String], call: &str) -> Opti
     if with_parent {
         if let Some(key) = dynamic_resource_setter_value(types, value_statements, value) {
             fused.push(format!("    {value_marker}"));
-            fused.push(format!("    rt::add_dynamic_resource_setter_with_parent(&context, {style}, {property}, {key});"));
+            fused.push(styles.dynamic(style, property, key));
             return Some(fused);
         }
     }
@@ -587,7 +606,7 @@ const SETTER_VALUE_PROPERTY_INFO_ARGUMENTS: &str =
 
 /// Whether `text` borrows a local without evaluating anything: `&local`, or
 /// `local.upcast_ref::<Base>()`.
-fn is_plain_borrow(text: &str) -> bool {
+pub(super) fn is_plain_borrow(text: &str) -> bool {
     if let Some(local) = text.strip_prefix('&') {
         return is_identifier(local);
     }
@@ -655,6 +674,8 @@ struct Emitter<'a> {
     /// the content starts, so nested content follows the content around it).
     deferred_functions: Vec<String>,
     theme_tables: ThemeTables,
+    selectors: SelectorPlans,
+    styles: StyleSetters,
     /// The Rust types of the locals whose type the emitter states (`let` of
     /// an object created with its default constructor): what a part of a
     /// split function can be passed ([`split_into_parts`]).
@@ -2336,7 +2357,7 @@ impl<'a> Emitter<'a> {
         };
         let dynamic_type = &dynamic_type;
         // The branches, decided before anything is written.
-        let mut branches: Vec<(Option<String>, Rc<dyn IXamlPropertySetter>)> = Vec::with_capacity(setters.len());
+        let mut branches = Vec::with_capacity(setters.len());
         let mut first_allowing_null: Option<Rc<dyn IXamlPropertySetter>> = None;
         for setter in setters {
             let allows_null = setter.binder_parameters().allow_runtime_null.get();
@@ -2353,11 +2374,11 @@ impl<'a> Emitter<'a> {
                     true => parameter.generic_arguments().into_iter().next().unwrap_or_else(|| parameter.clone()),
                     false => parameter.clone(),
                 };
-                Some(format!("rt::is_instance(&{{value}}, {})", self.handle_expr(node, &checked)?))
+                SetterTest::Instance(self.handle_expr(node, &checked)?)
             } else if !allows_null {
-                Some("{value}.is_some()".to_string())
+                SetterTest::NonNull
             } else {
-                None
+                SetterTest::Always
             };
             let checked_priority = priority_node.as_ref().map(|_| "");
             self.setter_statement(node, assignment, setter, target, &SetterValues::Checked, checked_priority)?;
@@ -2381,13 +2402,20 @@ impl<'a> Emitter<'a> {
             Kind::Exact { .. } => format!("rt::to_value({})", value.expr),
         };
         self.line(format!("let {local}: ::ferroui_base::metadata::MarkupValue = {untyped};"));
+        if let Some(call) = priority.as_deref().and_then(|priority| self.compact_priority_setter(
+            node, &value_node, &property_name, &branches, target, &local, priority,
+        )) {
+            self.line(call);
+            return Ok(());
+        }
         let mut lines: Vec<String> = Vec::new();
         let mut closed = false;
-        for (index, (condition, setter)) in branches.iter().enumerate() {
+        for (index, (test, setter)) in branches.iter().enumerate() {
+            let condition = test.condition(&local);
             let statement = self.setter_statement(node, assignment, setter, target, &SetterValues::Untyped(&local, &value_node), priority.as_deref())?;
-            match (condition, index) {
-                (Some(condition), 0) => lines.push(format!("if {} {{", condition.replace("{value}", &local))),
-                (Some(condition), _) => lines.push(format!("}} else if {} {{", condition.replace("{value}", &local))),
+            match (&condition, index) {
+                (Some(condition), 0) => lines.push(format!("if {condition} {{")),
+                (Some(condition), _) => lines.push(format!("}} else if {condition} {{")),
                 (None, 0) => lines.push("{".to_string()),
                 (None, _) => lines.push("} else {".to_string()),
             }
@@ -2416,6 +2444,38 @@ impl<'a> Emitter<'a> {
             self.line(line);
         }
         Ok(())
+    }
+
+    /// Share the exact binding-then-value plan for a registered template property.
+    /// Keep unusual overload orders, aliases and distinct diagnostic sites on the general path.
+    #[allow(clippy::too_many_arguments)]
+    fn compact_priority_setter(
+        &self,
+        node: &Rc<dyn IXamlAstNode>,
+        value_node: &Rc<dyn IXamlAstNode>,
+        property_name: &str,
+        branches: &[(SetterTest, Rc<dyn IXamlPropertySetter>)],
+        target: &Typed<'a>,
+        value: &str,
+        priority: &str,
+    ) -> Option<String> {
+        let [(SetterTest::Instance(_), bind), (SetterTest::Instance(expected), set)] = branches else { return None };
+        let bind = bind.as_any().downcast_ref::<BindingWithPrioritySetter>()?;
+        let set = set.as_any().downcast_ref::<SetValueWithPrioritySetter>()?;
+        let field = set.ferro_property();
+        let property = self.types.field(&**field)?.ferro_property()?;
+        if !bind.ferro_property().equals(&**field) || bind.binder_parameters().allow_runtime_null.get()
+            || property.name() != property_name || (node.line(), node.position()) != (value_node.line(), value_node.position())
+        {
+            return None;
+        }
+        let definition = self.types.property_definition(property, self.types.class_of(&*field.declaring_type())).ok()?;
+        let member = rust_string_literal(&format!("{}.{}", property.owner_name(), property.name()));
+        let nullable = set.binder_parameters().allow_runtime_null.get();
+        Some(format!(
+            "rt::bind_or_set_priority({}.upcast_ref::<::ferroui_base::FerroObject>(), || {definition}, {value}, {priority}, || {expected}, {nullable}, {member}, {}, {})?;",
+            target.expr, node.line(), node.position()
+        ))
     }
 
     /// The expression of the canonical handle of a type (`rt::class_handle`
@@ -2854,51 +2914,57 @@ impl<'a> Emitter<'a> {
                 None => "::core::option::Option::None".to_string(),
             })
         };
-        let types = self.types;
-        let class_of = |type_: &Rc<dyn IXamlType>| -> EmitResult<String> {
-            let class = types
-                .class_of(&**type_)
-                .ok_or_else(|| unsupported(node, format!("{} is not a class of the object model: it cannot be used as a control type", type_.get_full_name())))?;
-            let path = class
-                .rust_path()
-                .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", class.full_name())))?;
-            Ok(format!("<{} as ::ferroui_base::StaticType>::TYPE", absolute(path)))
-        };
-        let call = if let Some(n) = node.cast::<XamlIlTypeSelector>() {
-            let previous = previous(self, &n.base.previous)?;
-            let class = class_of(&n.target_type)?;
-            match n.concrete {
-                true => format!("{SELECTORS}::of_type_info({previous}, {class})"),
-                false => format!("{SELECTORS}::is_type_info({previous}, {class})"),
-            }
-        } else if let Some(n) = node.cast::<XamlIlStringSelector>() {
-            let previous = previous(self, &n.base.previous)?;
-            let text = rust_string_literal(&n.string());
-            match n.selector_type {
-                XamlIlStringSelectorType::Class => format!("{SELECTORS}::class({previous}, {text})"),
-                XamlIlStringSelectorType::Name => format!("{SELECTORS}::name({previous}, {text})"),
-            }
-        } else if let Some(n) = node.cast::<XamlIlCombinatorSelector>() {
-            let previous = previous(self, &n.base.previous)?;
-            match n.selector_type {
-                CombinatorSelectorType::Child => format!("{SELECTORS}::child({previous})"),
-                CombinatorSelectorType::Descendant => format!("{SELECTORS}::descendant({previous})"),
-                CombinatorSelectorType::Template => format!("{SELECTORS}::template({previous})"),
-            }
+        // Walk a linear suffix in reverse. A branch or a property-equality value is an
+        // evaluation boundary: emit it first, then feed its result into the shared suffix.
+        let mut cursor = Some(node.clone());
+        let mut steps = Vec::new();
+        while let Some(current) = cursor.as_ref() {
+            let (op, args, previous) = if let Some(n) = current.cast::<XamlIlTypeSelector>() {
+                let class = self.types.class_of(&*n.target_type).ok_or_else(|| unsupported(current,
+                    format!("{} is not a class of the object model: it cannot be used as a control type", n.target_type.get_full_name())))?;
+                let path = class.rust_path().ok_or_else(|| unsupported(current, format!("no public Rust path is recorded for {}", class.full_name())))?;
+                let type_info = format!("<{} as ::ferroui_base::StaticType>::TYPE", absolute(path));
+                (if n.concrete { SelectorOp::OfType } else { SelectorOp::IsType }, vec![type_info], n.base.previous.clone())
+            } else if let Some(n) = current.cast::<XamlIlStringSelector>() {
+                let op = match n.selector_type {
+                    XamlIlStringSelectorType::Class => SelectorOp::Class,
+                    XamlIlStringSelectorType::Name => SelectorOp::Name,
+                };
+                (op, vec![rust_string_literal(&n.string())], n.base.previous.clone())
+            } else if let Some(n) = current.cast::<XamlIlCombinatorSelector>() {
+                let op = match n.selector_type {
+                    CombinatorSelectorType::Child => SelectorOp::Child,
+                    CombinatorSelectorType::Descendant => SelectorOp::Descendant,
+                    CombinatorSelectorType::Template => SelectorOp::Template,
+                };
+                (op, vec![], n.base.previous.clone())
+            } else if let Some(n) = current.cast::<XamlIlNthChildSelector>() {
+                let op = match n.selector_type {
+                    XamlIlNthChildSelectorType::NthChild => SelectorOp::NthChild,
+                    XamlIlNthChildSelectorType::NthLastChild => SelectorOp::NthLastChild,
+                };
+                (op, vec![n.step.to_string(), n.offset.to_string()], n.base.previous.clone())
+            } else if let Some(n) = current.cast::<XamlIlNestingSelector>() {
+                (SelectorOp::Nesting, vec![], n.base.previous.clone())
+            } else {
+                break;
+            };
+            steps.push((op, args));
+            cursor = previous.map(|p| p.as_node());
+        }
+        let call = if !steps.is_empty() {
+            steps.reverse();
+            let seed = match cursor {
+                Some(prefix) => self.selector(&prefix)?,
+                None => None,
+            };
+            self.selectors.call(self.function_name, seed.as_deref(), &steps)
         } else if let Some(n) = node.cast::<XamlIlNotSelector>() {
             let previous = previous(self, &n.base.previous)?;
             let argument = self
                 .selector(&n.argument.clone().as_node())?
                 .ok_or_else(|| unsupported(node, "a not selector without an argument"))?;
             format!("{SELECTORS}::not({previous}, {argument})")
-        } else if let Some(n) = node.cast::<XamlIlNthChildSelector>() {
-            let previous = previous(self, &n.base.previous)?;
-            match n.selector_type {
-                XamlIlNthChildSelectorType::NthChild => format!("{SELECTORS}::nth_child({previous}, {}, {})", n.step, n.offset),
-                XamlIlNthChildSelectorType::NthLastChild => {
-                    format!("{SELECTORS}::nth_last_child({previous}, {}, {})", n.step, n.offset)
-                }
-            }
         } else if let Some(n) = node.cast::<XamlIlPropertyEqualsSelector>() {
             let previous = previous(self, &n.base.previous)?;
             let field = n.resolve_ferro_property_field().map_err(|e| failed(node, e))?;
@@ -2922,9 +2988,6 @@ impl<'a> Emitter<'a> {
                     format!("{SELECTORS}::or([{}])", list.join(", "))
                 }
             }
-        } else if let Some(n) = node.cast::<XamlIlNestingSelector>() {
-            let previous = previous(self, &n.base.previous)?;
-            format!("{SELECTORS}::nesting({previous})")
         } else {
             return Err(unsupported(node, "no emitter for this selector node"));
         };
@@ -3531,10 +3594,17 @@ impl<'a> Emitter<'a> {
         }
         let call = self.declared_call(node, &method, &arguments)?;
         if self.member_name(&method) == "FerroUI.Styling.StyleBase.Add" {
-            if let Some(fused) = fused_setter_add(self.types, &self.lines[start..], &call) {
+            if let Some(fused) = fused_setter_add(self.types, &mut self.styles, &self.lines[start..], &call) {
                 self.lines.truncate(start);
                 self.lines.extend(fused);
                 return Ok(());
+            }
+            if let [_, child] = arguments.as_slice() {
+                if matches!(child.kind, Kind::Class(class) if class.rust_path().is_some_and(|p| absolute(p) == "::ferroui_base::styling::Style"))
+                    && self.styles.attach(self.function_name, &mut self.lines, start, &child.expr, &call, node.line(), node.position()).is_some()
+                {
+                    return Ok(());
+                }
             }
         }
         self.line(format!("{call};"));
@@ -4033,6 +4103,8 @@ pub fn emit_function<'a>(
         function_name,
         deferred_functions: Vec::new(),
         theme_tables: ThemeTables::default(),
+        selectors: SelectorPlans::default(),
+        styles: StyleSetters::default(),
         local_types: HashMap::new(),
         namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
         root_namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
@@ -4083,6 +4155,8 @@ pub fn emit_function<'a>(
         source.push_str(&format!("const {}: rt::XmlNamespaceTable = {};\n\n", table.name, table.source));
     }
     source.push_str(&emitter.theme_tables.constants);
+    source.push_str(&emitter.selectors.helpers);
+    source.push_str(&emitter.styles.helpers);
     source.push_str(&format!("/// The base URI and the XML namespaces of `{document_text}`.\n"));
     source.push_str(&format!(
         "static {document_constant}: rt::DocumentInfo = rt::DocumentInfo {{ base_uri: {base_uri}, namespaces: {namespaces} }};\n"

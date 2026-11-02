@@ -218,3 +218,33 @@ fn the_error_of_an_assignment_without_a_setter_names_the_type_of_the_value() {
     let error = no_setter("Background", &None, 1, 2);
     assert_eq!(error.message(), "No setter of property Background accepts null Line 1, position 2. (line 1 position 2)");
 }
+
+#[test]
+fn compact_template_setter_preserves_priority_null_and_error_location() {
+    use super::compiled::{bind_or_set_priority, no_setter};
+    use ferroui_base::data::{core::ValueType, BindingPriority};
+    use ferroui_base::{FerroObject, Visual};
+    use ferroui_controls::TextBlock;
+
+    crate::register_types();
+    let text = TextBlock::new();
+    let object = text.upcast_ref::<FerroObject>();
+    let priority = BindingPriority::Template;
+    bind_or_set_priority(object, Visual::opacity_property, to_value(0.25_f64), priority,
+        ValueType::of::<f64>, false, "Visual.Opacity", 8, 13).unwrap();
+    assert_eq!(text.get_value(Visual::opacity_property()), 0.25);
+    text.set_value(Visual::opacity_property(), 0.75);
+    assert_eq!(text.get_value(Visual::opacity_property()), 0.75);
+    text.clear_value(Visual::opacity_property());
+    assert_eq!(text.get_value(Visual::opacity_property()), 0.25);
+
+    for invalid in [None, to_value("bad".to_owned())] {
+        let expected = no_setter("Opacity", &invalid, 8, 13);
+        let error = bind_or_set_priority(object, Visual::opacity_property, invalid, priority,
+            ValueType::of::<f64>, false, "Visual.Opacity", 8, 13).unwrap_err();
+        assert_eq!(error.message(), expected.message());
+    }
+    bind_or_set_priority(object, TextBlock::text_property, None, priority, ValueType::of::<String>,
+        true, "TextBlock.Text", 8, 13).unwrap();
+    assert_eq!(text.get_value(TextBlock::text_property()), None);
+}
