@@ -108,6 +108,43 @@ fn time_span_type_converter_accepts_seconds_and_time_spans() {
     assert!(convert(&*conv, "1:xx").is_err());
 }
 
+/// Not from upstream (C5 of #423): a time span converts to the other Rust form of a time
+/// span, `Duration`, unless it is negative (decision O2 of docs/idiomatic-rust-signatures.md).
+#[test]
+fn time_span_type_converter_converts_to_a_duration() {
+    use std::time::Duration;
+
+    register_types();
+    let conv = TimeSpanTypeConverter::new();
+    let duration = ValueType::of::<Duration>();
+    let nullable = ValueType::of::<Option<Duration>>();
+    assert!(conv.can_convert_to(None, duration) && conv.can_convert_to(None, nullable));
+    assert!(conv.can_convert_to(None, ValueType::of::<String>()));
+    assert!(!conv.can_convert_to(None, ValueType::of::<i32>()));
+
+    let to = |value: BoxedValue, destination: ValueType| conv.convert_to(None, None, Some(&value), destination);
+    let value = |converted: Result<Option<BoxedValue>, XamlLoadError>| *converted.unwrap().unwrap().downcast_ref::<Duration>().unwrap();
+    assert_eq!(value(to(boxed(SignedDuration::from_seconds(1.5)), duration)), Duration::from_millis(1500));
+    assert_eq!(value(to(boxed("0:0:2".to_string()), duration)), Duration::from_secs(2));
+    assert_eq!(value(to(boxed("0.25".to_string()), duration)), Duration::from_millis(250));
+    assert_eq!(value(to(boxed(Duration::from_secs(3)), duration)), Duration::from_secs(3));
+    let some = to(boxed(SignedDuration::from_seconds(4.0)), nullable).unwrap().unwrap();
+    assert_eq!(some.downcast_ref::<Option<Duration>>(), Some(&Some(Duration::from_secs(4))));
+    let none = conv.convert_to(None, None, None, nullable).unwrap().unwrap();
+    assert_eq!(none.downcast_ref::<Option<Duration>>(), Some(&None));
+
+    // A negative time span is not a duration: an error, never zero.
+    let error = to(boxed(SignedDuration::from_seconds(-1.0)), duration).unwrap_err();
+    assert_eq!(error.message(), "The TimeSpan -00:00:01 is negative and cannot be converted to a Duration.");
+    assert!(to(boxed("-0:0:1".to_string()), nullable).is_err());
+    assert!(to(boxed("abc".to_string()), duration).is_err());
+    assert!(to(boxed(1i32), duration).is_err());
+
+    // To text, as every converter.
+    let text = to(boxed(SignedDuration::from_seconds(1.0)), ValueType::of::<String>()).unwrap().unwrap();
+    assert_eq!(text.downcast_ref::<String>().map(String::as_str), Some("00:00:01"));
+}
+
 // --- FerroUriTypeConverter ------------------------------------------------
 
 #[test]

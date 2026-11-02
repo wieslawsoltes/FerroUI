@@ -4522,4 +4522,29 @@ mod cultures {
         // An invalid date and time format string is the format exception.
         assert_eq!(format_arg(&FormatArg::DateTime(date), "%"), Err(FormatError::InvalidFormat));
     }
+
+    /// Not from upstream (C5 of #423): a `Duration` is the other Rust form of a time span,
+    /// and a string format formats it exactly as the time span of the same value.
+    #[test]
+    fn string_format_formats_a_duration_as_a_time_span() {
+        let invariant = CultureInfo::invariant_culture();
+        let formats = ["{0}", "{0:c}", "{0:g}", "{0:G}", "{0:hh\\:mm\\:ss}", "{0:%s}", "[{0,12}]"];
+        for (duration, span) in [
+            (std::time::Duration::from_millis(1500), SignedDuration::from_seconds(1.5)),
+            (std::time::Duration::from_secs(93_784), SignedDuration::from_dhms(1, 2, 3, 4)),
+            (std::time::Duration::ZERO, SignedDuration::ZERO),
+        ] {
+            let duration: Option<BoxedValue> = Some(Rc::new(duration));
+            let span: Option<BoxedValue> = Some(Rc::new(span));
+            for format in formats {
+                let expected = format_values_with(format, std::slice::from_ref(&span), &invariant);
+                assert!(expected.is_ok(), "{format}: {expected:?}");
+                assert_eq!(format_values_with(format, std::slice::from_ref(&duration), &invariant), expected, "{format}");
+            }
+        }
+        let nullable: Option<BoxedValue> = Some(Rc::new(Some(std::time::Duration::from_secs(5))));
+        assert_eq!(format_values_with("{0:c}", &[nullable], &invariant).as_deref(), Ok("00:00:05"));
+        let duration: Option<BoxedValue> = Some(Rc::new(std::time::Duration::from_millis(1500)));
+        assert_eq!(format_values("{0}", &[duration]).as_deref(), Ok("00:00:01.5000000"));
+    }
 }

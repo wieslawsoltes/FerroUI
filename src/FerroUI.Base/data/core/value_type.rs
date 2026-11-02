@@ -139,6 +139,7 @@ type InterfaceFn = Rc<dyn Fn(&Ref<FerroObject>) -> Option<BoxedValue>>;
 type ReferenceIdentityFn = Rc<dyn Fn(&dyn AnyValue) -> Option<*const ()>>;
 type InterfaceObjectFn = Rc<dyn Fn(&dyn AnyValue) -> Option<Ref<FerroObject>>>;
 type OrderingFn = Rc<dyn Fn(&dyn AnyValue, &dyn AnyValue) -> Option<std::cmp::Ordering>>;
+type CastErrorFn = Rc<dyn Fn(&dyn AnyValue) -> Option<String>>;
 
 #[derive(Default)]
 struct Registry {
@@ -160,6 +161,9 @@ struct Registry {
     /// The conversions that are assignability casts: the value is the same
     /// value, seen as a wider type.
     casts: IdMap<(TypeId, TypeId), ConvertFn>,
+    /// Why a value is refused by a cast that holds for some values of its
+    /// type only ([`ValueTypes::register_try_cast`]).
+    cast_errors: IdMap<(TypeId, TypeId), CastErrorFn>,
     /// `Option<T>` → the type of the value it unwraps to.
     nullable_inner: IdMap<TypeId, ValueType>,
     /// `ElementRef<T>` and `Option<ElementRef<T>>` → the class `T` and
@@ -416,6 +420,45 @@ impl ValueTypes {
         with_registry(|r| {
             r.any_conversions.insert((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), convert_any);
         });
+    }
+
+    /// Registers an assignability cast that holds for some values of `TFrom`
+    /// only: a value `cast` converts is a value of `TTo`, and a value it
+    /// refuses is not one (a negative `SignedDuration` is not a
+    /// [`Duration`](std::time::Duration)). The cast applies wherever one of
+    /// [`register_cast`](Self::register_cast) does ([`is_assignable`](Self::is_assignable)
+    /// states it of the two types, [`try_cast`](Self::try_cast),
+    /// [`try_convert`](Self::try_convert) and the untyped property routes
+    /// perform it); a refused value is a value that does not convert, which a
+    /// binding reports as a conversion error and a markup loader as a load
+    /// error, and [`cast_error`](Self::cast_error) gives the error of `cast`.
+    pub fn register_try_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&TFrom) -> Result<TTo, String> + 'static) {
+        let key = (TypeId::of::<TFrom>(), TypeId::of::<TTo>());
+        let cast = Rc::new(cast);
+        let boxed = cast.clone();
+        let convert: ConvertFn = Rc::new(move |v: &BoxedValue| {
+            v.downcast_ref::<TFrom>().and_then(|v| boxed(v).ok()).map(|v| Rc::new(v) as BoxedValue)
+        });
+        insert_cast(key, convert);
+        let borrowed = cast.clone();
+        let convert_any: AnyConvertFn = Rc::new(move |v: &dyn std::any::Any| {
+            v.downcast_ref::<TFrom>().and_then(|v| borrowed(v).ok()).map(|v| Rc::new(v) as BoxedValue)
+        });
+        let error: CastErrorFn = Rc::new(move |v: &dyn AnyValue| cast(v.downcast_ref::<TFrom>()?).err());
+        with_registry(|r| {
+            r.any_conversions.insert(key, convert_any);
+            r.cast_errors.insert(key, error);
+        });
+    }
+
+    /// Why `value` does not cast to `target` although its type is assignable
+    /// to it: the error of the cast registered with
+    /// [`register_try_cast`](Self::register_try_cast). `None` when no such
+    /// cast is registered between the two types, or when the value casts.
+    pub fn cast_error(value: &BoxedValue, target: ValueType) -> Option<String> {
+        let key = (value_type_id(&**value), target.id());
+        let error = with_registry(|r| r.cast_errors.get(&key).cloned())?;
+        error(&**value)
     }
 
     /// States that the Rust type `TFrom` dereferences to `TTo`: `&TFrom`
@@ -1822,6 +1865,36 @@ fn register_defaults() {
     );
     ValueTypes::register_ordering_by::<f64>(|a, b| Some(float_order(*a, *b)));
     ValueTypes::register_ordering_by::<f32>(|a, b| Some(float_order(f64::from(*a), f64::from(*b))));
+
+    // A `Duration` is the other Rust form of `System.TimeSpan` (C5 of #423, decision O2 of
+    // docs/idiomatic-rust-signatures.md): a non-negative time span is a duration, a negative
+    // one is refused (never clamped), and a duration is a time span, saturating at the
+    // largest one. Its text and its order are the ones of the time span.
+    fn display_duration(value: &dyn AnyValue) -> String {
+        value
+            .downcast_ref::<std::time::Duration>()
+            .map(|duration| crate::animation::SignedDuration::from(*duration).to_string())
+            .unwrap_or_default()
+    }
+    ValueTypes::register_display::<crate::animation::SignedDuration>();
+    with_registry(|r| {
+        r.display.insert(TypeId::of::<std::time::Duration>(), display_duration);
+    });
+    ValueTypes::register_nullable::<std::time::Duration>();
+    ValueTypes::register_ordering::<std::time::Duration>();
+    ValueTypes::register_try_cast::<crate::animation::SignedDuration, std::time::Duration>(|span| {
+        std::time::Duration::try_from(*span).map_err(|error| error.to_string())
+    });
+    ValueTypes::register_cast::<std::time::Duration, crate::animation::SignedDuration>(|duration| {
+        crate::animation::SignedDuration::from(*duration)
+    });
+    // Text converts to a duration as it converts to a time span, and a negative one does not
+    // convert.
+    fn parse_duration(text: &str) -> Option<std::time::Duration> {
+        crate::animation::SignedDuration::parse(text).ok()?.to_duration()
+    }
+    ValueTypes::register_parse::<std::time::Duration>(parse_duration);
+    ValueTypes::register_conversion::<String, Option<std::time::Duration>>(|text| parse_duration(text).map(Some));
 }
 
 impl ValueTypes {
@@ -2650,5 +2723,66 @@ mod tests {
         ValueTypes::register_ordering_by::<Reversed>(|a, b| Some(b.0.cmp(&a.0)));
         let reversed = |value: i32| -> BoxedValue { Rc::new(Reversed(value)) };
         assert_eq!(ValueTypes::compare(&reversed(1), &reversed(2)), Some(std::cmp::Ordering::Greater));
+    }
+
+    /// Not from upstream (C5 of #423, decision O2): `SignedDuration` and `Duration` are the
+    /// two Rust forms of a time span. A duration is a time span; a time span is a duration
+    /// unless it is negative, which the cast refuses with its error instead of clamping it.
+    #[test]
+    fn signed_durations_and_durations_are_two_forms_of_a_time_span() {
+        use crate::animation::SignedDuration;
+        use std::time::Duration;
+
+        let b = |value: SignedDuration| -> BoxedValue { Rc::new(value) };
+        let duration = ValueType::of::<Duration>();
+        let span = ValueType::of::<SignedDuration>();
+        assert!(ValueTypes::is_assignable(span, duration));
+        assert!(ValueTypes::is_assignable(duration, span));
+        assert!(ValueTypes::is_assignable(span, ValueType::of::<Option<Duration>>()));
+
+        // A time span that is not negative casts and converts to the duration of the same value.
+        let cast = ValueTypes::try_cast(&b(SignedDuration::from_seconds(1.5)), duration).expect("a duration");
+        assert_eq!(cast.downcast_ref::<Duration>(), Some(&Duration::from_millis(1500)));
+        let converted = ValueTypes::try_convert(Some(&b(SignedDuration::ZERO)), duration).flatten().expect("a duration");
+        assert_eq!(converted.downcast_ref::<Duration>(), Some(&Duration::ZERO));
+        let nullable = ValueTypes::try_cast(&b(SignedDuration::from_seconds(2.0)), ValueType::of::<Option<Duration>>());
+        assert_eq!(nullable.expect("a nullable duration").downcast_ref::<Option<Duration>>(), Some(&Some(Duration::from_secs(2))));
+        let implicit = ValueTypes::try_convert_implicit(&SignedDuration::from_seconds(3.0), duration.id()).expect("a duration");
+        assert_eq!(implicit.downcast_ref::<Duration>(), Some(&Duration::from_secs(3)));
+        assert_eq!(ValueTypes::cast_error(&b(SignedDuration::from_seconds(1.0)), duration), None);
+
+        // A negative one is refused by every route, with the error of the cast.
+        let negative = b(SignedDuration::from_seconds(-1.0));
+        assert!(ValueTypes::try_cast(&negative, duration).is_none());
+        assert!(ValueTypes::try_convert(Some(&negative), duration).is_none());
+        assert!(ValueTypes::try_cast(&negative, ValueType::of::<Option<Duration>>()).is_none());
+        assert!(ValueTypes::try_convert_implicit(&SignedDuration::from_seconds(-1.0), duration.id()).is_none());
+        assert_eq!(
+            ValueTypes::cast_error(&negative, duration).as_deref(),
+            Some("The TimeSpan -00:00:01 is negative and cannot be converted to a Duration.")
+        );
+        assert_eq!(ValueTypes::cast_error(&negative, ValueType::of::<String>()), None);
+
+        // A duration is the time span of the same value, saturating at the largest one.
+        let back = ValueTypes::try_cast(&(Rc::new(Duration::from_millis(250)) as BoxedValue), span).expect("a time span");
+        assert_eq!(back.downcast_ref::<SignedDuration>(), Some(&SignedDuration::from_seconds(0.25)));
+        let longest = ValueTypes::try_cast(&(Rc::new(Duration::MAX) as BoxedValue), span).expect("a time span");
+        assert_eq!(longest.downcast_ref::<SignedDuration>(), Some(&SignedDuration::MAX_VALUE));
+
+        // Its text and its order are the ones of the time span, and text converts to it as
+        // to a time span.
+        let text = ValueTypes::to_display_string(Some(&(Rc::new(Duration::from_millis(1500)) as BoxedValue)));
+        assert_eq!(text, "00:00:01.5000000");
+        let parsed = ValueTypes::try_convert(Some(&(Rc::new(text) as BoxedValue)), duration).flatten().expect("a duration");
+        assert_eq!(parsed.downcast_ref::<Duration>(), Some(&Duration::from_millis(1500)));
+        let nullable_text: BoxedValue = Rc::new("0:0:2".to_string());
+        let parsed = ValueTypes::try_convert(Some(&nullable_text), ValueType::of::<Option<Duration>>()).flatten();
+        assert_eq!(parsed.expect("a nullable duration").downcast_ref::<Option<Duration>>(), Some(&Some(Duration::from_secs(2))));
+        assert!(ValueTypes::try_convert(Some(&(Rc::new("-0:0:1".to_string()) as BoxedValue)), duration).is_none());
+        let shorter: BoxedValue = Rc::new(Duration::from_secs(1));
+        let longer: BoxedValue = Rc::new(Duration::from_secs(2));
+        assert_eq!(ValueTypes::compare(&shorter, &longer), Some(std::cmp::Ordering::Less));
+        assert_eq!(ValueTypes::compare(&shorter, &b(SignedDuration::from_seconds(1.0))), Some(std::cmp::Ordering::Equal));
+        assert_eq!(ValueTypes::compare(&b(SignedDuration::from_seconds(-1.0)), &longer), Some(std::cmp::Ordering::Less));
     }
 }

@@ -23,10 +23,11 @@ use super::tokens::{
 use super::{codes, Diagnostic, InvocationCounts, ScanOptions, ScannedFile, Severity};
 use crate::model::VALUE_REGISTRATIONS;
 
-// Both APIs insert the same assignability pair into ValueTypes. The boxed form
-// only gives the runtime predicate access to the actual shared box.
+// The three APIs insert the same assignability pair into ValueTypes. The boxed form
+// only gives the runtime predicate access to the actual shared box; the fallible form
+// refuses some values of the source type, which decides nothing about the two types.
 fn canonical_registration(name: &str) -> &str {
-    if name == "boxed_cast" { "cast" } else { name }
+    if matches!(name, "boxed_cast" | "try_cast") { "cast" } else { name }
 }
 
 /// Where a declaration is written.
@@ -1574,7 +1575,7 @@ impl<'ast> Visit<'ast> for RegistrationFinder {
             return;
         }
         match (*registration, types.as_slice()) {
-            ("cast" | "boxed_cast", [from, to]) => self.casts.push(((from.clone(), to.clone()), line)),
+            ("cast" | "boxed_cast" | "try_cast", [from, to]) => self.casts.push(((from.clone(), to.clone()), line)),
             _ => self.value_types.push(((registration.to_string(), types), line)),
         }
     }
@@ -1665,7 +1666,7 @@ impl Source {
             let site = Site { line, ..site.clone() };
             self.value_calls.entry(canonical_registration(registration).to_string()).or_default().1 += 1;
             match (*registration, types.as_slice()) {
-                ("cast" | "boxed_cast", [from, to]) => self.casts.push(Located { site, value: RawCast { from: from.clone(), to: to.clone(), imports: Vec::new() } }),
+                ("cast" | "boxed_cast" | "try_cast", [from, to]) => self.casts.push(Located { site, value: RawCast { from: from.clone(), to: to.clone(), imports: Vec::new() } }),
                 _ => self.value_types.push(Located { site, value: RawValueType { registration: registration.to_string(), types, imports: Vec::new() } }),
             }
         }
@@ -1852,6 +1853,16 @@ mod boxed_cast_tests {
         assert_eq!(text_of(&finder.casts[1].0.0),"A");assert_eq!(text_of(&finder.casts[1].0.1),"C");
         assert!(finder.value_types.is_empty());
         assert_eq!(canonical_registration("boxed_cast"),"cast");assert_eq!(canonical_registration("reference"),"reference");
+    }
+    /// Not from upstream (C5 of #423): a fallible cast states the same pair of types.
+    #[test]
+    fn fallible_casts_are_casts() {
+        let block: syn::Block = syn::parse_str("{ ValueTypes::register_try_cast::<A,B>(|a| f(a)); ValueTypes::register_try_cast::<A,_>(f); }").unwrap();
+        let mut finder=RegistrationFinder::default();finder.visit_block(&block);
+        assert_eq!(finder.casts.len(),1);
+        assert_eq!(text_of(&finder.casts[0].0.0),"A");assert_eq!(text_of(&finder.casts[0].0.1),"B");
+        assert!(finder.value_types.is_empty());
+        assert_eq!(canonical_registration("try_cast"),"cast");
     }
     #[test]
     fn boxed_casts_in_declaration_tokens_are_casts_not_other_value_registrations() {

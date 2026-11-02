@@ -236,6 +236,11 @@ pub fn exact<T: Clone + 'static>(
     match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
         Some(converted) => Ok(converted.clone()),
         None => {
+            // A value whose cast refuses it (a negative time span for a `Duration`): the
+            // error of the cast, as the run-time loader reports it (`to_exact`).
+            if let Some(error) = value.as_ref().and_then(|boxed| ValueTypes::cast_error(boxed, target)) {
+                return Err(at(TARGET_INVOCATION_EXCEPTION, error, line, position));
+            }
             let error = MarkupInvokeError::Argument {
                 index,
                 expected: target.name(),
@@ -1311,15 +1316,28 @@ pub fn instance<'a, T: 'static>(
 /// the `InvalidCastException` of the loader at `line`, `position`.
 pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, position: i32) -> Result<T, XamlLoadError> {
     let target = ValueType::of::<T>();
-    let converted = match into_markup_value(value) {
-        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
-        Some(boxed) => ValueTypes::try_cast(&boxed, target),
+    let value = into_markup_value(value);
+    let converted = match &value {
+        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed.clone()),
+        Some(boxed) => ValueTypes::try_cast(boxed, target),
         None => ValueTypes::try_convert(None, target).flatten(),
     };
     match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
         Some(value) => Ok(value.clone()),
-        None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
+        None => match value.as_ref().and_then(|boxed| ValueTypes::cast_error(boxed, target)) {
+            // A value whose cast refuses it (a negative time span for a `Duration`).
+            Some(error) => Err(at(TARGET_INVOCATION_EXCEPTION, error, line, position)),
+            None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
+        },
     }
+}
+
+/// A time span literal of markup as the `Duration` a member declares. The emitter writes
+/// it only for a literal it checked is not negative (a negative one is an error of the
+/// document, decision O2 of docs/idiomatic-rust-signatures.md), so the conversion does not
+/// fail.
+pub fn duration(literal: ferroui_base::animation::SignedDuration) -> std::time::Duration {
+    std::time::Duration::try_from(literal).unwrap_or_default()
 }
 
 /// `value` cast to the type with the handle `target`, then held untyped as the run-time
