@@ -10,7 +10,7 @@
 //! futures run by the dispatcher of the user interface.
 
 use ferroui_base::reactive::Subscription;
-use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTimer, OperationCanceledError};
+use ferroui_base::threading::{Canceled, Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTimer};
 use std::cell::RefCell;
 use std::fmt;
 use std::future::Future;
@@ -102,7 +102,7 @@ impl<T: 'static> fmt::Debug for TaskHandle<T> {
 }
 
 impl<T: 'static> Future for TaskHandle<T> {
-    type Output = Result<T, OperationCanceledError>;
+    type Output = Result<T, Canceled>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         Pin::new(&mut self.get_mut().task).poll(cx)
