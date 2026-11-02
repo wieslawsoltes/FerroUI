@@ -15,10 +15,17 @@ fn failure(message: impl ToString) -> ReloadError {
     ReloadError::Failed(message.to_string())
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct Leaf {
+    kind: Kind,
+    hash: u64,
+    imports: Option<usize>,
+}
+
 struct Manifest {
     module: String,
     caller: u64,
-    blocks: BTreeMap<String, (Kind, u64)>,
+    blocks: BTreeMap<String, Leaf>,
 }
 
 impl Manifest {
@@ -53,14 +60,23 @@ impl Manifest {
             }
             let fields = fields
                 .as_array()
-                .filter(|f| f.len() == 2)
+                .filter(|f| matches!(f.len(), 2 | 3))
                 .ok_or_else(|| failure(format!("Invalid FXB entry for {name}")))?;
             let kind = fields[0]
                 .as_u64()
                 .and_then(|n| u8::try_from(n).ok())
                 .and_then(Kind::from_wire)
                 .ok_or_else(|| failure(format!("Unknown FXB factory kind for {name}")))?;
-            blocks.insert(name.clone(), (kind, digest(&fields[1])?));
+            let imports = match (kind, fields.get(2)) {
+                (Kind::DeferredFactory, Some(n)) => Some(n.as_u64()
+                    .and_then(|n| usize::try_from(n).ok())
+                    .ok_or_else(|| failure(format!("Invalid native import count for {name}")))?),
+                (Kind::DeferredFactory, None) | (_, Some(_)) => {
+                    return Err(failure(format!("Invalid native import layout for {name}")))
+                }
+                (_, None) => None,
+            };
+            blocks.insert(name.clone(), Leaf { kind, hash: digest(&fields[1])?, imports });
         }
         if blocks.is_empty() {
             return Err(failure("The compiled module has no binary resource blocks"));
@@ -78,14 +94,14 @@ impl Manifest {
             && self
                 .blocks
                 .iter()
-                .map(|(name, (kind, _))| (name, kind))
-                .eq(other.blocks.iter().map(|(name, (kind, _))| (name, kind)))
+                .map(|(name, leaf)| (name, leaf.kind, leaf.imports))
+                .eq(other.blocks.iter().map(|(name, leaf)| (name, leaf.kind, leaf.imports)))
     }
 }
 
 struct Generation {
     manifest: Vec<u8>,
-    blocks: BTreeMap<String, (Kind, u64)>,
+    blocks: BTreeMap<String, Leaf>,
     snapshot: Result<Snapshot, ReloadError>,
 }
 
@@ -120,19 +136,22 @@ impl GenerationReader {
                 .as_deref()
                 .and_then(|p| p.snapshot.as_ref().ok().map(|s| (s, &p.blocks)));
             let mut snapshot = previous.map(|(s, _)| s.clone()).unwrap_or_default();
-            for (name, &(kind, hash)) in &generation.blocks {
-                if previous.is_some_and(|(_, blocks)| blocks.get(name) == Some(&(kind, hash))) {
+            for (name, leaf_layout) in &generation.blocks {
+                if previous.is_some_and(|(_, blocks)| blocks.get(name) == Some(leaf_layout)) {
                     continue;
                 }
                 let bytes = leaf(name)?;
-                if fingerprint(&bytes) != hash {
+                if fingerprint(&bytes) != leaf_layout.hash {
                     return Err(format!(
                         "{name} does not match the published FXB generation"
                     ));
                 }
                 let batch = Batch::decode(&bytes).map_err(|e| format!("{name}: {e}"))?;
+                if let Some(imports) = leaf_layout.imports {
+                    batch.validate_imports(imports).map_err(|e| format!("{name}: {e}"))?;
+                }
                 snapshot
-                    .replace_decoded(&format!("{}/{}", generation.module, name), kind, batch)
+                    .replace_decoded(&format!("{}/{}", generation.module, name), leaf_layout.kind, batch)
                     .map_err(|e| e.to_string())?;
             }
             Ok(snapshot)
@@ -330,6 +349,27 @@ mod tests {
             std::thread::sleep(Duration::from_millis(10));
         }
         panic!("the file watcher did not deliver a stable revision");
+    }
+
+    #[test]
+    fn nested_factory_slots_are_checked_against_the_embedded_caller_before_publication() {
+        // A single row referencing native builder zero. In a nested deferred dictionary
+        // the UI thread might first execute its registration well after installation.
+        let valid = b"FXB\0\x01\x05\x01\x01\x00\x01A\x00\x00\x01\x01\x00\x00";
+        let image = |bytes: &[u8], count| serde_json::json!({
+            "version": 1, "module": "nested", "caller": "1234567890abcdef",
+            "blocks": {"child.fxb": [5, format!("{:016x}", fingerprint(bytes)), count]}
+        }).to_string().into_bytes();
+        let baseline = image(valid, 1);
+        let mut reader = GenerationReader { baseline: Manifest::parse(&baseline).unwrap(), previous: None };
+        let good = reader.read(baseline.clone(), |_| Ok(valid.to_vec())).unwrap();
+        assert!(good.snapshot.is_ok());
+        let mut invalid = valid.to_vec();
+        invalid[12] = 1;
+        assert!(reader.read(image(&invalid, 1), |_| Ok(invalid.clone())).is_err());
+        assert!(Arc::ptr_eq(&good, reader.previous.as_ref().unwrap()));
+        let changed_layout = reader.read(image(&invalid, 2), |_| panic!("native layout changed")).unwrap();
+        assert!(matches!(changed_layout.snapshot, Err(ReloadError::RestartRequired(_))));
     }
 
     #[test]

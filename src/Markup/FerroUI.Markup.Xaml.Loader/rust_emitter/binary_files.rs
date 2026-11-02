@@ -4,10 +4,16 @@
 use ferroui_xaml_binary::{encode, Kind, Resource};
 use std::{cell::RefCell, collections::BTreeMap, rc::Rc};
 
+/// A compiled leaf and the number of native builders its call site exposes.
+pub struct BinaryLeaf {
+    pub bytes: Vec<u8>,
+    pub factory_imports: Option<usize>,
+}
+
 #[derive(Clone)]
 pub struct BinaryResourceFiles {
     module: String,
-    files: Rc<RefCell<BTreeMap<String, Vec<u8>>>>,
+    files: Rc<RefCell<BTreeMap<String, BinaryLeaf>>>,
 }
 
 impl BinaryResourceFiles {
@@ -20,6 +26,11 @@ impl BinaryResourceFiles {
 
     /// Take the artifacts after compiling a group, to write adjacent to its generated Rust.
     pub fn take(&self) -> BTreeMap<String, Vec<u8>> {
+        self.take_leaves().into_iter().map(|(name, leaf)| (name, leaf.bytes)).collect()
+    }
+
+    /// Take the bytes and call-site ABI for a reloadable module.
+    pub fn take_leaves(&self) -> BTreeMap<String, BinaryLeaf> {
         self.files.take()
     }
 
@@ -52,7 +63,8 @@ impl BinaryResourceFiles {
             }
             name = format!("{base}-{ordinal}.fxb");
         }
-        files.insert(name.clone(), bytes);
+        let factory_imports = (kind == Kind::DeferredFactory).then_some(rows.len());
+        files.insert(name.clone(), BinaryLeaf { bytes, factory_imports });
         let name = super::rust_string_literal(&name);
         Some(format!("rt::binary_resources::Block::new(concat!(module_path!(), \"/\", {name}), include_bytes!({name}))"))
     }

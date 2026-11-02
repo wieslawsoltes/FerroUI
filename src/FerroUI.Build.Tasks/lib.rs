@@ -1051,9 +1051,15 @@ fn write_binary_files(module_file: &Path, module: &str, source: &str, files: Opt
     }
     use ferroui_markup_xaml_loader::rust_emitter::binary_fingerprint;
     let mut blocks = std::collections::BTreeMap::new();
-    for (name, bytes) in files.take() {
+    for (name, leaf) in files.take_leaves() {
+        let bytes = leaf.bytes;
         let path = directory.join(&name);
-        blocks.insert(name, (bytes[5], format!("{:016x}", binary_fingerprint(&bytes))));
+        let hash = format!("{:016x}", binary_fingerprint(&bytes));
+        let layout = match leaf.factory_imports {
+            Some(count) => serde_json::json!([bytes[5], hash, count]),
+            None => serde_json::json!([bytes[5], hash]),
+        };
+        blocks.insert(name, layout);
         if fs::read(&path).ok().as_deref() != Some(bytes.as_slice()) {
             if let Err(error) = fs::write(&path, bytes) {
                 errors.push(format!("{}: {error}", path.display()));

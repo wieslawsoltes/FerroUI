@@ -101,7 +101,7 @@
 //! and the accessor table of the base crate.
 
 mod binary_files;
-pub use binary_files::BinaryResourceFiles;
+pub use binary_files::{BinaryLeaf, BinaryResourceFiles};
 pub use ferroui_xaml_binary::fingerprint as binary_fingerprint;
 mod compiled;
 mod compiled_resources;
