@@ -91,6 +91,12 @@ pub(super) fn navigation_handle(state: &Rc<Shell>) -> El<Border> {
     let press = drag.clone();
     let movement = drag.clone();
     let release = drag.clone();
+    let disposed_drag = drag.clone();
+    let disposed_timer = timer.clone();
+    on_cleanup(move || {
+        disposed_drag.set(None);
+        disposed_timer.borrow_mut().take();
+    });
     let start_timer = timer.clone();
     let stop_timer = timer.clone();
     let shell = Rc::downgrade(state);
