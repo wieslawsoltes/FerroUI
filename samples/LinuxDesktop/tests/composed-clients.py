@@ -138,6 +138,11 @@ def probe(path, color, test, reference=None):
         # This band sits above the taskbar, below the independent client swatches.
         offset = im.height - 230
         im = im.crop((0, offset, im.width, im.height - 52))
+    if test in ("client-visible", "client-hidden"):
+        # Exclude taskbar previews when checking whether the full GTK
+        # toplevel is mapped. Both can display the same live client pixels.
+        im = im.crop((0, 0, im.width, im.height - 230))
+        test = "present" if test == "client-visible" else "absent"
     if color == "preview":
         # Each profile lays out its live cards differently. Require both swatches
         # in new positions relative to the same full-size client windows. This

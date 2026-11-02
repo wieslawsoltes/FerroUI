@@ -10,6 +10,7 @@ use crate::session::Snapshot;
 struct Window {
     id: u32,
     active: bool,
+    minimized: bool,
     can_minimize: bool,
 }
 
@@ -33,7 +34,7 @@ impl Entry {
         }
     }
 
-    fn invoke(&self, shell: &Rc<Shell>, layout: Layout) {
+    fn invoke(&self, shell: &Rc<Shell>, layout: Layout, previous_focus: Option<u32>) {
         if self.windows.is_empty() {
             if let Some(index) = self.app {
                 shell.launch(&shell.catalog.applications()[index]);
@@ -42,7 +43,15 @@ impl Entry {
             let active = self.windows.iter().position(|w| w.active);
             let next = active.map_or(0, |i| (i + 1) % self.windows.len());
             let target = &self.windows[next];
-            if layout == Layout::Taskbar && target.active && target.can_minimize {
+            let took_focus = previous_focus == Some(target.id)
+                && shell
+                    .snapshot
+                    .with_untracked(|s| !s.windows.iter().any(|w| w.active && w.id != target.id));
+            if layout == Layout::Taskbar
+                && (target.active || took_focus)
+                && !target.minimized
+                && target.can_minimize
+            {
                 session.minimize(target.id);
             } else {
                 activate_window(session, target.id);
@@ -125,6 +134,7 @@ fn entries(
         item.windows.push(Window {
             id: w.id,
             active: w.active,
+            minimized: w.minimized,
             can_minimize: w.can_minimize,
         });
     }
@@ -193,7 +203,7 @@ pub(super) fn strip(shell: &Rc<Shell>, layout: Layout) -> Element {
                 _ => (6, 3),
             };
             let dock_menu = (layout == Layout::MenuBarDock).then(|| dock_menu(&shell, &item));
-            let button = action(&label, move || item.invoke(&state, layout))
+            let button = action(&label, move || item.invoke(&state, layout, None))
                 .width(width)
                 .min_width(width)
                 .height(48)

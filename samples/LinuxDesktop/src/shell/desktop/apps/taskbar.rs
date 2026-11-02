@@ -10,7 +10,10 @@ use ferroui_base::input::{
 };
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_controls::{Control, Flyout, FlyoutPresenter, FlyoutShowMode, PlacementMode};
-use std::{cell::RefCell, time::Duration};
+use std::{
+    cell::{Cell, RefCell},
+    time::Duration,
+};
 
 pub(super) fn buttons(shell: &Rc<Shell>, items: Memo<Vec<Entry>>) -> Element {
     let shell = shell.clone();
@@ -149,6 +152,13 @@ fn group_button(
         }
     });
 
+    // The task button gets keyboard focus on pointer-down. The asynchronous
+    // Wayland KeyboardLeave can be applied before Click (pointer-up). Record
+    // which client owned focus at the hand-off, for mouse and keyboard alike.
+    let previous_focus = Rc::new(Cell::new(None));
+    let remember = previous_focus.clone();
+    let forget = previous_focus.clone();
+    let cancel_pending = hover.clone();
     let invoke = flyout.clone();
     let state = shell.clone();
     let pending = hover.clone();
@@ -198,7 +208,19 @@ fn group_button(
         .on_pointer_exited(move |_| {
             hover.borrow_mut().take();
         })
+        .on_getting_focus(move |_| {
+            remember.set(entry.with(|app| {
+                app.as_ref()?
+                    .windows
+                    .iter()
+                    .find(|w| w.active)
+                    .map(|w| w.id)
+            }));
+        })
+        .on_lost_focus(move |_| forget.set(None))
         .on_click(move |_| {
+            cancel_pending.borrow_mut().take();
+            let before = previous_focus.take();
             let Some(current) = entry.get_untracked() else {
                 return;
             };
@@ -210,7 +232,7 @@ fn group_button(
                 }
             }
             if current.windows.len() <= 1 {
-                current.invoke(&state, Layout::Taskbar);
+                current.invoke(&state, Layout::Taskbar, before);
             } else if let Some(b) = anchor.get_untracked() {
                 invoke.set_show_mode(FlyoutShowMode::Standard);
                 invoke.popup().set_is_light_dismiss_enabled(true);

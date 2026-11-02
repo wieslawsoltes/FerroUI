@@ -157,9 +157,12 @@ pointer set 20 445
 wait_for has_color 9354ba absent
 # The same app slot now has one window. A click minimizes it, and the
 # next restores both the client pixels and the native keyboard seat.
-wait_for has_color d76a3d
-click "$tx" "$ty"; wait_for has_color d76a3d absent
-click "$tx" "$ty"; wait_for has_color d76a3d
+wait_for has_color d76a3d client-visible
+# Hold the button across a Wayland keyboard-focus round trip. The task
+# button takes focus on press, but its activation command runs on release.
+pointer set "$tx" "$ty"; pointer press button1; sleep .35; pointer release button1
+wait_for has_color d76a3d client-hidden
+click "$tx" "$ty"; wait_for has_color d76a3d client-visible
 wtype -s 90 -k F8
 received_again() { [[ $(grep -cx 'received F8' "$output/gtk.log") == 2 ]]; }
 wait_for received_again
