@@ -65,3 +65,55 @@ On Linux x86-64 with Rust 1.99.1 in release mode, the 690 XAML files across the 
 | Controls/Button.xaml | 16,102 | 18,937 | 7,990 | 747 µs | 454 µs | 587 µs |
 | Resources/Button_themeresources.xaml | 15,733 | 16,570 | 6,368 | 356 µs | 276 µs | 346 µs |
 | WinUITheme.xaml | 7,672 | 8,480 | 3,040 | 135 µs | 103 µs | 127 µs |
+
+## Indexed theme archives
+
+FXP v1 packages an inventory of original relative XAML asset paths and independently decodable FXD images. A member retains its source coordinates, namespace scopes and the full syntax graph. A development host can replace an individual member through the existing portable style reload API. When replacing an entire untrusted archive, call `ThemePack::open` and `ThemePack::validate` before publishing the new generation. The latter walks the graphs without executing application code.
+
+```sh
+cargo run --release -p ferroui-markup-xaml-loader --no-default-features \
+  --features portable-xaml --bin ferroui-fxd -- \
+  --pack src/FerroUI.Themes.WinUI WinUI.fxp
+```
+
+`binary_document::pack::compile_documents` accepts a build host's selected inventory, including the result of an explicit resource-roots pass. The directory CLI includes every regular `.xaml` file recursively. Paths use UTF-8 and slash separators. An FXP reader borrows the set of member images. Its sorted index supports binary search by path. Looking up a member does not decompress its neighbors.
+
+| FXP v1 field | Representation |
+| --- | --- |
+| Envelope | Four bytes `FXP\0`, version byte 1, little-endian u32 document count, little-endian u32 index byte length |
+| Index | In strictly increasing UTF-8 path order, repeated u16-LE path length, path bytes, u32-LE stored image length |
+| Images | Concatenated independent complete FXD images in index order |
+
+The reader checks all index and image boundaries up front, including every member's size declaration. Counts are bounded to 16,384 members, 4,096 bytes per path, 256 MiB total stored or expanded archive size and the normal 32 MiB limit per FXD. Duplicate names, traversal components, leading slashes, invalid envelopes, extra index bytes and trailing data fail validation.
+
+### Columnar FXD storage
+
+Layout 2 stores five streams for the node graph. Layout 3 wraps that same syntax payload in the version 1 zlib envelope. Both preserve the metadata, string table, lexical scope table and postorder node numbering of layouts 0 and 1. After the node count, three canonical unsigned LEB128 lengths give the respective byte sizes of the source line, column and scope streams.
+
+| Stream | Count and contents |
+| --- | --- |
+| Tags | One opcode byte per node |
+| Source lines | One ZigZag-encoded i32 delta from the previous line per node. The initial line is zero |
+| Source columns | One unsigned column per node |
+| Scopes | One optional scope reference per node |
+| Operands | The original per-opcode payload of each node in order |
+
+The decoder reads the streams together directly into the syntax graph. Syntax validators enforce the same node roles, resource limits and shared-reference rules. The reader rejects surplus bytes in any stream and source-line overflow. Archives use these layouts to keep opcodes, positions and repeated operand sequences individually compressible. Each member makes its own stored-versus-zlib decision. Older readers continue to load the standalone compiler's layout 0/1 output and reject unfamiliar layout codes.
+
+### Full WinUI corpus
+
+```sh
+cargo run --release -p ferroui-markup-xaml-loader --no-default-features \
+  --features portable-xaml --example portable_document -- \
+  --pack src/FerroUI.Themes.WinUI Controls/Button.xaml
+```
+
+The unfiltered WinUI source tree contains 169 documents totaling 2,092,775 bytes. Standalone FXD output totals 900,063 bytes. The complete indexed archive is **432,438 bytes**, including the directory. Decoding and serializing each member as canonical stored FXD reproduced the XML parser's graph byte for byte on the full inventory.
+
+| In-memory operation, Linux x86-64 | Standalone FXD p50 / p95 | FXP p50 / p95 |
+| --- | ---: | ---: |
+| Open index | — | 82 / 139 µs |
+| Decode and drop Button syntax | 431 / 587 µs | 383 / 551 µs |
+| Decode and drop all 169 graphs | 55.074 / 66.955 ms | 52.147 / 65.618 ms |
+
+A pinned CPU ran 51 iterations in rotating order using release-optimized Rust 1.99.1. Archive compilation, including source reads from a warm filesystem cache, took a median 214.322 ms over nine builds with identical output. These timings end at syntax reconstruction. Type resolution, framework construction, process startup and first usable UI are separate measurements. The archive contains portable XAML data. An executable also links the decoder, runtime and its selected framework types.
