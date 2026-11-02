@@ -13,6 +13,8 @@ use std::{cell::RefCell, io, rc::Rc};
 pub struct ClientWindow {
     pub id: u32,
     pub title: String,
+    /// XDG app ID or X11 resource class, when the client supplied one.
+    pub app_id: String,
     /// `None` denotes a sticky window visible on every workspace.
     pub workspace: Option<usize>,
     pub active: bool,

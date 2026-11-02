@@ -67,6 +67,7 @@ impl Desktop {
                 Some(ClientWindow {
                     id: u32::try_from(w.id).ok()?,
                     title: w.title.clone(),
+                    app_id: w.app_id.clone(),
                     workspace: Some(w.workspace),
                     active: w.focused,
                     minimized: w.minimized,

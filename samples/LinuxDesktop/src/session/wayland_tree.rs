@@ -183,6 +183,12 @@ impl Tree {
                 self.snapshot.windows.push(ClientWindow {
                     id,
                     title: node["name"].as_str().unwrap_or("Window").to_owned(),
+                    app_id: node["app_id"]
+                        .as_str()
+                        .filter(|id| !id.is_empty())
+                        .or_else(|| node["window_properties"]["class"].as_str())
+                        .unwrap_or_default()
+                        .to_owned(),
                     workspace: if node["sticky"] == true {
                         None
                     } else {

@@ -40,7 +40,7 @@ fn groups_are_not_windows_and_internal_scratchpad_is_not_a_desktop() {
     let spaces = json!([{"id":4,"num":1,"name":"1","focused":true,"output":"HEADLESS-1","rect":{"x":-100,"y":20,"width":101,"height":80}}]);
     let tree = json!({"type":"root","nodes":[{"type":"output","nodes":[{"type":"workspace","id":4,"name":"1",
         "nodes":[{"type":"con","id":7,"nodes":[{"type":"con","id":8,"name":"Editor","app_id":"org.test.Editor","focused":true}]}],
-        "floating_nodes":[{"type":"floating_con","id":9,"window":432,"name":"XWayland"}]}]},
+        "floating_nodes":[{"type":"floating_con","id":9,"window":432,"name":"XWayland","window_properties":{"class":"XTerm"}}]}]},
         {"type":"output","name":"__i3","nodes":[{"type":"workspace","name":"__i3_scratch","floating_nodes":[{"type":"floating_con","id":10,"shell":"xdg_shell"}]}]}]});
     let model = Tree::parse(&spaces, &tree).unwrap();
     assert_eq!(model.snapshot.workspace_names, ["1"]);
@@ -53,6 +53,8 @@ fn groups_are_not_windows_and_internal_scratchpad_is_not_a_desktop() {
             .collect::<Vec<_>>(),
         [(8, true, false), (9, false, false), (10, false, true)]
     );
+    let ids: Vec<_> = model.snapshot.windows.iter().map(|w| w.app_id.as_str()).collect();
+    assert_eq!(ids, ["org.test.Editor", "XTerm", ""]);
     assert_eq!(
         model.spaces[0].area.half(true),
         Rect {

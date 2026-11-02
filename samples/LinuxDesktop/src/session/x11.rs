@@ -341,7 +341,7 @@ impl Session {
                         if atom == a._NET_WM_NAME || atom == a.WM_NAME {
                             session.dirty.borrow_mut().titles.insert(id);
                             session.queue();
-                        } else if [a._NET_WM_ALLOWED_ACTIONS, a._NET_WM_DESKTOP, a._NET_WM_STATE, a._NET_WM_WINDOW_TYPE]
+                        } else if [a.WM_CLASS, a._NET_WM_ALLOWED_ACTIONS, a._NET_WM_DESKTOP, a._NET_WM_STATE, a._NET_WM_WINDOW_TYPE]
                             .contains(&atom)
                         {
                             session.dirty.borrow_mut().clients.insert(id);
@@ -414,6 +414,12 @@ impl Session {
         Some(ClientWindow {
             id: id as u32,
             title: self.client_title(id),
+            // ICCCM WM_CLASS contains the NUL-terminated instance, then the class.
+            app_id: self.bytes(id, a.WM_CLASS, a.STRING)
+                .split(|&byte| byte == 0)
+                .nth(1)
+                .map(|class| String::from_utf8_lossy(class).into_owned())
+                .unwrap_or_default(),
             workspace: (desktop != u32::MAX).then_some(desktop as usize),
             active: self.active.get() == id,
             minimized: states.contains(&a._NET_WM_STATE_HIDDEN),
