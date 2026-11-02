@@ -228,11 +228,11 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
 
 /// A second view of the client's retained subtree. The shared drawing surfaces
 /// receive a single upload per buffer even with the overview on screen.
-fn preview(source: Rc<CompositionVisual>) -> Element {
+pub(super) fn preview(source: Rc<CompositionVisual>, height: f64) -> Element {
     let host = NodeRef::<ferroui_controls::Border>::new();
     border()
         .horizontal_alignment(H::Stretch)
-        .height(152.0)
+        .height(height)
         .is_hit_test_visible(false)
         .node_ref(host)
         .on_loaded(move |_| {
@@ -298,7 +298,7 @@ fn client_row(
             Ink::Secondary,
         ));
     let content: Element = if composed {
-        let artwork = source.map(preview).unwrap_or_else(|| {
+        let artwork = source.map(|visual| preview(visual, 152.0)).unwrap_or_else(|| {
             grid()
                 .height(152.0)
                 .child(glyph(Icon::Window, 32.0, colors().accent))

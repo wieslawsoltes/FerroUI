@@ -1,5 +1,7 @@
 //! Pinned and running apps share one slot. Only the small set of visible
 //! buttons is mounted; the overview still lists every individual window.
+mod taskbar;
+
 use super::*;
 use crate::services::ApplicationCatalog;
 use crate::session::Snapshot;
@@ -116,6 +118,19 @@ fn entries(
     items
 }
 
+fn app_art(shell: &Rc<Shell>, item: &Entry) -> Element {
+    if let Some(i) = item.app {
+        super::super::launcher::app_icon(shell, &shell.catalog.applications()[i])
+    } else {
+        let id = if item.native_id.is_empty() {
+            &item.label
+        } else {
+            &item.native_id
+        };
+        super::super::launcher::fallback_icon(id, &item.label)
+    }
+}
+
 pub(super) fn strip(shell: &Rc<Shell>, layout: Layout) -> Element {
     let pins = shell.favorites;
     let model = shell.snapshot;
@@ -126,6 +141,9 @@ pub(super) fn strip(shell: &Rc<Shell>, layout: Layout) -> Element {
     let items = memo(move |_| {
         pins.with(|pins| model.with(|model| entries(&catalog, pins, model, capacity.get())))
     });
+    if layout == Layout::Taskbar {
+        return taskbar::buttons(&shell, items);
+    }
     let buttons = for_each(
         move || {
             items.with(|items| {
@@ -150,27 +168,14 @@ pub(super) fn strip(shell: &Rc<Shell>, layout: Layout) -> Element {
                 1 => item.label.clone(),
                 n => format!("{} · {n} windows", item.label),
             };
-            let icon = item
-                .app
-                .map(|i| super::super::launcher::app_icon(&shell, &shell.catalog.applications()[i]))
-                .unwrap_or_else(|| {
-                    super::super::launcher::fallback_icon(
-                        if item.native_id.is_empty() {
-                            &item.label
-                        } else {
-                            &item.native_id
-                        },
-                        &item.label,
-                    )
-                });
+            let icon = app_art(&shell, &item);
             let state = shell.clone();
             let width = match layout {
-                Layout::Taskbar => 40,
+                Layout::Taskbar => unreachable!(),
                 Layout::MenuBarDock => 44,
                 Layout::BottomNavigation => 48,
             };
             let (marker_width, marker_height) = match layout {
-                Layout::Taskbar if active => (16, 3),
                 Layout::MenuBarDock => (4, 4),
                 _ => (6, 3),
             };
@@ -178,15 +183,11 @@ pub(super) fn strip(shell: &Rc<Shell>, layout: Layout) -> Element {
             let button = action(&label, move || item.invoke(&state, layout))
                 .width(width)
                 .min_width(width)
-                .height(if layout == Layout::Taskbar { 40 } else { 48 })
+                .height(48)
                 .padding(0)
                 .corner_radius(8)
                 .border_thickness(0)
-                .background(if layout == Layout::Taskbar && active {
-                    colors().tile
-                } else {
-                    "Transparent"
-                })
+                .background("Transparent")
                 .child(
                     grid().row_definitions("*,5").child(icon).child(
                         border()
