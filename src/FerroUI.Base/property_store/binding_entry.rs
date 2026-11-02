@@ -6,26 +6,47 @@ use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
-/// The observable a binding entry or binding observer reads its values from.
-pub(crate) enum BindingSource<T> {
-    Typed(Rc<dyn IObservable<T>>),
-    Value(Rc<dyn IObservable<BindingValue<T>>>),
-    Untyped(Rc<dyn IObservable<BoxedValue>>),
+// A deferred frame entry retains the observable and the adapter chosen by the
+// binding overload. A boxed-only property can resubscribe without retaining
+// its typed and BindingValue observer implementations in the executable.
+type EntryObserver<T, U> = fn(Weak<BindingEntry<T>>) -> Rc<dyn IObserver<U>>;
+
+pub(crate) enum BindingSource<T: PropertyValue> {
+    Typed(Rc<dyn IObservable<T>>, EntryObserver<T, T>),
+    Value(Rc<dyn IObservable<BindingValue<T>>>, EntryObserver<T, BindingValue<T>>),
+    Untyped(Rc<dyn IObservable<BoxedValue>>, EntryObserver<T, BoxedValue>),
 }
 
-enum Subscription {
-    None,
+impl<T: PropertyValue> BindingSource<T> {
+    pub(crate) fn typed(source: Rc<dyn IObservable<T>>) -> Self {
+        Self::Typed(source, |entry| Rc::new(TypedObserver(entry)))
+    }
+
+    pub(crate) fn value(source: Rc<dyn IObservable<BindingValue<T>>>) -> Self {
+        Self::Value(source, |entry| Rc::new(ValueObserver(entry)))
+    }
+
+    pub(crate) fn untyped(source: Rc<dyn IObservable<BoxedValue>>) -> Self {
+        Self::Untyped(source, |entry| Rc::new(UntypedObserver(entry)))
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum SubscriptionPhase {
+    Idle,
     /// Subscribing; values produced during subscription are published.
     Creating,
     /// Subscribing; values produced during subscription are only stored.
     CreatingQuiet,
-    Active(Rc<dyn IDisposable>),
+    Active,
 }
 
 /// Subscription and validation belong to the binding, regardless of its
 /// property's Rust value type. Keep their reentrant transitions in one place.
 struct BindingEntryState {
-    subscription: RefCell<Subscription>,
+    // The phase is readable while subscribing or disposing synchronously.
+    phase: Cell<SubscriptionPhase>,
+    subscription: Cell<Option<Rc<dyn IDisposable>>>,
     frame: Weak<dyn ValueFrame>,
     has_data_validation: bool,
     data_validation_state: Cell<BindingValueType>,
@@ -46,7 +67,8 @@ impl BoundFrame {
 impl BindingEntryState {
     fn new(frame: Weak<dyn ValueFrame>, has_data_validation: bool) -> Self {
         Self {
-            subscription: RefCell::new(Subscription::None),
+            phase: Cell::new(SubscriptionPhase::Idle),
+            subscription: Cell::new(None),
             frame,
             has_data_validation,
             data_validation_state: Cell::new(BindingValueType::VALUE),
@@ -60,27 +82,25 @@ impl BindingEntryState {
     }
 
     fn begin(&self, publish: bool) -> bool {
-        let mut current = self.subscription.borrow_mut();
-        if !matches!(*current, Subscription::None) {
+        if self.phase.get() != SubscriptionPhase::Idle {
             return false;
         }
-        *current = if publish { Subscription::Creating } else { Subscription::CreatingQuiet };
+        self.phase.set(if publish { SubscriptionPhase::Creating } else { SubscriptionPhase::CreatingQuiet });
         true
     }
 
     fn finish(&self, subscription: Rc<dyn IDisposable>) {
-        let mut current = self.subscription.borrow_mut();
         // A synchronous source may have completed during subscribe.
-        if matches!(*current, Subscription::None) {
-            drop(current);
+        if self.phase.get() == SubscriptionPhase::Idle {
             subscription.dispose();
         } else {
-            *current = Subscription::Active(subscription);
+            self.phase.set(SubscriptionPhase::Active);
+            self.subscription.set(Some(subscription));
         }
     }
 
     fn publishes(&self) -> bool {
-        matches!(*self.subscription.borrow(), Subscription::Creating | Subscription::Active(_))
+        matches!(self.phase.get(), SubscriptionPhase::Creating | SubscriptionPhase::Active)
     }
 
     fn set_validation(&self, state: BindingValueType, error: Option<&BindingError>) {
@@ -96,14 +116,15 @@ impl BindingEntryState {
     }
 
     fn unsubscribe(&self) {
-        let subscription = self.subscription.replace(Subscription::None);
-        if let Subscription::Active(s) = subscription {
+        self.phase.set(SubscriptionPhase::Idle);
+        if let Some(s) = self.subscription.take() {
             s.dispose();
         }
     }
 
     fn completed(&self, property: &'static FerroProperty) {
-        self.subscription.replace(Subscription::None);
+        self.phase.set(SubscriptionPhase::Idle);
+        drop(self.subscription.take());
         if let Some(frame) = self.frame.upgrade() {
             frame.on_binding_completed(property);
         }
@@ -112,7 +133,7 @@ impl BindingEntryState {
 
 impl Drop for BindingEntryState {
     fn drop(&mut self) {
-        if let Subscription::Active(s) = std::mem::replace(self.subscription.get_mut(), Subscription::None) {
+        if let Some(s) = self.subscription.get_mut().take() {
             s.dispose();
         }
     }
@@ -161,9 +182,9 @@ impl<T: PropertyValue> BindingEntry<T> {
         // system): the entry holds its source, and the source its observers.
         let this = self.this.clone();
         let subscription = match &self.source {
-            BindingSource::Typed(source) => source.subscribe(Rc::new(TypedObserver(this))),
-            BindingSource::Value(source) => source.subscribe(Rc::new(ValueObserver(this))),
-            BindingSource::Untyped(source) => source.subscribe(Rc::new(UntypedObserver(this))),
+            BindingSource::Typed(source, observer) => source.subscribe(observer(this)),
+            BindingSource::Value(source, observer) => source.subscribe(observer(this)),
+            BindingSource::Untyped(source, observer) => source.subscribe(observer(this)),
         };
         self.state.finish(subscription);
     }
@@ -190,15 +211,6 @@ impl<T: PropertyValue> BindingEntry<T> {
         BindingValue::binding_error(invalid_value_error(self.property))
     }
 
-    fn cached_default_value(&self, owner: &FerroObject) -> T {
-        if let Some(v) = &*self.default_value.borrow() {
-            return v.clone();
-        }
-        let value = self.property.get_default_value_for(owner);
-        *self.default_value.borrow_mut() = Some(value.clone());
-        value
-    }
-
     fn set_value(self: &Rc<Self>, mut value: BindingValue<T>) {
         if value.value_type() == BindingValueType::DO_NOTHING {
             return;
@@ -206,7 +218,7 @@ impl<T: PropertyValue> BindingEntry<T> {
         let Some(bound) = self.state.bound_frame() else { return };
 
         if !value.has_value() && value.value_type() != BindingValueType::DATA_VALIDATION_ERROR {
-            value = value.with_value(self.cached_default_value(&bound.owner));
+            value = value.with_value(self.property.binding_default(&bound.owner, &self.default_value));
         }
 
         self.state.set_validation(value.value_type(), value.error());

@@ -1,7 +1,6 @@
-use super::BindingSource;
 use crate::data::{BindingError, BindingValue, BindingValueType};
-use crate::reactive::{IDisposable, IObserver, ObservableError, Subscription};
-use crate::{BoxedValue, DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, Ref, StyledProperty, WeakRef};
+use crate::reactive::{IDisposable, IObservable, IObserver, ObservableError, Subscription};
+use crate::{BoxedValue, DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, StyledProperty, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
@@ -75,22 +74,16 @@ impl<T: PropertyValue> LocalValueBindingObserver<T> {
         })
     }
 
-    pub fn start(self: &Rc<Self>, source: BindingSource<T>) {
-        let subscription = match source {
-            BindingSource::Typed(source) => source.subscribe(Rc::new(Typed(Rc::downgrade(self)))),
-            BindingSource::Value(source) => source.subscribe(Rc::new(Value(Rc::downgrade(self)))),
-            BindingSource::Untyped(source) => source.subscribe(Rc::new(Untyped(Rc::downgrade(self)))),
-        };
-        self.state.started(subscription);
+    pub(crate) fn start_typed(self: &Rc<Self>, source: Rc<dyn IObservable<T>>) {
+        self.state.started(source.subscribe(Rc::new(Typed(Rc::downgrade(self)))));
     }
 
-    fn cached_default_value(&self, owner: &Ref<FerroObject>) -> T {
-        if let Some(v) = &*self.default_value.borrow() {
-            return v.clone();
-        }
-        let value = self.property.get_default_value_for(owner);
-        *self.default_value.borrow_mut() = Some(value.clone());
-        value
+    pub(crate) fn start_value(self: &Rc<Self>, source: Rc<dyn IObservable<BindingValue<T>>>) {
+        self.state.started(source.subscribe(Rc::new(Value(Rc::downgrade(self)))));
+    }
+
+    pub(crate) fn start_untyped(self: &Rc<Self>, source: Rc<dyn IObservable<BoxedValue>>) {
+        self.state.started(source.subscribe(Rc::new(Untyped(Rc::downgrade(self)))));
     }
 
     fn completed(&self) {
@@ -100,7 +93,7 @@ impl<T: PropertyValue> LocalValueBindingObserver<T> {
     fn next(&self, mut value: T) {
         let Some(owner) = self.state.owner.upgrade() else { return };
         if !self.property.is_valid(&value) {
-            value = self.cached_default_value(&owner);
+            value = self.property.binding_default(&owner, &self.default_value);
         }
         owner.values().set_local_value(&owner, self.property, value);
         self.state.validate(&owner, self.property, BindingValueType::VALUE, None);
@@ -116,7 +109,7 @@ impl<T: PropertyValue> LocalValueBindingObserver<T> {
         let value = match value {
             Some(v) if self.property.is_valid(&v) => Some(v),
             None if kind == BindingValueType::DATA_VALIDATION_ERROR => None,
-            _ => Some(self.cached_default_value(&owner)),
+            _ => Some(self.property.binding_default(&owner, &self.default_value)),
         };
         if let Some(v) = value {
             owner.values().set_local_value(&owner, self.property, v);
@@ -207,14 +200,17 @@ impl<T: PropertyValue> DirectBindingObserver<T> {
         })
     }
 
-    pub fn start(self: &Rc<Self>, source: BindingSource<T>) {
-        self.is_untyped.set(matches!(source, BindingSource::Untyped(_)));
-        let subscription = match source {
-            BindingSource::Typed(source) => source.subscribe(Rc::new(DirectTyped(Rc::downgrade(self)))),
-            BindingSource::Value(source) => source.subscribe(Rc::new(DirectValue(Rc::downgrade(self)))),
-            BindingSource::Untyped(source) => source.subscribe(Rc::new(DirectUntyped(Rc::downgrade(self)))),
-        };
-        self.state.started(subscription);
+    pub(crate) fn start_typed(self: &Rc<Self>, source: Rc<dyn IObservable<T>>) {
+        self.state.started(source.subscribe(Rc::new(DirectTyped(Rc::downgrade(self)))));
+    }
+
+    pub(crate) fn start_value(self: &Rc<Self>, source: Rc<dyn IObservable<BindingValue<T>>>) {
+        self.state.started(source.subscribe(Rc::new(DirectValue(Rc::downgrade(self)))));
+    }
+
+    pub(crate) fn start_untyped(self: &Rc<Self>, source: Rc<dyn IObservable<BoxedValue>>) {
+        self.is_untyped.set(true);
+        self.state.started(source.subscribe(Rc::new(DirectUntyped(Rc::downgrade(self)))));
     }
 
     /// `disposing` is true when the binding is disposed, false when its

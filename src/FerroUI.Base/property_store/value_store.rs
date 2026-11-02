@@ -9,7 +9,7 @@ use crate::diagnostics::{
     ValueFrameDiagnostic, ValueStoreDiagnostic,
 };
 use crate::data::{BindingExpressionBase, BindingPriority, BindingValueType};
-use crate::reactive::IDisposable;
+use crate::reactive::{IDisposable, IObservable};
 use crate::{DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, Ref, StyledProperty, WeakRef};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -160,23 +160,25 @@ impl ValueStore {
     }
 
     /// Adds a binding to a styled property.
-    pub fn add_binding<T: PropertyValue>(
+    pub fn add_binding<T: PropertyValue, U: 'static>(
         &self,
         owner: &FerroObject,
         property: &'static StyledProperty<T>,
-        source: BindingSource<T>,
+        source: Rc<dyn IObservable<U>>,
         priority: BindingPriority,
+        start_local: fn(&Rc<LocalValueBindingObserver<T>>, Rc<dyn IObservable<U>>),
+        frame_source: fn(Rc<dyn IObservable<U>>) -> BindingSource<T>,
     ) -> Rc<dyn IDisposable> {
         if priority == BindingPriority::LocalValue {
             let observer = LocalValueBindingObserver::new(owner, property);
             self.dispose_existing_local_value_binding(property);
             self.set_local_value_binding(property, observer.clone());
-            observer.start(source);
+            start_local(&observer, source);
             observer
         } else {
             let effective = self.get_effective_value(property);
             let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
-            let result = frame.add_binding(property, source);
+            let result = frame.add_binding(property, frame_source(source));
             if effective.is_none_or(|e| priority <= e.priority()) {
                 result.start();
             }
@@ -185,16 +187,17 @@ impl ValueStore {
     }
 
     /// Adds a binding to a direct property.
-    pub fn add_direct_binding<T: PropertyValue>(
+    pub fn add_direct_binding<T: PropertyValue, U: 'static>(
         &self,
         owner: &FerroObject,
         property: &'static DirectPropertyBase<T>,
-        source: BindingSource<T>,
+        source: Rc<dyn IObservable<U>>,
+        start: fn(&Rc<DirectBindingObserver<T>>, Rc<dyn IObservable<U>>),
     ) -> Rc<dyn IDisposable> {
         let observer = DirectBindingObserver::new(owner, property);
         self.dispose_existing_local_value_binding(property);
         self.set_local_value_binding(property, observer.clone());
-        observer.start(source);
+        start(&observer, source);
         observer
     }
 

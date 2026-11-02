@@ -139,6 +139,17 @@ impl<T: PropertyValue> StyledProperty<T> {
         self.get_default_value(owner.get_type())
     }
 
+    /// A binding keeps the first fallback it observes for its owner, even if
+    /// the property's metadata is subsequently overridden.
+    pub(crate) fn binding_default(&self, owner: &FerroObject, cache: &RefCell<Option<T>>) -> T {
+        if let Some(value) = &*cache.borrow() {
+            return value.clone();
+        }
+        let value = self.get_default_value_for(owner);
+        *cache.borrow_mut() = Some(value.clone());
+        value
+    }
+
     /// Gets the property metadata for the specified type.
     #[inline]
     pub fn get_metadata(&self, type_: &'static TypeInfo) -> Rc<StyledPropertyMetadata<T>> {
@@ -341,7 +352,7 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
             o,
             frame,
             self,
-            crate::property_store::BindingSource::Untyped(source),
+            crate::property_store::BindingSource::untyped(source),
         )
     }
 }

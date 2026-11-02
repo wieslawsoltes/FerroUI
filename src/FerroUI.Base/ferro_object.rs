@@ -1,5 +1,5 @@
 use crate::data::{BindingBase, BindingError, BindingExpressionBase, BindingPriority, BindingValue, BindingValueType};
-use crate::property_store::{BindingSource, ValueStore};
+use crate::property_store::{BindingSource, DirectBindingObserver, LocalValueBindingObserver, ValueStore};
 use crate::reactive::{Disposable, IDisposable, IObservable};
 use crate::threading::Dispatcher;
 use crate::type_system::{__forwards_to_parent, cast_this, parent_vtable};
@@ -685,7 +685,9 @@ impl FerroObject {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         Self::validate_priority(priority);
-        self.values.add_binding(self, property, BindingSource::Typed(source), priority)
+        self.values.add_binding(
+            self, property, source, priority, LocalValueBindingObserver::start_typed, BindingSource::typed,
+        )
     }
 
     /// Binds a property to an observable of binding values.
@@ -696,7 +698,9 @@ impl FerroObject {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         Self::validate_priority(priority);
-        self.values.add_binding(self, property, BindingSource::Value(source), priority)
+        self.values.add_binding(
+            self, property, source, priority, LocalValueBindingObserver::start_value, BindingSource::value,
+        )
     }
 
     /// Binds a property to an observable of untyped values.
@@ -707,7 +711,9 @@ impl FerroObject {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         Self::validate_priority(priority);
-        self.values.add_binding(self, property, BindingSource::Untyped(source), priority)
+        self.values.add_binding(
+            self, property, source, priority, LocalValueBindingObserver::start_untyped, BindingSource::untyped,
+        )
     }
 
     /// Coerces the specified property.
@@ -768,7 +774,7 @@ impl FerroObject {
         source: Rc<dyn IObservable<T>>,
     ) -> Rc<dyn IDisposable> {
         let property = self.writable_direct(property);
-        self.values.add_direct_binding(self, property, BindingSource::Typed(source))
+        self.values.add_direct_binding(self, property, source, DirectBindingObserver::start_typed)
     }
 
     /// Binds a direct property to an observable of binding values.
@@ -778,7 +784,7 @@ impl FerroObject {
         source: Rc<dyn IObservable<BindingValue<T>>>,
     ) -> Rc<dyn IDisposable> {
         let property = self.writable_direct(property);
-        self.values.add_direct_binding(self, property, BindingSource::Value(source))
+        self.values.add_direct_binding(self, property, source, DirectBindingObserver::start_value)
     }
 
     /// Binds a direct property to an observable of untyped values.
@@ -788,7 +794,7 @@ impl FerroObject {
         source: Rc<dyn IObservable<BoxedValue>>,
     ) -> Rc<dyn IDisposable> {
         let property = self.writable_direct(property);
-        self.values.add_direct_binding(self, property, BindingSource::Untyped(source))
+        self.values.add_direct_binding(self, property, source, DirectBindingObserver::start_untyped)
     }
 
     fn writable_direct<T: PropertyValue>(

@@ -204,47 +204,39 @@ impl BindingNotification {
     /// converted produces a binding error, aggregated with the notification's
     /// own error if it has one. `target_type` names `T` in that error.
     pub(crate) fn to_binding_value<T: Clone + 'static>(&self, target_type: &str) -> crate::data::BindingValue<T> {
-        use crate::data::BindingValue;
-
-        // Only the downcast and the construction of the result depend on
-        // `T`; the rest is shared by every instantiation.
-        let (error, error_type, value) = match self.binding_value_parts() {
-            Ok(parts) => parts,
-            Err((error, BindingErrorType::DataValidationError)) => return BindingValue::data_validation_error(error),
-            Err((error, _)) => return BindingValue::binding_error(error),
-        };
-
-        let typed = value.as_ref().and_then(|value| value.downcast_ref::<T>().cloned());
-
-        match typed {
-            Some(typed) => match (error_type, error) {
-                (BindingErrorType::Error, Some(error)) => BindingValue::binding_error_with_fallback(error, Some(typed)),
-                (BindingErrorType::DataValidationError, Some(error)) => {
-                    BindingValue::data_validation_error_with_fallback(error, Some(typed))
-                }
-                _ => BindingValue::new(typed),
-            },
-            None => BindingValue::binding_error(Self::conversion_error(error, value.is_some(), target_type)),
-        }
+        let mut typed = None;
+        let (kind, error) = self.resolve_binding_value(target_type, &mut |value| {
+            typed = value.downcast_ref::<T>().cloned();
+            typed.is_some()
+        });
+        crate::data::BindingValue::from_notification_parts(kind, typed, error)
     }
 
-    /// The error, the error type and the value of the notification, or the
-    /// error a notification without a value stands for.
-    #[allow(clippy::type_complexity)]
-    fn binding_value_parts(
+    // Only copying the payload needs the destination Rust type. Keep the
+    // error policy, including aggregation for an invalid fallback, shared
+    // across all property types. The callback runs outside any RefCell borrow.
+    fn resolve_binding_value(
         &self,
-    ) -> Result<(Option<BindingError>, BindingErrorType, Option<BoxedValue>), (BindingError, BindingErrorType)> {
+        target_type: &str,
+        copy_value: &mut dyn FnMut(&BoxedValue) -> bool,
+    ) -> (BindingValueType, Option<BindingError>) {
         let error = self.error();
         let error_type = self.error_type();
-
-        // As in the reference, a notification without an error always counts
-        // as carrying a value, even when its value is the unset marker.
         if !self.has_value() && error_type != BindingErrorType::None {
             let error = error.unwrap_or_else(|| BindingError::message("Binding notification has no error."));
-            return Err((error, error_type));
+            return (error_type.to_binding_value_type(), Some(error));
         }
 
-        Ok((error, error_type, self.value()))
+        let value = self.value();
+        if value.as_ref().is_some_and(copy_value) {
+            if error_type != BindingErrorType::None && error.is_some() {
+                return (error_type.to_binding_value_type() | BindingValueType::HAS_VALUE, error);
+            }
+            (BindingValueType::VALUE, None)
+        } else {
+            let error = Self::conversion_error(error, value.is_some(), target_type);
+            (BindingValueType::BINDING_ERROR, Some(error))
+        }
     }
 
     /// The error of a notification whose value is not of the type asked

@@ -90,6 +90,14 @@ pub struct BindingValue<T> {
 }
 
 impl<T> BindingValue<T> {
+    pub(super) fn from_notification_parts(
+        type_: BindingValueType,
+        value: Option<T>,
+        error: Option<BindingError>,
+    ) -> Self {
+        Self { type_, value, error }
+    }
+
     /// Creates a binding value holding a simple value.
     #[inline]
     pub fn new(value: T) -> Self {
