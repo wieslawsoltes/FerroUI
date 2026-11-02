@@ -39,6 +39,10 @@ The dark WinUI personalization flyout below samples the actual GTK and Qt surfac
 
 ![Dark WinUI acrylic over native GTK and Qt clients](screenshots/compositor-winui-acrylic.webp)
 
+## Shell motion
+
+Start and Windows system flyouts rise 14 DIPs over 155 ms. Spotlight and macOS system panels fade in over 105 ms. Material sheets rise 28 DIPs over 200 ms. These are finite compositor key frames. Animating `Translation.Y` preserves the elevation in `Translation.Z`. The input target becomes available as soon as the sheet opens, and closing it immediately restores the underlying target. The shell skips entry motion in Windows High Contrast and when the active theme or platform disables animations.
+
 ## Live window previews
 
 Open the window overview with **Super+Tab** in the composed session. Task View, Mission Control and Recents show each visible client from the same retained visual tree that presents it on the desktop. A toplevel has a container positioned at its xdg window geometry. Its surface, synchronized children and popups retain their local positions and stacking order. Popups can extend beyond that geometry on the desktop.

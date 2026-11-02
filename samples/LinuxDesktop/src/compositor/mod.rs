@@ -6,6 +6,7 @@ use crate::compositor_server::{Input, Scene, Server};
 use crate::session::{ClientWindow, Session, SnapSide, Snapshot};
 use crate::shell::appearance::ThemeController;
 use crate::{services::ApplicationCatalog, shell};
+use ferroui_base::rendering::composition::CompositionVisual;
 use ferroui_base::Ref;
 use ferroui_controls::{Application, Control, Window, WindowState};
 use ferroui_freedesktop::ui_thread_object::UiThreadHandle;
@@ -95,7 +96,7 @@ impl Desktop {
     pub fn element(&self) -> Element {
         self.scene.element()
     }
-    pub fn window_visual(&self, window: u32) -> Option<Rc<ferroui_base::rendering::composition::CompositionVisual>> {
+    pub fn window_visual(&self, window: u32) -> Option<Rc<CompositionVisual>> {
         self.scene.window_visual(window)
     }
 

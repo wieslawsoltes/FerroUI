@@ -189,28 +189,35 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
 fn preview(source: Rc<CompositionVisual>) -> Element {
     let host = NodeRef::<ferroui_controls::Border>::new();
     border()
-        .width(96.0).height(60.0)
+        .width(96.0)
+        .height(60.0)
         .is_hit_test_visible(false)
         .node_ref(host)
         .on_loaded(move |_| {
-            let Some(control) = host.get_untracked() else { return };
-            let Some(visual) = ElementComposition::get_element_visual(&*control) else { return };
-            let c = visual.compositor();
-            if !Rc::ptr_eq(c, source.compositor()) { return; }
-            let surface = c.create_visual_surface();
+            let Some(control) = host.get_untracked() else {
+                return;
+            };
+            let Some(visual) = ElementComposition::get_element_visual(&control) else {
+                return;
+            };
+            let compositor = visual.compositor();
+            if !Rc::ptr_eq(compositor, source.compositor()) {
+                return;
+            }
+            let surface = compositor.create_visual_surface();
             surface.set_source_visual(Some(source.clone()));
-            let brush = c.create_surface_brush_with_surface(surface);
+            let brush = compositor.create_surface_brush_with_surface(surface);
             brush.set_stretch(CompositionStretch::Uniform);
             brush.set_horizontal_alignment_ratio(0.5);
             brush.set_vertical_alignment_ratio(0.5);
-            let sprite = c.create_sprite_visual();
+            let sprite = compositor.create_sprite_visual();
             sprite.set_size(ferroui_base::Vector::new(96., 60.));
             sprite.set_brush(Some((*brush).clone()));
-            ElementComposition::set_element_child_visual(&*control, Some((*sprite).clone()));
+            ElementComposition::set_element_child_visual(&control, Some((*sprite).clone()));
         })
         .on_unloaded(move |_| {
             if let Some(control) = host.get_untracked() {
-                ElementComposition::set_element_child_visual(&*control, None);
+                ElementComposition::set_element_child_visual(&control, None);
             }
         })
         .into()
@@ -220,9 +227,15 @@ fn client_row(shell: &Rc<Shell>, client: ClientWindow, expanded: Signal<Option<u
     let id = client.id;
     let state = shell.clone();
     let title = client.title.as_str();
-    let source = shell.session.as_ref().and_then(|s| s.compositor()).and_then(|host| host.window_visual(id));
+    let source = shell
+        .session
+        .as_ref()
+        .and_then(|session| session.compositor())
+        .and_then(|host| host.window_visual(id));
     let columns = if source.is_some() { "96,*" } else { "20,*" };
-    let artwork = source.map(preview).unwrap_or_else(|| glyph(Icon::Window, 16.0, colors().accent).into());
+    let artwork = source
+        .map(preview)
+        .unwrap_or_else(|| glyph(Icon::Window, 16.0, colors().accent).into());
     let restore = action(title, move || {
         if let Some(session) = &state.session {
             state.dismiss();
