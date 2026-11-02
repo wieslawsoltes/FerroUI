@@ -116,7 +116,7 @@ impl FerroRuntimeXamlLoader {
             includes.insert(
                 uri,
                 Rc::new(move |provider| {
-                    let value = plan.build_at(provider)?;
+                    let value = plan.build_include(provider)?;
                     from_markup_value::<Ref<ResourceDictionary>>(&Some(value)).ok_or_else(|| {
                         XamlLoadError::with_message(
                             "Expected a resource dictionary at the compiled include",

@@ -87,13 +87,17 @@ impl PreparedPackedDocument {
     /// rerun diagnostics. It executes the ordinary constructor and markup factories.
     pub fn build(&self, parent: Option<Rc<dyn IServiceProvider>>) -> Result<BoxedValue, ferroui_markup_xaml::XamlLoadError> {
         let provider = XamlIlRuntimeHelpers::create_root_service_provider_v3(parent);
-        self.build_at(provider)
+        self.result(FerroXamlIlRuntimeCompiler::build_new(&self.provider, self.class, provider))
     }
 
-    /// A compiled include already established its own root service provider.
-    pub(crate) fn build_at(&self, provider: Rc<dyn IServiceProvider>) -> Result<BoxedValue, ferroui_markup_xaml::XamlLoadError> {
-        let value = FerroXamlIlRuntimeCompiler::build_new(&self.provider, self.class, provider)
-            .map_err(|error| {
+    /// An include calls the document's Build method directly with its established
+    /// provider. Only an independent class-root load runs the populate override.
+    pub(crate) fn build_include(&self, provider: Rc<dyn IServiceProvider>) -> Result<BoxedValue, ferroui_markup_xaml::XamlLoadError> {
+        self.result(self.provider.build(Some(provider)))
+    }
+
+    fn result(&self, value: XamlResult<MarkupValue>) -> Result<BoxedValue, ferroui_markup_xaml::XamlLoadError> {
+        let value = value.map_err(|error| {
                 let error = match error.document() {
                     Some(_) => error,
                     None => error.with_document(Some(self.name.clone())),
