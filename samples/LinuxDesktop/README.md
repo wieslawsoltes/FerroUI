@@ -67,14 +67,14 @@ samples/LinuxDesktop/build.sh run -- --theme=material --scene=applications
 | macOS | FerroUI macOS theme | Menu bar, Dock and centered application search |
 | Material 3 | FerroUI Material theme | Touch-sized bottom navigation and app drawer |
 
-**Ctrl+K** opens applications. Type a name or part of a description, then press **Enter** to launch the first match. **Ctrl+W** opens the workspace and window overview. **Ctrl+Alt+1–9** selects a workspace where the window manager provides it. **Esc** dismisses the open surface.
+**Ctrl+K** opens applications. Type a name or part of a description, then use **Up/Down** or **Page Up/Page Down** to select an application and press **Enter** to launch it. **Ctrl+W** opens the workspace and window overview. **Ctrl+Alt+1–9** selects a workspace where the window manager provides it. **Esc** dismisses the open surface.
 
 ## Everyday controls
 
 | In the shell | Action |
 | --- | --- |
 | Ctrl+K or Ctrl+Space | Open the launcher. Pin an installed application to put it on the taskbar, Dock or Material home screen. |
-| Ctrl+P / Ctrl+Shift+P in search | Pin or unpin the first result on the page / switch between all applications and pins. In the pinned list, Alt+Left or Alt+Right moves the entry. |
+| Ctrl+P / Ctrl+Shift+P in search | Pin or unpin the selected result / switch between all applications and pins. In the pinned list, Alt+Left or Alt+Right moves the entry. |
 | Ctrl+W | Switch or create workspaces, arrange a client, or move it to a named workspace. The overview exposes actions supported by the window manager. |
 | Ctrl+N | Read or dismiss notifications, invoke actions and toggle Do Not Disturb. Banners leave the active application's keyboard focus intact. |
 | Ctrl+Shift+Q | Open Quick Settings. Adjust default audio output, toggle Wi-Fi and control available backlights. While open, M toggles mute, + and − change volume, and W toggles the wireless radio. |

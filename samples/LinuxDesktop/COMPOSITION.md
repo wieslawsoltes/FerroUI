@@ -39,6 +39,12 @@ The dark WinUI personalization flyout below samples the actual GTK and Qt surfac
 
 ![Dark WinUI acrylic over native GTK and Qt clients](screenshots/compositor-winui-acrylic.webp)
 
+## Live window previews
+
+Open the window overview with **Super+Tab** in the composed session. Task View, Mission Control and Recents show each visible client from the same retained visual tree that presents it on the desktop. A toplevel has a container positioned at its xdg window geometry. Its surface, synchronized children and popups retain their local positions and stacking order. Popups can extend beyond that geometry on the desktop.
+
+Each overview thumbnail binds a FerroUI `CompositionVisualSurface` to the client container. A uniformly scaled surface brush shows the window in its natural proportions, including portions obscured by other windows. The overview creates these brushes only while mounted. A client buffer update feeds both views through the existing drawing surface. The shell uses an icon for minimized clients and for clients owned by a separate compositor.
+
 ## Scope
 
 The child compositor exposes one logical output, native xdg-shell clients and shared-memory buffer import. Direct DMA-BUF import, DRM/KMS scanout, Xwayland, touch/tablet seats and a child screen-capture portal remain outside this mode. The Sway-managed login remains available for native multi-output management, Xwayland and portal integration. See [Wayland sessions](WAYLAND.md).
