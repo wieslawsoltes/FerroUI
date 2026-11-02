@@ -95,7 +95,7 @@ impl StyleSetters {
                     .getters
                     .entry(site.property.clone())
                     .or_insert_with(|| {
-                        let name = format!("{document}_style_property_{index}");
+                        let name = format!("__{document}_style_property_{index}");
                         writeln!(
                             self.helpers,
                             "fn {name}() -> &'static ::ferroui_base::FerroProperty {{ {} }}",

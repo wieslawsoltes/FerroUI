@@ -84,7 +84,7 @@ impl SelectorPlans {
         );
         let next = self.shapes.len();
         let name = self.shapes.entry(shape).or_insert_with(|| {
-            let name = format!("{document}_selector_shape_{next}");
+            let name = format!("__{document}_selector_shape_{next}");
             let mut parameters = Vec::new();
             let mut body = String::new();
             let mut previous = match seed {
@@ -136,17 +136,17 @@ mod tests {
         };
         assert_eq!(
             plans.call("build", None, &steps("Border::TYPE", "\"part\"")),
-            "build_selector_shape_0(Border::TYPE, \"part\")"
+            "__build_selector_shape_0(Border::TYPE, \"part\")"
         );
         assert_eq!(
             plans.call("build", None, &steps("Grid::TYPE", "\"other\"")),
-            "build_selector_shape_0(Grid::TYPE, \"other\")"
+            "__build_selector_shape_0(Grid::TYPE, \"other\")"
         );
         assert_eq!(plans.helpers.matches("fn ").count(), 1);
         assert!(!plans.helpers.contains("Border") && !plans.helpers.contains("Grid"));
         assert_eq!(
             plans.call("build", Some("prefix"), &steps("T", "s")),
-            "build_selector_shape_1(prefix, T, s)"
+            "__build_selector_shape_1(prefix, T, s)"
         );
         assert_eq!(
             plans.call("build", None, &[(Op::Class, vec!["s".into()])]),
