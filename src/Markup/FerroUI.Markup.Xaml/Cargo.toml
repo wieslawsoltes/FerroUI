@@ -26,6 +26,7 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
+binary-resources = ["dep:ferroui-xaml-binary"]
 hot-reload = ["runtime-populate", "source-overlays", "ferroui-base/hot-reload", "ferroui-markup/hot-reload"]
 # Explicit, UI-thread source snapshots used by embedded designers in every build profile.
 # Global reload-session publication remains a development-only facility.
@@ -37,6 +38,7 @@ runtime-populate = []
 perf-counters = ["ferroui-base/perf-counters", "ferroui-controls/perf-counters"]
 
 [dependencies]
+ferroui-xaml-binary = { workspace = true, optional = true }
 # The runtime helpers of compiled XAML call the typed functions of the declared members, as
 # generated code does (`xaml_il::runtime::compiled::add_setter`).
 ferroui-base = { workspace = true, features = ["markup-functions"] }
