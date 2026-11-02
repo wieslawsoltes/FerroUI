@@ -2,6 +2,39 @@
 
 The native Rust backend uses XamlX to resolve types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
 
+## Whole-program release after syncing main
+
+At `ff5ea13a`, the complete editable WinUI executable on x86-64 GNU/Linux is **29,194,408 bytes** under compact FatLTO. The comparison keeps the original shipping main at `df3e12ad` as the fixed 54,577,848-byte reference. The candidate is **46.51% smaller** and is **1,905,484 bytes above** the 27,288,924-byte target. With compact FatLTO on both revisions, the reduction is **24.37%**. The PR includes the runtime changes from main through `8aa7ca2b`.
+
+| Final compiler and linker policy | Original main native theme (bytes) | Full editable candidate (bytes) |
+|---|---:|---:|
+| Ordinary ThinLTO | 54,577,848 | 43,376,296 |
+| Compact ThinLTO | 44,441,808 | 34,965,128 |
+| Ordinary FatLTO | — | 34,295,672 |
+| Compact FatLTO | 38,600,504 | 29,194,408 |
+
+The compact FatLTO binary retains 20,307,877 bytes of machine code, 5,256,232 bytes of unwind and exception data, 74,323 frame descriptions and 29,040 bytes of dynamic relocation tables. Recompiling the WinUI Rust unit took 25.78 s in this dependency-warm run. The final whole-program compile and compact link took approximately 316 s. All 894 FXB blocks, four generated Rust files and the FXP archive matched the preceding PR build byte for byte. Each of the four executables passed eight checked cases covering embedded and independently supplied resources, including three archive versions and structural edits.
+
+| First typed Button lookup, compact FatLTO | Median | p95 | Median with executable pages evicted |
+|---|---:|---:|---:|
+| Original main | 14.22 ms | 19.29 ms | 31.00 ms |
+| Pre-sync editable checkpoint | 8.60 ms | 11.98 ms | 21.06 ms |
+| Synced editable candidate | 9.85 ms | 14.34 ms | 21.21 ms |
+
+These are 81 rotating fresh processes per configuration with 31 additional verified executable-page evictions. Startup includes theme construction and lookup and ends before window creation. The candidate was faster than original main and slower than the pre-sync editable checkpoint. A scalar edit took 12.93 ms, a structural edit to an independently replaceable dictionary took 10.85 ms, and an edit requiring the full interpreter took 1.86 s.
+
+The separate property fixture passed 299 public API tests. In a 72-block four-way trial, all eleven FatLTO candidate workloads were faster than original shipping ThinLTO. At equal FatLTO, eight improved and the intervals for mixed reads/writes and style-binding emission included parity. Style install/read/dispose took **7.4% longer** (paired 95% interval 6.3–9.2%). The property fixture itself shrank from 11,366,632 to 8,852,056 bytes under equal FatLTO.
+
+An application can request the same final compiler policy from the repository root. The selected target keeps the distribution linker flags off host-side build tools. The compact configuration uses an ELF loader with RELR support, such as glibc 2.36 or newer.
+
+```sh
+cargo --config .cargo/compact-linux-x86_64.toml rustc \
+  --profile compact-release --target x86_64-unknown-linux-gnu \
+  -p hello-world --bin hello-world -- -Clto=fat -Ccodegen-units=1
+```
+
+[ELF hashes and sections, complete archive checks, compile times, startup distributions and paired property measurements](benchmarks/compiled-theme-whole-program-linux-x86_64.json)
+
 ## Complete editable WinUI after sharing property dispatch
 
 The full editable Linux x86-64 consumer at `e2e681c1` includes the complete typed theme, external FXP loading and the structural-edit fallback. The original ordinary main executable at `df3e12ad` was 54,577,848 bytes, giving a 50% budget of **27,288,924 bytes**.

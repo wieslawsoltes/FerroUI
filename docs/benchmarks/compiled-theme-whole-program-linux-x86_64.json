@@ -1,0 +1,2991 @@
+{
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.39",
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1",
+  "profile": {
+    "normal": "opt-level=s, ThinLTO, 16 CGUs, stripped, PIE, normal unwinding",
+    "compact": "Same objects plus safe identical-code folding and DT_RELR on x86-64 GNU/Linux",
+    "fat": "The final crate uses opt-level=s with FatLTO and one CGU over the same release archives. Both link outputs are recorded."
+  },
+  "revision": "ff5ea13a23e3a659d46a38854ab9909d100976eb",
+  "tree": "8261ba72534f6230cdf0ca9e4180bb9aca6aaa06",
+  "original_target": {
+    "revision": "df3e12ad721fb8877699ea1f5ff157e22b45e9a7",
+    "ordinary_bytes": 54577848,
+    "ordinary_sha256": "9e37447e98f55a9daab7ea93521f7977a7ba2c19afdeb4b6d749ed4d998505e7",
+    "target_bytes": 27288924
+  },
+  "inputs": {
+    "/tmp/c496-root/target/release/deps/libferroui_base-628a0579e6170704.rlib": {
+      "bytes": 215460858,
+      "sha256": "790bf808cea5fe48b3db707e95374271a1b80fd40ba4a5b4e922e9c7c0b3692a"
+    },
+    "/tmp/c496-root/target/release/deps/libferroui_controls-4a93923fefd73189.rlib": {
+      "bytes": 260122420,
+      "sha256": "97cdd9d513ebe385f35e4f96022eaf826fa097caaf0d1fad9ccda7209da408dd"
+    },
+    "/tmp/c496-root/target/release/deps/libferroui_markup_xaml-a7b3f71b37aff251.rlib": {
+      "bytes": 22130612,
+      "sha256": "f4d98e75335107e02b091559c8616933ec29a7bc8122525c3375e0b6e45f0cc8"
+    },
+    "/tmp/c496-root/target/release/deps/libferroui_markup_xaml_loader-6f26c9715862f0a1.rlib": {
+      "bytes": 19509800,
+      "sha256": "c631e5ba1e5751788694e504369252591f56d66e3dd3143231ddc9587dd6af1a"
+    },
+    "/tmp/c496-root/target/release/deps/libferroui_themes_winui-05e9c66bfa8b05fc.rlib": {
+      "bytes": 19342946,
+      "sha256": "07b3ea79d1902403a79089204a7851d57baffde85983ee893efc4e04af88baa3"
+    }
+  },
+  "thin_validation": {
+    "ordinary": {
+      "sha256": "2369dc2e5c15a9539c17e78b61fb460a745985edd4bf3ca948ab9f11b134d8c9",
+      "bytes": 43376296,
+      "cies": 2,
+      "fdes": 130086,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2496,
+        ".gnu.version": 208,
+        ".gnu.version_r": 384,
+        ".gnu.hash": 28,
+        ".dynstr": 1358,
+        ".rela.dyn": 5006016,
+        ".rela.plt": 48,
+        ".rodata": 2094661,
+        ".gcc_except_table": 2143860,
+        ".eh_frame_hdr": 1040700,
+        ".eh_frame": 5734824,
+        ".text": 24466405,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2784,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 2198016,
+        ".dynamic": 464,
+        ".got": 484512,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195896
+      },
+      "verified_elf": [
+        "Position-Independent Executable",
+        "BIND_NOW",
+        "GNU_RELRO"
+      ],
+      "checked_archives": {
+        "embedded": {
+          "normal": 14,
+          "compact": 14,
+          "archive_sha256": null
+        },
+        "installed-v3-current": {
+          "normal": 14,
+          "compact": 14,
+          "archive_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+        },
+        "installed-v3-old": {
+          "normal": 14,
+          "compact": 14,
+          "archive_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+        },
+        "scalar-v3": {
+          "normal": 14,
+          "compact": 17,
+          "archive_sha256": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f"
+        },
+        "scalar-v2": {
+          "normal": 14,
+          "compact": 17,
+          "archive_sha256": "0e4fcec590bf9f786f65d0da502b55b4cd0706e355ad49ccdc921d6f5a4b4e8b"
+        },
+        "scalar-v1": {
+          "normal": 14,
+          "compact": 17,
+          "archive_sha256": "dc14da19ec977d16302ec2e806d011eaac467f08986279498333b621088333b4"
+        },
+        "structural-v3": {
+          "normal": 14,
+          "compact": 29,
+          "archive_sha256": "f258743cc9601170e31fc45f84b55f5fcb869273e61d4ccf061f8a7efd9123b9"
+        },
+        "full-fallback": {
+          "normal": 19,
+          "compact": 17,
+          "archive_sha256": "ac7712e2a7611f71432a7aaf6dd2f61c5ffa771a3574ca6834722245933e5cf0"
+        }
+      },
+      "distinct_external_sha256_count": 6
+    },
+    "compact": {
+      "sha256": "3cbb04e2133edf12de0f1517f034ac3e0c1e8ec399bf7704ecc95c34b600ec11",
+      "bytes": 34965128,
+      "cies": 2,
+      "fdes": 110373,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2496,
+        ".gnu.version": 208,
+        ".gnu.version_r": 400,
+        ".gnu.hash": 28,
+        ".dynstr": 1376,
+        ".rela.dyn": 2448,
+        ".relr.dyn": 36616,
+        ".rela.plt": 48,
+        ".rodata": 1725067,
+        ".gcc_except_table": 881036,
+        ".eh_frame_hdr": 882996,
+        ".eh_frame": 5252848,
+        ".text": 23674325,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2784,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 1827176,
+        ".dynamic": 496,
+        ".got": 475168,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195896
+      },
+      "verified_elf": [
+        "Position-Independent Executable",
+        "BIND_NOW",
+        "GNU_RELRO",
+        "DT_RELR"
+      ],
+      "checked_archives": {
+        "embedded": {
+          "normal": 14,
+          "compact": 14,
+          "archive_sha256": null
+        },
+        "installed-v3-current": {
+          "normal": 14,
+          "compact": 14,
+          "archive_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+        },
+        "installed-v3-old": {
+          "normal": 14,
+          "compact": 14,
+          "archive_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+        },
+        "scalar-v3": {
+          "normal": 14,
+          "compact": 17,
+          "archive_sha256": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f"
+        },
+        "scalar-v2": {
+          "normal": 14,
+          "compact": 17,
+          "archive_sha256": "0e4fcec590bf9f786f65d0da502b55b4cd0706e355ad49ccdc921d6f5a4b4e8b"
+        },
+        "scalar-v1": {
+          "normal": 14,
+          "compact": 17,
+          "archive_sha256": "dc14da19ec977d16302ec2e806d011eaac467f08986279498333b621088333b4"
+        },
+        "structural-v3": {
+          "normal": 14,
+          "compact": 29,
+          "archive_sha256": "f258743cc9601170e31fc45f84b55f5fcb869273e61d4ccf061f8a7efd9123b9"
+        },
+        "full-fallback": {
+          "normal": 19,
+          "compact": 17,
+          "archive_sha256": "ac7712e2a7611f71432a7aaf6dd2f61c5ffa771a3574ca6834722245933e5cf0"
+        }
+      },
+      "distinct_external_sha256_count": 6
+    }
+  },
+  "fat_validation": {
+    "ordinary": {
+      "sha256": "7212480da5ba0c058532edc0ecfaebd05c7d4045143cdc4f09b1864c8f29b186",
+      "bytes": 34295672,
+      "cies": 2,
+      "fdes": 80894,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2448,
+        ".gnu.version": 204,
+        ".gnu.version_r": 368,
+        ".gnu.hash": 28,
+        ".dynstr": 1315,
+        ".rela.dyn": 3351000,
+        ".rela.plt": 48,
+        ".gcc_except_table": 1663460,
+        ".rodata": 1722648,
+        ".eh_frame_hdr": 647164,
+        ".eh_frame": 3850640,
+        ".text": 20766053,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2736,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 2086632,
+        ".dynamic": 464,
+        ".got": 928,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195888
+      },
+      "verified_elf": [
+        "Position-Independent Executable",
+        "BIND_NOW",
+        "GNU_RELRO"
+      ],
+      "checked_archives": {
+        "embedded": {
+          "normal": 14,
+          "compact": 14,
+          "archive_sha256": null
+        },
+        "installed-v3-current": {
+          "normal": 14,
+          "compact": 14,
+          "archive_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+        },
+        "installed-v3-old": {
+          "normal": 14,
+          "compact": 14,
+          "archive_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+        },
+        "scalar-v3": {
+          "normal": 14,
+          "compact": 17,
+          "archive_sha256": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f"
+        },
+        "scalar-v2": {
+          "normal": 14,
+          "compact": 17,
+          "archive_sha256": "0e4fcec590bf9f786f65d0da502b55b4cd0706e355ad49ccdc921d6f5a4b4e8b"
+        },
+        "scalar-v1": {
+          "normal": 14,
+          "compact": 17,
+          "archive_sha256": "dc14da19ec977d16302ec2e806d011eaac467f08986279498333b621088333b4"
+        },
+        "structural-v3": {
+          "normal": 14,
+          "compact": 29,
+          "archive_sha256": "f258743cc9601170e31fc45f84b55f5fcb869273e61d4ccf061f8a7efd9123b9"
+        },
+        "full-fallback": {
+          "normal": 19,
+          "compact": 17,
+          "archive_sha256": "ac7712e2a7611f71432a7aaf6dd2f61c5ffa771a3574ca6834722245933e5cf0"
+        }
+      },
+      "distinct_external_sha256_count": 6
+    },
+    "compact": {
+      "sha256": "06ead3da02b02dd4e83534c0b5a0ad5cfc0c82c404119e027ad54484eb711a11",
+      "bytes": 29194408,
+      "cies": 2,
+      "fdes": 74323,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2448,
+        ".gnu.version": 204,
+        ".gnu.version_r": 384,
+        ".gnu.hash": 28,
+        ".dynstr": 1333,
+        ".rela.dyn": 2400,
+        ".relr.dyn": 26640,
+        ".rela.plt": 48,
+        ".gcc_except_table": 989872,
+        ".rodata": 1719384,
+        ".eh_frame_hdr": 594596,
+        ".eh_frame": 3671764,
+        ".text": 20307877,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2736,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 1673648,
+        ".dynamic": 496,
+        ".got": 928,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195888
+      },
+      "verified_elf": [
+        "Position-Independent Executable",
+        "BIND_NOW",
+        "GNU_RELRO",
+        "DT_RELR"
+      ],
+      "checked_archives": {
+        "embedded": {
+          "normal": 14,
+          "compact": 14,
+          "archive_sha256": null
+        },
+        "installed-v3-current": {
+          "normal": 14,
+          "compact": 14,
+          "archive_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+        },
+        "installed-v3-old": {
+          "normal": 14,
+          "compact": 14,
+          "archive_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+        },
+        "scalar-v3": {
+          "normal": 14,
+          "compact": 17,
+          "archive_sha256": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f"
+        },
+        "scalar-v2": {
+          "normal": 14,
+          "compact": 17,
+          "archive_sha256": "0e4fcec590bf9f786f65d0da502b55b4cd0706e355ad49ccdc921d6f5a4b4e8b"
+        },
+        "scalar-v1": {
+          "normal": 14,
+          "compact": 17,
+          "archive_sha256": "dc14da19ec977d16302ec2e806d011eaac467f08986279498333b621088333b4"
+        },
+        "structural-v3": {
+          "normal": 14,
+          "compact": 29,
+          "archive_sha256": "f258743cc9601170e31fc45f84b55f5fcb869273e61d4ccf061f8a7efd9123b9"
+        },
+        "full-fallback": {
+          "normal": 19,
+          "compact": 17,
+          "archive_sha256": "ac7712e2a7611f71432a7aaf6dd2f61c5ffa771a3574ca6834722245933e5cf0"
+        }
+      },
+      "distinct_external_sha256_count": 6
+    }
+  },
+  "generated": {
+    "changed_outputs_vs_round_one": [],
+    "runtime_features": {
+      "ferroui_base": [
+        "markup-functions"
+      ],
+      "ferroui_controls": [],
+      "ferroui_markup_xaml": [
+        "binary-resources",
+        "runtime-populate"
+      ],
+      "ferroui_markup_xaml_loader": [
+        "default",
+        "portable-xaml",
+        "runtime"
+      ],
+      "ferroui_themes_winui": [
+        "binary-resources",
+        "precompiled-theme",
+        "solid-theme"
+      ]
+    },
+    "winui_xaml_source_files": 169,
+    "rust_bytes": 4921299,
+    "rust_sha256": "7a275ec948d0fe868b72a18c236a785a48281934cf37de9096e49fb0dd807f05",
+    "fxb_blocks": 894,
+    "fxb_bytes": 180091,
+    "archive_bytes": 296347,
+    "archive_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+  },
+  "compiler": {
+    "cargo_wall_scope": "The build reused the production dependency cache. Elapsed Cargo wall time includes resource reservation while other measured binaries were built. Per-compiler-unit elapsed starts after its resource gate.",
+    "cargo_wall_seconds": 906,
+    "units": [
+      {
+        "crate": "___",
+        "exit": 0,
+        "seconds": 0.019683785998495296,
+        "user_cpu_seconds": 0.0036249999999999998,
+        "system_cpu_seconds": 0.012366,
+        "peak_rss_kib": 33456
+      },
+      {
+        "crate": "___",
+        "exit": 0,
+        "seconds": 0.014212879003025591,
+        "user_cpu_seconds": 0.0,
+        "system_cpu_seconds": 0.010468,
+        "peak_rss_kib": 33456
+      },
+      {
+        "crate": "ferroui_system",
+        "exit": 0,
+        "seconds": 0.6513846329980879,
+        "user_cpu_seconds": 0.644782,
+        "system_cpu_seconds": 0.08477799999999999,
+        "peak_rss_kib": 177672
+      },
+      {
+        "crate": "___",
+        "exit": 0,
+        "seconds": 0.013314707000972703,
+        "user_cpu_seconds": 0.007474,
+        "system_cpu_seconds": 0.0039049999999999996,
+        "peak_rss_kib": 33328
+      },
+      {
+        "crate": "ferroui_base",
+        "exit": 0,
+        "seconds": 75.93040445599763,
+        "user_cpu_seconds": 72.969024,
+        "system_cpu_seconds": 2.928983,
+        "peak_rss_kib": 3052380
+      },
+      {
+        "crate": "ferroui_markup",
+        "crate_type": "lib",
+        "cg_settings": [
+          "extra-filename=-7af903aae87b80d2"
+        ],
+        "exit": 0,
+        "seconds": 0.30733867899834877,
+        "resource_gate_seconds": 1.2309974408708513e-06,
+        "user_cpu_seconds": 0.23679299999999998,
+        "system_cpu_seconds": 0.053586999999999996,
+        "peak_rss_kib": 225924
+      },
+      {
+        "crate": "ferroui_system",
+        "crate_type": "lib",
+        "cg_settings": [
+          "opt-level=s",
+          "linker-plugin-lto",
+          "codegen-units=16",
+          "extra-filename=-f51722e3a2c7d025"
+        ],
+        "exit": 0,
+        "seconds": 0.7731274129982921,
+        "resource_gate_seconds": 1.2419986887834966e-06,
+        "user_cpu_seconds": 0.688388,
+        "system_cpu_seconds": 0.062243999999999994,
+        "peak_rss_kib": 180380
+      },
+      {
+        "crate": "ferroui_markup_xaml_loader",
+        "crate_type": "lib",
+        "cg_settings": [
+          "extra-filename=-85454254cea6492b"
+        ],
+        "exit": 0,
+        "seconds": 7.633228639002482,
+        "resource_gate_seconds": 9.419964044354856e-07,
+        "user_cpu_seconds": 7.255071,
+        "system_cpu_seconds": 0.32806599999999997,
+        "peak_rss_kib": 539016
+      },
+      {
+        "crate": "ferroui_base",
+        "crate_type": "lib",
+        "cg_settings": [
+          "opt-level=s",
+          "linker-plugin-lto",
+          "codegen-units=16",
+          "extra-filename=-628a0579e6170704"
+        ],
+        "exit": 0,
+        "seconds": 164.73488244399778,
+        "resource_gate_seconds": 0.0031605749973095953,
+        "user_cpu_seconds": 160.878558,
+        "system_cpu_seconds": 3.9607859999999997,
+        "peak_rss_kib": 3206176
+      },
+      {
+        "crate": "ferroui_build",
+        "crate_type": "lib",
+        "cg_settings": [
+          "extra-filename=-316d4d537f13215b"
+        ],
+        "exit": 0,
+        "seconds": 2.4577224599997862,
+        "resource_gate_seconds": 1.5229961718432605e-06,
+        "user_cpu_seconds": 2.231191,
+        "system_cpu_seconds": 0.186883,
+        "peak_rss_kib": 318600
+      },
+      {
+        "crate": "ferroui_remote_protocol",
+        "crate_type": "lib",
+        "cg_settings": [
+          "opt-level=s",
+          "linker-plugin-lto",
+          "codegen-units=16",
+          "extra-filename=-e40380aca375c30e"
+        ],
+        "exit": 0,
+        "seconds": 2.2990938240036485,
+        "resource_gate_seconds": 1.2919990695081651e-06,
+        "user_cpu_seconds": 2.133524,
+        "system_cpu_seconds": 0.130665,
+        "peak_rss_kib": 220892
+      },
+      {
+        "crate": "ferroui_controls",
+        "crate_type": "lib",
+        "cg_settings": [
+          "opt-level=s",
+          "linker-plugin-lto",
+          "codegen-units=16",
+          "extra-filename=-4a93923fefd73189"
+        ],
+        "exit": 0,
+        "seconds": 219.66418488900672,
+        "resource_gate_seconds": 0.0038987749940133654,
+        "user_cpu_seconds": 214.602168,
+        "system_cpu_seconds": 5.165672,
+        "peak_rss_kib": 3418708
+      },
+      {
+        "crate": "build_script_build",
+        "crate_type": "bin",
+        "cg_settings": [
+          "extra-filename=-c0f2351a2cdd2b92"
+        ],
+        "exit": 0,
+        "seconds": 0.9238387560035335,
+        "resource_gate_seconds": 1.5019977581687272e-06,
+        "user_cpu_seconds": 0.877666,
+        "system_cpu_seconds": 0.32265299999999997,
+        "peak_rss_kib": 519992
+      },
+      {
+        "crate": "ferroui_markup",
+        "crate_type": "lib",
+        "cg_settings": [
+          "opt-level=s",
+          "linker-plugin-lto",
+          "codegen-units=16",
+          "extra-filename=-eb2d0c3baaebb5ed"
+        ],
+        "exit": 0,
+        "seconds": 0.7014582319970941,
+        "resource_gate_seconds": 1.3020035112276673e-06,
+        "user_cpu_seconds": 0.5905349999999999,
+        "system_cpu_seconds": 0.075559,
+        "peak_rss_kib": 216580
+      },
+      {
+        "crate": "ferroui_markup_xaml",
+        "crate_type": "lib",
+        "cg_settings": [
+          "opt-level=s",
+          "linker-plugin-lto",
+          "codegen-units=16",
+          "extra-filename=-a7b3f71b37aff251"
+        ],
+        "exit": 0,
+        "seconds": 14.055990648004808,
+        "resource_gate_seconds": 7.509952411055565e-07,
+        "user_cpu_seconds": 13.629114,
+        "system_cpu_seconds": 0.396115,
+        "peak_rss_kib": 579996
+      },
+      {
+        "crate": "build_script_build",
+        "crate_type": "bin",
+        "cg_settings": [
+          "extra-filename=-f5edfa8313c7ea77"
+        ],
+        "exit": 0,
+        "seconds": 0.8183671660008258,
+        "resource_gate_seconds": 1.571999746374786e-06,
+        "user_cpu_seconds": 1.004837,
+        "system_cpu_seconds": 0.315449,
+        "peak_rss_kib": 519736
+      },
+      {
+        "crate": "ferroui_dialogs",
+        "crate_type": "lib",
+        "cg_settings": [
+          "opt-level=s",
+          "linker-plugin-lto",
+          "codegen-units=16",
+          "extra-filename=-7791ca8f55680c46"
+        ],
+        "exit": 0,
+        "seconds": 6.633587099000579,
+        "resource_gate_seconds": 1.0220028343610466e-06,
+        "user_cpu_seconds": 6.342543,
+        "system_cpu_seconds": 0.269924,
+        "peak_rss_kib": 435876
+      },
+      {
+        "crate": "ferroui_markup_xaml_loader",
+        "crate_type": "lib",
+        "cg_settings": [
+          "opt-level=s",
+          "linker-plugin-lto",
+          "codegen-units=16",
+          "extra-filename=-6f26c9715862f0a1"
+        ],
+        "exit": 0,
+        "seconds": 17.312071902000753,
+        "resource_gate_seconds": 1.3519966159947217e-06,
+        "user_cpu_seconds": 16.784001,
+        "system_cpu_seconds": 0.488631,
+        "peak_rss_kib": 603032
+      },
+      {
+        "crate": "ferroui_themes_winui",
+        "crate_type": "lib",
+        "cg_settings": [
+          "opt-level=s",
+          "linker-plugin-lto",
+          "codegen-units=16",
+          "extra-filename=-05e9c66bfa8b05fc"
+        ],
+        "exit": 0,
+        "seconds": 25.77815749500587,
+        "resource_gate_seconds": 0.00044393599819159135,
+        "user_cpu_seconds": 25.023657,
+        "system_cpu_seconds": 0.7395189999999999,
+        "peak_rss_kib": 1207788
+      },
+      {
+        "crate": "winui_theme_probe",
+        "crate_type": "bin",
+        "cg_settings": [
+          "opt-level=s",
+          "codegen-units=16",
+          "extra-filename=-f0cd7b2db0a76785"
+        ],
+        "exit": 0,
+        "seconds": 91.37208281400672,
+        "resource_gate_seconds": 0.004422916994371917,
+        "user_cpu_seconds": 421.450909,
+        "system_cpu_seconds": 19.495782,
+        "peak_rss_kib": 1947624
+      }
+    ],
+    "fat": {
+      "compile_and_two_links_seconds": 316.46278112999426,
+      "cpu_seconds": 317.999632,
+      "peak_process_kib": 4738732,
+      "peak_shared_anonymous_bytes": 5507379200,
+      "total_wall_seconds": 318.1601834539979,
+      "compile_and_compact_link_seconds_estimated": 316.0713361809976,
+      "additional_symbol_map_seconds": 1.6974023240036331,
+      "cpu_scope": "CPU includes the separately timed address-map capture."
+    }
+  },
+  "timed_files": {
+    "original-main-thin": {
+      "bytes": 44441808,
+      "cies": 2,
+      "fdes": 126415,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2496,
+        ".gnu.version": 208,
+        ".gnu.version_r": 400,
+        ".gnu.hash": 28,
+        ".dynstr": 1376,
+        ".rela.dyn": 2448,
+        ".relr.dyn": 41976,
+        ".rela.plt": 48,
+        ".rodata": 1146126,
+        ".gcc_except_table": 945400,
+        ".eh_frame_hdr": 1011332,
+        ".eh_frame": 6332016,
+        ".text": 32115077,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2816,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 2021584,
+        ".dynamic": 496,
+        ".got": 618512,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195754
+      },
+      "sha256": "b570cc52197c8f3bb64f8983943ccfd4492c2679eac1af8469cbcb8846cf1217"
+    },
+    "original-main-fat": {
+      "bytes": 38600504,
+      "cies": 2,
+      "fdes": 85764,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2448,
+        ".gnu.version": 204,
+        ".gnu.version_r": 384,
+        ".gnu.hash": 28,
+        ".dynstr": 1333,
+        ".rela.dyn": 2400,
+        ".relr.dyn": 29200,
+        ".rela.plt": 48,
+        ".gcc_except_table": 1153684,
+        ".rodata": 1141679,
+        ".eh_frame_hdr": 686124,
+        ".eh_frame": 4519564,
+        ".text": 29024725,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2768,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 1835032,
+        ".dynamic": 496,
+        ".got": 912,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195752
+      },
+      "sha256": "67e3bc647924c8f6b595418cb1941c2604b016ebea32e760394e9cc7cb470b74"
+    },
+    "before-thin": {
+      "bytes": 34759256,
+      "cies": 2,
+      "fdes": 109553,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2496,
+        ".gnu.version": 208,
+        ".gnu.version_r": 400,
+        ".gnu.hash": 28,
+        ".dynstr": 1376,
+        ".rela.dyn": 2448,
+        ".relr.dyn": 36568,
+        ".rela.plt": 48,
+        ".rodata": 1724571,
+        ".gcc_except_table": 877716,
+        ".eh_frame_hdr": 876436,
+        ".eh_frame": 5200196,
+        ".text": 23534181,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2784,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 1830128,
+        ".dynamic": 496,
+        ".got": 469568,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195888
+      },
+      "sha256": "c09450548a7a3461298cf21e393b37164cdebd68e3464435e110006831866e15"
+    },
+    "before-fat": {
+      "bytes": 29116824,
+      "cies": 2,
+      "fdes": 74010,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2448,
+        ".gnu.version": 204,
+        ".gnu.version_r": 384,
+        ".gnu.hash": 28,
+        ".dynstr": 1333,
+        ".rela.dyn": 2400,
+        ".relr.dyn": 26656,
+        ".rela.plt": 48,
+        ".gcc_except_table": 985316,
+        ".rodata": 1719096,
+        ".eh_frame_hdr": 592092,
+        ".eh_frame": 3655848,
+        ".text": 20252741,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2736,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 1674472,
+        ".dynamic": 496,
+        ".got": 928,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195880
+      },
+      "sha256": "63e26d456e9eba7c3e27cbed58024a322f573eb61698b790f19b99ecaeeb4c10"
+    },
+    "selected-thin": {
+      "bytes": 34965128,
+      "cies": 2,
+      "fdes": 110373,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2496,
+        ".gnu.version": 208,
+        ".gnu.version_r": 400,
+        ".gnu.hash": 28,
+        ".dynstr": 1376,
+        ".rela.dyn": 2448,
+        ".relr.dyn": 36616,
+        ".rela.plt": 48,
+        ".rodata": 1725067,
+        ".gcc_except_table": 881036,
+        ".eh_frame_hdr": 882996,
+        ".eh_frame": 5252848,
+        ".text": 23674325,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2784,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 1827176,
+        ".dynamic": 496,
+        ".got": 475168,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195896
+      },
+      "sha256": "3cbb04e2133edf12de0f1517f034ac3e0c1e8ec399bf7704ecc95c34b600ec11"
+    },
+    "selected-fat": {
+      "bytes": 29194408,
+      "cies": 2,
+      "fdes": 74323,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2448,
+        ".gnu.version": 204,
+        ".gnu.version_r": 384,
+        ".gnu.hash": 28,
+        ".dynstr": 1333,
+        ".rela.dyn": 2400,
+        ".relr.dyn": 26640,
+        ".rela.plt": 48,
+        ".gcc_except_table": 989872,
+        ".rodata": 1719384,
+        ".eh_frame_hdr": 594596,
+        ".eh_frame": 3671764,
+        ".text": 20307877,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2736,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 1673648,
+        ".dynamic": 496,
+        ".got": 928,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195888
+      },
+      "sha256": "06ead3da02b02dd4e83534c0b5a0ad5cfc0c82c404119e027ad54484eb711a11"
+    }
+  },
+  "interleaved_spawn_to_typed_button": {
+    "samples": {
+      "original-main-thin": {
+        "n": 81,
+        "median_ms": 15.292534,
+        "p95_ms": 22.259521,
+        "ready_ns": [
+          15995423,
+          12737687,
+          13001165,
+          12883972,
+          12733670,
+          12391154,
+          12661383,
+          19280877,
+          15229481,
+          22259521,
+          16695758,
+          15479409,
+          27483482,
+          17610676,
+          23757271,
+          18681805,
+          17128148,
+          13951852,
+          15513140,
+          18523582,
+          18516792,
+          23757131,
+          14687559,
+          17711000,
+          14512180,
+          13656585,
+          13963519,
+          14855218,
+          14384902,
+          15559319,
+          13198868,
+          13341277,
+          13930028,
+          16423657,
+          14465961,
+          13497811,
+          15098176,
+          14133239,
+          13107302,
+          20181918,
+          15292534,
+          15877599,
+          14534734,
+          15753826,
+          13707761,
+          14343329,
+          17995911,
+          14872172,
+          17200014,
+          22429228,
+          14392433,
+          13792575,
+          15921133,
+          17517523,
+          20124129,
+          18643309,
+          14786525,
+          15157434,
+          16734766,
+          14604967,
+          14146620,
+          14886003,
+          14516536,
+          14165327,
+          13250574,
+          15416126,
+          15453732,
+          15046740,
+          14928255,
+          19545813,
+          15346123,
+          20873922,
+          17528710,
+          18345313,
+          16280274,
+          16498162,
+          12813107,
+          13494664,
+          19182827,
+          16767985,
+          15483366
+        ],
+        "phase_ms": {
+          "create_ns": {
+            "median_ms": 12.207241,
+            "p95_ms": 17.171642
+          },
+          "button_lookup_ns": {
+            "median_ms": 0.248417,
+            "p95_ms": 0.456325
+          },
+          "create_and_button_ns": {
+            "median_ms": 12.458854,
+            "p95_ms": 17.41371
+          },
+          "process_ns": {
+            "median_ms": 17.767394,
+            "p95_ms": 24.965813
+          }
+        }
+      },
+      "original-main-fat": {
+        "n": 81,
+        "median_ms": 14.215821,
+        "p95_ms": 19.288052,
+        "ready_ns": [
+          19374326,
+          11616067,
+          10988850,
+          11425305,
+          11428930,
+          11182756,
+          11257177,
+          11468890,
+          13178377,
+          15719345,
+          17632414,
+          15040652,
+          22776125,
+          14532460,
+          22661450,
+          16380853,
+          16533339,
+          14215821,
+          15283280,
+          19075878,
+          20246600,
+          19288052,
+          15425315,
+          16412290,
+          12155605,
+          15889356,
+          11935890,
+          13984200,
+          13336030,
+          11836032,
+          12358775,
+          14713497,
+          12598321,
+          13516778,
+          12257636,
+          13064499,
+          13012602,
+          16798971,
+          16383978,
+          12640482,
+          12097249,
+          13353446,
+          12994035,
+          12873547,
+          15123444,
+          12546333,
+          16679431,
+          15129803,
+          15174910,
+          15187540,
+          12057420,
+          14456769,
+          15714528,
+          15862236,
+          16832411,
+          16639796,
+          12015238,
+          13648383,
+          14658887,
+          13536356,
+          13677366,
+          13274379,
+          13356120,
+          11986866,
+          12764366,
+          14227118,
+          18003182,
+          12760089,
+          13249453,
+          15791562,
+          16649300,
+          14452421,
+          15927523,
+          14968114,
+          13935887,
+          13613159,
+          12820889,
+          11197349,
+          16724902,
+          16164644,
+          14258074
+        ],
+        "phase_ms": {
+          "create_ns": {
+            "median_ms": 11.180553,
+            "p95_ms": 15.604762
+          },
+          "button_lookup_ns": {
+            "median_ms": 0.20969,
+            "p95_ms": 0.388204
+          },
+          "create_and_button_ns": {
+            "median_ms": 11.470372,
+            "p95_ms": 16.107626
+          },
+          "process_ns": {
+            "median_ms": 16.481292,
+            "p95_ms": 23.350299
+          }
+        }
+      },
+      "before-thin": {
+        "n": 81,
+        "median_ms": 10.057282,
+        "p95_ms": 14.588813,
+        "ready_ns": [
+          14352913,
+          8554560,
+          8071486,
+          8153987,
+          8124284,
+          8229749,
+          8123633,
+          8239113,
+          9681696,
+          11314471,
+          11778868,
+          10426368,
+          12651989,
+          10609179,
+          12735593,
+          11499855,
+          10068808,
+          9714596,
+          10690679,
+          11128307,
+          10993617,
+          10714303,
+          9539888,
+          11495859,
+          8607808,
+          9520959,
+          9723970,
+          8768025,
+          10931506,
+          8562683,
+          9684292,
+          8778211,
+          8821085,
+          9050112,
+          9500458,
+          8692034,
+          13509418,
+          9264590,
+          9240935,
+          9047910,
+          8863638,
+          9881402,
+          10085073,
+          10626484,
+          15549744,
+          8857929,
+          10057282,
+          10514980,
+          9369175,
+          10310276,
+          13537328,
+          9407691,
+          10487909,
+          16658103,
+          11206963,
+          12077649,
+          9815685,
+          10433598,
+          10332390,
+          9759283,
+          10002000,
+          9895764,
+          10931404,
+          9214666,
+          13060854,
+          11127875,
+          11031113,
+          9475542,
+          12981558,
+          9186686,
+          14643739,
+          10768684,
+          12047225,
+          14588813,
+          17818876,
+          8201329,
+          8414202,
+          9473329,
+          12049528,
+          10161386,
+          8948463
+        ],
+        "phase_ms": {
+          "create_ns": {
+            "median_ms": 7.288417,
+            "p95_ms": 11.779128
+          },
+          "button_lookup_ns": {
+            "median_ms": 0.191002,
+            "p95_ms": 0.369847
+          },
+          "create_and_button_ns": {
+            "median_ms": 7.473281,
+            "p95_ms": 11.985222
+          },
+          "process_ns": {
+            "median_ms": 11.88112,
+            "p95_ms": 17.269979
+          }
+        }
+      },
+      "before-fat": {
+        "n": 81,
+        "median_ms": 8.59535,
+        "p95_ms": 11.976024,
+        "ready_ns": [
+          7633418,
+          7413743,
+          7041002,
+          7552679,
+          7186998,
+          7110966,
+          7184273,
+          7046490,
+          12131579,
+          9447110,
+          9642940,
+          10676927,
+          11274682,
+          15023345,
+          11976024,
+          9812861,
+          8584936,
+          8563954,
+          7982524,
+          9190429,
+          9082411,
+          9139005,
+          10888792,
+          10377817,
+          9176200,
+          8498307,
+          7833333,
+          7883818,
+          7776799,
+          7647629,
+          7444949,
+          8236169,
+          7495394,
+          8996604,
+          7375898,
+          7838020,
+          8803317,
+          7396147,
+          7928544,
+          8803839,
+          7604194,
+          8645835,
+          7835757,
+          8333803,
+          8157563,
+          8105626,
+          10225300,
+          10662857,
+          8378520,
+          8799733,
+          9641717,
+          8512037,
+          8008964,
+          8941744,
+          9956483,
+          11408801,
+          8595350,
+          9293542,
+          11568126,
+          7708088,
+          8262859,
+          8349047,
+          7674649,
+          8155421,
+          8815956,
+          12788212,
+          8049733,
+          9856775,
+          8976474,
+          8253305,
+          9443115,
+          10657690,
+          9857245,
+          9903005,
+          13062154,
+          7776911,
+          8018267,
+          8698859,
+          8988202,
+          10327683,
+          10406698
+        ],
+        "phase_ms": {
+          "create_ns": {
+            "median_ms": 6.23445,
+            "p95_ms": 8.873982
+          },
+          "button_lookup_ns": {
+            "median_ms": 0.138525,
+            "p95_ms": 0.338681
+          },
+          "create_and_button_ns": {
+            "median_ms": 6.408898,
+            "p95_ms": 9.015111
+          },
+          "process_ns": {
+            "median_ms": 10.544462,
+            "p95_ms": 15.274602
+          }
+        }
+      },
+      "selected-thin": {
+        "n": 81,
+        "median_ms": 11.165501,
+        "p95_ms": 17.143691,
+        "ready_ns": [
+          9515421,
+          9425639,
+          9129730,
+          11330916,
+          9066136,
+          8679995,
+          9114879,
+          9326276,
+          10705170,
+          11312318,
+          10978694,
+          16694527,
+          11311927,
+          14354196,
+          12275832,
+          11725669,
+          14559841,
+          11989118,
+          12423290,
+          13167022,
+          14392071,
+          17143691,
+          9694225,
+          11178540,
+          10374882,
+          10186544,
+          10251018,
+          9640135,
+          9798550,
+          11639372,
+          8970525,
+          11692821,
+          8896185,
+          11316684,
+          10505425,
+          10560717,
+          11075669,
+          11038804,
+          10090792,
+          12409290,
+          11520636,
+          10139705,
+          10073605,
+          10374132,
+          11413808,
+          10385847,
+          9573086,
+          11049170,
+          10105123,
+          12382130,
+          10655627,
+          12241954,
+          11165501,
+          30934434,
+          13185688,
+          16156646,
+          11153453,
+          11349523,
+          10684961,
+          12313469,
+          10774101,
+          9526106,
+          9747615,
+          9760363,
+          10368513,
+          12818936,
+          13233920,
+          11195716,
+          11138000,
+          10365847,
+          12325176,
+          13337112,
+          11324867,
+          19867009,
+          24180718,
+          11276325,
+          9410045,
+          25327794,
+          11926295,
+          11483020,
+          11467308
+        ],
+        "phase_ms": {
+          "create_ns": {
+            "median_ms": 7.856027,
+            "p95_ms": 12.107013
+          },
+          "button_lookup_ns": {
+            "median_ms": 0.245443,
+            "p95_ms": 0.526849
+          },
+          "create_and_button_ns": {
+            "median_ms": 8.109921,
+            "p95_ms": 12.699108
+          },
+          "process_ns": {
+            "median_ms": 13.365925,
+            "p95_ms": 23.857059
+          }
+        }
+      },
+      "selected-fat": {
+        "n": 81,
+        "median_ms": 9.848504,
+        "p95_ms": 14.335359,
+        "ready_ns": [
+          8346623,
+          8281635,
+          7904188,
+          7881816,
+          8099758,
+          8192604,
+          7982172,
+          11279359,
+          9848504,
+          9122049,
+          10937344,
+          9754904,
+          10077201,
+          14715951,
+          10136209,
+          12122787,
+          9361432,
+          8849496,
+          12580312,
+          12546755,
+          13091803,
+          16041425,
+          8948262,
+          9490593,
+          9254916,
+          8439069,
+          8521822,
+          8632765,
+          9620566,
+          8491076,
+          9974300,
+          9978556,
+          8954382,
+          9905738,
+          9053829,
+          8547409,
+          9592845,
+          9608239,
+          8824850,
+          9954260,
+          11593034,
+          8199055,
+          11022460,
+          8818951,
+          10987568,
+          8549904,
+          9604583,
+          10261344,
+          11851456,
+          9936574,
+          8624634,
+          9823226,
+          10415293,
+          10218080,
+          18771809,
+          14335359,
+          9761346,
+          8695008,
+          9157852,
+          10553546,
+          10022191,
+          8951017,
+          8282006,
+          9950625,
+          9682798,
+          11212020,
+          10692361,
+          12091591,
+          9194817,
+          10290067,
+          9094078,
+          13418983,
+          10960096,
+          11712169,
+          23150524,
+          12085221,
+          10115018,
+          9926749,
+          10125233,
+          9670381,
+          9987499
+        ],
+        "phase_ms": {
+          "create_ns": {
+            "median_ms": 7.074962,
+            "p95_ms": 11.109489
+          },
+          "button_lookup_ns": {
+            "median_ms": 0.175449,
+            "p95_ms": 0.296789
+          },
+          "create_and_button_ns": {
+            "median_ms": 7.310299,
+            "p95_ms": 11.264698
+          },
+          "process_ns": {
+            "median_ms": 12.119632,
+            "p95_ms": 17.90732
+          }
+        }
+      }
+    },
+    "paired": {
+      "selected-thin/original-main-thin": {
+        "n": 81,
+        "median_ratio": 0.7216229518623272,
+        "paired_bootstrap_median_ci95": [
+          0.6930711631874378,
+          0.7429425910351225
+        ]
+      },
+      "selected-fat/original-main-fat": {
+        "n": 81,
+        "median_ratio": 0.7087065893307597,
+        "paired_bootstrap_median_ci95": [
+          0.6781906435975078,
+          0.7265255189228063
+        ]
+      },
+      "selected-thin/before-thin": {
+        "n": 81,
+        "median_ratio": 1.1159304623028934,
+        "paired_bootstrap_median_ci95": [
+          1.0699073486189783,
+          1.1620674421147619
+        ]
+      },
+      "selected-fat/before-fat": {
+        "n": 81,
+        "median_ratio": 1.1225941989506607,
+        "paired_bootstrap_median_ci95": [
+          1.0934319331130562,
+          1.1521084477130112
+        ]
+      },
+      "selected-fat/selected-thin": {
+        "n": 81,
+        "median_ratio": 0.8757298917517171,
+        "paired_bootstrap_median_ci95": [
+          0.8657636096576788,
+          0.9199764226070207
+        ]
+      }
+    },
+    "executable_page_evicted": {
+      "original-main-thin": {
+        "n": 31,
+        "median_ms": 36.916171,
+        "p95_ms": 51.224628,
+        "ready_ns": [
+          35827565,
+          39476496,
+          37618318,
+          37699608,
+          38052481,
+          35106750,
+          51224628,
+          35140499,
+          35177799,
+          36407186,
+          51689722,
+          41333562,
+          43349804,
+          40939850,
+          39502115,
+          36093234,
+          40580125,
+          35478760,
+          40572192,
+          35098612,
+          33150272,
+          36916171,
+          41507995,
+          33309358,
+          33831490,
+          34669297,
+          42501039,
+          33748625,
+          33786708,
+          37035051,
+          36225154
+        ],
+        "skipped_resident": 0
+      },
+      "original-main-fat": {
+        "n": 31,
+        "median_ms": 30.997548,
+        "p95_ms": 38.270602,
+        "ready_ns": [
+          32360278,
+          42462122,
+          37126170,
+          27492324,
+          26169508,
+          38270602,
+          28751130,
+          32841978,
+          32339426,
+          30997548,
+          36570653,
+          30253086,
+          33042757,
+          34212156,
+          31206452,
+          31374871,
+          30655031,
+          33853347,
+          33389365,
+          32977345,
+          25502833,
+          28243084,
+          30057218,
+          26921555,
+          27314211,
+          26899744,
+          28981222,
+          36089747,
+          28179902,
+          25373607,
+          24375010
+        ],
+        "skipped_resident": 0
+      },
+      "before-thin": {
+        "n": 31,
+        "median_ms": 25.993228,
+        "p95_ms": 34.260613,
+        "ready_ns": [
+          23368206,
+          29243709,
+          26320722,
+          29449288,
+          23467993,
+          23910388,
+          23349012,
+          23119428,
+          29030435,
+          23944778,
+          27703587,
+          34941034,
+          28160262,
+          25457405,
+          28539183,
+          27735835,
+          27469781,
+          27371907,
+          28377469,
+          28909881,
+          23442786,
+          27428211,
+          24229750,
+          23381096,
+          23695040,
+          22748870,
+          21260884,
+          25993228,
+          23461715,
+          34260613,
+          22773272
+        ],
+        "skipped_resident": 0
+      },
+      "before-fat": {
+        "n": 31,
+        "median_ms": 21.056613,
+        "p95_ms": 28.176526,
+        "ready_ns": [
+          22414214,
+          21541079,
+          19773750,
+          31508098,
+          22439573,
+          21287559,
+          20864628,
+          22715080,
+          20097073,
+          21056613,
+          24398510,
+          25087193,
+          20611825,
+          28176526,
+          21750029,
+          20481682,
+          24138090,
+          19557781,
+          23558647,
+          19887349,
+          18973217,
+          19531783,
+          19788703,
+          21108680,
+          22730359,
+          22315029,
+          17522051,
+          19630755,
+          18377356,
+          19741061,
+          19163248
+        ],
+        "skipped_resident": 0
+      },
+      "selected-thin": {
+        "n": 31,
+        "median_ms": 27.350169,
+        "p95_ms": 32.723055,
+        "ready_ns": [
+          28243505,
+          26477648,
+          28267280,
+          32395655,
+          27016711,
+          27851951,
+          24503710,
+          27454638,
+          26102004,
+          32723055,
+          25173706,
+          31403488,
+          27124666,
+          32760259,
+          29018597,
+          26112529,
+          26628057,
+          28935885,
+          26571148,
+          29238437,
+          24776588,
+          22403630,
+          31168830,
+          25458016,
+          29381433,
+          24581910,
+          26420610,
+          31722881,
+          28427607,
+          27350169,
+          27242000
+        ],
+        "skipped_resident": 0
+      },
+      "selected-fat": {
+        "n": 31,
+        "median_ms": 21.208902,
+        "p95_ms": 25.671292,
+        "ready_ns": [
+          19518083,
+          23514567,
+          21062486,
+          20636336,
+          20288181,
+          20334169,
+          25671292,
+          19001484,
+          19669698,
+          24785652,
+          24184298,
+          24165390,
+          22368332,
+          25756853,
+          25645694,
+          24033995,
+          24673337,
+          21208902,
+          20659571,
+          19454223,
+          18464795,
+          18898036,
+          19720631,
+          18922006,
+          22046832,
+          25269598,
+          21511175,
+          21427987,
+          19185766,
+          19220182,
+          22410084
+        ],
+        "skipped_resident": 0
+      }
+    }
+  },
+  "external_edit_readiness": {
+    "matching-v3": {
+      "requested_font_sizes": [
+        14,
+        14
+      ],
+      "archive_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb",
+      "timings": {
+        "before-thin": {
+          "n": 21,
+          "median_ms": 10.506397,
+          "p95_ms": 13.625889,
+          "ready_ns": [
+            10152403,
+            9334703,
+            9434882,
+            9744269,
+            10506397,
+            10245870,
+            13871753,
+            11387398,
+            12689495,
+            10401923,
+            12283454,
+            12246970,
+            13625889,
+            9383746,
+            9325611,
+            9798960,
+            10703239,
+            10849573,
+            11757717,
+            11484544,
+            9780823
+          ]
+        },
+        "before-fat": {
+          "n": 21,
+          "median_ms": 9.454772,
+          "p95_ms": 11.677804,
+          "ready_ns": [
+            9073807,
+            9592776,
+            7756280,
+            9454772,
+            11395410,
+            9410426,
+            10848723,
+            9426049,
+            10494478,
+            9425578,
+            10341924,
+            10385298,
+            8509193,
+            7853313,
+            8146506,
+            9819691,
+            10108448,
+            15629408,
+            11677804,
+            8622971,
+            8727496
+          ]
+        },
+        "selected-thin": {
+          "n": 21,
+          "median_ms": 10.539525,
+          "p95_ms": 12.27402,
+          "ready_ns": [
+            10711220,
+            12162385,
+            9822176,
+            10611221,
+            10068360,
+            10539525,
+            14634872,
+            10384145,
+            11590009,
+            10461871,
+            11498823,
+            11120594,
+            10467589,
+            9764569,
+            9851819,
+            9003093,
+            9926529,
+            12274020,
+            11251759,
+            9676590,
+            10874090
+          ]
+        },
+        "selected-fat": {
+          "n": 21,
+          "median_ms": 9.978927,
+          "p95_ms": 13.390972,
+          "ready_ns": [
+            9463654,
+            10013808,
+            9308795,
+            9076823,
+            10051102,
+            8231933,
+            12474807,
+            10469732,
+            10087528,
+            13390972,
+            9978927,
+            9526157,
+            9616130,
+            8285723,
+            8696650,
+            8540590,
+            25848184,
+            10003824,
+            10564663,
+            8756669,
+            13363863
+          ]
+        }
+      }
+    },
+    "scalar-v3": {
+      "requested_font_sizes": [
+        14,
+        17
+      ],
+      "archive_sha256": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f",
+      "timings": {
+        "before-thin": {
+          "n": 21,
+          "median_ms": 14.071328,
+          "p95_ms": 18.070964,
+          "ready_ns": [
+            13586681,
+            15567100,
+            13480455,
+            11959325,
+            13887487,
+            18070964,
+            13962396,
+            14181881,
+            16832331,
+            13476238,
+            17357156,
+            13722792,
+            12709825,
+            12687482,
+            15362828,
+            13558430,
+            18352619,
+            14101924,
+            16123058,
+            14417486,
+            14071328
+          ]
+        },
+        "before-fat": {
+          "n": 21,
+          "median_ms": 12.045072,
+          "p95_ms": 17.140377,
+          "ready_ns": [
+            11027598,
+            10853019,
+            10682507,
+            12102978,
+            11719881,
+            11186982,
+            11670258,
+            13409469,
+            12282782,
+            12223566,
+            11999474,
+            11950272,
+            12995809,
+            12045072,
+            15679456,
+            11635126,
+            17140377,
+            16036775,
+            11545724,
+            20707001,
+            12523149
+          ]
+        },
+        "selected-thin": {
+          "n": 21,
+          "median_ms": 13.468648,
+          "p95_ms": 15.435775,
+          "ready_ns": [
+            11999734,
+            12307460,
+            12608095,
+            12994596,
+            12485794,
+            12926215,
+            14563446,
+            13468648,
+            14332575,
+            15435775,
+            13154122,
+            12786098,
+            15072599,
+            14375218,
+            13419735,
+            13516367,
+            16404319,
+            14468064,
+            14827235,
+            13350643,
+            13784605
+          ]
+        },
+        "selected-fat": {
+          "n": 21,
+          "median_ms": 12.927016,
+          "p95_ms": 14.226547,
+          "ready_ns": [
+            12552252,
+            11122198,
+            11258298,
+            14088363,
+            11507598,
+            13698757,
+            12369482,
+            12844855,
+            13625038,
+            12927016,
+            14226547,
+            13634883,
+            14940212,
+            12352295,
+            11954527,
+            11297446,
+            13111690,
+            13452854,
+            13476599,
+            13127832,
+            11707682
+          ]
+        }
+      }
+    },
+    "structural-v3": {
+      "requested_font_sizes": [
+        14,
+        29
+      ],
+      "archive_sha256": "f258743cc9601170e31fc45f84b55f5fcb869273e61d4ccf061f8a7efd9123b9",
+      "timings": {
+        "before-thin": {
+          "n": 9,
+          "median_ms": 11.71267,
+          "p95_ms": 16.212996,
+          "ready_ns": [
+            12200412,
+            11425276,
+            12224507,
+            11753481,
+            16212996,
+            10898127,
+            10721985,
+            10887411,
+            11712670
+          ]
+        },
+        "before-fat": {
+          "n": 9,
+          "median_ms": 10.926467,
+          "p95_ms": 12.245918,
+          "ready_ns": [
+            11556990,
+            10606305,
+            10954489,
+            9932568,
+            10926467,
+            12245918,
+            11323195,
+            9748977,
+            9544595
+          ]
+        },
+        "selected-thin": {
+          "n": 9,
+          "median_ms": 11.816684,
+          "p95_ms": 14.500388,
+          "ready_ns": [
+            11816684,
+            14085789,
+            11389552,
+            12186971,
+            14500388,
+            11134076,
+            10888301,
+            10692793,
+            12541114
+          ]
+        },
+        "selected-fat": {
+          "n": 9,
+          "median_ms": 10.84763,
+          "p95_ms": 12.068947,
+          "ready_ns": [
+            12068947,
+            10735485,
+            11308463,
+            9617442,
+            11703667,
+            10847630,
+            9331089,
+            10376534,
+            11923953
+          ]
+        }
+      }
+    },
+    "full-fallback": {
+      "requested_font_sizes": [
+        19,
+        17
+      ],
+      "archive_sha256": "ac7712e2a7611f71432a7aaf6dd2f61c5ffa771a3574ca6834722245933e5cf0",
+      "timings": {
+        "before-thin": {
+          "n": 9,
+          "median_ms": 1772.693416,
+          "p95_ms": 2079.030814,
+          "ready_ns": [
+            1655488622,
+            1628671257,
+            1614556741,
+            1773688134,
+            1598307659,
+            2079030814,
+            1772693416,
+            2037762113,
+            1883257316
+          ]
+        },
+        "before-fat": {
+          "n": 9,
+          "median_ms": 1732.518604,
+          "p95_ms": 1905.342593,
+          "ready_ns": [
+            1589514254,
+            1745223703,
+            1613543295,
+            1732518604,
+            1814578267,
+            1796480981,
+            1530408158,
+            1721249686,
+            1905342593
+          ]
+        },
+        "selected-thin": {
+          "n": 9,
+          "median_ms": 1972.439459,
+          "p95_ms": 2144.654767,
+          "ready_ns": [
+            1604617124,
+            1694750549,
+            1654088457,
+            2081355741,
+            2144654767,
+            2070787078,
+            1972439459,
+            1542969162,
+            2128819045
+          ]
+        },
+        "selected-fat": {
+          "n": 9,
+          "median_ms": 1858.661475,
+          "p95_ms": 1949.100931,
+          "ready_ns": [
+            1603001829,
+            1548445593,
+            1517761528,
+            1633231883,
+            1858661475,
+            1930362342,
+            1874288270,
+            1861013125,
+            1949100931
+          ]
+        }
+      }
+    }
+  },
+  "source_main_merge": "8aa7ca2b7c1a87bff38034c3535bba4ea9b936da",
+  "original_fat_elf": {
+    "bytes": 38600504,
+    "cies": 2,
+    "fdes": 85764,
+    "allocated_file_sections": {
+      ".interp": 28,
+      ".note.ABI-tag": 32,
+      ".note.gnu.build-id": 36,
+      ".dynsym": 2448,
+      ".gnu.version": 204,
+      ".gnu.version_r": 384,
+      ".gnu.hash": 28,
+      ".dynstr": 1333,
+      ".rela.dyn": 2400,
+      ".relr.dyn": 29200,
+      ".rela.plt": 48,
+      ".gcc_except_table": 1153684,
+      ".rodata": 1141679,
+      ".eh_frame_hdr": 686124,
+      ".eh_frame": 4519564,
+      ".text": 29024725,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".tdata": 2768,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 1835032,
+      ".dynamic": 496,
+      ".got": 912,
+      ".got.plt": 40,
+      ".tm_clone_table": 0,
+      ".data": 195752
+    },
+    "sha256": "67e3bc647924c8f6b595418cb1941c2604b016ebea32e760394e9cc7cb470b74"
+  },
+  "property": {
+    "scope": "Public i32 property/observer operations on four concrete host classes, Linux x86-64, single thread. Cases do not exercise rendering or all possible property payload types.",
+    "toolchain": "rustc 1.99.0 with opt-level=s, unwinding, PIE, safe identical-code folding and RELR. Thin used 16 codegen units; whole-program Fat used one final-crate codegen unit. Compiler and source features were preserved.",
+    "timings": {
+      "cpu": 8,
+      "clock": "CLOCK_THREAD_CPUTIME_ID",
+      "warmup_blocks": 3,
+      "measured_blocks": 72,
+      "measured_processes": 576,
+      "description": "Each 24-block cycle uses every permutation of four binaries once, in shuffled order. Each block is followed immediately by its reverse. All eight processes in a block use the same workload rotation. Medians of within-block candidate/reference CPU ratios with 4000-resample percentile bootstrap intervals (95%)."
+    },
+    "artifacts": {
+      "main_thin": {
+        "bytes": 13001304,
+        "sha256": "a096152279026b540817d8adffe2d6751b6293524f3c8b5d170fcb41c42fb833",
+        "sections": {
+          ".interp": 28,
+          ".note.ABI-tag": 32,
+          ".note.gnu.build-id": 36,
+          ".dynsym": 2232,
+          ".gnu.version": 186,
+          ".gnu.version_r": 352,
+          ".gnu.hash": 28,
+          ".dynstr": 1248,
+          ".rela.dyn": 2184,
+          ".relr.dyn": 17392,
+          ".rela.plt": 48,
+          ".rodata": 466749,
+          ".gcc_except_table": 229720,
+          ".eh_frame_hdr": 357164,
+          ".eh_frame": 2020748,
+          ".text": 8781541,
+          ".init": 27,
+          ".fini": 13,
+          ".plt": 48,
+          ".tdata": 1576,
+          ".tbss": 4336,
+          ".fini_array": 8,
+          ".init_array": 16,
+          ".data.rel.ro": 860928,
+          ".dynamic": 496,
+          ".got": 231096,
+          ".got.plt": 40,
+          ".relro_padding": 1408,
+          ".tm_clone_table": 0,
+          ".data": 23888,
+          ".bss": 251,
+          ".comment": 184
+        }
+      },
+      "main_fat": {
+        "bytes": 11366632,
+        "sha256": "abbcc5a626c3cd0f7b2fa78c0da23f108d787da4e6d40589725ee51d094fe48a",
+        "sections": {
+          ".interp": 28,
+          ".note.ABI-tag": 32,
+          ".note.gnu.build-id": 36,
+          ".dynsym": 2208,
+          ".gnu.version": 184,
+          ".gnu.version_r": 352,
+          ".gnu.hash": 28,
+          ".dynstr": 1222,
+          ".rela.dyn": 2160,
+          ".relr.dyn": 12832,
+          ".rela.plt": 48,
+          ".gcc_except_table": 341548,
+          ".rodata": 464407,
+          ".eh_frame_hdr": 247020,
+          ".eh_frame": 1402276,
+          ".text": 8058085,
+          ".init": 27,
+          ".fini": 13,
+          ".plt": 48,
+          ".tdata": 1528,
+          ".tbss": 4296,
+          ".fini_array": 8,
+          ".init_array": 16,
+          ".data.rel.ro": 803808,
+          ".dynamic": 496,
+          ".got": 824,
+          ".got.plt": 40,
+          ".relro_padding": 1776,
+          ".tm_clone_table": 0,
+          ".data": 23888,
+          ".bss": 194,
+          ".comment": 184
+        }
+      },
+      "final_thin": {
+        "bytes": 10562760,
+        "sha256": "00e31db722eaad3a9de5669fc5040c6d3e5b60630f22c1b1a98f1338700d1674",
+        "sections": {
+          ".interp": 28,
+          ".note.ABI-tag": 32,
+          ".note.gnu.build-id": 36,
+          ".dynsym": 2232,
+          ".gnu.version": 186,
+          ".gnu.version_r": 352,
+          ".gnu.hash": 28,
+          ".dynstr": 1248,
+          ".rela.dyn": 2184,
+          ".relr.dyn": 14336,
+          ".rela.plt": 48,
+          ".rodata": 475261,
+          ".gcc_except_table": 213656,
+          ".eh_frame_hdr": 303844,
+          ".eh_frame": 1688960,
+          ".text": 6931477,
+          ".init": 27,
+          ".fini": 13,
+          ".plt": 48,
+          ".tdata": 1448,
+          ".tbss": 4488,
+          ".fini_array": 8,
+          ".init_array": 16,
+          ".data.rel.ro": 729600,
+          ".dynamic": 496,
+          ".got": 169784,
+          ".got.plt": 40,
+          ".relro_padding": 2848,
+          ".tm_clone_table": 0,
+          ".data": 23904,
+          ".bss": 251,
+          ".comment": 184
+        }
+      },
+      "final_fat": {
+        "bytes": 8852056,
+        "sha256": "ad72925373064183843221b6fcfbb43f7dd74abbdca59b3cae9c8e9b1fd3a934",
+        "sections": {
+          ".interp": 28,
+          ".note.ABI-tag": 32,
+          ".note.gnu.build-id": 36,
+          ".dynsym": 2208,
+          ".gnu.version": 184,
+          ".gnu.version_r": 352,
+          ".gnu.hash": 28,
+          ".dynstr": 1222,
+          ".rela.dyn": 2160,
+          ".relr.dyn": 11064,
+          ".rela.plt": 48,
+          ".gcc_except_table": 244648,
+          ".rodata": 472855,
+          ".eh_frame_hdr": 212180,
+          ".eh_frame": 1175152,
+          ".text": 6007221,
+          ".init": 27,
+          ".fini": 13,
+          ".plt": 48,
+          ".tdata": 1400,
+          ".tbss": 4448,
+          ".fini_array": 8,
+          ".init_array": 16,
+          ".data.rel.ro": 692400,
+          ".dynamic": 496,
+          ".got": 824,
+          ".got.plt": 40,
+          ".relro_padding": 1424,
+          ".tm_clone_table": 0,
+          ".data": 23904,
+          ".bss": 186,
+          ".comment": 184
+        }
+      }
+    },
+    "base_inputs": {
+      "main": {
+        "source_revision": "df3e12ad721fb8877699ea1f5ff157e22b45e9a7",
+        "archive": "/tmp/c496-mainfat/deps/libferroui_base-923621b9e287e76d.rlib",
+        "bytes": 259925056,
+        "sha256": "7d93d96423297570aa8265415b24d14fb67501517d765ad8e365187772a03ee0",
+        "workload_sha256": "2758bd8c66978d414e74ff0a2dad52442ecf0d5d03a22d77df6d4381acf11b70",
+        "rustc": [
+          "/tmp/ember11-rust/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustc",
+          "--edition=2021",
+          "--crate-name",
+          "property_access_probe",
+          "/tmp/c496-fastsafe/bench.rs",
+          "-Copt-level=s",
+          "-Cpanic=unwind",
+          "-Cstrip=symbols",
+          "-Clink-arg=-fuse-ld=lld",
+          "-Ldependency=/tmp/c496-mainfat/deps",
+          "-Ldependency=/tmp/r496-current-run/target/release/deps",
+          "--extern",
+          "ferroui_base=/tmp/c496-mainfat/deps/libferroui_base-923621b9e287e76d.rlib",
+          "-o",
+          "/tmp/c496-fastsafe/exact/main-fat",
+          "-Clto=fat",
+          "-Ccodegen-units=1",
+          "-Cllvm-args=--addrsig",
+          "-Clink-arg=-Wl,--icf=safe",
+          "-Clink-arg=-Wl,-z,pack-relative-relocs"
+        ]
+      },
+      "final": {
+        "archive": "/tmp/c496-root/target/release/deps/libferroui_base-628a0579e6170704.rlib",
+        "sha256": "790bf808cea5fe48b3db707e95374271a1b80fd40ba4a5b4e922e9c7c0b3692a",
+        "bytes": 215460858,
+        "git_revision": "ed12631e2521b3a07d6d24ad71430408cf2ab290",
+        "features": "[\"markup-functions\"]"
+      }
+    },
+    "summary": {
+      "style_set_read_dispose": {
+        "cpu_ns_per_op": {
+          "main_thin": 357.80065,
+          "main_fat": 273.5943,
+          "final_thin": 356.9723,
+          "final_fat": 301.03218749999996
+        },
+        "ratios": {
+          "final_fat_vs_main_fat": [
+            1.0744123148982963,
+            1.0625222688828304,
+            1.0920618823363641
+          ],
+          "final_fat_vs_main_shipping": [
+            0.8171642172018978,
+            0.8053707162025695,
+            0.8270006184460128
+          ],
+          "final_thin_vs_main_shipping": [
+            0.982774943894496,
+            0.974477541161431,
+            1.0047996415413571
+          ],
+          "final_fat_vs_final_thin": [
+            0.8323883419002123,
+            0.8242828963401667,
+            0.8353941798960152
+          ],
+          "main_fat_vs_main_thin": [
+            0.7627446283210121,
+            0.7558421409096663,
+            0.7864221493671133
+          ]
+        }
+      },
+      "style_binding_emit_read": {
+        "cpu_ns_per_op": {
+          "main_thin": 134.76129999999998,
+          "main_fat": 122.85808750000001,
+          "final_thin": 141.109475,
+          "final_fat": 124.80725
+        },
+        "ratios": {
+          "final_fat_vs_main_fat": [
+            1.007546662189187,
+            0.9957170938063746,
+            1.0291355475594992
+          ],
+          "final_fat_vs_main_shipping": [
+            0.9250902448458692,
+            0.910704968884553,
+            0.9446140476259117
+          ],
+          "final_thin_vs_main_shipping": [
+            1.0413488637613817,
+            1.031917856812263,
+            1.0621615787608405
+          ],
+          "final_fat_vs_final_thin": [
+            0.884848017299545,
+            0.8740192801664693,
+            0.8925080529619395
+          ],
+          "main_fat_vs_main_thin": [
+            0.9102595498760424,
+            0.9006382990247388,
+            0.9180407486548032
+          ]
+        }
+      },
+      "coerce_scoped_local": {
+        "cpu_ns_per_op": {
+          "main_thin": 21.8517375,
+          "main_fat": 20.3716625,
+          "final_thin": 20.39685,
+          "final_fat": 18.0556125
+        },
+        "ratios": {
+          "final_fat_vs_main_fat": [
+            0.8985342013278435,
+            0.8718322523422277,
+            0.9131139232241907
+          ],
+          "final_fat_vs_main_shipping": [
+            0.8274322695995193,
+            0.8016173855524154,
+            0.8570808837002907
+          ],
+          "final_thin_vs_main_shipping": [
+            0.9389141868966775,
+            0.914752491619433,
+            0.9597758199296917
+          ],
+          "final_fat_vs_final_thin": [
+            0.892656058084911,
+            0.8689503966943815,
+            0.9127848036382851
+          ],
+          "main_fat_vs_main_thin": [
+            0.9305517399876304,
+            0.9043694911102174,
+            0.9497318879472584
+          ]
+        }
+      },
+      "metadata_default": {
+        "cpu_ns_per_op": {
+          "main_thin": 6.22668625,
+          "main_fat": 6.08936875,
+          "final_thin": 5.866025,
+          "final_fat": 5.35288625
+        },
+        "ratios": {
+          "final_fat_vs_main_fat": [
+            0.8701444107737426,
+            0.851174654781694,
+            0.8798706008170422
+          ],
+          "final_fat_vs_main_shipping": [
+            0.8550202131225948,
+            0.8323137079142033,
+            0.8636984548869777
+          ],
+          "final_thin_vs_main_shipping": [
+            0.9419109933758829,
+            0.9259962268364896,
+            0.9655430251176119
+          ],
+          "final_fat_vs_final_thin": [
+            0.8956213241094073,
+            0.8773081444876937,
+            0.9125947163914905
+          ],
+          "main_fat_vs_main_thin": [
+            0.9763356025945542,
+            0.9592629651178453,
+            0.9906245308151076
+          ]
+        }
+      },
+      "metadata_scoped": {
+        "cpu_ns_per_op": {
+          "main_thin": 7.20144875,
+          "main_fat": 7.267810000000001,
+          "final_thin": 6.9132575,
+          "final_fat": 6.3628
+        },
+        "ratios": {
+          "final_fat_vs_main_fat": [
+            0.8817015140285162,
+            0.8580198806015753,
+            0.9101549097293171
+          ],
+          "final_fat_vs_main_shipping": [
+            0.8783118197733975,
+            0.8588630398594466,
+            0.9091403381488334
+          ],
+          "final_thin_vs_main_shipping": [
+            0.9781653684284808,
+            0.9447606336390695,
+            1.00549562887565
+          ],
+          "final_fat_vs_final_thin": [
+            0.9183723910502258,
+            0.8927861123878835,
+            0.9364980236254884
+          ],
+          "main_fat_vs_main_thin": [
+            1.0061577384780613,
+            0.9858028108819041,
+            1.0175090190502925
+          ]
+        }
+      },
+      "metadata_cached_override": {
+        "cpu_ns_per_op": {
+          "main_thin": 7.589438749999999,
+          "main_fat": 7.506891250000001,
+          "final_thin": 6.2054175,
+          "final_fat": 5.86956625
+        },
+        "ratios": {
+          "final_fat_vs_main_fat": [
+            0.782129725119094,
+            0.7711049774993325,
+            0.7961265278166928
+          ],
+          "final_fat_vs_main_shipping": [
+            0.7665511488224064,
+            0.7585193738719075,
+            0.7744268117066069
+          ],
+          "final_thin_vs_main_shipping": [
+            0.8194180967557352,
+            0.8032584197376635,
+            0.8330388121032215
+          ],
+          "final_fat_vs_final_thin": [
+            0.9404196253008474,
+            0.9221698093539055,
+            0.9500661389495874
+          ],
+          "main_fat_vs_main_thin": [
+            0.9811257451859399,
+            0.9625366413107668,
+            0.9916672157553417
+          ]
+        }
+      },
+      "get_plain": {
+        "cpu_ns_per_op": {
+          "main_thin": 7.1704275,
+          "main_fat": 7.601168749999999,
+          "final_thin": 6.165795,
+          "final_fat": 5.9552700000000005
+        },
+        "ratios": {
+          "final_fat_vs_main_fat": [
+            0.8001224586932816,
+            0.7818119142939863,
+            0.8211981682744639
+          ],
+          "final_fat_vs_main_shipping": [
+            0.8391101309326585,
+            0.8246469285085951,
+            0.8649112659812181
+          ],
+          "final_thin_vs_main_shipping": [
+            0.8819079815465085,
+            0.8567829714024567,
+            0.8922820136638969
+          ],
+          "final_fat_vs_final_thin": [
+            0.9648156380549735,
+            0.9358638046732469,
+            0.9906025672396377
+          ],
+          "main_fat_vs_main_thin": [
+            1.0525847240403312,
+            1.0372888190151706,
+            1.067895128920672
+          ]
+        }
+      },
+      "get_derived_default": {
+        "cpu_ns_per_op": {
+          "main_thin": 12.865884999999999,
+          "main_fat": 13.36164875,
+          "final_thin": 11.007458750000001,
+          "final_fat": 10.474141249999999
+        },
+        "ratios": {
+          "final_fat_vs_main_fat": [
+            0.7844948990360194,
+            0.7752531301097368,
+            0.8007146014272317
+          ],
+          "final_fat_vs_main_shipping": [
+            0.80127207696271,
+            0.7903258031571165,
+            0.8124003004067621
+          ],
+          "final_thin_vs_main_shipping": [
+            0.8424833528170812,
+            0.8305787118608157,
+            0.8512886493293801
+          ],
+          "final_fat_vs_final_thin": [
+            0.9540397230758859,
+            0.9440481996038087,
+            0.9625912043491291
+          ],
+          "main_fat_vs_main_thin": [
+            1.0233541078531974,
+            1.0026245525654562,
+            1.0365564106783165
+          ]
+        }
+      },
+      "get_mixed_hosts": {
+        "cpu_ns_per_op": {
+          "main_thin": 14.07120375,
+          "main_fat": 14.197389999999999,
+          "final_thin": 12.45442375,
+          "final_fat": 11.49081625
+        },
+        "ratios": {
+          "final_fat_vs_main_fat": [
+            0.8052875717095731,
+            0.7917953549807045,
+            0.8151340451500273
+          ],
+          "final_fat_vs_main_shipping": [
+            0.8108162808939872,
+            0.8012956059364139,
+            0.8224534388482677
+          ],
+          "final_thin_vs_main_shipping": [
+            0.883376098846721,
+            0.8725791615781798,
+            0.8960709187105365
+          ],
+          "final_fat_vs_final_thin": [
+            0.9188548104928702,
+            0.9050582635474974,
+            0.9325454123269483
+          ],
+          "main_fat_vs_main_thin": [
+            1.018233751362204,
+            1.0013270202954836,
+            1.0264639482968096
+          ]
+        }
+      },
+      "get_effective_local": {
+        "cpu_ns_per_op": {
+          "main_thin": 6.774301250000001,
+          "main_fat": 7.0800425,
+          "final_thin": 6.41743125,
+          "final_fat": 6.16797375
+        },
+        "ratios": {
+          "final_fat_vs_main_fat": [
+            0.8640810823304895,
+            0.8463629049726267,
+            0.8863607613047215
+          ],
+          "final_fat_vs_main_shipping": [
+            0.9188768308834901,
+            0.9056149161248891,
+            0.9431080105964141
+          ],
+          "final_thin_vs_main_shipping": [
+            0.9566404648971183,
+            0.9478265921654789,
+            0.9830030438520043
+          ],
+          "final_fat_vs_final_thin": [
+            0.9580836225728173,
+            0.9467390969985369,
+            0.9712923467514996
+          ],
+          "main_fat_vs_main_thin": [
+            1.053022720686065,
+            1.0380690925776597,
+            1.07923555624329
+          ]
+        }
+      },
+      "mixed_75read_25write": {
+        "cpu_ns_per_op": {
+          "main_thin": 27.377818750000003,
+          "main_fat": 23.082857500000003,
+          "final_thin": 27.3112975,
+          "final_fat": 23.783886250000002
+        },
+        "ratios": {
+          "final_fat_vs_main_fat": [
+            0.993581347694863,
+            0.9855005974842017,
+            1.0046103087698481
+          ],
+          "final_fat_vs_main_shipping": [
+            0.8605801882960359,
+            0.8510908095561347,
+            0.8724498816326571
+          ],
+          "final_thin_vs_main_shipping": [
+            0.9931886796904256,
+            0.9820035334724223,
+            1.0093879639892012
+          ],
+          "final_fat_vs_final_thin": [
+            0.8605979628249609,
+            0.8435220512888109,
+            0.8733846995048787
+          ],
+          "main_fat_vs_main_thin": [
+            0.8687181465360845,
+            0.8553810408719937,
+            0.8759266887515802
+          ]
+        }
+      }
+    },
+    "validation": {
+      "tests": 299,
+      "failures": 0,
+      "checksum_agrees_for_every_lane_and_block": true
+    },
+    "workload_source": "compiled-theme-binding-dispatch-linux-x86_64.json#/property/property_workload_source",
+    "workload_order": [
+      "metadata_default",
+      "metadata_scoped",
+      "metadata_cached_override",
+      "get_plain",
+      "get_derived_default",
+      "get_mixed_hosts",
+      "get_effective_local",
+      "mixed_75read_25write",
+      "style_set_read_dispose",
+      "style_binding_emit_read",
+      "coerce_scoped_local"
+    ],
+    "iterations_and_checksums": [
+      [
+        200000,
+        3400000
+      ],
+      [
+        200000,
+        3400000
+      ],
+      [
+        200000,
+        5800000
+      ],
+      [
+        200000,
+        3400000
+      ],
+      [
+        200000,
+        5800000
+      ],
+      [
+        200000,
+        5425000
+      ],
+      [
+        200000,
+        20325000
+      ],
+      [
+        200000,
+        29693725
+      ],
+      [
+        20000,
+        10679440
+      ],
+      [
+        20000,
+        10099440
+      ],
+      [
+        20000,
+        140000
+      ]
+    ],
+    "raw_cpu_ns_by_block": [
+      [["final_fat",1081063,1288186,1259874,1033958,2019033,2037511,1070532,4952426,6417575,2642109,367938],["main_fat",1281606,1715992,1574121,1661201,2729350,2887284,1434724,5072504,5857582,2640828,436380],["main_thin",1384730,1639899,1524167,1495013,2682640,2871741,1409797,5696293,7739732,2857060,519232],["final_thin",1243710,1395746,1330709,1364690,2307702,2504785,1308846,5642952,7592683,2985370,430670],["final_thin",1191141,1448925,1262097,1288246,2249265,2537304,1277460,5607650,7677599,3013732,426054],["main_thin",1403007,1662002,1541122,1534111,2733025,2816890,1438820,5638226,7948331,2782168,472063],["main_fat",1266293,1535945,1538688,1583626,2700767,2900164,1442356,4965385,5889760,2600618,421757],["final_fat",1121789,1502595,1200715,1237441,2171490,2297928,1307625,4902301,6046517,2331357,244103]],
+      [["main_fat",1212914,1015901,1044714,1309818,2130438,2617533,1551487,4745478,5154136,2379489,445382],["main_thin",1416396,1447963,1608121,1641551,2451295,2737792,1269839,5720408,7090035,2774997,451131],["final_fat",1058595,1370368,1268947,1198944,2123178,2113654,1198713,4607122,5875920,2760836,369750],["final_thin",1231722,1258212,1245052,1288697,2139182,2493669,1276799,5561121,7649147,3012530,502427],["final_thin",1016743,1372882,1329027,1204792,2121795,2568109,1384169,5998462,7084617,2668189,333997],["final_fat",1003102,1317579,1117702,1024283,1905514,2260872,1184422,4616757,5571197,2417826,343120],["main_thin",1259083,1392171,1435134,1386111,2586216,2850550,1428995,5478868,7398294,2994043,440745],["main_fat",1158944,1508504,1626018,1682663,2989927,2926182,1498830,4575455,5257209,2453579,394707]],
+      [["main_thin",920819,1196230,1538829,1468854,2802598,3123907,1399242,5555423,5553840,2218489,282931],["final_fat",1346242,804797,852898,921410,1791925,1969179,1097492,4082051,4062702,1878905,351232],["final_thin",814632,826859,1085485,1159845,1595573,1842230,996011,4170212,5237861,1999584,269421],["main_fat",1011154,912867,1066636,1143080,2517684,2626857,1274616,4113428,5632577,1949159,280658],["main_fat",886579,998585,1017303,1002131,1808460,2522041,990794,3596549,3618111,1566039,339144],["final_thin",1273389,1001119,822494,737417,1418800,1757004,836804,4581394,7124607,2857701,425492],["final_fat",1091904,1342036,902002,898356,2310967,1760168,843995,3081603,3439556,2133303,354857],["main_thin",1311902,1475855,1593109,1479711,2732153,2936007,1428304,5758194,7593554,2710491,438323]],
+      [["main_thin",1281716,1487332,1612107,1416557,2814265,2952912,1397869,5756852,7954931,2828667,457240],["final_thin",1313484,1509134,1512890,1381886,2410215,2753155,1433032,5832285,7539633,2945782,551350],["final_fat",1120917,1389386,1232073,1418840,2290938,2545445,1346423,5162628,6150918,2584043,379625],["main_fat",1247165,1523054,1642463,1610545,2614739,2901665,1451219,5012014,5804363,2589381,388388],["main_fat",763756,820761,947159,1576315,2770270,3557522,1458990,4173582,3526755,1564277,272716],["final_fat",646481,856724,796124,892227,1562574,1666869,910645,3582959,3731240,5460892,272656],["final_thin",983222,760901,879428,861721,1729933,1671766,944715,4467194,4768733,1897021,300557],["main_thin",917164,816334,1278501,799419,2157589,2042798,984655,3474087,6384045,1768801,281198]],
+      [["final_thin",728583,753922,885637,757958,1599148,1714700,860159,3976334,4584929,2059353,262410],["main_thin",771207,1180646,1590405,830295,1943751,2365047,892527,3718400,4882291,1720960,427546],["main_fat",1222768,1574762,1533471,1558498,2497925,2356916,1033998,7141056,5680839,2636211,406304],["final_fat",1113185,1331611,1260815,1282057,2222025,2440260,1303739,4856192,6339038,2481020,452593],["final_fat",1114437,1340784,1225873,1277671,2768388,2926763,1309958,5606138,6929827,2749790,355639],["main_fat",1327545,1452000,1561213,1603756,2866854,2696831,1486521,4821051,5637925,2586928,409038],["main_thin",1315687,1483356,1612868,1553400,2639535,2782748,1380674,5682201,7591261,2894886,442959],["final_thin",1321245,1571437,1299543,1360223,2287072,2552526,1378079,5608923,7438934,2833184,411552]],
+      [["main_thin",1248246,1449977,1550867,1587561,2728068,2831692,1375606,5749441,7600665,2702840,459793],["final_thin",1165894,1565899,1234977,1322297,2239360,2556983,1394084,5629403,7584430,2900234,415298],["main_fat",824766,819299,891206,874942,1827588,3041414,1446933,3758660,3428970,1524958,267478],["final_fat",663006,786089,772629,1019225,1482014,1649924,906077,2974163,3464002,1595162,238534],["final_fat",704598,750556,831026,799239,1686859,1568083,874340,3153831,4379944,2401823,254579],["main_fat",1023483,847590,974340,1018184,1865735,3412446,1206855,4880910,5015349,1663124,268449],["final_thin",737256,884876,900890,767591,1555153,2274042,894440,4027930,5587771,2255515,376690],["main_thin",774441,823214,905788,813960,1622494,2229046,913399,3565473,4195740,1772216,280748]],
+      [["main_fat",1085314,872458,914681,1012225,2745163,2858131,1001620,3300459,3617811,1472380,327287],["main_thin",1263840,1539439,1527142,1481703,2696590,2795688,1361225,5658466,7963645,2779905,468977],["final_thin",1338501,1588372,1272933,1285532,2284738,2505797,1283519,5630163,7514266,2943578,410711],["final_fat",1152684,1359792,1182339,1512850,2173433,2624594,1660860,5369796,6603271,2821376,367307],["final_fat",1112705,1326192,1194026,1225222,2128015,2332008,1297129,4929883,6420479,2937079,367096],["final_thin",1190450,1566440,1278471,1303830,2271648,2522642,1283009,5647740,7570149,2896599,405754],["main_thin",1299743,1537407,1535814,1562104,2688108,2828136,1478820,5663072,7712571,2868576,465792],["main_fat",1263329,1530105,1536395,1635081,2649580,2844771,1431919,5007618,5861338,2622360,391872]],
+      [["main_thin",1313624,1551848,1522275,1476206,2719065,2780976,1407173,5690173,7662577,2893053,477781],["main_fat",1297710,1567191,1535704,1587482,2642771,2823499,1509386,4928580,5749642,2617904,391142],["final_fat",1176519,1321535,1146265,1038324,1732447,1830282,855803,4836684,6303936,2651113,360636],["final_thin",896894,853099,803946,1221767,2059133,3695326,1014639,3673243,9697715,2209797,361317],["final_thin",738358,1020488,1015931,769385,1787048,2210388,1378871,4123964,9910410,5333663,265384],["final_fat",727262,806330,778047,1037243,1939204,2108616,876093,4747211,5129449,2077019,259937],["main_fat",984614,862232,1022100,963904,1874198,2006444,1192935,3398554,3807673,1533140,308429],["main_thin",1099706,1317790,1431910,1398090,2478396,2538196,1373313,3779612,4483698,2206171,404562]],
+      [["final_fat",1016922,1291060,1118764,1082530,1973035,2189807,1160646,4168940,5113756,2364246,345984],["main_thin",1085404,1290089,1610505,1333213,2446880,2805312,1414784,5564375,6419929,2326561,379154],["main_fat",1259123,1449076,1538238,1519370,2697211,2862838,1513250,4816063,5645416,2519677,397281],["final_thin",1236800,1545148,1231792,1241196,2309465,2494580,1342847,5656684,7479794,2867024,439224],["final_thin",1146745,1562154,1224652,1236960,2154604,2498176,1274286,5392180,7628486,2791472,384612],["main_fat",1187577,1461053,1620791,1617676,2943147,2996997,1456576,4832507,5542934,2365719,435457],["main_thin",1182859,1482825,1455175,1438129,2544135,2908346,1356167,5345631,6732323,2604594,417922],["final_fat",1112114,1313493,1234436,1200726,2084890,2330666,1286103,4975470,5576384,2421211,401918]],
+      [["final_thin",1153856,1534452,1256559,1294825,2199992,2502782,1363819,5520261,7435950,2801236,401317],["final_fat",1112194,1400443,1163320,1164512,2074105,2253131,1219874,4832547,6224447,2471416,412213],["main_thin",1296648,1466311,1535344,1477688,2572206,2807436,1380624,5639538,7739391,2851852,417891],["main_fat",1292262,1443197,1488795,1608472,2740666,2844380,1411360,5124842,5525978,2643592,460214],["main_fat",1241887,1465550,1545609,1544818,2634358,2821296,1476666,4997413,5871773,2488391,411152],["main_thin",1310479,1526040,1478318,1505569,2589581,2773475,1391890,5577265,7725881,2740366,449668],["final_fat",1092826,1320024,1180105,1217191,2143067,2265239,1303068,5026716,6232700,2560567,419224],["final_thin",1281055,1524758,1224482,1319413,2287933,2506869,1265923,5594871,7473375,2837230,423720]],
+      [["main_thin",1291331,1546349,1524798,1496316,2680526,2830891,1373583,5659988,7613875,2750301,449249],["main_fat",1276088,1466552,1544277,1657926,2787195,2873654,1444819,5004573,5916969,2636731,390601],["final_thin",1190461,1433813,1281096,1276599,2289435,2546327,1356217,5731214,7498042,2958260,455948],["final_fat",1099204,1307705,1203530,1234356,2177138,2347271,1192463,4789153,6219339,2537354,388698],["final_fat",1118644,1364249,1168478,1226454,2095617,2310116,1273635,4931004,6786564,2544444,387747],["final_thin",1134817,1483877,1280004,1317850,2194023,2450185,1388886,5657364,7428168,2825863,404902],["main_fat",1218773,1509885,1450848,1536195,2722168,2825633,1415345,4869383,5763152,2589731,429278],["main_thin",1289538,1524648,1511318,1016081,2061747,2819373,961500,4293936,4185876,1899665,456669]],
+      [["main_thin",849533,1159314,1348906,1679197,2107294,2369344,851667,4566611,4503077,1725566,288469],["final_fat",766690,739891,822554,785699,1638216,1595613,854932,3196264,3606184,1887627,240598],["final_thin",1409817,817867,1076000,1550897,1901078,1844343,1268607,3625533,4542035,1992843,424020],["main_fat",1039897,806239,876544,1105164,1825935,2044962,990503,3487638,3603980,1567422,312946],["main_fat",912798,1199694,1107578,1129840,1815760,2194704,940699,3296563,3441278,1531568,269941],["final_thin",868522,923935,981600,814561,1489956,1657946,907650,3507737,4312825,1819817,288348],["final_fat",686591,737266,829965,752560,1561352,1700099,980268,3302121,3336232,1638497,250282],["main_thin",822974,1004023,1218893,960529,2141475,2156547,1214917,4137594,7776977,2059022,489979]],
+      [["main_fat",1057362,845708,957204,1010092,1828209,2186031,971345,3327028,3547616,1737664,332625],["final_thin",1034399,816384,821492,784988,1400093,2437771,923644,4221182,5038023,2105561,255671],["final_fat",645270,2001697,1148538,818968,4208900,1785606,1320764,3326037,6593006,1727399,274699],["main_thin",1279563,901311,1353343,1054308,1670765,2135416,1108749,6807259,7739881,2790050,454335],["main_thin",1320704,1502976,1506901,1517958,2607298,2787145,1388676,5656333,7820021,2822708,424932],["final_fat",1144632,1453762,1170721,1204542,2212150,2251168,1230059,4989621,6416383,2540609,403430],["final_thin",1240645,1520281,1190641,1324870,2237077,2664193,1294485,5676713,7666782,2897740,460785],["main_fat",1278271,1601853,1582714,1517106,2664563,2867355,1417949,4896152,5795650,2556573,386826]],
+      [["main_fat",1220094,1559620,1502474,1533611,2853024,2812443,1367885,4845036,5728780,2570473,393155],["final_fat",1136350,1332051,1299112,1192834,2123669,2276446,1287394,5013487,6288784,2515852,398352],["main_thin",1330720,1589224,1546580,1496997,2701277,2951771,1489255,5635401,7741554,2865412,440636],["final_thin",1427613,1600710,1267675,1319954,2273110,2480289,1251641,5559979,7369381,2870229,447986],["final_thin",1254105,1544247,1215618,1270019,2196286,2590463,1217521,5597665,7504862,3031108,417431],["main_thin",1261987,1555483,1634351,1426472,2763900,2929046,1352101,5797983,8168259,2788357,475687],["final_fat",1103842,1310179,1187306,1167697,2074235,2312880,1275237,4931425,6367690,2587158,425462],["main_fat",1214206,1540441,1483256,1504378,2664753,2858201,1393372,4927609,5673247,2546097,434006]],
+      [["final_thin",1208928,1412571,1259614,1283659,2211679,2520929,1262127,5631035,7477101,2918491,383490],["main_fat",1287806,1501924,1538968,1516215,2691693,2973252,1473261,4807640,5779476,2485907,496889],["main_thin",1295517,1431650,1543736,1484218,2716891,2875887,1371069,5671996,7876575,2649761,483860],["final_fat",1101889,1373613,1129580,1331581,2103859,2310977,1200776,5016681,6179410,2515612,344933],["final_fat",1137492,1419131,1134558,1188939,2121105,2303035,1259152,4856252,6279960,2575310,346174],["main_thin",1267295,1488694,1564357,1547041,2675299,2871982,1384469,5610244,7625322,2742860,421568],["main_fat",1221106,1452110,1551557,1521222,2703651,2744622,1374905,4859517,5952253,2570513,442699],["final_thin",1164321,1566380,1226073,1255447,2278900,2426990,1250009,5585788,7396992,2905482,431793]],
+      [["final_fat",1109480,1392572,1173996,1243790,2066793,2276876,1228998,4754612,6197428,2625164,376390],["final_thin",1276669,1611366,1211671,1271952,2254072,2457706,1290910,5522193,7619293,2883428,436830],["main_thin",1302798,1376407,1550486,1461474,2678413,2853624,1388194,5637074,7731870,2999551,453885],["main_fat",1211803,1570986,1554632,1475915,2740146,2923168,1400543,4871385,5951702,2573438,388608],["main_fat",1219715,1533381,1512450,1462375,2818983,2851291,1345862,4919197,5836200,2594098,383831],["main_thin",1290379,1504768,1503707,1504778,2655940,2775518,1352883,5632127,7656528,2785453,458181],["final_thin",1232033,1535814,1260755,1221497,2187293,2448471,1247645,5506009,7409490,2878651,456679],["final_fat",1132274,1340764,1190571,1185103,2150799,2358909,1215498,4883032,6291477,2601790,400025]],
+      [["main_fat",1212773,1520472,1541732,1574632,2585916,2967313,1459671,4842642,5761288,2593858,382819],["main_thin",939468,967179,1011244,861812,1924402,2815237,1387404,5595993,7812529,2856258,415788],["final_fat",658870,754472,967008,845868,1547141,1699377,843635,3152158,3390122,1621882,238224],["final_thin",846559,795953,1078564,822853,1496035,2214964,920810,3805832,4556317,1873196,255610],["final_thin",1153516,1412430,1274416,1233725,2158280,2066594,1056501,4258664,7550380,2796489,480324],["final_fat",1163571,1360043,1187046,1233626,2142447,2332589,1342998,4967277,6251168,2544375,379905],["main_thin",1351911,1403387,1602873,1434414,2661138,2769169,1363127,5679978,7973419,2819794,446854],["main_fat",1265672,1557727,1507853,1574332,2737181,2743070,1427233,4916443,5901918,2574940,423510]],
+      [["final_fat",1111434,1423688,1202839,1200926,2112372,2373030,1242608,4906177,6622019,2553187,414657],["main_fat",1267205,1550706,1530577,1578158,2615890,2802458,1416577,5007237,5883670,2633517,393134],["final_thin",1211021,1470137,1343207,1265802,2309645,2480379,1260194,5614230,7948742,2973322,405683],["main_thin",1344940,1449306,1519079,1484709,2656811,2843269,1408394,5681930,7939698,2765874,424220],["main_thin",1422666,1643294,1525428,1545779,2699545,2852222,1361555,5811724,8012016,2880264,462849],["final_thin",1263589,1511708,1236039,1270379,2307532,2416073,1248397,5610935,7724990,2950559,448007],["main_fat",1286723,1610356,1482235,1550436,2717151,2796810,1415846,4844866,5745295,2506969,427195],["final_fat",991124,1162239,1087888,1172594,2052863,2221915,1304800,4891826,5774669,2214483,364102]],
+      [["final_thin",1254476,1447793,1247776,1379792,2204789,2506609,1391119,5030842,6256305,2743631,437620],["final_fat",996483,1178883,1189669,1184021,2075737,2190037,1311460,4207268,5124101,2274893,363340],["main_fat",1125844,1348346,1493581,1457407,2568070,2833154,1469966,4304042,4934570,2240742,385673],["main_thin",1119305,1347174,1426522,1347033,2624534,2901545,1333973,5543064,6669439,2439228,445042],["main_thin",1060237,1297089,1515484,1365441,2495041,2615751,1323589,4843874,6317406,2339018,457520],["main_fat",1151512,1394885,1398390,1438610,2408883,2596953,1356007,4442147,4782013,2214724,438302],["final_fat",1010683,1338881,1167086,1223179,2187944,2407671,1334825,4308648,5491177,2314092,357732],["final_thin",1209399,1388685,1294225,1330829,2308964,2540660,1282808,5538828,7223593,2922116,425483]],
+      [["main_thin",1312992,1541592,1525679,1538318,2766715,2790920,1414213,5652077,7098958,2818772,464591],["final_fat",1123681,1319823,1211181,1213314,2126773,2382864,1221627,4974790,6574749,2570964,425113],["main_fat",1217291,1503416,1497998,1550516,2730912,2919622,1474723,5031603,5803571,2588190,391792],["final_thin",1263609,1532679,1268928,1247005,2256416,2479157,1373493,5565778,8082992,2965300,486974],["final_thin",1280965,1629113,1250870,1297670,2277898,2574359,1300424,5604986,7624500,2878562,417100],["main_fat",1229980,1602754,1599028,1553281,2760124,2913303,1466711,5003833,5909029,2593608,390150],["final_fat",1101078,1430637,1177431,1223490,2180413,2266340,1231532,4931845,6372668,2560238,359044],["main_thin",1278311,1529224,1612578,1449286,2705804,2894925,1373343,5636413,7734663,2818251,431111]],
+      [["main_fat",1296007,1474202,1519580,1546040,2697962,2818292,1470828,4939036,5877682,2619817,397501],["final_fat",1117552,1670524,1141298,1204481,2124470,2353540,1216620,4834700,6444815,2514599,384382],["final_thin",1222008,1530737,1287695,1251451,2251358,2555591,1276007,5719737,8362178,2881235,405463],["main_thin",1322627,1497697,1546220,1529535,2729210,2863288,1435655,5668601,8028722,2882087,465031],["main_thin",1345161,1466661,1569204,1506530,2675900,2785092,1355546,5537085,6805883,2921966,436158],["final_thin",1135168,1387544,1070943,1210780,2056649,2531866,1409296,5108057,6569951,2510043,367336],["final_fat",1038865,1297390,1147557,1274446,2182106,2390896,1352211,4892677,6000364,2435803,383159],["main_fat",1365421,1472760,1587672,1624706,2879042,3015615,1455695,4799218,5396446,2469332,416890]],
+      [["final_thin",1238412,1401254,1261086,1301445,2267743,2520428,1294275,5587851,7634134,2894746,508446],["main_fat",1270560,1514222,1546730,1580521,2722309,2904991,1406952,4953177,5902277,2646836,463479],["final_fat",1111543,1316588,1202648,1301736,2170919,2341963,1252653,4904134,6541740,2631664,381728],["main_thin",1293564,1494403,1566260,1546600,2713156,2797590,1365311,5698996,7817277,2810169,480245],["main_thin",1302567,1572369,1548774,1502594,2717702,2956697,1360854,5709772,7811168,2843469,470429],["final_fat",1208698,1325351,1176239,1301005,2119482,2311518,1246825,4953528,6394882,2587498,358243],["main_fat",1257300,1647330,1536836,1577947,2674437,2864610,1484377,5003331,5895498,2646727,397141],["final_thin",1199183,1479801,1242117,1308967,2294282,2547369,1279943,5613419,7607224,2927925,411893]],
+      [["final_fat",1113576,1379101,1159785,1234567,2189987,2268685,1309317,4901229,6356013,2548880,459564],["main_fat",1270069,1570656,1607020,1538098,2672285,2810299,1476296,4971685,5887186,2592826,382289],["main_thin",1364950,1644947,1581803,1502114,2667687,2769329,1384439,5723582,7702566,2844481,421086],["final_thin",1202668,1551647,1239023,1330088,2249686,2557053,1252813,5709732,7714203,2887134,477189],["final_thin",1253244,1388755,1248276,1340114,2239381,2542461,1274496,5915127,7609378,2910439,450179],["main_thin",1377439,1604837,1538518,1514322,2780044,2887324,1379441,5787718,7762656,2879012,436709],["main_fat",1231882,1597646,1541573,1565969,2732193,2847075,1378490,4935070,5903981,2561971,528907],["final_fat",1144452,1357129,1162910,1243519,2123188,2347000,1228187,4896974,6421971,2625905,369970]],
+      [["final_thin",1184001,1476426,1320333,1284621,2246662,2469693,1268907,5534572,7601926,2965611,436660],["main_thin",1289418,1638437,1527401,1513321,2699185,2787766,1361776,5708020,7712741,2804181,507354],["final_fat",1109079,1573130,1220676,1257300,2101526,2384676,1257941,5010302,6379388,2632616,346656],["main_fat",1336037,1661151,1579980,1585117,2809589,2951850,1450247,4955961,5927486,2657192,397331],["main_fat",1295176,1583085,2003730,1635603,2969056,3103957,1480392,5090441,6037189,2581750,388448],["final_fat",1115359,1322467,1175869,1252653,2104120,2330426,1233555,4938515,6334772,2599447,350792],["main_thin",1393633,1049521,1854198,1065134,2236696,2502071,1284547,5871713,7749186,2769500,449018],["final_thin",1190991,1302337,1291651,1246414,2257808,2658404,1239143,5731895,7806640,2851271,398452]],
+      [["final_fat",1077302,1208037,1195178,1173786,2169837,2331678,1251401,4782193,6103198,2697061,356690],["final_thin",1142379,3502239,1217721,1338341,2224919,2616481,1272443,5730824,7312606,3182433,440445],["main_fat",1340915,1445049,1515444,1516295,2958210,3088894,1596345,5018664,5808339,2512837,422418],["main_thin",1269929,1475154,1647139,1394374,2580408,2880815,1341906,5157351,7220859,2741838,468027],["main_thin",1284390,1486450,1650514,1463287,2721558,2928105,1338932,5652257,7441608,2900874,440474],["main_fat",1277540,1460452,1466061,1579829,2713285,2896769,1428595,4628134,5581011,2570763,396850],["final_thin",1072244,1246113,1380884,1423448,2388542,2660397,1346763,5627971,6981654,2855396,373665],["final_fat",1110752,1259343,1246914,1288286,2106262,2335524,1285292,4811196,6115345,2533899,386554]],
+      [["main_fat",1202328,1422095,1535614,1506931,2850480,2959883,1462446,4890193,5720609,2408902,422288],["final_thin",1182279,895162,826289,1245573,2185230,2499147,1292602,5514081,7075744,2850710,391483],["main_thin",830455,807121,1106255,793580,1664916,1936961,838167,3554898,4192546,1603836,294028],["final_fat",667853,721553,793010,821562,1565159,1523366,900249,2855847,3339396,1863742,240427],["final_fat",791106,1200996,757357,775954,1472279,1915258,832598,3213670,3642408,1767509,242060],["main_thin",765138,798257,900108,890715,1677285,2542271,846329,3467607,4311792,1828199,436520],["final_thin",710277,1093337,915361,765819,1480562,1645347,844476,3527296,4966767,2125511,297673],["main_fat",847801,814561,895412,1109901,2019714,2090219,1249248,3289732,3662127,1583255,345755]],
+      [["final_fat",685490,736155,786750,864296,1648361,1692878,1748391,3364675,3914472,1816071,254098],["main_thin",918466,866538,905437,797607,1933977,1977671,976092,3735586,4244644,1777143,280197],["final_thin",799098,762154,942011,832368,1527792,1794288,908661,3529639,4909612,2170418,304673],["main_fat",877815,923644,914090,919438,1975067,2376625,1084223,3748506,3821223,1589814,270202],["main_fat",949812,942922,1236328,1384800,1910441,2045152,1383307,3344064,4116793,1601482,390461],["final_thin",800110,1042861,931706,820130,1560541,1762090,976052,3456631,4617578,3385977,308318],["main_thin",766380,1095449,965236,1283660,1854308,2077550,962762,3817267,4986998,1689984,280907],["final_fat",722295,3004579,1075700,1264500,1900216,2238339,980508,3853341,4310431,2150338,291529]],
+      [["final_thin",856223,1169539,2198339,731418,1728300,2115556,2242675,12089341,4870494,3205587,261419],["main_thin",1350649,1035730,1516606,1293524,2080544,3152298,1250951,4933567,4913969,2444816,327567],["main_fat",1017734,879989,1068570,1209729,2098542,2984609,1203510,3768715,4604328,2169197,437461],["final_fat",951815,955832,861051,932016,1596515,1605399,925015,3987580,4133297,1842240,239726],["final_fat",769495,1154167,916193,954229,1521513,1754480,1072114,3337654,3777539,2586046,320367],["main_fat",1181647,888502,1117762,1241266,2278449,2912441,1100817,3227721,4685559,1926235,331823],["main_thin",990103,882653,1038174,1267575,2236846,2243507,873689,3843176,4622405,1748601,483019],["final_thin",1015710,804637,873248,751808,1428675,1903311,942152,3558403,4633261,1797123,254468]],
+      [["final_thin",783476,775063,809554,881682,1437217,1741761,901311,3658932,4647582,2294553,257423],["main_fat",967609,858106,898466,1028029,2548310,2639306,1134848,3148944,3470752,1549384,268489],["main_thin",1015630,819199,955591,1012677,1856421,2086273,852989,3690839,5502398,2328303,657628],["final_fat",1190661,925677,821592,848773,1631917,2825131,860410,3466225,4159456,2727797,460775],["final_fat",756445,859518,1081578,954099,1567201,2541399,1035089,4170002,4781942,2212801,348508],["main_thin",1255877,1578858,1540781,1460793,2654568,2802418,1191733,4104185,6240051,2782128,418633],["main_fat",1218983,3342021,1656254,1527702,3500576,2717892,1404369,4895982,5784383,2668278,664599],["final_thin",1184512,1541132,1262087,1312181,2253241,2497564,1279152,5452960,7426726,2848657,391973]],
+      [["main_fat",1208057,1519840,1478499,1542314,2667968,2097319,990724,4894799,5704194,2519487,419283],["final_fat",659651,735624,782494,751087,1465460,1535934,813300,2944068,3304665,1614792,243112],["main_thin",832698,815753,898306,778608,1656043,1954537,854321,3471333,4145235,1905785,280998],["final_thin",716886,769875,882933,764707,1402897,1807228,943334,4198154,4741232,2064561,271584],["final_thin",1470016,1324500,1190010,1238983,2055828,2432788,1256238,3988402,4973186,2261714,311103],["main_thin",1225553,1564617,1590906,1379151,2579116,2802028,1360894,5593199,7414618,2655860,458252],["final_fat",766920,741263,839979,820591,1653659,1571267,828212,4791356,4113538,1583976,280507],["main_fat",1205262,877045,970063,1013738,1822851,2179031,984263,3183084,3552684,1662242,269351]],
+      [["main_thin",836765,897115,1169780,795934,1968378,2158720,1060878,4096563,4340506,1798245,283281],["main_fat",737958,1105434,923934,898156,2031261,2755118,1036962,3189213,3497873,1497287,419974],["final_fat",662055,727252,911676,777586,1492480,1720689,990222,4154269,4534324,1924783,239486],["final_thin",1181848,1465299,1260725,1251000,2252340,2442082,1295928,5448524,7761564,2864410,402839],["final_thin",1203049,1420122,1247956,1217081,2141976,2528701,1275257,5523877,7100450,2756971,409158],["final_fat",1047598,1251832,1142980,1186495,2262956,2430334,1421825,4800430,5821408,2386920,394597],["main_fat",1225022,1293023,1373824,1474793,2597764,2572436,1265672,3950665,5988587,2406309,440515],["main_thin",1230791,1603174,1494503,1458689,2633627,2852022,1327294,5698746,6647757,2671965,431862]],
+      [["main_fat",1240055,1436857,1494874,1598798,2788257,2955256,1475594,4868701,5535904,2612496,423249],["main_thin",1259022,1467493,1569104,1480242,2640147,2886923,1382025,5691154,7552142,2756880,404071],["final_thin",1196489,1350239,1326042,1236579,2233742,2524374,1327864,5436376,7292586,2918361,422288],["final_fat",1065535,1235006,1243319,1186524,2088617,2321473,1242468,4836403,6064870,2586617,350401],["final_fat",1058855,1234396,1208487,1237050,2191099,2318499,1289799,4097844,3557221,2493628,372324],["final_thin",707703,776996,809164,764898,1385070,1684045,903874,3712732,4139687,1862009,310271],["main_thin",750005,873139,914440,789634,1737364,1960746,1415355,3658441,4646921,1657125,280477],["main_fat",807411,877425,1020167,900669,2058812,2394150,928221,3111968,3380408,1460833,261529]],
+      [["final_fat",667823,1084023,1007298,841652,1486021,1526721,830695,2866714,3331404,1578138,252676],["main_fat",827401,848111,931896,904295,1791604,2055517,1010934,3058129,3961152,1607490,386835],["final_thin",907861,819469,924365,1099485,2541610,2467980,1356207,3806391,8119712,2837971,528325],["main_thin",1267085,1247616,998885,939928,2781096,3142404,1339743,4184103,4719700,2160544,282710],["main_thin",757397,1248087,1484638,889353,1974387,2221514,902632,3712511,5326102,2187524,281589],["final_thin",968650,1000658,1579248,1336748,1912725,4831911,1038745,3692282,4380886,2185731,481326],["main_fat",773791,1098283,1418139,1011775,1959805,2141686,979867,3011529,4182060,1777964,267828],["final_fat",676326,808333,752499,802754,1618327,1754590,1203139,3193580,3780893,2531546,239486]],
+      [["main_thin",844165,993999,977104,855562,2087194,2182076,915661,4248429,4614133,1764945,296571],["final_thin",706631,768143,803154,863834,1457658,1605358,1012946,4971224,4246947,1902269,257984],["final_fat",725028,810015,788984,774011,1754730,1535434,953288,3084899,3541237,1701670,511570],["main_fat",913379,825368,982752,1717404,1855119,3088203,1297450,3215262,3427788,1787218,268580],["main_fat",962201,1183841,1240975,926849,2311828,2256466,1451369,7334168,8285323,3750819,303953],["final_fat",2085682,805078,2377276,1111784,2035327,2922607,1299414,4642144,5431729,2391247,360927],["final_thin",1203659,1383818,1281096,1373593,2351568,2759544,1464469,5689191,7429139,2725013,405012],["main_thin",1210210,1343919,1513611,1328455,2537754,2866593,1436827,5649132,7595928,2854235,460776]],
+      [["final_fat",1012376,1218242,1186485,1145544,1957100,2154675,1209990,4408016,5557276,2417456,343811],["main_thin",1335376,1388876,1481143,1438980,2705393,3052860,1619298,5454102,7635977,2787446,528186],["final_thin",1169259,1325191,1202408,1195238,2068156,2423825,1269909,5362536,6925991,2623422,418792],["main_fat",1243270,1560430,1612468,1544998,2736561,3161442,1554462,5095989,5351018,2538676,411232],["main_fat",1289237,1433001,1474904,1593821,2899332,3056907,1483686,5233204,5834167,2485277,423070],["final_thin",1237520,1314925,1253795,1207176,2182857,2482793,1306022,5331930,6995464,2842617,451923],["main_thin",1310549,1552399,1554292,1494112,2787616,3035925,1404709,5548813,7325515,2738423,403571],["final_fat",1027828,1208427,1202959,1317360,2276106,2540749,1286433,4756094,5821258,2456103,365204]],
+      [["main_fat",1271200,1388054,1493051,1692467,2888816,2948766,1541763,5215677,5831504,2509933,396820],["final_thin",1322377,1298071,1200266,1294315,2157468,2592606,1421304,5236478,6847705,2875948,433195],["final_fat",970273,1151483,1203320,1351570,2306480,2445187,1305352,5057692,5963911,2512516,371001],["main_thin",1291772,1549295,1436276,1319493,2568500,2815527,1422585,5251691,6694857,2713156,459093],["main_thin",814992,868822,1714820,1377008,2747607,3108654,1408675,5961887,5781033,1676273,382960],["final_fat",852428,989702,784267,909513,1701330,1547422,1091804,3181552,4000430,1889941,240488],["final_thin",1211582,1533390,980648,860089,1530627,1800018,927029,5020727,5665927,2961896,411372],["main_fat",1226173,1552199,1523025,1574782,2730271,2924760,1429225,5000537,5958643,2646006,394988]],
+      [["final_thin",1295416,1835520,1423137,1267105,2304568,2464926,1336457,5691265,7669376,2962757,409309],["final_fat",1111873,1359802,1219443,1244351,2163367,2383475,1234466,4915521,6439097,2625355,369340],["main_fat",1337329,1548553,1593670,1529564,2750431,2810850,1419391,5201086,5941427,2580117,406335],["main_thin",1382637,1499350,1668322,1641762,2673396,2833744,1369938,5888067,8178944,2833023,430620],["main_thin",1326262,1454694,1502024,1502985,2760125,2956467,1437548,5744684,7809545,2986552,486623],["main_fat",1273014,1573130,1510196,1637005,2842197,2857199,1454623,5034438,5910210,2530864,440455],["final_fat",1054268,1368777,1167226,1287485,2110229,2318298,1233815,4952476,6280140,2684613,353005],["final_thin",1234236,1492620,1245682,1222378,2275965,2444536,1344660,5511958,7569619,3023827,410089]],
+      [["main_fat",1230179,1500893,1584447,1518128,2669500,3007463,1425150,4966216,5869649,2864911,424622],["final_fat",1146305,1394734,1383868,1334485,2202566,2411586,1451689,5116951,6233010,2580949,362148],["final_thin",1203830,1501914,1306063,1271992,2307552,2595240,1377849,5621161,7327449,3019100,419193],["main_thin",1256598,1487843,1530697,1505569,2682289,2766124,1377649,5670274,7655837,9274234,437271],["main_thin",1315937,1557266,1563796,1530947,2750751,2941015,1338591,5749011,7769075,2923998,466023],["final_thin",1292802,1602964,1241487,1319152,2266812,2547499,1276288,5664736,7545402,2964329,445422],["final_fat",1113115,1496025,1190481,1220856,2172992,2378568,1222198,5072524,6348161,2648008,377531],["main_fat",1248397,1575343,1564086,1525759,2697472,2847175,1406461,4967829,5871573,2662750,393585]],
+      [["final_thin",1132525,1535965,1357911,1301666,2298028,2550593,1290209,5695431,7558562,3007403,395659],["main_fat",1275557,1459200,1475485,1598167,2702549,2907845,1499180,4861911,5704144,2546667,432803],["final_fat",1103471,1353523,1153936,1255998,2102607,2353240,1279934,4893959,6236596,2629511,396129],["main_thin",1373453,1449907,1563155,1485600,2693026,2849949,1398781,5684865,7482709,2865972,436279],["main_thin",1221957,1430077,1556635,1501834,2664183,2900785,1430137,5731885,7723217,2813234,428928],["final_fat",666131,907490,802944,830515,1514333,2356414,1293905,4822732,6146883,2144905,261729],["main_fat",791177,962261,1174336,885597,2023370,2357717,1260143,3546024,3803938,1505910,269081],["final_thin",795033,871186,817005,743446,1463937,1783503,1105995,4532011,5012796,2255916,255330]],
+      [["main_thin",1058404,1380393,1364119,1417709,2471977,2813545,1066596,5171396,6204589,2426008,377672],["final_fat",1123130,1285221,1217010,1255076,2117039,2282345,1257851,4750114,6225429,2492918,394577],["final_thin",1243991,1513902,1253365,1193876,2265280,2455452,1262558,5422094,7370862,2844650,406805],["main_fat",1218843,1396206,1470847,1578618,2689180,2824531,1474903,4802263,5596664,2513458,394947],["main_fat",1221667,1761810,1510757,1575002,2672215,3020132,1612679,4823474,5565748,2462031,397101],["final_thin",1217972,1379672,1280544,1339923,2180523,2556843,1315987,5454543,6690971,2805262,434696],["final_fat",1024203,1247825,1240665,1285082,2169927,2457185,1279373,4370841,5494101,2453138,317863],["main_thin",1344139,1532580,1488334,1454884,2617513,2871411,1277000,5632037,6697832,2637403,428748]],
+      [["main_thin",1316438,1568012,1455835,1529024,2529652,2699906,1396437,5257749,7371704,2726985,398473],["final_fat",1082359,1457237,1120517,1109641,2070239,2188845,1194086,4844966,6222044,2512768,353195],["main_fat",1285242,1464939,1492810,1548072,2650572,2733365,1420463,4835863,5648752,2520088,379825],["final_thin",1149760,1370638,1320013,1205232,2192851,2426890,1282177,5643934,7299176,2842617,434026],["final_thin",1271852,1582063,1251651,1274216,2294332,2642640,1229068,5449245,7294970,2974914,407156],["main_fat",1330118,1487502,1553431,1583445,2653576,2942466,1571247,4822503,5807267,2574499,441356],["final_fat",1102399,1276769,1155968,1235568,2040274,2241594,1187026,4903683,6255384,2457295,434897],["main_thin",1232724,1362247,1534022,1414905,2222185,1935869,866108,5625907,8237863,2802038,421357]],
+      [["final_fat",1110472,1351400,1139816,1182048,2159832,2237868,1285522,4974819,6066373,2584934,363501],["final_thin",1268757,1607421,1197030,1242839,2284398,2427942,1345982,5916049,7512223,2930629,432543],["main_thin",1306292,1461264,1538429,1572439,2741287,2932651,1376928,5588021,7896875,2744953,449208],["main_fat",1249789,1512519,1470407,1510396,2692114,2993102,1463667,4945175,5699347,2504205,415198],["main_fat",1280875,1427303,1544818,1597386,2657463,3093021,1417408,4910774,5683113,2572446,380556],["main_thin",1326002,1591717,1512269,1503436,2723580,2814705,1364750,5664004,7777277,2864801,461617],["final_thin",1243490,1490957,1238162,1335747,2215024,2448882,1250820,5604165,7396221,2813755,430230],["final_fat",1112354,1491648,1193906,1184712,2212151,2302255,1198443,4879878,6419608,2585005,357201]],
+      [["final_fat",1116921,1482565,1192634,1191682,2125321,2275294,1230880,4909251,6463764,2543093,393966],["final_thin",1314345,1509485,1274666,1241637,2213833,2469834,1273825,5609613,7398904,2841486,400977],["main_fat",1221487,1572088,1533060,1507182,2641859,2751142,1366242,4911695,5738565,2580999,457841],["main_thin",1346453,1471969,1605988,1443978,2703121,2775177,1390548,5729642,7692951,2728938,424922],["main_thin",1303879,1594241,1537697,1520401,2710011,2916858,1382736,5608121,7617880,2873774,465052],["main_fat",1205403,1485109,1530957,1556245,2710411,2837300,1368756,4955230,5737964,2553137,382239],["final_thin",1264160,1441143,1301826,1346353,2223867,2425898,1308186,5474593,7357974,2927965,462378],["final_fat",1101779,1404959,1198823,1190831,2056088,2314402,1186956,4885637,6265208,2465798,375118]],
+      [["final_thin",1282227,1411229,1219794,1260374,2241974,2497735,1244191,5523214,7453536,2870460,426475],["final_fat",1124092,1332212,1153345,1206595,2065692,2283516,1183840,4792729,6070850,2536812,358393],["main_thin",1268938,807061,924255,859619,1646169,2018712,865518,3405125,4080189,1615893,423340],["main_fat",764577,942121,900149,986517,1830352,2403564,1029912,2992691,3477312,1634601,269621],["main_fat",1118424,1255327,1316437,1292202,2377656,2560529,1321896,3940300,4311052,2000426,404762],["main_thin",1155749,1392571,1449696,1466551,2508020,2764902,1301105,5441763,7084837,2534960,379965],["final_fat",1139945,1226814,1156370,1188838,2057831,2274193,1211923,4616496,5852024,2457055,345034],["final_thin",1173756,1340314,1189849,1204181,2115707,2595290,1239043,5297149,6850008,2717341,376139]],
+      [["main_thin",1225323,1456987,1610345,1422015,2591885,2796179,1314725,5449755,7197294,2707016,410050],["final_thin",1139705,1251891,1235528,1206805,2119743,2466238,1253685,5437908,6962626,2772494,382930],["main_fat",1188328,1480672,1440743,1469376,2614048,2826964,1431849,4582927,3389441,1546601,268330],["final_fat",677277,739500,1231096,1629654,3032780,2816739,898776,9222216,7270383,4581784,241840],["final_fat",1021490,1205703,1147557,1141037,2066543,2250447,1201497,4604388,5191862,2324548,324903],["main_fat",1136300,1376007,1359241,1376607,2532117,2676130,1381935,4656446,5501132,2395002,388458],["final_thin",1152785,1326092,1251521,1192714,2120243,2470024,1213215,4869813,6238829,2480159,392724],["main_thin",1092304,1244581,1374985,1266764,2399839,2686646,1272393,4989671,6232790,2348162,391152]],
+      [["final_fat",957504,1263379,1053567,1111593,1916740,2119082,1157812,4257312,5085093,2341172,323401],["main_thin",1067738,1341876,1349508,1288096,2512457,2725254,1355225,5015820,6384466,2402062,450229],["main_fat",1229118,1316268,1355045,1366953,2446278,2654618,1397258,4556728,5327754,2441161,390891],["final_thin",1149410,1269448,1238081,1165173,2129477,2449573,1283048,5364048,6990427,2684242,380566],["final_thin",1167607,1346673,1260465,1150792,2099683,2359289,1277300,5339432,6849298,2870359,389159],["main_fat",1227756,1450878,1452450,1435935,2675098,2852854,1399322,4669365,5363938,2352669,403810],["main_thin",1194697,1377438,1476536,1452159,2606166,2768338,1336147,5390307,7168401,2654728,480274],["final_fat",1057813,1291982,1188407,1196650,2100364,2210297,1202048,4574634,5780317,2422473,390991]],
+      [["final_fat",749655,810666,1217601,1399010,2314081,2481962,1344170,3590099,3377294,1591407,241830],["main_fat",969772,1230530,943714,904565,2108637,2395032,1263179,3133781,3607986,1586059,421907],["main_thin",758217,789314,971304,821282,1901358,2366069,1017663,4183182,6789243,2708258,283122],["final_thin",1237410,1400763,817335,749305,1491128,1885715,1130662,3576861,6810719,3019491,440805],["final_thin",756976,780651,1268016,1319652,2324257,2585415,1343448,5826115,5932443,1955729,318674],["main_thin",822774,993878,901971,833910,1749832,2130308,835642,3505884,4144424,1956530,280718],["main_fat",786049,861922,1121257,913038,1909821,2123649,932507,3333078,3585042,2192912,268950],["final_fat",650407,738418,753350,767692,1474433,1517487,851235,2825112,3391424,1599960,264183]],
+      [["main_thin",738128,796635,912567,819509,1804664,2074155,901221,3524623,4330400,1990200,334858],["main_fat",865678,1036741,976913,946258,1886777,2266911,941871,3024318,3502780,1490357,341638],["final_thin",720381,1225673,1107708,811146,1487352,2385127,1363307,3553145,4992766,1855370,249521],["final_fat",1082450,1271491,1236810,851186,1636935,1735291,1404319,7860501,6519396,2896077,361989],["final_fat",1099946,1178592,1156239,1288467,2129607,2358899,1282818,4761372,5542564,2445037,371552],["final_thin",1144031,1376027,1299642,1270840,2091761,2615650,1295677,5457376,7432183,2777080,418112],["main_fat",1302077,1504338,1738276,1619499,3012550,3135874,1577085,4718478,5837883,2618664,445382],["main_thin",1276299,1472209,1505800,1554051,2897639,3189915,1406211,5798374,6635860,2848716,451281]],
+      [["final_thin",957484,1306533,1168257,1200014,2405398,2632035,1366622,5876610,7568396,2933793,370822],["main_thin",1186925,1488334,1596905,1415416,2461751,2791842,1367834,5328305,6600106,2525115,432283],["final_fat",987639,1154026,1199484,1164833,2307932,2514329,1338211,4683155,6918571,2490404,350912],["main_fat",1271562,1570415,1772846,1788009,2711623,2926252,1397779,4586671,5586719,2453900,422078],["main_fat",1205413,1396798,1517988,1410118,2923218,2955226,1555544,4480704,5273413,2361483,422498],["final_fat",1203009,1340704,1131513,1262067,2155135,2400360,1420173,4805227,6219961,2701969,359424],["main_thin",1141198,1419391,1443027,1486922,2669170,2919772,1248246,5110221,6912772,2679635,404171],["final_thin",1242999,1351881,1263680,1145754,2229766,2577373,1428825,5522684,7487507,2930809,422689]],
+      [["main_fat",1248076,1434444,1412941,1478239,2678514,2639135,1358851,4579271,5429025,2278809,424221],["final_thin",1138243,1350429,1158953,1331951,2160072,2592406,1315837,5454583,7025709,3077277,404963],["main_thin",1386903,1455224,1584437,1534542,2841375,2590613,862523,4234518,4374897,2845105,448597],["final_fat",1000268,1140406,1277670,1171252,2091811,2354322,1251431,4968830,5720358,2215736,375789],["final_fat",992206,1137602,1085905,1173074,2008568,2259661,1293124,4640993,5354454,2299561,405033],["main_thin",1140767,1412611,1398720,1419982,2518285,3037208,1404259,5013767,6594388,2421862,407015],["final_thin",978826,1237691,1080567,1125995,1937262,2324007,1238863,5017673,6335743,2391356,520034],["main_fat",1091012,1303869,1333254,1384629,2400380,2694888,1445550,4393385,5037853,2138100,404873]],
+      [["main_fat",1193355,1379531,1486121,1466421,2489783,3041273,1451038,4286906,4985605,2514951,388698],["main_thin",1184392,1378390,1600661,1575663,2656361,3052910,1300514,5290468,6515061,2408192,439844],["final_fat",1085444,1303409,1250079,1285612,2209497,2413610,1274426,4589506,6173693,2579116,387326],["final_thin",1268707,1463797,1274746,1377188,2270286,2631614,1314004,5516144,7551171,2951901,412644],["final_thin",1254225,1451879,1297189,1318521,2377907,2520629,1302287,5684254,7645101,2906273,511080],["final_fat",1171903,1316659,1177661,1299463,2150398,2351607,1250600,4949221,6478495,2561469,400315],["main_thin",1294645,1533481,1567431,1551668,2734497,2894175,1402687,5811954,7930315,2839333,505822],["main_fat",1242748,1496535,1544496,1577606,2779034,2898060,1462185,4935501,5978592,2592546,465913]],
+      [["main_thin",1240224,1516796,1568503,1541533,2752113,2889768,1408515,5664765,7894742,2880835,438983],["final_fat",1106516,1388596,1208408,1278361,2187834,2406840,1295917,4958775,6426398,2600638,397011],["main_fat",1241146,1467833,1607421,1598478,2792963,2922367,1479460,4982280,5999553,2624133,509308],["final_thin",1239313,1483897,1346102,1343879,2292470,2614839,1356828,5634630,7636307,2969406,445293],["final_thin",1102800,1287926,1126745,1236329,2018502,2450154,1265251,5710243,6834946,2669440,369840],["main_fat",1297790,1384549,1487622,1585008,2612166,2788758,1460442,4244633,4923794,2434320,426945],["final_fat",1066616,1267716,1202077,1241417,2209486,2410335,1315977,4493243,5889770,2499648,396970],["main_thin",1289167,1474403,1632258,1467572,2714518,2988205,1375646,5353402,7034112,2903588,455969]],
+      [["main_thin",1187025,1514754,1561662,1418460,2697422,3016677,1391149,5576144,7350252,2778072,459093],["main_fat",1229008,1402476,1504207,1613760,2832142,2995786,1496606,4900939,5598126,2502582,442699],["final_fat",1009511,1185323,1187476,1283960,2151090,2326721,1277470,4677377,6015097,2312119,435959],["final_thin",1204091,1457208,1237160,1270660,2223888,2568360,1287805,5926445,7949914,2848116,404632],["final_thin",1230310,1560030,1257019,1329708,2347611,2608129,1318692,5659097,7621055,2881085,441577],["final_fat",926578,876844,955892,1081108,1656884,1629513,988270,3110136,6005518,1898734,310552],["main_fat",859749,1156961,1441153,1184822,1956971,2860524,1184572,3552573,3663289,1630475,267878],["main_thin",1315947,1469916,1539169,1539901,2712815,2959001,1428885,5741459,7503956,2971660,472163]],
+      [["main_fat",1241637,1550426,1542424,1591176,2873214,3058619,1501593,5057221,5882319,2682660,408467],["final_thin",1284720,1478779,1326603,1308315,2307542,2604845,1401645,5671676,7682045,2943107,421888],["final_fat",1148689,1316408,1200805,1328836,2217328,2300411,1255407,4987679,6268253,2639276,375900],["main_thin",1285713,1513612,1553490,1507722,2731522,2888226,1391169,5761369,7769646,2923819,475758],["main_thin",1283869,1559930,1617316,1495304,2750170,2897008,1379201,6646124,7834031,2832503,508196],["final_fat",1135629,1306744,1303329,1285642,2228714,2420570,1280675,4945435,6346850,2578906,346204],["final_thin",1251211,1552720,1317740,1370818,2364978,2540738,1317159,5791183,7569728,2965110,408437],["main_fat",1279764,1533651,1503396,1578538,2766324,2976848,1492560,5019946,5940856,2599386,444751]],
+      [["final_fat",1091533,1312041,1221807,1268747,2131060,2385858,1258182,4919677,6383445,2659045,430771],["main_thin",1306083,1546440,1579589,1523085,2737932,2880063,1412511,5707228,7678119,2890820,456048],["main_fat",1258712,1605758,1517837,1589544,2754427,2993122,1534942,4952576,5873306,2692174,447645],["final_thin",1253435,1516666,1318521,1443638,2388182,2668679,1303078,5617455,7568296,2899542,446984],["final_thin",1273224,1480983,1240275,1345231,2300983,2554530,1358401,5738324,7616568,3015335,454857],["main_fat",1232503,1582824,1537446,1578127,2811802,2954083,1470056,5023131,5932684,2667408,417681],["main_thin",1319252,1559520,1593420,1515404,2709730,2873554,1382696,5738104,7793822,2882647,451532],["final_fat",1149009,1361325,1212944,1342056,2221134,2360020,1247054,4960898,6256225,2623081,369129]],
+      [["main_fat",1292252,1540461,1554031,1653289,2738693,2918941,1448194,5083260,5849430,2636702,420055],["final_thin",1197922,1379913,1290409,1347914,2296586,2594979,1394915,5655371,7743246,2949587,407105],["main_thin",1343478,1584397,1601462,1530507,2665995,2882397,1431369,5785034,7850686,2932812,488095],["final_fat",1122299,1447162,1171913,1248177,2263867,2353020,1338641,4895081,6435702,2580077,430009],["final_fat",1153606,1450868,1210871,1308226,2226802,2261133,1235057,4965535,6232389,2660026,377412],["main_thin",1400523,1610205,1632538,1520181,2661128,2847264,1425620,5746006,7881191,2958290,512442],["final_thin",1214866,1393413,1296809,1387864,2374752,3262072,1284331,5913335,7521537,2965540,429990],["main_fat",1268827,1574772,1579039,1556295,2398347,2046684,923384,2987984,3516460,1464729,310242]],
+      [["final_fat",670677,735955,785018,761743,1544317,1619860,857595,3104748,3627485,1783323,332845],["main_thin",753380,805758,908781,898176,1689563,2151570,898927,3876195,4372683,1747648,286275],["final_thin",2862227,799248,808954,901671,1604156,1641381,910454,3705512,4199256,1992123,252315],["main_fat",952316,2973602,2328032,1559980,4239816,4539532,993358,2985079,3620945,1665267,295760],["main_fat",835543,972977,1034198,903394,2158340,2306821,1163190,3633164,4114089,1612058,866298],["final_thin",883833,773440,823395,815993,1613089,1830433,917705,5541241,4658930,1991281,293066],["main_thin",825628,998485,926077,857175,2108055,2072823,1166596,4441936,4480584,1811564,521756],["final_fat",1056421,722855,765379,826940,2189577,2220221,1215588,4686771,5840237,2486889,341528]],
+      [["main_fat",1225884,1547813,1517006,1447012,2688829,2808467,1394925,4727531,5499810,2415162,416550],["main_thin",1157321,1477988,1504798,1388575,2668088,3042576,1429907,5379901,7232727,2685464,392003],["final_fat",1026456,1231241,1226374,1148088,2072984,2294362,1209799,5146694,5913566,2704031,372374],["final_thin",1136851,1294154,1243460,1163200,2212530,2388802,1259413,5314574,7119259,2752414,398994],["final_thin",1115088,1306834,1213065,1170210,2098251,2423244,1222719,5345090,6817780,2651584,368689],["final_fat",1116410,1242669,1154958,1116620,2037160,2388362,1201887,4587433,5474852,2394482,400556],["main_thin",1304430,1530787,1565848,1540882,2758863,3011319,1473011,5612348,7205296,2869738,434657],["main_fat",1190370,1354685,1671796,1595934,2888907,2873614,1455786,4492142,5005205,2308985,437731]],
+      [["final_thin",963813,1208918,1025405,1181447,1930722,2317046,1206775,4522367,5676263,2261543,342219],["final_fat",1040048,1239394,1107898,1033097,1801199,2021537,1098113,3849075,5161868,2399989,335669],["main_thin",1333143,1466712,1576144,1255878,2262109,1940997,858637,3844769,4015973,2309460,497650],["main_fat",752869,826309,894661,1546580,1819275,2059203,923894,3320158,3513766,1465049,279536],["main_fat",956403,1282687,898306,908081,1823131,2102136,952928,2985521,3313579,1459471,285555],["main_thin",750667,795894,908341,797817,1664856,2244388,862262,3454878,4341527,1621612,283401],["final_fat",667162,736786,791086,778998,1567371,1582113,1149239,3613284,3339537,1611126,238575],["final_thin",745018,763015,813540,758689,1419000,1757684,1217291,4111686,4333686,1811975,271203]],
+      [["main_thin",1202329,1471078,1492701,1477578,1748931,2463774,850956,4187278,7723137,2916028,471832],["final_thin",1280484,1459612,1285552,1336467,2196086,2479948,1305041,6453768,8546000,3125288,516308],["final_fat",1109100,1290820,1155498,1241557,2137038,2316034,1190029,4864145,6209676,2457205,349600],["main_fat",1371279,1491128,1511187,1575784,2707547,2966312,1522915,4882382,5749892,2578936,400897],["main_fat",1203992,1528384,1517236,1633018,2632195,2911560,1456286,5058834,5805524,2587819,427055],["final_fat",1088479,1340784,1213023,1270510,2159201,2399338,1217220,4764556,6328622,2560589,366455],["final_thin",1259684,1560601,1203250,1202168,2215565,2465367,1295437,5631946,7373647,2858522,443310],["main_thin",1120126,1387614,1401144,1379602,2656230,2795358,1349798,5477496,6467078,2372468,399314]],
+      [["main_thin",1100627,1283058,1429656,1350910,2256316,2789729,1365671,5487181,6381552,2350426,419143],["main_fat",758298,907340,882202,908210,1800278,2051090,933208,2909948,3297514,1509215,268099],["final_thin",808973,762364,798097,779339,1398961,1603205,851377,3372085,4138715,1857823,274278],["final_fat",722375,869914,859919,780570,1562493,1533080,935491,2832102,3399056,1966525,526322],["final_fat",881942,751247,830535,778789,1621322,1545979,845978,2971570,3582808,1753778,238425],["final_thin",1307715,2042578,923553,902963,1905704,2035588,933958,3680244,9673063,2864981,253818],["main_fat",1077022,1091924,1609534,1421695,2372599,2904490,1103160,3406316,6030359,2363495,355448],["main_thin",1289247,839709,1432431,952757,1953005,2527189,971956,4712569,5486080,2154765,285565]],
+      [["final_thin",1016282,855492,966648,739990,1812655,2763731,1000288,4376900,5422855,2448081,779800],["main_thin",1287976,1602303,1613440,1474864,2769319,2854505,1817268,5854737,7798478,2858571,485121],["final_fat",1144261,1322447,1190520,1256168,2138851,2436314,1257921,5038985,6361972,2582621,379945],["main_fat",1256469,1584456,1508444,1591838,2724432,2976797,1528113,4950232,6070880,2564985,442257],["main_fat",1424989,1514042,1523456,1591627,2679285,2895908,1571958,4983872,6086874,2626356,403100],["final_fat",1109169,1305371,1192714,1391931,2094976,2285479,1260385,4867790,6294672,2621479,364352],["main_thin",1312021,1454153,1537648,1466311,2751202,2763560,1347975,5638006,7651550,2796760,441887],["final_thin",1186866,1593981,1229389,1337179,2255445,2568661,1277410,5580880,7538522,2899503,403490]],
+      [["final_fat",1106546,1379752,1164381,1223420,2217939,2304727,1194357,4828751,6283245,2625114,318925],["final_thin",1314636,1519099,1262238,1372071,2201795,2548651,1275297,5596223,7597479,2907304,407466],["main_thin",1252332,1460432,1567872,1471579,2745303,2851361,1364669,6099892,7721235,2830610,439513],["main_fat",1243219,1517798,1548433,1537337,2721157,2875777,1386933,4976091,6074114,2572285,462247],["main_fat",1272914,1483357,1612689,1649293,2695138,2791663,1485540,4876733,5797132,2567919,397912],["main_thin",1298491,1473272,1554662,1531168,2635249,2947944,1422545,5716452,7705841,2793065,433655],["final_thin",1264931,1613760,1237290,1282758,2337285,2497144,1341325,5521723,7502048,2923027,475266],["final_fat",1147356,1456677,1187847,1255086,2125010,2312829,1229819,4815562,6328803,2526037,364623]],
+      [["final_fat",1107026,1400223,1254726,1235678,2090849,2318028,1239483,4945145,6306520,2546657,430340],["main_fat",1242808,1546640,1491128,1571678,2686956,2881195,1381304,4943262,5870300,2581530,402589],["final_thin",1255267,1447513,1285352,1324050,2243827,2551245,1257410,5582292,7521507,2920384,419624],["main_thin",1303078,1553811,1537326,1548463,2700306,2884370,1331700,5707730,7634585,2822818,493404],["main_thin",1365952,1434423,1564217,1558858,2637883,2800756,1476646,5641841,7655336,2856649,430189],["final_thin",1183230,1581102,1204822,1309347,2313341,2481090,1319982,5565196,7371905,2882487,434887],["main_fat",1233375,1567221,1529835,1582484,2694077,2927614,1388745,4936402,5749912,2587218,455958],["final_fat",688223,826098,769013,799289,1479000,1549054,824967,2848166,5999423,1601142,355959]],
+      [["main_fat",752549,805949,892467,878687,2117800,2213583,929602,2989677,3503080,1504718,268850],["final_fat",662705,720121,763265,811818,1457618,1515364,931846,2900414,3698461,1605928,244013],["main_thin",755333,797557,899968,891356,1624396,2124360,843625,3699051,4355008,1777684,284683],["final_thin",717757,809944,793119,749184,1476947,1753578,978195,3508769,4361357,1909390,260597],["final_thin",751889,778237,878126,732719,1597175,1685326,843074,3641746,4389869,1956690,262821],["main_thin",1771705,1006346,933899,1072495,1649313,1971192,865797,3381009,4105165,1669573,280787],["final_fat",743846,902873,779890,772860,1637465,1683864,909372,3473977,3929324,1609464,239977],["main_fat",932978,914620,1150501,1043602,2061476,2825822,1585828,3660184,3643469,1660299,337091]],
+      [["main_thin",769715,793240,1216940,959477,1753578,2265430,1009561,4225685,4663936,1788661,282500],["final_thin",1337640,787191,968830,882783,1609074,1892255,928351,3694605,4509627,1999083,254929],["main_fat",825588,818568,891075,1422316,1802891,2991029,1577867,3229423,4007361,1692738,346205],["final_fat",1090582,1004594,1077232,788943,1670194,1752748,825688,3415921,4248920,1831724,347587],["final_fat",682936,931455,837836,778007,2127354,2309555,1292212,4887098,6368512,2660937,304202],["main_fat",1248477,1646439,1543466,1654381,2805673,2995536,1548093,4949251,5863631,2672104,396429],["final_thin",1468464,1372852,1251121,1538327,2264147,2696120,1681511,6270026,7793722,2967604,419003],["main_thin",1327365,1541783,1604997,1484418,2742830,2844061,1413723,6222044,7647975,2897339,450170]],
+      [["main_fat",1482795,1486561,1727960,1588202,2834016,2984920,1447983,4996372,5858664,2711542,413996],["main_thin",1290519,1618497,1581802,1442074,2744772,2888176,1352522,5402756,6826814,2660697,426264],["final_thin",1112645,1320094,1225183,1419261,2238159,2533278,1277620,5264219,6992851,2814255,390621],["final_fat",974800,1240044,1090662,1180736,2116968,2304027,1285722,4783415,5561031,2464465,377702],["final_fat",1059145,1343849,1183230,1218132,2002338,2140694,1243659,4468997,5469135,2532697,356631],["final_thin",1126786,1323939,1314545,1318922,2310196,2642961,1398129,5718315,7176173,2791652,413385],["main_thin",1208848,1402286,1518228,1452410,2693486,2977549,1444748,5732836,6587137,2395333,394757],["main_fat",1103201,1372251,1328216,1341375,2483934,2805703,1412361,4394116,5371149,2610583,409269]],
+      [["main_fat",1241376,1551507,1551938,1535554,2869418,2996767,1470918,5135879,5924512,2584084,442238],["final_fat",1116671,1386623,1245202,1325271,2165430,2497484,1480432,4736535,6098030,2584604,386125],["final_thin",1202358,1399321,1326273,1335957,2256716,2607658,1291731,5760378,7595978,2927254,427736],["main_thin",1384129,1508143,1617596,1489115,2655029,2898220,1354435,5750152,7640434,2856689,463690],["main_thin",1293383,1446111,1591287,1474133,2662409,2861285,1414213,5635602,7542968,2819222,461757],["final_thin",1179344,1359462,1330039,1333534,2281754,2538675,1332682,5663884,7234980,2957950,434467],["final_fat",1075720,1334916,1235307,1269539,2179262,2389414,1296528,4857545,5491878,2406109,367857],["main_fat",752720,1441433,1407263,1476256,2760886,2843589,1572279,3757428,3426997,1526410,267688]],
+      [["final_thin",736275,770496,949712,765558,1474984,1603014,890775,3443792,4013028,1760148,265214],["final_fat",674272,795874,767812,798969,1477558,1647430,909593,3039962,3363242,1618857,253918],["main_fat",779129,900459,897415,926979,2074315,2051822,925176,2937529,3345916,1470708,280037],["main_thin",1254376,1555504,913358,812919,1872345,1962588,935651,3456651,6821005,3852530,424521],["main_thin",1234056,1443457,1552048,1405741,2580188,2768498,1342947,5478418,7319797,2701928,450450],["main_fat",1210069,1454704,1455815,1495374,2696551,2886182,1437838,4868571,5448523,2437255,407646],["final_fat",1045856,1221266,1180606,1196921,2088136,2258640,1213975,5075078,5878383,2496433,371243],["final_thin",1166565,1513070,1268596,1229618,2141275,2420730,1274947,5416056,7126529,2803049,390171]],
+      [["final_fat",1088469,1212663,1170431,1193535,2102948,2284838,1229068,4690306,5908327,2421541,337061],["final_thin",1105855,1283889,1260615,1224210,2088687,2412809,1274655,5350467,6821836,2680036,411823],["main_fat",1332672,1466381,1678897,1538038,2725494,2928636,1550406,4884385,5495163,2506768,425493],["main_thin",1126645,1212223,1227146,1450988,2735218,3359767,1354625,5131693,6856868,2537014,420256],["main_thin",997694,1207145,1273374,1207305,2447310,2471526,1218753,4647562,5781529,2107214,377061],["main_fat",1102720,1388335,1312282,1260315,2373140,2454680,1337058,3955042,5044894,2237057,374217],["final_thin",1133976,1359021,1317710,1180286,2228034,2386680,1292762,5335105,6873372,2763760,382118],["final_fat",1052465,1243580,1183480,1204992,2051080,2267943,1215838,4552681,5875699,2500620,349770]],
+      [["final_thin",1124232,1431278,1252563,1212844,2160543,2442182,1287616,5291651,6974544,2740456,411041],["main_thin",1237570,1430297,1532078,1394014,2609581,2764111,1300154,5372972,7284735,2673726,420145],["main_fat",1146446,1433382,1562394,1480752,2656771,2877871,1447113,4816294,5389786,2508671,405834],["final_fat",1037273,1359182,1150962,1164312,2069688,2211719,1321695,4532101,5685086,2447300,341238],["final_fat",1046016,1211882,1215878,1180465,2091671,2280071,1262498,4670697,5690663,2406059,336761],["main_fat",1396787,1493301,1892816,1635212,2713395,2643281,1086976,3527797,3863877,2501360,450069],["main_thin",1255347,1480732,1670865,1509064,2867685,2950409,1428024,6376374,7848853,2714557,497139],["final_thin",1202268,1434533,1338201,1425079,2253711,2566217,1417989,5730262,7520846,3037228,427716]],
+      [["final_thin",1140987,1419631,1269188,1374113,2322364,2459829,1275106,5899534,6995875,2824721,395729],["main_fat",1258422,1460592,1598047,1635232,2987233,3064898,1508063,4962321,5577686,2591595,438663],["main_thin",1263129,1520602,1697725,1506842,2697663,2944379,1378961,5832315,7567636,2868487,461897],["final_fat",1084603,1257099,1251621,1264110,2202856,2409534,1269989,4931746,6076578,2600267,390090],["final_fat",1074719,1277780,1234617,1293954,2219831,2287732,1229458,4972806,6065711,2652685,363901],["main_thin",1289768,1448795,1657635,1445781,2683621,2912822,1351560,5914657,7624119,2825092,436109],["main_fat",1278451,1504868,1527903,1556505,2763801,2952220,1556295,4995850,5941346,2559317,421216],["final_thin",1038575,790927,846910,817035,1915228,2499227,1337248,5558136,7332356,3008103,441406]],
+      [["final_fat",1074919,1283990,1231461,1279773,2218801,2490514,1258933,4907439,5949860,2641459,368448],["main_fat",1235257,1431569,1508144,1482976,2660487,2799333,1509344,4979005,5939033,2526988,452503],["main_thin",1267846,1563806,1578117,1479029,2656541,2912592,1392080,5024042,6639795,2684983,509608],["final_thin",1184922,1439511,1395906,1451519,2506438,2812703,1452390,5345811,7093790,2849188,366134],["final_thin",1158523,1379562,1271371,1343869,2398878,2643692,1393373,5490617,6506687,2962086,446184],["main_thin",1217460,1278271,1378701,1384720,2437616,2596311,1404710,5813787,7630258,2786194,438692],["main_fat",1209789,1348565,1502244,1575863,2776439,2942727,1471699,5327604,5829781,2409624,444922],["final_fat",1066997,1353263,1123151,1381465,2947654,2312679,1523165,3769756,8318622,2938851,411011]],
+      [["final_thin",1401966,1371370,1658767,1797454,2990407,2776810,1449476,5749632,7636187,3459064,388858],["main_fat",1310460,1507012,1519911,1559400,2568330,2910919,1396957,5041138,5436686,2737812,585631],["final_fat",1114578,1625938,1139084,1200846,2423294,2329254,1283929,4833679,6422742,2795407,395248],["main_thin",1441264,1242007,1599719,1349397,2538616,3175383,1511398,5533801,7019360,2842578,440395],["main_thin",1275016,1400033,1396317,1476445,2463584,2755017,1442616,5676823,7633884,2676901,449659],["final_fat",1026797,1304750,1176219,1238212,2096218,2280072,1355476,4885967,5786977,2357467,333746],["main_fat",1317249,1566400,1413983,1477257,2694427,2800315,1664846,5091863,5909670,3249833,431923],["final_thin",1084463,1289568,1249709,1140797,2178039,2559647,1310138,6014065,7624851,2954575,351503]],
+      [["main_thin",1271851,1686027,1682362,1547832,2810330,2964760,1376097,5817312,6991929,2658705,446945],["final_fat",1025645,1202408,1279804,1366662,2178991,2376845,1284550,5071283,5783472,2402373,351072],["final_thin",1129841,1306293,1259493,1286053,2425197,3000122,1334495,5871153,7223343,2776940,429169],["main_fat",1235778,1418550,1545649,1526220,2545236,2702569,1450908,4731016,5894767,2552416,415878],["main_fat",1183230,1409196,1493972,1504087,2703391,2928055,1560531,4939917,5251491,2339619,446163],["final_thin",1219534,1487082,1323268,1331741,2247643,2496413,1380854,5552558,7040181,3019722,445002],["final_fat",1078113,1311981,1164872,1330148,2113223,2248264,1256259,4578910,5684885,2894685,342139],["main_thin",1166115,1511938,1574662,1561013,2796239,2817661,1291501,5557776,7293147,2928906,447706]]
+    ]
+  },
+  "additional_validation": {
+    "xamlx_tests": 107,
+    "fxb_codec_tests": 10,
+    "metadata_cases": 2,
+    "metadata_inheritance_differential_queries": 589824
+  }
+}
