@@ -59,6 +59,39 @@ The subscription fixture runs compiled Wasm in Chromium with 256 rows and 256 ne
 
 A separate 12,000-sibling stress test compares the source indexes with the first editor optimization in this round (`4804e0e3`). With the editor crate optimized against identical dependencies, median warmed sibling definition fell from 85 to 44 µs and lookup inside a method with 12,000 reads from 93 to 46 µs. On this workload, elapsed time to open the file ranged from 471 ms before to 553 ms after in one comparison, while process CPU varied by less than 3% in a separate comparison. These results support faster repeated queries. Cold file opening and first-query latency remain sensitive to parsing and semantic index construction.
 
+## Follow-up measurements against `65304945`
+
+This pass changes how the compiler represents repeated objects, how the runtime finds references during destruction, and how the native adapter applies model edits. Each pair below compares the same fixture against `65304945` on Linux.
+
+| Operation | Before | After |
+|---|---:|---:|
+| Generated Rust for 256 composite instances | 790,960 B | 381,523 B |
+| Downstream dev rustc CPU, full rlib code generation | 3.01 s | 0.99 s |
+| Downstream dev rustc peak RSS | 518.5 MiB | 232.2 MiB |
+| Materialize and drop the compiled component | 249 µs | 187 µs |
+| Create and drop its 257-object instance | 1.83 ms | 1.81 ms |
+| Create and retire a child beside 8,192 scalar properties | 103.6 µs | 2.24 µs |
+| Insert and remove a section in the middle of 8,000 rows | 8.11 ms | 63 µs |
+| Append and remove a section at the end of the same model | 3.97 ms | 58 µs |
+| Reorder siblings with 320 unrelated native peers | 855 µs | 9 µs |
+| Transfer a child between two panels in that tree | 831 µs | 44 µs |
+| Page a mounted ListView with delegate pooling | 1.21 ms | 141 µs |
+| First hover in a file with 12,000 sibling items | 451 ms | 121 ms |
+| First definition inside its method with 12,000 reads | 0.088 ms | 37.2 ms |
+| Subsequent definitions inside the same method | 0.060 ms | 0.061 ms |
+| Warm V8 method call with 1,024 properties, no host reads | 315 µs | 290 µs |
+| The same call with one host property read | 415 µs | 386 µs |
+
+The generator emits typed records for common members and shares a metadata factory across objects with identical shapes. The public component still materializes owned IR. Timing the generator itself gave 27.39 ms before and 27.76 ms after. The downstream rustc measurements are medians of five alternating pairs with the same runtime rlib at optimization level 0 and debug info disabled. Component and instance timings use thirteen alternating release pairs pinned to the same core.
+
+The runtime discovers reference-bearing slots on first retirement, then tracks writes, aliases and binding targets in declaration order. The create-and-retire fixture measures repeated retirement and includes creation on every iteration. The first retirement still visits the slot arena, and later retirements scale with the number of candidate slots. Across three alternating release runs a write to an unrelated slot took 481–482 ns, and constructing the separate 256-child tree took 441 µs before and 459 µs after.
+
+ListView now receives the changed row range. It preserves the unaffected prefix of the section index and updates the boundaries at the edit. A long move still scans the moved interval, and shifting a suffix still costs time proportional to the number of affected boundaries. The native adapter validates edits to stable child collections together, so it can move a child in either update order. Lifetime changes, reentrant updates and custom hosts retain the full validation path. The controls rows use simulation-thread CPU time with identical native dependencies, ten warmups and three alternating runs per revision.
+
+The editor indexes declarations once per document revision. For complex scripts, the first hover or definition inside the script resolves its JavaScript names and caches them. This moves the cost of resolving the 12,000-read method to its first navigation. Warm sibling hovers took 0.060 ms before and 0.065 ms after. These stdio timings use six alternating pairs of pinned server processes with `--properties 12 --siblings 12000 --iterations 21`.
+
+The native WebScene host now uses one I/O thread per child for a bounded request/reply exchange. It waits once per frame under the original deadline, including when a host callback reenters the worker. WorkerScript cancellation also interrupts the owner's wait when the child has stopped reading its pipe. The V8 measurements use eight paired runs of the dev client on two dedicated cores, swapping affinities between runs, with the same worker executable and native library. In the eight-property scope the no-read call took 322 µs before and 297 µs after, and a single read took 382 µs before and 354 µs after. Elapsed times varied more when the clients competed with unrelated builds.
+
 ## Reproduce
 
 Run these commands from the workspace root. For comparisons with an earlier revision, use the same harness and Cargo bench target declarations in both checkouts. Keep build flags, toolchain, CPU affinity and background load consistent. The measurements above used rustc 1.99.0.
@@ -86,4 +119,20 @@ For browser timings, build and package the `qml-browser-tests` Wasm application 
 
 ```sh
 python3 tests/QmlBrowser/run.py --benchmark-subscriptions --chrome google-chrome --site /path/to/site
+```
+
+To measure the downstream compiler separately, save each revision's generated Rust module. Use the same benchmark harness in both checkouts. The commands below assume Cargo's default target directory. For a paired comparison, point both rustc invocations at the same current runtime build.
+
+```sh
+FERROUI_QML_BENCH_OUTPUT=/tmp/generated.rs cargo bench --locked -p ferroui-qml-build --bench compiler
+cargo build --locked -p ferroui-qml
+/usr/bin/time -v rustc --edition=2021 --crate-name qml_fixture --crate-type rlib \
+  -C opt-level=0 -C debuginfo=0 -L dependency=target/debug/deps \
+  --extern ferroui_qml=target/debug/libferroui_qml.rlib /tmp/generated.rs -o /tmp/libqml_fixture.rlib
+
+cargo build --locked --release -p ferroui-qml
+FERROUI_QML_BENCH_MODULE=/tmp/generated.rs rustc --edition=2021 -C opt-level=3 \
+  -L dependency=target/release/deps --extern ferroui_qml=target/release/libferroui_qml.rlib \
+  scripts/qml/bench-generated.rs -o /tmp/qml-consumer
+/tmp/qml-consumer
 ```
