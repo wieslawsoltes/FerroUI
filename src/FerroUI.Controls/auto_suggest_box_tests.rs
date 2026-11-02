@@ -95,7 +95,7 @@ fn text_changes_within_150_ms_raise_one_event_with_the_reason_of_the_change() {
     let parts = parts(&control);
     let events = Rc::new(RefCell::new(Vec::new()));
     let recorded = events.clone();
-    control.text_changed(move |args| recorded.borrow_mut().push(args.clone()));
+    control.text_changed(move |args| recorded.borrow_mut().push(args.clone())).detach();
     parts.text_box.set_text(Some("a"));
     parts.text_box.set_text(Some("ab"));
     assert!(events.borrow().is_empty());
@@ -124,7 +124,7 @@ fn the_arguments_and_the_timer_do_not_keep_the_box_alive() {
     let parts = parts(&control);
     let events = Rc::new(RefCell::new(Vec::new()));
     let recorded = events.clone();
-    control.text_changed(move |args| recorded.borrow_mut().push(args.clone()));
+    control.text_changed(move |args| recorded.borrow_mut().push(args.clone())).detach();
     parts.text_box.set_text(Some("current"));
     fire();
     let args = events.borrow()[0].clone();
@@ -154,7 +154,7 @@ fn a_chosen_suggestion_is_the_text_before_its_event_and_enter_submits_it() {
         let owner = weak.upgrade().unwrap();
         assert_eq!(*args.selected_item.downcast_ref::<String>().unwrap(), owner.text());
         log.borrow_mut().push("chosen".to_string());
-    });
+    }).detach();
     let expected = control.items().get_at(1).unwrap();
     let log = events.clone();
     let weak = control.downgrade();
@@ -163,7 +163,7 @@ fn a_chosen_suggestion_is_the_text_before_its_event_and_enter_submits_it() {
         assert!(Rc::ptr_eq(args.chosen_suggestion.as_ref().unwrap(), &expected));
         assert!(weak.upgrade().unwrap().is_suggestion_list_open());
         log.borrow_mut().push("query".to_string());
-    });
+    }).detach();
     control.set_is_suggestion_list_open(true);
     parts.list.set_selected_index(1);
     assert!(key(&control, Key::Enter).handled());
@@ -187,7 +187,7 @@ fn the_query_button_submits_the_text_without_the_selected_suggestion() {
         assert_eq!("chosen", args.query_text);
         assert!(args.chosen_suggestion.is_none());
         count.set(count.get() + 1);
-    });
+    }).detach();
     assert!(parts.query.is_visible());
     assert!(parts.query.content().is_some());
     parts.query.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
@@ -208,10 +208,10 @@ fn without_update_text_on_select_the_text_stays_and_the_suggestion_is_chosen() {
     control.set_update_text_on_select(false);
     let changes = Rc::new(Cell::new(0));
     let count = changes.clone();
-    control.text_changed(move |_| count.set(count.get() + 1));
+    control.text_changed(move |_| count.set(count.get() + 1)).detach();
     let choices = Rc::new(Cell::new(0));
     let count = choices.clone();
-    control.suggestion_chosen(move |_| count.set(count.get() + 1));
+    control.suggestion_chosen(move |_| count.set(count.get() + 1)).detach();
     control.set_items_source(Some(ItemsSource::from_strs(["Alpha"])));
     parts.list.set_selected_index(0);
     fire();
@@ -306,7 +306,7 @@ fn the_parts_of_a_replaced_template_no_longer_change_the_box() {
     control.set_text("current");
     let calls = Rc::new(Cell::new(0));
     let count = calls.clone();
-    control.query_submitted(move |_| count.set(count.get() + 1));
+    control.query_submitted(move |_| count.set(count.get() + 1)).detach();
     old.text_box.set_text(Some("detached"));
     old.query.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
     old.list.set_items_source(Some(ItemsSource::from_strs(["stale"])));
@@ -355,7 +355,7 @@ fn the_peer_is_a_group_whose_invoke_submits_the_query() {
         assert_eq!("query", args.query_text);
         assert!(args.chosen_suggestion.is_none());
         count.set(count.get() + 1);
-    });
+    }).detach();
     let peer = ControlAutomationPeer::create_peer_for_element(&control);
     assert_eq!(AutomationControlType::Group, peer.get_automation_control_type());
     assert_eq!("AutoSuggestBox", peer.get_class_name());

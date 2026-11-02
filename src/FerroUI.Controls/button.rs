@@ -58,7 +58,7 @@ pub struct Button {
     is_pressed: Cell<bool>,
     space_pressed: Cell<bool>,
     /// The subscriptions to the `Opened` and `Closed` events of the flyout.
-    flyout_events: RefCell<Option<(Rc<dyn IDisposable>, Rc<dyn IDisposable>)>>,
+    flyout_events: RefCell<Option<(Subscription, Subscription)>>,
 }
 
 ferro_class! {

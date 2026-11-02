@@ -15,7 +15,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs, RoutedEventHandlerToken};
 use ferroui_base::layout::{LayoutHelper, Layoutable};
 use ferroui_base::logging::{LogEventLevel, Logger};
-use ferroui_base::reactive::{AnonymousObserver, Disposable, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::{CancelEventArgs, HandlerList};
 use ferroui_base::{
     ferro_class, ferro_property, FerroObjectImpl, FerroProperty, FerroPropertyChangedEventArgs,
@@ -644,16 +644,16 @@ impl PopupFlyoutBase {
         })
     }
 
-    /// Raised before the flyout closes; the close can be cancelled.
-    /// Disposing the returned handle unsubscribes.
-    pub fn closing(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn(&CancelEventArgs)>(|flyout| &flyout.closing, Rc::new(handler))
+    /// Raised before the flyout closes; the close can be cancelled. Dropping the returned guard
+    /// removes the handler; [`Subscription::detach`] keeps it for the life of the flyout.
+    pub fn closing(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn(&CancelEventArgs)>(|flyout| &flyout.closing, Rc::new(handler)))
     }
 
-    /// Raised before the flyout opens; the opening can be cancelled.
-    /// Disposing the returned handle unsubscribes.
-    pub fn opening(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn(&CancelEventArgs)>(|flyout| &flyout.opening, Rc::new(handler))
+    /// Raised before the flyout opens; the opening can be cancelled. Dropping the returned guard
+    /// removes the handler; [`Subscription::detach`] keeps it for the life of the flyout.
+    pub fn opening(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn(&CancelEventArgs)>(|flyout| &flyout.opening, Rc::new(handler)))
     }
 
     /// Pre-registers a control as the default placement target for this

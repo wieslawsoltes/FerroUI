@@ -1226,11 +1226,11 @@ impl TextBlock {
             new_value.set_logical_children(Some(self));
             new_value.set_inline_host(Some(self.as_inline_host()));
             let weak = self.to_ref().downgrade();
-            *self.inlines_invalidated.borrow_mut() = Some(Subscription::new(new_value.invalidated(move || {
+            *self.inlines_invalidated.borrow_mut() = Some(new_value.invalidated(move || {
                 if let Some(this) = weak.upgrade() {
                     this.invalidate_text_layout();
                 }
-            })));
+            }));
         }
     }
 

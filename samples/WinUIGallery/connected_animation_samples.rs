@@ -467,7 +467,7 @@ fn wire_collection(
             }
             state.report(&format!("Returned to {}", state.items[index].title));
         }
-    });
+    }).detach();
     let weak_state = Rc::downgrade(&state);
     root.detached_from_visual_tree(move |_| {
         if let Some(state) = weak_state.upgrade() {

@@ -152,7 +152,7 @@ fn observe_flyout(peer: &Ref<AutomationPeer>, owner: &Button) {
                     );
                 }
             }
-        });
+        }).detach();
         let weak_peer = peer.downgrade();
         let weak_owner = owner.to_ref().downgrade();
         let weak_flyout = flyout.downgrade();
@@ -170,7 +170,7 @@ fn observe_flyout(peer: &Ref<AutomationPeer>, owner: &Button) {
                     );
                 }
             }
-        });
+        }).detach();
     }
 }
 fn subscribe_flyout(peer: &Ref<AutomationPeer>, owner: &Button) {

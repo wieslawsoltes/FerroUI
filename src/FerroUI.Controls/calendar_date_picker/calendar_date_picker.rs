@@ -425,13 +425,13 @@ impl TemplatedControlImpl for CalendarDatePicker {
                 if let Some(this) = weak.upgrade() {
                     this.calendar_display_date_changed(e);
                 }
-            }));
+            }).detach());
             let weak = this.to_ref().downgrade();
             subscriptions.add(calendar.selected_dates_changed(move |e| {
                 if let Some(this) = weak.upgrade() {
                     this.calendar_selected_dates_changed(e);
                 }
-            }));
+            }).detach());
             subscriptions.add(calendar.add_disposable_handler(InputElement::pointer_released_event(), |_, e| {
                 Self::calendar_pointer_released(e);
             }).detach());
@@ -1008,33 +1008,47 @@ impl CalendarDatePicker {
     }
 
     /// Occurs when the drop-down [`Calendar`] is closed.
-    pub fn calendar_closed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn()>(|picker| &picker.calendar_closed, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the picker.
+    pub fn calendar_closed(&self, handler: impl Fn() + 'static) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn()>(|picker| &picker.calendar_closed, Rc::new(handler)))
     }
 
     /// Occurs when the drop-down [`Calendar`] is opened.
-    pub fn calendar_opened(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn()>(|picker| &picker.calendar_opened, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the picker.
+    pub fn calendar_opened(&self, handler: impl Fn() + 'static) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn()>(|picker| &picker.calendar_opened, Rc::new(handler)))
     }
 
     /// Occurs when the text is assigned a value that cannot be interpreted
     /// as a date.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the picker.
     pub fn date_validation_error(
         &self,
         handler: impl Fn(&CalendarDatePickerDateValidationErrorEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn(&CalendarDatePickerDateValidationErrorEventArgs)>(
+    ) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn(&CalendarDatePickerDateValidationErrorEventArgs)>(
             |picker| &picker.date_validation_error,
             Rc::new(handler),
-        )
+        ))
     }
 
     /// Occurs when the selected date is changed.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the picker.
     pub fn selected_date_changed(
         &self,
         handler: impl Fn(&SelectionChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn(&SelectionChangedEventArgs)>(|picker| &picker.selected_date_changed, Rc::new(handler))
+    ) -> Subscription {
+        Subscription::new(
+            self.subscribe::<dyn Fn(&SelectionChangedEventArgs)>(|picker| &picker.selected_date_changed, Rc::new(handler)),
+        )
     }
 
     // --- the control ------------------------------------------------------------

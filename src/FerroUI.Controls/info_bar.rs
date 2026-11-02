@@ -14,7 +14,7 @@ use ferroui_base::input::{ICommand, InputElementImpl};
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -566,50 +566,53 @@ impl InfoBar {
     }
 
     /// Adds a handler of `CloseButtonClick`, raised when the close button is clicked, before the
-    /// bar closes. Disposing the result removes it.
-    pub fn close_button_click(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// bar closes. Dropping the returned guard removes the handler; [`Subscription::detach`] keeps
+    /// it for the life of the bar.
+    pub fn close_button_click(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.close_button_click.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.close_button_click.remove(token);
             }
-        })
+        }))
     }
 
-    /// Adds a handler of `Closing`, raised when the bar is about to close; a handler may cancel
-    /// it. Disposing the result removes it.
-    pub fn closing(&self, handler: impl Fn(&InfoBarClosingEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `Closing`, raised when the bar is about to close; a handler may cancel it.
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the bar.
+    pub fn closing(&self, handler: impl Fn(&InfoBarClosingEventArgs) + 'static) -> Subscription {
         let token = self.closing.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.closing.remove(token);
             }
-        })
+        }))
     }
 
-    /// Adds a handler of `Closed`, raised when the bar has closed. Disposing the result removes
-    /// it.
-    pub fn closed(&self, handler: impl Fn(&InfoBarClosedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `Closed`, raised when the bar has closed. Dropping the returned guard
+    /// removes the handler; [`Subscription::detach`] keeps it for the life of the bar.
+    pub fn closed(&self, handler: impl Fn(&InfoBarClosedEventArgs) + 'static) -> Subscription {
         let token = self.closed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.closed.remove(token);
             }
-        })
+        }))
     }
 
-    /// Adds a handler of `Opened`, raised when the bar opens. Disposing the result removes it.
-    pub fn opened(&self, handler: impl Fn(&InfoBarOpenedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `Opened`, raised when the bar opens. Dropping the returned guard removes
+    /// the handler; [`Subscription::detach`] keeps it for the life of the bar.
+    pub fn opened(&self, handler: impl Fn(&InfoBarOpenedEventArgs) + 'static) -> Subscription {
         let token = self.opened.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.opened.remove(token);
             }
-        })
+        }))
     }
 
     /// InfoBar::OnCloseButtonClick: the event, then the bar closes because of the button. The

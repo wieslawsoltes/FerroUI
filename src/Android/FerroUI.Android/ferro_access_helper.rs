@@ -185,7 +185,7 @@ impl FerroAccessHelper {
             if let Some(this) = weak.upgrade() {
                 this.base.invalidate_virtual_view_with(peer_view_id, CONTENT_CHANGE_TYPE_SUBTREE);
             }
-        }));
+        }).detach());
         let weak = self.this.clone();
         subscriptions.push(peer.property_changed(move |ev| {
             let Some(this) = weak.upgrade() else {
@@ -200,7 +200,7 @@ impl FerroAccessHelper {
             {
                 this.base.invalidate_virtual_view(peer_view_id);
             }
-        }));
+        }).detach());
 
         // Drop the registration once the peer's control leaves the visual tree, otherwise
         // every control ever explored by accessibility is kept alive for the lifetime of

@@ -2,7 +2,7 @@ use super::{Inline, InlineImpl, Span, TextElementImpl};
 use crate::{Control, TopLevel};
 use ferroui_base::input::Key;
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::utilities::{HandlerList, Uri};
 use ferroui_base::{
@@ -311,18 +311,22 @@ impl Hyperlink {
         }
     }
 
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the hyperlink.
     pub fn click(
         &self,
         handler: impl Fn(&HyperlinkClickEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
-        subscribe(&self.click_handlers, handler)
+    ) -> Subscription {
+        Subscription::new(subscribe(&self.click_handlers, handler))
     }
 
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the hyperlink.
     pub fn navigation_requested(
         &self,
         handler: impl Fn(&HyperlinkClickEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
-        subscribe(&self.navigation_handlers, handler)
+    ) -> Subscription {
+        Subscription::new(subscribe(&self.navigation_handlers, handler))
     }
 
     /// Raises Click, then NavigationRequested. A handled event cancels default URI

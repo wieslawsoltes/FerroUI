@@ -1257,12 +1257,11 @@ impl RichEditBox {
         }
         if let Some(flyout) = self.context_flyout() {
             let weak = self.to_ref().downgrade();
-            *self.context_flyout_closed_subscription.borrow_mut() =
-                Some(Subscription::new(flyout.closed(move || {
-                    if let Some(owner) = weak.upgrade() {
-                        owner.refresh_flyout_focus_state();
-                    }
-                })));
+            *self.context_flyout_closed_subscription.borrow_mut() = Some(flyout.closed(move || {
+                if let Some(owner) = weak.upgrade() {
+                    owner.refresh_flyout_focus_state();
+                }
+            }));
         }
         self.refresh_flyout_focus_state();
     }
@@ -1729,7 +1728,7 @@ impl RichEditBox {
                 this.on_document_changed();
             }
         });
-        *self.document_subscription.borrow_mut() = Some(Subscription::new(subscription));
+        *self.document_subscription.borrow_mut() = Some(subscription);
         if self.document_generation.get() > 1 {
             self.on_document_changed();
         } else {

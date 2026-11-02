@@ -1109,7 +1109,7 @@ pub(crate) fn toolbar_flyout(owner: &Control) -> Ref<Flyout> {
     let flyout = Flyout::new();
     let weak_owner = owner.to_ref().downgrade();
     let weak_flyout = flyout.downgrade();
-    let _ = flyout.opening(move |_| {
+    flyout.opening(move |_| {
         let (Some(owner), Some(flyout)) = (weak_owner.upgrade(), weak_flyout.upgrade()) else {
             return;
         };
@@ -1119,7 +1119,7 @@ pub(crate) fn toolbar_flyout(owner: &Control) -> Ref<Flyout> {
         if let Some(theme) = ferroui_base::metadata::from_markup_value::<Ref<ControlTheme>>(&theme) {
             flyout.set_flyout_presenter_theme(theme);
         }
-    });
+    }).detach();
     flyout
 }
 

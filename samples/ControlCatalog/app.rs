@@ -297,7 +297,7 @@ impl App {
                     if let Some(dock_menu) = dock_menu.upgrade() {
                         dock_menu.items().remove(&item.to_ref().upcast());
                     }
-                });
+                }).detach();
             }
             dock_menu.items().insert(0, item.upcast());
         }

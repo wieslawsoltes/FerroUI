@@ -345,7 +345,7 @@ fn nested_edit_batches_raise_one_revision_and_one_event() {
     let document = RichTextDocument::from_text("abc");
     let events = Rc::new(RefCell::new(Vec::new()));
     let output = events.clone();
-    document.changed(move |event| output.borrow_mut().push(event.clone()));
+    document.changed(move |event| output.borrow_mut().push(event.clone())).detach();
     {
         let _outer = document.begin_edit();
         document.replace_text(1..1, "x").unwrap();
@@ -583,10 +583,10 @@ fn reentrant_handlers_receive_revisions_in_order() {
         if event.revision == 1 {
             weak.upgrade().unwrap().replace_text(0..0, "Y").unwrap();
         }
-    });
+    }).detach();
     let revisions = Rc::new(RefCell::new(Vec::new()));
     let target = revisions.clone();
-    document.changed(move |event| target.borrow_mut().push(event.revision));
+    document.changed(move |event| target.borrow_mut().push(event.revision)).detach();
     let pointer = document.create_pointer(2, TextGravity::Forward).unwrap();
     document.replace_text(0..0, "X").unwrap();
     assert_eq!(&*revisions.borrow(), &[1, 2]);
@@ -607,7 +607,7 @@ fn hyperlink_events_cancellation_input_and_split_behavior_are_preserved() {
     link.click(move |args| {
         target.set(target.get() + 1);
         args.set_handled(true);
-    });
+    }).detach();
     link.set_tab_index(7);
     paragraph.inlines().add(link.clone());
     document.blocks().add(paragraph);

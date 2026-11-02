@@ -98,14 +98,14 @@ impl FrnAutomationPeer {
                 if let Some(node) = weak.upgrade().and_then(|this| this.node()) {
                     node.children_changed();
                 }
-            }));
+            }).detach());
 
             let weak = this.clone();
             subscriptions.push(inner.property_changed(move |e| {
                 if let Some(this) = weak.upgrade() {
                     this.on_peer_property_changed(e);
                 }
-            }));
+            }).detach());
 
             // The reference tests the class of the peer for the contract;
             // the provider lookup of a peer answers the same question.

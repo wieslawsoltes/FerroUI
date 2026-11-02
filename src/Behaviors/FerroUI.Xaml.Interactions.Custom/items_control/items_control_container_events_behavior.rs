@@ -63,7 +63,7 @@ ferroui_base::ferro_overrides! {
                 if let (Some(behavior), Some(control)) = (behavior.upgrade(), control.upgrade()) {
                     behavior.on_preparing_container(&control, e);
                 }
-            });
+            }).detach();
 
             let behavior = this.to_ref().downgrade();
             let control = items_control.downgrade();
@@ -71,7 +71,7 @@ ferroui_base::ferro_overrides! {
                 if let (Some(behavior), Some(control)) = (behavior.upgrade(), control.upgrade()) {
                     behavior.on_container_prepared(&control, e);
                 }
-            });
+            }).detach();
 
             let behavior = this.to_ref().downgrade();
             let control = items_control.downgrade();
@@ -80,7 +80,7 @@ ferroui_base::ferro_overrides! {
                     if let (Some(behavior), Some(control)) = (behavior.upgrade(), control.upgrade()) {
                         behavior.on_container_index_changed(&control, e);
                     }
-                });
+                }).detach();
 
             let behavior = this.to_ref().downgrade();
             let control = items_control.downgrade();
@@ -88,7 +88,7 @@ ferroui_base::ferro_overrides! {
                 if let (Some(behavior), Some(control)) = (behavior.upgrade(), control.upgrade()) {
                     behavior.on_container_clearing(&control, e);
                 }
-            });
+            }).detach();
 
             // Deviation (DEVIATIONS.md, Behaviors): the reference subscribes its handler of
             // `PreparingContainer` again when it is disposed (`+=` where `-=` is meant); here

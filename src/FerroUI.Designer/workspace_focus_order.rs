@@ -69,14 +69,14 @@ impl DesignerWorkspace {
             if let Some(flyout) = weak_flyout.upgrade() {
                 flyout.set_content(Some(Control::boxed(editor_opening.control())));
             }
-        });
+        }).detach();
         let weak = Rc::downgrade(self);
         flyout.closed(move || {
             editor.retire();
             if let Some(workspace) = weak.upgrade() {
                 workspace.surface.set_focus_order_visible(false);
             }
-        });
+        }).detach();
         button.set_flyout(Some(flyout.upcast()));
     }
 

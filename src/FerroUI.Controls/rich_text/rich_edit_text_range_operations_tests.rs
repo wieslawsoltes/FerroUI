@@ -582,13 +582,13 @@ fn rich_range_publication_callback_preserves_external_edits_and_live_range_rebas
         let observed = changed.clone();
         let model = document.document();
         let callback_model = model.clone();
-        let _subscription = model.changed(move |_| {
+        model.changed(move |_| {
             if !changed.replace(true) {
                 callback_model
                     .replace_text(0..callback_model.text_length(), "q")
                     .unwrap();
             }
-        });
+        }).detach();
         let result = if replace_character {
             range.set_character_scalar('X').map(|_| ())
         } else {

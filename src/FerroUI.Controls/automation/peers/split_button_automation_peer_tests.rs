@@ -132,7 +132,7 @@ mod split_button_automation_peer_tests {
             if e.property() == ExpandCollapsePatternIdentifiers::expand_collapse_state_property() {
                 *sink.borrow_mut() = Some(e.clone());
             }
-        });
+        }).detach();
 
         peer.expand().unwrap();
 

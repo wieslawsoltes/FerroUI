@@ -3,7 +3,7 @@
 
 use ferroui_base::collections::{FerroList, NotifyCollectionChangedEventArgs};
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::{FormatError, SpanStringTokenizer};
 use std::cell::Cell;
 use std::fmt;
@@ -248,18 +248,20 @@ impl TextRangeCollection {
         }
     }
 
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the collection.
     pub fn collection_changed(
         &self,
         handler: impl for<'a, 'b> Fn(&'a NotifyCollectionChangedEventArgs<'b, TextHighlightRange>)
         + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.0.add_collection_changed(Rc::new(handler));
         let weak = Rc::downgrade(&self.0);
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(list) = weak.upgrade() {
                 list.remove_collection_changed(token);
             }
-        })
+        }))
     }
 }
 

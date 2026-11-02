@@ -344,7 +344,7 @@ fn source_drag_preview_control_exposes_readonly_value_provider_and_change_event(
         assert_eq!(provider.value().as_deref(), Some("Dock"));
         let changes = Rc::new(RefCell::new(Vec::new()));
         let observed = changes.clone();
-        peer.property_changed(move |args| observed.borrow_mut().push(args.property()));
+        peer.property_changed(move |args| observed.borrow_mut().push(args.property())).detach();
         control.set_status(Some("Float".into()));
         assert_eq!(provider.value().as_deref(), Some("Float"));
         assert!(changes

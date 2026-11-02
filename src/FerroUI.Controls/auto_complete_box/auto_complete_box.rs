@@ -1541,38 +1541,60 @@ impl AutoCompleteBox {
     /// contained in the drop-down. In this case, if you want possible
     /// matches to appear, you must provide the logic for populating the
     /// selection adapter.
-    pub fn populating(&self, handler: impl Fn(&PopulatingEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscription::<dyn Fn(&PopulatingEventArgs)>(|this| &this.populating, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the box.
+    pub fn populating(&self, handler: impl Fn(&PopulatingEventArgs) + 'static) -> Subscription {
+        Subscription::new(self.subscription::<dyn Fn(&PopulatingEventArgs)>(|this| &this.populating, Rc::new(handler)))
     }
 
     /// Occurs when the [`AutoCompleteBox`] has populated the drop-down with
     /// possible matches based on the `Text` property.
-    pub fn populated(&self, handler: impl Fn(&PopulatedEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscription::<dyn Fn(&PopulatedEventArgs)>(|this| &this.populated, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the box.
+    pub fn populated(&self, handler: impl Fn(&PopulatedEventArgs) + 'static) -> Subscription {
+        Subscription::new(self.subscription::<dyn Fn(&PopulatedEventArgs)>(|this| &this.populated, Rc::new(handler)))
     }
 
     /// Occurs when the value of the `IsDropDownOpen` property is changing
     /// from false to true.
-    pub fn drop_down_opening(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscription::<dyn Fn(&CancelEventArgs)>(|this| &this.drop_down_opening, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the box.
+    pub fn drop_down_opening(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Subscription {
+        Subscription::new(
+            self.subscription::<dyn Fn(&CancelEventArgs)>(|this| &this.drop_down_opening, Rc::new(handler)),
+        )
     }
 
     /// Occurs when the value of the `IsDropDownOpen` property has changed
     /// from false to true and the drop-down is open.
-    pub fn drop_down_opened(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
-        self.subscription::<dyn Fn()>(|this| &this.drop_down_opened, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the box.
+    pub fn drop_down_opened(&self, handler: impl Fn() + 'static) -> Subscription {
+        Subscription::new(self.subscription::<dyn Fn()>(|this| &this.drop_down_opened, Rc::new(handler)))
     }
 
     /// Occurs when the `IsDropDownOpen` property is changing from true to
     /// false.
-    pub fn drop_down_closing(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscription::<dyn Fn(&CancelEventArgs)>(|this| &this.drop_down_closing, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the box.
+    pub fn drop_down_closing(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Subscription {
+        Subscription::new(
+            self.subscription::<dyn Fn(&CancelEventArgs)>(|this| &this.drop_down_closing, Rc::new(handler)),
+        )
     }
 
     /// Occurs when the `IsDropDownOpen` property was changed from true to
     /// false and the drop-down is open.
-    pub fn drop_down_closed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
-        self.subscription::<dyn Fn()>(|this| &this.drop_down_closed, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the box.
+    pub fn drop_down_closed(&self, handler: impl Fn() + 'static) -> Subscription {
+        Subscription::new(self.subscription::<dyn Fn()>(|this| &this.drop_down_closed, Rc::new(handler)))
     }
 
     /// Occurs when the selected item in the drop-down portion of the

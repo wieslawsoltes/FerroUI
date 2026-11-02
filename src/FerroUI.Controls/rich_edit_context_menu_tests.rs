@@ -541,7 +541,7 @@ fn rich_context_nested_request_consumes_outer_opening_and_uses_new_selection() {
     });
     let opened = Rc::new(Cell::new(0));
     let observed = opened.clone();
-    let _opened = flyout.opened(move || observed.set(observed.get() + 1));
+    flyout.opened(move || observed.set(observed.get() + 1)).detach();
     assert!(f.keyboard(Key::Apps, KeyModifiers::NONE).handled());
     assert_eq!(calls.get(), 2);
     assert_eq!(opened.get(), 1);
@@ -574,10 +574,10 @@ fn rich_context_menu_precedence_and_opening_cancellation_are_not_retried() {
     f.owner.set_context_menu(&menu);
     let calls = Rc::new(Cell::new(0));
     let observed = calls.clone();
-    let _opening = menu.opening(move |args| {
+    menu.opening(move |args| {
         observed.set(observed.get() + 1);
         args.set_cancel(true);
-    });
+    }).detach();
     assert!(f.keyboard(Key::Apps, KeyModifiers::NONE).handled());
     assert_eq!(calls.get(), 1);
     assert!(!menu.is_open());
@@ -608,10 +608,10 @@ fn rich_context_flyout_opening_cancellation_is_not_retried() {
     let flyout = f.flyout();
     let calls = Rc::new(Cell::new(0));
     let observed = calls.clone();
-    let _opening = flyout.opening(move |args| {
+    flyout.opening(move |args| {
         observed.set(observed.get() + 1);
         args.set_cancel(true);
-    });
+    }).detach();
     assert!(f.keyboard(Key::Apps, KeyModifiers::NONE).handled());
     assert_eq!(calls.get(), 1);
     assert!(!flyout.is_open());

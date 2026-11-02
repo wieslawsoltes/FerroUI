@@ -12,7 +12,7 @@ use ferroui_base::data::BindingMode;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
 use ferroui_base::layout::{LayoutableImpl, VerticalAlignment};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::{CultureInfo, DateTime, HandlerList};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, FerroObject, FerroObjectImpl, FerroObjectImplExt,
@@ -50,7 +50,7 @@ pub struct TimePicker {
     flyout_button_click: Cell<Option<RoutedEventHandlerToken>>,
     /// The subscriptions to the confirmed and dismissed events of the
     /// presenter.
-    presenter_subscriptions: RefCell<Option<(Rc<dyn IDisposable>, Rc<dyn IDisposable>)>>,
+    presenter_subscriptions: RefCell<Option<(Subscription, Subscription)>>,
 
     selected_time_changed: HandlerList<dyn Fn(&TimePickerSelectedValueChangedEventArgs)>,
 }
@@ -395,19 +395,19 @@ impl TimePicker {
         self.set_value(Self::selected_time_property(), value)
     }
 
-    /// Raised when the selected time changes. Disposing the returned handle
-    /// removes the handler.
+    /// Raised when the selected time changes. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the picker.
     pub fn selected_time_changed(
         &self,
         handler: impl Fn(&TimePickerSelectedValueChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.selected_time_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.selected_time_changed.remove(token);
             }
-        })
+        }))
     }
 
     fn set_grid(&self) {

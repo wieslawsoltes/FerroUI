@@ -14,7 +14,7 @@ use ferroui_base::input::{
 };
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt,
@@ -197,33 +197,39 @@ impl CalendarButton {
     /// Occurs when the left mouse button is pressed (or when the tip of the
     /// stylus touches the tablet PC) while the mouse pointer is over a UI
     /// element. The handler receives the button that raises the event.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the button.
     pub fn calendar_left_mouse_button_down(
         &self,
         handler: impl Fn(&CalendarButton, &PointerPressedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.calendar_left_mouse_button_down.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.calendar_left_mouse_button_down.remove(token);
             }
-        })
+        }))
     }
 
     /// Occurs when the left mouse button is released (or the tip of the
     /// stylus is removed from the tablet PC) while the mouse (or the
     /// stylus) is over a UI element (or while a UI element holds mouse
     /// capture). The handler receives the button that raises the event.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the button.
     pub fn calendar_left_mouse_button_up(
         &self,
         handler: impl Fn(&CalendarButton, &PointerReleasedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.calendar_left_mouse_button_up.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.calendar_left_mouse_button_up.remove(token);
             }
-        })
+        }))
     }
 }
