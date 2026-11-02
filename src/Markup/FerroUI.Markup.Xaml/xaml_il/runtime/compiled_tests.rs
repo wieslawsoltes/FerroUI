@@ -122,8 +122,11 @@ fn the_parent_stack_is_the_pushed_objects_then_the_parents_of_the_parent() {
     let stack = provider.get_service_of::<Rc<dyn IFerroXamlIlParentStackProvider>>().expect("a parent stack");
     assert_eq!(values(&stack.parents()), [2, 1, 11, 10]);
     let eager: Rc<dyn IFerroXamlIlEagerParentStackProvider> = context.clone();
-    assert_eq!(values(&eager.direct_parents_stack()), [1, 2]);
+    let snapshot = eager.direct_parents_stack();
+    assert!(Rc::ptr_eq(&snapshot, &eager.direct_parents_stack()));
     context.pop_parent();
+    assert_eq!(values(&snapshot), [1, 2]);
+    assert_eq!(values(&eager.direct_parents_stack()), [1]);
     assert_eq!(values(&stack.parents()), [1, 11, 10]);
 }
 

@@ -7,7 +7,7 @@ use super::{
 };
 use crate::object_casts::{as_object, rc_of};
 use crate::{
-    EagerParentStackEnumerator, IRootObjectProvider, IXamlTypeResolver, ServiceProviderExtensions, XamlLoadError,
+    IRootObjectProvider, IXamlTypeResolver, ServiceProviderExtensions, XamlLoadError,
     XamlResourceNode,
 };
 use ferroui_base::controls::{ChildNameScope, IDeferredContent, INameScope, NameScope, NameScopeRef};
@@ -397,9 +397,11 @@ fn name_scope_service(service_type: TypeId, scope: &NameScopeRef) -> Option<Rc<d
 
 /// Parent resource nodes are often the same (e.g. most values in a
 /// resource dictionary), cache the last ones.
+#[derive(Clone)]
 struct LastParentStack {
     parent_stack_provider: Weak<dyn IFerroXamlIlParentStackProvider>,
     resource_nodes: Weak<CapturedResourceNodes>,
+    frames: Rc<[Weak<Vec<BoxedValue>>]>,
 }
 
 impl LastParentStack {
@@ -424,8 +426,74 @@ impl LastParentStack {
     }
 }
 
+/// Temporarily removed from TLS while calling host providers, which may load XAML reentrantly.
+#[derive(Default)]
+struct ParentStackBuffer {
+    nodes: Vec<BoxedValue>,
+    frames: Vec<Weak<Vec<BoxedValue>>>,
+}
+
+impl ParentStackBuffer {
+    fn capture(
+        &mut self,
+        provider: &Rc<dyn IFerroXamlIlParentStackProvider>,
+        last: Option<&LastParentStack>,
+    ) -> Rc<CapturedResourceNodes> {
+        let mut stable = true;
+        let mut same_frames = last.is_some();
+        if let Some(eager) = provider.clone().as_eager_parent_stack_provider() {
+            let mut current = Some(eager);
+            while let Some(provider) = current {
+                let frame = provider.direct_parents_stack();
+                let known = last.and_then(|last| last.frames.get(self.frames.len()))
+                    .is_some_and(|key| key.as_ptr() == Rc::as_ptr(&frame));
+                if known {
+                    self.nodes.extend(frame.iter().rev().cloned());
+                } else {
+                    same_frames = false;
+                    for value in frame.iter().rev() {
+                        if is_resource_node(value) {
+                            // The object in a concrete Ref<T> is fixed. An interface adapter
+                            // or weak element handle in the same box can change its target.
+                            stable &= ValueTypes::class_of(ValueType::of_value(&**value)).is_some();
+                            self.nodes.push(value.clone());
+                        } else {
+                            stable = false;
+                        }
+                    }
+                }
+                self.frames.push(Rc::downgrade(&frame));
+                current = provider.parent_provider();
+            }
+            if let Some(nodes) = last.filter(|last| same_frames && last.frames.len() == self.frames.len())
+                .and_then(|last| last.resource_nodes.upgrade())
+            {
+                return nodes;
+            }
+        } else {
+            stable = false;
+            self.nodes.extend(provider.parents().into_iter().filter(is_resource_node));
+        }
+        // The captured stack lists the immediate parent last.
+        self.nodes.reverse();
+        let resource_nodes = last.and_then(|last| last.is_equivalent_to(provider, &self.nodes))
+            .unwrap_or_else(|| Rc::new(CapturedResourceNodes {
+                nodes: self.nodes.iter().map(WeakValue::new).collect(),
+                alive: RefCell::new(Weak::new()),
+            }));
+        LAST_PARENT_STACK.with(|last| {
+            *last.borrow_mut() = Some(LastParentStack {
+                parent_stack_provider: Rc::downgrade(provider),
+                resource_nodes: Rc::downgrade(&resource_nodes),
+                frames: if stable { self.frames.as_slice().into() } else { Rc::default() },
+            });
+        });
+        resource_nodes
+    }
+}
+
 ferroui_base::ferro_thread_local! {
-    static RESOURCE_NODE_BUFFER: RefCell<Vec<BoxedValue>> = RefCell::new(Vec::with_capacity(8));
+    static PARENT_STACK_BUFFER: RefCell<ParentStackBuffer> = RefCell::default();
     static LAST_PARENT_STACK: RefCell<Option<LastParentStack>> = const { RefCell::new(None) };
     static LAST_APPLICATION_PROVIDER: RefCell<Option<Rc<ApplicationParentStackProvider>>> = const { RefCell::new(None) };
     static EMPTY_PARENT_STACK_PROVIDER: Rc<EmptyParentStackProvider> =
@@ -530,53 +598,13 @@ impl XamlIlRuntimeHelpers {
     }
 
     fn as_resource_nodes_stack(provider: &Rc<dyn IFerroXamlIlParentStackProvider>) -> Rc<CapturedResourceNodes> {
-        let mut buffer = RESOURCE_NODE_BUFFER.with(|buffer| std::mem::take(&mut *buffer.borrow_mut()));
-        buffer.clear();
-
-        match provider.clone().as_eager_parent_stack_provider() {
-            Some(eager_provider) => {
-                let mut enumerator = EagerParentStackEnumerator::new(Some(eager_provider));
-
-                while let Some(parent) = enumerator.try_get_next() {
-                    if is_resource_node(&parent) {
-                        buffer.push(parent);
-                    }
-                }
-            }
-            None => {
-                for item in provider.parents() {
-                    if is_resource_node(&item) {
-                        buffer.push(item);
-                    }
-                }
-            }
-        }
-
-        // The immediate parent should be last in the stack.
-        buffer.reverse();
-
-        let cached = LAST_PARENT_STACK
-            .with(|last| last.borrow().as_ref().and_then(|last| last.is_equivalent_to(provider, &buffer)));
-        let resource_nodes = match cached {
-            Some(resource_nodes) => resource_nodes,
-            None => {
-                let resource_nodes = Rc::new(CapturedResourceNodes {
-                    nodes: buffer.iter().map(WeakValue::new).collect(),
-                    alive: RefCell::new(Weak::new()),
-                });
-                LAST_PARENT_STACK.with(|last| {
-                    *last.borrow_mut() = Some(LastParentStack {
-                        parent_stack_provider: Rc::downgrade(provider),
-                        resource_nodes: Rc::downgrade(&resource_nodes),
-                    })
-                });
-                resource_nodes
-            }
-        };
-
-        buffer.clear();
-        RESOURCE_NODE_BUFFER.with(|slot| *slot.borrow_mut() = buffer);
-        resource_nodes
+        let last = LAST_PARENT_STACK.with(|slot| slot.borrow().clone());
+        let mut buffer = PARENT_STACK_BUFFER.with(RefCell::take);
+        let nodes = buffer.capture(provider, last.as_ref());
+        buffer.frames.clear();
+        buffer.nodes.clear();
+        PARENT_STACK_BUFFER.with(|slot| *slot.borrow_mut() = buffer);
+        nodes
     }
 
     /// The provider as an eager provider: itself if it is one, a wrapper
