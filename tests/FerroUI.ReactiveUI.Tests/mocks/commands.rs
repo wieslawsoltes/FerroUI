@@ -120,7 +120,7 @@ pub fn delay(duration: Duration, token: CancellationToken) -> Task<()> {
     let _ = timer.continue_with(move |_| {
         elapsed.try_set_result(());
     });
-    if token.can_be_canceled() {
+    if token.can_be_cancelled() {
         let canceled = completion.clone();
         let registration = token.register_local(move || {
             canceled.try_set_canceled();
