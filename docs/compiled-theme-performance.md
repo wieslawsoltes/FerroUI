@@ -25,6 +25,20 @@ The native emitter recognizes four deferred operations. They create a static res
 
 Both backends name the required factory directly. The closed-world pass removes unused theme factories before rustc sees them. The framework also registers metadata for runtime XAML and value conversions. Calling the existing framework registration APIs can retain control and dialog implementations independently of whether their theme entry survives. Applications which use open-ended resource lookup should use the full dictionary.
 
+## Generated Rust in the built-in themes
+
+These counts are bytes of the full native output of the model-host compiler. All five theme crates passed `cargo check`. Each row compares the same theme on both revisions.
+
+| Theme | Baseline Rust bytes | Compact Rust bytes | Reduction |
+| --- | ---: | ---: | ---: |
+| WinUI | 14,421,918 | 9,234,385 | 36.0% |
+| macOS | 13,033,763 | 8,320,752 | 36.2% |
+| Fluent | 5,670,771 | 4,242,612 | 25.2% |
+| Simple | 3,219,915 | 3,088,372 | 4.1% |
+| Material | 15,910,704 | 10,353,001 | 34.9% |
+
+WinUI folded 3,598 static aliases, 738 literal brushes, 711 dynamic-color brushes and 338 static-color brushes. The remaining 792 deferred factories use direct typed construction. The FXB build of the same dictionary emitted 456 blocks with 5,385 records. Validating, expanding and dropping all 175,024 encoded bytes took 412 µs median and 530 µs at p95 across 101 passes with the bytes resident in memory.
+
 ## Measuring a consumer
 
 `scripts/themes/bench/measure.py` builds a headless, release-mode consumer through the normal WinUI constructor. It first resolves the Button control theme, which forces an actual deferred lookup. Each startup sample runs in a new process with the executable already in the OS page cache. There is no window system, renderer or first-frame wait in this measurement.
