@@ -683,6 +683,31 @@ pub fn get_type<S: IXamlTypeSystem + ?Sized>(
         .ok_or_else(|| XamlError::type_system_exception(format!("Unable to resolve type {type_}")))
 }
 
+/// Resolve a statically sized group in declaration order. Lookups stop on the first
+/// error. Filling from the back preserves the reverse destruction of initialized
+/// locals if a host returns an error or unwinds during lookup.
+pub fn get_types<const N: usize>(
+    names: [&str; N],
+    mut lookup: impl FnMut(&str) -> XamlResult<Rc<dyn IXamlType>>,
+) -> XamlResult<[Rc<dyn IXamlType>; N]> {
+    let mut slots = [const { None }; N];
+    fill_type_group(&names, &mut slots, &mut lookup)?;
+    slots.reverse();
+    Ok(slots.map(|slot| slot.expect("every type was resolved")))
+}
+
+#[inline(never)]
+fn fill_type_group(
+    names: &[&str],
+    slots: &mut [Option<Rc<dyn IXamlType>>],
+    lookup: &mut dyn FnMut(&str) -> XamlResult<Rc<dyn IXamlType>>,
+) -> XamlResult<()> {
+    for (name, slot) in names.iter().zip(slots.iter_mut().rev()) {
+        *slot = Some(lookup(name)?);
+    }
+    Ok(())
+}
+
 fn params_match(
     actual: &[Rc<dyn IXamlType>],
     wanted: &[Rc<dyn IXamlType>],
@@ -728,6 +753,16 @@ impl dyn IXamlType {
         &self,
         criteria: impl Fn(&dyn IXamlMethod) -> bool,
     ) -> Vec<Rc<dyn IXamlMethod>> {
+        self.find_methods_matching(&criteria)
+    }
+
+    // The hierarchy walk is identical for every caller. Borrow its predicate
+    // for this call so each binding or transformer emits only its criteria.
+    #[inline(never)]
+    fn find_methods_matching(
+        &self,
+        criteria: &dyn Fn(&dyn IXamlMethod) -> bool,
+    ) -> Vec<Rc<dyn IXamlMethod>> {
         let mut rv = Vec::new();
         rv.extend(self.methods().into_iter().filter(|m| criteria(&**m)));
         let mut t = self.base_type();
@@ -755,6 +790,14 @@ impl dyn IXamlType {
     pub fn find_method(
         &self,
         criteria: impl Fn(&dyn IXamlMethod) -> bool,
+    ) -> Option<Rc<dyn IXamlMethod>> {
+        self.find_method_matching(&criteria)
+    }
+
+    #[inline(never)]
+    fn find_method_matching(
+        &self,
+        criteria: &dyn Fn(&dyn IXamlMethod) -> bool,
     ) -> Option<Rc<dyn IXamlMethod>> {
         if let Some(m) = self.methods().into_iter().find(|m| criteria(&**m)) {
             return Some(m);
