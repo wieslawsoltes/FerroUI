@@ -476,7 +476,7 @@ fn string_literal_of(expr: &str) -> Option<&str> {
 
 /// Whether `text` is one Rust string literal (`"..."` with escapes, as `rust_string_literal`
 /// writes it) and nothing else.
-fn is_string_literal(text: &str) -> bool {
+pub(super) fn is_string_literal(text: &str) -> bool {
     let Some(inner) = text.strip_prefix('"').and_then(|rest| rest.strip_suffix('"')) else { return false };
     let mut escaped = false;
     for c in inner.chars() {
@@ -4271,6 +4271,7 @@ pub fn emit_function<'a>(
         source.push('\n');
         source.push_str(part);
     }
+    super::factory_shapes::share(function_name, &mut emitter.deferred_functions);
     for function in emitter.deferred_functions.iter().filter(|function| !function.is_empty()) {
         source.push('\n');
         source.push_str(function);
