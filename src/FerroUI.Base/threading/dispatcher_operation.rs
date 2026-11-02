@@ -64,6 +64,20 @@ impl fmt::Display for OperationCanceledError {
 
 impl std::error::Error for OperationCanceledError {}
 
+/// The one cancellation error of the workspace (docs/idiomatic-rust-async.md, section 3.7).
+impl From<ferroui_system::task::Canceled> for OperationCanceledError {
+    fn from(_: ferroui_system::task::Canceled) -> Self {
+        OperationCanceledError
+    }
+}
+
+/// The one cancellation error of the workspace (docs/idiomatic-rust-async.md, section 3.7).
+impl From<OperationCanceledError> for ferroui_system::task::Canceled {
+    fn from(_: OperationCanceledError) -> Self {
+        ferroui_system::task::Canceled
+    }
+}
+
 #[derive(Default)]
 struct OperationInner {
     callback: Option<SendCallback>,
