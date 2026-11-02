@@ -84,7 +84,7 @@ pub struct TextBox {
     presenter: RefCell<Option<Ref<TextPresenter>>>,
     scroll_viewer: RefCell<Option<Ref<ScrollViewer>>>,
     im_client: Rc<TextBoxTextInputMethodClient>,
-    password_input_privacy: RefCell<Option<Rc<dyn IDisposable>>>,
+    password_input_privacy: RefCell<Option<Subscription>>,
     updating_password_privacy: Cell<bool>,
     undo_redo_helper: UndoRedoHelper<UndoRedoState>,
     /// The handle through which the undo/redo helper reaches this text box.
@@ -1569,10 +1569,10 @@ impl TextBox {
                     ferroui_base::input::text_input::TextInputOptions::is_sensitive_property(),
                     true, BindingPriority::Animation,
                 ).expect("password input privacy requires an owned priority value");
-                *self.password_input_privacy.borrow_mut() = Some(value);
+                *self.password_input_privacy.borrow_mut() = Some(Subscription::new(value));
             } else {
-                let value = self.password_input_privacy.borrow_mut().take();
-                if let Some(value) = value { value.dispose(); }
+                // Taken first: dropping the guard notifies, and a handler may change the mask.
+                drop(self.password_input_privacy.take());
             }
         }
     }
@@ -1753,10 +1753,13 @@ impl TextBox {
 
     /// Observes completed selection operations, independently of focus, read-only
     /// state or presenter creation. Individual endpoint writes remain individual
-    /// operations. Dispose the subscription to stop observing.
-    pub fn selection_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// operations.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the text box.
+    pub fn selection_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         use ferroui_base::input::text_input::TextInputMethodClient;
-        self.im_client.selection_changed(Rc::new(handler))
+        Subscription::new(self.im_client.selection_changed(Rc::new(handler)))
     }
 
     /// Sets the UTF-16 range and caret as one native selection operation. Property

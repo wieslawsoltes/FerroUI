@@ -259,7 +259,7 @@ fn selection_operations_notify_complete_ranges_without_an_active_text_view() {
             field.set_selection_and_caret(TextSelection::new(start, end), caret);
             assert_eq!(observed.borrow().len(), 1);
         }
-        token.dispose();
+        drop(token);
         observed.borrow_mut().clear();
         field.set_caret_index(0);
         assert!(observed.borrow().is_empty());
