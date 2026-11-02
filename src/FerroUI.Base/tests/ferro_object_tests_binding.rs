@@ -986,3 +986,56 @@ fn to_binding_binds_values_of_observable() {
 
     assert_eq!("second", target.get_value(property));
 }
+
+#[test]
+fn boxed_frame_disposes_the_subscription_returned_after_synchronous_completion_or_error() {
+    for fail in [false, true] {
+        let target = Class1::new();
+        let property = Class1::qux_property();
+        let disposed = Counter::new();
+        let changes = Recorder::new();
+        let log = changes.clone();
+        target.property_changed(move |change| log.push(change.get_new_value::<f64>()));
+        let count = disposed.clone();
+        let source = Observable::create(move |observer| {
+            observer.on_next(boxed(12.5));
+            if fail {
+                observer.on_error(Rc::new(std::io::Error::other("source failed")));
+            } else {
+                observer.on_completed();
+            }
+            let count = count.clone();
+            Disposable::create(move || count.increment())
+        });
+
+        let binding = target.bind_property_untyped(property, source, BindingPriority::Style);
+        assert_eq!(changes.get(), vec![12.5, 5.6]);
+        assert_eq!(target.get_value(property), 5.6);
+        assert_eq!(disposed.get(), 1);
+        binding.dispose();
+        assert_eq!(disposed.get(), 1);
+    }
+}
+
+#[test]
+fn boxed_frame_subscribes_when_unmasked_and_restores_default_after_disposal() {
+    let target = Class1::new();
+    let property = Class1::qux_property();
+    let source = Subject::behavior(boxed(8.5));
+    target.set_value(property, 15.0);
+    let binding = target.bind_property_untyped(property, source.observable(), BindingPriority::Style);
+    assert_eq!(source.subscriber_count(), 0);
+
+    target.clear_value(property);
+    assert_eq!(source.subscriber_count(), 1);
+    assert_eq!(target.get_value(property), 8.5);
+    source.on_next(boxed(BindingValue::<f64>::data_validation_error(error("invalid"))));
+    assert_eq!(target.get_value(property), 8.5);
+    source.on_next(boxed(BindingValue::<f64>::binding_error_with_fallback(error("fallback"), Some(9.5))));
+    assert_eq!(target.get_value(property), 9.5);
+
+    binding.dispose();
+    assert_eq!(source.subscriber_count(), 0);
+    source.on_next(boxed(21.0));
+    assert_eq!(target.get_value(property), 5.6);
+}
