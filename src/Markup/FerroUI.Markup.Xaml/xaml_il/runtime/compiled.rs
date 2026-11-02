@@ -474,9 +474,8 @@ pub fn add_deferred_resource(
     line: i32,
     position: i32,
 ) -> Result<(), XamlLoadError> {
-    use ferroui_base::controls::{IDeferredContent, ResourceDictionary};
     let deferred = defer(result_type, context, build, line, position)?;
-    invoked(ResourceDictionary::__markup_AddDeferred_1(dictionary, string_object(key), deferred as Rc<dyn IDeferredContent>), line, position)
+    invoked(dictionary.try_add_deferred(key.into(), deferred), line, position)
 }
 
 /// `target.SetValue(property, FerroProperty.UnsetValue, BindingPriority.LocalValue)`:

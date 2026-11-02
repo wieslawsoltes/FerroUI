@@ -3,7 +3,7 @@
 
 use std::rc::Rc;
 
-use ferroui_base::controls::{IDeferredContent, ResourceDictionary, ResourceKey};
+use ferroui_base::controls::{ResourceDictionary, ResourceKey};
 use ferroui_base::data::core::ValueType;
 use ferroui_base::media::{Color, SolidColorBrush};
 use ferroui_base::metadata::{IServiceProvider, MarkupValue};
@@ -29,23 +29,7 @@ fn register(
         line,
         column,
     )?;
-    let resource_key = ResourceKey::from(key);
-    if !dictionary.contains_key(&resource_key) {
-        // The compiler proved this operand is a string. Insert its final key directly,
-        // bypassing the intermediate String, BoxedValue and dynamic key conversion.
-        dictionary.add_deferred(resource_key, deferred);
-        return Ok(());
-    }
-    // Preserve the markup member's exact duplicate-key failure and source position.
-    invoked(
-        ResourceDictionary::__markup_AddDeferred_1(
-            dictionary,
-            string_object(key),
-            deferred as Rc<dyn IDeferredContent>,
-        ),
-        line,
-        column,
-    )
+    invoked(dictionary.try_add_deferred(ResourceKey::from(key), deferred), line, column)
 }
 
 /// Registers a deferred StaticResource lookup against its declaration's namespace table.
@@ -204,6 +188,10 @@ pub(super) fn add_constant(
     value: MarkupValue, line: i32, column: i32,
 ) -> Result<(), XamlLoadError> {
     use ferroui_base::controls::IResourceDictionary;
+    // A derived dictionary can supply its own interface implementation.
+    if std::ptr::eq(dictionary.get_type(), ResourceDictionary::TYPE) {
+        return invoked(dictionary.try_add(ResourceKey::from(key), value), line, column);
+    }
     invoked(<dyn IResourceDictionary>::__markup_Add_0(
         &super::cast(dictionary.clone(), line, column)?, string_object(key), value,
     ), line, column)
