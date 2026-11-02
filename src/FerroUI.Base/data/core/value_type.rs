@@ -2058,6 +2058,30 @@ mod tests {
 
     ferro_markup_enum!(NamedMode { First, Second }, { namespace: "Tests.Display" });
 
+    #[test]
+    fn borrowed_and_boxed_casts_share_the_callback_and_allow_reentrant_lookup() {
+        #[derive(PartialEq)]
+        struct Source(i32);
+        #[derive(Clone, Debug, PartialEq)]
+        struct Target(i32);
+
+        let calls = std::cell::Cell::new(0);
+        ValueTypes::register_cast::<Source, Target>(move |source| {
+            assert!(ValueTypes::is_assignable(ValueType::of::<Source>(), ValueType::of::<Target>()));
+            calls.set(calls.get() + 1);
+            Target(source.0 + calls.get())
+        });
+        let value: BoxedValue = Rc::new(Source(10));
+        let target = ValueType::of::<Target>();
+        let cast = ValueTypes::try_cast(&value, target).unwrap();
+        assert_eq!(cast.downcast_ref::<Target>(), Some(&Target(11)));
+        let borrowed = ValueTypes::try_convert_for_property(value.as_any(), target.id()).unwrap();
+        assert_eq!(borrowed.downcast_ref::<Target>(), Some(&Target(12)));
+        let converted = ValueTypes::try_convert_registered(&value, target).unwrap();
+        assert_eq!(converted.downcast_ref::<Target>(), Some(&Target(13)));
+        assert_eq!(crate::metadata::from_markup_value::<Target>(&Some(value)), Some(Target(14)));
+    }
+
     struct Unknown;
 
     impl PartialEq for Unknown {
