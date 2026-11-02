@@ -90,12 +90,17 @@ pub fn source_root(manifest_dir: &Path, stated: Option<&Path>) -> Result<PathBuf
 /// changed nothing does not make the compiler, or the build script of a dependent crate,
 /// run again. Whether the file was written.
 pub fn write_if_changed(path: &Path, text: &str) -> Result<bool, String> {
-    if fs::read_to_string(path).ok().as_deref() == Some(text) {
+    write_bytes_if_changed(path, text.as_bytes())
+}
+
+/// Write binary compiler output, creating its directory on first build.
+pub fn write_bytes_if_changed(path: &Path, bytes: &[u8]) -> Result<bool, String> {
+    if fs::read(path).ok().as_deref() == Some(bytes) {
         return Ok(false);
     }
     let written = match path.parent() {
-        Some(directory) => fs::create_dir_all(directory).and_then(|()| fs::write(path, text)),
-        None => fs::write(path, text),
+        Some(directory) => fs::create_dir_all(directory).and_then(|()| fs::write(path, bytes)),
+        None => fs::write(path, bytes),
     };
     written.map(|()| true).map_err(|error| format!("{}: {error}", path.display()))
 }

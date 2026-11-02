@@ -114,17 +114,25 @@ pub mod reload {
         /// Scope this candidate to one reconstruction; nesting and unwinding restore the
         /// previous snapshot without leaving a stale thread-local pointer.
         pub fn run<T>(self: &Rc<Self>, build: impl FnOnce() -> T) -> T {
-            struct Restore(Option<Rc<Snapshot>>);
-            impl Drop for Restore {
-                fn drop(&mut self) {
-                    ACTIVE.with(|slot| {
-                        slot.replace(self.0.take());
-                    });
-                }
-            }
-            let _guard = Restore(ACTIVE.with(|slot| slot.replace(Some(self.clone()))));
-            build()
+            with_snapshot(Some(self.clone()), build)
         }
+    }
+
+    pub(crate) fn capture() -> Option<Rc<Snapshot>> {
+        ACTIVE.with(|slot| slot.borrow().clone())
+    }
+
+    pub(crate) fn with_snapshot<T>(snapshot: Option<Rc<Snapshot>>, build: impl FnOnce() -> T) -> T {
+        struct Restore(Option<Rc<Snapshot>>);
+        impl Drop for Restore {
+            fn drop(&mut self) {
+                ACTIVE.with(|slot| {
+                    slot.replace(self.0.take());
+                });
+            }
+        }
+        let _guard = Restore(ACTIVE.with(|slot| slot.replace(snapshot)));
+        build()
     }
 
     pub(super) fn get(id: &str) -> Option<Rc<Batch>> {
@@ -163,6 +171,30 @@ mod tests {
             .is_err());
         assert!(candidate.replace(BLOCK.id, Kind::Alias, BLUE).is_err());
         let candidate = Rc::new(candidate);
+        // A deferred template can contain another compiled dictionary. Its body must
+        // observe the declaration's candidate even when realized under a different one.
+        use crate::test_support::TestServiceProvider;
+        use crate::xaml_il::runtime::{DeferredContentBuilder, XamlIlRuntimeHelpers};
+        use ferroui_base::data::core::ValueType;
+        let declare = || {
+            XamlIlRuntimeHelpers::deferred_transformation_factory_for(
+                ValueType::object(),
+                DeferredContentBuilder::new(|_| Some(Rc::new(color()))),
+                &TestServiceProvider::new().with_parents(vec![]).with_root(None).sp(),
+            )
+        };
+        let original = declare();
+        let edited = candidate.run(declare);
+        let resolved = |value: &Rc<crate::xaml_il::runtime::DeferredContent>| {
+            *value
+                .build_with(None)
+                .result
+                .unwrap()
+                .downcast_ref::<u32>()
+                .unwrap()
+        };
+        assert_eq!(resolved(&edited), 0xff00ff00);
+        candidate.run(|| assert_eq!(resolved(&original), 0xff0000ff));
         candidate.run(|| {
             assert_eq!(color(), 0xff00ff00);
             Rc::new(reload::Snapshot::default()).run(|| assert_eq!(color(), 0xff0000ff));

@@ -115,6 +115,8 @@ pub struct DeferredContent {
     parent_resource_nodes: Rc<CapturedResourceNodes>,
     builder: DeferredContentBuilder,
     result_type: ValueType,
+    #[cfg(all(feature = "binary-resources", feature = "hot-reload", debug_assertions))]
+    binary_snapshot: Option<Rc<super::compiled::binary_resources::reload::Snapshot>>,
     #[cfg(feature = "source-overlays")]
     source_snapshot: Option<crate::source_overlay::SourceSnapshot>,
     #[cfg(all(feature = "hot-reload", debug_assertions))]
@@ -163,6 +165,8 @@ impl DeferredContent {
             parent_resource_nodes,
             builder,
             result_type,
+            #[cfg(all(feature = "binary-resources", feature = "hot-reload", debug_assertions))]
+            binary_snapshot: super::compiled::binary_resources::reload::capture(),
             #[cfg(feature = "source-overlays")]
             source_snapshot: crate::source_overlay::capture_snapshot(),
             #[cfg(all(feature = "hot-reload", debug_assertions))]
@@ -234,6 +238,8 @@ impl DeferredContent {
             self.event_context.clone(),
         );
         let invoke = || self.builder.invoke(&provider);
+        #[cfg(all(feature = "binary-resources", feature = "hot-reload", debug_assertions))]
+        let invoke = || super::compiled::binary_resources::reload::with_snapshot(self.binary_snapshot.clone(), invoke);
         #[cfg(feature = "source-overlays")]
         let obj = if let Some(snapshot) = &self.source_snapshot { snapshot.run(invoke) } else { invoke() }?;
         #[cfg(not(feature = "source-overlays"))]
