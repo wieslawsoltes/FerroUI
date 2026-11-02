@@ -43,17 +43,29 @@ impl Entry {
     }
 }
 
+/// Space occupied by the built-in commands, tray, margins and separators,
+/// measured in the same logical pixels as the containing panel. A centered
+/// Windows taskbar needs to leave tray-sized space on both sides.
+fn slot_capacity(layout: Layout, width: f64) -> usize {
+    let (fixed, pitch) = match layout {
+        Layout::Taskbar if width >= 900.0 => (590.0, 45.0),
+        Layout::Taskbar => (325.0, 45.0),
+        Layout::MenuBarDock => (192.0, 51.0),
+        Layout::BottomNavigation => (170.0, 52.0),
+    };
+    (((width - fixed) / pitch) as usize).min(7)
+}
+
 fn entries(
     catalog: &ApplicationCatalog,
     pins: &[String],
     model: &Snapshot,
-    pin_limit: usize,
-    extra_limit: usize,
+    slots: usize,
 ) -> Vec<Entry> {
     let mut items: Vec<_> = pins
         .iter()
         .filter_map(|id| catalog.index_of(id))
-        .take(pin_limit)
+        .take(slots.min(4))
         .map(|app| Entry {
             app: Some(app),
             native_id: String::new(),
@@ -61,7 +73,7 @@ fn entries(
             windows: Vec::new(),
         })
         .collect();
-    let limit = items.len() + extra_limit;
+    let limit = slots.min(items.len() + 3);
     for w in model
         .windows
         .iter()
@@ -104,20 +116,12 @@ pub(super) fn strip(shell: &Rc<Shell>, layout: Layout) -> Element {
     let display = shell.metrics();
     let catalog = shell.catalog.clone();
     let shell = shell.clone();
-    for_each(
-        move || {
-            pins.with(|pins| {
-                model.with(|s| {
-                    entries(
-                        &catalog,
-                        pins,
-                        s,
-                        display.pins.get(),
-                        if display.width.get() >= 760.0 { 3 } else { 0 },
-                    )
-                })
-            })
-        },
+    let capacity = memo(move |_| slot_capacity(layout, display.width.get()));
+    let items = memo(move |_| {
+        pins.with(|pins| model.with(|model| entries(&catalog, pins, model, capacity.get())))
+    });
+    let buttons = for_each(
+        move || items.get(),
         Entry::key,
         move |item| {
             let running = !item.windows.is_empty();
@@ -183,5 +187,39 @@ pub(super) fn strip(shell: &Rc<Shell>, layout: Layout) -> Element {
                     ),
                 )
         },
-    )
+    );
+    if layout == Layout::MenuBarDock {
+        row(7.0)
+            .child(
+                border()
+                    .width(1)
+                    .height(31)
+                    .background(colors().bar_edge)
+                    .is_visible(move || items.with(|items| !items.is_empty())),
+            )
+            .child(buttons)
+            .into()
+    } else {
+        buttons
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn panel_capacity_respects_chrome_and_retains_small_screen_pins() {
+        assert_eq!(slot_capacity(Layout::Taskbar, 320.0), 0);
+        assert_eq!(slot_capacity(Layout::MenuBarDock, 320.0), 2);
+        assert_eq!(slot_capacity(Layout::BottomNavigation, 375.0), 3);
+        for layout in [
+            Layout::Taskbar,
+            Layout::MenuBarDock,
+            Layout::BottomNavigation,
+        ] {
+            assert_eq!(slot_capacity(layout, 0.0), 0);
+            assert_eq!(slot_capacity(layout, 1440.0), 7);
+        }
+    }
 }

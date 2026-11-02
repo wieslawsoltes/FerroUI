@@ -408,9 +408,6 @@ fn menubar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
 }
 
 fn dock(state: &Rc<Shell>) -> Element {
-    let metrics = state.metrics();
-    let snapshot = state.snapshot;
-    let pins = state.favorites;
     let dock_tile = |scene, title: &'static str, icon, fill: &'static str| {
         command(state, scene, title)
             .width(45.0)
@@ -448,21 +445,6 @@ fn dock(state: &Rc<Shell>) -> Element {
                     Icon::Appearance,
                     colors().dock_tiles[2],
                 ))
-                .child(
-                    border()
-                        .width(1)
-                        .height(31)
-                        .background(colors().bar_edge)
-                        .is_visible(move || {
-                            (metrics.pins.get() > 0 && pins.with(|p| !p.is_empty()))
-                                || (metrics.width.get() >= 760.0
-                                    && snapshot.with(|s| {
-                                        s.windows.iter().any(|w| {
-                                            w.workspace.is_none_or(|i| i == s.current_workspace)
-                                        })
-                                    }))
-                        }),
-                )
                 .child(apps::strip(state, Layout::MenuBarDock)),
         )
         .into()

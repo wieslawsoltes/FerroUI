@@ -67,7 +67,6 @@ impl Surface {
             provide_context(shell.appearance);
             let metrics = OutputMetrics {
                 width: signal(f64::from(width)),
-                pins: signal(pin_capacity(f64::from(width))),
             };
             provide_context(metrics);
             let state = Rc::downgrade(shell);
@@ -76,7 +75,6 @@ impl Surface {
                 .on_size_changed(move |e| {
                     let width = e.new_size().width;
                     metrics.width.set_if_changed(width);
-                    metrics.pins.set_if_changed(pin_capacity(width));
                 })
                 .with(move |grid| {
                     let name = name.clone();
@@ -118,16 +116,6 @@ impl Surface {
             self.config = config;
         }
         Ok(())
-    }
-}
-
-fn pin_capacity(width: f64) -> usize {
-    if width >= 1024.0 {
-        4
-    } else if width >= 800.0 {
-        2
-    } else {
-        0
     }
 }
 

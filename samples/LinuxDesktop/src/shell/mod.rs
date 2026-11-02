@@ -42,7 +42,6 @@ struct Shell {
     themes: Rc<ThemeController>,
     favorites: Signal<Vec<String>>,
     pin_editing: Signal<bool>,
-    pin_limit: Signal<usize>,
     viewport_width: Signal<f64>,
     notifications: notifications::Notifications,
     settings: quick_settings::Settings,
@@ -66,14 +65,12 @@ struct Shell {
 #[derive(Clone, Copy)]
 struct OutputMetrics {
     width: Signal<f64>,
-    pins: Signal<usize>,
 }
 
 impl Shell {
     fn metrics(&self) -> OutputMetrics {
         ferroui_view::use_context::<OutputMetrics>().unwrap_or(OutputMetrics {
             width: self.viewport_width,
-            pins: self.pin_limit,
         })
     }
 
@@ -291,13 +288,11 @@ fn create(
     if !initial_status.is_empty() {
         eprintln!("{initial_status}");
     }
-    let pin_limit = signal(4);
     let viewport_width = signal(1280.0);
     let state = Rc::new(Shell {
         scene: signal(initial),
         favorites: signal(favorites.unwrap_or_default()),
         pin_editing: signal(false),
-        pin_limit,
         viewport_width,
         notifications: notifications::Notifications::new(managed),
         settings: quick_settings::Settings::new(),
@@ -571,7 +566,6 @@ fn composed_shortcut(shell: &Rc<Shell>, event: &ferroui_base::input::KeyEventArg
 fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
     let appearance = state.appearance;
     let viewport_width = state.viewport_width;
-    let pin_limit = state.pin_limit;
     let current = state.scene;
     let compositor = state.session.as_ref().and_then(|s| s.compositor()).cloned();
     let composed = compositor.is_some();
@@ -598,13 +592,6 @@ fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
                 manager.resize(width.round() as i32, event.new_size().height.round() as i32);
             }
             viewport_width.set_if_changed(width);
-            pin_limit.set_if_changed(if width >= 1024.0 {
-                4
-            } else if width >= 800.0 {
-                2
-            } else {
-                0
-            });
         })
         .clip_to_bounds(true)
         .with({
