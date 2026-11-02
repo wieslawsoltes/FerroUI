@@ -6,11 +6,11 @@
 use crate::dbus_helper::DBusHelper;
 use crate::dbus_menu_exporter::{DBusMenuExporter, DBusMenuExporterImpl};
 use crate::event::Event;
-use crate::signal_watch::CancellationFlag;
+use crate::signal_watch::run_until_cancelled;
 use crate::ui_thread_object::UiThreadHandle;
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{CancellationToken, Dispatcher};
 use ferroui_controls::platform::{INativeMenuExporter, ITrayIconImpl, IWindowIconImpl};
 use futures_util::future::{LocalBoxFuture, Shared};
 use futures_util::{FutureExt, StreamExt};
@@ -55,7 +55,7 @@ type NameTask = Shared<LocalBoxFuture<'static, Result<(), String>>>;
 
 pub struct DBusTrayIconImpl {
     connection: Option<Connection>,
-    watch_cts: RefCell<Option<CancellationFlag>>,
+    watch_cts: RefCell<Option<CancellationToken>>,
     status_notifier_item_dbus_obj: Option<Rc<StatusNotifierItemDbusObj>>,
     /// Whether the proxy of the watcher exists (`_statusNotifierWatcher`
     /// is not null); the proxy itself is made where it is called.
@@ -170,7 +170,7 @@ impl DBusTrayIconImpl {
         let Some(connection) = self.connection.clone() else {
             return;
         };
-        let watch_cts = CancellationFlag::new();
+        let watch_cts = CancellationToken::new();
         *self.watch_cts.borrow_mut() = Some(watch_cts.clone());
         let this = self.this.clone();
         drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
@@ -190,8 +190,8 @@ impl DBusTrayIconImpl {
                     Err(e) => return Err(zbus::Error::from(e)),
                 };
                 on_owner_changed(owner);
-                while !watch_cts.is_cancellation_requested() {
-                    let Some(Some(signal)) = watch_cts.run(changes.next()).await else {
+                while !watch_cts.is_cancelled() {
+                    let Some(Some(signal)) = run_until_cancelled(&watch_cts, changes.next()).await else {
                         break;
                     };
                     let args = signal.args()?;
@@ -200,7 +200,7 @@ impl DBusTrayIconImpl {
                 Ok::<(), zbus::Error>(())
             };
 
-            if let Some(Err(e)) = watch_cts.run(watch).await {
+            if let Some(Err(e)) = run_until_cancelled(&watch_cts, watch).await {
                 let disposed = this.upgrade().is_none_or(|this| this.is_disposed.get());
                 if !disposed {
                     log_error(&format!("Interface 'org.kde.StatusNotifierWatcher' is unavailable.\n{e}"));
@@ -426,7 +426,8 @@ impl IDisposable for DBusTrayIconImpl {
         if let Some(menu_exporter) = &self.menu_exporter {
             menu_exporter.dispose();
         }
-        if let Some(watch_cts) = &*self.watch_cts.borrow() {
+        let watch_cts = self.watch_cts.borrow().clone();
+        if let Some(watch_cts) = watch_cts {
             watch_cts.cancel();
         }
         if let Some(item) = &self.status_notifier_item_dbus_obj {

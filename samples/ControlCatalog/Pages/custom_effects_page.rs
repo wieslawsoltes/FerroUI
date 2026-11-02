@@ -1,5 +1,5 @@
-//! The page "Custom effects" of the section "Composition" of the catalog (#455, E2 and E4; not
-//! from upstream; `docs/porting/custom-effects.md`): the custom effects FerroUI ships
+//! The page "Custom effects" of the section "Composition" of the catalog (#455, E2 to E4; not from
+//! upstream; `docs/porting/custom-effects.md`): the custom effects FerroUI ships
 //! (`ferroui_base::media::effects::library`), each set as `Visual.Effect` on the same sample
 //! content, with a slider for each of its numbers and the effect string markup writes for it.
 //! The colour effects and the glow are effect graphs, pixelate, scan lines and spotlight runtime
@@ -9,8 +9,8 @@
 use super::winui_composition_page::{brush, section, text};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
 use ferroui_base::media::effects::library::{
-    BrightnessContrastEffect, GlowEffect, GrayscaleEffect, InvertEffect, PixelateEffect, SaturationEffect,
-    ScanlineShaderEffect, SepiaEffect, SpotlightShaderEffect, TintEffect,
+    BrightnessContrastEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect, InvertEffect, PixelateEffect,
+    SaturationEffect, ScanlineShaderEffect, SepiaEffect, SharpenEffect, SpotlightShaderEffect, TintEffect,
 };
 use ferroui_base::media::effects::{CustomEffect, EffectParameterValue, ImmutableCustomEffect};
 use ferroui_base::media::{Color, FontWeight};
@@ -141,6 +141,8 @@ pub(super) fn custom_effects_section() -> Ref<StackPanel> {
     ));
     tiles.children().add(effect_tile(InvertEffect::default(), &[("amount", 0.0, 1.0)]));
     tiles.children().add(effect_tile(GlowEffect::default(), &[("blur-radius", 0.0, 24.0), ("intensity", 0.0, 1.0)]));
+    tiles.children().add(effect_tile(SharpenEffect::default(), &[("strength", 0.0, 2.0)]));
+    tiles.children().add(effect_tile(EdgeDetectEffect::default(), &[("strength", 0.0, 2.0)]));
     tiles.children().add(effect_tile(
         PixelateEffect { cell_size: 6.0 },
         &[("cell-size", 0.0, PixelateEffect::MAXIMUM_CELL_SIZE)],
@@ -155,7 +157,7 @@ pub(super) fn custom_effects_section() -> Ref<StackPanel> {
     ));
     section(
         "Custom effects",
-        "Effects defined outside the framework as values of CustomEffect, set as Visual.Effect from code or markup (Effect=\"tint(color=#0F9D8E, strength=0.55)\"). The colour effects and the glow describe themselves as effect graphs: colour matrices and a drop shadow drawn by the backend on the GPU. Pixelate, scan lines and spotlight are runtime shaders: an SkSL program Skia compiles once and draws around the content on the GPU (Vello draws them from a WGSL program in a later step). A slider changes only the values of the members or the uniforms.",
+        "Effects defined outside the framework as values of CustomEffect, set as Visual.Effect from code or markup (Effect=\"tint(color=#0F9D8E, strength=0.55)\"). The colour effects, the glow, sharpen and edge detect describe themselves as effect graphs: colour matrices, convolutions and a drop shadow drawn by the backend on the GPU. Pixelate, scan lines and spotlight are runtime shaders: an SkSL program Skia compiles once and draws around the content on the GPU (Vello draws them from a WGSL program in a later step). A slider changes only the values of the members or the uniforms.",
         &tiles.upcast(),
     )
 }

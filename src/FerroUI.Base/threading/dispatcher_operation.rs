@@ -13,9 +13,10 @@ use std::time::Duration;
 use super::dispatcher::DispatcherLocal;
 use super::dispatcher_priority_queue::NOT_QUEUED;
 use super::{
-    CancellationTokenSource, Dispatcher, DispatcherFrame, DispatcherPriority, DispatcherTimer,
+    CancellationToken, Dispatcher, DispatcherFrame, DispatcherPriority, DispatcherTimer,
     FerroSynchronizationContext,
 };
+use ferroui_system::task::Canceled;
 use crate::reactive::{Disposable, IDisposable};
 
 /// The payload of a panic raised by a dispatcher callback. This is what the
@@ -53,18 +54,26 @@ impl DispatcherOperationStatus {
 }
 
 /// The error produced when the result of an aborted operation is requested.
+///
+/// The operations give [`Canceled`] (`ferroui_system::task::Canceled`, re-exported as
+/// `threading::Canceled`), the one cancellation error of the workspace
+/// (docs/idiomatic-rust-async.md, section 3.7); this type converts to and from it.
+#[deprecated(since = "0.5.0", note = "use `ferroui_system::task::Canceled` (`threading::Canceled`)")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct OperationCanceledError;
 
+#[allow(deprecated)]
 impl fmt::Display for OperationCanceledError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("The dispatcher operation was canceled")
     }
 }
 
+#[allow(deprecated)]
 impl std::error::Error for OperationCanceledError {}
 
 /// The one cancellation error of the workspace (docs/idiomatic-rust-async.md, section 3.7).
+#[allow(deprecated)]
 impl From<ferroui_system::task::Canceled> for OperationCanceledError {
     fn from(_: ferroui_system::task::Canceled) -> Self {
         OperationCanceledError
@@ -72,6 +81,7 @@ impl From<ferroui_system::task::Canceled> for OperationCanceledError {
 }
 
 /// The one cancellation error of the workspace (docs/idiomatic-rust-async.md, section 3.7).
+#[allow(deprecated)]
 impl From<OperationCanceledError> for ferroui_system::task::Canceled {
     fn from(_: OperationCanceledError) -> Self {
         ferroui_system::task::Canceled
@@ -455,7 +465,7 @@ impl OperationCore {
             }
 
             let deadline = timeout.map(|timeout| dispatcher.now().saturating_add(duration_to_ms(timeout)));
-            let cts = CancellationTokenSource::new();
+            let cts = CancellationToken::new();
             let cancel = cts.clone();
             let finished_handler: EventHandler = Arc::new(move || cancel.cancel());
             let completed = self.add_completed(finished_handler.clone());
@@ -475,15 +485,12 @@ impl OperationCore {
                     };
                     if dispatcher.supports_run_loops() {
                         if self.priority() >= DispatcherPriority::MINIMUM_FOREGROUND_PRIORITY {
-                            dispatcher.run_jobs_with_cancellation(Some(self.priority()), &cts.token());
+                            dispatcher.run_jobs_with_cancellation(Some(self.priority()), &cts);
                         } else {
                             self.push_operation_frame(remaining);
                         }
                     } else {
-                        dispatcher.run_jobs_with_cancellation(
-                            Some(DispatcherPriority::MINIMUM_ACTIVE_VALUE),
-                            &cts.token(),
-                        );
+                        dispatcher.run_jobs_with_cancellation(Some(DispatcherPriority::MINIMUM_ACTIVE_VALUE), &cts);
                     }
                 }
             }));
@@ -593,10 +600,10 @@ impl OperationCore {
 
     /// Takes the outcome of a finished operation: re-raises the callback's
     /// panic, or returns the boxed result.
-    fn take_outcome<R: 'static>(&self) -> Result<R, OperationCanceledError> {
+    fn take_outcome<R: 'static>(&self) -> Result<R, Canceled> {
         debug_assert!(self.is_finished());
         if self.status() == DispatcherOperationStatus::Aborted {
-            return Err(OperationCanceledError);
+            return Err(Canceled);
         }
 
         let (panic, result) = {
@@ -638,7 +645,7 @@ impl Drop for OperationCore {
 ///
 /// The handle can be cloned and sent to other threads. It is also a
 /// [`Future`] that resolves when the operation has completed
-/// (`Ok(result)`) or has been aborted (`Err(OperationCanceledError)`).
+/// (`Ok(result)`) or has been aborted (`Err(Canceled)`).
 ///
 /// A panic raised by the callback is the equivalent of an exception in the
 /// reference implementation: it is captured when the callback runs and
@@ -748,10 +755,10 @@ impl<R: 'static> DispatcherOperation<R> {
     /// # Panics
     /// Re-raises the panic of the callback. Panics when called on the
     /// dispatcher thread for the operation that is currently executing.
-    pub fn wait(&self) -> Result<(), OperationCanceledError> {
+    pub fn wait(&self) -> Result<(), Canceled> {
         self.core.wait();
         if self.core.status() == DispatcherOperationStatus::Aborted {
-            return Err(OperationCanceledError);
+            return Err(Canceled);
         }
         let panic = self.core.lock().panic.take();
         if let Some(payload) = panic {
@@ -775,7 +782,7 @@ impl<R: 'static> DispatcherOperation<R> {
     /// # Panics
     /// Re-raises the panic of the callback. Panics when called on the
     /// dispatcher thread for the operation that is currently executing.
-    pub fn wait_with_timeout(&self, timeout: Duration) -> Result<bool, OperationCanceledError> {
+    pub fn wait_with_timeout(&self, timeout: Duration) -> Result<bool, Canceled> {
         if self.core.wait_with_limit(Some(timeout), false) == WaitOutcome::TimedOut {
             return Ok(false);
         }
@@ -792,7 +799,7 @@ impl<R: 'static> DispatcherOperation<R> {
     /// finished and the calling thread is the dispatcher thread, when the
     /// result has already been taken, and when the result of a local
     /// operation is requested from another thread.
-    pub fn result(&self) -> Result<R, OperationCanceledError> {
+    pub fn result(&self) -> Result<R, Canceled> {
         if !self.core.is_finished() {
             if self.core.dispatcher.check_access() {
                 panic!("Synchronous wait is only supported on non-UI threads");
@@ -803,13 +810,13 @@ impl<R: 'static> DispatcherOperation<R> {
     }
 
     /// Takes the result of a finished operation.
-    pub(crate) fn take_result(&self) -> Result<R, OperationCanceledError> {
+    pub(crate) fn take_result(&self) -> Result<R, Canceled> {
         self.core.take_outcome()
     }
 }
 
 impl<R: 'static> Future for DispatcherOperation<R> {
-    type Output = Result<R, OperationCanceledError>;
+    type Output = Result<R, Canceled>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         {

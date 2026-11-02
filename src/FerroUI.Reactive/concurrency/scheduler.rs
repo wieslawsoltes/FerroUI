@@ -163,7 +163,7 @@ pub trait SchedulerExt {
     /// The body receives a scheduler and a token. It runs on the scheduler, as a task of the thread,
     /// until its first await; awaiting [`yield_`](Self::yield_) or [`sleep`](Self::sleep) of the
     /// scheduler it received resumes it there. Disposing the result cancels the token, which ends a
-    /// pending `yield_` or `sleep` with a `TaskCanceledError`, and disposes the disposable the body
+    /// pending `yield_` or `sleep` with a cancellation (`Canceled`), and disposes the disposable the body
     /// ended with (its future's output: `()`, or an `Rc<dyn IDisposable>`).
     fn schedule_async<R: ScheduleAsyncResult, Fut: Future<Output = Result<R, ObservableError>> + 'static>(
         &self,
@@ -222,8 +222,8 @@ pub trait SchedulerExt {
     /// [`schedule_async`](Self::schedule_async) body, the token of the body cancels it.
     fn yield_(&self) -> SchedulerOperation;
 
-    /// [`yield_`](Self::yield_) that the cancellation of `token` ends with a `TaskCanceledError`
-    /// (`Yield(IScheduler, CancellationToken)`).
+    /// [`yield_`](Self::yield_) that the cancellation of `token` ends with a cancellation
+    /// (`Canceled`; `Yield(IScheduler, CancellationToken)`).
     fn yield_with_token(&self, token: CancellationToken) -> SchedulerOperation;
 
     /// An operation whose await runs the rest of the work on the scheduler after `due_time`
@@ -231,8 +231,8 @@ pub trait SchedulerExt {
     /// [`schedule_async`](Self::schedule_async) body, the token of the body cancels it.
     fn sleep(&self, due_time: Duration) -> SchedulerOperation;
 
-    /// [`sleep`](Self::sleep) that the cancellation of `token` ends with a `TaskCanceledError`
-    /// (`Sleep(IScheduler, TimeSpan, CancellationToken)`).
+    /// [`sleep`](Self::sleep) that the cancellation of `token` ends with a cancellation
+    /// (`Canceled`; `Sleep(IScheduler, TimeSpan, CancellationToken)`).
     fn sleep_with_token(&self, due_time: Duration, token: CancellationToken) -> SchedulerOperation;
 
     /// An operation whose await runs the rest of the work on the scheduler at `due_time`
@@ -240,8 +240,8 @@ pub trait SchedulerExt {
     /// [`schedule_async`](Self::schedule_async) body, the token of the body cancels it.
     fn sleep_at(&self, due_time: SystemTime) -> SchedulerOperation;
 
-    /// [`sleep_at`](Self::sleep_at) that the cancellation of `token` ends with a
-    /// `TaskCanceledError` (`Sleep(IScheduler, DateTimeOffset, CancellationToken)`).
+    /// [`sleep_at`](Self::sleep_at) that the cancellation of `token` ends with a cancellation
+    /// (`Canceled`; `Sleep(IScheduler, DateTimeOffset, CancellationToken)`).
     fn sleep_at_with_token(&self, due_time: SystemTime, token: CancellationToken) -> SchedulerOperation;
 }
 

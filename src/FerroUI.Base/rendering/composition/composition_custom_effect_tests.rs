@@ -1,4 +1,4 @@
-//! Tests of custom effects on `Visual.Effect` (#455, E1, E2 and E4; not from
+//! Tests of custom effects on `Visual.Effect` (#455, E1 to E4; not from
 //! upstream): the snapshot of a custom effect, or of a custom effect class,
 //! crosses the batch stream to the server visual as a value; the render walk
 //! pushes an effect without a graph around the content, which a drawing
@@ -10,7 +10,8 @@
 
 use super::{CompositorCanvas, TestBorder};
 use crate::media::effects::library::{
-    BrightnessContrastEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect, SepiaEffect, TintEffect,
+    BrightnessContrastEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect,
+    SepiaEffect, SharpenEffect, TintEffect,
 };
 use crate::media::effects::{
     CustomEffect, CustomEffectClass, Effect, EffectExtensions, EffectParameterValue, IEffect, ImmutableCustomEffect,
@@ -246,6 +247,38 @@ fn the_colour_effects_of_the_library_are_drawn_as_their_graphs() {
     assert_drawn_as_matrix(ImmutableCustomEffect::new(contrast.clone()), &contrast.matrix());
     let invert = InvertEffect { amount: 0.8 };
     assert_drawn_as_matrix(ImmutableCustomEffect::new(invert.clone()), &invert.matrix());
+}
+
+/// Sets `effect` on the child and renders it; asserts that a convolution
+/// layer with `kernel` wraps the content and that nothing else changed.
+fn assert_drawn_as_convolution(effect: ImmutableCustomEffect, kernel: &[f32]) {
+    let s = CompositorCanvas::new();
+    let child = TestBorder::filled(10.0, 10.0, 40.0, 30.0);
+    s.canvas.add(&child);
+    s.run_jobs();
+    let plain = render_layers(&s, &child);
+
+    child.set_effect(Some(effect.clone().into()));
+    s.run_jobs();
+    let entries = render_layers(&s, &child);
+    let elements: Vec<String> = kernel.iter().map(|value| format!("{}", (value * 1000.0).round() / 1000.0)).collect();
+    let expected = format!("3x3 [{}]", elements.join(" "));
+    let push = entries
+        .iter()
+        .position(|e| e.starts_with("PushConvolveMatrixLayer ") && e.ends_with(&expected))
+        .unwrap_or_else(|| panic!("{effect}: a convolution layer with {expected}: {entries:?}"));
+    let draw = entries.iter().position(|e| e.starts_with("DrawRectangle Red")).expect("the content is drawn");
+    let pop = entries.iter().position(|e| e == "PopConvolveMatrixLayer").expect("the layer is popped");
+    assert!(push < draw && draw < pop, "{effect}: {entries:?}");
+    assert_eq!(plain, without(&entries, &["PushConvolveMatrixLayer", "PopConvolveMatrixLayer"]), "{effect}");
+}
+
+#[test]
+fn the_image_effects_of_the_library_are_drawn_as_convolutions() {
+    let sharpen = SharpenEffect { strength: 0.75 };
+    assert_drawn_as_convolution(ImmutableCustomEffect::new(sharpen.clone()), &sharpen.kernel());
+    let edges = EdgeDetectEffect { strength: 1.5 };
+    assert_drawn_as_convolution(ImmutableCustomEffect::new(edges.clone()), &edges.kernel());
 }
 
 #[test]

@@ -98,12 +98,14 @@ ferroui_base::ferro_thread_local! {
 fn register_cancel_action(token: &CancellationToken, action: impl FnOnce() + 'static) {
     let id = NEXT_CANCEL_ACTION.with(|next| next.replace(next.get() + 1));
     CANCEL_ACTIONS.with(|actions| actions.borrow_mut().insert(id, Box::new(action)));
-    let _ = token.register(move || {
-        let action = CANCEL_ACTIONS.with(|actions| actions.borrow_mut().remove(&id));
-        if let Some(action) = action {
-            action();
-        }
-    });
+    token
+        .register(move || {
+            let action = CANCEL_ACTIONS.with(|actions| actions.borrow_mut().remove(&id));
+            if let Some(action) = action {
+                action();
+            }
+        })
+        .detach();
 }
 
 /// The stand-in for a task completion source: its task completes when the
@@ -171,7 +173,7 @@ impl TestTransitionState {
         }
         *self.tcs.borrow_mut() = None;
 
-        if !token.is_cancellation_requested() {
+        if !token.is_cancelled() {
             self.finish_count.set(self.finish_count.get() + 1);
         } else {
             self.cancel_count.set(self.cancel_count.get() + 1);

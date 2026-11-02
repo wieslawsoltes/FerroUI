@@ -82,7 +82,7 @@ impl IPageTransition for FadeThroughTransition {
         let to = to.cloned();
 
         start_async(async move {
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 
@@ -126,14 +126,14 @@ impl IPageTransition for FadeThroughTransition {
             when_all(tasks).await;
 
             if let Some(to) = &to {
-                if !cancellation_token.is_cancellation_requested() {
+                if !cancellation_token.is_cancelled() {
                     to.set_opacity(1.0);
                     to.set_render_transform(None);
                 }
             }
 
             if let Some(from) = &from {
-                if !cancellation_token.is_cancellation_requested() {
+                if !cancellation_token.is_cancelled() {
                     from.set_is_visible(false);
                 }
                 from.set_opacity(1.0);

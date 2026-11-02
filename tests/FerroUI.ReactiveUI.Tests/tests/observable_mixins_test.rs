@@ -260,7 +260,7 @@ fn from_async_with_all_notifications_cancel_delegate_is_invokable() {
         |(start, release): (TaskCompletionSource<()>, TaskCompletionSource<()>), token: CancellationToken| async move {
             start.try_set_result(());
             release.task().await?;
-            if token.is_cancellation_requested() {
+            if token.is_cancelled() {
                 return canceled();
             }
             Ok(0)

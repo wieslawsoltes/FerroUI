@@ -333,6 +333,41 @@ deprecated = "ferroui_x11::selections::selection_helper::TaskCompletionSource"
 behaviour = "deviation"
 notes = "Step A3. `oneshot::channel()` gives a Sender (SetResult and TrySetResult are send, which gives the value back when the receiver is gone; SetCanceled is dropping the sender) and a Receiver (the task: a future of Result<T, Canceled>, try_recv, blocking_recv, recv_timeout, shared() for several waiters). A dropped sender cancels its receiver, where a dropped TaskCompletionSource leaves its task pending (F6; DEVIATIONS rows of the X11, remote protocol, iOS, Android and WinUI code). Also deprecated: ferroui_x11::selections::selection_helper::TaskCompletionFuture, ferroui_ios::completion::{Completion, CompletionFuture}. ferroui_system::threading::tasks::TaskCompletionSource keeps its behaviour until the steps that replace its uses (section 4)."
 
+[[name]]
+upstream = "System.Threading.CancellationTokenSource"
+rust = "ferroui_system::threading::CancellationToken"
+kind = "type"
+phase = "C4"
+deprecated = "ferroui_system::threading::CancellationTokenSource"
+behaviour = "same"
+notes = "Step A4b. A token that can be canceled is CancellationToken::new(); Token is a clone of it, Cancel is cancel(), IsCancellationRequested is is_cancelled(), CreateLinkedTokenSource is child_token() of the outer token. CancellationToken.CanBeCanceled is can_be_cancelled(); CancellationToken.None and the default token stay none(). The callbacks run once, in the order of registration, on the cancelling thread (the order is a DEVIATIONS row). Also deprecated: CancellationToken::is_cancellation_requested, CancellationToken::can_be_canceled, ferroui_freedesktop::signal_watch::{CancellationFlag, Cancelled} (the token, cancelled() and signal_watch::run_until_cancelled), ferroui_protranslate_studio::AiCancellationToken, CancellationDisposable::with_source (with_token)."
+
+[[name]]
+upstream = "System.Threading.CancellationTokenRegistration"
+rust = "ferroui_system::threading::CancellationGuard"
+kind = "type"
+phase = "C4"
+deprecated = "ferroui_system::threading::CancellationTokenRegistration"
+behaviour = "test"
+notes = "Step A4b. CancellationToken::register and register_local give the guard: #[must_use], Send, dropping it removes the callback (Dispose), detach() keeps it for the life of the token, which is what dropping a CancellationTokenRegistration did. The old forms are the deprecated register_handle and register_local_handle (and LocalCancellationTokenRegistration); register_guarded and register_local_guarded are deprecated aliases of register and register_local. Tested in src/FerroUI.System/tests/cancellation_tests.rs."
+
+[[name]]
+upstream = "System.OperationCanceledException"
+rust = "ferroui_system::task::Canceled"
+kind = "type"
+phase = "C4"
+deprecated = "ferroui_base::threading::OperationCanceledError"
+behaviour = "same"
+notes = "Step A4b. The dispatcher operations (wait, wait_with_timeout, result, the future), the synchronous invokes, DispatcherTask, AutoCompletePopulation, HeadlessUnitTestTask and the TaskHandle of the behaviors give Canceled (re-exported as ferroui_base::threading::Canceled); OperationCanceledError converts to and from it. Its message is the one of Canceled."
+
+[[name]]
+upstream = "System.Threading.Tasks.TaskCanceledException"
+rust = "ferroui_system::task::Canceled"
+kind = "type"
+phase = "C4"
+behaviour = "same"
+notes = "Step A4b. A cancellation that names no task (threading::tasks::canceled(), the cancellation of RunAsync, the work of the tests) is Canceled; TaskCanceledError::is_cancellation recognizes both, and a Canceled cancels a Task as a TaskCanceledError does. TaskCanceledError stays, not deprecated, as the outcome of a canceled Task that names it (TaskCanceledException.Task), until Task moves to the executor (A7)."
+
 # C5: the public signatures take std and the chosen crates (docs/idiomatic-rust-signatures.md).
 
 [[name]]

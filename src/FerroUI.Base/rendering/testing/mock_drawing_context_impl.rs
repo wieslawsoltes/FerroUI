@@ -408,6 +408,28 @@ impl crate::platform::IDrawingContextImplWithLayerEffects for MockDrawingContext
         self.log.push("PopMultiplyLayer");
     }
 
+    fn push_convolve_matrix_layer(&mut self, bounds: Rect, convolution: &crate::media::ConvolveMatrix) {
+        if self.log_matrices {
+            let elements: Vec<String> =
+                convolution.elements().iter().map(|value| format!("{}", (value * 1000.0).round() / 1000.0)).collect();
+            self.log.push(format!(
+                "PushConvolveMatrixLayer {bounds} {}x{} [{}]",
+                convolution.kernel_width,
+                convolution.kernel_height,
+                elements.join(" ")
+            ));
+        } else {
+            self.log.push(format!(
+                "PushConvolveMatrixLayer {bounds} {}x{}",
+                convolution.kernel_width, convolution.kernel_height
+            ));
+        }
+    }
+
+    fn pop_convolve_matrix_layer(&mut self) {
+        self.log.push("PopConvolveMatrixLayer");
+    }
+
     fn draw_lighting(&mut self, rect: Rect, lighting: &crate::platform::LightingParameters) -> bool {
         if self.supports_gpu_effects {
             self.log.push(format!("DrawLighting {rect} {}", lighting.lights.len()));

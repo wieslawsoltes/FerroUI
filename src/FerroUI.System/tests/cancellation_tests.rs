@@ -5,9 +5,9 @@
 
 use crate::task::{block_on, run_pending, Canceled};
 use crate::threading::tasks::TaskCanceledError;
-use crate::threading::{
-    CancellationGuard, CancellationToken, CancellationTokenSource, DropGuard, WaitForCancellation,
-};
+#[allow(deprecated)]
+use crate::threading::CancellationTokenSource;
+use crate::threading::{CancellationGuard, CancellationToken, DropGuard, WaitForCancellation};
 use std::cell::RefCell;
 use std::future::Future;
 use std::pin::Pin;
@@ -58,7 +58,7 @@ fn log() -> Arc<Mutex<Vec<u32>>> {
 /// Registers a callback that writes `n` to `log`.
 fn push(token: &CancellationToken, log: &Arc<Mutex<Vec<u32>>>, n: u32) -> CancellationGuard {
     let log = log.clone();
-    token.register_guarded(move || log.lock().unwrap().push(n))
+    token.register(move || log.lock().unwrap().push(n))
 }
 
 fn assert_send_sync<T: Send + Sync>() {}
@@ -74,6 +74,7 @@ fn the_token_and_its_guards_are_send() {
 }
 
 #[test]
+#[allow(deprecated)]
 fn a_new_token_is_canceled_once_and_runs_its_callbacks_in_the_order_of_registration() {
     let token = CancellationToken::new();
     assert!(token.can_be_cancelled());
@@ -108,7 +109,7 @@ fn a_callback_registered_after_the_cancellation_runs_at_once_on_the_registering_
     token.cancel();
     let ran_on = Arc::new(Mutex::new(None));
     let r = ran_on.clone();
-    let guard = token.register_guarded(move || *r.lock().unwrap() = Some(thread::current().id()));
+    let guard = token.register(move || *r.lock().unwrap() = Some(thread::current().id()));
     assert_eq!(*ran_on.lock().unwrap(), Some(thread::current().id()));
     drop(guard);
     assert_eq!(token.registration_count(), 0);
@@ -267,14 +268,14 @@ fn a_callback_may_register_unregister_and_cancel_without_deadlocking() {
     let later: Arc<Mutex<Option<CancellationGuard>>> = Arc::new(Mutex::new(None));
 
     let (t, o, l, slot) = (token.clone(), other.clone(), log.clone(), later.clone());
-    let _reentrant = token.register_guarded(move || {
+    let _reentrant = token.register(move || {
         l.lock().unwrap().push(0);
         // Canceling the token again does nothing; canceling another token runs its pass here.
         t.cancel();
         o.cancel();
         // A callback or a child registered during the pass is canceled at once.
         let l2 = l.clone();
-        t.register_guarded(move || l2.lock().unwrap().push(1)).detach();
+        t.register(move || l2.lock().unwrap().push(1)).detach();
         assert!(t.child_token().is_cancelled());
         // A callback unregistered before the pass reaches it does not run.
         drop(slot.lock().unwrap().take());
@@ -294,13 +295,12 @@ fn a_local_callback_runs_on_its_thread_and_its_guard_removes_it_from_any_thread(
         let token = CancellationToken::new();
         let log = Rc::new(RefCell::new(Vec::new()));
         let l = log.clone();
-        let kept = token.register_local_guarded(move || l.borrow_mut().push("kept"));
+        let kept = token.register_local(move || l.borrow_mut().push("kept"));
         let l = log.clone();
-        let dropped_here =
-            token.register_local_guarded(move || l.borrow_mut().push("dropped here"));
+        let dropped_here = token.register_local(move || l.borrow_mut().push("dropped here"));
         let owned = Rc::new(());
         let (l, o) = (log.clone(), owned.clone());
-        let dropped_elsewhere = token.register_local_guarded(move || {
+        let dropped_elsewhere = token.register_local(move || {
             let _owned = o;
             l.borrow_mut().push("dropped elsewhere");
         });
@@ -323,20 +323,21 @@ fn a_local_callback_runs_on_its_thread_and_its_guard_removes_it_from_any_thread(
 
         // Registered on a canceled token, it runs at once.
         let l = log.clone();
-        let _late = token.register_local_guarded(move || l.borrow_mut().push("late"));
+        let _late = token.register_local(move || l.borrow_mut().push("late"));
         assert_eq!(*log.borrow(), ["kept", "late"]);
     });
 }
 
 #[test]
+#[allow(deprecated)]
 fn a_source_is_a_token_that_can_be_canceled_and_its_registrations_stay_when_dropped() {
     let source = CancellationTokenSource::new();
     let token = source.token();
     assert!(token.can_be_canceled());
     let count = Arc::new(AtomicUsize::new(0));
     let c = count.clone();
-    // Dropping the registration of `register` keeps the callback.
-    drop(token.register(move || {
+    // Dropping the registration of `register_handle` keeps the callback.
+    drop(token.register_handle(move || {
         c.fetch_add(1, Ordering::SeqCst);
     }));
     let child = token.child_token();

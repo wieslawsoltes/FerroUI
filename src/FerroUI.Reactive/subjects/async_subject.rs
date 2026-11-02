@@ -62,7 +62,7 @@ impl<T: Clone + 'static> AsyncSubject<T> {
     }
 
     /// The awaiter of the subject (`GetAwaiter`): a task that ends when the subject ends, with its
-    /// last value, with its error (a `TaskCanceledError` cancels it), or with
+    /// last value, with its error (a cancellation, `Canceled` or `TaskCanceledError`, cancels it), or with
     /// [`SequenceError::NoElements`] when it ended without a value (`GetResult`'s
     /// `InvalidOperationException`). `async` code awaits it.
     ///

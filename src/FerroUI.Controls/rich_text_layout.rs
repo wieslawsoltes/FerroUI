@@ -14,11 +14,11 @@ use ferroui_base::media::text_formatting::{
     TextLineMetricsMode, TextParagraphProperties, TextRunCache, TextRunProperties, TextTabStops,
 };
 use ferroui_base::media::{
-    BaselineAlignment, CharacterHit, TextAlignment, TextCollapsingCreateInfo, TextLineBounds,
-    TextTrimming, TextWrapping, Typeface,
+    BaselineAlignment, CharacterHit, DrawingContext, GlyphRun, IBrush, IPen, Pen, TextAlignment,
+    TextCollapsingCreateInfo, TextLineBounds, TextTrimming, TextWrapping, Typeface,
 };
 use ferroui_base::utilities::ValueSpan;
-use ferroui_base::{Point, Rect, Ref, Size, Vector};
+use ferroui_base::{Matrix, Point, Rect, Ref, Size, Vector};
 use rustc_hash::FxHashMap;
 use std::cell::RefCell;
 use std::ops::Range;
@@ -34,7 +34,8 @@ pub(crate) struct RichParagraphSource {
     /// The shaping cache of the paragraph, shared with the next source while the paragraph
     /// does not change (F1, #243 review S7).
     pub cache: Rc<TextRunCache>,
-    /// The formatting overrides of the paragraph (selection, highlighters), relative to it.
+    /// The formatting overrides of the paragraph (highlighters), relative to it. The selection
+    /// is not one: it is drawn over the lines (`RichTextLayout::draw_with_selection`, #439).
     modifiers: Option<Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>>,
     /// The lines of the whole paragraph from its last layout, shared with the next source while
     /// the paragraph does not change: a page that formats it again with the same width and
@@ -142,9 +143,9 @@ pub(crate) struct RichTextSource {
 
 impl RichTextSource {
     /// The source of the document for the view. The paragraphs of `previous` (the source the
-    /// view had before its document or its selection changed) that format as before keep their
-    /// runs and shaping caches, so an edit reshapes the paragraphs it changed, not the document
-    /// (F1, #243 review S7).
+    /// view had before its document changed) that format as before keep their runs and shaping
+    /// caches, so an edit reshapes the paragraphs it changed, not the document (F1, #243 review
+    /// S7). The selection is not part of the source: a selection change keeps it (#439).
     pub fn new(document: &RichTextDocument, view: &crate::RichTextBlock, previous: Option<&RichTextSource>) -> Rc<Self> {
         let previous_paragraphs: FxHashMap<usize, &RichParagraphSource> = previous
             .map(|previous| {
@@ -224,7 +225,7 @@ impl RichTextSource {
                     || view.default_incremental_tab(properties.font_rendering_em_size()),
                     |paragraph| paragraph.default_tab_stop(),
                 );
-            let modifiers = formatting_overrides(&runs, offset, &highlights, view);
+            let modifiers = formatting_overrides(&runs, offset, &highlights);
             let has_embedded_controls = runs.iter().any(|run| run.is::<EmbeddedControlRun>());
             let unchanged = (!empty && !has_embedded_controls)
                 .then(|| previous_paragraphs.get(&(&*block as *const Block as *const () as usize)))
@@ -274,16 +275,15 @@ impl RichTextSource {
     }
 }
 
+/// The highlighters of a paragraph as formatting overrides of its runs: the foreground of the
+/// highlight, and no background (the highlight's background is drawn behind the text). The
+/// selection is drawn over the lines instead (`RichTextLayout::draw_with_selection`).
 fn formatting_overrides(
     runs: &[Rc<dyn TextRun>],
     paragraph_offset: usize,
     highlights: &[TextHighlightRegion],
-    view: &crate::RichTextBlock,
 ) -> Option<Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>> {
-    let selected = view.selection_start().min(view.selection_end())
-        ..view.selection_start().max(view.selection_end());
-    let selection = view.selection_is_visible() && !selected.is_empty();
-    if highlights.is_empty() && !selection {
+    if highlights.is_empty() {
         return None;
     }
     let mut modifiers = Vec::new();
@@ -300,42 +300,28 @@ fn formatting_overrides(
                 boundaries.push(region.range.start.max(position));
                 boundaries.push(region.range.end.min(end));
             }
-            if selection && selected.start < end && selected.end > position {
-                boundaries.push(selected.start.max(position));
-                boundaries.push(selected.end.min(end));
-            }
             boundaries.sort_unstable();
             boundaries.dedup();
             for boundary in boundaries.windows(2) {
                 let start = boundary[0];
                 let end = boundary[1];
-                let highlight = regions
+                let Some(highlight) = regions
                     .iter()
-                    .find(|region| region.range.start <= start && region.range.end >= end);
-                let selected = selection && start >= selected.start && end <= selected.end;
-                if highlight.is_none() && !selected {
+                    .find(|region| region.range.start <= start && region.range.end >= end)
+                else {
                     continue;
-                }
-                let foreground = if selected {
-                    view.selection_foreground_brush()
-                } else {
-                    None
-                }
-                .or_else(|| highlight.and_then(|region| region.foreground.clone()))
-                .or_else(|| properties.foreground_brush().cloned());
-                let background =
-                    if highlight.is_some() || selected && view.selection_render_brush().is_some() {
-                        None
-                    } else {
-                        properties.background_brush().cloned()
-                    };
+                };
+                let foreground = highlight
+                    .foreground
+                    .clone()
+                    .or_else(|| properties.foreground_brush().cloned());
                 let override_properties: Rc<dyn TextRunProperties> =
                     Rc::new(GenericTextRunProperties::with_all(
                         properties.typeface().clone(),
                         properties.font_rendering_em_size(),
                         properties.text_decorations().cloned(),
                         foreground,
-                        background,
+                        None,
                         properties.baseline_alignment(),
                         properties.culture_info().cloned(),
                         properties.font_features().cloned(),
@@ -1110,6 +1096,57 @@ impl RichTextLayout {
         }
     }
 
+    /// Draws the lines with the selected text over the selection highlight (#439): the runs are
+    /// formatted without the selection, so a selection change keeps every paragraph's runs,
+    /// shaping cache and lines. A line the selection touches is drawn through a
+    /// `SelectionDrawingSink`, which gives the selected parts of its glyph runs and
+    /// decorations the selection foreground and leaves out the run backgrounds under the
+    /// highlight; the other lines are drawn as they are.
+    pub(crate) fn draw_with_selection(
+        &self,
+        context: &mut DrawingContext<'_>,
+        origin: Point,
+        selection: Option<&SelectionOverlay>,
+    ) {
+        let Some(selection) = selection.filter(|selection| {
+            !selection.range.is_empty()
+                && (selection.foreground.is_some() || selection.hides_backgrounds)
+        }) else {
+            self.draw(context, origin);
+            return;
+        };
+        let mut rects = Vec::new();
+        let mut spans = Vec::new();
+        for entry in &self.lines {
+            let line_origin = Point::new(origin.x + entry.origin.x, origin.y + entry.origin.y);
+            rects.clear();
+            // Without its paragraph mark, a selection that ends before the line or starts after
+            // it selects nothing on it.
+            if selection.range.end > entry.start() && selection.range.start < entry.end() {
+                self.line_selection_rects(
+                    entry,
+                    selection.range.start,
+                    selection.range.end,
+                    false,
+                    &mut rects,
+                );
+            }
+            if rects.is_empty() {
+                entry.line.draw(&mut *context, line_origin);
+                continue;
+            }
+            spans.clear();
+            spans.extend(
+                rects
+                    .iter()
+                    .map(|rect| origin.x + rect.x..origin.x + rect.right()),
+            );
+            merge_spans(&mut spans);
+            let mut sink = SelectionDrawingSink::new(&mut *context, &spans, selection);
+            entry.line.draw(&mut sink, line_origin);
+        }
+    }
+
     pub fn metrics(&self, origin: Point) -> Vec<RichTextLineMetrics> {
         self.lines
             .iter()
@@ -1193,32 +1230,46 @@ impl RichTextLayout {
     pub fn selection_rects(&self, start: usize, end: usize) -> Vec<Rect> {
         let mut result = Vec::new();
         for entry in &self.lines {
-            for visible in entry.visible_ranges() {
-                let a = start.max(visible.start);
-                let b = end.min(visible.end);
-                if a < b {
-                    let a = entry.display_position(a - entry.paragraph_offset);
-                    let b = entry.display_position(b - entry.paragraph_offset);
-                    for bounds in entry.line.get_text_bounds(a as i32, (b - a) as i32) {
-                        result.push(entry.range_bounds(bounds.rectangle()));
-                    }
-                }
-            }
-            let paragraph_end = entry.paragraph_offset + entry.paragraph_length;
-            if start <= paragraph_end
-                && end > paragraph_end
-                && entry.end() == paragraph_end
-                && (entry.source_spans.is_none()
-                    || entry
-                        .visible_ranges()
-                        .iter()
-                        .any(|range| range.end == paragraph_end))
-            {
-                let caret = self.caret_rect(paragraph_end);
-                result.push(Rect::new(caret.x, caret.y, 4.0, caret.height));
-            }
+            self.line_selection_rects(entry, start, end, true, &mut result);
         }
         result
+    }
+
+    /// The bounds of the text of `start..end` on one line, from the line's hit test, and with
+    /// `paragraph_mark` the bounds of the selected paragraph mark at the end of the paragraph.
+    fn line_selection_rects(
+        &self,
+        entry: &RichTextLine,
+        start: usize,
+        end: usize,
+        paragraph_mark: bool,
+        result: &mut Vec<Rect>,
+    ) {
+        for visible in entry.visible_ranges() {
+            let a = start.max(visible.start);
+            let b = end.min(visible.end);
+            if a < b {
+                let a = entry.display_position(a - entry.paragraph_offset);
+                let b = entry.display_position(b - entry.paragraph_offset);
+                for bounds in entry.line.get_text_bounds(a as i32, (b - a) as i32) {
+                    result.push(entry.range_bounds(bounds.rectangle()));
+                }
+            }
+        }
+        let paragraph_end = entry.paragraph_offset + entry.paragraph_length;
+        if paragraph_mark
+            && start <= paragraph_end
+            && end > paragraph_end
+            && entry.end() == paragraph_end
+            && (entry.source_spans.is_none()
+                || entry
+                    .visible_ranges()
+                    .iter()
+                    .any(|range| range.end == paragraph_end))
+        {
+            let caret = self.caret_rect(paragraph_end);
+            result.push(Rect::new(caret.x, caret.y, 4.0, caret.height));
+        }
     }
 
     pub fn visible_text_ranges(&self) -> Vec<Range<usize>> {
@@ -1262,6 +1313,244 @@ impl RichTextLayout {
             }
         }
         result
+    }
+}
+
+/// How the selected text of a view is drawn over its selection highlight (#439).
+pub(crate) struct SelectionOverlay {
+    /// The selected range, in document UTF-16 offsets.
+    pub range: Range<usize>,
+    /// The foreground of the selected glyphs and decorations; `None` keeps their own.
+    pub foreground: Option<Rc<dyn IBrush>>,
+    /// Whether the run backgrounds under the selection are left out, so that the selection
+    /// highlight drawn behind the text shows.
+    pub hides_backgrounds: bool,
+}
+
+/// Sorts spans and merges those that overlap or touch.
+fn merge_spans(spans: &mut Vec<Range<f64>>) {
+    spans.sort_by(|a, b| a.start.total_cmp(&b.start));
+    let mut merged: Vec<Range<f64>> = Vec::with_capacity(spans.len());
+    for span in spans.drain(..) {
+        match merged.last_mut() {
+            Some(last) if span.start <= last.end => last.end = last.end.max(span.end),
+            _ => merged.push(span),
+        }
+    }
+    *spans = merged;
+}
+
+/// The sink a line the selection touches is drawn through (#439), the way WinUI's
+/// `D2DTextDrawingContext::DrawGlyphRun` gives the highlighted part of a glyph run the
+/// highlight's foreground: the runs are shaped and formatted without the selection, and the
+/// sink splits what they draw at the selection's spans.
+///
+/// - A glyph run, and a decoration or tab leader drawn with the run's foreground, that the
+///   spans cover in part are drawn once for each part, clipped to it (rectangle clips of the
+///   drawing context), with the selection foreground in the selected parts.
+/// - A run background (a filled rectangle without a pen) is drawn without the parts the spans
+///   cover, when the selection highlight is to show through.
+///
+/// What the line draws apart from its runs (bar tab stops) and anything drawn under a
+/// transform that is not a translation are drawn as they are.
+struct SelectionDrawingSink<'c, 'a> {
+    context: &'c mut DrawingContext<'a>,
+    /// The selected spans of the line in the coordinates of the context: sorted and disjoint.
+    spans: &'c [Range<f64>],
+    foreground: Option<&'c Rc<dyn IBrush>>,
+    hides_backgrounds: bool,
+    /// The offset of each transform the line pushed, from the coordinates of the context;
+    /// `None` under a transform that is not a translation.
+    transforms: Vec<Option<Vector>>,
+    /// The foreground of the glyph run drawn last in the current run's transform: the brush
+    /// of its decorations and tab leader.
+    run_foreground: Option<Rc<dyn IBrush>>,
+}
+
+impl<'c, 'a> SelectionDrawingSink<'c, 'a> {
+    fn new(
+        context: &'c mut DrawingContext<'a>,
+        spans: &'c [Range<f64>],
+        selection: &'c SelectionOverlay,
+    ) -> Self {
+        Self {
+            context,
+            spans,
+            foreground: selection.foreground.as_ref(),
+            hides_backgrounds: selection.hides_backgrounds,
+            transforms: Vec::new(),
+            run_foreground: None,
+        }
+    }
+
+    /// The offset from local coordinates to those of the context.
+    fn offset(&self) -> Option<Vector> {
+        self.transforms
+            .last()
+            .copied()
+            .unwrap_or(Some(Vector::new(0.0, 0.0)))
+    }
+
+    /// The parts of `left..right` (context coordinates) inside and outside the spans, in order.
+    fn parts(&self, left: f64, right: f64) -> Vec<(f64, f64, bool)> {
+        let mut parts = Vec::new();
+        let mut x = left;
+        for span in self
+            .spans
+            .iter()
+            .filter(|span| span.start < right && span.end > left)
+        {
+            let start = span.start.max(x);
+            let end = span.end.min(right);
+            if start > x {
+                parts.push((x, start, false));
+            }
+            parts.push((start, end, true));
+            x = end;
+        }
+        if parts.is_empty() {
+            return parts;
+        }
+        if x < right {
+            parts.push((x, right, false));
+        }
+        parts
+    }
+
+    /// Draws something whose extent is `extent` (local coordinates) once if the spans cover all
+    /// or none of it, and otherwise once for each part, clipped to the part and told whether
+    /// the part is selected. The first and the last part reach past the extent, so that ink
+    /// outside the advance (an italic overhang) belongs to the part at that edge.
+    fn draw_split(&mut self, extent: Rect, mut draw: impl FnMut(&mut DrawingContext<'a>, bool)) {
+        let Some(offset) = self.offset() else {
+            draw(&mut *self.context, false);
+            return;
+        };
+        let parts = self.parts(extent.x + offset.x, extent.right() + offset.x);
+        match parts.as_slice() {
+            [] => draw(&mut *self.context, false),
+            [(_, _, selected)] => draw(&mut *self.context, *selected),
+            _ => {
+                let margin = 2.0 * extent.height.abs() + extent.width.abs() + 16.0;
+                let last = parts.len() - 1;
+                for (index, &(start, end, selected)) in parts.iter().enumerate() {
+                    let start = if index == 0 { start - margin } else { start };
+                    let end = if index == last { end + margin } else { end };
+                    let clip = Rect::new(
+                        start - offset.x,
+                        extent.y - margin,
+                        end - start,
+                        extent.height + 2.0 * margin,
+                    );
+                    let state = self.context.push_clip(clip);
+                    draw(&mut *self.context, selected);
+                    self.context.pop(state);
+                }
+            }
+        }
+    }
+}
+
+impl ITextDrawingSink for SelectionDrawingSink<'_, '_> {
+    fn draw_glyph_run(&mut self, foreground: Option<&Rc<dyn IBrush>>, glyph_run: &Rc<GlyphRun>) {
+        self.run_foreground = foreground.cloned();
+        let Some(selected) = self.foreground.cloned() else {
+            self.context.draw_glyph_run(foreground, glyph_run);
+            return;
+        };
+        self.draw_split(glyph_run.bounds(), |context, is_selected| {
+            context.draw_glyph_run(
+                if is_selected {
+                    Some(&selected)
+                } else {
+                    foreground
+                },
+                glyph_run,
+            );
+        });
+    }
+
+    fn draw_rectangle(&mut self, brush: Option<&Rc<dyn IBrush>>, pen: Option<&Rc<dyn IPen>>, rect: Rect) {
+        let offset = self.offset();
+        let (Some(offset), true, Some(_), None) =
+            (offset, self.hides_backgrounds, brush, pen)
+        else {
+            ITextDrawingSink::draw_rectangle(&mut *self.context, brush, pen, rect);
+            return;
+        };
+        let parts = self.parts(rect.x + offset.x, rect.right() + offset.x);
+        if parts.is_empty() {
+            ITextDrawingSink::draw_rectangle(&mut *self.context, brush, pen, rect);
+            return;
+        }
+        for (start, end, selected) in parts {
+            if !selected && end > start {
+                ITextDrawingSink::draw_rectangle(
+                    &mut *self.context,
+                    brush,
+                    None,
+                    Rect::new(start - offset.x, rect.y, end - start, rect.height),
+                );
+            }
+        }
+    }
+
+    fn draw_line(&mut self, pen: &Rc<dyn IPen>, p1: Point, p2: Point) {
+        let selected_pen: Option<Rc<dyn IPen>> = match (self.foreground, &self.run_foreground) {
+            (Some(selected), Some(run)) if !self.transforms.is_empty() => pen
+                .brush()
+                .is_some_and(|brush| Rc::ptr_eq(&brush, run))
+                .then(|| {
+                    let selected_pen: Rc<dyn IPen> = Pen::with_all(
+                        Some(selected.clone()),
+                        pen.thickness(),
+                        pen.dash_style(),
+                        pen.line_cap(),
+                        pen.line_join(),
+                        pen.miter_limit(),
+                    )
+                    .into();
+                    selected_pen
+                }),
+            _ => None,
+        };
+        let Some(selected_pen) = selected_pen else {
+            self.context.draw_line(pen, p1, p2);
+            return;
+        };
+        let half = pen.thickness().abs() / 2.0;
+        let extent = Rect::new(
+            p1.x.min(p2.x),
+            p1.y.min(p2.y) - half,
+            (p1.x - p2.x).abs(),
+            (p1.y - p2.y).abs() + 2.0 * half,
+        );
+        self.draw_split(extent, |context, is_selected| {
+            context.draw_line(if is_selected { &selected_pen } else { pen }, p1, p2);
+        });
+    }
+
+    fn push_transform(&mut self, matrix: Matrix) {
+        let translation = matrix.m11 == 1.0
+            && matrix.m12 == 0.0
+            && matrix.m13 == 0.0
+            && matrix.m21 == 0.0
+            && matrix.m22 == 1.0
+            && matrix.m23 == 0.0
+            && matrix.m33 == 1.0;
+        let offset = self
+            .offset()
+            .filter(|_| translation)
+            .map(|offset| Vector::new(offset.x + matrix.m31, offset.y + matrix.m32));
+        self.transforms.push(offset);
+        self.run_foreground = None;
+        ITextDrawingSink::push_transform(&mut *self.context, matrix);
+    }
+
+    fn pop_transform(&mut self) {
+        self.transforms.pop();
+        self.run_foreground = None;
+        ITextDrawingSink::pop_transform(&mut *self.context);
     }
 }
 

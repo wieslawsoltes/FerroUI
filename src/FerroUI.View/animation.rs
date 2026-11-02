@@ -14,7 +14,7 @@ use ferroui_base::animation::{
 use ferroui_base::animation::easings::Easing;
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::CancellationTokenSource;
+use ferroui_base::threading::CancellationToken;
 use ferroui_base::{BoxedValue, CornerRadius, FerroProperty, ObjectType, Point, Ref, Size, Thickness, Upcast, Vector};
 use std::rc::Rc;
 use std::time::Duration;
@@ -170,9 +170,9 @@ where
 {
     use_effect_with(trigger, move |_| {
         let Some(control) = target.get_untracked() else { return };
-        let cancellation = CancellationTokenSource::new();
+        let cancellation = CancellationToken::new();
         let animatable: &Animatable = (*control).upcast();
-        let _task = animation().build().run_async(animatable, cancellation.token());
+        let _task = animation().build().run_async(animatable, cancellation.clone());
         on_cleanup(move || cancellation.cancel());
     });
 }

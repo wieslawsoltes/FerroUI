@@ -6,20 +6,21 @@
 //! own awaiter (`IsCompleted`, `OnCompleted`, `GetResult`); here the methods return the task of
 //! that subject ([`AsyncSubject::get_awaiter`]), whose `is_completed`, `continue_with` and `result`
 //! are those members, and which `async` code awaits. The cancellation ends the subject with a
-//! `TaskCanceledError` (upstream's `OperationCanceledException`), which cancels the task.
+//! [`Canceled`] (upstream's `OperationCanceledException`), which cancels the task.
 
 use crate::disposables::StableCompositeDisposable;
 use crate::internal::TokenRegistration;
 use crate::observer::AnonymousObserver;
 use crate::subjects::{AsyncSubject, IConnectableObservable};
-use ferroui_system::threading::tasks::{Task, TaskCanceledError};
+use ferroui_system::task::Canceled;
+use ferroui_system::threading::tasks::Task;
 use ferroui_system::threading::CancellationToken;
 use ferroui_system::{IDisposable, IObservable, IObserver};
 use std::rc::Rc;
 
 /// `Cancel`: ends the subject with a cancellation (`OperationCanceledException`).
 fn cancel<T: Clone + 'static>(subject: &AsyncSubject<T>) {
-    subject.on_error(Rc::new(TaskCanceledError::default()));
+    subject.on_error(Rc::new(Canceled));
 }
 
 /// `RegisterCancelation`: the cancellation of `token` disposes `subscription` and cancels the
@@ -39,12 +40,12 @@ fn register_cancelation<T: Clone + 'static>(subject: &Rc<AsyncSubject<T>>, subsc
 /// subscribed to; a token canceled already cancels it without subscribing.
 pub(crate) fn run_async_subject<T: Clone + 'static>(source: Rc<dyn IObservable<T>>, token: &CancellationToken) -> Rc<AsyncSubject<T>> {
     let subject = AsyncSubject::new();
-    if token.is_cancellation_requested() {
+    if token.is_cancelled() {
         cancel(&subject);
         return subject;
     }
     let subscription = source.subscribe(subject.as_observer());
-    if token.can_be_canceled() {
+    if token.can_be_cancelled() {
         register_cancelation(&subject, subscription, token);
     }
     subject
@@ -57,13 +58,13 @@ pub(crate) fn run_async_connectable_subject<T: Clone + 'static>(
     token: &CancellationToken,
 ) -> Rc<AsyncSubject<T>> {
     let subject = AsyncSubject::new();
-    if token.is_cancellation_requested() {
+    if token.is_cancelled() {
         cancel(&subject);
         return subject;
     }
     let subscription = source.subscribe(subject.as_observer());
     let connection = source.connect();
-    if token.can_be_canceled() {
+    if token.can_be_cancelled() {
         let both: Rc<dyn IDisposable> = StableCompositeDisposable::create(subscription, connection);
         register_cancelation(&subject, both, token);
     }

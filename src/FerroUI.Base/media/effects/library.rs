@@ -1,7 +1,8 @@
-//! The custom effects FerroUI ships (#455, E2 and E4; not from upstream):
+//! The custom effects FerroUI ships (#455, E2 to E4; not from upstream):
 //!
 //! - the colour effects of Effector's sample set (tint, grayscale, sepia,
-//!   saturation, brightness and contrast, invert) and its glow, as values of
+//!   saturation, brightness and contrast, invert), its glow, and the image
+//!   effects sharpen and edge detect (convolutions, E3), as values of
 //!   [`CustomEffect`] that describe themselves as effect graphs
 //!   ([`CustomEffect::graph`]), so that every backend draws them on the GPU
 //!   with the painter of the composition effects;
@@ -24,7 +25,7 @@ use super::{
     CustomEffect, CustomEffectRegistry, EffectExtensions, EffectParameterValue, IEffect, ImmutableDropShadowEffect,
     CUSTOM_EFFECT_CONTENT,
 };
-use crate::media::{Color, ColorMatrix, ColorMatrixAlphaMode, Colors};
+use crate::media::{Color, ColorMatrix, ColorMatrixAlphaMode, Colors, ConvolveMatrix};
 use crate::rendering::composition::effects as graph;
 use crate::rendering::composition::effects::{
     CanvasComposite, CompositionEffectSourceParameter, GraphicsEffect, GraphicsEffectSource,
@@ -49,6 +50,8 @@ pub fn register_library_effects() {
         let _ = CustomEffectRegistry::register::<BrightnessContrastEffect>();
         let _ = CustomEffectRegistry::register::<InvertEffect>();
         let _ = CustomEffectRegistry::register::<GlowEffect>();
+        let _ = CustomEffectRegistry::register::<SharpenEffect>();
+        let _ = CustomEffectRegistry::register::<EdgeDetectEffect>();
         let _ = CustomEffectRegistry::register::<PixelateEffect>();
         let _ = CustomEffectRegistry::register::<ScanlineShaderEffect>();
         let _ = CustomEffectRegistry::register::<SpotlightShaderEffect>();
@@ -616,6 +619,179 @@ impl CustomEffect for GlowEffect {
             let alpha = f32::from(pixel[3]) / 255.0 + halo * under;
             pixel[3] = (alpha * 255.0).round().clamp(0.0, 255.0) as u8;
         }
+        true
+    }
+}
+
+// --- sharpen and edge detect ---------------------------------------------------
+
+/// The names of the elements of a 3 by 3 kernel as members of the effect
+/// named `Sharpen` and of the effect named `Edges`.
+const SHARPEN_MEMBERS: [&str; 9] = [
+    "Sharpen.KernelMatrix0",
+    "Sharpen.KernelMatrix1",
+    "Sharpen.KernelMatrix2",
+    "Sharpen.KernelMatrix3",
+    "Sharpen.KernelMatrix4",
+    "Sharpen.KernelMatrix5",
+    "Sharpen.KernelMatrix6",
+    "Sharpen.KernelMatrix7",
+    "Sharpen.KernelMatrix8",
+];
+const EDGE_MEMBERS: [&str; 9] = [
+    "Edges.KernelMatrix0",
+    "Edges.KernelMatrix1",
+    "Edges.KernelMatrix2",
+    "Edges.KernelMatrix3",
+    "Edges.KernelMatrix4",
+    "Edges.KernelMatrix5",
+    "Edges.KernelMatrix6",
+    "Edges.KernelMatrix7",
+    "Edges.KernelMatrix8",
+];
+
+/// Sharpens the content (Effector's `SharpenEffect`): the 3 by 3 kernel
+/// `[0, -s, 0; -s, 1 + 4 s, -s; 0, -s, 0]` with `s` the strength clamped
+/// to 0..2, the four premultiplied channels convolved, transparent beyond
+/// the edges.
+///
+/// `sharpen(strength=1)`. The graph is a convolution (Win2D's
+/// `ConvolveMatrixEffect`, `Sharpen.KernelMatrix0` to
+/// `Sharpen.KernelMatrix8`), whose kernel steps over device pixels.
+#[derive(Clone, Debug, PartialEq)]
+pub struct SharpenEffect {
+    /// How much, 0 (unchanged) to 2 (default 1).
+    pub strength: f64,
+}
+
+impl Default for SharpenEffect {
+    fn default() -> Self {
+        Self { strength: 1.0 }
+    }
+}
+
+impl SharpenEffect {
+    /// The kernel, row by row.
+    pub fn kernel(&self) -> [f32; 9] {
+        let s = clamp(self.strength, 0.0, 2.0) as f32;
+        [0.0, -s, 0.0, -s, 1.0 + 4.0 * s, -s, 0.0, -s, 0.0]
+    }
+
+    /// The convolution of the effect.
+    pub fn convolution(&self) -> ConvolveMatrix {
+        ConvolveMatrix::new(3, 3, &self.kernel()).unwrap_or_default()
+    }
+}
+
+impl CustomEffect for SharpenEffect {
+    const NAME: &'static str = "sharpen";
+
+    fn for_each_parameter(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+        f("strength", self.strength.into());
+    }
+
+    fn set_parameter(&mut self, name: &str, value: EffectParameterValue) -> bool {
+        match name {
+            "strength" => value.as_float().map(|strength| self.strength = strength).is_some(),
+            _ => false,
+        }
+    }
+
+    fn neutral() -> Option<Self> {
+        Some(Self { strength: 0.0 })
+    }
+
+    fn graph() -> Option<GraphicsEffect> {
+        Some(graph::ConvolveMatrixEffect { name: "Sharpen".into(), source: content(), ..Default::default() }.into())
+    }
+
+    fn for_each_graph_value(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+        for (member, element) in SHARPEN_MEMBERS.into_iter().zip(self.kernel()) {
+            f(member, f64::from(element).into());
+        }
+    }
+
+    fn cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, _scale: f64) -> bool {
+        self.convolution().apply_to_premultiplied_rgba8(area(pixels, width, height), width, height);
+        true
+    }
+}
+
+/// Finds the edges of the content: the 3 by 3 Laplacian kernel of
+/// Effector's `EdgeDetectEffect`, `[-s, -s, -s; -s, 8 s, -s; -s, -s, -s]`
+/// with `s` the strength clamped to 0..2, applied to the colours
+/// un-premultiplied with the alpha kept: flat areas turn black, edges keep
+/// the change of colour across them.
+///
+/// Deviation from Effector, which lays a black line of the response of a
+/// grey copy over the content: that uses the content twice, which a graph
+/// around the content of a visual does not (custom-effects.md, section
+/// 3.3); here the response is the output. There is no neutral value (a
+/// transition from no effect switches at half way).
+///
+/// `edge-detect(strength=1)`. The graph is a convolution
+/// (`Edges.KernelMatrix0` to `Edges.KernelMatrix8`).
+#[derive(Clone, Debug, PartialEq)]
+pub struct EdgeDetectEffect {
+    /// How strong the response is, 0 to 2 (default 1).
+    pub strength: f64,
+}
+
+impl Default for EdgeDetectEffect {
+    fn default() -> Self {
+        Self { strength: 1.0 }
+    }
+}
+
+impl EdgeDetectEffect {
+    /// The kernel, row by row.
+    pub fn kernel(&self) -> [f32; 9] {
+        let s = clamp(self.strength, 0.0, 2.0) as f32;
+        [-s, -s, -s, -s, 8.0 * s, -s, -s, -s, -s]
+    }
+
+    /// The convolution of the effect.
+    pub fn convolution(&self) -> ConvolveMatrix {
+        let mut convolution = ConvolveMatrix::new(3, 3, &self.kernel()).unwrap_or_default();
+        convolution.preserve_alpha = true;
+        convolution
+    }
+}
+
+impl CustomEffect for EdgeDetectEffect {
+    const NAME: &'static str = "edge-detect";
+
+    fn for_each_parameter(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+        f("strength", self.strength.into());
+    }
+
+    fn set_parameter(&mut self, name: &str, value: EffectParameterValue) -> bool {
+        match name {
+            "strength" => value.as_float().map(|strength| self.strength = strength).is_some(),
+            _ => false,
+        }
+    }
+
+    fn graph() -> Option<GraphicsEffect> {
+        Some(
+            graph::ConvolveMatrixEffect {
+                name: "Edges".into(),
+                preserve_alpha: true,
+                source: content(),
+                ..Default::default()
+            }
+            .into(),
+        )
+    }
+
+    fn for_each_graph_value(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+        for (member, element) in EDGE_MEMBERS.into_iter().zip(self.kernel()) {
+            f(member, f64::from(element).into());
+        }
+    }
+
+    fn cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, _scale: f64) -> bool {
+        self.convolution().apply_to_premultiplied_rgba8(area(pixels, width, height), width, height);
         true
     }
 }

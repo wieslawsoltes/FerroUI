@@ -331,7 +331,7 @@ impl IPageTransition for CardStackPageTransition {
         let to = to.cloned();
 
         start_async(async move {
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 
@@ -411,13 +411,13 @@ impl IPageTransition for CardStackPageTransition {
             when_all(tasks).await;
 
             if let Some(from) = &from {
-                if !cancellation_token.is_cancellation_requested() {
+                if !cancellation_token.is_cancelled() {
                     from.set_is_visible(false);
                 }
             }
 
             if let Some(to) = &to {
-                if !cancellation_token.is_cancellation_requested() {
+                if !cancellation_token.is_cancelled() {
                     let (scale, translate) = Self::ensure_back_transforms(to);
                     scale.set_scale_x(1.0);
                     scale.set_scale_y(1.0);
