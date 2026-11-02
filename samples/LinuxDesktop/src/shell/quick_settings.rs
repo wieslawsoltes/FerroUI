@@ -162,8 +162,8 @@ fn drain_levels(shell: &Rc<Shell>) {
     }
 }
 
-// Keep the Slider object alive through readback. Release commits pointer,
-// touch, and keyboard edits without sending every intermediate thumb value.
+// Keep the Slider object alive through readback. Commit a drag on release
+// and a keyboard step immediately after the native Slider applies it.
 fn level_slider(shell: &Rc<Shell>, target: Level, label: &str) -> Element {
     let values = shell.settings.values;
     let read = target.clone();
@@ -204,7 +204,7 @@ fn level_slider(shell: &Rc<Shell>, target: Level, label: &str) -> Element {
                 }
             };
             let pointer_up = ferroui_base::input::InputElement::pointer_released_event();
-            let key_up = ferroui_base::input::InputElement::key_up_event();
+            let key_down = ferroui_base::input::InputElement::key_down_event();
             let pointer_commit = commit.clone();
             let mouse = slider.add_handler_with(
                 pointer_up,
@@ -213,8 +213,25 @@ fn level_slider(shell: &Rc<Shell>, target: Level, label: &str) -> Element {
                 true,
             );
             let keyboard = slider.add_handler_with(
-                key_up,
-                move |_, _| commit(),
+                key_down,
+                move |_, e| {
+                    if e.handled()
+                        && e.key_modifiers.is_empty()
+                        && matches!(
+                            e.key,
+                            Key::Left
+                                | Key::Right
+                                | Key::Up
+                                | Key::Down
+                                | Key::PageUp
+                                | Key::PageDown
+                                | Key::Home
+                                | Key::End
+                        )
+                    {
+                        commit();
+                    }
+                },
                 RoutingStrategies::BUBBLE,
                 true,
             );
@@ -222,7 +239,7 @@ fn level_slider(shell: &Rc<Shell>, target: Level, label: &str) -> Element {
             on_cleanup(move || {
                 if let Some(slider) = slider.upgrade() {
                     slider.remove_handler(pointer_up, mouse);
-                    slider.remove_handler(key_up, keyboard);
+                    slider.remove_handler(key_down, keyboard);
                 }
             });
         })

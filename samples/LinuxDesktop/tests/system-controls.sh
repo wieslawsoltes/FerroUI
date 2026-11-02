@@ -37,7 +37,9 @@ pulseaudio -n --daemonize=no --exit-idle-time=-1 --use-pid-file=no --log-target=
     -L 'module-null-sink sink_name=ferro_fixture' >"$output/pulse.log" 2>&1 & children+=("$!")
 
 wait_until() {
-    for ((i=0; i<80; i++)); do if "$@"; then return; fi; sleep .1; done
+    local i
+    for ((i=0; i<120; i++)); do if "$@"; then return; fi; sleep .1; done
+    if [[ $1 == volume_is ]]; then pactl get-sink-volume ferro_fixture >&2; fi
     echo "Timed out waiting for $*" >&2; return 1
 }
 ready_audio() { pactl info >/dev/null 2>&1; }
@@ -139,20 +141,55 @@ if grep -q 'Read connection ID at .*/ActiveConnection/2$' "$output/system-bus.lo
     echo "Used the Ethernet profile as the Wi-Fi name" >&2; exit 1
 fi
 bluetooth_cycle quick-settings
-# Discover the native Slider in normal tab order. Optional monitor controls
-# and each profile's spatial layout may change the number of preceding tabs.
-# Only the volume Slider can advance the audio sink by one keyboard step.
-for ((tab=0;tab<16;tab++)); do
-    key Tab Right
-    for ((i=0;i<6;i++)); do volume_is 46 && break; sleep .08; done
-    volume_is 46 && break
-done
+# Focus the presented Sound thumb without changing its value. Optional monitor
+# sliders appear above it. In the light WinUI profile, its blue center and
+# left track match, a white ring surrounds it and the right track is gray.
+sound_thumb=$(/usr/bin/python3 - "$output/quick-settings.png" <<'PYTHON'
+import sys
+from PIL import Image
+
+image = Image.open(sys.argv[1]).convert("RGB")
+w, h = image.size
+p = image.load()
+for y in range(h - 12, 11, -1):
+    for x in range(max(20, w - 370), w - 20):
+        r, g, b = p[x, y]
+        if not (b > g + 30 and g > r + 30 and p[x - 20, y] == (r, g, b)):
+            continue
+        if min(*p[x - 7, y], *p[x + 7, y]) < 245:
+            continue
+        right = p[x + 20, y]
+        if max(right) - min(right) < 20 and 85 < min(right) < 180:
+            print(x, y)
+            sys.exit(0)
+sys.exit("No rendered Sound slider thumb found in Quick Settings")
+PYTHON
+)
+read -r thumb_x thumb_y <<<"$sound_thumb"
+xdotool mousemove --window "$window" "$thumb_x" "$thumb_y" click 1 mousemove 1410 920
+key Right
 wait_until volume_is 46
 sleep .2; key Right
 wait_until volume_is 47
 sleep .2; key Left
 wait_until volume_is 46
-sleep .3
+# PulseAudio can report more than the slider's 100% ceiling. Wait for the
+# periodic device readback to paint the formerly gray track blue.
+# Tab away and back. A focus change must preserve the boost, while End is an
+# explicit request to return the sink to 100%.
+pactl set-sink-volume ferro_fixture 145%
+boost_presented() {
+    import -window "$window" -crop "1x1+$((thumb_x + 20))+$thumb_y" -format '%[fx:b-r]' info: |
+        awk '{exit !($1 > .4)}'
+}
+wait_until boost_presented
+key Tab shift+Tab m
+wait_until mute_is yes
+volume_is 145 || { echo 'Focusing the Sound slider changed boosted volume' >&2; exit 1; }
+key End
+wait_until volume_is 100
+pactl set-sink-mute ferro_fixture 0
+pactl set-sink-volume ferro_fixture 46%
 changed_from desktop quick-settings
 # The window can present the previous scene after key delivery, especially
 # under synchronization validation. Ctrl+Shift+C selects Calendar from the
