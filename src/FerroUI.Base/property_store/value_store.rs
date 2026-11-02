@@ -437,11 +437,20 @@ impl ValueStore {
             }
         }
         if property.inherits() {
-            if let Some(v) = self.try_get_inherited_value(property) {
-                return cast_effective_value::<T>(&*v).value();
-            }
+            self.inherited_or_default(owner, property)
+        } else {
+            property.get_default_value_for(owner)
         }
-        property.get_default_value_for(owner)
+    }
+
+    // Keep the inherited value's temporary Rc and its unwind cleanup off the
+    // hot paths for a local value or the default of a non-inheriting property.
+    #[inline(never)]
+    fn inherited_or_default<T: PropertyValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) -> T {
+        match self.try_get_inherited_value(property) {
+            Some(value) => cast_effective_value::<T>(&*value).value(),
+            None => property.get_default_value_for(owner),
+        }
     }
 
     pub fn is_animating(&self, property: &FerroProperty) -> bool {

@@ -174,10 +174,16 @@ impl<T: PropertyValue> BindingEntry<T> {
         self.start_core(true)
     }
 
+    #[inline]
     fn start_core(&self, produce_value: bool) {
-        if !self.state.begin(produce_value) {
-            return;
+        if self.state.begin(produce_value) {
+            self.subscribe();
         }
+    }
+
+    // Active entries only read the phase when the store asks for a value.
+    #[inline(never)]
+    fn subscribe(&self) {
         // The observers hold the entry weakly (DEVIATIONS.md, Property
         // system): the entry holds its source, and the source its observers.
         let this = self.this.clone();

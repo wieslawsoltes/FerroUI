@@ -127,16 +127,21 @@ impl<T: PropertyValue> StyledProperty<T> {
     /// Gets the default value for the property on the specified type.
     #[inline]
     pub fn get_default_value(&self, type_: &'static TypeInfo) -> T {
-        if let Some(value) = &*self.single_default_value.borrow() {
-            return value.clone();
-        }
-        self.get_metadata(type_).default_value().clone()
+        self.default_for(|| type_)
     }
 
     /// Gets the default value for the property on the type of `owner`.
     #[inline]
     pub fn get_default_value_for(&self, owner: &FerroObject) -> T {
-        self.get_default_value(owner.get_type())
+        self.default_for(|| owner.get_type())
+    }
+
+    #[inline]
+    fn default_for(&self, host: impl FnOnce() -> &'static TypeInfo) -> T {
+        if let Some(value) = &*self.single_default_value.borrow() {
+            return value.clone();
+        }
+        self.get_metadata(host()).default_value().clone()
     }
 
     /// A binding keeps the first fallback it observes for its owner, even if
