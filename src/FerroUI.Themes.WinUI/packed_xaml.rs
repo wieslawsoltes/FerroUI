@@ -5,11 +5,12 @@ use ferroui_base::{
     controls::ResourceDictionary,
     metadata::{from_markup_value, into_markup_value, IServiceProvider},
     styling::Styles,
+    utilities::Uri,
     BoxedValue, Ref,
 };
 use ferroui_markup_xaml::{
     xaml_il::runtime::{compiled::uri_equals, XamlIlRuntimeHelpers},
-    FerroXamlLoader, XamlLoadError,
+    FerroXamlLoader, RuntimeXamlLoaderConfiguration, XamlLoadError,
 };
 use ferroui_markup_xaml_loader::{binary_document::pack::ThemePack, FerroRuntimeXamlLoader};
 use std::{rc::Rc, sync::OnceLock};
@@ -25,7 +26,11 @@ fn load(path: &str, root: Option<BoxedValue>, parent: Parent) -> Result<BoxedVal
     let archive = archive
         .as_ref()
         .map_err(|message| XamlLoadError::with_message(message.clone()))?;
-    FerroRuntimeXamlLoader::load_packed_document(archive, &ASSEMBLY, path, root, parent)
+    let uri = Uri::absolute(&format!("ferres://{}/{path}", ASSEMBLY.name))
+        .map_err(|error| XamlLoadError::with_message(error.to_string()))?;
+    let mut configuration = RuntimeXamlLoaderConfiguration::new();
+    configuration.local_assembly = Some(&ASSEMBLY);
+    FerroRuntimeXamlLoader::load_packed_document(archive, uri, root, parent, configuration)
 }
 
 /// Class constructor and external compiled markup entry point.
