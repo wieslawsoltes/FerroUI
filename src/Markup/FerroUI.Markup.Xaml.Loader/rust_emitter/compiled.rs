@@ -449,6 +449,7 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
         documents.entry(function.as_str()).or_insert_with(|| (name.as_str(), name.replace(['\r', '\n'], " ")));
     }
     let mut table_document: Option<(&str, bool)> = None;
+    let mut binding_document = None;
     let mut document = None;
     let mut map = String::from("{\n  \"entries\": [\n");
     let mut first_entry = true;
@@ -465,11 +466,19 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
     for (index, text) in source.lines().enumerate() {
         let number = index + 1;
         if let Some((current, value_position)) = table_document {
-            if text == "];" {
+            if text.trim_start() == "];" {
                 table_document = None;
             } else if let Some((line, column)) = native_row_position(text, value_position) {
                 close(&mut Some((number, line, column)), current, number);
             }
+            continue;
+        }
+        if let Some(function) = text.strip_prefix("mod __").and_then(|s| s.strip_suffix("_bindings {")) {
+            binding_document = documents.get(function).map(|(doc, _)| *doc);
+        } else if text == "}" {
+            binding_document = None;
+        } else if text.starts_with("    pub(super) const R") && text.ends_with(": &[rt::TemplateBindingRow] = &[") {
+            table_document = binding_document.map(|document| (document, false));
             continue;
         }
         if let Some((name, row_type)) = text.strip_prefix("static ").and_then(|s| s.split_once(": &[rt::theme_resources::")) {

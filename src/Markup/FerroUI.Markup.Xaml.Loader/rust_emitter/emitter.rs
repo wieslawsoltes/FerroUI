@@ -53,6 +53,7 @@ use super::emit_types::{
 use super::source::rust_string_literal;
 use super::selector_plans::{Op as SelectorOp, SelectorPlans};
 use super::style_setters::StyleSetters;
+use super::template_bindings::TemplateBindings;
 use super::theme_tables::{Factory, ThemeTables};
 
 /// Why a document is not eligible for emission: the first node (or member)
@@ -547,7 +548,7 @@ fn fused_dynamic_resource_bind(types: &dyn EmitTypes, lines: &[String], statemen
 /// The binding setter of a registered property whose value is `{TemplateBinding source}`, as the
 /// shared helper of `rt` writes it: `lines` end with the statements of the value (the binding
 /// created for the property of the templated parent, `ProvideValue`) and `statement` is the call
-/// of `rt::bind` with the provided binding. `rt::bind_template_binding(target, property, source,
+/// of `rt::bind` with the provided binding. `rt::apply_template_binding(target, source, property_getter,
 /// line, position)` makes the same calls in the same order. `None` (the statements are kept) for
 /// any other shape.
 fn fused_template_binding_bind(types: &dyn EmitTypes, lines: &[String], statement: &str) -> Option<String> {
@@ -570,7 +571,7 @@ fn fused_template_binding_bind(types: &dyn EmitTypes, lines: &[String], statemen
         return None;
     }
     Some(format!(
-        "rt::bind_template_binding({object}.upcast_ref::<::ferroui_base::FerroObject>(), {property}, {source}, {line}, {column})?;"
+        "rt::apply_template_binding({object}.upcast_ref::<::ferroui_base::FerroObject>(), {source}, || rt::property({property}), {line}, {column})?;"
     ))
 }
 
@@ -676,6 +677,7 @@ struct Emitter<'a> {
     theme_tables: ThemeTables,
     selectors: SelectorPlans,
     styles: StyleSetters,
+    bindings: TemplateBindings,
     /// The Rust types of the locals whose type the emitter states (`let` of
     /// an object created with its default constructor): what a part of a
     /// split function can be passed ([`split_into_parts`]).
@@ -2693,6 +2695,7 @@ impl<'a> Emitter<'a> {
         if self.theme_tables.site_count() != sites_before_body {
             self.theme_tables.lower(&mut body_lines, &mut self.deferred_functions, self.function_name, self.documents);
         }
+        self.bindings.lower(self.function_name, &mut body_lines);
         self.assignments = outer_assignments;
         self.local_names = outer_names;
         let (uses_context, uses_name_scope) = (self.uses_context || self.uses_name_scope, self.uses_name_scope);
@@ -4184,6 +4187,7 @@ pub fn emit_function<'a>(
         theme_tables: ThemeTables::default(),
         selectors: SelectorPlans::default(),
         styles: StyleSetters::default(),
+        bindings: TemplateBindings::default(),
         local_types: HashMap::new(),
         namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
         root_namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
@@ -4227,6 +4231,7 @@ pub fn emit_function<'a>(
     }
 
     emitter.theme_tables.lower(&mut emitter.lines, &mut emitter.deferred_functions, function_name, documents);
+    emitter.bindings.lower(function_name, &mut emitter.lines);
     let mut source = String::new();
     let document_text = document_name.replace('`', "'").replace(['\r', '\n'], " ");
     for table in &emitter.namespace_tables {
@@ -4236,6 +4241,7 @@ pub fn emit_function<'a>(
     source.push_str(&emitter.theme_tables.constants);
     source.push_str(&emitter.selectors.helpers);
     source.push_str(&emitter.styles.helpers);
+    emitter.bindings.write(function_name, &emitter.styles, &mut source);
     source.push_str(&format!("/// The base URI and the XML namespaces of `{document_text}`.\n"));
     source.push_str(&format!(
         "static {document_constant}: rt::DocumentInfo = rt::DocumentInfo {{ base_uri: {base_uri}, namespaces: {namespaces} }};\n"

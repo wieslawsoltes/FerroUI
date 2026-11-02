@@ -24,6 +24,10 @@ pub(super) struct StyleSetters {
 }
 
 impl StyleSetters {
+    pub(super) fn getter_name(&self, expression: &str) -> Option<&str> {
+        self.getters.get(expression).map(String::as_str)
+    }
+
     pub(super) fn dynamic(&mut self, receiver: &str, property: &str, key: &str) -> String {
         let call = format!("    rt::add_dynamic_resource_setter_with_parent(&context, {receiver}, {property}, {key});");
         // A getter invocation may initialize metadata. Keep it in the loop at its exact

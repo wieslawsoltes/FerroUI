@@ -277,3 +277,35 @@ fn local_setter_checks_the_overloads_before_registering_the_property() {
         true, "FerroUI.Controls.TextBlock.set_Text", "Text", 7, 19).unwrap();
     assert_eq!(text.get_value(TextBlock::text_property()), None);
 }
+
+#[test]
+fn template_binding_rows_resolve_operands_in_order_and_stop_on_unwind() {
+    use ferroui_base::{FerroObject, FerroProperty};
+    use ferroui_controls::Border;
+    use std::cell::RefCell;
+    use super::compiled::{bind_template_rows, property};
+
+    thread_local! { static TRACE: RefCell<Vec<&'static str>> = const { RefCell::new(Vec::new()) }; }
+    fn source() -> &'static FerroProperty {
+        TRACE.with(|trace| trace.borrow_mut().push("source"));
+        property(Border::background_property())
+    }
+    fn destination() -> &'static FerroProperty {
+        TRACE.with(|trace| trace.borrow_mut().push("destination"));
+        property(Border::background_property())
+    }
+    fn fail() -> &'static FerroProperty {
+        TRACE.with(|trace| trace.borrow_mut().push("fail"));
+        panic!("property initializer");
+    }
+    let target = Border::new();
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        bind_template_rows(target.upcast_ref::<FerroObject>(), &[
+            ((source, destination), 2, 3),
+            ((fail, destination), 3, 4),
+            ((source, destination), 4, 5),
+        ]).unwrap();
+    }));
+    assert!(result.is_err());
+    TRACE.with(|trace| assert_eq!(*trace.borrow(), ["source", "destination", "fail"]));
+}

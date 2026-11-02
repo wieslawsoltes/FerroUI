@@ -3899,7 +3899,7 @@ fn build_control_template_parts_xaml_deferred_0(
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Border")));
     rt::register_name_value(name_scope.as_ref(), "PART_Border", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 1, 158)?;
     // control_template_parts.xaml(1,177) Background
-    rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 1, 177)?;
+    rt::apply_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), || rt::property(::ferroui_controls::Border::background_property()), 1, 177)?;
     // control_template_parts.xaml(1,220) Child
     // control_template_parts.xaml(1,220) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();

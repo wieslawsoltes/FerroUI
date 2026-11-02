@@ -116,6 +116,7 @@ pub mod runtime_types;
 mod source;
 mod transform;
 mod theme_tables;
+mod template_bindings;
 mod factory_shapes;
 mod imports;
 mod selector_plans;

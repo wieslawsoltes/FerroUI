@@ -422,6 +422,36 @@ pub fn bind_template_binding(
     bind(target, property, provided, line, position)
 }
 
+/// Property getters are evaluated at the original operation, including first-use registration.
+pub type TemplateBindingProperties = (fn() -> &'static FerroProperty, fn() -> &'static FerroProperty);
+
+/// A resolved property pair and the XAML position of its binding setter.
+pub type TemplateBindingRow = (TemplateBindingProperties, i32, i32);
+
+/// The source operand is evaluated by the caller. Resolve the destination after ProvideValue,
+/// as the interpreter does when it applies the property's binding setter.
+#[inline(never)]
+pub fn apply_template_binding(
+    target: &Ref<FerroObject>, source: &'static FerroProperty, destination: fn() -> &'static FerroProperty,
+    line: i32, column: i32,
+) -> Result<(), XamlLoadError> {
+    use ferroui_base::data::TemplateBinding;
+    let binding = TemplateBinding::__markup_new_1(source);
+    let provided = TemplateBinding::__markup_ProvideValue_0(&binding);
+    bind(target, destination(), provided, line, column)
+}
+
+/// Apply an adjacent run in declaration order. A failure stops before the next source getter.
+#[inline(never)]
+pub fn bind_template_rows(
+    target: &Ref<FerroObject>, rows: &[TemplateBindingRow],
+) -> Result<(), XamlLoadError> {
+    for &((source, destination), line, column) in rows {
+        apply_template_binding(target, source(), destination, line, column)?;
+    }
+    Ok(())
+}
+
 /// A literal-key StaticResource assignment. Evaluate the target descriptor after
 /// constructing the extension, including any first-use property registration.
 #[inline(never)]

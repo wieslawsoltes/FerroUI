@@ -48,6 +48,7 @@ fn has_location(call: &str) -> bool {
             | "rt::no_setter"
             | "rt::bind_dynamic_resource"
             | "rt::bind_template_binding"
+            | "rt::apply_template_binding"
             | "rt::bind_or_set_priority"
             | "rt::defer"
             | "rt::register_name"
