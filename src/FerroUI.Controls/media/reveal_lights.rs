@@ -1217,7 +1217,7 @@ impl XamlAmbientLight {
 
     fn static_constructor() {
         // `OnAttachedIsTargetPropertyChanged`.
-        let _ = Self::is_target_property().changed().subscribe(|e| {
+        Self::is_target_property().changed().subscribe(|e| {
             let is_target = e.get_new_value::<bool>();
             let sender = e.sender();
             if let Some(element) = sender.downcast_ref::<Visual>() {
@@ -1234,7 +1234,7 @@ impl XamlAmbientLight {
                     XamlLight::remove_target_brush(XAML_AMBIENT_LIGHT_ID, &brush);
                 }
             }
-        });
+        }).detach();
     }
 
     pub fn color(&self) -> Color {

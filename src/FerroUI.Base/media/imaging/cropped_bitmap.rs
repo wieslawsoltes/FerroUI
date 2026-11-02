@@ -54,8 +54,8 @@ crate::ferro_properties! { impl CroppedBitmap {
 
 impl CroppedBitmap {
     fn static_constructor() {
-        Self::source_rect_property().changed().add_class_handler::<CroppedBitmap>(|x, e| x.source_rect_changed(e));
-        Self::source_property().changed().add_class_handler::<CroppedBitmap>(|x, e| x.source_changed(e));
+        Self::source_rect_property().changed().add_class_handler::<CroppedBitmap>(|x, e| x.source_rect_changed(e)).detach();
+        Self::source_property().changed().add_class_handler::<CroppedBitmap>(|x, e| x.source_changed(e)).detach();
     }
 
     /// Creates the class data.

@@ -57,7 +57,7 @@ crate::ferro_properties! { impl PathFigure {
 
 impl PathFigure {
     fn static_constructor() {
-        Self::segments_property().changed().add_class_handler::<PathFigure>(|s, _| s.on_segments_changed());
+        Self::segments_property().changed().add_class_handler::<PathFigure>(|s, _| s.on_segments_changed()).detach();
     }
 
     /// Creates the class data.

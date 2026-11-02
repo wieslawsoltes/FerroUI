@@ -215,7 +215,7 @@ impl Panel {
                     let panel: &Panel = panel.upcast();
                     panel.invalidate_arrange();
                 }
-            });
+            }).detach();
         }
     }
 
@@ -232,7 +232,7 @@ impl Panel {
                     let panel: &Panel = panel.upcast();
                     panel.invalidate_measure();
                 }
-            });
+            }).detach();
         }
     }
 

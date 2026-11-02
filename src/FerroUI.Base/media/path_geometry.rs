@@ -80,7 +80,7 @@ impl PathGeometry {
     fn static_constructor() {
         Self::figures_property().changed().add_class_handler::<PathGeometry>(|s, e| {
             s.on_figures_changed(e.get_new_value::<Option<PathFigures>>())
-        });
+        }).detach();
     }
 
     /// Creates the class data.

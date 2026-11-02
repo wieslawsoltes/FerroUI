@@ -286,7 +286,7 @@ crate::ferro_properties! { impl StyledElement, also [
                 "DataContext",
                 StyledPropertyOptions::new(None).inherits(true).notifying(Self::data_context_notifying),
             );
-            property.changed().add_class_handler::<StyledElement>(|x, _| x.on_data_context_changed());
+            property.changed().add_class_handler::<StyledElement>(|x, _| x.on_data_context_changed()).detach();
             property
         }
     );

@@ -179,7 +179,7 @@ impl ContextMenu {
     /// Initializes static members of the [`ContextMenu`] class.
     fn static_constructor() {
         Self::placement_property().override_default_value::<ContextMenu>(PlacementMode::Pointer);
-        let _ = Control::context_menu_property().changed().subscribe(Self::context_menu_changed);
+        Control::context_menu_property().changed().subscribe(Self::context_menu_changed).detach();
         crate::automation::AutomationProperties::accessibility_view_property()
             .override_default_value::<ContextMenu>(crate::automation::AccessibilityView::Control);
         crate::automation::AutomationProperties::control_type_override_property()

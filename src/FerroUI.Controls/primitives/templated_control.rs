@@ -271,7 +271,7 @@ impl TemplatedControl {
 
     fn static_constructor() {
         Visual::clip_to_bounds_property().override_default_value::<TemplatedControl>(true);
-        Self::template_property().changed().add_class_handler::<TemplatedControl>(|x, e| x.on_template_changed(e));
+        Self::template_property().changed().add_class_handler::<TemplatedControl>(|x, e| x.on_template_changed(e)).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

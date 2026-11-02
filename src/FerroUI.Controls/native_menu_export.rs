@@ -109,7 +109,7 @@ impl NativeMenu {
                 panic!("IsNativeMenuExported property is read-only");
             }
             info.changing_is_exported.set(false);
-        });
+        }).detach();
         Self::menu_property().changed().subscribe(|args| {
             let new_value = args.get_new_value::<Option<Ref<NativeMenu>>>();
             if let Some(tl) = args.sender().downcast_ref::<TopLevel>() {
@@ -121,6 +121,6 @@ impl NativeMenu {
                     exporter.set_native_menu(new_value);
                 }
             }
-        });
+        }).detach();
     }
 }

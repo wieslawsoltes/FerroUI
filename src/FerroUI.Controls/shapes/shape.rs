@@ -419,7 +419,7 @@ impl Shape {
                     let shape: &Shape = sender.upcast();
                     Shape::affects_geometry_invalidate(shape, e);
                 }
-            });
+            }).detach();
         }
     }
 

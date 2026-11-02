@@ -36,7 +36,7 @@ impl ClassBindingManager {
                 let value = args.get_new_value::<bool>();
                 element.classes().set(&class_name, value);
             }
-        });
+        }).detach();
         property
     }
 

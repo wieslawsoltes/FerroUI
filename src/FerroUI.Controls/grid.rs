@@ -780,28 +780,36 @@ impl Grid {
 
         show_grid_lines
             .changed()
-            .add_class_handler::<Grid>(Self::on_show_grid_lines_property_changed);
+            .add_class_handler::<Grid>(Self::on_show_grid_lines_property_changed)
+            .detach();
         column_spacing
             .changed()
-            .add_class_handler::<Grid>(Self::on_spacing_property_changed);
+            .add_class_handler::<Grid>(Self::on_spacing_property_changed)
+            .detach();
         row_spacing
             .changed()
-            .add_class_handler::<Grid>(Self::on_spacing_property_changed);
+            .add_class_handler::<Grid>(Self::on_spacing_property_changed)
+            .detach();
 
         is_shared_size_scope
             .changed()
-            .add_class_handler::<Control>(DefinitionBase::on_is_shared_size_scope_property_changed);
+            .add_class_handler::<Control>(DefinitionBase::on_is_shared_size_scope_property_changed)
+            .detach();
         column
             .changed()
-            .add_class_handler::<Control>(Self::on_cell_attached_property_changed);
+            .add_class_handler::<Control>(Self::on_cell_attached_property_changed)
+            .detach();
         column_span
             .changed()
-            .add_class_handler::<Control>(Self::on_cell_attached_property_changed);
+            .add_class_handler::<Control>(Self::on_cell_attached_property_changed)
+            .detach();
         row.changed()
-            .add_class_handler::<Control>(Self::on_cell_attached_property_changed);
+            .add_class_handler::<Control>(Self::on_cell_attached_property_changed)
+            .detach();
         row_span
             .changed()
-            .add_class_handler::<Control>(Self::on_cell_attached_property_changed);
+            .add_class_handler::<Control>(Self::on_cell_attached_property_changed)
+            .detach();
 
         Layoutable::affects_measure::<Grid>(&[column_spacing.as_property(), row_spacing.as_property()]);
         Panel::affects_parent_measure::<Grid>(&[

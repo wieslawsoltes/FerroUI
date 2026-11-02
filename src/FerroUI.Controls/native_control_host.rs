@@ -134,7 +134,8 @@ impl NativeControlHost {
     fn static_constructor() {
         Visual::flow_direction_property()
             .changed()
-            .add_class_handler::<NativeControlHost>(Self::on_flow_direction_changed);
+            .add_class_handler::<NativeControlHost>(Self::on_flow_direction_changed)
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
