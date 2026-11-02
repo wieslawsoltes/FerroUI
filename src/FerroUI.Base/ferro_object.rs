@@ -720,7 +720,14 @@ impl FerroObject {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         Self::validate_priority(priority);
-        self.values.add_boxed_binding(self, property, source, priority)
+        if priority == BindingPriority::LocalValue {
+            let observer = LocalValueBindingObserver::new(self, property);
+            self.values.install_local_observer(property, observer.clone());
+            observer.start_untyped(source);
+            observer
+        } else {
+            self.values.add_boxed_frame_binding(self, property, source, priority)
+        }
     }
 
     /// Coerces the specified property.
@@ -881,11 +888,7 @@ impl FerroObject {
         source: Rc<dyn IObservable<BoxedValue>>,
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
-        if property.is_direct() {
-            return property.routes().route_bind_local(self, source);
-        }
-        Self::validate_priority(priority);
-        self.values.add_boxed_binding(self, property, source, priority)
+        property.routes().route_bind(self, source, priority)
     }
 
     // --- change notification ----------------------------------------------

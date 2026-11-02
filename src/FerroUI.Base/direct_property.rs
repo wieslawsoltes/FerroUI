@@ -185,10 +185,11 @@ impl<T: PropertyValue> PropertyRoutes for DirectPropertyBase<T> {
         }
     }
 
-    fn route_bind_local(
+    fn route_bind(
         &'static self,
         o: &FerroObject,
         source: Rc<dyn IObservable<BoxedValue>>,
+        _priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         o.bind_direct_untyped(self, source)
     }

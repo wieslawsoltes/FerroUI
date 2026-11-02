@@ -171,8 +171,7 @@ impl ValueStore {
     ) -> Rc<dyn IDisposable> {
         if priority == BindingPriority::LocalValue {
             let observer = LocalValueBindingObserver::new(owner, property);
-            self.dispose_existing_local_value_binding(property);
-            self.set_local_value_binding(property, observer.clone());
+            self.install_local_observer(property, observer.clone());
             start_local(&observer, source);
             observer
         } else {
@@ -186,28 +185,25 @@ impl ValueStore {
         }
     }
 
-    pub(crate) fn add_boxed_binding(
+    pub(crate) fn add_boxed_frame_binding(
         &self,
         owner: &FerroObject,
         property: &'static FerroProperty,
         source: Rc<dyn IObservable<crate::BoxedValue>>,
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
-        if priority == BindingPriority::LocalValue {
-            return property.routes().route_bind_local(owner, source);
-        }
         let effective = self.get_effective_value(property);
         let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
         let weak = Rc::downgrade(&frame);
         let entry = property.routes().route_create_binding_entry(owner, weak, source);
         frame.base().add(entry.clone());
         if effective.is_none_or(|e| priority <= e.priority()) {
-            entry.binding().start(true);
+            entry.start_publishing();
         }
         entry
     }
 
-    pub(crate) fn replace_local_binding(&self, property: &'static FerroProperty, binding: Rc<dyn IDisposable>) {
+    pub(crate) fn install_local_observer(&self, property: &'static FerroProperty, binding: Rc<dyn IDisposable>) {
         self.dispose_existing_local_value_binding(property);
         self.set_local_value_binding(property, binding);
     }
@@ -221,8 +217,7 @@ impl ValueStore {
         start: fn(&Rc<DirectBindingObserver<T>>, Rc<dyn IObservable<U>>),
     ) -> Rc<dyn IDisposable> {
         let observer = DirectBindingObserver::new(owner, property);
-        self.dispose_existing_local_value_binding(property);
-        self.set_local_value_binding(property, observer.clone());
+        self.install_local_observer(property, observer.clone());
         start(&observer, source);
         observer
     }
