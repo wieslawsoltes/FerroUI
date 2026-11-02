@@ -1,0 +1,33 @@
+[package]
+name = "ferroui-qml-compiler"
+description = "Clean-room QML language frontend and component compiler for FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+autotests = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+javascript = ["dep:swc_common", "dep:swc_ecma_ast", "dep:swc_ecma_parser", "dep:swc_ecma_visit", "dep:swc_ecma_codegen", "dep:swc_ecma_compat_es2017", "dep:swc_ecma_transforms_base","dep:swc_ecma_transforms_module"]
+
+[dependencies]
+swc_ecma_transforms_module = { version = "58", optional = true }
+swc_ecma_codegen = { version = "33", optional = true }
+swc_ecma_compat_es2017 = { version = "52", optional = true }
+swc_ecma_transforms_base = { version = "51", optional = true, features = ["inline-helpers"] }
+swc_common = { version = "27", optional = true }
+swc_ecma_ast = { version = "30", optional = true }
+swc_ecma_parser = { version = "47", default-features = false, optional = true }
+swc_ecma_visit = { version = "30", optional = true }
+serde = { workspace = true, features = ["derive", "rc"] }
+
+[package.metadata.release]
+group = "markup"

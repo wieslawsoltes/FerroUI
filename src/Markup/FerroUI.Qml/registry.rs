@@ -1,0 +1,549 @@
+use super::{Error, Parameter, Value};
+use crate::{Namespace, ScriptContext};
+use ferroui_qml_compiler::Import;
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    rc::Rc,
+};
+
+pub type NativeCallback = fn(&[Value]) -> Result<Value, Error>;
+
+type ContextCallback = dyn Fn(&mut ScriptContext<'_, '_>, &[Value]) -> Result<Value, Error>;
+
+#[derive(Clone)]
+pub(crate) enum Implementation {
+    Pure(NativeCallback),
+    Context(Rc<ContextCallback>),
+}
+
+impl std::fmt::Debug for Implementation {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(match self {
+            Self::Pure(_) => "Pure",
+            Self::Context(_) => "Context",
+        })
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct NativeMethod {
+    pub(crate) parameters: Vec<Parameter>,
+    pub(crate) result: String,
+    pub(crate) callback: Implementation,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct TypeDefinition {
+    pub(crate) readonly: BTreeSet<String>,
+    pub(crate) enums: Rc<Namespace>,
+    base: Option<(String, String)>,
+    pub(crate) lineage: Rc<Vec<(String, String)>>,
+    pub(crate) properties: BTreeMap<String, (String, Value)>,
+    pub(crate) signals: Rc<BTreeMap<String, Vec<Parameter>>>,
+    pub(crate) native: Rc<BTreeMap<String, NativeMethod>>,
+    pub(crate) visual_children: Option<String>,
+    pub(crate) default_property: Option<String>,
+}
+
+impl TypeDefinition {
+    /// Registered properties, including members inherited from native base types.
+    pub fn property_types(&self) -> impl Iterator<Item = (&str, &str)> {
+        self.properties
+            .iter()
+            .map(|(name, (ty, _))| (name.as_str(), ty.as_str()))
+    }
+
+    pub fn signals(&self) -> impl Iterator<Item = &str> {
+        self.signals.keys().map(String::as_str)
+    }
+
+    pub fn methods(&self) -> impl Iterator<Item = &str> {
+        self.native.keys().map(String::as_str)
+    }
+
+    /// Extend a previously registered native type, retaining its members and
+    /// assignability. A derived definition may specialize inherited defaults.
+    pub fn inherits(mut self, module: &str, name: &str) -> Self {
+        self.base = Some((module.into(), name.into()));
+        self
+    }
+
+    /// Expose registered dotted properties as a live grouped object to QML scripts.
+    pub fn property_group(self, name: &str) -> Self {
+        self.readonly_property(name, "$qml:propertyGroup", Value::Undefined)
+    }
+
+    /// Register Qt Quick Item anchor lines and their assignable grouped properties.
+    pub fn quick_anchors(mut self) -> Self {
+        for edge in crate::AnchorEdge::ALL {
+            self = self
+                .readonly_property(edge.name(), "$qml:anchorLine", Value::Undefined)
+                .property(
+                    &format!("anchors.{}", edge.name()),
+                    "$qml:anchorLine",
+                    Value::Undefined,
+                );
+        }
+        for side in ["left", "right", "top", "bottom"] {
+            self = self.property(&format!("anchors.{side}Margin"), "var", Value::Undefined);
+        }
+        self.readonly_property("anchors", "$qml:anchorGroup", Value::Undefined)
+            .property_group("LayoutMirroring")
+            .property("LayoutMirroring.enabled", "bool", Value::Bool(false))
+            .property(
+                "LayoutMirroring.childrenInherit",
+                "bool",
+                Value::Bool(false),
+            )
+            .property("baselineOffset", "real", Value::Number(0.))
+            .property("anchors.baselineOffset", "real", Value::Number(0.))
+            .property("anchors.alignWhenCentered", "bool", Value::Bool(true))
+            .property("anchors.fill", "Item", Value::Null)
+            .property("anchors.centerIn", "Item", Value::Null)
+            .property("anchors.margins", "real", Value::Number(0.))
+            .property("anchors.horizontalCenterOffset", "real", Value::Number(0.))
+            .property("anchors.verticalCenterOffset", "real", Value::Number(0.))
+    }
+
+    /// Register a Rust enumeration in the type namespace. Keys are accessible
+    /// via both Type.Enum.Key and Type.Key.
+    pub fn enumeration(mut self, name: &str, keys: &[(&str, i32)]) -> Result<Self, Error> {
+        let keys = keys
+            .iter()
+            .map(|(k, v)| (k.to_string(), *v))
+            .collect::<Vec<_>>();
+        Rc::make_mut(&mut self.enums).declare(name, &keys)?;
+        Ok(self)
+    }
+
+    pub fn property(mut self, name: &str, ty: &str, default: Value) -> Self {
+        self.properties.insert(name.into(), (ty.into(), default));
+        self
+    }
+
+    pub fn readonly_property(mut self, name: &str, ty: &str, default: Value) -> Self {
+        self.readonly.insert(name.to_owned());
+        self.property(name, ty, default)
+    }
+    pub fn signal(mut self, name: &str, parameters: Vec<Parameter>) -> Self {
+        Rc::make_mut(&mut self.signals).insert(name.into(), parameters);
+        self
+    }
+
+    /// A deterministic Rust function may be called from methods or bindings.
+    /// Its result must depend only on its arguments for invalidation to be correct.
+    pub fn method(
+        mut self,
+        name: &str,
+        parameters: Vec<Parameter>,
+        result: &str,
+        callback: NativeCallback,
+    ) -> Self {
+        Rc::make_mut(&mut self.native).insert(
+            name.into(),
+            NativeMethod {
+                parameters,
+                result: result.into(),
+                callback: Implementation::Pure(callback),
+            },
+        );
+        self
+    }
+
+    /// Register a method with access to its QML receiver. Property reads contribute
+    /// to the active binding. Property writes, signal delivery and nested calls use
+    /// the caller's transaction. External state captured by the closure is owned by Rust.
+    pub fn context_method(
+        mut self,
+        name: &str,
+        parameters: Vec<Parameter>,
+        result: &str,
+        callback: impl Fn(&mut ScriptContext<'_, '_>, &[Value]) -> Result<Value, Error> + 'static,
+    ) -> Self {
+        Rc::make_mut(&mut self.native).insert(
+            name.into(),
+            NativeMethod {
+                parameters,
+                result: result.into(),
+                callback: Implementation::Context(Rc::new(callback)),
+            },
+        );
+        self
+    }
+
+    /// Identify the ownership list to which newly parented visual children are added.
+    pub fn visual_children(mut self, name: &str) -> Self {
+        self.visual_children = Some(name.into());
+        self
+    }
+
+    pub fn default_property(mut self, name: &str) -> Self {
+        self.default_property = Some(name.into());
+        self
+    }
+}
+
+/// A registry explicitly owns the modules visible to a QML component.
+#[derive(Clone)]
+pub struct TypeRegistry {
+    pub(crate) plugins: BTreeSet<crate::ir::qmldir::StaticPlugin>,
+    pub(crate) component_import_paths: Vec<url::Url>,
+    pub(crate) component_transport: Option<Rc<dyn crate::network::ComponentTransport>>,
+    imports: BTreeMap<String, Vec<String>>,
+    import_order: Rc<BTreeMap<String, Vec<String>>>,
+    pub(crate) modules: Rc<BTreeMap<String, BTreeMap<String, TypeDefinition>>>,
+    versions: BTreeMap<(String, u16), u16>,
+}
+
+impl Default for TypeRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl TypeRegistry {
+    /// Install a host plugin atomically. A failed initializer leaves the original registry
+    /// intact. Reinstalling the same module/name/version does not rerun its initializer.
+    pub fn install_plugin(
+        &mut self,
+        plugin: crate::ir::qmldir::StaticPlugin,
+        initialize: impl FnOnce(&mut TypeRegistry) -> Result<(), Error>,
+    ) -> Result<(), Error> {
+        if self.plugins.contains(&plugin) {
+            return Ok(());
+        }
+        let mut staged = self.clone();
+        staged.plugins.insert(plugin.clone());
+        initialize(&mut staged)?;
+        if !staged.modules.contains_key(&plugin.module) {
+            return Err(Error::new(format!(
+                "plugin '{}' registered no module '{}'",
+                plugin.name, plugin.module
+            )));
+        }
+        let maximum = staged
+            .versions
+            .entry((plugin.module, plugin.version.major))
+            .or_default();
+        *maximum = (*maximum).max(plugin.version.minor);
+        *self = staged;
+        Ok(())
+    }
+
+    pub fn static_plugins(&self) -> impl Iterator<Item = &crate::ir::qmldir::StaticPlugin> {
+        self.plugins.iter()
+    }
+
+    /// Add a directory in which to look up identified modules for remote QML.
+    /// The first matching same-origin module wins (e.g. Lab.Widgets/qmldir
+    /// is located under Lab/Widgets/ in this directory).
+    pub fn add_component_import_path(&mut self, mut directory: url::Url) -> Result<(), Error> {
+        if !matches!(directory.scheme(), "http" | "https") || directory.host().is_none() {
+            return Err(Error::new(
+                "a network import path must be an HTTP(S) directory",
+            ));
+        }
+        directory.set_query(None);
+        directory.set_fragment(None);
+        if !directory.path().ends_with('/') {
+            directory
+                .path_segments_mut()
+                .map_err(|_| Error::new("invalid import directory"))?
+                .push("");
+        }
+        if !self.component_import_paths.contains(&directory) {
+            self.component_import_paths.push(directory);
+        }
+        Ok(())
+    }
+
+    /// Configure asynchronous HTTP(S) component sources for instances built from this registry.
+    /// Without a transport only bundled components are accessible.
+    pub fn set_component_transport(
+        &mut self,
+        transport: Rc<dyn crate::network::ComponentTransport>,
+    ) {
+        self.component_transport = Some(transport);
+    }
+
+    pub fn new() -> Self {
+        let mut registry = Self {
+            plugins: BTreeSet::new(),
+            component_transport: None,
+            component_import_paths: Vec::new(),
+            imports: BTreeMap::new(),
+            import_order: Rc::default(),
+            modules: Rc::default(),
+            versions: BTreeMap::new(),
+        };
+        let qt_object = TypeDefinition::default().property(
+            "objectName",
+            "string",
+            Value::String(String::new()),
+        );
+        Rc::make_mut(&mut registry.modules)
+            .entry("QtQml".into())
+            .or_default()
+            .insert("QtObject".into(), qt_object);
+        registry
+            .register(
+                "QtQml",
+                "Component",
+                TypeDefinition::default()
+                    .inherits("QtQml", "QtObject")
+                    .readonly_property("status", "int", Value::Number(1.))
+                    .readonly_property("progress", "real", Value::Number(1.))
+                    .readonly_property("url", "url", Value::String(String::new()))
+                    .enumeration(
+                        "Status",
+                        &[("Null", 0), ("Ready", 1), ("Loading", 2), ("Error", 3)],
+                    )
+                    .unwrap()
+                    .enumeration(
+                        "CompilationMode",
+                        &[("PreferSynchronous", 0), ("Asynchronous", 1)],
+                    )
+                    .unwrap(),
+            )
+            .expect("built-in Component");
+        let binding = TypeDefinition::default()
+            .inherits("QtQml", "QtObject")
+            .property("target", "QtObject", Value::Null)
+            .property("property", "string", Value::String(String::new()))
+            .property("value", "var", Value::Undefined)
+            .property("when", "bool", Value::Bool(true))
+            .property("delayed", "bool", Value::Bool(false))
+            .property("restoreMode", "int", Value::Number(3.))
+            .enumeration(
+                "RestoreMode",
+                &[
+                    ("RestoreNone", 0),
+                    ("RestoreBinding", 1),
+                    ("RestoreValue", 2),
+                    ("RestoreBindingOrValue", 3),
+                ],
+            )
+            .expect("built-in restore modes");
+        registry
+            .register("QtQml", "Binding", binding)
+            .expect("built-in Binding contract");
+        let timer = TypeDefinition::default()
+            .inherits("QtQml", "QtObject")
+            .property("interval", "int", Value::Number(1000.))
+            .property("repeat", "bool", Value::Bool(false))
+            .property("running", "bool", Value::Bool(false))
+            .property("triggeredOnStart", "bool", Value::Bool(false))
+            .signal("triggered", Vec::new());
+        registry
+            .register("QtQml", "Timer", timer)
+            .expect("built-in Timer contract");
+        let connections = TypeDefinition::default()
+            .inherits("QtQml", "QtObject")
+            .property("target", "QtObject", Value::Null)
+            .property("enabled", "bool", Value::Bool(true))
+            .property("ignoreUnknownSignals", "bool", Value::Bool(false));
+        registry
+            .register("QtQml", "Connections", connections)
+            .expect("built-in Connections contract");
+        crate::workers::register(&mut registry).expect("built-in WorkerScript contract");
+        crate::list_model::register(&mut registry).expect("built-in list model contracts");
+        registry.set_module_version("QtQml", 2, 15);
+        registry.set_module_version("QtQml", 6, 12);
+        registry
+    }
+
+    /// Export another native module in the same import namespace and version.
+    /// This is the native counterpart of a qmldir `import Module auto`.
+    pub fn reexport(&mut self, module: &str, dependency: &str) -> Result<(), Error> {
+        if !self.modules.contains_key(dependency) {
+            return Err(Error::new(format!(
+                "unknown re-exported module '{dependency}'"
+            )));
+        }
+        if self.module_order(dependency).any(|uri| uri == module) {
+            return Err(Error::new(format!(
+                "cyclic module import {module} -> {dependency}"
+            )));
+        }
+        Rc::make_mut(&mut self.modules)
+            .entry(module.to_owned())
+            .or_default();
+        let imports = self.imports.entry(module.to_owned()).or_default();
+        if !imports.iter().any(|uri| uri == dependency) {
+            imports.push(dependency.to_owned());
+            // Transitive re-exports can affect previously registered importers.
+            // Recompute on registration, so object construction never walks the graph.
+            self.import_order = Rc::new(
+                self.imports
+                    .keys()
+                    .map(|uri| {
+                        let mut pending = self.imports[uri]
+                            .iter()
+                            .map(String::as_str)
+                            .collect::<Vec<_>>();
+                        let mut order = Vec::new();
+                        let mut seen = BTreeSet::new();
+                        while let Some(current) = pending.pop() {
+                            if seen.insert(current) {
+                                order.push(current.to_owned());
+                                if let Some(more) = self.imports.get(current) {
+                                    pending.extend(more.iter().map(String::as_str));
+                                }
+                            }
+                        }
+                        (uri.clone(), order)
+                    })
+                    .collect(),
+            );
+        }
+        Ok(())
+    }
+
+    pub(crate) fn module_order<'a>(
+        &'a self,
+        uri: &'a str,
+    ) -> impl DoubleEndedIterator<Item = &'a str> {
+        std::iter::once(uri).chain(
+            self.import_order
+                .get(uri)
+                .into_iter()
+                .flatten()
+                .map(String::as_str),
+        )
+    }
+
+    /// Permit versioned imports of this major up to the given minor version.
+    pub fn set_module_version(&mut self, module: &str, major: u16, minor: u16) {
+        self.versions.insert((module.into(), major), minor);
+    }
+
+    pub fn register(
+        &mut self,
+        module: &str,
+        name: &str,
+        mut definition: TypeDefinition,
+    ) -> Result<(), Error> {
+        if let Some((base_module, base_name)) = definition.base.take() {
+            let base = self
+                .modules
+                .get(&base_module)
+                .and_then(|types| types.get(&base_name))
+                .ok_or_else(|| {
+                    Error::new(format!("unknown base type {base_module}.{base_name}"))
+                })?;
+            let mut merged = base.clone();
+            Rc::make_mut(&mut merged.lineage).push((base_module, base_name));
+            Rc::make_mut(&mut merged.enums).inherit(&definition.enums);
+            merged.readonly.append(&mut definition.readonly);
+            merged.properties.append(&mut definition.properties);
+            if definition.visual_children.is_some() {
+                merged.visual_children = definition.visual_children;
+            }
+            if !definition.signals.is_empty() {
+                Rc::make_mut(&mut merged.signals).extend(Rc::unwrap_or_clone(definition.signals));
+            }
+            if !definition.native.is_empty() {
+                Rc::make_mut(&mut merged.native).extend(Rc::unwrap_or_clone(definition.native));
+            }
+            if definition.default_property.is_some() {
+                merged.default_property = definition.default_property;
+            }
+            definition = merged;
+        }
+        if let Some(default) = &definition.default_property {
+            if !definition.properties.contains_key(default) {
+                return Err(Error::new(format!(
+                    "missing default property {name}.{default}"
+                )));
+            }
+        }
+        let types = Rc::make_mut(&mut self.modules)
+            .entry(module.to_owned())
+            .or_default();
+        if types.contains_key(name) {
+            return Err(Error::new(format!("duplicate type {module}.{name}")));
+        }
+        types.insert(name.to_owned(), definition);
+        Ok(())
+    }
+
+    pub(crate) fn validate_imports(&self, imports: &[Import]) -> Result<(), Error> {
+        for import in imports {
+            if import.is_path {
+                return Err(Error::new(format!(
+                    "file import '{}' requires a component resolver",
+                    import.uri
+                )));
+            }
+            if !self.modules.contains_key(&import.uri) {
+                return Err(Error::new(format!("unknown QML module '{}'", import.uri)));
+            }
+            if let Some(version) = &import.version {
+                let (major, minor) = version.split_once('.').unwrap_or((version, "0"));
+                let major = major
+                    .parse::<u16>()
+                    .map_err(|_| Error::new("invalid module major version"))?;
+                let minor = minor
+                    .parse::<u16>()
+                    .map_err(|_| Error::new("invalid module minor version"))?;
+                for uri in self.module_order(&import.uri) {
+                    if !self
+                        .versions
+                        .get(&(uri.to_owned(), major))
+                        .is_some_and(|maximum| minor <= *maximum)
+                    {
+                        return Err(Error::new(format!(
+                            "unavailable module version {uri} {version}"
+                        )));
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /// Names of registered native modules.
+    pub fn modules(&self) -> impl Iterator<Item = &str> {
+        self.modules.keys().map(String::as_str)
+    }
+
+    /// Names visible through this module, including its transitive exports.
+    pub fn exported_types(&self, uri: &str) -> BTreeSet<&str> {
+        self.module_order(uri)
+            .filter_map(|m| self.modules.get(m))
+            .flat_map(|types| types.keys().map(String::as_str))
+            .collect()
+    }
+
+    /// Resolve the authored type name with the same aliases and precedence as the engine.
+    pub fn resolve<'a>(
+        &'a self,
+        imports: &[Import],
+        name: &str,
+    ) -> Result<(&'a str, &'a str, &'a TypeDefinition), Error> {
+        let (namespace, name) = name
+            .split_once('.')
+            .map_or((None, name), |(ns, n)| (Some(ns), n));
+        for import in imports
+            .iter()
+            .rev()
+            .filter(|i| i.alias.as_deref() == namespace)
+        {
+            for uri in self.module_order(&import.uri) {
+                if let Some((module, types)) = self.modules.get_key_value(uri) {
+                    if let Some((name, ty)) = types.get_key_value(name) {
+                        return Ok((module, name, ty));
+                    }
+                }
+            }
+        }
+        Err(Error::new(format!(
+            "unresolved QML type '{}{name}'",
+            namespace.map(|s| format!("{s}.")).unwrap_or_default()
+        )))
+    }
+}
+
+#[path = "registry_metadata.rs"]
+mod metadata;
+pub use metadata::ToolingMetadata;

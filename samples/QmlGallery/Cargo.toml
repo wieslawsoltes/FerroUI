@@ -1,0 +1,36 @@
+[package]
+name = "qml-gallery"
+description = "A native, interactive FerroUI window authored in QML"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[features]
+default = ["desktop"]
+webscene = ["dep:ferroui-qml-webscene", "ferroui-qml-build/javascript"]
+desktop = ["dep:ferroui-view", "dep:ferroui-themes-winui"]
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "qml-gallery"
+path = "main.rs"
+required-features = ["desktop"]
+
+[dependencies]
+ferroui-controls.workspace = true
+ferroui-qml.workspace = true
+ferroui-qml-controls.workspace = true
+ferroui-qml-webscene = { workspace = true, optional = true }
+ferroui-view = { workspace = true, features = ["desktop"], optional = true }
+ferroui-themes-winui = { workspace = true, optional = true }
+
+[build-dependencies]
+ferroui-qml-build.workspace = true
+
+[dev-dependencies]
+ferroui-controls = { workspace = true, features = ["testing"] }

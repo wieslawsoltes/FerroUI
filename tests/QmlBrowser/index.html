@@ -1,0 +1,75 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>FerroUI QML browser conformance</title>
+<pre id="result">Running</pre>
+<script type="module">
+import init, {has_browser_host, qmlApplicationModule} from "./pkg/qml_browser_tests.js";
+const result = document.querySelector("#result");
+const report = async value => {
+    result.textContent = value;
+    await fetch("/result",{method:"POST",body:value});
+};
+function runOwner(url) {
+    const owner = new Worker(url,{type:"module"});
+    owner.onmessage = ({data}) => {owner.terminate();report(data);};
+    owner.onerror = e => report(e.message);
+}
+
+async function conformance() {
+    await init();
+    if (has_browser_host()) throw Error("UI thread accepted a blocking QML worker");
+    const {openQmlApplication} = await import(qmlApplicationModule());
+    try {
+        await openQmlApplication("./owner.js?application&fail");
+        throw Error("missing startup failure");
+    } catch(e) { if (!String(e).includes("fixture initialization failed")) throw e; }
+    let terminalError;
+    const terminal = new Promise(resolve => { terminalError=resolve; });
+    const trapped = await openQmlApplication("./owner.js?application&trap",{onError:terminalError});
+    if (!(await terminal).message.includes("fixture Wasm trap")) throw new Error("lost original Wasm trap");
+    try { await trapped.get("seed"); throw Error("request accepted after trap"); }
+    catch(e) { if (!String(e).includes("fixture Wasm trap")) throw e; }
+    let notifyError;
+    const reportedError = new Promise(resolve => { notifyError=resolve; });
+    const app = await openQmlApplication("./owner.js?application",{onError:notifyError});
+    function check(ok, label) { if (!ok) throw new Error(label); }
+    check(await app.get("caption","nested") === "native child","id-addressed child");
+    const totals = [];
+    const stop = await app.watch("total", n => totals.push(n));
+    const [set, total, bumped] = await Promise.all([app.set("seed",4),app.get("total"),app.call("bump",[2])]);
+    check(set === undefined && total === 13 && bumped === 17 && totals.join(",") === "13,17","concurrent FIFO requests and committed changes");
+    await stop();
+    const result = await app.call("copied",[{items:[true,undefined,"λ"]}]);
+    check(result.nested.items[0] && result.nested.items[1] === undefined && result.nested.items[2] === "λ"
+        && Object.is(result.numbers[0],-0) && Number.isNaN(result.numbers[1]) && result.numbers[2] === Infinity && result.empty === null,"typed round trip");
+    const values = [];
+    const unwatchModel = await app.watch("rows", rows => values.push(rows[0].n));
+    check((await app.get("rows"))[0].n === 2,"ListModel snapshot");
+    await app.call("rowEdit");
+    check(values.join(",") === "5","ListModel role edit notification");
+    await unwatchModel();
+    const ticks = [];
+    await app.watch("ticks",n=>ticks.push(n));
+    await app.call("startTimer");
+    for (let i=0; !ticks.length && i<150; i++) await new Promise(r=>setTimeout(r,10));
+    check(ticks[0] === 1,"asynchronous Timer change");
+    try { await app.call("fail"); throw Error("missing exception"); } catch(e) { check(String(e).includes("browser rollback"),"exception propagation"); }
+    try { await app.call("uncopyable"); throw Error("exported function"); } catch(e) { check(String(e).includes("plain"),"non-data result"); }
+    check(await app.get("seed") === 6 && totals.length === 2,"rollback and unsubscribe");
+    await app.call("failLater");
+    check((await reportedError).message.includes("browser rollback"),"deferred error delivery");
+    check(await app.get("seed") === 6,"deferred error rollback and recovery");
+    check(await app.call("later") === 21,"Promise result");
+    const pending = app.call("spin").then(()=>false,e=>String(e).includes("disposed"));
+    const queued = app.get("seed").then(()=>false,e=>String(e).includes("disposed"));
+    await new Promise(resolve=>requestAnimationFrame(resolve));
+    app.dispose();
+    check(await pending && await queued,"responsive page and disposal with pending calls");
+    runOwner("./owner.js");
+}
+try {
+    if (new URL(location.href).searchParams.has("benchmark-subscriptions"))
+        runOwner("./owner.js?benchmark-subscriptions");
+    else await conformance();
+} catch (e) { report(String(e?.stack || e)); }
+</script>

@@ -4,6 +4,8 @@ mod design_support;
 mod formatting;
 mod line_index;
 pub mod lsp;
+#[cfg(feature = "qml")]
+mod qml;
 mod references;
 mod schema;
 mod service;
