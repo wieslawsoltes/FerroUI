@@ -2,6 +2,51 @@
 
 The native Rust backend uses XamlX to resolve types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
 
+## Whole-executable deduplication
+
+The complete editable WinUI consumer embeds all 169 XAML documents and retains the external FXP loader. It constructs the theme in a fresh process and resolves a deferred, typed Button control theme. These measurements include Base, Controls, Dialogs, XAML runtime, interpreter and theme. Window creation, rendering and first paint are outside the probe.
+
+| Final link on x86-64 Linux | Previous editable PR, bytes | Current editable PR, bytes | Source savings at the same link policy |
+|---|---:|---:|---:|
+| Ordinary | 49,664,944 | 47,817,336 | 1,847,608 |
+| Safe identical-code folding | 44,695,408 | 42,941,800 | 1,753,608 |
+| Packed relative relocations | 43,919,480 | 42,151,984 | 1,767,496 |
+| Safe folding and packed relocations | 39,600,120 | 37,920,960 | 1,679,160 |
+
+
+For each revision, LLD linked the same ThinLTO-generated objects four ways under `opt-level=s`, 16 codegen units and Rust panic unwinding. These ordinary ELFs were stripped at link time. The earlier 49,664,936-byte result for the previous PR used GNU `strip`.
+
+| ELF data | Previous ordinary | Current ordinary | Current safe folding and RELR |
+|---|---:|---:|---:|
+| Machine code, `.text` | 28,530,117 | 27,089,685 | 25,852,453 |
+| Frame descriptions, `.eh_frame` | 6,376,268 | 6,247,084 | 5,617,076 |
+| Frame lookup index, `.eh_frame_hdr` | 1,150,348 | 1,134,836 | 948,044 |
+| Language-specific exception data, `.gcc_except_table` | 2,444,252 | 2,312,252 | 893,696 |
+| Per-frame description entries, count | 143,792 | 141,853 | 118,504 |
+| `.rela.dyn` and `.relr.dyn` | 5,796,456 | 5,715,888 | 44,312 |
+
+The modern link retains 2,448 bytes of ordinary dynamic relocations and represents relative fixups in a 41,864-byte RELR table. A separate `.rela.plt` occupies 48 bytes. Source sharing and safe folding remove functions and their associated unwind records. The remaining frame records describe how to restore registers and the stack for live machine code. A compact-profile smoke executable verified a caught panic payload, six RAII guards unwinding in order, and distinct addresses for equal-valued static objects.
+
+### Readiness and build cost
+
+Main was measured at `df3e12ad`, the previous PR at `0257f6b6`, and the candidate runtime at `58b32389`. All fast lanes had 41 rotating fresh-process launches on one CPU. Every process resolved Button before emitting its readiness marker. The separate file-eviction experiment used 17 launches per lane and checked executable and supplied archive page residency with `mincore`. Shared libraries and device caches stayed warm.
+
+| Build | Stripped ordinary bytes | Modern Linux bytes | Median / p95, ordinary (ms) | Median / p95, modern (ms) | Generated Rust bytes | XAML build script (s) | WinUI rustc unit (s) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Current main, native | 54,577,848 | 44,441,808 | 16.45 / 21.73 | 15.79 / 22.32 | 14,421,918 | 29.20 | 76.37 |
+| Native Rust | 45,231,872 | 35,491,312 | 11.39 / 17.21 | 10.20 / 12.82 | 5,688,077 | 10.60 | 26.91 |
+| Typed FXB | 44,858,192 | 35,400,200 | 11.65 / 17.74 | 10.89 / 13.84 | 5,074,619 | 11.70 | 24.43 |
+| Full editable FXP with typed execution | 47,817,336 | 37,920,960 | 12.61 / 15.51 | 10.94 / 14.01 | 5,074,619 | 13.97 | 26.60 |
+| Full editable with FXU enabled | 47,862,632 | 37,962,896 | 12.48 / 15.90 | 11.22 / 16.34 | 5,074,619 | 14.28 | 28.75 |
+
+The build-script and rustc columns are individual Cargo unit observations. The final application ThinLTO phase is separate. Two additional matched rustc invocations per revision on the same two CPUs took 74.52 s on main and 38.93 s on the editable PR, a 47.8% reduction. These observations exclude a cold build of all workspace dependencies.
+
+With executable pages evicted, the ordinary editable build reached Button in 31.85 ms versus 44.20 ms on main. On the modern link those medians were 28.84 and 38.02 ms. A modified independent FXP dictionary reached Button in 14.98 ms with a warm file cache. A 751-byte FXU changed a merged value and a compact-density value in 11.92 ms. A complete FXP editing merged resources still required an interpreter rebuild, measured at 1788 ms median.
+
+The FXB encoder references both ends of an adjacent resource name within its own block. It selects v3 only when this reduces total bytes. All 7,354 WinUI records matched after decoding, including import slots, numeric bits and four source positions. Of 894 independent blocks, 532 use the new spelling. Total FXB size fell from 211,373 to 180,091 bytes. In 300 rotating codec samples the old reader and images took 0.678 ms median for the complete corpus, the new reader on old images took 0.565 ms, and the new reader on new images took 0.619 ms. Old images retained the same 702,966 bytes of decoded buffer capacity. The new blocks retained 709,692 bytes. V3 blocks require the updated runtime.
+
+A headless feature comparison matched 7,599 resource entries across native and FXB, including variants, keys, concrete types and representative values. Both instantiated the Button template. Direct exported builders were also checked with no enclosing service provider and with nested scopes. The corrected metadata design keeps cache hits typed. In a distinct 96-block balanced CPU benchmark, overridden reads across multiple host classes cost 14.02 to 14.18 ns per operation. The 75% read / 25% write workload cost 27.14 to 28.77 ns. These are measurable steady-state tradeoffs. [Machine-code families and next experiments](ported-runtime-code-size.md) · [Raw ELF, build, startup and property measurements](benchmarks/compiled-theme-runtime-sharing-linux-x86_64.json)
+
 ## Building a smaller Linux application
 
 For an x86-64 GNU/Linux distribution targeting glibc 2.36 or newer, use the compact Cargo configuration with the shipping profile. Run this command from the repository root.
