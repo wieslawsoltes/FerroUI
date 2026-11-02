@@ -241,8 +241,10 @@ impl FerroObjectImpl for TextBox {
             this.on_caret_index_changed(change);
         } else if property == Self::selection_start_property().as_property() {
             this.on_selection_start_changed(change);
+            this.im_client.on_selection_changed();
         } else if property == Self::selection_end_property().as_property() {
             this.on_selection_end_changed(change);
+            this.im_client.on_selection_changed();
         } else if property == Self::max_lines_property().as_property() {
             this.invalidate_measure();
         } else if property == Self::min_lines_property().as_property() {
@@ -1715,6 +1717,28 @@ impl TextBox {
 
     pub fn set_selection_start(&self, value: i32) {
         self.set_value(Self::selection_start_property(), value)
+    }
+
+    /// Observes completed selection operations, independently of focus, read-only
+    /// state or presenter creation. Individual endpoint writes remain individual
+    /// operations. Dispose the subscription to stop observing.
+    pub fn selection_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+        use ferroui_base::input::text_input::TextInputMethodClient;
+        self.im_client.selection_changed(Rc::new(handler))
+    }
+
+    /// Sets the UTF-16 range and caret as one native selection operation. Property
+    /// notifications retain their usual order; selection observers see the final
+    /// coerced range when the operation completes.
+    pub fn set_selection_and_caret(
+        &self,
+        selection: ferroui_base::input::text_input::TextSelection,
+        caret_index: i32,
+    ) {
+        let _change = self.im_client.begin_change();
+        self.set_caret_index(caret_index);
+        self.set_selection_start(selection.start);
+        self.set_selection_end(selection.end);
     }
 
     fn on_selection_start_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {

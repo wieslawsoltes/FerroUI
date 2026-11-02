@@ -235,3 +235,59 @@ fn touch_hold_on_selection_requests_context() {
 
     assert!(requested.get());
 }
+
+#[test]
+fn selection_operations_notify_complete_ranges_without_an_active_text_view() {
+    use ferroui_base::input::text_input::TextSelection;
+    use std::cell::RefCell;
+    let _scope = test_scope();
+    for readonly in [false, true] {
+        let field = TextBox::new();
+        field.set_text(Some("a😀bcdef"));
+        field.set_is_read_only(readonly);
+        let observed = Rc::new(RefCell::new(Vec::new()));
+        let log = observed.clone();
+        let weak = field.downgrade();
+        let token = field.selection_changed(move || {
+            let field = weak.upgrade().unwrap();
+            log.borrow_mut().push((field.selection_start(), field.selection_end(), field.caret_index()));
+        });
+        for (start, end, caret) in [(1, 6, 6), (6, 1, 1), (3, 3, 3)] {
+            observed.borrow_mut().clear();
+            field.set_selection_and_caret(TextSelection::new(start, end), caret);
+            assert_eq!(*observed.borrow(), [(start, end, caret)]);
+            field.set_selection_and_caret(TextSelection::new(start, end), caret);
+            assert_eq!(observed.borrow().len(), 1);
+        }
+        token.dispose();
+        observed.borrow_mut().clear();
+        field.set_caret_index(0);
+        assert!(observed.borrow().is_empty());
+    }
+}
+
+#[test]
+fn selection_operation_coercion_and_reentrant_observers_preserve_the_latest_range() {
+    use ferroui_base::input::text_input::TextSelection;
+    use std::cell::RefCell;
+    let _scope = test_scope();
+    let field = TextBox::new();
+    field.set_text(Some("abcdef"));
+    let observed = Rc::new(RefCell::new(Vec::new()));
+    let log = observed.clone();
+    let once = Cell::new(true);
+    let weak = field.downgrade();
+    let _token = field.selection_changed(move || {
+        let field = weak.upgrade().unwrap();
+        log.borrow_mut().push((field.selection_start(), field.selection_end()));
+        if once.replace(false) {
+            field.set_selection_and_caret(TextSelection::new(2, 2), 2);
+        }
+    });
+    field.set_selection_and_caret(TextSelection::new(1, 4), 4);
+    assert_eq!(*observed.borrow(), [(1, 4), (2, 2)]);
+    assert_eq!((field.selection_start(), field.selection_end(), field.caret_index()), (2, 2, 2));
+    observed.borrow_mut().clear();
+    field.set_text(Some("x"));
+    assert_eq!(*observed.borrow(), [(1, 1)]);
+}
