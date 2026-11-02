@@ -1,10 +1,14 @@
 //! Native notification history and a passive top-level for banners. A banner has
 //! its own native window so it stays visible above normal applications. No window is
 //! allocated until the first notification arrives.
-use super::appearance::Appearance;
+mod cards;
+mod center;
+
+use super::appearance::{Appearance, Layout};
 use super::chrome::*;
-use super::{popup_header, Scene, Shell};
+use super::{Scene, Shell};
 use crate::services::notifications::{Notice, Service};
+use ferroui_base::layout::{HorizontalAlignment as H, VerticalAlignment as V};
 use ferroui_base::media::{FontWeight, TextWrapping};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, Ref};
@@ -12,7 +16,7 @@ use ferroui_controls::primitives::ScrollBarVisibility;
 use ferroui_controls::{Control, Window, WindowBaseImpl, WindowDecorations};
 use ferroui_view::prelude::*;
 use ferroui_wayland::{
-    layer_shell::{LayerConfig, LayerWindow},
+    layer_shell::{Anchors, LayerConfig, LayerWindow},
     wayland_top_level_factory::WaylandTopLevelFactory,
 };
 use ferroui_x11::xlib::{self, PropertyMode, XID};
@@ -49,204 +53,86 @@ impl Notifications {
         });
         Self { service, revision }
     }
+    pub(super) fn quiet(&self) -> bool {
+        self.revision.get();
+        self.service.quiet()
+    }
+
+    pub(super) fn toggle_quiet(&self) {
+        self.service.toggle_quiet();
+    }
+
     pub(super) fn count(&self) -> usize {
         self.revision.get();
         self.service.len()
     }
 }
 
-fn card(notice: &Notice, service: &Rc<Service>, revision: Signal<u64>, banner: bool) -> Element {
-    let id = notice.id;
-    let close = service.clone();
-    let app = if notice.app.is_empty() {
-        "Application"
-    } else {
-        &notice.app
-    };
-    let mut details = stack_panel()
-        .spacing(4.0)
-        .child(
-            grid()
-                .column_definitions("*,Auto")
-                .child(shell_text(
-                    app,
-                    11.0,
-                    if notice.critical {
-                        Ink::Accent
-                    } else {
-                        Ink::Secondary
-                    },
-                ))
-                .child(
-                    icon_action("Dismiss notification", Icon::Close, move || {
-                        close.dismiss(id)
-                    })
-                    .width(28)
-                    .height(28)
-                    .grid_column(1),
-                ),
-        )
-        .child(
-            shell_text(&notice.title, 15.0, Ink::Primary)
-                .font_weight(FontWeight::SemiBold)
-                .text_wrapping(TextWrapping::Wrap)
-                .max_lines(if banner { 2 } else { 4 }),
-        );
-    if !notice.body.is_empty() {
-        details = details.child(
-            shell_text(&notice.body, 13.0, Ink::Primary)
-                .text_wrapping(TextWrapping::Wrap)
-                .max_lines(if banner { 2 } else { 12 }),
-        );
-    }
-    if !notice.actions.is_empty() {
-        let mut buttons = wrap_panel();
-        for (key, title) in &notice.actions {
-            let key = key.clone();
-            let label = if title.is_empty() {
-                if key == "default" {
-                    "Open"
-                } else {
-                    &key
-                }
-            } else {
-                title
-            }
-            .to_owned();
-            let enabled = service.clone();
-            let service = service.clone();
-            buttons = buttons.child(
-                action(&label, move || service.invoke(id, &key))
-                    .is_enabled(move || {
-                        revision.get();
-                        enabled.accepts_actions()
-                    })
-                    .margin((0.0, 3.0, 6.0, 0.0))
-                    .padding((10.0, 3.0))
-                    .child(shell_text(&label, 12.0, Ink::Primary)),
-            );
-        }
-        details = details.child(buttons);
-    }
-    border()
-        .padding((12.0, 8.0))
-        .background(if banner { "Transparent" } else { colors().tile })
-        .corner_radius(colors().radius)
-        .child(details)
-        .into()
+pub(super) fn view(shell: &Rc<Shell>) -> Element {
+    center::view(shell)
 }
 
-pub(super) fn view(shell: &Rc<Shell>) -> Element {
-    const PAGE: usize = 8;
-    let page = signal(0usize);
-    let notices = shell.notifications.service.clone();
-    let revision = shell.notifications.revision;
-    let settings = notices.clone();
-    let clear = notices.clone();
-    let rows = dynamic(move || -> Element {
-        revision.get();
-        let count = notices.len();
-        if count == 0 {
-            let status = notices.status();
-            return stack_panel()
-                .spacing(6)
-                .margin((0.0, 15.0))
-                .child(shell_text("You're all caught up", 19.0, Ink::Primary))
-                .child(
-                    shell_text(
-                        if status.is_empty() {
-                            "New notifications will appear here."
-                        } else {
-                            &status
-                        },
-                        13.0,
-                        Ink::Secondary,
-                    )
-                    .text_wrapping(TextWrapping::Wrap),
-                )
-                .into();
+/// The compositor interprets layer margins within its usable area. X11 offers
+/// the same area in physical pixels; the in-scene host reserves its own edges.
+#[derive(Clone, Copy)]
+struct BannerGeometry {
+    layout: Layout,
+    width: f64,
+    height: f64,
+}
+
+impl BannerGeometry {
+    const GAP: f64 = 12.;
+
+    fn new(layout: Layout, actions: bool) -> Self {
+        let (width, plain, actionable) = match layout {
+            Layout::Taskbar => (364., 104., 140.),
+            Layout::MenuBarDock => (354., 96., 132.),
+            Layout::BottomNavigation => (414., 104., 144.),
+        };
+        Self {
+            layout,
+            width,
+            height: if actions { actionable } else { plain },
         }
-        let last = (count - 1) / PAGE;
-        let index = page.get().min(last);
-        let mut list = stack_panel().spacing(8);
-        for item in notices.page(index * PAGE, PAGE) {
-            list = list.child(card(&item, &notices, revision, false));
+    }
+
+    fn fit(mut self, width: f64, height: f64) -> Self {
+        self.width = self.width.min((width - Self::GAP * 2.).max(1.));
+        self.height = self.height.min((height - Self::GAP * 2.).max(1.));
+        self
+    }
+
+    fn layer(self) -> LayerConfig {
+        let gap = Self::GAP as i32;
+        let mut config = LayerConfig::notification(self.width as u32, self.height as u32, gap, gap);
+        match self.layout {
+            Layout::Taskbar => {
+                config.anchors = Anchors::BOTTOM | Anchors::RIGHT;
+                config.margins = [0, gap, gap, 0];
+            }
+            Layout::MenuBarDock => {}
+            Layout::BottomNavigation => {
+                config.anchors = Anchors::TOP;
+                config.margins = [gap, 0, 0, 0];
+            }
         }
-        if last > 0 {
-            list = list.child(
-                row(5.0)
-                    .child(
-                        action("Previous notifications", move || {
-                            page.set(index.saturating_sub(1))
-                        })
-                        .is_enabled(index != 0)
-                        .child(shell_text("Previous", 12.0, Ink::Primary)),
-                    )
-                    .child(shell_text(
-                        &format!("{} / {}", index + 1, last + 1),
-                        12.0,
-                        Ink::Secondary,
-                    ))
-                    .child(
-                        action("More notifications", move || page.set(index + 1))
-                            .is_enabled(index < last)
-                            .child(shell_text("Next", 12.0, Ink::Primary)),
-                    ),
-            );
-        }
-        list.into()
-    });
-    let quiet = shell.notifications.service.clone();
-    let quiet_button = NodeRef::<ferroui_controls::Button>::new();
-    let count = shell.notifications.service.clone();
-    super::desktop::system_frame(shell, 470.0)
-        .max_height(640)
-        .padding(18)
-        .child(
-            grid()
-                .row_definitions("Auto,Auto,*")
-                .child(popup_header("Notifications", "ACTIVITY", shell))
-                .child(
-                    row(8.0)
-                        .grid_row(1)
-                        .margin((0.0, 8.0))
-                        .child(
-                            action("Toggle Do Not Disturb", move || settings.toggle_quiet())
-                                .node_ref(quiet_button)
-                                .on_loaded(move |_| {
-                                    if let Some(button) = quiet_button.get_untracked() {
-                                        button.focus();
-                                    }
-                                })
-                                .child(shell_text("", 12.0, Ink::Primary).text(move || {
-                                    revision.get();
-                                    if quiet.quiet() {
-                                        "Do Not Disturb · On"
-                                    } else {
-                                        "Do Not Disturb · Off"
-                                    }
-                                    .to_owned()
-                                })),
-                        )
-                        .child(
-                            action("Clear all notifications", move || clear.clear())
-                                .is_enabled(move || {
-                                    revision.get();
-                                    count.len() > 0
-                                })
-                                .child(shell_text("Clear all", 12.0, Ink::Primary)),
-                        ),
-                )
-                .child(
-                    scroll_viewer()
-                        .grid_row(2)
-                        .max_height(420)
-                        .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
-                        .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
-                        .child(rows),
-                ),
-        )
-        .into()
+        config
+    }
+
+    fn position(self, work: ferroui_base::PixelRect, scale: f64) -> PixelPoint {
+        let x = if self.layout == Layout::BottomNavigation {
+            work.x + (work.width - (self.width * scale).round() as i32) / 2
+        } else {
+            work.right() - ((self.width + Self::GAP) * scale).round() as i32
+        };
+        let y = if self.layout == Layout::Taskbar {
+            work.bottom() - ((self.height + Self::GAP) * scale).round() as i32
+        } else {
+            work.y + (Self::GAP * scale).round() as i32
+        };
+        PixelPoint::new(x, y)
+    }
 }
 
 struct Banner {
@@ -257,12 +143,16 @@ struct Banner {
 }
 
 impl Banner {
-    fn new(wayland: bool, output: Option<String>, height: u32) -> Result<Self, String> {
+    fn new(
+        wayland: bool,
+        output: Option<String>,
+        geometry: BannerGeometry,
+    ) -> Result<Self, String> {
         let window = if wayland {
             let window = LayerWindow::new(
                 "ferro-desktop-notification",
                 output.as_deref(),
-                LayerConfig::notification(356, height, 12, 12),
+                geometry.layer(),
             )?;
             super::wayland::transparent(&window);
             window
@@ -310,12 +200,7 @@ impl Banner {
                     scroll_viewer()
                         .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
                         .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
-                        .child(card(
-                            notice,
-                            &shell.notifications.service,
-                            shell.notifications.revision,
-                            true,
-                        )),
+                        .child(cards::card(shell, notice, true)),
                 )
                 .into_element()
                 .mount()
@@ -324,40 +209,40 @@ impl Banner {
         if let Some(old) = self.content_owner.replace(owner) {
             old.dispose();
         }
-        let mut width: f64 = 356.0;
-        let height = if notice.actions.is_empty() {
-            110.0
-        } else {
-            148.0
-        };
-        let screens = self.window.screens();
+        let mut geometry = BannerGeometry::new(
+            shell.appearance.get_untracked().layout(),
+            !notice.actions.is_empty(),
+        );
         if self.wayland {
             if let Ok(outputs) = LayerWindow::outputs() {
                 if let Some(output) = outputs.iter().find(|o| o.name == self.output) {
-                    width = width.min(f64::from((output.logical_size.width - 24).max(1)));
+                    geometry = geometry.fit(
+                        output.logical_size.width.into(),
+                        output.logical_size.height.into(),
+                    );
                 }
             }
-            if let Err(e) = LayerWindow::configure(
-                &self.window,
-                LayerConfig::notification(width as u32, height as u32, 12, 12),
-            ) {
+            if let Err(e) = LayerWindow::configure(&self.window, geometry.layer()) {
                 eprintln!("Wayland notification: {e}");
                 return;
             }
-        } else if let Some(screen) = screens
-            .primary()
-            .or_else(|| screens.all().into_iter().next())
-        {
-            let work = screen.working_area();
-            let scale = screen.scaling().max(0.1);
-            width = width.min((f64::from(work.width) / scale - 24.0).max(1.0));
-            self.window.set_position(PixelPoint::new(
-                work.right() - ((width + 12.0) * scale).round() as i32,
-                work.y + (12.0 * scale).round() as i32,
-            ));
+        } else {
+            let screens = self.window.screens();
+            if let Some(screen) = screens
+                .primary()
+                .or_else(|| screens.all().into_iter().next())
+            {
+                let work = screen.working_area();
+                let scale = screen.scaling().max(0.1);
+                geometry = geometry.fit(
+                    f64::from(work.width) / scale,
+                    f64::from(work.height) / scale,
+                );
+                self.window.set_position(geometry.position(work, scale));
+            }
         }
-        self.window.set_width(width);
-        self.window.set_height(height);
+        self.window.set_width(geometry.width);
+        self.window.set_height(geometry.height);
         WindowBaseImpl::show(&*self.window);
     }
 }
@@ -375,7 +260,8 @@ impl Drop for Banner {
 pub(super) fn composed_banner(shell: Rc<Shell>) -> Element {
     dynamic(move || {
         shell.notifications.revision.get();
-        let (top, _) = shell.appearance.get().insets();
+        let profile = shell.appearance.get();
+        let (top, bottom) = profile.insets();
         if shell.scene.get() == Scene::Notifications {
             shell.notifications.service.hide_banner();
             return Element::Empty;
@@ -383,18 +269,30 @@ pub(super) fn composed_banner(shell: Rc<Shell>) -> Element {
         let Some(notice) = shell.notifications.service.banner() else {
             return Element::Empty;
         };
+        let geometry = BannerGeometry::new(profile.layout(), !notice.actions.is_empty());
+        let width = shell.metrics().width;
+        let horizontal = if geometry.layout == Layout::BottomNavigation {
+            H::Center
+        } else {
+            H::Right
+        };
+        let (vertical, margin) = if geometry.layout == Layout::Taskbar {
+            (V::Bottom, (12., 0., 12., bottom + 12.))
+        } else {
+            (V::Top, (12., top + 12., 12., 0.))
+        };
         shell_panel()
-            .width(356.0)
-            .max_height(210.0)
-            .horizontal_alignment(ferroui_base::layout::HorizontalAlignment::Right)
-            .vertical_alignment(ferroui_base::layout::VerticalAlignment::Top)
-            .margin((12.0, top + 12.0, 12.0, 0.0))
-            .child(card(
-                &notice,
-                &shell.notifications.service,
-                shell.notifications.revision,
-                true,
-            ))
+            .width(move || (width.get() - 24.).clamp(1., geometry.width))
+            .max_height(geometry.height)
+            .horizontal_alignment(horizontal)
+            .vertical_alignment(vertical)
+            .margin(margin)
+            .child(
+                scroll_viewer()
+                    .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
+                    .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
+                    .child(cards::card(&shell, &notice, true)),
+            )
             .into_element()
     })
     .into_element()
@@ -435,7 +333,7 @@ pub(super) fn attach(shell: &Rc<Shell>) {
                 match Banner::new(
                     wayland,
                     output,
-                    if notice.actions.is_empty() { 110 } else { 148 },
+                    BannerGeometry::new(selected.layout(), !notice.actions.is_empty()),
                 ) {
                     Ok(banner) => *mounted = Some(banner),
                     Err(e) => {
