@@ -5,6 +5,7 @@ mod color;
 mod color_tests;
 mod colors;
 mod color_matrix;
+mod convolve_matrix;
 mod drawing_context;
 #[cfg(test)]
 mod drawing_context_tests;
@@ -124,6 +125,7 @@ mod translate_transform;
 
 pub use alignment_x::AlignmentX;
 pub use color_matrix::{ColorMatrix, ColorMatrixAlphaMode, LUMINANCE_WEIGHTS};
+pub use convolve_matrix::ConvolveMatrix;
 pub use alignment_y::AlignmentY;
 pub use arc_segment::ArcSegment;
 pub use bezier_segment::BezierSegment;

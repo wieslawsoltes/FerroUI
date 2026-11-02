@@ -79,8 +79,11 @@ pub struct VelloHybridSceneSink {
     /// The images of the scene by the identity of their pixels.
     images: HashMap<u64, ImageData>,
     /// The textures of the device the scene paints with, by their
-    /// identity.
-    textures: HashMap<u64, wgpu::TextureView>,
+    /// identity. They are held until the scene is reset or dropped, after
+    /// its render was submitted: a texture of a pool (the result of a pass
+    /// of `gpu/effect_passes.rs`) is not written again before the scene
+    /// that paints with it is rendered.
+    textures: HashMap<u64, Arc<crate::gpu::VelloDeviceTexture>>,
     /// The rectangles of the target that are made transparent before the
     /// scene is composed over what the target holds, when it is
     /// ([`IVelloSceneSink::retain_target`]).
@@ -174,7 +177,7 @@ impl VelloHybridSceneSink {
                     "The hybrid mode paints with a texture of its device that holds premultiplied colors"
                 );
                 let id = texture.texture.id();
-                self.textures.entry(id).or_insert_with(|| texture.texture.view().clone());
+                self.textures.entry(id).or_insert_with(|| texture.texture.clone());
 
                 PaintType::Image(ImageBrush {
                     image: ImageSource::ExternalTexture {
@@ -234,8 +237,8 @@ impl VelloHybridSceneSink {
                     texture.last_used = render_count;
                     bindings.insert(TextureId(*id), texture.view.clone());
                 }
-                for (id, view) in textures {
-                    bindings.insert(TextureId(*id), view.clone());
+                for (id, texture) in textures {
+                    bindings.insert(TextureId(*id), texture.view().clone());
                 }
 
                 // A target that is kept: its cleared rectangles are made

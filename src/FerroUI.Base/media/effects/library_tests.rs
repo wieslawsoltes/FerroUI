@@ -1,4 +1,4 @@
-//! Tests of the custom effects FerroUI ships (#455, E2; not from upstream):
+//! Tests of the custom effects FerroUI ships (#455, E2 and E3; not from upstream):
 //! each loads its graph with members that match its graph values, prints
 //! and parses back, leaves the content unchanged at its neutral value, and
 //! has a CPU reference. How the render walk draws them is tested with the
@@ -20,12 +20,17 @@ fn library_effects() -> Vec<ImmutableCustomEffect> {
         ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: -0.1, contrast: 1.3 }),
         ImmutableCustomEffect::new(InvertEffect { amount: 0.9 }),
         ImmutableCustomEffect::new(GlowEffect { color: Colors::ORANGE, blur_radius: 4.0, intensity: 0.7 }),
+        ImmutableCustomEffect::new(SharpenEffect { strength: 0.8 }),
+        ImmutableCustomEffect::new(EdgeDetectEffect { strength: 1.2 }),
     ]
 }
 
-/// The neutral values of the library effects.
+/// The neutral values of the library effects that have one (all but edge
+/// detect).
 fn neutral_effects() -> Vec<ImmutableCustomEffect> {
-    library_effects().iter().map(|effect| effect.neutral().expect("a neutral value")).collect()
+    let neutral: Vec<ImmutableCustomEffect> = library_effects().iter().filter_map(|effect| effect.neutral()).collect();
+    assert_eq!(library_effects().len() - 1, neutral.len());
+    neutral
 }
 
 /// A 6 x 2 image of premultiplied colours: opaque, translucent and
@@ -78,6 +83,9 @@ fn the_members_of_the_graphs() {
     assert_eq!(transfer, members(ImmutableCustomEffect::new(BrightnessContrastEffect::default())));
     assert_eq!(transfer, members(ImmutableCustomEffect::new(InvertEffect::default())));
     assert_eq!(vec!["Glow.BlurAmount", "Glow.ShadowColor"], members(ImmutableCustomEffect::new(GlowEffect::default())));
+    let kernel = |name: &str| -> Vec<String> { (0..9).map(|index| format!("{name}.KernelMatrix{index}")).collect() };
+    assert_eq!(kernel("Sharpen"), members(ImmutableCustomEffect::new(SharpenEffect::default())));
+    assert_eq!(kernel("Edges"), members(ImmutableCustomEffect::new(EdgeDetectEffect::default())));
 }
 
 #[test]
@@ -135,7 +143,9 @@ fn the_effects_print_and_parse_back() {
 #[test]
 fn the_effects_are_registered_and_their_graphs_prewarmed() {
     let names = CustomEffectRegistry::names();
-    for name in ["tint", "grayscale", "sepia", "saturation", "brightness-contrast", "invert", "glow"] {
+    let library =
+        ["tint", "grayscale", "sepia", "saturation", "brightness-contrast", "invert", "glow", "sharpen", "edge-detect"];
+    for name in library {
         assert!(names.contains(&name), "{name}: {names:?}");
         assert!(CustomEffectRegistry::is_registered(name), "{name}");
         assert!(effect_prewarm_names().contains(&format!("custom-effect:{name}")), "{name}");
@@ -213,6 +223,35 @@ fn the_reference_of_a_glow_is_a_halo_under_the_content() {
     let plain = ImmutableCustomEffect::new(Plain);
     assert!(!plain.cpu_reference(&mut untouched, width, height, 1.0));
     assert_eq!(content, untouched);
+}
+
+#[test]
+fn the_reference_of_an_image_effect_is_its_convolution() {
+    let sharpen = SharpenEffect { strength: 0.8 };
+    let edges = EdgeDetectEffect { strength: 1.2 };
+    let effects = [
+        (sharpen.convolution(), ImmutableCustomEffect::new(sharpen)),
+        (edges.convolution(), ImmutableCustomEffect::new(edges)),
+    ];
+    for (convolution, effect) in effects {
+        let mut pixels = sample_pixels();
+        assert!(effect.cpu_reference(&mut pixels, 6, 2, 1.0), "{effect}");
+        let mut expected = sample_pixels();
+        convolution.apply_to_premultiplied_rgba8(&mut expected, 6, 2);
+        assert_eq!(expected, pixels, "{effect}");
+        assert_ne!(sample_pixels(), pixels, "{effect} changes the content");
+    }
+    // The kernels, with the strength clamped to 0..2.
+    assert_eq!([0.0, -2.0, 0.0, -2.0, 9.0, -2.0, 0.0, -2.0, 0.0], SharpenEffect { strength: 5.0 }.kernel());
+    assert_eq!([-1.0, -1.0, -1.0, -1.0, 8.0, -1.0, -1.0, -1.0, -1.0], EdgeDetectEffect::default().kernel());
+    assert!(!SharpenEffect::default().convolution().preserve_alpha);
+    assert!(EdgeDetectEffect::default().convolution().preserve_alpha);
+    // A flat opaque area has no edges: black, opaque.
+    let mut flat = vec![120u8, 60, 30, 255].repeat(9);
+    ImmutableCustomEffect::new(EdgeDetectEffect::default()).cpu_reference(&mut flat, 3, 3, 1.0);
+    assert_eq!([0, 0, 0, 255], flat[16..20]);
+    // Edge detect has no neutral value.
+    assert!(ImmutableCustomEffect::new(EdgeDetectEffect::default()).neutral().is_none());
 }
 
 /// An effect without a graph and without a reference.

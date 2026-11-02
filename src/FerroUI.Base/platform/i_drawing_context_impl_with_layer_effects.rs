@@ -1,6 +1,6 @@
 use super::{IDrawingContextImpl, LightingParameters, PixelOperation};
 use crate::media::imaging::BitmapBlendingMode;
-use crate::media::{ColorMatrix, ColorMatrixAlphaMode};
+use crate::media::{ColorMatrix, ColorMatrixAlphaMode, ConvolveMatrix};
 use crate::{PixelSize, Rect};
 use std::sync::Arc;
 
@@ -48,6 +48,25 @@ pub trait IDrawingContextImplWithLayerEffects: IDrawingContextImpl {
     /// [`push_multiply_layer`](Self::push_multiply_layer) or by
     /// [`push_lighting_multiply_layer`](Self::push_lighting_multiply_layer).
     fn pop_multiply_layer(&mut self);
+
+    /// Pushes a layer: what is drawn until the matching
+    /// [`pop_convolve_matrix_layer`](Self::pop_convolve_matrix_layer) is
+    /// convolved with `convolution` (its kernel stepping over device pixels,
+    /// the edges of the layer those of `bounds`) and composed source-over
+    /// onto what is under it. `bounds` is the area drawn into, in the
+    /// coordinates of the context; nothing outside it is kept. Win2D's
+    /// `ConvolveMatrixEffect` (#455, E3).
+    ///
+    /// The default pushes a plain layer: the content is drawn unchanged.
+    fn push_convolve_matrix_layer(&mut self, bounds: Rect, convolution: &ConvolveMatrix) {
+        let _ = convolution;
+        self.push_layer(bounds);
+    }
+
+    /// Pops the latest convolution layer.
+    fn pop_convolve_matrix_layer(&mut self) {
+        self.pop_layer();
+    }
 
     // --- the lights and pixel operations evaluated by the context ----------------------
     //
