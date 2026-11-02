@@ -9,6 +9,7 @@ use ferroui_base::{
 use ferroui_media_controls::{RendererHost, TexturePresenter};
 use ferroui_media_opengl::NativeGlFrameProducer;
 use image::RgbaImage;
+use std::cell::Cell;
 fn expected(u: f64, v: f64, orientation: u32, crop: bool) -> [u8; 3] {
     // Independent inverse of rotation followed by output-space reflection.
     let u = if orientation >= 4 { 1. - u } else { u };
@@ -209,6 +210,11 @@ async fn exercise(
         SolidColorBrush::with_color(Color::new(255, 32, 32, 32)).into(),
     ));
     let source = TexturePresenter::new();
+    let receipt = Rc::new(Cell::new(None));
+    let observed_receipt = receipt.clone();
+    let _receipt_subscription = source.frame_presented().subscribe(move |metadata| {
+        observed_receipt.set(Some(metadata.identity));
+    });
     source.set_width(320.);
     source.set_height(280.);
     source.set_stretch(Stretch::Fill);
@@ -499,6 +505,24 @@ async fn exercise(
             })
             .await?;
             source.present_latest();
+            // Decoding a fresh frame does not mean its asynchronous surface
+            // update has completed. Observe acceptance before taking pixels.
+            let identity = source_frame.metadata().identity;
+            let received = receipt.clone();
+            let observed = source.clone();
+            let accepted = wait(move || {
+                if let Some(error) = observed.last_error() {
+                    return Err(error.to_string());
+                }
+                observed.present_latest();
+                Ok(received.get().filter(|accepted| {
+                    accepted.source == identity.source
+                        && accepted.generation == identity.generation
+                        && accepted.sequence >= identity.sequence
+                }))
+            })
+            .await?;
+            println!("VIDEO_PRESENTATION_READY phase={phase} identity={accepted:?}");
             settle().await?;
             let shot = composition(
                 &window,

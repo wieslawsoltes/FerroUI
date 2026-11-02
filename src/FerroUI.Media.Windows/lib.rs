@@ -4,7 +4,7 @@
 #[allow(unsafe_code)]
 mod native;
 use ferroui_base::{
-    reactive::IDisposable,
+    reactive::Subscription,
     threading::{DispatcherPriority, DispatcherTimer},
 };
 use ferroui_media::{frames::*, *};
@@ -18,27 +18,21 @@ use std::{cell::RefCell, rc::Rc, task::Poll, time::Duration};
 fn unsupported(message: impl Into<String>) -> MediaError {
     MediaError::new(MediaErrorKind::Unsupported, message)
 }
-struct Timer(Rc<dyn IDisposable>);
-impl Drop for Timer {
-    fn drop(&mut self) {
-        self.0.dispose();
-    }
-}
 pub fn poll_native<T: 'static>(
     mut poll: impl FnMut() -> Poll<Result<T, MediaError>> + 'static,
 ) -> MediaFuture<T> {
-    let mut timer = None;
+    let mut timer: Option<Subscription> = None;
     Box::pin(std::future::poll_fn(move |cx| {
         timer.take();
         match poll() {
             Poll::Ready(v) => Poll::Ready(v),
             Poll::Pending => {
                 let w = cx.waker().clone();
-                timer = Some(Timer(DispatcherTimer::run_once(
+                timer = Some(DispatcherTimer::run_once(
                     move || w.wake_by_ref(),
                     Duration::from_millis(16),
                     DispatcherPriority::NORMAL,
-                )));
+                ));
                 Poll::Pending
             }
         }

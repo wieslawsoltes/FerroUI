@@ -94,7 +94,7 @@ fn wire_control_search(root: &Ref<Control>) {
                     .map(|title| Some(Rc::new(title.to_string()) as BoxedValue)),
             )));
         }
-    });
+    }).detach();
     let weak_suggestions = suggestions.downgrade();
     suggestions.suggestion_chosen(move |args| {
         if let (Some(suggestions), Some(entry)) = (
@@ -103,7 +103,7 @@ fn wire_control_search(root: &Ref<Control>) {
         ) {
             suggestions.set_text(entry.title);
         }
-    });
+    }).detach();
     let weak_root = root.downgrade();
     suggestions.query_submitted(move |args| {
         let chosen = args.chosen_suggestion.as_ref().and_then(control_from_item);
@@ -117,7 +117,7 @@ fn wire_control_search(root: &Ref<Control>) {
         if let (Some(root), Some(entry)) = (weak_root.upgrade(), entry) {
             show_control(&root, entry);
         }
-    });
+    }).detach();
 }
 
 fn find<T: ObjectType>(root: &Ref<Control>, name: &str) -> Option<Ref<T>> {
@@ -161,7 +161,7 @@ fn wire_cats(root: &Ref<Control>) {
                     .map(|cat| Some(Rc::new(cat.to_string()) as BoxedValue)),
             )));
         }
-    });
+    }).detach();
     let weak_output = root
         .get_control::<TextBlock>("SuggestionOutput")
         .downgrade();
@@ -172,7 +172,7 @@ fn wire_cats(root: &Ref<Control>) {
         ) {
             output.set_text(Some(cat));
         }
-    });
+    }).detach();
 }
 
 const LONG_MESSAGE: &str = "A long essential app message for your users to be informed of, acknowledge, or take action on. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin dapibus dolor vitae justo rutrum, ut lobortis nibh mattis. Aenean id elit commodo, semper felis nec.";

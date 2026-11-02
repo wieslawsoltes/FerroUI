@@ -106,8 +106,8 @@ fn create_main_window() -> Ref<Window> {
     window.set_height(400.0);
     window.set_content(Some(Control::boxed(border)));
 
-    window.opened(|| println!("Window opened"));
-    window.closed(|| println!("Window closed"));
+    window.opened(|| println!("Window opened")).detach();
+    window.closed(|| println!("Window closed")).detach();
 
     if let Some(ms) = std::env::var("FERROUI_SMOKE_EXIT_MS").ok().and_then(|v| v.parse::<u64>().ok()) {
         println!("Will close the main window after {ms} ms");
@@ -120,7 +120,8 @@ fn create_main_window() -> Ref<Window> {
             },
             Duration::from_millis(ms),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 
     window
@@ -130,7 +131,7 @@ fn logging_item(header: &str) -> Ref<NativeMenuItem> {
     let item = NativeMenuItem::with_header(header);
     let name = header.to_string();
     // The subscription lives as long as the item.
-    let _ = item.click(move |_| println!("Menu item clicked: {name}"));
+    item.click(move |_| println!("Menu item clicked: {name}")).detach();
     item
 }
 
@@ -155,7 +156,8 @@ fn smoke_menu(window: &Ref<Window>) {
         },
         Duration::from_millis(800),
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
 }
 
 /// Creates a tray icon with a menu and disposes it a little later.
@@ -166,7 +168,7 @@ fn smoke_tray(application: &Application) {
     let icon = TrayIcon::new();
     icon.set_tool_tip_text(Some("FerroUI hello window".to_string()));
     icon.set_menu(Some(menu));
-    let _ = icon.clicked(|_| println!("Tray icon clicked"));
+    icon.clicked(|_| println!("Tray icon clicked")).detach();
 
     let icons = TrayIcons::new();
     icons.add(icon.clone());
@@ -185,7 +187,8 @@ fn smoke_tray(application: &Application) {
         },
         Duration::from_millis(1200),
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
 }
 
 /// Reads the main menu AppKit holds for this application and performs item

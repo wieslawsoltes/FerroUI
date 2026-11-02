@@ -1,7 +1,7 @@
 //! The grammar of binding expression paths (`Foo.Bar[0]`, `#name.Text`,
 //! `$parent[Border].Tag`, `!Foo`, `((ns:Type)Foo).Bar`, `Foo^`, ...).
 
-use crate::data::core::ExpressionParseException;
+use crate::data::core::ExpressionParseError;
 use crate::utilities::character_reader::CharacterReader;
 use crate::utilities::span_helpers::{try_parse_int, NumberStyles};
 
@@ -62,7 +62,7 @@ pub struct BindingExpressionGrammar;
 
 impl BindingExpressionGrammar {
     /// Parses `text` into a list of nodes and the source mode.
-    pub fn parse(text: &str) -> Result<(Vec<Node>, SourceMode), ExpressionParseException> {
+    pub fn parse(text: &str) -> Result<(Vec<Node>, SourceMode), ExpressionParseError> {
         let mut r = CharacterReader::new(text);
         Self::parse_reader(&mut r)
     }
@@ -70,14 +70,14 @@ impl BindingExpressionGrammar {
     /// Parses the remaining input of `r` into a list of nodes and the source mode.
     pub fn parse_reader(
         r: &mut CharacterReader<'_>,
-    ) -> Result<(Vec<Node>, SourceMode), ExpressionParseException> {
+    ) -> Result<(Vec<Node>, SourceMode), ExpressionParseError> {
         let mut result = Vec::new();
         let mode = parse(r, &mut result)?;
         Ok((result, mode))
     }
 }
 
-type ParseResult<T> = Result<T, ExpressionParseException>;
+type ParseResult<T> = Result<T, ExpressionParseError>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum State {
@@ -126,14 +126,14 @@ fn parse(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> ParseResult<Sour
     }
 
     if !r.end() {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Expected end of expression.",
         ));
     }
 
     if matches!(state, State::BeforeMember | State::BeforeMemberNullable) {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Unexpected end of expression.",
         ));
@@ -248,7 +248,7 @@ fn parse_attached_property(
     }
 
     if r.end() || !r.take_if('.') {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Invalid attached property name.",
         ));
@@ -257,14 +257,14 @@ fn parse_attached_property(
     let name = r.parse_identifier();
 
     if name.is_empty() {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Attached Property name expected after '.'.",
         ));
     }
 
     if r.end() || !r.take_if(')') {
-        return Err(ExpressionParseException::new(r.position(), "Expected ')'."));
+        return Err(ExpressionParseError::new(r.position(), "Expected ')'."));
     }
 
     nodes.push(Node::AttachedPropertyName {
@@ -280,7 +280,7 @@ fn parse_indexer(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> ParseRes
     let args = r.parse_arguments('[', ']')?;
 
     if args.is_empty() {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Indexer may not be empty.",
         ));
@@ -302,7 +302,7 @@ fn parse_type_cast(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> ParseR
 
     if parse_member_before_add_cast {
         if !parse_close_brace(r) {
-            return Err(ExpressionParseException::new(r.position(), "Expected ')'."));
+            return Err(ExpressionParseError::new(r.position(), "Expected ')'."));
         }
 
         result = parse_before_member(r, nodes, false);
@@ -321,7 +321,7 @@ fn parse_type_cast(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> ParseR
     });
 
     if r.end() || !r.take_if(')') {
-        return Err(ExpressionParseException::new(r.position(), "Expected ')'."));
+        return Err(ExpressionParseError::new(r.position(), "Expected ')'."));
     }
 
     Ok(result)
@@ -331,7 +331,7 @@ fn parse_element_name(r: &mut CharacterReader<'_>, nodes: &mut Vec<Node>) -> Par
     let name = r.parse_identifier();
 
     if name.is_empty() {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Element name expected after '#'.",
         ));
@@ -358,7 +358,7 @@ fn parse_relative_source(
         if peek_open_bracket(r) {
             let args = r.parse_arguments_with_delimiter('[', ']', ';')?;
             if args.len() > 2 || args.is_empty() {
-                return Err(ExpressionParseException::new(
+                return Err(ExpressionParseError::new(
                     r.position(),
                     "Too many arguments in RelativeSource syntax sugar",
                 ));
@@ -380,7 +380,7 @@ fn parse_relative_source(
                 ancestor_level = match try_parse_int(&args[1], NumberStyles::INTEGER) {
                     Some(level) => level,
                     None => {
-                        return Err(ExpressionParseException::new(
+                        return Err(ExpressionParseError::new(
                             r.position(),
                             format!(
                                 "The input string '{}' was not in a correct format.",
@@ -397,7 +397,7 @@ fn parse_relative_source(
             level: ancestor_level,
         });
     } else {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Unknown RelativeSource mode.",
         ));
@@ -484,7 +484,7 @@ mod tests {
         BindingExpressionGrammar::parse_reader(&mut r).unwrap().0
     }
 
-    fn parse_err(s: &str) -> ExpressionParseException {
+    fn parse_err(s: &str) -> ExpressionParseError {
         BindingExpressionGrammar::parse(s).unwrap_err()
     }
 

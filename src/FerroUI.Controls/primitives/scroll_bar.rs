@@ -13,7 +13,7 @@ use ferroui_base::input::{
 };
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::layout::{LayoutableImpl, Orientation};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -360,17 +360,17 @@ impl ScrollBar {
             |x, e| x.on_thumb_drag_delta(e),
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
         Thumb::drag_started_event().add_class_handler_with::<ScrollBar>(
             |x, e| x.on_thumb_drag_start(e),
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
         Thumb::drag_completed_event().add_class_handler_with::<ScrollBar>(
             |x, e| x.on_thumb_drag_complete(e),
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
 
         InputElement::focusable_property().override_default_value::<ScrollBar>(false);
     }
@@ -467,14 +467,17 @@ impl ScrollBar {
 
     /// Raised when the scrollbar scrolls. The handler receives the event
     /// data, as the handlers of the other plain events do.
-    pub fn scroll(&self, handler: impl Fn(&ScrollEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the scroll bar.
+    pub fn scroll(&self, handler: impl Fn(&ScrollEventArgs) + 'static) -> Subscription {
         let token = self.scroll.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.scroll.remove(token);
             }
-        })
+        }))
     }
 
     /// Calculates and updates whether the scrollbar should be visible.

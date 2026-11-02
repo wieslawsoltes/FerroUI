@@ -18,7 +18,7 @@ use ferroui_base::interactivity::{
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::text_formatting::unicode::{Codepoint, GeneralCategory};
 use ferroui_base::media::{IBrush, TextAlignment};
-use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{Disposable, ObservableExt, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::number_format::format_decimal_composite;
 use ferroui_base::utilities::{CultureInfo, Decimal, HandlerList, NumberFormatInfo, NumberParseError, NumberStyles};
@@ -57,7 +57,7 @@ type Part<T> = (Ref<T>, RoutedEventHandlerToken);
 #[repr(C)]
 pub struct NumericUpDown {
     base: TemplatedControl,
-    text_box_text_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    text_box_text_changed_subscription: RefCell<Option<Subscription>>,
     internal_value_set: Cell<bool>,
     is_syncing_text_and_value_properties: Cell<bool>,
     is_text_changed_from_ui: Cell<bool>,
@@ -144,7 +144,7 @@ impl FerroObjectImpl for NumericUpDown {
 
                 this.set_valid_spin_direction();
             }
-        });
+        }).detach();
     }
 }
 
@@ -209,7 +209,7 @@ impl TemplatedControlImpl for NumericUpDown {
                         this.text_box_on_text_changed();
                     }
                 });
-            *this.text_box_text_changed_subscription.borrow_mut() = Some(subscription);
+            *this.text_box_text_changed_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
 
         if let Some((spinner, token)) = this.spinner.take() {
@@ -539,39 +539,39 @@ impl NumericUpDown {
         Self::number_format_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<Option<Rc<NumberFormatInfo>>>();
             up_down.on_number_format_changed(old_value, new_value);
-        });
+        }).detach();
         Self::format_string_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<String>();
             up_down.on_format_string_changed(&old_value, &new_value);
-        });
+        }).detach();
         Self::increment_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<Decimal>();
             up_down.on_increment_changed(old_value, new_value);
-        });
+        }).detach();
         Self::is_read_only_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<bool>();
             up_down.on_is_read_only_changed(old_value, new_value);
-        });
+        }).detach();
         Self::maximum_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<Decimal>();
             up_down.on_maximum_changed(old_value, new_value);
-        });
+        }).detach();
         Self::minimum_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<Decimal>();
             up_down.on_minimum_changed(old_value, new_value);
-        });
+        }).detach();
         Self::text_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<Option<String>>();
             up_down.on_text_changed(old_value.as_deref(), new_value.as_deref());
-        });
+        }).detach();
         Self::text_converter_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<Option<Rc<dyn IValueConverter>>>();
             up_down.on_text_converter_changed(old_value, new_value);
-        });
+        }).detach();
         Self::value_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<Option<Decimal>>();
             up_down.on_value_changed(old_value, new_value);
-        });
+        }).detach();
 
         InputElement::focusable_property().override_default_value::<NumericUpDown>(true);
         InputElement::is_tab_stop_property().override_default_value::<NumericUpDown>(false);
@@ -859,14 +859,17 @@ impl NumericUpDown {
     }
 
     /// Occurs when spinning is initiated by the end-user.
-    pub fn spinned(&self, handler: impl Fn(&SpinEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the control.
+    pub fn spinned(&self, handler: impl Fn(&SpinEventArgs) + 'static) -> Subscription {
         let token = self.spinned.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.spinned.remove(token);
             }
-        })
+        }))
     }
 
     /// Raised when the `Value` changes.

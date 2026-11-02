@@ -4,7 +4,7 @@ use crate::converters::ColorToBrushConverter;
 use crate::object_casts::{actual_theme_variant_of, rc_of, resource_key_of, TargetProperty};
 use crate::xaml_il::runtime::IFerroXamlIlParentStackProvider;
 use crate::{
-    EagerParentStackEnumerator, FromXamlObject, IProvideValueTarget, XamlLoadException, XamlResourceNode,
+    EagerParentStackEnumerator, FromXamlObject, IProvideValueTarget, XamlLoadError, XamlResourceNode,
 };
 use ferroui_base::controls::IThemeVariantProvider;
 use ferroui_base::data::core::ValueType;
@@ -46,16 +46,16 @@ impl StaticResourceExtension {
     /// The resource. If it is not found and the target is a control that is
     /// still being initialised, the lookup is repeated when the control is
     /// initialised and the unset value marker is returned for now.
-    pub fn provide_value(&self, service_provider: &Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadException> {
+    pub fn provide_value(&self, service_provider: &Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadError> {
         Self::provide_value_for(service_provider, self.resource_key().as_ref())
     }
 
     fn provide_value_for(
         service_provider: &Rc<dyn IServiceProvider>,
         resource_key: Option<&BoxedValue>,
-    ) -> Result<Option<BoxedValue>, XamlLoadException> {
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
         let Some(resource_key) = resource_key else {
-            return Err(XamlLoadException::with_message("StaticResourceExtension.ResourceKey must be set."));
+            return Err(XamlLoadError::with_message("StaticResourceExtension.ResourceKey must be set."));
         };
         let key = resource_key_of(resource_key);
 
@@ -110,11 +110,11 @@ impl StaticResourceExtension {
             DelayedBinding::add_value(&target, property.into_property_info(), move |x| {
                 ColorToBrushConverter::convert_to(x.find_resource(&key), target_type)
             })
-            .map_err(|e| XamlLoadException::with_message(e.to_string()))?;
+            .map_err(|e| XamlLoadError::with_message(e.to_string()))?;
             return Ok(Some(FerroProperty::unset_value()));
         }
 
-        Err(XamlLoadException::with_message(format!("Static resource '{key}' not found.")))
+        Err(XamlLoadError::with_message(format!("Static resource '{key}' not found.")))
     }
 
     /// The theme variant of the nearest theme dictionary the place is

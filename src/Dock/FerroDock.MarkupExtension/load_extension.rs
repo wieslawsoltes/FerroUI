@@ -1,7 +1,7 @@
 // Copyright (c) Wiesław Šoltés. All rights reserved.
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
 use ferroui_base::{metadata::IServiceProvider, utilities::Uri, BoxedValue};
-use ferroui_markup_xaml::{FerroXamlLoader, IUriContext, MarkupExtension, XamlLoadException};
+use ferroui_markup_xaml::{FerroXamlLoader, IUriContext, MarkupExtension, XamlLoadError};
 use std::{cell::RefCell, rc::Rc};
 
 /// Loads a markup object from Source using the calling document's URI context.
@@ -40,7 +40,7 @@ impl LoadExtension {
     pub fn provide_value(
         &self,
         service_provider: &Rc<dyn IServiceProvider>,
-    ) -> Result<Option<BoxedValue>, XamlLoadException> {
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
         let Some(context) = service_provider.get_service_of::<Rc<dyn IUriContext>>() else {
             return Ok(None);
         };
@@ -64,7 +64,7 @@ impl MarkupExtension for LoadExtension {
     fn provide_value(
         &self,
         service_provider: &Rc<dyn IServiceProvider>,
-    ) -> Result<Option<BoxedValue>, XamlLoadException> {
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
         Self::provide_value(self, service_provider)
     }
 }

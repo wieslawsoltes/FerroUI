@@ -1,7 +1,7 @@
 //! `AppBuilderTestBaseTests` (`ReactiveUI.Testing.Tests/AppBuilderTestBaseTests.cs`).
 
 use crate::mocks::{is_invalid_operation, yield_now, InvalidOperationException};
-use ferroui_reactiveui::PanicException;
+use ferroui_reactiveui::PanicError;
 use ferroui_reactiveui_testing::AppBuilderTestBase;
 use ferroui_system::threading::tasks::{block_on, Task};
 use std::cell::Cell;
@@ -65,7 +65,7 @@ fn run_app_builder_test_async_with_sync_test_body_propagates_exceptions() {
     // The synchronous body throws: here it panics, and the task ends with the error of the panic.
     let error = block_on(TestHelper::run_app_builder_test_action(|| panic!("Test exception"))).expect_err("the panic of the test is passed on");
 
-    assert_eq!(error.downcast_ref::<PanicException>().map(|exception| exception.message.as_str()), Some("Test exception"));
+    assert_eq!(error.downcast_ref::<PanicError>().map(|exception| exception.message.as_str()), Some("Test exception"));
 }
 
 #[test]

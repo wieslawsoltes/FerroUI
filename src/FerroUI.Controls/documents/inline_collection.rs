@@ -1,7 +1,7 @@
 use super::{IInlineHost, Inline, InlineUIContainer, Run};
 use crate::Control;
 use ferroui_base::collections::{FerroList, NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs, ResetBehavior};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{IntoRef, Ref, StyledElement, WeakRef};
 use std::cell::RefCell;
@@ -165,14 +165,17 @@ impl InlineCollection {
     }
 
     /// Raised when an inline in the collection changes.
-    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the collection.
+    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.0.invalidated.add(Rc::new(handler));
         let handlers = Rc::downgrade(&self.0.invalidated);
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(handlers) = handlers.upgrade() {
                 handlers.remove(token);
             }
-        })
+        }))
     }
 
     /// Invalidates this collection.

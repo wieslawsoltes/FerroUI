@@ -2,7 +2,7 @@ use crate::animation::Animatable;
 use crate::media::immutable::ImmutableTransform;
 use crate::media::MatrixTransform;
 use crate::media::ref_adapter::RefAdapter;
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::rendering::composition::drawing::{CompositorResourceHolder, ICompositionRenderResource};
 use crate::rendering::composition::generated::ServerCompositionSimpleTransformProps;
 use crate::rendering::composition::server::{IServerObject, ServerCompositionSimpleTransform, ServerObjectId};
@@ -50,19 +50,20 @@ impl Transform {
         Ok(MatrixTransform::with_matrix(Matrix::parse(s)?).upcast())
     }
 
-    /// Subscribes to changes of the transform. Disposing the returned handle
-    /// unsubscribes.
-    pub fn changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Subscribes to changes of the transform. Dropping the returned guard
+    /// removes the handler; [`Subscription::detach`] keeps it for the life of
+    /// the transform.
+    pub fn changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.changed.add(Rc::new(handler));
         let object: &FerroObject = self.upcast();
         let weak = object.to_weak();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 if let Some(this) = this.downcast_ref::<Transform>() {
                     this.changed.remove(token);
                 }
             }
-        })
+        }))
     }
 
     /// Raises the changed notification.

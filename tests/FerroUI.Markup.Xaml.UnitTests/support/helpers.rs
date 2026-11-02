@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::{BoxedValue, PropertyValue};
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 
 use super::loader::{describe, xaml_error, XamlResult};
 
@@ -74,7 +74,7 @@ pub fn assert_value_is<T: Clone + 'static>(value: &Option<BoxedValue>) -> T {
 /// an XML exception (which the XAML parse, transform and load exceptions
 /// derive from).
 #[track_caller]
-pub fn assert_throws_xaml_exception<T>(result: XamlResult<T>) -> XamlLoadException {
+pub fn assert_throws_xaml_exception<T>(result: XamlResult<T>) -> XamlLoadError {
     match result {
         Ok(_) => panic!("Expected to throw xaml exception"),
         Err(error) if xaml_error(&error).is_some_and(|inner| inner.is_xml_exception()) => error,
@@ -85,7 +85,7 @@ pub fn assert_throws_xaml_exception<T>(result: XamlResult<T>) -> XamlLoadExcepti
 /// The diagnostic code the compiler reports for a failed load
 /// (`FRN2100`, ...): the code of the error of the compiler, as the
 /// diagnostics of the loader carry it.
-pub fn diagnostic_code(error: &XamlLoadException) -> Option<String> {
+pub fn diagnostic_code(error: &XamlLoadError) -> Option<String> {
     use ferroui_markup_xaml_loader::compiler_extensions::FerroXamlDiagnosticCodes;
     use xamlx::transform::XamlDiagnosticCodeSource;
 
@@ -99,7 +99,7 @@ pub fn diagnostic_code(error: &XamlLoadException) -> Option<String> {
 /// `code` and whose message (the text followed by the position) is
 /// `message`.
 #[track_caller]
-pub fn assert_throws_xaml_diagnostic<T>(result: XamlResult<T>, code: &str, message: &str) -> XamlLoadException {
+pub fn assert_throws_xaml_diagnostic<T>(result: XamlResult<T>, code: &str, message: &str) -> XamlLoadError {
     let error = assert_throws_xaml_exception(result);
     let inner = xaml_error(&error).expect("an XML exception is an error of the compiler");
     assert_eq!(
@@ -113,13 +113,13 @@ pub fn assert_throws_xaml_diagnostic<T>(result: XamlResult<T>, code: &str, messa
 
 /// `Assert.ThrowsAny<XmlException>(..)`.
 #[track_caller]
-pub fn assert_throws_xml_exception<T>(result: XamlResult<T>) -> XamlLoadException {
+pub fn assert_throws_xml_exception<T>(result: XamlResult<T>) -> XamlLoadError {
     assert_throws_xaml_exception(result)
 }
 
 /// `Assert.ThrowsAny<XamlParseException>(..)`.
 #[track_caller]
-pub fn assert_throws_xaml_parse_exception<T>(result: XamlResult<T>) -> XamlLoadException {
+pub fn assert_throws_xaml_parse_exception<T>(result: XamlResult<T>) -> XamlLoadError {
     match result {
         Ok(_) => panic!("Expected a XamlParseException"),
         Err(error) if xaml_error(&error).is_some_and(|inner| inner.is_xaml_parse_exception()) => error,

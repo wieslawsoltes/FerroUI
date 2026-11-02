@@ -62,7 +62,7 @@ fn flag() -> Rc<Cell<bool>> {
 fn track_exit(lifetime: &ClassicDesktopStyleApplicationLifetime) -> Rc<Cell<bool>> {
     let has_exit = flag();
     let h = has_exit.clone();
-    lifetime.exit(move |_| h.set(true));
+    lifetime.exit(move |_| h.set(true)).detach();
     has_exit
 }
 
@@ -180,9 +180,9 @@ fn secondary_window_cancellation_is_overridden(
     window.closing(move |args| {
         executed.set(true);
         args.set_cancel(true);
-    });
+    }).detach();
     let executed = secondary_window_closed_executed.clone();
-    window.closed(move || executed.set(true));
+    window.closed(move || executed.set(true)).detach();
     window.show();
 
     shutdown(&lifetime, &main_window);
@@ -333,7 +333,7 @@ fn should_allow_canceling_shutdown_via_shutdown_requested_event() {
     lifetime.shutdown_requested(move |e| {
         e.set_cancel(true);
         r.set(r.get() + 1);
-    });
+    }).detach();
 
     lifetime_events.raise_shutdown_requested(&ShutdownRequestedEventArgs::new());
 
@@ -363,7 +363,7 @@ fn main_window_closed_shutdown_should_be_cancellable() {
     lifetime.shutdown_requested(move |e| {
         e.set_cancel(true);
         r.set(r.get() + 1);
-    });
+    }).detach();
 
     main_window.close();
 
@@ -390,7 +390,7 @@ fn last_window_closed_shutdown_should_be_cancellable() {
     lifetime.shutdown_requested(move |e| {
         e.set_cancel(true);
         r.set(r.get() + 1);
-    });
+    }).detach();
 
     window_a.close();
 
@@ -409,7 +409,7 @@ fn try_shutdown_cancellable_by_preventing_window_close() {
     let lifetime = ClassicDesktopStyleApplicationLifetime::new();
     setup(&lifetime);
 
-    lifetime.exit(|_| panic!("lifetime.Exit was called."));
+    lifetime.exit(|_| panic!("lifetime.Exit was called.")).detach();
     let shutdown_started = Dispatcher::ui_thread()
         .shutdown_started(|_| panic!("Dispatcher.UIThread.ShutdownStarted was called."));
 
@@ -422,7 +422,7 @@ fn try_shutdown_cancellable_by_preventing_window_close() {
     window_a.closing(move |e| {
         e.set_cancel(true);
         r.set(r.get() + 1);
-    });
+    }).detach();
 
     lifetime.try_shutdown(0);
 
@@ -450,9 +450,9 @@ fn shutdown_not_cancellable_by_preventing_window_close() {
     window_a.closing(move |e| {
         e.set_cancel(true);
         r.set(r.get() + 1);
-    });
+    }).detach();
     let r = closed_raised.clone();
-    window_a.closed(move || r.set(r.get() + 1));
+    window_a.closed(move || r.set(r.get() + 1)).detach();
 
     lifetime.shutdown(0);
 
@@ -473,7 +473,7 @@ fn shutdown_doesnt_raise_shutdown_requested() {
     let raised = counter();
 
     let r = raised.clone();
-    lifetime.shutdown_requested(move |_| r.set(r.get() + 1));
+    lifetime.shutdown_requested(move |_| r.set(r.get() + 1)).detach();
 
     lifetime.shutdown(0);
 
@@ -584,7 +584,7 @@ fn setup_with_classic_desktop_lifetime_should_subscribe_to_platform_shutdown_req
     lifetime.shutdown_requested(move |e| {
         e.set_cancel(true);
         r.set(r.get() + 1);
-    });
+    }).detach();
 
     lifetime_events.raise_shutdown_requested(&ShutdownRequestedEventArgs::new());
 
@@ -609,7 +609,7 @@ fn setup_with_classic_desktop_lifetime_should_not_raise_startup() {
         move |l| {
             builder_called.set(true);
             let raised = raised.clone();
-            l.startup(move |_| raised.set(true));
+            l.startup(move |_| raised.set(true)).detach();
         },
     );
 
@@ -629,7 +629,7 @@ fn start_after_setup_with_classic_desktop_lifetime_should_not_raise_startup_twic
     create_app_builder(None, None).setup_with_classic_desktop_lifetime_with(&[], move |l| {
         *slot.borrow_mut() = Some(l.clone());
         let r = r.clone();
-        l.startup(move |_| r.set(r.get() + 1));
+        l.startup(move |_| r.set(r.get() + 1)).detach();
     });
 
     let lifetime = lifetime.borrow().clone().expect("the lifetime builder was called");
@@ -678,12 +678,12 @@ fn start_passes_the_arguments_and_shows_the_main_window() {
 
     let seen = Rc::new(std::cell::RefCell::new(Vec::new()));
     let s = seen.clone();
-    lifetime.startup(move |e| *s.borrow_mut() = e.args().to_vec());
+    lifetime.startup(move |e| *s.borrow_mut() = e.args().to_vec()).detach();
     let l = lifetime.clone();
     lifetime.exit(move |e| {
         assert!(l.windows().is_empty());
         e.set_application_exit_code(e.application_exit_code() + 1);
-    });
+    }).detach();
 
     // Closing the main (and last) window from a job ends the loop.
     let w = main_window.clone();
@@ -730,7 +730,7 @@ fn platform_shutdown_request_closes_the_windows_for_an_os_shutdown() {
     let window = shown_window();
     let reason = Rc::new(Cell::new(None));
     let r = reason.clone();
-    window.closing(move |e| r.set(Some((e.close_reason(), e.is_programmatic()))));
+    window.closing(move |e| r.set(Some((e.close_reason(), e.is_programmatic())))).detach();
 
     let e = ShutdownRequestedEventArgs::with_is_os_shutdown(true);
     lifetime_events.raise_shutdown_requested(&e);
@@ -787,10 +787,10 @@ fn start_returns_after_the_startup_without_run_loops_and_shutdown_completes_late
     lifetime.set_main_window(Some(Window::new()));
     let startup_raised = counter();
     let r = startup_raised.clone();
-    lifetime.startup(move |_| r.set(r.get() + 1));
+    lifetime.startup(move |_| r.set(r.get() + 1)).detach();
     let exit_code = Rc::new(Cell::new(None));
     let c = exit_code.clone();
-    lifetime.exit(move |e| c.set(Some(e.application_exit_code())));
+    lifetime.exit(move |e| c.set(Some(e.application_exit_code()))).detach();
 
     // Nothing ends a loop here: the call returns because none is run.
     assert_eq!(0, lifetime.start(&[]));

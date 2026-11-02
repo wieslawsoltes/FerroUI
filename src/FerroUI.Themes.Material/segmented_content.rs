@@ -10,7 +10,7 @@ use ferroui_base::animation::{IGlobalClock, TimeSpan};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::{AnonymousObserver, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, Subscription};
 use ferroui_base::{
     DirectProperty, FerroLocator, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, LocatorExtensions, Rect, Ref, Size, StyledElementImpl,
@@ -31,8 +31,8 @@ pub struct MaterialSegmentedContent {
     label_progress: Cell<f64>,
     icon_scale: Cell<f64>,
     icon_opacity: Cell<f64>,
-    clock: RefCell<Option<Rc<dyn IDisposable>>>,
-    visibility: RefCell<Option<Rc<dyn IDisposable>>>,
+    clock: RefCell<Option<Subscription>>,
+    visibility: RefCell<Option<Subscription>>,
     last_frame: Cell<Option<f64>>,
 }
 ferro_class!(MaterialSegmentedContent: Panel);
@@ -271,7 +271,7 @@ impl MaterialSegmentedContent {
                     this.stop_clock();
                 }
             })));
-        *self.clock.borrow_mut() = Some(subscription);
+        *self.clock.borrow_mut() = Some(Subscription::new(subscription));
     }
     fn stop_clock(&self) {
         if let Some(subscription) = self.clock.borrow_mut().take() {

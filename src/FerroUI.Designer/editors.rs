@@ -585,7 +585,7 @@ fn numeric_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
                 apply(Some(value.to_string()));
             }
         }
-    });
+    }).detach();
     Some(editor.upcast::<Control>())
 }
 

@@ -3,7 +3,7 @@
 use super::collection_changed;
 use ferroui_base::collections::NotifyCollectionChangedAction;
 use ferroui_base::data::model::CollectionChange;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, DirectProperty, FerroObject,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StaticType,
@@ -30,7 +30,7 @@ pub struct CollectionChangedBehavior {
     removed_actions: OnceCell<ActionCollection>,
     reset_actions: OnceCell<ActionCollection>,
     // The subscription to the changes of the collection.
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(CollectionChangedBehavior: DisposingBehavior);
@@ -178,7 +178,7 @@ impl CollectionChangedBehavior {
                 behavior.on_collection_changed(e);
             }
         });
-        *self.subscription.borrow_mut() = subscription;
+        *self.subscription.borrow_mut() = subscription.map(Subscription::new);
     }
 
     fn on_collection_changed(&self, e: CollectionChange) {

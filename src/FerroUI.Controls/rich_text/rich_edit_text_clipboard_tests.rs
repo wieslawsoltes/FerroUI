@@ -1087,7 +1087,7 @@ fn rich_tom_publication_keeps_handler_owned_range_and_external_document_changes(
         let changed_model = document.document();
         let called = Rc::new(Cell::new(false));
         let callback_called = called.clone();
-        let _subscription = document.editor().changed(move || {
+        document.editor().changed(move || {
             if !callback_called.replace(true) {
                 if model_change {
                     changed_model
@@ -1097,7 +1097,7 @@ fn rich_tom_publication_keeps_handler_owned_range_and_external_document_changes(
                     changed_range.set_range(0, 0).unwrap();
                 }
             }
-        });
+        }).detach();
         let result = ready(
             range.paste_from_clipboard_async(text_clipboard("X").0, RichTextPasteFormat::PlainText),
         );

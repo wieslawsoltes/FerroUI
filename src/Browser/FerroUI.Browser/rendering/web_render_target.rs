@@ -22,6 +22,9 @@ extern "C" {
     #[wasm_bindgen(js_namespace = WebRenderTarget, js_name = setSize)]
     fn set_js_size(target: &JsObject, w: i32, h: i32);
 
+    #[wasm_bindgen(js_namespace = WebRenderTarget, js_name = present)]
+    fn present_js(target: &JsObject, w: i32, h: i32, scaling: f64);
+
     #[wasm_bindgen(js_namespace = WebRenderTargetRegistry, js_name = initializeWorker)]
     fn initialize_js_worker();
 
@@ -196,6 +199,14 @@ pub(crate) fn set_script_unregister_for_unit_tests(unregister: fn(i32)) {
 /// Sets the size of the canvas behind a render target.
 pub(crate) fn update_size(js: &JsObject, size: PixelSize) {
     set_js_size(js, size.width, size.height);
+}
+
+/// Tells the script that a frame of `size` device pixels for `scaling` is drawn to the canvas
+/// behind a render target. Not from upstream: the canvas of a render worker hands the frame to
+/// the page, which shows it with the size of the canvas element in one task (`CanvasPresenter`
+/// of the script side); a canvas of the page shows its frames by itself.
+pub(crate) fn present(js: &JsObject, size: PixelSize, scaling: f64) {
+    present_js(js, size.width, size.height, scaling);
 }
 
 #[cfg(test)]

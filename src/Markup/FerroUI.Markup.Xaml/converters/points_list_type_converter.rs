@@ -2,7 +2,7 @@
 
 use super::type_converter::{text_of, type_converter_markup};
 use super::{ITypeDescriptorContext, TypeConverter};
-use crate::XamlLoadException;
+use crate::XamlLoadError;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::utilities::{CultureInfo, FormatError, SpanStringTokenizer};
 use ferroui_base::{BoxedValue, Point};
@@ -37,8 +37,8 @@ impl TypeConverter for PointsListTypeConverter {
         _context: Option<&Rc<dyn ITypeDescriptorContext>>,
         _culture: Option<&CultureInfo>,
         value: Option<&BoxedValue>,
-    ) -> Result<Option<BoxedValue>, XamlLoadException> {
-        let points = Self::parse(text_of(value)?).map_err(|e| XamlLoadException::with_message(e.to_string()))?;
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
+        let points = Self::parse(text_of(value)?).map_err(|e| XamlLoadError::with_message(e.to_string()))?;
         Ok(Some(Rc::new(points)))
     }
 }

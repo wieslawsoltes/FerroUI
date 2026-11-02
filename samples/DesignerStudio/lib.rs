@@ -128,7 +128,7 @@ impl ApplicationImpl for App {
                     }) {
                         event.set_cancel(true);
                     }
-                });
+                }).detach();
                 desktop.set_main_window(Some(window));
             } else if let Some(single) = lifetime.as_single_view_application_lifetime() {
                 single.set_main_view(Some(workspace.control()));

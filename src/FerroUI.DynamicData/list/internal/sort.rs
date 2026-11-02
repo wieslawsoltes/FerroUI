@@ -1,7 +1,7 @@
 //! `Sort<T>` (`List/Internal/Sort.cs`).
 
 use super::unified;
-use crate::list::{binary_search_by, clone_changes, remove_many, ChangeAwareList, ChangeSet, IExtendedList, ListChangeReason, SortException, SortOptions};
+use crate::list::{binary_search_by, clone_changes, remove_many, ChangeAwareList, ChangeSet, IExtendedList, ListChangeReason, SortError, SortOptions};
 use ferroui_reactive::{Observable, ObservableExt};
 use ferroui_system::{IObservable, IObserver, ObservableError};
 use std::cell::RefCell;
@@ -58,7 +58,7 @@ impl<T: Clone + PartialEq + 'static> Sorter<T> {
         } else {
             target.index_of(item)
         };
-        index.ok_or_else(|| SortException::new(format!("Cannot find item: {}", std::any::type_name::<T>())).into_error())
+        index.ok_or_else(|| SortError::new(format!("Cannot find item: {}", std::any::type_name::<T>())).into_error())
     }
 
     fn get_insert_position(&self, target: &ChangeAwareList<T>, item: &T) -> Result<usize, ObservableError> {
@@ -73,7 +73,7 @@ impl<T: Clone + PartialEq + 'static> Sorter<T> {
         match binary_search_by(target, item, &|a: &T, b: &T| self.compare(a, b)) {
             Err(insert_index) => Ok(insert_index),
             // The sort does not tell the items apart.
-            Ok(_) => Err(SortException::new("Binary search has been specified, yet the sort does not yield uniqueness").into_error()),
+            Ok(_) => Err(SortError::new("Binary search has been specified, yet the sort does not yield uniqueness").into_error()),
         }
     }
 
@@ -127,7 +127,7 @@ impl<T: Clone + PartialEq + 'static> Sorter<T> {
                     // Add to the current list so that downstream operators receive a refresh
                     // notification, with the latest index.
                     let Some(index) = target.index_of(current) else {
-                        return Err(SortException::new(format!("Cannot find index of {}. Expected to be in the list", std::any::type_name::<T>())).into_error());
+                        return Err(SortError::new(format!("Cannot find index of {}. Expected to be in the list", std::any::type_name::<T>())).into_error());
                     };
                     let item = target.get(index).clone();
                     target.refresh_with(item, index);

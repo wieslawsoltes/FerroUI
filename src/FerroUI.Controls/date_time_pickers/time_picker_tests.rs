@@ -222,7 +222,7 @@ fn selected_time_changed_should_fire_when_selected_time_set() {
     let handled = Rc::new(Cell::new(false));
     let time_picker = TimePicker::new();
     let flag = handled.clone();
-    time_picker.selected_time_changed(move |_| flag.set(true));
+    time_picker.selected_time_changed(move |_| flag.set(true)).detach();
     let value = TimeSpan::from_hours(10.0);
     time_picker.set_selected_time(Some(value));
     Dispatcher::ui_thread().run_jobs(None);
@@ -361,17 +361,25 @@ fn using_12_hour_clock_on_culture_with_empty_period_should_show_period() {
 /// tests throw. A panic payload has to be `Send`, which the error type of
 /// the framework (it holds shared error data) is not.
 #[derive(Debug)]
-struct ThrownDataValidationException {
+struct ThrownDataValidationError {
     message: String,
 }
+
+impl std::fmt::Display for ThrownDataValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.message)
+    }
+}
+
+impl std::error::Error for ThrownDataValidationError {}
 
 /// Runs `action` and returns the data validation failure it fails with.
 /// Fails when `action` completes or fails with anything else, as the
 /// `Assert.Throws<DataValidationException>` of the reference tests does.
-fn assert_throws_data_validation_exception(action: impl FnOnce()) -> ThrownDataValidationException {
+fn assert_throws_data_validation_exception(action: impl FnOnce()) -> ThrownDataValidationError {
     match catch_unwind(AssertUnwindSafe(action)) {
         Ok(()) => panic!("expected a data validation failure"),
-        Err(payload) => match payload.downcast::<ThrownDataValidationException>() {
+        Err(payload) => match payload.downcast::<ThrownDataValidationError>() {
             Ok(exception) => *exception,
             Err(payload) => std::panic::resume_unwind(payload),
         },
@@ -400,15 +408,15 @@ fn selected_time_enable_data_validation() {
         let max_time = TimeSpan::from_hms(15, 0, 0);
 
         if e.new_time().is_some_and(|new_time| new_time < min_time) {
-            std::panic::panic_any(ThrownDataValidationException { message: format!("time is less than {max_time}") });
+            std::panic::panic_any(ThrownDataValidationError { message: format!("time is less than {max_time}") });
         }
 
         if e.new_time().is_some_and(|new_time| new_time > max_time) {
-            std::panic::panic_any(ThrownDataValidationException { message: format!("time is over {max_time}") });
+            std::panic::panic_any(ThrownDataValidationError { message: format!("time is over {max_time}") });
         }
 
         flag.set(true);
-    });
+    }).detach();
 
     // time is less than
     let exception =
@@ -647,7 +655,7 @@ fn window_popup_accept_updates_selected_time_and_closes() {
     let target = WindowTarget::show(selected);
     let changes = Rc::new(Cell::new(0));
     let counter = changes.clone();
-    target.time_picker.selected_time_changed(move |_| counter.set(counter.get() + 1));
+    target.time_picker.selected_time_changed(move |_| counter.set(counter.get() + 1)).detach();
 
     assert!(!target.popup.is_open());
     assert!(target.popup.host().is_none());
@@ -700,7 +708,7 @@ fn window_popup_dismiss_leaves_selected_time_unchanged() {
     let target = WindowTarget::show(selected);
     let changes = Rc::new(Cell::new(0));
     let counter = changes.clone();
-    target.time_picker.selected_time_changed(move |_| counter.set(counter.get() + 1));
+    target.time_picker.selected_time_changed(move |_| counter.set(counter.get() + 1)).detach();
 
     target.flyout_button.perform_click();
     Dispatcher::ui_thread().run_jobs(None);

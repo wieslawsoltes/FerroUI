@@ -207,7 +207,7 @@ impl ButtonSpinner {
         Self::allow_spin_property().changed().add_class_handler::<ButtonSpinner>(|spinner, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<bool>();
             spinner.on_allow_spin_changed(old_value, new_value);
-        });
+        }).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

@@ -199,10 +199,10 @@ fn impl_close_should_call_raise_closed_event() {
 
     let raised = Rc::new(Cell::new(false));
     let target = TestTopLevel::new(&platform_impl);
-    let _ = target.closed({
+    target.closed({
         let raised = raised.clone();
         move || raised.set(true)
-    });
+    }).detach();
 
     closed(&platform_impl);
 
@@ -216,10 +216,10 @@ fn impl_close_should_raise_closed_event_only_once() {
 
     let raised = Rc::new(Cell::new(0));
     let target = TestTopLevel::new(&platform_impl);
-    let _ = target.closed({
+    target.closed({
         let raised = raised.clone();
         move || raised.set(raised.get() + 1)
-    });
+    }).detach();
 
     closed(&platform_impl);
     closed(&platform_impl);
@@ -234,10 +234,10 @@ fn embeddable_control_root_dispose_should_raise_closed_event() {
 
     let raised = Rc::new(Cell::new(0));
     let target = EmbeddableControlRoot::with_impl(platform_impl.clone());
-    let _ = target.closed({
+    target.closed({
         let raised = raised.clone();
         move || raised.set(raised.get() + 1)
-    });
+    }).detach();
 
     target.dispose();
 
@@ -251,10 +251,10 @@ fn embeddable_control_root_dispose_after_impl_close_should_raise_closed_event_on
 
     let raised = Rc::new(Cell::new(0));
     let target = EmbeddableControlRoot::with_impl(platform_impl.clone());
-    let _ = target.closed({
+    target.closed({
         let raised = raised.clone();
         move || raised.set(raised.get() + 1)
-    });
+    }).detach();
 
     closed(&platform_impl);
     target.dispose();
@@ -276,10 +276,10 @@ fn embeddable_control_root_dispose_should_dispose_impl_before_teardown() {
     });
 
     let target = EmbeddableControlRoot::with_impl(platform_impl.clone());
-    let _ = target.closed({
+    target.closed({
         let closed_raised = closed_raised.clone();
         move || closed_raised.set(true)
-    });
+    }).detach();
 
     target.dispose();
 
@@ -306,7 +306,7 @@ fn impl_close_should_raise_detached_from_logical_tree_event() {
             assert!(e.parent().is_none());
             raised.set(raised.get() + 1);
         }
-    });
+    }).detach();
 
     closed(&platform_impl);
 
@@ -390,7 +390,7 @@ fn adding_resource_to_application_should_raise_resources_changed() {
     let _ = target.resources_changed({
         let raised = raised.clone();
         move |_| raised.set(true)
-    });
+    }).detach();
     Application::current().unwrap().resources().add_value("foo", "bar".to_string());
 
     assert!(raised.get());
@@ -532,10 +532,10 @@ fn scaling_change_updates_render_scaling_and_raises_scaling_changed() {
     let platform_impl = create_mock_top_level_impl();
     let target = TestTopLevel::new(&platform_impl);
     let raised = Rc::new(Cell::new(0));
-    let _ = target.scaling_changed({
+    target.scaling_changed({
         let raised = raised.clone();
         move || raised.set(raised.get() + 1)
-    });
+    }).detach();
 
     ITopLevelImpl::scaling_changed(&*platform_impl).unwrap()(2.0);
 

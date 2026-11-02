@@ -808,7 +808,7 @@ impl DesignerWorkspace {
             if let Some(editor) = weak.upgrade() {
                 editor.retire();
             }
-        });
+        }).detach();
         *self.preview_stages.editor.borrow_mut() = Some(editor);
         self.preview_stages.editor_epoch.set(Some(epoch));
         *self.preview_stages.flyout.borrow_mut() = Some(flyout.clone());
@@ -875,7 +875,7 @@ impl DesignerWorkspace {
             if let Some(editor) = weak.upgrade() {
                 editor.retire();
             }
-        });
+        }).detach();
         *self.preview_stages.matrix_editor.borrow_mut() = Some(editor);
         self.preview_stages
             .editor_epoch

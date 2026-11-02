@@ -3,12 +3,6 @@ use super::*;
 use crate::desktop::providers;
 use ferroui_media_opengl::NativeGlFrameProducer;
 use ferroui_media_windows::NativeDevice;
-struct Watchdog(Rc<dyn IDisposable>);
-impl Drop for Watchdog {
-    fn drop(&mut self) {
-        self.0.dispose();
-    }
-}
 async fn exercise(
     state: Rc<State>,
     window: Ref<Window>,
@@ -43,7 +37,7 @@ async fn exercise(
     std::println!("CAMERA_STRESS_BEGIN cycles={cycles} workload={workload} resets_per_cycle={resets} warmup_cycles=5 private_growth_limit=134217728 gpu_growth_limit=134217728 handle_growth_limit=64 quiet={} png={}",crate::QUIET.load(Ordering::Relaxed),!std::env::args().any(|a|a=="--no-png-diagnostics"));
     for cycle in 0..cycles {
         let weak = window.downgrade();
-        let _watchdog = Watchdog(DispatcherTimer::run_once(
+        let _watchdog = DispatcherTimer::run_once(
             move || {
                 FAILED.store(true, Ordering::Relaxed);
                 eprintln!("CAMERA_STRESS_TIMEOUT cycle={cycle}");
@@ -53,7 +47,7 @@ async fn exercise(
             },
             Duration::from_secs(90),
             DispatcherPriority::NORMAL,
-        ));
+        );
         if !std::env::args().any(|a| a == "--memory-fixed-window") {
             window.set_width(if cycle % 2 == 0 { 800. } else { 1000. });
             window.set_height(if cycle % 2 == 0 { 500. } else { 700. });

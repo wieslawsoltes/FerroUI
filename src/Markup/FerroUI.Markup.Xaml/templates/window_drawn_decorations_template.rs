@@ -40,9 +40,9 @@ impl WindowDrawnDecorationsTemplate {
 
     /// [`build`](Self::build) without the panic: a template without content
     /// is an error.
-    pub fn try_build(&self) -> Result<TemplateResult<Ref<WindowDrawnDecorationsContent>>, crate::XamlLoadException> {
+    pub fn try_build(&self) -> Result<TemplateResult<Ref<WindowDrawnDecorationsContent>>, crate::XamlLoadError> {
         TemplateContent::try_load_as::<Ref<WindowDrawnDecorationsContent>>(self.content().as_ref())?.ok_or_else(|| {
-            crate::XamlLoadException::with_message("Operation is not valid due to the current state of the object.")
+            crate::XamlLoadError::with_message("Operation is not valid due to the current state of the object.")
         })
     }
 

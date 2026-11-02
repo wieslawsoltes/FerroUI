@@ -6,7 +6,7 @@ use ferroui_base::media::{
     DrawingContext, Geometry, IBrush, IPen, MatrixTransform, MediaCollection, Pen, PenLineCap, PenLineJoin, Stretch,
     StrokeDashArray,
 };
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::rendering::composition::{AlphaMask, CompositionBrush};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -25,7 +25,7 @@ pub struct Shape {
     defining_geometry: RefCell<Option<Ref<Geometry>>>,
     rendered_geometry: RefCell<Option<Ref<Geometry>>>,
     stroke_pen: RefCell<Option<Rc<dyn IPen>>>,
-    geometry_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    geometry_changed_subscription: RefCell<Option<Subscription>>,
     /// The alpha mask of [`get_alpha_mask`](Shape::get_alpha_mask), created
     /// on the first request.
     alpha_mask: std::cell::OnceCell<Box<AlphaMask>>,
@@ -419,7 +419,7 @@ impl Shape {
                     let shape: &Shape = sender.upcast();
                     Shape::affects_geometry_invalidate(shape, e);
                 }
-            });
+            }).detach();
         }
     }
 

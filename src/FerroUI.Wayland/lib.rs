@@ -70,8 +70,10 @@ pub mod xkb_compose_table;
 pub mod xkb_context;
 
 pub use ferro_wayland_exception::{
-    FerroWaylandException, FerroWaylandFlushException, FerroWaylandNetworkException, FerroWaylandPollException,
+    FerroWaylandError, FerroWaylandFlushException, FerroWaylandNetworkException, FerroWaylandPollException,
     FerroWaylandProtocolErrorException, FerroWaylandReadException,
 };
+#[allow(deprecated)]
+pub use ferro_wayland_exception::FerroWaylandException;
 pub use ferro_wayland_platform_extensions::FerroWaylandPlatformExtensions;
 pub use wayland_platform_options::WaylandPlatformOptions;

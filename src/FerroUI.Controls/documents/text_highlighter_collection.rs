@@ -4,7 +4,7 @@
 use super::{TextHighlightMerge, TextHighlightRegion, TextHighlighter};
 use ferroui_base::collections::FerroList;
 use ferroui_base::media::IBrush;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{IntoRef, Ref};
 use std::cell::{Cell, RefCell};
@@ -19,7 +19,7 @@ pub struct TextHighlighterCollection(Rc<HighlighterCollectionData>);
 struct HighlighterCollectionData {
     list: FerroList<Ref<TextHighlighter>>,
     list_subscription: Cell<Option<u64>>,
-    item_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    item_subscriptions: RefCell<Vec<Subscription>>,
     invalidated: Rc<HandlerList<dyn Fn()>>,
 }
 
@@ -111,14 +111,16 @@ impl TextHighlighterCollection {
         self.0.list.snapshot()
     }
 
-    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the collection.
+    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.0.invalidated.add(Rc::new(handler));
         let weak = Rc::downgrade(&self.0.invalidated);
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(handlers) = weak.upgrade() {
                 handlers.remove(token);
             }
-        })
+        }))
     }
 
     /// Produces ordered, disjoint regions, ignoring invalid/empty ranges and

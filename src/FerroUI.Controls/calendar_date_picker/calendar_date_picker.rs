@@ -30,7 +30,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutingStrategies};
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::IBrush;
-use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::utilities::{CalendarWeekRule, DateTime, DayOfWeek, FormatError, HandlerList};
 use ferroui_base::{
@@ -106,20 +106,20 @@ pub struct CalendarDatePicker {
 
     calendar: RefCell<Option<Ref<Calendar>>>,
     /// The subscriptions to the events of the calendar.
-    calendar_subscriptions: RefCell<Option<Rc<dyn IDisposable>>>,
+    calendar_subscriptions: RefCell<Option<Subscription>>,
     default_text: RefCell<String>,
     drop_down_button: RefCell<Option<Ref<Button>>>,
     /// The subscription to the click event of the drop-down button.
-    drop_down_button_click_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    drop_down_button_click_subscription: RefCell<Option<Subscription>>,
     pop_up: RefCell<Option<Ref<Popup>>>,
     /// The subscription to the closed event of the popup.
-    pop_up_closed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    pop_up_closed_subscription: RefCell<Option<Subscription>>,
     text_box: RefCell<Option<Ref<TextBox>>>,
     /// The subscriptions to the key down and got focus events of the text
     /// box.
-    text_box_subscriptions: RefCell<Option<Rc<dyn IDisposable>>>,
-    text_box_text_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    button_pointer_pressed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    text_box_subscriptions: RefCell<Option<Subscription>>,
+    text_box_text_changed_subscription: RefCell<Option<Subscription>>,
+    button_pointer_pressed_subscription: RefCell<Option<Subscription>>,
 
     on_open_selected_date: Cell<Option<DateTime>>,
     setting_selected_date: Cell<bool>,
@@ -425,23 +425,23 @@ impl TemplatedControlImpl for CalendarDatePicker {
                 if let Some(this) = weak.upgrade() {
                     this.calendar_display_date_changed(e);
                 }
-            }));
+            }).detach());
             let weak = this.to_ref().downgrade();
             subscriptions.add(calendar.selected_dates_changed(move |e| {
                 if let Some(this) = weak.upgrade() {
                     this.calendar_selected_dates_changed(e);
                 }
-            }));
+            }).detach());
             subscriptions.add(calendar.add_disposable_handler(InputElement::pointer_released_event(), |_, e| {
                 Self::calendar_pointer_released(e);
-            }));
+            }).detach());
             let weak = this.to_ref().downgrade();
             subscriptions.add(calendar.add_disposable_handler(InputElement::key_down_event(), move |sender, e| {
                 if let Some(this) = weak.upgrade() {
                     this.calendar_key_down(sender, e);
                 }
-            }));
-            *this.calendar_subscriptions.borrow_mut() = Some(Rc::new(subscriptions));
+            }).detach());
+            *this.calendar_subscriptions.borrow_mut() = Some(Subscription::new(Rc::new(subscriptions)));
 
             let current_blackout_days = this.blackout_dates();
             let blackout_dates = calendar.blackout_dates();
@@ -506,7 +506,7 @@ impl TemplatedControlImpl for CalendarDatePicker {
                 },
                 routes,
                 true,
-            );
+            ).detach();
             let weak = this.to_ref().downgrade();
             let released = drop_down_button.add_disposable_handler_with(
                 InputElement::pointer_released_event(),
@@ -517,9 +517,9 @@ impl TemplatedControlImpl for CalendarDatePicker {
                 },
                 routes,
                 true,
-            );
+            ).detach();
             *this.button_pointer_pressed_subscription.borrow_mut() =
-                Some(Rc::new(CompositeDisposable::from_disposables([pressed, released])));
+                Some(Subscription::new(Rc::new(CompositeDisposable::from_disposables([pressed, released]))));
         }
 
         if this.text_box.take().is_some() {
@@ -544,14 +544,14 @@ impl TemplatedControlImpl for CalendarDatePicker {
                 if let Some(this) = weak.upgrade() {
                     this.text_box_key_down(e);
                 }
-            }));
+            }).detach());
             let weak = this.to_ref().downgrade();
             subscriptions.add(text_box.add_disposable_handler(InputElement::got_focus_event(), move |_, _| {
                 if let Some(this) = weak.upgrade() {
                     this.text_box_got_focus();
                 }
-            }));
-            *this.text_box_subscriptions.borrow_mut() = Some(Rc::new(subscriptions));
+            }).detach());
+            *this.text_box_subscriptions.borrow_mut() = Some(Subscription::new(Rc::new(subscriptions)));
 
             let weak = this.to_ref().downgrade();
             let object: &FerroObject = text_box;
@@ -561,7 +561,7 @@ impl TemplatedControlImpl for CalendarDatePicker {
                         this.text_box_text_changed();
                     }
                 });
-            *this.text_box_text_changed_subscription.borrow_mut() = Some(subscription);
+            *this.text_box_text_changed_subscription.borrow_mut() = Some(Subscription::new(subscription));
 
             if let Some(selected_date) = this.selected_date() {
                 text_box.set_text(this.date_time_to_string(selected_date).as_deref());
@@ -1008,33 +1008,47 @@ impl CalendarDatePicker {
     }
 
     /// Occurs when the drop-down [`Calendar`] is closed.
-    pub fn calendar_closed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn()>(|picker| &picker.calendar_closed, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the picker.
+    pub fn calendar_closed(&self, handler: impl Fn() + 'static) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn()>(|picker| &picker.calendar_closed, Rc::new(handler)))
     }
 
     /// Occurs when the drop-down [`Calendar`] is opened.
-    pub fn calendar_opened(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn()>(|picker| &picker.calendar_opened, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the picker.
+    pub fn calendar_opened(&self, handler: impl Fn() + 'static) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn()>(|picker| &picker.calendar_opened, Rc::new(handler)))
     }
 
     /// Occurs when the text is assigned a value that cannot be interpreted
     /// as a date.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the picker.
     pub fn date_validation_error(
         &self,
         handler: impl Fn(&CalendarDatePickerDateValidationErrorEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn(&CalendarDatePickerDateValidationErrorEventArgs)>(
+    ) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn(&CalendarDatePickerDateValidationErrorEventArgs)>(
             |picker| &picker.date_validation_error,
             Rc::new(handler),
-        )
+        ))
     }
 
     /// Occurs when the selected date is changed.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the picker.
     pub fn selected_date_changed(
         &self,
         handler: impl Fn(&SelectionChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn(&SelectionChangedEventArgs)>(|picker| &picker.selected_date_changed, Rc::new(handler))
+    ) -> Subscription {
+        Subscription::new(
+            self.subscribe::<dyn Fn(&SelectionChangedEventArgs)>(|picker| &picker.selected_date_changed, Rc::new(handler)),
+        )
     }
 
     // --- the control ------------------------------------------------------------

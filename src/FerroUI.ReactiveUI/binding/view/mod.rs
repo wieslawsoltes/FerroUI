@@ -21,6 +21,8 @@ pub use exclude_from_view_registration_attribute::ExcludeFromViewRegistration;
 pub use single_instance_view_attribute::SingleInstanceView;
 pub use view_contract_attribute::ViewContract;
 pub use view_locator::ViewLocator;
+pub use view_locator_not_found_exception::ViewLocatorNotFoundError;
+#[allow(deprecated)]
 pub use view_locator_not_found_exception::ViewLocatorNotFoundException;
 pub use view_mapping_builder::ViewMappingBuilder;
 pub use register_view_for::RegisterViewForExt;

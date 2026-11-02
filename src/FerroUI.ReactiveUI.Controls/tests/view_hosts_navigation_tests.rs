@@ -276,7 +276,7 @@ fn record_source(host: &Control) -> (Rc<RefCell<Option<Rc<dyn IPresentationSourc
     let source: Rc<RefCell<Option<Rc<dyn IPresentationSource>>>> = Rc::new(RefCell::new(None));
     let slot = source.clone();
     let subscription = host.attached_to_visual_tree(move |args| *slot.borrow_mut() = Some(args.presentation_source().clone()));
-    (source, subscription)
+    (source, subscription.detach())
 }
 
 /// The attachment arguments of `host` in `source` (`new(this, source)`).

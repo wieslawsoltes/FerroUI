@@ -2,7 +2,7 @@ use super::{append_member, ExpressionNode, ISettableNode, NodeState};
 use crate::data::core::plugins::{get_property_value, property_value_type, set_property_value};
 use crate::data::core::{ValueType, ValueTypes};
 use crate::data::{BindingError, BindingPriority};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::{BoxedValue, FerroProperty};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -14,7 +14,7 @@ pub struct FerroPropertyAccessorNode {
     state: NodeState,
     property: &'static FerroProperty,
     accepts_null: bool,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl FerroPropertyAccessorNode {
@@ -64,7 +64,7 @@ impl ExpressionNode for FerroPropertyAccessorNode {
                     }
                 }
             });
-            self.subscription.replace(Some(subscription));
+            self.subscription.replace(Some(Subscription::new(subscription)));
             self.state.set_value(get_property_value(&object, self.property), None);
         }
     }

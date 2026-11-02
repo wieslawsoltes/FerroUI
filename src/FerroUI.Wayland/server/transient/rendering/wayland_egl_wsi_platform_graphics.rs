@@ -7,7 +7,7 @@ use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::platform::IPlatformGraphicsContext;
 use ferroui_base::reactive::IDisposable;
 use ferroui_opengl::egl::{EglDisplay, EglDisplayCreationOptions, EglDisplayOptions, EglInterface};
-use ferroui_opengl::{GetProcAddress, GlVersion, OpenGlException};
+use ferroui_opengl::{GetProcAddress, GlVersion, OpenGlError};
 use std::any::Any;
 use std::ffi::{c_char, c_void, CString};
 use std::rc::Rc;
@@ -39,17 +39,17 @@ pub struct WaylandEglWsiPlatformGraphics {
 /// `eglGetProcAddress`; a name it does not know is looked up among the
 /// exported symbols here, which covers a library older than EGL 1.5, whose
 /// `eglGetProcAddress` answers for extensions only.
-pub(crate) fn load_egl_interface() -> Result<EglInterface, OpenGlException> {
+pub(crate) fn load_egl_interface() -> Result<EglInterface, OpenGlError> {
     // SAFETY: the name is a terminated string; the library is never closed, so what it
     // exports stays valid.
     let library = unsafe { libc::dlopen(EGL_LIBRARY.as_ptr(), libc::RTLD_LAZY | libc::RTLD_LOCAL) };
     if library.is_null() {
-        return Err(OpenGlException::new("Unable to load shared library 'libEGL.so.1' or one of its dependencies."));
+        return Err(OpenGlError::new("Unable to load shared library 'libEGL.so.1' or one of its dependencies."));
     }
     // SAFETY: the handle is the one `dlopen` returned; the name is a terminated string.
     let egl_get_proc_address = unsafe { libc::dlsym(library, c"eglGetProcAddress".as_ptr()) };
     if egl_get_proc_address.is_null() {
-        return Err(OpenGlException::new("libEGL.so.1 does not export the entry points of EGL"));
+        return Err(OpenGlError::new("libEGL.so.1 does not export the entry points of EGL"));
     }
     // SAFETY: the symbol is the function of that name of the EGL library, whose C
     // declaration this type is.

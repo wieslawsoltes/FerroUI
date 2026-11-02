@@ -711,3 +711,62 @@ recovery/renderer arguments plus `--memory-workload=reset
 `--memory-workload=capture --camera-stress-cycles=100 --memory-fixed-window`.
 Logs are `windows-memory-reset-fixed-300-final.log` and
 `windows-memory-capture-fixed-100-final.log` beside the worktree.
+
+## Upstream main integration — 2026-11-02
+
+The desktop media branch integrates GitHub `upstream/main` at
+`df8b92d9438a7f1f797f9f86c2c4c602e3a4bf75`. Conflict resolution preserves
+the media frame/retirement paths, healthy ANGLE display cache and EGL failure/
+current-context cleanup while adopting the canonical `OpenGlError` and
+`PlatformGraphicsContextLostError` names and upstream subscription guards.
+Media controls retain timer, visibility and scaling guards as `Subscription`;
+native polling futures retain their one-shot guard until repolled or canceled.
+The same timer adaptation is applied to Windows, Linux, Apple and Android.
+Sample loops intended to live with their source explicitly detach their guard.
+
+The first integration run correctly fails at recovered paused-video pixels.
+The trace shows the source frame being accepted after the screenshot was
+captured: decoded-frame readiness and a fixed 100 ms delay did not establish
+presentation readiness. The fixture now observes `frame_presented`, requires
+the selected source/generation and an equal or newer sequence, and only then
+captures pixels. All pixel assertions and boundary tolerances are unchanged.
+The runner requires `VIDEO_PRESENTATION_READY phase=recovered` too. Original
+failure/debug evidence is retained in `windows verification main merge/` and
+`media-main-merge-presentation-debug.log`; the corrected individual case is
+recorded in `media-main-merge-presentation-fixed.log`.
+
+The next run passes all 16 geometry/presentation cases but exposes an idle
+ANGLE import fence that remains pending after the replacement source opens.
+Stage diagnostics isolate it from decoding, seek and camera cancellation.
+Polling the owning context with `GL_SYNC_FLUSH_COMMANDS_BIT` and a zero timeout
+submits that work without blocking; the focused lifecycle run then completes
+every cancellation/recovery stage and retires all resources. Failure evidence
+remains in `windows verification main merge accepted-frame/`; the focused fix
+is recorded in `media-main-merge-race-flush.log`. Lifecycle stage markers are
+retained to identify future failures.
+
+Windows and WSL native sample type-checks, browser Rust host type-check and
+strict browser TypeScript type-check pass. TypeScript 5.8.3 is verified against
+the lockfile integrity, and the file-system adapter is the lockfile's exact
+Git revision. The 27 Win32 ANGLE tests pass. WSL targeted checks pass nine
+context-manager, 15 render-thread and five renderer-scheduling tests, plus the
+native descriptor and real EGL-disposal tests. The latter uses llvmpipe and
+does not establish accelerated DMA-BUF media acceptance. Apple/Android native
+runtime gates retain their separately recorded status.
+
+The complete rerun passes all 50 steps (47 positive checks and three expected
+negative controls), recorded beside the worktree in
+`windows verification main merge flush/report.json` and `report.md`. It covers
+eight six-cycle memory profiles, all 16 orientation/crop cases including seek
+and device recovery, three lifecycle race cycles, a six-cycle camera soak
+(36 resets), the default build/recovery/five ended-restart runs and WSL build,
+video-control and EGL tests. Every counted retirement checkpoint reaches zero
+frames, reads, quarantine and native sessions; CPU preview transfers remain
+zero. These short integration runs do not replace the longer memory evidence
+above or prove absence of leaks.
+
+The frozen audit executable's SHA-256 is
+`58273541A60B4A0CE0C8CDB1E728AB29ADC7358BB8ADA0642120E4D009B9D17B`.
+Because verification runs before the merge commit, the report records its
+pre-merge HEAD plus hashes of all changed source files. Those hashes match
+the final staged code; only these verification notes change afterwards.

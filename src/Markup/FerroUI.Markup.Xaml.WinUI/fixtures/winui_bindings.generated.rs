@@ -13,7 +13,7 @@ pub const ROOT_URI: &str = "ferres://FerroUI.WinUI.BindingFixture/";
 /// An untyped build function: the root object as the loader returns it.
 pub type BuildDocument = fn(
     ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException>;
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError>;
 
 /// The XML namespaces of documents of this file, as the compiler resolved them.
 const XML_NAMESPACES_0: rt::XmlNamespaceTable = &[
@@ -50,7 +50,7 @@ static BUILD_ROOT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri:
 /// Generated from `root.xaml`.
 pub fn build_root_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // root.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_ROOT_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -145,7 +145,7 @@ pub fn build_root_xaml(
 
 fn build_root_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_root_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -156,7 +156,7 @@ static BUILD_TEMPLATE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_
 /// Generated from `template.xaml`.
 pub fn build_template_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ContentControl>, ::ferroui_markup_xaml::XamlLoadError> {
     // template.xaml(1,2) ContentControl
     let content_control_0 = ::ferroui_controls::ContentControl::new();
     let context = rt::populate_context(service_provider, &BUILD_TEMPLATE_XAML_DOCUMENT, rt::to_value(content_control_0.clone()));
@@ -182,7 +182,7 @@ pub fn build_template_xaml(
 /// Builds the deferred content at `template.xaml(5,8)` (a template or a deferred resource).
 fn build_template_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_TEMPLATE_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // template.xaml(5,8) StackPanel
@@ -283,7 +283,7 @@ fn build_template_xaml_deferred_0(
 
 fn build_template_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_template_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -294,7 +294,7 @@ static BUILD_NAVIGATION_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { bas
 /// Generated from `navigation.xaml`.
 pub fn build_navigation_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::NavigationView>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::NavigationView>, ::ferroui_markup_xaml::XamlLoadError> {
     // navigation.xaml(1,2) NavigationView
     let navigation_view_0 = ::ferroui_controls::NavigationView::new();
     let context = rt::populate_context(service_provider, &BUILD_NAVIGATION_XAML_DOCUMENT, rt::to_value(navigation_view_0.clone()));
@@ -437,7 +437,7 @@ pub fn build_navigation_xaml(
 
 fn build_navigation_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_navigation_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -448,7 +448,7 @@ static BUILD_NATIVE_CONTROLS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo 
 /// Generated from `native_controls.xaml`.
 pub fn build_native_controls_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
     // native_controls.xaml(1,2) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     let context = rt::populate_context(service_provider, &BUILD_NATIVE_CONTROLS_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
@@ -792,7 +792,7 @@ pub fn build_native_controls_xaml(
 /// Builds the deferred content at `native_controls.xaml(4,6)` (a template or a deferred resource).
 fn build_native_controls_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_NATIVE_CONTROLS_XAML_DOCUMENT);
     // native_controls.xaml(4,6) FontIconSource
     let font_icon_source_0 = ::ferroui_controls::FontIconSource::new();
@@ -804,7 +804,7 @@ fn build_native_controls_xaml_deferred_0(
 /// Builds the deferred content at `native_controls.xaml(5,6)` (a template or a deferred resource).
 fn build_native_controls_xaml_deferred_1(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_NATIVE_CONTROLS_XAML_DOCUMENT);
     // native_controls.xaml(5,6) SymbolIconSource
     let symbol_icon_source_0 = ::ferroui_controls::SymbolIconSource::new();
@@ -816,7 +816,7 @@ fn build_native_controls_xaml_deferred_1(
 /// Builds the deferred content at `native_controls.xaml(6,6)` (a template or a deferred resource).
 fn build_native_controls_xaml_deferred_2(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_NATIVE_CONTROLS_XAML_DOCUMENT);
     // native_controls.xaml(6,6) PathIconSource
     let path_icon_source_0 = ::ferroui_controls::PathIconSource::new();
@@ -829,7 +829,7 @@ fn build_native_controls_xaml_deferred_2(
 /// Builds the deferred content at `native_controls.xaml(7,6)` (a template or a deferred resource).
 fn build_native_controls_xaml_deferred_3(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_NATIVE_CONTROLS_XAML_DOCUMENT);
     // native_controls.xaml(7,6) RatingItemInfo
     let rating_item_info_0 = ::ferroui_controls::RatingItemInfo::new();
@@ -839,7 +839,7 @@ fn build_native_controls_xaml_deferred_3(
 /// Builds the deferred content at `native_controls.xaml(8,6)` (a template or a deferred resource).
 fn build_native_controls_xaml_deferred_4(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_NATIVE_CONTROLS_XAML_DOCUMENT);
     // native_controls.xaml(8,6) RatingItemImageInfo
     let rating_item_image_info_0 = ::ferroui_controls::RatingItemImageInfo::new();
@@ -849,7 +849,7 @@ fn build_native_controls_xaml_deferred_4(
 /// Builds the deferred content at `native_controls.xaml(9,6)` (a template or a deferred resource).
 fn build_native_controls_xaml_deferred_5(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_NATIVE_CONTROLS_XAML_DOCUMENT);
     // native_controls.xaml(9,6) InfoBarTemplateSettings
     let info_bar_template_settings_0 = ::ferroui_controls::primitives::InfoBarTemplateSettings::new();
@@ -859,7 +859,7 @@ fn build_native_controls_xaml_deferred_5(
 /// Builds the deferred content at `native_controls.xaml(10,6)` (a template or a deferred resource).
 fn build_native_controls_xaml_deferred_6(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_NATIVE_CONTROLS_XAML_DOCUMENT);
     // native_controls.xaml(10,6) InfoBadgeTemplateSettings
     let info_badge_template_settings_0 = ::ferroui_controls::primitives::InfoBadgeTemplateSettings::new();
@@ -869,7 +869,7 @@ fn build_native_controls_xaml_deferred_6(
 /// Builds the deferred content at `native_controls.xaml(11,6)` (a template or a deferred resource).
 fn build_native_controls_xaml_deferred_7(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_NATIVE_CONTROLS_XAML_DOCUMENT);
     // native_controls.xaml(11,6) ProgressRingTemplateSettings
     let progress_ring_template_settings_0 = ::ferroui_controls::primitives::ProgressRingTemplateSettings::new();
@@ -878,7 +878,7 @@ fn build_native_controls_xaml_deferred_7(
 
 fn build_native_controls_xaml_untyped(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_native_controls_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
@@ -898,7 +898,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
 pub fn try_load(
     service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     uri: &str,
-) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadError> {
     let ::core::option::Option::Some((_, build)) = ::core::iter::Iterator::find(&mut DOCUMENTS.iter(), |(document, _)| rt::uri_equals(uri, ROOT_URI, document)) else {
         return ::core::result::Result::Ok(::core::option::Option::None);
     };

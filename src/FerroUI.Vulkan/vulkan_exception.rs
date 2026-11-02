@@ -3,12 +3,16 @@ use std::fmt;
 
 /// A failure reported by Vulkan or by the code driving it.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct VulkanException {
+pub struct VulkanError {
     message: String,
     result: Option<vk::Result>,
 }
 
-impl VulkanException {
+/// The name of [`VulkanError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `VulkanError`")]
+pub type VulkanException = VulkanError;
+
+impl VulkanError {
     /// A failure without a result of Vulkan.
     pub fn new(message: impl Into<String>) -> Self {
         Self { message: message.into(), result: None }
@@ -37,18 +41,18 @@ impl VulkanException {
 
     /// The failure of the function `func_name`, unless its numeric result
     /// `res` is `VK_SUCCESS`.
-    pub fn throw_on_error(func_name: &str, res: i32) -> Result<(), VulkanException> {
+    pub fn throw_on_error(func_name: &str, res: i32) -> Result<(), VulkanError> {
         vk::Result::from_raw(res).throw_on_error(func_name)
     }
 }
 
-impl fmt::Display for VulkanException {
+impl fmt::Display for VulkanError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
     }
 }
 
-impl std::error::Error for VulkanException {}
+impl std::error::Error for VulkanError {}
 
 /// The name of a result as the Vulkan headers spell it.
 fn result_name(res: vk::Result) -> String {
@@ -65,13 +69,13 @@ fn result_name(res: vk::Result) -> String {
 pub trait VulkanExceptionExtensions {
     /// The failure of the function `func_name`, unless the result is
     /// `VK_SUCCESS`.
-    fn throw_on_error(self, func_name: &str) -> Result<(), VulkanException>;
+    fn throw_on_error(self, func_name: &str) -> Result<(), VulkanError>;
 }
 
 impl VulkanExceptionExtensions for vk::Result {
-    fn throw_on_error(self, func_name: &str) -> Result<(), VulkanException> {
+    fn throw_on_error(self, func_name: &str) -> Result<(), VulkanError> {
         if self != vk::Result::SUCCESS {
-            return Err(VulkanException::from_result(func_name, self));
+            return Err(VulkanError::from_result(func_name, self));
         }
         Ok(())
     }
@@ -80,12 +84,12 @@ impl VulkanExceptionExtensions for vk::Result {
 /// Names the function whose result a failure is.
 pub trait VulkanResultExtensions<T> {
     /// The value, or the failure of the function `func_name`.
-    fn throw_on_error(self, func_name: &str) -> Result<T, VulkanException>;
+    fn throw_on_error(self, func_name: &str) -> Result<T, VulkanError>;
 }
 
 impl<T> VulkanResultExtensions<T> for Result<T, vk::Result> {
-    fn throw_on_error(self, func_name: &str) -> Result<T, VulkanException> {
-        self.map_err(|res| VulkanException::from_result(func_name, res))
+    fn throw_on_error(self, func_name: &str) -> Result<T, VulkanError> {
+        self.map_err(|res| VulkanError::from_result(func_name, res))
     }
 }
 
@@ -96,7 +100,7 @@ mod tests {
     #[test]
     fn success_is_no_failure() {
         assert_eq!(vk::Result::SUCCESS.throw_on_error("vkCreateFence"), Ok(()));
-        assert_eq!(VulkanException::throw_on_error("vkCreateFence", 0), Ok(()));
+        assert_eq!(VulkanError::throw_on_error("vkCreateFence", 0), Ok(()));
     }
 
     #[test]
@@ -110,19 +114,19 @@ mod tests {
     #[test]
     fn a_positive_result_is_a_failure_too() {
         // The reference compares with VK_SUCCESS, so VK_SUBOPTIMAL_KHR and VK_INCOMPLETE fail.
-        let error = VulkanException::throw_on_error("vkQueuePresentKHR", 1000001003).unwrap_err();
+        let error = VulkanError::throw_on_error("vkQueuePresentKHR", 1000001003).unwrap_err();
         assert_eq!(error.message(), "vkQueuePresentKHR returned VK_SUBOPTIMAL_KHR");
     }
 
     #[test]
     fn a_result_without_a_name_prints_its_number() {
-        let error = VulkanException::from_code("vkFoo", -123456);
+        let error = VulkanError::from_code("vkFoo", -123456);
         assert_eq!(error.message(), "vkFoo returned -123456");
     }
 
     #[test]
     fn a_plain_message_has_no_result() {
-        let error = VulkanException::new("No devices found");
+        let error = VulkanError::new("No devices found");
         assert_eq!(error.message(), "No devices found");
         assert_eq!(error.result(), None);
     }

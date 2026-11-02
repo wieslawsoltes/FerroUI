@@ -7,7 +7,7 @@ use super::{
 use crate::automation::peers::{
     AutomationPeer, ControlAutomationPeer, HyperlinkAutomationPeer, RichEditBoxAutomationPeer,
 };
-use crate::automation::ElementNotEnabledException;
+use crate::automation::ElementNotEnabledError;
 use crate::documents::{
     CharacterFormat, Hyperlink, InlineCollection, InlineSnapshot, InlineSnapshotKind,
     InlineUIContainer, LineBreak, Paragraph, ParagraphFormat, RichTextDocument, Run, Span,
@@ -23,7 +23,7 @@ use ferroui_base::media::{
     BaselineAlignment, Color, FlowDirection, FontStyle, IBrush, TextAlignment,
     TextDecorationLocation,
 };
-use ferroui_base::reactive::{CompositeDisposable, IDisposable, SerialDisposable};
+use ferroui_base::reactive::{CompositeDisposable, IDisposable, SerialDisposable, Subscription};
 use ferroui_base::{Matrix, ObjectType, Point, Rect, Ref, Visual, WeakRef};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -137,7 +137,7 @@ impl RichTextAutomationHost {
     fn select(&self, range: Range<usize>) -> Result<(), ProviderError> {
         self.control()?;
         if !self.is_enabled() {
-            return Err(Box::new(ElementNotEnabledException::new()));
+            return Err(Box::new(ElementNotEnabledError::new()));
         }
         let view = self.view()?;
         if !view.is_text_selection_enabled() {
@@ -307,7 +307,7 @@ fn observe_text_edit_changes(
             change_type,
             changed_data: vec![text.clone()],
         });
-    })
+    }).detach()
 }
 
 impl<T: RichTextAutomationPeer> ITextProvider2 for ProviderAdapter<T> {
@@ -478,7 +478,7 @@ impl<T: RichTextAutomationPeer> ITextProvider for ProviderAdapter<T> {
         let owner = context.host.control()?;
         let document_subscription = Rc::new(SerialDisposable::new());
         let callback = handler.clone();
-        document_subscription.set(Some(view.rich_document().changed(move |_| callback())));
+        document_subscription.set(Some(view.rich_document().changed(move |_| callback()).detach()));
         let current = document_subscription.clone();
         let host = context.host;
         let property_subscription = owner.property_changed(move |event| {
@@ -491,7 +491,7 @@ impl<T: RichTextAutomationPeer> ITextProvider for ProviderAdapter<T> {
             if event.property() == document_property {
                 if let Ok(view) = host.view() {
                     let callback = handler.clone();
-                    current.set(Some(view.rich_document().changed(move |_| callback())));
+                    current.set(Some(view.rich_document().changed(move |_| callback()).detach()));
                     handler();
                 }
             }
@@ -509,12 +509,13 @@ impl<T: RichTextAutomationPeer> ITextProvider for ProviderAdapter<T> {
         let context = TextContext::from_peer(&*self.0)?;
         match &context.host {
             RichTextAutomationHost::Block(_) => {
-                Ok(context.view()?.selection_changed(move |_| handler()))
+                Ok(context.view()?.selection_changed(move |_| handler()).detach())
             }
             RichTextAutomationHost::Editor(editor) => Ok(editor
                 .upgrade()
                 .ok_or(TextProviderError::ElementNotAvailable)?
-                .selection_changed(move |_| handler())),
+                .selection_changed(move |_| handler())
+                .detach()),
         }
     }
 }
@@ -1106,7 +1107,7 @@ fn text_views(view: &Ref<RichTextBlock>) -> Vec<Ref<RichTextBlock>> {
 #[derive(Default)]
 pub(crate) struct RichTextAutomationState {
     children: RefCell<Option<TextChildrenCache>>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 struct TextChildrenCache {
@@ -1142,7 +1143,7 @@ impl RichTextAutomationState {
                 let _ = state.entries(host, &peer);
             }))
             .ok();
-        if let Some(previous) = self.subscription.replace(subscription) {
+        if let Some(previous) = self.subscription.replace(subscription.map(Subscription::new)) {
             previous.dispose();
         }
     }

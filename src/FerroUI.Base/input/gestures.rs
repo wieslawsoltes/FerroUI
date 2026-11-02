@@ -3,7 +3,7 @@ use super::{
     PointerPressedEventArgs, PointerReleasedEventArgs, PointerType, TappedEventArgs,
 };
 use crate::interactivity::{IRoutedEventArgs, Interactive, RoutingStrategies};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::threading::{DispatcherPriority, DispatcherTimer};
 use crate::utilities::HandlerList;
 use crate::{FerroObject, Point, Rect, Ref, Size, Thickness, Visual, WeakRef};
@@ -39,7 +39,7 @@ struct GesturesData {
     last_press: RefCell<Option<WeakRef<FerroObject>>>,
     last_press_point: Cell<Point>,
     hold_cancellation_token: RefCell<Option<Rc<Cell<bool>>>>,
-    hold_timer: RefCell<Option<Rc<dyn IDisposable>>>,
+    hold_timer: RefCell<Option<Subscription>>,
 }
 
 crate::ferro_thread_local! {
@@ -69,9 +69,9 @@ crate::ferro_static_type!(Gestures);
 impl Gestures {
     /// Subscribes the gesture recognition to the pointer events.
     fn static_constructor() {
-        InputElement::pointer_pressed_event().route_finished().subscribe(Self::pointer_pressed);
-        InputElement::pointer_released_event().route_finished().subscribe(Self::pointer_released);
-        InputElement::pointer_moved_event().route_finished().subscribe(Self::pointer_moved);
+        InputElement::pointer_pressed_event().route_finished().subscribe(Self::pointer_pressed).detach();
+        InputElement::pointer_released_event().route_finished().subscribe(Self::pointer_released).detach();
+        InputElement::pointer_moved_event().route_finished().subscribe(Self::pointer_moved).detach();
     }
 
     pub(crate) fn add_holding(handler: impl Fn(&Interactive, &HoldingRoutedEventArgs) + 'static) {

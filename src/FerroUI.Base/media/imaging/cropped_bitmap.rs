@@ -1,6 +1,6 @@
 use crate::media::ref_adapter::RefAdapter;
 use crate::media::{DrawingContext, IAffectsRender, IImage};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::utilities::HandlerList;
 use crate::{
     ferro_class, ferro_property, instantiate, FerroObject, FerroObjectImpl, FerroProperty,
@@ -54,8 +54,8 @@ crate::ferro_properties! { impl CroppedBitmap {
 
 impl CroppedBitmap {
     fn static_constructor() {
-        Self::source_rect_property().changed().add_class_handler::<CroppedBitmap>(|x, e| x.source_rect_changed(e));
-        Self::source_property().changed().add_class_handler::<CroppedBitmap>(|x, e| x.source_changed(e));
+        Self::source_rect_property().changed().add_class_handler::<CroppedBitmap>(|x, e| x.source_rect_changed(e)).detach();
+        Self::source_property().changed().add_class_handler::<CroppedBitmap>(|x, e| x.source_changed(e)).detach();
     }
 
     /// Creates the class data.
@@ -75,15 +75,16 @@ impl CroppedBitmap {
         result
     }
 
-    /// Raised when the image changes.
-    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when the image changes. Dropping the returned guard removes the
+    /// handler; [`Subscription::detach`] keeps it for the life of the image.
+    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.invalidated.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.invalidated.remove(token);
             }
-        })
+        }))
     }
 
     fn raise_invalidated(&self) {

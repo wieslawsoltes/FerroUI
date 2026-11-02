@@ -58,7 +58,9 @@ pub use i_vulkan_platform_surface::{
 };
 pub use i_vulkan_render_target::{IVulkanRenderSession, IVulkanRenderTarget};
 pub use vulkan_bindings::VulkanHelpers;
-pub use vulkan_exception::{VulkanException, VulkanExceptionExtensions, VulkanResultExtensions};
+pub use vulkan_exception::{VulkanError, VulkanExceptionExtensions, VulkanResultExtensions};
+#[allow(deprecated)]
+pub use vulkan_exception::VulkanException;
 pub use vulkan_image_info::VulkanImageInfo;
 pub use vulkan_options::{
     Version, VkGetInstanceProcAddressDelegate, VulkanDeviceCheckSurfaceFactory, VulkanDeviceCreationOptions,

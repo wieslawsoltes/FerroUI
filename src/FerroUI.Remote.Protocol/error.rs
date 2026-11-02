@@ -6,14 +6,14 @@ use std::fmt;
 use std::io;
 use std::sync::Arc;
 
-use crate::metsys_bson::BsonException;
+use crate::metsys_bson::BsonError;
 
 /// What a serializer, a resolver or a transport reports. Each variant is the
 /// exception of the same name in the upstream code.
 #[derive(Clone, Debug)]
 pub enum Error {
-    /// `BsonException`: what the BSON serializer itself rejects.
-    Bson(BsonException),
+    /// `BsonError`: what the BSON serializer itself rejects.
+    Bson(BsonError),
     /// `EndOfStreamException`: the document or the stream ended inside a
     /// value.
     EndOfStream,
@@ -69,8 +69,8 @@ impl std::error::Error for Error {
     }
 }
 
-impl From<BsonException> for Error {
-    fn from(e: BsonException) -> Self {
+impl From<BsonError> for Error {
+    fn from(e: BsonError) -> Self {
         Error::Bson(e)
     }
 }

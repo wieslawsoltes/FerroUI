@@ -266,6 +266,42 @@ for (const [mode, expectedContext] of [["WebGL2", "webgl2"], ["Software2D", "2d"
         await page.resize(SMALLER_SIZE.width, SMALLER_SIZE.height);
         await waitForFrame(SMALLER_SIZE, undefined, 64);
 
+        // A cooperative resize: no frame is painted stretched. Each time the browser is about to
+        // paint the view after its size changed (a resize observer created after the platform's
+        // runs after it, before the paint), what is shown holds a frame of the size it is shown at:
+        // on the thread of the page the frame was rendered at once in the platform's observer;
+        // with a render thread the page shows the frames in an overlay at their own size while the
+        // resize lasts (the canvas of the worker is hidden then). Twenty steps of the viewport,
+        // each a frame or two apart, as a drag of the edge of a window gives.
+        await page.evaluate(`(() => {
+            window.__resizeProbe = { samples: 0, stretched: [], overlays: 0 };
+            const sample = () => {
+                const overlay = document.querySelector("#out .ferroui-resize-overlay");
+                if (overlay) { window.__resizeProbe.overlays++; }
+                const canvas = overlay ?? document.querySelector("#out canvas");
+                const box = canvas.getBoundingClientRect();
+                const width = Math.round(box.width * devicePixelRatio);
+                const height = Math.round(box.height * devicePixelRatio);
+                window.__resizeProbe.samples++;
+                if (Math.abs(canvas.width - width) > 1 || Math.abs(canvas.height - height) > 1) {
+                    window.__resizeProbe.stretched.push(canvas.width + "x" + canvas.height + " shown at " + width + "x" + height);
+                }
+            };
+            new ResizeObserver(sample).observe(document.querySelector("#out canvas"));
+            new ResizeObserver(sample).observe(document.querySelector("#out"));
+        })()`);
+        for (let step = 1; step <= 20; step++) {
+            const t = step / 20;
+            await page.resize(Math.round(SMALLER_SIZE.width + (LARGER_SIZE.width - SMALLER_SIZE.width) * t),
+                Math.round(SMALLER_SIZE.height + (LARGER_SIZE.height - SMALLER_SIZE.height) * t));
+            await sleep(20);
+        }
+        await waitForFrame(LARGER_SIZE, undefined, 64);
+        const probe = JSON.parse(await page.evaluate("JSON.stringify(window.__resizeProbe)"));
+        measured(`${probe.samples} paints of a resized view (${probe.overlays} with the resize overlay), ${probe.stretched.length} stretched`);
+        assert(probe.samples >= 20, `the resize was not observed: ${JSON.stringify(probe)}`);
+        assert(probe.stretched.length === 0, `frames were painted stretched: ${probe.stretched.slice(0, 5).join(", ")}`);
+
         // Let a few more frames run so that errors of the render loop show up.
         await sleep(1000);
         assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);

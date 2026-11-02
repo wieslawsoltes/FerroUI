@@ -298,7 +298,7 @@ mod imp {
     use crate::server::transient::wayland_text_input_v3::{WorkerTextInputSurfaces, WorkerTextInputV3};
     use crate::server::transient::xdg_toplevel_export::{ExportedTopLevel, XdgToplevelExport, XdgToplevelExportId};
     use crate::server::wayland_worker::{WaylandWorker, WaylandWorkerState};
-    use crate::ferro_wayland_exception::FerroWaylandException;
+    use crate::ferro_wayland_exception::FerroWaylandError;
     use crate::text_input_options_converter::{ContentHint, ContentPurpose};
     use ferroui_base::{PixelRect, Rect};
     use ferroui_base::platform::{PlatformRenderTargetState, RenderTargetSceneInfo};
@@ -1152,7 +1152,7 @@ mod imp {
         fn on_connected(&mut self, cx: &ConnectionContext<'_>) {
             self.shell.on_connected(cx);
             if cx.globals.outputs.outputs().is_empty() {
-                FerroWaylandException::new("Expected at least one wl_output at this point").throw();
+                FerroWaylandError::new("Expected at least one wl_output at this point").throw();
             }
             self.pending_batch = XdgConfigureBatch::default();
             let xdg_surface = self.shell.xdg_surface.as_ref().expect("the shell surface was just connected");

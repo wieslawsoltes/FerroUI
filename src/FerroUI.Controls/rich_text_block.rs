@@ -26,7 +26,7 @@ use ferroui_base::media::{
     FontStyle, FontWeight, IBrush, TextAlignment, TextDecorationCollection, TextLineBounds,
     TextTrimming, TextWrapping,
 };
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, instantiate, DirectProperty, ElementRef, FerroObject, FerroObjectImpl,
@@ -59,8 +59,8 @@ pub struct RichTextSelectionChangedEventArgs {
 pub struct RichTextBlock {
     base: Control,
     document: RefCell<RichTextDocument>,
-    document_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    font_features_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    document_subscription: RefCell<Option<Subscription>>,
+    font_features_subscription: RefCell<Option<Subscription>>,
     source: RefCell<Option<Rc<RichTextSource>>>,
     /// The source before the last invalidation, whose unchanged paragraphs the next source
     /// takes over (F1).
@@ -901,12 +901,12 @@ impl RichTextBlock {
             Self::on_context_requested,
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
         InputElement::context_canceled_event().add_class_handler_with::<RichTextBlock>(
             Self::on_context_canceled,
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
         // Trimmed line boxes deliberately exclude some glyph ink, just as the
         // shared TextBlock formatter does. Overflow uses the document owner's
         // bounds policy even when it is not in the owner's logical tree.
@@ -1125,7 +1125,7 @@ impl RichTextBlock {
                 this.invalidate_document_layout();
             }
         });
-        *self.view_subscriptions.borrow_mut() = vec![highlighters, resources, theme];
+        *self.view_subscriptions.borrow_mut() = vec![highlighters.detach(), resources.detach(), theme.detach()];
         self.refresh_default_highlight_brush_subscriptions();
     }
 
@@ -1326,17 +1326,21 @@ impl RichTextBlock {
         }
     }
 
+    /// Adds a handler of the changes of the selection.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the block.
     pub fn selection_changed(
         &self,
         handler: impl Fn(&RichTextSelectionChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.selection_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.selection_changed.remove(token);
             }
-        })
+        }))
     }
 
     pub fn selected_text(&self) -> String {

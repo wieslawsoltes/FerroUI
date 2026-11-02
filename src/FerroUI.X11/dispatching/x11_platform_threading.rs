@@ -5,7 +5,7 @@
 
 use super::{IX11PlatformDispatcher, X11EventDispatcher};
 #[cfg(target_os = "linux")]
-use crate::x11_exception::X11Exception;
+use crate::x11_exception::X11Error;
 use crate::x11_platform::FerroX11Platform;
 use ferroui_base::threading::{
     CancellationToken, DispatcherImplEvent, IControlledDispatcherImpl, IDispatcherImpl,
@@ -88,17 +88,17 @@ impl Waiter {
         unsafe {
             let epoll = libc::epoll_create1(0);
             if epoll == -1 {
-                X11Exception::new("epoll_create1 failed").throw();
+                X11Error::new("epoll_create1 failed").throw();
             }
 
             let mut ev = libc::epoll_event { events: libc::EPOLLIN as u32, u64: event_codes::X11 };
             if libc::epoll_ctl(epoll, libc::EPOLL_CTL_ADD, x11_fd, &mut ev) == -1 {
-                X11Exception::new("Unable to attach X11 connection handle to epoll").throw();
+                X11Error::new("Unable to attach X11 connection handle to epoll").throw();
             }
 
             let mut ev = libc::epoll_event { events: libc::EPOLLIN as u32, u64: event_codes::SIGNAL };
             if libc::epoll_ctl(epoll, libc::EPOLL_CTL_ADD, sigread, &mut ev) == -1 {
-                X11Exception::new("Unable to attach signal pipe to epoll").throw();
+                X11Error::new("Unable to attach signal pipe to epoll").throw();
             }
             Self { epoll, sigread }
         }

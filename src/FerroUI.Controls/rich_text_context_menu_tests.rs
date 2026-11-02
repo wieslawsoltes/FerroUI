@@ -363,10 +363,10 @@ fn rich_readonly_context_actual_keys_keep_typed_cancellation_before_shared_closi
     let observed = closing.clone();
     let cancel_closing = Rc::new(Cell::new(true));
     let cancel_handler = cancel_closing.clone();
-    let _closing = flyout.closing(move |args| {
+    flyout.closing(move |args| {
         observed.set(observed.get() + 1);
         args.set_cancel(cancel_handler.get());
-    });
+    }).detach();
     cancel_typed.set(true);
     assert!(keyboard(&f.view, Key::Apps, KeyModifiers::NONE).handled());
     assert_eq!(typed.get(), 2);
@@ -402,7 +402,7 @@ fn rich_readonly_context_nested_programmatic_request_does_not_inherit_key_toggle
     });
     let closes = Rc::new(Cell::new(0));
     let observed = closes.clone();
-    let _closing = flyout.closing(move |_| observed.set(observed.get() + 1));
+    flyout.closing(move |_| observed.set(observed.get() + 1)).detach();
     assert!(keyboard(&f.view, Key::Apps, KeyModifiers::NONE).handled());
     assert_eq!(calls.get(), 2);
     assert_eq!(closes.get(), 0);
@@ -429,7 +429,7 @@ fn rich_readonly_context_nested_keyboard_request_supersedes_outer_key_identity()
     });
     let closes = Rc::new(Cell::new(0));
     let observed = closes.clone();
-    let _closing = flyout.closing(move |_| observed.set(observed.get() + 1));
+    flyout.closing(move |_| observed.set(observed.get() + 1)).detach();
     assert!(keyboard(&f.view, Key::Apps, KeyModifiers::NONE).handled());
     assert_eq!(calls.get(), 2);
     assert_eq!(closes.get(), 1);
@@ -508,10 +508,10 @@ fn rich_readonly_context_key_handler_replacement_or_removal_closes_previous_popu
         });
         let closes = Rc::new(Cell::new(0));
         let observed = closes.clone();
-        let _closing = previous.closing(move |args| {
+        previous.closing(move |args| {
             observed.set(observed.get() + 1);
             args.set_cancel(cancel_close);
-        });
+        }).detach();
         assert!(keyboard(&f.view, Key::Apps, KeyModifiers::NONE).handled());
         assert_eq!(closes.get(), 1);
         assert_eq!(previous.is_open(), cancel_close);
@@ -591,7 +591,7 @@ fn rich_readonly_context_nested_request_owns_the_opening_and_pointer_anchor() {
     });
     let opened = Rc::new(Cell::new(0));
     let observed = opened.clone();
-    let _opened = flyout.opened(move || observed.set(observed.get() + 1));
+    flyout.opened(move || observed.set(observed.get() + 1)).detach();
     assert!(keyboard(&f.view, Key::Apps, KeyModifiers::NONE).handled());
     assert_eq!(calls.get(), 2);
     assert_eq!(opened.get(), 1);
@@ -655,7 +655,7 @@ fn rich_readonly_context_transform_reentry_retires_outer_before_typed_opening() 
     });
     let opened = Rc::new(Cell::new(0));
     let observed = opened.clone();
-    let _opened = flyout.opened(move || observed.set(observed.get() + 1));
+    flyout.opened(move || observed.set(observed.get() + 1)).detach();
     let view = f.view.downgrade();
     let window = f.window.downgrade();
     let point = Point::new(203.25, 63.75);
@@ -737,7 +737,7 @@ fn rich_readonly_context_placement_transform_preserves_nested_flyout_anchor() {
     });
     let opened = Rc::new(Cell::new(0));
     let observed = opened.clone();
-    let _opened = flyout.opened(move || observed.set(observed.get() + 1));
+    flyout.opened(move || observed.set(observed.get() + 1)).detach();
 
     assert!(right_release(&f.view, &f.window, Point::new(170.5, 55.5)).handled());
     assert_eq!(calls.get(), 2);
@@ -827,11 +827,11 @@ fn rich_readonly_context_menu_opening_reentry_preserves_newer_menu_choice() {
     let view = f.view.downgrade();
     let window = f.window.downgrade();
     let point = Point::new(209.25, 69.75);
-    let _opening = menu.opening(move |_| {
+    menu.opening(move |_| {
         let view = view.upgrade().unwrap();
         view.set_context_menu(None);
         assert!(right_release(&view, &window.upgrade().unwrap(), point).handled());
-    });
+    }).detach();
 
     assert!(keyboard(&f.view, Key::Apps, KeyModifiers::NONE).handled());
     assert_eq!(calls.get(), 2);
@@ -850,13 +850,13 @@ fn rich_readonly_context_menu_precedence_survives_canceled_property_removal() {
         let calls = Rc::new(Cell::new(0));
         let observed = calls.clone();
         let view = f.view.downgrade();
-        let _opening = menu.opening(move |args| {
+        menu.opening(move |args| {
             observed.set(observed.get() + 1);
             if remove {
                 view.upgrade().unwrap().set_context_menu(None);
             }
             args.set_cancel(true);
-        });
+        }).detach();
         assert!(keyboard(&f.view, Key::Apps, KeyModifiers::NONE).handled());
         assert_eq!(calls.get(), 1);
         assert!(!menu.is_open());
@@ -1022,10 +1022,10 @@ fn rich_readonly_context_overflow_keyboard_anchor_dismissal_and_target_cancellat
     let observed = close_calls.clone();
     let cancel = Rc::new(Cell::new(true));
     let cancel_handler = cancel.clone();
-    let _closing = flyout.closing(move |args| {
+    flyout.closing(move |args| {
         observed.set(observed.get() + 1);
         args.set_cancel(cancel_handler.get());
-    });
+    }).detach();
     second.raise_event(&RoutedEventArgs::with_event(
         InputElement::context_canceled_event(),
     ));
@@ -1071,10 +1071,10 @@ fn rich_readonly_context_inherited_flyout_opening_cancellation_is_not_retried() 
     let flyout = f.flyout(&f.view);
     let calls = Rc::new(Cell::new(0));
     let observed = calls.clone();
-    let _opening = flyout.opening(move |args| {
+    flyout.opening(move |args| {
         observed.set(observed.get() + 1);
         args.set_cancel(true);
-    });
+    }).detach();
     assert!(keyboard(&overflow, Key::Apps, KeyModifiers::NONE).handled());
     assert_eq!(calls.get(), 1);
     assert!(!flyout.is_open());

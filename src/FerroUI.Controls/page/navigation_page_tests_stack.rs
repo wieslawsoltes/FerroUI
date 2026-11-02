@@ -164,7 +164,7 @@ fn pop_to_root_fires_popped_to_root_event() {
     let _scope = test_scope();
     let nav = NavigationPage::new();
     let fired = flag();
-    nav.popped_to_root(raise_flag(&fired));
+    nav.popped_to_root(raise_flag(&fired)).detach();
     wait(nav.push_async(page()));
     wait(nav.push_async(page()));
     wait(nav.pop_to_root_async());
@@ -181,7 +181,7 @@ fn pop_to_root_invokes_navigated_from_on_current_page() {
     wait(nav.push_async(&top));
 
     let args = slot::<NavigatedFromEventArgs>();
-    top.navigated_from(store(&args));
+    top.navigated_from(store(&args)).detach();
 
     wait(nav.pop_to_root_async());
 
@@ -200,7 +200,7 @@ fn pop_to_root_invokes_navigated_to_on_root_page() {
     wait(nav.push_async(&top));
 
     let args = slot::<NavigatedToEventArgs>();
-    root.navigated_to(store(&args));
+    root.navigated_to(store(&args)).detach();
 
     wait(nav.pop_to_root_async());
 
@@ -221,7 +221,7 @@ fn pop_to_root_navigated_from_fires_after_state_change() {
     let stack_depth_at_event = Rc::new(std::cell::Cell::new(-1));
     let depth = stack_depth_at_event.clone();
     let weak = nav.downgrade();
-    top.navigated_from(move |_| depth.set(weak.upgrade().expect("the navigation page is alive").stack_depth()));
+    top.navigated_from(move |_| depth.set(weak.upgrade().expect("the navigation page is alive").stack_depth())).detach();
 
     wait(nav.pop_to_root_async());
 
@@ -233,7 +233,7 @@ fn pop_to_root_when_already_at_root_does_nothing() {
     let _scope = test_scope();
     let nav = NavigationPage::new();
     let fired = flag();
-    nav.popped_to_root(raise_flag(&fired));
+    nav.popped_to_root(raise_flag(&fired)).detach();
     wait(nav.push_async(page()));
     wait(nav.pop_to_root_async());
     assert_eq!(1, nav.stack_depth());
@@ -283,7 +283,7 @@ fn insert_page_fires_page_inserted_event() {
     wait(nav.push_async(&top));
 
     let args = slot::<PageInsertedEventArgs>();
-    nav.page_inserted(store(&args));
+    nav.page_inserted(store(&args)).detach();
 
     let inserted = page();
     nav.insert_page(&inserted, &top);
@@ -303,7 +303,7 @@ fn remove_page_fires_page_removed_event() {
     wait(nav.push_async(&top));
 
     let args = slot::<PageRemovedEventArgs>();
-    nav.page_removed(store(&args));
+    nav.page_removed(store(&args)).detach();
 
     nav.remove_page(&mid);
 
@@ -324,7 +324,7 @@ fn insert_page_does_not_fire_navigated_to_on_inserted_page() {
 
     let args = slot::<NavigatedToEventArgs>();
     let inserted = page();
-    inserted.navigated_to(store(&args));
+    inserted.navigated_to(store(&args)).detach();
 
     nav.insert_page(&inserted, &top);
 
@@ -343,8 +343,8 @@ fn insert_page_fires_navigated_to_when_inserted_page_becomes_current() {
     let inserted = page();
     let navigated_to_count = counter();
     let args = slot::<NavigatedToEventArgs>();
-    inserted.navigated_to(count(&navigated_to_count));
-    inserted.navigated_to(store(&args));
+    inserted.navigated_to(count(&navigated_to_count)).detach();
+    inserted.navigated_to(store(&args)).detach();
 
     nav.insert_page(&inserted, &top);
     assert_eq!(0, navigated_to_count.get());
@@ -417,7 +417,7 @@ fn remove_page_top_page_fires_navigated_from_with_remove_type() {
     wait(nav.push_async(&top));
 
     let from_args = slot::<NavigatedFromEventArgs>();
-    top.navigated_from(store(&from_args));
+    top.navigated_from(store(&from_args)).detach();
 
     nav.remove_page(&top);
 
@@ -436,7 +436,7 @@ fn remove_page_top_page_fires_navigated_to_on_new_current_page_with_remove_type(
     wait(nav.push_async(&top));
 
     let to_args = slot::<NavigatedToEventArgs>();
-    root.navigated_to(store(&to_args));
+    root.navigated_to(store(&to_args)).detach();
 
     nav.remove_page(&top);
 
@@ -527,7 +527,7 @@ fn push_modal_fires_modal_pushed_event() {
     let nav = NavigationPage::new();
     wait(nav.push_async(page()));
     let args = slot::<ModalPushedEventArgs>();
-    nav.modal_pushed(store(&args));
+    nav.modal_pushed(store(&args)).detach();
     let modal = page();
     wait(nav.push_modal_async(&modal));
     assert!(same(&modal, &taken(&args).modal()));
@@ -541,7 +541,7 @@ fn pop_modal_fires_modal_popped_event() {
     let modal = page();
     wait(nav.push_modal_async(&modal));
     let args = slot::<ModalPoppedEventArgs>();
-    nav.modal_popped(store(&args));
+    nav.modal_popped(store(&args)).detach();
     wait(nav.pop_modal_async());
     assert!(same(&modal, &taken(&args).modal()));
 }
@@ -563,7 +563,7 @@ fn push_modal_invokes_navigated_from_on_covered_page_with_push_modal_type() {
     wait(nav.push_async(&root));
 
     let args = slot::<NavigatedFromEventArgs>();
-    root.navigated_from(store(&args));
+    root.navigated_from(store(&args)).detach();
 
     wait(nav.push_modal_async(page_h("Modal")));
 
@@ -578,7 +578,7 @@ fn push_modal_invokes_navigated_to_on_modal_page_with_push_modal_type() {
 
     let modal = page_h("Modal");
     let args = slot::<NavigatedToEventArgs>();
-    modal.navigated_to(store(&args));
+    modal.navigated_to(store(&args)).detach();
 
     wait(nav.push_modal_async(&modal));
 
@@ -594,7 +594,7 @@ fn pop_modal_invokes_navigated_from_on_popped_modal_with_pop_modal_type() {
     wait(nav.push_modal_async(&modal));
 
     let args = slot::<NavigatedFromEventArgs>();
-    modal.navigated_from(store(&args));
+    modal.navigated_from(store(&args)).detach();
 
     wait(nav.pop_modal_async());
 
@@ -610,7 +610,7 @@ fn pop_modal_invokes_navigated_to_on_revealed_page_with_pop_modal_type() {
     wait(nav.push_modal_async(page_h("Modal")));
 
     let args = slot::<NavigatedToEventArgs>();
-    root.navigated_to(store(&args));
+    root.navigated_to(store(&args)).detach();
 
     wait(nav.pop_modal_async());
 
@@ -626,7 +626,7 @@ fn push_modal_navigated_from_destination_page_is_the_modal() {
 
     let modal = page_h("Modal");
     let args = slot::<NavigatedFromEventArgs>();
-    root.navigated_from(store(&args));
+    root.navigated_from(store(&args)).detach();
 
     wait(nav.push_modal_async(&modal));
 
@@ -642,7 +642,7 @@ fn push_modal_navigated_to_previous_page_is_covered_page() {
 
     let modal = page_h("Modal");
     let args = slot::<NavigatedToEventArgs>();
-    modal.navigated_to(store(&args));
+    modal.navigated_to(store(&args)).detach();
 
     wait(nav.push_modal_async(&modal));
 
@@ -659,7 +659,7 @@ fn pop_modal_navigated_from_destination_page_is_revealed_page() {
     wait(nav.push_modal_async(&modal));
 
     let args = slot::<NavigatedFromEventArgs>();
-    modal.navigated_from(store(&args));
+    modal.navigated_from(store(&args)).detach();
 
     wait(nav.pop_modal_async());
 
@@ -676,7 +676,7 @@ fn pop_modal_navigated_to_previous_page_is_popped_modal() {
     wait(nav.push_modal_async(&modal));
 
     let args = slot::<NavigatedToEventArgs>();
-    root.navigated_to(store(&args));
+    root.navigated_to(store(&args)).detach();
 
     wait(nav.pop_modal_async());
 
@@ -691,7 +691,7 @@ fn push_modal_when_covered_page_cancels_navigating_does_not_push_modal() {
     wait(nav.push_async(&root));
 
     let handler_invoked = flag();
-    root.navigating(cancel_navigation(&handler_invoked));
+    root.navigating(cancel_navigation(&handler_invoked)).detach();
 
     wait(nav.push_modal_async(page_h("Modal")));
 
@@ -709,7 +709,7 @@ fn push_modal_when_top_modal_cancels_navigating_does_not_push_another_modal() {
     wait(nav.push_modal_async(&first_modal));
 
     let handler_invoked = flag();
-    first_modal.navigating(cancel_navigation(&handler_invoked));
+    first_modal.navigating(cancel_navigation(&handler_invoked)).detach();
 
     wait(nav.push_modal_async(page_h("Modal 2")));
 
@@ -727,7 +727,7 @@ fn pop_modal_when_modal_cancels_navigating_does_not_pop_modal() {
     wait(nav.push_modal_async(&modal));
 
     let handler_invoked = flag();
-    modal.navigating(cancel_navigation(&handler_invoked));
+    modal.navigating(cancel_navigation(&handler_invoked)).detach();
 
     let result = wait(nav.pop_modal_async());
 

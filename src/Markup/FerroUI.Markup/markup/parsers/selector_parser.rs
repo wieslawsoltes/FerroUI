@@ -2,7 +2,7 @@
 //! text at run time.
 
 use super::{SelectorGrammar, SelectorSyntax};
-use ferroui_base::data::core::{ExpressionParseException, ValueType, ValueTypes};
+use ferroui_base::data::core::{ExpressionParseError, ValueType, ValueTypes};
 use ferroui_base::styling::{Selector, Selectors};
 use ferroui_base::{BoxedValue, FerroProperty, FerroPropertyRegistry, TypeInfo};
 use std::fmt;
@@ -13,7 +13,7 @@ use std::rc::Rc;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SelectorParserError {
     /// The text is not a selector (`ExpressionParseException`).
-    Parse(ExpressionParseException),
+    Parse(ExpressionParseError),
     /// The selector names a type, a property or a value that does not exist
     /// or does not apply (`InvalidOperationException`).
     InvalidOperation(String),
@@ -35,8 +35,8 @@ impl fmt::Display for SelectorParserError {
 
 impl std::error::Error for SelectorParserError {}
 
-impl From<ExpressionParseException> for SelectorParserError {
-    fn from(error: ExpressionParseException) -> Self {
+impl From<ExpressionParseError> for SelectorParserError {
+    fn from(error: ExpressionParseError) -> Self {
         SelectorParserError::Parse(error)
     }
 }

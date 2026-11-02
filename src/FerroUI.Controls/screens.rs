@@ -1,7 +1,7 @@
 use crate::platform::{IScreenImpl, Screen};
 use crate::{TopLevel, WindowBase};
 use ferroui_base::utilities::HandlerList;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::{PixelPoint, PixelRect, Visual};
 use std::future::Future;
 use std::pin::Pin;
@@ -35,9 +35,12 @@ impl Screens {
         self.all().into_iter().find(|x| x.is_primary())
     }
 
-    /// Fired when screens are added or removed, or when a screen's
-    /// properties change. Disposing the returned handle unsubscribes.
-    pub fn changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Fired when screens are added or removed, or when a screen's properties
+    /// change.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the screens.
+    pub fn changed(&self, handler: impl Fn() + 'static) -> Subscription {
         if self.changed_handlers.is_empty() {
             let weak = self.this.clone();
             self.i_screen_impl.set_changed(Some(Rc::new(move || {
@@ -49,14 +52,14 @@ impl Screens {
         let token = self.changed_handlers.add(Rc::new(handler));
 
         let weak = self.this.clone();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(screens) = weak.upgrade() {
                 screens.changed_handlers.remove(token);
                 if screens.changed_handlers.is_empty() {
                     screens.i_screen_impl.set_changed(None);
                 }
             }
-        })
+        }))
     }
 
     /// Retrieves the screen that contains the largest area of the specified

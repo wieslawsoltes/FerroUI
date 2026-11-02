@@ -3,7 +3,7 @@ use crate::primitives::TemplatedControlImpl;
 use crate::templates::IDataTemplate;
 use crate::{ContentControl, ContentControlImpl, Control, ControlImpl};
 use ferroui_base::data::{
-    AggregateError, AggregateException, BindingChainException, BindingError, DataValidationException,
+    AggregateError, AggregateException, BindingChainError, BindingError, DataValidationError,
 };
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
@@ -151,12 +151,13 @@ ferroui_base::ferro_properties! { impl DataValidationErrors {
 impl DataValidationErrors {
     /// Initializes the static members of the `DataValidationErrors` class.
     fn static_constructor() {
-        Self::errors_property().changed().subscribe(Self::errors_changed);
-        Self::has_errors_property().changed().subscribe(Self::has_errors_changed);
+        Self::errors_property().changed().subscribe(Self::errors_changed).detach();
+        Self::has_errors_property().changed().subscribe(Self::has_errors_changed).detach();
         StyledElement::templated_parent_property()
             .changed()
-            .add_class_handler::<DataValidationErrors>(|x, e| x.on_templated_parent_change(e));
-        Self::error_converter_property().changed().subscribe(Self::on_error_converter_changed);
+            .add_class_handler::<DataValidationErrors>(|x, e| x.on_templated_parent_change(e))
+            .detach();
+        Self::error_converter_property().changed().subscribe(Self::on_error_converter_changed).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -319,13 +320,13 @@ impl DataValidationErrors {
             vec![exception.clone()]
         };
 
-        Some(exceptions.into_iter().filter(|x| !x.inner().is::<BindingChainException>()).collect())
+        Some(exceptions.into_iter().filter(|x| !x.inner().is::<BindingChainError>()).collect())
     }
 
     /// The error data of a data validation error (`None` when it has none),
     /// any other error as it is.
     fn unpack_data_validation_exception(exception: &BindingError) -> Option<BoxedValue> {
-        if let Some(data_validation_exception) = exception.inner().downcast_ref::<DataValidationException>() {
+        if let Some(data_validation_exception) = exception.inner().downcast_ref::<DataValidationError>() {
             return data_validation_exception.error_data().cloned();
         }
 

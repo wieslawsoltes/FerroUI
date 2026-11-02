@@ -19,7 +19,7 @@ impl Error for InnerError {}
 
 #[test]
 fn default_constructor_has_message() {
-    let ex = ViewLocatorNotFoundException::new();
+    let ex = ViewLocatorNotFoundError::new();
 
     assert!(!ex.message().is_empty());
     assert!(ex.message().contains("IViewLocator"));
@@ -27,7 +27,7 @@ fn default_constructor_has_message() {
 
 #[test]
 fn message_constructor_preserves_message() {
-    let ex = ViewLocatorNotFoundException::with_message("custom message");
+    let ex = ViewLocatorNotFoundError::with_message("custom message");
 
     assert_eq!(ex.message(), "custom message");
 }
@@ -35,7 +35,7 @@ fn message_constructor_preserves_message() {
 #[test]
 fn message_and_inner_constructor_preserves_both() {
     let inner = InnerError;
-    let ex = ViewLocatorNotFoundException::with_inner("outer", &inner);
+    let ex = ViewLocatorNotFoundError::with_inner("outer", &inner);
 
     assert_eq!(ex.message(), "outer");
     assert_eq!(ex.inner_exception(), Some("inner"));

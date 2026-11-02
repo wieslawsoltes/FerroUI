@@ -13,7 +13,7 @@ use ferroui_opengl::egl::egl_consts::{
     EGL_ALPHA_SIZE, EGL_EXTENSIONS, EGL_NATIVE_VISUAL_ID, EGL_NONE, EGL_PLATFORM_X11_EXT, EGL_VENDOR,
 };
 use ferroui_opengl::egl::{EglDisplay, EglDisplayCreationOptions, EglDisplayOptions, EglInterface};
-use ferroui_opengl::{GlVersion, OpenGlException};
+use ferroui_opengl::{GlVersion, OpenGlError};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -192,7 +192,7 @@ pub(crate) fn has_x11_platform_extension(client_extensions: Option<&str>) -> boo
 
 /// Creates the display of EGL for a connection (the display factory of
 /// `InitializeGraphics`).
-pub fn create_display(x11: X11EglTarget, gl_profiles: &[GlVersion]) -> Result<Rc<EglDisplay>, OpenGlException> {
+pub fn create_display(x11: X11EglTarget, gl_profiles: &[GlVersion]) -> Result<Rc<EglDisplay>, OpenGlError> {
     let egl = Rc::new(EglInterface::new_default()?);
     let mut options = EglDisplayCreationOptions {
         base: EglDisplayOptions {
@@ -281,7 +281,7 @@ impl X11EglPlatformGraphics {
     }
 
     /// The display of the calling thread.
-    fn display(&self) -> Result<Rc<EglDisplay>, OpenGlException> {
+    fn display(&self) -> Result<Rc<EglDisplay>, OpenGlError> {
         if self.display.is_on_thread() {
             return Ok(self.display.get().clone());
         }

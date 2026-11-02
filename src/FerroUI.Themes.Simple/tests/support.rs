@@ -9,7 +9,7 @@ use ferroui_base::styling::{ControlTheme, IStyle, Style, Styles};
 use ferroui_base::utilities::Uri;
 use ferroui_base::{BoxedValue, FerroObject, Ref, TypeInfo};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
-use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadException};
+use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::rc::Rc;
 
@@ -26,7 +26,7 @@ pub fn start_application() -> UnitTestApplicationScope {
 }
 
 /// A load error as text, with the error of the compiler it carries.
-pub fn describe(error: &XamlLoadException) -> String {
+pub fn describe(error: &XamlLoadError) -> String {
     match error.inner_exception() {
         Some(inner) => format!("{}\n ---> {inner}", error.message()),
         None => error.message().to_string(),
@@ -35,7 +35,7 @@ pub fn describe(error: &XamlLoadException) -> String {
 
 /// Loads the embedded document with the rooted asset path `path` on its
 /// own.
-pub fn try_load_document(path: &str) -> Result<BoxedValue, XamlLoadException> {
+pub fn try_load_document(path: &str) -> Result<BoxedValue, XamlLoadError> {
     register_types();
     let content = assets::document(path).unwrap_or_else(|| panic!("{path} is not a document of the theme"));
     let text = std::str::from_utf8(content).unwrap_or_else(|e| panic!("{path} is not UTF-8: {e}"));
@@ -179,7 +179,7 @@ impl ferroui_base::animation::IClock for MockGlobalClock {
 impl ferroui_base::animation::IGlobalClock for MockGlobalClock {}
 
 /// Loads markup text with the run-time loader.
-pub fn try_load_text(xaml: &str) -> Result<BoxedValue, XamlLoadException> {
+pub fn try_load_text(xaml: &str) -> Result<BoxedValue, XamlLoadError> {
     register_types();
     let mut configuration = RuntimeXamlLoaderConfiguration::new();
     configuration.local_assembly = Some(&ASSEMBLY);

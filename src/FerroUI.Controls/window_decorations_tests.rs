@@ -749,10 +749,10 @@ mod additional_tests {
             let _app = UnitTestApplication::start(TestServices::styled_window());
             let (window_impl, target) = shown_window_with_decorations();
             let closed = Rc::new(Cell::new(0));
-            let _subscription = target.closed({
+            target.closed({
                 let closed = closed.clone();
                 move || closed.set(closed.get() + 1)
-            });
+            }).detach();
 
             caption_button(&target, name).perform_click();
 

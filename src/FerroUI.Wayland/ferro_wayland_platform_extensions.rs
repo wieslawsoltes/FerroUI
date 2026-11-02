@@ -34,7 +34,7 @@ impl FerroWaylandPlatformExtensions for AppBuilder {
                 #[cfg(target_os = "linux")]
                 crate::wayland_platform::WaylandPlatform::initialize(current_options());
                 #[cfg(not(target_os = "linux"))]
-                crate::FerroWaylandException::new("The Wayland backend exists on Linux only").throw();
+                crate::FerroWaylandError::new("The Wayland backend exists on Linux only").throw();
             },
             "Wayland",
         )

@@ -303,7 +303,7 @@ pub(super) fn file_of(assembly_name: &str, root_uri: &str, compiled: Vec<Compile
     source.push_str("/// An untyped build function: the root object as the loader returns it.\n");
     source.push_str("pub type BuildDocument = fn(\n");
     source.push_str("    ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
-    source.push_str(") -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException>;\n");
+    source.push_str(") -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError>;\n");
 
     let mut constants: Vec<&(String, String)> = Vec::new();
     for document in &compiled {
@@ -337,7 +337,7 @@ pub(super) fn file_of(assembly_name: &str, root_uri: &str, compiled: Vec<Compile
                     source.push('\n');
                     source.push_str(&format!("fn {}(\n", untyped_function_name(&document.function_name)));
                     source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
-                    source.push_str(") -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {\n");
+                    source.push_str(") -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {\n");
                     source.push_str(&format!("    let root = {}(service_provider)?;\n", document.function_name));
                     source.push_str("    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)\n");
                     source.push_str("}\n");
@@ -368,7 +368,7 @@ pub(super) fn file_of(assembly_name: &str, root_uri: &str, compiled: Vec<Compile
     source.push_str("pub fn try_load(\n");
     source.push_str("    service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
     source.push_str("    uri: &str,\n");
-    source.push_str(") -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {\n");
+    source.push_str(") -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadError> {\n");
     source.push_str("    let ::core::option::Option::Some((_, build)) = ::core::iter::Iterator::find(&mut DOCUMENTS.iter(), |(document, _)| rt::uri_equals(uri, ROOT_URI, document)) else {\n");
     source.push_str("        return ::core::result::Result::Ok(::core::option::Option::None);\n");
     source.push_str("    };\n");
@@ -860,7 +860,7 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
     source.push_str("pub fn populate(\n");
     source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
     source.push_str(&format!("    root: &::ferroui_base::Ref<::{}>,\n", class_path.trim_start_matches("::")));
-    source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {\n");
+    source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
     source.push_str(&format!("    ::ferroui_markup_xaml::FerroXamlLoader::track_instance(<::{} as ::ferroui_base::StaticType>::TYPE, root);\n", class_path.trim_start_matches("::")));
     source.push_str(&format!("    if let Some(populate) = ::ferroui_markup_xaml::FerroXamlLoader::populate_override(<::{} as ::ferroui_base::StaticType>::TYPE) {{\n", class_path.trim_start_matches("::")));
     source.push_str("        return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));\n    }\n");
@@ -963,7 +963,7 @@ fn loader_table(
         "    {parameter}: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n"
     ));
     source.push_str("    uri: &str,\n");
-    source.push_str(") -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {\n");
+    source.push_str(") -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadError> {\n");
     // The class has an entry when it has a constructor the table can call.
     for index in constructor.iter().map(|_| 0).chain(loadable.iter().copied()) {
         let uri = documents[index].2.clone().unwrap_or_default();

@@ -4,7 +4,7 @@ use super::expression_chain_parameters::{ExpressionChainParameters, ValueCompare
 use super::reactive_notify_property_changed_mixins::notify_for_property;
 use crate::binding::interfaces::ObservedChange;
 use ferroui_reactive::disposables::SerialDisposable;
-use ferroui_reactive::linq::InvalidCastException;
+use ferroui_reactive::linq::InvalidCastError;
 use ferroui_system::component_model::{PathStep, PropertyOwner};
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::any::Any;
@@ -179,7 +179,7 @@ impl<T: 'static, V: Clone + 'static> ChainState<T, V> {
         let typed: V = match value.downcast::<V>() {
             Ok(typed) => *typed,
             Err(_) => {
-                self.downstream.on_error(Rc::new(InvalidCastException::new::<V>()));
+                self.downstream.on_error(Rc::new(InvalidCastError::new::<V>()));
                 return;
             }
         };

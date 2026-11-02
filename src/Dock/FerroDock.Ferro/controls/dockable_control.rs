@@ -59,7 +59,7 @@ impl VisualImpl for DockableControl {
             move |_, e| owner.set_pointer_tracking(e),
             RoutingStrategies::TUNNEL,
             false,
-        );
+        ).detach();
         this.pressed.replace(Some(pressed));
         let owner = this.to_ref();
         let moved = this.add_disposable_handler_with(
@@ -67,7 +67,7 @@ impl VisualImpl for DockableControl {
             move |_, e| owner.set_pointer_tracking(e),
             RoutingStrategies::TUNNEL,
             false,
-        );
+        ).detach();
         this.moved.replace(Some(moved));
         let owner = this.to_ref();
         let subscription =

@@ -63,7 +63,7 @@ impl OpenGlPage {
             if this.get_window().is_some() {
                 this.find_control::<Button>("Snapshot").expect("the element Snapshot").set_is_visible(true);
             }
-        });
+        }).detach();
         this
     }
 

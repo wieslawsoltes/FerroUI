@@ -1,7 +1,7 @@
 //! Port of `Diagnostics/XamlSourceInfo.cs`.
 
 use crate::object_casts::{as_object, resource_key_of};
-use crate::{FromXamlObject, XamlLoadException};
+use crate::{FromXamlObject, XamlLoadError};
 use ferroui_base::controls::{IResourceDictionary, ResourceDictionary, ResourceKey};
 use ferroui_base::utilities::{Uri, UriExtensions, UriKind};
 use ferroui_base::{
@@ -210,8 +210,8 @@ impl FromXamlObject for Rc<dyn IResourceDictionary> {
     }
 }
 
-fn object_argument(obj: Option<BoxedValue>, name: &str) -> Result<BoxedValue, XamlLoadException> {
-    obj.ok_or_else(|| XamlLoadException::with_message(format!("Value cannot be null. (Parameter '{name}')")))
+fn object_argument(obj: Option<BoxedValue>, name: &str) -> Result<BoxedValue, XamlLoadError> {
+    obj.ok_or_else(|| XamlLoadError::with_message(format!("Value cannot be null. (Parameter '{name}')")))
 }
 
 ferro_markup_type!(class XamlSourceInfo {
@@ -228,24 +228,24 @@ ferro_markup_type!(class XamlSourceInfo {
     ],
     methods: [
         static try fn SetXamlSourceInfo(Option<BoxedValue>, Option<XamlSourceInfo>) =>
-            |obj: Option<BoxedValue>, info: Option<XamlSourceInfo>| -> Result<(), XamlLoadException> {
+            |obj: Option<BoxedValue>, info: Option<XamlSourceInfo>| -> Result<(), XamlLoadError> {
                 XamlSourceInfo::set_xaml_source_info(&object_argument(obj, "obj")?, info);
                 Ok(())
             },
         static try fn SetXamlSourceInfo(Rc<dyn IResourceDictionary>, Option<BoxedValue>, Option<XamlSourceInfo>) =>
             |dictionary: Rc<dyn IResourceDictionary>, key: Option<BoxedValue>, info: Option<XamlSourceInfo>|
-             -> Result<(), XamlLoadException> {
+             -> Result<(), XamlLoadError> {
                 let key = resource_key_of(&object_argument(key, "key")?);
                 XamlSourceInfo::set_xaml_source_info_for_key(&dictionary, key, info);
                 Ok(())
             },
         static try fn GetXamlSourceInfo(Option<BoxedValue>) -> Option<XamlSourceInfo> =>
-            |obj: Option<BoxedValue>| -> Result<Option<XamlSourceInfo>, XamlLoadException> {
+            |obj: Option<BoxedValue>| -> Result<Option<XamlSourceInfo>, XamlLoadError> {
                 Ok(XamlSourceInfo::get_xaml_source_info(&object_argument(obj, "obj")?))
             },
         static try fn GetXamlSourceInfo(Rc<dyn IResourceDictionary>, Option<BoxedValue>) -> Option<XamlSourceInfo> =>
             |dictionary: Rc<dyn IResourceDictionary>, key: Option<BoxedValue>|
-             -> Result<Option<XamlSourceInfo>, XamlLoadException> {
+             -> Result<Option<XamlSourceInfo>, XamlLoadError> {
                 let key = resource_key_of(&object_argument(key, "key")?);
                 Ok(XamlSourceInfo::get_xaml_source_info_for_key(&dictionary, key))
             },

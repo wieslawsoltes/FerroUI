@@ -114,11 +114,11 @@ impl NavigationPagePerformancePage {
             }
         };
         let pushed = on_stack_changed();
-        demo_nav.pushed(move |_e| pushed());
+        demo_nav.pushed(move |_e| pushed()).detach();
         let popped = on_stack_changed();
-        demo_nav.popped(move |_e| popped());
+        demo_nav.popped(move |_e| popped()).detach();
         let popped_to_root = on_stack_changed();
-        demo_nav.popped_to_root(move |_e| popped_to_root());
+        demo_nav.popped_to_root(move |_e| popped_to_root()).detach();
 
         drop(start_async(Self::initialize_async(this.clone())));
         this

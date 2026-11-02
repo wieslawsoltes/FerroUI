@@ -1,7 +1,7 @@
 use super::{EventArgs, WeakEvent, WeakEventArgs};
 use crate::data::model::{CollectionChange, INotifyCollectionChanged, INotifyPropertyChanged};
 use crate::input::ICommand;
-use crate::reactive::IDisposable;
+use crate::reactive::{IDisposable, Subscription};
 use crate::{FerroObject, FerroPropertyChangedEventArgs, ObjectType, Ref};
 use std::any::Any;
 use std::cell::RefCell;
@@ -134,7 +134,7 @@ impl WeakEvents {
                 }
             }
         }));
-        *subscription.inner.borrow_mut() = Some(inner);
+        *subscription.inner.borrow_mut() = Some(Subscription::new(inner));
 
         subscription
     }
@@ -143,7 +143,7 @@ impl WeakEvents {
 /// The handle of a weak event subscription: unsubscribes when disposed and
 /// when dropped.
 struct WeakEventSubscription {
-    inner: RefCell<Option<Rc<dyn IDisposable>>>,
+    inner: RefCell<Option<Subscription>>,
 }
 
 impl IDisposable for WeakEventSubscription {

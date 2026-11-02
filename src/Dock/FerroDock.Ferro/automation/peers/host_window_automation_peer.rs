@@ -11,7 +11,7 @@ use ferroui_controls::automation::{
         WindowAutomationPeer,
     },
     provider::IInvokeProvider,
-    ElementNotEnabledException,
+    ElementNotEnabledError,
 };
 use std::rc::Rc;
 #[repr(C)]
@@ -86,7 +86,7 @@ impl IInvokeProvider for InvokeProvider {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }
-    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         let owner = self.0.owner.clone();
         if !owner.is_visible() {
             owner.show();

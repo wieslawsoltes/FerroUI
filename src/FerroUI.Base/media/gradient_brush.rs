@@ -1,7 +1,7 @@
 use crate::media::media_collection::track_item_property_changed;
 use crate::media::immutable::ImmutableGradientStop;
 use crate::media::{Brush, BrushImpl, BrushImplExt, GradientSpreadMethod, GradientStops, IImmutableBrush};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::Compositor;
 use crate::{
@@ -15,8 +15,8 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct GradientBrush {
     base: Brush,
-    gradient_stops_collection_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    gradient_stops_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    gradient_stops_collection_subscription: RefCell<Option<Subscription>>,
+    gradient_stops_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class! {

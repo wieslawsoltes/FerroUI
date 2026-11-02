@@ -22,6 +22,8 @@ pub use expression_evaluation_context::{
     ExpressionEvaluationContext, IExpressionForeignFunctionInterface, IExpressionObject,
     IExpressionParameterCollection,
 };
+pub use expression_parse_exception::ExpressionParseError;
+#[allow(deprecated)]
 pub use expression_parse_exception::ExpressionParseException;
 pub use expression_parser::ExpressionParser;
 pub use expression_tracked_values::{ExpressionObjectKey, ExpressionTrackedObjects, ExpressionTrackedObjectsPool};

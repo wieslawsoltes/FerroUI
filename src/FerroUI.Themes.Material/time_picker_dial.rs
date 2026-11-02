@@ -25,7 +25,7 @@ use ferroui_base::media::{
     BrushExtensions, DrawingContext, EllipseGeometry, FlowDirection, FormattedText, Geometry,
     IBrush, IPen, PenLineCap, PenLineJoin, Typeface,
 };
-use ferroui_base::reactive::{AnonymousObserver, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, Subscription};
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{
     FerroLocator, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -40,7 +40,7 @@ use ferroui_controls::automation::peers::{
 use ferroui_controls::automation::provider::{
     IInvokeProvider, ISelectionItemProvider, ISelectionProvider,
 };
-use ferroui_controls::automation::{AutomationProperties, ElementNotEnabledException};
+use ferroui_controls::automation::{AutomationProperties, ElementNotEnabledError};
 use ferroui_controls::primitives::{
     TemplatedControl, TemplatedControlImpl, ToggleButton, ToggleButtonImpl,
 };
@@ -96,8 +96,8 @@ pub struct MaterialTimePickerDial {
     inner: Cell<bool>,
     pending_advance: Cell<Option<f64>>,
     drag: RefCell<Option<DialDrag>>,
-    clock_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    clock_subscription: RefCell<Option<Subscription>>,
+    visibility_subscription: RefCell<Option<Subscription>>,
     last_frame: Cell<Option<f64>>,
 }
 ferro_class!(MaterialTimePickerDial: Panel);
@@ -638,7 +638,7 @@ impl MaterialTimePickerDial {
                     }
                 }
             })));
-        *self.clock_subscription.borrow_mut() = Some(subscription);
+        *self.clock_subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
     fn stop_clock(&self) {
         if let Some(subscription) = self.clock_subscription.borrow_mut().take() {
@@ -852,11 +852,11 @@ impl MaterialTimePickerNumberAutomationPeer {
     fn selection_provider(peer: Ref<Self>) -> Rc<dyn ISelectionItemProvider> {
         Rc::new(TimeNumberProvider(peer))
     }
-    fn activate(&self, semantic_click: bool) -> Result<(), ElementNotEnabledException> {
+    fn activate(&self, semantic_click: bool) -> Result<(), ElementNotEnabledError> {
         if self.number().activate(semantic_click) {
             Ok(())
         } else {
-            Err(ElementNotEnabledException::with_message(
+            Err(ElementNotEnabledError::with_message(
                 "The clock number is unavailable, disabled, or read-only.",
             ))
         }
@@ -867,7 +867,7 @@ impl IInvokeProvider for TimeNumberProvider {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }
-    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         self.0.activate(true)
     }
 }
@@ -881,13 +881,13 @@ impl ISelectionItemProvider for TimeNumberProvider {
     fn selection_container(&self) -> Option<Rc<dyn ISelectionProvider>> {
         None
     }
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.add_to_selection()
     }
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.remove_from_selection()
     }
-    fn select(&self) -> Result<(), ElementNotEnabledException> {
+    fn select(&self) -> Result<(), ElementNotEnabledError> {
         self.0.activate(false)
     }
 }

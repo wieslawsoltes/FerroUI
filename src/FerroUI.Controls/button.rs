@@ -20,7 +20,7 @@ use ferroui_base::interactivity::{
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::logical_tree::LogicalTreeAttachmentEventArgs;
 use ferroui_base::utilities::WeakEvents;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, BoxedValue, DirectProperty,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Nullable, Ref, StyledElementImpl,
@@ -48,7 +48,7 @@ const PC_FLYOUT_OPEN: &str = ":flyout-open";
 #[repr(C)]
 pub struct Button {
     base: ContentControl,
-    can_execute_change_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    can_execute_change_subscription: RefCell<Option<Subscription>>,
     is_subscribed_to_command: Cell<bool>,
     default_key_down_handlers: RefCell<Vec<RoutedEventHandlerToken>>,
     cancel_key_down_handlers: RefCell<Vec<RoutedEventHandlerToken>>,
@@ -57,7 +57,7 @@ pub struct Button {
     is_flyout_open: Cell<bool>,
     is_pressed: Cell<bool>,
     /// The subscriptions to the `Opened` and `Closed` events of the flyout.
-    flyout_events: RefCell<Option<(Rc<dyn IDisposable>, Rc<dyn IDisposable>)>>,
+    flyout_events: RefCell<Option<(Subscription, Subscription)>>,
 }
 
 ferro_class! {
@@ -533,7 +533,7 @@ impl Button {
 
         InputElement::focusable_property().override_default_value::<Button>(true);
         PlatformFeedback::feedback_type_property().override_default_value::<Button>(FeedbackType::Auto);
-        AccessKeyHandler::access_key_pressed_event().add_class_handler::<Button>(Self::on_access_key_pressed);
+        AccessKeyHandler::access_key_pressed_event().add_class_handler::<Button>(Self::on_access_key_pressed).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -657,7 +657,7 @@ impl Button {
         let subscription = WeakEvents::subscribe_command_can_execute_changed(command, &self.to_ref(), |this| {
             this.can_execute_changed_handler()
         });
-        let old = self.can_execute_change_subscription.replace(Some(subscription));
+        let old = self.can_execute_change_subscription.replace(Some(Subscription::new(subscription)));
         if let Some(old) = old {
             old.dispose();
         }

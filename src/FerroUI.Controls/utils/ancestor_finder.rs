@@ -1,4 +1,4 @@
-use ferroui_base::reactive::{Disposable, IDisposable, IObservable, IObserver, LightweightSubject, Observable, ObservableExt};
+use ferroui_base::reactive::{Disposable, IObservable, IObserver, LightweightSubject, Observable, ObservableExt, Subscription};
 use ferroui_base::{ObjectType, Ref, StyledElement, TypeInfo, WeakRef};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -11,7 +11,7 @@ struct FinderNode {
     ancestor_type: &'static TypeInfo,
     subject: LightweightSubject<Option<Ref<StyledElement>>>,
     child: RefCell<Option<Rc<FinderNode>>>,
-    disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    disposable: RefCell<Option<Subscription>>,
 }
 
 impl FinderNode {
@@ -36,7 +36,7 @@ impl FinderNode {
                 this.on_value_changed(e.get_new_value::<Option<Ref<StyledElement>>>());
             }
         });
-        *self.disposable.borrow_mut() = Some(subscription);
+        *self.disposable.borrow_mut() = Some(Subscription::new(subscription));
         self.on_value_changed(control.parent());
     }
 

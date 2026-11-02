@@ -83,7 +83,7 @@ fn prepare_puts_the_image_of_the_source_in_the_layer_and_hides_the_source() {
     // Cancel shows the source again and removes the image, without a completed event.
     let completed = Rc::new(Cell::new(false));
     let flag = completed.clone();
-    let _subscription = animation.completed(move |_| flag.set(true));
+    animation.completed(move |_| flag.set(true)).detach();
     animation.cancel();
     scene.services.run_jobs();
     assert_eq!(layer.children().count(), 0);
@@ -101,7 +101,7 @@ fn a_started_animation_flies_to_the_destination_and_completes() {
     animation.set_configuration(Some(BasicConnectedAnimationConfiguration::new()));
     let completed = Rc::new(Cell::new(None));
     let flag = completed.clone();
-    let _subscription = animation.completed(move |e| flag.set(Some(e.cancelled())));
+    animation.completed(move |e| flag.set(Some(e.cancelled()))).detach();
 
     assert!(animation.try_start(&scene.destination));
     assert!(animation.is_consumed());
@@ -157,7 +157,7 @@ fn a_destination_that_leaves_the_tree_cancels_the_flight() {
     animation.set_configuration(Some(DirectConnectedAnimationConfiguration::new()));
     let completed = Rc::new(Cell::new(None));
     let flag = completed.clone();
-    let _subscription = animation.completed(move |e| flag.set(Some(e.cancelled())));
+    animation.completed(move |e| flag.set(Some(e.cancelled()))).detach();
     assert!(animation.try_start(&scene.destination));
     scene.canvas.children().remove(&scene.destination);
     scene.services.run_jobs();
@@ -177,7 +177,7 @@ fn coordinated_elements_enter_with_the_animation() {
     animation.set_configuration(Some(BasicConnectedAnimationConfiguration::new()));
     let completed = Rc::new(Cell::new(false));
     let flag = completed.clone();
-    let _subscription = animation.completed(move |_| flag.set(true));
+    animation.completed(move |_| flag.set(true)).detach();
     assert!(animation.try_start_with_coordinated_elements(&scene.destination, &[coordinated.clone().upcast()]));
     assert!(coordinated.is_hidden_by_composition());
     scene.services.run_jobs();

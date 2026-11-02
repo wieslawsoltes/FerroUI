@@ -151,7 +151,7 @@ fn scalar_spring_settles_at_the_final_value_and_completes_its_batch() {
     fixture.visual.start_animation("Opacity", &*spring);
     batch.end();
     let (completed, handler) = counter();
-    let _subscription = batch.completed(handler);
+    let _subscription = batch.completed(handler).detach();
 
     fixture.test.run_jobs();
     assert!(fixture.server.opacity() < 1.0, "the spring is moving");
@@ -256,9 +256,9 @@ fn undamped_spring_is_an_infinite_animation() {
     finite.end();
     all.end();
     let (finite_completed, finite_handler) = counter();
-    let _finite = finite.completed(finite_handler);
+    let _finite = finite.completed(finite_handler).detach();
     let (all_completed, all_handler) = counter();
-    let _all = all.completed(all_handler);
+    let _all = all.completed(all_handler).detach();
 
     fixture.test.run_jobs();
     fixture.run_for(Duration::from_millis(200));

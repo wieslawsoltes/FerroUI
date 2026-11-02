@@ -1,4 +1,4 @@
-//! `SortException` (`List/SortException.cs`).
+//! `SortError` (`List/SortException.cs`).
 
 use ferroui_system::ObservableError;
 use std::error::Error;
@@ -10,12 +10,16 @@ use std::rc::Rc;
 /// item that is not in the sorted collection. The operators end their sequence with it, as an
 /// exception thrown in an operator of upstream reaches `OnError`.
 #[derive(Clone, Debug)]
-pub struct SortException {
+pub struct SortError {
     message: String,
     inner: Option<ObservableError>,
 }
 
-impl SortException {
+/// The name of [`SortError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `SortError`")]
+pub type SortException = SortError;
+
+impl SortError {
     /// An error with `message` (`SortException(string)`).
     pub fn new(message: impl Into<String>) -> Self {
         Self { message: message.into(), inner: None }
@@ -37,20 +41,20 @@ impl SortException {
     }
 }
 
-impl Default for SortException {
+impl Default for SortError {
     /// An error with the default message of an exception (`SortException()`).
     fn default() -> Self {
         Self::new("Exception of type 'DynamicData.SortException' was thrown.")
     }
 }
 
-impl fmt::Display for SortException {
+impl fmt::Display for SortError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
     }
 }
 
-impl Error for SortException {
+impl Error for SortError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         self.inner.as_deref()
     }

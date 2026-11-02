@@ -5,7 +5,7 @@ use ferroui_base::input::{Cursor, FocusManager, IInputManager, IInputRoot, Input
 use ferroui_base::layout::{LayoutHelper, LayoutManager};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::platform::IPlatformSettings;
-use ferroui_base::reactive::{IDisposable, IObserver};
+use ferroui_base::reactive::{IDisposable, IObserver, Subscription};
 use ferroui_base::rendering::{IHitTester, IPresentationSource, IRenderer};
 use ferroui_base::{
     FerroLocator, IFerroDependencyResolver, LocatorExtensions, PixelPoint, Point, Ref, Size, Visual, WeakRef,
@@ -19,21 +19,21 @@ pub struct PresentationSource {
     pub(super) this: Weak<PresentationSource>,
     pub(super) platform_impl: RefCell<Option<Rc<dyn ITopLevelImpl>>>,
     pub(super) pointer_over_pre_processor: RefCell<Option<Rc<PointerOverPreProcessor>>>,
-    pointer_over_pre_processor_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    pointer_over_pre_processor_subscription: RefCell<Option<Subscription>>,
     pub(super) input_manager: Option<Rc<dyn IInputManager>>,
     focus_manager: Rc<FocusManager>,
     root_visual: RefCell<Option<Ref<InputElement>>>,
     pub(super) focus_root: WeakRef<InputElement>,
     /// The scaling callback of the platform implementation that was in
     /// place before the source chained its own.
-    scaling_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    scaling_changed_subscription: RefCell<Option<Subscription>>,
 
     // Cursor
     pub(super) cursor: RefCell<Option<Rc<Cursor>>>,
     pub(super) cursor_override: RefCell<Option<Rc<Cursor>>>,
     pub(super) pointer_over_element: RefCell<Option<Ref<InputElement>>>,
     pub(super) cursor_element: RefCell<Option<Ref<InputElement>>>,
-    pub(super) cursor_element_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    pub(super) cursor_element_subscription: RefCell<Option<Subscription>>,
 
     // Layout
     pub(super) layout_manager: Rc<LayoutManager>,
@@ -41,7 +41,7 @@ pub struct PresentationSource {
 
     // Render root
     pub(super) renderer: OnceCell<Rc<dyn ITopLevelRenderer>>,
-    pub(super) scene_invalidated_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    pub(super) scene_invalidated_subscription: RefCell<Option<Subscription>>,
     pub(super) hit_tester_override: RefCell<Option<Rc<dyn IHitTester>>>,
     pub(super) render_scaling: Cell<f64>,
 }
@@ -97,27 +97,29 @@ impl PresentationSource {
 
         source.render_scaling.set(LayoutHelper::validate_scaling(platform_impl.render_scaling()));
         let weak = Rc::downgrade(&source);
-        *source.scaling_changed_subscription.borrow_mut() = Some(add_scaling_changed(
+        *source.scaling_changed_subscription.borrow_mut() = Some(Subscription::new(add_scaling_changed(
             &platform_impl,
             Rc::new(move |scaling| {
                 if let Some(source) = weak.upgrade() {
                     source.handle_scaling_changed(scaling);
                 }
             }),
-        ));
+        )));
 
         let pointer_over_pre_processor = Rc::new(PointerOverPreProcessor::new(source.clone()));
         *source.pointer_over_pre_processor.borrow_mut() = Some(pointer_over_pre_processor.clone());
         *source.pointer_over_pre_processor_subscription.borrow_mut() =
-            source.input_manager.as_ref().map(|input_manager| input_manager.pre_process().subscribe(pointer_over_pre_processor));
+            source.input_manager.as_ref().map(|input_manager| {
+                Subscription::new(input_manager.pre_process().subscribe(pointer_over_pre_processor))
+            });
 
         let renderer = create_renderer(source.clone(), platform_impl.compositor(), platform_impl.render_surfaces());
         let weak = Rc::downgrade(&source);
-        *source.scene_invalidated_subscription.borrow_mut() = Some(renderer.scene_invalidated(Rc::new(move |e| {
+        *source.scene_invalidated_subscription.borrow_mut() = Some(Subscription::new(renderer.scene_invalidated(Rc::new(move |e| {
             if let Some(source) = weak.upgrade() {
                 source.scene_invalidated(e);
             }
-        })));
+        }))));
         if source.renderer.set(renderer).is_err() {
             unreachable!("the renderer is created once");
         }

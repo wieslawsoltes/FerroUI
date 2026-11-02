@@ -4,7 +4,7 @@
 //! The errors of a read are returned (the exceptions of the original);
 //! the errors of a write are swallowed, as the original swallows them.
 
-use super::{Version, VncException, VncFailureReason, VncRectangle, VncTransport, VncUtility};
+use super::{Version, VncError, VncFailureReason, VncRectangle, VncTransport, VncUtility};
 use crate::remote_viewing::utility::{AutoClear, ReentrantLock};
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 
@@ -78,21 +78,21 @@ impl VncStream {
             .collect()
     }
 
-    /// Fails with a [`VncException`] if a specific condition is not met.
+    /// Fails with a [`VncError`] if a specific condition is not met.
     pub(crate) fn require(
         condition: bool,
         message: &str,
         reason: VncFailureReason,
-    ) -> Result<(), VncException> {
+    ) -> Result<(), VncError> {
         if !condition {
-            return Err(VncException::new(message, reason, None));
+            return Err(VncError::new(message, reason, None));
         }
 
         Ok(())
     }
 
-    /// Fails with a [`VncException`] if a specific condition is not met.
-    pub(crate) fn sanity_check(condition: bool) -> Result<(), VncException> {
+    /// Fails with a [`VncError`] if a specific condition is not met.
+    pub(crate) fn sanity_check(condition: bool) -> Result<(), VncError> {
         Self::require(
             condition,
             "Sanity check failed.",
@@ -109,7 +109,7 @@ impl VncStream {
     }
 
     /// Reads `count` bytes from the stream.
-    pub(crate) fn receive(&self, count: usize) -> Result<Vec<u8>, VncException> {
+    pub(crate) fn receive(&self, count: usize) -> Result<Vec<u8>, VncError> {
         let mut buffer = vec![0u8; count];
         self.receive_into(&mut buffer, 0, count)?;
         Ok(buffer)
@@ -122,9 +122,9 @@ impl VncStream {
         buffer: &mut [u8],
         offset: usize,
         count: usize,
-    ) -> Result<(), VncException> {
+    ) -> Result<(), VncError> {
         let Some(stream) = self.stream() else {
-            return Err(VncException::new(
+            return Err(VncError::new(
                 "Lost connection.",
                 VncFailureReason::NetworkError,
                 None,
@@ -136,7 +136,7 @@ impl VncStream {
             let bytes = stream
                 .read(&mut buffer[offset + i..offset + count])
                 .map_err(|error| {
-                    VncException::new(
+                    VncError::new(
                         error.to_string(),
                         VncFailureReason::NetworkError,
                         Some(Box::new(error)),
@@ -154,14 +154,14 @@ impl VncStream {
     }
 
     /// Reads a byte from the stream.
-    pub(crate) fn receive_byte(&self) -> Result<u8, VncException> {
+    pub(crate) fn receive_byte(&self) -> Result<u8, VncError> {
         let mut value = [0u8; 1];
         self.receive_into(&mut value, 0, 1)?;
         Ok(value[0])
     }
 
     /// Reads a [`VncRectangle`] (8 bytes) from the stream.
-    pub(crate) fn receive_rectangle(&self) -> Result<VncRectangle, VncException> {
+    pub(crate) fn receive_rectangle(&self) -> Result<VncRectangle, VncError> {
         let x = i32::from(self.receive_uint16_be()?);
         let y = i32::from(self.receive_uint16_be()?);
         let w = i32::from(self.receive_uint16_be()?);
@@ -171,7 +171,7 @@ impl VncStream {
 
     /// Reads a string of at most `max_length` bytes (0xfff in the original
     /// when it is not given) from the stream.
-    pub(crate) fn receive_string(&self, max_length: usize) -> Result<String, VncException> {
+    pub(crate) fn receive_string(&self, max_length: usize) -> Result<String, VncError> {
         let length = self.receive_uint32_be()? as usize;
         Self::sanity_check(length <= max_length)?;
         let value = Self::decode_string(&self.receive(length)?, 0, length);
@@ -179,17 +179,17 @@ impl VncStream {
     }
 
     /// Reads a `u16` in big-endian encoding from the stream.
-    pub(crate) fn receive_uint16_be(&self) -> Result<u16, VncException> {
+    pub(crate) fn receive_uint16_be(&self) -> Result<u16, VncError> {
         Ok(VncUtility::decode_uint16_be(&self.receive(2)?, 0))
     }
 
     /// Reads a `u32` in big-endian encoding from the stream.
-    pub(crate) fn receive_uint32_be(&self) -> Result<u32, VncException> {
+    pub(crate) fn receive_uint32_be(&self) -> Result<u32, VncError> {
         Ok(VncUtility::decode_uint32_be(&self.receive(4)?, 0))
     }
 
     /// Receives version information (`RFB xxx.yyy\n`) from the stream.
-    pub(crate) fn receive_version(&self) -> Result<Version, VncException> {
+    pub(crate) fn receive_version(&self) -> Result<Version, VncError> {
         let version = self.receive(12)?;
         let digits = |range: std::ops::Range<usize>| -> Option<i32> {
             let text = std::str::from_utf8(&version[range]).ok()?;

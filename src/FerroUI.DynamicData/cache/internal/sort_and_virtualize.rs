@@ -3,7 +3,7 @@
 use super::sorted_key_value_applicator::{ApplicatorOptions, SortedKeyValueApplicator};
 use super::{Comparer, KeyComparer, KeyValueComparer};
 use crate::cache::{Change, ChangeReason, ChangeSet, ChangeSetWithContext, ObservableCacheEx, SortAndVirtualizeOptions, VirtualContext, VirtualRequest, VirtualResponse};
-use crate::list::SortException;
+use crate::list::SortError;
 use ferroui_reactive::{Observable, ObservableExt};
 use ferroui_system::{IObservable, IObserver};
 use std::cell::RefCell;
@@ -19,7 +19,7 @@ type VirtualChanges<T, K> = ChangeSetWithContext<T, K, VirtualContext<T>>;
 /// comparer and the options as their context.
 ///
 /// Deviation (DEVIATIONS.md, DynamicData): the sources are merged without the shared delivery
-/// queue of upstream (single-threaded, section 5.1); a `SortException` of the sorted list ends
+/// queue of upstream (single-threaded, section 5.1); a `SortError` of the sorted list ends
 /// the sequence with that error.
 pub(crate) fn sort_and_virtualize<T: Clone + 'static, K: Eq + Hash + Clone + 'static>(
     source: Rc<dyn IObservable<ChangeSet<T, K>>>,
@@ -46,7 +46,7 @@ pub(crate) fn sort_and_virtualize<T: Clone + 'static, K: Eq + Hash + Clone + 'st
             // Each change set must have unique keys only, otherwise the calculation of the
             // virtual changes is very complex.
             .ensure_unique_keys()
-            .try_select(move |changes: ChangeSet<T, K>| data_state.borrow_mut().process_changes(&changes).map_err(SortException::into_error));
+            .try_select(move |changes: ChangeSet<T, K>| data_state.borrow_mut().process_changes(&changes).map_err(SortError::into_error));
 
         Observable::merge_all(vec![comparer_changed, params_changed, data_change])
             .where_(|changes: &VirtualChanges<T, K>| changes.count() != 0)
@@ -92,7 +92,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> State<T, K> {
         self.apply_virtual_changes(None)
     }
 
-    fn process_changes(&mut self, changes: &ChangeSet<T, K>) -> Result<VirtualChanges<T, K>, SortException> {
+    fn process_changes(&mut self, changes: &ChangeSet<T, K>) -> Result<VirtualChanges<T, K>, SortError> {
         // The comparer has not been received yet.
         let Some(applicator) = &mut self.applicator else {
             return Ok(ChangeSetWithContext::empty(VirtualContext::empty()));

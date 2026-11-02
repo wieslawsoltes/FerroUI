@@ -1,6 +1,6 @@
 use crate::media::ref_adapter::RefAdapter;
 use crate::media::{Drawing, DrawingContext, IAffectsRender, IImage};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::utilities::HandlerList;
 use crate::{
     ferro_class, ferro_property, instantiate, FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -15,7 +15,7 @@ use std::rc::Rc;
 pub struct DrawingImage {
     base: FerroObject,
     invalidated: HandlerList<dyn Fn()>,
-    drawing_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    drawing_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(DrawingImage: FerroObject);
@@ -85,15 +85,16 @@ impl DrawingImage {
         result
     }
 
-    /// Raised when the image changes.
-    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when the image changes. Dropping the returned guard removes the
+    /// handler; [`Subscription::detach`] keeps it for the life of the image.
+    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.invalidated.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.invalidated.remove(token);
             }
-        })
+        }))
     }
 
     /// Raises the invalidated notification.

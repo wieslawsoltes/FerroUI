@@ -2,7 +2,7 @@ use super::{IInlineHost, Inline, InlineCollection, InlineImpl, InlineUIContainer
 use crate::Control;
 use ferroui_base::media::text_formatting::TextRun;
 use ferroui_base::metadata::IAddChild;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     ferro_class, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, IntoRef, Ref, Size, StyledElementImpl, StyledProperty,
@@ -14,7 +14,7 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct Span {
     base: Inline,
-    inlines_invalidated: RefCell<Option<Rc<dyn IDisposable>>>,
+    inlines_invalidated: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(Span: Inline);

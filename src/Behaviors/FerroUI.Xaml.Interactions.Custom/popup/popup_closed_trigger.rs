@@ -1,6 +1,6 @@
 //! Port of `Popup/PopupClosedTrigger.cs`.
 
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::EventArgs;
 use ferroui_base::{
     ferro_class, ferro_class_info, instantiate, BoxedValue, FerroObjectImpl, Ref, StaticType, StyledElementImpl,
@@ -17,7 +17,7 @@ use std::rc::Rc;
 pub struct PopupClosedTrigger {
     base: StyledElementTriggerOfT,
     // The subscription of the closed event (`Closed -= OnClosed` of the reference).
-    closed: RefCell<Option<Rc<dyn IDisposable>>>,
+    closed: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(PopupClosedTrigger: StyledElementTriggerOfT);

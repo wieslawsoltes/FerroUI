@@ -423,6 +423,22 @@ impl MediaContext {
         self.sync_commit(compositor, true);
     }
 
+    /// Commits the compositor of a composition target right away and asks
+    /// its render loop for a frame out of turn, without waiting for the
+    /// frame. Not from upstream: for a platform whose frames are rendered by
+    /// another thread and shown asynchronously (the render worker of the
+    /// browser), where waiting would block this thread without the frame
+    /// being shown any sooner.
+    pub fn commit_and_request_frame(&self, compositor: &Rc<Compositor>) {
+        // Unit tests assume that they can call any API without setting up
+        // platforms.
+        if FerroLocator::current().get_service::<dyn IPlatformRenderInterface>().is_none() {
+            return;
+        }
+        self.commit_compositor(compositor);
+        compositor.render_loop().request_frame_out_of_turn();
+    }
+
     /// Disposes the server side of a composition target outside of the
     /// normal commit cycle and waits for it.
     pub fn sync_dispose_composition_target(&self, compositor: &Rc<Compositor>, server_target: ServerObjectId) {

@@ -133,7 +133,8 @@ impl WindowActivationTrackingHelper {
             },
             Duration::from_secs(1),
             DispatcherPriority::INPUT,
-        );
+        )
+        .detach();
     }
 
     pub fn on_event(&self, ev: &XEvent) {

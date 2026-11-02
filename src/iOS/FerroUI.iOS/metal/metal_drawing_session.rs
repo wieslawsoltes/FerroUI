@@ -1,6 +1,6 @@
 //! One frame drawn to a drawable of the Metal layer of a view.
 
-use super::{MetalDevice, SurfaceShared};
+use super::{MetalDevice, SharedLayer, SurfaceShared};
 use ferroui_base::PixelSize;
 use ferroui_metal::{IMetalDevice, IMetalPlatformSurfaceRenderingSession};
 use objc2::rc::Retained;
@@ -56,6 +56,9 @@ pub struct MetalDrawingSession {
     scaling: f64,
     shared: Arc<SurfaceShared>,
     capturable: bool,
+    /// The layer, for a frame presented with the current Core Animation transaction
+    /// (`MetalRenderTarget::begin_rendering`); `None` for a frame presented asynchronously.
+    present_with_transaction: Option<Arc<SharedLayer>>,
 }
 
 impl MetalDrawingSession {
@@ -66,9 +69,19 @@ impl MetalDrawingSession {
         scaling: f64,
         shared: Arc<SurfaceShared>,
         capturable: bool,
+        present_with_transaction: Option<Arc<SharedLayer>>,
     ) -> Self {
         let texture = drawable.texture();
-        Self { device, drawable: RefCell::new(Some(drawable)), texture, size, scaling, shared, capturable }
+        Self {
+            device,
+            drawable: RefCell::new(Some(drawable)),
+            texture,
+            size,
+            scaling,
+            shared,
+            capturable,
+            present_with_transaction,
+        }
     }
 
     fn queue(&self) -> Retained<ProtocolObject<dyn MTLCommandQueue>> {
@@ -187,8 +200,18 @@ impl IMetalPlatformSurfaceRenderingSession for MetalDrawingSession {
             panic!("The command queue of the Metal device gave no command buffer.");
         };
         let drawable: &ProtocolObject<dyn MTLDrawable> = ProtocolObject::from_ref(&*drawable);
-        buffer.presentDrawable(drawable);
-        buffer.commit();
+        if let Some(layer) = &self.present_with_transaction {
+            // Presented with the transaction: once the commands are scheduled, the drawable is
+            // presented by the transaction that is being built on this thread. Then the layer goes
+            // back to the asynchronous presentation of the render thread.
+            buffer.commit();
+            buffer.waitUntilScheduled();
+            drawable.present();
+            layer.0.setPresentsWithTransaction(false);
+        } else {
+            buffer.presentDrawable(drawable);
+            buffer.commit();
+        }
         self.shared.frame_presented();
     }
 }

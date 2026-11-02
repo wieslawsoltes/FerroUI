@@ -22,7 +22,7 @@ use ferroui_controls::automation::peers::{
     ControlAutomationPeerImpl,
 };
 use ferroui_controls::automation::provider::{ISelectionItemProvider, ISelectionProvider};
-use ferroui_controls::automation::{AutomationProperties, ElementNotEnabledException};
+use ferroui_controls::automation::{AutomationProperties, ElementNotEnabledError};
 use ferroui_controls::primitives::TemplatedControlImpl;
 use ferroui_controls::{
     Button, ButtonImpl, ButtonImplExt, ContentControlImpl, Control, ControlImpl, Panel, PanelImpl,
@@ -240,15 +240,15 @@ impl ISelectionItemProvider for DateCellSelectionProvider {
                 .get_provider::<dyn ISelectionProvider>()
         })
     }
-    fn select(&self) -> Result<(), ElementNotEnabledException> {
+    fn select(&self) -> Result<(), ElementNotEnabledError> {
         self.0.ensure_enabled()?;
         self.0.cell().select();
         Ok(())
     }
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.select()
     }
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.ensure_enabled()?;
         let cell = self.0.cell();
         if cell.is_selected() && !cell.is_year() {

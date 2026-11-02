@@ -26,7 +26,7 @@ use ferroui_controls::{
     NavigationViewSelectionFollowsFocus, RadioButton, StackPanel, Symbol, SymbolIcon,
     TextBlock, ToolTip, TopLevel,
 };
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -217,7 +217,7 @@ fn wire_selection(
                 error.set_is_visible(true);
             }
         }
-    });
+    }).detach();
     Ok(())
 }
 
@@ -413,8 +413,8 @@ fn wire_adaptive(root: &Ref<Control>) {
                 adaptive_mode(&nav, host.client_size().width);
             }
         }));
-    });
-    root.detached_from_visual_tree(move |_| subscription.clear());
+    }).detach();
+    root.detached_from_visual_tree(move |_| subscription.clear()).detach();
     let weak_root = root.downgrade();
     let weak_nav = nav.downgrade();
     root.property_changed(move |change| {
@@ -443,7 +443,7 @@ fn wire_adaptive(root: &Ref<Control>) {
     });
 }
 
-pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadException> {
+pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
     if root
         .find_control::<Control>("nvSample5")
         .and_then(|x| x.cast::<NavigationView>())
@@ -452,7 +452,7 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadException> {
         return Ok(());
     }
     let convert_error = |error| {
-        XamlLoadException::with_inner("Could not initialize NavigationView samples.", error)
+        XamlLoadError::with_inner("Could not initialize NavigationView samples.", error)
     };
     categories(&root.get_control::<NavigationView>("nvSample4"));
     for (number, header) in [

@@ -282,7 +282,7 @@ fn wire_text_input(
                 *previous_input.borrow_mut() = input.text().unwrap_or_default();
             }
         },
-    );
+    ).detach();
     let weak_root = root.downgrade();
     let changing = updating.clone();
     input.add_disposable_handler(
@@ -299,7 +299,7 @@ fn wire_text_input(
                 synchronize_color(&root, &changing, color, None);
             }
         },
-    );
+    ).detach();
 }
 
 fn parse_alpha(text: &str) -> Option<u8> {

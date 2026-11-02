@@ -3,7 +3,7 @@ use super::{
     ControlAutomationPeer, ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{IInvokeProvider, ProviderAdapter};
-use crate::automation::ElementNotEnabledException;
+use crate::automation::ElementNotEnabledError;
 use crate::automation::peers::AutomationPeer;
 use crate::Button;
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Ref};
@@ -50,7 +50,7 @@ impl IInvokeProvider for ProviderAdapter<ButtonAutomationPeer> {
         self.0.clone().upcast()
     }
 
-    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         self.0.invoke()
     }
 }
@@ -72,7 +72,7 @@ impl ButtonAutomationPeer {
     }
 
     /// Sends a request to activate the button.
-    pub fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
         self.owner().perform_click();
         Ok(())

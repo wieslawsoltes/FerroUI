@@ -10,7 +10,7 @@ use ferroui_controls::platform::PlatformManager;
 use ferroui_controls::templates::IDataTemplate;
 use ferroui_controls::{Control, Design, PreviewTarget, SizeToContent, Window};
 use ferroui_markup_xaml::{
-    IRuntimeXamlLoader, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadException,
+    IRuntimeXamlLoader, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError,
 };
 use std::path::Path;
 use std::rc::Rc;
@@ -34,7 +34,7 @@ impl DesignWindowLoader {
         xaml: &str,
         assembly_path: Option<&str>,
         xaml_file_project_path: Option<&str>,
-    ) -> Result<Ref<Window>, XamlLoadException> {
+    ) -> Result<Ref<Window>, XamlLoadError> {
         Self::load_designer_window_with_scaling(xaml, assembly_path, xaml_file_project_path, 1.0)
     }
 
@@ -56,7 +56,7 @@ impl DesignWindowLoader {
         assembly_path: Option<&str>,
         xaml_file_project_path: Option<&str>,
         render_scaling: f64,
-    ) -> Result<Ref<Window>, XamlLoadException> {
+    ) -> Result<Ref<Window>, XamlLoadError> {
         let window;
         {
             let _designer_mode = DesignerMode(PlatformManager::designer_mode());
@@ -71,7 +71,7 @@ impl DesignWindowLoader {
                     get_file_name_without_extension(assembly_path)
                 );
                 base_uri = Some(Uri::new(&uri, UriKind::Absolute).map_err(|e| {
-                    XamlLoadException::with_inner(format!("Invalid URI: the URI '{uri}' of the document: {e}"), e)
+                    XamlLoadError::with_inner(format!("Invalid URI: the URI '{uri}' of the document: {e}"), e)
                 })?);
             }
 

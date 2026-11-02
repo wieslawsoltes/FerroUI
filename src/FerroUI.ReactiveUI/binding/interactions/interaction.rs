@@ -1,8 +1,8 @@
 //! `Interaction<TInput, TOutput>` (ReactiveUI.Binding, `Interactions/Interaction.cs`), with the
 //! copy-on-write list of its handlers (`Helpers/CopyOnWriteArray.cs`).
 
-use super::{IInteraction, IInteractionContext, IOutputContext, InteractionContext, UnhandledInteractionException};
-use crate::PanicException;
+use super::{IInteraction, IInteractionContext, IOutputContext, InteractionContext, UnhandledInteractionError};
+use crate::PanicError;
 use ferroui_reactive::concurrency::{IScheduler, SchedulerExt};
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::linq::Observable;
@@ -22,14 +22,14 @@ pub type InteractionHandler<I, O> = Rc<dyn Fn(Rc<dyn IInteractionContext<I, O>>)
 ///
 /// The handlers run in the reverse order of their registration: the handler registered last has
 /// the first chance to handle a question. A handler need not handle it, and leaves it to the next
-/// one; [`handle`](Self::handle) fails with an [`UnhandledInteractionException`] when no handler
+/// one; [`handle`](Self::handle) fails with an [`UnhandledInteractionError`] when no handler
 /// set an output.
 ///
 /// Deviation (DEVIATIONS.md, ReactiveUI): upstream's virtual members (`Handle`, `GenerateContext`)
 /// and protected `GetHandlers` serve subclasses; Rust has none, so `handle` and
 /// [`get_handlers`](Self::get_handlers) are public and the context is always an
 /// [`InteractionContext`]. A handler that throws upstream faults the question; here a handler that
-/// panics does, its panic caught as a [`PanicException`].
+/// panics does, its panic caught as a [`PanicError`].
 pub struct Interaction<I, O> {
     inner: Rc<InteractionInner<I, O>>,
 }
@@ -112,7 +112,7 @@ impl<I: Clone + 'static, O: Clone + 'static> Interaction<I, O> {
     }
 
     /// Runs the handlers, latest registered first, until one sets an output, and gives a task of
-    /// that output; the task fails with an [`UnhandledInteractionException`] when no handler set
+    /// that output; the task fails with an [`UnhandledInteractionError`] when no handler set
     /// one (`Handle(TInput)`).
     pub fn handle(&self, input: I) -> Task<O> {
         let this = self.clone();
@@ -125,12 +125,12 @@ impl<I: Clone + 'static, O: Clone + 'static> Interaction<I, O> {
                     return Ok(context.get_output());
                 }
             }
-            Err(Rc::new(UnhandledInteractionException::new(this.clone(), input)) as ObservableError)
+            Err(Rc::new(UnhandledInteractionError::new(this.clone(), input)) as ObservableError)
         })
     }
 
     /// Asks the question as an observable: each subscription runs [`handle`](Self::handle) once,
-    /// then notifies the output and ends, or fails with an [`UnhandledInteractionException`]
+    /// then notifies the output and ends, or fails with an [`UnhandledInteractionError`]
     /// (`WhenHandled(TInput)`). Disposing the subscription drops the output; a handler that is
     /// running still finishes.
     pub fn when_handled(&self, input: I) -> Rc<dyn IObservable<O>> {
@@ -205,7 +205,7 @@ impl<I: Clone + 'static, O: Clone + 'static> Interaction<I, O> {
 /// Runs a handler: its task, or a faulted task when it panics (the exception a handler throws
 /// upstream faults `Handle`).
 fn run_handler<I, O>(handler: &InteractionHandler<I, O>, context: Rc<dyn IInteractionContext<I, O>>) -> Task<()> {
-    match PanicException::catch(|| handler(context)) {
+    match PanicError::catch(|| handler(context)) {
         Ok(task) => task,
         Err((error, _)) => Task::from_exception(error),
     }

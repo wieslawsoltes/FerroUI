@@ -170,7 +170,7 @@ fn source_error_reaches_thrown_exceptions() {
     let sink = errors.clone();
     let subscription = fixture.upper_helper().thrown_exceptions().subscribe_next(move |error| sink.borrow_mut().push(error));
 
-    source.on_error(Rc::new(PanicException { message: "boom".to_owned() }));
+    source.on_error(Rc::new(PanicError { message: "boom".to_owned() }));
 
     assert_eq!(errors.borrow().len(), 1);
     subscription.dispose();

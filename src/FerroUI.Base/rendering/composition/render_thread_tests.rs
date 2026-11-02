@@ -25,7 +25,7 @@ use crate::rendering::testing::{
     DrawingLog, ManualRenderLoop, MockDrawingContextLayerImpl, MockPlatformRenderInterface, MockRenderTarget,
 };
 use crate::threading::Dispatcher;
-use crate::{PixelSize, RenderTargetCorruptedException, RenderTargetNotReadyException, Size, Vector};
+use crate::{PixelSize, RenderTargetCorruptedError, RenderTargetNotReadyError, Size, Vector};
 use std::any::{Any, TypeId};
 use std::cell::Cell;
 use std::collections::HashMap;
@@ -489,11 +489,11 @@ impl IRenderTarget for ConfinedRenderTarget {
         match self.log.failing.load(Ordering::SeqCst) {
             1 => {
                 self.log.touch("a frame could not be begun: corrupted");
-                Err(RenderTargetCorruptedException::new().into())
+                Err(RenderTargetCorruptedError::new().into())
             }
             2 => {
                 self.log.touch("a frame could not be begun: not ready");
-                Err(RenderTargetNotReadyException::new().into())
+                Err(RenderTargetNotReadyError::new().into())
             }
             _ => Ok(self.create_drawing_context(scene_info)),
         }

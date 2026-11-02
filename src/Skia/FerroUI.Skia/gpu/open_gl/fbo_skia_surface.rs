@@ -3,7 +3,7 @@ use crate::gpu::ganesh::GaneshGrContext;
 use crate::gpu::{ISkiaGrContext, ISkiaSurface, SkiaSurfaceOrigin};
 use ferroui_base::PixelSize;
 use ferroui_opengl::gl_consts::*;
-use ferroui_opengl::{GlProfileType, IGlContext, OpenGlException};
+use ferroui_opengl::{GlProfileType, IGlContext, OpenGlError};
 use skia_safe::gpu::gl::FramebufferInfo;
 use skia_safe::gpu::{backend_render_targets, surfaces, SurfaceOrigin};
 use skia_safe::{Canvas, Color, ColorType, Surface, SurfaceProps};
@@ -37,7 +37,7 @@ impl FboSkiaSurface {
         pixel_size: PixelSize,
         surface_origin: SkiaSurfaceOrigin,
         properties: &SurfaceProps,
-    ) -> Result<Self, OpenGlException> {
+    ) -> Result<Self, OpenGlError> {
         let internal_format = if gl_context.version().type_() == GlProfileType::OpenGLES { GL_RGBA } else { GL_RGBA8 };
         let gl = gl_context.gl_interface();
 
@@ -104,7 +104,7 @@ impl FboSkiaSurface {
         if !success {
             gl.delete_framebuffer(fbo);
             gl.delete_texture(texture);
-            return Err(OpenGlException::new("Unable to create FBO with stencil"));
+            return Err(OpenGlError::new("Unable to create FBO with stencil"));
         }
 
         let target = backend_render_targets::make_gl(

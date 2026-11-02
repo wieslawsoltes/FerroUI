@@ -44,7 +44,7 @@ use ferroui_base::media::{
     subscribe_invalidated, Brushes, FontStyle, FontWeight, IBrush, TextAlignment,
     TextDecorationCollection, TextDecorationLocation, TextDecorations, TextWrapping,
 };
-use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable};
+use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -307,10 +307,10 @@ pub struct RichEditBox {
     /// reported as ended and the input method is reset (#243 review, S4).
     composition_operation_depth: Cell<u32>,
     im_client: Rc<RichEditBoxTextInputMethodClient>,
-    document_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    selection_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    editor_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    input_scope_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    document_subscription: RefCell<Option<Subscription>>,
+    selection_subscription: RefCell<Option<Subscription>>,
+    editor_subscription: RefCell<Option<Subscription>>,
+    input_scope_subscription: RefCell<Option<Subscription>>,
     input_scope_owns_options: Cell<bool>,
     projecting_selection: Cell<bool>,
     last_input_selection: Cell<EditorSelection>,
@@ -320,8 +320,8 @@ pub struct RichEditBox {
     description_presenter: RefCell<Option<Ref<ContentPresenter>>>,
     placeholder_presenter: RefCell<Option<Ref<TextBlock>>>,
     selection_brush_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
-    context_flyout_closed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    flyout_focus_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    context_flyout_closed_subscription: RefCell<Option<Subscription>>,
+    flyout_focus_subscription: RefCell<Option<Subscription>>,
     context_menu_request_generation: Cell<u64>,
     force_focused_visual_state: Cell<bool>,
     can_undo: Cell<bool>,
@@ -842,7 +842,7 @@ impl RichEditBox {
             Self::on_context_requested,
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
         InputElement::text_input_method_client_requested_event().add_class_handler::<RichEditBox>(
             |this, event| {
                 if !this.is_read_only() && event.source().as_ref() == Some(&this.to_ref().upcast())
@@ -850,7 +850,7 @@ impl RichEditBox {
                     event.set_client(Some(this.im_client.clone()));
                 }
             },
-        );
+        ).detach();
     }
     pub fn construct() -> Self {
         Self {
@@ -974,10 +974,14 @@ impl RichEditBox {
     pub fn selected_text(&self) -> String {
         self.text_presenter.selected_text()
     }
+    /// Adds a handler of the changes of the selection.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the box.
     pub fn selection_changed(
         &self,
         handler: impl Fn(&RichTextSelectionChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         self.text_presenter.selection_changed(handler)
     }
     pub fn is_text_selection_enabled(&self) -> bool {
@@ -1225,14 +1229,13 @@ impl RichEditBox {
         if value {
             if let Some(device) = KeyboardDevice::instance() {
                 let weak = self.to_ref().downgrade();
-                *self.flyout_focus_subscription.borrow_mut() =
-                    Some(device.property_changed(move |property| {
-                        if property == "FocusedElement" {
-                            if let Some(owner) = weak.upgrade() {
-                                owner.refresh_flyout_focus_state();
-                            }
+                *self.flyout_focus_subscription.borrow_mut() = Some(device.property_changed(move |property| {
+                    if property == "FocusedElement" {
+                        if let Some(owner) = weak.upgrade() {
+                            owner.refresh_flyout_focus_state();
                         }
-                    }));
+                    }
+                }));
             }
         }
     }
@@ -1258,12 +1261,11 @@ impl RichEditBox {
         }
         if let Some(flyout) = self.context_flyout() {
             let weak = self.to_ref().downgrade();
-            *self.context_flyout_closed_subscription.borrow_mut() =
-                Some(flyout.closed(move || {
-                    if let Some(owner) = weak.upgrade() {
-                        owner.refresh_flyout_focus_state();
-                    }
-                }));
+            *self.context_flyout_closed_subscription.borrow_mut() = Some(flyout.closed(move || {
+                if let Some(owner) = weak.upgrade() {
+                    owner.refresh_flyout_focus_state();
+                }
+            }));
         }
         self.refresh_flyout_focus_state();
     }
@@ -1662,10 +1664,10 @@ impl RichEditBox {
             }
         });
         *self.editor_subscription.borrow_mut() =
-            Some(Rc::new(CompositeDisposable::from_disposables([
-                subscription,
-                composition_subscription,
-            ])));
+            Some(Subscription::new(Rc::new(CompositeDisposable::from_disposables([
+                subscription.detach(),
+                composition_subscription.detach(),
+            ]))));
         editor
     }
 
@@ -2471,22 +2473,30 @@ impl RichEditBox {
             }
         }
     }
-    pub fn edit_failed(&self, handler: impl Fn(&EditError) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of the edits that failed.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the box.
+    pub fn edit_failed(&self, handler: impl Fn(&EditError) + 'static) -> Subscription {
         let token = self.errors.add(Rc::new(handler));
         let events = self.errors.clone();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             events.remove(token);
-        })
+        }))
     }
+    /// Adds a handler of the clipboard operations that failed.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the box.
     pub fn clipboard_failed(
         &self,
         handler: impl Fn(&ClipboardError) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.clipboard_errors.add(Rc::new(handler));
         let events = self.clipboard_errors.clone();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             events.remove(token);
-        })
+        }))
     }
     pub fn text_input_method_client(&self) -> Rc<dyn TextInputMethodClient> {
         self.im_client.clone()

@@ -152,7 +152,7 @@ mod tests {
 
         let is_called = Rc::new(Cell::new(false));
         let c = is_called.clone();
-        target.changed(move || c.set(true));
+        target.changed(move || c.set(true)).detach();
 
         children.add(StreamGeometry::new().upcast());
 
@@ -168,7 +168,7 @@ mod tests {
 
         let is_called = Rc::new(Cell::new(false));
         let c = is_called.clone();
-        target.changed(move || c.set(true));
+        target.changed(move || c.set(true)).detach();
 
         old.add(StreamGeometry::new().upcast());
 

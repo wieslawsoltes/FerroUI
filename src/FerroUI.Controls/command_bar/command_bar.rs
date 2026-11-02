@@ -17,7 +17,7 @@ use ferroui_base::interactivity::{
     Interactive, InteractiveImpl, RoutedEvent, RoutedEventArgs, RoutedEventHandlerToken, RoutingStrategies,
 };
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
-use ferroui_base::reactive::{CompositeDisposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{CompositeDisposable, ObservableExt, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -258,7 +258,7 @@ pub struct CommandBar {
         Option<(RoutedEventHandlerToken, RoutedEventHandlerToken, RoutedEventHandlerToken, RoutedEventHandlerToken)>,
     >,
     overflow_presenter_handler: Cell<Option<RoutedEventHandlerToken>>,
-    overflow_popup_opened: RefCell<Option<Rc<dyn IDisposable>>>,
+    overflow_popup_opened: RefCell<Option<Subscription>>,
     // The subscriptions to the changes of the current command lists.
     primary_commands_changed: Cell<Option<u64>>,
     secondary_commands_changed: Cell<Option<u64>>,

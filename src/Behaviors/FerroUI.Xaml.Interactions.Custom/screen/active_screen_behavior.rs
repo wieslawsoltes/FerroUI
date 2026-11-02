@@ -59,7 +59,7 @@ ferroui_base::ferro_overrides! {
                     if let Some(behavior) = behavior.upgrade() {
                         behavior.update();
                     }
-                }));
+                }).detach());
             }
 
             // Deviation (DEVIATIONS.md, Behaviors): the reference never ends its subscription to
@@ -80,7 +80,7 @@ ferroui_base::ferro_overrides! {
                     if let Some(behavior) = behavior.upgrade() {
                         behavior.update();
                     }
-                }));
+                }).detach());
             }
 
             DisposableAction::create(move || {

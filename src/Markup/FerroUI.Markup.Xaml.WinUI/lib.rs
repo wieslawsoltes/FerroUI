@@ -44,7 +44,7 @@ pub(crate) use identity_eq;
 /// The error of a fallible member called through metadata: thrown as the runtime of
 /// `ferroui-markup-xaml` throws (into a scope of `xaml_error_scope::with_xaml_errors`, or as a
 /// panic with its message).
-pub(crate) fn throw<T>(result: Result<T, ferroui_markup_xaml::XamlLoadException>) -> T {
+pub(crate) fn throw<T>(result: Result<T, ferroui_markup_xaml::XamlLoadError>) -> T {
     match result {
         Ok(value) => value,
         Err(error) => ferroui_markup_xaml::xaml_error_scope::throw(error),

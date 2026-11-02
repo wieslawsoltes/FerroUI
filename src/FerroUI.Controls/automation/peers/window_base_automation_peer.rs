@@ -5,7 +5,7 @@ use crate::automation::provider::{IEmbeddedRootProvider, IRootProvider, Provider
 use crate::platform::ITopLevelImpl;
 use crate::{Control, TopLevel, WindowBase};
 use ferroui_base::input::{InputElement, KeyboardDevice};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Point, Ref, Visual, WeakRef};
 use std::cell::RefCell;
@@ -58,7 +58,7 @@ impl IRootProvider for ProviderAdapter<WindowBaseAutomationPeer> {
     }
 
     fn focus_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        self.0.focus_changed(move || handler())
+        self.0.focus_changed(move || handler()).detach()
     }
 }
 
@@ -91,14 +91,17 @@ impl WindowBaseAutomationPeer {
     }
 
     /// Raised when the focus changes (the root provider contract).
-    pub fn focus_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the peer.
+    pub fn focus_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.focus_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.focus_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Gets the peer of the currently focused element (the root provider
@@ -132,7 +135,7 @@ impl WindowBaseAutomationPeer {
                 if let Some(this) = weak.upgrade() {
                     this.keyboard_device_property_changed(property_name);
                 }
-            });
+            }).detach();
             *self.keyboard_device_subscription.borrow_mut() = Some(subscription);
             self.on_focus_changed(keyboard_device.focused_element());
         }

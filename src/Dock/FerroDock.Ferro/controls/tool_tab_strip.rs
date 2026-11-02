@@ -174,8 +174,8 @@ impl ItemsControlImpl for ToolTabStrip {
             });
             this.container_events.borrow_mut().push(ContainerEvents {
                 item: item.downgrade(),
-                attached,
-                detached,
+                attached: attached.detach(),
+                detached: detached.detach(),
             });
         }
     }

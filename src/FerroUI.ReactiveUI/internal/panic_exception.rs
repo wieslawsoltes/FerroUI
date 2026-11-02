@@ -5,9 +5,9 @@
 //! panic with `catch_unwind` at the same places.
 //! Deviation (DEVIATIONS.md, ReactiveUI): an exception of a subscriber or of a command's code is a
 //! panic; it is caught with `catch_unwind` where upstream catches it, and becomes a
-//! [`PanicException`] that carries its message.
+//! [`PanicError`] that carries its message.
 
-use crate::UnhandledErrorException;
+use crate::UnhandledError;
 use ferroui_system::ObservableError;
 use std::any::Any;
 use std::error::Error;
@@ -18,24 +18,28 @@ use std::rc::Rc;
 /// The error of a panic of user code, caught where upstream catches an exception: the message
 /// of the panic.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct PanicException {
+pub struct PanicError {
     /// The message of the panic (`Exception.Message`).
     pub message: String,
 }
 
-impl fmt::Display for PanicException {
+/// The name of [`PanicError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `PanicError`")]
+pub type PanicException = PanicError;
+
+impl fmt::Display for PanicError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
     }
 }
 
-impl Error for PanicException {}
+impl Error for PanicError {}
 
-impl PanicException {
-    /// The error of a caught panic: an [`UnhandledErrorException`] stays one, any other payload
-    /// becomes a `PanicException` with the text of the payload.
+impl PanicError {
+    /// The error of a caught panic: an [`UnhandledError`] stays one, any other payload
+    /// becomes a `PanicError` with the text of the payload.
     pub fn from_payload(payload: &(dyn Any + Send)) -> ObservableError {
-        if let Some(exception) = payload.downcast_ref::<UnhandledErrorException>() {
+        if let Some(exception) = payload.downcast_ref::<UnhandledError>() {
             return Rc::new(exception.clone());
         }
         let message = payload
@@ -43,7 +47,7 @@ impl PanicException {
             .map(|text| (*text).to_owned())
             .or_else(|| payload.downcast_ref::<String>().cloned())
             .unwrap_or_else(|| "the code panicked".to_owned());
-        Rc::new(PanicException { message })
+        Rc::new(PanicError { message })
     }
 
     /// Runs `action` and catches its panic (`try { action() } catch (Exception ex)`): the result,

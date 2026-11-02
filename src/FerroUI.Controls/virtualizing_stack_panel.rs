@@ -16,7 +16,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::{EffectiveViewportChangedEventArgs, LayoutableImpl, Orientation};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, AttachedProperty, BoxedValue,
@@ -57,7 +57,7 @@ pub struct VirtualizingStackPanel {
     last_known_extended_viewport: Cell<Rect>,
 
     /// The subscription to the property changes of the items control.
-    items_control_property_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+    items_control_property_changed: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(VirtualizingStackPanel: VirtualizingPanel);
@@ -102,7 +102,7 @@ impl FerroObjectImpl for VirtualizingStackPanel {
             if let Some(this) = weak.upgrade() {
                 this.on_effective_viewport_changed(e);
             }
-        });
+        }).detach();
     }
 }
 
@@ -393,7 +393,7 @@ impl VirtualizingPanelImpl for VirtualizingStackPanel {
                     this.on_items_control_property_changed(e);
                 }
             });
-            *this.items_control_property_changed.borrow_mut() = Some(subscription);
+            *this.items_control_property_changed.borrow_mut() = Some(Subscription::new(subscription));
         }
 
         let realized_elements = this.realized_elements.borrow().clone();
@@ -702,7 +702,8 @@ impl VirtualizingStackPanel {
         register_scroll_snap_points_info::<VirtualizingStackPanel>();
         Self::cache_length_property()
             .changed()
-            .add_class_handler::<VirtualizingStackPanel>(|x, e| x.on_cache_length_changed(e));
+            .add_class_handler::<VirtualizingStackPanel>(|x, e| x.on_cache_length_changed(e))
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -1791,10 +1792,10 @@ impl IScrollSnapPointsInfo for VirtualizingStackPanel {
     }
 
     fn horizontal_snap_points_changed(&self, handler: SnapPointsChangedHandler) -> Rc<dyn IDisposable> {
-        self.add_disposable_handler(Self::horizontal_snap_points_changed_event(), move |sender, e| handler(sender, e))
+        self.add_disposable_handler(Self::horizontal_snap_points_changed_event(), move |sender, e| handler(sender, e)).detach()
     }
 
     fn vertical_snap_points_changed(&self, handler: SnapPointsChangedHandler) -> Rc<dyn IDisposable> {
-        self.add_disposable_handler(Self::vertical_snap_points_changed_event(), move |sender, e| handler(sender, e))
+        self.add_disposable_handler(Self::vertical_snap_points_changed_event(), move |sender, e| handler(sender, e)).detach()
     }
 }

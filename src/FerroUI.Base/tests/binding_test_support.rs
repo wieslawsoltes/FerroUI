@@ -993,11 +993,11 @@ pub fn assert_binding_chain_error(
     expression: &str,
     error_point: &str,
 ) {
-    let expected = crate::data::BindingChainException::with_expression(message, expression, error_point);
+    let expected = crate::data::BindingChainError::with_expression(message, expression, error_point);
     let error = assert_binding_error(target, property, &expected.message(), BindingErrorType::Error);
     let chain = error
         .inner()
-        .downcast_ref::<crate::data::BindingChainException>()
+        .downcast_ref::<crate::data::BindingChainError>()
         .expect("the error is a binding chain error");
     assert_eq!(chain.expression(), Some(expression));
     assert_eq!(chain.expression_error_point(), Some(error_point));
@@ -1008,7 +1008,7 @@ pub fn assert_binding_chain_error(
 #[track_caller]
 pub fn assert_data_validation_error(target: &TargetClass, property: &'static FerroProperty, message: &str) {
     let error = assert_binding_error(target, property, message, BindingErrorType::DataValidationError);
-    assert!(error.inner().downcast_ref::<crate::data::DataValidationException>().is_some());
+    assert!(error.inner().downcast_ref::<crate::data::DataValidationError>().is_some());
 }
 
 // --- docking ----------------------------------------------------------------

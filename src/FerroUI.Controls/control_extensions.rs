@@ -1,7 +1,7 @@
 use crate::{Control, RequestBringIntoViewEventArgs};
 use ferroui_base::controls::NameScopeExtensions;
 use ferroui_base::layout::{BringIntoViewRequest, Layoutable};
-use ferroui_base::reactive::{AnonymousObserver, IDisposable, IObservable};
+use ferroui_base::reactive::{AnonymousObserver, IObservable, Subscription};
 use ferroui_base::{ObjectType, Rect, Ref};
 use std::rc::Rc;
 
@@ -73,15 +73,16 @@ impl Control {
 
     /// Sets a pseudoclass of the control depending on an observable trigger.
     ///
-    /// Returns a disposable used to cancel the subscription.
-    pub fn set_pseudo_class_from(&self, name: &str, trigger: &dyn IObservable<bool>) -> Rc<dyn IDisposable> {
+    /// Dropping the returned guard stops following the trigger; [`Subscription::detach`] keeps it
+    /// for the life of the trigger.
+    pub fn set_pseudo_class_from(&self, name: &str, trigger: &dyn IObservable<bool>) -> Subscription {
         let name = name.to_string();
         let weak = self.to_ref().downgrade();
-        trigger.subscribe(Rc::new(AnonymousObserver::new(move |x: bool| {
+        Subscription::new(trigger.subscribe(Rc::new(AnonymousObserver::new(move |x: bool| {
             if let Some(this) = weak.upgrade() {
                 this.pseudo_classes().set(&name, x);
             }
-        })))
+        }))))
     }
 }
 

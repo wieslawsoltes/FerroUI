@@ -35,7 +35,7 @@ use ferroui_base::platform::IAssetLoader;
 use ferroui_base::utilities::{Uri, UriKind};
 use ferroui_base::{BoxedValue, FerroLocator, LocatorExtensions, TypeInfo};
 use ferroui_markup_xaml::{
-    IRuntimeXamlLoader, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadException,
+    IRuntimeXamlLoader, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError,
 };
 use crate::back_end::include_sources;
 use crate::runtime::framework::load_exception;
@@ -46,7 +46,7 @@ use crate::ferro_xaml_il_runtime_compiler::FerroXamlIlRuntimeCompiler;
 ///
 /// Every failure of a load (parsing, transforming, interpreting the
 /// document, a member or markup extension that fails) is a
-/// [`XamlLoadException`]: its message carries the line and position, its
+/// [`XamlLoadError`]: its message carries the line and position, its
 /// inner error is the error of the compiler (`xamlx::exceptions::XamlError`).
 pub struct FerroRuntimeXamlLoader;
 
@@ -64,7 +64,7 @@ impl FerroRuntimeXamlLoader {
         root_instance: Option<BoxedValue>,
         uri: Option<Uri>,
         design_mode: bool,
-    ) -> Result<BoxedValue, XamlLoadException> {
+    ) -> Result<BoxedValue, XamlLoadError> {
         let stream: Box<dyn Read> = Box::new(Cursor::new(xaml.as_bytes().to_vec()));
         Self::load_stream(stream, local_assembly, root_instance, uri, design_mode)
     }
@@ -76,7 +76,7 @@ impl FerroRuntimeXamlLoader {
         root_instance: Option<BoxedValue>,
         uri: Option<Uri>,
         design_mode: bool,
-    ) -> Result<BoxedValue, XamlLoadException> {
+    ) -> Result<BoxedValue, XamlLoadError> {
         let document = RuntimeXamlLoaderDocument::from_stream_with_base_uri_and_root_instance(uri, root_instance, stream);
         let mut configuration = RuntimeXamlLoaderConfiguration::new();
         configuration.design_mode = design_mode;
@@ -88,7 +88,7 @@ impl FerroRuntimeXamlLoader {
     pub fn load_document(
         document: RuntimeXamlLoaderDocument,
         configuration: Option<RuntimeXamlLoaderConfiguration>,
-    ) -> Result<BoxedValue, XamlLoadException> {
+    ) -> Result<BoxedValue, XamlLoadError> {
         let configuration = configuration.unwrap_or_default();
         // A document with an absolute URI is loaded as a group with the documents it
         // includes (directly or not) that the asset loader has: the group transformers
@@ -98,7 +98,7 @@ impl FerroRuntimeXamlLoader {
         let uri = document.base_uri.clone().filter(|uri| uri.is_absolute_uri());
         let text = document
             .read_to_string()
-            .map_err(|e| XamlLoadException::with_inner(format!("Unable to read the XAML document: {e}"), e))?;
+            .map_err(|e| XamlLoadError::with_inner(format!("Unable to read the XAML document: {e}"), e))?;
         let mut included = Vec::new();
         let mut visited: Vec<String> = uri.iter().map(|uri| uri.absolute_uri().to_string()).collect();
         collect_included_documents(&*asset_loader(), uri.as_ref(), &text, &mut visited, &|_| false, &mut included);
@@ -120,7 +120,7 @@ impl FerroRuntimeXamlLoader {
         let loaded = FerroXamlIlRuntimeCompiler::load_group(documents, &configuration).map_err(load_exception)?;
         match loaded.into_iter().next() {
             Some(Some(root)) => Ok(root),
-            _ => Err(XamlLoadException::with_message("The document built a null root object".to_string())),
+            _ => Err(XamlLoadError::with_message("The document built a null root object".to_string())),
         }
     }
 
@@ -129,23 +129,23 @@ impl FerroRuntimeXamlLoader {
     pub fn load_group(
         documents: Vec<RuntimeXamlLoaderDocument>,
         configuration: Option<RuntimeXamlLoaderConfiguration>,
-    ) -> Result<Vec<Option<BoxedValue>>, XamlLoadException> {
+    ) -> Result<Vec<Option<BoxedValue>>, XamlLoadError> {
         FerroXamlIlRuntimeCompiler::load_group(documents, &configuration.unwrap_or_default()).map_err(load_exception)
     }
 
     /// Parses XAML from a string.
-    pub fn parse(xaml: &str, local_assembly: Option<&'static MarkupAssembly>) -> Result<BoxedValue, XamlLoadException> {
+    pub fn parse(xaml: &str, local_assembly: Option<&'static MarkupAssembly>) -> Result<BoxedValue, XamlLoadError> {
         Self::load(xaml, local_assembly, None, None, false)
     }
 
     /// Parses XAML from a string to an object of type `T` (the handle type
     /// of the object: `Ref<Border>`, `Rc<Style>`, ...). The cast of the
     /// managed original: an object of another type is an invalid cast.
-    pub fn parse_as<T: Clone + 'static>(xaml: &str, local_assembly: Option<&'static MarkupAssembly>) -> Result<T, XamlLoadException> {
+    pub fn parse_as<T: Clone + 'static>(xaml: &str, local_assembly: Option<&'static MarkupAssembly>) -> Result<T, XamlLoadError> {
         let loaded = Self::parse(xaml, local_assembly)?;
         let type_name = loaded.type_name();
         from_markup_value::<T>(&Some(loaded)).ok_or_else(|| {
-            XamlLoadException::with_message(format!(
+            XamlLoadError::with_message(format!(
                 "Unable to cast object of type '{type_name}' to type '{}'.",
                 std::any::type_name::<T>()
             ))
@@ -209,7 +209,7 @@ impl FerroRuntimeXamlLoader {
     pub fn load_object(
         instance: &BoxedValue,
         service_provider: Option<&Rc<dyn IServiceProvider>>,
-    ) -> Result<(), XamlLoadException> {
+    ) -> Result<(), XamlLoadError> {
         let object = ValueTypes::as_object(&**instance);
         if let Some(object) = &object {
             if let Some(populate) = ferroui_markup_xaml::FerroXamlLoader::populate_override(object.get_type()) {
@@ -221,7 +221,7 @@ impl FerroRuntimeXamlLoader {
             None => (**instance).type_name().to_string(),
         };
         let Some(uri_text) = object.as_ref().and_then(|object| Self::class_document(object.get_type())) else {
-            return Err(XamlLoadException::with_message(format!(
+            return Err(XamlLoadError::with_message(format!(
                 "No precompiled XAML found for {type_name}, make sure to specify x:Class and include your XAML file as FerroResource"
             )));
         };
@@ -243,7 +243,7 @@ impl FerroRuntimeXamlLoader {
     /// errors) with every document it includes, directly or not, that the
     /// asset loader has, and the assembly of the document: the group the
     /// document of a class is loaded (and compiled) as.
-    pub fn document_group(uri_text: &str, type_name: &str) -> Result<DocumentGroup, XamlLoadException> {
+    pub fn document_group(uri_text: &str, type_name: &str) -> Result<DocumentGroup, XamlLoadError> {
         Self::document_group_without(uri_text, type_name, &|_| false)
     }
 
@@ -256,20 +256,20 @@ impl FerroRuntimeXamlLoader {
         uri_text: &str,
         type_name: &str,
         skip: &dyn Fn(&Uri) -> bool,
-    ) -> Result<DocumentGroup, XamlLoadException> {
+    ) -> Result<DocumentGroup, XamlLoadError> {
         let uri = Uri::new(uri_text, UriKind::Absolute).map_err(|e| {
-            XamlLoadException::with_message(format!("The URI '{uri_text}' of the XAML document of {type_name} is invalid: {e}"))
+            XamlLoadError::with_message(format!("The URI '{uri_text}' of the XAML document of {type_name} is invalid: {e}"))
         })?;
         // The document of a class is found wherever the class is created, as compiled
         // markup is: without an asset loader service the registered assets are read
         // directly.
         let assets = asset_loader();
         let (mut stream, assembly) = assets.open_and_get_assembly(&uri, None).map_err(|e| {
-            XamlLoadException::with_inner(format!("Could not open the XAML document {uri} of {type_name}: {e}"), e)
+            XamlLoadError::with_inner(format!("Could not open the XAML document {uri} of {type_name}: {e}"), e)
         })?;
         let mut text = String::new();
         stream.read_to_string(&mut text).map_err(|e| {
-            XamlLoadException::with_inner(format!("Could not read the XAML document {uri} of {type_name}: {e}"), e)
+            XamlLoadError::with_inner(format!("Could not read the XAML document {uri} of {type_name}: {e}"), e)
         })?;
 
         // The document of a class is loaded as a group with every document it includes,
@@ -316,7 +316,7 @@ impl IRuntimeXamlLoader for RuntimeXamlLoaderService {
         &self,
         document: RuntimeXamlLoaderDocument,
         configuration: RuntimeXamlLoaderConfiguration,
-    ) -> Result<BoxedValue, XamlLoadException> {
+    ) -> Result<BoxedValue, XamlLoadError> {
         FerroRuntimeXamlLoader::load_document(document, Some(configuration))
     }
 
@@ -324,7 +324,7 @@ impl IRuntimeXamlLoader for RuntimeXamlLoaderService {
         &self,
         instance: &BoxedValue,
         service_provider: Option<&Rc<dyn IServiceProvider>>,
-    ) -> Result<(), XamlLoadException> {
+    ) -> Result<(), XamlLoadError> {
         FerroRuntimeXamlLoader::load_object(instance, service_provider)
     }
 }

@@ -13,7 +13,7 @@ impl DockLayoutLifetimeBehavior {
         let close: Rc<dyn ICommand> =
             Rc::new(ReactiveCommand::create(move || model.close_layout()));
         let command = close.clone();
-        window.closing(move |_| command.execute(None));
+        window.closing(move |_| command.execute(None)).detach();
         lifetime.exit(Rc::new(move |_| close.execute(None)));
     }
 }

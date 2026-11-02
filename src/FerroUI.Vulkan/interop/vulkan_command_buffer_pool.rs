@@ -1,5 +1,5 @@
 use super::VulkanCommandBuffer;
-use crate::{IVulkanPlatformGraphicsContext, VulkanException, VulkanResultExtensions};
+use crate::{IVulkanPlatformGraphicsContext, VulkanError, VulkanResultExtensions};
 use ash::vk;
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
@@ -18,7 +18,7 @@ pub(crate) struct VulkanCommandBufferPool {
 impl VulkanCommandBufferPool {
     /// Creates a pool. With `auto_free` the buffers whose commands have run
     /// are freed whenever a new buffer is created.
-    pub fn new(context: Rc<dyn IVulkanPlatformGraphicsContext>, auto_free: bool) -> Result<Rc<Self>, VulkanException> {
+    pub fn new(context: Rc<dyn IVulkanPlatformGraphicsContext>, auto_free: bool) -> Result<Rc<Self>, VulkanError> {
         let create_info = vk::CommandPoolCreateInfo::default()
             .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER)
             .queue_family_index(context.graphics_queue_family_index());
@@ -79,7 +79,7 @@ impl VulkanCommandBufferPool {
         self.handle.set(vk::CommandPool::null());
     }
 
-    pub fn create_command_buffer(&self) -> Result<Rc<VulkanCommandBuffer>, VulkanException> {
+    pub fn create_command_buffer(&self) -> Result<Rc<VulkanCommandBuffer>, VulkanError> {
         if self.auto_free {
             self.free_finished_command_buffers();
         }

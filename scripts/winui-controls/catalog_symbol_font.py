@@ -388,7 +388,8 @@ def cmap_table(codes):
     deltas = struct.pack(f">{n}h", *[((gid - start) + 0x8000) % 0x10000 - 0x8000 if start != 0xFFFF else 1 for start, _, gid in segments])
     offsets = struct.pack(f">{n}H", *[0] * n)
     body = struct.pack(">HHHH", 2 * n, search, int(math.log2(search // 2)), 2 * n - search) + ends + b"\0\0" + starts + deltas + offsets
-    sub = struct.pack(">HHH", 4, 14 + len(body), 0) + body
+    # The length counts the 6 bytes of format, length and language, and the body.
+    sub = struct.pack(">HHH", 4, 6 + len(body), 0) + body
     return struct.pack(">HHHHI", 0, 2, 0, 3, 20) + struct.pack(">HHI", 3, 1, 20) + sub
 
 

@@ -1,6 +1,6 @@
 //! Port of `Styling/ResourceInclude.cs`.
 
-use crate::{FerroXamlLoader, FromXamlObject, ServiceProviderExtensions, XamlLoadException};
+use crate::{FerroXamlLoader, FromXamlObject, ServiceProviderExtensions, XamlLoadError};
 use ferroui_base::controls::{
     IResourceDictionary, IResourceNode, IResourceProvider, IThemeVariantProvider, ResourceHostRef, ResourceKey,
     ResourceValue,
@@ -71,7 +71,7 @@ impl ResourceInclude {
     /// The loaded resource dictionary; loads it on first use. A missing
     /// [`source`](Self::source), a document that cannot be loaded and a
     /// document that is not a resource dictionary are errors.
-    pub fn try_loaded(&self) -> Result<Rc<dyn IResourceDictionary>, XamlLoadException> {
+    pub fn try_loaded(&self) -> Result<Rc<dyn IResourceDictionary>, XamlLoadError> {
         if let Some(loaded) = &*self.loaded.borrow() {
             return Ok(loaded.clone());
         }
@@ -83,7 +83,7 @@ impl ResourceInclude {
         }
         let _loading = LoadingGuard(&self.is_loading);
         let Some(source) = self.source() else {
-            return Err(XamlLoadException::with_message("ResourceInclude.Source must be set."));
+            return Err(XamlLoadError::with_message("ResourceInclude.Source must be set."));
         };
         let load = ||
             FerroXamlLoader::load_with_service_provider(self.service_provider.as_ref(), &source, self.base_uri.as_ref());
@@ -92,7 +92,7 @@ impl ResourceInclude {
         #[cfg(not(feature = "source-overlays"))]
         let loaded = load()?;
         let Some(loaded) = <Rc<dyn IResourceDictionary>>::from_xaml_object(&loaded) else {
-            return Err(XamlLoadException::with_message(format!(
+            return Err(XamlLoadError::with_message(format!(
                 "Unable to cast object of type '{}' to type 'IResourceDictionary'.",
                 (*loaded).type_name()
             )));

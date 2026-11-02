@@ -3,7 +3,7 @@
 use ferroui_reactive::concurrency::IScheduler;
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive_testing::TestScheduler;
-use ferroui_reactiveui::{PanicException, RxSchedulers};
+use ferroui_reactiveui::{PanicError, RxSchedulers};
 use ferroui_system::threading::tasks::Task;
 use ferroui_system::IDisposable;
 use std::rc::Rc;
@@ -60,11 +60,11 @@ pub trait SchedulerExtensions {
     /// and `WithAsync(Func<T, Task>)` with a `Task<()>`).
     ///
     /// A panic of `block` ends the returned task with the error of the panic
-    /// ([`PanicException`]), as an exception thrown in an `async` method faults its task; the
+    /// ([`PanicError`]), as an exception thrown in an `async` method faults its task; the
     /// schedulers are restored in every case.
     fn with_async<R: Clone + 'static>(&self, block: impl FnOnce(&Self) -> Task<R>) -> Task<R> {
         let restore = self.with_scheduler();
-        let task = match PanicException::catch(|| block(self)) {
+        let task = match PanicError::catch(|| block(self)) {
             Ok(task) => task,
             Err((error, _payload)) => {
                 restore.dispose();

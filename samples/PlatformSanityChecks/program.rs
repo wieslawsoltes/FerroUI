@@ -115,7 +115,7 @@ mod checks {
                 let second_fired = std::rc::Rc::new(Cell::new(false));
                 let cts = cts.clone();
                 let (first, second) = (first_fired.clone(), second_fired.clone());
-                let _ = DispatcherTimer::run(
+                DispatcherTimer::run(
                     move || {
                         println!("Second tick");
                         verify_access();
@@ -131,8 +131,9 @@ mod checks {
                     },
                     Duration::from_secs(2),
                     DispatcherPriority::DEFAULT,
-                );
-                let _ = DispatcherTimer::run(
+                )
+                .detach();
+                DispatcherTimer::run(
                     move || {
                         println!("First tick");
                         verify_access();
@@ -147,7 +148,8 @@ mod checks {
                     },
                     Duration::from_secs(1),
                     DispatcherPriority::DEFAULT,
-                );
+                )
+                .detach();
             },
             "CheckTimerOrdering",
         );
@@ -159,7 +161,7 @@ mod checks {
                 let ticks = Cell::new(0);
                 let st = Instant::now();
                 let cts = cts.clone();
-                let _ = DispatcherTimer::run(
+                DispatcherTimer::run(
                     move || {
                         ticks.set(ticks.get() + 1);
                         println!("Tick {} at {}", ticks.get(), TimeSpan::from(st.elapsed()));
@@ -179,7 +181,8 @@ mod checks {
                     },
                     Duration::from_secs(1),
                     DispatcherPriority::DEFAULT,
-                );
+                )
+                .detach();
             },
             "CheckTimerTicking",
         );

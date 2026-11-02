@@ -3,7 +3,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutHelper, Layoutable, LayoutableImpl};
 use ferroui_base::media::{ExperimentalAcrylicMaterial, ImmutableExperimentalAcrylicMaterial};
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{IDisposable, ObservableExt, Subscription};
 use ferroui_base::rendering::composition::{
     CompositionDrawListVisual, CompositionExperimentalAcrylicVisual, Compositor,
 };
@@ -27,7 +27,7 @@ use ferroui_base::{
 pub struct ExperimentalAcrylicBorder {
     base: Decorator,
     subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    material_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    material_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(ExperimentalAcrylicBorder: Decorator);
@@ -169,7 +169,7 @@ impl ExperimentalAcrylicBorder {
                 this.update_material_subscription();
             }
         });
-        *self.material_subscription.borrow_mut() = Some(material_subscription);
+        *self.material_subscription.borrow_mut() = Some(Subscription::new(material_subscription));
         self.sync_material(Some(composition_visual));
     }
 

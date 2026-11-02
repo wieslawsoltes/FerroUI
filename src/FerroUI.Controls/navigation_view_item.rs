@@ -439,7 +439,7 @@ impl TemplatedControlImpl for NavigationViewItem {
                         owner.set_current_value(Self::is_expanded_property(), false);
                     }
                 }
-            }));
+            }).detach());
         }
         *this.parts.borrow_mut() = parts;
         this.realize_children();

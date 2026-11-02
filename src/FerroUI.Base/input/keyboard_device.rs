@@ -4,7 +4,7 @@ use super::{
     FocusChangedEventArgs, FocusChangingEventArgs, IFocusManager, IInputDevice, IInputManager, IInputRoot, IKeyboardDevice, InputElement,
     KeyEventArgs, KeyModifiers, NavigationMethod, TextInputEventArgs,
 };
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::utilities::HandlerList;
 use crate::{FerroLocator, LocatorExtensions, Ref};
 use std::any::Any;
@@ -57,15 +57,17 @@ impl KeyboardDevice {
     }
 
     /// Raised with the name of a property of the device that changed
-    /// (`"FocusedElement"`).
-    pub fn property_changed(&self, handler: impl Fn(&str) + 'static) -> Rc<dyn IDisposable> {
+    /// (`"FocusedElement"`). Dropping the returned guard removes the
+    /// handler; [`Subscription::detach`] keeps it for the life of the
+    /// device.
+    pub fn property_changed(&self, handler: impl Fn(&str) + 'static) -> Subscription {
         let token = self.property_changed.add(Rc::new(handler));
         let weak = self.this.clone();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.property_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// The element that has keyboard focus.

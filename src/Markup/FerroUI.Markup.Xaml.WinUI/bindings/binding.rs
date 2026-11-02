@@ -2,7 +2,7 @@
 
 use super::path_node::{PathNode, RootGate};
 use super::WinUIBindings;
-use ferroui_markup_xaml::{IRootObjectProvider, ServiceProviderExtensions, XamlLoadException};
+use ferroui_markup_xaml::{IRootObjectProvider, ServiceProviderExtensions, XamlLoadError};
 use ferroui_base::controls::{INameScope, NameScopeRef};
 use ferroui_base::data::core::expression_nodes::ExpressionNode;
 use ferroui_base::data::core::{
@@ -110,19 +110,19 @@ impl WinUIBindExtension {
         &self,
         root: &FerroObject,
         name_scope: Option<&NameScopeRef>,
-    ) -> Result<Rc<WinUIBinding>, XamlLoadException> {
+    ) -> Result<Rc<WinUIBinding>, XamlLoadError> {
         let path = self.path();
         validate_path(&path)?;
         if !matches!(
             self.mode(),
             BindingMode::OneTime | BindingMode::OneWay | BindingMode::TwoWay
         ) {
-            return Err(XamlLoadException::with_message(
+            return Err(XamlLoadError::with_message(
                 "WinUIBind Mode must be OneTime, OneWay or TwoWay",
             ));
         }
         if self.mode() == BindingMode::TwoWay && path.is_empty() {
-            return Err(XamlLoadException::with_message(
+            return Err(XamlLoadError::with_message(
                 "A TwoWay x:Bind needs a writable property path",
             ));
         }
@@ -130,12 +130,12 @@ impl WinUIBindExtension {
             || (self.update_source_trigger() != UpdateSourceTrigger::Default
                 && self.mode() != BindingMode::TwoWay)
         {
-            return Err(XamlLoadException::with_message(
+            return Err(XamlLoadError::with_message(
                 "WinUIBind UpdateSourceTrigger accepts PropertyChanged or LostFocus only with TwoWay"));
         }
         if self.scope() == WinUIBindingScope::Template {
             if self.data_type().is_none() || root.to_ref().cast::<StyledElement>().is_none() {
-                return Err(XamlLoadException::with_message(
+                return Err(XamlLoadError::with_message(
                     "A template x:Bind needs a StyledElement root and a declared x:DataType",
                 ));
             }
@@ -156,11 +156,11 @@ impl WinUIBindExtension {
     pub fn provide_value(
         &self,
         provider: &Rc<dyn IServiceProvider>,
-    ) -> Result<Rc<WinUIBinding>, XamlLoadException> {
+    ) -> Result<Rc<WinUIBinding>, XamlLoadError> {
         let root_provider = provider
             .get_service_of::<Rc<dyn IRootObjectProvider>>()
             .ok_or_else(|| {
-                XamlLoadException::with_message("WinUIBind requires IRootObjectProvider")
+                XamlLoadError::with_message("WinUIBind requires IRootObjectProvider")
             })?;
         let root = match self.scope() {
             WinUIBindingScope::Root => root_provider.root_object(),
@@ -168,7 +168,7 @@ impl WinUIBindExtension {
         }
         .and_then(|root| ValueTypes::as_object(&*root))
         .ok_or_else(|| {
-            XamlLoadException::with_message("WinUIBind requires a declaring object root")
+            XamlLoadError::with_message("WinUIBind requires a declaring object root")
         })?;
         let names = provider.get_name_scope().map(NameScopeRef);
         self.create_binding(&root, names.as_ref())
@@ -194,8 +194,8 @@ impl WinUIBinding {
         &self,
         target: &FerroObject,
         target_property: Option<&'static FerroProperty>,
-    ) -> Result<Rc<BindingExpression>, XamlLoadException> {
-        let target_property = target_property.ok_or_else(|| XamlLoadException::with_message(
+    ) -> Result<Rc<BindingExpression>, XamlLoadError> {
+        let target_property = target_property.ok_or_else(|| XamlLoadError::with_message(
             "The WinUI x:Bind property-path adapter requires a registered target property; event bindings are unsupported"))?;
         let trigger = match self.trigger {
             // BindAssignment.NeedsLostFocusForTwoWay in the pinned WinUI compiler.
@@ -266,7 +266,7 @@ impl BindingBase for WinUIBinding {
 }
 
 /// This strict grammar intentionally excludes operators, functions, casts and indexers.
-pub(super) fn validate_path(path: &str) -> Result<(), XamlLoadException> {
+pub(super) fn validate_path(path: &str) -> Result<(), XamlLoadError> {
     if path.is_empty()
         || path.split('.').all(|segment| {
             let mut chars = segment.chars();
@@ -276,7 +276,7 @@ pub(super) fn validate_path(path: &str) -> Result<(), XamlLoadException> {
     {
         Ok(())
     } else {
-        Err(XamlLoadException::with_message(format!(
+        Err(XamlLoadError::with_message(format!(
             "Unsupported x:Bind path '{path}'; only dotted property/field names are implemented"
         )))
     }

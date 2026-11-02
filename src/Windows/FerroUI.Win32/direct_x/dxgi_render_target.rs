@@ -5,7 +5,7 @@
 use super::dxgi_connection::DxgiConnection;
 use super::{
     IDXGIDevice, IDXGIFactory2, IDXGISwapChain1, DXGI_ALPHA_MODE, DXGI_FORMAT, DXGI_MWA, DXGI_SWAP_CHAIN_DESC1,
-    DXGI_SWAP_CHAIN_FLAG, DXGI_SWAP_EFFECT,
+    DXGI_SCALING, DXGI_SWAP_CHAIN_FLAG, DXGI_SWAP_EFFECT,
 };
 use crate::interop::unmanaged_methods::{get_client_rect, RECT};
 use crate::open_gl::angle::{AngleContextDisplay, AngleWin32EglDisplay};
@@ -111,6 +111,12 @@ impl DxgiRenderTarget {
         dxgi_swap_chain_desc.height = window.size().height as u32;
         dxgi_swap_chain_desc.buffer_count = 2;
         dxgi_swap_chain_desc.swap_effect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_DISCARD;
+        // Not from upstream, which leaves the scaling at `DXGI_SCALING_STRETCH`: a frame that lags
+        // the size of the window during a resize was stretched to it. With `DXGI_SCALING_NONE`
+        // (a flip-model swap chain) it is shown at its own size from the top left corner until
+        // the frame of the new size, which `WM_PAINT` renders synchronously, is presented (issue
+        // 476, cooperative resize; the gravity of the X11 backend is the same).
+        dxgi_swap_chain_desc.scaling = DXGI_SCALING::DXGI_SCALING_NONE;
 
         // okay I know this looks bad, but we're hitting our render-calls by awaiting via dxgi
         // this is done in the DxgiConnection itself

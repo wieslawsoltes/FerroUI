@@ -1,12 +1,11 @@
 use crate::media::{FillRule, Geometry, GeometryImpl, Points};
 use crate::platform::{self, IGeometryImpl};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::{
     ferro_class, ferro_property, instantiate, DirectProperty, FerroObjectImpl, FerroProperty,
     Point, Ref, StyledProperty,
 };
 use std::cell::RefCell;
-use std::rc::Rc;
 use std::sync::Arc;
 
 /// Represents the geometry of a polyline or polygon.
@@ -14,7 +13,7 @@ use std::sync::Arc;
 pub struct PolylineGeometry {
     base: Geometry,
     points: RefCell<Option<Points>>,
-    points_observer: RefCell<Option<Rc<dyn IDisposable>>>,
+    points_observer: RefCell<Option<Subscription>>,
     fill_rule: FillRule,
 }
 
@@ -73,7 +72,7 @@ impl PolylineGeometry {
         Geometry::affects_geometry(&[Self::is_filled_property().as_property()]);
         Self::points_property().changed().add_class_handler::<PolylineGeometry>(|s, e| {
             s.on_points_changed(e.get_new_value::<Option<Points>>())
-        });
+        }).detach();
     }
 
     /// Creates the class data.

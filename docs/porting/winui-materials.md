@@ -224,7 +224,8 @@ presenter gets its system backdrop.
 
 ### Phase 6: catalog and verification
 
-Reveal sections on the "Composition (WinUI)" page and a "Materials (WinUI)" page; screenshots of
+Pages of the ControlCatalog (first a "Materials (WinUI)" page and a Reveal section of the
+"Composition (WinUI)" page, now pages of the section "Composition", section 10); screenshots of
 the window with Skia and Vello on macOS; this page, `DEVIATIONS.md` and the changelog.
 
 ## 6. Design
@@ -314,7 +315,7 @@ were partial and 43 missing. After it:
 | 3 | done | `media::XamlLight`, `Visual::lights()`, the scene lighting of `server_composition_light.rs`, `ferroui_controls::media::{RevealBrush, RevealBackgroundBrush, RevealBorderBrush, RevealHoverLight, RevealPressLight, RevealBorderLight, XamlAmbientLight}` |
 | 4 | done | `rendering::composition::system_backdrops`, `ferroui_controls::media::{SystemBackdrop, MicaBackdrop, DesktopAcrylicBackdrop}`, `TopLevel::system_backdrop`, `MenuFlyoutPresenter::system_backdrop`, `ContextMenu::system_backdrop`, `ITopLevelImpl::set_system_backdrop` (macOS, Windows) |
 | 5 | done | `scripts/winui-theme/convert.py` keeps `AcrylicBrush`, the Reveal brushes and `DesktopAcrylicBackdrop`; the menu flyout presenter and the context menu draw `MenuFlyoutSystemBackdrop`; the popups of `Menu` and `MenuItem` draw `AcrylicBackgroundFillColorDefaultBrush`; a window with a system backdrop has a transparent background |
-| 6 | done | the "Materials (WinUI)" page and the "Reveal and XAML lights" section of "Composition (WinUI)" in the ControlCatalog (section 10) |
+| 6 | done | the pages "Acrylic brush", "Blend and colour effects", "Lighting", "Reveal", "System backdrops" and "Acrylic menus" of the section "Composition" of the ControlCatalog (section 10) |
 
 Tests: `composition_winui_material_tests.rs` (the effects, the backdrop, composition brushes as
 element brushes, the acrylic recipe, its policy and cross-fade, the XAML lights, the controllers),
@@ -384,3 +385,26 @@ run in this port's development (it is compiled for `x86_64-pc-windows-msvc` only
 8. Removing the system backdrop gives the window its opaque background back (`DWMSBT_AUTO`).
 9. The menu flyout presenter and the context menu with `MenuFlyoutSystemBackdrop` in overlay popups
    and in popup windows.
+
+## 10. The catalog
+
+The section "Composition" of the ControlCatalog (after "Media & Graphics") has a page per feature
+of the materials, beside the pages of the composition API (`winui-composition.md`, section 8). The
+demos are in `samples/ControlCatalog/Pages/winui_materials_page.rs`, the pages in
+`winui_composition_pages.rs`; each page shows its demo at once:
+
+| Page | What it shows |
+|---|---|
+| Acrylic brush | `AcrylicBrush` over a busy scene: the in-app and the HostBackdrop cards, `TintColor`, `TintOpacity` and `TintLuminosityOpacity`, the cross-fade of `TintTransitionDuration` and the material policy (the upstream page "Acrylic" of "Media & Graphics" stays as it is) |
+| Blend and colour effects | `BlendEffect` in its modes, `SaturationEffect`, `GrayscaleEffect`, `InvertEffect`, `TintEffect` and `ColorMatrixEffect` in the effect graph of the compositor |
+| Lighting | coloured lights multiplying the content they reach, a light in the space of a moving visual, and the specular highlight of the scene lighting effect |
+| Reveal | `RevealBackgroundBrush` and `RevealBorderBrush` lit by `RevealHoverLight`, `RevealPressLight` and the border lights of the window; the Reveal button styles; Reveal focus |
+| System backdrops | `Window.SystemBackdrop` set to none, `MicaBackdrop` (`Base`, `BaseAlt`) and `DesktopAcrylicBackdrop`, with the state of the controller |
+| Acrylic menus | a menu flyout and a context menu whose presenters draw `MenuFlyoutSystemBackdrop` |
+
+The page "Reveal" replaces both the Reveal section of the earlier "Materials (WinUI)" page and the
+section "Reveal and XAML lights" of the earlier "Composition (WinUI)" page, whose three tiles were a
+part of it. With `FERROUI_SMOKE_MATERIALS_BACKDROP=<n>` on a screenshot run of the desktop entry
+point whose first page is "System backdrops" (`FERROUI_SMOKE_SCREENSHOT_PAGES="System backdrops"`),
+the backdrop `n` (1 Mica, 2 Mica Alt, 3 desktop acrylic) is set half an interval after the page is
+selected.

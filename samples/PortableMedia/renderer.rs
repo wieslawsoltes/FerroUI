@@ -121,6 +121,6 @@ pub fn install(
         },
         Duration::from_millis(400),
         DispatcherPriority::NORMAL,
-    );
+    ).detach();
     Some(host)
 }

@@ -39,14 +39,14 @@ macro_rules! define_dock_tab_strip_item_peer {
             pub(crate) fn notify_is_selected_changed(&self,old:bool,new:bool) {if old!=new {self.raise_property_changed_event(SelectionItemPatternIdentifiers::is_selected_property(),Some(Rc::new(old)),Some(Rc::new(new)));}}
         }
         struct $provider(Ref<$name>);
-        impl IInvokeProvider for $provider {fn peer(&self)->Ref<AutomationPeer> {self.0.clone().upcast()}fn invoke(&self)->Result<(),ElementNotEnabledException> {self.0.invoke();Ok(())}}
+        impl IInvokeProvider for $provider {fn peer(&self)->Ref<AutomationPeer> {self.0.clone().upcast()}fn invoke(&self)->Result<(),ElementNotEnabledError> {self.0.invoke();Ok(())}}
         impl ISelectionItemProvider for $provider {
             fn peer(&self)->Ref<AutomationPeer> {self.0.clone().upcast()}
             fn is_selected(&self)->bool {self.0.owner.is_selected()}
             fn selection_container(&self)->Option<Rc<dyn ISelectionProvider>> {let strip=self.0.owner.find_ancestor_of_type::<TabStrip>(false)?;ControlAutomationPeer::create_peer_for_element(&strip).get_provider::<dyn ISelectionProvider>()}
-            fn add_to_selection(&self)->Result<(),ElementNotEnabledException> {self.0.invoke();Ok(())}
-            fn select(&self)->Result<(),ElementNotEnabledException> {self.0.invoke();Ok(())}
-            fn remove_from_selection(&self)->Result<(),ElementNotEnabledException> {if self.0.owner.is_selected() {self.0.owner.set_is_selected(false);}Ok(())}
+            fn add_to_selection(&self)->Result<(),ElementNotEnabledError> {self.0.invoke();Ok(())}
+            fn select(&self)->Result<(),ElementNotEnabledError> {self.0.invoke();Ok(())}
+            fn remove_from_selection(&self)->Result<(),ElementNotEnabledError> {if self.0.owner.is_selected() {self.0.owner.set_is_selected(false);}Ok(())}
         }
     };
 }

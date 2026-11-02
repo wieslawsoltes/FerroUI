@@ -3,7 +3,7 @@ use crate::media::{
     FillRule, GeometryImpl, PathFigure, PathFigures, PathMarkupParser, StreamGeometry, StreamGeometryImpl,
 };
 use crate::platform::{self, IGeometryContext, IGeometryImpl, PathGeometryContext};
-use crate::reactive::IDisposable;
+use crate::reactive::{IDisposable, Subscription};
 use crate::utilities::FormatError;
 use crate::{
     ferro_class, ferro_property, instantiate, DirectProperty, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -22,8 +22,8 @@ type FigureSubscriptions = Rc<RefCell<Vec<(Ref<PathFigure>, Rc<dyn IDisposable>)
 pub struct PathGeometry {
     base: StreamGeometry,
     figures: RefCell<Option<PathFigures>>,
-    figures_observer: RefCell<Option<Rc<dyn IDisposable>>>,
-    figures_properties_observer: RefCell<Option<Rc<dyn IDisposable>>>,
+    figures_observer: RefCell<Option<Subscription>>,
+    figures_properties_observer: RefCell<Option<Subscription>>,
     figure_subscriptions: FigureSubscriptions,
 }
 
@@ -80,7 +80,7 @@ impl PathGeometry {
     fn static_constructor() {
         Self::figures_property().changed().add_class_handler::<PathGeometry>(|s, e| {
             s.on_figures_changed(e.get_new_value::<Option<PathFigures>>())
-        });
+        }).detach();
     }
 
     /// Creates the class data.
@@ -156,7 +156,7 @@ impl PathGeometry {
         let observer = figures.for_each_item(
             move |_, s: &Ref<PathFigure>| {
                 let from_segments = invalidate_added.clone();
-                let subscription = s.segments_invalidated(from_segments);
+                let subscription = s.segments_invalidated(from_segments).detach();
                 subscriptions_added.borrow_mut().push((s.clone(), subscription));
                 invalidate_added();
             },
@@ -207,7 +207,7 @@ mod tests {
         let target = PathGeometry::new();
         let changed = Rc::new(Cell::new(false));
         let c = changed.clone();
-        target.changed(move || c.set(true));
+        target.changed(move || c.set(true)).detach();
 
         target.figures().unwrap().add(figure);
         assert!(changed.get());
@@ -261,7 +261,7 @@ mod tests {
 
         let changed = Rc::new(Cell::new(false));
         let c = changed.clone();
-        target.changed(move || c.set(true));
+        target.changed(move || c.set(true)).detach();
 
         target_segment.set_size(Size::new(20.0, 20.0));
 
@@ -273,7 +273,7 @@ mod tests {
         let target = PathGeometry::parse("M 0,0 L 10,10").unwrap();
         let count = Rc::new(Cell::new(0));
         let c = count.clone();
-        target.changed(move || c.set(c.get() + 1));
+        target.changed(move || c.set(c.get() + 1)).detach();
 
         let figure = target.figures().unwrap().get(0);
         figure.segments().unwrap().add(crate::media::LineSegment::new().upcast());

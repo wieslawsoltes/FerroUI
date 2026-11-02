@@ -5,7 +5,7 @@
 use super::sort_extensions::{get_current_position, get_insert_position, get_insert_position_linear};
 use super::{Cache, KeyComparer, KeyValueComparer};
 use crate::cache::{ChangeReason, ChangeSet, ICache, IQuery};
-use crate::list::SortException;
+use crate::list::SortError;
 use std::hash::Hash;
 
 /// The options of the applicator (the parts of `SortAndBindOptions` it reads).
@@ -48,7 +48,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> SortedKeyValueApplicato
 
     /// Applies `changes` to the list, or rebuilds it when there are more changes than the reset
     /// threshold (`ProcessChanges`).
-    pub(crate) fn process_changes(&mut self, changes: &ChangeSet<T, K>) -> Result<(), SortException> {
+    pub(crate) fn process_changes(&mut self, changes: &ChangeSet<T, K>) -> Result<(), SortError> {
         self.cache.clone_changes(changes);
         let fire_reset = self.options.reset_threshold > 0 && self.options.reset_threshold < changes.count();
         if fire_reset {
@@ -67,7 +67,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> SortedKeyValueApplicato
         self.target = sorted;
     }
 
-    fn apply_changes(&mut self, changes: &ChangeSet<T, K>) -> Result<(), SortException> {
+    fn apply_changes(&mut self, changes: &ChangeSet<T, K>) -> Result<(), SortError> {
         // Iterate through the changes, find the sorted positions and apply the changes.
         for change in changes {
             let item = (change.key().clone(), change.current().clone());
@@ -91,7 +91,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> SortedKeyValueApplicato
                     // Look up the current and the new location, with the linear methods, as a
                     // binary search does not work on a list that may not be sorted any more.
                     let current_index = KeyComparer::index_of(&self.target, &item).ok_or_else(|| {
-                        SortException::new(format!("Cannot find item: {} from {} items", std::any::type_name::<(K, T)>(), self.target.len()))
+                        SortError::new(format!("Cannot find item: {} from {} items", std::any::type_name::<(K, T)>(), self.target.len()))
                     })?;
                     let comparer = self.comparer.clone();
                     let mut updated_index = get_insert_position_linear(&self.target, &item, &|x, y| comparer.compare(x, y));
@@ -110,7 +110,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> SortedKeyValueApplicato
         Ok(())
     }
 
-    fn get_current_position(&self, item: &(K, T)) -> Result<usize, SortException> {
+    fn get_current_position(&self, item: &(K, T)) -> Result<usize, SortError> {
         get_current_position(&self.target, item, &|x, y| self.comparer.compare(x, y), self.options.use_binary_search, &KeyComparer::equals::<T, K>)
     }
 

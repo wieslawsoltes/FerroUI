@@ -7,7 +7,7 @@
 //! whoever asks, so the interface here is a handle to the one table.
 
 use crate::xlib::{self, VisualInfo, XDisplay, XID};
-use ferroui_opengl::OpenGlException;
+use ferroui_opengl::OpenGlError;
 use std::ffi::{c_char, c_int, c_void, CStr, CString};
 use std::sync::OnceLock;
 
@@ -73,10 +73,10 @@ impl GlxInterface {
     /// Loads the library and its entry points. Fails when `libGL` cannot be
     /// loaded or has no `glXCreateContextAttribsARB`, as the constructor of
     /// the reference does for an entry point it cannot resolve.
-    pub fn new() -> Result<GlxInterface, OpenGlException> {
-        let library = library().map_err(OpenGlException::new)?;
+    pub fn new() -> Result<GlxInterface, OpenGlError> {
+        let library = library().map_err(OpenGlError::new)?;
         let Some(create_context_attribs_arb) = library.create_context_attribs_arb else {
-            return Err(OpenGlException::new("Unable to resolve the entry point glXCreateContextAttribsARB"));
+            return Err(OpenGlError::new("Unable to resolve the entry point glXCreateContextAttribsARB"));
         };
         Ok(GlxInterface { library, create_context_attribs_arb })
     }

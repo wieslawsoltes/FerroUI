@@ -5,7 +5,7 @@ use crate::{migrate_winui_xaml, WinUIXamlMigration, WinUIXamlOptions};
 use ferroui_base::metadata::{from_markup_value, MarkupAssembly};
 use ferroui_base::utilities::Uri;
 use ferroui_base::BoxedValue;
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 
 /// Loads an explicitly opted-in WinUI document after the shared migration pass. Unresolved
@@ -21,12 +21,12 @@ pub fn load_winui(
     uri: Option<Uri>,
     design_mode: bool,
     options: &WinUIXamlOptions,
-) -> Result<BoxedValue, XamlLoadException> {
+) -> Result<BoxedValue, XamlLoadError> {
     // The migrated document names the x:Bind types of this crate.
     crate::register_types();
     let migrated = migrate_winui_xaml(xaml, options)
         .and_then(WinUIXamlMigration::into_xaml)
-        .map_err(|error| XamlLoadException::with_inner(error.to_string(), error))?;
+        .map_err(|error| XamlLoadError::with_inner(error.to_string(), error))?;
     // A fresh-root preview can convert a typed, deferred XAML resource error to Result. Loading an
     // existing instance remains outside this boundary: it can be partly populated when a callback
     // fails, and this function does not promise rollback.
@@ -45,7 +45,7 @@ pub fn parse_winui(
     xaml: &str,
     local_assembly: Option<&'static MarkupAssembly>,
     options: &WinUIXamlOptions,
-) -> Result<BoxedValue, XamlLoadException> {
+) -> Result<BoxedValue, XamlLoadError> {
     load_winui(xaml, local_assembly, None, None, false, options)
 }
 
@@ -55,11 +55,11 @@ pub fn parse_winui_as<T: Clone + 'static>(
     xaml: &str,
     local_assembly: Option<&'static MarkupAssembly>,
     options: &WinUIXamlOptions,
-) -> Result<T, XamlLoadException> {
+) -> Result<T, XamlLoadError> {
     let loaded = parse_winui(xaml, local_assembly, options)?;
     let type_name = loaded.type_name();
     from_markup_value::<T>(&Some(loaded)).ok_or_else(|| {
-        XamlLoadException::with_message(format!(
+        XamlLoadError::with_message(format!(
             "Unable to cast object of type '{type_name}' to type '{}'.",
             std::any::type_name::<T>()
         ))

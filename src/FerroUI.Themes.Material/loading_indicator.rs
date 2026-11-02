@@ -14,7 +14,7 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::{BoxShadows, DrawingContext, IBrush, StreamGeometry};
 use ferroui_base::platform::IGeometryContext;
-use ferroui_base::reactive::{AnonymousObserver, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate,
     DirectProperty, FerroLocator, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -36,8 +36,8 @@ use std::sync::OnceLock;
 pub struct MaterialLoadingIndicator {
     base: RangeBase,
     percentage: Cell<f64>,
-    clock_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    clock_subscription: RefCell<Option<Subscription>>,
+    visibility_subscription: RefCell<Option<Subscription>>,
     elapsed: Cell<f64>,
     epoch: Cell<Option<f64>>,
 }
@@ -256,7 +256,7 @@ impl MaterialLoadingIndicator {
         };
         let weak = self.to_ref().downgrade();
         self.epoch.set(None);
-        *self.clock_subscription.borrow_mut() = Some(clock.subscribe(Rc::new(
+        *self.clock_subscription.borrow_mut() = Some(Subscription::new(clock.subscribe(Rc::new(
             AnonymousObserver::new(move |time: TimeSpan| {
                 if let Some(this) = weak.upgrade() {
                     if !animations_enabled(this.reduced_motion()) {
@@ -277,7 +277,7 @@ impl MaterialLoadingIndicator {
                     this.invalidate_visual();
                 }
             }),
-        )));
+        ))));
     }
     fn stop_clock(&self) {
         if let Some(subscription) = self.clock_subscription.borrow_mut().take() {

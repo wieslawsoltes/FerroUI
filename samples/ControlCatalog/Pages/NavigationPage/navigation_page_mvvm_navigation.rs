@@ -94,19 +94,19 @@ impl SampleNavigationService {
             if let Some(this) = weak.upgrade() {
                 this.publish_state(&format!("Pushed {}", header_text(&e.page())));
             }
-        });
+        }).detach();
         let weak = Rc::downgrade(&this);
         navigation_page.popped(move |e| {
             if let Some(this) = weak.upgrade() {
                 this.publish_state(&format!("Popped {}", header_text(&e.page())));
             }
-        });
+        }).detach();
         let weak = Rc::downgrade(&this);
         navigation_page.popped_to_root(move |_| {
             if let Some(this) = weak.upgrade() {
                 this.publish_state("Popped to root");
             }
-        });
+        }).detach();
         this
     }
 

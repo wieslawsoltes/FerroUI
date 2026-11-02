@@ -383,7 +383,7 @@ fn current_page_changed_fires_on_selection_change() {
 
     let count = Rc::new(Cell::new(0));
     let c = count.clone();
-    cp.current_page_changed(move || c.set(c.get() + 1));
+    cp.current_page_changed(move || c.set(c.get() + 1)).detach();
 
     cp.set_selected_index(1);
 
@@ -399,7 +399,7 @@ fn current_page_changed_not_fired_when_same_page_selected() {
 
     let count = Rc::new(Cell::new(0));
     let c = count.clone();
-    cp.current_page_changed(move || c.set(c.get() + 1));
+    cp.current_page_changed(move || c.set(c.get() + 1)).detach();
 
     cp.set_selected_index(0);
 
@@ -414,7 +414,7 @@ fn pages_changed_fires_on_add() {
     let cp = CarouselPage::new();
     let received: ReceivedChange = Rc::default();
     let r = received.clone();
-    cp.pages_changed(move |e| *r.borrow_mut() = Some(e.share()));
+    cp.pages_changed(move |e| *r.borrow_mut() = Some(e.share())).detach();
 
     pages(&cp).add(page().upcast());
 
@@ -431,7 +431,7 @@ fn pages_changed_fires_on_remove() {
 
     let received: ReceivedChange = Rc::default();
     let r = received.clone();
-    cp.pages_changed(move |e| *r.borrow_mut() = Some(e.share()));
+    cp.pages_changed(move |e| *r.borrow_mut() = Some(e.share())).detach();
 
     pages(&cp).remove(&page);
 
@@ -446,7 +446,7 @@ fn pages_changed_not_fired_after_pages_collection_replaced() {
     let old_pages = pages(&cp);
     cp.set_pages(Some(PageList::new()));
 
-    cp.pages_changed(|_| panic!("Should not fire for old collection"));
+    cp.pages_changed(|_| panic!("Should not fire for old collection")).detach();
 
     old_pages.add(page().upcast());
 }
@@ -461,7 +461,7 @@ fn selection_change_fires_navigated_from_on_previous_page() {
 
     let args: Rc<RefCell<Option<NavigatedFromEventArgs>>> = Rc::default();
     let a = args.clone();
-    page1.navigated_from(move |e| *a.borrow_mut() = Some(e.clone()));
+    page1.navigated_from(move |e| *a.borrow_mut() = Some(e.clone())).detach();
 
     cp.set_selected_index(1);
 
@@ -477,7 +477,7 @@ fn selection_change_fires_navigated_to_on_new_page() {
 
     let args: Rc<RefCell<Option<NavigatedToEventArgs>>> = Rc::default();
     let a = args.clone();
-    page2.navigated_to(move |e| *a.borrow_mut() = Some(e.clone()));
+    page2.navigated_to(move |e| *a.borrow_mut() = Some(e.clone())).detach();
 
     cp.set_selected_index(1);
 
@@ -493,9 +493,9 @@ fn selection_change_lifecycle_order_navigated_from_then_navigated_to() {
 
     let order: Rc<RefCell<Vec<&'static str>>> = Rc::default();
     let o = order.clone();
-    page1.navigated_from(move |_| o.borrow_mut().push("NavigatedFrom"));
+    page1.navigated_from(move |_| o.borrow_mut().push("NavigatedFrom")).detach();
     let o = order.clone();
-    page2.navigated_to(move |_| o.borrow_mut().push("NavigatedTo"));
+    page2.navigated_to(move |_| o.borrow_mut().push("NavigatedTo")).detach();
 
     cp.set_selected_index(1);
 
@@ -512,9 +512,9 @@ fn selection_change_same_page_no_lifecycle_events() {
 
     let events: Rc<RefCell<Vec<&'static str>>> = Rc::default();
     let ev = events.clone();
-    page.navigated_to(move |_| ev.borrow_mut().push("NavigatedTo"));
+    page.navigated_to(move |_| ev.borrow_mut().push("NavigatedTo")).detach();
     let ev = events.clone();
-    page.navigated_from(move |_| ev.borrow_mut().push("NavigatedFrom"));
+    page.navigated_from(move |_| ev.borrow_mut().push("NavigatedFrom")).detach();
 
     cp.set_selected_index(0);
 
@@ -528,7 +528,7 @@ fn navigated_from_navigation_type_is_replace() {
 
     let args: Rc<RefCell<Option<NavigatedFromEventArgs>>> = Rc::default();
     let a = args.clone();
-    page1.navigated_from(move |e| *a.borrow_mut() = Some(e.clone()));
+    page1.navigated_from(move |e| *a.borrow_mut() = Some(e.clone())).detach();
 
     cp.set_selected_index(1);
 
@@ -543,7 +543,7 @@ fn navigated_to_navigation_type_is_replace() {
 
     let args: Rc<RefCell<Option<NavigatedToEventArgs>>> = Rc::default();
     let a = args.clone();
-    page2.navigated_to(move |e| *a.borrow_mut() = Some(e.clone()));
+    page2.navigated_to(move |e| *a.borrow_mut() = Some(e.clone())).detach();
 
     cp.set_selected_index(1);
 
@@ -559,7 +559,7 @@ fn navigated_to_first_auto_selection_navigation_type_is_replace() {
 
     let args: Rc<RefCell<Option<NavigatedToEventArgs>>> = Rc::default();
     let a = args.clone();
-    page.navigated_to(move |e| *a.borrow_mut() = Some(e.clone()));
+    page.navigated_to(move |e| *a.borrow_mut() = Some(e.clone())).detach();
 
     pages(&cp).add(page.clone());
 

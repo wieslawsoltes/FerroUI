@@ -323,7 +323,7 @@ fn text_highlighter_mutable_brush_changes_invalidate_and_replacement_unsubscribe
         .unwrap();
     let changes = Rc::new(Cell::new(0));
     let capture = changes.clone();
-    let _subscription = highlighter.invalidated(move || capture.set(capture.get() + 1));
+    highlighter.invalidated(move || capture.set(capture.get() + 1)).detach();
     mutable.set_color(Color::from_rgb(4, 5, 6));
     assert_eq!(
         changes.get(),
@@ -358,20 +358,20 @@ fn text_highlighter_observer_ownership_is_weak_and_callbacks_can_reenter() {
     collection.add(first.clone());
     let once = Rc::new(Cell::new(true));
     let weak = weak_collection.clone();
-    let _subscription = collection.invalidated(move || {
+    collection.invalidated(move || {
         if once.replace(false) {
             if let Some(collection) = weak.upgrade() {
                 collection.add(TextHighlighter::new());
             }
         }
-    });
+    }).detach();
     ranges.add(TextHighlightRange::new(0, 1));
     assert_eq!(
         collection.count(),
         2,
         "callbacks can reenter after every collection borrow ends"
     );
-    let _item_subscription = first.invalidated(|| {});
+    first.invalidated(|| {}).detach();
     drop(collection);
     assert!(weak_collection.upgrade().is_none());
     drop(first);

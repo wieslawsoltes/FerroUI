@@ -177,7 +177,7 @@ impl DesignSurface {
                     .set(surface.helper_epoch.get().wrapping_add(1));
                 surface.invalidate_visual();
             }
-        }));
+        }).detach());
         ferroui_controls::automation::AutomationProperties::set_name(
             &result,
             Some("Design canvas. F8 selects layout handles; arrow keys adjust; Escape cancels."),

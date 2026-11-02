@@ -1,6 +1,6 @@
 //! Argument list parsing (`[a, b]`) on top of [`CharacterReader`].
 
-use crate::data::core::ExpressionParseException;
+use crate::data::core::ExpressionParseError;
 use crate::utilities::character_reader::{is_white_space, CharacterReader};
 
 impl CharacterReader<'_> {
@@ -10,7 +10,7 @@ impl CharacterReader<'_> {
         &mut self,
         open: char,
         close: char,
-    ) -> Result<Vec<String>, ExpressionParseException> {
+    ) -> Result<Vec<String>, ExpressionParseError> {
         self.parse_arguments_with_delimiter(open, close, ',')
     }
 
@@ -21,7 +21,7 @@ impl CharacterReader<'_> {
         open: char,
         close: char,
         delimiter: char,
-    ) -> Result<Vec<String>, ExpressionParseException> {
+    ) -> Result<Vec<String>, ExpressionParseError> {
         let r = self;
 
         if r.peek() == Some(open) {
@@ -33,7 +33,7 @@ impl CharacterReader<'_> {
                 let argument =
                     r.take_while(|c| c != delimiter && c != close && !is_white_space(c));
                 if argument.is_empty() {
-                    return Err(ExpressionParseException::new(
+                    return Err(ExpressionParseError::new(
                         r.position(),
                         "Expected indexer argument.",
                     ));
@@ -44,7 +44,7 @@ impl CharacterReader<'_> {
                 r.skip_whitespace();
 
                 if r.end() {
-                    return Err(ExpressionParseException::new(
+                    return Err(ExpressionParseError::new(
                         r.position(),
                         format!("Expected '{delimiter}'."),
                     ));
@@ -52,7 +52,7 @@ impl CharacterReader<'_> {
                     return Ok(result);
                 } else {
                     if r.take() != Some(delimiter) {
-                        return Err(ExpressionParseException::new(
+                        return Err(ExpressionParseError::new(
                             r.position(),
                             format!("Expected '{delimiter}'."),
                         ));
@@ -62,13 +62,13 @@ impl CharacterReader<'_> {
                 }
             }
 
-            return Err(ExpressionParseException::new(
+            return Err(ExpressionParseError::new(
                 r.position(),
                 format!("Expected '{close}'."),
             ));
         }
 
-        Err(ExpressionParseException::new(
+        Err(ExpressionParseError::new(
             r.position(),
             format!("Expected '{open}'."),
         ))
@@ -79,7 +79,7 @@ impl CharacterReader<'_> {
 mod tests {
     use super::*;
 
-    fn parse(s: &str) -> Result<Vec<String>, ExpressionParseException> {
+    fn parse(s: &str) -> Result<Vec<String>, ExpressionParseError> {
         CharacterReader::new(s).parse_arguments('[', ']')
     }
 

@@ -1,6 +1,6 @@
 //! Port of `Styling/StyleInclude.cs`.
 
-use crate::{FerroXamlLoader, FromXamlObject, ServiceProviderExtensions, XamlLoadException};
+use crate::{FerroXamlLoader, FromXamlObject, ServiceProviderExtensions, XamlLoadError};
 use ferroui_base::controls::{IResourceNode, IResourceProvider, ResourceHostRef, ResourceKey, ResourceValue};
 use ferroui_base::ferro_markup_type;
 use ferroui_base::metadata::{IServiceProvider, MarkupDelegate};
@@ -95,7 +95,7 @@ impl StyleInclude {
     /// The loaded style; loads it on first use. A missing
     /// [`source`](Self::source), a document that cannot be loaded and a
     /// document that is not a style are errors.
-    pub fn try_loaded(&self) -> Result<Rc<dyn IStyle>, XamlLoadException> {
+    pub fn try_loaded(&self) -> Result<Rc<dyn IStyle>, XamlLoadError> {
         if let Some(loaded) = &*self.loaded.borrow() {
             return Ok(loaded[0].clone());
         }
@@ -107,7 +107,7 @@ impl StyleInclude {
         }
         let _loading = LoadingGuard(&self.is_loading);
         let Some(source) = self.source() else {
-            return Err(XamlLoadException::with_message("StyleInclude.Source must be set."));
+            return Err(XamlLoadError::with_message("StyleInclude.Source must be set."));
         };
         let load = ||
             FerroXamlLoader::load_with_service_provider(self.service_provider.as_ref(), &source, self.base_uri.as_ref());
@@ -116,7 +116,7 @@ impl StyleInclude {
         #[cfg(not(feature = "source-overlays"))]
         let loaded = load()?;
         let Some(loaded) = <Rc<dyn IStyle>>::from_xaml_object(&loaded) else {
-            return Err(XamlLoadException::with_message(format!(
+            return Err(XamlLoadError::with_message(format!(
                 "Unable to cast object of type '{}' to type 'IStyle'.",
                 (*loaded).type_name()
             )));

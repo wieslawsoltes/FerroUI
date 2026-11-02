@@ -18,7 +18,7 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{Layoutable, LayoutableImpl};
 use ferroui_base::logical_tree::LogicalTreeAttachmentEventArgs;
 use ferroui_base::media::{ScaleTransform, Transform};
-use ferroui_base::reactive::{AnonymousObserver, CompositeDisposable, Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{AnonymousObserver, CompositeDisposable, Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::HandlerList;
@@ -355,10 +355,10 @@ ferroui_base::ferro_properties! { impl Popup {
 
 impl Popup {
     fn static_constructor() {
-        Self::child_property().changed().add_class_handler::<Popup>(|x, e| x.child_changed(e));
-        Self::is_open_property().changed().add_class_handler::<Popup>(|x, e| x.is_open_changed(e));
+        Self::child_property().changed().add_class_handler::<Popup>(|x, e| x.child_changed(e)).detach();
+        Self::is_open_property().changed().add_class_handler::<Popup>(|x, e| x.is_open_changed(e)).detach();
         // WinUI: the `Shadow` of a popup is cast by its child (`NeedsDropShadowVisual`).
-        Visual::shadow_property().changed().add_class_handler::<Popup>(|x, _| x.update_child_theme_shadow());
+        Visual::shadow_property().changed().add_class_handler::<Popup>(|x, _| x.update_child_theme_shadow()).detach();
     }
 
     /// Hands the `Shadow` of the popup to its child, which casts it (with the elevation of the
@@ -403,40 +403,49 @@ impl Popup {
         instantiate(Self::construct())
     }
 
-    fn subscribe<F: ?Sized + 'static>(&self, select: fn(&Popup) -> &HandlerList<F>, handler: Rc<F>) -> Rc<dyn IDisposable> {
+    fn subscribe<F: ?Sized + 'static>(&self, select: fn(&Popup) -> &HandlerList<F>, handler: Rc<F>) -> Subscription {
         let token = select(self).add(handler);
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 select(&this).remove(token);
             }
-        })
+        }))
     }
 
-    /// Raised when the popup closes. Disposing the returned handle
-    /// unsubscribes.
-    pub fn closed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when the popup closes.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the popup.
+    pub fn closed(&self, handler: impl Fn() + 'static) -> Subscription {
         self.subscribe::<dyn Fn()>(|popup| &popup.closed, Rc::new(handler))
     }
 
-    /// Raised when the popup opens. Disposing the returned handle
-    /// unsubscribes.
-    pub fn opened(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when the popup opens.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the popup.
+    pub fn opened(&self, handler: impl Fn() + 'static) -> Subscription {
         self.subscribe::<dyn Fn()>(|popup| &popup.opened, Rc::new(handler))
     }
 
     /// Raised before the popup closes; the close can be cancelled (internal
-    /// upstream). Disposing the returned handle unsubscribes.
-    pub fn closing(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// upstream).
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the popup.
+    pub fn closing(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Subscription {
         self.subscribe::<dyn Fn(&CancelEventArgs)>(|popup| &popup.closing, Rc::new(handler))
     }
 
-    /// Raised when the popup host changes (the popup host provider
-    /// contract). Disposing the returned handle unsubscribes.
+    /// Raised when the popup host changes (the popup host provider contract).
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the popup.
     pub fn popup_host_changed(
         &self,
         handler: impl Fn(Option<&Rc<dyn IPopupHost>>) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         self.subscribe::<dyn Fn(Option<&Rc<dyn IPopupHost>>)>(|popup| &popup.popup_host_changed_handler, Rc::new(handler))
     }
 
@@ -772,11 +781,14 @@ impl Popup {
 
         if self.inherits_transform() {
             let weak = weak.clone();
-            handler_cleanup.add(TransformTrackingHelper::track(&placement_target.clone().upcast(), true, move |v, m| {
-                if let Some(this) = weak.upgrade() {
-                    this.placement_target_transform_changed(v, m);
-                }
-            }));
+            handler_cleanup.add(
+                TransformTrackingHelper::track(&placement_target.clone().upcast(), true, move |v, m| {
+                    if let Some(this) = weak.upgrade() {
+                        this.placement_target_transform_changed(v, m);
+                    }
+                })
+                .detach(),
+            );
         } else {
             popup_host.set_transform(None);
         }
@@ -820,7 +832,7 @@ impl Popup {
                     this.target_detached(e);
                 }
             }
-        }));
+        }).detach());
 
         self.subscribe_to_top_level(&top_level, &placement_target, &handler_cleanup);
         if !self.is_current_lifecycle_request(generation) {
@@ -970,7 +982,7 @@ impl Popup {
                             this.window_deactivated();
                         }
                     }
-                }));
+                }).detach());
 
                 handler_cleanup.add(top_level.platform_lost_focus({
                     let weak = weak.clone();
@@ -979,7 +991,7 @@ impl Popup {
                             this.window_lost_focus();
                         }
                     }
-                }));
+                }).detach());
 
                 // Recalculate popup position on parent moved/resized, but not if placement was on pointer
                 if self.placement() != PlacementMode::Pointer {
@@ -990,7 +1002,7 @@ impl Popup {
                                 this.window_position_changed(pp);
                             }
                         }
-                    }));
+                    }).detach());
 
                     // If the placement target is moved, update the popup position
                     handler_cleanup.add(placement_target.layout_updated({
@@ -1000,7 +1012,7 @@ impl Popup {
                                 this.placement_target_layout_updated();
                             }
                         }
-                    }));
+                    }).detach());
                 }
 
                 return;
@@ -1015,7 +1027,7 @@ impl Popup {
                         this.parent_popup_position_changed(e);
                     }
                 }
-            }));
+            }).detach());
 
             if let Some(popup) = parent_popup_root.parent().and_then(|parent| parent.cast::<Popup>()) {
                 handler_cleanup.add(popup.closed({
@@ -1025,7 +1037,7 @@ impl Popup {
                             this.parent_closed();
                         }
                     }
-                }));
+                }).detach());
             }
         } else if let Some(platform_impl) = top_level.platform_impl() {
             if platform_impl.as_window_base_impl().is_some() {
@@ -1036,7 +1048,7 @@ impl Popup {
                             this.top_level_lost_platform_focus();
                         }
                     }
-                }));
+                }).detach());
 
                 handler_cleanup.add(top_level.platform_deactivated({
                     let weak = weak.clone();
@@ -1045,7 +1057,7 @@ impl Popup {
                             this.window_base_deactivated();
                         }
                     }
-                }));
+                }).detach());
             } else {
                 handler_cleanup.add(top_level.platform_lost_focus({
                     let weak = weak.clone();
@@ -1054,7 +1066,7 @@ impl Popup {
                             this.top_level_lost_platform_focus();
                         }
                     }
-                }));
+                }).detach());
             }
         }
     }
@@ -1724,6 +1736,6 @@ impl IPopupHostProvider for PopupHostProvider {
     }
 
     fn popup_host_changed(&self, handler: Rc<dyn Fn(Option<&Rc<dyn IPopupHost>>)>) -> Rc<dyn IDisposable> {
-        self.0.popup_host_changed(move |host| handler(host))
+        self.0.popup_host_changed(move |host| handler(host)).detach()
     }
 }

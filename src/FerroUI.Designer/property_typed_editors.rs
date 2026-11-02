@@ -468,7 +468,7 @@ pub(super) fn font(
         let field = enumeration(&context, &metadata, &families);
         field.set_width(280.0);
         flyout.set_content(Some(Control::boxed(&field)));
-    });
+    }).detach();
     Grid::set_column(&chooser, 1);
     root.children().add(chooser.upcast::<Control>());
     root.upcast::<Control>()

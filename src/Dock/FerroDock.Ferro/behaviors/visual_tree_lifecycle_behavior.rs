@@ -40,10 +40,12 @@ impl VisualTreeLifecycleBehavior {
     fn static_constructor() {
         Self::is_enabled_property()
             .changed()
-            .add_class_handler::<Control>(Self::on_is_enabled_changed);
+            .add_class_handler::<Control>(Self::on_is_enabled_changed)
+            .detach();
         StyledElement::data_context_property()
             .changed()
-            .add_class_handler::<Control>(Self::on_data_context_changed);
+            .add_class_handler::<Control>(Self::on_data_context_changed)
+            .detach();
     }
     /// Gets whether the source lifecycle behavior is enabled on the control.
     pub fn get_is_enabled(element: &Control) -> bool {
@@ -80,7 +82,7 @@ impl VisualTreeLifecycleBehavior {
                         subscriptions: Vec::new(),
                     })
                     .subscriptions
-                    .push(Subscriptions { attached, detached });
+                    .push(Subscriptions { attached: attached.detach(), detached: detached.detach() });
             });
             if element.is_attached_to_visual_tree() {
                 Self::invoke_attached(element);

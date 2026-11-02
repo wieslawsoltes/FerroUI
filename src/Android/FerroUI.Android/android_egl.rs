@@ -17,7 +17,7 @@ use ferroui_base::reactive::IDisposable;
 use ferroui_opengl::egl::{
     EglContext, EglContextOptions, EglDisplay, EglDisplayCreationOptions, EglDisplayOptions, EglInterface,
 };
-use ferroui_opengl::{GetProcAddress, OpenGlException};
+use ferroui_opengl::{GetProcAddress, OpenGlError};
 use std::ffi::{c_char, c_void, CString};
 use std::rc::Rc;
 use std::sync::OnceLock;
@@ -32,7 +32,7 @@ struct EglLibrary {
     get_proc_address: EglGetProcAddress,
 }
 
-fn egl_library() -> Result<EglLibrary, OpenGlException> {
+fn egl_library() -> Result<EglLibrary, OpenGlError> {
     static LIBRARY: OnceLock<Option<EglLibrary>> = OnceLock::new();
     LIBRARY
         .get_or_init(|| {
@@ -55,13 +55,13 @@ fn egl_library() -> Result<EglLibrary, OpenGlException> {
                 })
             }
         })
-        .ok_or_else(|| OpenGlException::new("Unable to load libEGL.so"))
+        .ok_or_else(|| OpenGlError::new("Unable to load libEGL.so"))
 }
 
 /// The loader of the entry points of EGL and of OpenGL ES: an entry point
 /// the library exports, or else what `eglGetProcAddress` answers (which on
 /// Android knows the functions of OpenGL ES, core and extensions).
-fn load_egl() -> Result<GetProcAddress, OpenGlException> {
+fn load_egl() -> Result<GetProcAddress, OpenGlError> {
     let library = egl_library()?;
     Ok(Rc::new(move |name: &str| {
         let Ok(name) = CString::new(name) else {
@@ -84,7 +84,7 @@ pub(crate) struct AndroidEglPlatformGraphics;
 
 impl AndroidEglPlatformGraphics {
     /// The display of the system, as an object of the calling thread.
-    fn create_display() -> Result<Rc<EglDisplay>, OpenGlException> {
+    fn create_display() -> Result<Rc<EglDisplay>, OpenGlError> {
         let get_proc_address = load_egl()?;
         // SAFETY: the loader returns, for a name, null or the address of the entry point of
         // that name in the EGL library of the system or behind its `eglGetProcAddress`;
@@ -102,7 +102,7 @@ impl AndroidEglPlatformGraphics {
     }
 
     /// A context of a display, which the context disposes with itself.
-    fn create_context_for_display(display: Rc<EglDisplay>) -> Result<Rc<EglContext>, OpenGlException> {
+    fn create_context_for_display(display: Rc<EglDisplay>) -> Result<Rc<EglContext>, OpenGlError> {
         let dispose_display = display.clone();
         let result = display.create_context(Some(EglContextOptions {
             dispose_callback: Some(Rc::new(move || dispose_display.dispose())),
@@ -118,14 +118,14 @@ impl AndroidEglPlatformGraphics {
     /// initialized and a context of it made current; `None`, with the
     /// failure logged, when not.
     pub fn try_create() -> Option<AndroidEglPlatformGraphics> {
-        let probe = || -> Result<(), OpenGlException> {
+        let probe = || -> Result<(), OpenGlError> {
             let context = Self::create_context_for_display(Self::create_display()?)?;
             let result = match context.make_current_with_surface(None) {
                 Ok(current) => {
                     current.dispose();
                     Ok(())
                 }
-                Err(error) => Err(OpenGlException::new(error.to_string())),
+                Err(error) => Err(OpenGlError::new(error.to_string())),
             };
             IPlatformGraphicsContext::dispose(&*context);
             result

@@ -1,6 +1,6 @@
 use crate::media::media_collection::media_collection_type;
 use crate::media::{MediaCollection, ResetBehavior, Transform, TransformImpl};
-use crate::reactive::IDisposable;
+use crate::reactive::{IDisposable, Subscription};
 use crate::{
     ferro_class, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, Matrix,
@@ -32,7 +32,7 @@ type ChildSubscriptions = Rc<RefCell<Vec<(Ref<Transform>, Rc<dyn IDisposable>)>>
 #[repr(C)]
 pub struct TransformGroup {
     base: Transform,
-    children_notification_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    children_notification_subscription: RefCell<Option<Subscription>>,
     child_subscriptions: ChildSubscriptions,
     last_matrix: Cell<Option<Matrix>>,
 }
@@ -75,7 +75,8 @@ impl FerroObjectImpl for TransformGroup {
                             if let Some(this) = weak_child.upgrade() {
                                 this.on_transform_invalidated();
                             }
-                        });
+                        })
+                        .detach();
                         subscriptions_added.borrow_mut().push((tr.clone(), handle));
                         if let Some(this) = weak_added.upgrade() {
                             this.on_transform_invalidated();

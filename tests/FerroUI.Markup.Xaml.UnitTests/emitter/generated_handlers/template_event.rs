@@ -18,7 +18,7 @@ const XML_NAMESPACES_0: rt::XmlNamespaceTable = &[
 pub fn populate(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     root: &::ferroui_base::Ref<crate::support::xaml::event_tests::MyPanel>,
-) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     ::ferroui_markup_xaml::FerroXamlLoader::track_instance(<crate::support::xaml::event_tests::MyPanel as ::ferroui_base::StaticType>::TYPE, root);
     if let Some(populate) = ::ferroui_markup_xaml::FerroXamlLoader::populate_override(<crate::support::xaml::event_tests::MyPanel as ::ferroui_base::StaticType>::TYPE) {
         return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));
@@ -35,7 +35,7 @@ static POPULATE_HANDLERS_TEMPLATEEVENT_XAML_DOCUMENT: rt::DocumentInfo = rt::Doc
 pub fn populate_handlers_templateevent_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     root: &::ferroui_base::Ref<crate::support::xaml::event_tests::MyPanel>,
-) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let root = root.clone();
     let context = rt::populate_context(service_provider, &POPULATE_HANDLERS_TEMPLATEEVENT_XAML_DOCUMENT, rt::to_value(root.clone()));
     let name_scope = context.name_scope_field();
@@ -64,7 +64,7 @@ pub fn populate_handlers_templateevent_xaml(
 /// Builds the deferred content at `Handlers/TemplateEvent.xaml(1,208)` (a template or a deferred resource).
 fn populate_handlers_templateevent_xaml_deferred_0(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &POPULATE_HANDLERS_TEMPLATEEVENT_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Handlers/TemplateEvent.xaml(1,208) Border
@@ -87,7 +87,7 @@ fn populate_handlers_templateevent_xaml_deferred_0(
 pub fn try_load(
     _service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     uri: &str,
-) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadError> {
     if rt::uri_equals(uri, "ferres://FerroUI.Markup.Xaml.UnitTests/Handlers/TemplateEvent.xaml", "") {
         return ::core::result::Result::Ok(::ferroui_base::metadata::into_markup_value(crate::support::xaml::event_tests::MyPanel::new()));
     }

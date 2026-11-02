@@ -5,7 +5,7 @@ use crate::data::core::expression_nodes::{
     LogicalNotNode, NamedElementNode, ParentDataContextNode, PropertyAccessorNode, ReflectionIndexerNode, StreamNode,
     TemplatedParentNode, TypeCastNode, VisualAncestorElementNode,
 };
-use crate::data::core::ExpressionParseException;
+use crate::data::core::ExpressionParseError;
 use crate::data::{RelativeSource, RelativeSourceMode, TreeType};
 use crate::{FerroProperty, FerroPropertyRegistry, StyledElement, TypeInfo};
 use std::rc::Rc;
@@ -16,8 +16,8 @@ pub type TypeResolver = Rc<dyn Fn(Option<&str>, &str) -> Option<CastTarget>>;
 /// Creates expression nodes from the syntax of a binding path.
 pub struct ExpressionNodeFactory;
 
-fn error(message: String) -> ExpressionParseException {
-    ExpressionParseException::new(0, message)
+fn error(message: String) -> ExpressionParseError {
+    ExpressionParseError::new(0, message)
 }
 
 impl ExpressionNodeFactory {
@@ -28,7 +28,7 @@ impl ExpressionNodeFactory {
         type_resolver: Option<&TypeResolver>,
         name_scope: Option<&NameScopeRef>,
         result: &mut Vec<Rc<dyn ExpressionNode>>,
-    ) -> Result<bool, ExpressionParseException> {
+    ) -> Result<bool, ExpressionParseError> {
         let mut negated = 0;
         let mut is_rooted = false;
 
@@ -110,7 +110,7 @@ impl ExpressionNodeFactory {
         type_resolver: Option<&TypeResolver>,
         namespace: Option<&str>,
         name: &str,
-    ) -> Result<CastTarget, ExpressionParseException> {
+    ) -> Result<CastTarget, ExpressionParseError> {
         type_resolver
             .and_then(|r| r(namespace, name))
             .ok_or_else(|| error(format!("Unable to resolve type '{}:{}'.", namespace.unwrap_or(""), name)))
@@ -120,7 +120,7 @@ impl ExpressionNodeFactory {
         type_resolver: Option<&TypeResolver>,
         namespace: Option<&str>,
         name: &str,
-    ) -> Result<&'static TypeInfo, ExpressionParseException> {
+    ) -> Result<&'static TypeInfo, ExpressionParseError> {
         match Self::lookup_type(type_resolver, namespace, name)? {
             CastTarget::Class(t) => Ok(t),
             CastTarget::Value(t) => Err(error(format!("Type '{t}' is not a class."))),

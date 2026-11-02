@@ -22,7 +22,7 @@ use ferroui_base::input::{FocusChangedEventArgs, InputElement, InputElementImpl,
 use ferroui_base::interactivity::{InteractiveImpl, RoutingStrategies};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -438,7 +438,7 @@ impl TemplatedControlImpl for AutoSuggestBox {
                 if let Some(this) = weak.upgrade() {
                     this.set_current_value(Self::is_suggestion_list_open_property(), false);
                 }
-            }));
+            }).detach());
         }
         *this.template_subscriptions.borrow_mut() = subscriptions;
         this.set_text_box_query_button_icon();
@@ -628,43 +628,46 @@ impl AutoSuggestBox {
     }
 
     /// Adds a handler of the `TextChanged` event, raised 150 ms after the last change of the text.
-    /// Disposing the result removes the handler.
-    pub fn text_changed(&self, handler: impl Fn(&AutoSuggestBoxTextChangedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the box.
+    pub fn text_changed(&self, handler: impl Fn(&AutoSuggestBoxTextChangedEventArgs) + 'static) -> Subscription {
         let token = self.text_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.text_changed.remove(token);
             }
-        })
+        }))
     }
 
-    /// Adds a handler of the `SuggestionChosen` event. Disposing the result removes the handler.
+    /// Adds a handler of the `SuggestionChosen` event. Dropping the returned guard removes the
+    /// handler; [`Subscription::detach`] keeps it for the life of the box.
     pub fn suggestion_chosen(
         &self,
         handler: impl Fn(&AutoSuggestBoxSuggestionChosenEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.suggestion_chosen.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.suggestion_chosen.remove(token);
             }
-        })
+        }))
     }
 
-    /// Adds a handler of the `QuerySubmitted` event. Disposing the result removes the handler.
+    /// Adds a handler of the `QuerySubmitted` event. Dropping the returned guard removes the
+    /// handler; [`Subscription::detach`] keeps it for the life of the box.
     pub fn query_submitted(
         &self,
         handler: impl Fn(&AutoSuggestBoxQuerySubmittedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.query_submitted.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.query_submitted.remove(token);
             }
-        })
+        }))
     }
 
     /// Submits the text alone, without the suggestion that is selected (WinUI's

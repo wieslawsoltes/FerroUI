@@ -3,7 +3,7 @@ use crate::ControlImpl;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{ferro_class, ferro_class_info, ferro_impl_classes, FerroObjectImpl, StyledElementImpl, VisualImpl};
 use std::rc::Rc;
@@ -58,27 +58,27 @@ impl PickerPresenterBase {
         Self { base: TemplatedControl::construct(), confirmed: HandlerList::new(), dismissed: HandlerList::new() }
     }
 
-    /// Raised when the selection of the presenter is confirmed. Disposing
-    /// the returned handle removes the handler.
-    pub fn confirmed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when the selection of the presenter is confirmed. Dropping the returned guard removes
+    /// the handler; [`Subscription::detach`] keeps it for the life of the presenter.
+    pub fn confirmed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.confirmed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.confirmed.remove(token);
             }
-        })
+        }))
     }
 
-    /// Raised when the presenter is dismissed. Disposing the returned handle
-    /// removes the handler.
-    pub fn dismissed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when the presenter is dismissed. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the presenter.
+    pub fn dismissed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.dismissed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.dismissed.remove(token);
             }
-        })
+        }))
     }
 }

@@ -1,6 +1,6 @@
 use crate::media::ref_adapter::RefAdapter;
 use crate::media::{BrushImpl, BrushImplExt, Drawing, DrawingContext, ISceneBrushContent, ServerBrushFactory, TileBrush};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::rendering::composition::drawing::{
     CompositionRenderData, CompositionRenderDataSceneBrushContentProperties, RenderDataDrawingContext,
 };
@@ -30,7 +30,7 @@ impl RenderDataItem {
 #[repr(C)]
 pub struct DrawingBrush {
     base: TileBrush,
-    drawing_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    drawing_subscription: RefCell<Option<Subscription>>,
     /// The recorded content per compositor the brush is used with; `None`
     /// for a compositor the content of which is empty.
     render_data_dictionary: RefCell<Vec<(Weak<Compositor>, Option<Rc<RenderDataItem>>)>>,
@@ -223,7 +223,7 @@ mod tests {
         let target = DrawingBrush::new();
         let raised = Rc::new(Cell::new(0));
         let r = raised.clone();
-        target.invalidated(move || r.set(r.get() + 1));
+        target.invalidated(move || r.set(r.get() + 1)).detach();
 
         let drawing = GeometryDrawing::new();
         target.set_drawing(&drawing);

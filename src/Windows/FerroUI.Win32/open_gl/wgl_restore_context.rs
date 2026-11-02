@@ -23,7 +23,7 @@ mod imp {
     };
     use crate::interop::unmanaged_methods::DEVICECAP;
     use ferroui_base::reactive::IDisposable;
-    use ferroui_opengl::OpenGlException;
+    use ferroui_opengl::OpenGlError;
     use std::cell::Cell;
 
     pub(crate) struct WglRestoreContext {
@@ -35,14 +35,14 @@ mod imp {
     impl WglRestoreContext {
         /// Makes `context` current with the device context `gc`,
         /// remembering what was current.
-        pub fn new(gc: isize, context: isize) -> Result<WglRestoreContext, OpenGlException> {
+        pub fn new(gc: isize, context: isize) -> Result<WglRestoreContext, OpenGlError> {
             let old_dc = wgl_get_current_dc();
             let old_context = wgl_get_current_context();
 
             if !wgl_make_current(gc, context) {
                 let last_error = get_last_error();
                 let caps = get_device_caps(gc, DEVICECAP::BITSPIXEL);
-                return Err(OpenGlException::new(make_current_error(last_error, caps != 0)));
+                return Err(OpenGlError::new(make_current_error(last_error, caps != 0)));
             }
 
             Ok(WglRestoreContext { old_dc, old_context, restored: Cell::new(false) })

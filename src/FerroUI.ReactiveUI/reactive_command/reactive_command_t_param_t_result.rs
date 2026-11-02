@@ -17,12 +17,12 @@ use super::reactive_command_base::{icommand_execute, ReactiveCommandBase};
 use super::{IReactiveCommand, IReactiveCommandOf};
 use crate::internal::scheduler_extensions::SchedulerExtensions;
 use crate::primitives::broadcaster::Broadcaster;
-use crate::{IHandleObservableErrors, PanicException, RxSchedulers, RxState};
+use crate::{IHandleObservableErrors, PanicError, RxSchedulers, RxState};
 use ferroui_reactive::concurrency::IScheduler;
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::linq::Observable;
 use ferroui_reactive::Observer;
-use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
+use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError, Subscription};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::fmt;
@@ -85,8 +85,9 @@ pub(crate) struct Inner<P, R> {
     output_scheduler: Rc<dyn IScheduler>,
     /// `_execute`.
     execute: ExecuteFn<P, R>,
-    /// `_canExecuteSubscription`.
-    can_execute_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    /// `_canExecuteSubscription`. When nothing can reach the command any more, dropping it ends
+    /// the subscription to the gate, which holds only a weak reference to the command.
+    can_execute_subscription: RefCell<Option<Subscription>>,
     /// `_canExecuteBroadcaster`.
     can_execute_broadcaster: Broadcaster<bool>,
     /// `_isExecutingBroadcaster`.
@@ -105,16 +106,6 @@ pub(crate) struct Inner<P, R> {
     in_flight: Cell<usize>,
     /// `_disposed`.
     disposed: Cell<bool>,
-}
-
-impl<P, R> Drop for Inner<P, R> {
-    fn drop(&mut self) {
-        // Nothing can reach the command any more: end its subscription to the gate, which holds
-        // only a weak reference to it.
-        if let Some(subscription) = self.can_execute_subscription.get_mut().take() {
-            subscription.dispose();
-        }
-    }
 }
 
 impl<P: Clone + Default + 'static, R: Clone + 'static> ReactiveCommand<P, R> {
@@ -159,7 +150,7 @@ impl<P: Clone + Default + 'static, R: Clone + 'static> ReactiveCommand<P, R> {
             },
             || {},
         ));
-        *inner.can_execute_subscription.borrow_mut() = Some(subscription);
+        *inner.can_execute_subscription.borrow_mut() = Some(Subscription::new(subscription));
         Self { inner }
     }
 
@@ -506,7 +497,7 @@ impl<P: Clone + 'static, R: Clone + 'static> Execution<P, R> {
         notify_begin(&self.owner);
         // `try { _outer = _execute(parameter).Subscribe(this); } catch (Exception ex)`: the
         // function of the command fails with an `Err`, or panics.
-        let source = match PanicException::catch(|| (self.owner.execute)(parameter)) {
+        let source = match PanicError::catch(|| (self.owner.execute)(parameter)) {
             Ok(source) => source,
             Err((error, _)) => Err(error),
         };

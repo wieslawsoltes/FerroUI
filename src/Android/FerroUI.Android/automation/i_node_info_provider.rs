@@ -1,5 +1,5 @@
 use super::node_info::NodeInfo;
-use ferroui_controls::automation::ElementNotEnabledException;
+use ferroui_controls::automation::ElementNotEnabledError;
 
 /// The arguments of an action of a node: what the access helper reads of
 /// the bundle of the system.
@@ -14,15 +14,15 @@ pub struct NodeActionArguments {
 #[derive(Debug)]
 pub enum NodeActionError {
     /// The element of the peer is not enabled.
-    ElementNotEnabled(ElementNotEnabledException),
+    ElementNotEnabled(ElementNotEnabledError),
     /// The peer cannot do what was asked in its state.
     InvalidOperation(String),
     /// The peer does not support what was asked.
     NotSupported(String),
 }
 
-impl From<ElementNotEnabledException> for NodeActionError {
-    fn from(error: ElementNotEnabledException) -> Self {
+impl From<ElementNotEnabledError> for NodeActionError {
+    fn from(error: ElementNotEnabledError) -> Self {
         Self::ElementNotEnabled(error)
     }
 }

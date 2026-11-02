@@ -7,7 +7,7 @@ use crate::animation::easings::{IEasing, SplineEasing};
 use crate::animation::KeySpline;
 use crate::media::imaging::Bitmap;
 use crate::platform::IPlatformGraphics;
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::rendering::composition::server::IServerObject;
 use crate::rendering::{IRenderLoop, IRenderLoopTask};
 use crate::threading::{Dispatcher, DispatcherPriority};
@@ -563,15 +563,17 @@ impl Compositor {
         (self.clock)()
     }
 
-    /// Subscribes to the notification raised after each commit.
-    pub fn after_commit(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Subscribes to the notification raised after each commit. Dropping the
+    /// returned guard removes the handler; [`Subscription::detach`] keeps it
+    /// for the life of the compositor.
+    pub fn after_commit(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.after_commit.add(Rc::new(handler));
         let weak = self.this.clone();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.after_commit.remove(token);
             }
-        })
+        }))
     }
 
     pub(crate) fn this_handle(&self) -> Rc<Compositor> {

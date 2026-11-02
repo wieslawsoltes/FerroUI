@@ -13,7 +13,7 @@ use crate::automation::provider::{
     IRangeValueProvider, IValueProvider, ProviderAdapter, ProviderError,
 };
 use crate::automation::{
-    ElementNotEnabledException, RangeValuePatternIdentifiers, ValuePatternIdentifiers,
+    ElementNotEnabledError, RangeValuePatternIdentifiers, ValuePatternIdentifiers,
 };
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue,
@@ -136,11 +136,11 @@ impl IRangeValueProvider for ProviderAdapter<RatingControlAutomationPeer> {
     fn value(&self) -> f64 {
         self.0.owner().value().max(0.0)
     }
-    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledException> {
+    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledError> {
         // RatingControlAutomationPeer::SetValue sets Value even when the control is read-only:
         // IsReadOnly is about the input of the user.
         if value.is_nan() {
-            return Err(ElementNotEnabledException::with_message(
+            return Err(ElementNotEnabledError::with_message(
                 "Rating cannot be NaN.",
             ));
         }

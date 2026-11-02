@@ -12,7 +12,7 @@ use ferroui_base::media::{
     BrushImpl, Color, ColorMatrix, ColorMatrixAlphaMode, MaterialPolicy, XamlCompositionBrushBase,
     XamlCompositionBrushBaseImpl, XamlLight,
 };
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::rendering::composition::effects::{
     AlphaMaskEffect, ArithmeticCompositeEffect, BorderEffect, CanvasComposite, CanvasEdgeBehavior, ColorMatrixEffect,
     ColorSourceEffect, CompositeEffect, CompositionEffectFactory, CompositionEffectSourceParameter, GraphicsEffect,
@@ -239,8 +239,8 @@ pub(crate) fn on_top_level_created(top_level: &TopLevel) {
 /// application to another does not count as none being active.
 fn track_window_activation(top_level: &TopLevel) {
     let Some(window) = top_level.to_ref().cast::<crate::WindowBase>() else { return };
-    let _ = window.activated(|| ferroui_base::media::MaterialPolicy::set_window_active(true));
-    let _ = window.deactivated(|| {
+    window.activated(|| ferroui_base::media::MaterialPolicy::set_window_active(true)).detach();
+    window.deactivated(|| {
         let _ = ferroui_base::threading::Dispatcher::ui_thread().invoke_async_local_with_priority(
             || {
                 let any_active = TOP_LEVELS.with(|top_levels| {
@@ -252,7 +252,7 @@ fn track_window_activation(top_level: &TopLevel) {
             },
             ferroui_base::threading::DispatcherPriority::BACKGROUND,
         );
-    });
+    }).detach();
 }
 
 /// `AttachLightsToElement`: two border lights (normal and wide) for each
@@ -327,8 +327,8 @@ struct RevealState {
     /// Whether the platform asks for high contrast: Reveal falls back to its
     /// colour (WinUI's high contrast theme has no Reveal).
     is_high_contrast: bool,
-    policy_subscription: Option<Rc<dyn IDisposable>>,
-    contrast_subscription: Option<Rc<dyn IDisposable>>,
+    policy_subscription: Option<Subscription>,
+    contrast_subscription: Option<Subscription>,
 }
 
 /// Whether the platform asks for high contrast.
@@ -416,7 +416,7 @@ impl XamlCompositionBrushBaseImpl for RevealBrush {
                     this.update_reveal_brush();
                 }
             }));
-            this.state.borrow_mut().contrast_subscription = Some(contrast);
+            this.state.borrow_mut().contrast_subscription = Some(Subscription::new(contrast));
         }
         this.update_light_targets(true);
         this.update_reveal_brush();
@@ -488,7 +488,7 @@ impl RevealBrush {
 
     fn static_constructor() {
         // `OnIsContainerPropertyChanged`.
-        let _ = Self::is_container_property().changed().subscribe(|e| {
+        Self::is_container_property().changed().subscribe(|e| {
             let Some(element) = e.sender().downcast_ref::<Visual>() else { return };
             let lights = element.lights();
             if e.get_new_value::<bool>() {
@@ -501,9 +501,9 @@ impl RevealBrush {
                     }
                 }
             }
-        });
+        }).detach();
         // `OnStatePropertyChanged`.
-        let _ = Self::state_property().changed().subscribe(|e| {
+        Self::state_property().changed().subscribe(|e| {
             let (old, new) = e.get_old_and_new_value::<RevealBrushState>();
             if old == new {
                 return;
@@ -517,7 +517,7 @@ impl RevealBrush {
                     hover.go_to_state(new);
                 }
             }
-        });
+        }).detach();
     }
 
     pub fn color(&self) -> Color {

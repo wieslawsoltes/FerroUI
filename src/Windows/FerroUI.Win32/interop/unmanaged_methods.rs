@@ -3270,6 +3270,12 @@ mod native {
         unsafe { gdi::InvalidateRect(h(hwnd), &rect, erase as i32) != 0 }
     }
 
+    /// Removes the whole client area of a window from what it has to paint.
+    pub fn validate_client_area(hwnd: isize) -> bool {
+        // SAFETY: a null rectangle validates the whole client area.
+        unsafe { gdi::ValidateRect(h(hwnd), std::ptr::null()) != 0 }
+    }
+
     /// A paint of a window between `BeginPaint` and `EndPaint`: the update
     /// region is validated when the value is dropped.
     pub struct PaintScope {

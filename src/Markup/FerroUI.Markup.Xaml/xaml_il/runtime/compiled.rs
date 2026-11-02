@@ -4,7 +4,7 @@
 //! Not a port of an upstream file: upstream's compiler emits IL that calls
 //! the members of the framework and the runtime helpers directly and lets
 //! their exceptions propagate. Generated Rust has an error channel instead
-//! ([`XamlLoadException`]); these helpers perform the steps of the run-time
+//! ([`XamlLoadError`]); these helpers perform the steps of the run-time
 //! loader whose failure is a load error, with the same messages, so that a
 //! document built by generated code fails exactly where and as the run-time
 //! loader fails.
@@ -38,13 +38,13 @@ use super::{
 };
 use crate::converters::ITypeDescriptorContext;
 use crate::markup_extensions::compiled_bindings::PropertyInfoAccessorFactory;
-use crate::{ServiceProviderExtensions, XamlLoadException};
+use crate::{ServiceProviderExtensions, XamlLoadError};
 
 /// The exception a step of generated code failed with: the type name of the
 /// exception the managed original throws there (the name the run-time
 /// loader gives its error as well, `XamlError::type_name` of the loader
 /// crate), its message and the position of the node being built. It is the
-/// inner error of the [`XamlLoadException`] the step returns
+/// inner error of the [`XamlLoadError`] the step returns
 /// ([`at`]).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CompiledLoadError {
@@ -92,13 +92,13 @@ impl std::error::Error for CompiledLoadError {}
 /// `Line <line>, position <position>.` unless both are 0), then the
 /// position in parentheses. The inner error is a [`CompiledLoadError`]
 /// that carries the type name.
-pub fn at(type_name: &'static str, message: impl Display, line: i32, position: i32) -> XamlLoadException {
+pub fn at(type_name: &'static str, message: impl Display, line: i32, position: i32) -> XamlLoadError {
     let message = message.to_string();
     let positioned = match (line, position) {
         (0, 0) => message.clone(),
         _ => format!("{message} Line {line}, position {position}."),
     };
-    XamlLoadException::with_inner(
+    XamlLoadError::with_inner(
         format!("{positioned} (line {line} position {position})"),
         CompiledLoadError { type_name, message, line_number: line, line_position: position },
     )
@@ -140,7 +140,7 @@ pub fn bind<V: PartialEq + 'static>(
     value: V,
     line: i32,
     position: i32,
-) -> Result<(), XamlLoadException> {
+) -> Result<(), XamlLoadError> {
     let value = to_value(value);
     let binding = from_markup_value::<Rc<dyn BindingBase>>(&value).ok_or_else(|| match &value {
         None => at("NullReferenceException", "The binding is null", line, position),
@@ -222,7 +222,7 @@ pub fn exact<T: Clone + 'static>(
     index: usize,
     line: i32,
     position: i32,
-) -> Result<T, XamlLoadException> {
+) -> Result<T, XamlLoadError> {
     let target = ValueType::of::<T>();
     let value = match (&value, target.is_object()) {
         (Some(boxed), true) => untyped_object_form(boxed).map(Some).unwrap_or(value),
@@ -262,7 +262,7 @@ pub const TARGET_INVOCATION_EXCEPTION: &str = "TargetInvocationException";
 /// error path is one function for every member, outside the generated
 /// code.
 #[inline]
-pub fn invoked<T, E: Display>(result: Result<T, E>, line: i32, position: i32) -> Result<T, XamlLoadException> {
+pub fn invoked<T, E: Display>(result: Result<T, E>, line: i32, position: i32) -> Result<T, XamlLoadError> {
     match result {
         Ok(value) => Ok(value),
         Err(error) => Err(invocation_error(&error, line, position)),
@@ -271,7 +271,7 @@ pub fn invoked<T, E: Display>(result: Result<T, E>, line: i32, position: i32) ->
 
 #[cold]
 #[inline(never)]
-fn invocation_error(error: &dyn Display, line: i32, position: i32) -> XamlLoadException {
+fn invocation_error(error: &dyn Display, line: i32, position: i32) -> XamlLoadError {
     at(TARGET_INVOCATION_EXCEPTION, error, line, position)
 }
 
@@ -391,7 +391,7 @@ pub fn bind_dynamic_resource(
     key: &str,
     line: i32,
     position: i32,
-) -> Result<(), XamlLoadException> {
+) -> Result<(), XamlLoadError> {
     use crate::markup_extensions::DynamicResourceExtension;
     let extension = DynamicResourceExtension::__markup_new_1(string_object(key));
     let provided = provide_value(context, property_value(property), &extension, DynamicResourceExtension::__markup_ProvideValue_0);
@@ -410,7 +410,7 @@ pub fn bind_template_binding(
     source: &'static FerroProperty,
     line: i32,
     position: i32,
-) -> Result<(), XamlLoadException> {
+) -> Result<(), XamlLoadError> {
     use ferroui_base::data::TemplateBinding;
     let binding = TemplateBinding::__markup_new_1(source);
     let provided = TemplateBinding::__markup_ProvideValue_0(&binding);
@@ -430,7 +430,7 @@ pub fn static_resource_content(
     key: &str,
     line: i32,
     position: i32,
-) -> Result<MarkupValue, XamlLoadException> {
+) -> Result<MarkupValue, XamlLoadError> {
     use crate::markup_extensions::StaticResourceExtension;
     let context = deferred_context(service_provider, document);
     let extension = StaticResourceExtension::__markup_new_0();
@@ -453,7 +453,7 @@ pub fn add_deferred_resource(
     build: DeferredBuild,
     line: i32,
     position: i32,
-) -> Result<(), XamlLoadException> {
+) -> Result<(), XamlLoadError> {
     use ferroui_base::controls::{IDeferredContent, ResourceDictionary};
     let deferred = defer(result_type, context, build, line, position)?;
     invoked(ResourceDictionary::__markup_AddDeferred_1(dictionary, string_object(key), deferred as Rc<dyn IDeferredContent>), line, position)
@@ -491,7 +491,7 @@ pub fn cast_checked(
     target_name: &str,
     line: i32,
     position: i32,
-) -> Result<MarkupValue, XamlLoadException> {
+) -> Result<MarkupValue, XamlLoadError> {
     let Some(boxed) = &value else { return Ok(None) };
     if is_instance(&value, target) {
         return Ok(Some(normalize_object(boxed.clone())));
@@ -507,7 +507,7 @@ pub fn cast_checked(
 /// The error of a property assignment whose setter is chosen at run time
 /// when no setter takes the value: `value` null (no setter allows null) or
 /// of a type none of them takes.
-pub fn no_setter(property: &str, value: &MarkupValue, line: i32, position: i32) -> XamlLoadException {
+pub fn no_setter(property: &str, value: &MarkupValue, line: i32, position: i32) -> XamlLoadError {
     match value {
         None => at("NullReferenceException", format!("No setter of property {property} accepts null"), line, position),
         Some(value) => at(
@@ -761,7 +761,7 @@ pub fn path_indexer(
 
 /// The name scope of an element name in a binding path: the name scope field
 /// of the context; none is the loader's error.
-pub fn path_name_scope(scope: Option<&Rc<dyn INameScope>>, line: i32, position: i32) -> Result<NameScopeRef, XamlLoadException> {
+pub fn path_name_scope(scope: Option<&Rc<dyn INameScope>>, line: i32, position: i32) -> Result<NameScopeRef, XamlLoadError> {
     scope
         .cloned()
         .map(NameScopeRef)
@@ -891,7 +891,7 @@ pub fn provide_value_invoked<E: ?Sized, T, F: Display>(
     provide: impl FnOnce(&E, Rc<dyn IServiceProvider>) -> Result<T, F>,
     line: i32,
     position: i32,
-) -> Result<T, XamlLoadException> {
+) -> Result<T, XamlLoadError> {
     let provided = invoked(provide(extension, target_service_provider(context, target)), line, position)?;
     clear_target_property(context);
     Ok(provided)
@@ -1020,7 +1020,7 @@ pub fn deferred_content(
     builder: DeferredContentBuilder,
     line: i32,
     position: i32,
-) -> Result<Rc<DeferredContent>, XamlLoadException> {
+) -> Result<Rc<DeferredContent>, XamlLoadError> {
     let content = XamlIlRuntimeHelpers::try_deferred_transformation_factory_for(result_type, builder, &service_provider(context))
         .map_err(|error| at("InvalidOperationException", error.message(), line, position))?;
     #[cfg(all(feature = "hot-reload", debug_assertions))]
@@ -1035,7 +1035,7 @@ pub fn deferred_content(
 /// function of its own per template or deferred resource, which creates its
 /// context ([`deferred_context`]) from the service provider it is called with
 /// and builds the content anew on every call.
-pub type DeferredBuild = fn(&Rc<dyn IServiceProvider>) -> Result<MarkupValue, XamlLoadException>;
+pub type DeferredBuild = fn(&Rc<dyn IServiceProvider>) -> Result<MarkupValue, XamlLoadError>;
 
 /// [`deferred_content`] of the build function `build`: every piece of
 /// deferred content of generated code goes through this one function (a
@@ -1046,7 +1046,7 @@ pub fn defer(
     build: DeferredBuild,
     line: i32,
     position: i32,
-) -> Result<Rc<DeferredContent>, XamlLoadException> {
+) -> Result<Rc<DeferredContent>, XamlLoadError> {
     deferred_content(result_type, context, DeferredContentBuilder::try_new(build), line, position)
 }
 
@@ -1070,7 +1070,7 @@ pub fn register_name(
     element: Ref<FerroObject>,
     line: i32,
     position: i32,
-) -> Result<(), XamlLoadException> {
+) -> Result<(), XamlLoadError> {
     register_name_value(scope, name, Rc::new(element), line, position)
 }
 
@@ -1082,7 +1082,7 @@ pub fn register_name_value(
     value: BoxedValue,
     line: i32,
     position: i32,
-) -> Result<(), XamlLoadException> {
+) -> Result<(), XamlLoadError> {
     let scope = scope.ok_or_else(|| {
         at("NullReferenceException", "The runtime context has no name scope to register a name in", line, position)
     })?;
@@ -1107,7 +1107,7 @@ pub fn complete_root_name_scope(
     scope: Option<&Rc<dyn INameScope>>,
     line: i32,
     position: i32,
-) -> Result<(), XamlLoadException> {
+) -> Result<(), XamlLoadError> {
     if let Some(root) = root {
         NameScope::set_name_scope(root, scope.cloned().map(NameScopeRef));
     }
@@ -1251,7 +1251,7 @@ pub fn argument<T: Clone + 'static, V: PartialEq + 'static>(
     index: usize,
     line: i32,
     position: i32,
-) -> Result<T, XamlLoadException> {
+) -> Result<T, XamlLoadError> {
     let value = to_untyped(Rc::new(value));
     from_markup_value::<T>(&value).ok_or_else(|| {
         let error = MarkupInvokeError::Argument {
@@ -1294,7 +1294,7 @@ pub fn instance<'a, T: 'static>(
     member: &str,
     line: i32,
     position: i32,
-) -> Result<&'a T, XamlLoadException> {
+) -> Result<&'a T, XamlLoadError> {
     value.instance().ok_or_else(|| {
         let error = MarkupInvokeError::Argument { index: 0, expected: std::any::type_name::<T>(), actual: "null".to_string() };
         at("InvalidCastException", format!("{member}: {error}"), line, position)
@@ -1309,7 +1309,7 @@ pub fn instance<'a, T: 'static>(
 /// conversion states the cast and [`ValueTypes::is_assignable`] holds for the
 /// two types, which is when the cast succeeds; a value it does not convert is
 /// the `InvalidCastException` of the loader at `line`, `position`.
-pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, position: i32) -> Result<T, XamlLoadException> {
+pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, position: i32) -> Result<T, XamlLoadError> {
     let target = ValueType::of::<T>();
     let converted = match into_markup_value(value) {
         Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
@@ -1332,7 +1332,7 @@ pub fn cast_untyped<V: PartialEq + 'static>(
     target: ValueType,
     line: i32,
     position: i32,
-) -> Result<MarkupValue, XamlLoadException> {
+) -> Result<MarkupValue, XamlLoadError> {
     let converted = match into_markup_value(value) {
         Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
         Some(boxed) => ValueTypes::try_cast(&boxed, target),
@@ -1355,7 +1355,7 @@ pub use super::RuntimeList;
 /// [`ValueTypes::is_assignable`] holds for the list of the items and `T`, which is when
 /// the cast succeeds; a list it does not convert is the `InvalidCastException` of the
 /// loader at `line`, `position`.
-pub fn list_cast<T: Clone + 'static>(list: &RuntimeList, line: i32, position: i32) -> Result<T, XamlLoadException> {
+pub fn list_cast<T: Clone + 'static>(list: &RuntimeList, line: i32, position: i32) -> Result<T, XamlLoadError> {
     let target = ValueType::of::<T>();
     let converted = list.to_declared(target);
     match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
@@ -1619,7 +1619,7 @@ pub fn add_event_handler(
     handler: ferroui_base::metadata::MarkupDelegate,
     line: i32,
     position: i32,
-) -> Result<(), XamlLoadException> {
+) -> Result<(), XamlLoadError> {
     let member = format!("{}.add_{event}", declaring.full_name());
     let Some(declared) = declaring.find_event(event) else {
         return Err(at(TARGET_INVOCATION_EXCEPTION, format!("Method {member} has no invoker"), line, position));

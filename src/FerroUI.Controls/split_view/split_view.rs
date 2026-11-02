@@ -12,7 +12,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::IBrush;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_routed_event, instantiate, BoxedValue,
     DirectProperty, DirectPropertyMetadata, FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -39,7 +39,7 @@ const PC_LIGHT_DISMISS: &str = ":lightDismiss";
 pub struct SplitView {
     base: ContentControl,
     pane: RefCell<Option<Ref<Panel>>>,
-    pointer_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    pointer_disposable: RefCell<Option<Subscription>>,
     template_settings: RefCell<Ref<SplitViewTemplateSettings>>,
     last_display_mode_pseudoclass: Cell<Option<&'static str>>,
     last_placement_pseudoclass: Cell<Option<&'static str>>,
@@ -595,7 +595,7 @@ impl SplitView {
                     top_level.remove_handler(TopLevel::back_requested_event(), back_requested);
                 }
             });
-            *self.pointer_disposable.borrow_mut() = Some(disposable);
+            *self.pointer_disposable.borrow_mut() = Some(Subscription::new(disposable));
         }
     }
 

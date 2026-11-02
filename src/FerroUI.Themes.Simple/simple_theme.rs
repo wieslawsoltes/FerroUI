@@ -5,7 +5,7 @@ use crate::register_types::register_types;
 use ferroui_base::metadata::IServiceProvider;
 use ferroui_base::styling::{styles_as_style, IStyle, Styles};
 use ferroui_base::{ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Ref};
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use std::rc::Rc;
 
 /// The Simple theme: the styles and resources of `SimpleTheme.xaml`.
@@ -65,7 +65,7 @@ impl SimpleTheme {
     /// compiled markup (`compiled_xaml.rs`) is the document compiled with
     /// every document it includes as one group, exactly as the run-time
     /// loader loads it.
-    fn load(sp: Option<Rc<dyn IServiceProvider>>, this: &Ref<Self>) -> Result<(), XamlLoadException> {
+    fn load(sp: Option<Rc<dyn IServiceProvider>>, this: &Ref<Self>) -> Result<(), XamlLoadError> {
         register_types();
         crate::compiled_xaml::populate(sp, this)
     }

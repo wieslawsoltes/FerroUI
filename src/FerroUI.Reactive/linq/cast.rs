@@ -30,11 +30,15 @@ impl AnyObject for Rc<dyn Any> {
 /// The error of [`cast`](super::ObservableExt::cast) for a value that is not of the type of the
 /// cast (`InvalidCastException`).
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct InvalidCastException {
+pub struct InvalidCastError {
     target_type: &'static str,
 }
 
-impl InvalidCastException {
+/// The name of [`InvalidCastError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `InvalidCastError`")]
+pub type InvalidCastException = InvalidCastError;
+
+impl InvalidCastError {
     /// The error of a value that does not cast to `U`.
     pub fn new<U: ?Sized>() -> Self {
         Self { target_type: std::any::type_name::<U>() }
@@ -46,16 +50,16 @@ impl InvalidCastException {
     }
 }
 
-impl fmt::Display for InvalidCastException {
+impl fmt::Display for InvalidCastError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Unable to cast the value to type '{}'.", self.target_type)
     }
 }
 
-impl std::error::Error for InvalidCastException {}
+impl std::error::Error for InvalidCastError {}
 
 /// The sink of `Cast` (`Cast<TSource, TResult>._`): a value that is not a `U` ends the sequence
-/// with an [`InvalidCastException`].
+/// with an [`InvalidCastError`].
 struct CastSink<T, U> {
     sink: Sink<Rc<U>>,
     _source: PhantomData<fn(T)>,
@@ -73,7 +77,7 @@ impl<T: AnyObject, U: 'static> IObserver<T> for CastSink<T, U> {
     fn on_next(&self, value: T) {
         match value.downcast_object::<U>() {
             Ok(result) => self.sink.forward_on_next(result),
-            Err(_) => self.sink.forward_on_error(Rc::new(InvalidCastException::new::<U>())),
+            Err(_) => self.sink.forward_on_error(Rc::new(InvalidCastError::new::<U>())),
         }
     }
 
@@ -94,7 +98,7 @@ pub(crate) fn cast<T: AnyObject, U: 'static>(source: Rc<dyn IObservable<T>>) -> 
 macro_rules! cast_methods {
     () => {
         /// Casts each value of a sequence of `Rc<dyn Any>` to `U`; a value that is not a `U` ends
-        /// the sequence with an `InvalidCastException` (`Cast<TResult>()`).
+        /// the sequence with an `InvalidCastError` (`Cast<TResult>()`).
         fn cast<U: 'static>(&self) -> std::rc::Rc<dyn ferroui_system::IObservable<std::rc::Rc<U>>>
         where
             T: crate::linq::cast::AnyObject,

@@ -8,7 +8,7 @@ use crate::{Application, Control, ControlImpl, ItemsControlImpl, MenuBase, MenuB
 use ferroui_base::input::{ContextRequestedEventArgs, FocusManager, InputElement, InputElementImpl, KeyEventArgs};
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEventArgs};
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::styling::{ISetterValue, Setter};
 use ferroui_base::utilities::{CancelEventArgs, HandlerList};
 use ferroui_base::{
@@ -179,7 +179,7 @@ impl ContextMenu {
     /// Initializes static members of the [`ContextMenu`] class.
     fn static_constructor() {
         Self::placement_property().override_default_value::<ContextMenu>(PlacementMode::Pointer);
-        let _ = Control::context_menu_property().changed().subscribe(Self::context_menu_changed);
+        Control::context_menu_property().changed().subscribe(Self::context_menu_changed).detach();
         crate::automation::AutomationProperties::accessibility_view_property()
             .override_default_value::<ContextMenu>(crate::automation::AccessibilityView::Control);
         crate::automation::AutomationProperties::control_type_override_property()
@@ -335,16 +335,18 @@ impl ContextMenu {
         })
     }
 
-    /// Occurs when the value of the `IsOpen` property is changing from
-    /// false to true. Disposing the returned handle unsubscribes.
-    pub fn opening(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn(&CancelEventArgs)>(|menu| &menu.opening, Rc::new(handler))
+    /// Occurs when the value of the `IsOpen` property is changing from false to true. Dropping the
+    /// returned guard removes the handler; [`Subscription::detach`] keeps it for the life of the
+    /// menu.
+    pub fn opening(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn(&CancelEventArgs)>(|menu| &menu.opening, Rc::new(handler)))
     }
 
-    /// Occurs when the value of the `IsOpen` property is changing from
-    /// true to false. Disposing the returned handle unsubscribes.
-    pub fn closing(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn(&CancelEventArgs)>(|menu| &menu.closing, Rc::new(handler))
+    /// Occurs when the value of the `IsOpen` property is changing from true to false. Dropping the
+    /// returned guard removes the handler; [`Subscription::detach`] keeps it for the life of the
+    /// menu.
+    pub fn closing(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn(&CancelEventArgs)>(|menu| &menu.closing, Rc::new(handler)))
     }
 
     /// The controls the menu is attached to that are still alive, or
@@ -405,7 +407,7 @@ impl ContextMenu {
                     Self::control_detached_from_visual_tree(&control, e);
                 }
             });
-            control.context_menu_handlers().set(Some((context_requested, context_canceled, attached, detached)));
+            control.context_menu_handlers().set(Some((context_requested, context_canceled, attached.detach(), detached.detach())));
         }
 
         if control.is_attached_to_visual_tree() {
@@ -449,13 +451,16 @@ impl ContextMenu {
         popup.and_then(|popup| popup.host())
     }
 
-    /// Raised when the popup host changes (the popup host provider
-    /// contract). Disposing the returned handle unsubscribes.
+    /// Raised when the popup host changes (the popup host provider contract). Dropping the returned
+    /// guard removes the handler; [`Subscription::detach`] keeps it for the life of the menu.
     pub fn popup_host_changed(
         &self,
         handler: impl Fn(Option<&Rc<dyn IPopupHost>>) + 'static,
-    ) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn(Option<&Rc<dyn IPopupHost>>)>(|menu| &menu.popup_host_changed_handler, Rc::new(handler))
+    ) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn(Option<&Rc<dyn IPopupHost>>)>(
+            |menu| &menu.popup_host_changed_handler,
+            Rc::new(handler),
+        ))
     }
 
     /// The menu as a popup host provider (the diagnostics contract it
@@ -487,30 +492,30 @@ impl ContextMenu {
                 // The popup belongs to the menu and lives as long as it:
                 // the handlers are never removed.
                 let weak = self.to_ref().downgrade();
-                let _ = popup.opened({
+                popup.opened({
                     let weak = weak.clone();
                     move || {
                         if let Some(this) = weak.upgrade() {
                             this.popup_opened();
                         }
                     }
-                });
-                let _ = popup.closed({
+                }).detach();
+                popup.closed({
                     let weak = weak.clone();
                     move || {
                         if let Some(this) = weak.upgrade() {
                             this.popup_closed();
                         }
                     }
-                });
-                let _ = popup.closing({
+                }).detach();
+                popup.closing({
                     let weak = weak.clone();
                     move |e| {
                         if let Some(this) = weak.upgrade() {
                             this.popup_closing(e);
                         }
                     }
-                });
+                }).detach();
                 popup.add_handler(InputElement::key_up_event(), move |_, e: &KeyEventArgs| {
                     if let Some(this) = weak.upgrade() {
                         this.popup_key_up(e);

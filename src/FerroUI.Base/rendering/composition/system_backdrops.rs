@@ -14,7 +14,7 @@ use crate::media::{
     acrylic_effect, luminosity_color, Color, MaterialPolicy, ACRYLIC_NOISE_OPACITY,
 };
 use crate::platform::{IPlatformSettings, PlatformThemeVariant};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::rendering::composition::effects::{
     BorderEffect, CanvasComposite, CanvasEdgeBehavior, ColorSourceEffect, CompositeEffect,
     CompositionEffectSourceParameter, OpacityEffect,
@@ -213,15 +213,17 @@ impl SystemBackdropConfiguration {
         }
     }
 
-    /// Raised when a member changes. Disposing the handle unsubscribes.
-    pub fn changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when a member changes. Dropping the returned guard removes the
+    /// handler; [`Subscription::detach`] keeps it for the life of the
+    /// configuration.
+    pub fn changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.changed.add(Rc::new(handler));
         let list = Rc::downgrade(&self.changed);
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(list) = list.upgrade() {
                 list.remove(token);
             }
-        })
+        }))
     }
 
     fn raise_changed(&self) {
@@ -315,10 +317,10 @@ struct ControllerCore {
     luminosity_opacity: Cell<Option<f32>>,
     fallback_color: Cell<Option<Color>>,
     targets: RefCell<Vec<TargetEntry>>,
-    configuration: RefCell<Option<(Rc<SystemBackdropConfiguration>, Rc<dyn IDisposable>)>>,
+    configuration: RefCell<Option<(Rc<SystemBackdropConfiguration>, Subscription)>>,
     state: Cell<SystemBackdropState>,
     state_changed: Rc<HandlerList<dyn Fn(SystemBackdropState)>>,
-    policy_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    policy_subscription: RefCell<Option<Subscription>>,
     closed: Cell<bool>,
 }
 
@@ -503,15 +505,16 @@ impl SystemBackdropController {
         self.core.state.get()
     }
 
-    /// `StateChanged`. Disposing the handle unsubscribes.
-    pub fn state_changed(&self, handler: impl Fn(SystemBackdropState) + 'static) -> Rc<dyn IDisposable> {
+    /// `StateChanged`. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the controller.
+    pub fn state_changed(&self, handler: impl Fn(SystemBackdropState) + 'static) -> Subscription {
         let token = self.core.state_changed.add(Rc::new(handler));
         let list = Rc::downgrade(&self.core.state_changed);
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(list) = list.upgrade() {
                 list.remove(token);
             }
-        })
+        }))
     }
 
     /// The state the controller is in for `target`.

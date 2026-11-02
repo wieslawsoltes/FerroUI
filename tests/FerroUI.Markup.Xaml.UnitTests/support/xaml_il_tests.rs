@@ -27,7 +27,7 @@ use ferroui_controls::{
 };
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use ferroui_markup_xaml::converters::{ITypeDescriptorContext, TypeConverter};
-use ferroui_markup_xaml::{FerroXamlLoader, IProvideValueTarget, ServiceProviderExtensions, XamlLoadException};
+use ferroui_markup_xaml::{FerroXamlLoader, IProvideValueTarget, ServiceProviderExtensions, XamlLoadError};
 
 use crate::support::TypeModule;
 
@@ -316,7 +316,7 @@ impl TypeConverter for MyTypeConverter {
         context: Option<&Rc<dyn ITypeDescriptorContext>>,
         culture: Option<&CultureInfo>,
         value: Option<&BoxedValue>,
-    ) -> Result<Option<BoxedValue>, XamlLoadException> {
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
         if let Some(s) = value.and_then(|value| value.downcast_ref::<String>()) {
             let items: MyTypes = s.split(',').filter(|x| !x.is_empty()).map(|x| MyType::new(x.trim())).collect();
             // The value of the property: a (non-null) sequence of items.

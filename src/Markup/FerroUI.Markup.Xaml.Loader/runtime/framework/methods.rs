@@ -199,13 +199,17 @@ fn invoke_deferred_transformation_factory(method: &DeferredTransformationFactory
 /// method, a markup extension): the exception the member throws in the managed original,
 /// which leaves the load as it is and is not an error of the compiler.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct XamlMemberException {
+pub struct XamlMemberError {
     message: String,
     line_number: Option<i32>,
     line_position: Option<i32>,
 }
 
-impl XamlMemberException {
+/// The name of [`XamlMemberError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `XamlMemberError`")]
+pub type XamlMemberException = XamlMemberError;
+
+impl XamlMemberError {
     /// The message of the member.
     pub fn message(&self) -> &str {
         &self.message
@@ -222,27 +226,27 @@ impl XamlMemberException {
     }
 }
 
-impl std::fmt::Display for XamlMemberException {
+impl std::fmt::Display for XamlMemberError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&self.message)
     }
 }
 
-impl std::error::Error for XamlMemberException {}
+impl std::error::Error for XamlMemberError {}
 
 /// A failed load as the load exception of the runtime library: the message with the
 /// position, and as the inner error either the error of the compiler or, when a member the
-/// document called failed, the failure of that member ([`XamlMemberException`]).
-pub(crate) fn load_exception(error: XamlError) -> ferroui_markup_xaml::XamlLoadException {
+/// document called failed, the failure of that member ([`XamlMemberError`]).
+pub(crate) fn load_exception(error: XamlError) -> ferroui_markup_xaml::XamlLoadError {
     if error.is_derived_type("TargetInvocationException") {
-        let inner = XamlMemberException {
+        let inner = XamlMemberError {
             message: error.message(),
             line_number: error.line_number(),
             line_position: error.line_position(),
         };
-        return ferroui_markup_xaml::XamlLoadException::with_inner(describe(&error), inner);
+        return ferroui_markup_xaml::XamlLoadError::with_inner(describe(&error), inner);
     }
-    ferroui_markup_xaml::XamlLoadException::with_inner(describe(&error), error)
+    ferroui_markup_xaml::XamlLoadError::with_inner(describe(&error), error)
 }
 
 /// The message of a load error with its position, as the exception of the

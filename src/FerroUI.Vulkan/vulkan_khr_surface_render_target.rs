@@ -1,7 +1,7 @@
 use crate::interop::{VulkanDisplay, VulkanImage};
 use crate::{
     IVulkanKhrSurfacePlatformSurface, IVulkanPlatformGraphicsContext, IVulkanRenderSession, IVulkanRenderTarget,
-    VulkanException, VulkanImageInfo,
+    VulkanError, VulkanImageInfo,
 };
 use ash::vk;
 use ferroui_base::platform::surfaces::IPlatformRenderSurfaceRenderTarget;
@@ -36,7 +36,7 @@ impl VulkanKhrRenderTarget {
     pub fn new(
         surface: Rc<dyn IVulkanKhrSurfacePlatformSurface>,
         context: Rc<dyn IVulkanPlatformGraphicsContext>,
-    ) -> Result<Self, VulkanException> {
+    ) -> Result<Self, VulkanError> {
         let display = VulkanDisplay::create_display(&context, surface.clone())?;
         let (is_rgba, format) = render_format(display.surface_format()?.format);
         Ok(Self {
@@ -58,7 +58,7 @@ impl VulkanKhrRenderTarget {
         self.display.borrow().clone().expect("the render target has been disposed")
     }
 
-    fn create_image(&self, display: &VulkanDisplay) -> Result<(), VulkanException> {
+    fn create_image(&self, display: &VulkanDisplay) -> Result<(), VulkanError> {
         let image = VulkanImage::new(
             self.context.clone(),
             display.command_buffer_pool().clone(),
@@ -77,7 +77,7 @@ impl VulkanKhrRenderTarget {
         }
     }
 
-    fn try_begin_draw(&self, lock: &LockGuard) -> Result<Rc<VulkanImage>, VulkanException> {
+    fn try_begin_draw(&self, lock: &LockGuard) -> Result<Rc<VulkanImage>, VulkanError> {
         let _ = lock;
         let display = self.display();
         display.command_buffer_pool().free_used_command_buffers();
@@ -146,7 +146,7 @@ impl RenderingSession {
         Self { display, image, is_rgba, scaling, dispose: RefCell::new(Some(dispose)), disposed: Cell::new(false) }
     }
 
-    fn present(&self) -> Result<(), VulkanException> {
+    fn present(&self) -> Result<(), VulkanError> {
         let command_buffer = self.display.start_presentation()?;
         self.display.blit_image_to_current_image(&command_buffer, &self.image);
         self.display.end_presentation(&command_buffer)

@@ -14,7 +14,7 @@ use ferroui_opengl::egl::egl_consts::{
 };
 use ferroui_opengl::egl::{EglContext, EglSurface};
 use ferroui_opengl::gl_consts::{GL_RGBA, GL_RGBA8, GL_TEXTURE_2D};
-use ferroui_opengl::{IGlContext, IGlExportableExternalImageTexture, IGlExternalImageTexture, OpenGlException};
+use ferroui_opengl::{IGlContext, IGlExportableExternalImageTexture, IGlExternalImageTexture, OpenGlError};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -41,10 +41,10 @@ impl AngleExternalMemoryD3D11Texture2D {
         context: &Rc<EglContext>,
         texture2d: &ComPtr<ID3D11Texture2D>,
         props: PlatformGraphicsExternalImageProperties,
-    ) -> Result<AngleExternalMemoryD3D11Texture2D, OpenGlException> {
+    ) -> Result<AngleExternalMemoryD3D11Texture2D, OpenGlError> {
         let mutex = texture2d
             .cast::<IDXGIKeyedMutex>()
-            .map_err(|error| OpenGlException::new(format!("The texture has no keyed mutex: {error}")))?;
+            .map_err(|error| OpenGlError::new(format!("The texture has no keyed mutex: {error}")))?;
 
         let attrs = [
             EGL_WIDTH,
@@ -71,7 +71,7 @@ impl AngleExternalMemoryD3D11Texture2D {
         gl.bind_texture(GL_TEXTURE_2D, texture_id);
 
         if display.egl_interface().bind_tex_image(display.handle(), egl_surface.dangerous_get_handle(), EGL_BACK_BUFFER) == 0 {
-            let error = OpenGlException::get_formatted_exception_for_egl("eglBindTexImage", display.egl_interface());
+            let error = OpenGlError::get_formatted_exception_for_egl("eglBindTexImage", display.egl_interface());
             gl.delete_texture(texture_id);
             egl_surface.dispose();
             return Err(error);
@@ -151,11 +151,11 @@ pub(crate) struct AngleExternalMemoryD3D11ExportedTexture2D {
 }
 
 impl AngleExternalMemoryD3D11ExportedTexture2D {
-    fn get_handle(texture2d: &ComPtr<ID3D11Texture2D>) -> Result<Rc<dyn IPlatformHandle>, OpenGlException> {
+    fn get_handle(texture2d: &ComPtr<ID3D11Texture2D>) -> Result<Rc<dyn IPlatformHandle>, OpenGlError> {
         let shared_handle = texture2d
             .cast::<IDXGIResource>()
             .and_then(|resource| resource.get_shared_handle())
-            .map_err(|error| OpenGlException::new(format!("The texture has no shared handle: {error}")))?;
+            .map_err(|error| OpenGlError::new(format!("The texture has no shared handle: {error}")))?;
         Ok(Rc::new(PlatformHandle::new(
             shared_handle,
             Some(KnownPlatformGraphicsExternalImageHandleTypes::D3D11_TEXTURE_GLOBAL_SHARED_HANDLE),
@@ -167,7 +167,7 @@ impl AngleExternalMemoryD3D11ExportedTexture2D {
         texture2d: &ComPtr<ID3D11Texture2D>,
         desc: &D3D11_TEXTURE2D_DESC,
         format: PlatformGraphicsExternalImageFormat,
-    ) -> Result<AngleExternalMemoryD3D11ExportedTexture2D, OpenGlException> {
+    ) -> Result<AngleExternalMemoryD3D11ExportedTexture2D, OpenGlError> {
         let handle = Self::get_handle(texture2d)?;
         let properties = PlatformGraphicsExternalImageProperties {
             width: desc.width as i32,

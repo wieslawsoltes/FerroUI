@@ -4,7 +4,7 @@ use super::type_converter::{service_provider_of, text_of, type_converter_markup}
 use super::{ITypeDescriptorContext, TypeConverter};
 use crate::parsers::PropertyParser;
 use crate::templates::ControlTemplate;
-use crate::{ServiceProviderExtensions, XamlLoadException};
+use crate::{ServiceProviderExtensions, XamlLoadError};
 use ferroui_base::data::core::expression_nodes::CastTarget;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
@@ -26,7 +26,7 @@ impl FerroPropertyTypeConverter {
         context: Option<&Rc<dyn ITypeDescriptorContext>>,
         ns: Option<&str>,
         owner: Option<&str>,
-    ) -> Result<Option<&'static TypeInfo>, XamlLoadException> {
+    ) -> Result<Option<&'static TypeInfo>, XamlLoadError> {
         let Some(owner) = owner else { return Ok(None) };
 
         let result = match service_provider_of(context) {
@@ -44,7 +44,7 @@ impl FerroPropertyTypeConverter {
                     Some(ns) if !ns.is_empty() => format!("{ns}:{owner}"),
                     _ => owner.to_string(),
                 };
-                Err(XamlLoadException::with_message(format!("Could not find type '{name}'.")))
+                Err(XamlLoadError::with_message(format!("Could not find type '{name}'.")))
             }
         }
     }
@@ -60,10 +60,10 @@ impl TypeConverter for FerroPropertyTypeConverter {
         context: Option<&Rc<dyn ITypeDescriptorContext>>,
         _culture: Option<&CultureInfo>,
         value: Option<&BoxedValue>,
-    ) -> Result<Option<BoxedValue>, XamlLoadException> {
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
         let registry = FerroPropertyRegistry::instance();
         let (ns, owner, property_name) = PropertyParser::parse_reader(CharacterReader::new(text_of(value)?))
-            .map_err(|e| XamlLoadException::with_inner(e.to_string(), e))?;
+            .map_err(|e| XamlLoadError::with_inner(e.to_string(), e))?;
         let owner_type = Self::try_resolve_owner_by_name(context, ns.as_deref(), owner.as_deref())?;
         let service_provider = service_provider_of(context);
         let target_type = service_provider
@@ -80,7 +80,7 @@ impl TypeConverter for FerroPropertyTypeConverter {
             .unwrap_or(<Control as StaticType>::TYPE);
         let effective_owner = owner_type.unwrap_or(target_type);
         let Some(property) = registry.find_registered(effective_owner, &property_name) else {
-            return Err(XamlLoadException::with_message(format!(
+            return Err(XamlLoadError::with_message(format!(
                 "Could not find property '{}.{}'.",
                 effective_owner.name(),
                 property_name

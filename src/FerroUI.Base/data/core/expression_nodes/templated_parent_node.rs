@@ -1,7 +1,7 @@
 use super::{ExpressionNode, NodeState, SourceNode};
 use crate::data::core::ValueTypes;
 use crate::data::BindingError;
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::{BoxedValue, FerroObject, Ref, StyledElement};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -11,7 +11,7 @@ use std::rc::{Rc, Weak};
 pub struct TemplatedParentNode {
     this: Weak<TemplatedParentNode>,
     state: NodeState,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl TemplatedParentNode {
@@ -74,7 +74,7 @@ impl ExpressionNode for TemplatedParentNode {
                         }
                     }
                 });
-                self.subscription.replace(Some(subscription));
+                self.subscription.replace(Some(Subscription::new(subscription)));
                 self.state.set_value(Self::read(&element), None);
             }
             None => self

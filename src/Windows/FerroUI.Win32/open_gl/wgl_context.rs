@@ -9,9 +9,9 @@ use crate::interop::unmanaged_methods::{
 };
 use crate::interop::unmanaged_methods::PixelFormatDescriptor;
 use ferroui_base::logging::{LogEventLevel, Logger};
-use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphicsContext, PlatformGraphicsContextLostException};
+use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphicsContext, PlatformGraphicsContextLostError};
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_opengl::{GetProcAddress, GlInterface, GlVersion, IGlContext, OpenGlException};
+use ferroui_opengl::{GetProcAddress, GlInterface, GlVersion, IGlContext, OpenGlError};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, OnceCell};
 use std::ffi::{c_void, CString};
@@ -47,7 +47,7 @@ impl WglContext {
         dc: isize,
         pixel_format: i32,
         format_descriptor: PixelFormatDescriptor,
-    ) -> Result<Rc<WglContext>, OpenGlException> {
+    ) -> Result<Rc<WglContext>, OpenGlError> {
         let this = Rc::new_cyclic(|this| WglContext {
             this: this.clone(),
             shared_with,
@@ -105,9 +105,9 @@ impl WglContext {
     /// # Panics
     /// Panics when the context is lost (the
     /// `PlatformGraphicsContextLostException` of the reference).
-    pub fn try_make_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlException> {
+    pub fn try_make_current(&self) -> Result<Rc<dyn IDisposable>, OpenGlError> {
         if self.is_lost.get() {
-            panic!("{}", PlatformGraphicsContextLostException);
+            panic!("{}", PlatformGraphicsContextLostError);
         }
         if self.is_current() {
             return Ok(Disposable::empty());
@@ -126,7 +126,7 @@ impl WglContext {
 
     /// Makes the context current with a device context (`MakeCurrent(IntPtr hdc)`).
     /// Disposing the result restores what was current before.
-    pub fn make_current_with(&self, hdc: isize) -> Result<Rc<dyn IDisposable>, OpenGlException> {
+    pub fn make_current_with(&self, hdc: isize) -> Result<Rc<dyn IDisposable>, OpenGlError> {
         Ok(Rc::new(WglRestoreContext::new(hdc, self.context.get())?))
     }
 

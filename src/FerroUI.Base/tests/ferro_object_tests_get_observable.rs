@@ -146,11 +146,12 @@ fn get_property_changed_observable_fires_only_for_the_property_and_supports_clas
     let c = changes.clone();
     let subscription = observable.subscribe(move |e| c.push((old_string(e), new_string(e))));
     let c1 = class1.clone();
-    observable.add_class_handler::<Class1>(move |_, _| c1.increment());
+    observable.add_class_handler::<Class1>(move |_, _| c1.increment()).detach();
     let c2 = class2.clone();
     target
         .get_property_changed_observable(Class2::bar_property())
-        .add_class_handler::<Class2>(move |_, _| c2.increment());
+        .add_class_handler::<Class2>(move |_, _| c2.increment())
+        .detach();
 
     target.set_value(Class1::foo_property(), s("a"));
     target.set_value(Class2::bar_property(), s("b"));

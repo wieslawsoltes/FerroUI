@@ -2,7 +2,7 @@
 
 use super::{attach_actions_to_logical_tree, detach_actions_from_logical_tree};
 use ferroui_base::logical_tree::LogicalTreeAttachmentEventArgs;
-use ferroui_base::reactive::{AnonymousObserver, IDisposable, IObservable, ObservableError};
+use ferroui_base::reactive::{AnonymousObserver, IObservable, ObservableError, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt,
@@ -23,7 +23,7 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct ObservableStreamBehavior {
     base: StyledElementBehavior,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(ObservableStreamBehavior: StyledElementBehavior);
@@ -274,7 +274,7 @@ impl ObservableStreamBehavior {
 
         let subscription =
             observable.subscribe(Rc::new(AnonymousObserver::new_with_error_and_completed(on_next, on_error, on_completed)));
-        *self.subscription.borrow_mut() = Some(subscription);
+        *self.subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 
     /// The associated object as the sender of the actions.

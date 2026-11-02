@@ -44,7 +44,7 @@ impl<T: ?Sized + 'static> NodeInfoProvider<T> {
             if let (Some(peer_property_changed), Some(owner)) = (peer_property_changed, handler_owner.upgrade()) {
                 peer_property_changed(&*owner, virtual_view_id, e);
             }
-        });
+        }).detach();
         Self { owner, peer, virtual_view_id, subscription, provider: PhantomData }
     }
 

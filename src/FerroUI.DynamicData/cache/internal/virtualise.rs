@@ -3,7 +3,7 @@
 use super::sort::where_some;
 use super::{filtered_index_calculator, KeyValueCollection};
 use crate::cache::{ChangeSet, SortReason, SortedChangeSet, VirtualChangeSet, VirtualRequest, VirtualResponse};
-use crate::list::SortException;
+use crate::list::SortError;
 use ferroui_reactive::{Observable, ObservableExt};
 use ferroui_system::{IObservable, IObserver};
 use std::cell::RefCell;
@@ -23,9 +23,9 @@ pub(crate) fn virtualise<T: Clone + 'static, K: Eq + Hash + Clone + 'static>(
         let virtualiser = Rc::new(RefCell::new(Virtualiser::new(None)));
         let request_virtualiser = virtualiser.clone();
         let request =
-            virtual_requests.try_select(move |parameters: VirtualRequest| request_virtualiser.borrow_mut().virtualise_request(parameters).map_err(SortException::into_error));
+            virtual_requests.try_select(move |parameters: VirtualRequest| request_virtualiser.borrow_mut().virtualise_request(parameters).map_err(SortError::into_error));
         let data_virtualiser = virtualiser.clone();
-        let data_change = source.try_select(move |updates: SortedChangeSet<T, K>| data_virtualiser.borrow_mut().update(&updates).map_err(SortException::into_error));
+        let data_change = source.try_select(move |updates: SortedChangeSet<T, K>| data_virtualiser.borrow_mut().update(&updates).map_err(SortError::into_error));
         where_some(Observable::merge_all(vec![request, data_change])).subscribe(observer)
     })
 }
@@ -44,7 +44,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> Virtualiser<T, K> {
     }
 
     /// The window after a change of the data (`Update`).
-    fn update(&mut self, updates: &SortedChangeSet<T, K>) -> Result<Option<VirtualChangeSet<T, K>>, SortException> {
+    fn update(&mut self, updates: &SortedChangeSet<T, K>) -> Result<Option<VirtualChangeSet<T, K>>, SortError> {
         self.is_loaded = true;
         self.all = updates.sorted_items().clone();
         self.virtualise(Some(updates))
@@ -52,7 +52,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> Virtualiser<T, K> {
 
     /// The window of a new request; nothing for an empty window or the request of now
     /// (`Virtualise(IVirtualRequest)`).
-    fn virtualise_request(&mut self, parameters: VirtualRequest) -> Result<Option<VirtualChangeSet<T, K>>, SortException> {
+    fn virtualise_request(&mut self, parameters: VirtualRequest) -> Result<Option<VirtualChangeSet<T, K>>, SortError> {
         if parameters.size() < 1 {
             return Ok(None);
         }
@@ -63,7 +63,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> Virtualiser<T, K> {
         self.virtualise(None)
     }
 
-    fn virtualise(&mut self, updates: Option<&SortedChangeSet<T, K>>) -> Result<Option<VirtualChangeSet<T, K>>, SortException> {
+    fn virtualise(&mut self, updates: Option<&SortedChangeSet<T, K>>) -> Result<Option<VirtualChangeSet<T, K>>, SortError> {
         if !self.is_loaded {
             return Ok(None);
         }

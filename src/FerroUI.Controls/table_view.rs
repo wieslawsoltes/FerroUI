@@ -10,7 +10,7 @@ use ferroui_base::collections::{FerroList, NotifyCollectionChangedAction, ResetB
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, BoxedValue, DirectProperty,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledElement,
@@ -23,7 +23,7 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct TableView {
     base: ListBox,
-    columns_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    columns_subscription: RefCell<Option<Subscription>>,
     columns: RefCell<Option<FerroList<Ref<TableViewColumn>>>>,
     /// The presenter of the column headers of the template; it is part of
     /// the tree below the control and held weakly.
@@ -253,7 +253,7 @@ impl TableView {
         };
 
         let subscription = for_each_item(columns, items, added, removed, || {});
-        *self.columns_subscription.borrow_mut() = Some(subscription);
+        *self.columns_subscription.borrow_mut() = Some(Subscription::new(subscription));
 
         is_initial_iteration.set(false);
     }

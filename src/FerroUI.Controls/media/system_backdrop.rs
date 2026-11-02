@@ -8,7 +8,7 @@ use ferroui_base::media::{
     BrushImpl, IBrush, XamlCompositionBrushBase, XamlCompositionBrushBaseImpl,
 };
 use ferroui_base::platform::{ColorContrastPreference, IPlatformSettings};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::rendering::composition::system_backdrops::{
     DesktopAcrylicController, ICompositionSupportsSystemBackdrop, MicaController, MicaKind, PlatformSystemBackdrop,
     SystemBackdropConfiguration, SystemBackdropController, SystemBackdropSupport, SystemBackdropTheme,
@@ -151,7 +151,7 @@ pub struct ElementBackdropTarget {
     element: WeakRef<crate::primitives::TemplatedControl>,
     brush: RefCell<Option<Rc<CompositionBrush>>>,
     host_brush: Ref<SystemBackdropHostBrush>,
-    background: RefCell<Option<Rc<dyn IDisposable>>>,
+    background: RefCell<Option<Subscription>>,
 }
 
 impl ElementBackdropTarget {
@@ -183,7 +183,7 @@ impl ICompositionSupportsSystemBackdrop for ElementBackdropTarget {
                 crate::primitives::TemplatedControl::background_property(),
                 Some(host),
                 ferroui_base::data::BindingPriority::StyleTrigger,
-            );
+            ).map(Subscription::new);
         }
     }
 
@@ -362,7 +362,7 @@ impl SystemBackdropImpl for SystemBackdrop {
                     configuration.set_theme(theme_of(&root));
                     notify();
                 }
-            }));
+            }).detach());
         }
         if let Some(settings) = FerroLocator::current().get_service::<dyn IPlatformSettings>() {
             let configuration = configuration.clone();
@@ -380,7 +380,8 @@ impl SystemBackdropImpl for SystemBackdrop {
                     configuration.set_is_input_active(active);
                     notify();
                 };
-                subscriptions.push(if active { window.activated(handler) } else { window.deactivated(handler) });
+                let subscription = if active { window.activated(handler) } else { window.deactivated(handler) };
+                subscriptions.push(subscription.detach());
             }
         }
         this.configurations.borrow_mut().push(PerTargetConfiguration {

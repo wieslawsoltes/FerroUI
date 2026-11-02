@@ -174,7 +174,7 @@ fn read_only_and_disabled_block_the_user_and_not_the_application() {
     let rating = RatingControl::new();
     let count = Rc::new(Cell::new(0));
     let log = count.clone();
-    rating.value_changed(move |_| log.set(log.get() + 1));
+    rating.value_changed(move |_| log.set(log.get() + 1)).detach();
     rating.set_is_read_only(true);
     assert!(!press(&rating, Key::End).handled());
     rating.set_rating_to(2.0, true);
@@ -345,7 +345,7 @@ fn the_peer_reports_the_coerced_values_and_the_text_of_the_rating() {
     let peer = ControlAutomationPeer::create_peer_for_element(&rating);
     let recorded = Rc::new(RefCell::new(Vec::new()));
     let log = recorded.clone();
-    peer.property_changed(move |args| log.borrow_mut().push(args.clone()));
+    peer.property_changed(move |args| log.borrow_mut().push(args.clone())).detach();
     rating.set_rating_value(99.0);
     {
         let events = recorded.borrow();

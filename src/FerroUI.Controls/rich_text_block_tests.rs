@@ -365,7 +365,7 @@ fn rich_selection_tracks_external_edits_and_is_shared_across_columns() {
     overflow.select(6, 10);
     let changes = Rc::new(Cell::new(0));
     let observed = changes.clone();
-    let _subscription = overflow.selection_changed(move |_| observed.set(observed.get() + 1));
+    overflow.selection_changed(move |_| observed.set(observed.get() + 1)).detach();
     view.document().replace_text(0..0, "😀 ").unwrap();
     assert_eq!(view.selected_text(), "beta");
     assert_eq!(overflow.selected_text(), "beta");
@@ -469,10 +469,10 @@ fn rich_hyperlink_hit_testing_keyboard_focus_and_cancellation_use_the_host() {
     assert!(view.hyperlink_at(Point::new(190.0, 95.0)).is_none());
     let invocations = Rc::new(Cell::new(0));
     let observed = invocations.clone();
-    let _subscription = link.click(move |event| {
+    link.click(move |event| {
         observed.set(observed.get() + 1);
         event.set_handled(true);
-    });
+    }).detach();
     let revision = view.document().revision();
     assert!(key(&view, Key::Tab, false).handled());
     assert!(link.is_focused());

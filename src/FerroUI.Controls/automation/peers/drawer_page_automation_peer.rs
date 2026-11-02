@@ -3,7 +3,7 @@ use super::{
     ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{IExpandCollapseProvider, ProviderAdapter};
-use crate::automation::{ElementNotEnabledException, ExpandCollapsePatternIdentifiers, ExpandCollapseState};
+use crate::automation::{ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState};
 use crate::DrawerPage;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::{
@@ -66,11 +66,11 @@ impl IExpandCollapseProvider for ProviderAdapter<DrawerPageAutomationPeer> {
         self.0.shows_menu()
     }
 
-    fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    fn expand(&self) -> Result<(), ElementNotEnabledError> {
         self.0.expand()
     }
 
-    fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         self.0.collapse()
     }
 }
@@ -104,13 +104,13 @@ impl DrawerPageAutomationPeer {
     }
 
     /// Closes the drawer (the expand and collapse provider contract).
-    pub fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         self.owner().set_is_open(false);
         Ok(())
     }
 
     /// Opens the drawer (the expand and collapse provider contract).
-    pub fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn expand(&self) -> Result<(), ElementNotEnabledError> {
         self.owner().set_is_open(true);
         Ok(())
     }

@@ -12,21 +12,21 @@ impl PressedMixin {
     /// Attaches the pressed functionality to the control class `TControl`.
     pub fn attach<TControl: ObjectType + Upcast<Control>>() {
         // The handlers live as long as the events they are attached to.
-        let _ = InputElement::pointer_pressed_event().add_class_handler_with::<TControl>(
+        InputElement::pointer_pressed_event().add_class_handler_with::<TControl>(
             |x, e| Self::handle_pointer_pressed(Upcast::<Control>::upcast(x), e),
             RoutingStrategies::TUNNEL,
             false,
-        );
-        let _ = InputElement::pointer_released_event().add_class_handler_with::<TControl>(
+        ).detach();
+        InputElement::pointer_released_event().add_class_handler_with::<TControl>(
             |x, _| Self::handle_pointer_released(Upcast::<Control>::upcast(x)),
             RoutingStrategies::TUNNEL,
             false,
-        );
-        let _ = InputElement::pointer_capture_lost_event().add_class_handler_with::<TControl>(
+        ).detach();
+        InputElement::pointer_capture_lost_event().add_class_handler_with::<TControl>(
             |x, _| Self::handle_pointer_released(Upcast::<Control>::upcast(x)),
             RoutingStrategies::TUNNEL,
             false,
-        );
+        ).detach();
     }
 
     fn handle_pointer_pressed(sender: &Control, e: &PointerPressedEventArgs) {

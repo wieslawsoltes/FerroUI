@@ -21,7 +21,9 @@ mod settable_property;
 mod trigger_update;
 mod view_thread_invokers;
 pub use binding_change::BindingChange;
-pub use binding_errors::{BindingErrors, TargetInvocationException};
+pub use binding_errors::{BindingErrors, TargetInvocationError};
+#[allow(deprecated)]
+pub use binding_errors::TargetInvocationException;
 pub use binding_hooks::BindingHooks;
 pub use binding_schedulers::BindingSchedulers;
 pub use reactive_binding::ReactiveBinding;

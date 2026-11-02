@@ -1,7 +1,7 @@
 //! `Cast` (`List/ObservableListEx.Cast.cs`).
 
 use crate::list::{Change, ChangeSet, ChangeType};
-use ferroui_reactive::linq::{AnyObject, InvalidCastException};
+use ferroui_reactive::linq::{AnyObject, InvalidCastError};
 use ferroui_reactive::ObservableExt;
 use ferroui_system::{IObservable, ObservableError};
 use std::any::Any;
@@ -19,9 +19,9 @@ macro_rules! cast_methods {
 pub(crate) use cast_methods;
 
 /// The change sets of a list with each item cast to a `U`: an item of another type ends the
-/// sequence with an `InvalidCastException`.
+/// sequence with an `InvalidCastError`.
 fn cast_object<U: 'static>(changes: &ChangeSet<Rc<dyn Any>>) -> Result<ChangeSet<Rc<U>>, ObservableError> {
-    let cast = |item: &Rc<dyn Any>| -> Result<Rc<U>, ObservableError> { item.clone().downcast_object::<U>().map_err(|_| Rc::new(InvalidCastException::new::<U>()) as ObservableError) };
+    let cast = |item: &Rc<dyn Any>| -> Result<Rc<U>, ObservableError> { item.clone().downcast_object::<U>().map_err(|_| Rc::new(InvalidCastError::new::<U>()) as ObservableError) };
     let mut result = Vec::with_capacity(changes.count());
     for change in changes {
         if change.change_type() == ChangeType::Item {
@@ -40,7 +40,7 @@ fn cast_object<U: 'static>(changes: &ChangeSet<Rc<dyn Any>>) -> Result<ChangeSet
 /// have no equality, so that `ObservableListEx` does not apply to them).
 pub trait ObservableObjectListEx {
     /// The change sets with each item cast to a `U`; an item of another type ends the sequence with
-    /// an `InvalidCastException` (`Cast<TDestination>(IObservable<IChangeSet<object>>)`).
+    /// an `InvalidCastError` (`Cast<TDestination>(IObservable<IChangeSet<object>>)`).
     fn cast_list_any<U: 'static>(&self) -> Rc<dyn IObservable<ChangeSet<Rc<U>>>>;
 }
 

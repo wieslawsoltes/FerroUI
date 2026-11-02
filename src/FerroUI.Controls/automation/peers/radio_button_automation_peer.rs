@@ -3,7 +3,7 @@ use super::{
     ToggleButtonAutomationPeer,
 };
 use crate::automation::provider::{ISelectionItemProvider, ISelectionProvider, ProviderAdapter};
-use crate::automation::{ElementNotEnabledException, SelectionItemPatternIdentifiers};
+use crate::automation::{ElementNotEnabledError, SelectionItemPatternIdentifiers};
 use crate::primitives::ToggleButton;
 use crate::RadioButton;
 use ferroui_base::{ferro_class, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt, Ref};
@@ -78,15 +78,15 @@ impl ISelectionItemProvider for ProviderAdapter<RadioButtonAutomationPeer> {
         self.0.selection_container()
     }
 
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.add_to_selection()
     }
 
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.remove_from_selection()
     }
 
-    fn select(&self) -> Result<(), ElementNotEnabledException> {
+    fn select(&self) -> Result<(), ElementNotEnabledError> {
         self.0.select()
     }
 }
@@ -124,7 +124,7 @@ impl RadioButtonAutomationPeer {
     /// # Panics
     ///
     /// Panics if the radio button is not checked.
-    pub fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         if self.radio_button().is_checked() != Some(true) {
             panic!("Operation cannot be performed");
         }
@@ -137,7 +137,7 @@ impl RadioButtonAutomationPeer {
     /// # Panics
     ///
     /// Panics if the radio button is checked.
-    pub fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         if self.radio_button().is_checked() == Some(true) {
             panic!("Operation cannot be performed");
         }
@@ -149,7 +149,7 @@ impl RadioButtonAutomationPeer {
     /// # Panics
     ///
     /// Panics if the radio button is disabled.
-    pub fn select(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn select(&self) -> Result<(), ElementNotEnabledError> {
         if !self.is_enabled() {
             panic!("Element is disabled thus it cannot be selected");
         }

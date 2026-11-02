@@ -133,3 +133,15 @@ cargo test --locked -p ferroui-opengl --lib \
 The Windows-side ANGLE device cache does not change Linux device selection.
 The remaining positive Linux media/camera gates still require another host or
 a WSL graphics stack with the required DMA-BUF extensions.
+
+The 2026-11-02 integration of GitHub main `df8b92d94` adopts upstream
+`Subscription` guards in Linux native polling and the shared media controls.
+Pending native futures keep their wakeup timer alive and drop it on cancellation;
+the existing context-retirement and EGL cleanup paths are preserved. WSL passes
+the sample type-check, nine context-manager tests, 15 render-thread tests, five
+renderer-scheduling tests and the native descriptor test. The real EGL-disposal
+test also passes with llvmpipe. Logs use the `media-main-merge-` prefix beside
+the worktree. These integration results add no DMA-BUF or physical-camera gate.
+The shared EGL fence poll now uses `GL_SYNC_FLUSH_COMMANDS_BIT` with a zero
+timeout after Windows exposed a stalled idle import. WSL reruns all 28 EGL
+tests including native disposal successfully (`media-main-merge-linux-egl-flush.log`).

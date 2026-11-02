@@ -5,7 +5,7 @@
 use super::{ObservableCollectionExtended, SortAndBindOptions};
 use crate::cache::internal::Cache;
 use crate::cache::{ChangeReason, ChangeSet, ICache, IQuery};
-use crate::list::{binary_search_by, IList, SortException};
+use crate::list::{binary_search_by, IList, SortError};
 use ferroui_reactive::{Observable, ObservableExt};
 use ferroui_reactive::disposables::CompositeDisposable;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
@@ -31,7 +31,7 @@ fn sorted_items<T: Clone, K: Eq + Hash + Clone>(cache: &Cache<T, K>, comparer: &
 /// not the item, which would need `T: Debug`.
 pub(crate) fn get_current_position<T: Clone + PartialEq>(list: &dyn IList<T>, item: &T, comparer: &Comparer<T>, use_binary_search: bool) -> Result<usize, ObservableError> {
     let index = if use_binary_search { binary_search_by(list, item, &|a: &T, b: &T| comparer(a, b)).ok() } else { list.index_of(item) };
-    index.ok_or_else(|| SortException::new(format!("Cannot find item: {} from {} items", short_type_name::<T>(), list.count())).into_error())
+    index.ok_or_else(|| SortError::new(format!("Cannot find item: {} from {} items", short_type_name::<T>(), list.count())).into_error())
 }
 
 /// The index at which `item` goes in `list` (`SortExtensions.GetInsertPosition`).
@@ -181,7 +181,7 @@ impl<T: Clone + PartialEq + 'static, K: Eq + Hash + Clone + 'static, L: IList<T>
                     // Look up the current location and the new location. The linear methods are
                     // used, as a binary search does not work on a list that is not sorted yet.
                     let Some(current_index) = target.index_of(item) else {
-                        return Err(SortException::new(format!("Cannot find item: {}", short_type_name::<T>())).into_error());
+                        return Err(SortError::new(format!("Cannot find item: {}", short_type_name::<T>())).into_error());
                     };
                     let mut updated_index = get_insert_position_linear(&*target, item, comparer);
 

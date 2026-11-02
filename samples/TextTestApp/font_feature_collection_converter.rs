@@ -13,7 +13,7 @@ use ferroui_base::media::FontFeatureCollection;
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{AnyValue, BoxedValue};
 use ferroui_markup_xaml::converters::{ITypeDescriptorContext, TypeConverter};
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use std::rc::Rc;
 
 pub struct FontFeatureCollectionConverter;
@@ -28,21 +28,21 @@ impl TypeConverter for FontFeatureCollectionConverter {
         _context: Option<&Rc<dyn ITypeDescriptorContext>>,
         _culture: Option<&CultureInfo>,
         value: Option<&BoxedValue>,
-    ) -> Result<Option<BoxedValue>, XamlLoadException> {
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
         // `(string)value`: a value that is not text is an invalid cast.
         let text = value.and_then(|value| {
             let value: &dyn AnyValue = &**value;
             value.downcast_ref::<String>().map(String::as_str).or_else(|| value.downcast_ref::<&'static str>().copied())
         });
         let Some(text) = text else {
-            return Err(XamlLoadException::with_message(format!(
+            return Err(XamlLoadError::with_message(format!(
                 "Unable to cast object of type '{}' to type 'String'.",
                 value.map_or("null", |value| (**value).type_name())
             )));
         };
 
         let font_features =
-            FontFeatureCollection::parse(text).map_err(|error| XamlLoadException::with_message(error.to_string()))?;
+            FontFeatureCollection::parse(text).map_err(|error| XamlLoadError::with_message(error.to_string()))?;
         Ok(Some(Rc::new(font_features)))
     }
 }

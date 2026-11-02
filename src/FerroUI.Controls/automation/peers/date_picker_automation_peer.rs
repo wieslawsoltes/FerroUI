@@ -2,7 +2,7 @@ use super::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{IValueProvider, ProviderError, ProviderAdapter};
-use crate::automation::ElementNotEnabledException;
+use crate::automation::ElementNotEnabledError;
 use crate::date_time_pickers::DatePicker;
 use ferroui_base::utilities::{CultureInfo, DateTimeOffset};
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Ref};
@@ -75,7 +75,7 @@ impl DatePickerAutomationPeer {
 
     /// Sets the selected date from text, if the text is a date (the value
     /// provider contract).
-    pub fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledException> {
+    pub fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledError> {
         if let Some(result) =
             value.and_then(|value| DateTimeOffset::try_parse(value, &CultureInfo::current_culture()))
         {

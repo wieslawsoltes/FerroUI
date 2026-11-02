@@ -15,7 +15,7 @@ use ferroui_controls::{
     ContentControlImpl, Control, ControlImpl, DatePicker, Frame, FramePage, FramePageImpl,
     RadioButtons, StackPanel, TextBlock, TextBox,
 };
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::rc::Rc;
 
@@ -87,7 +87,7 @@ fn switch(frame: &Frame, compact: bool) -> Result<(), NavigationError> {
     Ok(())
 }
 
-pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadException> {
+pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
     let Some(frame) = root
         .find_control::<Control>("SizingFrame")
         .and_then(|control| control.cast::<Frame>())
@@ -95,7 +95,7 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadException> {
         return Ok(());
     };
     let convert_error =
-        |error| XamlLoadException::with_inner("Could not initialize the sizing example.", error);
+        |error| XamlLoadError::with_inner("Could not initialize the sizing example.", error);
     frame
         .register_page_factory(
             StandardSizingPage::TYPE,

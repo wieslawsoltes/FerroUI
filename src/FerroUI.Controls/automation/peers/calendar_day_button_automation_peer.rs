@@ -1,6 +1,6 @@
 use super::{AutomationPeer, AutomationPeerImpl, ButtonAutomationPeer, ControlAutomationPeer, ControlAutomationPeerImpl};
 use crate::automation::provider::{ISelectionItemProvider, ISelectionProvider, ProviderAdapter};
-use crate::automation::ElementNotEnabledException;
+use crate::automation::ElementNotEnabledError;
 use crate::calendar::{date_of, Calendar, CalendarDayButton, CalendarSelectionMode};
 use ferroui_base::utilities::DateTime;
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Ref};
@@ -39,15 +39,15 @@ impl ISelectionItemProvider for ProviderAdapter<CalendarDayButtonAutomationPeer>
         self.0.selection_container()
     }
 
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.add_to_selection()
     }
 
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.remove_from_selection()
     }
 
-    fn select(&self) -> Result<(), ElementNotEnabledException> {
+    fn select(&self) -> Result<(), ElementNotEnabledError> {
         self.0.select()
     }
 }
@@ -85,7 +85,7 @@ impl CalendarDayButtonAutomationPeer {
 
     /// Clears any existing selection and then selects the day (the
     /// selection item provider contract).
-    pub fn select(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn select(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         if let Some((calendar, date)) = self.try_get_selectable_date() {
@@ -97,7 +97,7 @@ impl CalendarDayButtonAutomationPeer {
 
     // The reference implements the two members below explicitly: they are
     // members of the selection item provider contract only.
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         let Some((calendar, date)) = self.try_get_selectable_date() else {
@@ -116,7 +116,7 @@ impl CalendarDayButtonAutomationPeer {
         Ok(())
     }
 
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         let owner = self.owner();

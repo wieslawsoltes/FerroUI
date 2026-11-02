@@ -19,7 +19,7 @@ use ferroui_base::interactivity::{InteractiveImpl, RoutedEventArgs, RoutedEventH
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::{FlowDirection, Geometry, StreamGeometry};
-use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{Disposable, ObservableExt, Subscription};
 use ferroui_base::threading::{CancellationTokenSource, DispatcherTask};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -43,7 +43,7 @@ const PC_NAV_BAR_COMPACT: &str = ":nav-bar-compact";
 
 const ALREADY_HOSTED: &str = "The page is already hosted by this NavigationPage.";
 
-type Subscription = RefCell<Option<Rc<dyn IDisposable>>>;
+type SubscriptionSlot = RefCell<Option<Subscription>>;
 
 /// A navigation page that supports simple stack-based navigation.
 #[repr(C)]
@@ -75,12 +75,12 @@ pub struct NavigationPage {
     modal_back_presenter: RefCell<Option<Ref<ContentPresenter>>>,
     modal_presenter: RefCell<Option<Ref<ContentPresenter>>>,
     top_command_bar_presenter: RefCell<Option<Ref<ContentPresenter>>>,
-    has_navigation_bar_sub: Subscription,
-    has_back_button_sub: Subscription,
-    is_back_button_enabled_sub: Subscription,
-    bar_layout_behavior_sub: Subscription,
-    bar_height_sub: Subscription,
-    back_button_content_sub: Subscription,
+    has_navigation_bar_sub: SubscriptionSlot,
+    has_back_button_sub: SubscriptionSlot,
+    is_back_button_enabled_sub: SubscriptionSlot,
+    bar_layout_behavior_sub: SubscriptionSlot,
+    bar_height_sub: SubscriptionSlot,
+    back_button_content_sub: SubscriptionSlot,
     restoring_pages_property: Cell<bool>,
     is_navigating: Cell<bool>,
     can_go_back: Cell<bool>,
@@ -481,36 +481,36 @@ impl MultiPageImpl for NavigationPage {
             let subscription =
                 FerroObjectExtensions::get_observable(object, &**Self::has_navigation_bar_property())
                     .subscribe_fn(move |_| update());
-            *this.has_navigation_bar_sub.borrow_mut() = Some(subscription);
+            *this.has_navigation_bar_sub.borrow_mut() = Some(Subscription::new(subscription));
 
             let update = observe(Self::update_is_back_button_effectively_visible);
             let subscription = FerroObjectExtensions::get_observable(object, &**Self::has_back_button_property())
                 .subscribe_fn(move |_| update());
-            *this.has_back_button_sub.borrow_mut() = Some(subscription);
+            *this.has_back_button_sub.borrow_mut() = Some(Subscription::new(subscription));
 
             let update = observe(Self::update_is_back_button_effectively_enabled);
             let subscription =
                 FerroObjectExtensions::get_observable(object, &**Self::is_back_button_enabled_property())
                     .subscribe_fn(move |_| update());
-            *this.is_back_button_enabled_sub.borrow_mut() = Some(subscription);
+            *this.is_back_button_enabled_sub.borrow_mut() = Some(Subscription::new(subscription));
 
             let update = observe(Self::update_bar_layout_behavior_effective);
             let subscription =
                 FerroObjectExtensions::get_observable(object, &**Self::bar_layout_behavior_property())
                     .subscribe_fn(move |_| update());
-            *this.bar_layout_behavior_sub.borrow_mut() = Some(subscription);
+            *this.bar_layout_behavior_sub.borrow_mut() = Some(Subscription::new(subscription));
 
             let update = observe(Self::update_effective_bar_height);
             let subscription =
                 FerroObjectExtensions::get_observable(object, &**Self::bar_height_override_property())
                     .subscribe_fn(move |_| update());
-            *this.bar_height_sub.borrow_mut() = Some(subscription);
+            *this.bar_height_sub.borrow_mut() = Some(Subscription::new(subscription));
 
             let update = observe(Self::update_back_button_content);
             let subscription =
                 FerroObjectExtensions::get_observable(object, &**Self::back_button_content_property())
                     .subscribe_fn(move |_| update());
-            *this.back_button_content_sub.borrow_mut() = Some(subscription);
+            *this.back_button_content_sub.borrow_mut() = Some(Subscription::new(subscription));
         }
 
         this.update_is_nav_bar_effectively_visible();
@@ -984,44 +984,48 @@ impl NavigationPage {
                     drop(sender.pop_async());
                 }
             },
-        );
+        ).detach();
 
         Self::modal_content_property().changed().add_class_handler::<NavigationPage>(|x, e| {
             let modal_presenter = x.modal_presenter.borrow().clone();
             if let Some(modal_presenter) = modal_presenter {
                 modal_presenter.set_content(e.get_new_value::<Option<BoxedValue>>());
             }
-        });
+        }).detach();
 
         Self::is_modal_visible_property().changed().add_class_handler::<NavigationPage>(|x, e| {
             let modal_presenter = x.modal_presenter.borrow().clone();
             if let Some(modal_presenter) = modal_presenter {
                 modal_presenter.set_is_visible(e.get_new_value::<bool>());
             }
-        });
+        }).detach();
 
         Self::is_back_button_visible_property()
             .changed()
-            .add_class_handler::<NavigationPage>(|x, _| x.update_is_back_button_effectively_visible());
+            .add_class_handler::<NavigationPage>(|x, _| x.update_is_back_button_effectively_visible())
+            .detach();
 
         Self::bar_height_property()
             .changed()
-            .add_class_handler::<NavigationPage>(|x, _| x.update_effective_bar_height());
+            .add_class_handler::<NavigationPage>(|x, _| x.update_effective_bar_height())
+            .detach();
 
-        Self::has_shadow_property().changed().add_class_handler::<NavigationPage>(|x, _| x.apply_has_shadow());
+        Self::has_shadow_property().changed().add_class_handler::<NavigationPage>(|x, _| x.apply_has_shadow()).detach();
 
         Self::effective_bar_height_property()
             .changed()
-            .add_class_handler::<NavigationPage>(|x, _| x.apply_has_shadow());
+            .add_class_handler::<NavigationPage>(|x, _| x.apply_has_shadow())
+            .detach();
 
         Self::is_nav_bar_effectively_visible_property().changed().add_class_handler::<NavigationPage>(|x, _| {
             x.apply_nav_bar_visibility();
             x.apply_has_shadow();
-        });
+        }).detach();
 
         Self::is_back_button_effectively_enabled_property()
             .changed()
-            .add_class_handler::<NavigationPage>(|x, e| x.apply_back_button_enabled(e.get_new_value::<bool>()));
+            .add_class_handler::<NavigationPage>(|x, e| x.apply_back_button_enabled(e.get_new_value::<bool>()))
+            .detach();
 
         Self::content_property().changed().add_class_handler::<NavigationPage>(|x, e| {
             let page = e
@@ -1037,7 +1041,7 @@ impl NavigationPage {
             }
             // A property-changed handler cannot be asynchronous; fire-and-forget is intentional.
             drop(x.push_async(page));
-        });
+        }).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -1381,59 +1385,73 @@ impl NavigationPage {
         &self,
         select: fn(&NavigationPage) -> &HandlerList<F>,
         handler: Rc<F>,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = select(self).add(handler);
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 select(&this).remove(token);
             }
-        })
+        }))
     }
 
-    /// Occurs when a page is pushed onto the navigation stack. Disposing
-    /// the returned handle unsubscribes.
-    pub fn pushed(&self, handler: impl Fn(&NavigationEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Occurs when a page is pushed onto the navigation stack.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the page.
+    pub fn pushed(&self, handler: impl Fn(&NavigationEventArgs) + 'static) -> Subscription {
         self.subscribe::<dyn Fn(&NavigationEventArgs)>(|x| &x.pushed, Rc::new(handler))
     }
 
-    /// Occurs when a page is popped from the navigation stack. Disposing
-    /// the returned handle unsubscribes.
-    pub fn popped(&self, handler: impl Fn(&NavigationEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Occurs when a page is popped from the navigation stack.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the page.
+    pub fn popped(&self, handler: impl Fn(&NavigationEventArgs) + 'static) -> Subscription {
         self.subscribe::<dyn Fn(&NavigationEventArgs)>(|x| &x.popped, Rc::new(handler))
     }
 
-    /// Occurs when the stack is popped to root. Disposing the returned
-    /// handle unsubscribes.
+    /// Occurs when the stack is popped to root.
     ///
     /// The page of the args is the root page that is now current, not any
     /// of the pages that were popped. To observe each popped page
     /// individually, subscribe to [`popped`](Self::popped).
-    pub fn popped_to_root(&self, handler: impl Fn(&NavigationEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the page.
+    pub fn popped_to_root(&self, handler: impl Fn(&NavigationEventArgs) + 'static) -> Subscription {
         self.subscribe::<dyn Fn(&NavigationEventArgs)>(|x| &x.popped_to_root, Rc::new(handler))
     }
 
     /// Occurs when a page has been inserted into the navigation stack.
-    /// Disposing the returned handle unsubscribes.
-    pub fn page_inserted(&self, handler: impl Fn(&PageInsertedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the page.
+    pub fn page_inserted(&self, handler: impl Fn(&PageInsertedEventArgs) + 'static) -> Subscription {
         self.subscribe::<dyn Fn(&PageInsertedEventArgs)>(|x| &x.page_inserted, Rc::new(handler))
     }
 
     /// Occurs when a page has been removed from the navigation stack.
-    /// Disposing the returned handle unsubscribes.
-    pub fn page_removed(&self, handler: impl Fn(&PageRemovedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the page.
+    pub fn page_removed(&self, handler: impl Fn(&PageRemovedEventArgs) + 'static) -> Subscription {
         self.subscribe::<dyn Fn(&PageRemovedEventArgs)>(|x| &x.page_removed, Rc::new(handler))
     }
 
-    /// Occurs when a modal page is pushed. Disposing the returned handle
-    /// unsubscribes.
-    pub fn modal_pushed(&self, handler: impl Fn(&ModalPushedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Occurs when a modal page is pushed.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the page.
+    pub fn modal_pushed(&self, handler: impl Fn(&ModalPushedEventArgs) + 'static) -> Subscription {
         self.subscribe::<dyn Fn(&ModalPushedEventArgs)>(|x| &x.modal_pushed, Rc::new(handler))
     }
 
-    /// Occurs when a modal page is popped. Disposing the returned handle
-    /// unsubscribes.
-    pub fn modal_popped(&self, handler: impl Fn(&ModalPoppedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Occurs when a modal page is popped.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the page.
+    pub fn modal_popped(&self, handler: impl Fn(&ModalPoppedEventArgs) + 'static) -> Subscription {
         self.subscribe::<dyn Fn(&ModalPoppedEventArgs)>(|x| &x.modal_popped, Rc::new(handler))
     }
 

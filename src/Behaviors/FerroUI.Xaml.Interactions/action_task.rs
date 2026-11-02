@@ -9,7 +9,7 @@
 //! Deviation (DEVIATIONS.md, Behaviors): `Task` and `Task.Delay` are [`TaskHandle`] and [`delay`],
 //! futures run by the dispatcher of the user interface.
 
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTimer, OperationCanceledError};
 use std::cell::RefCell;
 use std::fmt;
@@ -114,7 +114,7 @@ impl<T: 'static> Future for TaskHandle<T> {
 struct DelayState {
     elapsed: bool,
     waker: Option<Waker>,
-    timer: Option<Rc<dyn IDisposable>>,
+    timer: Option<Subscription>,
 }
 
 /// The future of [`delay`].

@@ -4,7 +4,7 @@
 
 use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
 use ferroui_base::platform::{IPlatformGraphicsContext, RenderTargetSceneInfo};
-use ferroui_base::{PixelPoint, PixelSize, RenderTargetCorruptedException};
+use ferroui_base::{PixelPoint, PixelSize, RenderTargetCorruptedError};
 use ferroui_microcom::HResult;
 use std::rc::Rc;
 
@@ -35,7 +35,7 @@ pub trait IDirect3D11TexturePlatformSurface2: IPlatformRenderSurface {
 }
 
 pub trait IDirect3D11TextureRenderTarget: IPlatformRenderSurfaceRenderTarget {
-    fn begin_draw(&self) -> Result<Rc<dyn IDirect3D11TextureRenderTargetRenderSession>, RenderTargetCorruptedException>;
+    fn begin_draw(&self) -> Result<Rc<dyn IDirect3D11TextureRenderTargetRenderSession>, RenderTargetCorruptedError>;
 
     /// Releases the render target.
     fn dispose(&self);
@@ -45,7 +45,7 @@ pub trait IDirect3D11TextureRenderTarget2: IPlatformRenderSurfaceRenderTarget {
     fn begin_draw(
         &self,
         scene_info: &RenderTargetSceneInfo,
-    ) -> Result<Rc<dyn IDirect3D11TextureRenderTargetRenderSession>, RenderTargetCorruptedException>;
+    ) -> Result<Rc<dyn IDirect3D11TextureRenderTargetRenderSession>, RenderTargetCorruptedError>;
 
     /// Releases the render target.
     fn dispose(&self);

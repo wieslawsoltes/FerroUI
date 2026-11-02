@@ -33,14 +33,15 @@ impl RootDockDebugBehavior {
                 // assign DataContext. Native Initialized waits for a logical root;
                 // selection-name lookup itself remains deferred until visual attach.
                 Self::initialize(view.to_ref());
-            });
+            })
+            .detach();
     }
     fn initialize(view: Ref<RootDockDebug>) {
         let owner = view.clone();
         view.data_context_changed(move || {
             let factory = dockable(owner.data_context().as_ref()).and_then(|model| model.factory());
             owner.presentation().set_factory(factory);
-        });
+        }).detach();
         let owner = view.clone();
         view.presentation()
             .property_changed()
@@ -72,9 +73,9 @@ impl RootDockDebugBehavior {
             overlay: RefCell::new(None),
         });
         let attached = state.clone();
-        view.attached_to_visual_tree(move |_| attached.attach());
+        view.attached_to_visual_tree(move |_| attached.attach()).detach();
         let detached = state.clone();
-        view.detached_from_visual_tree(move |_| detached.detach());
+        view.detached_from_visual_tree(move |_| detached.detach()).detach();
         if view.is_attached_to_visual_tree() {
             state.attach();
         }

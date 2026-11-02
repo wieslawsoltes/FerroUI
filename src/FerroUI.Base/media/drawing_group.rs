@@ -7,7 +7,7 @@ use crate::media::{
     RectangleGeometry, RenderOptions, TextOptions, Transform,
 };
 use crate::platform::{self, IGeometryImpl, IPlatformRenderInterface};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{
     ferro_class, ferro_property, instantiate, DirectProperty, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -17,7 +17,7 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::sync::Arc;
 
-type ChildSubscription = (Ref<Drawing>, Rc<dyn IDisposable>);
+type ChildSubscription = (Ref<Drawing>, Subscription);
 
 /// Represents a collection of drawings that can be operated upon as a single
 /// drawing.
@@ -25,7 +25,7 @@ type ChildSubscription = (Ref<Drawing>, Rc<dyn IDisposable>);
 pub struct DrawingGroup {
     base: Drawing,
     children: RefCell<DrawingCollection>,
-    children_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    children_subscription: RefCell<Option<Subscription>>,
     child_subscriptions: RefCell<Vec<ChildSubscription>>,
     render_options: Cell<Option<RenderOptions>>,
     text_options: Cell<Option<TextOptions>>,
@@ -704,7 +704,7 @@ mod tests {
     fn counter(drawing: &Drawing) -> Rc<Cell<i32>> {
         let count = Rc::new(Cell::new(0));
         let c = count.clone();
-        drawing.invalidated(move || c.set(c.get() + 1));
+        drawing.invalidated(move || c.set(c.get() + 1)).detach();
         count
     }
 
@@ -859,7 +859,7 @@ mod tests {
 
         let count = Rc::new(Cell::new(0));
         let c = count.clone();
-        image.invalidated(move || c.set(c.get() + 1));
+        image.invalidated(move || c.set(c.get() + 1)).detach();
 
         drawing.set_rect(Rect::new(0.0, 0.0, 4.0, 4.0));
         assert_eq!(1, count.get());

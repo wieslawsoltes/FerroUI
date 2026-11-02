@@ -2,7 +2,7 @@ use super::{
     IResourceHost, IResourceProvider, ResourceHostRef, ResourceKey, ResourceValue, ResourcesChangedEventArgs,
     WeakResourceHost,
 };
-use crate::reactive::{Disposable, IDisposable, IObservable, IObserver};
+use crate::reactive::{Disposable, IDisposable, IObservable, IObserver, Subscription};
 use crate::styling::ThemeVariant;
 use crate::{BoxedValue, FerroProperty};
 use std::cell::{Cell, RefCell};
@@ -106,7 +106,7 @@ struct ResourceObservable {
     converter: Option<ResourceConverter>,
     observers: RefCell<Vec<(u64, ResourceObserver)>>,
     next_id: Cell<u64>,
-    owner_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    owner_changed_subscription: RefCell<Option<Subscription>>,
     host_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
 }
 
@@ -155,7 +155,7 @@ impl ResourceObservable {
                 this.subscribe_host();
                 this.publish_next();
             }));
-            *self.owner_changed_subscription.borrow_mut() = Some(subscription);
+            *self.owner_changed_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
         self.subscribe_host();
     }

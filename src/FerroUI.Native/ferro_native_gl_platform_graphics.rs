@@ -16,21 +16,21 @@ use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSu
 use ferroui_base::platform::{
     IExternalObjectsHandleWrapRenderInterfaceContextFeature, IOptionalFeatureProvider, IPlatformGraphics,
     IPlatformGraphicsContext, IPlatformHandle, KnownPlatformGraphicsExternalImageHandleTypes,
-    KnownPlatformGraphicsExternalSemaphoreHandleTypes, PlatformGraphicsContextLostException,
+    KnownPlatformGraphicsExternalSemaphoreHandleTypes, PlatformGraphicsContextLostError,
     PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties, PlatformRenderTargetState,
     RenderTargetSceneInfo,
 };
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::CompositionGpuImportedImageSynchronizationCapabilities;
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::{PixelSize, RenderTargetNotReadyException};
+use ferroui_base::{PixelSize, RenderTargetNotReadyError};
 use ferroui_microcom::{ComPtr, HResult, IUnknown};
 use ferroui_opengl::gl_consts::*;
 use ferroui_opengl::surfaces::{IGlPlatformSurface, IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession};
 use ferroui_opengl::{
     GetProcAddress, GlBasicInfoInterface, GlInterface, GlProfileType, GlVersion, IGlContext,
     IGlContextExternalObjectsFeature, IGlExportableExternalImageTexture, IGlExternalImageTexture,
-    IGlExternalSemaphore, OpenGlException,
+    IGlExternalSemaphore, OpenGlError,
 };
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
@@ -80,11 +80,11 @@ impl FerroNativeGlPlatformGraphics {
     pub fn new(
         display: ComPtr<IFrnGlDisplay>,
         factory: &ComPtr<IFerroNativeFactory>,
-    ) -> Result<FerroNativeGlPlatformGraphics, OpenGlException> {
+    ) -> Result<FerroNativeGlPlatformGraphics, OpenGlError> {
         let context = display
             .create_context(None)
             .map_err(native_error("CreateContext"))?
-            .ok_or_else(|| OpenGlException::new("CreateContext returned no context"))?;
+            .ok_or_else(|| OpenGlError::new("CreateContext returned no context"))?;
 
         let gl_interface;
         let version;
@@ -121,7 +121,7 @@ impl FerroNativeGlPlatformGraphics {
             display
                 .create_context(None)
                 .map_err(native_error("CreateContext"))?
-                .ok_or_else(|| OpenGlException::new("CreateContext returned no context"))?,
+                .ok_or_else(|| OpenGlError::new("CreateContext returned no context"))?,
             version,
         );
 
@@ -185,8 +185,8 @@ fn proc_address_of(display: &ComPtr<IFrnGlDisplay>) -> GetProcAddress {
 }
 
 /// Turns the failure of a native call into the exception of the original.
-fn native_error(call: &'static str) -> impl Fn(HResult) -> OpenGlException {
-    move |error| OpenGlException::new(format!("{call} failed: {error:?}"))
+fn native_error(call: &'static str) -> impl Fn(HResult) -> OpenGlError {
+    move |error| OpenGlError::new(format!("{call} failed: {error:?}"))
 }
 
 /// The native OpenGL display and what every context of it shares: the
@@ -218,11 +218,11 @@ impl GlDisplay {
         sample_count: i32,
         stencil_size: i32,
         factory: ComPtr<IFerroNativeFactory>,
-    ) -> Result<GlDisplay, OpenGlException> {
+    ) -> Result<GlDisplay, OpenGlError> {
         let memory_helper = factory
             .create_memory_management_helper()
             .map_err(native_error("CreateMemoryManagementHelper"))?
-            .ok_or_else(|| OpenGlException::new("CreateMemoryManagementHelper returned no helper"))?;
+            .ok_or_else(|| OpenGlError::new("CreateMemoryManagementHelper returned no helper"))?;
         Ok(GlDisplay { display, sample_count, stencil_size, factory, gl_interface, memory_helper })
     }
 
@@ -255,13 +255,13 @@ impl GlDisplay {
     ///
     /// # Panics
     /// Panics when `share` is lost.
-    pub fn create_shared_context(self: &Rc<Self>, share: &Rc<GlContext>) -> Result<Rc<GlContext>, OpenGlException> {
+    pub fn create_shared_context(self: &Rc<Self>, share: &Rc<GlContext>) -> Result<Rc<GlContext>, OpenGlError> {
         let share_native = share.native();
         let native = self
             .display
             .create_context(Some(&share_native))
             .map_err(native_error("CreateContext"))?
-            .ok_or_else(|| OpenGlException::new("CreateContext returned no context"))?;
+            .ok_or_else(|| OpenGlError::new("CreateContext returned no context"))?;
         Ok(GlContext::new(self, Some(share.clone()), native, share.version()))
     }
 }
@@ -316,7 +316,7 @@ impl GlContext {
     #[track_caller]
     pub fn throw_if_lost(&self) {
         if self.is_lost() {
-            panic!("{}", PlatformGraphicsContextLostException);
+            panic!("{}", PlatformGraphicsContextLostError);
         }
     }
 
@@ -608,10 +608,10 @@ impl IGlPlatformSurface for GlPlatformSurface {
     /// the render target.
     fn create_gl_render_target(&self, context: &Rc<dyn IGlContext>) -> Rc<dyn IGlPlatformSurfaceRenderTarget> {
         if !Dispatcher::ui_thread().check_access() {
-            panic!("{}", RenderTargetNotReadyException::new());
+            panic!("{}", RenderTargetNotReadyError::new());
         }
         let Some(top_level) = self.top_level.get() else {
-            panic!("{}", RenderTargetNotReadyException::new());
+            panic!("{}", RenderTargetNotReadyError::new());
         };
         let Some(native_context) = context.as_any().downcast_ref::<GlContext>() else {
             panic!("Unable to cast the context to type 'GlContext'.");
@@ -678,7 +678,7 @@ impl GlExternalObjectsFeature {
     fn context(&self) -> Rc<GlContext> {
         match self.context.upgrade() {
             Some(context) => context,
-            None => panic!("{}", PlatformGraphicsContextLostException),
+            None => panic!("{}", PlatformGraphicsContextLostError),
         }
     }
 }
@@ -709,22 +709,22 @@ impl IGlContextExternalObjectsFeature for GlExternalObjectsFeature {
         _type_: &str,
         _size: PixelSize,
         _format: PlatformGraphicsExternalImageFormat,
-    ) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlException> {
-        Err(OpenGlException::new("Specified method is not supported."))
+    ) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlError> {
+        Err(OpenGlError::new("Specified method is not supported."))
     }
 
-    fn create_semaphore(&self, _type_: &str) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlException> {
-        Err(OpenGlException::new("Specified method is not supported."))
+    fn create_semaphore(&self, _type_: &str) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlError> {
+        Err(OpenGlError::new("Specified method is not supported."))
     }
 
     fn import_image(
         &self,
         handle: Rc<dyn IPlatformHandle>,
         properties: PlatformGraphicsExternalImageProperties,
-    ) -> Result<Rc<dyn IGlExternalImageTexture>, OpenGlException> {
+    ) -> Result<Rc<dyn IGlExternalImageTexture>, OpenGlError> {
         if handle.handle_descriptor() == Some(KnownPlatformGraphicsExternalImageHandleTypes::IO_SURFACE_REF) {
             if properties.format != PlatformGraphicsExternalImageFormat::B8G8R8A8UNorm {
-                return Err(OpenGlException::new("Only B8G8R8A8UNorm format is supported for IOSurfaceRef"));
+                return Err(OpenGlError::new("Only B8G8R8A8UNorm format is supported for IOSurfaceRef"));
             }
             let context = self.context();
             let current = context.ensure_current();
@@ -753,7 +753,7 @@ impl IGlContextExternalObjectsFeature for GlExternalObjectsFeature {
             if error != 0 {
                 gl.delete_texture(texture_id);
                 current.dispose();
-                return Err(OpenGlException::new(format!("CGLTexImageIOSurface2D returned {error}")));
+                return Err(OpenGlError::new(format!("CGLTexImageIOSurface2D returned {error}")));
             }
             current.dispose();
             return Ok(Rc::new(ImportedTexture::new(
@@ -764,10 +764,10 @@ impl IGlContextExternalObjectsFeature for GlExternalObjectsFeature {
                 properties,
             )));
         }
-        Err(OpenGlException::new("This handle type is not supported"))
+        Err(OpenGlError::new("This handle type is not supported"))
     }
 
-    fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Result<Rc<dyn IGlExternalSemaphore>, OpenGlException> {
+    fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Result<Rc<dyn IGlExternalSemaphore>, OpenGlError> {
         if handle.handle_descriptor() == Some(KnownPlatformGraphicsExternalSemaphoreHandleTypes::METAL_SHARED_EVENT) {
             // SAFETY: by its descriptor the handle is an
             // `id<MTLSharedEvent>`, which the caller keeps alive for the
@@ -775,11 +775,11 @@ impl IGlContextExternalObjectsFeature for GlExternalObjectsFeature {
             // the event.
             let imported = unsafe { self.display.factory().import_mtl_shared_event(handle.handle() as *mut c_void) }
                 .map_err(native_error("ImportMTLSharedEvent"))?
-                .ok_or_else(|| OpenGlException::new("ImportMTLSharedEvent returned no event"))?;
+                .ok_or_else(|| OpenGlError::new("ImportMTLSharedEvent returned no event"))?;
             return Ok(Rc::new(MtlEventSemaphore::new(imported)));
         }
 
-        Err(OpenGlException::new("This handle type is not supported"))
+        Err(OpenGlError::new("This handle type is not supported"))
     }
 
     fn get_synchronization_capabilities(

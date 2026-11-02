@@ -1067,7 +1067,7 @@ fn crate_file(assembly_name: &str, modules: &[Module], loaders: &[String], asset
     text.push_str("    pub fn try_load(\n");
     text.push_str("        service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
     text.push_str("        uri: &str,\n");
-    text.push_str("    ) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {\n");
+    text.push_str("    ) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadError> {\n");
     let tables = loaders
         .iter()
         .cloned()

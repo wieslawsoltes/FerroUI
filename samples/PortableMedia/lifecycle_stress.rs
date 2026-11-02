@@ -103,18 +103,23 @@ async fn exercise(
             providers::video(&*interop, budget.clone()).map_err(|e| e.to_string())?
         };
         let player = MediaPlayer::new(provider);
+        eprintln!("LIFECYCLE_STAGE cycle={} open-cancel", cycle + 1);
         // Cancel only after the real native worker has started opening.
         let opening = pending_native(player.set_source(resource.clone())).await?;
         player.clear_source();
         cancelled(opening).await?;
         retired(budget.clone()).await?;
+        eprintln!("LIFECYCLE_STAGE cycle={} open-replace", cycle + 1);
         // Replace an actual in-flight open, keeping its future alive to observe
         // cancellation instead of relying on dropping an unpolled future.
         let opening = pending_native(player.set_source(source.clone())).await?;
+        eprintln!("LIFECYCLE_STAGE cycle={} replace-native-pending", cycle + 1);
         let replacement = player.set_source(resource.clone());
         cancelled(opening).await?;
         replacement.await.map_err(|e| e.to_string())?;
+        eprintln!("LIFECYCLE_STAGE cycle={} replace-native-ready", cycle + 1);
         let old = new_frame(player.clone()).await?;
+        eprintln!("LIFECYCLE_STAGE cycle={} seek-overlap", cycle + 1);
         let mut pending = Vec::new();
         for index in 0..12 {
             let mut seek = player.seek(Duration::from_millis(100 + index * 30));
@@ -156,6 +161,7 @@ async fn exercise(
             cancelled(seeking).await?;
         }
         replace.await.map_err(|e| e.to_string())?;
+        eprintln!("LIFECYCLE_STAGE cycle={} seek-replace-frame", cycle + 1);
         let fresh = new_frame(player.clone()).await?;
         if fresh.metadata().identity.generation <= old.metadata().identity.generation {
             return Err("Replaced source published stale generation".into());
@@ -170,6 +176,7 @@ async fn exercise(
             providers::camera(&*interop, budget.clone()).map_err(|e| e.to_string())?,
             budget.clone(),
         );
+        eprintln!("LIFECYCLE_STAGE cycle={} camera-open-close", cycle + 1);
         let mut options = CameraStartOptions::default();
         options.selection.device_id = Some("ferroui:synthetic-camera/recovery".into());
         let (opening_window, opening_view) = child(&window);
@@ -193,6 +200,7 @@ async fn exercise(
         retired(budget.clone()).await?;
 
         let (photo_window, photo_view) = child(&window);
+        eprintln!("LIFECYCLE_STAGE cycle={} camera-photo-start", cycle + 1);
         settle().await?;
         let calls = Rc::new(Cell::new(0));
         let observed = calls.clone();
@@ -217,6 +225,7 @@ async fn exercise(
         let session =
             wait(move || Ok(observed.session().filter(|s| s.frames().latest().is_some()))).await?;
         let before = ferroui_media_camera_windows::synthetic_photo_jobs_started();
+        eprintln!("LIFECYCLE_STAGE cycle={} camera-photo-job", cycle + 1);
         let observed = session.clone();
         let photo = wait(move || {
             let photo = observed.photo();
@@ -227,6 +236,7 @@ async fn exercise(
         })
         .await?;
         let close = photo_window.clone();
+        eprintln!("LIFECYCLE_STAGE cycle={} photo-recovery-close", cycle + 1);
         let subscription = compositor.render_context_changed(move |state| {
             if state == ferroui_base::rendering::composition::RenderContextState::Created {
                 close.close();

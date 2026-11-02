@@ -8,7 +8,7 @@ use std::rc::Rc;
 ///
 /// An error that reaches this observable while nothing subscribes to it goes to
 /// [`RxState::default_exception_handler`](crate::RxState::default_exception_handler), which
-/// panics with an [`UnhandledErrorException`](crate::UnhandledErrorException).
+/// panics with an [`UnhandledError`](crate::UnhandledError).
 pub trait IHandleObservableErrors {
     /// The errors of the object's pipelines (`ThrownExceptions`).
     fn thrown_exceptions(&self) -> Rc<dyn IObservable<ObservableError>>;

@@ -3,7 +3,7 @@
 
 use crate::data::core::{UntypedObservableBindingExpression, ValueTypes};
 use crate::data::{BindingBase, BindingExpressionBase, BindingPriority, BindingValue};
-use crate::reactive::{Disposable, IDisposable, IObservable, IObserver, ObservableExt};
+use crate::reactive::{Disposable, IDisposable, IObservable, IObserver, ObservableExt, Subscription};
 use crate::{
     AttachedProperty, BoxedValue, DirectProperty, DirectPropertyBase, FerroObject, FerroProperty,
     FerroPropertyChangedEventArgs, ObjectType, PropertyValue, StyledProperty, WeakRef,
@@ -445,26 +445,33 @@ pub struct ObjectPropertyChangedObservable {
 }
 
 impl ObjectPropertyChangedObservable {
-    /// Subscribes to changes of the property on the object. Disposing the
-    /// returned handle unsubscribes.
-    pub fn subscribe(&self, handler: impl Fn(&FerroPropertyChangedEventArgs<'_>) + 'static) -> Rc<dyn IDisposable> {
+    /// Subscribes to changes of the property on the object.
+    ///
+    /// Dropping the returned guard removes the handler; call
+    /// [`detach`](Subscription::detach) to keep it for the life of the
+    /// object.
+    pub fn subscribe(&self, handler: impl Fn(&FerroPropertyChangedEventArgs<'_>) + 'static) -> Subscription {
         let property = self.property;
-        match self.target.upgrade() {
+        Subscription::new(match self.target.upgrade() {
             Some(target) => target.property_changed(move |e| {
                 if e.property() == property {
                     handler(e);
                 }
             }),
             None => Disposable::empty(),
-        }
+        })
     }
 
     /// Subscribes a handler that is only invoked when the object is of class
     /// `TTarget` (or a class derived from it).
+    ///
+    /// Dropping the returned guard removes the handler; call
+    /// [`detach`](Subscription::detach) to keep it for the life of the
+    /// object.
     pub fn add_class_handler<TTarget: ObjectType>(
         &self,
         handler: impl Fn(&TTarget, &FerroPropertyChangedEventArgs<'_>) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         self.subscribe(move |e| {
             if let Some(target) = e.sender().downcast_ref::<TTarget>() {
                 handler(target, e);
@@ -488,7 +495,7 @@ struct PropertyObservable<TResult: Clone + 'static> {
     value: RefCell<Option<TResult>>,
     observers: RefCell<Vec<(u64, Rc<dyn IObserver<TResult>>)>>,
     next_id: Cell<u64>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl<TResult: Clone + 'static> PropertyObservable<TResult> {
@@ -521,7 +528,7 @@ impl<TResult: Clone + 'static> PropertyObservable<TResult> {
         // observers, even if the caller dropped its own reference.
         let Some(this) = self.this.upgrade() else { return };
         let subscription = target.property_changed(move |e| this.property_changed(e));
-        *self.subscription.borrow_mut() = Some(subscription);
+        *self.subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 
     fn deinitialize(&self) {

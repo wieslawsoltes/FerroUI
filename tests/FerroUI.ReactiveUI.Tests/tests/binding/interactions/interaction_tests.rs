@@ -21,7 +21,7 @@ const HANDLER_ERROR_MESSAGE: &str = "test error";
 const REGISTERED_HANDLER_COUNT: usize = 2;
 
 fn is_unhandled<I: 'static, O: 'static>(error: &ObservableError) -> bool {
-    error.downcast_ref::<UnhandledInteractionException<I, O>>().is_some()
+    error.downcast_ref::<UnhandledInteractionError<I, O>>().is_some()
 }
 
 #[test]
@@ -245,7 +245,7 @@ fn handle_with_scheduler_falls_to_next_handler() {
 }
 
 /// The handler throws before it gives a task (`static Task (_) => throw ...`): here it panics,
-/// and the question fails with the panic as a `PanicException`.
+/// and the question fails with the panic as a `PanicError`.
 #[test]
 fn handle_with_scheduler_handler_throws_faults_handle() {
     let interaction = Interaction::<String, bool>::with_scheduler(Some(immediate()));
@@ -254,7 +254,7 @@ fn handle_with_scheduler_handler_throws_faults_handle() {
 
     let error = block_on(interaction.handle(HANDLE_INPUT.to_owned())).expect_err("the handler fails");
 
-    assert!(error.downcast_ref::<PanicException>().is_some());
+    assert!(error.downcast_ref::<PanicError>().is_some());
     assert_eq!(error.to_string(), HANDLER_ERROR_MESSAGE);
     registration.dispose();
 }

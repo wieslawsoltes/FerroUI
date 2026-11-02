@@ -64,7 +64,7 @@ fn count_properties(target: &Target, raised: &Rc<Cell<i32>>) {
 
 fn count_selection_changed(target: &Target, raised: &Rc<Cell<i32>>) {
     let r = raised.clone();
-    target.selection_changed(move |_| inc(&r));
+    target.selection_changed(move |_| inc(&r)).detach();
 }
 
 mod source {
@@ -82,7 +82,7 @@ mod source {
             assert_eq!(e.selected_indexes().to_vec(), vec![5]);
             assert_eq!(e.selected_items().to_vec(), vec![None]);
             inc(&r);
-        });
+        }).detach();
 
         target.set_selected_index(5);
 
@@ -140,7 +140,7 @@ mod source {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         target.set_source(source(&["foo", "bar", "baz"]));
 
@@ -165,7 +165,7 @@ mod source {
             assert_eq!(e.selected_indexes().to_vec(), vec![1]);
             assert_eq!(e.selected_items().to_vec(), strs(&["bar"]));
             inc(&r);
-        });
+        }).detach();
 
         target.set_source(source(&["foo", "bar", "baz"]));
 
@@ -269,7 +269,7 @@ mod source {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         target.set_source(source(&["qux", "quux", "corge"]));
 
@@ -349,7 +349,7 @@ mod selected_index {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         target.set_selected_index(5);
 
@@ -390,7 +390,7 @@ mod selected_index {
             assert_eq!(e.selected_indexes().to_vec(), vec![1]);
             assert_eq!(e.selected_items().to_vec(), strs(&["bar"]));
             inc(&r);
-        });
+        }).detach();
 
         target.set_selected_index(1);
 
@@ -465,7 +465,7 @@ mod selected_item {
             assert_eq!(e.selected_indexes().to_vec(), vec![1]);
             assert_eq!(e.selected_items().to_vec(), strs(&["bar"]));
             inc(&r);
-        });
+        }).detach();
 
         target.set_selected_item(Some("bar".to_string()));
 
@@ -585,7 +585,7 @@ mod select {
             assert_eq!(e.selected_indexes().to_vec(), vec![1]);
             assert_eq!(e.selected_items().to_vec(), strs(&["bar"]));
             inc(&r);
-        });
+        }).detach();
 
         target.select(1);
 
@@ -657,7 +657,7 @@ mod deselect {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         target.deselect(0);
 
@@ -702,7 +702,7 @@ mod deselect_range {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         target.deselect_range(0, 2);
 
@@ -747,7 +747,7 @@ mod clear {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         target.clear();
 
@@ -871,7 +871,7 @@ mod collection_changes {
             assert_eq!(e.start_index(), 0);
             assert_eq!(e.delta(), 1);
             inc(&r);
-        });
+        }).detach();
 
         data.insert(0, "new".to_string());
 
@@ -895,7 +895,7 @@ mod collection_changes {
         count_properties(&target, &raised);
         count_selection_changed(&target, &raised);
         let r = raised.clone();
-        target.indexes_changed(move |_| inc(&r));
+        target.indexes_changed(move |_| inc(&r)).detach();
 
         data.insert(2, "new".to_string());
 
@@ -924,7 +924,7 @@ mod collection_changes {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         data.remove_at(1);
 
@@ -952,7 +952,7 @@ mod collection_changes {
             assert_eq!(e.start_index(), 0);
             assert_eq!(e.delta(), -1);
             inc(&r);
-        });
+        }).detach();
 
         data.remove_at(0);
 
@@ -975,7 +975,7 @@ mod collection_changes {
         count_properties(&target, &raised);
         count_selection_changed(&target, &raised);
         let r = raised.clone();
-        target.indexes_changed(move |_| inc(&r));
+        target.indexes_changed(move |_| inc(&r)).detach();
 
         data.remove_at(2);
 
@@ -1005,7 +1005,7 @@ mod collection_changes {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         data.set(1, "new".to_string());
 
@@ -1037,7 +1037,7 @@ mod collection_changes {
             assert!(e.selected_indexes().is_empty());
             assert!(e.selected_items().is_empty());
             inc(&r);
-        });
+        }).detach();
 
         data.move_item(1, 0);
 
@@ -1064,7 +1064,7 @@ mod collection_changes {
 
         count_selection_changed(&target, &selection_changed_raised);
         let r = reset_raised.clone();
-        target.source_reset(move || inc(&r));
+        target.source_reset(move || inc(&r)).detach();
 
         data.clear();
 
@@ -1119,7 +1119,7 @@ mod collection_changes {
             assert_eq!(e.selected_items().iter().next().unwrap(), Some("bar".to_string()));
             assert_eq!(e.selected_items().get(0), Some("bar".to_string()));
             inc(&r);
-        });
+        }).detach();
 
         target.select(1);
         assert_eq!(raised.get(), 1);
@@ -1177,12 +1177,12 @@ mod lost_selection {
             assert_eq!(e.selected_indexes().to_vec(), vec![0]);
             assert_eq!(e.selected_items().to_vec(), strs(&["foo"]));
             inc(&r);
-        });
+        }).detach();
 
         let t = target.clone();
         target.lost_selection(move || {
             t.select(0);
-        });
+        }).detach();
 
         target.clear();
 
@@ -1204,12 +1204,12 @@ mod lost_selection {
             assert_eq!(e.selected_indexes().to_vec(), vec![0]);
             assert_eq!(e.selected_items().to_vec(), strs(&["foo"]));
             inc(&r);
-        });
+        }).detach();
 
         let t = target.clone();
         target.lost_selection(move || {
             t.select(0);
-        });
+        }).detach();
 
         data.remove_at(1);
 
@@ -1228,7 +1228,7 @@ mod lost_selection {
             if t.source().as_ref() == Some(&data_source) {
                 inc(&r);
             }
-        });
+        }).detach();
 
         target.set_source(None);
 
@@ -1249,7 +1249,7 @@ mod lost_selection {
             if t.source().as_ref() == Some(&data2_source) {
                 inc(&r);
             }
-        });
+        }).detach();
 
         update_source(&target, Some(data2.clone().into()));
 

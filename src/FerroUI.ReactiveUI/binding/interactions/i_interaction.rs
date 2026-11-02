@@ -31,7 +31,7 @@ pub trait IInteraction<I, O> {
 
     /// Asks the question: a cold observable that runs the handlers, latest registered first, until
     /// one sets an output, each time it is subscribed, then notifies the output and ends. It fails
-    /// with [`UnhandledInteractionException`](super::UnhandledInteractionException) when no handler
+    /// with [`UnhandledInteractionError`](super::UnhandledInteractionError) when no handler
     /// sets one (`Handle(TInput)`).
     fn handle(&self, input: I) -> Rc<dyn IObservable<O>>;
 }

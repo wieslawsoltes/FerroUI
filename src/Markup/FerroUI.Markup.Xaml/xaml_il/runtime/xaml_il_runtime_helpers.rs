@@ -7,7 +7,7 @@ use super::{
 };
 use crate::object_casts::{as_object, rc_of};
 use crate::{
-    EagerParentStackEnumerator, IRootObjectProvider, IXamlTypeResolver, ServiceProviderExtensions, XamlLoadException,
+    EagerParentStackEnumerator, IRootObjectProvider, IXamlTypeResolver, ServiceProviderExtensions, XamlLoadError,
     XamlResourceNode,
 };
 use ferroui_base::controls::{ChildNameScope, IDeferredContent, INameScope, NameScope, NameScopeRef};
@@ -40,7 +40,7 @@ pub use reload::{DeferredContentRebase, DeferredContentReloadScope};
 /// throw, and is the error of the instantiation.
 #[derive(Clone)]
 pub struct DeferredContentBuilder(
-    Rc<dyn Fn(&Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadException>>,
+    Rc<dyn Fn(&Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadError>>,
 );
 
 impl DeferredContentBuilder {
@@ -51,20 +51,20 @@ impl DeferredContentBuilder {
 
     /// A builder that can fail.
     pub fn try_new(
-        builder: impl Fn(&Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadException> + 'static,
+        builder: impl Fn(&Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadError> + 'static,
     ) -> Self {
         Self(Rc::new(builder))
     }
 
     /// Wraps a shared builder function.
     pub fn from_rc(
-        builder: Rc<dyn Fn(&Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadException>>,
+        builder: Rc<dyn Fn(&Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadError>>,
     ) -> Self {
         Self(builder)
     }
 
     /// Calls the builder.
-    pub fn invoke(&self, service_provider: &Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadException> {
+    pub fn invoke(&self, service_provider: &Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadError> {
         (self.0)(service_provider)
     }
 }
@@ -212,7 +212,7 @@ impl DeferredContent {
     pub fn try_build_with(
         &self,
         service_provider: Option<&Rc<dyn IServiceProvider>>,
-    ) -> Result<DeferredResult, XamlLoadException> {
+    ) -> Result<DeferredResult, XamlLoadError> {
         let scope = match self.parent_name_scope.as_ref().and_then(Weak::upgrade) {
             None => NameScopeRef::new(NameScope::new()),
             Some(parent) => NameScopeRef::new(ChildNameScope::new(NameScopeRef(parent))),
@@ -242,7 +242,7 @@ impl DeferredContent {
 
         if let Some(obj) = &obj {
             if !self.result_type.is_object() && !ValueTypes::is_assignable(ValueType::of_value(&**obj), self.result_type) {
-                return Err(XamlLoadException::with_message(format!(
+                return Err(XamlLoadError::with_message(format!(
                     "Unable to cast object of type '{}' to type '{}'.",
                     (**obj).type_name(),
                     self.result_type
@@ -444,12 +444,12 @@ impl XamlIlRuntimeHelpers {
     /// service provider when no platform was registered.
     pub fn get_runtime_platform(
         service_provider: &Rc<dyn IServiceProvider>,
-    ) -> Result<Option<Rc<dyn IRuntimePlatform>>, XamlLoadException> {
+    ) -> Result<Option<Rc<dyn IRuntimePlatform>>, XamlLoadError> {
         if let Some(platform) = service_provider.get_service_of::<Rc<dyn IRuntimePlatform>>() {
             return Ok(Some(platform));
         }
         if service_provider.get_service_of::<RuntimePlatformNotRegistered>().is_some() {
-            return Err(XamlLoadException::with_message("IRuntimePlatform was not registered"));
+            return Err(XamlLoadError::with_message("IRuntimePlatform was not registered"));
         }
         Ok(None)
     }
@@ -505,8 +505,8 @@ impl XamlIlRuntimeHelpers {
         result_type: ValueType,
         builder: DeferredContentBuilder,
         provider: &Rc<dyn IServiceProvider>,
-    ) -> Result<Rc<DeferredContent>, XamlLoadException> {
-        let missing = |service: &str| XamlLoadException::with_message(format!("Service {service} hasn't been registered"));
+    ) -> Result<Rc<DeferredContent>, XamlLoadError> {
+        let missing = |service: &str| XamlLoadError::with_message(format!("Service {service} hasn't been registered"));
         let parent_stack = provider
             .get_service_of::<Rc<dyn IFerroXamlIlParentStackProvider>>()
             .ok_or_else(|| missing("IFerroXamlIlParentStackProvider"))?;
@@ -595,7 +595,7 @@ impl XamlIlRuntimeHelpers {
         property: Option<&BoxedValue>,
         _prov: &Rc<dyn IServiceProvider>,
         value: Option<&BoxedValue>,
-    ) -> Result<(), XamlLoadException> {
+    ) -> Result<(), XamlLoadError> {
         let ferro_property = property.and_then(|p| p.downcast_ref::<&'static FerroProperty>().copied());
         let describe = |value: Option<&BoxedValue>| match value {
             Some(value) => ValueTypes::try_to_string(&**value).unwrap_or_else(|| (**value).type_name().to_string()),
@@ -603,7 +603,7 @@ impl XamlIlRuntimeHelpers {
         };
         let target_object = || {
             target.and_then(as_object).ok_or_else(|| {
-                XamlLoadException::with_message(format!(
+                XamlLoadError::with_message(format!(
                     "Unable to cast object of type '{}' to type 'FerroObject'.",
                     target.map_or("(null)", |t| (**t).type_name())
                 ))
@@ -616,7 +616,7 @@ impl XamlIlRuntimeHelpers {
                     target_object()?.bind_binding(p, &*binding);
                     Ok(())
                 }
-                None => Err(XamlLoadException::with_message(format!(
+                None => Err(XamlLoadError::with_message(format!(
                     "Attempt to apply binding to non-ferro property {}",
                     describe(property)
                 ))),
@@ -627,7 +627,7 @@ impl XamlIlRuntimeHelpers {
             }
             Ok(())
         } else {
-            Err(XamlLoadException::with_message(format!(
+            Err(XamlLoadError::with_message(format!(
                 "Don't know what to do with {}",
                 value.map_or("(null)", |v| (**v).type_name())
             )))
@@ -737,14 +737,14 @@ impl XamlTypeResolver {
 }
 
 impl IXamlTypeResolver for XamlTypeResolver {
-    fn resolve(&self, qualified_type_name: &str) -> Result<CastTarget, XamlLoadException> {
+    fn resolve(&self, qualified_type_name: &str) -> Result<CastTarget, XamlLoadError> {
         let (ns, name) = match qualified_type_name.split_once(':') {
             Some((ns, name)) => (ns, name),
             None => ("", qualified_type_name),
         };
         let namespaces = self.ns_info.xml_namespaces();
         let Some(lst) = namespaces.get(ns) else {
-            return Err(XamlLoadException::with_message(format!(
+            return Err(XamlLoadError::with_message(format!(
                 "Unable to resolve namespace for type {qualified_type_name}"
             )));
         };
@@ -758,7 +758,7 @@ impl IXamlTypeResolver for XamlTypeResolver {
         let locations: Vec<String> = resolvable
             .map(|e| format!("`clr-namespace:{};assembly={}`", e.clr_namespace(), e.clr_assembly_name()))
             .collect();
-        Err(XamlLoadException::with_message(format!(
+        Err(XamlLoadError::with_message(format!(
             "Unable to resolve type {qualified_type_name} from any of the following locations: {}",
             locations.join(",")
         )))

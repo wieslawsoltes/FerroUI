@@ -108,7 +108,7 @@ impl TabbedPageEventsPage {
                 if let Some(this) = weak.upgrade() {
                     this.append_log(&format!("NavigatedTo: {name} (from {})", header_text(args.previous_page())));
                 }
-            });
+            }).detach();
             let weak = self.to_ref().downgrade();
             page.navigated_from(move |args| {
                 if let Some(this) = weak.upgrade() {
@@ -117,7 +117,7 @@ impl TabbedPageEventsPage {
                         header_text(args.destination_page())
                     ));
                 }
-            });
+            }).detach();
 
             pages_list.add(page.upcast());
         }

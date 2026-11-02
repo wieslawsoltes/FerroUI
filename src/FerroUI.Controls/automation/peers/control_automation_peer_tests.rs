@@ -27,7 +27,7 @@ fn panel_with_two_borders() -> Ref<Panel> {
 fn record(peer: &Ref<AutomationPeer>) -> Rc<RefCell<Vec<AutomationPropertyChangedEventArgs>>> {
     let raised = Rc::new(RefCell::new(Vec::new()));
     let sink = raised.clone();
-    peer.property_changed(move |e| sink.borrow_mut().push(e.clone()));
+    peer.property_changed(move |e| sink.borrow_mut().push(e.clone())).detach();
     raised
 }
 

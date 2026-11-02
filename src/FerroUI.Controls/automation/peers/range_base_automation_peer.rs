@@ -1,6 +1,6 @@
 use super::{AutomationPeer, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl};
 use crate::automation::provider::{IRangeValueProvider, ProviderAdapter};
-use crate::automation::{ElementNotEnabledException, RangeValuePatternIdentifiers};
+use crate::automation::{ElementNotEnabledError, RangeValuePatternIdentifiers};
 use crate::primitives::RangeBase;
 use ferroui_base::{
     ferro_class, BoxedValue, FerroObjectImpl, FerroObjectImplExt, FerroPropertyChangedEventArgs, Ref,
@@ -97,7 +97,7 @@ impl IRangeValueProvider for ProviderAdapter<RangeBaseAutomationPeer> {
         self.0.small_change()
     }
 
-    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledException> {
+    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledError> {
         self.0.set_value(value)
     }
 }
@@ -141,7 +141,7 @@ impl RangeBaseAutomationPeer {
     }
 
     /// Sets the value of the control (the range value provider contract).
-    pub fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledException> {
+    pub fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledError> {
         self.owner().set_range_value(value);
         Ok(())
     }

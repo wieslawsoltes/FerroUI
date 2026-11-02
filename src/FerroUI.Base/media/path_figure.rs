@@ -1,7 +1,7 @@
 use crate::media::media_collection::track_item_property_changed;
 use crate::media::PathSegments;
 use crate::platform::IGeometryContext;
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::utilities::HandlerList;
 use crate::{
     ferro_class, ferro_property, instantiate, DirectProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt,
@@ -18,8 +18,8 @@ pub struct PathFigure {
     base: FerroObject,
     segments_invalidated: HandlerList<dyn Fn()>,
     segments: RefCell<Option<PathSegments>>,
-    segments_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
-    segments_properties_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    segments_disposable: RefCell<Option<Subscription>>,
+    segments_properties_disposable: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(PathFigure: FerroObject);
@@ -57,7 +57,7 @@ crate::ferro_properties! { impl PathFigure {
 
 impl PathFigure {
     fn static_constructor() {
-        Self::segments_property().changed().add_class_handler::<PathFigure>(|s, _| s.on_segments_changed());
+        Self::segments_property().changed().add_class_handler::<PathFigure>(|s, _| s.on_segments_changed()).detach();
     }
 
     /// Creates the class data.
@@ -76,16 +76,16 @@ impl PathFigure {
         instantiate(Self::construct())
     }
 
-    /// Subscribes to invalidation of the figure's segments. Disposing the
-    /// returned handle unsubscribes.
-    pub(crate) fn segments_invalidated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Subscribes to invalidation of the figure's segments. Dropping the
+    /// returned guard removes the handler.
+    pub(crate) fn segments_invalidated(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.segments_invalidated.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.segments_invalidated.remove(token);
             }
-        })
+        }))
     }
 
     fn on_segments_changed(&self) {

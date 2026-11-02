@@ -515,7 +515,7 @@ fn selection_box_item_rectangle_is_removed_from_logical_tree() {
     assert!(target.is_attached_to_logical_tree());
     assert!(rectangle.is_attached_to_logical_tree());
 
-    rectangle.detached_from_logical_tree(|_| {});
+    rectangle.detached_from_logical_tree(|_| {}).detach();
 
     root.set_child(None);
 
@@ -794,7 +794,7 @@ fn close_window_on_alt_f4_when_combo_box_is_focus() {
     window.set_content(Some(Control::boxed(target.clone())));
 
     let counter = count.clone();
-    window.closing(move |_| counter.set(counter.get() + 1));
+    window.closing(move |_| counter.set(counter.get() + 1)).detach();
 
     window.show();
 
@@ -1336,9 +1336,9 @@ fn opening_and_closing_the_popup_raises_drop_down_events() {
     let opened = Rc::new(Cell::new(0));
     let closed = Rc::new(Cell::new(0));
     let counter = opened.clone();
-    target.drop_down_opened(move || counter.set(counter.get() + 1));
+    target.drop_down_opened(move || counter.set(counter.get() + 1)).detach();
     let counter = closed.clone();
-    target.drop_down_closed(move || counter.set(counter.get() + 1));
+    target.drop_down_closed(move || counter.set(counter.get() + 1)).detach();
 
     let _window = show_window(&target);
 

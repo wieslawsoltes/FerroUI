@@ -2,7 +2,7 @@ use super::{
     impl_untyped_binding_expression, Publish, UntypedBindingExpression, UntypedBindingExpressionBase, ValueType, ValueTypes,
 };
 use crate::data::{BindingMode, BindingPriority};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::{BoxedValue, FerroObject, FerroProperty, WeakRef};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -23,8 +23,8 @@ pub struct IndexerBindingExpression {
     target: WeakRef<FerroObject>,
     target_property: Option<&'static FerroProperty>,
     mode: BindingMode,
-    source_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    target_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    source_subscription: RefCell<Option<Subscription>>,
+    target_subscription: RefCell<Option<Subscription>>,
 }
 
 impl IndexerBindingExpression {
@@ -116,7 +116,7 @@ impl UntypedBindingExpression for IndexerBindingExpression {
                         source.set_value_untyped(this.source_property, e.new_value(), BindingPriority::LocalValue);
                     }
                 });
-                self.target_subscription.replace(Some(subscription));
+                self.target_subscription.replace(Some(Subscription::new(subscription)));
             }
         }
 
@@ -131,7 +131,7 @@ impl UntypedBindingExpression for IndexerBindingExpression {
                         }
                     }
                 });
-                self.source_subscription.replace(Some(subscription));
+                self.source_subscription.replace(Some(Subscription::new(subscription)));
             }
             self.publish_source_value();
         }

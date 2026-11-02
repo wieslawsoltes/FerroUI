@@ -8,7 +8,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::logical_tree::LogicalTreeAttachmentEventArgs;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, BoxedValue, FerroObjectImpl,
     FerroProperty, FerroPropertyChangedEventArgs, Ref, StaticType, StyledElement, StyledElementImpl,
@@ -21,7 +21,7 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct HeaderedItemsControl {
     base: ItemsControl,
-    items_binding: RefCell<Option<Rc<dyn IDisposable>>>,
+    items_binding: RefCell<Option<Subscription>>,
     prepare_item_container_on_attach: RefCell<Option<WeakRef<ItemsControl>>>,
     header_presenter: RefCell<Option<Ref<ContentPresenter>>>,
 }
@@ -105,7 +105,7 @@ ferroui_base::ferro_properties! { impl HeaderedItemsControl {
 impl HeaderedItemsControl {
     fn static_constructor() {
         register_content_presenter_host::<HeaderedItemsControl>();
-        Self::header_property().changed().add_class_handler::<HeaderedItemsControl>(|x, e| x.header_changed(e));
+        Self::header_property().changed().add_class_handler::<HeaderedItemsControl>(|x, e| x.header_changed(e)).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -170,7 +170,7 @@ impl HeaderedItemsControl {
             if tree_template.match_(Some(&item)) {
                 let items_binding =
                     tree_template.bind_children(self, ItemsControl::items_source_property().as_property(), &item);
-                *self.items_binding.borrow_mut() = Some(items_binding);
+                *self.items_binding.borrow_mut() = Some(Subscription::new(items_binding));
             }
         }
     }

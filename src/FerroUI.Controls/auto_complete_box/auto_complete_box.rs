@@ -34,7 +34,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::IBrush;
-use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::threading::{
     CancellationToken, CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTimer,
     FerroSynchronizationContext, OperationCanceledError,
@@ -265,7 +265,7 @@ pub struct AutoCompleteBox {
 
     /// The text box template part.
     text_box: RefCell<Option<Ref<TextBox>>>,
-    text_box_subscriptions: RefCell<Option<Rc<dyn IDisposable>>>,
+    text_box_subscriptions: RefCell<Option<Subscription>>,
 
     /// The selection adapter, with the subscriptions to its events.
     adapter: RefCell<Option<Rc<dyn ISelectionAdapter>>>,
@@ -287,7 +287,7 @@ pub struct AutoCompleteBox {
 
     /// The drop down popup control, with the subscription to its closed
     /// event.
-    drop_down_popup: RefCell<Option<(Ref<Popup>, Rc<dyn IDisposable>)>>,
+    drop_down_popup: RefCell<Option<(Ref<Popup>, Subscription)>>,
 
     populating: HandlerList<dyn Fn(&PopulatingEventArgs)>,
     populated: HandlerList<dyn Fn(&PopulatedEventArgs)>,
@@ -937,32 +937,41 @@ impl AutoCompleteBox {
 
         Self::minimum_populate_delay_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_minimum_populate_delay_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_minimum_populate_delay_changed(e))
+            .detach();
         Self::is_drop_down_open_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_is_drop_down_open_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_is_drop_down_open_changed(e))
+            .detach();
         Self::selected_item_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_selected_item_property_changed(e));
-        Self::text_property().changed().add_class_handler::<AutoCompleteBox>(|x, e| x.on_text_property_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_selected_item_property_changed(e))
+            .detach();
+        Self::text_property().changed().add_class_handler::<AutoCompleteBox>(|x, e| x.on_text_property_changed(e)).detach();
         Self::search_text_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_search_text_property_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_search_text_property_changed(e))
+            .detach();
         Self::filter_mode_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_filter_mode_property_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_filter_mode_property_changed(e))
+            .detach();
         Self::item_filter_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_item_filter_property_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_item_filter_property_changed(e))
+            .detach();
         Self::items_source_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_items_source_property_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_items_source_property_changed(e))
+            .detach();
         Self::item_template_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_item_template_property_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_item_template_property_changed(e))
+            .detach();
         InputElement::is_enabled_property()
             .changed()
-            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_control_is_enabled_changed(e));
+            .add_class_handler::<AutoCompleteBox>(|x, e| x.on_control_is_enabled_changed(e))
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -1347,7 +1356,7 @@ impl AutoCompleteBox {
                         this.on_text_box_text_changed();
                     }
                 });
-            *self.text_box_subscriptions.borrow_mut() = Some(subscription);
+            *self.text_box_subscriptions.borrow_mut() = Some(Subscription::new(subscription));
 
             if let Some(text) = self.text() {
                 self.update_text_value(Some(text), None);
@@ -1532,38 +1541,60 @@ impl AutoCompleteBox {
     /// contained in the drop-down. In this case, if you want possible
     /// matches to appear, you must provide the logic for populating the
     /// selection adapter.
-    pub fn populating(&self, handler: impl Fn(&PopulatingEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscription::<dyn Fn(&PopulatingEventArgs)>(|this| &this.populating, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the box.
+    pub fn populating(&self, handler: impl Fn(&PopulatingEventArgs) + 'static) -> Subscription {
+        Subscription::new(self.subscription::<dyn Fn(&PopulatingEventArgs)>(|this| &this.populating, Rc::new(handler)))
     }
 
     /// Occurs when the [`AutoCompleteBox`] has populated the drop-down with
     /// possible matches based on the `Text` property.
-    pub fn populated(&self, handler: impl Fn(&PopulatedEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscription::<dyn Fn(&PopulatedEventArgs)>(|this| &this.populated, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the box.
+    pub fn populated(&self, handler: impl Fn(&PopulatedEventArgs) + 'static) -> Subscription {
+        Subscription::new(self.subscription::<dyn Fn(&PopulatedEventArgs)>(|this| &this.populated, Rc::new(handler)))
     }
 
     /// Occurs when the value of the `IsDropDownOpen` property is changing
     /// from false to true.
-    pub fn drop_down_opening(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscription::<dyn Fn(&CancelEventArgs)>(|this| &this.drop_down_opening, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the box.
+    pub fn drop_down_opening(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Subscription {
+        Subscription::new(
+            self.subscription::<dyn Fn(&CancelEventArgs)>(|this| &this.drop_down_opening, Rc::new(handler)),
+        )
     }
 
     /// Occurs when the value of the `IsDropDownOpen` property has changed
     /// from false to true and the drop-down is open.
-    pub fn drop_down_opened(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
-        self.subscription::<dyn Fn()>(|this| &this.drop_down_opened, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the box.
+    pub fn drop_down_opened(&self, handler: impl Fn() + 'static) -> Subscription {
+        Subscription::new(self.subscription::<dyn Fn()>(|this| &this.drop_down_opened, Rc::new(handler)))
     }
 
     /// Occurs when the `IsDropDownOpen` property is changing from true to
     /// false.
-    pub fn drop_down_closing(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscription::<dyn Fn(&CancelEventArgs)>(|this| &this.drop_down_closing, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the box.
+    pub fn drop_down_closing(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Subscription {
+        Subscription::new(
+            self.subscription::<dyn Fn(&CancelEventArgs)>(|this| &this.drop_down_closing, Rc::new(handler)),
+        )
     }
 
     /// Occurs when the `IsDropDownOpen` property was changed from true to
     /// false and the drop-down is open.
-    pub fn drop_down_closed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
-        self.subscription::<dyn Fn()>(|this| &this.drop_down_closed, Rc::new(handler))
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the box.
+    pub fn drop_down_closed(&self, handler: impl Fn() + 'static) -> Subscription {
+        Subscription::new(self.subscription::<dyn Fn()>(|this| &this.drop_down_closed, Rc::new(handler)))
     }
 
     /// Occurs when the selected item in the drop-down portion of the

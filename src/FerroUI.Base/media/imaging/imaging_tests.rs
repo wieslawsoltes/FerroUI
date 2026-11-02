@@ -728,7 +728,7 @@ fn cropped_bitmap_reports_the_cropped_size() {
 
         let count = Rc::new(Cell::new(0));
         let c = count.clone();
-        target.invalidated(move || c.set(c.get() + 1));
+        target.invalidated(move || c.set(c.get() + 1)).detach();
 
         target.set_source(Some(source.clone()));
         assert_eq!(1, count.get());

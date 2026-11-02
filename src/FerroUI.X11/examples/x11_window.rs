@@ -184,8 +184,8 @@ mod app {
         window.set_height(HEIGHT);
         window.set_content(Some(Control::boxed(border.clone())));
 
-        window.opened(|| println!("Window opened"));
-        window.closed(|| println!("Window closed"));
+        window.opened(|| println!("Window opened")).detach();
+        window.closed(|| println!("Window closed")).detach();
 
         if let Some((x, y)) = dnd::target_position() {
             // The process that only takes drops: a small window at the place it is told, whose
@@ -199,7 +199,7 @@ mod app {
                 if let Some(handle) = opened.try_get_platform_handle() {
                     println!("DND TARGET READY {}", handle.handle());
                 }
-            });
+            }).detach();
         }
 
         if std::env::args().any(|arg| arg == "--smoke") {
@@ -1191,7 +1191,8 @@ mod app {
                 },
                 duration,
                 DispatcherPriority::BACKGROUND,
-            );
+            )
+            .detach();
             std::future::poll_fn(move |cx| {
                 let _keep = &timer;
                 let mut state = state.borrow_mut();
@@ -1977,10 +1978,10 @@ mod app {
             popup.set_horizontal_offset(POPUP_OFFSET.0);
             popup.set_vertical_offset(POPUP_OFFSET.1);
             popup.set_is_light_dismiss_enabled(true);
-            let _closed = popup.closed({
+            popup.closed({
                 let closed = closed.clone();
                 move || closed.set(true)
-            });
+            }).detach();
             popup.open();
 
             let expected_position =
@@ -2957,10 +2958,10 @@ mod app {
             let file = NativeMenuItem::with_header("File");
             let file_menu = NativeMenu::new();
             let quit = NativeMenuItem::with_header("Quit");
-            let _click = {
+            {
                 let clicks = clicks.clone();
-                quit.click(move |_| clicks.set(clicks.get() + 1))
-            };
+                quit.click(move |_| clicks.set(clicks.get() + 1)).detach();
+            }
             file_menu.add(quit.clone());
             file.set_menu(Some(file_menu));
             menu.add(file);
@@ -3000,7 +3001,7 @@ mod app {
             let tray_icon = TrayIcon::new();
             let _tray_click = {
                 let tray_clicks = tray_clicks.clone();
-                tray_icon.clicked(move |_| tray_clicks.set(tray_clicks.get() + 1))
+                tray_icon.clicked(move |_| tray_clicks.set(tray_clicks.get() + 1)).detach()
             };
             // A tray icon has its platform implementation while it is one of the icons of the application.
             let tray_icons = ferroui_controls::TrayIcons::new();
@@ -3746,7 +3747,8 @@ mod app {
                 },
                 CLOSE_TIMEOUT,
                 DispatcherPriority::BACKGROUND,
-            );
+            )
+            .detach();
         }
     }
 }

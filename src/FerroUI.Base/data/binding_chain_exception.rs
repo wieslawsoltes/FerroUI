@@ -3,13 +3,17 @@ use std::fmt;
 /// An error that signals that a binding chain is broken: the value could not
 /// be read at some point of the binding path.
 #[derive(Clone, Debug, Default)]
-pub struct BindingChainException {
+pub struct BindingChainError {
     message: Option<String>,
     expression: Option<String>,
     expression_error_point: Option<String>,
 }
 
-impl BindingChainException {
+/// The name of [`BindingChainError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `BindingChainError`")]
+pub type BindingChainException = BindingChainError;
+
+impl BindingChainError {
     pub fn new() -> Self {
         Self::default()
     }
@@ -57,7 +61,7 @@ impl BindingChainException {
     }
 }
 
-impl fmt::Display for BindingChainException {
+impl fmt::Display for BindingChainError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match (&self.expression, &self.expression_error_point, &self.message) {
             (Some(expression), Some(point), Some(message)) => {
@@ -72,4 +76,4 @@ impl fmt::Display for BindingChainException {
     }
 }
 
-impl std::error::Error for BindingChainException {}
+impl std::error::Error for BindingChainError {}

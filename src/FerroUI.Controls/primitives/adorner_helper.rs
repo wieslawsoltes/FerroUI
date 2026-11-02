@@ -1,5 +1,5 @@
 use ferroui_base::media::{CombinedGeometry, Geometry, GeometryCombineMode, MatrixTransform, RectangleGeometry};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::{FerroPropertyChangedEventArgs, Rect, Ref, Visual, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -10,15 +10,18 @@ pub struct AdornerHelper;
 
 impl AdornerHelper {
     /// Calls `changed` whenever the bounds or the render transform (with
-    /// `include_clip` also the clip) of the visual or of one of its
-    /// ancestors changes, and when the visual is attached to or detached
-    /// from a visual tree. Disposing the returned handle unsubscribes.
+    /// `include_clip` also the clip) of the visual or of one of its ancestors
+    /// changes, and when the visual is attached to or detached from a visual
+    /// tree.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the visual.
     pub fn subscribe_to_ancestor_property_changes(
         visual: &Ref<Visual>,
         include_clip: bool,
         changed: impl Fn() + 'static,
-    ) -> Rc<dyn IDisposable> {
-        AncestorPropertyChangesSubscription::new(visual, include_clip, Rc::new(changed))
+    ) -> Subscription {
+        Subscription::new(AncestorPropertyChangesSubscription::new(visual, include_clip, Rc::new(changed)))
     }
 
     /// Calculates the clip of an adorner from the clips of the adorned
@@ -109,7 +112,7 @@ impl AncestorPropertyChangesSubscription {
             let this = this.clone();
             visual.detached_from_visual_tree(move |_| this.on_detached_from_visual_tree())
         };
-        this.attachment_subscriptions.borrow_mut().extend([attached, detached]);
+        this.attachment_subscriptions.borrow_mut().extend([attached.detach(), detached.detach()]);
 
         if visual.is_attached_to_visual_tree() {
             Self::subscribe_to_ancestors(&this);

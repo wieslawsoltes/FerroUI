@@ -220,7 +220,7 @@ fn set_value_raises_changed() {
                 && new_string(e) == "newvalue"
                 && e.priority() == BindingPriority::LocalValue,
         );
-    });
+    }).detach();
 
     target.set_direct_value(Class1::foo_property(), s("newvalue"));
 

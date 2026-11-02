@@ -234,8 +234,8 @@ mod app {
         window.set_title(Some(TITLE.to_string()));
         window.set_content(Some(Control::boxed(border)));
 
-        window.opened(|| println!("Window opened"));
-        window.closed(|| println!("Window closed"));
+        window.opened(|| println!("Window opened")).detach();
+        window.closed(|| println!("Window closed")).detach();
 
         if std::env::args().any(|arg| arg == "--smoke") {
             smoke::start(&window);
@@ -1416,7 +1416,8 @@ mod app {
                 },
                 duration,
                 DispatcherPriority::BACKGROUND,
-            );
+            )
+            .detach();
             std::future::poll_fn(move |cx| {
                 let _keep = &timer;
                 let mut state = state.borrow_mut();
@@ -3433,7 +3434,7 @@ mod app {
             let closed = Rc::new(Cell::new(false));
             {
                 let closed = closed.clone();
-                let _subscription = window.closed(move || closed.set(true));
+                window.closed(move || closed.set(true)).detach();
             }
             println!("Asking the compositor to close the window (swaymsg kill)");
             if sway::message(&["kill"]).is_none() {
@@ -3443,7 +3444,8 @@ mod app {
                 return;
             }
 
-            let _watchdog = DispatcherTimer::run_once(
+            // The timer lives until the process ends.
+            DispatcherTimer::run_once(
                 move || {
                     if !closed.get() {
                         println!("  [FAILED] close: the window did not close after the compositor asked it to");
@@ -3453,9 +3455,8 @@ mod app {
                 },
                 CLOSE_TIMEOUT,
                 DispatcherPriority::BACKGROUND,
-            );
-            // The timer lives until the process ends.
-            std::mem::forget(_watchdog);
+            )
+            .detach();
         }
     }
 }

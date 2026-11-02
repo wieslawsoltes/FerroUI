@@ -1,6 +1,6 @@
 use crate::automation::peers::AutomationPeer;
 use ferroui_base::Ref;
-use crate::automation::ElementNotEnabledException;
+use crate::automation::ElementNotEnabledError;
 
 /// Exposes methods and properties to support UI Automation client access to controls that
 /// initiate or perform a single, unambiguous action and do not maintain state when
@@ -12,7 +12,7 @@ pub trait IInvokeProvider {
     /// Sends a request to activate a control and initiate its single, unambiguous action.
     ///
     /// Windows: `IInvokeProvider.Invoke`. macOS: `NSAccessibilityProtocol.accessibilityPerformPress`.
-    fn invoke(&self) -> Result<(), ElementNotEnabledException>;
+    fn invoke(&self) -> Result<(), ElementNotEnabledError>;
 }
 
 impl PartialEq for dyn IInvokeProvider {

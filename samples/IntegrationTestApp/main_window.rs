@@ -82,7 +82,7 @@ impl MainWindow {
             if let Some(this) = weak.upgrade() {
                 this.on_position_changed(e);
             }
-        });
+        }).detach();
         this
     }
 
@@ -121,7 +121,7 @@ impl MainWindow {
                     if let Some(view_model) = weak.upgrade().and_then(|this| this.view_model()) {
                         view_model.set_selected_page(Some(page.clone()));
                     }
-                });
+                }).detach();
             }
 
             if let Some(menu) = view_menu.as_ref().and_then(|view_menu| view_menu.menu()) {

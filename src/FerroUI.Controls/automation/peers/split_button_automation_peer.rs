@@ -3,7 +3,7 @@ use super::{
     ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{IExpandCollapseProvider, IInvokeProvider, ProviderAdapter};
-use crate::automation::{ElementNotEnabledException, ExpandCollapsePatternIdentifiers, ExpandCollapseState};
+use crate::automation::{ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState};
 use crate::SplitButton;
 use ferroui_base::{ferro_class, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt, Ref};
 use std::cell::Cell;
@@ -62,7 +62,7 @@ impl IInvokeProvider for ProviderAdapter<SplitButtonAutomationPeer> {
         self.0.clone().upcast()
     }
 
-    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         self.0.ensure_enabled()?;
         self.0.owner().invoke_primary();
         Ok(())
@@ -82,11 +82,11 @@ impl IExpandCollapseProvider for ProviderAdapter<SplitButtonAutomationPeer> {
         self.0.shows_menu()
     }
 
-    fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    fn expand(&self) -> Result<(), ElementNotEnabledError> {
         self.0.expand()
     }
 
-    fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         self.0.collapse()
     }
 }
@@ -123,13 +123,13 @@ impl SplitButtonAutomationPeer {
     }
 
     /// Closes the flyout (the expand and collapse provider contract).
-    pub fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         self.owner().close_flyout_for_automation();
         Ok(())
     }
 
     /// Opens the flyout (the expand and collapse provider contract).
-    pub fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn expand(&self) -> Result<(), ElementNotEnabledError> {
         self.owner().open_flyout_for_automation();
         Ok(())
     }

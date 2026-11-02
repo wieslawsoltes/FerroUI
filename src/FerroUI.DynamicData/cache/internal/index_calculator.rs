@@ -3,7 +3,7 @@
 use super::sort_extensions::{binary_search_range, get_insert_position_linear};
 use super::{KeyComparer, KeyValueComparer};
 use crate::cache::{Change, ChangeAwareCache, ChangeReason, ChangeSet, IQuery, SortOptimisations};
-use crate::list::SortException;
+use crate::list::SortError;
 use std::cmp::Ordering;
 use std::hash::Hash;
 
@@ -27,7 +27,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> IndexCalculator<T, K> {
 
     /// Applies `changes` to the sorted pairs, and returns them with their indexes, followed by the
     /// moves that the refreshes cause (`Calculate`).
-    pub(crate) fn calculate(&mut self, changes: &ChangeSet<T, K>) -> Result<ChangeSet<T, K>, SortException> {
+    pub(crate) fn calculate(&mut self, changes: &ChangeSet<T, K>) -> Result<ChangeSet<T, K>, SortError> {
         let mut result = Vec::with_capacity(changes.count());
         let mut refreshes = Vec::with_capacity(changes.refreshes());
         for u in changes {
@@ -148,17 +148,17 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> IndexCalculator<T, K> {
         self.comparer.compare(x, y)
     }
 
-    fn get_current_position(&self, item: &(K, T)) -> Result<usize, SortException> {
+    fn get_current_position(&self, item: &(K, T)) -> Result<usize, SortError> {
         if self.optimisations.has_flag(SortOptimisations::COMPARES_IMMUTABLE_VALUES_ONLY) {
             let index = binary_search_range(&self.list, 0, self.list.len(), item, &|x, y| self.compare(x, y));
             if index < 0 {
-                return Err(SortException::new(
+                return Err(SortError::new(
                     "Current position cannot be found.  Ensure the comparer includes a unique value, or do not specify ComparesImmutableValuesOnly",
                 ));
             }
             Ok(index as usize)
         } else {
-            KeyComparer::index_of(&self.list, item).ok_or_else(|| SortException::new("Current position cannot be found. The item is not in the collection"))
+            KeyComparer::index_of(&self.list, item).ok_or_else(|| SortError::new("Current position cannot be found. The item is not in the collection"))
         }
     }
 

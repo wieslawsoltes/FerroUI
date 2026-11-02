@@ -5,7 +5,7 @@ use ferroui_base::input::{InputElementImpl, PullDirection};
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::TranslateTransform;
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{ObservableExt, Subscription};
 use ferroui_base::animation::easings::{Easing, LinearEasing};
 use ferroui_base::numerics::Vector3;
 use ferroui_base::rendering::composition::animations::{AnimationIterationBehavior, AnimationStopBehavior};
@@ -33,8 +33,8 @@ pub struct RefreshVisualizer {
     initial_visual_offset: Cell<Vector3D>,
     refresh_visualizer_state: Cell<RefreshVisualizerState>,
     refresh_info_provider: RefCell<Option<Ref<RefreshInfoProvider>>>,
-    is_interacting_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    interaction_ratio_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    is_interacting_subscription: RefCell<Option<Subscription>>,
+    interaction_ratio_subscription: RefCell<Option<Subscription>>,
     is_interacting_for_refresh: Cell<bool>,
     root: RefCell<Option<Ref<Grid>>>,
     content: RefCell<Option<Ref<Control>>>,
@@ -527,7 +527,7 @@ impl RefreshVisualizer {
                     this.interacting_for_refresh_observer(value);
                 }
             });
-            drop(self.is_interacting_subscription.replace(Some(subscription)));
+            drop(self.is_interacting_subscription.replace(Some(Subscription::new(subscription))));
 
             let weak = self.to_ref().downgrade();
             let subscription =
@@ -537,7 +537,7 @@ impl RefreshVisualizer {
                             this.interaction_ratio_observer(value);
                         }
                     });
-            drop(self.interaction_ratio_subscription.replace(Some(subscription)));
+            drop(self.interaction_ratio_subscription.replace(Some(Subscription::new(subscription))));
 
             self.executing_ratio.set(provider.execution_ratio());
         } else {

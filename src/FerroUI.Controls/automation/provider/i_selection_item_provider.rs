@@ -1,7 +1,7 @@
 use crate::automation::peers::AutomationPeer;
 use ferroui_base::Ref;
 use super::ISelectionProvider;
-use crate::automation::ElementNotEnabledException;
+use crate::automation::ElementNotEnabledError;
 use std::rc::Rc;
 
 /// Exposes methods and properties to support access by a UI Automation client to individual,
@@ -18,13 +18,13 @@ pub trait ISelectionItemProvider {
     fn selection_container(&self) -> Option<Rc<dyn ISelectionProvider>>;
 
     /// Adds the current element to the collection of selected items.
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException>;
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError>;
 
     /// Removes the current element from the collection of selected items.
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException>;
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError>;
 
     /// Clears any existing selection and then selects the current element.
-    fn select(&self) -> Result<(), ElementNotEnabledException>;
+    fn select(&self) -> Result<(), ElementNotEnabledError>;
 }
 
 impl PartialEq for dyn ISelectionItemProvider {

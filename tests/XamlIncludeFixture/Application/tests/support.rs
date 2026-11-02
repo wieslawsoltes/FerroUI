@@ -11,7 +11,7 @@ use ferroui_base::threading::{Dispatcher, UnitTestDispatcherScope};
 use ferroui_base::{BoxedValue, FerroLocator, FerroObject, ObjectType, Ref};
 use ferroui_controls::Control;
 use ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers;
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 
 /// The scope of a test of a class that derives from upstream's XAML test base: its
 /// own dispatcher, loaded queue and service locator scope. The run-time loader is
@@ -44,11 +44,11 @@ impl Drop for XamlTestScope {
 }
 
 /// A build function of a compiled document.
-pub type Build<T> = fn(Option<Rc<dyn IServiceProvider>>) -> Result<Ref<T>, XamlLoadException>;
+pub type Build<T> = fn(Option<Rc<dyn IServiceProvider>>) -> Result<Ref<T>, XamlLoadError>;
 
 /// Builds a compiled document as `LoadGroup` builds a document of the group: with a
 /// root service provider (`XamlIlRuntimeHelpers.CreateRootServiceProviderV3(null)`).
-pub fn try_build<T: ObjectType>(build: Build<T>) -> Result<Ref<T>, XamlLoadException> {
+pub fn try_build<T: ObjectType>(build: Build<T>) -> Result<Ref<T>, XamlLoadError> {
     crate::register_types();
     build(Some(XamlIlRuntimeHelpers::create_root_service_provider_v3(None)))
 }
@@ -60,7 +60,7 @@ pub fn build<T: ObjectType>(build: Build<T>) -> Ref<T> {
 }
 
 /// A load error as text, with the errors it carries.
-pub fn describe(error: &XamlLoadException) -> String {
+pub fn describe(error: &XamlLoadError) -> String {
     match error.inner_exception() {
         Some(inner) => format!("{}\n ---> {inner}", error.message()),
         None => error.message().to_string(),

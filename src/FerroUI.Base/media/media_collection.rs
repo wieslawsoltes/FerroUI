@@ -8,7 +8,7 @@
 //! [`track_item_property_changed`].
 
 use crate::collections::{FerroList, NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::{FerroObject, ObjectType, Ref};
 use std::cell::RefCell;
 use std::fmt;
@@ -153,30 +153,32 @@ impl<T: Clone + 'static> MediaCollection<T> {
         self.list.clear()
     }
 
-    /// Subscribes to changes of the list. Disposing the returned handle
-    /// unsubscribes.
+    /// Subscribes to changes of the list. Dropping the returned guard removes
+    /// the handler; [`Subscription::detach`] keeps it for the life of the
+    /// list.
     pub fn collection_changed(
         &self,
         handler: impl for<'a, 'b> Fn(&'a NotifyCollectionChangedEventArgs<'b, T>) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.list.add_collection_changed(Rc::new(handler));
         let weak = Rc::downgrade(&self.list);
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(list) = weak.upgrade() {
                 list.remove_collection_changed(token);
             }
-        })
+        }))
     }
 
     /// Invokes `added` for every item currently in the list and for every item
     /// added later, `removed` for every item removed and `reset` when the list
-    /// is reset.
+    /// is reset. Dropping the returned guard stops the calls for later
+    /// changes; [`Subscription::detach`] keeps them for the life of the list.
     pub fn for_each_item(
         &self,
         added: impl Fn(usize, &T) + 'static,
         removed: impl Fn(usize, &T) + 'static,
         reset: impl Fn() + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let add = move |index: usize, items: &[T]| {
             for (i, item) in items.iter().enumerate() {
                 added(index + i, item);
@@ -248,11 +250,13 @@ impl<T: Clone + PartialEq + 'static> MediaCollection<T> {
 
 /// Invokes `callback` whenever a property changes on any item of the list.
 ///
-/// A reset of the list is not supported and panics.
+/// A reset of the list is not supported and panics. Dropping the returned
+/// guard stops tracking the items; [`Subscription::detach`] keeps tracking
+/// them.
 pub fn track_item_property_changed<T: ObjectType>(
     collection: &MediaCollection<Ref<T>>,
     callback: impl Fn() + 'static,
-) -> Rc<dyn IDisposable> {
+) -> Subscription {
     type Tracked = Rc<RefCell<Vec<(Ref<FerroObject>, Rc<dyn IDisposable>)>>>;
     let tracked: Tracked = Rc::new(RefCell::new(Vec::new()));
     let callback: Rc<dyn Fn()> = Rc::new(callback);
@@ -261,7 +265,7 @@ pub fn track_item_property_changed<T: ObjectType>(
     let tracked_remove = tracked.clone();
     // The subscription to the list itself is intentionally kept, as in the
     // reference implementation; disposing only detaches the tracked items.
-    let _ = collection.for_each_item(
+    collection.for_each_item(
         move |_, item: &Ref<T>| {
             let callback = callback.clone();
             let object: &FerroObject = (**item).upcast();
@@ -278,14 +282,15 @@ pub fn track_item_property_changed<T: ObjectType>(
             }
         },
         || panic!("Collection reset not supported."),
-    );
+    )
+    .detach();
 
-    Disposable::create(move || {
+    Subscription::new(Disposable::create(move || {
         let items = std::mem::take(&mut *tracked.borrow_mut());
         for (_, subscription) in items {
             subscription.dispose();
         }
-    })
+    }))
 }
 
 /// Declares a named list type wrapping a [`MediaCollection`].

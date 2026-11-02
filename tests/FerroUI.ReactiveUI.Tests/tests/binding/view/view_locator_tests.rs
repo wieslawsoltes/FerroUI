@@ -27,5 +27,5 @@ fn get_current_not_registered_throws_view_locator_not_found_exception() {
     }))
     .expect_err("there is no view locator");
 
-    assert!(payload.downcast_ref::<ViewLocatorNotFoundException>().is_some());
+    assert!(payload.downcast_ref::<ViewLocatorNotFoundError>().is_some());
 }

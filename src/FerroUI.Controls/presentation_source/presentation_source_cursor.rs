@@ -2,6 +2,7 @@ use super::PresentationSource;
 use ferroui_base::input::text_input::ITextInputMethodImpl;
 use ferroui_base::input::{Cursor, FocusManager, IInputRoot, InputElement};
 use ferroui_base::platform::IOptionalFeatureProvider;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{Point, Rect, Ref, Size};
 use std::rc::Rc;
 
@@ -71,7 +72,7 @@ impl IInputRoot for PresentationSource {
                     }
                 }
             });
-            *self.cursor_element_subscription.borrow_mut() = Some(subscription);
+            *self.cursor_element_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
         self.set_cursor(value.and_then(|element| element.cursor()));
     }

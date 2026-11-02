@@ -90,8 +90,7 @@
     "ferroui-controls": {
       "Calendar": 1,
       "ElementNotEnabledException": 1,
-      "Span": 2,
-      "ThrownDataValidationException": 2
+      "Span": 2
     },
     "ferroui-controls-treedatagrid": {
       "Random": 1

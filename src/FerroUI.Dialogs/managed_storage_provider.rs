@@ -79,7 +79,7 @@ impl ManagedStorageProvider {
             window.closed(move || {
                 model.cancel();
                 tcs.try_set_result(true);
-            });
+            }).detach();
         }
 
         let result: Rc<RefCell<Vec<String>>> = Rc::new(RefCell::new(Vec::new()));
@@ -161,7 +161,7 @@ impl ManagedStorageProvider {
             popup.closed(move || {
                 model.cancel();
                 tcs.try_set_result(true);
-            });
+            }).detach();
         }
 
         let result: Rc<RefCell<Vec<String>>> = Rc::new(RefCell::new(Vec::new()));
@@ -257,7 +257,7 @@ impl ManagedStorageProvider {
             let tcs = tcs.clone();
             flyout.closed(move || {
                 tcs.try_set_result(false);
-            });
+            }).detach();
         }
         flyout.set_content(Some(Control::boxed(prompt)));
         flyout.set_placement(PlacementMode::Center);

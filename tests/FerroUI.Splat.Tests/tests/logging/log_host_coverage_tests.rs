@@ -9,7 +9,7 @@
 use crate::tests::common::{panic_message, panic_payload, panics, AppLocatorScope, IMockLogTarget, TextLogger};
 use ferroui_splat::{
     AppLocator, FuncLogManager, IEnableLogger, IFullLogger, ILogManager, IStaticFullLogger, LogHost,
-    LogLevel, LoggingException, WrappingFullLogger,
+    LogLevel, LoggingError, WrappingFullLogger,
 };
 use std::rc::Rc;
 
@@ -56,7 +56,7 @@ fn default_without_log_manager_throws_logging_exception() {
         let _ = LogHost::default_logger();
     })
     .expect("LogHost::default_logger panics without a log manager");
-    assert!(payload.downcast_ref::<LoggingException>().is_some());
+    assert!(payload.downcast_ref::<LoggingError>().is_some());
 }
 
 #[test]
@@ -80,6 +80,6 @@ fn log_extension_without_log_manager_throws_invalid_operation_exception() {
         let _ = LogHostCoverageTests.log();
     })
     .expect("log panics without a log manager");
-    assert!(payload.downcast_ref::<LoggingException>().is_none());
+    assert!(payload.downcast_ref::<LoggingError>().is_none());
     assert!(panic_message(payload.as_ref()).contains("ILogManager is null"));
 }

@@ -1,11 +1,11 @@
 //! Shared constructor-scoped and development populate hooks.
-use crate::{FerroXamlLoader, XamlLoadException};
+use crate::{FerroXamlLoader, XamlLoadError};
 use ferroui_base::metadata::IServiceProvider;
 use ferroui_base::{BoxedValue, TypeInfo};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 pub type PopulateOverride =
-    Rc<dyn Fn(Option<&Rc<dyn IServiceProvider>>, &BoxedValue) -> Result<(), XamlLoadException>>;
+    Rc<dyn Fn(Option<&Rc<dyn IServiceProvider>>, &BoxedValue) -> Result<(), XamlLoadError>>;
 
 ferroui_base::ferro_thread_local! {
     #[cfg(any(feature = "runtime-populate", test))]

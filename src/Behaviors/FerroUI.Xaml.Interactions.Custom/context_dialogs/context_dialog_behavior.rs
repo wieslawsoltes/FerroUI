@@ -2,7 +2,7 @@
 
 use crate::{AttachedToVisualTreeBehavior, AttachedToVisualTreeBehaviorImpl};
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::{EventArgs, HandlerList};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObject, FerroObjectImpl,
@@ -28,7 +28,7 @@ type DialogEventHandler = dyn Fn(Option<&BoxedValue>, &EventArgs);
 pub struct ContextDialogBehavior {
     base: AttachedToVisualTreeBehavior,
     popup: RefCell<Option<Ref<Popup>>>,
-    popup_closed: RefCell<Option<Rc<dyn IDisposable>>>,
+    popup_closed: RefCell<Option<Subscription>>,
     opened: HandlerList<DialogEventHandler>,
     closed: HandlerList<DialogEventHandler>,
 }

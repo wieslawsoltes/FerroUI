@@ -293,12 +293,12 @@ pub(crate) fn track_lights(element: &Visual, lights: &FerroList<Ref<XamlLight>>)
         element.detached_from_visual_tree(move |_| sync(Some(false)))
     };
     sync(None);
-    vec![collection, attached, detached]
+    vec![collection, attached.detach(), detached.detach()]
 }
 
 /// Offers `element` to the lights above it each time it enters a visual
 /// tree.
-pub(crate) fn track_light_target(element: &Visual) -> Rc<dyn IDisposable> {
+pub(crate) fn track_light_target(element: &Visual) -> crate::reactive::Subscription {
     let weak = element.to_ref().downgrade();
     element.attached_to_visual_tree(move |_| {
         if let Some(element) = weak.upgrade() {

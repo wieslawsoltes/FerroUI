@@ -10,7 +10,7 @@ use ferroui_base::interactivity::{
     RoutingStrategies,
 };
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable};
+use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, AnyValue, AttachedProperty, BoxedValue,
@@ -195,7 +195,7 @@ impl ToolTip {
     /// Initializes static members of the [`ToolTip`] class.
     fn static_constructor() {
         // The subscription lives as long as the property.
-        let _ = Self::is_open_property().changed().subscribe(Self::is_open_changed);
+        Self::is_open_property().changed().subscribe(Self::is_open_changed).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -430,15 +430,17 @@ impl ToolTip {
     }
 
     /// Raised when the popup of the tooltip has closed (internal upstream).
-    /// Disposing the returned handle unsubscribes.
-    pub fn closed(&self, handler: impl Fn(&ToolTip) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the tooltip.
+    pub fn closed(&self, handler: impl Fn(&ToolTip) + 'static) -> Subscription {
         let token = self.closed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.closed.remove(token);
             }
-        })
+        }))
     }
 
     /// The host of the popup the tooltip is shown in, while it is open.
@@ -447,19 +449,21 @@ impl ToolTip {
         popup.and_then(|popup| popup.host())
     }
 
-    /// Raised when the popup host changes (the popup host provider
-    /// contract). Disposing the returned handle unsubscribes.
+    /// Raised when the popup host changes (the popup host provider contract).
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the tooltip.
     pub fn popup_host_changed(
         &self,
         handler: impl Fn(Option<&Rc<dyn IPopupHost>>) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.popup_host_changed_handler.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.popup_host_changed_handler.remove(token);
             }
-        })
+        }))
     }
 
     /// The tooltip as a popup host provider (the diagnostics contract it
@@ -482,7 +486,7 @@ impl ToolTip {
                 // The popup belongs to the tooltip, which unsubscribes by
                 // letting go of it.
                 let weak = self.to_ref().downgrade();
-                let _ = popup.opened({
+                popup.opened({
                     let weak = weak.clone();
                     let weak_popup = popup.downgrade();
                     move || {
@@ -490,12 +494,12 @@ impl ToolTip {
                             this.on_popup_opened(&popup);
                         }
                     }
-                });
-                let _ = popup.closed(move || {
+                }).detach();
+                popup.closed(move || {
                     if let Some(this) = weak.upgrade() {
                         this.on_popup_closed();
                     }
-                });
+                }).detach();
 
                 *self.popup.borrow_mut() = Some(popup.clone());
                 popup
@@ -625,6 +629,6 @@ impl IPopupHostProvider for ToolTipPopupHostProvider {
     }
 
     fn popup_host_changed(&self, handler: Rc<dyn Fn(Option<&Rc<dyn IPopupHost>>)>) -> Rc<dyn IDisposable> {
-        self.0.popup_host_changed(move |host| handler(host))
+        self.0.popup_host_changed(move |host| handler(host)).detach()
     }
 }

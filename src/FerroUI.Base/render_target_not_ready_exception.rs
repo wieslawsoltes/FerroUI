@@ -4,12 +4,16 @@ use std::rc::Rc;
 
 /// The error a render target reports when it cannot be drawn to yet.
 #[derive(Clone, Debug)]
-pub struct RenderTargetNotReadyException {
+pub struct RenderTargetNotReadyError {
     message: Option<String>,
     inner_exception: Option<Rc<dyn Error>>,
 }
 
-impl RenderTargetNotReadyException {
+/// The name of [`RenderTargetNotReadyError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `RenderTargetNotReadyError`")]
+pub type RenderTargetNotReadyException = RenderTargetNotReadyError;
+
+impl RenderTargetNotReadyError {
     /// Creates the exception without a message.
     pub fn new() -> Self {
         Self { message: None, inner_exception: None }
@@ -43,19 +47,19 @@ impl RenderTargetNotReadyException {
     }
 }
 
-impl Default for RenderTargetNotReadyException {
+impl Default for RenderTargetNotReadyError {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl fmt::Display for RenderTargetNotReadyException {
+impl fmt::Display for RenderTargetNotReadyError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.message())
     }
 }
 
-impl Error for RenderTargetNotReadyException {
+impl Error for RenderTargetNotReadyError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         self.inner_exception.as_deref()
     }

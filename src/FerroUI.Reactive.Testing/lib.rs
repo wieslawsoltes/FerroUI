@@ -252,19 +252,30 @@ impl fmt::Debug for Subscription {
 
 /// An error made by a test, which compares by identity (`new Exception()` of upstream's tests).
 #[derive(Debug)]
-pub struct TestException(pub String);
+pub struct TestError(pub String);
 
-impl fmt::Display for TestException {
+/// The name of [`TestError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `TestError`")]
+pub type TestException = TestError;
+
+/// The constructor of the tuple struct [`TestError`] under its name before 0.5.
+#[deprecated(since = "0.5.0", note = "use `TestError`")]
+#[allow(non_snake_case)]
+pub fn TestException(message: String) -> TestError {
+    TestError(message)
+}
+
+impl fmt::Display for TestError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.0)
     }
 }
 
-impl std::error::Error for TestException {}
+impl std::error::Error for TestError {}
 
 /// A new error for a test (`new Exception(message)`).
 pub fn new_error(message: &str) -> ObservableError {
-    Rc::new(TestException(message.to_owned()))
+    Rc::new(TestError(message.to_owned()))
 }
 
 /// A notification a test expects: one notification, or a notification that satisfies a predicate

@@ -55,7 +55,7 @@ pub struct DocumentModel {
     /// The public Rust path of the `x:Class` type of the document.
     pub class_rust_path: Option<String>,
     /// The absolute Rust path of the build function of a document without a class:
-    /// `fn(Option<Rc<dyn IServiceProvider>>) -> Result<Ref<T>, XamlLoadException>`.
+    /// `fn(Option<Rc<dyn IServiceProvider>>) -> Result<Ref<T>, XamlLoadError>`.
     pub build_path: Option<String>,
     /// The absolute Rust path of the populate function of the document.
     pub populate_path: Option<String>,

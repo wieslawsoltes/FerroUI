@@ -14,7 +14,7 @@ use crate::data::core::plugins::ObservableValue;
 use crate::data::core::{Maybe, Value, ValueTypes};
 use crate::data::model::ModelTypes;
 use crate::data::{
-    BindingBase, BindingChainException, BindingError, BindingValueType, CompiledBinding, ReflectionBinding,
+    BindingBase, BindingChainError, BindingError, BindingValueType, CompiledBinding, ReflectionBinding,
 };
 use crate::logging::{ILogSink, LogArea, LogEventLevel, Logger};
 use crate::{
@@ -327,7 +327,7 @@ fn assert_no_error(text_box: &ErrorCollectingTextBox, expected_text: Option<&str
 #[track_caller]
 fn assert_chain_error(text_box: &ErrorCollectingTextBox, expression: &str, error_point: &str, log: &TestLogger) {
     let error = text_box.error.borrow().clone().expect("an error is reported");
-    let error = error.inner().downcast_ref::<BindingChainException>().expect("a binding chain error").clone();
+    let error = error.inner().downcast_ref::<BindingChainError>().expect("a binding chain error").clone();
     let messages = log.messages();
 
     assert_eq!(messages.len(), 1);

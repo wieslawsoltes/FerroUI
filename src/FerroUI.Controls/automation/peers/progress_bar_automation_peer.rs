@@ -3,7 +3,7 @@ use super::{
     RangeBaseAutomationPeerImpl,
 };
 use crate::automation::provider::{IRangeValueProvider, ProviderAdapter};
-use crate::automation::ElementNotEnabledException;
+use crate::automation::ElementNotEnabledError;
 use crate::primitives::RangeBase;
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Ref};
 use std::rc::Rc;
@@ -42,7 +42,7 @@ impl IRangeValueProvider for ProviderAdapter<ProgressBarAutomationPeer> {
     }
 
     /// Request to set the value that this UI element is representing.
-    fn set_value(&self, _val: f64) -> Result<(), ElementNotEnabledException> {
+    fn set_value(&self, _val: f64) -> Result<(), ElementNotEnabledError> {
         panic!("ProgressBar is ReadOnly, value can't be set.");
     }
 

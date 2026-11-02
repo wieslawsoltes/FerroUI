@@ -18,7 +18,7 @@ const XML_NAMESPACES_0: rt::XmlNamespaceTable = &[
 pub fn populate(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     root: &::ferroui_base::Ref<crate::support::xaml::event_tests::MyButton>,
-) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     ::ferroui_markup_xaml::FerroXamlLoader::track_instance(<crate::support::xaml::event_tests::MyButton as ::ferroui_base::StaticType>::TYPE, root);
     if let Some(populate) = ::ferroui_markup_xaml::FerroXamlLoader::populate_override(<crate::support::xaml::event_tests::MyButton as ::ferroui_base::StaticType>::TYPE) {
         return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));
@@ -35,7 +35,7 @@ static POPULATE_HANDLERS_ROUTEDEVENT_XAML_DOCUMENT: rt::DocumentInfo = rt::Docum
 pub fn populate_handlers_routedevent_xaml(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     root: &::ferroui_base::Ref<crate::support::xaml::event_tests::MyButton>,
-) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let root = root.clone();
     let context = rt::populate_context(service_provider, &POPULATE_HANDLERS_ROUTEDEVENT_XAML_DOCUMENT, rt::to_value(root.clone()));
     let name_scope = context.name_scope_field();
@@ -56,7 +56,7 @@ pub fn populate_handlers_routedevent_xaml(
 pub fn try_load(
     _service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     uri: &str,
-) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadException> {
+) -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadError> {
     if rt::uri_equals(uri, "ferres://FerroUI.Markup.Xaml.UnitTests/Handlers/RoutedEvent.xaml", "") {
         return ::core::result::Result::Ok(::ferroui_base::metadata::into_markup_value(crate::support::xaml::event_tests::MyButton::new()));
     }

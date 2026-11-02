@@ -57,7 +57,7 @@ fn on_error_sends_error_to_observers() {
 
     let sink = received_error.clone();
     let _ = subject.as_observable().subscribe_next_error(|_| {}, move |error| *sink.borrow_mut() = Some(error));
-    let error: ObservableError = Rc::new(PanicException { message: "Test error".to_owned() });
+    let error: ObservableError = Rc::new(PanicError { message: "Test error".to_owned() });
     subject.on_error(error.clone());
     scheduler.run();
 

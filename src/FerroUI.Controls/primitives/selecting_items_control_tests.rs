@@ -1826,7 +1826,7 @@ mod list_box_tests {
                 if let Some(target) = weak.upgrade() {
                     target.bind_binding(property, &binding);
                 }
-            });
+            }).detach();
         }
     }
 

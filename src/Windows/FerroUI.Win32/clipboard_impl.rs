@@ -82,7 +82,8 @@ impl Future for Delay {
                     },
                     self.duration,
                     DispatcherPriority::default(),
-                );
+                )
+                .detach();
                 self.state = Some(state.clone());
                 state
             }

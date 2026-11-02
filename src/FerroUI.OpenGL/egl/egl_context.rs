@@ -7,11 +7,11 @@ use super::{
 use crate::SharedGlTextureRetirementQueue;
 use crate::{
     GetProcAddress, GlInterface, GlVersion, IGlContext, IGlContextExternalObjectsFeature,
-    OpenGlException,
+    OpenGlError,
 };
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::platform::{
-    IOptionalFeatureProvider, IPlatformGraphicsContext, PlatformGraphicsContextLostException,
+    IOptionalFeatureProvider, IPlatformGraphicsContext, PlatformGraphicsContextLostError,
 };
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::rendering::composition::frames::GpuCompletion;
@@ -64,7 +64,7 @@ impl EglContext {
         stencil_size: i32,
         dispose_callback: Option<Rc<dyn Fn()>>,
         features: HashMap<TypeId, EglContextFeatureFactory>,
-    ) -> Result<Rc<EglContext>, OpenGlException> {
+    ) -> Result<Rc<EglContext>, OpenGlError> {
         let this = Rc::new_cyclic(|this| Self {
             this: this.clone(),
             disp: display.clone(),
@@ -88,8 +88,8 @@ impl EglContext {
         let current = match this.make_current_with_surface(None) {
             Ok(current) => current,
             Err(MakeCurrentError::ContextLost) => {
-                return Err(OpenGlException::new(
-                    PlatformGraphicsContextLostException.to_string(),
+                return Err(OpenGlError::new(
+                    PlatformGraphicsContextLostError.to_string(),
                 ));
             }
             Err(MakeCurrentError::OpenGl(error)) => return Err(error),
@@ -207,7 +207,7 @@ impl EglContext {
             }
 
             return Err(MakeCurrentError::OpenGl(
-                OpenGlException::get_formatted_egl_exception("eglMakeCurrent", error),
+                OpenGlError::get_formatted_egl_exception("eglMakeCurrent", error),
             ));
         }
 
@@ -239,16 +239,16 @@ impl EglContext {
 /// Why a context could not be made current.
 #[derive(Clone, Debug)]
 pub enum MakeCurrentError {
-    /// The context is lost (the `PlatformGraphicsContextLostException` of the original).
+    /// The context is lost (the `PlatformGraphicsContextLostError` of the original).
     ContextLost,
     /// `eglMakeCurrent` failed.
-    OpenGl(OpenGlException),
+    OpenGl(OpenGlError),
 }
 
 impl std::fmt::Display for MakeCurrentError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::ContextLost => write!(f, "{}", PlatformGraphicsContextLostException),
+            Self::ContextLost => write!(f, "{}", PlatformGraphicsContextLostError),
             Self::OpenGl(error) => write!(f, "{error}"),
         }
     }
@@ -344,8 +344,10 @@ impl IPlatformGraphicsContext for EglContext {
         let gl = self.gl_interface();
         let mut pending = Vec::new();
         for (fence, completion) in fences {
-            // timeout=0 is a poll, never a render/UI-thread wait.
-            match gl.client_wait_sync(fence, 0, 0) {
+            // Flush on the owning context even when no target is drawing.
+            // ANGLE can otherwise leave an idle import's fence unsubmitted.
+            // SYNC_FLUSH_COMMANDS_BIT with timeout=0 remains nonblocking.
+            match gl.client_wait_sync(fence, 0x0001, 0) {
                 0x911A | 0x911C => {
                     // ALREADY_SIGNALED / CONDITION_SATISFIED
                     gl.delete_sync(fence);

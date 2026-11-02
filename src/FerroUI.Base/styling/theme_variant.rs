@@ -88,7 +88,7 @@ impl ThemeVariant {
                 "RequestedThemeVariant",
                 Some(ThemeVariant::default()),
             );
-            property.changed().add_class_handler::<FerroObject>(|x, _| ThemeVariant::update_actual_theme_variant(x));
+            property.changed().add_class_handler::<FerroObject>(|x, _| ThemeVariant::update_actual_theme_variant(x)).detach();
             property
         }
     );

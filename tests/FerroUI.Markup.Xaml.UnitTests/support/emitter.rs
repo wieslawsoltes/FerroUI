@@ -18,7 +18,7 @@ use ferroui_base::{
 };
 use ferroui_controls::{Control, ControlImpl};
 use ferroui_markup_xaml::converters::{ITypeDescriptorContext, TypeConverter};
-use ferroui_markup_xaml::{ServiceProviderExtensions, XamlLoadException};
+use ferroui_markup_xaml::{ServiceProviderExtensions, XamlLoadError};
 
 use super::xaml::event_tests::{MyButton, MyHost, MyPanel};
 use super::TypeModule;
@@ -118,10 +118,10 @@ impl TypeConverter for CaptionConverter {
         context: Option<&Rc<dyn ITypeDescriptorContext>>,
         _culture: Option<&CultureInfo>,
         value: Option<&BoxedValue>,
-    ) -> Result<Option<BoxedValue>, XamlLoadException> {
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
         let text = value
             .and_then(|value| value.downcast_ref::<String>())
-            .ok_or_else(|| XamlLoadException::with_message("CaptionConverter converts a text."))?;
+            .ok_or_else(|| XamlLoadError::with_message("CaptionConverter converts a text."))?;
         let service_provider = context.map(|context| {
             let service_provider: Rc<dyn IServiceProvider> = context.clone();
             service_provider
@@ -129,7 +129,7 @@ impl TypeConverter for CaptionConverter {
         let caption = match text.as_str() {
             "none" => return Ok(None),
             "number" => return Ok(Some(Rc::new(1i32))),
-            failing if failing.starts_with('!') => return Err(XamlLoadException::with_message(format!("No caption is made of '{failing}'."))),
+            failing if failing.starts_with('!') => return Err(XamlLoadError::with_message(format!("No caption is made of '{failing}'."))),
             rooted if rooted.starts_with('/') => {
                 let base_uri = service_provider.as_ref().and_then(|service_provider| service_provider.get_context_base_uri());
                 format!("{}{rooted}", base_uri.map_or("(no base URI)".to_string(), |uri| uri.to_string()))

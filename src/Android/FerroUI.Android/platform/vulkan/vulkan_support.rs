@@ -7,7 +7,7 @@ use ferroui_controls::platform::INativePlatformHandleSurface;
 use ferroui_vulkan::ash::{self, vk};
 use ferroui_vulkan::{
     IVulkanInstance, IVulkanKhrSurfacePlatformSurface, IVulkanKhrSurfacePlatformSurfaceFactory,
-    IVulkanPlatformGraphicsContext, VkGetInstanceProcAddressDelegate, VulkanException, VulkanOptions,
+    IVulkanPlatformGraphicsContext, VkGetInstanceProcAddressDelegate, VulkanError, VulkanOptions,
     VulkanPlatformGraphics, VulkanPlatformSpecificOptions,
 };
 use std::any::Any;
@@ -69,7 +69,7 @@ impl VulkanSupport {
         VulkanPlatformGraphics::try_create(&options.unwrap_or_default(), platform_options)
     }
 
-    fn create_android_surface(handle: isize, instance: &dyn IVulkanInstance) -> Result<u64, VulkanException> {
+    fn create_android_surface(handle: isize, instance: &dyn IVulkanInstance) -> Result<u64, VulkanError> {
         if handle == 0 {
             panic!("Surface handle can't be 0x0 (Parameter 'handle')");
         }
@@ -77,7 +77,7 @@ impl VulkanSupport {
         let create_info = VkAndroidSurfaceCreateInfoKHR::default().window(handle as *mut vk::ANativeWindow);
 
         let (result, surface) = vulkan_android.vk_create_android_surface_khr(instance.handle(), &create_info);
-        VulkanException::throw_on_error("vkCreateAndroidSurfaceKHR", result)?;
+        VulkanError::throw_on_error("vkCreateAndroidSurfaceKHR", result)?;
         Ok(surface)
     }
 }

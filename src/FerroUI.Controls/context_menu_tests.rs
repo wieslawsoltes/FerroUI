@@ -329,10 +329,10 @@ fn cancel_light_dismiss_closing_keeps_flyout_open() {
 
     let c = ContextMenu::new();
     let count = tracker.clone();
-    let _ = c.closing(move |e| {
+    c.closing(move |e| {
         count.set(count.get() + 1);
         e.set_cancel(true);
-    });
+    }).detach();
     button.set_context_menu(&c);
     c.open_at(Some(&button.clone().upcast()));
 
@@ -457,10 +457,10 @@ fn cancelling_opening_does_not_show_context_menu() {
     window.set_content(Some(Control::boxed(target.clone())));
 
     let called = event_called.clone();
-    let _ = sut.opening(move |e| {
+    sut.opening(move |e| {
         called.set(true);
         e.set_cancel(true);
-    });
+    }).detach();
 
     right_click(&app.mouse, &target);
 
@@ -601,10 +601,10 @@ fn cancelling_closing_leaves_context_menu_open() {
     let overlay = light_dismiss_overlay(&window);
 
     let called = event_called.clone();
-    let _ = sut.closing(move |e| {
+    sut.closing(move |e| {
         called.set(true);
         e.set_cancel(true);
-    });
+    }).detach();
 
     window.show();
 

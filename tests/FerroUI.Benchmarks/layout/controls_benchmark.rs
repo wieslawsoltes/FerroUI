@@ -3,7 +3,6 @@
 
 use crate::harness::Registry;
 use crate::test_root::TestRoot;
-use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::Ref;
 use ferroui_controls::testing::{NullRenderer, TestServices, UnitTestApplication, UnitTestApplicationScope};

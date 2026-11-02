@@ -7,7 +7,7 @@ use crate::screens::snapshot_screens_impl::SnapshotScreensImpl;
 use crate::server::wayland_worker::WaylandWorker;
 use crate::server::wayland_worker_client::WaylandWorkerClient;
 use crate::wayland_cursor_factory::WaylandCursorFactory;
-use crate::ferro_wayland_exception::FerroWaylandException;
+use crate::ferro_wayland_exception::FerroWaylandError;
 use crate::wayland_glib_dispatcher::WaylandGlibDispatcher;
 use crate::wayland_platform_options::WaylandPlatformOptions;
 use crate::wayland_top_level_factory::WaylandTopLevelFactory;
@@ -43,7 +43,7 @@ impl WaylandPlatform {
     /// Starts the backend, or says why it cannot be started. Nothing is registered in the
     /// second case, and the dispatcher of the UI thread has no implementation yet, so
     /// another backend can still be started.
-    pub fn try_initialize(options: WaylandPlatformOptions) -> Option<FerroWaylandException> {
+    pub fn try_initialize(options: WaylandPlatformOptions) -> Option<FerroWaylandError> {
         // In some cases we aren't allowed to open multiple connections (e. g. WAYLAND_SOCKET env
         // is used), so we can't do separate usability checks and bail before doing any initialization.
         // Instead we do full startup sequence with the worker on its thread and wait for it
@@ -52,7 +52,7 @@ impl WaylandPlatform {
         let worker_options = options.for_worker();
         let connection = match WaylandWorker::probe(&worker_options) {
             Ok(connection) => connection,
-            Err(error) => return Some(FerroWaylandException::with_inner("Unable to connect to Wayland display", error)),
+            Err(error) => return Some(FerroWaylandError::with_inner("Unable to connect to Wayland display", error)),
         };
 
         // The dispatcher over GLib needs its libraries: asked before the worker is started,
@@ -85,7 +85,7 @@ impl WaylandPlatform {
         match init_receiver.recv() {
             Ok(None) => {}
             Ok(Some(init_error)) => return Some(init_error),
-            Err(_) => return Some(FerroWaylandException::new("The Wayland worker ended before it bound its globals")),
+            Err(_) => return Some(FerroWaylandError::new("The Wayland worker ended before it bound its globals")),
         }
 
         Dispatcher::initialize_ui_thread_dispatcher(dispatcher_impl);

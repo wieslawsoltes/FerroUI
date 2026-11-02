@@ -8,7 +8,7 @@ use ferroui_base::collections::{
     FerroList, NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs, ResetBehavior,
 };
 use ferroui_base::input::ICommand;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -166,7 +166,7 @@ impl TrayIcon {
             } else {
                 panic!("TrayIcon.Icons must be set on the Application.");
             }
-        });
+        }).detach();
 
         let _ = Dispatcher::ui_thread().shutdown_started(|_| Self::shutdown_started());
     }
@@ -189,14 +189,17 @@ impl TrayIcon {
     /// Raised when the TrayIcon is clicked.
     /// Note, this is only supported on Win32 and some Linux DEs,
     /// on OSX this event is not raised.
-    pub fn clicked(&self, handler: impl Fn(&TrayIcon) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the tray icon.
+    pub fn clicked(&self, handler: impl Fn(&TrayIcon) + 'static) -> Subscription {
         let token = self.clicked.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.clicked.remove(token);
             }
-        })
+        }))
     }
 
     /// Sets the tray icons of the application.

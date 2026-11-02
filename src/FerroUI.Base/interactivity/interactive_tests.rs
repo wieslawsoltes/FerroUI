@@ -346,7 +346,7 @@ fn typed_class_handlers_should_be_called() {
     let ev = RoutedEvent::<RoutedEventArgs>::new("test", BUBBLE_TUNNEL, TestInteractive::TYPE);
     let target = create_tree(ev.as_routed_event(), None, RoutingStrategies::empty(), false);
 
-    ev.add_class_handler_with::<TestInteractive>(|x, e| x.class_handler(e), RoutingStrategies::BUBBLE, false);
+    ev.add_class_handler_with::<TestInteractive>(|x, e| x.class_handler(e), RoutingStrategies::BUBBLE, false).detach();
 
     let args = RoutedEventArgs::with_event_and_source(&ev, &*target);
     target.raise_event(&args);
@@ -361,8 +361,8 @@ fn typed_class_handlers_should_be_called_for_handled_events() {
     let ev = RoutedEvent::<RoutedEventArgs>::new("test", BUBBLE_TUNNEL, TestInteractive::TYPE);
     let target = create_tree(ev.as_routed_event(), None, RoutingStrategies::empty(), false);
 
-    ev.add_class_handler_with::<TestInteractive>(|x, e| x.mark_event_as_handled(e), RoutingStrategies::BUBBLE, false);
-    ev.add_class_handler_with::<TestInteractive>(|x, e| x.class_handler(e), RoutingStrategies::BUBBLE, true);
+    ev.add_class_handler_with::<TestInteractive>(|x, e| x.mark_event_as_handled(e), RoutingStrategies::BUBBLE, false).detach();
+    ev.add_class_handler_with::<TestInteractive>(|x, e| x.class_handler(e), RoutingStrategies::BUBBLE, true).detach();
 
     let args = RoutedEventArgs::with_event_and_source(&ev, &*target);
     target.raise_event(&args);

@@ -10,7 +10,7 @@ use ferroui_base::input::{ICloseable, IInputRoot, InputElement, InputElementImpl
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::metadata::{from_markup_value, into_markup_value};
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{IDisposable, ObservableExt, Subscription};
 use ferroui_base::styling::{ControlTheme, StyleHostRef};
 use ferroui_base::utilities::CancelEventArgs;
 use ferroui_base::{
@@ -49,10 +49,10 @@ pub struct MainWindow {
     base: Window,
     input_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     /// The frozen popups, with the subscriptions of their `Closing` events.
-    frozen_popup_states: RefCell<Vec<(Ref<Popup>, Rc<dyn IDisposable>)>>,
+    frozen_popup_states: RefCell<Vec<(Ref<Popup>, Subscription)>>,
     root: RefCell<Option<Ref<FerroObject>>>,
     /// The subscription to the `Closed` event of the root.
-    root_closed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    root_closed_subscription: RefCell<Option<Subscription>>,
     last_pointer_position: Cell<PixelPoint>,
     hot_keys: RefCell<Option<Rc<HotKeyConfiguration>>>,
 }
@@ -203,7 +203,7 @@ impl MainWindow {
                 }
             }
         });
-        *opened_subscription.borrow_mut() = Some(subscription);
+        *opened_subscription.borrow_mut() = Some(subscription.detach());
 
         this
     }
@@ -260,7 +260,7 @@ impl MainWindow {
                             this.root_closed();
                         }
                     }));
-                    *self.root_closed_subscription.borrow_mut() = Some(subscription);
+                    *self.root_closed_subscription.borrow_mut() = Some(Subscription::new(subscription));
                     self.set_data_context(into_markup_value(MainViewModel::new(root)));
                 }
                 None => self.set_data_context(None),

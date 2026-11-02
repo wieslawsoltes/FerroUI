@@ -170,7 +170,7 @@ try {
                 $suffix=if ($crop) { '-crop' } else { '' }
                 $arguments=@((Join-Path $fixtures "orientation-$orientation$suffix.mp4"),'--renderer','--video-pixel-smoke','--video-lifecycle-pixels',"--orientation=$orientation")
                 if ($crop) { $arguments+='--crop-smoke' }
-                $null=Run-Step "video-$orientation$suffix" $app $arguments @("VIDEO_PIXEL_SMOKE_PASS orientation=$orientation crop=$($crop.ToString().ToLowerInvariant())",'VIDEO_LIFECYCLE_PIXELS_PASS phase=seek','VIDEO_LIFECYCLE_PIXELS_PASS phase=recovered') 90
+                $null=Run-Step "video-$orientation$suffix" $app $arguments @("VIDEO_PIXEL_SMOKE_PASS orientation=$orientation crop=$($crop.ToString().ToLowerInvariant())",'VIDEO_PRESENTATION_READY phase=recovered','VIDEO_LIFECYCLE_PIXELS_PASS phase=seek','VIDEO_LIFECYCLE_PIXELS_PASS phase=recovered') 90
             }
         }
         $null=Run-Step 'lifecycle-races' $app @('tests/media/fixtures/avc-aac.mp4',"--lifecycle-stress-cycles=$RaceCycles",'--renderer','--synthetic-camera') @("LIFECYCLE_STRESS_PASS cycles=$RaceCycles") ($RaceCycles*60+60)

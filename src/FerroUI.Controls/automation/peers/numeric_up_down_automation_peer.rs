@@ -2,7 +2,7 @@ use super::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{IRangeValueProvider, ProviderAdapter};
-use crate::automation::{ElementNotEnabledException, RangeValuePatternIdentifiers};
+use crate::automation::{ElementNotEnabledError, RangeValuePatternIdentifiers};
 use crate::NumericUpDown;
 use ferroui_base::utilities::Decimal;
 use ferroui_base::{
@@ -75,7 +75,7 @@ impl IRangeValueProvider for ProviderAdapter<NumericUpDownAutomationPeer> {
         self.0.small_change()
     }
 
-    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledException> {
+    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledError> {
         self.0.set_value(value)
     }
 }
@@ -132,7 +132,7 @@ impl NumericUpDownAutomationPeer {
     }
 
     /// Sets the value of the control (the range value provider contract).
-    pub fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledException> {
+    pub fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledError> {
         self.owner().set_numeric_value(Some(Decimal::from_f64(value)));
         Ok(())
     }

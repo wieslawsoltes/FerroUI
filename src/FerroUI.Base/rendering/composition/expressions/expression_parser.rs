@@ -5,7 +5,7 @@ use super::expression::{
     ExpressionType, FunctionCallExpression, KeywordExpression, MemberAccessExpression, ParameterExpression,
     UnaryExpression,
 };
-use super::expression_parse_exception::ExpressionParseException;
+use super::expression_parse_exception::ExpressionParseError;
 use super::token_parser::TokenParser;
 
 /// The parser of composition expressions.
@@ -13,12 +13,12 @@ pub struct ExpressionParser;
 
 impl ExpressionParser {
     /// Parses an expression.
-    pub fn parse(s: &str) -> Result<Expression, ExpressionParseException> {
+    pub fn parse(s: &str) -> Result<Expression, ExpressionParseError> {
         let mut p = TokenParser::new(s);
         let (parsed, _) = parse_till_terminator(&mut p, "", false, false)?;
         p.skip_whitespace();
         if p.length() != 0 {
-            return Err(ExpressionParseException::new("Unexpected data ", p.position()));
+            return Err(ExpressionParseError::new("Unexpected data ", p.position()));
         }
         Ok(parsed)
     }
@@ -158,11 +158,11 @@ impl ExpressionOperatorGroup {
         operators: &[ExpressionType],
         from: usize,
         to: usize,
-    ) -> Result<Expression, ExpressionParseException> {
-        let mut take = |index: usize| -> Result<Expression, ExpressionParseException> {
+    ) -> Result<Expression, ExpressionParseError> {
+        let mut take = |index: usize| -> Result<Expression, ExpressionParseError> {
             expressions[index]
                 .take()
-                .ok_or_else(|| ExpressionParseException::new("Expression parsing algorithm bug in ToExpression", 0))
+                .ok_or_else(|| ExpressionParseError::new("Expression parsing algorithm bug in ToExpression", 0))
         };
 
         if to - from == 0 {
@@ -190,13 +190,13 @@ impl ExpressionOperatorGroup {
         }
 
         // We shouldn't ever get here, if we are, there is something wrong in the code
-        Err(ExpressionParseException::new(
+        Err(ExpressionParseError::new(
             "Expression parsing algorithm bug in ToExpression",
             0,
         ))
     }
 
-    fn into_expression(mut self) -> Result<Expression, ExpressionParseException> {
+    fn into_expression(mut self) -> Result<Expression, ExpressionParseError> {
         match &mut self.expressions {
             None => Ok(self.first.take().expect("the operator group is empty")),
             Some(expressions) => {
@@ -214,21 +214,21 @@ fn parse_till_terminator(
     terminator_chars: &str,
     throw_on_terminator: bool,
     throw_on_end: bool,
-) -> Result<(Expression, Option<char>), ExpressionParseException> {
+) -> Result<(Expression, Option<char>), ExpressionParseError> {
     let mut left = ExpressionOperatorGroup::default();
     loop {
         if let Some(consumed_token) = parser.try_consume_any(terminator_chars) {
             if throw_on_terminator || left.empty() {
                 // The reference implementation formats the (not yet assigned)
                 // output token here, so the message never names the character.
-                return Err(ExpressionParseException::new("Unexpected ''", parser.position() - 1));
+                return Err(ExpressionParseError::new("Unexpected ''", parser.position() - 1));
             }
             return Ok((left.into_expression()?, Some(consumed_token)));
         }
         parser.skip_whitespace();
         if parser.length() == 0 {
             if throw_on_end || left.empty() {
-                return Err(ExpressionParseException::new(
+                return Err(ExpressionParseError::new(
                     "Unexpected end of  expression",
                     parser.position(),
                 ));
@@ -253,7 +253,7 @@ fn parse_till_terminator(
             // We expect a binary operator here
             match try_parse_operator(parser) {
                 Some(sop) => op = Some(sop),
-                None => return Err(ExpressionParseException::new("Unexpected token", parser.position())),
+                None => return Err(ExpressionParseError::new("Unexpected token", parser.position())),
             }
         }
 
@@ -281,7 +281,7 @@ fn parse_till_terminator(
                     break;
                 }
                 if closing_token != Some(',') {
-                    return Err(ExpressionParseException::new(
+                    return Err(ExpressionParseError::new(
                         "Unexpected end of the expression",
                         parser.position(),
                     ));
@@ -292,14 +292,14 @@ fn parse_till_terminator(
         } else if let Some(atomic) = try_parse_atomic(parser) {
             parsed = atomic;
         } else {
-            return Err(ExpressionParseException::new("Unexpected token", parser.position()));
+            return Err(ExpressionParseError::new("Unexpected token", parser.position()));
         }
 
         // Parse any following member accesses
         while parser.try_consume('.') {
             match parser.try_parse_identifier() {
                 Some(member_name) => parsed = MemberAccessExpression::new(parsed, member_name).into(),
-                None => return Err(ExpressionParseException::new("Unexpected token", parser.position())),
+                None => return Err(ExpressionParseError::new("Unexpected token", parser.position())),
             }
         }
 

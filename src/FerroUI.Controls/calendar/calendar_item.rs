@@ -371,17 +371,17 @@ impl CalendarItem {
                     // The cells keep these subscriptions for as long as
                     // they live.
                     let weak = self.to_ref().downgrade();
-                    let _ = cell.calendar_day_button_mouse_down(move |sender, e| {
+                    cell.calendar_day_button_mouse_down(move |sender, e| {
                         if let Some(this) = weak.upgrade() {
                             this.cell_mouse_left_button_down(sender, e);
                         }
-                    });
+                    }).detach();
                     let weak = self.to_ref().downgrade();
-                    let _ = cell.calendar_day_button_mouse_up(move |sender, e| {
+                    cell.calendar_day_button_mouse_up(move |sender, e| {
                         if let Some(this) = weak.upgrade() {
                             this.cell_mouse_left_button_up(sender, e);
                         }
-                    });
+                    }).detach();
                     let weak = self.to_ref().downgrade();
                     let weak_cell = cell.downgrade();
                     cell.add_handler(InputElement::pointer_entered_event(), move |_, _| {
@@ -431,17 +431,17 @@ impl CalendarItem {
                     month.set_value(Grid::column_property(), j);
 
                     let weak = self.to_ref().downgrade();
-                    let _ = month.calendar_left_mouse_button_down(move |sender, _| {
+                    month.calendar_left_mouse_button_down(move |sender, _| {
                         if let Some(this) = weak.upgrade() {
                             this.month_calendar_button_mouse_down(Some(sender));
                         }
-                    });
+                    }).detach();
                     let weak = self.to_ref().downgrade();
-                    let _ = month.calendar_left_mouse_button_up(move |sender, _| {
+                    month.calendar_left_mouse_button_up(move |sender, _| {
                         if let Some(this) = weak.upgrade() {
                             this.month_calendar_button_mouse_up(Some(sender));
                         }
-                    });
+                    }).detach();
                     let weak = self.to_ref().downgrade();
                     let weak_month = month.downgrade();
                     month.add_handler(InputElement::pointer_entered_event(), move |_, _| {

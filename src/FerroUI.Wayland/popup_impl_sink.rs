@@ -4,7 +4,7 @@
 use crate::server::transient::clipboard::wayland_offer_cookie::WaylandOfferCookie;
 use std::sync::Arc;
 use ferroui_base::input::DragDropEffects;
-use crate::ferro_wayland_exception::FerroWaylandException;
+use crate::ferro_wayland_exception::FerroWaylandError;
 use crate::popup_impl::PopupImpl;
 use crate::screens::wayland_output_snapshot::WaylandOutputId;
 use crate::server::persistent::i_w_surface::IWSurface;
@@ -54,7 +54,7 @@ impl PopupImplSink {
         // through the real visual hierarchy lets it constrain each
         // link's anchor rect against its direct parent.
         let Some(parent_proxy) = parent.parent().shell_surface_proxy() else {
-            FerroWaylandException::new("Cannot create popup: parent surface has not been mapped yet.").throw()
+            FerroWaylandError::new("Cannot create popup: parent surface has not been mapped yet.").throw()
         };
 
         let handle = client.create_popup_handle(sink_proxy, &parent_proxy);

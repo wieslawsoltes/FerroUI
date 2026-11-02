@@ -2,7 +2,7 @@ use super::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{IValueProvider, ProviderError, ProviderAdapter};
-use crate::automation::{ElementNotEnabledException, ValuePatternIdentifiers};
+use crate::automation::{ElementNotEnabledError, ValuePatternIdentifiers};
 use crate::TextBox;
 use ferroui_base::{
     ferro_class, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt, FerroPropertyChangedEventArgs, Ref,
@@ -107,7 +107,7 @@ impl TextBoxAutomationPeer {
     }
 
     /// Sets the text of the text box (the value provider contract).
-    pub fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledException> {
+    pub fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledError> {
         self.owner().set_text(value);
         Ok(())
     }

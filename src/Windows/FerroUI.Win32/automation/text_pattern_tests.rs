@@ -602,7 +602,7 @@ fn native_hyperlink_text_child_has_canonical_container_ranges_and_dispatches_inv
     link.click(move |args| {
         count.set(count.get() + 1);
         args.set_handled(true);
-    });
+    }).detach();
     paragraph.add_child(link);
     paragraph.add_child_text(" after");
     view.blocks().add(paragraph);

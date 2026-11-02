@@ -4,7 +4,7 @@ use crate::media::{
     ITransform, RenderOptions, TextOptions, Transform,
 };
 use crate::rendering::composition::{CompositionDrawListVisual, CompositionVisual, Compositor};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::rendering::IPresentationSource;
 use crate::utilities::HandlerList;
 use crate::{
@@ -53,7 +53,7 @@ pub struct Visual {
     composition_extras: RefCell<Option<Box<CompositionExtras>>>,
     /// The subscription to the `changed` notification of the render
     /// transform, held while the visual is attached to a visual tree.
-    render_transform_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    render_transform_subscription: RefCell<Option<Subscription>>,
     affects_render_subscriptions: RefCell<Vec<(&'static FerroProperty, Rc<dyn IDisposable>)>>,
 }
 
@@ -90,7 +90,7 @@ struct CompositionExtras {
     /// The ids of the XAML lights that target the element (`XamlLight.AddTargetElement`), and
     /// the subscription that offers the element to those lights when it enters a tree.
     light_target_ids: Vec<String>,
-    light_target_subscription: Option<Rc<dyn IDisposable>>,
+    light_target_subscription: Option<Subscription>,
     /// The manipulation transform of the visual (see [`Visual::manipulation_transform`]).
     manipulation_transform: Option<crate::Matrix>,
     /// The theme shadow of the visual (`UIElement.Shadow`): `None` while the visual never had a
@@ -261,7 +261,7 @@ impl VisualImpl for Visual {
                         visual.render_transform_value_changed();
                     }
                 }));
-                this.set_render_transform_subscription(Some(subscription));
+                this.set_render_transform_subscription(Some(Subscription::new(subscription)));
             }
         }
 
@@ -782,9 +782,9 @@ impl Visual {
             Self::effect_property().as_property(),
             Self::has_mirror_transform_property().as_property(),
         ]);
-        Self::render_transform_property().changed().subscribe(Self::render_transform_changed);
-        Self::clip_to_bounds_property().changed().subscribe(|_| bump_geometry_version());
-        Self::render_transform_origin_property().changed().subscribe(|_| bump_geometry_version());
+        Self::render_transform_property().changed().subscribe(Self::render_transform_changed).detach();
+        Self::clip_to_bounds_property().changed().subscribe(|_| bump_geometry_version()).detach();
+        Self::render_transform_origin_property().changed().subscribe(|_| bump_geometry_version()).detach();
         Self::z_index_property().changed().subscribe(|e| {
             let Some(sender) = e.sender().downcast_ref::<Visual>() else { return };
             let parent = sender.visual_parent();
@@ -799,7 +799,7 @@ impl Visual {
                     source.renderer().recalculate_children(parent);
                 }
             }
-        });
+        }).detach();
     }
 
     /// Creates the class data; see [`crate::FerroObject::construct`].
@@ -838,39 +838,39 @@ impl Visual {
     pub fn attached_to_visual_tree(
         &self,
         handler: impl Fn(&VisualTreeAttachmentEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.attached_to_visual_tree.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.attached_to_visual_tree.remove(token);
             }
-        })
+        }))
     }
 
     /// Raised when the control is detached from a rooted visual tree.
     pub fn detached_from_visual_tree(
         &self,
         handler: impl Fn(&VisualTreeAttachmentEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.detached_from_visual_tree.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.detached_from_visual_tree.remove(token);
             }
-        })
+        }))
     }
 
     /// Raised when `is_effectively_visible` changes.
-    pub fn is_effectively_visible_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    pub fn is_effectively_visible_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.is_effectively_visible_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.is_effectively_visible_changed.remove(token);
             }
-        })
+        }))
     }
 
     // --- properties -------------------------------------------------------
@@ -1417,14 +1417,14 @@ impl Visual {
                         visual.update_affects_render_subscription(e);
                         visual.invalidate_visual();
                     }
-                });
+                }).detach();
             } else {
                 property.changed().subscribe(|e| {
                     if let Some(sender) = e.sender().downcast_ref::<T>() {
                         let visual: &Visual = sender.upcast();
                         visual.invalidate_visual();
                     }
-                });
+                }).detach();
             }
         }
     }
@@ -1489,7 +1489,7 @@ impl Visual {
         self.invalidate_visual();
     }
 
-    fn set_render_transform_subscription(&self, value: Option<Rc<dyn IDisposable>>) {
+    fn set_render_transform_subscription(&self, value: Option<Subscription>) {
         let previous = self.render_transform_subscription.replace(value);
         if let Some(previous) = previous {
             previous.dispose();

@@ -9,7 +9,7 @@ use ferroui_base::interactivity::{
     Interactive, InteractiveImpl, RoutedEvent, RoutedEventArgs, RoutedEventHandlerToken, RoutingStrategies,
 };
 use ferroui_base::layout::{Layoutable, LayoutableImpl};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_routed_event, AnyValue, BoxedValue,
@@ -208,7 +208,7 @@ impl Page {
             if sender.on_system_back_button_pressed() {
                 event_args.set_handled(true);
             }
-        });
+        }).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -307,40 +307,46 @@ impl Page {
         &self,
         select: fn(&Page) -> &HandlerList<F>,
         handler: Rc<F>,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = select(self).add(handler);
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 select(&this).remove(token);
             }
-        })
+        }))
     }
 
-    /// Occurs when the page has been navigated to. Disposing the returned
-    /// handle unsubscribes.
-    pub fn navigated_to(&self, handler: impl Fn(&NavigatedToEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Occurs when the page has been navigated to.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the page.
+    pub fn navigated_to(&self, handler: impl Fn(&NavigatedToEventArgs) + 'static) -> Subscription {
         self.subscribe::<dyn Fn(&NavigatedToEventArgs)>(|page| &page.navigated_to, Rc::new(handler))
     }
 
-    /// Occurs when the page is about to be navigated from. Disposing the
-    /// returned handle unsubscribes.
+    /// Occurs when the page is about to be navigated from.
     ///
     /// Each subscriber is awaited in turn. Set the cancel flag of the args
     /// to abort the navigation; remaining subscribers are not invoked once
     /// cancellation is requested. If a subscriber panics, the panic
     /// propagates to the task of the calling navigation method (such as the
     /// push of a navigation page) and the navigation is aborted.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the page.
     pub fn navigating(
         &self,
         handler: impl Fn(&NavigatingFromEventArgs) -> NavigatingTask + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         self.subscribe::<NavigatingHandler>(|page| &page.navigating, Rc::new(handler))
     }
 
-    /// Occurs when the page has been navigated from. Disposing the returned
-    /// handle unsubscribes.
-    pub fn navigated_from(&self, handler: impl Fn(&NavigatedFromEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Occurs when the page has been navigated from.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the page.
+    pub fn navigated_from(&self, handler: impl Fn(&NavigatedFromEventArgs) + 'static) -> Subscription {
         self.subscribe::<dyn Fn(&NavigatedFromEventArgs)>(|page| &page.navigated_from, Rc::new(handler))
     }
 

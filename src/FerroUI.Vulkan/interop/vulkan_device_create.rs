@@ -2,7 +2,7 @@ use super::VulkanDevice;
 use crate::unmanaged_interop::vulkan_global_api::fixed_name;
 use crate::unmanaged_interop::{Utf8BufferArray, VulkanInstanceApi};
 use crate::{
-    IVulkanDevice, IVulkanInstance, VulkanDeviceCreationOptions, VulkanException, VulkanExternalObjectsFeature,
+    IVulkanDevice, IVulkanInstance, VulkanDeviceCreationOptions, VulkanError, VulkanExternalObjectsFeature,
     VulkanPlatformSpecificOptions, VulkanResultExtensions,
 };
 use ash::vk;
@@ -31,13 +31,13 @@ impl VulkanDevice {
         instance: Arc<dyn IVulkanInstance>,
         options: &VulkanDeviceCreationOptions,
         platform_options: &VulkanPlatformSpecificOptions,
-    ) -> Result<Arc<dyn IVulkanDevice>, VulkanException> {
+    ) -> Result<Arc<dyn IVulkanDevice>, VulkanError> {
         let api = VulkanInstanceApi::new(instance.clone());
         let vk_instance: vk::Instance = vk::Handle::from_raw(instance.handle() as u64);
         let devices = api.enumerate_physical_devices(vk_instance).throw_on_error("vkEnumeratePhysicalDevices")?;
 
         if devices.is_empty() {
-            return Err(VulkanException::new("No devices found"));
+            return Err(VulkanError::new("No devices found"));
         }
 
         let surface_for_probe_ptr =
@@ -61,7 +61,7 @@ impl VulkanDevice {
             return Err(failure);
         }
 
-        let dev = compatible_device.ok_or_else(|| VulkanException::new("No compatible devices found"))?;
+        let dev = compatible_device.ok_or_else(|| VulkanError::new("No compatible devices found"))?;
 
         let queue_priorities = vec![1f32; dev.queue_count as usize];
 
@@ -111,7 +111,7 @@ impl VulkanDevice {
         physical_device: vk::PhysicalDevice,
         options: &VulkanDeviceCreationOptions,
         surface: Option<vk::SurfaceKHR>,
-    ) -> Result<Option<DeviceInfo>, VulkanException> {
+    ) -> Result<Option<DeviceInfo>, VulkanError> {
         let properties = instance.get_physical_device_properties(physical_device);
 
         let supported_extensions = Self::get_device_extensions(instance, physical_device);
@@ -142,8 +142,8 @@ impl VulkanDevice {
 pub(crate) fn select_queue_family(
     family_properties: &[vk::QueueFamilyProperties],
     require_compute_bit: bool,
-    mut supports_surface: impl FnMut(u32) -> Result<bool, VulkanException>,
-) -> Result<Option<u32>, VulkanException> {
+    mut supports_surface: impl FnMut(u32) -> Result<bool, VulkanError>,
+) -> Result<Option<u32>, VulkanError> {
     let mut required_flags = vk::QueueFlags::GRAPHICS;
     if require_compute_bit {
         required_flags |= vk::QueueFlags::COMPUTE;
@@ -274,7 +274,7 @@ mod tests {
     fn a_failure_of_the_surface_query_is_the_failure_of_the_check() {
         let families = [family(vk::QueueFlags::GRAPHICS, 1)];
         let error =
-            select_queue_family(&families, false, |_| Err(VulkanException::new("lost"))).unwrap_err();
+            select_queue_family(&families, false, |_| Err(VulkanError::new("lost"))).unwrap_err();
         assert_eq!(error.message(), "lost");
     }
 

@@ -10,7 +10,7 @@
 //! ```ignore
 //! pub fn build_border_xaml(
 //!     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-//! ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadException> {
+//! ) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
 //!     // border.xaml(1,2) Border
 //!     let border_0 = ::ferroui_controls::Border::new();
 //!     let name_scope = rt::name_scope_of(service_provider.as_ref());

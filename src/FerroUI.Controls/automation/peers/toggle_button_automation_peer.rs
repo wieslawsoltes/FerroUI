@@ -3,7 +3,7 @@ use super::{
     ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{IToggleProvider, ProviderAdapter, ToggleState};
-use crate::automation::{ElementNotEnabledException, TogglePatternIdentifiers};
+use crate::automation::{ElementNotEnabledError, TogglePatternIdentifiers};
 use crate::primitives::ToggleButton;
 use ferroui_base::{ferro_class, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt, Ref};
 use std::rc::Rc;
@@ -61,7 +61,7 @@ impl IToggleProvider for ProviderAdapter<ToggleButtonAutomationPeer> {
         self.0.toggle_state()
     }
 
-    fn toggle(&self) -> Result<(), ElementNotEnabledException> {
+    fn toggle(&self) -> Result<(), ElementNotEnabledError> {
         self.0.toggle()
     }
 }
@@ -97,7 +97,7 @@ impl ToggleButtonAutomationPeer {
 
     /// Cycles through the toggle states of the button (the toggle provider
     /// contract).
-    pub fn toggle(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn toggle(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
         self.owner().perform_click();
         Ok(())

@@ -5,12 +5,12 @@ use crate::gl_consts::{
     GL_TEXTURE_MAG_FILTER, GL_TEXTURE_MIN_FILTER, GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T,
 };
 use crate::surfaces::{IGlPlatformSurface, IGlPlatformSurfaceRenderingSession};
-use crate::{GlInterface, IGlContext, OpenGlException};
+use crate::{GlInterface, IGlContext, OpenGlError};
 use ferroui_base::platform::{
     IPlatformGraphicsContext, PlatformRenderTargetState, RenderTargetError, RenderTargetSceneInfo,
 };
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::{PixelSize, RenderTargetCorruptedException};
+use ferroui_base::{PixelSize, RenderTargetCorruptedError};
 use std::cell::Cell;
 use std::ffi::c_void;
 use std::rc::Rc;
@@ -29,7 +29,7 @@ pub enum BeginImageDrawError {
     /// The context could not be made current.
     MakeCurrent(MakeCurrentError),
     /// The framebuffer of the image is incomplete.
-    OpenGl(OpenGlException),
+    OpenGl(OpenGlError),
 }
 
 impl std::fmt::Display for BeginImageDrawError {
@@ -104,7 +104,7 @@ impl EglPlatformImageSurfaceRenderTargetBase {
             // The `finally` of the original: the context is restored when the frame does
             // not begin.
             restore_context.dispose();
-            return Err(BeginImageDrawError::OpenGl(OpenGlException::new(format!(
+            return Err(BeginImageDrawError::OpenGl(OpenGlError::new(format!(
                 "Framebuffer incomplete: 0x{status:X}"
             ))));
         }
@@ -203,7 +203,7 @@ pub trait EglPlatformImageSurfaceRenderTarget {
         scene_info: &RenderTargetSceneInfo,
     ) -> Result<Rc<dyn IGlPlatformSurfaceRenderingSession>, RenderTargetError> {
         if IPlatformGraphicsContext::is_lost(&**self.base().context()) {
-            return Err(RenderTargetCorruptedException::new().into());
+            return Err(RenderTargetCorruptedError::new().into());
         }
 
         self.try_begin_draw_core(scene_info)

@@ -149,9 +149,9 @@ fn change_is_raised_to_the_overrides_then_the_property_subscribers_then_the_obje
     let target = NotifyOrderDerived::new("t");
     let foo = NotifyOrderBase::foo_property();
 
-    foo.changed().add_class_handler::<NotifyOrderDerived>(|_, e| log(format!("class1 {}", describe(e))));
-    foo.changed().subscribe(|e| log(format!("property2 {}", describe(e))));
-    foo.changed().add_class_handler::<NotifyOrderBase>(|_, e| log(format!("class3 {}", describe(e))));
+    foo.changed().add_class_handler::<NotifyOrderDerived>(|_, e| log(format!("class1 {}", describe(e)))).detach();
+    foo.changed().subscribe(|e| log(format!("property2 {}", describe(e)))).detach();
+    foo.changed().add_class_handler::<NotifyOrderBase>(|_, e| log(format!("class3 {}", describe(e)))).detach();
     target.property_changed(|e| log(format!("handler1 {}", describe(e))));
     target.property_changed(|e| log(format!("handler2 {}", describe(e))));
 
@@ -178,8 +178,8 @@ fn class_handler_is_called_for_objects_of_its_class_only() {
     let derived = NotifyOrderDerived::new("d");
     let foo = NotifyOrderBase::foo_property();
 
-    foo.changed().add_class_handler::<NotifyOrderDerived>(|_, e| log(format!("derived {}", sender_name(e))));
-    foo.changed().add_class_handler::<NotifyOrderBase>(|_, e| log(format!("base {}", sender_name(e))));
+    foo.changed().add_class_handler::<NotifyOrderDerived>(|_, e| log(format!("derived {}", sender_name(e)))).detach();
+    foo.changed().add_class_handler::<NotifyOrderBase>(|_, e| log(format!("base {}", sender_name(e)))).detach();
 
     base.set_value(foo, s("a"));
     derived.set_value(foo, s("a"));
@@ -207,7 +207,7 @@ fn change_of_a_base_value_is_raised_to_the_core_override_only() {
     let target = NotifyOrderDerived::new("t");
     let foo = NotifyOrderBase::foo_property();
 
-    foo.changed().subscribe(|e| log(format!("property {}", describe(e))));
+    foo.changed().subscribe(|e| log(format!("property {}", describe(e)))).detach();
     target.property_changed(|e| log(format!("handler {}", describe(e))));
 
     target.set_value_with_priority(foo, s("animated"), BindingPriority::Animation);
@@ -228,9 +228,9 @@ fn change_made_by_a_property_subscriber_is_raised_completely_before_the_next_sub
     foo.changed().add_class_handler::<NotifyOrderDerived>(|o, e| {
         log(format!("class1 {}", describe(e)));
         o.set_value(NotifyOrderBase::bar_property(), s("x"));
-    });
-    foo.changed().subscribe(|e| log(format!("property2 {}", describe(e))));
-    bar.changed().subscribe(|e| log(format!("bar {}", describe(e))));
+    }).detach();
+    foo.changed().subscribe(|e| log(format!("property2 {}", describe(e)))).detach();
+    bar.changed().subscribe(|e| log(format!("bar {}", describe(e)))).detach();
     target.property_changed(|e| log(format!("handler {}", describe(e))));
 
     target.set_value(foo, s("a"));
@@ -257,7 +257,7 @@ fn change_of_the_same_property_made_by_a_handler_reaches_later_handlers_first() 
     let target = NotifyOrderDerived::new("t");
     let foo = NotifyOrderBase::foo_property();
 
-    foo.changed().subscribe(|e| log(format!("property {}", describe(e))));
+    foo.changed().subscribe(|e| log(format!("property {}", describe(e)))).detach();
     let weak = target.downgrade();
     target.property_changed(move |e| {
         log(format!("handler1 {}", describe(e)));
@@ -301,14 +301,14 @@ fn property_subscribers_called_for_a_change_are_the_ones_there_were_when_it_bega
         if !done.replace(true) {
             // Subscribes another and unsubscribes the next one.
             let late = late.clone();
-            NotifyOrderBase::foo_property().changed().subscribe(move |_| late.increment());
+            NotifyOrderBase::foo_property().changed().subscribe(move |_| late.increment()).detach();
             if let Some(subscription) = second_slot.borrow_mut().take() {
                 subscription.dispose();
             }
         }
-    });
+    }).detach();
     let calls = second_calls.clone();
-    *second.borrow_mut() = Some(foo.changed().subscribe(move |_| calls.increment()));
+    *second.borrow_mut() = Some(foo.changed().subscribe(move |_| calls.increment()).detach());
 
     // The subscriber that was unsubscribed during the change is still called
     // for it; the one that subscribed during it is not.
@@ -391,7 +391,7 @@ fn inherited_change_is_raised_completely_on_an_object_before_its_children() {
     let child2 = NotifyOrderDerived::with_parent("c2", &parent);
     let baz = NotifyOrderBase::baz_property();
 
-    baz.changed().subscribe(|e| log(format!("property {}", sender_name(e))));
+    baz.changed().subscribe(|e| log(format!("property {}", sender_name(e)))).detach();
     for object in [&parent, &child1, &grandchild, &child2] {
         object.property_changed(|e| log(format!("handler {} {}", sender_name(e), describe(e))));
     }

@@ -80,6 +80,8 @@ mod visual_tree_attachment_event_args;
 pub use class_binding_manager::ClassBindingManager;
 pub use corner_radius::CornerRadius;
 pub use direct_property::{DirectProperty, DirectPropertyBase};
+pub use ferro_internal_exception::FerroInternalError;
+#[allow(deprecated)]
 pub use ferro_internal_exception::FerroInternalException;
 pub use ferro_locator::{FerroLocator, IFerroDependencyResolver, LocatorExtensions, RegistrationHelper, ServiceHandle};
 pub use ferro_object::{FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroObjectVTable};
@@ -111,7 +113,11 @@ pub use register_types::registered_type_list;
 pub use relative_point::{RelativePoint, RelativeUnit};
 pub use relative_rect::RelativeRect;
 pub use relative_scalar::RelativeScalar;
+pub use render_target_corrupted_exception::RenderTargetCorruptedError;
+#[allow(deprecated)]
 pub use render_target_corrupted_exception::RenderTargetCorruptedException;
+pub use render_target_not_ready_exception::RenderTargetNotReadyError;
+#[allow(deprecated)]
 pub use render_target_not_ready_exception::RenderTargetNotReadyException;
 pub use rounded_rect::RoundedRect;
 pub use size::Size;

@@ -16,7 +16,7 @@ use crate::selections::drag_drop::X11DragSource;
 use crate::x11_cursor_factory::X11CursorFactory;
 use ferroui_base::input::platform::IPlatformDragSource;
 use crate::x11_egl_helper::X11EglPlatformGraphics;
-use crate::x11_exception::X11Exception;
+use crate::x11_exception::X11Error;
 use crate::x11_globals::X11Globals;
 use crate::x11_icon_loader::X11IconLoader;
 use crate::x11_info::X11Info;
@@ -269,11 +269,11 @@ impl FerroX11Platform {
 
         xlib::x_init_threads();
         let Some(display) = xlib::x_open_display() else {
-            X11Exception::new("XOpenDisplay failed").throw();
+            X11Error::new("XOpenDisplay failed").throw();
         };
         self.set_display(display);
         let Some(deferred_display) = xlib::x_open_display() else {
-            X11Exception::new("XOpenDisplay failed").throw();
+            X11Error::new("XOpenDisplay failed").throw();
         };
         self.set_deferred_display(deferred_display);
 

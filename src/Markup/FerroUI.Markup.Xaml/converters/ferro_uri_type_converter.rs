@@ -2,7 +2,7 @@
 
 use super::type_converter::type_converter_markup;
 use super::{ITypeDescriptorContext, TypeConverter};
-use crate::XamlLoadException;
+use crate::XamlLoadError;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::utilities::{CultureInfo, Uri, UriKind};
 use ferroui_base::BoxedValue;
@@ -22,7 +22,7 @@ impl TypeConverter for FerroUriTypeConverter {
         _context: Option<&Rc<dyn ITypeDescriptorContext>>,
         _culture: Option<&CultureInfo>,
         value: Option<&BoxedValue>,
-    ) -> Result<Option<BoxedValue>, XamlLoadException> {
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
         let Ok(s) = super::type_converter::text_of(value) else {
             return Ok(None);
         };
@@ -30,7 +30,7 @@ impl TypeConverter for FerroUriTypeConverter {
         let kind = if s.starts_with('/') { UriKind::Relative } else { UriKind::RelativeOrAbsolute };
         match Uri::try_create(s, kind) {
             Some(res) => Ok(Some(Rc::new(res))),
-            None => Err(XamlLoadException::with_message(format!("Unable to parse URI: {s}"))),
+            None => Err(XamlLoadError::with_message(format!("Unable to parse URI: {s}"))),
         }
     }
 }

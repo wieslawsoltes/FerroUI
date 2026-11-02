@@ -7,7 +7,7 @@ use crate::automation::SelectionPatternIdentifiers;
 use crate::primitives::SelectingItemsControl;
 use crate::selection::{ISelectionModel, SelectionModelSelectionChangedEventArgs};
 use crate::{ListBox, SelectionMode};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{ferro_class, FerroObjectImpl, FerroObjectImplExt, FerroPropertyChangedEventArgs, Ref};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -17,7 +17,7 @@ use std::rc::Rc;
 pub struct SelectingItemsControlAutomationPeer {
     base: ItemsControlAutomationPeer,
     selection: RefCell<Option<Rc<dyn ISelectionModel>>>,
-    selection_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+    selection_changed: RefCell<Option<Subscription>>,
 }
 
 ferro_class! {
@@ -161,7 +161,7 @@ impl SelectingItemsControlAutomationPeer {
                 }
             }))
         });
-        *self.selection_changed.borrow_mut() = subscription;
+        *self.selection_changed.borrow_mut() = subscription.map(Subscription::new);
     }
 
     fn unsubscribe_from_selection(&self) {

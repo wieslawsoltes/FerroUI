@@ -10,7 +10,7 @@
 use crate::tests::common::{panic_payload, same, IMockLogTarget, TextLogger};
 use ferroui_splat::{
     DefaultLogManager, FuncLogManager, IFullLogger, ILogManager, ILogger, LogLevel, LogManagerExt,
-    LoggingException, MemoizingMRUCache, ModernDependencyResolver, MutableDependencyResolverExt,
+    LoggingError, MemoizingMRUCache, ModernDependencyResolver, MutableDependencyResolverExt,
     WrappingFullLogger,
 };
 use std::cell::Cell;
@@ -100,5 +100,5 @@ fn default_log_manager_should_throw_when_resolver_has_no_logger() {
         let _ = log_manager.get_logger(std::any::type_name::<LogManagerTests>());
     })
     .expect("get_logger panics without a logger");
-    assert!(payload.downcast_ref::<LoggingException>().is_some());
+    assert!(payload.downcast_ref::<LoggingError>().is_some());
 }

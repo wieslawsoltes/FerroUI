@@ -235,7 +235,7 @@ fn document(module: &str) -> &'static ClassDocument {
 fn populated<T: ObjectType>(
     module: &str,
     new: fn() -> Ref<T>,
-    populate: fn(Option<Rc<dyn ferroui_base::metadata::IServiceProvider>>, &Ref<T>) -> Result<(), ferroui_markup_xaml::XamlLoadException>,
+    populate: fn(Option<Rc<dyn ferroui_base::metadata::IServiceProvider>>, &Ref<T>) -> Result<(), ferroui_markup_xaml::XamlLoadError>,
 ) -> (Ref<T>, Ref<T>) {
     let document = document(module);
     let compiled = new();

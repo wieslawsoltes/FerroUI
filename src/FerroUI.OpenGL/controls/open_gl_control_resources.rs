@@ -2,7 +2,7 @@ use super::composition_open_gl_swapchain::CompositionOpenGlSwapchain;
 use crate::composition::task_support::start;
 use crate::composition::ICompositionGlContext;
 use crate::gl_consts::*;
-use crate::{GlProfileType, IGlContext, OpenGlException};
+use crate::{GlProfileType, IGlContext, OpenGlError};
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::rendering::composition::CompositionDrawingSurface;
@@ -87,7 +87,7 @@ impl OpenGlControlBaseResources {
     /// to the texture of the frame. Disposing the result presents the frame and restores
     /// the context. A framebuffer that cannot be configured is the error (the exception of
     /// the original); the frame is discarded and the context restored before it is returned.
-    pub(crate) fn begin_draw(&self, size: PixelSize) -> Result<Rc<dyn IDisposable>, OpenGlException> {
+    pub(crate) fn begin_draw(&self, size: PixelSize) -> Result<Rc<dyn IDisposable>, OpenGlError> {
         let context = self.context();
         let restore_context = context.ensure_current();
 
@@ -108,7 +108,7 @@ impl OpenGlControlBaseResources {
             // The frame wasn't rendered, so it shouldn't reach the surface
             lease.discard();
             restore_context.dispose();
-            return Err(OpenGlException::get_formatted_exception_for_code("Unable to configure OpenGL FBO", code));
+            return Err(OpenGlError::get_formatted_exception_for_code("Unable to configure OpenGL FBO", code));
         }
 
         let fbo = self.fbo.clone();

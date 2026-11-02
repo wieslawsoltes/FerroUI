@@ -8,7 +8,7 @@ use crate::{Border, Button, Control, Window, WindowState};
 use ferroui_base::controls::NameScopeRef;
 use ferroui_base::interactivity::{RoutedEventArgs, RoutedEventHandlerToken};
 use ferroui_base::layout::LayoutHelper;
-use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, AttachedProperty, DirectProperty, FerroObject,
@@ -39,7 +39,7 @@ pub struct WindowDrawnDecorations {
     full_screen_button: CaptionButton,
     popover_close_button: CaptionButton,
     popover_full_screen_button: CaptionButton,
-    window_subscriptions: RefCell<Option<Rc<dyn IDisposable>>>,
+    window_subscriptions: RefCell<Option<Subscription>>,
     host_window: RefCell<Option<WeakRef<Window>>>,
     title_bar_height_override: Cell<f64>,
     frame_thickness_override: Cell<Option<Thickness>>,
@@ -214,26 +214,31 @@ ferroui_base::ferro_properties! { impl WindowDrawnDecorations {
 
 impl WindowDrawnDecorations {
     fn static_constructor() {
-        let _ = Self::template_property()
+        Self::template_property()
             .changed()
-            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.invalidate_template());
-        let _ = Self::enabled_parts_property().changed().add_class_handler::<WindowDrawnDecorations>(|x, _| {
+            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.invalidate_template())
+            .detach();
+        Self::enabled_parts_property().changed().add_class_handler::<WindowDrawnDecorations>(|x, _| {
             x.update_enabled_parts_pseudo_classes();
             x.update_effective_geometry();
-        });
+        }).detach();
 
-        let _ = Self::title_bar_decorations_property()
+        Self::title_bar_decorations_property()
             .changed()
-            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_title_bar_decorations_pseudo_classes());
-        let _ = Self::default_title_bar_height_property()
+            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_title_bar_decorations_pseudo_classes())
+            .detach();
+        Self::default_title_bar_height_property()
             .changed()
-            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_effective_geometry());
-        let _ = Self::default_frame_thickness_property()
+            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_effective_geometry())
+            .detach();
+        Self::default_frame_thickness_property()
             .changed()
-            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_effective_geometry());
-        let _ = Self::default_shadow_thickness_property()
+            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_effective_geometry())
+            .detach();
+        Self::default_shadow_thickness_property()
             .changed()
-            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_effective_geometry());
+            .add_class_handler::<WindowDrawnDecorations>(|x, _| x.update_effective_geometry())
+            .detach();
     }
 
     /// Field initialisation only.
@@ -549,7 +554,7 @@ impl WindowDrawnDecorations {
                         this.on_allowed_window_actions_changed(actions);
                     }
                 }
-            }),
+            }).detach(),
             FerroObjectExtensions::get_observable(object, Window::title_property()).subscribe_fn({
                 let weak = weak.clone();
                 move |title| {
@@ -599,7 +604,7 @@ impl WindowDrawnDecorations {
             }),
         ];
         let subscriptions: Rc<dyn IDisposable> = Rc::new(CompositeDisposable::from_disposables(subscriptions));
-        *self.window_subscriptions.borrow_mut() = Some(subscriptions);
+        *self.window_subscriptions.borrow_mut() = Some(Subscription::new(subscriptions));
 
         self.update_title_bar_decorations_pseudo_classes();
         self.update_maximize_button_state();

@@ -11,7 +11,7 @@
 
 use super::wayland_dmabuf_feedback::DmabufFormatModifierPair;
 use ferroui_opengl::egl::{EglDisplay, EglDisplayCreationOptions};
-use ferroui_opengl::OpenGlException;
+use ferroui_opengl::OpenGlError;
 use std::cell::RefCell;
 use std::ffi::c_void;
 use std::rc::Rc;
@@ -34,7 +34,7 @@ impl WaylandEglDisplay {
         gbm_device: *mut c_void,
         drm_fd: i32,
         linux_dmabuf: ZwpLinuxDmabufV1,
-    ) -> Result<Rc<Self>, OpenGlException> {
+    ) -> Result<Rc<Self>, OpenGlError> {
         let display = EglDisplay::new_with_creation_options(options)?;
         Ok(Rc::new(Self { display, gbm_device, drm_fd, supported_formats: RefCell::new(Vec::new()), linux_dmabuf }))
     }

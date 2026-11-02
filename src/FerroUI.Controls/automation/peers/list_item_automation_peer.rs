@@ -3,7 +3,7 @@ use super::{
     ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{ISelectionItemProvider, ISelectionProvider, ProviderAdapter};
-use crate::automation::ElementNotEnabledException;
+use crate::automation::ElementNotEnabledError;
 use crate::primitives::SelectingItemsControl;
 use crate::{ContentControl, Control, ItemsControl, ListBox, ListBoxItem};
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Ref};
@@ -49,15 +49,15 @@ impl ISelectionItemProvider for ProviderAdapter<ListItemAutomationPeer> {
         self.0.selection_container()
     }
 
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.add_to_selection()
     }
 
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.remove_from_selection()
     }
 
-    fn select(&self) -> Result<(), ElementNotEnabledException> {
+    fn select(&self) -> Result<(), ElementNotEnabledError> {
         self.0.select()
     }
 }
@@ -92,7 +92,7 @@ impl ListItemAutomationPeer {
 
     /// Clears any existing selection and then selects the item (the
     /// selection item provider contract).
-    pub fn select(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn select(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         let owner = self.owner();
@@ -109,7 +109,7 @@ impl ListItemAutomationPeer {
 
     // The reference implements the two members below explicitly: they are
     // members of the selection item provider contract only.
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         let owner = self.owner();
@@ -126,7 +126,7 @@ impl ListItemAutomationPeer {
         Ok(())
     }
 
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         let owner = self.owner();

@@ -40,7 +40,7 @@ impl SelectionOverlayHelper {
         layer.children().add(adorner.upcast::<Control>());
         let owner = self.clone();
         self.layout_updated
-            .replace(Some(root.layout_updated(move || owner.on_layout_updated())));
+            .replace(Some(root.layout_updated(move || owner.on_layout_updated()).detach()));
     }
     pub(crate) fn remove_overlay(&self) {
         let root = self.root.borrow().clone();

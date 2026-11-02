@@ -17,7 +17,7 @@ use ferroui_controls::automation::provider::{
 };
 use ferroui_controls::automation::{
     AutomationElementIdentifiers, AutomationProperty, AutomationPropertyChangedEventArgs,
-    ElementNotEnabledException, ExpandCollapsePatternIdentifiers, ExpandCollapseState,
+    ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState,
     RangeValuePatternIdentifiers, SelectionItemPatternIdentifiers, SelectionPatternIdentifiers,
     TogglePatternIdentifiers, ValuePatternIdentifiers,
 };
@@ -98,14 +98,14 @@ impl FrnAutomationPeer {
                 if let Some(node) = weak.upgrade().and_then(|this| this.node()) {
                     node.children_changed();
                 }
-            }));
+            }).detach());
 
             let weak = this.clone();
             subscriptions.push(inner.property_changed(move |e| {
                 if let Some(this) = weak.upgrade() {
                     this.on_peer_property_changed(e);
                 }
-            }));
+            }).detach());
 
             // The reference tests the class of the peer for the contract;
             // the provider lookup of a peer answers the same question.
@@ -209,7 +209,7 @@ impl Drop for FrnAutomationPeer {
 
 /// Hands the error of a provider member to the dispatcher, as an exception
 /// thrown by a callback is in the reference.
-fn raise_on_error(result: Result<(), ElementNotEnabledException>) {
+fn raise_on_error(result: Result<(), ElementNotEnabledError>) {
     if let Err(e) = result {
         crate::callback_base::raise_exception(Box::new(e));
     }

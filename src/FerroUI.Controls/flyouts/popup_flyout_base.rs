@@ -15,7 +15,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{Interactive, RoutedEventArgs, RoutedEventHandlerToken};
 use ferroui_base::layout::{LayoutHelper, Layoutable};
 use ferroui_base::logging::{LogEventLevel, Logger};
-use ferroui_base::reactive::{AnonymousObserver, Disposable, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::{CancelEventArgs, HandlerList};
 use ferroui_base::{
     ferro_class, ferro_property, FerroObjectImpl, FerroProperty, FerroPropertyChangedEventArgs,
@@ -73,7 +73,7 @@ impl TargetLifetime {
         let detached = Rc::new(Cell::new(false));
         let observed = detached.clone();
         let subscription = target.detached_from_visual_tree(move |_| observed.set(true));
-        Self { target, root, detached, subscription }
+        Self { target, root, detached, subscription: subscription.detach() }
     }
 
     fn is_current(&self) -> bool {
@@ -485,10 +485,11 @@ ferroui_base::ferro_properties! { impl PopupFlyoutBase {
 
 impl PopupFlyoutBase {
     fn static_constructor() {
-        FlyoutBase::is_open_property().changed().add_class_handler::<PopupFlyoutBase>(|x, e| x.is_open_changed(e));
+        FlyoutBase::is_open_property().changed().add_class_handler::<PopupFlyoutBase>(|x, e| x.is_open_changed(e)).detach();
         Control::context_flyout_property()
             .changed()
-            .add_class_handler::<Control>(Self::on_context_flyout_property_changed);
+            .add_class_handler::<Control>(Self::on_context_flyout_property_changed)
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -643,16 +644,16 @@ impl PopupFlyoutBase {
         })
     }
 
-    /// Raised before the flyout closes; the close can be cancelled.
-    /// Disposing the returned handle unsubscribes.
-    pub fn closing(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn(&CancelEventArgs)>(|flyout| &flyout.closing, Rc::new(handler))
+    /// Raised before the flyout closes; the close can be cancelled. Dropping the returned guard
+    /// removes the handler; [`Subscription::detach`] keeps it for the life of the flyout.
+    pub fn closing(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn(&CancelEventArgs)>(|flyout| &flyout.closing, Rc::new(handler)))
     }
 
-    /// Raised before the flyout opens; the opening can be cancelled.
-    /// Disposing the returned handle unsubscribes.
-    pub fn opening(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn(&CancelEventArgs)>(|flyout| &flyout.opening, Rc::new(handler))
+    /// Raised before the flyout opens; the opening can be cancelled. Dropping the returned guard
+    /// removes the handler; [`Subscription::detach`] keeps it for the life of the flyout.
+    pub fn opening(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn(&CancelEventArgs)>(|flyout| &flyout.opening, Rc::new(handler)))
     }
 
     /// Pre-registers a control as the default placement target for this
@@ -723,7 +724,7 @@ impl PopupFlyoutBase {
                 this.on_placement_target_or_popup_key_up(e);
             }
         });
-        let old = self.target_handlers.replace(Some(TargetHandlers { owner, generation, detached, key_up }));
+        let old = self.target_handlers.replace(Some(TargetHandlers { owner, generation, detached: detached.detach(), key_up }));
         drop(old);
     }
 
@@ -787,30 +788,30 @@ impl PopupFlyoutBase {
         // The flyout owns the popup and lives as long as it: the handlers
         // are never removed.
         let weak = self.to_ref().downgrade();
-        let _ = popup.opened({
+        popup.opened({
             let weak = weak.clone();
             move || {
                 if let Some(this) = weak.upgrade() {
                     this.on_popup_opened();
                 }
             }
-        });
-        let _ = popup.closed({
+        }).detach();
+        popup.closed({
             let weak = weak.clone();
             move || {
                 if let Some(this) = weak.upgrade() {
                     this.on_popup_closed();
                 }
             }
-        });
-        let _ = popup.closing({
+        }).detach();
+        popup.closing({
             let weak = weak.clone();
             move |e| {
                 if let Some(this) = weak.upgrade() {
                     this.on_popup_closing(e);
                 }
             }
-        });
+        }).detach();
         popup.add_handler(InputElement::key_up_event(), move |_, e: &KeyEventArgs| {
             if let Some(this) = weak.upgrade() {
                 this.on_placement_target_or_popup_key_up(e);

@@ -5,7 +5,7 @@ use super::{
 };
 use crate::media::imaging::RenderTargetBitmap;
 use crate::platform::IPlatformRenderInterface;
-use crate::reactive::IDisposable;
+use crate::reactive::{IDisposable, Subscription};
 use crate::{FerroLocator, LocatorExtensions, PixelSize, Vector, Vector3D, Visual, VisualTreeAttachmentEventArgs, WeakRef};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -112,7 +112,7 @@ struct ImplicitEntry {
     translation_enabled: std::cell::Cell<bool>,
     /// While a hide animation runs: the subscription to the completion of its batch. The visual
     /// holds a show request meanwhile.
-    hiding: RefCell<Option<Rc<dyn IDisposable>>>,
+    hiding: RefCell<Option<Subscription>>,
     subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
 }
 
@@ -185,7 +185,7 @@ impl ImplicitEntry {
                 entry.on_removed(e);
             }
         });
-        self.subscriptions.borrow_mut().extend([changed, attached, detached]);
+        self.subscriptions.borrow_mut().extend([changed, attached.detach(), detached.detach()]);
     }
 
     /// The compositor of the visual, while it is in a tree rendered by one.
@@ -295,6 +295,6 @@ impl ImplicitEntry {
                 subscription.dispose();
             }
         });
-        *subscription.borrow_mut() = Some(completed);
+        *subscription.borrow_mut() = Some(completed.detach());
     }
 }

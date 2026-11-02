@@ -49,6 +49,8 @@ pub use runtime_xaml_loader_configuration::{
     RuntimeXamlDiagnostic, RuntimeXamlDiagnosticSeverity, RuntimeXamlLoaderConfiguration, XamlDiagnosticFunc,
 };
 pub use runtime_xaml_loader_document::RuntimeXamlLoaderDocument;
+pub use xaml_load_exception::XamlLoadError;
+#[allow(deprecated)]
 pub use xaml_load_exception::XamlLoadException;
 pub use xaml_types::{IProvideValueTarget, IRootObjectProvider, IUriContext, IXamlTypeResolver};
 
@@ -83,7 +85,7 @@ pub(crate) use identity_eq;
 /// of a fallible member surfaces as a panic that carries its message, or,
 /// inside a scope of [`xaml_error_scope::with_xaml_errors`], as the error of
 /// the scope.
-pub(crate) fn throw<T>(result: Result<T, XamlLoadException>) -> T {
+pub(crate) fn throw<T>(result: Result<T, XamlLoadError>) -> T {
     match result {
         Ok(value) => value,
         Err(error) => xaml_error_scope::throw(error),

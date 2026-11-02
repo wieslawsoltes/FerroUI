@@ -16,7 +16,7 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_markup_enum, ferro_properties, instantiate, BoxedValue, DirectProperty,
     FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref,
 };
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
 
@@ -310,7 +310,7 @@ impl MacOSTheme {
     /// Populates `this` from the document of the class with the compiled
     /// markup (`compiled_xaml.rs`): the document compiled with every document
     /// it includes as one group, exactly as the run-time loader loads it.
-    fn load(sp: Option<Rc<dyn IServiceProvider>>, this: &Ref<Self>) -> Result<(), XamlLoadException> {
+    fn load(sp: Option<Rc<dyn IServiceProvider>>, this: &Ref<Self>) -> Result<(), XamlLoadError> {
         register_types();
         crate::compiled_xaml::populate(sp, this)
     }

@@ -1,7 +1,7 @@
 use super::{ExpressionNode, NodeState, SourceNode};
 use crate::data::core::ValueTypes;
 use crate::data::BindingError;
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::{BoxedValue, FerroObject, IDataContextProvider, Ref, StyledElement, Visual, WeakRef};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -45,7 +45,7 @@ fn data_context_value_of(object: &FerroObject) -> Option<BoxedValue> {
 pub struct DataContextNode {
     this: Weak<DataContextNode>,
     state: NodeState,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl DataContextNode {
@@ -96,7 +96,7 @@ impl ExpressionNode for DataContextNode {
                         }
                     }
                 });
-                self.subscription.replace(Some(subscription));
+                self.subscription.replace(Some(Subscription::new(subscription)));
                 self.state.set_value(data_context_value_of(&object), None);
             }
             None => self
@@ -126,7 +126,7 @@ impl ExpressionNode for DataContextNode {
 pub struct ParentDataContextNode {
     this: Weak<ParentDataContextNode>,
     state: NodeState,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
     /// `None` until a parent (or the absence of one) has been recorded.
     ///
     /// Held weakly (DEVIATIONS.md, Bindings): the node belongs to a binding
@@ -134,7 +134,7 @@ pub struct ParentDataContextNode {
     /// the managed original holds it, the parent and the element keep each
     /// other alive.
     parent: RefCell<Option<Option<WeakRef<FerroObject>>>>,
-    parent_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    parent_subscription: RefCell<Option<Subscription>>,
 }
 
 impl ParentDataContextNode {
@@ -178,7 +178,7 @@ impl ParentDataContextNode {
                         }
                     }
                 });
-                self.parent_subscription.replace(Some(subscription));
+                self.parent_subscription.replace(Some(Subscription::new(subscription)));
                 self.state.set_value(data_context_value_of(&object), None);
             }
             None => self.state.set_value(None, None),
@@ -219,7 +219,7 @@ impl ExpressionNode for ParentDataContextNode {
                     }
                 }
             });
-            self.subscription.replace(Some(subscription));
+            self.subscription.replace(Some(Subscription::new(subscription)));
         }
         let parent = object.and_then(|o| o.cast::<Visual>()).and_then(|v| v.visual_parent());
         self.set_parent(parent.map(|p| p.upcast()));

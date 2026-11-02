@@ -146,7 +146,7 @@ mod calendar_date_picker_peer {
             if e.property() == ValuePatternIdentifiers::value_property() {
                 *sink.borrow_mut() = Some(e.clone());
             }
-        });
+        }).detach();
 
         control.set_text(Some("January"));
 
@@ -170,7 +170,7 @@ mod calendar_date_picker_peer {
             if e.property() == ExpandCollapsePatternIdentifiers::expand_collapse_state_property() {
                 *sink.borrow_mut() = Some(e.clone());
             }
-        });
+        }).detach();
 
         control.set_is_drop_down_open(true);
 
@@ -279,7 +279,7 @@ mod numeric_up_down_peer {
             if e.property() == RangeValuePatternIdentifiers::value_property() {
                 *sink.borrow_mut() = Some(e.clone());
             }
-        });
+        }).detach();
 
         control.set_numeric_value(Some(d("7.5")));
 

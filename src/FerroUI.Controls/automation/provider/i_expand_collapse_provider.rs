@@ -1,6 +1,6 @@
 use crate::automation::peers::AutomationPeer;
 use ferroui_base::Ref;
-use crate::automation::{ElementNotEnabledException, ExpandCollapseState};
+use crate::automation::{ElementNotEnabledError, ExpandCollapseState};
 
 /// Exposes methods and properties to support UI Automation client access to controls that
 /// visually expand to display content and collapse to hide content.
@@ -24,12 +24,12 @@ pub trait IExpandCollapseProvider {
     ///
     /// Windows: `IExpandCollapseProvider.Expand`.
     /// macOS: `NSAccessibilityProtocol.accessibilityPerformShowMenu`.
-    fn expand(&self) -> Result<(), ElementNotEnabledException>;
+    fn expand(&self) -> Result<(), ElementNotEnabledError>;
 
     /// Hides all nodes, controls, or content that are descendants of the control.
     ///
     /// Windows: `IExpandCollapseProvider.Collapse`. macOS: no mapping.
-    fn collapse(&self) -> Result<(), ElementNotEnabledException>;
+    fn collapse(&self) -> Result<(), ElementNotEnabledError>;
 }
 
 impl PartialEq for dyn IExpandCollapseProvider {

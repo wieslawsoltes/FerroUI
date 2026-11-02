@@ -2577,7 +2577,7 @@ impl<'a> Emitter<'a> {
         text.push_str(&format!("fn {function}(\n"));
         text.push_str("    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,\n");
         text.push_str(
-            ") -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {\n",
+            ") -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {\n",
         );
         let document_info = if declaration_aliases != self.root_namespace_aliases {
             let table = self.scoped_namespace_table(&declaration_aliases);
@@ -3876,7 +3876,7 @@ impl<'a> Emitter<'a> {
 /// ```ignore
 /// pub fn <function_name>(
 ///     service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
-/// ) -> Result<::ferroui_base::Ref<RootClass>, ::ferroui_markup_xaml::XamlLoadException>
+/// ) -> Result<::ferroui_base::Ref<RootClass>, ::ferroui_markup_xaml::XamlLoadError>
 /// ```
 ///
 /// `namespaces` names the constant (an `rt::XmlNamespaceTable`) that holds
@@ -3953,7 +3953,7 @@ impl<'a> DocumentFunctions<'a> {
 /// pub fn <function_name>(
 ///     service_provider: Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
 ///     root: &::ferroui_base::Ref<RootClass>,
-/// ) -> Result<(), ::ferroui_markup_xaml::XamlLoadException>
+/// ) -> Result<(), ::ferroui_markup_xaml::XamlLoadError>
 /// ```
 #[allow(clippy::too_many_arguments)]
 pub fn emit_function<'a>(
@@ -4067,10 +4067,10 @@ pub fn emit_function<'a>(
     match populate {
         Some(_) => {
             source.push_str(&format!("    root: &{root_type},\n"));
-            source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {\n");
+            source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
         }
         None => source.push_str(&format!(
-            ") -> ::core::result::Result<{root_type}, ::ferroui_markup_xaml::XamlLoadException> {{\n"
+            ") -> ::core::result::Result<{root_type}, ::ferroui_markup_xaml::XamlLoadError> {{\n"
         )),
     }
     let mut local_types = std::mem::take(&mut emitter.local_types);
@@ -4309,7 +4309,7 @@ fn split_into_parts(
         for name in &run_captured {
             part.push_str(&format!("    {name}: {},\n", types[name]));
         }
-        part.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {\n");
+        part.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
         for statement in &statements[index..=last] {
             for line in statement.lines {
                 part.push_str(line);

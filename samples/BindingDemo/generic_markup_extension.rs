@@ -4,7 +4,7 @@ use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::media::Color;
 use ferroui_base::metadata::IServiceProvider;
 use ferroui_base::{ferro_markup_type, BoxedValue};
-use ferroui_markup_xaml::{MarkupExtension, XamlLoadException};
+use ferroui_markup_xaml::{MarkupExtension, XamlLoadError};
 use std::cell::RefCell;
 use std::fmt::Display;
 use std::rc::Rc;
@@ -40,7 +40,7 @@ impl<T: Clone + Default + Display + 'static> GenericMarkupExtension<T> {
 }
 
 impl<T: Clone + Default + Display + 'static> MarkupExtension for GenericMarkupExtension<T> {
-    fn provide_value(&self, _service_provider: &Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadException> {
+    fn provide_value(&self, _service_provider: &Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadError> {
         // `Value?.GetType().Name`: the name of the type of the value, without its namespace.
         let full_name = ValueTypes::type_full_name(ValueType::of::<T>());
         let name = full_name.rsplit('.').next().unwrap_or(&full_name);

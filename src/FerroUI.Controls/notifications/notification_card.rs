@@ -117,7 +117,8 @@ impl NotificationCard {
     fn static_constructor() {
         Self::close_on_click_property()
             .changed()
-            .add_class_handler::<Button>(Self::on_close_on_click_property_changed);
+            .add_class_handler::<Button>(Self::on_close_on_click_property_changed)
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

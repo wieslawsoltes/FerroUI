@@ -3,7 +3,7 @@ use crate::media::{
     BrushExtensions, DashStyle, IBrush, IDashStyle, IPen, MediaCollection, PenLineCap, PenLineJoin, SolidColorBrush,
 };
 use crate::media::ref_adapter::RefAdapter;
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::rendering::composition::drawing::{
     brush_get_server_resource, CompositorResourceHolder, ICompositionRenderResource, ServerCompositionSimplePen,
 };
@@ -28,7 +28,7 @@ pub enum StrokeDashArray<'a> {
     Observable(&'a MediaCollection<f64>),
 }
 
-type DashStyleSubscription = (Ref<DashStyle>, Rc<dyn IDisposable>);
+type DashStyleSubscription = (Ref<DashStyle>, Subscription);
 
 /// Describes how a stroke is drawn.
 #[repr(C)]
@@ -279,16 +279,17 @@ impl Pen {
     }
 
     /// Subscribes to invalidation of the pen: raised whenever a change
-    /// requires strokes drawn with the pen to be redrawn. Disposing the
-    /// returned handle unsubscribes.
-    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// requires strokes drawn with the pen to be redrawn. Dropping the
+    /// returned guard removes the handler; [`Subscription::detach`] keeps it
+    /// for the life of the pen.
+    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.invalidated.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.invalidated.remove(token);
             }
-        })
+        }))
     }
 
     fn raise_invalidated(&self) {
@@ -473,7 +474,7 @@ mod tests {
         target.set_dash_style(None);
         let raised = Rc::new(Cell::new(false));
         let r = raised.clone();
-        target.invalidated(move || r.set(true));
+        target.invalidated(move || r.set(true)).detach();
         dashes.set_offset(3.0);
         assert!(!raised.get());
     }

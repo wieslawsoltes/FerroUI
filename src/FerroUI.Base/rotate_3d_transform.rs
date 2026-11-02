@@ -310,7 +310,7 @@ mod tests {
         let target = Rotate3DTransform::with_values(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0);
         let count = Rc::new(Cell::new(0));
         let c = count.clone();
-        target.changed(move || c.set(c.get() + 1));
+        target.changed(move || c.set(c.get() + 1)).detach();
         target.set_angle_x(10.0);
         target.set_center_z(10.0);
         target.set_depth(10.0);

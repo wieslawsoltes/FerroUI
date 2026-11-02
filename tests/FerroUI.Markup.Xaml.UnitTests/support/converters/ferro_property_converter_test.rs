@@ -14,7 +14,7 @@ use ferroui_base::{
 };
 use ferroui_markup_xaml::converters::ITypeDescriptorContext;
 use ferroui_markup_xaml::xaml_il::runtime::IFerroXamlIlParentStackProvider;
-use ferroui_markup_xaml::{IXamlTypeResolver, XamlLoadException};
+use ferroui_markup_xaml::{IXamlTypeResolver, XamlLoadError};
 
 use crate::support::TypeModule;
 
@@ -78,11 +78,11 @@ ferro_markup_type!(static AttachedOwner {
 pub struct TestTypeResolver;
 
 impl IXamlTypeResolver for TestTypeResolver {
-    fn resolve(&self, qualified_type_name: &str) -> Result<CastTarget, XamlLoadException> {
+    fn resolve(&self, qualified_type_name: &str) -> Result<CastTarget, XamlLoadError> {
         match qualified_type_name {
             "Class1" => Ok(CastTarget::Class(<Class1 as StaticType>::TYPE)),
             "AttachedOwner" => Ok(CastTarget::Class(<AttachedOwner as StaticType>::TYPE)),
-            other => Err(XamlLoadException::with_message(format!("Unable to resolve type {other}"))),
+            other => Err(XamlLoadError::with_message(format!("Unable to resolve type {other}"))),
         }
     }
 }

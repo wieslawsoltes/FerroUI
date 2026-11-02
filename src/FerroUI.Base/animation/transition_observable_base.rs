@@ -1,5 +1,5 @@
 use crate::animation::easings::Easing;
-use crate::reactive::{SingleSubscriberObservableBase, IDisposable, IObservable, IObserver, ObservableError};
+use crate::reactive::{SingleSubscriberObservableBase, IDisposable, IObservable, IObserver, ObservableError, Subscription};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -10,7 +10,7 @@ pub struct TransitionObservableBase<T: 'static, F: Fn(f64) -> T + 'static> {
     core: SingleSubscriberObservableBase<T>,
     easing: Easing,
     progress: Rc<dyn IObservable<f64>>,
-    progress_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    progress_subscription: RefCell<Option<Subscription>>,
     produce_value: F,
 }
 
@@ -38,7 +38,7 @@ impl<T: 'static, F: Fn(f64) -> T + 'static> TransitionObservableBase<T, F> {
         let subscription = self.progress.subscribe(this);
         // The progress may have completed while subscribing.
         if self.core.has_observer() {
-            *self.progress_subscription.borrow_mut() = Some(subscription);
+            *self.progress_subscription.borrow_mut() = Some(Subscription::new(subscription));
         } else {
             subscription.dispose();
         }

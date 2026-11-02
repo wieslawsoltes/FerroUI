@@ -1,6 +1,6 @@
 //! Port of `MarkupExtensions/CompiledBindings/PropertyInfoAccessorFactory.cs`.
 
-use crate::XamlLoadException;
+use crate::XamlLoadError;
 use ferroui_base::collections::NotifyCollectionChangedAction;
 use ferroui_base::data::core::plugins::{
     AccessorListener, FerroPropertyAccessor, IPropertyAccessor, InpcPropertyAccessor as BaseInpcPropertyAccessor,
@@ -43,9 +43,9 @@ impl PropertyInfoAccessorFactory {
     pub fn try_create_ferro_property_accessor(
         target: &WeakValue,
         property: Rc<dyn IPropertyInfo>,
-    ) -> Result<Rc<dyn IPropertyAccessor>, XamlLoadException> {
+    ) -> Result<Rc<dyn IPropertyAccessor>, XamlLoadError> {
         let Some(ferro_property) = property.as_ferro_property() else {
-            return Err(XamlLoadException::with_message(format!(
+            return Err(XamlLoadError::with_message(format!(
                 "Unable to cast the property '{}' to type 'FerroProperty'.",
                 property.name()
             )));

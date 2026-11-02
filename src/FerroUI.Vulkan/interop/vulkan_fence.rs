@@ -1,4 +1,4 @@
-use crate::{IVulkanPlatformGraphicsContext, VulkanException, VulkanExceptionExtensions, VulkanResultExtensions};
+use crate::{IVulkanPlatformGraphicsContext, VulkanError, VulkanExceptionExtensions, VulkanResultExtensions};
 use ash::vk;
 use std::cell::Cell;
 use std::rc::Rc;
@@ -13,7 +13,7 @@ impl VulkanFence {
     pub fn new(
         context: Rc<dyn IVulkanPlatformGraphicsContext>,
         flags: vk::FenceCreateFlags,
-    ) -> Result<Self, VulkanException> {
+    ) -> Result<Self, VulkanError> {
         let fence_create_info = vk::FenceCreateInfo::default().flags(flags);
         let handle = context
             .device_api()
@@ -37,11 +37,11 @@ impl VulkanFence {
     }
 
     /// Waits without a time limit.
-    pub fn wait(&self) -> Result<(), VulkanException> {
+    pub fn wait(&self) -> Result<(), VulkanError> {
         self.wait_for(u64::MAX)
     }
 
-    pub fn wait_for(&self, timeout: u64) -> Result<(), VulkanException> {
+    pub fn wait_for(&self, timeout: u64) -> Result<(), VulkanError> {
         self.context
             .device_api()
             .wait_for_fences(self.context.device_handle(), &[self.handle.get()], true, timeout)

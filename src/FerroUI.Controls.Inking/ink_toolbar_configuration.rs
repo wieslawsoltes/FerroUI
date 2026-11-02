@@ -245,7 +245,7 @@ impl FerroObjectImpl for InkToolbarPenConfigurationControl {
             if let Some(config) = weak.upgrade() {
                 config.rebuild_palette();
             }
-        });
+        }).detach();
         this.bind_pen();
     }
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {

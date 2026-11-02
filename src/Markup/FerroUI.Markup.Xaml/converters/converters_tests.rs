@@ -7,7 +7,7 @@ use super::*;
 use crate::templates::ControlTemplate;
 use crate::test_support::{boxed, TestAssetLoader, TestServiceProvider};
 use crate::xaml_il::runtime::IFerroXamlIlParentStackProvider;
-use crate::{register_types, IXamlTypeResolver, XamlLoadException};
+use crate::{register_types, IXamlTypeResolver, XamlLoadError};
 use ferroui_base::animation::TimeSpan;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::expression_nodes::CastTarget;
@@ -24,7 +24,7 @@ use ferroui_controls::Button;
 use std::any::{Any, TypeId};
 use std::rc::Rc;
 
-fn convert(converter: &dyn TypeConverter, text: &str) -> Result<Option<BoxedValue>, XamlLoadException> {
+fn convert(converter: &dyn TypeConverter, text: &str) -> Result<Option<BoxedValue>, XamlLoadError> {
     converter.convert_from(None, None, Some(&boxed(text.to_string())))
 }
 
@@ -275,13 +275,13 @@ ferro_properties! {
 struct TestTypeResolver;
 
 impl IXamlTypeResolver for TestTypeResolver {
-    fn resolve(&self, qualified_type_name: &str) -> Result<CastTarget, XamlLoadException> {
+    fn resolve(&self, qualified_type_name: &str) -> Result<CastTarget, XamlLoadError> {
         match qualified_type_name {
             "Class1" => Ok(CastTarget::Class(<Class1 as StaticType>::TYPE)),
             "AttachedOwner" => Ok(CastTarget::Class(<AttachedOwner as StaticType>::TYPE)),
             "local:Class1" => Ok(CastTarget::Class(<Class1 as StaticType>::TYPE)),
             "Number" => Ok(CastTarget::Value(ValueType::of::<i32>())),
-            other => Err(XamlLoadException::with_message(format!("Unable to resolve type {other}"))),
+            other => Err(XamlLoadError::with_message(format!("Unable to resolve type {other}"))),
         }
     }
 }
@@ -323,7 +323,7 @@ fn class1_style() -> Ref<Style> {
     style
 }
 
-fn convert_property(context: &Rc<dyn ITypeDescriptorContext>, text: &str) -> Result<&'static FerroProperty, XamlLoadException> {
+fn convert_property(context: &Rc<dyn ITypeDescriptorContext>, text: &str) -> Result<&'static FerroProperty, XamlLoadError> {
     let target = FerroPropertyTypeConverter::new();
     let result = target.convert_from(Some(context), None, Some(&boxed(text.to_string())))?;
     Ok(*result.unwrap().downcast_ref::<&'static FerroProperty>().unwrap())

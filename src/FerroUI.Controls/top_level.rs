@@ -27,7 +27,7 @@ use ferroui_base::media::{Brushes, IBrush, MediaContext, SolidColorBrush};
 use ferroui_base::platform::{
     IOptionalFeatureProvider, IPlatformBehaviorInhibition, IPlatformSettings, ISystemNavigationManagerImpl,
 };
-use ferroui_base::reactive::{AnonymousObserver, Disposable, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, Disposable, IDisposable, Subscription};
 use ferroui_base::rendering::composition::CompositionTransparencyLevel;
 use ferroui_base::rendering::{IHitTester, IRenderer, RendererDiagnostics};
 use ferroui_base::styling::{
@@ -64,9 +64,9 @@ pub struct TopLevel {
     global_styles: RefCell<Option<Rc<dyn IGlobalStyles>>>,
     global_styles_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
     application_theme_host: RefCell<Option<Rc<dyn IThemeVariantHost>>>,
-    application_theme_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    back_gesture_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    resources_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    application_theme_subscription: RefCell<Option<Subscription>>,
+    back_gesture_subscription: RefCell<Option<Subscription>>,
+    resources_changed_subscription: RefCell<Option<Subscription>>,
     platform_impl_bindings: RefCell<PlatformImplBindings>,
     scaling: Cell<f64>,
     is_closed: Cell<bool>,
@@ -84,8 +84,8 @@ pub struct TopLevel {
     source: OnceCell<Rc<PresentationSource>>,
     top_level_host: OnceCell<Ref<TopLevelHost>>,
     platform_impl: RefCell<Option<Rc<dyn ITopLevelImpl>>>,
-    insets_paddings: RefCell<Option<Rc<dyn IDisposable>>>,
-    insets_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    insets_paddings: RefCell<Option<Subscription>>,
+    insets_subscription: RefCell<Option<Subscription>>,
     opened: HandlerList<dyn Fn()>,
     closed: HandlerList<dyn Fn()>,
     scaling_changed: HandlerList<dyn Fn()>,
@@ -272,14 +272,14 @@ fn property_key(property: &'static FerroProperty) -> usize {
     property as *const FerroProperty as usize
 }
 
-fn subscribe(handlers: &HandlerList<dyn Fn()>, owner: &TopLevel, select: fn(&TopLevel) -> &HandlerList<dyn Fn()>, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+fn subscribe(handlers: &HandlerList<dyn Fn()>, owner: &TopLevel, select: fn(&TopLevel) -> &HandlerList<dyn Fn()>, handler: Rc<dyn Fn()>) -> Subscription {
     let token = handlers.add(handler);
     let weak = owner.to_ref().downgrade();
-    Disposable::create(move || {
+    Subscription::new(Disposable::create(move || {
         if let Some(owner) = weak.upgrade() {
             select(&owner).remove(token);
         }
-    })
+    }))
 }
 
 /// Chains `handler` onto the lost-focus callback of a platform
@@ -431,7 +431,7 @@ impl TopLevel {
                     insets.set_system_bar_color(Some(color_brush.color()));
                 }
             }
-        });
+        }).detach();
 
         Self::auto_safe_area_padding_property().changed().add_class_handler::<Control>(|view, _| {
             let top_level = view
@@ -441,10 +441,10 @@ impl TopLevel {
             if let Some(top_level) = top_level {
                 top_level.invalidate_child_insets_padding();
             }
-        });
+        }).detach();
 
         // The subscription lives as long as the property.
-        let _ = ToolTip::service_enabled_property().changed().subscribe(Self::on_tool_tip_service_enabled_changed);
+        ToolTip::service_enabled_property().changed().subscribe(Self::on_tool_tip_service_enabled_changed).detach();
     }
 
     fn on_tool_tip_service_enabled_changed(args: &FerroPropertyChangedEventArgs<'_>) {
@@ -692,7 +692,7 @@ impl TopLevel {
                     }
                 }
             }));
-            *self.application_theme_subscription.borrow_mut() = Some(subscription);
+            *self.application_theme_subscription.borrow_mut() = Some(Subscription::new(subscription));
         } else {
             ThemeVariant::update_actual_theme_variant(self);
         }
@@ -717,7 +717,7 @@ impl TopLevel {
                     }
                 }
             }));
-            *self.resources_changed_subscription.borrow_mut() = Some(subscription);
+            *self.resources_changed_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
 
         add_lost_focus(
@@ -783,7 +783,7 @@ impl TopLevel {
                     }
                 }
             })))
-        });
+        }).map(Subscription::new);
     }
 
     fn back_gesture_pre_process(&self, e: &dyn IRawInputEventArgs) {
@@ -823,55 +823,69 @@ impl TopLevel {
         }
     }
 
-    /// Fired when the window is opened. Disposing the returned handle
-    /// unsubscribes.
-    pub fn opened(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Fired when the window is opened.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the top-level.
+    pub fn opened(&self, handler: impl Fn() + 'static) -> Subscription {
         subscribe(&self.opened, self, |tl| &tl.opened, Rc::new(handler))
     }
 
-    /// Fired when the window is closed. Disposing the returned handle
-    /// unsubscribes.
-    pub fn closed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Fired when the window is closed.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the top-level.
+    pub fn closed(&self, handler: impl Fn() + 'static) -> Subscription {
         subscribe(&self.closed, self, |tl| &tl.closed, Rc::new(handler))
     }
 
-    /// Fired when the top-level's scaling changes. Disposing the returned
-    /// handle unsubscribes.
-    pub fn scaling_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Fired when the top-level's scaling changes.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the top-level.
+    pub fn scaling_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         subscribe(&self.scaling_changed, self, |tl| &tl.scaling_changed, Rc::new(handler))
     }
 
     /// Adds a handler to the lost-focus notification of the platform
-    /// implementation (C# `PlatformImpl.LostFocus += handler`); it runs
-    /// after the top-level's own handling. Disposing the returned handle
-    /// removes it.
+    /// implementation (C# `PlatformImpl.LostFocus += handler`); it runs after
+    /// the top-level's own handling.
     ///
     /// The callbacks of a platform implementation hold a single function,
     /// so handlers that come and go (an open popup watching its parent) are
     /// kept in a list of the top-level instead of being chained onto the
     /// callback, where a removed handler would stay behind.
-    pub fn platform_lost_focus(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the top-level.
+    pub fn platform_lost_focus(&self, handler: impl Fn() + 'static) -> Subscription {
         subscribe(&self.platform_lost_focus, self, |tl| &tl.platform_lost_focus, Rc::new(handler))
     }
 
     /// Adds a handler to the deactivated notification of a window platform
     /// implementation (C# `impl.Deactivated += handler`); see
     /// [`platform_lost_focus`](Self::platform_lost_focus).
-    pub fn platform_deactivated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the top-level.
+    pub fn platform_deactivated(&self, handler: impl Fn() + 'static) -> Subscription {
         subscribe(&self.platform_deactivated, self, |tl| &tl.platform_deactivated, Rc::new(handler))
     }
 
     /// Adds a handler to the position-changed notification of a window
     /// platform implementation (C# `impl.PositionChanged += handler`); see
     /// [`platform_lost_focus`](Self::platform_lost_focus).
-    pub fn platform_position_changed(&self, handler: impl Fn(PixelPoint) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the top-level.
+    pub fn platform_position_changed(&self, handler: impl Fn(PixelPoint) + 'static) -> Subscription {
         let token = self.platform_position_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.platform_position_changed.remove(token);
             }
-        })
+        }))
     }
 
     pub(crate) fn raise_platform_deactivated(&self) {
@@ -1245,14 +1259,14 @@ impl TopLevel {
                     this.invalidate_child_insets_padding();
                 }
             }));
-            *self.insets_subscription.borrow_mut() = Some(subscription);
+            *self.insets_subscription.borrow_mut() = Some(Subscription::new(subscription));
             // lower priority, so it can be redefined by user
             let insets_paddings = child.set_value_with_priority(
                 TemplatedControl::padding_property(),
                 insets_manager.safe_area_padding(),
                 BindingPriority::Style,
             );
-            *self.insets_paddings.borrow_mut() = insets_paddings;
+            *self.insets_paddings.borrow_mut() = insets_paddings.map(Subscription::new);
         }
     }
 
@@ -1484,7 +1498,7 @@ struct TopLevelCloseable(Ref<TopLevel>);
 
 impl ferroui_base::input::ICloseable for TopLevelCloseable {
     fn closed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        self.0.closed(move || handler())
+        self.0.closed(move || handler()).detach()
     }
 }
 

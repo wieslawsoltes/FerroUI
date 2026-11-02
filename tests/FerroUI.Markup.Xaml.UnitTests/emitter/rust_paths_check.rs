@@ -565,7 +565,7 @@ pub fn markup_types() -> Vec<(&'static ::ferroui_base::metadata::MarkupType, &'s
         (<::ferroui_base::data::CompiledBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::data::CompiledBinding", false),
         (<::ferroui_base::data::CompiledBindingPath as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::data::CompiledBindingPath", false),
         (<::ferroui_base::data::CompiledBindingPathBuilder as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::data::CompiledBindingPathBuilder", false),
-        (<::ferroui_base::data::DataValidationException as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::data::DataValidationException", false),
+        (<::ferroui_base::data::DataValidationError as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::data::DataValidationError", false),
         (<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::data::MultiBinding", false),
         (<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::data::ReflectionBinding", false),
         (<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_base::data::RelativeSource", false),

@@ -6,11 +6,15 @@ use std::fmt;
 /// payload of the panic that takes its place (see the porting guide on
 /// exceptions for programmer and environment errors).
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct X11Exception {
+pub struct X11Error {
     message: String,
 }
 
-impl X11Exception {
+/// The name of [`X11Error`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `X11Error`")]
+pub type X11Exception = X11Error;
+
+impl X11Error {
     pub fn new(message: impl Into<String>) -> Self {
         Self { message: message.into() }
     }
@@ -25,10 +29,10 @@ impl X11Exception {
     }
 }
 
-impl fmt::Display for X11Exception {
+impl fmt::Display for X11Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
     }
 }
 
-impl std::error::Error for X11Exception {}
+impl std::error::Error for X11Error {}

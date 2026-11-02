@@ -17,7 +17,7 @@ use ferroui_controls::{
             ControlAutomationPeer, ControlAutomationPeerImpl, ListItemAutomationPeer,
         },
         provider::{IInvokeProvider, ISelectionItemProvider, ISelectionProvider},
-        ElementNotEnabledException, SelectionItemPatternIdentifiers,
+        ElementNotEnabledError, SelectionItemPatternIdentifiers,
     },
     primitives::TabStrip,
 };

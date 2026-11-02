@@ -119,7 +119,7 @@ fn attachment_flag(visual: &Ref<Visual>, value: bool) -> Rc<dyn IObservable<bool
         };
         let handler = move |_: &VisualTreeAttachmentEventArgs| observer.on_next(value);
         let subscription: Rc<dyn IDisposable> =
-            if value { visual.attached_to_visual_tree(handler) } else { visual.detached_from_visual_tree(handler) };
+            if value { visual.attached_to_visual_tree(handler).detach() } else { visual.detached_from_visual_tree(handler).detach() };
         subscription
     })
 }

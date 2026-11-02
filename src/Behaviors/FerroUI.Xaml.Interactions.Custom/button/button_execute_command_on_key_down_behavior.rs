@@ -43,7 +43,7 @@ ferroui_base::ferro_overrides! {
                             behavior.root_default_key_down(e);
                         }
                     },
-                );
+                ).detach();
             }
 
             DisposableAction::empty()

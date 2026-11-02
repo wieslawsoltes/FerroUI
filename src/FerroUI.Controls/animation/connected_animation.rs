@@ -19,7 +19,7 @@ use ferroui_base::media::{
     Stretch, TransformGroup, TranslateTransform,
 };
 use ferroui_base::platform::IPlatformRenderInterface;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::styling::Setter;
 use ferroui_base::threading::{CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::HandlerList;
@@ -101,7 +101,7 @@ pub struct ConnectedAnimation {
     disposed: Cell<bool>,
 
     timeout_cts: RefCell<Option<CancellationTokenSource>>,
-    timeout_timer_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    timeout_timer_disposable: RefCell<Option<Subscription>>,
     animation_cts: RefCell<Option<CancellationTokenSource>>,
     animation_timer: RefCell<Option<Rc<DispatcherTimer>>>,
 
@@ -230,18 +230,21 @@ impl ConnectedAnimation {
 
     /// Raised when the animation finishes or is cancelled. Check
     /// [`ConnectedAnimationCompletedEventArgs::cancelled`] to distinguish the
-    /// cases. Disposing the returned handle unsubscribes.
+    /// cases.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the animation.
     pub fn completed(
         &self,
         handler: impl Fn(&ConnectedAnimationCompletedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let id = self.completed.add(Rc::new(handler));
         let this = self.this.clone();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = this.upgrade() {
                 this.completed.remove(id);
             }
-        })
+        }))
     }
 
     fn raise_completed(&self, cancelled: bool) {
@@ -512,7 +515,7 @@ impl ConnectedAnimation {
                         }
                     }
                 });
-                *handler.borrow_mut() = Some(subscription);
+                *handler.borrow_mut() = Some(subscription.detach());
 
                 // The 500 ms timeout of the reference.
                 let timeout = DispatcherTimer::run_once(

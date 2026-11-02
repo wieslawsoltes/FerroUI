@@ -11,7 +11,7 @@ use super::selection_node_base::{cast_item, CollectionChangeState, SelectionNode
 use crate::items_source::{box_item, unbox_item, ItemsChangedEventArgs, ItemsSource, ItemsView};
 use ferroui_base::collections::NotifyCollectionChangedAction;
 use ferroui_base::data::model::{Event, INotifyPropertyChanged};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{BoxedValue, PropertyValue};
 use std::cell::{Cell, RefCell};
@@ -358,41 +358,53 @@ impl<T: PropertyValue> SelectionModel<T> {
 
     /// Subscribes to the event raised when a change to the source shifts
     /// the indexes of selected items.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the model.
     pub fn indexes_changed(
         &self,
         handler: impl Fn(&SelectionModelIndexesChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.indexes_changed.add(Rc::new(handler));
-        self.subscription(move |this| {
+        Subscription::new(self.subscription(move |this| {
             this.indexes_changed.remove(token);
-        })
+        }))
     }
 
     /// Subscribes to the event raised when the selection changes.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the model.
     pub fn selection_changed(
         &self,
         handler: impl Fn(&SelectionModelSelectionChangedEventArgsOf<T>) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.selection_changed.add(Rc::new(handler));
-        self.subscription(move |this| {
+        Subscription::new(self.subscription(move |this| {
             this.selection_changed.remove(token);
-        })
+        }))
     }
 
     /// Subscribes to the event raised when the selection becomes empty.
-    pub fn lost_selection(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the model.
+    pub fn lost_selection(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.lost_selection.add(Rc::new(handler));
-        self.subscription(move |this| {
+        Subscription::new(self.subscription(move |this| {
             this.lost_selection.remove(token);
-        })
+        }))
     }
 
     /// Subscribes to the event raised when the source is reset.
-    pub fn source_reset(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the model.
+    pub fn source_reset(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.source_reset.add(Rc::new(handler));
-        self.subscription(move |this| {
+        Subscription::new(self.subscription(move |this| {
             this.source_reset.remove(token);
-        })
+        }))
     }
 
     fn subscription(&self, remove: impl Fn(&SelectionModel<T>) + 'static) -> Rc<dyn IDisposable> {
@@ -405,7 +417,7 @@ impl<T: PropertyValue> SelectionModel<T> {
     }
 
     /// Begins a batch update that ends when the returned operation is
-    /// disposed.
+    /// disposed or dropped.
     pub fn batch_update(&self) -> BatchUpdateOperation {
         BatchUpdateOperation::new(self.this.upgrade().expect("the selection model is alive"))
     }

@@ -3,7 +3,7 @@ use super::{
     UntypedBindingExpressionBase,
 };
 use crate::data::{BindingNotification, BindingPriority};
-use crate::reactive::{IDisposable, IObservable, IObserver};
+use crate::reactive::{IObservable, IObserver, Subscription};
 use crate::BoxedValue;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -14,7 +14,7 @@ pub struct UntypedObservableBindingExpression {
     this: Weak<UntypedObservableBindingExpression>,
     base: UntypedBindingExpressionBase,
     observable: Rc<dyn IObservable<Option<BoxedValue>>>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl UntypedObservableBindingExpression {
@@ -54,7 +54,7 @@ impl UntypedBindingExpression for UntypedObservableBindingExpression {
 
     fn start_core(&self) {
         let subscription = self.observable.subscribe(Rc::new(WeakObserver(self.this.clone())));
-        self.subscription.replace(Some(subscription));
+        self.subscription.replace(Some(Subscription::new(subscription)));
     }
 
     fn stop_core(&self) {

@@ -484,10 +484,10 @@ fn native_control_host_creates_shows_and_destroys_the_native_control() {
     target.set_width(50.0);
     target.set_height(20.0);
     let changes = Rc::new(Cell::new(0));
-    let _subscription = target.native_control_handle_changed({
+    target.native_control_handle_changed({
         let changes = changes.clone();
         move || changes.set(changes.get() + 1)
-    });
+    }).detach();
     assert!(target.native_control_handle().is_none());
     assert!(!target.try_update_native_control_position());
 
@@ -582,10 +582,10 @@ fn native_control_host_recreates_the_control_when_the_host_is_incompatible_with_
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let (window, host_impl, target) = shown_native_control_host();
     let changes = Rc::new(Cell::new(0));
-    let _subscription = target.native_control_handle_changed({
+    target.native_control_handle_changed({
         let changes = changes.clone();
         move || changes.set(changes.get() + 1)
-    });
+    }).detach();
     let first_attachment = host_impl.attachments.borrow()[0].clone();
     first_attachment.incompatible.set(true);
     host_impl.incompatible_with_handles.set(true);

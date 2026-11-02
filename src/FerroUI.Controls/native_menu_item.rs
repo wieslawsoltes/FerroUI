@@ -4,7 +4,7 @@ use crate::{MenuItem, MenuItemToggleType, NativeMenu, NativeMenuItemBase};
 use ferroui_base::input::{ICommand, KeyGesture};
 use ferroui_base::media::imaging::IBitmap;
 use ferroui_base::utilities::WeakEvents;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObject,
@@ -21,7 +21,7 @@ pub struct NativeMenuItem {
     /// The subscription to the "can execute changed" event of the command.
     /// The handler holds the item weakly, so that a command does not keep
     /// the items that use it alive.
-    can_execute_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    can_execute_changed_subscription: RefCell<Option<Subscription>>,
     click: HandlerList<dyn Fn(&NativeMenuItem)>,
 }
 
@@ -54,7 +54,7 @@ impl FerroObjectImpl for NativeMenuItem {
                 // this item.
                 let subscription =
                     WeakEvents::subscribe_command_can_execute_changed(&new_command, &this.to_ref(), |this| this.can_execute_changed());
-                let old = this.can_execute_changed_subscription.replace(Some(subscription));
+                let old = this.can_execute_changed_subscription.replace(Some(Subscription::new(subscription)));
                 if let Some(old) = old {
                     old.dispose();
                 }
@@ -286,14 +286,17 @@ impl NativeMenuItem {
     }
 
     /// Occurs when a [`NativeMenuItem`] is clicked.
-    pub fn click(&self, handler: impl Fn(&NativeMenuItem) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the item.
+    pub fn click(&self, handler: impl Fn(&NativeMenuItem) + 'static) -> Subscription {
         let token = self.click.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.click.remove(token);
             }
-        })
+        }))
     }
 
     /// The item viewed as the contract through which the platform

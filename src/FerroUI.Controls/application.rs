@@ -13,7 +13,7 @@ use ferroui_base::input::{
 };
 use ferroui_base::media::MediaContext;
 use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformSettings};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::styling::{
     GlobalStylesHandler, IGlobalStyles, IStyle, IStyleHost, IThemeVariantHost, IThemeVariantRoot, StyleHostRef,
     Styles, ThemeVariant,
@@ -358,18 +358,19 @@ impl Application {
         self.try_get::<dyn IPlatformSettings>()
     }
 
-    /// Raised when the resources of the application change. Disposing the
-    /// returned handle unsubscribes.
-    pub fn resources_changed(&self, handler: impl Fn(&ResourcesChangedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when the resources of the application change. Dropping the returned guard removes the
+    /// handler; [`Subscription::detach`] keeps it for the life of the application.
+    pub fn resources_changed(&self, handler: impl Fn(&ResourcesChangedEventArgs) + 'static) -> Subscription {
         let handler: Rc<dyn Fn(&ResourcesChangedEventArgs)> = Rc::new(handler);
-        self.host.subscribe(|host| &host.resources_changed, handler)
+        Subscription::new(self.host.subscribe(|host| &host.resources_changed, handler))
     }
 
-    /// Raised when the actual theme variant of the application has changed.
-    /// Disposing the returned handle unsubscribes.
-    pub fn actual_theme_variant_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when the actual theme variant of the application has changed. Dropping the returned
+    /// guard removes the handler; [`Subscription::detach`] keeps it for the life of the
+    /// application.
+    pub fn actual_theme_variant_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let handler: Rc<dyn Fn()> = Rc::new(handler);
-        self.host.subscribe(|host| &host.actual_theme_variant_changed, handler)
+        Subscription::new(self.host.subscribe(|host| &host.actual_theme_variant_changed, handler))
     }
 
     /// Tries to find a resource within the application: in its resource

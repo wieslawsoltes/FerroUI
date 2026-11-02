@@ -2,7 +2,7 @@ use super::gesture_recognizers::GestureRecognizer;
 use super::{
     IPointer, InputElement, PointerCaptureChangingEventArgs, PointerCaptureLostEventArgs, PointerType,
 };
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::{Ref, Visual, VisualTreeAttachmentEventArgs};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -39,7 +39,7 @@ pub struct Pointer {
     captured_gesture_recognizer: RefCell<Option<Ref<GestureRecognizer>>>,
     capture_source: Cell<CaptureSource>,
     is_gesture_recognition_skipped: Cell<bool>,
-    capture_detached: RefCell<Option<Rc<dyn IDisposable>>>,
+    capture_detached: RefCell<Option<Subscription>>,
     platform_capture: Option<PlatformCapture>,
 }
 

@@ -13,7 +13,7 @@ use ferroui_controls::{
     Application, Button, ComboBox, ContentControl, Control, Expander, HyperlinkButton, ListBox,
     ScrollViewer, StackPanel, TextBlock, TextBox,
 };
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_winui::{migrate_winui_xaml, WinUIXamlOptions};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::cell::{Cell, RefCell};
@@ -46,7 +46,7 @@ struct GalleryState {
 }
 
 impl GalleryView {
-    pub fn new() -> Result<Self, XamlLoadException> {
+    pub fn new() -> Result<Self, XamlLoadError> {
         Self::with_preview_options(WinUIXamlOptions::default())
     }
 
@@ -54,7 +54,7 @@ impl GalleryView {
     /// WinUI theme, use `WinUIXamlOptions::for_winui_theme()`.
     pub fn with_preview_options(
         preview_options: WinUIXamlOptions,
-    ) -> Result<Self, XamlLoadException> {
+    ) -> Result<Self, XamlLoadError> {
         ferroui_markup_xaml::register_types();
         FerroRuntimeXamlLoader::register();
         let root =
@@ -426,14 +426,14 @@ pub fn wrap_winui_sample(sample: &SampleDefinition) -> String {
 }
 
 /// Exercises the public opt-in migration path, shared with compiled XAML.
-pub fn load_winui_preview(xaml: &str) -> Result<Ref<Control>, XamlLoadException> {
+pub fn load_winui_preview(xaml: &str) -> Result<Ref<Control>, XamlLoadError> {
     load_winui_preview_with_options(xaml, &WinUIXamlOptions::default())
 }
 
 pub fn load_winui_preview_with_options(
     xaml: &str,
     options: &WinUIXamlOptions,
-) -> Result<Ref<Control>, XamlLoadException> {
+) -> Result<Ref<Control>, XamlLoadError> {
     ferroui_markup_xaml_winui::parse_winui_as(xaml, None, options)
 }
 

@@ -17,7 +17,7 @@ use ferroui_controls::automation::{
         IExpandCollapseProvider, IScrollProvider, ISelectionProvider, IValueProvider,
         ProviderError, ScrollAmount,
     },
-    AutomationElementIdentifiers, ElementNotEnabledException, ExpandCollapsePatternIdentifiers,
+    AutomationElementIdentifiers, ElementNotEnabledError, ExpandCollapsePatternIdentifiers,
     ExpandCollapseState, ScrollPatternIdentifiers, SelectionPatternIdentifiers,
     ValuePatternIdentifiers,
 };
@@ -81,11 +81,11 @@ impl IExpandCollapseProvider for Provider {
     fn shows_menu(&self) -> bool {
         false
     }
-    fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    fn expand(&self) -> Result<(), ElementNotEnabledError> {
         self.0.owner().set_is_open(true);
         Ok(())
     }
-    fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         self.0.owner().set_is_open(false);
         Ok(())
     }
@@ -172,7 +172,7 @@ impl IScrollProvider for Provider {
         &self,
         horizontal: ScrollAmount,
         vertical: ScrollAmount,
-    ) -> Result<(), ElementNotEnabledException> {
+    ) -> Result<(), ElementNotEnabledError> {
         self.0
             .get_scroll_provider()
             .map_or(Ok(()), |p| p.scroll(horizontal, vertical))
@@ -181,7 +181,7 @@ impl IScrollProvider for Provider {
         &self,
         horizontal: f64,
         vertical: f64,
-    ) -> Result<(), ElementNotEnabledException> {
+    ) -> Result<(), ElementNotEnabledError> {
         self.0
             .get_scroll_provider()
             .map_or(Ok(()), |p| p.set_scroll_percent(horizontal, vertical))

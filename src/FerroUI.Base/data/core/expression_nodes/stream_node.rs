@@ -2,7 +2,7 @@ use super::{ExpressionNode, NodeState};
 use crate::data::core::plugins::{BindingPlugins, IStreamPlugin};
 use crate::data::core::WeakValue;
 use crate::data::BindingError;
-use crate::reactive::{IDisposable, IObserver};
+use crate::reactive::{IObserver, Subscription};
 use crate::BoxedValue;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -14,7 +14,7 @@ pub struct StreamNode {
     this: Weak<StreamNode>,
     state: NodeState,
     plugin: Option<Rc<dyn IStreamPlugin>>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl StreamNode {
@@ -69,7 +69,7 @@ impl ExpressionNode for StreamNode {
         match plugin.and_then(|p| p.start(&reference)) {
             Some(observable) => {
                 let subscription = observable.subscribe(Rc::new(WeakObserver(self.this.clone())));
-                self.subscription.replace(Some(subscription));
+                self.subscription.replace(Some(Subscription::new(subscription)));
             }
             None if dynamic => self.state.set_value(None, None),
             None => self.state.clear_value(),

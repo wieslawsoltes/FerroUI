@@ -107,6 +107,7 @@ fn steps_run() {
             },
             Duration::from_millis(step_ms / 2),
             ferroui_base::threading::DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 }

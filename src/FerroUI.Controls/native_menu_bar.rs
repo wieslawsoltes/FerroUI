@@ -8,7 +8,7 @@ use ferroui_base::data::{BindingPriority, TemplateBinding};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::{CompositeDisposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{CompositeDisposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectExtensions, FerroObjectImpl, Ref,
     StaticType, StyledElementImpl, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
@@ -22,7 +22,7 @@ use std::rc::Rc;
 pub struct NativeMenuBar {
     base: TemplatedControl,
     menu: RefCell<Option<Ref<MenuBase>>>,
-    subscriptions: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(NativeMenuBar: TemplatedControl);
@@ -135,6 +135,6 @@ impl NativeMenuBar {
                 BindingPriority::LocalValue,
             ),
         ]));
-        *self.subscriptions.borrow_mut() = Some(subscriptions);
+        *self.subscriptions.borrow_mut() = Some(Subscription::new(subscriptions));
     }
 }

@@ -6,11 +6,15 @@ use std::fmt;
 /// programmer errors panic); the type names the error where it is passed on
 /// as a value.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct FerroInternalException {
+pub struct FerroInternalError {
     message: String,
 }
 
-impl FerroInternalException {
+/// The name of [`FerroInternalError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `FerroInternalError`")]
+pub type FerroInternalException = FerroInternalError;
+
+impl FerroInternalError {
     /// Creates the exception with the given message.
     pub fn new(message: impl Into<String>) -> Self {
         Self { message: message.into() }
@@ -22,10 +26,10 @@ impl FerroInternalException {
     }
 }
 
-impl fmt::Display for FerroInternalException {
+impl fmt::Display for FerroInternalError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
     }
 }
 
-impl std::error::Error for FerroInternalException {}
+impl std::error::Error for FerroInternalError {}

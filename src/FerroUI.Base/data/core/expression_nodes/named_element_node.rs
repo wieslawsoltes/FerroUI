@@ -1,7 +1,7 @@
 use super::{ExpressionNode, NodeState, SourceNode};
 use crate::controls::{NameScopeLocator, NameScopeRef};
 use crate::data::BindingError;
-use crate::reactive::{IDisposable, IObserver};
+use crate::reactive::{IObserver, Subscription};
 use crate::{BoxedValue, FerroObject, StyledElement};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -12,7 +12,7 @@ pub struct NamedElementNode {
     state: NodeState,
     name_scope: Option<Weak<dyn crate::controls::INameScope>>,
     name: Box<str>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl NamedElementNode {
@@ -62,7 +62,7 @@ impl ExpressionNode for NamedElementNode {
             Some(scope) => {
                 let subscription = NameScopeLocator::track_value(&NameScopeRef(scope), &self.name)
                     .subscribe(Rc::new(WeakObserver(self.this.clone())));
-                self.subscription.replace(Some(subscription));
+                self.subscription.replace(Some(Subscription::new(subscription)));
             }
             None => self.state.set_error("NameScope not found."),
         }

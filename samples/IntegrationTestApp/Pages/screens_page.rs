@@ -2,7 +2,7 @@
 
 use crate::markup::{user_control_class, xaml_class};
 use ferroui_base::interactivity::{IRoutedEventArgs, RoutedEventArgs};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref, Visual, VisualTreeAttachmentEventArgs, WeakRef};
 use ferroui_controls::platform::{IPlatformHandle, Screen};
 use ferroui_controls::{TextBox, TopLevel, UserControl, Window};
@@ -19,7 +19,7 @@ pub struct ScreensPage {
     last_window: RefCell<Option<WeakRef<Window>>>,
     /// The subscription to the change of the screens of the window (`Screens.Changed += ..`),
     /// which `Screens.Changed -= ..` ends.
-    screens_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+    screens_changed: RefCell<Option<Subscription>>,
 }
 
 user_control_class!(ScreensPage);

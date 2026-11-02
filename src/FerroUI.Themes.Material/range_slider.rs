@@ -18,7 +18,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::{LayoutableImpl, Orientation};
 use ferroui_base::media::{BoxShadows, DrawingContext, FlowDirection, IBrush};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs,
     Point, Rect, Ref, RoundedRect, Size, StyledElementImpl, StyledProperty, StyledPropertyOptions,
@@ -30,7 +30,7 @@ use ferroui_controls::automation::peers::{
     ControlAutomationPeerImpl, RangeBaseAutomationPeer, RangeBaseAutomationPeerImpl,
 };
 use ferroui_controls::automation::provider::IRangeValueProvider;
-use ferroui_controls::automation::{AutomationProperties, ElementNotEnabledException};
+use ferroui_controls::automation::{AutomationProperties, ElementNotEnabledError};
 use ferroui_controls::primitives::{
     RangeBase, RangeBaseValueChangedEventArgs, TemplateAppliedEventArgs, TemplatedControl,
     TemplatedControlImpl, TemplatedControlImplExt,
@@ -67,7 +67,7 @@ pub struct MaterialRangeSlider {
     layout: RefCell<Option<Ref<MaterialRangeSliderLayout>>>,
     start_thumb: RefCell<Option<Ref<MaterialRangeSliderThumb>>>,
     end_thumb: RefCell<Option<Ref<MaterialRangeSliderThumb>>>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
     synchronizing: Cell<bool>,
     drag: RefCell<Option<Drag>>,
     edited: Cell<bool>,
@@ -812,12 +812,12 @@ impl IRangeValueProvider for RangeThumbProvider {
     fn small_change(&self) -> f64 {
         self.0.thumb().small_change()
     }
-    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledException> {
+    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledError> {
         self.0.ensure_enabled()?;
         let thumb = self.0.thumb();
-        let owner = thumb.owner().ok_or_else(ElementNotEnabledException::new)?;
+        let owner = thumb.owner().ok_or_else(ElementNotEnabledError::new)?;
         if owner.is_read_only() {
-            return Err(ElementNotEnabledException::with_message(
+            return Err(ElementNotEnabledError::with_message(
                 "Range slider is read-only.",
             ));
         }

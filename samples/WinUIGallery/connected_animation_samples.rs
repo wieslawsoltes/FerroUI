@@ -25,7 +25,7 @@ use ferroui_controls::{
     Border, Button, ContentControlImpl, Control, ControlImpl, Frame, FramePage, FramePageImpl,
     Grid, Image, Panel, RadioButtons, ScrollViewer, StackPanel, TextBlock, ToolTip, TopLevel,
 };
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -212,7 +212,7 @@ fn wire_trimmed_description(description: &Ref<TextBlock>) {
                 tooltip.map(|text| Rc::new(text) as ferroui_base::BoxedValue),
             );
         }
-    });
+    }).detach();
 }
 
 fn item_button(
@@ -467,13 +467,13 @@ fn wire_collection(
             }
             state.report(&format!("Returned to {}", state.items[index].title));
         }
-    });
+    }).detach();
     let weak_state = Rc::downgrade(&state);
     root.detached_from_visual_tree(move |_| {
         if let Some(state) = weak_state.upgrade() {
             state.animation.clear();
         }
-    });
+    }).detach();
     frame.navigate(source_type, None)?;
     Ok(())
 }
@@ -566,7 +566,7 @@ fn wire_simple(root: &Ref<Control>) -> Result<(), NavigationError> {
         });
     root.detached_from_visual_tree(move |_| {
         animation.clear();
-    });
+    }).detach();
     frame.navigate(ConnectedFirstPage::TYPE, None)?;
     Ok(())
 }
@@ -657,7 +657,7 @@ fn wire_cards(root: &Ref<Control>) -> Result<(), NavigationError> {
                             smoke.children().add(restored_destination.clone());
                         }
                     }
-                });
+                }).detach();
                 target.bring_into_view();
                 cards.update_layout();
                 if !animation.try_start(&target) {
@@ -668,7 +668,7 @@ fn wire_cards(root: &Ref<Control>) -> Result<(), NavigationError> {
             });
             cards.detached_from_visual_tree(move |_| {
                 active.clear();
-            });
+            }).detach();
             Ok(ConnectedCardPage::with_content(cards))
         }),
     )?;
@@ -676,7 +676,7 @@ fn wire_cards(root: &Ref<Control>) -> Result<(), NavigationError> {
     Ok(())
 }
 
-pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadException> {
+pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
     if root
         .find_control::<Frame>("ConnectedCollectionFrame")
         .is_none()
@@ -684,7 +684,7 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadException> {
         return Ok(());
     }
     let load_error = |error| {
-        XamlLoadException::with_inner("Could not initialize connected animation examples.", error)
+        XamlLoadError::with_inner("Could not initialize connected animation examples.", error)
     };
     wire_collection(
         root,

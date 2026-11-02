@@ -698,14 +698,14 @@ impl ILogSink for TestLogSink {
 
 use ferroui_base::data::core::expression_nodes::ExpressionNode;
 use ferroui_base::data::core::parsers::{BindingExpressionGrammar, ExpressionNodeFactory, TypeResolver};
-use ferroui_base::data::core::{BindingExpression, BindingExpressionOptions, ExpressionParseException};
+use ferroui_base::data::core::{BindingExpression, BindingExpressionOptions, ExpressionParseError};
 use ferroui_base::reactive::{AnonymousObserver, IObservable};
 
 /// Parses a binding path into expression nodes.
 pub fn parse_nodes(
     path: &str,
     type_resolver: Option<&TypeResolver>,
-) -> Result<Vec<Rc<dyn ExpressionNode>>, ExpressionParseException> {
+) -> Result<Vec<Rc<dyn ExpressionNode>>, ExpressionParseError> {
     let (ast, _source_mode) = BindingExpressionGrammar::parse(path)?;
     let mut nodes = Vec::new();
     ExpressionNodeFactory::create_from_ast(&ast, type_resolver, None, &mut nodes)?;
@@ -718,7 +718,7 @@ pub fn build_expression(
     path: &str,
     type_resolver: Option<&TypeResolver>,
     enable_data_validation: bool,
-) -> Result<Rc<BindingExpression>, ExpressionParseException> {
+) -> Result<Rc<BindingExpression>, ExpressionParseError> {
     let nodes = parse_nodes(path, type_resolver)?;
     Ok(BindingExpression::new(
         source,

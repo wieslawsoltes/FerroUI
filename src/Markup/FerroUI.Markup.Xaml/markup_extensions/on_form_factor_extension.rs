@@ -78,7 +78,7 @@ impl<TReturn: Clone> OnFormFactorExtensionBase<TReturn> {
     pub fn try_should_provide_option(
         service_provider: &Rc<dyn IServiceProvider>,
         option: FormFactorType,
-    ) -> Result<bool, crate::XamlLoadException> {
+    ) -> Result<bool, crate::XamlLoadError> {
         let platform = XamlIlRuntimeHelpers::get_runtime_platform(service_provider)?;
         Ok(platform.is_some_and(|platform| platform.get_runtime_info().form_factor() == option))
     }

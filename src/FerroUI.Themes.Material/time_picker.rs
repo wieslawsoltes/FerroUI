@@ -41,7 +41,7 @@ use ferroui_controls::automation::peers::{
 };
 use ferroui_controls::automation::provider::{IValueProvider, ProviderError};
 use ferroui_controls::automation::{
-    AutomationLiveSetting, AutomationProperties, ElementNotEnabledException,
+    AutomationLiveSetting, AutomationProperties, ElementNotEnabledError,
 };
 use ferroui_controls::primitives::{
     TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl, TemplatedControlImplExt,
@@ -256,7 +256,7 @@ impl TemplatedControlImpl for MaterialTimePicker {
                         },
                         RoutingStrategies::BUBBLE,
                         false,
-                    );
+                    ).detach();
                     this.subscriptions.borrow_mut().push(subscription);
                 }
             }
@@ -1216,7 +1216,7 @@ impl IValueProvider for TimeValueProvider {
     fn set_value(&self, value: Option<&str>) -> Result<(), ProviderError> {
         let owner = self.0.picker();
         if !owner.can_edit() {
-            return Err(Box::new(ElementNotEnabledException::with_message(
+            return Err(Box::new(ElementNotEnabledError::with_message(
                 "Time picker is disabled or read-only.",
             )));
         }

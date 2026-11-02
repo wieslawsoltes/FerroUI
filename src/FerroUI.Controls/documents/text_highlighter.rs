@@ -4,7 +4,7 @@
 use super::{TextHighlightError, TextHighlightRange, TextRangeCollection};
 use ferroui_base::media::{IBrush, subscribe_invalidated};
 use ferroui_base::metadata::IAddChild;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs,
@@ -24,7 +24,7 @@ use std::rc::Rc;
 pub struct TextHighlighter {
     base: FerroObject,
     ranges: TextRangeCollection,
-    range_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    range_subscription: RefCell<Option<Subscription>>,
     brush_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
     invalidated: Rc<HandlerList<dyn Fn()>>,
 }
@@ -139,14 +139,16 @@ impl TextHighlighter {
         Rc::new(HighlighterAddChild(this))
     }
 
-    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the highlighter.
+    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.invalidated.add(Rc::new(handler));
         let weak = Rc::downgrade(&self.invalidated);
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(handlers) = weak.upgrade() {
                 handlers.remove(token);
             }
-        })
+        }))
     }
 
     fn invalidate(&self) {

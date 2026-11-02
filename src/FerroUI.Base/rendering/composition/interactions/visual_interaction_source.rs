@@ -8,7 +8,7 @@ use crate::input::{
 };
 use crate::interactivity::Interactive;
 use crate::numerics::Vector3;
-use crate::reactive::IDisposable;
+use crate::reactive::{IDisposable, Subscription};
 use crate::rendering::composition::{CompositionDrawListVisual, CompositionVisual, Compositor};
 use crate::{Point, Ref, WeakRef};
 use std::cell::{Cell, RefCell};
@@ -181,7 +181,7 @@ pub struct VisualInteractionSource {
     scale_velocity: Cell<f32>,
     trackers: RefCell<Vec<Weak<InteractionTracker>>>,
     manipulation: RefCell<Option<Manipulation>>,
-    wheel_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    wheel_subscription: RefCell<Option<Subscription>>,
 }
 
 impl VisualInteractionSource {
@@ -465,7 +465,7 @@ impl VisualInteractionSource {
             },
             Interactive::DEFAULT_ROUTES,
             true,
-        ));
+        ).detach());
         let weak = self.this.clone();
         subscriptions.push(element.add_disposable_handler_with(
             InputElement::pointer_released_event(),
@@ -480,7 +480,7 @@ impl VisualInteractionSource {
             },
             Interactive::DEFAULT_ROUTES,
             true,
-        ));
+        ).detach());
         let weak = self.this.clone();
         subscriptions.push(element.add_disposable_handler_with(
             InputElement::pointer_capture_lost_event(),
@@ -496,7 +496,7 @@ impl VisualInteractionSource {
             },
             Interactive::DEFAULT_ROUTES,
             true,
-        ));
+        ).detach());
 
         self.begin_manipulation(point.position, Some(pointer), subscriptions);
         true

@@ -126,13 +126,13 @@ impl RootDockDebugExtensions {
                     let closed = state.clone();
                     created.closed(move || {
                         closed.replace(None);
-                    });
+                    }).detach();
                     created.show();
                 }
             },
             RoutingStrategies::TUNNEL,
             false,
-        );
+        ).detach();
         let closing = top_level.cast::<Window>().map(|main| {
             let state = window.clone();
             main.closing(move |_| {
@@ -141,7 +141,7 @@ impl RootDockDebugExtensions {
                     current.close();
                     state.replace(None);
                 }
-            })
+            }).detach()
         });
         Rc::new(ActionDisposable(Box::new(move || {
             let _owner = &top_level;

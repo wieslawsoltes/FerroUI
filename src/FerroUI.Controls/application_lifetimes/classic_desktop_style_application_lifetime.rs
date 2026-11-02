@@ -5,7 +5,7 @@ use super::{
 };
 use crate::platform::IPlatformLifetimeEventsImpl;
 use crate::{AppBuilder, ShutdownMode, Window, WindowCloseReason};
-use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable};
+use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, Subscription};
 use ferroui_base::threading::{CancellationTokenSource, Dispatcher};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{FerroLocator, LocatorExtensions, Ref};
@@ -35,7 +35,7 @@ pub struct ClassicDesktopStyleApplicationLifetime {
     before_init_called: Cell<bool>,
     after_init_called: Cell<bool>,
     platform_lifetime_events_impl: RefCell<Option<Rc<dyn IPlatformLifetimeEventsImpl>>>,
-    platform_shutdown_requested: RefCell<Option<Rc<dyn IDisposable>>>,
+    platform_shutdown_requested: RefCell<Option<Subscription>>,
     startup: HandlerList<dyn Fn(&ControlledApplicationLifetimeStartupEventArgs)>,
     shutdown_requested: HandlerList<dyn Fn(&ShutdownRequestedEventArgs)>,
     exit: HandlerList<dyn Fn(&ControlledApplicationLifetimeExitEventArgs)>,
@@ -86,29 +86,29 @@ impl ClassicDesktopStyleApplicationLifetime {
         })
     }
 
-    /// Raised when the application is starting. Disposing the returned
-    /// handle unsubscribes.
+    /// Raised when the application is starting. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the lifetime.
     pub fn startup(
         &self,
         handler: impl Fn(&ControlledApplicationLifetimeStartupEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let handler: Rc<dyn Fn(&ControlledApplicationLifetimeStartupEventArgs)> = Rc::new(handler);
-        self.subscribe(|this| &this.startup, handler)
+        Subscription::new(self.subscribe(|this| &this.startup, handler))
     }
 
     /// Raised when an application shutdown is requested; see
-    /// [`IClassicDesktopStyleApplicationLifetime::shutdown_requested`].
-    /// Disposing the returned handle unsubscribes.
-    pub fn shutdown_requested(&self, handler: impl Fn(&ShutdownRequestedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// [`IClassicDesktopStyleApplicationLifetime::shutdown_requested`]. Dropping the returned guard
+    /// removes the handler; [`Subscription::detach`] keeps it for the life of the lifetime.
+    pub fn shutdown_requested(&self, handler: impl Fn(&ShutdownRequestedEventArgs) + 'static) -> Subscription {
         let handler: Rc<dyn Fn(&ShutdownRequestedEventArgs)> = Rc::new(handler);
-        self.subscribe(|this| &this.shutdown_requested, handler)
+        Subscription::new(self.subscribe(|this| &this.shutdown_requested, handler))
     }
 
-    /// Raised when the application is exiting. Disposing the returned
-    /// handle unsubscribes.
-    pub fn exit(&self, handler: impl Fn(&ControlledApplicationLifetimeExitEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when the application is exiting. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the lifetime.
+    pub fn exit(&self, handler: impl Fn(&ControlledApplicationLifetimeExitEventArgs) + 'static) -> Subscription {
         let handler: Rc<dyn Fn(&ControlledApplicationLifetimeExitEventArgs)> = Rc::new(handler);
-        self.subscribe(|this| &this.exit, handler)
+        Subscription::new(self.subscribe(|this| &this.exit, handler))
     }
 
     /// The arguments passed to the builder's start method.
@@ -209,7 +209,7 @@ impl ClassicDesktopStyleApplicationLifetime {
         };
 
         *self.global_events_subscriptions.borrow_mut() =
-            Some(Rc::new(CompositeDisposable::from_disposables([opened, closed])));
+            Some(Rc::new(CompositeDisposable::from_disposables([opened.detach(), closed.detach()])));
     }
 
     fn before_init(&self) {
@@ -233,7 +233,7 @@ impl ClassicDesktopStyleApplicationLifetime {
             let this = self.this();
             let subscription =
                 platform_lifetime_events_impl.shutdown_requested(Rc::new(move |e| this.on_shutdown_requested(e)));
-            *self.platform_shutdown_requested.borrow_mut() = Some(subscription);
+            *self.platform_shutdown_requested.borrow_mut() = Some(Subscription::new(subscription));
         }
         *self.platform_lifetime_events_impl.borrow_mut() = platform_lifetime_events_impl;
     }

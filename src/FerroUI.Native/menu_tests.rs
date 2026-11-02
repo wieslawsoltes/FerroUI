@@ -249,7 +249,7 @@ fn an_item_can_be_activated_when_it_has_something_to_run_and_is_enabled() {
     let plain = item("Plain");
     assert!(!can_activate(Some(&plain)));
 
-    let _subscription = plain.click(|_| {});
+    plain.click(|_| {}).detach();
     assert!(can_activate(Some(&plain)));
 
     plain.set_is_enabled(false);
@@ -451,9 +451,9 @@ fn native_menu_events_reach_the_menu() {
     let menu = NativeMenu::new();
     let log = Rc::new(RefCell::new(Vec::new()));
     let (l1, l2, l3) = (log.clone(), log.clone(), log.clone());
-    let _s1 = menu.needs_update(move |_| l1.borrow_mut().push("needs_update"));
-    let _s2 = menu.opening(move |_| l2.borrow_mut().push("opening"));
-    let _s3 = menu.closed(move |_| l3.borrow_mut().push("closed"));
+    menu.needs_update(move |_| l1.borrow_mut().push("needs_update")).detach();
+    menu.opening(move |_| l2.borrow_mut().push("opening")).detach();
+    menu.closed(move |_| l3.borrow_mut().push("closed")).detach();
     let (factory, _exporter) = export(&menu);
     let events = factory.events.borrow().get(&factory.dock_menu.get()).cloned().expect("events");
 

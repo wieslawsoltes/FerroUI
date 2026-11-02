@@ -2,7 +2,7 @@ use super::{PropertySetSnapshot, PropertySetSnapshotSource};
 use crate::media::Color;
 use crate::numerics::{Matrix3x2, Matrix4x4, Quaternion, Vector2, Vector3, Vector4};
 use crate::rendering::composition::expressions::{
-    Expression, ExpressionEvaluationContext, ExpressionParseException, ExpressionParser, ExpressionVariant,
+    Expression, ExpressionEvaluationContext, ExpressionParseError, ExpressionParser, ExpressionVariant,
     IExpressionForeignFunctionInterface, IExpressionObject, IExpressionParameterCollection,
 };
 use crate::rendering::composition::{AsCompositionObject, CompositionObject, CompositionPropertySet, Compositor};
@@ -213,7 +213,7 @@ impl InitialValueExpressionCollection {
     /// The expressions parsed, ordered by property name, in the form the
     /// starting animation takes them to the server (`Send`). Fails with the
     /// error of the first expression that cannot be parsed.
-    pub fn parse_all(&self) -> Result<Vec<(String, Expression)>, ExpressionParseException> {
+    pub fn parse_all(&self) -> Result<Vec<(String, Expression)>, ExpressionParseError> {
         self.expressions
             .borrow()
             .iter()

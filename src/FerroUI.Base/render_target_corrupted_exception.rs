@@ -4,12 +4,16 @@ use std::rc::Rc;
 
 /// The error a render target reports when it can no longer be drawn to and has to be created anew.
 #[derive(Clone, Debug)]
-pub struct RenderTargetCorruptedException {
+pub struct RenderTargetCorruptedError {
     message: Option<String>,
     inner_exception: Option<Rc<dyn Error>>,
 }
 
-impl RenderTargetCorruptedException {
+/// The name of [`RenderTargetCorruptedError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `RenderTargetCorruptedError`")]
+pub type RenderTargetCorruptedException = RenderTargetCorruptedError;
+
+impl RenderTargetCorruptedError {
     /// Creates the exception without a message.
     pub fn new() -> Self {
         Self { message: None, inner_exception: None }
@@ -43,19 +47,19 @@ impl RenderTargetCorruptedException {
     }
 }
 
-impl Default for RenderTargetCorruptedException {
+impl Default for RenderTargetCorruptedError {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl fmt::Display for RenderTargetCorruptedException {
+impl fmt::Display for RenderTargetCorruptedError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.message())
     }
 }
 
-impl Error for RenderTargetCorruptedException {
+impl Error for RenderTargetCorruptedError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         self.inner_exception.as_deref()
     }

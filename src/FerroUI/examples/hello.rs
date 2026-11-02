@@ -82,8 +82,8 @@ fn create_main_window() -> Ref<Window> {
     window.set_padding(Thickness::uniform(16.0));
     window.set_content(Some(Control::boxed(panel)));
 
-    window.opened(|| println!("Window opened"));
-    window.closed(|| println!("Window closed"));
+    window.opened(|| println!("Window opened")).detach();
+    window.closed(|| println!("Window closed")).detach();
 
     if let Some(ms) = std::env::var("FERROUI_SMOKE_EXIT_MS").ok().and_then(|v| v.parse::<u64>().ok()) {
         println!("Will close the main window after {ms} ms");
@@ -96,7 +96,8 @@ fn create_main_window() -> Ref<Window> {
             },
             Duration::from_millis(ms),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 
     window

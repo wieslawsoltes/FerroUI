@@ -47,14 +47,14 @@ impl VisualImpl for ScreenPage {
         let top_level = TopLevel::get_top_level(Some(this));
         if let Some(w) = top_level.as_ref().and_then(|top_level| top_level.cast::<Window>()) {
             let presenter = this.presenter.clone();
-            w.position_changed(move |_| presenter.invalidate_visual());
+            w.position_changed(move |_| presenter.invalidate_visual()).detach();
         }
 
         if let Some(screens) = top_level.and_then(|top_level| top_level.screens()) {
             let presenter = this.presenter.clone();
             screens.changed(move || {
                 presenter.invalidate_visual();
-            });
+            }).detach();
         }
     }
 }

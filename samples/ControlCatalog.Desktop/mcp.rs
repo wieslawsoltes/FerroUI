@@ -72,7 +72,8 @@ pub fn configure(
                 },
                 std::time::Duration::from_millis(100),
                 ferroui_base::threading::DispatcherPriority::BACKGROUND,
-            );
+            )
+            .detach();
         }
         if let Some(lifetime) = builder.instance().and_then(|a| a.application_lifetime()) {
             if let Some(lifetime) = lifetime.as_controlled_application_lifetime() {

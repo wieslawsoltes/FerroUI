@@ -5,7 +5,7 @@
 //! failure); the plain forms panic with the described error, as an
 //! exception that escapes a test does.
 //!
-//! A failed load is a [`XamlLoadException`] whose inner error is the error
+//! A failed load is a [`XamlLoadError`] whose inner error is the error
 //! of the compiler ([`XamlError`]: the XML, parse, transform and load
 //! exceptions of the managed original); [`xaml_error`] returns it.
 
@@ -14,16 +14,16 @@ use std::any::type_name;
 use ferroui_base::metadata::{from_markup_value, MarkupAssembly};
 use ferroui_base::utilities::{Uri, UriKind};
 use ferroui_base::BoxedValue;
-use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadException};
+use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use xamlx::exceptions::XamlError;
 
 /// The result of a load.
-pub type XamlResult<T> = Result<T, XamlLoadException>;
+pub type XamlResult<T> = Result<T, XamlLoadError>;
 
 /// The error of the compiler a failed load carries, when it failed in the
 /// compiler (and not, for example, in the cast of the loaded object).
-pub fn xaml_error(error: &XamlLoadException) -> Option<&XamlError> {
+pub fn xaml_error(error: &XamlLoadError) -> Option<&XamlError> {
     error.inner_exception().and_then(|inner| inner.downcast_ref::<XamlError>())
 }
 
@@ -35,7 +35,7 @@ pub fn test_assembly() -> &'static MarkupAssembly {
 
 /// A load error as text: message, and the type, message, position and
 /// inner errors of the error of the compiler.
-pub fn describe(error: &XamlLoadException) -> String {
+pub fn describe(error: &XamlLoadError) -> String {
     fn describe_xaml(error: &XamlError) -> String {
         let mut text = format!("{}: {}", error.type_name(), error.message());
         if let (Some(line), Some(position)) = (error.line_number(), error.line_position()) {

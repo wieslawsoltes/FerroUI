@@ -7,7 +7,7 @@
 //! from the log manager of the current resolver of `AppLocator`, as `IEnableLogger::log` reads it;
 //! the application registers one, as the builder does upstream.
 
-use crate::PanicException;
+use crate::PanicError;
 use ferroui_reactive::disposables::{SerialDisposable, SingleAssignmentDisposable};
 use ferroui_reactive::linq::Observable;
 #[allow(unused_imports)]
@@ -198,7 +198,7 @@ struct LoggingTeeSink<T> {
 
 impl<T> IObserver<T> for LoggingTeeSink<T> {
     fn on_next(&self, value: T) {
-        if let Err((error, _)) = PanicException::catch(|| (self.on_next)(&value)) {
+        if let Err((error, _)) = PanicError::catch(|| (self.on_next)(&value)) {
             self.downstream.on_error(error);
             return;
         }
@@ -206,7 +206,7 @@ impl<T> IObserver<T> for LoggingTeeSink<T> {
     }
 
     fn on_error(&self, error: ObservableError) {
-        if let Err((handler_error, _)) = PanicException::catch(|| (self.on_error)(&error)) {
+        if let Err((handler_error, _)) = PanicError::catch(|| (self.on_error)(&error)) {
             self.downstream.on_error(handler_error);
             return;
         }
@@ -214,7 +214,7 @@ impl<T> IObserver<T> for LoggingTeeSink<T> {
     }
 
     fn on_completed(&self) {
-        if let Err((error, _)) = PanicException::catch(|| (self.on_completed)()) {
+        if let Err((error, _)) = PanicError::catch(|| (self.on_completed)()) {
             self.downstream.on_error(error);
             return;
         }
@@ -267,7 +267,7 @@ impl<T> IObserver<T> for LoggedCatchSink<T> {
             self.downstream.on_error(error);
             return;
         }
-        let continuation = match PanicException::catch(|| (self.handler)(error)) {
+        let continuation = match PanicError::catch(|| (self.handler)(error)) {
             Ok(continuation) => continuation,
             Err((handler_error, _)) => {
                 self.downstream.on_error(handler_error);

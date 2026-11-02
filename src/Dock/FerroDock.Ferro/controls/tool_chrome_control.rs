@@ -24,7 +24,7 @@ use ferroui_controls::{
     Button, ContentControl, ContentControlImpl, Control, ControlImpl, TopLevel, Window,
     WindowState,
 };
-use ferroui_system::IDisposable;
+use ferroui_system::Subscription;
 use std::{
     cell::{Cell, RefCell},
     rc::Rc,
@@ -36,7 +36,7 @@ pub struct ToolChromeControl {
     attached_window: RefCell<Option<Ref<HostWindow>>>,
     window_drag_helper: RefCell<Option<Rc<WindowDragHelper>>>,
     maximize_restore_button: RefCell<Option<Ref<Button>>>,
-    maximize_restore_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    maximize_restore_subscription: RefCell<Option<Subscription>>,
     menu_lifetime: Rc<ToolMenuLifetime>,
     grip: RefCell<Option<Ref<Control>>>,
     close_button: RefCell<Option<Ref<Button>>>,
@@ -116,8 +116,7 @@ impl TemplatedControlImpl for ToolChromeControl {
                 RoutingStrategies::DIRECT | RoutingStrategies::BUBBLE,
                 false,
             );
-            this.maximize_restore_subscription
-                .replace(Some(subscription));
+            this.maximize_restore_subscription.replace(Some(subscription));
         }
     }
 }

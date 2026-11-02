@@ -21,7 +21,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventArgs};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::IBrush;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::{CalendarWeekRule, DateTime, DayOfWeek, HandlerList};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_routed_event_args, instantiate,
@@ -474,40 +474,46 @@ impl Calendar {
     fn static_constructor() {
         InputElement::is_enabled_property()
             .changed()
-            .add_class_handler::<Calendar>(|x, e| x.on_is_enabled_changed(e.get_new_value::<bool>()));
+            .add_class_handler::<Calendar>(|x, e| x.on_is_enabled_changed(e.get_new_value::<bool>()))
+            .detach();
         Self::first_day_of_week_property()
             .changed()
-            .add_class_handler::<Calendar>(|x, e| x.on_first_day_of_week_changed(e.get_new_value::<DayOfWeek>()));
+            .add_class_handler::<Calendar>(|x, e| x.on_first_day_of_week_changed(e.get_new_value::<DayOfWeek>()))
+            .detach();
         Self::is_today_highlighted_property()
             .changed()
-            .add_class_handler::<Calendar>(|x, _| x.on_is_today_highlighted_changed());
+            .add_class_handler::<Calendar>(|x, _| x.on_is_today_highlighted_changed())
+            .detach();
         Self::display_mode_property().changed().add_class_handler::<Calendar>(|x, e| {
             let (old_mode, mode) = e.get_old_and_new_value::<CalendarMode>();
             x.on_display_mode_property_changed(old_mode, mode);
-        });
+        }).detach();
         Self::selection_mode_property().changed().add_class_handler::<Calendar>(|x, e| {
             x.on_selection_mode_changed(e.get_new_value::<CalendarSelectionMode>())
-        });
+        }).detach();
         Self::allow_tap_range_selection_property()
             .changed()
-            .add_class_handler::<Calendar>(|x, _| x.on_allow_tap_range_selection_changed());
+            .add_class_handler::<Calendar>(|x, _| x.on_allow_tap_range_selection_changed())
+            .detach();
         Self::selected_date_property()
             .changed()
-            .add_class_handler::<Calendar>(|x, e| x.on_selected_date_changed(e.get_new_value::<Option<DateTime>>()));
+            .add_class_handler::<Calendar>(|x, e| x.on_selected_date_changed(e.get_new_value::<Option<DateTime>>()))
+            .detach();
         Self::display_date_property().changed().add_class_handler::<Calendar>(|x, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<DateTime>();
             x.on_display_date_changed(new_value, old_value);
-        });
+        }).detach();
         Self::display_date_start_property().changed().add_class_handler::<Calendar>(|x, e| {
             x.on_display_date_start_changed(e.get_new_value::<Option<DateTime>>())
-        });
+        }).detach();
         Self::display_date_end_property()
             .changed()
-            .add_class_handler::<Calendar>(|x, e| x.on_display_date_end_changed(e.get_new_value::<Option<DateTime>>()));
-        Self::is_week_number_visible_property().changed().add_class_handler::<Calendar>(|x, _| x.update_months());
-        Self::week_number_rule_property().changed().add_class_handler::<Calendar>(|x, _| x.update_months());
-        InputElement::key_down_event().add_class_handler::<Calendar>(|x, e| x.calendar_key_down(e));
-        InputElement::key_up_event().add_class_handler::<Calendar>(|x, e| x.calendar_key_up(e));
+            .add_class_handler::<Calendar>(|x, e| x.on_display_date_end_changed(e.get_new_value::<Option<DateTime>>()))
+            .detach();
+        Self::is_week_number_visible_property().changed().add_class_handler::<Calendar>(|x, _| x.update_months()).detach();
+        Self::week_number_rule_property().changed().add_class_handler::<Calendar>(|x, _| x.update_months()).detach();
+        InputElement::key_down_event().add_class_handler::<Calendar>(|x, e| x.calendar_key_down(e)).detach();
+        InputElement::key_up_event().add_class_handler::<Calendar>(|x, e| x.calendar_key_up(e)).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -1508,47 +1514,56 @@ impl Calendar {
 
     /// Occurs when the collection returned by the SelectedDates property is
     /// changed.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the calendar.
     pub fn selected_dates_changed(
         &self,
         handler: impl Fn(&SelectionChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.selected_dates_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.selected_dates_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Occurs when the DisplayDate property is changed.
     ///
     /// This event occurs after DisplayDate is assigned its new value.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the calendar.
     pub fn display_date_changed(
         &self,
         handler: impl Fn(&CalendarDateChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.display_date_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.display_date_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Occurs when the DisplayMode property is changed.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the calendar.
     pub fn display_mode_changed(
         &self,
         handler: impl Fn(&CalendarModeChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.display_mode_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.display_mode_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Occurs when the left mouse button is released over a day button

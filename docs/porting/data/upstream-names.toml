@@ -72,3 +72,249 @@ kind = "trait"
 phase = "C1"
 pull = 452
 behaviour = "same"
+
+# C3: the error types named after .NET exceptions are `...Error` types implementing std::error::Error;
+# the old names remain one release as deprecated aliases.
+
+[[name]]
+upstream = "Avalonia.Data.BindingChainException"
+rust = "ferroui_base::data::BindingChainError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_base::data::BindingChainException"
+behaviour = "same"
+
+[[name]]
+upstream = "Avalonia.Data.DataValidationException"
+rust = "ferroui_base::data::DataValidationError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_base::data::DataValidationException"
+behaviour = "same"
+notes = "The markup name stays DataValidationException (FerroUI.Data)."
+
+[[name]]
+upstream = "Avalonia.Data.Core.ExpressionParseException"
+rust = "ferroui_base::data::core::ExpressionParseError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_base::data::core::ExpressionParseException"
+behaviour = "same"
+
+[[name]]
+upstream = "Avalonia.Rendering.Composition.Expressions.ExpressionParseException"
+rust = "ferroui_base::rendering::composition::expressions::ExpressionParseError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_base::rendering::composition::expressions::ExpressionParseException"
+behaviour = "same"
+
+[[name]]
+upstream = "Avalonia.AvaloniaInternalException"
+rust = "ferroui_base::FerroInternalError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_base::FerroInternalException"
+behaviour = "same"
+
+[[name]]
+upstream = "Avalonia.Media.Fonts.Tables.InvalidFontTableException"
+rust = "ferroui_base::media::fonts::tables::InvalidFontTableError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_base::media::fonts::tables::InvalidFontTableException"
+behaviour = "same"
+
+[[name]]
+upstream = "Avalonia.Media.Fonts.Tables.MissingFontTableException"
+rust = "ferroui_base::media::fonts::tables::MissingFontTableError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_base::media::fonts::tables::MissingFontTableException"
+behaviour = "same"
+
+[[name]]
+upstream = "Avalonia.Platform.PlatformGraphicsContextLostException"
+rust = "ferroui_base::platform::PlatformGraphicsContextLostError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_base::platform::PlatformGraphicsContextLostException"
+behaviour = "same"
+notes = "A unit struct; the old name is also a deprecated constant of the value."
+
+[[name]]
+upstream = "Avalonia.RenderTargetCorruptedException"
+rust = "ferroui_base::RenderTargetCorruptedError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_base::RenderTargetCorruptedException"
+behaviour = "same"
+
+[[name]]
+upstream = "Avalonia.RenderTargetNotReadyException"
+rust = "ferroui_base::RenderTargetNotReadyError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_base::RenderTargetNotReadyException"
+behaviour = "same"
+
+[[name]]
+upstream = "Avalonia.Automation.ElementNotEnabledException"
+rust = "ferroui_controls::automation::ElementNotEnabledError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_controls::automation::ElementNotEnabledException"
+behaviour = "same"
+
+[[name]]
+upstream = "DynamicData.SortException"
+rust = "ferroui_dynamic_data::list::SortError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_dynamic_data::list::SortException"
+behaviour = "same"
+
+[[name]]
+upstream = "RemoteViewing.Vnc.VncException"
+rust = "ferroui_headless_vnc::remote_viewing::vnc::VncError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_headless_vnc::remote_viewing::vnc::VncException"
+behaviour = "same"
+
+[[name]]
+upstream = "Avalonia.Markup.Xaml.XamlLoadException"
+rust = "ferroui_markup_xaml::XamlLoadError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_markup_xaml::XamlLoadException"
+behaviour = "same"
+notes = "The code the markup compiler generates names the new type."
+
+[[name]]
+upstream = "Avalonia.OpenGL.OpenGlException"
+rust = "ferroui_opengl::OpenGlError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_opengl::OpenGlException"
+behaviour = "same"
+
+[[name]]
+upstream = "System.InvalidCastException"
+rust = "ferroui_reactive::linq::InvalidCastError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_reactive::linq::InvalidCastException"
+behaviour = "same"
+notes = "The error of Cast in the Rx port; the markup runtime reports the .NET name as a type name of XamlError."
+
+[[name]]
+upstream = "System.TimeoutException"
+rust = "ferroui_reactive::linq::TimeoutError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_reactive::linq::TimeoutException"
+behaviour = "same"
+notes = "The error of Timeout in the Rx port; a unit struct, the old name is also a deprecated constant of the value."
+
+[[name]]
+upstream = "System.Reflection.TargetInvocationException"
+rust = "ferroui_reactiveui::binding::bindings::TargetInvocationError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_reactiveui::binding::bindings::TargetInvocationException"
+behaviour = "same"
+notes = "The error a ReactiveUI binding raises; the markup runtime reports the .NET name as a type name of XamlError."
+
+[[name]]
+upstream = "ReactiveUI.UnhandledErrorException"
+rust = "ferroui_reactiveui::UnhandledError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_reactiveui::UnhandledErrorException"
+behaviour = "same"
+notes = "Not UnhandledErrorError: the name already says error."
+
+[[name]]
+upstream = "ReactiveUI.UnhandledInteractionException`2"
+rust = "ferroui_reactiveui::binding::interactions::UnhandledInteractionError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_reactiveui::binding::interactions::UnhandledInteractionException"
+behaviour = "same"
+notes = "The default message of empty() keeps the old type name."
+
+[[name]]
+upstream = "ReactiveUI.ViewLocatorNotFoundException"
+rust = "ferroui_reactiveui::binding::view::ViewLocatorNotFoundError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_reactiveui::binding::view::ViewLocatorNotFoundException"
+behaviour = "same"
+
+[[name]]
+upstream = "Metsys.Bson.BsonException"
+rust = "ferroui_remote_protocol::metsys_bson::BsonError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_remote_protocol::metsys_bson::BsonException"
+behaviour = "same"
+
+[[name]]
+upstream = "Splat.LoggingException"
+rust = "ferroui_splat::LoggingError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_splat::LoggingException"
+behaviour = "same"
+
+[[name]]
+upstream = "Avalonia.Vulkan.VulkanException"
+rust = "ferroui_vulkan::VulkanError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_vulkan::VulkanException"
+behaviour = "same"
+
+[[name]]
+upstream = "Avalonia.Wayland.AvaloniaWaylandException"
+rust = "ferroui_wayland::FerroWaylandError"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_wayland::FerroWaylandException"
+behaviour = "same"
+notes = "Its kind is ferroui_wayland::ferro_wayland_exception::FerroWaylandErrorKind (was FerroWaylandExceptionKind); the derived classes are still the factories FerroWaylandPollException and the others."
+
+[[name]]
+upstream = "Avalonia.X11.X11Exception"
+rust = "ferroui_x11::x11_exception::X11Error"
+kind = "type"
+phase = "C3"
+pull = 466
+deprecated = "ferroui_x11::x11_exception::X11Exception"
+behaviour = "same"

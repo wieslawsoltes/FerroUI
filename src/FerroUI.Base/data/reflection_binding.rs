@@ -5,7 +5,7 @@ use crate::data::compiled_binding::{
 use crate::data::converters::IValueConverter;
 use crate::data::core::expression_nodes::{ExpressionNode, NamedElementNode};
 use crate::data::core::parsers::{BindingExpressionGrammar, ExpressionNodeFactory, TypeResolver};
-use crate::data::core::{BindingExpression, BindingExpressionOptions, ExpressionParseException, TargetTypeConverter};
+use crate::data::core::{BindingExpression, BindingExpressionOptions, ExpressionParseError, TargetTypeConverter};
 use crate::data::{
     BindingBase, BindingExpressionBase, BindingMode, BindingPriority, RelativeSource, UpdateSourceTrigger,
 };
@@ -120,7 +120,7 @@ impl ReflectionBinding {
         target: &FerroObject,
         target_property: Option<&'static FerroProperty>,
         anchor: Option<&Ref<FerroObject>>,
-    ) -> Result<Rc<BindingExpression>, ExpressionParseException> {
+    ) -> Result<Rc<BindingExpression>, ExpressionParseError> {
         let mut nodes: Vec<Rc<dyn ExpressionNode>> = Vec::new();
         let mut is_rooted = false;
         let enable_data_validation =

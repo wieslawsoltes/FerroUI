@@ -43,10 +43,10 @@ fn ask(interaction: &Interaction<String, bool>) -> bool {
     block_on(interaction.handle(INPUT.to_owned())).expect("the question is handled")
 }
 
-/// Whether asking `interaction` fails with an `UnhandledInteractionException`.
+/// Whether asking `interaction` fails with an `UnhandledInteractionError`.
 fn is_unhandled(interaction: &Interaction<String, bool>) -> bool {
     let error = block_on(interaction.handle(INPUT.to_owned())).expect_err("no handler is registered");
-    error.downcast_ref::<UnhandledInteractionException<String, bool>>().is_some()
+    error.downcast_ref::<UnhandledInteractionError<String, bool>>().is_some()
 }
 
 fn bind_view(view_model: Option<Rc<InteractionBindViewModel>>) -> Rc<InteractionBindView> {

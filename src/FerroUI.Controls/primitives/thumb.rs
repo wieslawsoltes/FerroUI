@@ -147,17 +147,17 @@ impl Thumb {
             |x, e| x.on_drag_started(e),
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
         Self::drag_delta_event().add_class_handler_with::<Thumb>(
             |x, e| x.on_drag_delta(e),
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
         Self::drag_completed_event().add_class_handler_with::<Thumb>(
             |x, e| x.on_drag_completed(e),
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

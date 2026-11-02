@@ -1,7 +1,7 @@
 use super::{ExpressionNode, NodeState, SourceNode};
 use crate::data::core::ValueTypes;
 use crate::data::BindingError;
-use crate::reactive::{IDisposable, ObservableExt};
+use crate::reactive::{ObservableExt, Subscription};
 use crate::visual_tree::VisualLocator;
 use crate::{BoxedValue, FerroObject, Ref, Visual, TypeInfo};
 use std::cell::RefCell;
@@ -15,7 +15,7 @@ pub struct VisualAncestorElementNode {
     state: NodeState,
     ancestor_type: Option<&'static TypeInfo>,
     ancestor_level: usize,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl VisualAncestorElementNode {
@@ -101,7 +101,7 @@ impl ExpressionNode for VisualAncestorElementNode {
                     this.tracked_control_changed(control);
                 }
             });
-            self.subscription.replace(Some(subscription));
+            self.subscription.replace(Some(Subscription::new(subscription)));
         }
     }
 

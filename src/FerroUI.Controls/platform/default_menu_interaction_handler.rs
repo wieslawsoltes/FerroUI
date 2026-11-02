@@ -12,7 +12,7 @@ use ferroui_base::input::{
     PointerPressedEventArgs, PointerReleasedEventArgs,
 };
 use ferroui_base::interactivity::{IRoutedEventArgs, RoutedEventArgs, RoutedEventHandlerToken, RoutingStrategies};
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{ObservableExt, Subscription};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::{Ref, StyledElement, Visual};
 use std::cell::{Cell, RefCell};
@@ -112,11 +112,11 @@ pub struct DefaultMenuInteractionHandler {
     overrides: Option<Rc<dyn DefaultMenuInteractionHandlerOverrides>>,
     menu: RefCell<Option<Rc<dyn IMenu>>>,
     menu_handlers: RefCell<Option<MenuHandlers>>,
-    input_manager_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    input_manager_subscription: RefCell<Option<Subscription>>,
     root: RefCell<Option<Ref<TopLevel>>>,
     root_pointer_pressed: Cell<Option<RoutedEventHandlerToken>>,
-    window_deactivated: RefCell<Option<Rc<dyn IDisposable>>>,
-    top_level_lost_platform_focus: RefCell<Option<Rc<dyn IDisposable>>>,
+    window_deactivated: RefCell<Option<Subscription>>,
+    top_level_lost_platform_focus: RefCell<Option<Subscription>>,
     group_manager: RefCell<Option<Rc<RadioButtonGroupManager>>>,
 }
 
@@ -602,7 +602,7 @@ impl DefaultMenuInteractionHandler {
                     this.raw_input(&*e);
                 }
             });
-            *self.input_manager_subscription.borrow_mut() = Some(subscription);
+            *self.input_manager_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
     }
 
@@ -897,7 +897,7 @@ impl DefaultMenuInteractionHandler {
     }
 
     fn default_delay_run(action: Box<dyn Fn()>, time_span: Duration) {
-        DispatcherTimer::run_once(action, time_span, DispatcherPriority::default());
+        DispatcherTimer::run_once(action, time_span, DispatcherPriority::default()).detach();
     }
 
     fn add_menu_item_to_radio_group(manager: &RadioButtonGroupManager, element: &dyn IMenuElement) {

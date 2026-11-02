@@ -179,7 +179,7 @@ fn selected_date_changed_should_fire_when_selected_date_set() {
     let handled = Rc::new(Cell::new(false));
     let date_picker = DatePicker::new();
     let flag = handled.clone();
-    date_picker.selected_date_changed(move |_| flag.set(true));
+    date_picker.selected_date_changed(move |_| flag.set(true)).detach();
     let value = date(2000, 10, 10);
     date_picker.set_selected_date(Some(value));
     Dispatcher::ui_thread().run_jobs(None);
@@ -269,17 +269,25 @@ fn selected_date_null_should_use_placeholders() {
 /// tests throw. A panic payload has to be `Send`, which the error type of
 /// the framework (it holds shared error data) is not.
 #[derive(Debug)]
-struct ThrownDataValidationException {
+struct ThrownDataValidationError {
     message: String,
 }
+
+impl std::fmt::Display for ThrownDataValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.message)
+    }
+}
+
+impl std::error::Error for ThrownDataValidationError {}
 
 /// Runs `action` and returns the data validation failure it fails with.
 /// Fails when `action` completes or fails with anything else, as the
 /// `Assert.Throws<DataValidationException>` of the reference tests does.
-fn assert_throws_data_validation_exception(action: impl FnOnce()) -> ThrownDataValidationException {
+fn assert_throws_data_validation_exception(action: impl FnOnce()) -> ThrownDataValidationError {
     match catch_unwind(AssertUnwindSafe(action)) {
         Ok(()) => panic!("expected a data validation failure"),
-        Err(payload) => match payload.downcast::<ThrownDataValidationException>() {
+        Err(payload) => match payload.downcast::<ThrownDataValidationError>() {
             Ok(exception) => *exception,
             Err(payload) => std::panic::resume_unwind(payload),
         },
@@ -308,16 +316,16 @@ fn selected_date_enable_data_validation() {
         let max_date_time = date(2010, 1, 1);
 
         if e.new_date().is_some_and(|new_date| new_date < min_date_time) {
-            std::panic::panic_any(ThrownDataValidationException {
+            std::panic::panic_any(ThrownDataValidationError {
                 message: format!("dateTime is less than {min_date_time}"),
             });
         }
         if e.new_date().is_some_and(|new_date| new_date > max_date_time) {
-            std::panic::panic_any(ThrownDataValidationException { message: format!("dateTime is over {max_date_time}") });
+            std::panic::panic_any(ThrownDataValidationError { message: format!("dateTime is over {max_date_time}") });
         }
 
         flag.set(true);
-    });
+    }).detach();
 
     // dateTime is less than
     let exception = assert_throws_data_validation_exception(|| date_picker.set_selected_date(Some(date(1999, 1, 1))));
@@ -750,7 +758,7 @@ fn window_popup_accept_updates_selected_date_and_closes() {
     let target = WindowTarget::show(selected);
     let changes = Rc::new(Cell::new(0));
     let counter = changes.clone();
-    target.date_picker.selected_date_changed(move |_| counter.set(counter.get() + 1));
+    target.date_picker.selected_date_changed(move |_| counter.set(counter.get() + 1)).detach();
 
     assert!(!target.popup.is_open());
     assert!(target.popup.host().is_none());
@@ -799,7 +807,7 @@ fn window_popup_dismiss_leaves_selected_date_unchanged() {
     let target = WindowTarget::show(selected);
     let changes = Rc::new(Cell::new(0));
     let counter = changes.clone();
-    target.date_picker.selected_date_changed(move |_| counter.set(counter.get() + 1));
+    target.date_picker.selected_date_changed(move |_| counter.set(counter.get() + 1)).detach();
 
     target.flyout_button.perform_click();
     Dispatcher::ui_thread().run_jobs(None);

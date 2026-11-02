@@ -1,7 +1,7 @@
 //! Port of `Vnc/VncFailureReason.cs` of RemoteViewing (BSD-2-Clause,
 //! Copyright (c) 2013 James F. Bellinger; `NOTICE.md` of this crate).
 
-/// Possible reasons a [`VncException`](super::VncException) is raised.
+/// Possible reasons a [`VncError`](super::VncError) is raised.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub enum VncFailureReason {
     /// Unknown reason.

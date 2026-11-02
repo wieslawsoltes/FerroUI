@@ -223,7 +223,7 @@ impl ApplicationImpl for App {
                 },
                 Duration::from_millis(50),
                 DispatcherPriority::NORMAL,
-            );
+            ).detach();
             lifetime.set_main_window(Some(window));
         }
         Self::parent_on_framework_initialization_completed(this);
@@ -515,7 +515,7 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
         },
         Duration::from_millis(33),
         DispatcherPriority::NORMAL,
-    );
+    ).detach();
 }
 pub fn run() -> std::process::ExitCode {
     if std::env::args().any(|a| a.starts_with("--lifecycle-stress-cycles="))

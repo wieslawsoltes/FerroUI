@@ -10,12 +10,12 @@ use crate::server::wayland_worker::with_worker_thread;
 use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
 use ferroui_base::platform::{PlatformRenderTargetState, RenderTargetError, RenderTargetSceneInfo};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::{PixelSize, RenderTargetNotReadyException};
+use ferroui_base::{PixelSize, RenderTargetNotReadyError};
 use ferroui_opengl::egl::{
     EglContext, EglGlPlatformSurfaceBase, EglPlatformSurfaceRenderTarget, EglPlatformSurfaceRenderTargetBase, EglSurface,
 };
 use ferroui_opengl::surfaces::{IGlPlatformSurface, IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession};
-use ferroui_opengl::{IGlContext, OpenGlException};
+use ferroui_opengl::{IGlContext, OpenGlError};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -108,7 +108,7 @@ impl RenderTarget {
         target_state(WaylandRenderSurfaceTarget::Surface(self.surface))
     }
 
-    fn ensure_window(&self, size: PixelSize) -> Result<Rc<EglSurface>, OpenGlException> {
+    fn ensure_window(&self, size: PixelSize) -> Result<Rc<EglSurface>, OpenGlError> {
         debug_assert!(size.width > 0 && size.height > 0);
         if let (Some(egl_surface), true) = (self.egl_surface.borrow().clone(), self.current_size.get() == size) {
             return Ok(egl_surface);
@@ -130,9 +130,9 @@ impl RenderTarget {
                         .and_then(|(_, surface)| surface.wl_surface().cloned())
                 })
                 .flatten()
-                .ok_or_else(|| OpenGlException::new("The surface has no wl_surface"))?;
+                .ok_or_else(|| OpenGlError::new("The surface has no wl_surface"))?;
                 let egl_window = WlEglSurface::new(wl_surface.id(), size.width, size.height)
-                    .map_err(|_| OpenGlException::new("wl_egl_window_create failed"))?;
+                    .map_err(|_| OpenGlError::new("wl_egl_window_create failed"))?;
                 // On failure the window is dropped, which destroys it.
                 let egl_surface = self.base.context().display().create_window_surface(egl_window.ptr() as isize)?;
                 *self.egl_window.borrow_mut() = Some(egl_window);
@@ -199,7 +199,7 @@ impl EglPlatformSurfaceRenderTarget for RenderTarget {
         scene_info: &RenderTargetSceneInfo,
     ) -> Result<Rc<dyn IGlPlatformSurfaceRenderingSession>, RenderTargetError> {
         if self.disposed.get() || !self.surface_state().is_ready {
-            return Err(RenderTargetError::NotReady(RenderTargetNotReadyException::default()));
+            return Err(RenderTargetError::NotReady(RenderTargetNotReadyError::default()));
         }
 
         let size = scene_info.size;

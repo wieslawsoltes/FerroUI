@@ -8,7 +8,7 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::immutable::{ImmutablePen, ImmutableSolidColorBrush};
 use ferroui_base::media::{Brushes, Colors, DrawingContext, IBrush, ImmediateDrawingContext};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::rendering::composition::{
     CompositionCustomVisual, CompositionCustomVisualHandler, ElementComposition, ICompositionCustomVisualHandler,
 };
@@ -131,7 +131,7 @@ pub struct PointerCanvas {
     min_clock_offset: Cell<Option<f64>>,
     last_properties: Cell<Option<PointerPointProperties>>,
     last_non_other_update_kind: Cell<Option<PointerUpdateKind>>,
-    status_timer: RefCell<Option<Rc<dyn IDisposable>>>,
+    status_timer: RefCell<Option<Subscription>>,
     load_timer: RefCell<Option<Rc<DispatcherTimer>>>,
 
     status: RefCell<Option<String>>,

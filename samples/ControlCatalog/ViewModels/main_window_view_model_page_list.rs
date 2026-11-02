@@ -134,21 +134,6 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
         section("Media & Graphics", Icons::MEDIA, &mut unavailable, |s| {
             s.add("/Pages/AcrylicPage.xaml", "Acrylic", Icons::BLUR, "Translucent acrylic window materials");
             s.add("/Pages/BitmapCachePage.xaml", "BitmapCache", Icons::LIGHTNING, "Cache visuals as bitmaps for performance");
-            s.add("/Pages/CompositionPage.xaml", "Composition", Icons::LAYERS, "Composition-layer animations and effects");
-            // Not from upstream: the page of the WinUI composition API.
-            s.add_page(
-                || crate::pages::winui_composition_page().upcast(),
-                "Composition (WinUI)",
-                Icons::LAYERS,
-                "Connected animations and ElementCompositionPreview",
-            );
-            // Not from the managed original: the page of the WinUI materials.
-            s.add_page(
-                || crate::pages::winui_materials_page().upcast(),
-                "Materials (WinUI)",
-                Icons::BLUR,
-                "Acrylic, Reveal and system backdrops",
-            );
             s.add("/Pages/CustomDrawing.xaml", "Custom Drawing", Icons::BRUSH, "Render custom geometry in code");
             // Not from upstream: SymbolIcon and FontIcon of WinUI (docs/porting/winui-controls.md) and PathIcon.
             s.add("/Pages/IconElementPage.xaml", "IconElement", Icons::SPARKLE, "Symbol, font and path icons");
@@ -160,6 +145,31 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/OpenGl/OpenGlLeasePage.xaml", "OpenGL Lease", Icons::CUBE_3D, "Low-level access to the OpenGL context");
             s.add("/Pages/OpenGl/OpenGlInteropPage.xaml", "OpenGL Interop", Icons::CUBE_3D, "Compositor and OpenGL interop");
             s.add("/Pages/TransitioningContentControlPage.xaml", "TransitioningContentControl", Icons::TRANSITION, "Animate between content changes");
+        }),
+        // Not from upstream: the pages of the port of the WinUI composition API and of the WinUI
+        // materials, one per feature (`Pages/winui_composition_pages.rs`, docs/porting/winui-composition.md
+        // and docs/porting/winui-materials.md).
+        section("Composition", Icons::LAYERS, &mut unavailable, |s| {
+            s.add("/Pages/CompositionPage.xaml", "Composition overview", Icons::LAYERS, "Implicit animations, a custom visual and brushes of the composition layer");
+            s.add_page(|| crate::pages::winui_composition_pages::connected_animations_page().upcast(), "Connected animations", Icons::TRANSITION, "A connected animation between a list and a detail view");
+            s.add_page(|| crate::pages::winui_composition_pages::implicit_animations_page().upcast(), "Implicit animations", Icons::SPARKLE, "Implicit show and hide animations of elements");
+            s.add_page(|| crate::pages::winui_composition_pages::pointer_position_page().upcast(), "Pointer position", Icons::CURSOR, "A visual that follows the pointer position property set");
+            s.add_page(|| crate::pages::winui_composition_pages::parallax_page().upcast(), "Parallax", Icons::SCROLL, "A header driven by the manipulation property set of a scroll viewer");
+            s.add_page(|| crate::pages::winui_composition_pages::visuals_page().upcast(), "Visuals", Icons::LAYERS, "Sprite, shape, layer and redirect visuals");
+            s.add_page(|| crate::pages::winui_composition_pages::composition_brushes_page().upcast(), "Composition brushes", Icons::BRUSH, "Gradient, nine-grid and mask brushes");
+            s.add_page(|| crate::pages::winui_composition_pages::composition_animations_page().upcast(), "Spring and key frame animations", Icons::TRANSITION, "Natural motion, easing functions and scoped batches");
+            s.add_page(|| crate::pages::winui_composition_pages::shadows_and_lights_page().upcast(), "Shadows and lights", Icons::LIGHTNING, "Drop shadows and the four composition lights");
+            s.add_page(|| crate::pages::winui_composition_pages::interaction_tracker_page().upcast(), "InteractionTracker", Icons::GESTURE, "Drag a surface and let it coast in inertia");
+            s.add_page(|| crate::pages::winui_composition_pages::effect_brushes_page().upcast(), "Effect brushes", Icons::BLUR, "Blur, opacity, cross-fade and composite effects");
+            s.add_page(|| crate::pages::winui_composition_pages::alpha_mask_shadows_page().upcast(), "Alpha mask shadows", Icons::LAYERS, "Drop shadows that follow the alpha of an element");
+            s.add_page(|| crate::pages::winui_composition_pages::theme_shadow_page().upcast(), "ThemeShadow", Icons::LAYERS, "Elevation shadows of the WinUI controls");
+            s.add_page(|| crate::pages::winui_composition_pages::zoom_page().upcast(), "Zoom and manipulation", Icons::VIEWBOX, "Visuals that follow the zoom of a scroll viewer");
+            s.add_page(|| crate::pages::winui_composition_pages::acrylic_brush_page().upcast(), "Acrylic brush", Icons::BLUR, "The acrylic recipe of WinUI over a busy scene");
+            s.add_page(|| crate::pages::winui_composition_pages::blend_effects_page().upcast(), "Blend and colour effects", Icons::PALETTE, "Blend modes, saturation, tint and colour matrices");
+            s.add_page(|| crate::pages::winui_composition_pages::lighting_page().upcast(), "Lighting", Icons::LIGHTNING, "Coloured lights and the scene lighting effect");
+            s.add_page(|| crate::pages::winui_composition_pages::reveal_page().upcast(), "Reveal", Icons::SPARKLE, "Reveal brushes lit by the XAML lights of WinUI");
+            s.add_page(|| crate::pages::winui_composition_pages::system_backdrops_page().upcast(), "System backdrops", Icons::WINDOW, "Mica, Mica Alt and desktop acrylic window backdrops");
+            s.add_page(|| crate::pages::winui_composition_pages::acrylic_menus_page().upcast(), "Acrylic menus", Icons::MENU, "Menus whose background is the desktop acrylic backdrop");
         }),
         section("Status & Feedback", Icons::CHAT, &mut unavailable, |s| {
             s.add("/Pages/AdornerLayerPage.xaml", "AdornerLayer", Icons::SPARKLE, "Overlay visuals on top of other controls");

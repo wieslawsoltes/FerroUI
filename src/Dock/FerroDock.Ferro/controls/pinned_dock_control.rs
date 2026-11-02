@@ -102,7 +102,7 @@ impl TemplatedControlImpl for PinnedDockControl {
         let attached = this.attached_to_visual_tree(move |_| owner.on_attached());
         let owner = this.to_ref();
         let detached = this.detached_from_visual_tree(move |_| owner.on_detached());
-        this.layout_events.replace(vec![layout, attached, detached]);
+        this.layout_events.replace(vec![layout.detach(), attached.detach(), detached.detach()]);
     }
 }
 ferro_properties! {impl PinnedDockControl {
@@ -120,16 +120,20 @@ impl PinnedDockControl {
     fn static_constructor() {
         Self::pinned_dock_alignment_property()
             .changed()
-            .add_class_handler::<Self>(|this, _| this.update_grid());
+            .add_class_handler::<Self>(|this, _| this.update_grid())
+            .detach();
         Self::pinned_dock_display_mode_property()
             .changed()
-            .add_class_handler::<Self>(|this, _| this.on_display_mode_changed());
+            .add_class_handler::<Self>(|this, _| this.on_display_mode_changed())
+            .detach();
         Self::minimum_pinned_width_property()
             .changed()
-            .add_class_handler::<Self>(|this, _| this.update_grid());
+            .add_class_handler::<Self>(|this, _| this.update_grid())
+            .detach();
         Self::minimum_pinned_height_property()
             .changed()
-            .add_class_handler::<Self>(|this, _| this.update_grid());
+            .add_class_handler::<Self>(|this, _| this.update_grid())
+            .detach();
     }
     /// Constructs all original fields for native inheritance.
     pub fn construct() -> Self {
@@ -498,22 +502,25 @@ impl PinnedDockControl {
                     let this = self.to_ref();
                     let position = self
                         .owner_window()
-                        .position_changed(move |_| this.owner_window_position_changed());
+                        .position_changed(move |_| this.owner_window_position_changed())
+                        .detach();
                     let this = self.to_ref();
                     let resized = self
                         .owner_window()
-                        .resized(move |_| this.owner_window_resized());
+                        .resized(move |_| this.owner_window_resized())
+                        .detach();
                     let this = self.to_ref();
                     let pressed = self.owner_window().add_disposable_handler_with(
                         InputElement::pointer_pressed_event(),
                         move |_, e| this.owner_window_pointer_pressed(e),
                         RoutingStrategies::TUNNEL,
                         false,
-                    );
+                    ).detach();
                     let this = self.to_ref();
                     let deactivated = self
                         .owner_window()
-                        .deactivated(move || this.owner_window_deactivated());
+                        .deactivated(move || this.owner_window_deactivated())
+                        .detach();
                     self.owner_events
                         .replace(vec![position, resized, pressed, deactivated]);
                     self.window().show_with_owner(&self.owner_window());
@@ -869,7 +876,7 @@ impl PinnedDockControl {
                 move |_, _| this.on_pinned_dock_splitter_drag_started(),
                 RoutingStrategies::BUBBLE,
                 false,
-            );
+            ).detach();
         let this = self.to_ref();
         let delta = self
             .splitter()
@@ -879,7 +886,7 @@ impl PinnedDockControl {
                 move |_, e| this.on_pinned_dock_splitter_drag_delta(e.vector),
                 RoutingStrategies::BUBBLE,
                 false,
-            );
+            ).detach();
         let this = self.to_ref();
         let completed = self
             .splitter()
@@ -889,7 +896,7 @@ impl PinnedDockControl {
                 move |_, _| this.on_pinned_dock_splitter_drag_completed(),
                 RoutingStrategies::BUBBLE,
                 false,
-            );
+            ).detach();
         self.splitter_events
             .replace(vec![started, delta, completed]);
     }

@@ -18,7 +18,7 @@ use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignmen
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::{FlowDirection, RectangleGeometry, ScaleTransform};
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt,
@@ -77,7 +77,7 @@ struct Parts {
 pub struct RatingControl {
     base: TemplatedControl,
     parts: RefCell<Parts>,
-    item_info_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    item_info_subscription: RefCell<Option<Subscription>>,
     template_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
     pointer: RefCell<Option<Weak<dyn IPointer>>>,
     /// The rating under the pointer while it is over the items (`m_isPointerOver` with
@@ -494,15 +494,17 @@ impl RatingControl {
     }
 
     /// Adds a handler of the `ValueChanged` event, raised for the changes of the user only.
-    /// Disposing the result removes the handler.
-    pub fn value_changed(&self, handler: impl Fn(&RatingControl) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it
+    /// for the life of the control.
+    pub fn value_changed(&self, handler: impl Fn(&RatingControl) + 'static) -> Subscription {
         let token = self.value_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.value_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Sets a rating chosen by the user (WinUI's `SetRatingTo`): choosing the rating again clears
@@ -621,7 +623,7 @@ impl RatingControl {
                     this.update_rating_items_appearance();
                 }
             });
-            *self.item_info_subscription.borrow_mut() = Some(subscription);
+            *self.item_info_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
         self.stamp_out_rating_items();
     }

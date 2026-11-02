@@ -3,7 +3,7 @@ use super::{
     ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{IScrollProvider, ProviderAdapter, ScrollAmount};
-use crate::automation::{ElementNotEnabledException, ScrollPatternIdentifiers};
+use crate::automation::{ElementNotEnabledError, ScrollPatternIdentifiers};
 use crate::ScrollViewer;
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Ref};
@@ -69,7 +69,7 @@ impl IScrollProvider for ProviderAdapter<ScrollViewerAutomationPeer> {
         &self,
         horizontal_amount: ScrollAmount,
         vertical_amount: ScrollAmount,
-    ) -> Result<(), ElementNotEnabledException> {
+    ) -> Result<(), ElementNotEnabledError> {
         self.0.scroll(horizontal_amount, vertical_amount)
     }
 
@@ -77,7 +77,7 @@ impl IScrollProvider for ProviderAdapter<ScrollViewerAutomationPeer> {
         &self,
         horizontal_percent: f64,
         vertical_percent: f64,
-    ) -> Result<(), ElementNotEnabledException> {
+    ) -> Result<(), ElementNotEnabledError> {
         self.0.set_scroll_percent(horizontal_percent, vertical_percent)
     }
 }
@@ -173,9 +173,9 @@ impl ScrollViewerAutomationPeer {
         &self,
         horizontal_amount: ScrollAmount,
         vertical_amount: ScrollAmount,
-    ) -> Result<(), ElementNotEnabledException> {
+    ) -> Result<(), ElementNotEnabledError> {
         if !self.is_enabled() {
-            return Err(ElementNotEnabledException::new());
+            return Err(ElementNotEnabledError::new());
         }
 
         let scroll_horizontally = horizontal_amount != ScrollAmount::NoAmount;
@@ -220,9 +220,9 @@ impl ScrollViewerAutomationPeer {
         &self,
         horizontal_percent: f64,
         vertical_percent: f64,
-    ) -> Result<(), ElementNotEnabledException> {
+    ) -> Result<(), ElementNotEnabledError> {
         if !self.is_enabled() {
-            return Err(ElementNotEnabledException::new());
+            return Err(ElementNotEnabledError::new());
         }
 
         let scroll_horizontally = horizontal_percent != ScrollPatternIdentifiers::NO_SCROLL;

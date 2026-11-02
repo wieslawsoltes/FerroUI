@@ -18,7 +18,7 @@
 //! - [`interfaces`]: the change notifications ([`IReactiveNotifyPropertyChanged`],
 //!   [`ReactivePropertyChangedEventArgs`]) and [`IHandleObservableErrors`].
 //! - [`scheduler`]: [`ScheduledSubject`].
-//! - The root: [`RxSchedulers`], [`RxState`], [`RxCacheSize`] and [`UnhandledErrorException`].
+//! - The root: [`RxSchedulers`], [`RxState`], [`RxCacheSize`] and [`UnhandledError`].
 //!
 //! A view model holds a [`ReactiveObject`] and is shared as an `Rc`:
 //!
@@ -49,7 +49,7 @@
 //!
 //! Everything is single-threaded and reference counted, as the object model of FerroUI is
 //! (`docs/porting/reactive.md`, section 5.1). An exception of user code is a panic; where upstream
-//! catches one, the port catches the panic ([`PanicException`]).
+//! catches one, the port catches the panic ([`PanicError`]).
 
 pub mod interfaces;
 pub(crate) mod internal;
@@ -76,12 +76,16 @@ pub use binding::observables::*;
 pub use interfaces::*;
 pub use mixins::*;
 pub use reactive_command::*;
+pub use internal::PanicError;
+#[allow(deprecated)]
 pub use internal::PanicException;
 pub use reactive_object::*;
 pub use rx_cache_size::RxCacheSize;
 pub use rx_schedulers::RxSchedulers;
 pub use rx_state::RxState;
 pub use scheduler::*;
+pub use unhandled_error_exception::UnhandledError;
+#[allow(deprecated)]
 pub use unhandled_error_exception::UnhandledErrorException;
 
 /// What the macros of the crate expand to, so that a crate that uses them needs no other

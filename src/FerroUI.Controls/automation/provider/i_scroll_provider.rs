@@ -1,6 +1,6 @@
 use crate::automation::peers::AutomationPeer;
 use ferroui_base::Ref;
-use crate::automation::ElementNotEnabledException;
+use crate::automation::ElementNotEnabledError;
 
 /// The amount to scroll by, of a scroll request.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -54,13 +54,13 @@ pub trait IScrollProvider {
     /// Windows: `IScrollProvider.Scroll`.
     /// macOS: `NSAccessibilityProtocol.accessibilityPerformScroll*ByPage` (large increments
     /// and decrements only).
-    fn scroll(&self, horizontal_amount: ScrollAmount, vertical_amount: ScrollAmount) -> Result<(), ElementNotEnabledException>;
+    fn scroll(&self, horizontal_amount: ScrollAmount, vertical_amount: ScrollAmount) -> Result<(), ElementNotEnabledError>;
 
     /// Sets the horizontal and vertical scroll position as a percentage of the total content
     /// area within the control.
     ///
     /// Windows: `IScrollProvider.SetScrollPercent`. macOS: no mapping.
-    fn set_scroll_percent(&self, horizontal_percent: f64, vertical_percent: f64) -> Result<(), ElementNotEnabledException>;
+    fn set_scroll_percent(&self, horizontal_percent: f64, vertical_percent: f64) -> Result<(), ElementNotEnabledError>;
 }
 
 impl PartialEq for dyn IScrollProvider {

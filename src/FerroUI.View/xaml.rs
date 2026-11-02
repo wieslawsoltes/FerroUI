@@ -16,7 +16,7 @@ mod loading {
     use ferroui_base::utilities::Uri;
     use ferroui_base::Ref;
     use ferroui_controls::Control;
-    use ferroui_markup_xaml::{FerroXamlLoader, XamlLoadException};
+    use ferroui_markup_xaml::{FerroXamlLoader, XamlLoadError};
     use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 
     fn prepare() {
@@ -25,16 +25,16 @@ mod loading {
         FerroRuntimeXamlLoader::register();
     }
 
-    fn control(loaded: ferroui_base::BoxedValue) -> Result<Ref<Control>, XamlLoadException> {
+    fn control(loaded: ferroui_base::BoxedValue) -> Result<Ref<Control>, XamlLoadError> {
         let type_name = loaded.type_name();
         Control::from_boxed(&loaded)
-            .ok_or_else(|| XamlLoadException::with_message(format!("the root of the XAML is a {type_name}, not a control")))
+            .ok_or_else(|| XamlLoadError::with_message(format!("the root of the XAML is a {type_name}, not a control")))
     }
 
     /// Loads XAML text whose root is a control, with the run-time loader.
     /// Its named controls are found with `find_control` / `get_control` of
     /// the root.
-    pub fn load_xaml(text: &str) -> Result<Ref<Control>, XamlLoadException> {
+    pub fn load_xaml(text: &str) -> Result<Ref<Control>, XamlLoadError> {
         prepare();
         control(FerroRuntimeXamlLoader::parse(text, None)?)
     }
@@ -42,9 +42,9 @@ mod loading {
     /// Loads the XAML document at `uri` (`ferres://<assembly>/<path>`): its
     /// compiled markup when the assembly has it, the run-time loader
     /// otherwise.
-    pub fn load_xaml_uri(uri: &str) -> Result<Ref<Control>, XamlLoadException> {
+    pub fn load_xaml_uri(uri: &str) -> Result<Ref<Control>, XamlLoadError> {
         prepare();
-        let uri = Uri::absolute(uri).map_err(|error| XamlLoadException::with_message(format!("{uri}: {error:?}")))?;
+        let uri = Uri::absolute(uri).map_err(|error| XamlLoadError::with_message(format!("{uri}: {error:?}")))?;
         control(FerroXamlLoader::try_load_with_service_provider(None, &uri, None)?)
     }
 

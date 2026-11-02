@@ -7,33 +7,27 @@ use ferroui_base::{
     platform::{
         IPlatformHandle, KnownPlatformGraphicsExternalImageHandleTypes, LeasedPlatformHandle,
     },
-    reactive::IDisposable,
+    reactive::Subscription,
     threading::{DispatcherPriority, DispatcherTimer},
 };
 use ferroui_media::{frames::*, *};
 pub use native::PixelBuffer;
 use std::{rc::Rc, task::Poll, time::Duration};
-struct TimerRegistration(Rc<dyn IDisposable>);
-impl Drop for TimerRegistration {
-    fn drop(&mut self) {
-        self.0.dispose();
-    }
-}
 pub fn poll_native<T: 'static, E: 'static>(
     mut read: impl FnMut() -> Poll<Result<T, E>> + 'static,
 ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<T, E>>>> {
-    let mut timer: Option<TimerRegistration> = None;
+    let mut timer: Option<Subscription> = None;
     Box::pin(std::future::poll_fn(move |cx| {
         timer.take();
         match read() {
             Poll::Ready(result) => Poll::Ready(result),
             Poll::Pending => {
                 let waker = cx.waker().clone();
-                timer = Some(TimerRegistration(DispatcherTimer::run_once(
+                timer = Some(DispatcherTimer::run_once(
                     move || waker.wake_by_ref(),
                     Duration::from_millis(16),
                     DispatcherPriority::NORMAL,
-                )));
+                ));
                 Poll::Pending
             }
         }

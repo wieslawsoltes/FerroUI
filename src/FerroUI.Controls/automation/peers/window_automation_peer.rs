@@ -3,17 +3,16 @@ use super::{
     ControlAutomationPeerImplExt, WindowBaseAutomationPeer,
 };
 use crate::Window;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, FerroObjectImplExt, Ref};
 use std::cell::RefCell;
-use std::rc::Rc;
 
 /// An automation peer which represents a [`Window`].
 #[repr(C)]
 pub struct WindowAutomationPeer {
     base: WindowBaseAutomationPeer,
-    opened_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    closed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    opened_subscription: RefCell<Option<Subscription>>,
+    closed_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(WindowAutomationPeer: WindowBaseAutomationPeer);

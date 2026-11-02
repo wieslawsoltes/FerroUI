@@ -205,7 +205,7 @@ crate::ferro_rust_paths! {
         crate::data::CompiledBinding,
         crate::data::CompiledBindingPath,
         crate::data::CompiledBindingPathBuilder,
-        crate::data::DataValidationException,
+        crate::data::DataValidationError,
         crate::data::MultiBinding,
         crate::data::ReflectionBinding,
         crate::data::RelativeSource,

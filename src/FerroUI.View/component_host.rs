@@ -126,7 +126,8 @@ impl ComponentHost {
                     view
                 });
                 host.set_view_rc(view);
-            });
+            })
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

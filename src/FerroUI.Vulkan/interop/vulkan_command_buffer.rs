@@ -1,5 +1,5 @@
 use super::{VulkanCommandBufferPool, VulkanFence, VulkanSemaphore};
-use crate::{IVulkanPlatformGraphicsContext, VulkanException, VulkanExceptionExtensions};
+use crate::{IVulkanPlatformGraphicsContext, VulkanError, VulkanExceptionExtensions};
 use ash::vk;
 use std::cell::Cell;
 use std::rc::{Rc, Weak};
@@ -21,7 +21,7 @@ impl VulkanCommandBuffer {
         pool: &Rc<VulkanCommandBufferPool>,
         handle: vk::CommandBuffer,
         context: Rc<dyn IVulkanPlatformGraphicsContext>,
-    ) -> Result<Rc<Self>, VulkanException> {
+    ) -> Result<Rc<Self>, VulkanError> {
         let fence = VulkanFence::new(context.clone(), vk::FenceCreateFlags::SIGNALED)?;
         Ok(Rc::new_cyclic(|this| Self {
             pool: Rc::downgrade(pool),
@@ -61,7 +61,7 @@ impl VulkanCommandBuffer {
         self.fence.is_signaled()
     }
 
-    pub fn begin_recording(&self) -> Result<(), VulkanException> {
+    pub fn begin_recording(&self) -> Result<(), VulkanError> {
         if self.has_started.get() {
             return Ok(());
         }
@@ -76,7 +76,7 @@ impl VulkanCommandBuffer {
         Ok(())
     }
 
-    pub fn end_recording(&self) -> Result<(), VulkanException> {
+    pub fn end_recording(&self) -> Result<(), VulkanError> {
         if self.has_started.get() && !self.has_ended.get() {
             self.context.device_api().end_command_buffer(self.handle.get()).throw_on_error("vkEndCommandBuffer")?;
             self.has_ended.set(true);
@@ -85,7 +85,7 @@ impl VulkanCommandBuffer {
     }
 
     /// Submits the commands without semaphores.
-    pub fn submit(&self) -> Result<(), VulkanException> {
+    pub fn submit(&self) -> Result<(), VulkanError> {
         self.submit_with(&[], &[], &[], None)
     }
 
@@ -98,7 +98,7 @@ impl VulkanCommandBuffer {
         wait_dst_stage_mask: &[vk::PipelineStageFlags],
         signal_semaphores: &[&VulkanSemaphore],
         fence: Option<&VulkanFence>,
-    ) -> Result<(), VulkanException> {
+    ) -> Result<(), VulkanError> {
         self.end_recording()?;
         let fence_handle = fence.unwrap_or(&self.fence).handle();
         self.context

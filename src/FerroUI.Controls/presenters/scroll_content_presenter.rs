@@ -16,7 +16,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutHelper, Layoutable, LayoutableImpl, LayoutableImplExt, Orientation};
 use ferroui_base::media::FlowDirection;
-use ferroui_base::reactive::{CompositeDisposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{CompositeDisposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, AttachedProperty, BoxedValue, DirectProperty,
@@ -39,7 +39,7 @@ pub struct ScrollContentPresenter {
     base: ContentPresenter,
     arranging: Cell<bool>,
     extent: Cell<Size>,
-    logical_scroll_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    logical_scroll_subscription: RefCell<Option<Subscription>>,
     viewport: Cell<Size>,
     active_logical_gesture_scrolls: RefCell<Option<HashMap<i32, Vector>>>,
     scroll_gesture_snap_points: RefCell<Option<HashMap<i32, Vector>>>,
@@ -1268,7 +1268,7 @@ impl ScrollContentPresenter {
                 offset,
                 scroll_invalidated,
             ]));
-            *self.logical_scroll_subscription.borrow_mut() = Some(subscription);
+            *self.logical_scroll_subscription.borrow_mut() = Some(Subscription::new(subscription));
             self.update_from_scrollable(&child);
         }
     }

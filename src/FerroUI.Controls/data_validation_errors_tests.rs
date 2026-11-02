@@ -6,7 +6,7 @@
 use crate::test_support::{string_of, test_scope};
 use crate::{Control, DataValidationErrors, ErrorConverter, ItemsControl};
 use ferroui_base::data::{
-    AggregateError, AggregateException, BindingChainException, BindingError, DataValidationException,
+    AggregateError, AggregateException, BindingChainError, BindingError, DataValidationError,
 };
 use ferroui_base::{AnyValue, BoxedValue};
 use std::rc::Rc;
@@ -103,15 +103,15 @@ fn set_error_unpacks_data_validation_errors() {
     let _scope = test_scope();
     let target = Control::new();
 
-    DataValidationErrors::set_error(&target, Some(&BindingError::new(DataValidationException::new(boxed("foo")))));
+    DataValidationErrors::set_error(&target, Some(&BindingError::new(DataValidationError::new(boxed("foo")))));
     assert_eq!(vec!["foo"], errors_of(&target));
 
     DataValidationErrors::set_error(
         &target,
         Some(&BindingError::new(AggregateException::new(vec![
-            DataValidationException::new(boxed("bar")),
-            DataValidationException::new(None),
-            DataValidationException::new(boxed("baz")),
+            DataValidationError::new(boxed("bar")),
+            DataValidationError::new(None),
+            DataValidationError::new(boxed("baz")),
         ]))),
     );
     assert_eq!(vec!["bar", "baz"], errors_of(&target));
@@ -119,9 +119,9 @@ fn set_error_unpacks_data_validation_errors() {
     DataValidationErrors::set_error(
         &target,
         Some(&BindingError::new(AggregateError::new(vec![
-            BindingError::new(DataValidationException::new(boxed("foo"))),
-            BindingError::new(BindingChainException::with_message("broken")),
-            BindingError::new(DataValidationException::new(boxed("bar"))),
+            BindingError::new(DataValidationError::new(boxed("foo"))),
+            BindingError::new(BindingChainError::with_message("broken")),
+            BindingError::new(DataValidationError::new(boxed("bar"))),
         ]))),
     );
     assert_eq!(vec!["foo", "bar"], errors_of(&target));
@@ -132,7 +132,7 @@ fn set_error_ignores_binding_chain_errors() {
     let _scope = test_scope();
     let target = Control::new();
 
-    DataValidationErrors::set_error(&target, Some(&BindingError::new(BindingChainException::with_message("foo"))));
+    DataValidationErrors::set_error(&target, Some(&BindingError::new(BindingChainError::with_message("foo"))));
 
     assert_eq!(Some(0), DataValidationErrors::get_errors(&target).map(|errors| errors.len()));
     assert!(!DataValidationErrors::get_has_errors(&target));

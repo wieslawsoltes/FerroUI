@@ -42,10 +42,11 @@ impl MainViewThemeBehavior {
                                 Self::initialize(&view);
                             }
                         });
-                        *pending.borrow_mut() = Some(subscription);
+                        *pending.borrow_mut() = Some(subscription.detach());
                     }
                 }
-            });
+            })
+            .detach();
     }
     fn initialize(view: &MainView) {
         let Some(manager) = App::theme_manager() else {

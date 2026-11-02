@@ -429,8 +429,10 @@ struct RenderThreadServices {
     // Declared first: dropped before the scopes below.
     compositor: Rc<Compositor>,
     render_loop: Arc<ManualRenderLoop>,
-    _locator_scope: Rc<dyn crate::reactive::IDisposable>,
+    // The dispatcher scope is dropped before the locator scope: the jobs it
+    // runs when it is reset still find the mock render interface.
     _dispatcher_scope: crate::threading::UnitTestDispatcherScope,
+    _locator_scope: Rc<dyn crate::reactive::IDisposable>,
 }
 
 impl RenderThreadServices {

@@ -57,12 +57,12 @@ impl ToolTipService {
                     this.service_enabled_changed(args);
                 }
             }
-        }));
+        }).detach());
         service.subscriptions.add(ToolTip::tip_property().changed().subscribe(move |e| {
             if let Some(this) = weak.upgrade() {
                 this.tip_changed(e);
             }
-        }));
+        }).detach());
 
         service
     }
@@ -332,7 +332,7 @@ impl ToolTipService {
                 tool_tip.remove_handler(InputElement::pointer_exited_event(), pointer_exited);
             }
         });
-        *closed.borrow_mut() = Some(subscription);
+        *closed.borrow_mut() = Some(subscription.detach());
     }
 
     fn close(&self, control: &Control) {

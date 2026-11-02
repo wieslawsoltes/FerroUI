@@ -17,8 +17,8 @@ use ferroui_base::metadata::{IServiceProvider, MarkupType};
 use ferroui_base::{BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, Ref, StyledElement};
 use ferroui_markup_xaml::xaml_il::runtime::compiled::CompiledLoadError;
 use ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers;
-use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, XamlLoadException};
-use ferroui_markup_xaml_loader::runtime::framework::XamlMemberException;
+use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, XamlLoadError};
+use ferroui_markup_xaml_loader::runtime::framework::XamlMemberError;
 use ferroui_markup_xaml_loader::rust_emitter::{generate_file, GeneratedFile};
 use xamlx::exceptions::XamlError;
 
@@ -589,14 +589,14 @@ fn compare(interpreted: &str, generated: &str) -> Result<(), String> {
 
 /// The type name of the exception a failed load reports: the type of the error of the
 /// compiler the run-time loader wraps (`XamlError::type_name`, a failed member being a
-/// `TargetInvocationException` that wraps a [`XamlMemberException`]), or the type a step of
+/// `TargetInvocationException` that wraps a [`XamlMemberError`]), or the type a step of
 /// generated code names ([`CompiledLoadError`]). `None` for an error without either.
-fn exception_type(error: &XamlLoadException) -> Option<&'static str> {
+fn exception_type(error: &XamlLoadError) -> Option<&'static str> {
     let inner = error.inner_exception()?;
     if let Some(error) = inner.downcast_ref::<XamlError>() {
         return Some(error.type_name());
     }
-    if inner.downcast_ref::<XamlMemberException>().is_some() {
+    if inner.downcast_ref::<XamlMemberError>().is_some() {
         return Some("TargetInvocationException");
     }
     inner.downcast_ref::<CompiledLoadError>().map(CompiledLoadError::type_name)
@@ -604,11 +604,11 @@ fn exception_type(error: &XamlLoadException) -> Option<&'static str> {
 
 /// A failed load as the harness compares it: the exception type and the message, which
 /// carries the position.
-fn failure(error: &XamlLoadException) -> String {
+fn failure(error: &XamlLoadError) -> String {
     format!("<error {}: {}>\n", exception_type(error).unwrap_or("<no exception type>"), error.message())
 }
 
-fn build_generated(name: &str) -> Option<Result<BoxedValue, XamlLoadException>> {
+fn build_generated(name: &str) -> Option<Result<BoxedValue, XamlLoadError>> {
     let (_, build) = generated::DOCUMENTS.iter().find(|(document, _)| *document == name)?;
     // What the run-time loader gives `Build`: a root service provider with a fresh name scope.
     let provider: Rc<dyn IServiceProvider> = XamlIlRuntimeHelpers::create_root_service_provider_v3(None);
@@ -1054,7 +1054,7 @@ fn a_failed_build_reports_the_exception_type_of_the_run_time_loader() {
 }
 
 /// Both back ends' failure of the corpus document `name`, which must fail.
-fn failures_of(name: &str) -> (XamlLoadException, XamlLoadException) {
+fn failures_of(name: &str) -> (XamlLoadError, XamlLoadError) {
     let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| *document == name).expect("a corpus document");
     let interpreted = try_load(xaml).err().expect("the run-time loader fails");
     let generated = build_generated(name).expect("the document is generated").err().expect("the generated build fails");
@@ -1115,6 +1115,7 @@ fn compiled_documents_are_registered_by_uri() {
     FerroLocator::current_mutable()
         .bind::<dyn IAssetLoader>()
         .to_constant(Rc::new(StandardAssetLoader::new(Some(&AssetAssembly::new(generated::ASSEMBLY_NAME)))));
+    let _registry = compiled_xaml_registry();
     generated::register_compiled_xaml();
     let parsed = Uri::new(&uri, UriKind::Absolute).expect("an absolute URI");
     let loaded = FerroXamlLoader::try_load_with_service_provider(None, &parsed, None);
@@ -1151,6 +1152,7 @@ fn a_compiled_document_that_fails_to_build_fails_the_load() {
     FerroLocator::current_mutable()
         .bind::<dyn IAssetLoader>()
         .to_constant(Rc::new(StandardAssetLoader::new(Some(&AssetAssembly::new(generated::ASSEMBLY_NAME)))));
+    let _registry = compiled_xaml_registry();
     generated::register_compiled_xaml();
     let parsed = Uri::new(&uri, UriKind::Absolute).expect("an absolute URI");
     let loaded = FerroXamlLoader::try_load_with_service_provider(None, &parsed, None);
@@ -1223,4 +1225,12 @@ fn the_position_map_leads_back_to_the_document() {
         })
         .expect("the line is in a range of the map");
     assert!(entry.contains("\"line\": 5,"), "{entry}");
+}
+
+/// Serializes the tests that register the compiled documents of the test assembly: the registry of
+/// `FerroXamlLoader` is shared by the process, and a test that unregisters the assembly while
+/// another loads through it made the load fail with "could not be found".
+fn compiled_xaml_registry() -> std::sync::MutexGuard<'static, ()> {
+    static REGISTRY: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    REGISTRY.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
 }

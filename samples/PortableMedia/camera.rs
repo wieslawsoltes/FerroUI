@@ -4,7 +4,7 @@ use super::{Ordering, FAILED};
 mod smoke;
 use ferroui_base::{
     layout::{Orientation, VerticalAlignment},
-    reactive::IDisposable,
+    reactive::Subscription,
     rendering::composition::{frames::*, ElementComposition},
     threading::{Dispatcher, DispatcherPriority, DispatcherTimer},
     Ref, WeakRef,
@@ -28,7 +28,7 @@ struct State {
     session: RefCell<Option<CameraSession>>,
     presenter: WeakRef<TexturePresenter>,
     status: WeakRef<TextBlock>,
-    timer: RefCell<Option<Rc<dyn IDisposable>>>,
+    timer: RefCell<Option<Subscription>>,
     generation: Cell<u64>,
     seen_attached: Cell<bool>,
     initializing: Cell<bool>,

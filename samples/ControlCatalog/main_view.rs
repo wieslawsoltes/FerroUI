@@ -304,7 +304,7 @@ impl MainView {
                     view_model.navigate_to_item(&item);
                     this.selecting.set(false);
                 }
-            });
+            }).detach();
             // The view model opens the section of the current page while the pane is open.
             let weak = self.to_ref().downgrade();
             navigation.pane_opened(move || {
@@ -315,13 +315,13 @@ impl MainView {
                     }
                     this.open_current_section();
                 }
-            });
+            }).detach();
             let weak = self.to_ref().downgrade();
             navigation.pane_closed(move || {
                 if let Some(this) = weak.upgrade() {
                     this.view_model().set_is_drawer_opened(false);
                 }
-            });
+            }).detach();
             // An opened or closed section is the state of its section.
             let weak = self.to_ref().downgrade();
             navigation.expanding(move |args| {
@@ -333,7 +333,7 @@ impl MainView {
                         section.set_is_expanded(true);
                     }
                 }
-            });
+            }).detach();
             let weak = self.to_ref().downgrade();
             navigation.collapsed(move |args| {
                 let Some(this) = weak.upgrade() else { return };
@@ -344,7 +344,7 @@ impl MainView {
                         section.set_is_expanded(false);
                     }
                 }
-            });
+            }).detach();
             // The back button: a sample pushed on the page first, then the journal of the frame.
             let weak = self.to_ref().downgrade();
             navigation.back_requested(move |_| {
@@ -354,7 +354,7 @@ impl MainView {
                 } else {
                     let _ = this.content_frame().go_back();
                 }
-            });
+            }).detach();
             // The title bar of the shell, as in WinUI Gallery: its back button goes back as the back
             // button of the navigation view does, its toggle button opens and closes the pane.
             let title_bar = self.title_bar();
@@ -378,14 +378,14 @@ impl MainView {
                 } else {
                     let _ = this.content_frame().go_back();
                 }
-            });
+            }).detach();
             let weak = self.to_ref().downgrade();
             title_bar.pane_toggle_requested(move |_| {
                 if let Some(this) = weak.upgrade() {
                     let navigation = this.navigation_view();
                     navigation.set_is_pane_open(!navigation.is_pane_open());
                 }
-            });
+            }).detach();
             // The search box filters the pages and opens the one chosen.
             let search = self.get_control::<AutoSuggestBox>("SearchBox");
             let weak = self.to_ref().downgrade();
@@ -410,7 +410,7 @@ impl MainView {
                         .collect()
                 };
                 search.set_items_source(Some(ItemsSource::from_values(matches)));
-            });
+            }).detach();
             let weak = self.to_ref().downgrade();
             search.query_submitted(move |args| {
                 let Some(this) = weak.upgrade() else { return };
@@ -427,7 +427,7 @@ impl MainView {
                 if let Some(item) = header.and_then(|header| this.page_item_by_header(&header, &view_model)) {
                     view_model.navigate_to_item(&item);
                 }
-            });
+            }).detach();
 
             // The frame: a new entry shows the page the view model made, an entry of the journal
             // gets a new page of its item.
@@ -454,17 +454,17 @@ impl MainView {
                     if let Some(this) = weak.upgrade() {
                         this.update_back_button();
                     }
-                });
+                }).detach();
                 let weak = this.downgrade();
                 navigation_page.popped(move |_| {
                     if let Some(this) = weak.upgrade() {
                         this.update_back_button();
                     }
-                });
+                }).detach();
                 view_model.set_navigator(Some(navigation_page.as_navigation()));
                 this.select(&item);
                 this.update_back_button();
-            });
+            }).detach();
         }
 
         view_model.set_is_drawer_opened(navigation.is_pane_open());
@@ -474,7 +474,7 @@ impl MainView {
                 this.view_model().set_is_drawer_opened(this.navigation_view().is_pane_open());
                 this.update_content_margin();
             }
-        });
+        }).detach();
         self.update_content_margin();
         // The view model shows its pages in the frame.
         let weak = self.to_ref().downgrade();

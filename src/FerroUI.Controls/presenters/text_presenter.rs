@@ -15,7 +15,7 @@ use ferroui_base::media::{
     FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, IImmutableBrush, IPen, TextAlignment,
     TextWrapping, Typeface,
 };
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::{HandlerList, MathUtilities, ReadOnlyMemory, ValueSpan};
 use ferroui_base::{
@@ -43,7 +43,7 @@ pub struct TextPresenter {
     base: Control,
     caret_timer: RefCell<Option<Rc<DispatcherTimer>>>,
     /// The subscription of `caret_timer_tick` to the tick of `caret_timer`.
-    caret_timer_tick: RefCell<Option<Rc<dyn IDisposable>>>,
+    caret_timer_tick: RefCell<Option<Subscription>>,
     caret_blink: Cell<bool>,
     // Dropped by `invalidate_text_layout` and `invalidate_text_layout_keep_cache`
     // when a property that affects the text changes, by `measure_override`
@@ -69,7 +69,7 @@ pub struct TextPresenter {
     /// text changed; the inner one: the text is null).
     utf16_text: RefCell<Option<Option<ReadOnlyMemory<u16>>>>,
     /// The subscription to the changes of the `FontFeatures` collection.
-    font_features_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    font_features_subscription: RefCell<Option<Subscription>>,
 }
 
 impl Drop for TextPresenter {
@@ -580,14 +580,17 @@ impl TextPresenter {
     }
 
     /// Occurs when the bounds of the caret change.
-    pub fn caret_bounds_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the presenter.
+    pub fn caret_bounds_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.caret_bounds_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.caret_bounds_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// A brush used to paint the control's background.
@@ -1268,7 +1271,7 @@ impl TextPresenter {
                 }
             });
 
-            *self.caret_timer_tick.borrow_mut() = Some(subscription);
+            *self.caret_timer_tick.borrow_mut() = Some(Subscription::new(subscription));
             *self.caret_timer.borrow_mut() = Some(caret_timer.clone());
 
             if is_enabled {

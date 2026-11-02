@@ -5,12 +5,16 @@ use std::fmt;
 /// An error that describes a data validation failure reported by a model
 /// object.
 #[derive(Clone)]
-pub struct DataValidationException {
+pub struct DataValidationError {
     error_data: Option<BoxedValue>,
     message: String,
 }
 
-impl DataValidationException {
+/// The name of [`DataValidationError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `DataValidationError`")]
+pub type DataValidationException = DataValidationError;
+
+impl DataValidationError {
     /// Creates the error from the data received from the validation source.
     pub fn new(error_data: Option<BoxedValue>) -> Self {
         let message = match &error_data {
@@ -28,38 +32,38 @@ impl DataValidationException {
 
 /// Two errors are equal if they carry the same error data, so that the error
 /// can be held in an untyped value.
-impl PartialEq for DataValidationException {
+impl PartialEq for DataValidationError {
     fn eq(&self, other: &Self) -> bool {
         ValueTypes::identity_equals(self.error_data.as_ref(), other.error_data.as_ref())
     }
 }
 
-impl fmt::Debug for DataValidationException {
+impl fmt::Debug for DataValidationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "DataValidationException({})", self.message)
     }
 }
 
-impl fmt::Display for DataValidationException {
+impl fmt::Display for DataValidationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
     }
 }
 
-impl std::error::Error for DataValidationException {}
+impl std::error::Error for DataValidationError {}
 
 /// Several validation errors reported for one property.
 #[derive(Clone, Debug)]
 pub struct AggregateException {
-    inner: Vec<DataValidationException>,
+    inner: Vec<DataValidationError>,
 }
 
 impl AggregateException {
-    pub fn new(inner: Vec<DataValidationException>) -> Self {
+    pub fn new(inner: Vec<DataValidationError>) -> Self {
         Self { inner }
     }
 
-    pub fn inner_exceptions(&self) -> &[DataValidationException] {
+    pub fn inner_exceptions(&self) -> &[DataValidationError] {
         &self.inner
     }
 }

@@ -1,6 +1,6 @@
 use super::{StyleActivator, StyleActivatorBase};
 use crate::logical_tree::{ChildIndexChangedAction, ChildIndexChangedEventArgs, IChildIndexProvider};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::styling::NthChildSelector;
 use crate::{StyledElement, WeakRef};
 use std::cell::{Cell, RefCell};
@@ -19,7 +19,7 @@ pub(crate) struct NthChildActivator {
     offset: i32,
     reversed: bool,
     index: Cell<i32>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl NthChildActivator {
@@ -110,7 +110,7 @@ impl StyleActivator for NthChildActivator {
                 this.child_index_changed(e);
             }
         }));
-        *self.subscription.borrow_mut() = Some(subscription);
+        *self.subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 
     fn deinitialize(&self) {
