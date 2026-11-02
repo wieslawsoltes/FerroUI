@@ -1190,7 +1190,10 @@ pub fn defer(
 /// [`create_context`], with the root object and the intermediate root object
 /// set to `root`.
 pub fn populate_context(parent: Option<Rc<dyn IServiceProvider>>, document: &DocumentInfo, root: MarkupValue) -> Rc<XamlIlContext> {
-    let context = create_context(parent, document.base_uri, document.namespaces);
+    // A standalone exported builder has no enclosing document to supply its name scope.
+    // Includes and class populators already pass the service provider for their invocation.
+    let parent = parent.unwrap_or_else(XamlIlRuntimeHelpers::create_root_service_provider_v2);
+    let context = create_context(Some(parent), document.base_uri, document.namespaces);
     context.set_root_object(root.clone());
     context.set_intermediate_root_object(root);
     context

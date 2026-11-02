@@ -131,6 +131,20 @@ fn the_parent_stack_is_the_pushed_objects_then_the_parents_of_the_parent() {
 }
 
 #[test]
+fn standalone_populates_have_fresh_scopes_and_nested_populates_keep_their_provider() {
+    let document = DocumentInfo { base_uri: None, namespaces: NAMESPACES };
+    let first = populate_context(None, &document, None).name_scope_field().unwrap();
+    let second = populate_context(None, &document, None).name_scope_field().unwrap();
+    assert!(!Rc::ptr_eq(&first, &second));
+
+    let parent = TestServiceProvider::new().with_name_scope(NameScopeRef(first.clone())).sp();
+    let nested = populate_context(Some(parent.clone()), &document, None).name_scope_field().unwrap();
+    assert!(Rc::ptr_eq(&first, &nested));
+    let deferred = super::compiled::deferred_context(&parent, &document).name_scope_field().unwrap();
+    assert!(Rc::ptr_eq(&first, &deferred));
+}
+
+#[test]
 fn the_populate_context_has_the_root_object() {
     let context = populate_context(None, &DocumentInfo { base_uri: None, namespaces: NAMESPACES }, to_value(7i32));
     let provider: Rc<dyn IServiceProvider> = context;
