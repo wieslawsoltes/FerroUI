@@ -332,7 +332,7 @@ impl DocumentTabStrip {
         let subscription = self
             .add_disposable_handler(InputElement::double_tapped_event(), move |_, e| {
                 owner.on_double_tapped(e)
-            });
+            }).detach();
         self.double_tapped_subscription.replace(Some(subscription));
     }
     fn detach_double_tapped(&self) {

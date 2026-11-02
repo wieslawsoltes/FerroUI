@@ -509,7 +509,7 @@ impl PinnedDockControl {
                         move |_, e| this.owner_window_pointer_pressed(e),
                         RoutingStrategies::TUNNEL,
                         false,
-                    );
+                    ).detach();
                     let this = self.to_ref();
                     let deactivated = self
                         .owner_window()
@@ -869,7 +869,7 @@ impl PinnedDockControl {
                 move |_, _| this.on_pinned_dock_splitter_drag_started(),
                 RoutingStrategies::BUBBLE,
                 false,
-            );
+            ).detach();
         let this = self.to_ref();
         let delta = self
             .splitter()
@@ -879,7 +879,7 @@ impl PinnedDockControl {
                 move |_, e| this.on_pinned_dock_splitter_drag_delta(e.vector),
                 RoutingStrategies::BUBBLE,
                 false,
-            );
+            ).detach();
         let this = self.to_ref();
         let completed = self
             .splitter()
@@ -889,7 +889,7 @@ impl PinnedDockControl {
                 move |_, _| this.on_pinned_dock_splitter_drag_completed(),
                 RoutingStrategies::BUBBLE,
                 false,
-            );
+            ).detach();
         self.splitter_events
             .replace(vec![started, delta, completed]);
     }

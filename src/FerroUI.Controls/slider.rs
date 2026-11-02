@@ -151,14 +151,14 @@ impl TemplatedControlImpl for Slider {
 
             if let Some(decrease_button) = &decrease_button {
                 let (press, release) = subscribe(decrease_button);
-                *this.decrease_button_press_dispose.borrow_mut() = Some(Subscription::new(press));
-                *this.decrease_button_release_dispose.borrow_mut() = Some(Subscription::new(release));
+                *this.decrease_button_press_dispose.borrow_mut() = Some(press);
+                *this.decrease_button_release_dispose.borrow_mut() = Some(release);
             }
 
             if let Some(increase_button) = &increase_button {
                 let (press, release) = subscribe(increase_button);
-                *this.increase_button_subscription.borrow_mut() = Some(Subscription::new(press));
-                *this.increase_button_release_dispose.borrow_mut() = Some(Subscription::new(release));
+                *this.increase_button_subscription.borrow_mut() = Some(press);
+                *this.increase_button_release_dispose.borrow_mut() = Some(release);
             }
         }
 
@@ -172,7 +172,7 @@ impl TemplatedControlImpl for Slider {
             RoutingStrategies::TUNNEL,
             false,
         );
-        *this.pointer_moved_dispose.borrow_mut() = Some(Subscription::new(pointer_moved));
+        *this.pointer_moved_dispose.borrow_mut() = Some(pointer_moved);
     }
 }
 
@@ -318,12 +318,12 @@ impl Slider {
             |x, e| x.on_thumb_drag_started(e),
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
         Thumb::drag_completed_event().add_class_handler_with::<Slider>(
             |x, e| x.on_thumb_drag_completed(e),
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
 
         RangeBase::value_property()
             .override_metadata::<Slider>(StyledPropertyMetadata::new(None).with_enable_data_validation(true));

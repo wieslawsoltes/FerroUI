@@ -147,7 +147,7 @@ impl Menu {
             .override_default_value::<Menu>(crate::automation::AccessibilityView::Control);
         crate::automation::AutomationProperties::control_type_override_property()
             .override_default_value::<Menu>(Some(crate::automation::peers::AutomationControlType::Menu));
-        AccessKeyHandler::access_key_pressed_event().add_class_handler::<Menu>(Self::on_access_key_pressed);
+        AccessKeyHandler::access_key_pressed_event().add_class_handler::<Menu>(Self::on_access_key_pressed).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

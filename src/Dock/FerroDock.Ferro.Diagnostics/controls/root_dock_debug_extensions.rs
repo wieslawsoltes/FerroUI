@@ -132,7 +132,7 @@ impl RootDockDebugExtensions {
             },
             RoutingStrategies::TUNNEL,
             false,
-        );
+        ).detach();
         let closing = top_level.cast::<Window>().map(|main| {
             let state = window.clone();
             main.closing(move |_| {

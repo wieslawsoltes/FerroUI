@@ -111,7 +111,7 @@ impl TextInputMethodManager {
             })
         };
 
-        manager.subscriptions.borrow_mut().extend([matrix_changed, is_enabled_changed]);
+        manager.subscriptions.borrow_mut().extend([matrix_changed.detach(), is_enabled_changed]);
         manager
     }
 

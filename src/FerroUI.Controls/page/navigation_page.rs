@@ -984,7 +984,7 @@ impl NavigationPage {
                     drop(sender.pop_async());
                 }
             },
-        );
+        ).detach();
 
         Self::modal_content_property().changed().add_class_handler::<NavigationPage>(|x, e| {
             let modal_presenter = x.modal_presenter.borrow().clone();

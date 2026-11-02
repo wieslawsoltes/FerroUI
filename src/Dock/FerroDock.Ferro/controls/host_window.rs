@@ -38,7 +38,7 @@ use ferroui_controls::{
     Button, ContentControlImpl, Control, ControlImpl, TopLevelImpl, TopLevelImplExt, Window,
     WindowBaseImpl, WindowClosingEventArgs, WindowImpl, WindowImplExt, WindowState,
 };
-use ferroui_system::IDisposable;
+use ferroui_system::Subscription;
 use std::{
     any::TypeId,
     cell::{Cell, OnceCell, RefCell},
@@ -46,7 +46,7 @@ use std::{
 };
 struct ChromeClickSubscription {
     button: WeakRef<Button>,
-    subscription: Rc<dyn IDisposable>,
+    subscription: Subscription,
 }
 /// Original native floating host with tracked layout, close policy and window dragging.
 #[repr(C)]

@@ -116,8 +116,7 @@ impl TemplatedControlImpl for ToolChromeControl {
                 RoutingStrategies::DIRECT | RoutingStrategies::BUBBLE,
                 false,
             );
-            this.maximize_restore_subscription
-                .replace(Some(Subscription::new(subscription)));
+            this.maximize_restore_subscription.replace(Some(subscription));
         }
     }
 }

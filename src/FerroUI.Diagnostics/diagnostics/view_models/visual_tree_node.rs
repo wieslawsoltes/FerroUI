@@ -293,7 +293,7 @@ impl TreeNodeCollectionImpl for ApplicationHostVisuals {
                 })
             };
 
-            *self.subscriptions.borrow_mut() = Rc::new(CompositeDisposable::from_disposables([opened, closed]));
+            *self.subscriptions.borrow_mut() = Rc::new(CompositeDisposable::from_disposables([opened.detach(), closed.detach()]));
         }
     }
 

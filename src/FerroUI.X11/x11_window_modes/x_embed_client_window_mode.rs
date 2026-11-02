@@ -112,7 +112,7 @@ impl XEmbedClientWindowMode {
         LISTENING.with(|listening| listening.set(true));
 
         // The subscription lasts as long as the device.
-        let _ = keyboard_device.property_changed(|property_name| {
+        keyboard_device.property_changed(|property_name| {
             if property_name != "FocusedElement" {
                 return;
             }
@@ -136,7 +136,7 @@ impl XEmbedClientWindowMode {
                     xembed_mode.send_x_embed_message(&window, XEmbedMessage::RequestFocus, 0, 0, 0);
                 }
             }
-        });
+        }).detach();
     }
 
     fn root(window: &X11Window) -> Option<Ref<EmbeddableControlRoot>> {

@@ -212,7 +212,7 @@ impl MenuBase {
     /// Initializes static members of the [`MenuBase`] class.
     fn static_constructor() {
         register_menu::<MenuBase>(|menu| Rc::new(MenuBaseHandle(menu)));
-        MenuItem::submenu_opened_event().add_class_handler::<MenuBase>(|x, e| x.on_submenu_opened(e));
+        MenuItem::submenu_opened_event().add_class_handler::<MenuBase>(|x, e| x.on_submenu_opened(e)).detach();
     }
 
     /// Creates the class data of a menu that uses the default menu

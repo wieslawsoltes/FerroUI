@@ -611,7 +611,7 @@ impl DrawerPage {
                     }
                 }
             },
-        );
+        ).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

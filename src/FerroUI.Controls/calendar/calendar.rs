@@ -506,8 +506,8 @@ impl Calendar {
             .add_class_handler::<Calendar>(|x, e| x.on_display_date_end_changed(e.get_new_value::<Option<DateTime>>()));
         Self::is_week_number_visible_property().changed().add_class_handler::<Calendar>(|x, _| x.update_months());
         Self::week_number_rule_property().changed().add_class_handler::<Calendar>(|x, _| x.update_months());
-        InputElement::key_down_event().add_class_handler::<Calendar>(|x, e| x.calendar_key_down(e));
-        InputElement::key_up_event().add_class_handler::<Calendar>(|x, e| x.calendar_key_up(e));
+        InputElement::key_down_event().add_class_handler::<Calendar>(|x, e| x.calendar_key_down(e)).detach();
+        InputElement::key_up_event().add_class_handler::<Calendar>(|x, e| x.calendar_key_up(e)).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

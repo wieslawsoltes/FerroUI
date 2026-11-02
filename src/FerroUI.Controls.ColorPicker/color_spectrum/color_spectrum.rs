@@ -17,7 +17,7 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutHelper, LayoutableImpl};
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::{Color, FlowDirection, HsvColor, IBrush, IImageBrushSource, ImageBrush};
-use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::{HandlerList, MathUtilities};
 use ferroui_base::{
@@ -51,7 +51,7 @@ pub struct ColorSpectrum {
     selection_ellipse_panel_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
     /// The handlers connected to the input target in `on_apply_template`
     /// (the original removes its handlers one by one with `-=`).
-    input_target_disposables: RefCell<Vec<Rc<dyn IDisposable>>>,
+    input_target_disposables: RefCell<Vec<Subscription>>,
 
     // XAML template parts
     layout_root: RefCell<Option<Ref<Panel>>>,

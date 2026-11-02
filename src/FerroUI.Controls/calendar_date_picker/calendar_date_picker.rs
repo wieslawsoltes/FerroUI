@@ -434,13 +434,13 @@ impl TemplatedControlImpl for CalendarDatePicker {
             }));
             subscriptions.add(calendar.add_disposable_handler(InputElement::pointer_released_event(), |_, e| {
                 Self::calendar_pointer_released(e);
-            }));
+            }).detach());
             let weak = this.to_ref().downgrade();
             subscriptions.add(calendar.add_disposable_handler(InputElement::key_down_event(), move |sender, e| {
                 if let Some(this) = weak.upgrade() {
                     this.calendar_key_down(sender, e);
                 }
-            }));
+            }).detach());
             *this.calendar_subscriptions.borrow_mut() = Some(Subscription::new(Rc::new(subscriptions)));
 
             let current_blackout_days = this.blackout_dates();
@@ -493,7 +493,7 @@ impl TemplatedControlImpl for CalendarDatePicker {
                     this.drop_down_button_click();
                 }
             });
-            *this.drop_down_button_click_subscription.borrow_mut() = Some(Subscription::new(click));
+            *this.drop_down_button_click_subscription.borrow_mut() = Some(click);
 
             let routes = RoutingStrategies::DIRECT | RoutingStrategies::BUBBLE;
             let weak = this.to_ref().downgrade();
@@ -506,7 +506,7 @@ impl TemplatedControlImpl for CalendarDatePicker {
                 },
                 routes,
                 true,
-            );
+            ).detach();
             let weak = this.to_ref().downgrade();
             let released = drop_down_button.add_disposable_handler_with(
                 InputElement::pointer_released_event(),
@@ -517,7 +517,7 @@ impl TemplatedControlImpl for CalendarDatePicker {
                 },
                 routes,
                 true,
-            );
+            ).detach();
             *this.button_pointer_pressed_subscription.borrow_mut() =
                 Some(Subscription::new(Rc::new(CompositeDisposable::from_disposables([pressed, released]))));
         }
@@ -544,13 +544,13 @@ impl TemplatedControlImpl for CalendarDatePicker {
                 if let Some(this) = weak.upgrade() {
                     this.text_box_key_down(e);
                 }
-            }));
+            }).detach());
             let weak = this.to_ref().downgrade();
             subscriptions.add(text_box.add_disposable_handler(InputElement::got_focus_event(), move |_, _| {
                 if let Some(this) = weak.upgrade() {
                     this.text_box_got_focus();
                 }
-            }));
+            }).detach());
             *this.text_box_subscriptions.borrow_mut() = Some(Subscription::new(Rc::new(subscriptions)));
 
             let weak = this.to_ref().downgrade();

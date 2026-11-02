@@ -465,7 +465,7 @@ impl VisualInteractionSource {
             },
             Interactive::DEFAULT_ROUTES,
             true,
-        ));
+        ).detach());
         let weak = self.this.clone();
         subscriptions.push(element.add_disposable_handler_with(
             InputElement::pointer_released_event(),
@@ -480,7 +480,7 @@ impl VisualInteractionSource {
             },
             Interactive::DEFAULT_ROUTES,
             true,
-        ));
+        ).detach());
         let weak = self.this.clone();
         subscriptions.push(element.add_disposable_handler_with(
             InputElement::pointer_capture_lost_event(),
@@ -496,7 +496,7 @@ impl VisualInteractionSource {
             },
             Interactive::DEFAULT_ROUTES,
             true,
-        ));
+        ).detach());
 
         self.begin_manipulation(point.position, Some(pointer), subscriptions);
         true
@@ -659,7 +659,7 @@ impl VisualInteractionSource {
             Interactive::DEFAULT_ROUTES,
             false,
         );
-        *self.wheel_subscription.borrow_mut() = Some(Subscription::new(subscription));
+        *self.wheel_subscription.borrow_mut() = Some(subscription);
     }
 
     fn on_wheel(&self, e: &PointerWheelEventArgs) -> bool {

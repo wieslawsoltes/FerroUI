@@ -256,7 +256,7 @@ impl TemplatedControlImpl for MaterialTimePicker {
                         },
                         RoutingStrategies::BUBBLE,
                         false,
-                    );
+                    ).detach();
                     this.subscriptions.borrow_mut().push(subscription);
                 }
             }

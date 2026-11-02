@@ -5,7 +5,7 @@ use ferroui_base::input::{InputElement, InputElementImpl, PointerPressedEventArg
 use ferroui_base::interactivity::{Interactive, InteractiveImpl};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::HsvColor;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::span_helpers::{try_parse_int, NumberStyles};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -26,7 +26,7 @@ pub struct ColorPreviewer {
     events_connected: Cell<bool>,
     /// The handlers connected by `connect_events` (the original removes its
     /// handlers one by one with `-=`).
-    event_disposables: RefCell<Vec<Rc<dyn IDisposable>>>,
+    event_disposables: RefCell<Vec<Subscription>>,
 
     // XAML template parts
     accent_decrement1_border: RefCell<Option<Ref<Border>>>,

@@ -360,17 +360,17 @@ impl ScrollBar {
             |x, e| x.on_thumb_drag_delta(e),
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
         Thumb::drag_started_event().add_class_handler_with::<ScrollBar>(
             |x, e| x.on_thumb_drag_start(e),
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
         Thumb::drag_completed_event().add_class_handler_with::<ScrollBar>(
             |x, e| x.on_thumb_drag_complete(e),
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
 
         InputElement::focusable_property().override_default_value::<ScrollBar>(false);
     }

@@ -233,7 +233,7 @@ impl TemplatedControlImpl for MaterialSearchView {
                         },
                         RoutingStrategies::BUBBLE,
                         false,
-                    ));
+                    ).detach());
             }
         }
         this.apply_progress();

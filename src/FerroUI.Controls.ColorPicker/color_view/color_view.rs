@@ -6,7 +6,7 @@ use ferroui_base::input::{FocusChangedEventArgs, InputElement, InputElementImpl,
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::{Color, HsvColor};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, instantiate, FerroObject, FerroObjectImpl, FerroObjectImplExt,
@@ -28,7 +28,7 @@ pub struct ColorView {
     hex_text_box: RefCell<Option<Ref<TextBox>>>,
     /// The handlers connected to the hex text box (the original removes its
     /// handlers one by one with `-=`).
-    hex_text_box_disposables: RefCell<Vec<Rc<dyn IDisposable>>>,
+    hex_text_box_disposables: RefCell<Vec<Subscription>>,
 
     ignore_property_changed: Cell<bool>,
 }
