@@ -109,8 +109,9 @@ draws registered graphs offscreen once, so their pipelines are compiled before a
   a filter.
 - **The GPU layer**: Skia's runtime effects (SkSL compiled once per thread and source, uniforms
   checked by name and type, children; `runtime_effects.rs`) and Vello's own wgpu passes (WGSL
-  compiled once per device, uniforms in a pooled buffer, the result a pooled device texture the
-  scene paints with; `src/Vello/FerroUI.Vello/gpu/effect_passes.rs`, done for the scene lighting).
+  compiled once per device, uniforms written per pass, the result a pooled device texture the
+  scene paints with; `src/Vello/FerroUI.Vello/gpu/effect_passes.rs`: the scene lighting, and since
+  E3 the layers with an effect, whose content is a pooled texture the pass reads).
 
 ### 3.2 The open effect model (E1, this step)
 
@@ -192,8 +193,8 @@ sets uniforms from the parameters. Three kinds of effects cover Effector's set:
    parameters of the snapshot as the values of its animatable members. This is portable by
    construction: each node is drawn by each backend as the composition effects are, with the
    status gpu-rendering.md records per node. Tint, grayscale, sepia, saturation, brightness and
-   contrast, invert and glow are graphs; sharpen and edge detect need a convolution node
-   (`ConvolveMatrixEffect`, a Win2D effect) and pixelate a node of its own or a shader.
+   contrast, invert and glow are graphs; sharpen and edge detect are graphs of a convolution node
+   (`ConvolveMatrixEffect`, a Win2D effect, E3); pixelate needs a node of its own or a shader.
 2. **Runtime shader effects** (section 3.4): a shader program with uniforms from the parameters
    and children (the content, secondary images).
 3. **Native factories**: a backend crate may register, per effect type, a factory of its own (a
@@ -275,11 +276,11 @@ texture the scene paints with. So the plan, stated as it is:
   as the child `content`, coordinates in device pixels of the layer. The factory checks the WGSL
   against the parameters as `runtime_effects.rs` checks SkSL (naga 30, already in the tree through
   wgpu, parses WGSL and reports the uniform layout).
-- **Content-sampling on Vello** needs "layers with an effect", step 2 of the Vello route in
-  gpu-rendering.md: the content recorded into a scene of the device, rendered into a pooled
-  texture, read by the pass into another pooled texture the outer scene paints with. That step is
-  shared with the colour matrix and pixel operations of the composition effects and is a
-  prerequisite of E5.
+- **Content-sampling on Vello** takes "layers with an effect", step 2 of the Vello route in
+  gpu-rendering.md (done in E3): the content recorded into a scene of the device, rendered into a
+  pooled texture, read by the pass into another pooled texture the outer scene paints with. The
+  step is shared with the colour matrix, the convolution and the pixel operations of the
+  composition effects; a shader effect of E5 is one more program on it.
 - **WebGL2** has no wgpu device: the WGSL is translated to GLSL ES 3.0 by naga (`glsl-out`) at
   build time, by a helper of `ferroui-build`, and the description embeds both (decision 2); the
   browser module carries no naga.
@@ -345,6 +346,15 @@ ported as the reference set.
   (`composition_custom_effect_tests.rs`), and each library effect drawn on Skia raster and Graphite
   (`tests.rs`, `gpu/metal/tests.rs`) and on Vello CPU, hybrid and GPU (`effect_tests.rs`,
   `gpu/effect_pass_tests.rs`) against its CPU reference.
+- E3: `ConvolveMatrix` and its CPU reference (`media/convolve_matrix.rs`), the loader of the
+  convolution node (`effect_graph.rs`), sharpen and edge detect in the library tests, the render
+  walk drawing them as convolution layers (`composition_custom_effect_tests.rs`), the convolution
+  layer against its reference on Skia raster, Graphite and Vello CPU (`tests.rs`,
+  `gpu/metal/tests.rs`, `effect_tests.rs`), and in the hybrid and GPU modes of Vello
+  (`gpu/effect_pass_tests.rs`) each pass of the route (colour matrix, convolution, luminance mask,
+  light multiply, pixel operations) against its CPU reference, the library effects without a
+  layer drawn on the processor (`cpu_layer_count`), and nested layers over steady frames without
+  a texture allocated by the pool.
 - Later steps: per effect and backend, the GPU output against the CPU reference
   (`tests/FerroUI.RenderTests`, `tests/FerroUI.RenderBackends.Comparison`); the steady-state test
   (no new texture or program over frames that change only parameters, with the allocation
@@ -360,7 +370,7 @@ Each step is one pull request from main.
 | E0 | This plan | none | none |
 | E1 | The open effect model in ferroui-base (section 3.2): `CustomEffect`, `EffectParameterValue`, `ImmutableCustomEffect`, `CustomEffectClass` and `Effect::construct_custom`, `IEffect::as_custom_effect`, `EffectExtensions::to_custom_effect`, `CustomEffectRegistry` and `Effect::parse`, `CustomEffectAnimator` and `EffectTransition`; the no-op and the report of Skia and Vello; tests | additions (a provided method of `IEffect`) | low: the built-in effects take the same paths; an `IEffect` of an unknown kind still panics in `get_effect_output_padding` as upstream |
 | E2 | Graph effects (section 3.3, kind 1): the description hook of `CustomEffect`, loaded once per type into an `EffectGraph`, painted around the content by the render walk with the parameters as animatable members, registered for the prewarm; the colour effects of the sample set as graphs. **Done**: `graph`, `for_each_graph_value`, `cpu_reference`, the library of section 3.3, the catalog page "Custom effects" | addition | medium: the walk gains a second way to draw `Visual.Effect`; the graph painter is shared with the effect brushes |
-| E3 | Convolution and the Vello colour layers: a `ConvolveMatrixEffect` node (Skia: a matrix convolution image filter; Vello: a WGSL pass), and Vello step 2 of gpu-rendering.md ("layers with an effect": the content into a pooled device texture, a pass into another) for the colour matrix nodes, so the graph effects are GPU on Vello's GPU and hybrid modes | addition | high: the Vello pass reads the content of a layer, a new route in the scene |
+| E3 | Convolution and the Vello colour layers: a `ConvolveMatrixEffect` node (Skia: a matrix convolution image filter; Vello: a WGSL pass), and Vello step 2 of gpu-rendering.md ("layers with an effect": the content into a pooled device texture, a pass into another) for the colour matrix nodes, so the graph effects are GPU on Vello's GPU and hybrid modes. **Done**: `ConvolveMatrix`, `push_convolve_matrix_layer`, the node, sharpen and edge detect; the route for the colour matrix, convolution, light multiply, pixel operation and luminance layers; WebGL2 keeps the CPU path (route step 3) | addition | high: the Vello pass reads the content of a layer, a new route in the scene |
 | E4 | Runtime shader effects on Skia (section 3.4): the shader description (SkSL source, the uniform convention, children, blend mode, overlay or content-sampling), compiled once per thread by `runtime_effects.rs`, drawn as a runtime-shader image filter of a save layer; the shader samples | addition | medium: SkSL errors surface at the first draw (logged once, then the no-op) |
 | E5 | Runtime shader effects on Vello: the WGSL source of the description, checked with naga, a pass of `effect_passes.rs` compiled once per device on the route of E3; WebGL2 by GLSL ES generated at build time (decision 2); the CPU reference hook (decision 3) | addition | high: depends on E3 |
 | E6 | Secondary images (section 3.6): `EffectParameterValue::Image` and its handle, uploaded once per backend, bound as children; the page transitions | addition (a variant of a `#[non_exhaustive]` enum) | medium: the lifetime of textures across threads |
@@ -373,9 +383,16 @@ type has a graph is drawn by the render walk as that graph around the content, t
 of the composition effects, on every backend (section 3.3, "Graph effects as built"); the colour
 effects and the glow of the sample set ship as such effects with CPU references, and the render
 tests hold Skia (raster and Graphite) and Vello (CPU, hybrid and GPU modes) to those references.
-What each node costs on each backend is the status of gpu-rendering.md: the colour matrix layers
-are GPU on Skia and the CPU fallback on Vello until E3; the glow is GPU on Skia and on Vello where
-the scene has filter layers. Another custom effect keeps the no-op of E1.
+What each node costs on each backend is the status of gpu-rendering.md. E3 is done: the Win2D
+convolution is a node of the graphs (`ConvolveMatrixEffect`, drawn by Skia with its matrix
+convolution image filter and by Vello with a pass of its own), sharpen and edge detect ship as
+graphs of it with CPU references, and Vello's hybrid and GPU modes draw the colour matrix and
+convolution layers (and the multiply layers of lit visuals, the pixel operations and the luminance
+mask of the composition effects) on the device: the content recorded into a scene of the device,
+rendered into a pooled texture, passed through the program into another pooled texture the outer
+scene paints with. The graph effects of the library are GPU on Skia and on Vello's hybrid and GPU
+modes; Vello's CPU mode draws them by the references, and WebGL2 keeps the CPU path until step 3
+of the route. Another custom effect keeps the no-op of E1.
 
 ## 5. Not in scope
 
