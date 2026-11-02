@@ -4,8 +4,7 @@ use xamlx::ast::*;
 
 struct Entry {
     node: Rc<dyn IXamlAstNode>,
-    height: usize,
-    visits: usize,
+    expansion: Expansion,
     used: bool,
 }
 
@@ -16,8 +15,7 @@ struct Reader<'a> {
     nodes: Vec<Entry>,
     expanded_text: usize,
     alias_entries_left: usize,
-    height: usize,
-    visits: usize,
+    expansion: Expansion,
 }
 
 impl<'a> Reader<'a> {
@@ -122,11 +120,7 @@ impl<'a> Reader<'a> {
             return Err(invalid("shared mutable occurrence"));
         }
         entry.used = true;
-        self.height = self.height.max(entry.height + 1);
-        self.visits += entry.visits;
-        if self.height > MAX_DEPTH || self.visits > MAX_VISITS {
-            return Err(invalid("expanded graph exceeds limit"));
-        }
+        self.expansion.include(entry.expansion)?;
         Ok(result)
     }
 
@@ -244,8 +238,7 @@ pub fn decode(bytes: &[u8]) -> XamlResult<XamlDocument> {
         nodes: vec![],
         expanded_text: MAX_EXPANDED_TEXT,
         alias_entries_left: MAX_NODES,
-        height: 1,
-        visits: 1,
+        expansion: Expansion::LEAF,
     };
     let strings = r.count(1)?;
     r.strings.reserve(strings);
@@ -265,13 +258,11 @@ pub fn decode(bytes: &[u8]) -> XamlResult<XamlDocument> {
     let nodes = r.count(5)?;
     r.nodes.reserve(nodes);
     for _ in 0..nodes {
-        r.height = 1;
-        r.visits = 1;
+        r.expansion = Expansion::LEAF;
         let node = r.record()?;
         r.nodes.push(Entry {
             node,
-            height: r.height,
-            visits: r.visits,
+            expansion: r.expansion,
             used: false,
         });
     }

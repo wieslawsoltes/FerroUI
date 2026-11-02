@@ -12,6 +12,9 @@ enum Field {
 }
 
 fn children<T: ?Sized + XamlAstCast>(fields: &mut Vec<Field>, list: &[Rc<T>]) -> XamlResult<()> {
+    if list.len() > MAX_NODES {
+        return Err(invalid("invalid count"));
+    }
     fields.push(Field::Uint(count(list.len())?));
     fields.extend(list.iter().map(|n| Field::Node(n.as_node())));
     Ok(())
@@ -38,6 +41,7 @@ struct Encoder {
     scopes: HashMap<usize, u32>,
     scope_pool: Vec<u8>,
     ids: HashMap<usize, u32>,
+    expansions: Vec<Expansion>,
     records: Vec<u8>,
 }
 
@@ -128,7 +132,13 @@ impl Encoder {
         } else if let Some(o) = n.cast::<XamlAstObjectNode>() {
             body.push(Ref(o.type_.borrow().as_node()));
             children(&mut body, &o.arguments.borrow())?;
-            children(&mut body, &o.children.borrow())?;
+            let list = o.children.borrow();
+            if list.iter().any(|n| {
+                !n.is::<dyn IXamlAstValueNode>() && !n.is::<dyn IXamlAstManipulationNode>()
+            }) {
+                return Err(invalid("invalid object child"));
+            }
+            children(&mut body, &list)?;
             OBJECT
         } else if let Some(p) = n.cast::<XamlAstXamlPropertyValueNode>() {
             body.extend([
@@ -185,7 +195,10 @@ impl Encoder {
                                 pending = Some(child.clone());
                                 break;
                             }
-                            _ => {}
+                            Some(_) if !child.is::<XamlAstXmlTypeReference>() => {
+                                return Err(invalid("shared mutable occurrence"))
+                            }
+                            Some(_) => {}
                         }
                     }
                 }
@@ -193,7 +206,8 @@ impl Encoder {
                     break;
                 }
                 let frame = stack.pop().unwrap();
-                let id = count(self.ids.len() - stack.len() - 1)?;
+                let id = count(self.expansions.len())?;
+                let mut expansion = Expansion::LEAF;
                 let ptr = Rc::as_ptr(&frame.node) as *const () as usize;
                 self.ids.insert(ptr, id);
                 let scope = self.scope(&frame.node)?;
@@ -210,12 +224,17 @@ impl Encoder {
                     let v = match field {
                         Field::Uint(v) => v,
                         Field::Node(n) => {
-                            id - self.ids[&(Rc::as_ptr(&n) as *const () as usize)] - 1
+                            let child = self.ids[&(Rc::as_ptr(&n) as *const () as usize)];
+                            expansion.include(self.expansions[child as usize])?;
+                            id - child - 1
                         }
                     };
                     put(&mut self.records, v);
                 }
-                if self.records.len() + self.scope_pool.len() > MAX_DOCUMENT_BYTES {
+                self.expansions.push(expansion);
+                if self.records.len() + self.scope_pool.len() + self.string_pool.len()
+                    > MAX_DOCUMENT_BYTES
+                {
                     return Err(invalid("image too large"));
                 }
             }
@@ -226,18 +245,18 @@ impl Encoder {
 
 /// Encode syntax returned by the XML parser. Transformed CLR nodes are rejected.
 pub fn encode(document: &XamlDocument) -> XamlResult<Vec<u8>> {
-    use flate2::{write::ZlibEncoder, Compression};
-    use std::io::Write as _;
+    use flate2::{Compress, Compression, FlushCompress, Status};
     let mut stored = encode_stored(document)?;
-    // Small images decode straight from the caller's slice. Compress the whole syntax
-    // section only when its savings pay for the expanded buffer at load time.
+    // Reserve only the byte budget at which storing the compressed image pays off.
+    // Incompressible input fills this buffer and immediately takes the stored path.
     if stored.len() >= 1024 {
         let payload = &stored[6..];
-        let mut zlib = ZlibEncoder::new(Vec::new(), Compression::fast());
-        zlib.write_all(payload)
+        let budget = stored.len() - stored.len() / 8 - 11;
+        let mut compressed = Vec::with_capacity(budget);
+        let status = Compress::new(Compression::fast(), true)
+            .compress_vec(payload, &mut compressed, FlushCompress::Finish)
             .map_err(|_| invalid("compression failed"))?;
-        let compressed = zlib.finish().map_err(|_| invalid("compression failed"))?;
-        if compressed.len() + 10 < stored.len() - stored.len() / 8 {
+        if status == Status::StreamEnd && compressed.len() <= budget {
             let size = count(payload.len())?;
             stored.truncate(5);
             stored.push(1);
@@ -258,18 +277,30 @@ pub fn encode_stored(document: &XamlDocument) -> XamlResult<Vec<u8>> {
     let name = enc.optional(document.document.as_deref())?;
     let aliases = enc.aliases(&document.namespace_aliases)?;
     enc.graph(root)?;
-    let mut out = MAGIC.to_vec();
-    out.extend([VERSION, 0]);
-    put(&mut out, count(enc.strings.len())?);
-    out.extend(enc.string_pool);
-    put(&mut out, name);
-    out.extend(aliases);
-    put(&mut out, count(enc.scopes.len())?);
-    out.extend(enc.scope_pool);
-    put(&mut out, count(enc.ids.len())?);
-    out.extend(enc.records);
-    if out.len() > MAX_DOCUMENT_BYTES {
+    let mut header = MAGIC.to_vec();
+    header.extend([VERSION, 0]);
+    put(&mut header, count(enc.strings.len())?);
+    let mut meta = Vec::new();
+    put(&mut meta, name);
+    meta.extend(aliases);
+    put(&mut meta, count(enc.scopes.len())?);
+    let mut count_bytes = Vec::new();
+    put(&mut count_bytes, count(enc.ids.len())?);
+    let sections = [
+        header,
+        enc.string_pool,
+        meta,
+        enc.scope_pool,
+        count_bytes,
+        enc.records,
+    ];
+    let size: usize = sections.iter().map(Vec::len).sum();
+    if size > MAX_DOCUMENT_BYTES {
         return Err(invalid("image too large"));
+    }
+    let mut out = Vec::with_capacity(size);
+    for section in sections {
+        out.extend(section);
     }
     Ok(out)
 }

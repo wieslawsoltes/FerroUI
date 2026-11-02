@@ -20,6 +20,29 @@ const MAX_DEPTH: usize = 768;
 const MAX_VISITS: usize = 4 << 20;
 const MAX_EXPANDED_TEXT: usize = 64 << 20;
 
+/// Cost of traversing a node through all its references, including shared types.
+#[derive(Clone, Copy)]
+struct Expansion {
+    height: usize,
+    visits: usize,
+}
+
+impl Expansion {
+    const LEAF: Self = Self {
+        height: 1,
+        visits: 1,
+    };
+
+    fn include(&mut self, child: Self) -> XamlResult<()> {
+        self.height = self.height.max(child.height + 1);
+        self.visits += child.visits;
+        if self.height > MAX_DEPTH || self.visits > MAX_VISITS {
+            return Err(invalid("expanded graph exceeds limit"));
+        }
+        Ok(())
+    }
+}
+
 const TYPE: u8 = 0;
 const PROPERTY: u8 = 1;
 const TEXT: u8 = 2;

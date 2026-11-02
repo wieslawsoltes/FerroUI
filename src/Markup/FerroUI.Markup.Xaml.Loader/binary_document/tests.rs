@@ -129,3 +129,70 @@ fn compact_dag_cannot_request_exponential_transform_work() {
     let error = decode(&image).err().unwrap().message();
     assert!(error.contains("expanded graph"), "{error}");
 }
+
+#[test]
+fn encoder_rejects_shared_occurrences_invalid_children_and_expansion_bombs() {
+    let doc = crate::compiler_extensions::FerroXamlIlCompiler::parse_source_syntax(
+        "<A xmlns='urn:a'><B/></A>",
+    )
+    .unwrap();
+    let root = doc.root().unwrap().cast::<XamlAstObjectNode>().unwrap();
+    let shared = root.children.borrow()[0].clone();
+    root.children.borrow_mut().push(shared);
+    assert!(encode(&doc)
+        .unwrap_err()
+        .message()
+        .contains("shared mutable occurrence"));
+    root.children.borrow_mut().clear();
+    root.children
+        .borrow_mut()
+        .push(root.type_.borrow().as_node());
+    assert!(encode(&doc)
+        .unwrap_err()
+        .message()
+        .contains("invalid object child"));
+    root.children.borrow_mut().clear();
+    let mut ty = root
+        .type_
+        .borrow()
+        .cast::<XamlAstXmlTypeReference>()
+        .unwrap();
+    for _ in 0..24 {
+        ty = XamlAstXmlTypeReference::with_generic_arguments(
+            &*root,
+            Some("urn:a"),
+            "Pair",
+            vec![ty.clone(), ty],
+        );
+    }
+    root.type_.replace(ty);
+    assert!(encode(&doc)
+        .unwrap_err()
+        .message()
+        .contains("expanded graph"));
+}
+
+#[test]
+fn stored_and_compressed_images_round_trip_near_the_xml_nesting_limit() {
+    // The parser's element-depth limit is 256. Property elements add another syntax
+    // node on the way to the nested object. Run the XML parser on a suitable stack.
+    std::thread::Builder::new()
+        .stack_size(16 << 20)
+        .spawn(|| {
+            let xaml = format!(
+                "<Root xmlns='urn:a'>{}text{}</Root>",
+                "<Child>".repeat(255),
+                "</Child>".repeat(255)
+            );
+            let doc = crate::compiler_extensions::FerroXamlIlCompiler::parse_source_syntax(&xaml)
+                .unwrap();
+            let stored = encode_stored(&doc).unwrap();
+            assert_eq!(
+                encode_stored(&decode(&encode(&doc).unwrap()).unwrap()).unwrap(),
+                stored
+            );
+        })
+        .unwrap()
+        .join()
+        .unwrap();
+}
