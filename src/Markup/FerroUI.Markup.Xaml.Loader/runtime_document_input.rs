@@ -31,6 +31,11 @@ impl DocumentInput {
         }
     }
 
+    #[cfg(feature = "portable-xaml")]
+    pub(crate) fn from_portable(bytes: &[u8]) -> Self {
+        Self { content: DocumentContent::Portable(bytes.to_vec()), syntax: None }
+    }
+
     pub(crate) fn read(stream: &mut dyn Read) -> io::Result<Self> {
         #[cfg(feature = "portable-xaml")]
         {
@@ -78,15 +83,7 @@ impl DocumentInput {
     pub(crate) fn cache_weight(&self) -> usize {
         #[cfg(feature = "portable-xaml")]
         if let DocumentContent::Portable(bytes) = &self.content {
-            if bytes.get(5) == Some(&1) {
-                // Compression mode 1 starts with the validated expanded payload size.
-                return bytes
-                    .get(6..10)
-                    .and_then(|size| size.try_into().ok())
-                    .map_or(usize::MAX, |size| {
-                        (u32::from_le_bytes(size) as usize).saturating_add(6)
-                    });
-            }
+            return crate::binary_document::expanded_size(bytes).unwrap_or(usize::MAX);
         }
         self.bytes().len()
     }

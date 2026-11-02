@@ -187,12 +187,14 @@ impl FerroXamlIlRuntimeCompiler {
             })?;
             Ok((document, input))
         }).collect::<XamlResult<Vec<_>>>()?;
-        Self::load_inputs(inputs, configuration)
+        let count = inputs.len();
+        Self::load_inputs(inputs, configuration, count)
     }
 
     pub(crate) fn load_inputs(
         inputs: Vec<(RuntimeXamlLoaderDocument, DocumentInput)>,
         configuration: &RuntimeXamlLoaderConfiguration,
+        roots: usize,
     ) -> XamlResult<Vec<Option<BoxedValue>>> {
         let runtime_type_system = Self::type_system();
         let mut sources = Vec::with_capacity(inputs.len());
@@ -237,8 +239,8 @@ impl FerroXamlIlRuntimeCompiler {
             }
         };
 
-        let mut loaded = Vec::with_capacity(documents.len());
-        for ((document, provider), root_type) in documents.iter().zip(&group.providers).zip(&group.root_types) {
+        let mut loaded = Vec::with_capacity(roots);
+        for ((document, provider), root_type) in documents.iter().take(roots).zip(&group.providers).zip(&group.root_types) {
             let name = document.document.clone();
             let result = Self::load_or_populate(
                 provider,

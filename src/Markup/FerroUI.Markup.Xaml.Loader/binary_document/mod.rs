@@ -62,7 +62,7 @@ pub fn is_binary(bytes: &[u8]) -> bool {
 }
 
 /// Inspect just the envelope, before reserving decompression or AST storage.
-fn expanded_size(bytes: &[u8]) -> XamlResult<usize> {
+pub(crate) fn expanded_size(bytes: &[u8]) -> XamlResult<usize> {
     if bytes.len() > MAX_DOCUMENT_BYTES || !is_binary(bytes) || bytes.get(4) != Some(&VERSION) {
         return Err(invalid("unexpected signature, version or length"));
     }
