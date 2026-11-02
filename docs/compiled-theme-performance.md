@@ -2,6 +2,21 @@
 
 The native Rust backend uses XamlX to resolve types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
 
+## Current main and shipping solid under the same compact profile
+
+On Linux x86-64, the full editable WinUI consumer reached its first typed Button theme in **13.05 ms** versus **16.16 ms** on main at `c6279e98`. Both used size optimization, ThinLTO and ordinary unwinding. The shipping consumer also links the runtime that handles independently edited archives. Both executables used the same probe source, a warm filesystem cache, and the complete theme. The marker follows the typed lookup and precedes process teardown. First-frame rendering is outside this headless benchmark.
+
+| Full theme | Generated Rust | XAML build script | Theme rustc | Stripped executable | Spawn to Button p50 | p95 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Main native AOT | 14,421,918 B | 25.56 s | 63.44 s | 54,512,584 B | 16.16 ms | 22.73 ms |
+| Precompiled solid with external FXP loading | 5,325,703 B | 14.36 s | 32.68 s | **49,962,376 B** | **13.05 ms** | 15.65 ms |
+| Same executable, matching full FXP read from disk | — | — | — | 49,962,376 B | 13.34 ms | 17.60 ms |
+| Same executable, edited full FXP read from disk | — | — | — | 49,962,376 B | 1841.92 ms | 1947.81 ms |
+
+The installed startup time fell 19.2% and the stripped executable lost 4,550,208 bytes (8.3%). Fresh processes rotated for 31 rounds per fast case on one CPU after compilation had finished. The changed archive used seven separate launches. The initial Cargo-driven gate also passed, at 14.18 ms against 17.65 ms. In both series startup uses every resource root and the linked external loader can execute a different FXP.
+
+Build-script times are single Cargo unit observations. Theme rustc times are means of two matched invocations per revision in reversed order on the generated output, using the build's exact dependency metadata and optimization settings. They exclude the final ThinLTO link. The machine restarted between Cargo units, so there is no uninterrupted whole-graph cold build comparison. The 49.96 MB executable contains 28.78 MB of machine code, 10.04 MB of exception and unwind data, and 5.80 MB of dynamic relocations. [Raw process samples, compiler times, hashes and ELF sections](benchmarks/compiled-theme-shipping-linux-x86_64.json)
+
 ## Shipping WinUI with startup parity
 
 Use `ferroui-themes-winui/solid-theme` for an installed full theme with a reloadable FXP revision. The build resolves XAML types, overloads, includes, property getters and deferred builders. The constructor executes that typed program with FXB resource operands. The application can also install independently supplied FXP files. An exact revision can dispatch to the installed program after checking the bytes, URI, assembly, compiler settings and active overrides. A changed revision is resolved through XamlX. The `portable-solid-theme` feature offers a separate, interpreter-only configuration with a smaller WinUI contribution.
