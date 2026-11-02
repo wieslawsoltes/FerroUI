@@ -14,6 +14,7 @@ import argparse
 import json
 import os
 import platform
+import re
 import shutil
 import statistics
 import subprocess
@@ -36,6 +37,25 @@ def build(cargo_args, directory, env):
         cwd=directory, env=env, check=True, stdout=subprocess.PIPE, text=True,
     )
     return time.perf_counter() - start, [json.loads(line) for line in proc.stdout.splitlines()]
+
+
+def cargo_timings(target):
+    # Keep the documented HTML report as the canonical raw artifact. Cargo's
+    # embedded table is optional diagnostic detail, and can change with Cargo.
+    report = target / "cargo-timings/cargo-timing.html"
+    if report.is_file():
+        marker = "const UNIT_DATA = "
+        text = report.read_text()
+        if marker in text:
+            try:
+                units, _ = json.JSONDecoder().raw_decode(text.split(marker, 1)[1])
+                return [
+                    {"package": u["name"], "target": u["target"].strip(), "seconds": u["duration"]}
+                    for u in units if u["name"] in (THEME, PROBE)
+                ]
+            except (ValueError, KeyError, TypeError):
+                pass
+    return []
 
 
 def positive_int(text):
@@ -67,11 +87,13 @@ def main():
     parser.add_argument("--source", type=Path, default=HERE.parents[2])
     parser.add_argument("--work-dir", type=Path, required=True, help="dedicated directory for the consumer, target and results")
     parser.add_argument("--binary", action="store_true", help="enable the theme's binary-resources feature")
-    parser.add_argument("--rebuilds", type=positive_int, default=1, help="number of dependency-warm theme rebuilds")
+    parser.add_argument("--rebuilds", type=int, default=1, help="number of dependency-warm theme rebuilds, zero to measure the initial build only")
     parser.add_argument("--launches", type=positive_int, default=15, help="number of measured, fresh-process launches")
     parser.add_argument("--compare-with", type=Path, action="append", default=[],
                         help="also time a previous work directory's stripped-probe, interleaved with the new one")
     args = parser.parse_args()
+    if args.rebuilds < 0:
+        parser.error("--rebuilds must be zero or positive")
     source = args.source.resolve()
     work = args.work_dir.resolve()
     target = work / "target"
@@ -99,7 +121,8 @@ def main():
     # opt-level 3, without cross-crate LTO. Stripping is a separate measured copy.
     env = {**os.environ, "CARGO_TARGET_DIR": str(target), "CARGO_INCREMENTAL": "0", "CARGO_PROFILE_RELEASE_LTO": "false"}
     cargo_args = ["--features", THEME + "/binary-resources"] if args.binary else []
-    first_build, _ = build(cargo_args, package, env)
+    first_build, messages = build(cargo_args, package, env)
+    initial_units = cargo_timings(target)
     rebuilds = []
     for _ in range(args.rebuilds):
         subprocess.run(["cargo", "clean", "--release", "-p", THEME, "-p", PROBE], cwd=package, env=env, check=True)
@@ -110,6 +133,9 @@ def main():
     executable = Path(next(m["executable"] for m in messages if m.get("executable") and m["target"]["name"] == PROBE))
     generated = out / "xaml"
     source_bytes = (generated / "compiled_xaml.rs").read_bytes()
+    # Earlier feature/root combinations can have left other blocks in OUT_DIR.
+    # Only files included by this compiled consumer contribute to its payload.
+    referenced = set(re.findall(rb'include_bytes!\("([a-zA-Z0-9_-]+\.fxb)"\)', source_bytes))
     stripped = work / "stripped-probe"
     shutil.copy2(executable, stripped)
     subprocess.run(["strip", str(stripped)], check=True)
@@ -129,8 +155,9 @@ def main():
         "binary_resources": args.binary, "resource_roots": env.get("FERROUI_WINUI_THEME_ROOTS"),
         "profile": "release, LTO off, incremental off", "initial_target_empty": target_was_empty,
         "initial_build_seconds": first_build, "theme_rebuild_seconds": rebuilds,
+        "initial_cargo_units": initial_units, "last_cargo_units": cargo_timings(target),
         "generated_rust_bytes": len(source_bytes),
-        "fxb_bytes": sum(p.stat().st_size for p in generated.rglob("*.fxb")),
+        "fxb_bytes": sum((generated / name.decode("ascii")).stat().st_size for name in referenced),
         "stripped_executable_bytes": stripped_bytes,
         "launches": launches,
         "median": {k: statistics.median(sample[k] for sample in launches) for k in launches[0]},
