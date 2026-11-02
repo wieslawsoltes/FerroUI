@@ -12,7 +12,7 @@ use ferroui_base::{
     interactivity::InteractiveImpl,
     layout::{Layoutable, LayoutableImpl, Orientation},
     media::ITransform,
-    reactive::{AnonymousObserver, IDisposable},
+    reactive::{AnonymousObserver, IDisposable, Subscription},
     BoxedValue, FerroObject, FerroObjectExtensions, FerroObjectImpl, FerroObjectImplExt,
     FerroProperty, FerroPropertyChangedEventArgs, Rect, Ref, StyledElementImpl, StyledProperty,
     Thickness, Vector, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs, WeakRef,
@@ -51,7 +51,7 @@ pub struct ToolTabStrip {
     border_right_fill: RefCell<Option<Ref<Border>>>,
     items_presenter: RefCell<Option<Ref<ItemsPresenter>>>,
     scroll_viewer: RefCell<Option<Ref<ScrollViewer>>>,
-    scroll_viewer_wheel_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    scroll_viewer_wheel_subscription: RefCell<Option<Subscription>>,
 }
 ferro_class!(ToolTabStrip:TabStrip);
 ferro_class_info!(ToolTabStrip {new:ToolTabStrip::new,markup:{attributes:[PseudoClasses(":create")]}});
@@ -324,13 +324,11 @@ impl ToolTabStrip {
         self.pseudo_classes().set(":create", value);
     }
     fn attach_scroll_viewer_wheel(&self, scroll: Option<&ScrollViewer>) {
-        let subscription = self.scroll_viewer_wheel_subscription.borrow().clone();
-        if let Some(subscription) = subscription {
-            subscription.dispose();
-        }
+        drop(self.scroll_viewer_wheel_subscription.take());
         let subscription =
             ScrollViewerMouseWheelHookHelper::attach(scroll, self.mouse_wheel_scroll_orientation());
-        self.scroll_viewer_wheel_subscription.replace(subscription);
+        self.scroll_viewer_wheel_subscription
+            .replace(subscription.map(Subscription::new));
     }
     fn clear_template_observables(&self) {
         let version = self.template_version.get();

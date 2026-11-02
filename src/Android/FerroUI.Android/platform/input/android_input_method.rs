@@ -9,7 +9,7 @@ use ferroui_base::input::text_input::{
     TextInputReturnKeyType, TextSelection,
 };
 use ferroui_base::input::InputScopeNameValue;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::Rect;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -89,7 +89,7 @@ pub(crate) struct AndroidInputMethod {
     client: RefCell<Option<Rc<dyn TextInputMethodClient>>>,
     input_connection: RefCell<Option<Rc<FerroInputConnection>>>,
     /// The three subscriptions to the events of the client.
-    client_events: RefCell<Vec<Rc<dyn IDisposable>>>,
+    client_events: RefCell<Vec<Subscription>>,
     // The state of a client of the exact-edit connection (R12 of
     // docs/porting/winui-rich-text.md, decision D5); unused for any other client.
     /// Advanced by every `set_client`.
@@ -503,12 +503,9 @@ impl ITextInputMethodImpl for AndroidInputMethod {
 
     fn set_client(&self, client: Option<Rc<dyn TextInputMethodClient>>) {
         self.client_generation.set(self.client_generation.get().wrapping_add(1));
-        drop(self.options_restart_connection.borrow_mut().take());
-        drop(self.delivered_editor_info.borrow_mut().take());
-        let subscriptions = std::mem::take(&mut *self.client_events.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(self.options_restart_connection.take());
+        drop(self.delivered_editor_info.take());
+        drop(self.client_events.take());
 
         *self.client.borrow_mut() = client;
 
@@ -533,9 +530,11 @@ impl ITextInputMethodImpl for AndroidInputMethod {
                 })
             };
             *self.client_events.borrow_mut() = vec![
-                client.surrounding_text_changed(handler(Self::client_surrounding_text_changed)),
-                client.selection_changed(handler(Self::client_selection_changed)),
-                client.input_pane_activation_requested(handler(Self::client_input_pane_activation_requested)),
+                Subscription::new(client.surrounding_text_changed(handler(Self::client_surrounding_text_changed))),
+                Subscription::new(client.selection_changed(handler(Self::client_selection_changed))),
+                Subscription::new(
+                    client.input_pane_activation_requested(handler(Self::client_input_pane_activation_requested)),
+                ),
             ];
         } else {
             self.host.restart_input();

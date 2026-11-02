@@ -33,7 +33,7 @@ mod observer_base;
 pub mod subjects;
 mod time_interval;
 
-pub use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
+pub use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError, SubscribeGuard, Subscription};
 pub use linq::{ConnectableObservableExt, Observable, ObservableExt, TaskObservableExt};
 pub use notification::{IObserverWithResult, Notification, NotificationKind};
 pub use observable_base::{ObservableBase, ObservableCore};

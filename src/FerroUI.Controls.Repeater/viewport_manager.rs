@@ -6,7 +6,7 @@ use ferroui_controls::as_scroll_anchor_provider;
 use ferroui_controls::presenters::ScrollContentPresenter;
 use ferroui_controls::{Control, ScrollViewer};
 use ferroui_base::layout::Layoutable;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{Matrix, Point, Rect, Ref, Size, Visual, WeakRef};
 use std::cell::{Cell, RefCell};
@@ -19,8 +19,8 @@ pub(crate) struct ViewportManager {
     visible: Cell<Rect>,
     native_viewport: Cell<Rect>,
     viewport_received: Cell<bool>,
-    viewport_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    transform_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    viewport_subscription: RefCell<Option<Subscription>>,
+    transform_subscription: RefCell<Option<Subscription>>,
     attached: Cell<bool>,
     last_realization: Cell<Rect>,
     extent: Cell<Rect>,
@@ -207,12 +207,9 @@ impl ViewportManager {
                         .on_effective_viewport_changed(&owner, args.effective_viewport());
                 }
             });
-            *self.viewport_subscription.borrow_mut() = Some(subscription.detach());
+            *self.viewport_subscription.borrow_mut() = Some(subscription);
         } else if !virtualizing {
-            let subscription = self.viewport_subscription.borrow_mut().take();
-            if let Some(subscription) = subscription {
-                subscription.dispose();
-            }
+            drop(self.viewport_subscription.take());
             self.viewport_received.set(false);
             self.visible.set(Rect::default());
             self.native_viewport.set(Rect::default());
@@ -472,10 +469,7 @@ impl ViewportManager {
     }
 
     pub fn on_render_transform_changed(&self, owner: &ItemsRepeater) {
-        let previous = self.transform_subscription.borrow_mut().take();
-        if let Some(previous) = previous {
-            previous.dispose();
-        }
+        drop(self.transform_subscription.take());
         if let Some(transform) = owner.render_transform() {
             if let Some(mutable) = transform.as_mutable_transform() {
                 let weak = owner.to_ref().downgrade();
@@ -484,7 +478,7 @@ impl ViewportManager {
                         owner.viewport_manager.refresh_viewport(&owner);
                     }
                 }));
-                *self.transform_subscription.borrow_mut() = Some(subscription);
+                *self.transform_subscription.borrow_mut() = Some(Subscription::new(subscription));
             }
         }
         self.refresh_viewport(owner);
@@ -534,19 +528,5 @@ impl ViewportManager {
     pub fn set_test_viewport(&self, viewport: Rect) {
         self.test_viewport.set(Some(viewport));
         self.visible.set(viewport);
-    }
-}
-
-impl Drop for ViewportManager {
-    fn drop(&mut self) {
-        for subscription in [
-            self.viewport_subscription.get_mut().take(),
-            self.transform_subscription.get_mut().take(),
-        ]
-        .into_iter()
-        .flatten()
-        {
-            subscription.dispose();
-        }
     }
 }

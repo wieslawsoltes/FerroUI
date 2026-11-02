@@ -13,7 +13,7 @@ use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::FlowDirection;
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::{IDisposable, Subscription};
+use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_property, instantiate, AttachedProperty,
@@ -90,7 +90,7 @@ pub struct TitleBar {
     is_compact: Cell<bool>,
     compact_mode_threshold_width: Cell<f64>,
     window: RefCell<Option<WeakRef<Window>>>,
-    window_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    window_subscriptions: RefCell<Vec<Subscription>>,
     /// The elements the bar marked as taking the input (their role is reset when the list changes).
     interactable: RefCell<Vec<WeakRef<Visual>>>,
     /// The title of the window before the bar set its own (WinUI's `m_defaultAppWindowTitle`).
@@ -550,7 +550,7 @@ impl TitleBar {
                 bar.update_padding();
             }
         });
-        self.window_subscriptions.borrow_mut().push(subscription);
+        self.window_subscriptions.borrow_mut().push(Subscription::new(subscription));
         self.update_padding();
         self.update_title();
         self.update_states();
@@ -558,9 +558,7 @@ impl TitleBar {
     }
 
     fn detach_from_window(&self) {
-        for subscription in self.window_subscriptions.borrow_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(self.window_subscriptions.take());
         if self.window().is_some() {
             self.reset_window_title(&self.title());
         }

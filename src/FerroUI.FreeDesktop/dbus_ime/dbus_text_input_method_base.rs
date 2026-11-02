@@ -18,7 +18,7 @@ use ferroui_base::input::raw::IRawInputEventArgs;
 use ferroui_base::input::text_input::{ITextInputMethodImpl, TextInputMethodClient, TextInputOptions};
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{PixelPoint, PixelRect, PixelVector, Rect};
 use ferroui_controls::Application;
@@ -92,7 +92,7 @@ pub trait DBusTextInputMethodCore {
 pub struct DBusTextInputMethodBase {
     weak_self: Weak<DBusTextInputMethodBase>,
     core: Rc<dyn DBusTextInputMethodCore>,
-    disposables: RefCell<Vec<Rc<dyn IDisposable>>>,
+    disposables: RefCell<Vec<Subscription>>,
     /// The names that came online, each with the unique name of the owner it came with.
     online_names_queue: RefCell<VecDeque<(String, String)>>,
     connection: Connection,
@@ -408,10 +408,7 @@ impl DBusTextInputMethodBase {
     }
 
     fn dispose_disposables(&self) {
-        let disposables = std::mem::take(&mut *self.disposables.borrow_mut());
-        for s in disposables {
-            s.dispose();
-        }
+        drop(self.disposables.take());
     }
 
     /// `Reset` of the reference: the part of the input method, then the
@@ -453,7 +450,7 @@ impl DBusTextInputMethodBase {
         if self.disposed.get() {
             d.dispose();
         } else {
-            self.disposables.borrow_mut().push(d);
+            self.disposables.borrow_mut().push(Subscription::new(d));
         }
     }
 

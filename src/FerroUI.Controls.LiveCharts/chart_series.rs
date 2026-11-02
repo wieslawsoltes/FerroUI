@@ -20,7 +20,7 @@ pub struct ChartSeries {
     base: FerroObject,
     entity_id: u64,
     values_listener: RefCell<Option<(ChartPoints, u64)>>,
-    point_listeners: RefCell<Vec<Rc<dyn IDisposable>>>,
+    point_listeners: RefCell<Vec<Subscription>>,
     brush_listeners: RefCell<Vec<Subscription>>,
     changed: HandlerList<dyn Fn()>,
 }
@@ -128,10 +128,7 @@ impl ChartSeries {
         if let Some((values, token)) = old {
             values.remove_collection_changed(token);
         }
-        let previous = std::mem::take(&mut *self.point_listeners.borrow_mut());
-        for listener in previous {
-            listener.dispose();
-        }
+        drop(self.point_listeners.take());
     }
     fn rebind_values(&self) {
         self.clear_values_listener();
@@ -147,11 +144,11 @@ impl ChartSeries {
         let mut listeners = Vec::new();
         for point in values.to_vec() {
             let weak = self.to_ref().downgrade();
-            listeners.push(point.property_changed(move |_| {
+            listeners.push(Subscription::new(point.property_changed(move |_| {
                 if let Some(this) = weak.upgrade() {
                     this.notify_changed();
                 }
-            }));
+            })));
         }
         *self.point_listeners.borrow_mut() = listeners;
     }
@@ -226,9 +223,7 @@ impl Drop for ChartSeries {
         if let Some((values, token)) = self.values_listener.get_mut().take() {
             values.remove_collection_changed(token);
         }
-        for listener in self.point_listeners.get_mut().drain(..) {
-            listener.dispose();
-        }
+        drop(std::mem::take(self.point_listeners.get_mut()));
         for listener in self.brush_listeners.get_mut().drain(..) {
             listener.dispose();
         }

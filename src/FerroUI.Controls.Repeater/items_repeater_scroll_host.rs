@@ -12,7 +12,7 @@ use ferroui_base::animation::{Animation, Cue, FillMode, IClock, IGlobalClock, Ke
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{Layoutable, LayoutableImpl};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::styling::Setter;
 use ferroui_base::threading::CancellationTokenSource;
 use ferroui_base::utilities::HandlerList;
@@ -136,8 +136,8 @@ pub struct ItemsRepeaterScrollHost {
     anchor: RefCell<Option<WeakRef<Control>>>,
     anchor_bounds: Cell<Option<Rect>>,
     anchor_dirty: Cell<bool>,
-    viewer_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    layout_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    viewer_subscription: RefCell<Option<Subscription>>,
+    layout_subscription: RefCell<Option<Subscription>>,
     pending_bring: RefCell<Option<BringIntoViewState>>,
     next_bring_id: Cell<u64>,
     animation: RefCell<Option<ScrollAnimation>>,
@@ -217,7 +217,7 @@ impl FerroObjectImpl for ItemsRepeaterScrollHost {
                 this.on_layout_updated();
             }
         });
-        *this.layout_subscription.borrow_mut() = Some(subscription.detach());
+        *this.layout_subscription.borrow_mut() = Some(subscription);
     }
 
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
@@ -539,10 +539,7 @@ impl ItemsRepeaterScrollHost {
             None
         };
         self.cancel_scroll_animation();
-        let previous = self.viewer_subscription.borrow_mut().take();
-        if let Some(previous) = previous {
-            previous.dispose();
-        }
+        drop(self.viewer_subscription.take());
         self.pending_bring.borrow_mut().take();
         self.candidates.borrow_mut().clear();
         *self.anchor.borrow_mut() = None;
@@ -579,7 +576,7 @@ impl ItemsRepeaterScrollHost {
                     this.raise_configuration_changed();
                 }
             });
-            *self.viewer_subscription.borrow_mut() = Some(subscription);
+            *self.viewer_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
         *self.pending_bring.borrow_mut() = initial_bring;
         self.raise_configuration_changed();
@@ -908,11 +905,7 @@ impl Drop for ItemsRepeaterScrollHost {
         if let Some(animation) = self.animation.get_mut().take() {
             animation.cancellation.cancel();
         }
-        if let Some(subscription) = self.viewer_subscription.get_mut().take() {
-            subscription.dispose();
-        }
-        if let Some(subscription) = self.layout_subscription.get_mut().take() {
-            subscription.dispose();
-        }
+        drop(self.viewer_subscription.get_mut().take());
+        drop(self.layout_subscription.get_mut().take());
     }
 }

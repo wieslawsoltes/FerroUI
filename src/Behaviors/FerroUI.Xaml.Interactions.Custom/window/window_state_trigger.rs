@@ -2,7 +2,7 @@
 
 use crate::{AttachedToVisualTreeTriggerBase, AttachedToVisualTreeTriggerBaseImpl};
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{IDisposable, ObservableExt, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, ElementRef, FerroObject,
@@ -22,7 +22,7 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct WindowStateTrigger {
     base: AttachedToVisualTreeTriggerBase,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(WindowStateTrigger: AttachedToVisualTreeTriggerBase);
@@ -77,7 +77,7 @@ ferroui_base::ferro_overrides! {
             let trigger = this.to_ref().downgrade();
             let window_object: &FerroObject = &window;
             let subscription = FerroObjectExtensions::get_observable(window_object, Window::window_state_property())
-                .subscribe_fn(move |state: WindowState| {
+                .subscribe_fn_guard(move |state: WindowState| {
                     if let Some(trigger) = trigger.upgrade() {
                         trigger.on_state_changed(state);
                     }
@@ -88,10 +88,7 @@ ferroui_base::ferro_overrides! {
             let trigger = this.to_ref().downgrade();
             DisposableAction::create(move || {
                 if let Some(trigger) = trigger.upgrade() {
-                    let subscription = trigger.subscription.borrow().clone();
-                    if let Some(subscription) = subscription {
-                        subscription.dispose();
-                    }
+                    drop(trigger.subscription.take());
                 }
             })
         }
