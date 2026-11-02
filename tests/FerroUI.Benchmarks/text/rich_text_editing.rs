@@ -5,7 +5,8 @@
 
 use crate::harness::Registry;
 use ferroui_base::{Ref, Size};
-use ferroui_controls::documents::{Paragraph, RichTextDocument};
+use ferroui_base::media::FontWeight;
+use ferroui_controls::documents::{CharacterFormat, Paragraph, RichTextDocument};
 use ferroui_controls::rich_text::{EditKind, EditorSelection, RichTextEditor};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::RichTextBlock;
@@ -19,6 +20,9 @@ pub struct RichTextEditing {
     editor: RichTextEditor,
     caret: Cell<usize>,
     length: usize,
+    /// The paragraph mark nearest after the middle of the document.
+    boundary: usize,
+    bold: Cell<bool>,
     _app: UnitTestApplicationScope,
 }
 
@@ -32,7 +36,18 @@ impl RichTextEditing {
         let document = view.rich_document();
         let editor = RichTextEditor::new(document.clone());
         let length = document.text_length();
-        let this = Self { view, document, editor, caret: Cell::new(length / 2), length, _app: app };
+        // The text is ASCII: byte offsets are UTF-16 offsets.
+        let boundary = document.text()[length / 2..].find('\n').map_or(length / 2, |index| length / 2 + index);
+        let this = Self {
+            view,
+            document,
+            editor,
+            caret: Cell::new(length / 2),
+            length,
+            boundary,
+            bold: Cell::new(false),
+            _app: app,
+        };
         this.layout();
         this
     }
@@ -59,7 +74,7 @@ impl RichTextEditing {
     }
 
     /// One paragraph break in the middle of the document, and its deletion on the next call:
-    /// structural edits that rebuild the document from a snapshot through its content pool.
+    /// structural edits, which rebuild the paragraphs they change (F1c).
     pub fn split_paragraph(&self) {
         let caret = self.caret.get();
         let _ = self.editor.set_selection(EditorSelection::caret(caret));
@@ -69,6 +84,32 @@ impl RichTextEditing {
         } else {
             self.editor.insert_text("\n", EditKind::Typing).unwrap();
             self.caret.set(caret + 1);
+        }
+        self.layout();
+    }
+
+    /// A character format of text across the paragraph mark in the middle of the document, bold
+    /// and normal on alternate calls: a format change of two paragraphs (F1c).
+    pub fn format_paragraphs(&self) {
+        let bold = !self.bold.get();
+        self.bold.set(bold);
+        let _ = self.editor.set_selection(EditorSelection::new(self.boundary - 10, self.boundary + 10));
+        let weight = if bold { FontWeight::Bold } else { FontWeight::Normal };
+        self.editor
+            .apply_format(&CharacterFormat { font_weight: Some(weight), ..CharacterFormat::default() })
+            .unwrap();
+        self.layout();
+    }
+
+    /// One paragraph break in the middle of the document, and its undo on the next call: the
+    /// undo restores the snapshot from before the break, rebuilding the paragraphs it changes
+    /// (F1c).
+    pub fn undo_paragraph_break(&self) {
+        if self.document.text_length() > self.length {
+            self.editor.undo().unwrap();
+        } else {
+            let _ = self.editor.set_selection(EditorSelection::caret(self.length / 2));
+            self.editor.insert_text("\n", EditKind::Typing).unwrap();
         }
         self.layout();
     }
@@ -100,7 +141,9 @@ pub fn register(registry: &mut Registry) {
         class.benchmark("type_character", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.type_character());
         class.benchmark("move_selection", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.move_selection());
         class.benchmark("update_ime_preview", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.update_ime_preview());
-        class.benchmark("split_paragraph", parameters, move || RichTextEditing::new(paragraphs), |b| b.split_paragraph());
+        class.benchmark("split_paragraph", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.split_paragraph());
+        class.benchmark("format_paragraphs", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.format_paragraphs());
+        class.benchmark("undo_paragraph_break", parameters, move || RichTextEditing::new(paragraphs), |b| b.undo_paragraph_break());
     }
 }
 
