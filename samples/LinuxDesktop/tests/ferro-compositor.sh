@@ -53,10 +53,10 @@ binary=$2; output=$3
 [[ -n ${SWAYSOCK:-} && -n ${XDG_RUNTIME_DIR:-} ]]
 scratch=$(mktemp -d "$XDG_RUNTIME_DIR/composition.XXXXXX")
 inner=ferro-composition-test
-shell= gtk= qt= child= keyboard= modifier= mouse=
+shell= gtk= gtk_second= qt= child= keyboard= modifier= mouse=
 cleanup() {
     if declare -F stop_gallery_probe >/dev/null; then stop_gallery_probe; fi
-    for pid in "$modifier" "$mouse" "$keyboard" "$child" "$qt" "$gtk" "$shell"; do
+    for pid in "$modifier" "$mouse" "$keyboard" "$child" "$gtk_second" "$qt" "$gtk" "$shell"; do
         [[ -z $pid ]] || kill "$pid" 2>/dev/null || :
     done
     wait || :
@@ -132,6 +132,28 @@ wait_for has_color 397abb
 wait_for has_color d76a3d
 shot clients
 gtk_swatch_pixels=$(pixels d76a3d count)
+# Open a second independent GTK client from the same application. Hover the
+# active taskbar group without focusing it and observe both live thumbnails.
+inner_client GDK_BACKEND=wayland /usr/bin/python3 "$here/composed-clients.py" gtk-secondary >"$output/gtk-second.log" 2>&1 & gtk_second=$!
+wait_for has_color 337757
+active_task() { capture && pixels active-task point >"$scratch/active-task"; }
+wait_for active_task
+read -r tx ty < "$scratch/active-task"
+pointer set "$tx" "$ty"
+task_cards() { capture && pixels d76a3d task-card && pixels "$1" task-card; }
+wait_for task_cards 337757
+kill -USR1 "$gtk_second"
+wait_for task_cards 9354ba
+shot taskbar-group
+# Choose the older orange window and prove that it receives keyboard input.
+read -r cx cy < <(pixels d76a3d task-point)
+click "$cx" "$cy"
+wtype -s 90 -k F8
+wait_for grep -qx 'received F8' "$output/gtk.log"
+kill "$gtk_second"; wait "$gtk_second" || :; gtk_second=
+pointer set 20 445
+wait_for has_color 9354ba absent
+echo "Verified grouped taskbar previews, live client repaint and selection of a specific native window."
 scene_is() { [[ $("$binary" --platform=wayland --current-scene 2>/dev/null) == "$1" ]]; }
 "$binary" --platform=wayland --show=workspaces
 wait_for scene_is workspaces

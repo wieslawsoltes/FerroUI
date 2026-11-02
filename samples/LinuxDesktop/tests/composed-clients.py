@@ -3,17 +3,18 @@
 import sys
 
 
-def gtk_client():
+def gtk_client(secondary=False):
     import gi
     gi.require_version("Gtk", "3.0")
     gi.require_version("Gdk", "3.0")
     import signal
     from gi.repository import Gdk, GLib, Gtk
 
-    window = Gtk.Window(title="Project notes")
+    title = "Release notes" if secondary else "Project notes"
+    window = Gtk.Window(title=title)
     window.set_default_size(630, 400)
     window.connect("destroy", Gtk.main_quit)
-    header = Gtk.HeaderBar(title="Project notes", subtitle="GTK 3")
+    header = Gtk.HeaderBar(title=title, subtitle="GTK 3")
     header.set_show_close_button(True)
     window.set_titlebar(header)
 
@@ -23,7 +24,7 @@ def gtk_client():
                             + "; color: white; padding: 16px;}").encode())
         return GLib.SOURCE_REMOVE
 
-    swatch("#d76a3d")
+    swatch("#337757" if secondary else "#d76a3d")
     # Update behind the overview without transferring keyboard focus to GTK.
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, swatch, "#9354ba")
     Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css,
@@ -42,6 +43,11 @@ def gtk_client():
     column.pack_start(style, False, False, 0)
     column.pack_start(Gtk.CheckButton(label="Track updates on this output"), False, False, 0)
     window.add(column)
+    def check_key(_window, event):
+        if event.keyval == Gdk.KEY_F8:
+            print("received F8", flush=True)
+        return False
+    window.connect("key-press-event", check_key)
     window.show_all()
     Gtk.main()
 
@@ -119,6 +125,19 @@ def probe(path, color, test):
         if test == "macos":
             return r > b + 35 and r > g + 30
         return test == "material" and g > r + 18 and g > b + 8
+    if color == "active-task":
+        # Locate the actual 16-DIP running indicator on the bottom taskbar.
+        for y in range(im.height - 4, im.height - 26, -1):
+            for x in range(im.width // 3, im.width * 2 // 3):
+                if all(im.getpixel((x + dx, y)) == (0, 95, 184) for dx in range(9)):
+                    print(x + 5, y - 14)
+                    return True
+        return False
+    offset = 0
+    if test in ("task-card", "task-point"):
+        # This band sits above the taskbar, below the independent client swatches.
+        offset = im.height - 230
+        im = im.crop((0, offset, im.width, im.height - 52))
     if color == "preview":
         # The independent clients have large flat-color swatches. Their scaled
         # colors must survive in the bright previews inside the centered Task
@@ -155,22 +174,22 @@ def probe(path, color, test):
         return count < 80
     if count < 500:
         return False
-    if test == "point":
+    if test in ("point", "task-point"):
         left, top, right, bottom = mask.getbbox()
         # Choose a real interior pixel at the right edge of the visible swatch,
         # even if another client partially covers its left half.
         for y in range(top + 3, bottom - 3, 2):
             for x in range(right - 6, left + 4, -2):
                 if mask.getpixel((x, y)) and mask.getpixel((x - 3, y)):
-                    print(x, y)
+                    print(x, y + offset)
                     return True
         return False
     return True
 
 
 if __name__ == "__main__":
-    if sys.argv[1] == "gtk":
-        gtk_client()
+    if sys.argv[1] in ("gtk", "gtk-secondary"):
+        gtk_client(sys.argv[1] == "gtk-secondary")
     elif sys.argv[1] == "qt":
         qt_client()
     else:
