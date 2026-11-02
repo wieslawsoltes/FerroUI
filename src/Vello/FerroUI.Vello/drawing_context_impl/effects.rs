@@ -82,7 +82,8 @@ impl DrawingContextImpl {
         }
 
         // A custom effect (#455) has no factory in this backend yet: its
-        // content is drawn unchanged, in a layer without a filter.
+        // content is drawn unchanged, in a layer without a filter. A runtime
+        // shader effect (E4) too, until its WGSL program is drawn (E5).
         if let Some(custom) = effect.as_custom_effect() {
             custom.report_unhandled("Vello");
         }
