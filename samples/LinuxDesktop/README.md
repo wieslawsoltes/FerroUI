@@ -6,7 +6,7 @@ The **FerroUI compositor** can also host applications on its own Wayland display
 
 ## Screenshots
 
-**Task View on the FerroUI compositor.** The Qt and GTK cards are live views of their Wayland surface trees. Select a preview to activate its window. The card’s More menu exposes window and workspace commands.
+**Task View on the FerroUI compositor.** The Qt and GTK cards are live views of their Wayland surface trees. Select a preview to activate its window. The card’s More button exposes window and workspace commands.
 
 ![Ferro Desktop Task View showing two live client previews](screenshots/compositor-live-overview.webp)
 
