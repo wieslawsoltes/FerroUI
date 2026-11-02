@@ -1977,15 +1977,17 @@ fn replacement_paragraphs(
     let spans_paragraphs = paragraphs.len() > 1;
     let prefix = slice_inlines(&first.inlines, 0..offsets.start);
     let mut suffix = slice_inlines(&last.inlines, offsets.end..last.text_length());
-    if spans_paragraphs && first.format.character != last.format.character {
-        suffix = wrap_with_format(suffix, &last.format.character);
-    }
     let mut inserted = if fragment.paragraphs.is_empty() {
         vec![ParagraphSnapshot::default()]
     } else {
         fragment.paragraphs.clone()
     };
-    if inserted.len() == 1 {
+    let inserted_last = inserted.len() - 1;
+    let single = inserted.len() == 1;
+    if spans_paragraphs && first.format.character != last.format.character {
+        suffix = wrap_with_format(suffix, &last.format.character);
+    }
+    if single {
         let mut middle = wrap_with_format(
             std::mem::take(&mut inserted[0].inlines),
             &inserted[0].format.character,
@@ -2003,7 +2005,6 @@ fn replacement_paragraphs(
         inserted[0].inlines = prefix;
         inserted[0].inlines.append(&mut middle);
         inserted[0].format = first.format.clone();
-        let inserted_last = inserted.len() - 1;
         inserted[inserted_last].inlines.append(&mut suffix);
     }
     if alignment_source == ParagraphAlignmentSource::Trailing && spans_paragraphs {
@@ -2014,7 +2015,51 @@ fn replacement_paragraphs(
             paragraph.format.text_alignment = last.format.text_alignment;
         }
     }
+    // A replacement of text carries its format in an empty run, and a break leaves one at the
+    // end of the first part and at the start of the second; a merge kept the second part's and
+    // added its own, so every break and merge of a paragraph added inlines to it (#439). Where
+    // the parts meet, the empty inlines are reduced to the one that finding an element or a run
+    // at that offset gives (`collapse_empty_inlines`).
+    for paragraph in &mut inserted {
+        paragraph.inlines = collapse_empty_inlines(std::mem::take(&mut paragraph.inlines));
+    }
     inserted
+}
+
+/// Whether an inline holds nothing: a run without text, or a span (bold, italic, underline, a
+/// hyperlink that projects no link field) that holds only such inlines.
+fn is_empty_inline(inline: &InlineSnapshot) -> bool {
+    match &inline.kind {
+        InlineSnapshotKind::Run(text) => text.is_empty(),
+        InlineSnapshotKind::Span(children)
+        | InlineSnapshotKind::Bold(children)
+        | InlineSnapshotKind::Italic(children)
+        | InlineSnapshotKind::Underline(children)
+        | InlineSnapshotKind::Hyperlink {
+            inlines: children,
+            field_id: None,
+            ..
+        } => children.iter().all(is_empty_inline),
+        _ => false,
+    }
+}
+
+/// `inlines` with each group of consecutive inlines that hold nothing (`is_empty_inline`)
+/// reduced to its first, and the last inline kept: the others are never what an element or a
+/// run at an offset resolves to (an empty inline is found only as the first at its offset with
+/// nothing before it, or as the last inline), so the change is not visible to typing, formats
+/// or gravity.
+fn collapse_empty_inlines(inlines: Vec<InlineSnapshot>) -> Vec<InlineSnapshot> {
+    let empty: Vec<bool> = inlines.iter().map(is_empty_inline).collect();
+    let count = inlines.len();
+    inlines
+        .into_iter()
+        .enumerate()
+        .filter(|(index, _)| {
+            !empty[*index] || *index == 0 || !empty[*index - 1] || *index + 1 == count
+        })
+        .map(|(_, inline)| inline)
+        .collect()
 }
 
 /// Whether a character format of `range` changes the paragraph at `offset` of `length` units:

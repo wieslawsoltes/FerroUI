@@ -445,3 +445,61 @@ fn a_paragraph_break_and_its_undo_restore_the_document_and_selection() {
     assert_eq!(document.snapshot(), after);
     assert_eq!(editor.selection(), EditorSelection::caret(5));
 }
+
+#[test]
+fn breaks_and_merges_of_a_paragraph_keep_its_inlines_and_inheritance_children_bounded() {
+    // #439: every break and merge of a paragraph added empty runs to it (the run a replacement
+    // carries its format in, and the one each part kept), so its inlines, and the inheritance
+    // children of the paragraph that each removal and addition walks, grew with every edit.
+    let _scope = test_scope();
+    let view = crate::RichTextBlock::new();
+    for text in ["first paragraph", "second paragraph", "third paragraph"] {
+        view.blocks().add(Paragraph::with_text(text));
+    }
+    let document = view.rich_document();
+    let editor = RichTextEditor::new(document.clone());
+    let text = document.text();
+    // "first paragraph\nsecond| paragraph\nthird paragraph", as the editing benchmark does.
+    let cycle = || {
+        editor.set_selection(EditorSelection::caret(22)).unwrap();
+        assert!(editor.insert_text("\n", EditKind::Typing).unwrap());
+        assert!(editor.delete_backward(false).unwrap());
+    };
+    cycle();
+    let settled = document.snapshot();
+    for _ in 0..200 {
+        cycle();
+        assert_eq!(document.text(), text);
+    }
+    assert_eq!(
+        document.snapshot(),
+        settled,
+        "a break and its merge come back to one image"
+    );
+    let paragraphs = document.paragraphs();
+    assert_eq!(paragraphs.len(), 3);
+    for paragraph in &paragraphs {
+        let inlines = paragraph.inlines().count();
+        assert!(inlines <= 3, "{inlines} inlines");
+        let entries = paragraph.inheritance_child_entries();
+        assert!(
+            entries <= 2 * inlines + 2,
+            "{entries} inheritance children of {inlines} inlines"
+        );
+    }
+    let entries = view.inheritance_child_entries();
+    assert!(entries <= 16, "{entries} inheritance children of the view");
+    // The same through the path before F1c, which shares how the paragraphs are made.
+    let reference = RichTextDocument::from_text(&text);
+    reference.set_full_rebuild(true);
+    let editor = RichTextEditor::new(reference.clone());
+    for _ in 0..200 {
+        editor.set_selection(EditorSelection::caret(22)).unwrap();
+        editor.insert_text("\n", EditKind::Typing).unwrap();
+        editor.delete_backward(false).unwrap();
+    }
+    for paragraph in reference.paragraphs() {
+        assert!(paragraph.inlines().count() <= 3);
+        assert!(paragraph.inheritance_child_entries() <= 8);
+    }
+}
