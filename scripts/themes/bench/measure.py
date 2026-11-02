@@ -9,6 +9,7 @@ the executable with warmed dependencies. Times are wall clock seconds.
 python3 scripts/themes/bench/measure.py --work-dir /tmp/winui-before --source ../baseline
 python3 scripts/themes/bench/measure.py --work-dir /tmp/winui-after
 python3 scripts/themes/bench/measure.py --work-dir /tmp/winui-binary --binary
+python3 scripts/themes/bench/measure.py --work-dir /tmp/winui-packed --packed
 """
 import argparse
 import hashlib
@@ -97,7 +98,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=HERE.parents[2])
     parser.add_argument("--work-dir", type=Path, required=True, help="dedicated directory for the consumer, target and results")
-    parser.add_argument("--binary", action="store_true", help="enable the theme's binary-resources feature")
+    backend = parser.add_mutually_exclusive_group()
+    backend.add_argument("--packed", action="store_true", help="embed the complete FXP theme archive")
+    backend.add_argument("--binary", action="store_true", help="enable the theme's binary-resources feature")
     parser.add_argument("--rebuilds", type=int, default=1, help="number of dependency-warm theme rebuilds, zero to measure the initial build only")
     parser.add_argument("--launches", type=positive_int, default=15, help="number of measured, fresh-process launches")
     parser.add_argument("--compare-with", type=Path, action="append", default=[],
@@ -131,7 +134,8 @@ def main():
     # The standalone shipping-dependency consumer uses Cargo's release profile at
     # opt-level 3, without cross-crate LTO. Stripping is a separate measured copy.
     env = {**os.environ, "CARGO_TARGET_DIR": str(target), "CARGO_INCREMENTAL": "0", "CARGO_PROFILE_RELEASE_LTO": "false"}
-    cargo_args = ["--features", THEME + "/binary-resources"] if args.binary else []
+    feature = "packed-theme" if args.packed else "binary-resources" if args.binary else None
+    cargo_args = ["--features", f"{THEME}/{feature}"] if feature else []
     first_build, messages = build(cargo_args, package, env)
     initial_units = cargo_timings(target)
     rebuilds = []
@@ -144,7 +148,9 @@ def main():
     out = Path(next(m["out_dir"] for m in messages if m["reason"] == "build-script-executed" and m["package_id"] == artifact["package_id"]))
     executable = Path(next(m["executable"] for m in messages if m.get("executable") and m["target"]["name"] == PROBE))
     generated = out / "xaml"
-    source_bytes = (generated / "compiled_xaml.rs").read_bytes()
+    # Packed mode exports the same entry points from a handwritten adapter and emits no
+    # per-document Rust module. Count its small generated registration module separately.
+    source_bytes = b"" if args.packed else (generated / "compiled_xaml.rs").read_bytes()
     # Earlier feature/root combinations can have left other blocks in OUT_DIR.
     # Only files included by this compiled consumer contribute to its payload.
     referenced = set(re.findall(rb'include_bytes!\("([a-zA-Z0-9_-]+\.fxb)"\)', source_bytes))
@@ -164,6 +170,8 @@ def main():
         "source_dirty": bool(command_output(["git", "status", "--porcelain", "--untracked-files=no"], source)),
         "rustc": command_output(["rustc", "-vV"]), "cargo": command_output(["cargo", "-V"]),
         "platform": platform.platform(), "jobs": env.get("CARGO_BUILD_JOBS", "cargo default"),
+        "packed_theme": args.packed, "fxp_bytes": (out / "winui.fxp").stat().st_size if args.packed else 0,
+        "generated_registration_rust_bytes": (generated / "mod.rs").stat().st_size,
         "binary_resources": args.binary, "resource_roots": env.get("FERROUI_WINUI_THEME_ROOTS"),
         "profile": "release, LTO off, incremental off", "initial_target_empty": target_was_empty,
         "initial_build_seconds": first_build, "theme_rebuild_seconds": rebuilds,
