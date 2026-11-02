@@ -4088,6 +4088,52 @@ fn build_control_theme_template_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+#[inline(never)]
+fn __build_style_selectors_xaml_selector_shape_0(arg0: &'static ::ferroui_base::TypeInfo, arg1: &str, arg2: &str) -> ::ferroui_base::styling::Selector {
+    let selector = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, arg0);
+    let selector = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector), arg1);
+    let selector = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector), arg2);
+    selector
+}
+
+#[inline(never)]
+fn __build_style_selectors_xaml_selector_shape_1(arg0: &str, arg1: &'static ::ferroui_base::TypeInfo) -> ::ferroui_base::styling::Selector {
+    let selector = ::ferroui_base::styling::Selectors::name(::core::option::Option::None, arg0);
+    let selector = ::ferroui_base::styling::Selectors::child(::core::option::Option::Some(selector));
+    let selector = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector), arg1);
+    selector
+}
+
+#[inline(never)]
+fn __build_style_selectors_xaml_selector_shape_2(arg0: &'static ::ferroui_base::TypeInfo, arg1: &'static ::ferroui_base::TypeInfo) -> ::ferroui_base::styling::Selector {
+    let selector = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, arg0);
+    let selector = ::ferroui_base::styling::Selectors::descendant(::core::option::Option::Some(selector));
+    let selector = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector), arg1);
+    selector
+}
+
+#[inline(never)]
+fn __build_style_selectors_xaml_selector_shape_3(arg0: &'static ::ferroui_base::TypeInfo, arg1: &'static ::ferroui_base::TypeInfo) -> ::ferroui_base::styling::Selector {
+    let selector = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, arg0);
+    let selector = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector));
+    let selector = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector), arg1);
+    selector
+}
+
+#[inline(never)]
+fn __build_style_selectors_xaml_selector_shape_4(arg0: &'static ::ferroui_base::TypeInfo, arg1: i32, arg2: i32) -> ::ferroui_base::styling::Selector {
+    let selector = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, arg0);
+    let selector = ::ferroui_base::styling::Selectors::nth_child(::core::option::Option::Some(selector), arg1, arg2);
+    selector
+}
+
+#[inline(never)]
+fn __build_style_selectors_xaml_selector_shape_5(arg0: &'static ::ferroui_base::TypeInfo, arg1: &str) -> ::ferroui_base::styling::Selector {
+    let selector = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, arg0);
+    let selector = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector), arg1);
+    selector
+}
+
 /// The base URI and the XML namespaces of `style_selectors.xaml`.
 static BUILD_STYLE_SELECTORS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/style_selectors.xaml"), namespaces: XML_NAMESPACES_0 };
 
@@ -4108,10 +4154,8 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,127) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     // style_selectors.xaml(1,127) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
-    let selector_1 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_0), "primary");
-    let selector_2 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_1), ":pointerover");
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_2.clone()));
+    let selector_0 = __build_style_selectors_xaml_selector_shape_0(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE, "primary", ":pointerover");
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_0.clone()));
     // style_selectors.xaml(1,172) Content
     rt::add_setter(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.5_f64));
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 1, 127)?), 1, 127)?;
@@ -4120,10 +4164,8 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,220) Style
     let style_1 = ::ferroui_base::styling::Style::new();
     // style_selectors.xaml(1,220) Selector
-    let selector_3 = ::ferroui_base::styling::Selectors::name(::core::option::Option::None, "Root");
-    let selector_4 = ::ferroui_base::styling::Selectors::child(::core::option::Option::Some(selector_3));
-    let selector_5 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_4), <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_5.clone()));
+    let selector_1 = __build_style_selectors_xaml_selector_shape_1("Root", <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_1.clone()));
     // style_selectors.xaml(1,256) Content
     rt::add_setter(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.5_f64));
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_1, rt::cast(style_1.clone(), 1, 220)?), 1, 220)?;
@@ -4132,10 +4174,8 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,304) Style
     let style_2 = ::ferroui_base::styling::Style::new();
     // style_selectors.xaml(1,304) Selector
-    let selector_6 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE);
-    let selector_7 = ::ferroui_base::styling::Selectors::descendant(::core::option::Option::Some(selector_6));
-    let selector_8 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_7), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_8.clone()));
+    let selector_2 = __build_style_selectors_xaml_selector_shape_2(<::ferroui_controls::StackPanel as ::ferroui_base::StaticType>::TYPE, <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_2.clone()));
     // style_selectors.xaml(1,340) Content
     rt::add_setter(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.5_f64));
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_2, rt::cast(style_2.clone(), 1, 304)?), 1, 304)?;
@@ -4144,10 +4184,8 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,388) Style
     let style_3 = ::ferroui_base::styling::Style::new();
     // style_selectors.xaml(1,388) Selector
-    let selector_9 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE);
-    let selector_10 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_9));
-    let selector_11 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_10), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_11.clone()));
+    let selector_3 = __build_style_selectors_xaml_selector_shape_3(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE, <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_3.clone()));
     // style_selectors.xaml(1,441) Content
     rt::add_setter(style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.5_f64));
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_3, rt::cast(style_3.clone(), 1, 388)?), 1, 388)?;
@@ -4156,10 +4194,10 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,489) Style
     let style_4 = ::ferroui_base::styling::Style::new();
     // style_selectors.xaml(1,489) Selector
-    let selector_12 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
-    let selector_13 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, "muted");
-    let selector_14 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_12), selector_13);
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_14.clone()));
+    let selector_4 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
+    let selector_5 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, "muted");
+    let selector_6 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_4), selector_5);
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_6.clone()));
     // style_selectors.xaml(1,529) Content
     rt::add_setter(style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.5_f64));
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_4, rt::cast(style_4.clone(), 1, 489)?), 1, 489)?;
@@ -4168,9 +4206,8 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,577) Style
     let style_5 = ::ferroui_base::styling::Style::new();
     // style_selectors.xaml(1,577) Selector
-    let selector_15 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE);
-    let selector_16 = ::ferroui_base::styling::Selectors::nth_child(::core::option::Option::Some(selector_15), 2, 1);
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_16.clone()));
+    let selector_7 = __build_style_selectors_xaml_selector_shape_4(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE, 2, 1);
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_7.clone()));
     // style_selectors.xaml(1,623) Content
     rt::add_setter(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.5_f64));
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_5, rt::cast(style_5.clone(), 1, 577)?), 1, 577)?;
@@ -4179,9 +4216,9 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,671) Style
     let style_6 = ::ferroui_base::styling::Style::new();
     // style_selectors.xaml(1,671) Selector
-    let selector_17 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
-    let selector_18 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_17), rt::property(::ferroui_base::Visual::is_visible_property()), ::std::rc::Rc::new(::core::clone::Clone::clone(&true)));
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_6, ::core::option::Option::Some(selector_18.clone()));
+    let selector_8 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
+    let selector_9 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_8), rt::property(::ferroui_base::Visual::is_visible_property()), ::std::rc::Rc::new(::core::clone::Clone::clone(&true)));
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_6, ::core::option::Option::Some(selector_9.clone()));
     // style_selectors.xaml(1,715) Content
     rt::add_setter(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.5_f64));
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_6, rt::cast(style_6.clone(), 1, 671)?), 1, 671)?;
@@ -4190,9 +4227,9 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,763) Style
     let style_7 = ::ferroui_base::styling::Style::new();
     // style_selectors.xaml(1,763) Selector
-    let selector_19 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
-    let selector_20 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_19), rt::property(::ferroui_controls::Grid::row_property()), ::std::rc::Rc::new(1_i32));
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_7, ::core::option::Option::Some(selector_20.clone()));
+    let selector_10 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    let selector_11 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_10), rt::property(::ferroui_controls::Grid::row_property()), ::std::rc::Rc::new(1_i32));
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_7, ::core::option::Option::Some(selector_11.clone()));
     // style_selectors.xaml(1,802) Content
     rt::add_setter(style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.5_f64));
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_7, rt::cast(style_7.clone(), 1, 763)?), 1, 763)?;
@@ -4201,11 +4238,10 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,850) Style
     let style_8 = ::ferroui_base::styling::Style::new();
     // style_selectors.xaml(1,850) Selector
-    let selector_21 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
-    let selector_22 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
-    let selector_23 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_22), "card");
-    let selector_24 = ::ferroui_base::styling::Selectors::or([selector_21, selector_23]);
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_8, ::core::option::Option::Some(selector_24.clone()));
+    let selector_12 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
+    let selector_13 = __build_style_selectors_xaml_selector_shape_5(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE, "card");
+    let selector_14 = ::ferroui_base::styling::Selectors::or([selector_12, selector_13]);
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_8, ::core::option::Option::Some(selector_14.clone()));
     // style_selectors.xaml(1,891) Content
     rt::add_setter(style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.5_f64));
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_8, rt::cast(style_8.clone(), 1, 850)?), 1, 850)?;
@@ -4214,8 +4250,8 @@ pub fn build_style_selectors_xaml(
     // style_selectors.xaml(1,939) Style
     let style_9 = ::ferroui_base::styling::Style::new();
     // style_selectors.xaml(1,939) Selector
-    let selector_25 = ::ferroui_base::styling::Selectors::is_type_info(::core::option::Option::None, <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE);
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_9, ::core::option::Option::Some(selector_25.clone()));
+    let selector_15 = ::ferroui_base::styling::Selectors::is_type_info(::core::option::Option::None, <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE);
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_9, ::core::option::Option::Some(selector_15.clone()));
     // style_selectors.xaml(1,970) Content
     rt::add_setter(style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.5_f64));
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_9, rt::cast(style_9.clone(), 1, 939)?), 1, 939)?;
@@ -4229,6 +4265,21 @@ fn build_style_selectors_xaml_untyped(
 ) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_style_selectors_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+#[inline(never)]
+fn __build_style_nested_xaml_selector_shape_0(arg0: &str) -> ::ferroui_base::styling::Selector {
+    let selector = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector), arg0);
+    selector
+}
+
+#[inline(never)]
+fn __build_style_nested_xaml_selector_shape_1(arg0: &'static ::ferroui_base::TypeInfo) -> ::ferroui_base::styling::Selector {
+    let selector = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector));
+    let selector = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector), arg0);
+    selector
 }
 
 /// The base URI and the XML namespaces of `style_nested.xaml`.
@@ -4256,23 +4307,20 @@ pub fn build_style_nested_xaml(
     // style_nested.xaml(1,181) Style
     let style_1 = ::ferroui_base::styling::Style::new();
     // style_nested.xaml(1,181) Selector
-    let selector_1 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
-    let selector_2 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_1), ":pressed");
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_2.clone()));
+    let selector_1 = __build_style_nested_xaml_selector_shape_0(":pressed");
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_1.clone()));
     // style_nested.xaml(1,209) Content
     rt::add_setter(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.75_f64));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 1, 181)?);
+    rt::style_program::attach(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &style_1, 1, 181)?;
     // style_nested.xaml(1,258) Content
     // style_nested.xaml(1,258) Style
     let style_2 = ::ferroui_base::styling::Style::new();
     // style_nested.xaml(1,258) Selector
-    let selector_3 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
-    let selector_4 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_3));
-    let selector_5 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_4), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_5.clone()));
+    let selector_2 = __build_style_nested_xaml_selector_shape_1(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_2.clone()));
     // style_nested.xaml(1,306) Content
     rt::add_setter(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::margin_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 1, 258)?);
+    rt::style_program::attach(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &style_2, 1, 258)?;
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 1, 115)?), 1, 115)?;
     rt::invoked(border_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
@@ -4284,6 +4332,13 @@ fn build_style_nested_xaml_untyped(
 ) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
     let root = build_style_nested_xaml(service_provider)?;
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+#[inline(never)]
+fn __build_style_resources_xaml_selector_shape_0(arg0: &'static ::ferroui_base::TypeInfo, arg1: &str) -> ::ferroui_base::styling::Selector {
+    let selector = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, arg0);
+    let selector = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector), arg1);
+    selector
 }
 
 /// The base URI and the XML namespaces of `style_resources.xaml`.
@@ -4309,9 +4364,8 @@ pub fn build_style_resources_xaml(
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
     // style_resources.xaml(1,198) Selector
-    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
-    let selector_1 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_0), "accent");
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_1.clone()));
+    let selector_0 = __build_style_resources_xaml_selector_shape_0(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE, "accent");
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_0.clone()));
     // style_resources.xaml(1,230) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // style_resources.xaml(1,259) Value
@@ -5397,7 +5451,7 @@ pub fn build_container_query_xaml(
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_0.clone()));
     // container_query.xaml(5,10) Content
     rt::add_setter(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.5_f64));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(container_query_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 4, 8)?);
+    rt::style_program::attach(container_query_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &style_0, 4, 8)?;
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(container_query_0.clone(), 3, 6)?), 3, 6)?;
     // container_query.xaml(8,6) Styles
     let styles_collection_1 = ::ferroui_base::StyledElement::__markup_get_Styles(stack_panel_0.upcast_ref::<::ferroui_base::StyledElement>());
@@ -5420,7 +5474,7 @@ pub fn build_container_query_xaml(
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_1.clone()));
     // container_query.xaml(10,10) Content
     rt::add_setter(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.25_f64));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(container_query_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 9, 8)?);
+    rt::style_program::attach(container_query_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &style_1, 9, 8)?;
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_1, rt::cast(container_query_1.clone(), 8, 6)?), 8, 6)?;
     // container_query.xaml(13,6) Styles
     let styles_collection_2 = ::ferroui_base::StyledElement::__markup_get_Styles(stack_panel_0.upcast_ref::<::ferroui_base::StyledElement>());
@@ -5441,7 +5495,7 @@ pub fn build_container_query_xaml(
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_2.clone()));
     // container_query.xaml(15,10) Content
     rt::add_setter(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.75_f64));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(container_query_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 14, 8)?);
+    rt::style_program::attach(container_query_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &style_2, 14, 8)?;
     rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_2, rt::cast(container_query_2.clone(), 13, 6)?), 13, 6)?;
     // container_query.xaml(19,4) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
