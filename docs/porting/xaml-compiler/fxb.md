@@ -1,4 +1,4 @@
-# FXB v1 compiled resource blocks
+# FXB compiled resource blocks
 
 The XAML compiler groups dictionary operations into contiguous typed runs. FXB carries deferred aliases and brushes, immediate colors, doubles, thicknesses and corner radii, and calls to typed deferred builders. A builder import can construct a template with its own name scope, a custom object, or a subtree containing arbitrary supported markup extensions. The builder body remains compiled Rust. Other operations follow the ordinary emitter. A dictionary observes the original evaluation order, lazy construction and declaration namespace scope.
 
@@ -12,14 +12,17 @@ Portable whole-document FXD images preserve the parsed XamlX syntax graph for ru
 
 | Field in order | Representation |
 | --- | --- |
-| Signature and version | Four octets `46 58 42 00`, then major version `01` |
+| Signature and version | Four octets `46 58 42 00`, then version `01` or `02` |
 | Factory kind | One octet. Values 1–4 identify aliases, literal brushes, dynamic brushes and static-resource brushes. 5 imports a deferred builder. 6–9 insert a color, double, thickness or corner radius respectively |
+| Location flags (v2 only) | One byte declaring which source fields can be reconstructed after the first row |
 | String count, record count | Two unsigned 32-bit canonical LEB128 integers |
 | Strings, sorted by UTF-8 bytes | For each string, previous-string common-prefix length in bytes, suffix length in bytes, and suffix bytes. Prefixes end at UTF-8 scalar boundaries |
 | Dictionary key | Index into the string table, zero-based |
 | Value operand | Text operands use a string index. Colors and literal brushes use a little-endian ARGB word. Builder imports use an unsigned LEB128 slot. A double uses one numeric component, thickness and corner radius use four components in constructor order |
 | Source location | Declaration line and column, then ZigZag-encoded deltas for the value line and column relative to the declaration |
 | Remaining records | Repeat key, operand and location in XAML insertion order |
+
+The first row always stores four source fields. In v2, bits 0 through 3 omit, respectively, the declaration line, declaration column, ZigZag value-line delta and ZigZag value-column delta on subsequent rows. Each omitted field repeats its prior encoded value. Bit 4 changes the omitted declaration line to the preceding line plus one and requires bit 0. At least one of bits 0–3 must be set and bits 5–7 must be zero. Readers check the reconstructed absolute coordinates on every row. The encoder chooses v2 only when every prediction holds and removing fields saves more than the flag byte. Irregular blocks and singleton runs can still use v1.
 
 A numeric component from −32 through 222 uses a single byte containing the integer plus 32. Every other value uses byte 255 followed by the eight little-endian IEEE-754 bits. This preserves negative zero, subnormals, infinities and NaN payloads. Counts, indices and source locations use canonical unsigned LEB128. Absolute and reconstructed source positions fit a nonnegative `i32`. Blocks and expanded string pools are limited to 16 MiB each, with at most 1,048,576 records and 1,048,576 strings. Unknown versions and kinds, noncanonical or overflowing integers, invalid references, invalid UTF-8, invalid lengths and trailing bytes fail validation before registration begins.
 
