@@ -3,7 +3,7 @@
 //! session advertises the service; a windowed preview never competes for it.
 mod model;
 
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_freedesktop::{ui_thread_object::UiThreadHandle, DBusCallQueue};
 pub(crate) use model::Notice;
@@ -23,13 +23,7 @@ const SIGNAL_BATCH_LIMIT: usize = 128;
 
 struct Alarm {
     deadline: Instant,
-    cancel: Rc<dyn IDisposable>,
-}
-
-impl Drop for Alarm {
-    fn drop(&mut self) {
-        self.cancel.dispose();
-    }
+    _timer: Subscription,
 }
 
 pub(crate) struct Service {
@@ -255,7 +249,10 @@ impl Service {
                     deadline.saturating_duration_since(Instant::now()),
                     DispatcherPriority::NORMAL,
                 );
-                self.timer.replace(Some(Alarm { deadline, cancel }));
+                self.timer.replace(Some(Alarm {
+                    deadline,
+                    _timer: cancel,
+                }));
             }
         }
         (self.changed)();
