@@ -542,7 +542,7 @@ impl Animation {
         clock: Option<Rc<dyn IClock>>,
         cancellation_token: CancellationToken,
     ) -> AnimationTask {
-        if cancellation_token.is_cancellation_requested() {
+        if cancellation_token.is_cancelled() {
             return AnimationTask::completed();
         }
 
@@ -588,7 +588,7 @@ impl Animation {
         *subscriptions.borrow_mut() = Some(applied);
 
         let registration = register_local(&cancellation_token, move || finish());
-        if !run.is_completed() || !cancellation_token.is_cancellation_requested() {
+        if !run.is_completed() || !cancellation_token.is_cancelled() {
             *cancellation.borrow_mut() = Some(registration);
         }
 

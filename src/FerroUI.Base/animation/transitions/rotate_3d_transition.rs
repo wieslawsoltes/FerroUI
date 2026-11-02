@@ -171,7 +171,7 @@ impl IPageTransition for Rotate3DTransition {
         let to = to.cloned();
 
         start_async(async move {
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 
@@ -238,7 +238,7 @@ impl IPageTransition for Rotate3DTransition {
 
             when_all(tasks).await;
 
-            if !cancellation_token.is_cancellation_requested() {
+            if !cancellation_token.is_cancelled() {
                 if let Some(to) = &to {
                     to.set_z_index(2);
                 }

@@ -148,7 +148,7 @@ impl IPageTransition for PageSlide {
         let to = to.cloned();
 
         start_async(async move {
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 
@@ -185,7 +185,7 @@ impl IPageTransition for PageSlide {
 
             when_all(tasks).await;
 
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 
