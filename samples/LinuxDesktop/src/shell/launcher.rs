@@ -173,7 +173,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
             // Keep the themed presenter, editing commands, caret and IME host.
             let scope = args.name_scope();
             if let Some(chrome) = scope.find_as::<ferroui_controls::Border>("BorderElement") {
-                chrome.set_background(None);
+                chrome.set_background(Some(ferroui_base::media::Brushes::transparent()));
                 chrome.set_border_thickness(ferroui_base::Thickness::uniform(0.0));
             }
             if let Some(ring) = scope.find_as::<ferroui_controls::Border>("MacOSPointerFocusRing") {
