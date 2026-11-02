@@ -2,7 +2,35 @@
 
 The largest identified family in the complete editable WinUI executable is the dependency-property implementation. A property value can use one generic type parameter in the source and still generate multiple functions for each Rust value type in the linked application. The CLR can share generic machine code across reference-type instantiations. Rust ordinarily monomorphizes each reachable concrete instantiation, including distinct handle types such as `Ref<Button>` and `Ref<Border>`. Inlining and linker folding can subsequently share or eliminate some of that output. [CLR generic code sharing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/generics-in-the-run-time) · [rustc monomorphization](https://rustc-dev-guide.rust-lang.org/backend/monomorph.html)
 
-## Linked instructions
+## What changed in the linked executable at `71d44ae8`
+
+The same full editable workload was linked with safe ICF, RELR and panic unwinding at both revisions. Each byte of machine code is assigned once. The unwind columns sum frame records and their eight-byte search-index entries. A frame beginning at an aliased address is attributed to a shared category when ownership is ambiguous. The separate landing-pad table can share records across several functions, so the raw report identifies storage spans separately.
+
+| Symbol family | Previous machine code (B) | Current machine code (B) | Previous frame and index (B) | Current frame and index (B) |
+|---|---:|---:|---:|---:|
+| Property registration, stores and observers | 7,227,223 | 6,710,733 | 1,880,964 | 1,786,444 |
+| Bindings, reactive operators and events | 1,540,735 | 1,544,111 | 320,992 | 322,072 |
+| Generated native XAML functions | 2,462,821 | 2,379,871 | 257,568 | 256,420 |
+| Reflection and value conversion | 998,815 | 918,429 | 365,512 | 407,828 |
+| Class projection, initialization and virtual dispatch | 631,795 | 594,637 | 200,684 | 182,624 |
+| Compiler-generated destruction | 1,466,900 | 1,477,858 | 657,940 | 660,376 |
+| Callable entries and trait shims | 1,300,064 | 1,170,556 | 656,000 | 599,692 |
+
+The reflection and conversion functions occupy 80,386 fewer machine-code bytes, while their attributed frame and search-index bytes increase by 42,316. Compiler-generated destruction grows by 10,958 machine-code bytes. The property family alone loses 516,490 machine-code bytes and 94,520 frame and index bytes. Categories reflect outer linked symbols, so inlining and cross-category folding can move costs between rows.
+
+The property implementation shared disposal, state changes and notification scheduling across concrete value types. Its private dispatch table fell from 20 slots to 8. Typed value and comparison operations remain in their original type. The existing property route now creates missing entries, and coercion metadata directly owns the registered callback. In a separate full Base registry fixture, changing only the dispatch implementation saved 203,064 ordinary ELF bytes and 148,888 compact ELF bytes. The mixed read/write CPU median was nearly unchanged in this isolated test, while style installation, read and disposal took 4.1% longer. [Effective values](../src/FerroUI.Base/property_store/effective_value.rs) · [Value store](../src/FerroUI.Base/property_store/value_store.rs)
+
+Conversion registration shares the normal conversion, assignability and borrowed-object routes whenever they refer to the same operation. Captured user conversions keep their ownership and independent replacement semantics. Nullable facts now share one record. Primitive pair conversion shares a checked operation between ordinary and nullable destinations. A 38-control-class fixture plus FerroObject registered in 38.31 µs versus 77.85 µs, with 17 allocations versus 349. Boxed lookup rose from 43.22 to 44.20 ns while borrowed lookup fell from 41.67 to 39.57 ns. All 4,872 differential numeric records matched, including exact types and floating-point bits. [Value conversion registry](../src/FerroUI.Base/data/core/value_type.rs)
+
+Inherited virtual slots share a whole prefix when the generated override declarations prove it is unchanged. Each class still owns its table and most-derived type. Unspecified handwritten overrides take the existing builder. Repeated constant template assignments share a typed routine local to each XAML document, after resource pruning. In the full WinUI source 1,466 assignments share 88 routines. A Button-rooted generation retained 19. The 131-document compiler corpus checked generated code and position maps. [Class construction](../src/FerroUI.Base/type_system.rs) · [Template assignment lowering](../src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/template_values.rs)
+
+Plain-property binding metadata now asks for typed accessors lazily. The previous link had 377 distinct hook bodies that always declined the typed projection, alongside 145 supported bodies. The builder still evaluates the name expression once, preserves observable notification and captured conversion behavior, and uses the original untyped path for unsupported properties. On 78 rejected paths the allocation count fell from 78 to zero. A separate fixture including real two-way bindings fell by 82,304 executable bytes. [Typed binding metadata](../src/FerroUI.Base/metadata/typed_path.rs)
+
+The largest remaining property definitions include `set_and_raise_core_with_base` (292,254 bytes across 260 physical ranges), `set_and_raise_core` (252,453 across 267), and `MetadataTable::unregister` (208,530 across 330). A next experiment can share priority and notification decisions before calling typed leaves for value comparison, coercion and storage. Reentrant style disposal, validation order and typed reads are part of the comparison. An application link would measure what fraction of those bodies can be shared.
+
+[Measurements and complete ELF section breakdown](compiled-theme-performance.md) · [Raw machine-code families, frame ownership and startup samples](benchmarks/compiled-theme-property-reflection-linux-x86_64.json)
+
+## Earlier linked instructions at `58b32389`
 
 The columns below are physical bytes in the Linux x86-64 `.text` section of a full, unrooted WinUI consumer. Each column partitions instructions into mutually exclusive symbol categories. The raw file also lists the other framework implementations, standard-library functions, shared aliases and unlabelled text. Read-only tables, ELF relocations, unwind records and exception data have their own accounting in the executable report. [Executable sections and startup](compiled-theme-performance.md)
 

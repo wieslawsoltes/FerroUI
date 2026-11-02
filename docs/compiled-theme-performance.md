@@ -2,7 +2,69 @@
 
 The native Rust backend uses XamlX to resolve types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
 
-## Whole-executable deduplication
+## Complete WinUI after sharing property, reflection and template code
+
+The measured production revision is `71d44ae8`. The editable executable includes every WinUI theme resource, the typed compiled path, the external FXP reader and the fallback for structural edits. Process readiness means completion of the first deferred Button theme lookup in a fresh process. These are stripped ELF files for x86-64 GNU/Linux.
+
+| Full-theme configuration | Ordinary ELF bytes | Compact ELF bytes | Compact startup median / p95 (ms) | Generated Rust bytes | XAML build script (s) | Theme rustc unit (s) |
+|---|---:|---:|---:|---:|---:|---:|
+| Main `df3e12ad` | 54,577,848 | 44,441,808 | 15.10 / 21.37 | 14,421,918 | 29.20 | 76.37 |
+| Previous editable `58b32389` | 47,817,336 | 37,920,960 | 11.30 / 16.77 | 5,074,619 | 13.97 | 26.60 |
+| Native Rust | 42,660,296 | 33,930,112 | 9.53 / 12.99 | 5,534,757 | 16.80 | 33.92 |
+| Typed FXB | 42,286,936 | 33,838,616 | 11.07 / 14.24 | 4,921,299 | 10.16 | 21.27 |
+| Editable FXP | 45,249,656 | 36,361,272 | 11.55 / 15.53 | 4,921,299 | 12.45 | 28.69 |
+| Editable with FXU enabled | 45,297,760 | 36,405,016 | 11.14 / 15.62 | 4,921,299 | 13.14 | 22.07 |
+
+The compact link uses address-significant safe identical-code folding and RELR. It retains PIE, unwinding and ordinary Rust panic cleanup. Its distribution configuration targets glibc 2.36 or newer. The ordinary link uses the same application objects and supports the earlier loader baseline.
+
+| Editable ELF component | Previous compact | Current compact | Reduction |
+|---|---:|---:|---:|
+| Entire executable | 37,920,960 | 36,361,272 | 1,559,688 |
+| Machine code | 25,852,453 | 24,790,325 | 1,062,128 |
+| Read-only constants | 1,724,595 | 1,724,771 | -176 |
+| Relocatable read-only data | 2,088,520 | 1,881,784 | 206,736 |
+| Global offset table | 544,688 | 512,064 | 32,624 |
+| Frame descriptions | 5,617,076 | 5,409,724 | 207,352 |
+| Frame search index | 948,044 | 907,468 | 40,576 |
+| Exception landing-pad tables | 893,696 | 887,196 | 6,500 |
+| Combined unwind and exception data | 7,458,816 | 7,204,388 | 254,428 |
+| RELA and RELR dynamic relocations | 44,312 | 40,512 | 3,800 |
+| Frame description count | 118,504 | 113,432 | 5,072 |
+
+All section sizes in the table are file bytes. At the ordinary link, the previous PR baseline at `0257f6b6` used 5,796,456 bytes for dynamic relocations. The current source brings the ordinary table down to 5,208,144 bytes. The compact linker policy brings that to 40,512 bytes.
+
+The compact image contains 190,891 relative pointer fixups, down from 210,952. RELR encodes these using 4,758 eight-byte words. The dynamic relocation byte totals exclude a separate 48-byte PLT table. Counts by source section and pointed-to function are included in the raw report.
+
+Two further compiler invocations per revision, pinned to the same two CPUs in main/candidate/candidate/main order, took 75.37 s on main and 27.89 s on the current editable theme. This isolates compiling generated WinUI Rust with prebuilt dependencies. The table gives the separately observed build script and compiler units. Neither measurement includes a cold workspace or native application link.
+
+The startup table uses 41 rotating launches per configuration. With executable pages evicted and residency checked, the editable compact median was 32.60 ms versus 39.27 ms on main. The preceding compact build reached Button in 11.30 ms warm and 29.07 ms with pages evicted, compared with 11.55 and 32.60 ms on the current build. Warm p95 improved from 16.77 to 15.53 ms. A leaf FXP edit reached Button in 16.36 ms. A 751-byte FXU changed merged and compact-density values in 11.86 ms. Delivering edits to a merged dictionary through a complete replacement FXP used the fallback and took 1.78 s. Headless readiness excludes window creation and first paint.
+
+All 894 FXB images are byte-identical to the preceding generator and total 180,091 bytes. The complete reloadable FXP is 296,347 bytes. The compatibility suite checked existing version 1, 2 and 3 FXP images, a structural edit, a matching archive, and a revision-bound FXU. The native and binary inventory covered 7,599 entries. [Machine-code and unwind attribution](ported-runtime-code-size.md) · [Raw samples, ELF sections, toolchain, allocations and checks](benchmarks/compiled-theme-property-reflection-linux-x86_64.json)
+
+### Explicit resource roots
+
+A separate typed-FXB application requested Button plus the compact-density styles its constructor requires. The same public constructor resolved the deferred Button control theme and verified its target type. Under compact linking the executable fell from 33,838,616 to 31,067,568 bytes. Ordinary links were 42,286,936 and 39,340,704 bytes. Generated Rust fell from 4,921,299 to 701,051 bytes, referenced FXB blocks from 894 to 137, and embedded FXB bytes from 180,091 to 25,912. The theme compiler unit took 21.27 and 4.03 s. Three unrelated theme style keys were absent from the rooted executable. Across 41 interleaved launches after builds completed, compact median / p95 fell from 10.68 / 13.21 ms to 6.42 / 8.92 ms. This mode serves the declared resource graph and its dependencies. Applications that accept arbitrary runtime resource names can use the full theme figures above.
+
+### Compiler outlining experiment
+
+The same final application and dependency bitcode were recompiled with LLVM 23 machine outlining enabled at two benefit thresholds. These trial executables also used safe ICF and RELR and passed embedded, external leaf and modified merged-resource checks.
+
+| Final code generation | ELF bytes | Machine code bytes | Combined unwind bytes | Frame count | Startup median / p95 (ms) |
+|---|---:|---:|---:|---:|
+| Shipping | 36,361,272 | 24,790,325 | 7,204,388 | 113,432 | 11.55 / 15.53 |
+| outline-48 | 34,517,560 | 22,484,453 | 7,623,760 | 116,912 | 11.36 / 15.44 |
+| outline-192 | 35,251,520 | 23,323,637 | 7,493,044 | 115,711 | 10.98 / 19.00 |
+
+Threshold 48 removes repeated machine instructions and creates additional callable fragments. Its smaller executable has 419,372 more unwind and exception bytes than the shipping compact image. These LLVM implementation flags are recorded as experiments. The shipping figures above use the checked-in compact profile.
+
+The experiment added the following options to the final application rustc invocation. The recorded compiler was rustc 1.99.0 with LLVM 23.1.1.
+
+```text
+-Cllvm-args=--enable-machine-outliner=always
+-Cllvm-args=--outliner-benefit-threshold=48
+```
+
+## Earlier whole-executable measurement at `58b32389`
 
 The complete editable WinUI consumer embeds all 169 XAML documents and retains the external FXP loader. It constructs the theme in a fresh process and resolves a deferred, typed Button control theme. These measurements include Base, Controls, Dialogs, XAML runtime, interpreter and theme. Window creation, rendering and first paint are outside the probe.
 
