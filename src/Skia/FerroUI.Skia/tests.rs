@@ -1970,6 +1970,48 @@ mod effects_and_brushes {
         assert_eq!(TRANSPARENT, target.pixel(39, 50));
     }
 
+    /// A custom effect without a factory in this backend (#455, E1) draws
+    /// its content unchanged, and the backend reports it once.
+    #[test]
+    fn custom_effect_without_a_factory_draws_unchanged() {
+        use ferroui_base::media::effects::{CustomEffect, EffectParameterValue, ImmutableCustomEffect};
+
+        #[derive(Clone, Debug, Default, PartialEq)]
+        struct Unhandled {
+            amount: f64,
+        }
+
+        impl CustomEffect for Unhandled {
+            const NAME: &'static str = "skia-test-unhandled";
+
+            fn for_each_parameter(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+                f("amount", self.amount.into());
+            }
+
+            fn set_parameter(&mut self, name: &str, value: EffectParameterValue) -> bool {
+                match name {
+                    "amount" => value.as_float().map(|amount| self.amount = amount).is_some(),
+                    _ => false,
+                }
+            }
+        }
+
+        let effect = ImmutableCustomEffect::new(Unhandled { amount: 0.5 });
+        let target = Target::new();
+        draw(&target, |context| {
+            context.push_effect(Some(Rect::new(0.0, 0.0, 100.0, 100.0)), &effect);
+            red_square(context, 40.0);
+            context.pop_effect();
+        });
+
+        assert_eq!(RED, target.pixel(40, 50));
+        assert_eq!(RED, target.pixel(59, 59));
+        assert_eq!(TRANSPARENT, target.pixel(39, 50));
+        assert_eq!(TRANSPARENT, target.pixel(60, 50));
+        // Drawing reported the effect; another report is not logged again.
+        assert!(!effect.report_unhandled("Skia"));
+    }
+
     #[test]
     fn effect_with_clip_rect_draws_through_a_bounded_layer() {
         let target = Target::new();
