@@ -171,7 +171,7 @@ fn public_text_edit_observation_is_disposable_and_its_handle_is_weak() {
     let subscription = peer.text_edit_text_changed(move |event| {
         assert_eq!(event.change_type, TextEditChangeType::Composition);
         observed.set(observed.get() + 1);
-    });
+    }).detach();
     peer.raise_text_edit_text_changed_event(TextEditChangeType::None, vec!["ignored".into()]);
     assert!(sink.events.borrow().is_empty());
     assert_eq!(count.get(), 0);
@@ -235,7 +235,7 @@ fn public_text_edit_observers_can_rewire_and_dispose_during_delivery() {
             TextEditChangeType::CompositionFinalized,
             Vec::new(),
         );
-    }));
+    }).detach());
     peer.raise_text_edit_text_changed_event(TextEditChangeType::Composition, Vec::new());
     peer.raise_text_edit_text_changed_event(TextEditChangeType::Composition, Vec::new());
     assert_eq!(count.get(), 1);

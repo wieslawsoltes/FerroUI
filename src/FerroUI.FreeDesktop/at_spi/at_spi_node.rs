@@ -316,13 +316,13 @@ impl AtSpiNode {
             if let Some(node) = weak.upgrade() {
                 node.on_peer_children_changed();
             }
-        });
+        }).detach();
         let weak = self.weak_self.clone();
         let property_changed = self.peer.property_changed(move |e| {
             if let Some(node) = weak.upgrade() {
                 node.on_peer_property_changed(e);
             }
-        });
+        }).detach();
         *self.peer_subscriptions.borrow_mut() = vec![children_changed, property_changed];
 
         if let Some(connection) = self.server().and_then(|server| server.a11y_connection()) {

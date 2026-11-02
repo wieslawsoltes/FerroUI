@@ -4,7 +4,7 @@ use crate::{MenuItem, MenuItemToggleType, NativeMenu, NativeMenuItemBase};
 use ferroui_base::input::{ICommand, KeyGesture};
 use ferroui_base::media::imaging::IBitmap;
 use ferroui_base::utilities::WeakEvents;
-use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObject,
@@ -286,14 +286,17 @@ impl NativeMenuItem {
     }
 
     /// Occurs when a [`NativeMenuItem`] is clicked.
-    pub fn click(&self, handler: impl Fn(&NativeMenuItem) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the item.
+    pub fn click(&self, handler: impl Fn(&NativeMenuItem) + 'static) -> Subscription {
         let token = self.click.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.click.remove(token);
             }
-        })
+        }))
     }
 
     /// The item viewed as the contract through which the platform

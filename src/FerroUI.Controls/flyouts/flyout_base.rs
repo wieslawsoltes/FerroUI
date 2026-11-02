@@ -1,6 +1,6 @@
 use crate::Control;
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_property, AttachedProperty, DirectProperty, ElementRef, FerroObject, FerroObjectImpl,
@@ -103,16 +103,16 @@ impl FlyoutBase {
         })
     }
 
-    /// Raised when the flyout is opened. Disposing the returned handle
-    /// unsubscribes.
-    pub fn opened(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe(|flyout| &flyout.opened, Rc::new(handler))
+    /// Raised when the flyout is opened. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the flyout.
+    pub fn opened(&self, handler: impl Fn() + 'static) -> Subscription {
+        Subscription::new(self.subscribe(|flyout| &flyout.opened, Rc::new(handler)))
     }
 
-    /// Raised when the flyout is closed. Disposing the returned handle
-    /// unsubscribes.
-    pub fn closed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe(|flyout| &flyout.closed, Rc::new(handler))
+    /// Raised when the flyout is closed. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the flyout.
+    pub fn closed(&self, handler: impl Fn() + 'static) -> Subscription {
+        Subscription::new(self.subscribe(|flyout| &flyout.closed, Rc::new(handler)))
     }
 
     /// Whether this flyout is currently open.

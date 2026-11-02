@@ -801,7 +801,7 @@ impl ferroui_controls::application_lifetimes::IControlledApplicationLifetime
         &self,
         handler:Rc<dyn Fn(&ferroui_controls::application_lifetimes::ControlledApplicationLifetimeStartupEventArgs)>,
     ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
-        self.inner.startup(move |e| handler(e))
+        self.inner.startup(move |e| handler(e)).detach()
     }
     fn exit(
         &self,
@@ -849,7 +849,7 @@ impl ferroui_controls::application_lifetimes::IClassicDesktopStyleApplicationLif
         &self,
         handler: Rc<dyn Fn(&ferroui_controls::application_lifetimes::ShutdownRequestedEventArgs)>,
     ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
-        self.inner.shutdown_requested(move |e| handler(e))
+        self.inner.shutdown_requested(move |e| handler(e)).detach()
     }
 }
 

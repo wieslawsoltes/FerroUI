@@ -105,7 +105,7 @@ impl DesignerWorkspace {
             if let Some(editor) = weak_editor.upgrade() {
                 editor.retire();
             }
-        });
+        }).detach();
         *self.property_transfer.editor.borrow_mut() = Some(editor);
         *self.property_transfer.flyout.borrow_mut() = Some(flyout.clone());
         let anchor = self.root.get_control::<Button>("PropertyTransferOptions");

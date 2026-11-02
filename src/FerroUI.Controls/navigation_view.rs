@@ -24,7 +24,7 @@ use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::media::FlowDirection;
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::HandlerList;
@@ -691,105 +691,115 @@ impl NavigationView {
         self.set_value(Self::menu_item_container_style_property(), value);
     }
 
-    /// Adds a handler of `SelectionChanged`; the disposable removes it.
-    pub fn selection_changed(&self, handler: impl Fn(&NavigationViewSelectionChangedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `SelectionChanged`. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the view.
+    pub fn selection_changed(&self, handler: impl Fn(&NavigationViewSelectionChangedEventArgs) + 'static) -> Subscription {
         let token = self.selection_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.selection_changed.remove(token);
             }
-        })
+        }))
     }
-    /// Adds a handler of `ItemInvoked`; the disposable removes it.
-    pub fn item_invoked(&self, handler: impl Fn(&NavigationViewItemInvokedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `ItemInvoked`. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the view.
+    pub fn item_invoked(&self, handler: impl Fn(&NavigationViewItemInvokedEventArgs) + 'static) -> Subscription {
         let token = self.item_invoked.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.item_invoked.remove(token);
             }
-        })
+        }))
     }
-    /// Adds a handler of `DisplayModeChanged`; the disposable removes it.
-    pub fn display_mode_changed(&self, handler: impl Fn(&NavigationViewDisplayModeChangedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `DisplayModeChanged`. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the view.
+    pub fn display_mode_changed(&self, handler: impl Fn(&NavigationViewDisplayModeChangedEventArgs) + 'static) -> Subscription {
         let token = self.display_mode_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.display_mode_changed.remove(token);
             }
-        })
+        }))
     }
-    /// Adds a handler of `BackRequested`; the disposable removes it.
-    pub fn back_requested(&self, handler: impl Fn(&NavigationViewBackRequestedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `BackRequested`. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the view.
+    pub fn back_requested(&self, handler: impl Fn(&NavigationViewBackRequestedEventArgs) + 'static) -> Subscription {
         let token = self.back_requested.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.back_requested.remove(token);
             }
-        })
+        }))
     }
-    /// Adds a handler of `PaneClosing`; the disposable removes it.
-    pub fn pane_closing(&self, handler: impl Fn(&NavigationViewPaneClosingEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `PaneClosing`. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the view.
+    pub fn pane_closing(&self, handler: impl Fn(&NavigationViewPaneClosingEventArgs) + 'static) -> Subscription {
         let token = self.pane_closing.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.pane_closing.remove(token);
             }
-        })
+        }))
     }
-    /// Adds a handler of `Expanding`; the disposable removes it.
-    pub fn expanding(&self, handler: impl Fn(&NavigationViewItemExpandingEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `Expanding`. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the view.
+    pub fn expanding(&self, handler: impl Fn(&NavigationViewItemExpandingEventArgs) + 'static) -> Subscription {
         let token = self.expanding.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.expanding.remove(token);
             }
-        })
+        }))
     }
-    /// Adds a handler of `Collapsed`; the disposable removes it.
-    pub fn collapsed(&self, handler: impl Fn(&NavigationViewItemCollapsedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `Collapsed`. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the view.
+    pub fn collapsed(&self, handler: impl Fn(&NavigationViewItemCollapsedEventArgs) + 'static) -> Subscription {
         let token = self.collapsed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.collapsed.remove(token);
             }
-        })
+        }))
     }
-    /// Adds a handler of `PaneOpening`; the disposable removes it.
-    pub fn pane_opening(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `PaneOpening`. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the view.
+    pub fn pane_opening(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.pane_opening.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.pane_opening.remove(token);
             }
-        })
+        }))
     }
-    /// Adds a handler of `PaneOpened`; the disposable removes it.
-    pub fn pane_opened(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `PaneOpened`. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the view.
+    pub fn pane_opened(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.pane_opened.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.pane_opened.remove(token);
             }
-        })
+        }))
     }
-    /// Adds a handler of `PaneClosed`; the disposable removes it.
-    pub fn pane_closed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `PaneClosed`. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the view.
+    pub fn pane_closed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.pane_closed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.pane_closed.remove(token);
             }
-        })
+        }))
     }
 }
 

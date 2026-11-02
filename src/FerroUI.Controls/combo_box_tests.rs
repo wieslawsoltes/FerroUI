@@ -1336,9 +1336,9 @@ fn opening_and_closing_the_popup_raises_drop_down_events() {
     let opened = Rc::new(Cell::new(0));
     let closed = Rc::new(Cell::new(0));
     let counter = opened.clone();
-    target.drop_down_opened(move || counter.set(counter.get() + 1));
+    target.drop_down_opened(move || counter.set(counter.get() + 1)).detach();
     let counter = closed.clone();
-    target.drop_down_closed(move || counter.set(counter.get() + 1));
+    target.drop_down_closed(move || counter.set(counter.get() + 1)).detach();
 
     let _window = show_window(&target);
 

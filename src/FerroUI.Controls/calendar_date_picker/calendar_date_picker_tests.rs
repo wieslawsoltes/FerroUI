@@ -103,10 +103,10 @@ fn selected_date_changed_should_fire_when_selected_date_set() {
 
     let handled = Rc::new(Cell::new(false));
     let date_picker = create_control();
-    let _subscription = date_picker.selected_date_changed({
+    date_picker.selected_date_changed({
         let handled = handled.clone();
         move |_| handled.set(true)
-    });
+    }).detach();
     let value = DateTime::new(2000, 10, 10);
     date_picker.set_selected_date(Some(value));
     Dispatcher::ui_thread().run_jobs(None);
@@ -642,19 +642,20 @@ mod additional {
     fn errors_of(date_picker: &CalendarDatePicker) -> Rc<RefCell<Vec<(String, String)>>> {
         let errors = Rc::new(RefCell::new(Vec::new()));
         // The date picker keeps the handler for as long as it lives.
-        let _ = date_picker.date_validation_error({
+        date_picker.date_validation_error({
             let errors = errors.clone();
             move |e| errors.borrow_mut().push((e.text().to_string(), e.exception().to_string()))
-        });
+        }).detach();
         errors
     }
 
-    fn counter(subscribe: impl FnOnce(Box<dyn Fn()>) -> Rc<dyn ferroui_base::reactive::IDisposable>) -> Rc<Cell<i32>> {
+    fn counter(subscribe: impl FnOnce(Box<dyn Fn()>) -> ferroui_base::reactive::Subscription) -> Rc<Cell<i32>> {
         let count = Rc::new(Cell::new(0));
-        let _ = subscribe(Box::new({
+        subscribe(Box::new({
             let count = count.clone();
             move || count.set(count.get() + 1)
-        }));
+        }))
+        .detach();
         count
     }
 
@@ -932,20 +933,20 @@ mod additional {
         // A date that cannot be selected.
         let date_picker = create_control();
         date_picker.blackout_dates().unwrap().add(CalendarDateRange::new(date(2024, 2, 6)));
-        let _subscription = date_picker.date_validation_error(|e| e.set_throw_exception(true));
+        date_picker.date_validation_error(|e| e.set_throw_exception(true)).detach();
         let message = panic_message(|| commit(&date_picker, "2/6/2024"));
         assert_eq!("SelectedDate value is not valid. (Parameter 'text')", message);
 
         // A text that is not a date: the error of the parser.
         let date_picker = create_control();
         let error = Rc::new(RefCell::new(String::new()));
-        let _subscription = date_picker.date_validation_error({
+        date_picker.date_validation_error({
             let error = error.clone();
             move |e| {
                 *error.borrow_mut() = e.exception().to_string();
                 e.set_throw_exception(true);
             }
-        });
+        }).detach();
         let message = panic_message(|| commit(&date_picker, "not a date"));
         assert!(!message.is_empty());
         assert_eq!(*error.borrow(), message);

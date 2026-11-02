@@ -620,14 +620,14 @@ impl BrowserAccessibility {
                 this.structure_dirty.borrow_mut().insert(key);
                 this.request();
             }
-        });
+        }).detach();
         let weak = self.this.clone();
         let property_changed = peer.property_changed(move |_| {
             if let Some(this) = weak.upgrade() {
                 this.attributes_dirty.borrow_mut().insert(key);
                 this.request();
             }
-        });
+        }).detach();
         self.nodes.borrow_mut().insert(
             key,
             Node {
@@ -656,7 +656,7 @@ impl BrowserAccessibility {
                     this.structure_dirty.borrow_mut().insert(key);
                     this.request();
                 }
-            });
+            }).detach();
             self.nodes.borrow_mut().insert(
                 key,
                 Node {

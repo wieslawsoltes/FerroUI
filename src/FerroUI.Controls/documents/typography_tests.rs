@@ -629,7 +629,7 @@ fn typography_inherited_presentation_invalidates_layout_preserving_model_and_com
     let composition = control.editor().active_composition_range();
     let changed = Rc::new(Cell::new(0));
     let count = changed.clone();
-    let _subscription = document.changed(move |_| count.set(count.get() + 1));
+    document.changed(move |_| count.set(count.get() + 1)).detach();
     let presenter = control.text_presenter();
     presenter.measure(Size::new(400.0, 300.0));
     presenter.arrange(Rect::new(0.0, 0.0, 400.0, 300.0));

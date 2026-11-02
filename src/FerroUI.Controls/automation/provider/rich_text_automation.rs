@@ -478,7 +478,7 @@ impl<T: RichTextAutomationPeer> ITextProvider for ProviderAdapter<T> {
         let owner = context.host.control()?;
         let document_subscription = Rc::new(SerialDisposable::new());
         let callback = handler.clone();
-        document_subscription.set(Some(view.rich_document().changed(move |_| callback())));
+        document_subscription.set(Some(view.rich_document().changed(move |_| callback()).detach()));
         let current = document_subscription.clone();
         let host = context.host;
         let property_subscription = owner.property_changed(move |event| {
@@ -491,7 +491,7 @@ impl<T: RichTextAutomationPeer> ITextProvider for ProviderAdapter<T> {
             if event.property() == document_property {
                 if let Ok(view) = host.view() {
                     let callback = handler.clone();
-                    current.set(Some(view.rich_document().changed(move |_| callback())));
+                    current.set(Some(view.rich_document().changed(move |_| callback()).detach()));
                     handler();
                 }
             }

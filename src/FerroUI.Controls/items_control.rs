@@ -22,7 +22,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::logical_tree::{ChildIndexChangedEventArgs, IChildIndexProvider};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -563,28 +563,34 @@ impl ItemsControl {
     ///
     /// The prepared element might be newly created or an existing container
     /// that is being re-used.
-    pub fn preparing_container(&self, handler: impl Fn(&ContainerPreparedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the control.
+    pub fn preparing_container(&self, handler: impl Fn(&ContainerPreparedEventArgs) + 'static) -> Subscription {
         let token = self.preparing_container.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.preparing_container.remove(token);
             }
-        })
+        }))
     }
 
     /// Occurs each time a container is prepared for use.
     ///
     /// The prepared element might be newly created or an existing container
     /// that is being re-used.
-    pub fn container_prepared(&self, handler: impl Fn(&ContainerPreparedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the control.
+    pub fn container_prepared(&self, handler: impl Fn(&ContainerPreparedEventArgs) + 'static) -> Subscription {
         let token = self.container_prepared.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.container_prepared.remove(token);
             }
-        })
+        }))
     }
 
     /// Occurs for each realized container when the index for the item it
@@ -594,17 +600,20 @@ impl ItemsControl {
     /// the item it represents has changed. For example, when another item
     /// is added or removed in the data source, the index for items that
     /// come after in the ordering will be impacted.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the control.
     pub fn container_index_changed(
         &self,
         handler: impl Fn(&ContainerIndexChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.container_index_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.container_index_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Occurs each time a container is cleared.
@@ -612,14 +621,17 @@ impl ItemsControl {
     /// This event is raised immediately each time an container is cleared,
     /// such as when it falls outside the range of realized items or the
     /// corresponding item is removed.
-    pub fn container_clearing(&self, handler: impl Fn(&ContainerClearingEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the control.
+    pub fn container_clearing(&self, handler: impl Fn(&ContainerClearingEventArgs) + 'static) -> Subscription {
         let token = self.container_clearing.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.container_clearing.remove(token);
             }
-        })
+        }))
     }
 
     /// Gets a default recycle key that can be used when an [`ItemsControl`]

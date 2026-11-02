@@ -222,7 +222,7 @@ fn selected_time_changed_should_fire_when_selected_time_set() {
     let handled = Rc::new(Cell::new(false));
     let time_picker = TimePicker::new();
     let flag = handled.clone();
-    time_picker.selected_time_changed(move |_| flag.set(true));
+    time_picker.selected_time_changed(move |_| flag.set(true)).detach();
     let value = TimeSpan::from_hours(10.0);
     time_picker.set_selected_time(Some(value));
     Dispatcher::ui_thread().run_jobs(None);
@@ -416,7 +416,7 @@ fn selected_time_enable_data_validation() {
         }
 
         flag.set(true);
-    });
+    }).detach();
 
     // time is less than
     let exception =
@@ -655,7 +655,7 @@ fn window_popup_accept_updates_selected_time_and_closes() {
     let target = WindowTarget::show(selected);
     let changes = Rc::new(Cell::new(0));
     let counter = changes.clone();
-    target.time_picker.selected_time_changed(move |_| counter.set(counter.get() + 1));
+    target.time_picker.selected_time_changed(move |_| counter.set(counter.get() + 1)).detach();
 
     assert!(!target.popup.is_open());
     assert!(target.popup.host().is_none());
@@ -708,7 +708,7 @@ fn window_popup_dismiss_leaves_selected_time_unchanged() {
     let target = WindowTarget::show(selected);
     let changes = Rc::new(Cell::new(0));
     let counter = changes.clone();
-    target.time_picker.selected_time_changed(move |_| counter.set(counter.get() + 1));
+    target.time_picker.selected_time_changed(move |_| counter.set(counter.get() + 1)).detach();
 
     target.flyout_button.perform_click();
     Dispatcher::ui_thread().run_jobs(None);

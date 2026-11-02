@@ -94,7 +94,7 @@ impl FerroObjectImpl for SelectableTextBlock {
                         this.on_text_or_inlines_changed();
                     }
                 });
-                *this.inlines_invalidated.borrow_mut() = Some(Subscription::new(subscription));
+                *this.inlines_invalidated.borrow_mut() = Some(subscription);
             }
 
             this.on_text_or_inlines_changed();

@@ -695,7 +695,7 @@ fn rich_automation_hyperlinks_have_stable_identity_text_child_ranges_and_invoke(
     link.click(move |args| {
         count.set(count.get() + 1);
         args.set_handled(true);
-    });
+    }).detach();
     let invoke = child.get_provider::<dyn IInvokeProvider>().unwrap();
     invoke.invoke().unwrap();
     assert_eq!(invoked.get(), 1);

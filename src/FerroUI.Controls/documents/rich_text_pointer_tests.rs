@@ -13,7 +13,7 @@ fn rich_pointer_created_after_an_edit_does_not_replay_that_edit_at_batch_end() {
     let before_end = document.create_pointer(4, TextGravity::Forward).unwrap();
     let events = Rc::new(Cell::new(0));
     let received = events.clone();
-    let _subscription = document.changed(move |_| received.set(received.get() + 1));
+    document.changed(move |_| received.set(received.get() + 1)).detach();
     let batch = document.begin_edit();
     document.replace_text(1..3, "😀Q").unwrap();
     assert_eq!(document.text(), "a😀Qd");
@@ -91,7 +91,7 @@ fn rich_pointer_reentrant_notifications_see_current_positions_in_registration_or
     let weak = document.downgrade();
     // Register the application observer before the original pointer. Pointer
     // correctness must not depend on its place in the public observer list.
-    let _subscription = document.changed(move |change| {
+    document.changed(move |change| {
         let document = weak.upgrade().unwrap();
         received.borrow_mut().push(change.revision);
         if change.revision == 1 {
@@ -103,7 +103,7 @@ fn rich_pointer_reentrant_notifications_see_current_positions_in_registration_or
             assert_eq!(document.text(), "YXab");
             assert_eq!(later.borrow().as_ref().unwrap().offset(), 4);
         }
-    });
+    }).detach();
     *old.borrow_mut() = Some(document.create_pointer(2, TextGravity::Forward).unwrap());
     document.replace_text(0..0, "X").unwrap();
     assert_eq!(*revisions.borrow(), [1, 2]);

@@ -1731,7 +1731,7 @@ fn container_prepared_is_raised_when_scrolling(buffer_factor: f64, expected_rais
     let raised = Rc::new(Cell::new(0));
 
     let counter = raised.clone();
-    t.items_control.container_prepared(move |_| counter.set(counter.get() + 1));
+    t.items_control.container_prepared(move |_| counter.set(counter.get() + 1)).detach();
 
     t.scroll.set_offset(Vector::new(0.0, 200.0));
     layout(&t.target);
@@ -1749,7 +1749,7 @@ fn container_clearing_is_raised_when_scrolling(buffer_factor: f64, expected_rais
     let raised = Rc::new(Cell::new(0));
 
     let counter = raised.clone();
-    t.items_control.container_clearing(move |_| counter.set(counter.get() + 1));
+    t.items_control.container_clearing(move |_| counter.set(counter.get() + 1)).detach();
 
     t.scroll.set_offset(Vector::new(0.0, 200.0));
     layout(&t.target);
@@ -1774,7 +1774,7 @@ fn container_index_changed_is_raised_on_insert(buffer_factor: f64, expected_rais
         assert_eq!(expected_index.get(), e.old_index());
         expected_index.set(expected_index.get() + 1);
         assert_eq!(expected_index.get(), e.new_index());
-    });
+    }).detach();
 
     items.insert(index.get() as usize, "new".to_string());
 
@@ -1802,7 +1802,7 @@ fn container_index_changed_is_raised_when_item_inserted_before_realized_elements
         assert_eq!(expected_index.get(), e.old_index());
         expected_index.set(expected_index.get() + 1);
         assert_eq!(expected_index.get(), e.new_index());
-    });
+    }).detach();
 
     t.scroll.set_offset(Vector::new(0.0, 200.0));
     layout(&t.target);
@@ -1829,7 +1829,7 @@ fn container_index_changed_is_raised_on_remove(buffer_factor: f64, expected_rais
         assert_eq!(expected_index.get() + 1, e.old_index());
         assert_eq!(expected_index.get(), e.new_index());
         expected_index.set(expected_index.get() + 1);
-    });
+    }).detach();
 
     items.remove_at(index.get() as usize);
 
@@ -1857,7 +1857,7 @@ fn container_index_changed_is_raised_when_item_removed_before_realized_elements(
         assert_eq!(expected_index.get() - 1, e.new_index());
         expected_index.set(expected_index.get() + 1);
         counter.set(counter.get() + 1);
-    });
+    }).detach();
 
     t.scroll.set_offset(Vector::new(0.0, 200.0));
     layout(&t.target);
@@ -1880,15 +1880,15 @@ fn fires_correct_container_lifecycle_events_on_replace(buffer_factor: f64) {
     let sink = events.clone();
     t.items_control.container_prepared(move |e| {
         sink.borrow_mut().push(format!("Prepared #{} = {}", id(e.container()), e.index()));
-    });
+    }).detach();
     let sink = events.clone();
     t.items_control.container_clearing(move |e| {
         sink.borrow_mut().push(format!("Clearing #{}", id(e.container())));
-    });
+    }).detach();
     let sink = events.clone();
     t.items_control.container_index_changed(move |e| {
         sink.borrow_mut().push(format!("IndexChanged #{} {} -> {}", id(e.container()), e.old_index(), e.new_index()));
-    });
+    }).detach();
 
     let to_replace = t.target.get_realized_elements()[2].clone().unwrap();
     items.set(2, "New Item".to_string());
@@ -2380,14 +2380,14 @@ fn scroll_into_view_with_target_rect_outside_viewport_should_scroll_to_item(buff
         )];
         o.buffer_factor = buffer_factor;
     });
-    let _subscription = t.items_control.container_prepared(|ev| {
+    t.items_control.container_prepared(|ev| {
         ev.container().add_handler(Control::request_bring_into_view_event(), |_, e| {
             let data_context = e.target_object.as_ref().unwrap().data_context().unwrap();
             let value: &dyn AnyValue = &*data_context;
             let data_context = value.downcast_ref::<ItemWithHeight>().unwrap();
             e.set_target_rect(Rect::new(data_context.height() - 50.0, 0.0, 50.0, 10.0));
         });
-    });
+    }).detach();
 
     t.target.scroll_into_view(100);
 

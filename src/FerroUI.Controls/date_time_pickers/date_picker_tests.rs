@@ -179,7 +179,7 @@ fn selected_date_changed_should_fire_when_selected_date_set() {
     let handled = Rc::new(Cell::new(false));
     let date_picker = DatePicker::new();
     let flag = handled.clone();
-    date_picker.selected_date_changed(move |_| flag.set(true));
+    date_picker.selected_date_changed(move |_| flag.set(true)).detach();
     let value = date(2000, 10, 10);
     date_picker.set_selected_date(Some(value));
     Dispatcher::ui_thread().run_jobs(None);
@@ -325,7 +325,7 @@ fn selected_date_enable_data_validation() {
         }
 
         flag.set(true);
-    });
+    }).detach();
 
     // dateTime is less than
     let exception = assert_throws_data_validation_exception(|| date_picker.set_selected_date(Some(date(1999, 1, 1))));
@@ -758,7 +758,7 @@ fn window_popup_accept_updates_selected_date_and_closes() {
     let target = WindowTarget::show(selected);
     let changes = Rc::new(Cell::new(0));
     let counter = changes.clone();
-    target.date_picker.selected_date_changed(move |_| counter.set(counter.get() + 1));
+    target.date_picker.selected_date_changed(move |_| counter.set(counter.get() + 1)).detach();
 
     assert!(!target.popup.is_open());
     assert!(target.popup.host().is_none());
@@ -807,7 +807,7 @@ fn window_popup_dismiss_leaves_selected_date_unchanged() {
     let target = WindowTarget::show(selected);
     let changes = Rc::new(Cell::new(0));
     let counter = changes.clone();
-    target.date_picker.selected_date_changed(move |_| counter.set(counter.get() + 1));
+    target.date_picker.selected_date_changed(move |_| counter.set(counter.get() + 1)).detach();
 
     target.flyout_button.perform_click();
     Dispatcher::ui_thread().run_jobs(None);

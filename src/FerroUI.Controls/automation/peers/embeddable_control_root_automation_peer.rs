@@ -82,7 +82,7 @@ impl IEmbeddedRootProvider for ProviderAdapter<EmbeddableControlRootAutomationPe
     }
 
     fn focus_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        self.0.focus_changed(move || handler())
+        self.0.focus_changed(move || handler()).detach()
     }
 }
 
@@ -104,7 +104,7 @@ impl IRootProvider for ProviderAdapter<EmbeddableControlRootAutomationPeer> {
     }
 
     fn focus_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        self.0.focus_changed(move || handler())
+        self.0.focus_changed(move || handler()).detach()
     }
 }
 
@@ -132,14 +132,17 @@ impl EmbeddableControlRootAutomationPeer {
     }
 
     /// Raised when the focus changes (the root provider contracts).
-    pub fn focus_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the peer.
+    pub fn focus_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.focus_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.focus_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Gets the peer of the currently focused element (the root provider

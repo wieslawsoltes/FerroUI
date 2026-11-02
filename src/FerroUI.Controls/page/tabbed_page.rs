@@ -247,19 +247,19 @@ impl TemplatedControlImpl for TabbedPage {
                 if let Some(this) = weak.upgrade() {
                     this.on_container_prepared(e);
                 }
-            });
+            }).detach();
             let weak = this.to_ref().downgrade();
             let container_index_changed = tab_control.container_index_changed(move |e| {
                 if let Some(this) = weak.upgrade() {
                     this.on_container_index_changed(e);
                 }
-            });
+            }).detach();
             let weak = this.to_ref().downgrade();
             let container_clearing = tab_control.container_clearing(move |e| {
                 if let Some(this) = weak.upgrade() {
                     this.on_container_clearing(e);
                 }
-            });
+            }).detach();
             *this.tab_control.borrow_mut() = Some(TabControlPart {
                 tab_control: tab_control.clone(),
                 selection_changed: None,

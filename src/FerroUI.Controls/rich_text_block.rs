@@ -1087,7 +1087,7 @@ impl RichTextBlock {
         if let Some(old) = self
             .document_subscription
             .borrow_mut()
-            .replace(Subscription::new(subscription))
+            .replace(subscription)
         {
             old.dispose();
         }
@@ -1125,7 +1125,7 @@ impl RichTextBlock {
                 this.invalidate_document_layout();
             }
         });
-        *self.view_subscriptions.borrow_mut() = vec![highlighters, resources.detach(), theme.detach()];
+        *self.view_subscriptions.borrow_mut() = vec![highlighters.detach(), resources.detach(), theme.detach()];
         self.refresh_default_highlight_brush_subscriptions();
     }
 

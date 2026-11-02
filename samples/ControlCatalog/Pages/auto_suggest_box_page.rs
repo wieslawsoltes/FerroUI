@@ -58,7 +58,7 @@ impl AutoSuggestBoxPage {
                 let source = if matches.is_empty() { vec!["No results found"] } else { matches };
                 states.set_items_source(Some(ItemsSource::from_strs(source)));
             }
-        });
+        }).detach();
         let weak = this.downgrade();
         states.query_submitted(move |args| {
             let Some(this) = weak.upgrade() else { return };
@@ -70,7 +70,7 @@ impl AutoSuggestBoxPage {
             if let Some(status) = this.find_control::<TextBlock>("Submitted") {
                 status.set_text(Some(&text));
             }
-        });
+        }).detach();
         this
     }
 }

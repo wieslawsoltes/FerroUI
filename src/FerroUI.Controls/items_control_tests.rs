@@ -979,7 +979,7 @@ fn track_prepared(target: &ItemsControl) -> Rc<RefCell<Vec<Ref<Control>>>> {
         assert_eq!(index.get(), e.index());
         index.set(index.get() + 1);
         sink.borrow_mut().push(e.container().clone());
-    });
+    }).detach();
     result
 }
 
@@ -1033,7 +1033,7 @@ fn container_index_changed_is_raised_when_item_added() {
         index.set(index.get() + 1);
         assert_eq!(index.get(), e.new_index());
         sink.borrow_mut().push(e.container().clone());
-    });
+    }).detach();
 
     target.items().insert(1, boxed_str("Qux"));
 
@@ -1051,7 +1051,7 @@ fn container_clearing_is_raised_when_item_removed() {
     target.container_clearing(move |e| {
         assert_eq!(&expected, e.container());
         counter.set(counter.get() + 1);
-    });
+    }).detach();
 
     target.items().remove_at(1);
 
@@ -1073,7 +1073,7 @@ fn container_clearing_is_raised_when_items_source_is_cleared() {
     target.container_clearing(move |e| {
         sink.borrow_mut().push(e.container().clone());
         counter.set(counter.get() + 1);
-    });
+    }).detach();
 
     items_source.clear();
 

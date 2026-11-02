@@ -135,7 +135,7 @@ fn rich_inherited_presentation_preserves_undo_and_active_composition() {
     assert!(composition.is_some());
     let changed = Rc::new(Cell::new(0));
     let count = changed.clone();
-    let _subscription = document.changed(move |_| count.set(count.get() + 1));
+    document.changed(move |_| count.set(count.get() + 1)).detach();
 
     editor.set_template(Some(crate::rich_edit_box_tests::rich_edit_box_template()));
     let root = crate::test_support::TestRoot::with_child(editor.clone());

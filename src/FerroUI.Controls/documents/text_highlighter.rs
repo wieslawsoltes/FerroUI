@@ -43,11 +43,11 @@ impl FerroObjectImpl for TextHighlighter {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         let weak = this.to_ref().downgrade();
-        *this.range_subscription.borrow_mut() = Some(Subscription::new(this.ranges.collection_changed(move |_| {
+        *this.range_subscription.borrow_mut() = Some(this.ranges.collection_changed(move |_| {
             if let Some(this) = weak.upgrade() {
                 this.invalidate();
             }
-        })));
+        }));
         this.refresh_brush_subscriptions();
     }
 
@@ -139,14 +139,16 @@ impl TextHighlighter {
         Rc::new(HighlighterAddChild(this))
     }
 
-    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the highlighter.
+    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.invalidated.add(Rc::new(handler));
         let weak = Rc::downgrade(&self.invalidated);
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(handlers) = weak.upgrade() {
                 handlers.remove(token);
             }
-        })
+        }))
     }
 
     fn invalidate(&self) {

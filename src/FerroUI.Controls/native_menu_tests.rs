@@ -294,8 +294,8 @@ fn menu_events_are_raised_through_the_bridge() {
         let log = log.clone();
         move |_: &NativeMenu| log.borrow_mut().push(name)
     };
-    let _needs_update = menu.needs_update(record("needs update"));
-    let _opening = menu.opening(record("opening"));
+    menu.needs_update(record("needs update")).detach();
+    menu.opening(record("opening")).detach();
     let closed = menu.closed(record("closed"));
 
     let bridge = menu.to_exporter_events_bridge();
@@ -361,10 +361,10 @@ fn the_menu_bar_shows_the_items_of_the_native_menu_of_the_window() {
     let clicks = Rc::new(Cell::new(0));
     let file = item("File");
     let open = item("Open");
-    let _click = open.click({
+    open.click({
         let clicks = clicks.clone();
         move |_| clicks.set(clicks.get() + 1)
-    });
+    }).detach();
     let file_menu = NativeMenu::new();
     file_menu.add(open.clone());
     file.set_menu(Some(file_menu));

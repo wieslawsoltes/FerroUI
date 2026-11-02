@@ -309,13 +309,13 @@ impl AutomationPeerWrapper {
             if let Some(this) = weak.upgrade() {
                 this.update_children();
             }
-        });
+        }).detach();
         let weak = Rc::downgrade(&this);
         let property_changed = peer.property_changed(move |e| {
             if let Some(this) = weak.upgrade() {
                 this.update_properties(&[e.property()]);
             }
-        });
+        }).detach();
         *this.subscriptions.borrow_mut() = vec![children_changed, property_changed];
 
         this

@@ -6,7 +6,7 @@ use ferroui_base::data::BindingMode;
 use ferroui_base::input::{InputElementImpl, InputElementImplExt, Key, KeyEventArgs};
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::layout::{LayoutableImpl, Orientation};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::threading::{CancellationToken, CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::{
@@ -36,7 +36,7 @@ pub struct PipsPager {
     next_button: RefCell<Option<(Ref<Button>, RoutedEventHandlerToken)>>,
     pips_pager_list: RefCell<Option<(Ref<ListBox>, RoutedEventHandlerToken)>>,
     /// The `ContainerPrepared` / `ContainerIndexChanged` subscriptions on the pips list.
-    pips_pager_list_container_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    pips_pager_list_container_subscriptions: RefCell<Vec<Subscription>>,
     scroll_pending: Cell<bool>,
     updating_pager_size: Cell<bool>,
     is_initial_load: Cell<bool>,
