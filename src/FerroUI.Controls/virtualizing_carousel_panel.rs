@@ -20,7 +20,7 @@ use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::styling::Setter;
 use ferroui_base::threading::{
-    CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTaskScheduler,
+    CancellationToken, Dispatcher, DispatcherPriority, DispatcherTask, DispatcherTaskScheduler,
     FerroSynchronizationContext,
 };
 use ferroui_base::utilities::{HandlerList, MathUtilities};
@@ -73,7 +73,7 @@ pub struct VirtualizingCarouselPanel {
     realized_index: Cell<i32>,
     transition_from: RefCell<Option<Ref<Control>>>,
     transition_from_index: Cell<i32>,
-    transition: RefCell<Option<Rc<CancellationTokenSource>>>,
+    transition: RefCell<Option<Rc<CancellationToken>>>,
     transition_task: RefCell<Option<DispatcherTask<()>>>,
     scroll_invalidated: Rc<HandlerList<dyn Fn()>>,
     can_horizontally_scroll: Cell<bool>,
@@ -92,8 +92,8 @@ pub struct VirtualizingCarouselPanel {
     swipe_axis: Cell<Option<SlideAxis>>,
     locked_axis: Cell<SlideAxis>,
 
-    completion_cts: RefCell<Option<Rc<CancellationTokenSource>>>,
-    offset_animation_cts: RefCell<Option<Rc<CancellationTokenSource>>>,
+    completion_cts: RefCell<Option<Rc<CancellationToken>>>,
+    offset_animation_cts: RefCell<Option<Rc<CancellationToken>>>,
     completion_end_progress: Cell<f64>,
     is_rubber_banding: Cell<bool>,
     drag_start_offset: Cell<f64>,
@@ -199,7 +199,7 @@ impl LayoutableImpl for VirtualizingCarouselPanel {
             let transition = this.get_transition();
 
             if let (Some(transition_from), Some(to), Some(transition)) = (transition_from, to, transition) {
-                let transition_cts = Rc::new(CancellationTokenSource::new());
+                let transition_cts = Rc::new(CancellationToken::new());
                 *this.transition.borrow_mut() = Some(transition_cts.clone());
 
                 let forward = this.realized_index.get() > this.transition_from_index.get();
@@ -457,8 +457,8 @@ impl ILogicalScrollable for VirtualizingCarouselPanel {
 /// if the field still holds the source of that call.
 struct ClearSourceOnExit {
     panel: WeakRef<VirtualizingCarouselPanel>,
-    field: fn(&VirtualizingCarouselPanel) -> &RefCell<Option<Rc<CancellationTokenSource>>>,
-    source: Rc<CancellationTokenSource>,
+    field: fn(&VirtualizingCarouselPanel) -> &RefCell<Option<Rc<CancellationToken>>>,
+    source: Rc<CancellationToken>,
 }
 
 impl Drop for ClearSourceOnExit {
@@ -583,8 +583,8 @@ impl VirtualizingCarouselPanel {
     /// Whether the field holds a cancellation source that has not been
     /// cancelled.
     #[inline]
-    fn is_active(source: &RefCell<Option<Rc<CancellationTokenSource>>>) -> bool {
-        source.borrow().as_ref().is_some_and(|source| !source.is_cancellation_requested())
+    fn is_active(source: &RefCell<Option<Rc<CancellationToken>>>) -> bool {
+        source.borrow().as_ref().is_some_and(|source| !source.is_cancelled())
     }
 
     /// The carousel that the panel is displaying items for.
@@ -1294,7 +1294,7 @@ impl VirtualizingCarouselPanel {
 
     fn run_transition_async(
         &self,
-        transition_cts: Rc<CancellationTokenSource>,
+        transition_cts: Rc<CancellationToken>,
         transition_from: Ref<Control>,
         transition_to: Ref<Control>,
         forward: bool,
@@ -1305,7 +1305,7 @@ impl VirtualizingCarouselPanel {
         Self::task_scheduler().start_local(async move {
             let from: Ref<Visual> = transition_from.upcast();
             let to: Ref<Visual> = transition_to.upcast();
-            let task = transition.start(Some(&from), Some(&to), forward, transition_cts.token());
+            let task = transition.start(Some(&from), Some(&to), forward, (*transition_cts).clone());
 
             // An interruption is expected when a transition is interrupted
             // by a newer navigation action.
@@ -1317,7 +1317,7 @@ impl VirtualizingCarouselPanel {
 
             let is_current =
                 this.transition.borrow().as_ref().is_some_and(|current| Rc::ptr_eq(current, &transition_cts));
-            if transition_cts.is_cancellation_requested() || !is_current {
+            if transition_cts.is_cancelled() || !is_current {
                 return;
             }
 
@@ -1821,9 +1821,9 @@ impl VirtualizingCarouselPanel {
         on_completed: impl FnOnce(&Self) + 'static,
     ) {
         self.cancel_offset_animation();
-        let offset_animation_cts = Rc::new(CancellationTokenSource::new());
+        let offset_animation_cts = Rc::new(CancellationToken::new());
         *self.offset_animation_cts.borrow_mut() = Some(offset_animation_cts.clone());
-        let cancellation_token = offset_animation_cts.token();
+        let cancellation_token = (*offset_animation_cts).clone();
 
         let animation =
             Self::create_progress_animation(Self::offset_animation_progress_property(), 0.0, 1.0, duration, easing);
@@ -1847,7 +1847,7 @@ impl VirtualizingCarouselPanel {
                 return;
             }
 
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 
@@ -1916,7 +1916,7 @@ impl VirtualizingCarouselPanel {
         if let Some(previous_completion_cts) = previous_completion_cts {
             previous_completion_cts.cancel();
         }
-        let completion_cts = Rc::new(CancellationTokenSource::new());
+        let completion_cts = Rc::new(CancellationToken::new());
         *self.completion_cts.borrow_mut() = Some(completion_cts.clone());
 
         self.set_value(Self::completion_progress_property(), current_progress);
@@ -1937,9 +1937,9 @@ impl VirtualizingCarouselPanel {
         &self,
         animation: Ref<Animation>,
         carousel: Ref<Carousel>,
-        completion_cts: Rc<CancellationTokenSource>,
+        completion_cts: Rc<CancellationToken>,
     ) {
-        let cancellation_token = completion_cts.token();
+        let cancellation_token = (*completion_cts).clone();
 
         let this = self.to_ref().downgrade();
         let _finally =
@@ -1953,7 +1953,7 @@ impl VirtualizingCarouselPanel {
                 return;
             }
 
-            if cancellation_token.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return;
             }
 

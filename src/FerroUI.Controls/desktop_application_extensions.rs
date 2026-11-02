@@ -11,7 +11,7 @@
 
 use crate::{Application, Window};
 use ferroui_base::input::ICloseable;
-use ferroui_base::threading::{CancellationToken, CancellationTokenSource, Dispatcher};
+use ferroui_base::threading::{CancellationToken, Dispatcher};
 use ferroui_base::{Nullable, ObjectType, Ref, Upcast};
 use std::rc::Rc;
 
@@ -22,11 +22,11 @@ impl Application {
     /// Consider using a classic desktop lifetime instead. Without run loops
     /// this returns right after subscribing to the closed event.
     pub fn run(&self, closable: &dyn ICloseable) {
-        let cts = CancellationTokenSource::new();
+        let cts = CancellationToken::new();
         let source = cts.clone();
         closable.closed(Rc::new(move || source.cancel()));
 
-        self.run_with_token(&cts.token());
+        self.run_with_token(&cts);
     }
 
     /// On desktop-style platforms runs the application's main loop until
@@ -42,13 +42,13 @@ impl Application {
         let Some(main_window) = main_window.into().0 else {
             panic!("Value cannot be null. (Parameter 'main_window')");
         };
-        let cts = CancellationTokenSource::new();
+        let cts = CancellationToken::new();
         let source = cts.clone();
         main_window.closed(move || source.cancel()).detach();
         if !main_window.is_visible() {
             main_window.show();
         }
-        self.run_with_token(&cts.token());
+        self.run_with_token(&cts);
     }
 
     /// On desktop-style platforms runs the application's main loop with a

@@ -666,12 +666,12 @@ mod transitions {
         layout(&t.panel);
 
         assert!(cancelation_token.borrow().is_some());
-        assert!(!cancelation_token.borrow().as_ref().unwrap().is_cancellation_requested());
+        assert!(!cancelation_token.borrow().as_ref().unwrap().is_cancelled());
 
         t.carousel.set_selected_index(0);
         layout(&t.panel);
 
-        assert!(cancelation_token.borrow().as_ref().unwrap().is_cancellation_requested());
+        assert!(cancelation_token.borrow().as_ref().unwrap().is_cancelled());
     }
 
     #[test]

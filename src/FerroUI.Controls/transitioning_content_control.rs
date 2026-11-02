@@ -10,7 +10,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::threading::{
-    CancellationToken, CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTask,
+    CancellationToken, Dispatcher, DispatcherPriority, DispatcherTask,
     FerroSynchronizationContext,
 };
 use ferroui_base::{
@@ -29,7 +29,7 @@ use std::task::{Context, Poll};
 #[repr(C)]
 pub struct TransitioningContentControl {
     base: ContentControl,
-    current_transition: RefCell<Option<CancellationTokenSource>>,
+    current_transition: RefCell<Option<CancellationToken>>,
     last_presenter: RefCell<Option<Ref<ContentPresenter>>>,
     presenter2: RefCell<Option<Ref<ContentPresenter>>>,
     is_first_full: Cell<bool>,
@@ -80,7 +80,7 @@ impl LayoutableImpl for TransitioningContentControl {
             {
                 this.should_animate.set(false);
 
-                let cancel = CancellationTokenSource::new();
+                let cancel = CancellationToken::new();
                 *this.current_transition.borrow_mut() = Some(cancel.clone());
 
                 let (from, to) =
@@ -90,7 +90,7 @@ impl LayoutableImpl for TransitioningContentControl {
 
                 let from: Ref<Visual> = from.upcast();
                 let to: Ref<Visual> = to.upcast();
-                let task = transition.start(Some(&from), Some(&to), !this.is_transition_reversed(), cancel.token());
+                let task = transition.start(Some(&from), Some(&to), !this.is_transition_reversed(), cancel.clone());
 
                 // The continuation always runs as a job of the
                 // synchronization context, never inside this arrange pass.
@@ -110,10 +110,10 @@ impl LayoutableImpl for TransitioningContentControl {
                     this.on_transition_completed(&TransitionCompletedEventArgs::new(
                         from_content,
                         to_content,
-                        ran_to_completion && !cancel.is_cancellation_requested(),
+                        ran_to_completion && !cancel.is_cancelled(),
                     ));
 
-                    if !cancel.is_cancellation_requested() {
+                    if !cancel.is_cancelled() {
                         this.hide_old_presenter();
                     }
                 }));
