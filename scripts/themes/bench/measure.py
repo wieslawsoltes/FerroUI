@@ -160,7 +160,9 @@ def main():
     parser.add_argument("--linux-packed-relocations", action="store_true",
                         help="use DT_RELR for the final Linux ELF (requires a compatible dynamic loader)")
     parser.add_argument("--linux-safe-icf", action="store_true",
-                        help="emit address-significance metadata during ThinLTO and fold identical ELF sections with LLD")
+                        help="emit address-significance metadata during LTO and fold identical ELF sections with LLD")
+    parser.add_argument("--fat-app-link", action="store_true",
+                        help="use one whole-program LTO unit for the final compact executable")
     parser.add_argument("--max-executable-bytes", type=positive_int,
                         help="require the complete stripped application to fit this many bytes")
     parser.add_argument("--size-optimize-theme", action="store_true",
@@ -202,6 +204,8 @@ def main():
         parser.error("--linux-safe-icf requires --compact-app on a native Linux ELF target")
     if args.linux_packed_relocations and platform.system() != "Linux":
         parser.error("--linux-packed-relocations requires a Linux ELF target")
+    if args.fat_app_link and not args.compact_app:
+        parser.error("--fat-app-link requires --compact-app")
     if args.rebuilds < 0:
         parser.error("--rebuilds must be zero or positive")
     work = args.work_dir.resolve()
@@ -260,6 +264,9 @@ def main():
     link_args = ["-Clink-arg=-Wl,-z,pack-relative-relocs"] if args.linux_packed_relocations else []
     if args.linux_safe_icf:
         link_args.extend(["-Cllvm-args=--addrsig", "-Clink-arg=-fuse-ld=lld", "-Clink-arg=-Wl,--icf=safe"])
+    if args.fat_app_link:
+        # Keep the same cached compact dependencies for both link policies.
+        link_args.extend(["-Clto=fat", "-Ccodegen-units=1"])
     first_build, messages = build(cargo_args, package, env, link_args)
     initial_units = cargo_timings(target)
     rebuilds = []
@@ -315,13 +322,17 @@ def main():
         commands[archive] = [stripped, archive]
     samples = measure_commands(commands, args.launches)
     launches = samples[stripped]
+    profile = "release, LTO off, incremental off"
+    if args.compact_app:
+        lto = "16 dependency CGUs, final fat LTO in one CGU" if args.fat_app_link else "ThinLTO, 16 CGUs"
+        profile = f"release, opt-level=s, {lto}, incremental off"
     result = {
         "revision": command_output(["git", "rev-parse", "HEAD"], source),
         "source_dirty": bool(command_output(["git", "status", "--porcelain", "--untracked-files=no"], source)),
         "rustc": command_output(["rustc", "-vV"]), "cargo": command_output(["cargo", "-V"]),
         "platform": platform.platform(), "jobs": env.get("CARGO_BUILD_JOBS", "cargo default"),
         "packed_theme": packed, "solid_theme": args.solid or args.portable_solid or precompiled, "size_optimized_theme": args.size_optimize_theme,
-        "precompiled_theme": precompiled, "compact_app": args.compact_app,
+        "precompiled_theme": precompiled, "compact_app": args.compact_app, "fat_app_link": args.fat_app_link,
         "linux_packed_relocations": args.linux_packed_relocations, "linux_safe_icf": args.linux_safe_icf,
         "elf_sections": elf_sections(stripped) if platform.system() == "Linux" and shutil.which("readelf") else None,
         "linked_allocations": allocations,
@@ -329,7 +340,7 @@ def main():
         "fxp_bytes": (out / "winui.fxp").stat().st_size if packed or precompiled else 0,
         "generated_registration_rust_bytes": (generated / "mod.rs").stat().st_size,
         "binary_resources": args.binary or precompiled, "resource_roots": env.get("FERROUI_WINUI_THEME_ROOTS"),
-        "profile": "release, opt-level=s, ThinLTO, 16 CGUs, incremental off" if args.compact_app else "release, LTO off, incremental off",
+        "profile": profile,
         "initial_target_empty": target_was_empty,
         "initial_build_seconds": first_build, "theme_rebuild_seconds": rebuilds,
         "initial_cargo_units": initial_units, "last_cargo_units": last_units,
