@@ -33,10 +33,12 @@ def command_output(args, cwd=None):
     return subprocess.check_output(args, cwd=cwd, text=True).strip()
 
 
-def build(cargo_args, directory, env):
+def build(cargo_args, directory, env, link_args=()):
     start = time.perf_counter()
+    action = "rustc" if link_args else "build"
+    final_args = ["--bin", PROBE, "--", *link_args] if link_args else []
     proc = subprocess.run(
-        ["cargo", "build", "--release", "--timings", "--message-format=json-render-diagnostics", *cargo_args],
+        ["cargo", action, "--release", "--timings", "--message-format=json-render-diagnostics", *cargo_args, *final_args],
         cwd=directory, env=env, check=True, stdout=subprocess.PIPE, text=True,
     )
     return time.perf_counter() - start, [json.loads(line) for line in proc.stdout.splitlines()]
@@ -142,6 +144,8 @@ def main():
     parser.add_argument("--compact-app", action="store_true",
                         help="build the entire application with opt-level=s, ThinLTO and 16 CGUs")
     backend.add_argument("--binary", action="store_true", help="enable the theme's binary-resources feature")
+    parser.add_argument("--linux-packed-relocations", action="store_true",
+                        help="use DT_RELR for the final Linux ELF (requires a compatible dynamic loader)")
     parser.add_argument("--size-optimize-theme", action="store_true",
                         help="compile just the WinUI crate with opt-level=z and one codegen unit")
     parser.add_argument("--lld-link-map", action="store_true",
@@ -169,6 +173,8 @@ def main():
         parser.error("--max-theme-bytes requires --lld-link-map")
     if args.compact_app and args.lld_link_map:
         parser.error("cross-crate LTO cannot attribute all optimized code to its input archives")
+    if args.linux_packed_relocations and platform.system() != "Linux":
+        parser.error("--linux-packed-relocations requires a Linux ELF target")
     if args.rebuilds < 0:
         parser.error("--rebuilds must be zero or positive")
     work = args.work_dir.resolve()
@@ -220,12 +226,13 @@ def main():
     elif args.binary:
         features = [f"{THEME}/binary-resources"]
     cargo_args = ["--features", ",".join(features)] if features else []
-    first_build, messages = build(cargo_args, package, env)
+    link_args = ["-Clink-arg=-Wl,-z,pack-relative-relocs"] if args.linux_packed_relocations else []
+    first_build, messages = build(cargo_args, package, env, link_args)
     initial_units = cargo_timings(target)
     rebuilds = []
     for _ in range(args.rebuilds):
         subprocess.run(["cargo", "clean", "--release", "-p", THEME, "-p", PROBE], cwd=package, env=env, check=True)
-        duration, messages = build(["--locked", *cargo_args], package, env)
+        duration, messages = build(["--locked", *cargo_args], package, env, link_args)
         rebuilds.append(duration)
     artifact = next(m for m in messages if m["reason"] == "compiler-artifact" and m["target"]["name"] == "ferroui_themes_winui")
     rlib = next(Path(name) for name in artifact["filenames"] if name.endswith(".rlib"))
@@ -244,7 +251,7 @@ def main():
     if args.lld_link_map:
         link_map = work / "consumer.link.map"
         subprocess.run(["cargo", "rustc", "--locked", "--release", *cargo_args, "--bin", PROBE, "--",
-                        "-Clink-arg=-fuse-ld=lld", "-Clink-arg=-Wl,-Map," + str(link_map)],
+                        *link_args, "-Clink-arg=-fuse-ld=lld", "-Clink-arg=-Wl,-Map," + str(link_map)],
                        cwd=package, env=env, check=True)
         allocations = lld_allocations(link_map, executable)
         sections = allocations["archive_input_sections"].get(rlib.name)
@@ -254,6 +261,8 @@ def main():
     shutil.copy2(executable, stripped)
     subprocess.run(["strip", str(stripped)], check=True)
     stripped_bytes = stripped.stat().st_size
+    if args.linux_packed_relocations and "(RELR)" not in command_output(["readelf", "-dW", str(stripped)]):
+        raise ValueError("the linker did not emit the requested DT_RELR table")
     executables = [stripped, *(path.resolve() for path in args.compare_with)]
     baseline = args.startup_baseline.resolve() if args.startup_baseline else None
     if baseline == stripped:
@@ -279,6 +288,7 @@ def main():
         "platform": platform.platform(), "jobs": env.get("CARGO_BUILD_JOBS", "cargo default"),
         "packed_theme": packed, "solid_theme": args.solid or args.portable_solid or precompiled, "size_optimized_theme": args.size_optimize_theme,
         "precompiled_theme": precompiled, "compact_app": args.compact_app,
+        "linux_packed_relocations": args.linux_packed_relocations,
         "linked_allocations": allocations,
         "theme_allocated_sections": sections, "theme_allocated_bytes": sum(sections.values()) if sections else None,
         "fxp_bytes": (out / "winui.fxp").stat().st_size if packed or precompiled else 0,

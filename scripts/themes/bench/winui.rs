@@ -54,4 +54,12 @@ fn main() {
     assert_eq!(button.target_type(), Some(Button::TYPE));
     println!("{} {}", created.as_nanos(), start.elapsed().as_nanos());
     std::io::stdout().flush().expect("flush ready marker");
+    // A separate verification launch can prove that the external revision took effect.
+    #[cfg(feature = "retain-archive")]
+    if let Some(expected) = std::env::var_os("FERROUI_BENCH_EXPECT_COMPACT_FONT_SIZE") {
+        let expected: f64 = expected.to_str().unwrap().parse().expect("expected compact font size");
+        theme.set_density_style(ferroui_themes_winui::DensityStyle::Compact);
+        let value = theme.try_get_resource(&"ControlContentThemeFontSize".into(), None).flatten();
+        assert_eq!(from_markup_value::<f64>(&value), Some(expected));
+    }
 }
