@@ -200,7 +200,7 @@ fn opening_raises_single_opening_event(use_overlay_popups: bool) {
     let tracker = tracker();
     let f = Flyout::new();
     let count = tracker.clone();
-    let _ = f.opening(move |_| count.set(count.get() + 1));
+    f.opening(move |_| count.set(count.get() + 1)).detach();
     f.show_at(&window);
 
     assert_eq!(1, tracker.get());
@@ -215,7 +215,7 @@ fn opening_raises_single_opened_event(use_overlay_popups: bool) {
     let tracker = tracker();
     let f = Flyout::new();
     let count = tracker.clone();
-    let _ = f.opened(move || count.set(count.get() + 1));
+    f.opened(move || count.set(count.get() + 1)).detach();
     f.show_at(&window);
 
     assert_eq!(1, tracker.get());
@@ -229,10 +229,10 @@ fn opening_is_cancellable(use_overlay_popups: bool) {
     let tracker = tracker();
     let f = Flyout::new();
     let count = tracker.clone();
-    let _ = f.opening(move |e| {
+    f.opening(move |e| {
         count.set(count.get() + 1);
         e.set_cancel(true);
-    });
+    }).detach();
     f.show_at(&window);
 
     assert_eq!(1, tracker.get());
@@ -247,7 +247,7 @@ fn closing_raises_single_closing_event(use_overlay_popups: bool) {
     let tracker = tracker();
     let f = Flyout::new();
     let count = tracker.clone();
-    let _ = f.closing(move |_| count.set(count.get() + 1));
+    f.closing(move |_| count.set(count.get() + 1)).detach();
     f.show_at(&window);
     f.hide();
 
@@ -262,7 +262,7 @@ fn closing_raises_single_closed_event(use_overlay_popups: bool) {
     let tracker = tracker();
     let f = Flyout::new();
     let count = tracker.clone();
-    let _ = f.closed(move || count.set(count.get() + 1));
+    f.closed(move || count.set(count.get() + 1)).detach();
     f.show_at(&window);
     f.hide();
 
@@ -277,10 +277,10 @@ fn cancel_closing_keeps_flyout_open(use_overlay_popups: bool) {
     let tracker = tracker();
     let f = Flyout::new();
     let count = tracker.clone();
-    let _ = f.closing(move |e| {
+    f.closing(move |e| {
         count.set(count.get() + 1);
         e.set_cancel(true);
-    });
+    }).detach();
     f.show_at(&window);
     f.hide();
 
@@ -312,10 +312,10 @@ fn cancel_light_dismiss_closing_keeps_flyout_open(use_overlay_popups: bool) {
     let f = Flyout::new();
     f.set_content(Some(Control::boxed(sized_border())));
     let count = tracker.clone();
-    let _ = f.closing(move |e| {
+    f.closing(move |e| {
         count.set(count.get() + 1);
         e.set_cancel(true);
-    });
+    }).detach();
     f.show_at(&window);
 
     let e = create_pointer_pressed_event_args(&window, Point::new(90.0, 90.0));
@@ -418,11 +418,11 @@ fn flyout_has_uncancellable_close_before_showing_on_a_different_target(use_overl
     let closed_fired = Rc::new(Cell::new(false));
     let f = Flyout::new();
     let fired = closing_fired.clone();
-    let _ = f.closing(move |_| {
+    f.closing(move |_| {
         fired.set(true); // This shouldn't happen
-    });
+    }).detach();
     let fired = closed_fired.clone();
-    let _ = f.closed(move || fired.set(true));
+    f.closed(move || fired.set(true)).detach();
 
     f.show_at(&target1);
 
@@ -493,7 +493,7 @@ fn context_requested_opens_context_flyout(use_overlay_popups: bool) {
     let opened_count = tracker();
 
     let count = opened_count.clone();
-    let _ = flyout.opened(move || count.set(count.get() + 1));
+    flyout.opened(move || count.set(count.get() + 1)).detach();
 
     target.raise_event(&ContextRequestedEventArgs::new());
 
@@ -784,7 +784,7 @@ fn is_open_set_false_closes_flyout(use_overlay_popups: bool) {
     let flyout = Flyout::new();
     let closed_fired = Rc::new(Cell::new(false));
     let fired = closed_fired.clone();
-    let _ = flyout.closed(move || fired.set(true));
+    flyout.closed(move || fired.set(true)).detach();
 
     flyout.show_at(&window);
     assert!(flyout.is_open());
@@ -886,7 +886,7 @@ fn is_open_set_false_cancelled_closing_reverts_to_true(use_overlay_popups: bool)
     window.show();
 
     let flyout = Flyout::new();
-    let _ = flyout.closing(|e| e.set_cancel(true));
+    flyout.closing(|e| e.set_cancel(true)).detach();
 
     flyout.show_at(&window);
     assert!(flyout.is_open());
@@ -925,7 +925,7 @@ fn is_open_set_true_cancelled_opening_reverts_to_false(use_overlay_popups: bool)
     flyout.show_at(&window);
     flyout.hide();
 
-    let _ = flyout.opening(|e| e.set_cancel(true));
+    flyout.opening(|e| e.set_cancel(true)).detach();
 
     flyout.set_is_open(true);
 
@@ -940,7 +940,7 @@ fn cancelled_opening_releases_the_target(use_overlay_popups: bool) {
     window.show();
 
     let flyout = Flyout::new();
-    let _ = flyout.opening(|e| e.set_cancel(true));
+    flyout.opening(|e| e.set_cancel(true)).detach();
     flyout.show_at(&window);
 
     assert!(!flyout.is_open());

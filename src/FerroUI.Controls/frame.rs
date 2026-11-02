@@ -15,7 +15,7 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, BoxedValue, DirectProperty,
@@ -636,47 +636,51 @@ impl Frame {
         }
     }
 
-    /// Adds a handler of `Navigating`; the disposable removes it.
-    pub fn navigating(&self, handler: impl Fn(&NavigatingCancelEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `Navigating`. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the frame.
+    pub fn navigating(&self, handler: impl Fn(&NavigatingCancelEventArgs) + 'static) -> Subscription {
         let token = self.navigating.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(frame) = weak.upgrade() {
                 frame.navigating.remove(token);
             }
-        })
+        }))
     }
 
-    /// Adds a handler of `Navigated`; the disposable removes it.
-    pub fn navigated(&self, handler: impl Fn(&NavigationEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `Navigated`. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the frame.
+    pub fn navigated(&self, handler: impl Fn(&NavigationEventArgs) + 'static) -> Subscription {
         let token = self.navigated.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(frame) = weak.upgrade() {
                 frame.navigated.remove(token);
             }
-        })
+        }))
     }
 
-    /// Adds a handler of `NavigationStopped` (a cancelled navigation); the disposable removes it.
-    pub fn navigation_stopped(&self, handler: impl Fn(&NavigationEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `NavigationStopped` (a cancelled navigation). Dropping the returned guard
+    /// removes the handler; [`Subscription::detach`] keeps it for the life of the frame.
+    pub fn navigation_stopped(&self, handler: impl Fn(&NavigationEventArgs) + 'static) -> Subscription {
         let token = self.navigation_stopped.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(frame) = weak.upgrade() {
                 frame.navigation_stopped.remove(token);
             }
-        })
+        }))
     }
 
-    /// Adds a handler of `NavigationFailed`; the disposable removes it.
-    pub fn navigation_failed(&self, handler: impl Fn(&NavigationFailedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of `NavigationFailed`. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the frame.
+    pub fn navigation_failed(&self, handler: impl Fn(&NavigationFailedEventArgs) + 'static) -> Subscription {
         let token = self.navigation_failed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(frame) = weak.upgrade() {
                 frame.navigation_failed.remove(token);
             }
-        })
+        }))
     }
 }

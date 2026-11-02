@@ -86,29 +86,29 @@ impl ClassicDesktopStyleApplicationLifetime {
         })
     }
 
-    /// Raised when the application is starting. Disposing the returned
-    /// handle unsubscribes.
+    /// Raised when the application is starting. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the lifetime.
     pub fn startup(
         &self,
         handler: impl Fn(&ControlledApplicationLifetimeStartupEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let handler: Rc<dyn Fn(&ControlledApplicationLifetimeStartupEventArgs)> = Rc::new(handler);
-        self.subscribe(|this| &this.startup, handler)
+        Subscription::new(self.subscribe(|this| &this.startup, handler))
     }
 
     /// Raised when an application shutdown is requested; see
-    /// [`IClassicDesktopStyleApplicationLifetime::shutdown_requested`].
-    /// Disposing the returned handle unsubscribes.
-    pub fn shutdown_requested(&self, handler: impl Fn(&ShutdownRequestedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// [`IClassicDesktopStyleApplicationLifetime::shutdown_requested`]. Dropping the returned guard
+    /// removes the handler; [`Subscription::detach`] keeps it for the life of the lifetime.
+    pub fn shutdown_requested(&self, handler: impl Fn(&ShutdownRequestedEventArgs) + 'static) -> Subscription {
         let handler: Rc<dyn Fn(&ShutdownRequestedEventArgs)> = Rc::new(handler);
-        self.subscribe(|this| &this.shutdown_requested, handler)
+        Subscription::new(self.subscribe(|this| &this.shutdown_requested, handler))
     }
 
-    /// Raised when the application is exiting. Disposing the returned
-    /// handle unsubscribes.
-    pub fn exit(&self, handler: impl Fn(&ControlledApplicationLifetimeExitEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when the application is exiting. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the lifetime.
+    pub fn exit(&self, handler: impl Fn(&ControlledApplicationLifetimeExitEventArgs) + 'static) -> Subscription {
         let handler: Rc<dyn Fn(&ControlledApplicationLifetimeExitEventArgs)> = Rc::new(handler);
-        self.subscribe(|this| &this.exit, handler)
+        Subscription::new(self.subscribe(|this| &this.exit, handler))
     }
 
     /// The arguments passed to the builder's start method.

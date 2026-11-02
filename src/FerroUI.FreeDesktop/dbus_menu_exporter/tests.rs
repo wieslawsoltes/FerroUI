@@ -201,10 +201,10 @@ fn dbus_a_click_event_raises_the_click_of_an_enabled_item() {
     assert_eq!(fixture.layout(&exporter, 0, -1, &[]).unwrap().1, SAMPLE_LAYOUT);
 
     let clicks = Rc::new(Cell::new(0));
-    let _subscription = {
+    {
         let clicks = clicks.clone();
-        open.click(move |_| clicks.set(clicks.get() + 1))
-    };
+        open.click(move |_| clicks.set(clicks.get() + 1)).detach();
+    }
 
     fixture.event(&exporter, 2, "clicked");
     assert_eq!(clicks.get(), 1);

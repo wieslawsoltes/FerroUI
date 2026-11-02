@@ -47,7 +47,7 @@ pub(super) fn attach(
             let content = build_with_factories(&context, &metadata, &flyout, &factories);
             flyout.set_content(Some(Control::boxed(&content)));
         }
-    });
+    }).detach();
     Grid::set_column(&button, 1);
     root.children().add(button.upcast::<Control>());
     root.upcast::<Control>()

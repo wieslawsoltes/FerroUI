@@ -715,7 +715,7 @@ impl InkToolbar {
                         InkToolbarPenConfigurationControl::for_pen(&pen).upcast::<Control>();
                     flyout.set_content(Some(Rc::new(content)));
                 }
-            });
+            }).detach();
             pen.set_flyout(flyout);
         } else if let Some(eraser) = child.cast::<InkToolbarEraserButton>() {
             let button = InkToolbarFlyoutItem::new();
@@ -744,7 +744,7 @@ impl InkToolbar {
                             .map(|content| Rc::new(content) as ferroui_base::BoxedValue),
                     );
                 }
-            });
+            }).detach();
             tool.set_flyout(flyout);
         } else if let Some(stencil) = child.cast::<InkToolbarStencilButton>() {
             stencil.set_presenter(self.effective_ink_presenter());

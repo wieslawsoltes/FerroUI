@@ -7,7 +7,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutHelper, LayoutableImpl};
 use ferroui_base::platform::IOptionalFeatureProvider;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -179,14 +179,17 @@ impl NativeControlHost {
 
     /// Raised when the handle of the native control changes (internal
     /// upstream).
-    pub fn native_control_handle_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the host.
+    pub fn native_control_handle_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.native_control_handle_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.native_control_handle_changed.remove(token);
             }
-        })
+        }))
     }
 
     fn on_flow_direction_changed(native_control_host: &NativeControlHost, _e: &FerroPropertyChangedEventArgs<'_>) {

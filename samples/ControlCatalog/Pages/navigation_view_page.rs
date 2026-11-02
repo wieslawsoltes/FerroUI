@@ -83,7 +83,7 @@ impl NavigationViewPage {
                 if let Some(this) = weak.upgrade() {
                     this.show(name, selected_header(args).as_deref());
                 }
-            });
+            }).detach();
             this.show(name, Some("Home"));
         }
         this
@@ -114,7 +114,7 @@ impl NavigationViewPage {
             if args.navigation_mode() != NavigationMode::New {
                 this.select_left_item(&navigation, &header);
             }
-        });
+        }).detach();
         let weak_frame = frame.downgrade();
         let weak = this.downgrade();
         navigation.selection_changed(move |args| {
@@ -125,13 +125,13 @@ impl NavigationViewPage {
             if let Some(header) = selected_header(args) {
                 let _ = frame.navigate(FramePage::TYPE, box_item(&header));
             }
-        });
+        }).detach();
         let weak_frame = frame.downgrade();
         navigation.back_requested(move |_| {
             if let Some(frame) = weak_frame.upgrade() {
                 let _ = frame.go_back();
             }
-        });
+        }).detach();
         let _ = frame.navigate(FramePage::TYPE, box_item(&"Home".to_string()));
     }
 

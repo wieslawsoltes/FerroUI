@@ -32,7 +32,7 @@ impl FerroObjectImpl for CalendarAutomationPeer {
             if let Some(this) = weak.upgrade() {
                 this.owner_selected_dates_changed(e);
             }
-        });
+        }).detach();
     }
 }
 

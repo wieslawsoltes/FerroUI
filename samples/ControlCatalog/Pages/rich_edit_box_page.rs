@@ -37,10 +37,10 @@ impl RichEditBoxPage {
         let weak_preview = preview.downgrade();
         let source = document.downgrade();
         // The handler holds the preview and the document weakly; it ends with the editor.
-        let _subscription = document.changed(move |_| {
+        document.changed(move |_| {
             if let (Some(preview), Some(source)) = (weak_preview.upgrade(), source.upgrade()) {
                 let _ = preview.rich_document().restore(&source.snapshot());
             }
-        });
+        }).detach();
     }
 }

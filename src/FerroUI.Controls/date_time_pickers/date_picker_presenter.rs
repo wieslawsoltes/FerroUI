@@ -202,19 +202,19 @@ impl TemplatedControlImpl for DatePickerPresenter {
             if let Some(this) = weak.upgrade() {
                 this.on_month_changed();
             }
-        });
+        }).detach();
         let weak = weak_this.clone();
         items.day_selector.selection_changed(move || {
             if let Some(this) = weak.upgrade() {
                 this.on_day_changed();
             }
-        });
+        }).detach();
         let weak = weak_this.clone();
         items.year_selector.selection_changed(move || {
             if let Some(this) = weak.upgrade() {
                 this.on_year_changed();
             }
-        });
+        }).detach();
 
         if let Some(dismiss_button) = &items.dismiss_button {
             let weak = weak_this.clone();

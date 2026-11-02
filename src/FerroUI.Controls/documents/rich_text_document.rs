@@ -336,7 +336,7 @@ impl RichTextDocument {
                 document.on_invalidated();
             }
         });
-        *document.0.subscription.borrow_mut() = Some(Subscription::new(subscription));
+        *document.0.subscription.borrow_mut() = Some(subscription);
         document
     }
 
@@ -404,17 +404,19 @@ impl RichTextDocument {
         }
     }
 
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the document.
     pub fn changed(
         &self,
         handler: impl Fn(&DocumentChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.0.changed.add(Rc::new(handler));
         let weak = Rc::downgrade(&self.0.changed);
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(handlers) = weak.upgrade() {
                 handlers.remove(token);
             }
-        })
+        }))
     }
 
     /// Internal position tracking runs at each completed model replacement. The

@@ -122,7 +122,7 @@ mod auto_complete_box_automation_peer_tests {
             } else if e.property() == ValuePatternIdentifiers::value_property() {
                 *value_sink.borrow_mut() = Some(e.clone());
             }
-        });
+        }).detach();
 
         target.set_is_drop_down_open(true);
         let expand_collapse_changed = expand_collapse_changed.borrow();
@@ -210,7 +210,7 @@ mod calendar_automation_peer_tests {
             } else if e.property() == ValuePatternIdentifiers::value_property() {
                 *value_sink.borrow_mut() = Some(e.clone());
             }
-        });
+        }).detach();
 
         target.set_selected_date(Some(DateTime::new(2010, 1, 1)));
 

@@ -362,7 +362,7 @@ fn the_peer_reports_the_coerced_value_after_the_handlers_and_the_changes_of_the_
             assert_eq!(Some(&5.0), event.new_value().unwrap().downcast_ref::<f64>());
             recorded.borrow_mut().push("large change".to_string());
         }
-    });
+    }).detach();
     control.set_numeric_value(50.0);
     control.set_small_change(0.25);
     control.set_large_change(5.0);

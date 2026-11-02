@@ -95,6 +95,6 @@ impl DesignerWorkspace {
                 },
             );
             flyout.set_content(Some(Control::boxed(editor.control())));
-        });
+        }).detach();
     }
 }

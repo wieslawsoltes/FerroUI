@@ -90,7 +90,7 @@ fn text_change_raises_value_property_changed() {
             assert_eq!(Some("abc".to_string()), new_value);
             count.set(count.get() + 1);
         }
-    });
+    }).detach();
 
     combo_box.set_text(Some("abc".to_string()));
 

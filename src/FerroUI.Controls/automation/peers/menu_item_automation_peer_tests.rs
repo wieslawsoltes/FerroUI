@@ -178,7 +178,7 @@ fn toggle_raises_toggle_state_property_changed() {
             assert_eq!(Some(ToggleState::On), value_of::<ToggleState>(e.new_value()));
             count.set(count.get() + 1);
         }
-    });
+    }).detach();
 
     provider.toggle().unwrap();
 
@@ -275,7 +275,7 @@ fn expand_collapse_raises_property_changed() {
         if std::ptr::eq(e.property(), ExpandCollapsePatternIdentifiers::expand_collapse_state_property()) {
             sink.borrow_mut().push(e.clone());
         }
-    });
+    }).detach();
 
     provider.expand().unwrap();
     provider.collapse().unwrap();

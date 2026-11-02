@@ -71,7 +71,7 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
                 frame.back_stack_depth()
             )));
         }
-    });
+    }).detach();
     for name in ["NavigationNext", "NavigationBack", "NavigationForward"] {
         let weak_frame = frame.downgrade();
         let weak_status = status.downgrade();

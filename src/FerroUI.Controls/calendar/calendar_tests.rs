@@ -64,10 +64,10 @@ fn selected_dates_changed_should_fire_when_selected_date_set() {
     let handled = Rc::new(Cell::new(false));
     let calendar = Calendar::new();
     calendar.set_selection_mode(CalendarSelectionMode::SingleDate);
-    let _subscription = calendar.selected_dates_changed({
+    calendar.selected_dates_changed({
         let handled = handled.clone();
         move |_| handled.set(true)
-    });
+    }).detach();
     let value = DateTime::new(2000, 10, 10);
     calendar.set_selected_date(Some(value));
     assert!(handled.get());
@@ -79,10 +79,10 @@ fn display_date_changed_should_fire_when_display_date_set() {
     let handled = Rc::new(Cell::new(false));
     let calendar = Calendar::new();
     calendar.set_selection_mode(CalendarSelectionMode::SingleDate);
-    let _subscription = calendar.display_date_changed({
+    calendar.display_date_changed({
         let handled = handled.clone();
         move |_| handled.set(true)
-    });
+    }).detach();
     let value = DateTime::new(2000, 10, 10);
     calendar.set_display_date(value);
     assert!(handled.get());
@@ -227,10 +227,10 @@ fn single_date_selection_behavior() {
     let tracker = Rc::new(SelectedDatesChangedTracker::default());
     tracker.reset();
     let calendar = Calendar::new();
-    let _subscription = calendar.selected_dates_changed({
+    calendar.selected_dates_changed({
         let tracker = tracker.clone();
         move |e| tracker.on_selected_dates_changed(e)
-    });
+    }).detach();
     calendar.set_selection_mode(CalendarSelectionMode::SingleDate);
     calendar.set_selected_date(Some(today()));
     assert!(compare_dates(calendar.selected_date().unwrap(), today()));
@@ -270,10 +270,10 @@ fn single_range_selection_behavior() {
     let tracker = Rc::new(SelectedDatesChangedTracker::default());
     tracker.reset();
     let calendar = Calendar::new();
-    let _subscription = calendar.selected_dates_changed({
+    calendar.selected_dates_changed({
         let tracker = tracker.clone();
         move |e| tracker.on_selected_dates_changed(e)
-    });
+    }).detach();
     calendar.set_selection_mode(CalendarSelectionMode::SingleRange);
     calendar.set_selected_date(Some(today()));
     assert!(compare_dates(calendar.selected_date().unwrap(), today()));
@@ -898,10 +898,10 @@ mod additional {
     fn tracker_of(calendar: &Calendar) -> Rc<SelectedDatesChangedTracker> {
         let tracker = Rc::new(SelectedDatesChangedTracker::default());
         // The calendar keeps the handler for as long as it lives.
-        let _ = calendar.selected_dates_changed({
+        calendar.selected_dates_changed({
             let tracker = tracker.clone();
             move |e| tracker.on_selected_dates_changed(e)
-        });
+        }).detach();
         tracker
     }
 
@@ -1111,10 +1111,10 @@ mod additional {
         let _scope = start();
         let (calendar, item) = create_calendar(date(2024, 2, 15));
         let modes = Rc::new(RefCell::new(Vec::new()));
-        let _subscription = calendar.display_mode_changed({
+        calendar.display_mode_changed({
             let modes = modes.clone();
             move |e| modes.borrow_mut().push((e.old_mode(), e.new_mode()))
-        });
+        }).detach();
 
         assert!(press_with(&calendar, Key::Up, KeyModifiers::CONTROL));
         assert_eq!(CalendarMode::Year, calendar.display_mode());
@@ -1862,10 +1862,10 @@ mod additional {
         let calendar = Calendar::new();
         calendar.set_display_date(date(2024, 2, 15));
         let changes = Rc::new(RefCell::new(Vec::new()));
-        let _subscription = calendar.display_date_changed({
+        calendar.display_date_changed({
             let changes = changes.clone();
             move |e| changes.borrow_mut().push((e.removed_date(), e.added_date()))
-        });
+        }).detach();
 
         calendar.set_display_date(date(2024, 3, 20));
         assert_eq!(vec![(Some(date(2024, 2, 15)), Some(date(2024, 3, 20)))], *changes.borrow());

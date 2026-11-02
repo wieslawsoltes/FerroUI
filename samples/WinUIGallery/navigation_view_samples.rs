@@ -217,7 +217,7 @@ fn wire_selection(
                 error.set_is_visible(true);
             }
         }
-    });
+    }).detach();
     Ok(())
 }
 

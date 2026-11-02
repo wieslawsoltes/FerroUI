@@ -250,8 +250,8 @@ impl AutomationNode {
         });
 
         let mut subscriptions = vec![
-            peer.children_changed(move || Self::on_peer_children_changed(id)),
-            peer.property_changed(move |e| Self::on_peer_property_changed(id, e)),
+            peer.children_changed(move || Self::on_peer_children_changed(id)).detach(),
+            peer.property_changed(move |e| Self::on_peer_property_changed(id, e)).detach(),
         ];
         subscriptions.extend(Self::text_subscriptions(peer, id));
         if let Some(embedded_root) = peer.get_provider::<dyn aap::IEmbeddedRootProvider>() {

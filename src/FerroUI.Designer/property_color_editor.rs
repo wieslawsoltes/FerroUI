@@ -296,7 +296,7 @@ impl PropertyColorEditor {
             } else {
                 event.set_cancel(true);
             }
-        });
+        }).detach();
         let weak_flyout = flyout.downgrade();
         cancel.click(move |_, _| {
             if let Some(flyout) = weak_flyout.upgrade() {

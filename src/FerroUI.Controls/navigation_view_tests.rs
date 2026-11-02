@@ -258,7 +258,7 @@ fn invocation_precedes_selected_flags_and_selection_changed_and_repeat_is_not_a_
             a.is_selected(),
             b.is_selected()
         ));
-    });
+    }).detach();
     let seen = events.clone();
     let wa = a.downgrade();
     let wb = b.downgrade();
@@ -267,7 +267,7 @@ fn invocation_precedes_selected_flags_and_selection_changed_and_repeat_is_not_a_
         let b = wb.upgrade().unwrap();
         assert!(args.selected_item_container().unwrap().ptr_eq(&b));
         seen.borrow_mut().push(format!("select:{}:{}", a.is_selected(), b.is_selected()));
-    });
+    }).detach();
     invoke(&b);
     assert_eq!(&*events.borrow(), &["invoke:B:true:false", "select:false:true"]);
     events.borrow_mut().clear();
@@ -290,10 +290,10 @@ fn invocation_redirected_by_application_commits_only_the_final_selection() {
     let destination = c.downgrade();
     nav.item_invoked(move |_| {
         weak.upgrade().unwrap().set_selected_item(boxed(&destination.upgrade().unwrap()));
-    });
+    }).detach();
     let changes = Rc::new(Cell::new(0));
     let seen = changes.clone();
-    nav.selection_changed(move |_| seen.set(seen.get() + 1));
+    nav.selection_changed(move |_| seen.set(seen.get() + 1)).detach();
     invoke(&b);
     assert!(reference_equals(&nav.selected_item(), &boxed(&c)));
     assert!(!a.is_selected() && !b.is_selected() && c.is_selected());
@@ -312,7 +312,7 @@ fn disabled_and_nonselecting_items_preserve_selection_and_programmatic_suppressi
     nav.set_selected_item(boxed(&selected));
     let count = Rc::new(Cell::new(0));
     let seen = count.clone();
-    nav.item_invoked(move |_| seen.set(seen.get() + 1));
+    nav.item_invoked(move |_| seen.set(seen.get() + 1)).detach();
     action.set_is_enabled(false);
     invoke(&action);
     assert_eq!(count.get(), 0);
@@ -419,9 +419,9 @@ fn expansion_events_support_lazy_children_and_footer_settings_selection() {
             parent.menu_items().add(boxed(&item("Lazy child")));
         }
         seen.borrow_mut().push("expanding");
-    });
+    }).detach();
     let seen = events.clone();
-    nav.collapsed(move |_| seen.borrow_mut().push("collapsed"));
+    nav.collapsed(move |_| seen.borrow_mut().push("collapsed")).detach();
     nav.expand(&parent);
     nav.collapse(&parent);
     assert_eq!(&*events.borrow(), &["expanding", "collapsed"]);
@@ -431,7 +431,7 @@ fn expansion_events_support_lazy_children_and_footer_settings_selection() {
     assert!(reference_equals(&nav.selected_item(), &boxed(&footer)));
     let settings_seen = Rc::new(Cell::new(false));
     let seen = settings_seen.clone();
-    nav.selection_changed(move |args| seen.set(args.is_settings_selected()));
+    nav.selection_changed(move |args| seen.set(args.is_settings_selected())).detach();
     invoke(&nav.settings_item());
     assert!(settings_seen.get());
     assert!(nav.settings_item().is_selected() && !footer.is_selected());
@@ -451,7 +451,7 @@ fn escape_close_is_cancellable_but_explicit_close_keeps_its_source_semantics() {
         args.set_cancel(true);
     });
     let seen = events.clone();
-    nav.pane_closed(move || seen.borrow_mut().push("closed"));
+    nav.pane_closed(move || seen.borrow_mut().push("closed")).detach();
     assert!(!press(&nav, Key::Escape).handled());
     assert!(nav.is_pane_open());
     assert_eq!(&*events.borrow(), &["closing"]);
@@ -476,13 +476,13 @@ fn pane_opening_reentrancy_does_not_raise_a_stale_opened_event() {
     nav.pane_opening(move || {
         seen.borrow_mut().push("opening");
         weak.upgrade().unwrap().set_is_pane_open(false);
-    });
+    }).detach();
     let seen = events.clone();
-    nav.pane_closing(move |_| seen.borrow_mut().push("closing"));
+    nav.pane_closing(move |_| seen.borrow_mut().push("closing")).detach();
     let seen = events.clone();
-    nav.pane_closed(move || seen.borrow_mut().push("closed"));
+    nav.pane_closed(move || seen.borrow_mut().push("closed")).detach();
     let seen = events.clone();
-    nav.pane_opened(move || seen.borrow_mut().push("opened"));
+    nav.pane_opened(move || seen.borrow_mut().push("opened")).detach();
     nav.set_is_pane_open(true);
     assert!(!nav.is_pane_open());
     assert_eq!(&*events.borrow(), &["opening", "closing", "closed"]);
@@ -581,7 +581,7 @@ fn replacing_template_disconnects_old_buttons_and_preserves_selected_containers(
     nav.set_is_back_enabled(true);
     let backs = Rc::new(Cell::new(0));
     let seen = backs.clone();
-    nav.back_requested(move |_| seen.set(seen.get() + 1));
+    nav.back_requested(move |_| seen.set(seen.get() + 1)).detach();
     old_back.on_click();
     assert_eq!(backs.get(), 1);
     let replacement = FuncControlTemplate::for_type::<NavigationView>(|_, _| Border::new().upcast());
@@ -713,7 +713,7 @@ fn focus_following_raises_invocation_once_and_keyboard_navigation_moves_focus() 
     assert!(nav.template_settings().single_selection_follows_focus());
     let count = Rc::new(Cell::new(0));
     let seen = count.clone();
-    nav.item_invoked(move |_| seen.set(seen.get() + 1));
+    nav.item_invoked(move |_| seen.set(seen.get() + 1)).detach();
     a.focus_with(NavigationMethod::Directional, KeyModifiers::NONE);
     assert!(a.is_selected());
     assert_eq!(count.get(), 1);
@@ -763,15 +763,15 @@ fn mode_and_pane_events_expose_exact_values_and_source_enum_numbers() {
     let _scene = attach(&nav, 800.0);
     let modes = Rc::new(RefCell::new(Vec::new()));
     let seen = modes.clone();
-    nav.display_mode_changed(move |args| seen.borrow_mut().push(args.display_mode()));
+    nav.display_mode_changed(move |args| seen.borrow_mut().push(args.display_mode())).detach();
     nav.set_pane_display_mode(NavigationViewPaneDisplayMode::Left);
     nav.set_pane_display_mode(NavigationViewPaneDisplayMode::LeftMinimal);
     assert_eq!(&*modes.borrow(), &[NavigationViewDisplayMode::Expanded, NavigationViewDisplayMode::Minimal]);
     let events = Rc::new(RefCell::new(Vec::new()));
     let seen = events.clone();
-    nav.pane_opening(move || seen.borrow_mut().push("opening"));
+    nav.pane_opening(move || seen.borrow_mut().push("opening")).detach();
     let seen = events.clone();
-    nav.pane_opened(move || seen.borrow_mut().push("opened"));
+    nav.pane_opened(move || seen.borrow_mut().push("opened")).detach();
     nav.set_is_pane_open(true);
     assert_eq!(&*events.borrow(), &["opening", "opened"]);
     let settings = nav.settings_item();
@@ -782,7 +782,7 @@ fn mode_and_pane_events_expose_exact_values_and_source_enum_numbers() {
         assert!(args.is_settings_invoked());
         assert!(args.invoked_item_container().unwrap().ptr_eq(&weak_settings.upgrade().unwrap()));
         seen.set(true);
-    });
+    }).detach();
     invoke(&settings);
     assert!(invoked.get());
 }
@@ -886,7 +886,7 @@ fn compact_context_restores_expansion_and_public_expand_ignores_leaf_items() {
         assert!(args.collapsed_item_container().ptr_eq(&parent));
         assert!(reference_equals(&args.collapsed_item(), &boxed(&parent)));
         observed.set(true);
-    });
+    }).detach();
     nav.collapse(&parent);
     assert!(seen.get());
 }
@@ -969,7 +969,7 @@ fn focus_following_reaches_the_flyout_hierarchy_without_invoking_ancestors() {
         let child = weak_child.upgrade().unwrap();
         assert!(args.invoked_item_container().unwrap().ptr_eq(&child));
         seen.borrow_mut().push(format!("invoke:{}:{}", anchor.is_selected(), child.is_selected()));
-    });
+    }).detach();
     let seen = events.clone();
     let weak_anchor = anchor.downgrade();
     let weak_child = child.downgrade();
@@ -978,7 +978,7 @@ fn focus_following_reaches_the_flyout_hierarchy_without_invoking_ancestors() {
         let child = weak_child.upgrade().unwrap();
         assert!(args.selected_item_container().unwrap().ptr_eq(&child));
         seen.borrow_mut().push(format!("select:{}:{}", anchor.is_selected(), child.is_selected()));
-    });
+    }).detach();
     nav.set_selection_follows_focus(NavigationViewSelectionFollowsFocus::Enabled);
     assert!(child.focus_with(NavigationMethod::Directional, KeyModifiers::NONE));
     assert_eq!(&*events.borrow(), &["invoke:true:false", "select:false:true"]);
@@ -1023,7 +1023,7 @@ fn focus_subscriptions_preserve_redirects_and_detach_after_retemplate_removal_an
     nav.item_invoked(move |_| {
         observed.set(observed.get() + 1);
         weak_owner.upgrade().unwrap().set_selected_item(boxed(&weak_anchor.upgrade().unwrap()));
-    });
+    }).detach();
     nav.apply_template();
     // Each new template replaces the subscriptions. The redirect above leaves Child unselected,
     // which shows duplicate handlers instead of hiding them behind the guard of the selection.
@@ -1088,7 +1088,7 @@ fn flyout_directional_keys_follow_the_vertical_tree_and_top_roots_follow_flow_di
     }
     let invocations = Rc::new(Cell::new(0));
     let observed = invocations.clone();
-    nav.item_invoked(move |_| observed.set(observed.get() + 1));
+    nav.item_invoked(move |_| observed.set(observed.get() + 1)).detach();
     let scene = show(&nav, 900.0, 500.0);
     nav.expand(&parent);
     scene.0.update_layout();
@@ -1154,7 +1154,7 @@ fn clearing_an_attached_template_disconnects_retained_parts_and_restores_the_con
     let old_split = part::<SplitView>(&nav, "RootSplitView");
     let back_count = Rc::new(Cell::new(0));
     let observed = back_count.clone();
-    nav.back_requested(move |_| observed.set(observed.get() + 1));
+    nav.back_requested(move |_| observed.set(observed.get() + 1)).detach();
     nav.set_template(None);
     nav.apply_template();
     assert_eq!(nav.visual_children_count(), 0);
@@ -1181,7 +1181,7 @@ fn pending_selection_completes_once_for_the_current_model_with_or_without_a_cont
     let nav = NavigationView::new();
     let changes = Rc::new(RefCell::new(Vec::new()));
     let observed = changes.clone();
-    nav.selection_changed(move |args| observed.borrow_mut().push(args.clone()));
+    nav.selection_changed(move |args| observed.borrow_mut().push(args.clone())).detach();
     let first: Option<BoxedValue> = Some(Rc::new("Not realized first".to_owned()));
     let second: Option<BoxedValue> = Some(Rc::new("Not realized second".to_owned()));
     nav.set_selected_item(first);
@@ -1230,7 +1230,7 @@ fn queued_selection_completion_does_not_keep_navigation_alive() {
     let nav = NavigationView::new();
     let changes = Rc::new(Cell::new(0));
     let observed = changes.clone();
-    nav.selection_changed(move |_| observed.set(observed.get() + 1));
+    nav.selection_changed(move |_| observed.set(observed.get() + 1)).detach();
     nav.set_selected_item(Some(Rc::new("Not realized".to_owned())));
     let weak = nav.downgrade();
     drop(nav);

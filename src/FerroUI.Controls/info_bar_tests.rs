@@ -126,13 +126,13 @@ fn the_close_button_and_the_application_close_the_bar_in_the_order_of_winui() {
     apply_parts(&bar);
     let events = Rc::new(RefCell::new(Vec::new()));
     let seen = events.clone();
-    let _opened = bar.opened(move |_| seen.borrow_mut().push("opened".to_string()));
+    bar.opened(move |_| seen.borrow_mut().push("opened".to_string())).detach();
     let seen = events.clone();
-    let _click = bar.close_button_click(move || seen.borrow_mut().push("click".to_string()));
+    bar.close_button_click(move || seen.borrow_mut().push("click".to_string())).detach();
     let seen = events.clone();
-    let _closing = bar.closing(move |args| seen.borrow_mut().push(format!("closing:{:?}", args.reason())));
+    bar.closing(move |args| seen.borrow_mut().push(format!("closing:{:?}", args.reason()))).detach();
     let seen = events.clone();
-    let _closed = bar.closed(move |args| seen.borrow_mut().push(format!("closed:{:?}", args.reason())));
+    bar.closed(move |args| seen.borrow_mut().push(format!("closed:{:?}", args.reason()))).detach();
 
     bar.set_is_open(true);
     part::<Button>(&bar, "CloseButton").on_click();
@@ -162,10 +162,10 @@ fn a_cancelled_closing_opens_the_bar_again_without_closed() {
     });
     let closed = Rc::new(Cell::new(0));
     let counter = closed.clone();
-    let _closed = bar.closed(move |_| counter.set(counter.get() + 1));
+    bar.closed(move |_| counter.set(counter.get() + 1)).detach();
     let opened = Rc::new(Cell::new(0));
     let counter = opened.clone();
-    let _opened = bar.opened(move |_| counter.set(counter.get() + 1));
+    bar.opened(move |_| counter.set(counter.get() + 1)).detach();
 
     part::<Button>(&bar, "CloseButton").on_click();
     assert!(bar.is_open());
@@ -286,11 +286,11 @@ fn the_peer_is_a_status_bar_named_by_the_title_and_the_message() {
 
     let changed = Rc::new(Cell::new(0));
     let count = changed.clone();
-    let _changes = peer.property_changed(move |args| {
+    peer.property_changed(move |args| {
         if std::ptr::eq(args.property(), AutomationElementIdentifiers::name_property()) {
             count.set(count.get() + 1);
         }
-    });
+    }).detach();
     bar.set_message("Connected");
     assert_eq!("Network Connected", peer.get_name());
     assert_eq!(1, changed.get());

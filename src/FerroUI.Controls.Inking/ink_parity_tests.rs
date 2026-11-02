@@ -1021,7 +1021,7 @@ fn width_value_provider_clamps_and_announces_absolute_range_and_value_changes() 
         if event.property() == ValuePatternIdentifiers::value_property() {
             count.set(count.get() + 1);
         }
-    });
+    }).detach();
     value.set_value(Some("7")).unwrap();
     assert_eq!(slider.value(), 7.0);
     assert_eq!(value.value().as_deref(), Some("7"));
