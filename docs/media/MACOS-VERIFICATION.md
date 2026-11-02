@@ -157,7 +157,7 @@ absent from default builds.
 
 ## Remaining acceptance
 
-Physical camera consent/denial, device removal/Continuity, native JPEG output and
+Physical camera denial, device removal/Continuity, native JPEG output and
 camera+QR+projection recovery require a camera-equipped host. Actual audible
 output/AV synchronization, a full VoiceOver workflow, abrupt driver loss, oldest
 supported OS and Intel runtime/driver profiles remain unverified. Developer ID
@@ -191,5 +191,51 @@ The native contract test reproduces the old invalid rounding as a negative
 control, verifies exact 30 fps and 30000/1001 boundaries, the minimum rate,
 intermediate rates and invalid inputs. Together with the existing delegate
 lifetime test, both tests pass with `native-lifetime-tests`; neither test acquires
-a camera. A successful physical preview/photo replay after this fix remains
-separate evidence.
+a camera. On 2026-11-02 the user confirmed that the physical camera works on
+macOS after this fix. This is manual user-reported camera-operation evidence;
+it does not establish the separate photo, denial, hotplug, color/geometry or
+long-running recovery gates.
+
+## Upstream integration — 2026-11-02
+
+The desktop branch integrates `origin/main` at
+`f6ccf8b21f4abfc653b4342cfb734f796fd5e22e`, including the dispatcher/executor
+updates and Graphite pipeline prewarming. The two Skia import/export conflicts
+retain the upstream prewarm context/API together with media frame-context IDs,
+frame leases and asynchronous GPU completion. Prewarming still uses its own
+recorder; the media completion path stays on the actual rendering queue.
+
+A fresh default Metal replay passes all **37 stages**, including both expected
+negative controls and the full 300-cycle / 600-reset memory workload. All 16
+orientation/crop cases, achieved seek/recovery pixels, native transport
+accessibility/keyboard actions, shared media contracts, the real Metal frame
+fixture, both native camera contracts and the Vision fixture pass. Default
+playback/recovery/EOF restart, development bundle signing/launch, discovery and
+deployment metadata pass. Five separate effect/prewarming unit tests pass too.
+The integrated desktop catalog build and Metal media navigation/retirement smoke
+pass. The Emscripten catalog build and real Chrome/ANGLE-Metal catalog smoke also
+pass, including lazy served-video loading, native playback, fake-camera capture,
+an independently decoded photo, cleanup and both QR payloads. The browser fixture
+does not acquire a physical camera.
+
+| Measurement | Cycle 10 | Cycle 300 | Change |
+| --- | ---: | ---: | ---: |
+| Process footprint | 196,691,144 | 214,582,472 | +17,891,328 bytes |
+| Metal allocated bytes | 45,088,768 | 45,088,768 | 0 |
+| Mach ports | 546 | 550 | +4 |
+
+These changes remain below the original frozen limits. Every retirement
+checkpoint reaches zero frames, GPU reads, quarantine and native player owners;
+preview CPU transfers remain zero. This is the same lifecycle workload, not
+full-resolution performance acceptance or universal leak-freedom evidence.
+
+Evidence is outside Git in
+`/Volumes/SSD/build-cache/ferroui-portable-media-evidence/main-integration-f6ccf8b2-2026-11-02/`.
+The audit executable's SHA-256 is
+`948298d45178a67c04567e88a6a3a74a99a844d49938e98887e596e97814a428`.
+The JSON report links a supplemental `integration-source.json` containing both
+merge parents and all staged/unstaged source hashes, frozen during the audit
+build and checked unchanged after the native replay. The runner now captures
+staged integration files directly on subsequent runs and requires both named
+camera contracts instead of the obsolete single-test count. Later verification
+documentation edits are separate from the compiled source hashes.

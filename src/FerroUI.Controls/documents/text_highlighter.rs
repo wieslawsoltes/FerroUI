@@ -4,7 +4,7 @@
 use super::{TextHighlightError, TextHighlightRange, TextRangeCollection};
 use ferroui_base::media::{IBrush, subscribe_invalidated};
 use ferroui_base::metadata::IAddChild;
-use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs,
@@ -25,7 +25,7 @@ pub struct TextHighlighter {
     base: FerroObject,
     ranges: TextRangeCollection,
     range_subscription: RefCell<Option<Subscription>>,
-    brush_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    brush_subscriptions: RefCell<Vec<Subscription>>,
     invalidated: Rc<HandlerList<dyn Fn()>>,
 }
 
@@ -158,10 +158,7 @@ impl TextHighlighter {
     }
 
     fn refresh_brush_subscriptions(&self) {
-        let old = std::mem::take(&mut *self.brush_subscriptions.borrow_mut());
-        for subscription in old {
-            subscription.dispose();
-        }
+        drop(self.brush_subscriptions.take());
         let mut subscriptions = Vec::new();
         let mut seen = HashSet::new();
         for brush in [self.foreground(), self.background()] {
@@ -178,23 +175,13 @@ impl TextHighlighter {
                 }
             });
             if let Some(subscription) = subscribe_invalidated(&brush, changed) {
-                subscriptions.push(subscription);
+                subscriptions.push(Subscription::new(subscription));
             }
         }
         *self.brush_subscriptions.borrow_mut() = subscriptions;
     }
 }
 
-impl Drop for TextHighlighter {
-    fn drop(&mut self) {
-        if let Some(subscription) = self.range_subscription.get_mut().take() {
-            subscription.dispose();
-        }
-        for subscription in self.brush_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
-    }
-}
 
 struct HighlighterAddChild(Ref<TextHighlighter>);
 impl IAddChild<TextHighlightRange> for HighlighterAddChild {

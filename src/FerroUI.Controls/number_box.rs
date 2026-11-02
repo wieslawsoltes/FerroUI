@@ -21,7 +21,7 @@ use ferroui_base::interactivity::{InteractiveImpl, RoutingStrategies};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::TextAlignment;
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_markup_enum, ferro_markup_type, ferro_property, instantiate, BoxedValue,
@@ -165,7 +165,7 @@ pub struct NumberBox {
     value_updating: Cell<bool>,
     text_updating: Cell<bool>,
     parts: RefCell<Parts>,
-    template_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    template_subscriptions: RefCell<Vec<Subscription>>,
     value_changed: HandlerList<dyn Fn(&NumberBoxValueChangedEventArgs)>,
 }
 
@@ -357,11 +357,11 @@ impl TemplatedControlImpl for NumberBox {
                 }
             });
             let button = button.downgrade();
-            subscriptions.push(Disposable::create(move || {
+            subscriptions.push(Subscription::new(Disposable::create(move || {
                 if let Some(button) = button.upgrade() {
                     button.remove_handler(Button::click_event(), token);
                 }
-            }));
+            })));
         }
         *this.template_subscriptions.borrow_mut() = subscriptions;
         *this.parts.borrow_mut() = Parts {
@@ -785,10 +785,7 @@ impl NumberBox {
     }
 
     fn unhook_events(&self) {
-        let subscriptions = self.template_subscriptions.take();
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(self.template_subscriptions.take());
         let old = self.parts.take();
         if let Some(popup) = old.popup {
             popup.set_is_open(false);

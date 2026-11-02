@@ -6,7 +6,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use super::dispatcher_operation::{box_local_callback, OperationCore, SendCallback, WaitOutcome};
-use super::dispatcher_task::{wrap_local_future, wrap_send_future};
+use super::dispatcher_task::{new_local_task, new_send_task};
 use super::{
     CancellationToken, Dispatcher, DispatcherOperation, DispatcherOperationStatus, DispatcherPriority,
     DispatcherPriorityAwaitable, DispatcherPriorityTaskAwaitable, DispatcherTask, FerroSynchronizationContext,
@@ -444,6 +444,10 @@ impl Dispatcher {
     /// canceled when the operation is aborted before the callback ran or the
     /// dispatcher shuts down before the future is done, and it fails with
     /// the panic of the callback or the future.
+    ///
+    /// The task is a task of the dispatcher
+    /// ([`spawn_with_priority`](Self::spawn_with_priority)), with a handle
+    /// that keeps the contract of [`DispatcherTask`].
     pub fn invoke_async_task_with_priority<F, Fut>(
         &self,
         callback: F,
@@ -455,18 +459,10 @@ impl Dispatcher {
         Fut::Output: Send + 'static,
     {
         DispatcherPriority::validate(priority, "priority");
-        let dispatcher = self.to_arc();
-        let (task, completion, wrap) = wrap_send_future::<Fut>(&dispatcher);
-        let target = dispatcher.clone();
-        // When the operation is aborted its callback is dropped, which
-        // cancels the task.
-        drop(self.invoke_async_with_priority(
-            move || match catch_unwind(AssertUnwindSafe(callback)) {
-                Ok(future) => target.start_task(priority, wrap(future), completion, true),
-                Err(payload) => completion.fail(payload),
-            },
-            priority,
-        ));
+        let (task, start) = new_send_task::<Fut::Output>(&self.to_arc());
+        // When the job is dropped without running (the dispatcher has shut
+        // down), `start` is dropped with it, which cancels the task.
+        drop(self.spawn_with_priority(move || start.run(callback), priority));
         task
     }
 
@@ -503,13 +499,13 @@ impl Dispatcher {
         self.verify_access();
         DispatcherPriority::validate(priority, "priority");
         let dispatcher = self.to_arc();
-        let (task, completion, wrap) = wrap_local_future::<Fut>(&dispatcher);
+        let (task, start) = new_local_task::<Fut::Output>(&dispatcher);
         let target = dispatcher.clone();
+        // The callback is not `Send`: it runs in a local job, which starts the
+        // task with a first poll inside it. When the job is dropped without
+        // running, `start` is dropped with it, which cancels the task.
         drop(self.invoke_async_local_with_priority(
-            move || match catch_unwind(AssertUnwindSafe(callback)) {
-                Ok(future) => target.start_task(priority, wrap(future), completion, true),
-                Err(payload) => completion.fail(payload),
-            },
+            move || drop(target.start_local_with_priority(start.run(callback), priority)),
             priority,
         ));
         task

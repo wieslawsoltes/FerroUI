@@ -7,7 +7,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::media::{subscribe_invalidated, DrawingContext, IBrush};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, Size,
@@ -29,10 +29,10 @@ pub struct Chart {
     series: ChartSeriesCollection,
     axes: ChartAxisCollection,
     data: ChartDataCollection,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
     refreshing_subscriptions: Cell<bool>,
     subscriptions_dirty: Cell<bool>,
-    resource_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    resource_subscriptions: RefCell<Vec<Subscription>>,
     scene: RefCell<Option<Rc<ChartScene>>>,
     revision: Cell<u64>,
     scene_build_count: Cell<u64>,
@@ -98,7 +98,7 @@ impl FerroObjectImpl for Chart {
         });
         this.resource_subscriptions
             .borrow_mut()
-            .extend([resources.detach(), theme.detach()]);
+            .extend([resources, theme]);
     }
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs) {
         Self::parent_on_property_changed(this, change);
@@ -280,9 +280,7 @@ impl Chart {
     fn rebuild_subscriptions(&self) {
         // Dispose outside the borrow: subscriptions are allowed to call user code.
         let previous = std::mem::take(&mut *self.subscriptions.borrow_mut());
-        for subscription in previous {
-            subscription.dispose();
-        }
+        drop(previous);
         let mut subscriptions = Vec::new();
         let mut samples = Vec::new();
         for sample in self.data.snapshot().iter() {
@@ -304,12 +302,12 @@ impl Chart {
         }
         for axis in self.axes.snapshot().iter() {
             let weak = self.to_ref().downgrade();
-            subscriptions.push(axis.property_changed(move |_| {
+            subscriptions.push(Subscription::new(axis.property_changed(move |_| {
                 if let Some(chart) = weak.upgrade() {
                     chart.refresh_subscriptions();
                     chart.invalidate_scene();
                 }
-            }));
+            })));
             if let Some(axis) = axis.cast::<crate::CartesianAxis>() {
                 brushes.extend([
                     axis.axis_line_brush(),
@@ -322,12 +320,12 @@ impl Chart {
         }
         for series in self.series.snapshot().iter() {
             let weak = self.to_ref().downgrade();
-            subscriptions.push(series.property_changed(move |_| {
+            subscriptions.push(Subscription::new(series.property_changed(move |_| {
                 if let Some(chart) = weak.upgrade() {
                     chart.refresh_subscriptions();
                     chart.invalidate_scene();
                 }
-            }));
+            })));
             for sample in [series.x_values(), series.y_values()].into_iter().flatten() {
                 if !samples.contains(&sample) {
                     samples.push(sample);
@@ -353,9 +351,9 @@ impl Chart {
                     chart.invalidate_scene();
                 }
             }));
-            subscriptions.push(Disposable::create(move || {
+            subscriptions.push(Subscription::new(Disposable::create(move || {
                 labels.remove_collection_changed(token);
-            }));
+            })));
             let markers = series.data_marker_overrides();
             brushes.extend(markers.values().into_iter().map(|marker| marker.brush()));
             let weak = self.to_ref().downgrade();
@@ -365,12 +363,12 @@ impl Chart {
                     chart.invalidate_scene();
                 }
             }));
-            subscriptions.push(Disposable::create(move || {
+            subscriptions.push(Subscription::new(Disposable::create(move || {
                 markers.remove_collection_changed(token);
-            }));
+            })));
         }
         for sample in samples {
-            subscriptions.push(self.observe_samples(sample));
+            subscriptions.push(Subscription::new(self.observe_samples(sample)));
         }
         let mut watched: Vec<Rc<dyn IBrush>> = Vec::new();
         for brush in brushes.into_iter().flatten() {
@@ -387,7 +385,7 @@ impl Chart {
                     }
                 }),
             ) {
-                subscriptions.push(subscription);
+                subscriptions.push(Subscription::new(subscription));
             }
         }
         *self.subscriptions.borrow_mut() = subscriptions;
@@ -413,11 +411,7 @@ impl Drop for Chart {
         self.series.release_ownership();
         self.axes.release_ownership();
         self.owner.id.set(None);
-        for subscription in self.subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
-        for subscription in self.resource_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(std::mem::take(self.subscriptions.get_mut()));
+        drop(std::mem::take(self.resource_subscriptions.get_mut()));
     }
 }

@@ -4,7 +4,7 @@
 
 use super::application_at_spi_node::ApplicationAtSpiNode;
 use super::at_spi_node::AtSpiNode;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{PixelPoint, Point, Rect};
 use ferroui_controls::automation::provider::IRootProvider;
 use ferroui_controls::platform::IWindowBaseImpl;
@@ -15,7 +15,7 @@ pub(crate) struct RootAtSpiNode {
     node: Weak<AtSpiNode>,
     root_provider: Rc<dyn IRootProvider>,
     app_root: RefCell<Option<Rc<ApplicationAtSpiNode>>>,
-    focus_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    focus_subscription: RefCell<Option<Subscription>>,
     /// Whether the activation callbacks of the window still reach the node.
     window_subscribed: Rc<Cell<bool>>,
 }
@@ -35,7 +35,7 @@ impl RootAtSpiNode {
             node,
             root_provider,
             app_root: RefCell::new(None),
-            focus_subscription: RefCell::new(Some(focus_subscription)),
+            focus_subscription: RefCell::new(Some(Subscription::new(focus_subscription))),
             window_subscribed: Rc::new(Cell::new(false)),
         };
 

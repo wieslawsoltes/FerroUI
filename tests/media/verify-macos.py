@@ -67,7 +67,13 @@ def main():
         source = Path(env["SKIA_SOURCE_DIR"]) / "src/gpu/graphite/mtl/MtlGraphicsPipeline.mm"
         if source.is_file():
             report["skia"]["pipeline_source_sha256"] = digest(source)
-    files = subprocess.check_output(["git", "ls-files", "--modified", "--others", "--exclude-standard"], cwd=REPO, text=True).splitlines()
+    # A pending integration stages merged files before verification. Include
+    # both index and worktree changes relative to HEAD, not only unstaged edits.
+    files = set(subprocess.check_output(["git", "diff", "--name-only", "--diff-filter=ACMR", "-z", "HEAD"], cwd=REPO, text=True).split("\0"))
+    files.update(subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard", "-z"], cwd=REPO, text=True).split("\0"))
+    merge = subprocess.run(["git", "rev-parse", "--verify", "MERGE_HEAD"], cwd=REPO, text=True, capture_output=True)
+    if merge.returncode == 0:
+        report["integration_parent"] = merge.stdout.strip()
     report["changed_source_sha256"] = {name: digest(REPO / name) for name in files if (REPO / name).is_file()}
 
     def save():
@@ -136,7 +142,12 @@ def main():
                 ("camera-lifetime", ["-p", "ferroui-media-camera-apple", "--features", "native-lifetime-tests"]),
                 ("native-vision", ["-p", "ferroui-media-qr-apple", "--features", "test-fixtures"]),
             ]:
-                run(name, cargo + ["test", "--locked", "-j", "2", "--lib", *command], ["test result: ok. 7 passed" if name == "native-cgl" else "test result: ok. 1 passed"], timeout=900)
+                required = ["test result: ok. 7 passed" if name == "native-cgl" else "test result: ok. 1 passed"]
+                if name == "camera-lifetime":
+                    required = ["test result: ok.",
+                                "native_stop_releases_the_retaining_delegate_and_session_off_ui ... ok",
+                                "native_frame_duration_keeps_exact_supported_boundaries ... ok"]
+                run(name, cargo + ["test", "--locked", "-j", "2", "--lib", *command], required, timeout=900)
         run("default-build", cargo + ["build", "--locked", "-j", "2", "-p", "portable-media"], timeout=900)
         default = target / "debug/portable-media"
         run("default-recovery", [default, source, "--resource", "--smoke", "--renderer", "--device-recovery-smoke"], ["DEVICE_RECOVERY_PASS", "RENDERER_SHARED_INPUT" if args.backend == "cgl" else "RENDERER_PIXELS_PASS", "NATIVE_MEDIA_SMOKE_PASS"])

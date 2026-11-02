@@ -18,6 +18,7 @@ use super::{
     OperationCanceledError,
 };
 use crate::platform::ManagedDispatcherImpl;
+use ferroui_system::task::{JoinError, JoinHandle};
 use crate::reactive::IDisposable;
 use crate::FerroLocator;
 
@@ -2037,6 +2038,232 @@ fn dispatcher_task_is_a_future_for_other_executors() {
     assert_eq!(poll_once(&mut task, &waker), Poll::Ready(Ok(11)));
 }
 
+// ---------------------------------------------------------------------------
+// Tasks of the dispatcher on the executor of `ferroui-system` (step A2 of
+// phase C4 of #423, docs/idiomatic-rust-async.md, section 3.1).
+// ---------------------------------------------------------------------------
+
+/// The outcome of a task when it has ended, as text.
+fn outcome_of<T: std::fmt::Debug>(handle: &mut JoinHandle<T>) -> Option<String> {
+    match poll_once(handle, &CountingWaker::new()) {
+        Poll::Pending => None,
+        Poll::Ready(Ok(value)) => Some(format!("{value:?}")),
+        Poll::Ready(Err(JoinError::Canceled)) => Some("canceled".to_string()),
+        Poll::Ready(Err(error)) => Some(format!("{error}")),
+    }
+}
+
+#[test]
+fn a_task_whose_poll_pumps_the_queue_resumes_after_a_wake_that_ran_in_the_pump() {
+    // F1 (docs/idiomatic-rust-async.md, section 1.6): a wake during the poll of a dispatcher task
+    // queues a poll, which runs inside the nested loop that the poll pumps (a synchronous invoke
+    // at a priority other than Send). That poll must neither poll the task inside its own poll nor
+    // swallow the later wakes: before step A2 of C4 it found no task and left the task marked as
+    // scheduled, and the task never resumed.
+    let t = DispatcherTests::new();
+    let order = Rc::new(RefCell::new(Vec::new()));
+    let d = t.ui_thread.clone();
+    let o = order.clone();
+    let task = t.ui_thread.invoke_async_task_local_with_priority(
+        move || async move {
+            let mut first = d.invoke_async_local_with_priority(|| 1, DispatcherPriority::NORMAL);
+            // Registers the waker of the task with `first`, and goes on in the same poll.
+            std::future::poll_fn(|cx| {
+                assert!(Pin::new(&mut first).poll(cx).is_pending());
+                Poll::Ready(())
+            })
+            .await;
+            // Pumps the queue: `first` runs there and wakes the task, whose poll is queued at
+            // Normal and runs in the pump as well, ahead of the invoked callback.
+            d.invoke_local_with_priority(add(&o, "invoked"), DispatcherPriority::RENDER).unwrap();
+            o.borrow_mut().push(format!("first: {:?}", first.status()));
+            let value = first.await.unwrap();
+            // A wake after the pump still resumes the task.
+            let value = d.invoke_async_local_with_priority(move || value + 1, DispatcherPriority::NORMAL).await.unwrap();
+            o.borrow_mut().push(format!("resumed with {value}"));
+            value
+        },
+        DispatcherPriority::NORMAL,
+    );
+
+    t.ui_thread.run_jobs(None);
+    assert_eq!(names(&order), ["invoked", "first: Completed", "resumed with 2"]);
+    assert!(task.is_completed_successfully());
+    assert_eq!(task.result(), Ok(2));
+}
+
+#[test]
+fn a_resumption_that_runs_in_a_pump_of_its_task_does_not_poll_the_task_inside_its_poll() {
+    // The other side of F1: the job of `resume_with_priority` runs inside the poll that awaits it
+    // (the awaitable is polled by hand, then the poll pumps the queue). The task is not polled
+    // inside its own poll; it is polled again at its own priority once that poll has returned.
+    let t = DispatcherTests::new();
+    let order = Rc::new(RefCell::new(Vec::new()));
+    let d = t.ui_thread.clone();
+    let o = order.clone();
+    let mut handle = t.ui_thread.spawn_local_with_priority(
+        async move {
+            let mut resumption = d.resume_with_priority(DispatcherPriority::SEND);
+            std::future::poll_fn(|cx| {
+                assert!(Pin::new(&mut resumption).poll(cx).is_pending());
+                Poll::Ready(())
+            })
+            .await;
+            d.invoke_local_with_priority(add(&o, "invoked"), DispatcherPriority::RENDER).unwrap();
+            resumption.await;
+            o.borrow_mut().push(format!("resumed at {}", current_priority()));
+            d.post_local(add(&o, "posted"), DispatcherPriority::NORMAL);
+            d.invoke_async_local_with_priority(|| (), DispatcherPriority::NORMAL).await.unwrap();
+            o.borrow_mut().push(format!("woken at {}", current_priority()));
+        },
+        DispatcherPriority::LOADED,
+    );
+
+    t.ui_thread.run_jobs(None);
+    assert_eq!(names(&order), ["invoked", "resumed at Loaded", "posted", "woken at Loaded"]);
+    assert_eq!(outcome_of(&mut handle).as_deref(), Some("()"));
+}
+
+#[test]
+fn spawn_local_runs_a_future_from_jobs_of_its_priority() {
+    let t = DispatcherTests::new();
+    let order = Rc::new(RefCell::new(Vec::new()));
+    let handles: Rc<RefCell<Vec<JoinHandle<DispatcherPriority>>>> = Rc::new(RefCell::new(Vec::new()));
+    let (d, o, h) = (t.ui_thread.clone(), order.clone(), handles.clone());
+    t.ui_thread.post_local(
+        move || {
+            // The priority of the job that spawns it...
+            let (d2, o2) = (d.clone(), o.clone());
+            h.borrow_mut().push(d.spawn_local(async move {
+                o2.borrow_mut().push(format!("first poll at {}", current_priority()));
+                d2.resume_with_priority(DispatcherPriority::SEND).await;
+                o2.borrow_mut().push(format!("resumed at {}", current_priority()));
+                d2.invoke_async_local_with_priority(|| (), DispatcherPriority::NORMAL).await.unwrap();
+                current_priority()
+            }));
+            // ...or the given one; nothing runs inside the spawning call.
+            let o2 = o.clone();
+            h.borrow_mut().push(d.spawn_local_with_priority(
+                async move {
+                    o2.borrow_mut().push(format!("other task at {}", current_priority()));
+                    current_priority()
+                },
+                DispatcherPriority::BACKGROUND,
+            ));
+            o.borrow_mut().push("spawned".to_string());
+        },
+        DispatcherPriority::RENDER,
+    );
+
+    t.ui_thread.run_jobs(None);
+    assert_eq!(
+        names(&order),
+        ["spawned", "first poll at Render", "resumed at Send", "other task at Background"]
+    );
+    let mut handles = handles.borrow_mut();
+    assert!(handles.iter().all(JoinHandle::is_finished));
+    assert_eq!(outcome_of(&mut handles[0]), Some(format!("{:?}", DispatcherPriority::RENDER)));
+    assert_eq!(outcome_of(&mut handles[1]), Some(format!("{:?}", DispatcherPriority::BACKGROUND)));
+}
+
+#[test]
+fn spawn_makes_the_future_on_the_dispatcher_thread_and_polls_it_in_the_same_job() {
+    let t = DispatcherTests::new();
+    let dispatcher = t.ui_thread.clone();
+    let mut handle = thread::spawn(move || {
+        dispatcher.spawn(|| {
+            // Not `Send`: made and kept on the dispatcher thread.
+            let made_on = Rc::new(thread::current().id());
+            async move {
+                let first_poll = current_priority();
+                Dispatcher::yield_now().await;
+                (*made_on, first_poll, current_priority())
+            }
+        })
+    })
+    .join()
+    .unwrap();
+    assert!(!handle.is_finished());
+
+    t.ui_thread.run_jobs(None);
+    let ui_thread = thread::current().id();
+    assert_eq!(
+        outcome_of(&mut handle),
+        Some(format!("{:?}", (ui_thread, DispatcherPriority::DEFAULT, DispatcherPriority::BACKGROUND)))
+    );
+
+    // A panic of the closure faults the task.
+    let mut panicked = t.ui_thread.spawn(|| -> std::future::Ready<i32> { panic!("create") });
+    t.ui_thread.run_jobs(None);
+    assert_eq!(outcome_of(&mut panicked).as_deref(), Some("the task panicked: create"));
+}
+
+#[test]
+fn abort_and_shutdown_end_the_tasks_of_the_dispatcher_canceled() {
+    let t = DispatcherTests::new();
+    let dropped = Rc::new(Cell::new(0));
+
+    struct CountDrop(Rc<Cell<i32>>);
+    impl Drop for CountDrop {
+        fn drop(&mut self) {
+            self.0.set(self.0.get() + 1);
+        }
+    }
+
+    let guard = CountDrop(dropped.clone());
+    let mut aborted = t.ui_thread.spawn_local(async move {
+        let _guard = guard;
+        std::future::pending::<()>().await;
+    });
+    t.ui_thread.run_jobs(None);
+    let abort = aborted.abort_handle();
+    abort.abort();
+    assert_eq!(dropped.get(), 1);
+    assert!(abort.is_finished());
+    assert_eq!(outcome_of(&mut aborted).as_deref(), Some("canceled"));
+
+    let guard = CountDrop(dropped.clone());
+    let mut running = t.ui_thread.spawn_local(async move {
+        let _guard = guard;
+        std::future::pending::<()>().await;
+    });
+    let mut queued = t.ui_thread.spawn(|| async { 1 });
+    t.ui_thread.run_jobs(None);
+    let mut never_started = t.ui_thread.spawn(|| async { 2 });
+    assert_eq!(outcome_of(&mut queued).as_deref(), Some("1"));
+    assert!(!t.ui_thread.try_local().unwrap().tasks.borrow().is_empty());
+
+    // The shutdown drops the futures of the running tasks and the job of the one that has not
+    // started...
+    t.ui_thread.invoke_shutdown();
+    assert_eq!(dropped.get(), 2);
+    assert_eq!(outcome_of(&mut running).as_deref(), Some("canceled"));
+    assert_eq!(outcome_of(&mut never_started).as_deref(), Some("canceled"));
+    assert!(t.ui_thread.try_local().unwrap().tasks.borrow().is_empty());
+
+    // ...and a task spawned afterwards ends at once.
+    let mut late = t.ui_thread.spawn_local(async { 3 });
+    assert_eq!(outcome_of(&mut late).as_deref(), Some("canceled"));
+    let mut late = t.ui_thread.spawn(|| async { 4 });
+    assert_eq!(outcome_of(&mut late).as_deref(), Some("canceled"));
+}
+
+#[test]
+fn invoke_shutdown_inside_a_task_ends_it_canceled_after_its_poll() {
+    let t = DispatcherTests::new();
+    let d = t.ui_thread.clone();
+    let after = Rc::new(Cell::new(false));
+    let a = after.clone();
+    let task = t.ui_thread.invoke_async_task_local(move || async move {
+        d.invoke_shutdown();
+        a.set(true);
+        std::future::pending::<()>().await;
+    });
+    t.ui_thread.run_jobs(None);
+    assert!(after.get());
+    assert!(task.is_canceled());
+}
+
 #[test]
 fn invoke_with_timeout_from_another_thread() {
     let t = DispatcherTests::new();
@@ -2361,3 +2588,8 @@ fn legacy_platform_threading_interface_is_adapted() {
     assert_eq!(ticks.get(), 1);
     assert!(!timer.is_enabled());
 }
+
+// The ordering guarantees that phase C4 of #423 keeps (docs/idiomatic-rust-async.md); a child
+// module, so that it uses the simulated implementation and the helpers above.
+#[path = "dispatcher_ordering_tests.rs"]
+mod ordering;

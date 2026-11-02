@@ -1,4 +1,4 @@
-use crate::reactive::{IDisposable, IObservable, IObserver, LightweightObservable, LightweightObservableBase};
+use crate::reactive::{IDisposable, IObservable, IObserver, LightweightObservable, LightweightObservableBase, Subscription};
 use crate::{Ref, StyledElement, TypeInfo, WeakRef};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -33,7 +33,7 @@ struct ControlTracker {
     ancestor_level: usize,
     ancestor_type: Option<&'static TypeInfo>,
     value: RefCell<Option<WeakRef<StyledElement>>>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
 }
 
 impl ControlTracker {
@@ -95,14 +95,11 @@ impl LightweightObservable<Option<Ref<StyledElement>>> for ControlTracker {
                 this.detached();
             }
         });
-        self.subscriptions.borrow_mut().extend([attached.detach(), detached.detach()]);
+        self.subscriptions.borrow_mut().extend([attached, detached]);
     }
 
     fn deinitialize(&self) {
-        let subscriptions = std::mem::take(&mut *self.subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(self.subscriptions.take());
         *self.value.borrow_mut() = None;
     }
 

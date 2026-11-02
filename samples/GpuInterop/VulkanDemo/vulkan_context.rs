@@ -411,7 +411,7 @@ impl VulkanContext {
 
     pub fn dispose(&self) {
         let _ = self.d3d_device.take();
-        drop(self.gr_context.borrow_mut().take());
+        drop(self.gr_context.take());
         self.pool.dispose();
         // SAFETY: nothing of the device is used any more.
         unsafe {

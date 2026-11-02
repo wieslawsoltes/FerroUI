@@ -1,5 +1,6 @@
 use skia_safe::{Image, ImageInfo, MipmapMode, SamplingOptions, Surface, SurfaceProps};
 use std::any::Any;
+use std::rc::Rc;
 
 /// The Skia GPU backend a context runs on.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -76,8 +77,29 @@ pub trait ISkiaGrContext {
     /// Whether the GPU device behind the context was lost.
     fn is_lost(&self) -> bool;
 
+    /// Begins a prewarm of GPU pipelines off the frames (#437): a context
+    /// whose surfaces record into a recorder of their own, and what compiles
+    /// the pipelines of what was drawn on them away from the thread that
+    /// renders. `None`, the default, when the context has no such recorder:
+    /// a prewarm then draws with the context of the frames, whose flush
+    /// compiles the programs on the render thread (Ganesh).
+    fn begin_prewarm(&self) -> Option<SkiaPrewarm> {
+        None
+    }
+
     /// Lets a GPU implementation recover its concrete context type.
     fn as_any(&self) -> &dyn Any;
+}
+
+/// A prewarm of GPU pipelines on a recorder of its own; see
+/// [`ISkiaGrContext::begin_prewarm`].
+pub struct SkiaPrewarm {
+    /// The context to draw the prewarm with: its surfaces record into the
+    /// recorder of the prewarm, and it uploads the images drawn to it.
+    pub gr_context: Rc<dyn ISkiaGrContext>,
+    /// Compiles the pipelines of what was drawn, once the surfaces of the
+    /// prewarm are released; the context records nothing afterwards.
+    pub finish: Box<dyn FnOnce()>,
 }
 
 /// The form of `image` that a canvas drawing with `gr_context` draws; see

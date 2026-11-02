@@ -4,7 +4,7 @@
 use crate::i_android_navigation_service::{AndroidBackRequestedEventArgs, IActivityNavigationService};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::platform::ISystemNavigationManagerImpl;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -14,7 +14,7 @@ type BackRequestedHandlers = Rc<HandlerList<dyn Fn(&Rc<RoutedEventArgs>)>>;
 pub struct AndroidSystemNavigationManagerImpl {
     back_requested: BackRequestedHandlers,
     /// The subscription to the navigation service (`BackRequested +=`).
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl AndroidSystemNavigationManagerImpl {
@@ -26,7 +26,7 @@ impl AndroidSystemNavigationManagerImpl {
                 Self::on_back_requested(&back_requested, e);
             }))
         });
-        Rc::new(Self { back_requested, subscription: RefCell::new(subscription) })
+        Rc::new(Self { back_requested, subscription: RefCell::new(subscription.map(Subscription::new)) })
     }
 
     fn on_back_requested(back_requested: &BackRequestedHandlers, e: &AndroidBackRequestedEventArgs) {

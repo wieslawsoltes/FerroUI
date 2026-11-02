@@ -16,7 +16,7 @@ use super::interface::{
 };
 use crate::signal_watch::watch_stream;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::threading::Dispatcher;
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -157,7 +157,7 @@ pub(crate) struct AtSpiConnection {
     objects: Rc<ObjectTable>,
     outbox: RefCell<VecDeque<zbus::Message>>,
     sending: Cell<bool>,
-    message_loop: RefCell<Option<Rc<dyn IDisposable>>>,
+    message_loop: RefCell<Option<Subscription>>,
     weak_self: Weak<AtSpiConnection>,
 }
 
@@ -187,7 +187,7 @@ impl AtSpiConnection {
                 this.on_method_call(&message);
             }
         });
-        *this.message_loop.borrow_mut() = Some(subscription);
+        *this.message_loop.borrow_mut() = Some(Subscription::new(subscription));
         this
     }
 

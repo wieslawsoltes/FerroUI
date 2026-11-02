@@ -13,7 +13,7 @@ use ferroui_base::{
     instantiate,
     interactivity::{InteractiveImpl, RoutingStrategies},
     layout::{LayoutableImpl, LayoutableImplExt},
-    reactive::IDisposable,
+    reactive::{IDisposable, Subscription},
     FerroObject, FerroObjectImpl, FerroProperty, FerroPropertyChangedEventArgs, PixelPoint, Point,
     Rect, Ref, Size, StyledElementImpl, StyledProperty, StyledPropertyOptions, Vector, Visual,
 };
@@ -32,8 +32,8 @@ use std::{
     rc::Rc,
 };
 type NativeDockableSubscription = (Ref<FerroObject>, Rc<dyn IDisposable>);
-struct Subscription(Box<dyn Fn()>);
-impl Subscription {
+struct ClosureSubscription(Box<dyn Fn()>);
+impl ClosureSubscription {
     fn dispose(self) {
         (self.0)()
     }
@@ -56,12 +56,12 @@ pub struct PinnedDockControl {
     last_effective_display_mode: Cell<PinnedDockDisplayMode>,
     tracked_dockable: RefCell<Option<Rc<dyn IDockable>>>,
     tracked_native_dockable: RefCell<Option<NativeDockableSubscription>>,
-    tracked_notify_dockable: RefCell<Option<Subscription>>,
+    tracked_notify_dockable: RefCell<Option<ClosureSubscription>>,
     is_pinned_dock_empty: Cell<bool>,
     skip_pinned_bounds_update: Cell<bool>,
-    layout_events: RefCell<Vec<Rc<dyn IDisposable>>>,
-    splitter_events: RefCell<Vec<Rc<dyn IDisposable>>>,
-    owner_events: RefCell<Vec<Rc<dyn IDisposable>>>,
+    layout_events: RefCell<Vec<Subscription>>,
+    splitter_events: RefCell<Vec<Subscription>>,
+    owner_events: RefCell<Vec<Subscription>>,
 }
 ferro_class!(PinnedDockControl:TemplatedControl);
 ferro_class_info!(PinnedDockControl {new:PinnedDockControl::new,markup:{attributes:[TemplatePart("PART_PinnedDock",type(Ref<ContentControl>)),TemplatePart("PART_PinnedDockGrid",type(Ref<Grid>)),TemplatePart("PART_PinnedDockSplitter",type(Ref<Thumb>))]}});
@@ -102,7 +102,7 @@ impl TemplatedControlImpl for PinnedDockControl {
         let attached = this.attached_to_visual_tree(move |_| owner.on_attached());
         let owner = this.to_ref();
         let detached = this.detached_from_visual_tree(move |_| owner.on_detached());
-        this.layout_events.replace(vec![layout.detach(), attached.detach(), detached.detach()]);
+        this.layout_events.replace(vec![layout, attached, detached]);
     }
 }
 ferro_properties! {impl PinnedDockControl {
@@ -352,11 +352,7 @@ impl PinnedDockControl {
         self.invalidate_measure();
     }
     fn detach_layout_events(&self) {
-        let events = self.layout_events.borrow().clone();
-        for event in events {
-            event.dispose();
-        }
-        self.layout_events.replace(Vec::new());
+        drop(self.layout_events.take());
     }
     fn on_attached(&self) {
         if DockSettings::use_pinned_dock_window() && self.is_overlay_display_mode() {
@@ -433,7 +429,7 @@ impl PinnedDockControl {
                 owner.on_dockable_property_changed(name)
             }));
             self.tracked_notify_dockable
-                .replace(Some(Subscription(Box::new(move || {
+                .replace(Some(ClosureSubscription(Box::new(move || {
                     if let Some(notifier) = dockable.as_notify_property_changed() {
                         notifier.property_changed().remove(token);
                     }
@@ -502,25 +498,22 @@ impl PinnedDockControl {
                     let this = self.to_ref();
                     let position = self
                         .owner_window()
-                        .position_changed(move |_| this.owner_window_position_changed())
-                        .detach();
+                        .position_changed(move |_| this.owner_window_position_changed());
                     let this = self.to_ref();
                     let resized = self
                         .owner_window()
-                        .resized(move |_| this.owner_window_resized())
-                        .detach();
+                        .resized(move |_| this.owner_window_resized());
                     let this = self.to_ref();
                     let pressed = self.owner_window().add_disposable_handler_with(
                         InputElement::pointer_pressed_event(),
                         move |_, e| this.owner_window_pointer_pressed(e),
                         RoutingStrategies::TUNNEL,
                         false,
-                    ).detach();
+                    );
                     let this = self.to_ref();
                     let deactivated = self
                         .owner_window()
-                        .deactivated(move || this.owner_window_deactivated())
-                        .detach();
+                        .deactivated(move || this.owner_window_deactivated());
                     self.owner_events
                         .replace(vec![position, resized, pressed, deactivated]);
                     self.window().show_with_owner(&self.owner_window());
@@ -550,11 +543,7 @@ impl PinnedDockControl {
             self.window.replace(None);
         }
         if self.owner_window.borrow().is_some() {
-            let events = self.owner_events.borrow().clone();
-            for event in events {
-                event.dispose();
-            }
-            self.owner_events.replace(Vec::new());
+            drop(self.owner_events.take());
             self.owner_window.replace(None);
         }
         let dock = self.pinned_dock.borrow().clone();
@@ -876,7 +865,7 @@ impl PinnedDockControl {
                 move |_, _| this.on_pinned_dock_splitter_drag_started(),
                 RoutingStrategies::BUBBLE,
                 false,
-            ).detach();
+            );
         let this = self.to_ref();
         let delta = self
             .splitter()
@@ -886,7 +875,7 @@ impl PinnedDockControl {
                 move |_, e| this.on_pinned_dock_splitter_drag_delta(e.vector),
                 RoutingStrategies::BUBBLE,
                 false,
-            ).detach();
+            );
         let this = self.to_ref();
         let completed = self
             .splitter()
@@ -896,7 +885,7 @@ impl PinnedDockControl {
                 move |_, _| this.on_pinned_dock_splitter_drag_completed(),
                 RoutingStrategies::BUBBLE,
                 false,
-            ).detach();
+            );
         self.splitter_events
             .replace(vec![started, delta, completed]);
     }
@@ -907,11 +896,7 @@ impl PinnedDockControl {
         {
             return;
         }
-        let events = self.splitter_events.borrow().clone();
-        for event in events {
-            event.dispose();
-        }
-        self.splitter_events.replace(Vec::new());
+        drop(self.splitter_events.take());
     }
     fn on_pinned_dock_splitter_drag_started(&self) {
         self.is_resizing_pinned_dock.set(true);

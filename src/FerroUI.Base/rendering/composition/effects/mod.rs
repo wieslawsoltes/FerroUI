@@ -14,12 +14,15 @@
 
 mod composition_effect_factory;
 mod effect_graph;
+mod effect_prewarm;
 mod graphics_effects;
 
 pub use composition_effect_factory::{
     CompositionEffectFactory, CompositionEffectFactoryError, CompositionEffectFactoryLoadStatus,
 };
 pub use effect_graph::blur_amount_to_radius;
+pub use effect_prewarm::{effect_prewarm_names, register_effect_prewarm};
+pub(crate) use effect_prewarm::{effect_prewarm_generation, effect_prewarm_since};
 pub(crate) use effect_graph::{
     EffectColor, EffectGraph, EffectMatrix, EffectNode, EffectNodeKind, EffectPropertyValue, EffectScalar, PixelOp,
 };

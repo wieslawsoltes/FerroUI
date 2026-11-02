@@ -67,6 +67,44 @@ macro_rules! subscribe_methods {
             self.observable().subscribe(std::rc::Rc::new(crate::observer::AnonymousObserver::new(on_next, on_error, on_completed)))
         }
 
+        /// [`subscribe_next`](Self::subscribe_next) that returns the guard of the subscription:
+        /// dropping it unsubscribes (the handle of `subscribe_next` keeps the subscription when it
+        /// is dropped).
+        fn subscribe_next_guard(&self, on_next: impl Fn(T) + 'static) -> ferroui_system::Subscription {
+            ferroui_system::Subscription::new(self.subscribe_next(on_next))
+        }
+
+        /// [`subscribe_next_error`](Self::subscribe_next_error) that returns the guard of the
+        /// subscription: dropping it unsubscribes.
+        fn subscribe_next_error_guard(
+            &self,
+            on_next: impl Fn(T) + 'static,
+            on_error: impl Fn(ferroui_system::ObservableError) + 'static,
+        ) -> ferroui_system::Subscription {
+            ferroui_system::Subscription::new(self.subscribe_next_error(on_next, on_error))
+        }
+
+        /// [`subscribe_next_completed`](Self::subscribe_next_completed) that returns the guard of
+        /// the subscription: dropping it unsubscribes.
+        fn subscribe_next_completed_guard(
+            &self,
+            on_next: impl Fn(T) + 'static,
+            on_completed: impl Fn() + 'static,
+        ) -> ferroui_system::Subscription {
+            ferroui_system::Subscription::new(self.subscribe_next_completed(on_next, on_completed))
+        }
+
+        /// [`subscribe_all`](Self::subscribe_all) that returns the guard of the subscription:
+        /// dropping it unsubscribes.
+        fn subscribe_all_guard(
+            &self,
+            on_next: impl Fn(T) + 'static,
+            on_error: impl Fn(ferroui_system::ObservableError) + 'static,
+            on_completed: impl Fn() + 'static,
+        ) -> ferroui_system::Subscription {
+            ferroui_system::Subscription::new(self.subscribe_all(on_next, on_error, on_completed))
+        }
+
         /// Subscribes an observer until `token` is canceled
         /// (`Subscribe(IObserver<T>, CancellationToken)`): the cancellation disposes the
         /// subscription; a token canceled already does not subscribe.

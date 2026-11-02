@@ -169,13 +169,17 @@ No camera captures or build products are committed.
 
 ## Integration status (2026-11-02)
 
-The desktop branch is not ready for an unconditional fully supported media
-release. A read-only merge check against the fetched `origin/main` found content
-conflicts in `gpu/graphite/graphite_gr_context.rs` and `gpu/mod.rs` under
-`src/Skia/FerroUI.Skia`. These need resolution and a new integrated build before
-merging. The branch had 35 unique commits and upstream main had 20 at that check,
-before adding the catalog commit (`origin/main` was `df3e12ad7`). No main-branch
-merge was performed.
+The desktop branch integrates freshly fetched `origin/main` at `f6ccf8b21`
+(41 upstream commits since the previous common history). The two Skia
+import/export conflicts are resolved by retaining upstream pipeline prewarming
+alongside the media frame-context IDs, lease retention and GPU-completion code.
+The catalog retains both its media pages and upstream's new PolarChart page.
+Integrated verification is recorded in [macOS verification](MACOS-VERIFICATION.md).
+
+The user confirmed physical camera operation on macOS after the 30 fps fix.
+That manual confirmation is separate from automated checks and the remaining
+photo/denial/hotplug/recovery evidence. A fully supported media release still
+has the profile-specific requirements below.
 
 The default Metal profile has its own passing
 [verification](MACOS-VERIFICATION.md). Experimental
