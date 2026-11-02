@@ -50,26 +50,6 @@ display -immutable -title 'Julia study  ·  ImageMagick' -geometry +220+215 "$sc
 viewer=$!
 client=$(timeout 15s xdotool search --sync --onlyvisible --name 'Julia study' | head -1)
 xdotool windowactivate --sync "$client" windowmove "$client" 225 220 mousemove 1100 750
-for choice in '1 windows' '2 macos' '3 material'; do
-    read -r key theme <<< "$choice"
-    xdotool key --clearmodifiers super+space
-    sleep .3
-    xdotool key --clearmodifiers ctrl+comma
-    sleep .3
-    xdotool key --clearmodifiers "$key"
-    for ((i=0;i<60;i++)); do
-        [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/appearance" 2>/dev/null || :) == "$theme" ]] && break
-        sleep .1
-    done
-    [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/appearance") == "$theme" ]]
-    xdotool key --clearmodifiers Escape
-    xdotool windowactivate --sync "$client"
-    sleep .4
-    import -window root -depth 8 "$output/$theme.png"
-done
-
-# Drive the Material recognizer through the actual window manager. The client at
-# +225+220 remains open; begin each drag on uncovered wallpaper or the handle.
 await_scene() {
     local current=
     for ((i=0; i<60; i++)); do
@@ -77,10 +57,69 @@ await_scene() {
         [[ $current == "$1" ]] && return
         sleep .1
     done
-    echo "Material gesture expected $1; observed $current" >&2
+    echo "Expected shell scene $1; observed $current" >&2
     return 1
 }
 read -r width height < <(xdotool getdisplaygeometry)
+
+# The WM can decorate its client and publish the new scene before Graphite
+# presents the shell. Check a wallpaper sample outside the client and any sheet.
+# Downsample a vertical strip to the right of the client for a cheap, stable
+# presentation probe which includes the chooser on both the Mac and Android.
+capture_profile() {
+    local theme=$1 destination=$2 previous=${3:-} expected r g b changed
+    local frame="$scratch/frame.png" probe="$scratch/probe.png" prior="$scratch/prior.png"
+    case $theme in
+        windows) expected='b > r+.08' ;;
+        macos) expected='r > b+.08' ;;
+        material) expected='g > r+.06' ;;
+    esac
+    rm -f "$prior"
+    for ((i=0; i<50; i++)); do
+        import -window root -depth 8 "$frame"
+        read -r r g b < <(convert "$frame" -resize '100x100!' -format '%[fx:p{93,10}.r] %[fx:p{93,10}.g] %[fx:p{93,10}.b]\n' info:)
+        if ! awk -v r="$r" -v g="$g" -v b="$b" "BEGIN {exit !($expected)}"; then sleep .1; continue; fi
+        convert "$frame" -crop "120x${height}+$((width*59/100))+0" +repage -resize '40x240!' "$probe"
+        if [[ -f $prior ]] && compare -metric AE "$prior" "$probe" null: 2>/dev/null; then
+            if [[ -n $previous ]]; then
+                changed=$(compare -metric AE "$previous" "$probe" null: 2>&1 || :)
+                if ! awk -v n="$changed" 'BEGIN {exit !(n+0 > 160)}'; then sleep .1; continue; fi
+            fi
+            cp "$frame" "$destination"
+            cp "$probe" "$scratch/captured-strip.png"
+            return
+        fi
+        cp "$probe" "$prior"
+        sleep .1
+    done
+    cp "$frame" "$output/failed-$theme.png"
+    echo "Timed out waiting for the $theme shell to present $destination" >&2
+    return 1
+}
+await_scene desktop
+capture_profile windows "$output/windows.png"
+for choice in '2 macos' '3 material'; do
+    read -r key theme <<< "$choice"
+    xdotool key --clearmodifiers super+space
+    await_scene applications
+    xdotool key --clearmodifiers ctrl+comma
+    await_scene appearance
+    xdotool key --clearmodifiers "$key"
+    for ((i=0; i<60; i++)); do
+        [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/appearance" 2>/dev/null || :) == "$theme" ]] && break
+        sleep .1
+    done
+    [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/appearance") == "$theme" ]]
+    capture_profile "$theme" "$scratch/chooser.png"
+    cp "$scratch/captured-strip.png" "$scratch/chooser-strip.png"
+    xdotool key --clearmodifiers Escape
+    await_scene desktop
+    xdotool windowactivate --sync "$client"
+    capture_profile "$theme" "$output/$theme.png" "$scratch/chooser-strip.png"
+done
+
+# Drive the Material recognizers through the actual window manager. The client
+# at +225+220 remains open; begin each drag on free wallpaper or the handle.
 for gesture in apps shade recents home; do
     case $gesture in
         apps) x=$((width - 150)); y=$((height / 2)); dy=-100; expected=applications ;;
