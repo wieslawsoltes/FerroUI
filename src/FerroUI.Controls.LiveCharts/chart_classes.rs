@@ -58,3 +58,32 @@ impl PieChart {
         instantiate(Self::construct())
     }
 }
+
+#[repr(C)]
+pub struct PolarChart {
+    base: Chart,
+}
+ferro_class!(PolarChart:Chart);
+ferro_class_info!(PolarChart {
+    new: PolarChart::new
+});
+ferro_impl_classes!(PolarChart:StyledElementImpl,VisualImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl);
+impl FerroObjectImpl for PolarChart {
+    fn constructed(this: &Self) {
+        Self::parent_constructed(this);
+        this.set_chart_kind(ChartKind::Polar);
+    }
+}
+impl PolarChart {
+    fn static_constructor() {
+        Chart::initial_rotation_property().override_default_value::<PolarChart>(-90.0);
+    }
+    pub fn construct() -> Self {
+        Self {
+            base: Chart::construct(),
+        }
+    }
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+}

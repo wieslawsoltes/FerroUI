@@ -646,3 +646,41 @@ impl PieSeries {
         instantiate(Self::construct())
     }
 }
+
+#[repr(C)]
+pub struct PolarLineSeries {
+    base: ChartSeries,
+}
+ferro_class!(PolarLineSeries: ChartSeries);
+ferro_class_info!(PolarLineSeries {
+    new: PolarLineSeries::new
+});
+impl FerroObjectImpl for PolarLineSeries {
+    fn constructed(this: &Self) {
+        Self::parent_constructed(this);
+        this.set_kind(SeriesKind::PolarLine);
+    }
+}
+impl PolarLineSeries {
+    fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::PolarLine);
+        ChartSeries::kind_property()
+            .override_default_value::<PolarLineSeries>(SeriesKind::PolarLine);
+        ChartSeries::data_padding_property()
+            .override_default_value::<PolarLineSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<PolarLineSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<PolarLineSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<PolarLineSeries>(defaults.max_bar_width);
+    }
+    pub fn construct() -> Self {
+        Self {
+            base: ChartSeries::construct(),
+        }
+    }
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+}

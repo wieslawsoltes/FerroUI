@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Generate repetitive native property declarations, not chart algorithms.
 
-From the LiveCharts2 port of #312 (docs/porting/livecharts2.md): the Cartesian and pie charts of L2;
-the polar, Sankey, treemap and geographic charts add their rows with their engines (L4).
+From the LiveCharts2 port of #312 (docs/porting/livecharts2.md): the Cartesian and pie charts of L2
+and the polar chart of L4; the Sankey, treemap and geographic charts add their rows with their
+engines.
 
 The generated classes remain ordinary FerroUI classes visible to the XAML source
 scanner. This replaces the managed UI-property generator for this native host.
@@ -226,7 +227,7 @@ families = [('LineSeries','Line'),('StepLineSeries','StepLine'),('AreaSeries','A
 ('ColumnSeries','Column'),('RowSeries','Row'),('StackedColumnSeries','StackedColumn'),
 ('StackedRowSeries','StackedRow'),('ScatterSeries','Scatter'),('HeatSeries','Heat'),
 ('RangeColumnSeries','RangeColumn'),('RangeRowSeries','RangeRow'),('RangeLineSeries','RangeLine'),
-('CandlesticksSeries','Financial'),('BoxSeries','Box'),('PieSeries','Pie')]
+('CandlesticksSeries','Financial'),('BoxSeries','Box'),('PieSeries','Pie'),('PolarLineSeries','PolarLine')]
 classes = HEADER + '''use crate::ChartSeries;
 use ferroui_base::{ferro_class,ferro_class_info,instantiate,FerroObjectImpl,FerroObjectImplExt,Ref};
 use ferroui_livecharts::SeriesKind;
@@ -310,7 +311,13 @@ use ferroui_base::{ferro_class,ferro_class_info,ferro_impl_classes,instantiate,F
 use ferroui_base::{input::InputElementImpl,interactivity::InteractiveImpl,layout::LayoutableImpl};
 use ferroui_controls::ControlImpl;
 '''
-for cls,kind in [('CartesianChart','Cartesian'),('PieChart','Pie')]:
+# The chart classes, their kind and the defaults their source view takes from LiveChartsSettings
+# (PolarInitialRotation = -90: the angle zero points up).
+chart_families=[('CartesianChart','Cartesian',[]),('PieChart','Pie',[]),
+                ('PolarChart','Polar',[('initial_rotation','-90.0')])]
+for cls,kind,defaults in chart_families:
+    overrides=''.join(f'Chart::{prop}_property().override_default_value::<{cls}>({value});' for prop,value in defaults)
+    static=f'fn static_constructor(){{{overrides}}}' if overrides else ''
     chart_classes+=f'''
 #[repr(C)]
 pub struct {cls}{{base:Chart}}
@@ -321,6 +328,7 @@ impl FerroObjectImpl for {cls}{{
     fn constructed(this:&Self){{Self::parent_constructed(this);this.set_chart_kind(ChartKind::{kind});}}
 }}
 impl {cls}{{
+    {static}
     pub fn construct()->Self{{Self{{base:Chart::construct()}}}}
     pub fn new()->Ref<Self>{{instantiate(Self::construct())}}
 }}
