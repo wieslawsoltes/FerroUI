@@ -1,6 +1,7 @@
 //! Platform-specific desktop composition; scenes use the same session, catalog and input model.
 mod apps;
 mod gestures;
+mod motion;
 pub(super) use gestures::drawer_handle;
 
 use super::appearance::{Appearance, ColorMode, Layout, WinUISettings};
@@ -607,11 +608,11 @@ pub(super) fn system_frame(shell: &Shell, preferred_width: f64) -> El<Border> {
     let width = shell.metrics().width;
     let (top, bottom) = look().insets();
     match look().layout() {
-        Layout::Taskbar => shell_panel()
+        Layout::Taskbar => motion::sheet()
             .horizontal_alignment(H::Right)
             .vertical_alignment(V::Bottom)
             .margin((10.0, 10.0, 10.0, bottom + 10.0)),
-        Layout::MenuBarDock => shell_panel()
+        Layout::MenuBarDock => motion::sheet()
             .horizontal_alignment(H::Right)
             .vertical_alignment(V::Top)
             .margin((10.0, top + 8.0, 10.0, 10.0)),
@@ -624,17 +625,17 @@ pub(super) fn popup_frame() -> El<Border> {
     let (top, bottom) = look().insets();
     match look().layout() {
         Layout::Taskbar => {
-            shell_panel()
+            motion::sheet()
                 .vertical_alignment(V::Bottom)
                 .margin((12.0, 10.0, 12.0, bottom + 9.0))
         }
-        Layout::MenuBarDock => shell_panel().vertical_alignment(V::Center).margin((
+        Layout::MenuBarDock => motion::sheet().vertical_alignment(V::Center).margin((
             20.0,
             top + 5.0,
             20.0,
             bottom + 4.0,
         )),
-        Layout::BottomNavigation => shell_panel()
+        Layout::BottomNavigation => motion::sheet()
             .vertical_alignment(V::Bottom)
             .margin((8.0, 12.0, 8.0, 7.0)),
     }
