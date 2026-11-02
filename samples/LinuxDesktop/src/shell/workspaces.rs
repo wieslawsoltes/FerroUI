@@ -2,11 +2,13 @@
 //! Property notifications drive the authoritative workspace and client list.
 use super::appearance::Layout;
 use super::chrome::*;
-use ferroui_base::rendering::composition::{CompositionStretch, CompositionVisual, ElementComposition};
 use super::{feedback, popup_header, Shell};
 use crate::session::{ClientWindow, Session, SnapSide};
-use ferroui_base::layout::HorizontalAlignment as H;
+use ferroui_base::layout::{HorizontalAlignment as H, VerticalAlignment as V};
 use ferroui_base::media::FontWeight;
+use ferroui_base::rendering::composition::{
+    CompositionStretch, CompositionVisual, ElementComposition,
+};
 use ferroui_controls::primitives::ScrollBarVisibility;
 use ferroui_view::prelude::*;
 use std::rc::Rc;
@@ -19,7 +21,9 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     let session = shell.session.clone();
     let tab_state = memo(move |_| {
         snapshot.with(|model| {
-            let removable = session.as_ref().is_some_and(|s| s.can_remove_empty_last_workspace(model));
+            let removable = session
+                .as_ref()
+                .is_some_and(|s| s.can_remove_empty_last_workspace(model));
             (
                 model.workspace_names.clone(),
                 model.current_workspace,
@@ -93,75 +97,109 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     });
     let expanded = signal(None::<u32>);
     let empty_shell = shell.clone();
-    let clients = stack_panel()
-        .spacing(5.0)
-        .child(show(
-            move || {
+    let composed = shell
+        .session
+        .as_ref()
+        .is_some_and(|s| s.compositor().is_some());
+    let layout = look().layout();
+    let width = shell.metrics().width;
+    let empty = show(
+        move || {
+            snapshot.with(|model| {
+                !model
+                    .windows
+                    .iter()
+                    .any(|w| w.workspace.is_none_or(|ws| ws == model.current_workspace))
+            })
+        },
+        move || {
+            let text = if empty_shell.session.is_none() {
+                "Window management is unavailable in this host."
+            } else {
+                "Applications opened here will appear in this workspace."
+            };
+            border()
+                .padding(18)
+                .corner_radius(10)
+                .background(colors().tile)
+                .child(
+                    stack_panel()
+                        .spacing(6.0)
+                        .child(
+                            shell_text("No windows", 17.0, Ink::Primary)
+                                .font_weight(FontWeight::Medium),
+                        )
+                        .child(
+                            shell_text(text, 12.0, Ink::Secondary)
+                                .text_wrapping(ferroui_base::media::TextWrapping::Wrap),
+                        ),
+                )
+        },
+    );
+    let windows = for_each(
+        move || {
+            snapshot.with(|model| {
+                let mut windows: Vec<_> = model
+                    .windows
+                    .iter()
+                    .filter(|w| w.workspace.is_none_or(|ws| ws == model.current_workspace))
+                    .cloned()
+                    .collect();
+                // Stable sorting preserves mapping order among windows not yet activated.
+                windows.sort_by_key(|w| std::cmp::Reverse(w.last_activation));
+                windows
+            })
+        },
+        |w| w.id as usize,
+        move |client| client_row(&window_shell, client, expanded, composed),
+    );
+    let cards: Element = if composed {
+        uniform_grid()
+            .columns(move || {
+                let columns = if width.get() >= 720.0 { 2 } else { 1 };
                 snapshot.with(|model| {
-                    !model
-                        .windows
-                        .iter()
-                        .any(|w| w.workspace.is_none_or(|ws| ws == model.current_workspace))
-                })
-            },
-            move || {
-                let text = if empty_shell.session.is_none() {
-                    "Window management is unavailable in this host."
-                } else {
-                    "Applications opened here will appear in this workspace."
-                };
-                border()
-                    .padding(18)
-                    .corner_radius(10)
-                    .background(colors().tile)
-                    .child(
-                        stack_panel()
-                            .spacing(6.0)
-                            .child(
-                                shell_text("No windows", 17.0, Ink::Primary)
-                                    .font_weight(FontWeight::Medium),
-                            )
-                            .child(
-                                shell_text(text, 12.0, Ink::Secondary)
-                                    .text_wrapping(ferroui_base::media::TextWrapping::Wrap),
-                            ),
-                    )
-            },
-        ))
-        .child(for_each(
-            move || {
-                snapshot.with(|model| {
-                    let mut windows: Vec<_> = model
+                    let count = model
                         .windows
                         .iter()
                         .filter(|w| w.workspace.is_none_or(|ws| ws == model.current_workspace))
-                        .cloned()
-                        .collect();
-                    // Stable sorting preserves mapping order among windows not yet activated.
-                    windows.sort_by_key(|w| std::cmp::Reverse(w.last_activation));
-                    windows
+                        .count();
+                    columns.min(count.max(1)) as i32
                 })
-            },
-            |w| w.id as usize,
-            move |client| client_row(&window_shell, client, expanded),
-        ));
+            })
+            .child(windows)
+            .into()
+    } else {
+        stack_panel().spacing(5.0).child(windows).into()
+    };
+    let clients = stack_panel().child(empty).child(cards);
     let (title, subtitle) = match look().layout() {
         Layout::Taskbar => ("Task View", "VIRTUAL DESKTOPS"),
         Layout::MenuBarDock => ("Mission Control", "SPACES"),
         Layout::BottomNavigation => ("Recents", "WORKSPACES"),
     };
-    super::desktop::popup_frame()
-        .max_width(600.0)
+    let desktops_below = composed && layout == Layout::Taskbar;
+    let frame = super::desktop::popup_frame();
+    let frame = if composed {
+        frame.vertical_alignment(V::Center)
+    } else {
+        frame
+    };
+    frame
+        .max_width(if composed { 900.0 } else { 600.0 })
         .max_height(690.0)
         .padding(22)
         .child(
             grid()
-                .row_definitions("Auto,Auto,Auto,*,Auto")
+                .row_definitions(if desktops_below {
+                    "Auto,Auto,*,Auto,Auto"
+                } else {
+                    "Auto,Auto,Auto,*,Auto"
+                })
                 .child(popup_header(title, subtitle, shell))
                 .child(
                     border()
-                        .grid_row(1)
-                        .margin((0.0, 16.0, 0.0, 8.0))
+                        .grid_row(if desktops_below { 3 } else { 1 })
+                        .margin((0.0, 12.0, 0.0, 6.0))
                         .max_height(100.0)
                         .child(
                             scroll_viewer()
@@ -170,11 +208,15 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                                 .child(tabs),
                         ),
                 )
-                .child(eyebrow("WINDOWS").grid_row(2).margin((0.0, 3.0, 0.0, 9.0)))
+                .child(
+                    eyebrow("WINDOWS")
+                        .grid_row(if desktops_below { 1 } else { 2 })
+                        .margin((0.0, 8.0, 0.0, 6.0)),
+                )
                 .child(
                     scroll_viewer()
-                        .grid_row(3)
-                        .max_height(350.0)
+                        .grid_row(if desktops_below { 2 } else { 3 })
+                        .max_height(if composed { 455.0 } else { 350.0 })
                         .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
                         .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
                         .child(clients),
@@ -189,8 +231,8 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
 fn preview(source: Rc<CompositionVisual>) -> Element {
     let host = NodeRef::<ferroui_controls::Border>::new();
     border()
-        .width(96.0)
-        .height(60.0)
+        .horizontal_alignment(H::Stretch)
+        .height(152.0)
         .is_hit_test_visible(false)
         .node_ref(host)
         .on_loaded(move |_| {
@@ -211,7 +253,7 @@ fn preview(source: Rc<CompositionVisual>) -> Element {
             brush.set_horizontal_alignment_ratio(0.5);
             brush.set_vertical_alignment_ratio(0.5);
             let sprite = compositor.create_sprite_visual();
-            sprite.set_size(ferroui_base::Vector::new(96., 60.));
+            sprite.set_relative_size_adjustment(ferroui_base::Vector::new(1., 1.));
             sprite.set_brush(Some((*brush).clone()));
             ElementComposition::set_element_child_visual(&control, Some((*sprite).clone()));
         })
@@ -223,7 +265,12 @@ fn preview(source: Rc<CompositionVisual>) -> Element {
         .into()
 }
 
-fn client_row(shell: &Rc<Shell>, client: ClientWindow, expanded: Signal<Option<u32>>) -> Element {
+fn client_row(
+    shell: &Rc<Shell>,
+    client: ClientWindow,
+    expanded: Signal<Option<u32>>,
+    composed: bool,
+) -> Element {
     let id = client.id;
     let state = shell.clone();
     let title = client.title.as_str();
@@ -232,10 +279,49 @@ fn client_row(shell: &Rc<Shell>, client: ClientWindow, expanded: Signal<Option<u
         .as_ref()
         .and_then(|session| session.compositor())
         .and_then(|host| host.window_visual(id));
-    let columns = if source.is_some() { "96,*" } else { "20,*" };
-    let artwork = source
-        .map(preview)
-        .unwrap_or_else(|| glyph(Icon::Window, 16.0, colors().accent).into());
+    let description = stack_panel()
+        .spacing(2.0)
+        .child(shell_text(title, 14.0, Ink::Primary).font_weight(FontWeight::Medium))
+        .child(shell_text(
+            if client.minimized {
+                "Minimized"
+            } else if client.fullscreen {
+                "Fullscreen"
+            } else if client.maximized {
+                "Maximized"
+            } else if client.active {
+                "Focused"
+            } else {
+                "Open"
+            },
+            11.0,
+            Ink::Secondary,
+        ));
+    let content: Element = if composed {
+        let artwork = source.map(preview).unwrap_or_else(|| {
+            grid()
+                .height(152.0)
+                .child(glyph(Icon::Window, 32.0, colors().accent))
+                .into()
+        });
+        stack_panel()
+            .spacing(6.0)
+            .child(
+                border()
+                    .background(colors().surface)
+                    .corner_radius(6)
+                    .clip_to_bounds(true)
+                    .child(artwork),
+            )
+            .child(description)
+            .into()
+    } else {
+        grid()
+            .column_definitions("20,*")
+            .child(glyph(Icon::Window, 16.0, colors().accent))
+            .child(description.grid_column(1).margin((8.0, 0.0, 0.0, 0.0)))
+            .into()
+    };
     let restore = action(title, move || {
         if let Some(session) = &state.session {
             state.dismiss();
@@ -248,32 +334,7 @@ fn client_row(shell: &Rc<Shell>, client: ClientWindow, expanded: Signal<Option<u
     .horizontal_alignment(H::Stretch)
     .horizontal_content_alignment(H::Stretch)
     .background("Transparent")
-    .child(
-        grid()
-            .column_definitions(columns)
-            .child(artwork)
-            .child(
-                stack_panel()
-                    .grid_column(1)
-                    .margin((8.0, 0.0, 0.0, 0.0))
-                    .child(shell_text(title, 14.0, Ink::Primary).font_weight(FontWeight::Medium))
-                    .child(shell_text(
-                        if client.minimized {
-                            "Minimized"
-                        } else if client.fullscreen {
-                            "Fullscreen"
-                        } else if client.maximized {
-                            "Maximized"
-                        } else if client.active {
-                            "Focused"
-                        } else {
-                            "Open"
-                        },
-                        11.0,
-                        Ink::Secondary,
-                    )),
-            ),
-    );
+    .child(content);
     let command = |name: &str, icon, operation: fn(&Session, u32) -> bool| {
         let state = shell.clone();
         let label = name.to_owned();
@@ -321,23 +382,27 @@ fn client_row(shell: &Rc<Shell>, client: ClientWindow, expanded: Signal<Option<u
             },
         ))
         .child(command("Close", Icon::Close, Session::close).is_enabled(client.can_close));
+    let commands: Element = if composed {
+        stack_panel()
+            .child(restore)
+            .child(row_actions.horizontal_alignment(H::Right))
+            .into()
+    } else {
+        grid()
+            .column_definitions("*,Auto")
+            .child(restore)
+            .child(row_actions.grid_column(1))
+            .into()
+    };
     border()
         .background(colors().tile)
         .corner_radius(9)
+        .margin(if composed { 4 } else { 0 })
         .padding(4)
-        .child(
-            stack_panel()
-                .child(
-                    grid()
-                        .column_definitions("*,Auto")
-                        .child(restore)
-                        .child(row_actions.grid_column(1)),
-                )
-                .child(show(
-                    move || expanded.get() == Some(id),
-                    move || arrange_actions(&state, &client, expanded),
-                )),
-        )
+        .child(stack_panel().child(commands).child(show(
+            move || expanded.get() == Some(id),
+            move || arrange_actions(&state, &client, expanded),
+        )))
         .into()
 }
 

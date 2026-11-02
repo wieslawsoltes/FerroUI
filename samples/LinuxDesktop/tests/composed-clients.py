@@ -115,14 +115,15 @@ def probe(path, color, test):
     # compositor color conversion. Permit minor driver rounding differences.
     if color == "preview":
         # The independent clients have large flat-color swatches. Their scaled
-        # counterparts must both lie inside the overview card, in its thumbnail
-        # column, not in the client windows behind it.
+        # colors must survive in the bright previews inside the centered Task
+        # View. The scrim darkens the corresponding background windows.
         width, height = im.size
-        area = im.crop((width // 2 - 280, 0, width // 2 - 120, height - 52))
+        area = im.crop((width // 2 - 420, height // 2 - 125,
+                        width // 2 + 420, height // 2 + 100))
         colors = area.getcolors(area.width * area.height)
         gtk = (0x93, 0x54, 0xba) if test == "updated" else (0xd7, 0x6a, 0x3d)
         return all(sum(n for n, rgb in colors
-                       if all(abs(a - b) <= 4 for a, b in zip(rgb, target))) >= 35
+                       if all(abs(a - b) <= 4 for a, b in zip(rgb, target))) >= 450
                    for target in [gtk, (0x39, 0x7a, 0xbb)])
     if color == "picker":
         # The middle of the Appearance panel contains rows with opaque
