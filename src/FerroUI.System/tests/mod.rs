@@ -3,6 +3,7 @@
 mod ferro_thread_local_tests;
 mod task_tests;
 mod executor_tests;
+mod oneshot_tests;
 mod async_ordering_tests;
 mod synchronization_context_tests;
 mod dictionary_tests;
