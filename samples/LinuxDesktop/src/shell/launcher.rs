@@ -256,19 +256,29 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     let launching = shell.launching;
     let is_drawer = layout == Layout::BottomNavigation;
     let spotlight = layout == Layout::MenuBarDock;
-    let content =
-        grid()
-            .row_definitions("Auto,Auto,Auto,Auto,*,Auto,Auto")
+    let handle = if is_drawer {
+        super::desktop::drawer_handle(shell)
+            .height(30.0)
+            .automation_properties_name("Dismiss app drawer")
+            .automation_properties_help_text("Swipe down to return to the desktop.")
             .child(
                 border()
-                    .is_visible(is_drawer)
                     .width(36.0)
                     .height(4.0)
                     .corner_radius(2)
                     .horizontal_alignment(H::Center)
-                    .margin((0.0, 0.0, 0.0, 14.0))
+                    .vertical_alignment(V::Center)
+                    .is_hit_test_visible(false)
                     .background(p.muted),
             )
+            .into()
+    } else {
+        Element::Empty
+    };
+    let content =
+        grid()
+            .row_definitions("Auto,Auto,Auto,Auto,*,Auto,Auto")
+            .child(handle)
             .child(
                 border()
                     .grid_row(1)

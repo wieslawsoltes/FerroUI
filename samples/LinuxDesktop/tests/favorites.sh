@@ -107,6 +107,38 @@ for profile in macos material; do
     case "$profile" in macos) expected=06 ;; material) expected=15 ;; esac
     start_shell "$profile" "$@"
     key ctrl+k; sleep .25
+    if [[ $profile == material ]]; then
+        # Find the centered grabber on the presented frame. Its vertical position
+        # follows the number of apps and the available height.
+        for ((i=0; i<50; i++)); do
+            import -window "$shell_window" "$fixture/drawer.png"
+            if grabber=$(/usr/bin/python3 - "$fixture/drawer.png" <<'GRABBER'
+import sys
+from PIL import Image
+image = Image.open(sys.argv[1]).convert("RGB")
+x = image.width // 2
+for y in range(1, image.height - 2):
+    color = image.getpixel((x, y))
+    if (max(abs(a-b) for a,b in zip(color, (185, 201, 185))) < 12
+            and all(image.getpixel((p, y)) == color for p in range(x-12, x+13))
+            and image.getpixel((x, y+1)) == color
+            and image.getpixel((x-22, y)) != color):
+        print(x, y)
+        break
+else:
+    sys.exit(1)
+GRABBER
+            ); then break; fi
+            sleep .1
+        done
+        read -r gx gy <<<"$grabber"
+        [[ -n $gx && -n $gy ]]
+        xdotool mousemove --window "$shell_window" "$gx" "$gy" mousedown 1 \
+            mousemove --window "$shell_window" "$gx" "$((gy + 75))" sleep .1 mouseup 1
+        # Reopening and launching the app below verifies that the drag dismissed
+        # the drawer. If it stayed open this accelerator would close it instead.
+        key ctrl+k; sleep .25
+    fi
     xdotool type --clearmodifiers --delay 12 'Ferro Navigation'
     key Page_Down Up Return
     for ((i=0; i<80; i++)); do
