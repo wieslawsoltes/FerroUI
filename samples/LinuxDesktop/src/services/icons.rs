@@ -128,22 +128,21 @@ pub struct ApplicationIcons {
 
 impl ApplicationIcons {
     pub fn get(&self, app: &DesktopApplication) -> Option<Rc<Bitmap>> {
-        if app.icon.is_empty() {
+        self.get_icon(&app.icon)
+    }
+
+    pub fn get_icon(&self, icon: &str) -> Option<Rc<Bitmap>> {
+        if icon.is_empty() {
             return None;
         }
-        if let Some((_, image)) = self
-            .entries
-            .borrow()
-            .iter()
-            .find(|(key, _)| key == &app.icon)
-        {
+        if let Some((_, image)) = self.entries.borrow().iter().find(|(key, _)| key == icon) {
             return image.clone();
         }
         let resolver = self
             .resolver
             .get_or_init(|| Resolver::new().ok())
             .as_ref()?;
-        let image = resolver.decode(&app.icon).map(|(size, rgba)| {
+        let image = resolver.decode(icon).map(|(size, rgba)| {
             Rc::new(Bitmap::from_pixels(
                 PixelFormat::RGBA8888,
                 AlphaFormat::Unpremul,
@@ -157,7 +156,7 @@ impl ApplicationIcons {
         if entries.len() == 128 {
             entries.pop_front();
         }
-        entries.push_back((app.icon.clone(), image.clone()));
+        entries.push_back((icon.to_owned(), image.clone()));
         image
     }
 }

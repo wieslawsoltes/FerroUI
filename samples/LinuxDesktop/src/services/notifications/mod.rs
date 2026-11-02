@@ -6,8 +6,8 @@ mod model;
 use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_freedesktop::{ui_thread_object::UiThreadHandle, DBusCallQueue};
-pub(crate) use model::Notice;
 use model::{Event, History, Request};
+pub(crate) use model::{Notice, Sender};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -104,14 +104,8 @@ impl Service {
         service
     }
 
-    pub fn page(&self, first: usize, count: usize) -> Vec<Notice> {
-        self.model
-            .borrow()
-            .items()
-            .skip(first)
-            .take(count)
-            .cloned()
-            .collect()
+    pub fn history(&self) -> Vec<Notice> {
+        self.model.borrow().items().cloned().collect()
     }
     pub fn hide_banner(self: &Rc<Self>) {
         if self.model.borrow_mut().hide_banner() {
@@ -189,9 +183,9 @@ impl Service {
             self.commit(events);
         }
     }
-    pub fn clear(self: &Rc<Self>) {
+    pub fn clear(self: &Rc<Self>, sender: Option<&Sender>) {
         self.expire_due(Instant::now());
-        let events = self.model.borrow_mut().clear();
+        let events = self.model.borrow_mut().clear_matching(sender);
         self.commit(events);
     }
     pub fn toggle_quiet(self: &Rc<Self>) {
@@ -286,8 +280,13 @@ impl Endpoint {
     ) -> zbus::fdo::Result<u32> {
         // These are plain text, not markup. Bound retained memory and reject malformed
         // requests instead of silently assigning an identifier to unsupported actions.
-        let _ = app_icon;
-        if app_name.len() > 1024
+        let desktop_entry = hints
+            .get("desktop-entry")
+            .and_then(|hint| <&str>::try_from(hint).ok())
+            .unwrap_or_default();
+        if app_icon.len() > 4096
+            || desktop_entry.len() > 1024
+            || app_name.len() > 1024
             || summary.len() > 4096
             || body.len() > 16 * 1024
             || actions.len() % 2 != 0
@@ -300,7 +299,14 @@ impl Endpoint {
         }
         let mut pairs = actions.into_iter();
         let request = Request {
-            app: app_name,
+            sender: Sender {
+                name: app_name,
+                icon: app_icon.to_owned(),
+                desktop_entry: desktop_entry
+                    .strip_suffix(".desktop")
+                    .unwrap_or(desktop_entry)
+                    .to_owned(),
+            },
             title: summary,
             body,
             actions: std::iter::from_fn(|| Some((pairs.next()?, pairs.next()?))).collect(),
@@ -357,7 +363,10 @@ mod delivery_tests {
 
     fn request(timeout_ms: i32) -> Request {
         Request {
-            app: "Editor".into(),
+            sender: Sender {
+                name: "Editor".into(),
+                ..Sender::default()
+            },
             title: "Saved".into(),
             body: String::new(),
             actions: vec![],
@@ -386,7 +395,7 @@ mod delivery_tests {
             Err(zbus::fdo::Error::InvalidArgs(_))
         ));
         assert!(service.timer.borrow().is_none());
-        assert!(!service.page(0, 1)[0].active);
+        assert!(!service.history()[0].active);
     }
 
     #[test]

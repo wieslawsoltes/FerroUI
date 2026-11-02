@@ -1,12 +1,31 @@
 //! Notification lifetime is independent from the short-lived banner and the history card.
 use std::collections::VecDeque;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime};
 
 const CAPACITY: usize = 64;
 const BANNER_TIME: Duration = Duration::from_secs(6);
 
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub(crate) struct Sender {
+    pub name: String,
+    pub icon: String,
+    pub desktop_entry: String,
+}
+
+impl Sender {
+    /// Applications with translated or identical display names have independent
+    /// groups when they supply their freedesktop desktop-entry hint.
+    pub fn identity(&self) -> (bool, &str) {
+        if self.desktop_entry.is_empty() {
+            (false, &self.name)
+        } else {
+            (true, &self.desktop_entry)
+        }
+    }
+}
+
 pub(crate) struct Request {
-    pub app: String,
+    pub sender: Sender,
     pub title: String,
     pub body: String,
     pub actions: Vec<(String, String)>,
@@ -19,7 +38,8 @@ pub(crate) struct Request {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Notice {
     pub id: u32,
-    pub app: String,
+    pub sender: Sender,
+    pub received: SystemTime,
     pub title: String,
     pub body: String,
     pub actions: Vec<(String, String)>,
@@ -119,7 +139,8 @@ impl History {
         }
         self.items.push_front(Notice {
             id,
-            app: req.app,
+            sender: req.sender,
+            received: SystemTime::now(),
             title: req.title,
             body: req.body,
             actions: req.actions,
@@ -181,13 +202,21 @@ impl History {
         result
     }
 
-    pub(super) fn clear(&mut self) -> Vec<Event> {
-        self.hide_banner();
-        self.items
-            .drain(..)
-            .filter(|item| item.active)
-            .map(|item| Event::Closed(item.id, 2))
-            .collect()
+    pub(super) fn clear_matching(&mut self, sender: Option<&Sender>) -> Vec<Event> {
+        let mut events = Vec::new();
+        self.items.retain(|item| {
+            if sender.is_some_and(|s| s.identity() != item.sender.identity()) {
+                return true;
+            }
+            if self.banner.is_some_and(|(id, _)| id == item.id) {
+                self.banner = None;
+            }
+            if item.active {
+                events.push(Event::Closed(item.id, 2));
+            }
+            false
+        });
+        events
     }
 }
 
@@ -196,7 +225,10 @@ mod tests {
     use super::*;
     fn request() -> Request {
         Request {
-            app: "Mail".into(),
+            sender: Sender {
+                name: "Mail".into(),
+                ..Sender::default()
+            },
             title: "Message".into(),
             body: "Body".into(),
             actions: vec![("open".into(), "Open".into())],
@@ -224,7 +256,54 @@ mod tests {
         assert!(h.notify(id, request(), t).is_err());
         assert!(h.invoke(id, "open").is_empty());
         assert!(h.remove(id, 3).is_none());
-        assert!(h.clear().is_empty());
+        assert!(h.clear_matching(None).is_empty());
+    }
+
+    #[test]
+    fn clearing_a_sender_matches_the_desktop_entry_and_closes_only_live_ids() {
+        let mut history = History::default();
+        let start = Instant::now();
+        let sender = |name: &str, desktop: &str| Sender {
+            name: name.to_owned(),
+            desktop_entry: desktop.to_owned(),
+            icon: String::new(),
+        };
+        let mut send = |name, desktop, ttl| {
+            history
+                .notify(
+                    0,
+                    Request {
+                        sender: sender(name, desktop),
+                        timeout_ms: ttl,
+                        ..request()
+                    },
+                    start,
+                )
+                .unwrap()
+                .0
+        };
+        let expired = send("Editor", "org.editor", 10);
+        let translated = send("Éditeur", "org.editor", 0);
+        let other = send("Editor", "org.unrelated", 0);
+        let anonymous = send("Editor", "", 0);
+        assert_eq!(
+            history.expire(start + Duration::from_millis(10)),
+            [Event::Closed(expired, 1)]
+        );
+        assert_eq!(
+            history.clear_matching(Some(&sender("Editor", "org.editor"))),
+            [Event::Closed(translated, 2)]
+        );
+        assert_eq!(
+            history.items().map(|n| n.id).collect::<Vec<_>>(),
+            [anonymous, other]
+        );
+        assert_eq!(history.banner().map(|n| n.id), Some(anonymous));
+        assert_eq!(
+            history.clear_matching(Some(&sender("Editor", ""))),
+            [Event::Closed(anonymous, 2)]
+        );
+        assert!(history.banner().is_none());
     }
 
     #[test]
@@ -259,7 +338,7 @@ mod tests {
             .unwrap();
         assert!(h.banner().is_none());
         assert_eq!(h.expire(t + BANNER_TIME), [Event::Closed(other, 1)]);
-        assert_eq!(h.clear(), [Event::Closed(id, 2)]);
+        assert_eq!(h.clear_matching(None), [Event::Closed(id, 2)]);
     }
 
     #[test]
