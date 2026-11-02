@@ -1,0 +1,1019 @@
+{
+  "measured_utc_date": "2026-11-02",
+  "consumer": "scripts/themes/bench/winui.rs",
+  "consumer_sha256": "f3061af47882409ae213a8df86f253eff725802f6a6c8b9deb060f24f03e519e",
+  "baseline_commit": "df8b92d9438a7f1f797f9f86c2c4c602e3a4bf75",
+  "baseline_tree": "8ac62e7c6c5753182e83487b08437469b80a0ffb",
+  "candidate_commit": "9e4065b92ba54a7e39a9bcb00e3e84a80df01665",
+  "candidate_tree": "77dc573570aae327e09842324bb82e4db00460ec",
+  "trimmed_commit": "4c6b82c735fdb393faa1dca728087d32845b1e29",
+  "trimmed_tree": "a66fc6e1f27e9b94c2aac6ea4f6f9525a7298d2e",
+  "host": {
+    "cpu": "AMD EPYC 9V74 80-Core Processor (virtualized)",
+    "cpu_quota": 8,
+    "memory_limit_bytes": 8589934592,
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.39",
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1",
+    "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)"
+  },
+  "build": {
+    "profile": "release",
+    "opt_level": 3,
+    "cross_crate_lto": false,
+    "incremental": false,
+    "cargo_jobs": 1,
+    "target": "x86_64-unknown-linux-gnu",
+    "strip": "GNU strip, default flags on a copy of the linked executable",
+    "timing_source": "Cargo --timings wall seconds per executed unit; build-script (run) includes scanning, XAML generation, and writing output. Target directories and framework dependencies were reused. A single sample per candidate includes its changed compiler dependencies only in total build time, outside the theme units. Do not compare initial end-to-end totals as clean builds."
+  },
+  "startup": {
+    "clock": "monotonic nanoseconds",
+    "page_cache": "warm",
+    "launches": "Each round starts a fresh process for each variant. Position rotates by one each round. Each probe is warmed once before the measured rounds.",
+    "initial_order": [
+      "button-fxb",
+      "baseline",
+      "rust",
+      "fxb",
+      "button-rust"
+    ],
+    "rounds": 21,
+    "metrics": {
+      "create_ns": "inside the process, from before WinUITheme::new until construction returns",
+      "create_and_button_ns": "from the same start through successful Button resource lookup",
+      "process_ready_ns": "parent, from before spawn through the flushed ready marker after Button lookup",
+      "process_ns": "parent, from before spawn through process exit and theme destruction"
+    }
+  },
+  "hashes": {
+    "generated_rust_sha256": "compiled_xaml.rs bytes",
+    "referenced_fxb_sha256": "sorted unique ASCII include filenames; concatenate 8-byte LE filename length, filename, 8-byte LE file length and raw file bytes",
+    "stripped_sha256": "stripped ELF bytes"
+  },
+  "symbol_attribution": {
+    "method": "From nm -S -C --defined-only on the unstripped linked consumers, sum distinct (address, size) ranges for T or t symbols in each group. Inlined code and data are not attributed by this method.",
+    "generated": "ferroui_themes_winui::compiled_xaml:: prefix",
+    "shared": "contains xaml_il::runtime::compiled::theme_resources:: or xaml_il::runtime::compiled::binary_resources::, or starts with ferroui_xaml_binary::"
+  },
+  "cases": {
+    "baseline": {
+      "revision": "baseline",
+      "resource_roots": null,
+      "binary_resources": false,
+      "generated_rust_bytes": 14421918,
+      "generated_rust_sha256": "23d300c4cba80b3d822afd83dda1f6ffcc29e8266709c6a61952b3dcd88e1225",
+      "referenced_fxb_blocks": 0,
+      "referenced_fxb_bytes": 0,
+      "referenced_fxb_sha256": null,
+      "winui_rlib_bytes": 52968772,
+      "stripped_executable_bytes": 71124168,
+      "stripped_sha256": "99d68be7e85f4c4c6b943a5ee3a2ff9a13d1415ed82e955836116e3942b201d4",
+      "elf_section_bytes": {
+        ".rela.dyn": 4915800,
+        ".gcc_except_table": 4175240,
+        ".rodata": 1640324,
+        ".eh_frame": 7618276,
+        ".text": 48537285,
+        ".data.rel.ro": 2693496
+      },
+      "attributed_text": {
+        "generated": {
+          "symbol_ranges": 4736,
+          "bytes": 7833137
+        }
+      },
+      "contains_DefaultDatePickerStyle": true,
+      "cargo_units": [
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "build-script",
+          "seconds": 0.82
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "build-script (run)",
+          "seconds": 21.92
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "library",
+          "seconds": 197.77
+        },
+        {
+          "package": "winui-theme-probe",
+          "unit": "winui-theme-probe \"bin\"",
+          "seconds": 0.94
+        }
+      ],
+      "median_ns": {
+        "create_ns": 11222751,
+        "create_and_button_ns": 11427984,
+        "process_ready_ns": 15205545,
+        "process_ns": 17839343
+      },
+      "interleaved_samples_ns": [
+        {
+          "create_ns": 15696160,
+          "create_and_button_ns": 16061219,
+          "process_ready_ns": 19968852,
+          "process_ns": 22980802
+        },
+        {
+          "create_ns": 10594472,
+          "create_and_button_ns": 10858893,
+          "process_ready_ns": 14112515,
+          "process_ns": 16585839
+        },
+        {
+          "create_ns": 10394666,
+          "create_and_button_ns": 10601692,
+          "process_ready_ns": 13817194,
+          "process_ns": 16240544
+        },
+        {
+          "create_ns": 10324153,
+          "create_and_button_ns": 10508726,
+          "process_ready_ns": 14089967,
+          "process_ns": 16901205
+        },
+        {
+          "create_ns": 14812643,
+          "create_and_button_ns": 15094760,
+          "process_ready_ns": 19000762,
+          "process_ns": 22759129
+        },
+        {
+          "create_ns": 11741472,
+          "create_and_button_ns": 11941608,
+          "process_ready_ns": 15696680,
+          "process_ns": 18272015
+        },
+        {
+          "create_ns": 11386432,
+          "create_and_button_ns": 11704843,
+          "process_ready_ns": 15029369,
+          "process_ns": 17657662
+        },
+        {
+          "create_ns": 10682782,
+          "create_and_button_ns": 10870139,
+          "process_ready_ns": 14019833,
+          "process_ns": 16595128
+        },
+        {
+          "create_ns": 12610370,
+          "create_and_button_ns": 12910784,
+          "process_ready_ns": 17349722,
+          "process_ns": 20148688
+        },
+        {
+          "create_ns": 10580432,
+          "create_and_button_ns": 10778044,
+          "process_ready_ns": 14144537,
+          "process_ns": 16423464
+        },
+        {
+          "create_ns": 11222751,
+          "create_and_button_ns": 11417138,
+          "process_ready_ns": 15205545,
+          "process_ns": 17928017
+        },
+        {
+          "create_ns": 11137675,
+          "create_and_button_ns": 11427984,
+          "process_ready_ns": 14945330,
+          "process_ns": 17040756
+        },
+        {
+          "create_ns": 15325032,
+          "create_and_button_ns": 15594861,
+          "process_ready_ns": 19510947,
+          "process_ns": 22822068
+        },
+        {
+          "create_ns": 11037692,
+          "create_and_button_ns": 11377675,
+          "process_ready_ns": 14723802,
+          "process_ns": 17445423
+        },
+        {
+          "create_ns": 12903748,
+          "create_and_button_ns": 13121099,
+          "process_ready_ns": 16782484,
+          "process_ns": 20297676
+        },
+        {
+          "create_ns": 10736021,
+          "create_and_button_ns": 11031827,
+          "process_ready_ns": 15262397,
+          "process_ns": 17373206
+        },
+        {
+          "create_ns": 11918993,
+          "create_and_button_ns": 12463272,
+          "process_ready_ns": 15992710,
+          "process_ns": 18323684
+        },
+        {
+          "create_ns": 10995554,
+          "create_and_button_ns": 11188970,
+          "process_ready_ns": 14912030,
+          "process_ns": 17841968
+        },
+        {
+          "create_ns": 10608282,
+          "create_and_button_ns": 10792754,
+          "process_ready_ns": 14225897,
+          "process_ns": 16155637
+        },
+        {
+          "create_ns": 11653255,
+          "create_and_button_ns": 11877637,
+          "process_ready_ns": 15595629,
+          "process_ns": 17839343
+        },
+        {
+          "create_ns": 11855905,
+          "create_and_button_ns": 12266291,
+          "process_ready_ns": 16187324,
+          "process_ns": 18087922
+        }
+      ],
+      "cargo_units_first_build": [
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "build-script",
+          "seconds": 1.03
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "build-script (run)",
+          "seconds": 23.9
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "library",
+          "seconds": 193.18
+        },
+        {
+          "package": "winui-theme-probe",
+          "unit": "winui-theme-probe \"bin\"",
+          "seconds": 0.77
+        }
+      ],
+      "dependency_warm_clean_theme_and_probe_seconds": 221.72062775599989
+    },
+    "rust": {
+      "revision": "candidate",
+      "resource_roots": null,
+      "binary_resources": false,
+      "generated_rust_bytes": 9234385,
+      "generated_rust_sha256": "5721a06aa3bba9662cf726235c518d933b89b6b79b3cf97b217de02c9fcd4902",
+      "referenced_fxb_blocks": 0,
+      "referenced_fxb_bytes": 0,
+      "referenced_fxb_sha256": null,
+      "winui_rlib_bytes": 46432352,
+      "stripped_executable_bytes": 69286928,
+      "stripped_sha256": "c2ed723211ce96021cae43d51bac8a9f8c6314dbf57f2d64cb05685f1217c246",
+      "elf_section_bytes": {
+        ".rela.dyn": 5159856,
+        ".gcc_except_table": 4092956,
+        ".rodata": 1640300,
+        ".eh_frame": 7269016,
+        ".text": 46663989,
+        ".data.rel.ro": 2947616
+      },
+      "attributed_text": {
+        "shared": {
+          "symbol_ranges": 13,
+          "bytes": 9663
+        },
+        "generated": {
+          "symbol_ranges": 784,
+          "bytes": 5918159
+        }
+      },
+      "contains_DefaultDatePickerStyle": true,
+      "cargo_units": [
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "build-script",
+          "seconds": 0.98
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "build-script (run)",
+          "seconds": 26.68
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "library",
+          "seconds": 173.33
+        },
+        {
+          "package": "winui-theme-probe",
+          "unit": "winui-theme-probe \"bin\"",
+          "seconds": 0.82
+        }
+      ],
+      "median_ns": {
+        "create_ns": 10501064,
+        "create_and_button_ns": 10711575,
+        "process_ready_ns": 14551511,
+        "process_ns": 17274229
+      },
+      "interleaved_samples_ns": [
+        {
+          "create_ns": 10501064,
+          "create_and_button_ns": 10711575,
+          "process_ready_ns": 14357311,
+          "process_ns": 17437933
+        },
+        {
+          "create_ns": 13861008,
+          "create_and_button_ns": 14132369,
+          "process_ready_ns": 18191586,
+          "process_ns": 20993116
+        },
+        {
+          "create_ns": 11019210,
+          "create_and_button_ns": 11221539,
+          "process_ready_ns": 14773115,
+          "process_ns": 17356497
+        },
+        {
+          "create_ns": 10945431,
+          "create_and_button_ns": 11215420,
+          "process_ready_ns": 15180834,
+          "process_ns": 17840864
+        },
+        {
+          "create_ns": 14646788,
+          "create_and_button_ns": 14921665,
+          "process_ready_ns": 18885726,
+          "process_ns": 22075339
+        },
+        {
+          "create_ns": 12128749,
+          "create_and_button_ns": 12325129,
+          "process_ready_ns": 16627535,
+          "process_ns": 19089473
+        },
+        {
+          "create_ns": 13860498,
+          "create_and_button_ns": 14125960,
+          "process_ready_ns": 18333666,
+          "process_ns": 21149326
+        },
+        {
+          "create_ns": 11358461,
+          "create_and_button_ns": 11683782,
+          "process_ready_ns": 15747866,
+          "process_ns": 19079167
+        },
+        {
+          "create_ns": 9070941,
+          "create_and_button_ns": 9277617,
+          "process_ready_ns": 12716047,
+          "process_ns": 15552347
+        },
+        {
+          "create_ns": 9687742,
+          "create_and_button_ns": 9895279,
+          "process_ready_ns": 13235864,
+          "process_ns": 15764830
+        },
+        {
+          "create_ns": 8895012,
+          "create_and_button_ns": 9114336,
+          "process_ready_ns": 12559064,
+          "process_ns": 14792624
+        },
+        {
+          "create_ns": 9159391,
+          "create_and_button_ns": 9419866,
+          "process_ready_ns": 12880469,
+          "process_ns": 15443165
+        },
+        {
+          "create_ns": 9953806,
+          "create_and_button_ns": 10145399,
+          "process_ready_ns": 13735443,
+          "process_ns": 15904768
+        },
+        {
+          "create_ns": 9573283,
+          "create_and_button_ns": 9873927,
+          "process_ready_ns": 13481597,
+          "process_ns": 16252611
+        },
+        {
+          "create_ns": 14505829,
+          "create_and_button_ns": 14814495,
+          "process_ready_ns": 19105774,
+          "process_ns": 22161725
+        },
+        {
+          "create_ns": 9821089,
+          "create_and_button_ns": 10046642,
+          "process_ready_ns": 13606114,
+          "process_ns": 17212662
+        },
+        {
+          "create_ns": 14375788,
+          "create_and_button_ns": 14665586,
+          "process_ready_ns": 19001751,
+          "process_ns": 22338911
+        },
+        {
+          "create_ns": 10703671,
+          "create_and_button_ns": 10982884,
+          "process_ready_ns": 14829067,
+          "process_ns": 17274229
+        },
+        {
+          "create_ns": 9662585,
+          "create_and_button_ns": 9849030,
+          "process_ready_ns": 12999164,
+          "process_ns": 14906852
+        },
+        {
+          "create_ns": 10065399,
+          "create_and_button_ns": 10258424,
+          "process_ready_ns": 14056470,
+          "process_ns": 16271362
+        },
+        {
+          "create_ns": 10117126,
+          "create_and_button_ns": 10495354,
+          "process_ready_ns": 14551511,
+          "process_ns": 16677281
+        }
+      ]
+    },
+    "fxb": {
+      "revision": "candidate",
+      "resource_roots": null,
+      "binary_resources": true,
+      "generated_rust_bytes": 8753658,
+      "generated_rust_sha256": "62fd121bd9b787e0f71df6229e39005dbc5157c0a8a81e9bce7a87012f213ef5",
+      "referenced_fxb_blocks": 456,
+      "referenced_fxb_bytes": 175024,
+      "referenced_fxb_sha256": "7cb180aea56075b52ac63766fe204bdae64679cc5f6fe10d6e6108d9e755948d",
+      "winui_rlib_bytes": 45520568,
+      "stripped_executable_bytes": 69004736,
+      "stripped_sha256": "1629e9451fb9890c22e7448d7707f893d720cc130f4203e12723e7a49de09ea5",
+      "elf_section_bytes": {
+        ".rela.dyn": 4919568,
+        ".gcc_except_table": 4093912,
+        ".rodata": 1820364,
+        ".eh_frame": 7271104,
+        ".text": 46691045,
+        ".data.rel.ro": 2695256
+      },
+      "attributed_text": {
+        "shared": {
+          "symbol_ranges": 19,
+          "bytes": 10429
+        },
+        "generated": {
+          "symbol_ranges": 784,
+          "bytes": 5938160
+        }
+      },
+      "contains_DefaultDatePickerStyle": true,
+      "cargo_units": [
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "build-script",
+          "seconds": 0.85
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "build-script (run)",
+          "seconds": 26.2
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "library",
+          "seconds": 161.36
+        },
+        {
+          "package": "winui-theme-probe",
+          "unit": "winui-theme-probe \"bin\"",
+          "seconds": 0.93
+        }
+      ],
+      "median_ns": {
+        "create_ns": 11850176,
+        "create_and_button_ns": 12252000,
+        "process_ready_ns": 16205072,
+        "process_ns": 19534168
+      },
+      "interleaved_samples_ns": [
+        {
+          "create_ns": 10837311,
+          "create_and_button_ns": 11058208,
+          "process_ready_ns": 14950112,
+          "process_ns": 17776778
+        },
+        {
+          "create_ns": 16278520,
+          "create_and_button_ns": 16638301,
+          "process_ready_ns": 21022229,
+          "process_ns": 26028705
+        },
+        {
+          "create_ns": 13398695,
+          "create_and_button_ns": 13744966,
+          "process_ready_ns": 17298977,
+          "process_ns": 20518734
+        },
+        {
+          "create_ns": 15632295,
+          "create_and_button_ns": 15853011,
+          "process_ready_ns": 19635779,
+          "process_ns": 22702310
+        },
+        {
+          "create_ns": 11653246,
+          "create_and_button_ns": 11978436,
+          "process_ready_ns": 15710641,
+          "process_ns": 18411561
+        },
+        {
+          "create_ns": 10280944,
+          "create_and_button_ns": 10504163,
+          "process_ready_ns": 14457930,
+          "process_ns": 17008198
+        },
+        {
+          "create_ns": 10762420,
+          "create_and_button_ns": 11079418,
+          "process_ready_ns": 14568293,
+          "process_ns": 17778817
+        },
+        {
+          "create_ns": 11656601,
+          "create_and_button_ns": 11998667,
+          "process_ready_ns": 15880322,
+          "process_ns": 18978890
+        },
+        {
+          "create_ns": 12033358,
+          "create_and_button_ns": 12367401,
+          "process_ready_ns": 16205072,
+          "process_ns": 20109460
+        },
+        {
+          "create_ns": 15815986,
+          "create_and_button_ns": 16124582,
+          "process_ready_ns": 20774022,
+          "process_ns": 24376434
+        },
+        {
+          "create_ns": 13151264,
+          "create_and_button_ns": 13376467,
+          "process_ready_ns": 17211458,
+          "process_ns": 20082810
+        },
+        {
+          "create_ns": 17648123,
+          "create_and_button_ns": 18071649,
+          "process_ready_ns": 21574976,
+          "process_ns": 24543761
+        },
+        {
+          "create_ns": 16051795,
+          "create_and_button_ns": 16330276,
+          "process_ready_ns": 20520397,
+          "process_ns": 24378577
+        },
+        {
+          "create_ns": 10771614,
+          "create_and_button_ns": 10994092,
+          "process_ready_ns": 14745085,
+          "process_ns": 17693361
+        },
+        {
+          "create_ns": 11736218,
+          "create_and_button_ns": 11972697,
+          "process_ready_ns": 15641077,
+          "process_ns": 19210069
+        },
+        {
+          "create_ns": 15706363,
+          "create_and_button_ns": 15971275,
+          "process_ready_ns": 20227932,
+          "process_ns": 23174976
+        },
+        {
+          "create_ns": 13298035,
+          "create_and_button_ns": 13502007,
+          "process_ready_ns": 17557882,
+          "process_ns": 20878938
+        },
+        {
+          "create_ns": 11084195,
+          "create_and_button_ns": 11299312,
+          "process_ready_ns": 15201478,
+          "process_ns": 17797072
+        },
+        {
+          "create_ns": 11042844,
+          "create_and_button_ns": 11251702,
+          "process_ready_ns": 14676642,
+          "process_ns": 17786385
+        },
+        {
+          "create_ns": 11850176,
+          "create_and_button_ns": 12252000,
+          "process_ready_ns": 16527316,
+          "process_ns": 19534168
+        },
+        {
+          "create_ns": 11243349,
+          "create_and_button_ns": 11678092,
+          "process_ready_ns": 15592424,
+          "process_ns": 18458203
+        }
+      ]
+    },
+    "button-rust": {
+      "revision": "trimmed",
+      "resource_roots": "Button",
+      "binary_resources": false,
+      "generated_rust_bytes": 1223669,
+      "generated_rust_sha256": "2a4af77f61c85073278d25704f81c53028f49db3886769d7ca21e9a9dfb47c1b",
+      "referenced_fxb_blocks": 0,
+      "referenced_fxb_bytes": 0,
+      "referenced_fxb_sha256": null,
+      "winui_rlib_bytes": 19663232,
+      "stripped_executable_bytes": 60142304,
+      "stripped_sha256": "999417bc7e2a4826061aeab6fb731ce25789503be2a267e3a77ba95ea02849ca",
+      "elf_section_bytes": {
+        ".rela.dyn": 4731912,
+        ".gcc_except_table": 3568472,
+        ".rodata": 1510108,
+        ".eh_frame": 6666368,
+        ".text": 39594325,
+        ".data.rel.ro": 2622696
+      },
+      "attributed_text": {
+        "shared": {
+          "symbol_ranges": 13,
+          "bytes": 9663
+        },
+        "generated": {
+          "symbol_ranges": 107,
+          "bytes": 807470
+        }
+      },
+      "contains_DefaultDatePickerStyle": false,
+      "cargo_units": [
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "build-script",
+          "seconds": 0.67
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "build-script (run)",
+          "seconds": 3.47
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "library",
+          "seconds": 50.95
+        },
+        {
+          "package": "winui-theme-probe",
+          "unit": "winui-theme-probe \"bin\"",
+          "seconds": 0.55
+        }
+      ],
+      "median_ns": {
+        "create_ns": 3458970,
+        "create_and_button_ns": 3608541,
+        "process_ready_ns": 6916167,
+        "process_ns": 7860462
+      },
+      "interleaved_samples_ns": [
+        {
+          "create_ns": 3207228,
+          "create_and_button_ns": 3364371,
+          "process_ready_ns": 6451351,
+          "process_ns": 7257913
+        },
+        {
+          "create_ns": 3803499,
+          "create_and_button_ns": 3957116,
+          "process_ready_ns": 7440843,
+          "process_ns": 8436674
+        },
+        {
+          "create_ns": 3212666,
+          "create_and_button_ns": 3366403,
+          "process_ready_ns": 6756973,
+          "process_ns": 7956665
+        },
+        {
+          "create_ns": 3820815,
+          "create_and_button_ns": 4042413,
+          "process_ready_ns": 7136624,
+          "process_ns": 8174417
+        },
+        {
+          "create_ns": 3108022,
+          "create_and_button_ns": 3262981,
+          "process_ready_ns": 6086622,
+          "process_ns": 6807146
+        },
+        {
+          "create_ns": 3723982,
+          "create_and_button_ns": 3877779,
+          "process_ready_ns": 6981945,
+          "process_ns": 7805712
+        },
+        {
+          "create_ns": 4297238,
+          "create_and_button_ns": 4517374,
+          "process_ready_ns": 8191983,
+          "process_ns": 9204519
+        },
+        {
+          "create_ns": 3183093,
+          "create_and_button_ns": 3340035,
+          "process_ready_ns": 6537539,
+          "process_ns": 7368707
+        },
+        {
+          "create_ns": 3501653,
+          "create_and_button_ns": 3755819,
+          "process_ready_ns": 6897300,
+          "process_ns": 8030334
+        },
+        {
+          "create_ns": 4256248,
+          "create_and_button_ns": 4451326,
+          "process_ready_ns": 8022333,
+          "process_ns": 8883405
+        },
+        {
+          "create_ns": 4476674,
+          "create_and_button_ns": 4797578,
+          "process_ready_ns": 8743328,
+          "process_ns": 9774641
+        },
+        {
+          "create_ns": 3458970,
+          "create_and_button_ns": 3608541,
+          "process_ready_ns": 7163162,
+          "process_ns": 7925088
+        },
+        {
+          "create_ns": 3007523,
+          "create_and_button_ns": 3159077,
+          "process_ready_ns": 6202523,
+          "process_ns": 6980222
+        },
+        {
+          "create_ns": 3337742,
+          "create_and_button_ns": 3517177,
+          "process_ready_ns": 6442067,
+          "process_ns": 7137625
+        },
+        {
+          "create_ns": 4360482,
+          "create_and_button_ns": 4575369,
+          "process_ready_ns": 9597529,
+          "process_ns": 9668905
+        },
+        {
+          "create_ns": 3385812,
+          "create_and_button_ns": 3536845,
+          "process_ready_ns": 6536216,
+          "process_ns": 7248618
+        },
+        {
+          "create_ns": 3101342,
+          "create_and_button_ns": 3335619,
+          "process_ready_ns": 6856009,
+          "process_ns": 7707006
+        },
+        {
+          "create_ns": 3501924,
+          "create_and_button_ns": 3652756,
+          "process_ready_ns": 7054331,
+          "process_ns": 7860462
+        },
+        {
+          "create_ns": 3061833,
+          "create_and_button_ns": 3279965,
+          "process_ready_ns": 6444771,
+          "process_ns": 7041582
+        },
+        {
+          "create_ns": 3438780,
+          "create_and_button_ns": 3590434,
+          "process_ready_ns": 6916167,
+          "process_ns": 7752352
+        },
+        {
+          "create_ns": 3580189,
+          "create_and_button_ns": 3775358,
+          "process_ready_ns": 6926723,
+          "process_ns": 7879932
+        }
+      ]
+    },
+    "button-fxb": {
+      "revision": "trimmed",
+      "resource_roots": "Button",
+      "binary_resources": true,
+      "generated_rust_bytes": 1165828,
+      "generated_rust_sha256": "ad3913d6fe58a3683e9ef23ccc1f1bd29d8cdbfa8f0cc6ea919966e6b40d8672",
+      "referenced_fxb_blocks": 77,
+      "referenced_fxb_bytes": 22362,
+      "referenced_fxb_sha256": "667290ff5cacf32fd5210028bc9c9deaff9914853cc69d82dc958f418db141fe",
+      "winui_rlib_bytes": 19552072,
+      "stripped_executable_bytes": 60118328,
+      "stripped_sha256": "47a18b960b7231401182d4c3c2f64612803320e1282ab4bda1a12ae8dd960dbd",
+      "elf_section_bytes": {
+        ".rela.dyn": 4700592,
+        ".gcc_except_table": 3569308,
+        ".rodata": 1536620,
+        ".eh_frame": 6668464,
+        ".text": 39604037,
+        ".data.rel.ro": 2590584
+      },
+      "attributed_text": {
+        "shared": {
+          "symbol_ranges": 19,
+          "bytes": 10429
+        },
+        "generated": {
+          "symbol_ranges": 107,
+          "bytes": 810131
+        }
+      },
+      "contains_DefaultDatePickerStyle": false,
+      "cargo_units": [
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "build-script",
+          "seconds": 0.71
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "build-script (run)",
+          "seconds": 4.24
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "unit": "library",
+          "seconds": 54.23
+        },
+        {
+          "package": "winui-theme-probe",
+          "unit": "winui-theme-probe \"bin\"",
+          "seconds": 0.83
+        }
+      ],
+      "median_ns": {
+        "create_ns": 4428623,
+        "create_and_button_ns": 4609300,
+        "process_ready_ns": 7923756,
+        "process_ns": 9172251
+      },
+      "interleaved_samples_ns": [
+        {
+          "create_ns": 3680297,
+          "create_and_button_ns": 3859422,
+          "process_ready_ns": 7210693,
+          "process_ns": 8838918
+        },
+        {
+          "create_ns": 4292332,
+          "create_and_button_ns": 4466009,
+          "process_ready_ns": 7759384,
+          "process_ns": 8917485
+        },
+        {
+          "create_ns": 4986036,
+          "create_and_button_ns": 5173483,
+          "process_ready_ns": 8598183,
+          "process_ns": 9962719
+        },
+        {
+          "create_ns": 3792613,
+          "create_and_button_ns": 3961112,
+          "process_ready_ns": 6915012,
+          "process_ns": 7878635
+        },
+        {
+          "create_ns": 4761014,
+          "create_and_button_ns": 4938896,
+          "process_ready_ns": 7923756,
+          "process_ns": 9654558
+        },
+        {
+          "create_ns": 4431507,
+          "create_and_button_ns": 4611432,
+          "process_ready_ns": 8048722,
+          "process_ns": 9199291
+        },
+        {
+          "create_ns": 3819793,
+          "create_and_button_ns": 4002443,
+          "process_ready_ns": 7181099,
+          "process_ns": 8368944
+        },
+        {
+          "create_ns": 4428623,
+          "create_and_button_ns": 4609300,
+          "process_ready_ns": 7852111,
+          "process_ns": 9039606
+        },
+        {
+          "create_ns": 4280399,
+          "create_and_button_ns": 4576937,
+          "process_ready_ns": 7834625,
+          "process_ns": 9172251
+        },
+        {
+          "create_ns": 4439970,
+          "create_and_button_ns": 4739202,
+          "process_ready_ns": 8138794,
+          "process_ns": 9716124
+        },
+        {
+          "create_ns": 4207586,
+          "create_and_button_ns": 4387171,
+          "process_ready_ns": 7906060,
+          "process_ns": 9164399
+        },
+        {
+          "create_ns": 5160574,
+          "create_and_button_ns": 5409232,
+          "process_ready_ns": 9281743,
+          "process_ns": 10753697
+        },
+        {
+          "create_ns": 3652446,
+          "create_and_button_ns": 3855336,
+          "process_ready_ns": 6743823,
+          "process_ns": 7671213
+        },
+        {
+          "create_ns": 5354692,
+          "create_and_button_ns": 5606333,
+          "process_ready_ns": 9718538,
+          "process_ns": 10860055
+        },
+        {
+          "create_ns": 4443034,
+          "create_and_button_ns": 4624442,
+          "process_ready_ns": 10980291,
+          "process_ns": 12739479
+        },
+        {
+          "create_ns": 5223917,
+          "create_and_button_ns": 5481628,
+          "process_ready_ns": 9387347,
+          "process_ns": 10645606
+        },
+        {
+          "create_ns": 4655237,
+          "create_and_button_ns": 4838889,
+          "process_ready_ns": 8041400,
+          "process_ns": 8892427
+        },
+        {
+          "create_ns": 5288333,
+          "create_and_button_ns": 5541226,
+          "process_ready_ns": 9421107,
+          "process_ns": 10715159
+        },
+        {
+          "create_ns": 4119035,
+          "create_and_button_ns": 4373481,
+          "process_ready_ns": 8464525,
+          "process_ns": 8755184
+        },
+        {
+          "create_ns": 4130853,
+          "create_and_button_ns": 4387281,
+          "process_ready_ns": 7465088,
+          "process_ns": 9203757
+        },
+        {
+          "create_ns": 3885981,
+          "create_and_button_ns": 4055331,
+          "process_ready_ns": 7652154,
+          "process_ns": 8575123
+        }
+      ]
+    }
+  }
+}
