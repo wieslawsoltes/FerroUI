@@ -125,8 +125,44 @@ pub(super) fn expand(image: &[u8]) -> XamlResult<Vec<u8>> {
     Ok(out)
 }
 
+// Older editors emit an unpaged v2 stream or an indexed v1 pack whose FXD
+// members are independently compressed. Compare the validated stored graphs
+// against one installed page at a time. No XAML type lookup happens here.
+fn compare_indexed(
+    installed: &[Page<'_>],
+    indexed: &[u8],
+) -> XamlResult<Option<Vec<(String, Vec<u8>, Vec<u8>)>>> {
+    let incoming = ThemePack::open(indexed)?;
+    let mut next = incoming.entries.into_iter();
+    let mut changed = Vec::new();
+    for page in installed {
+        let bytes = page.open()?;
+        let baseline = ThemePack::open(&bytes)?;
+        for (path, before) in baseline.entries {
+            let Some((name, after)) = next.next() else {
+                return Ok(None);
+            };
+            if name != path {
+                return Ok(None);
+            }
+            if before == after {
+                continue;
+            }
+            // An installed page always contains stored columnar FXD (mode 2).
+            // Mode 3 differs only by the zlib envelope. Row-layout syntax takes
+            // the conservative changed path and is validated by the caller.
+            if after[5] == 3 && super::super::decode::payload(after)?.as_ref() == &before[6..] {
+                continue;
+            }
+            changed.push((path.to_owned(), before.to_vec(), after.to_vec()));
+        }
+    }
+    Ok(next.next().is_none().then_some(changed))
+}
+
 /// Compare against a known-good installed revision. Equal frames are proven by
-/// byte equality. Only unequal frames are expanded. Some returns complete old
+/// byte equality. With matching v3 framing only unequal frames are expanded.
+/// Legacy indexed or solid revisions compare uncompressed member bytes. Some returns complete old
 /// and new FXD images for each changed path. None requires ordinary loading
 /// (a different format or path inventory). Callers validate the syntax and
 /// semantics of changed documents before applying any edit.
@@ -134,10 +170,19 @@ pub fn changed_documents(
     installed: &[u8],
     replacement: &[u8],
 ) -> XamlResult<Option<Vec<(String, Vec<u8>, Vec<u8>)>>> {
-    if !is_paged(installed) || !is_paged(replacement) {
+    if !is_paged(installed) {
         return Ok(None);
     }
     let original = pages(installed)?;
+    if solid::is_solid(replacement) {
+        return compare_indexed(&original, &solid::expand_solid(replacement)?);
+    }
+    if replacement.starts_with(MAGIC) && replacement.get(4) == Some(&PACK_VERSION) {
+        return compare_indexed(&original, replacement);
+    }
+    if !is_paged(replacement) {
+        return Ok(None);
+    }
     let incoming = pages(replacement)?;
     if original.len() != incoming.len() {
         return Ok(None);
@@ -178,7 +223,10 @@ mod tests {
         let solid = solid::compile_solid_documents(BASE).unwrap();
         assert_eq!(flat, solid::expand_solid(&solid).unwrap());
         assert_eq!(a, compile_paged_documents(&[BASE[1], BASE[0]]).unwrap());
-        assert!(changed_documents(&a, &solid).unwrap().is_none());
+        assert!(changed_documents(&a, &solid).unwrap().unwrap().is_empty());
+        assert!(changed_documents(&a, &flat).unwrap().unwrap().is_empty());
+        let indexed = super::super::compile_documents(BASE).unwrap();
+        assert!(changed_documents(&a, &indexed).unwrap().unwrap().is_empty());
         assert!(changed_documents(&a, &a).unwrap().unwrap().is_empty());
         let delta = changed_documents(&a, &b).unwrap().unwrap();
         assert_eq!(delta.len(), 1);
@@ -195,6 +243,36 @@ mod tests {
         let rename = compile_paged_documents(&[("themes/c.xaml", "<Panel/>"), BASE[1]]).unwrap();
         assert!(changed_documents(&a, &rename).unwrap().is_none());
         assert!(compile_paged_documents(&[BASE[0], BASE[0]]).is_err());
+    }
+
+    #[test]
+    fn compressed_legacy_members_compare_their_complete_graphs() {
+        let xml = format!("<Panel>{}</Panel>", "<Button Content='hello'/>".repeat(200));
+        let old = [("A.xaml", xml.as_str()), ("B.xaml", "<Panel/>")];
+        let edited = [old[0], ("B.xaml", "<Button/>")];
+        let baseline = compile_paged_documents(&old).unwrap();
+        let compressed = super::super::compile_documents(&edited).unwrap();
+        assert_eq!(
+            ThemePack::open(&compressed)
+                .unwrap()
+                .document("A.xaml")
+                .unwrap()[5],
+            3
+        );
+        let legacy = solid::compile_solid_documents(&edited).unwrap();
+        for pack in [&compressed, &legacy] {
+            let delta = changed_documents(&baseline, pack).unwrap().unwrap();
+            assert_eq!(delta.len(), 1);
+            assert_eq!(delta[0].0, "B.xaml");
+        }
+        let mut bad = compressed.clone();
+        let member = ThemePack::open(&compressed)
+            .unwrap()
+            .document("A.xaml")
+            .unwrap();
+        let end = member.as_ptr() as usize - compressed.as_ptr() as usize + member.len();
+        bad[end - 1] ^= 0x80;
+        assert!(changed_documents(&baseline, &bad).is_err());
     }
 
     #[test]

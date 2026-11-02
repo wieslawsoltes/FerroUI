@@ -252,13 +252,12 @@ impl<'a> Columns<'a> {
     }
 }
 
-/// Decode and validate a complete syntax graph. No framework types are accessed or
-/// application constructors called until the caller transforms the returned document.
-pub fn decode(bytes: &[u8]) -> XamlResult<XamlDocument> {
+// Return validated, uncompressed operand bytes while preserving the graph's
+// row/column layout. Comparisons can reuse this without constructing an AST.
+pub(super) fn payload(bytes: &[u8]) -> XamlResult<std::borrow::Cow<'_, [u8]>> {
     let size = expanded_size(bytes)? - 6;
-    let expanded;
-    let payload = match bytes[5] & 1 {
-        0 => &bytes[6..],
+    match bytes[5] & 1 {
+        0 => Ok(std::borrow::Cow::Borrowed(&bytes[6..])),
         _ => {
             let data = &bytes[10..];
             let mut buffer = vec![0; size];
@@ -272,12 +271,17 @@ pub fn decode(bytes: &[u8]) -> XamlResult<XamlDocument> {
             {
                 return Err(invalid("compressed payload length mismatch"));
             }
-            expanded = buffer;
-            &expanded
+            Ok(std::borrow::Cow::Owned(buffer))
         }
-    };
+    }
+}
+
+/// Decode and validate a complete syntax graph. No framework types are accessed or
+/// application constructors called until the caller transforms the returned document.
+pub fn decode(bytes: &[u8]) -> XamlResult<XamlDocument> {
+    let payload = payload(bytes)?;
     let mut r = Reader {
-        input: payload,
+        input: &payload,
         strings: vec![],
         scopes: vec![],
         nodes: vec![],
