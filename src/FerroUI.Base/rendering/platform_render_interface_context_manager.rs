@@ -8,7 +8,7 @@ use crate::platform::{
     IPlatformGraphics, IPlatformGraphicsContext, IPlatformGraphicsReadyStateFeature, IPlatformRenderInterface,
     IPlatformRenderInterfaceContext, IRenderTarget,
 };
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::utilities::HandlerList;
 use crate::{FerroLocator, LocatorExtensions};
 
@@ -104,29 +104,33 @@ impl PlatformRenderInterfaceContextManager {
         drop((graphics, ready_state_feature, render_interface));
     }
 
-    /// Raised after a lost graphics context has been released.
-    pub fn context_disposed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Raised after a lost graphics context has been released. Dropping the
+    /// returned guard removes the handler; [`Subscription::detach`] keeps it
+    /// for the life of the manager.
+    pub fn context_disposed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.context_disposed.add(Rc::new(handler));
         let this = self.weak_self.clone();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = this.upgrade() {
                 this.context_disposed.remove(token);
             }
-        })
+        }))
     }
 
-    /// Raised after a backend context has been created.
+    /// Raised after a backend context has been created. Dropping the
+    /// returned guard removes the handler; [`Subscription::detach`] keeps it
+    /// for the life of the manager.
     pub fn context_created(
         &self,
         handler: impl Fn(&Rc<dyn IPlatformRenderInterfaceContext>) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.context_created.add(Rc::new(handler));
         let this = self.weak_self.clone();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = this.upgrade() {
                 this.context_created.remove(token);
             }
-        })
+        }))
     }
 
     pub fn is_ready(&self) -> bool {
@@ -655,7 +659,7 @@ mod tests {
             let manager =
                 PlatformRenderInterfaceContextManager::new(graphics.map(|graphics| graphics as Arc<dyn IPlatformGraphics>));
             let log = self.log.clone();
-            manager.context_disposed(move || record(&log, "ContextDisposed"));
+            manager.context_disposed(move || record(&log, "ContextDisposed")).detach();
             let log = self.log.clone();
             let render_interface = Rc::downgrade(&self.render_interface);
             manager.context_created(move |context| {
@@ -664,7 +668,8 @@ mod tests {
                 let created = backends.last().unwrap();
                 assert!(std::ptr::eq(Rc::as_ptr(context) as *const (), Rc::as_ptr(created) as *const ()));
                 record(&log, format!("ContextCreated(backend{})", created.id));
-            });
+            })
+            .detach();
             manager
         }
     }

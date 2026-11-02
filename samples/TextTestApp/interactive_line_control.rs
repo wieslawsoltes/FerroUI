@@ -16,7 +16,7 @@ use ferroui_base::media::{
     PathGeometry, Pen, PenLineCap, PenLineJoin, PolylineGeometry, RenderOptions, SweepDirection, TextAlignment,
     TextOptions, TextRenderingMode, TextWrapping, Typeface,
 };
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::{CultureInfo, HandlerList};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, FerroObjectImpl, FerroObjectImplExt,
@@ -57,7 +57,7 @@ pub struct InteractiveLineControl {
 
     /// The subscription to the changes of the font feature collection the control has
     /// (`CollectionChanged += OnFeatureCollectionChanged` of the managed original).
-    feature_collection_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    feature_collection_subscription: RefCell<Option<Subscription>>,
 
     labels_cache: RefCell<HashMap<String, Rc<FormattedText>>>,
 

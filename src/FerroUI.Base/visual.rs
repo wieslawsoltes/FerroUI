@@ -1471,11 +1471,11 @@ impl Visual {
             let subscription = new_value.as_ref().and_then(|new_value| {
                 let new_transform = new_value.as_any().downcast_ref::<Transform>()?;
                 let weak = sender.to_ref().downgrade();
-                Some(Subscription::new(new_transform.changed(move || {
+                Some(new_transform.changed(move || {
                     if let Some(visual) = weak.upgrade() {
                         visual.render_transform_value_changed();
                     }
-                })))
+                }))
             });
             sender.set_render_transform_subscription(subscription);
 

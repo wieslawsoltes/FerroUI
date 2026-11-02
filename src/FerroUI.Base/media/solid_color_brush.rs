@@ -108,7 +108,7 @@ mod tests {
         let target = SolidColorBrush::with_color(Colors::RED);
         let raised = Rc::new(Cell::new(false));
         let r = raised.clone();
-        target.invalidated(move || r.set(true));
+        target.invalidated(move || r.set(true)).detach();
         target.set_color(Colors::GREEN);
         assert!(raised.get());
     }

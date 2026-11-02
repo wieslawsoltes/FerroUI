@@ -4,7 +4,7 @@ use crate::media::{
 };
 use crate::media::ref_adapter::RefAdapter;
 use crate::platform::IGeometryImpl;
-use crate::reactive::{Disposable, IDisposable, Subscription};
+use crate::reactive::{Disposable, Subscription};
 use crate::rendering::composition::drawing::{CompositorResourceHolder, ICompositionRenderResource};
 use crate::rendering::composition::generated::ServerCompositionSimpleGeometryProps;
 use crate::rendering::composition::server::{IServerObject, ServerCompositionSimpleGeometry, ServerObjectId};
@@ -100,16 +100,17 @@ impl Geometry {
         self.changed.len()
     }
 
-    /// Subscribes to changes of the geometry. Disposing the returned handle
-    /// unsubscribes.
-    pub fn changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Subscribes to changes of the geometry. Dropping the returned guard
+    /// removes the handler; [`Subscription::detach`] keeps it for the life of
+    /// the geometry.
+    pub fn changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.changed.remove(token);
             }
-        })
+        }))
     }
 
     fn raise_changed(&self) {
@@ -232,7 +233,7 @@ impl Geometry {
                     this.transform_changed(Some(&transform));
                 }
             });
-            *self.transform_subscription.borrow_mut() = Some(Subscription::new(subscription));
+            *self.transform_subscription.borrow_mut() = Some(subscription);
         }
 
         self.transform_changed(new_value.as_ref());
@@ -746,7 +747,7 @@ pub(crate) mod tests {
     fn track_changed(target: &Geometry) -> Rc<Cell<bool>> {
         let raised = Rc::new(Cell::new(false));
         let r = raised.clone();
-        target.changed(move || r.set(true));
+        target.changed(move || r.set(true)).detach();
         raised
     }
 
