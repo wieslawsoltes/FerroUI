@@ -4,6 +4,7 @@ mod gestures;
 mod mac_menus;
 mod material_home;
 mod motion;
+mod popup_host;
 pub(super) use gestures::drawer_handle;
 
 use super::appearance::{Appearance, ColorMode, Layout};

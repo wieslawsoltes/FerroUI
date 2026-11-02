@@ -2,7 +2,7 @@
 //! Preview brushes live only for the open flyout and sample the original
 //! client surfaces in the same compositor.
 use super::*;
-use crate::shell::desktop::mac_menus::{MenuHost, opaque_background};
+use crate::shell::desktop::popup_host::{PopupHost, opaque_background};
 use crate::shell::workspaces::preview;
 use ferroui_base::input::{
     Key, KeyModifiers, KeyboardNavigationHandler, KeyboardNavigationMode, NavigationDirection,
@@ -46,13 +46,8 @@ fn group_button(shell: &Rc<Shell>, entry: Memo<Option<Entry>>) -> Element {
     let anchor = NodeRef::<Button>::new();
     let flyout = Flyout::new();
     flyout.set_placement(PlacementMode::Top);
-    let host = MenuHost::current();
-    flyout
-        .popup()
-        .set_should_use_overlay_layer(host == MenuHost::InScene);
-    if host == MenuHost::OpaqueNative {
-        crate::shell::x11_outline::track_popup(&flyout.popup(), 8.0);
-    }
+    let host = PopupHost::current();
+    host.configure(&flyout.popup(), 8.0);
     let composed = shell
         .session
         .as_ref()
@@ -69,10 +64,10 @@ fn group_button(shell: &Rc<Shell>, entry: Memo<Option<Entry>>) -> Element {
             presenter.set_focusable(false);
             presenter.set_max_width((width.get_untracked() - 24.0).max(160.0));
             presenter.set_padding(ferroui_base::Thickness::uniform(5.0));
-            if host != MenuHost::InScene {
+            if host != PopupHost::InScene {
                 presenter.set_background(Some(opaque_background(surface)));
             }
-            if host == MenuHost::OpaqueNative {
+            if host == PopupHost::OpaqueNative {
                 presenter.set_margin(Default::default());
             }
         }

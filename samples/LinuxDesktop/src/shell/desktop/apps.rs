@@ -240,14 +240,8 @@ fn dock_menu(shell: &Rc<Shell>, entry: &Entry) -> ferroui_base::Ref<ferroui_cont
     }
 
     let menu = MenuFlyout::new();
-    let host = super::mac_menus::MenuHost::current();
-    let surface = colors().surface;
-    menu.popup()
-        .set_should_use_overlay_layer(host == super::mac_menus::MenuHost::InScene);
+    super::popup_host::configure_menu(&menu, 10.0);
     menu.set_placement(PlacementMode::Top);
-    if host == super::mac_menus::MenuHost::OpaqueNative {
-        super::super::x11_outline::track_popup(&menu.popup(), 10.0);
-    }
     let app = entry.app;
     let native_id = entry.native_id.clone();
     let window_id = entry.windows.first().map(|w| w.id);
@@ -257,17 +251,6 @@ fn dock_menu(shell: &Rc<Shell>, entry: &Entry) -> ferroui_base::Ref<ferroui_cont
         let (Some(menu), Some(shell)) = (weak.upgrade(), shell.upgrade()) else {
             return;
         };
-        if host == super::mac_menus::MenuHost::OpaqueNative {
-            if let Some(presenter) = menu
-                .popup()
-                .child()
-                .and_then(|c| c.downcast::<ferroui_controls::MenuFlyoutPresenter>().ok())
-            {
-                presenter.set_margin(Default::default());
-                presenter.set_corner_radius(Default::default());
-                presenter.set_background(Some(super::mac_menus::opaque_background(surface)));
-            }
-        }
         let items = menu.items();
         items.clear();
         let windows = shell.snapshot.with_untracked(|s| {

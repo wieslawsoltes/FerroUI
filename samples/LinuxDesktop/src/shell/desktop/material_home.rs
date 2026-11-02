@@ -128,12 +128,7 @@ fn shortcut_menu(shell: &Rc<Shell>, shortcut: Shortcut) -> ferroui_base::Ref<Men
     let index = shortcut.index;
     let app = &shell.catalog.applications()[index];
     let menu = MenuFlyout::new();
-    let host = super::mac_menus::MenuHost::current();
-    menu.popup()
-        .set_should_use_overlay_layer(host == super::mac_menus::MenuHost::InScene);
-    if host == super::mac_menus::MenuHost::OpaqueNative {
-        super::super::x11_outline::track_popup(&menu.popup(), 8.0);
-    }
+    super::popup_host::configure_menu(&menu, 8.0);
     menu.set_placement(PlacementMode::Top);
     let items = menu.items();
     fn item(name: &str, invoke: impl Fn() + 'static) -> ferroui_base::Ref<MenuItem> {

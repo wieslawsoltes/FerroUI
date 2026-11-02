@@ -4,42 +4,10 @@ use super::*;
 use crate::session::{ClientWindow, Session, SnapSide};
 use ferroui_controls::{MenuItem, MenuItemToggleType};
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub(super) enum MenuHost {
-    InScene,
-    Native,
-    OpaqueNative,
-}
-
-impl MenuHost {
-    pub(super) fn current() -> Self {
-        use ferroui_base::{FerroLocator, LocatorExtensions};
-        if use_context::<super::super::ManagedDesktopWindow>().is_some() {
-            let platform = FerroLocator::current().get_service::<ferroui_x11::FerroX11Platform>();
-            if platform.is_some_and(|x| !x.globals().is_composition_enabled()) {
-                Self::OpaqueNative
-            } else {
-                Self::Native
-            }
-        } else if use_context::<DesktopBackdrop>().is_some() {
-            Self::InScene
-        } else {
-            // A Wayland panel is a narrow layer surface. Its native popup
-            // can extend beyond the edge reservation.
-            Self::Native
-        }
-    }
-}
-
-pub(super) fn opaque_background(color: &str) -> Rc<dyn ferroui_base::media::IBrush> {
-    use ferroui_base::media::{immutable::ImmutableSolidColorBrush, Color};
-    Rc::new(ImmutableSolidColorBrush::new(
-        Color::parse(color).expect("desktop surface color"),
-    ))
-}
+use super::popup_host::{PopupHost, opaque_background};
 
 fn submenu() -> El<MenuItem> {
-    let host = MenuHost::current();
+    let host = PopupHost::current();
     let surface = colors().surface;
     menu_item().on_template_applied(move |event| {
         let Some(popup) = event
@@ -48,9 +16,8 @@ fn submenu() -> El<MenuItem> {
         else {
             return;
         };
-        popup.set_should_use_overlay_layer(host == MenuHost::InScene);
-        if host == MenuHost::OpaqueNative {
-            super::super::x11_outline::track_popup(&popup, 10.0);
+        host.configure(&popup, 10.0);
+        if host == PopupHost::OpaqueNative {
             // Without an X compositor, transparent pixels around the menu
             // become the native window's clear color. Remove the shadow
             // inset and paint a continuous surface to the popup edges.
