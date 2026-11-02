@@ -13,7 +13,7 @@ use super::{TriggerRank, VisualState, VisualStateGroup, VisualStateGroupCollecti
 use crate::Control;
 use ferroui_base::collections::{CollectionChangedHandler, NotifyCollectionChangedEventArgs};
 use ferroui_base::layout::Layoutable;
-use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::{ferro_properties, ferro_static_type, AttachedProperty, FerroProperty, Ref, Visual, WeakRef};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -23,7 +23,7 @@ pub(crate) struct TriggerHost {
     element: WeakRef<Control>,
     groups: VisualStateGroupCollection,
     // Attached and detached, and the changes of the collection.
-    element_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    element_subscriptions: RefCell<Vec<Subscription>>,
     // The size changes of the root of the tree, while the element is in one.
     root_subscription: RefCell<Option<Subscription>>,
 }
@@ -38,16 +38,6 @@ impl PartialEq for TriggerHostRef {
     }
 }
 
-impl Drop for TriggerHost {
-    fn drop(&mut self) {
-        for subscription in self.element_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
-        if let Some(subscription) = self.root_subscription.get_mut().take() {
-            subscription.dispose();
-        }
-    }
-}
 
 struct StateTriggerHosts;
 
@@ -103,7 +93,7 @@ pub(crate) fn install(element: &Control, groups: Option<&VisualStateGroupCollect
             list.remove_collection_changed(token);
         })
     };
-    host.element_subscriptions.borrow_mut().extend([attached.detach(), detached.detach(), collection]);
+    host.element_subscriptions.borrow_mut().extend([attached, detached, Subscription::new(collection)]);
     element.set_value(StateTriggerHosts::host_property(), Some(TriggerHostRef(host.clone())));
     if element.is_attached_to_visual_tree() {
         host.attach();

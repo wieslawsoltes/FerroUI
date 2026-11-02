@@ -18,7 +18,7 @@ use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignmen
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::{FlowDirection, RectangleGeometry, ScaleTransform};
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt,
@@ -78,7 +78,7 @@ pub struct RatingControl {
     base: TemplatedControl,
     parts: RefCell<Parts>,
     item_info_subscription: RefCell<Option<Subscription>>,
-    template_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    template_subscriptions: RefCell<Vec<Subscription>>,
     pointer: RefCell<Option<Weak<dyn IPointer>>>,
     /// The rating under the pointer while it is over the items (`m_isPointerOver` with
     /// `m_mousePercentage`).
@@ -186,9 +186,7 @@ impl TemplatedControlImpl for RatingControl {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         this.cancel_pointer();
         Self::parent_on_apply_template(this, args);
-        for subscription in this.template_subscriptions.take() {
-            subscription.dispose();
-        }
+        drop(this.template_subscriptions.take());
         let scope = args.name_scope();
         let background = scope.find_as::<StackPanel>("RatingBackgroundStackPanel");
         *this.parts.borrow_mut() = Parts {
@@ -211,7 +209,7 @@ impl TemplatedControlImpl for RatingControl {
                     }
                 }
             });
-            this.template_subscriptions.borrow_mut().push(subscription);
+            this.template_subscriptions.borrow_mut().push(Subscription::new(subscription));
         }
         this.stamp_out_rating_items();
     }
@@ -789,17 +787,6 @@ impl RatingControl {
             if let Some(clip) = &foreground.clip {
                 clip.set_rect(Rect::new(0.0, 0.0, size * (display - index as f64).clamp(0.0, 1.0), size));
             }
-        }
-    }
-}
-
-impl Drop for RatingControl {
-    fn drop(&mut self) {
-        if let Some(subscription) = self.item_info_subscription.get_mut().take() {
-            subscription.dispose();
-        }
-        for subscription in self.template_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
         }
     }
 }

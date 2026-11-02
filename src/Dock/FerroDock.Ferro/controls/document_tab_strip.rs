@@ -16,7 +16,7 @@ use ferroui_base::{
     instantiate,
     interactivity::InteractiveImpl,
     layout::{Layoutable, LayoutableImpl, Orientation},
-    reactive::{AnonymousObserver, IDisposable},
+    reactive::{AnonymousObserver, IDisposable, Subscription},
     styling::ControlTheme,
     BoxedValue, FerroObject, FerroObjectExtensions, FerroObjectImpl, FerroObjectImplExt,
     FerroProperty, FerroPropertyChangedEventArgs, Rect, Ref, StyledElementImpl, StyledProperty,
@@ -49,8 +49,8 @@ pub struct DocumentTabStrip {
     scroll_viewer: RefCell<Option<Ref<ScrollViewer>>>,
     template_observables: RefCell<Vec<Rc<dyn IDisposable>>>,
     template_observables_version: Cell<u32>,
-    scroll_viewer_wheel_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    double_tapped_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    scroll_viewer_wheel_subscription: RefCell<Option<Subscription>>,
+    double_tapped_subscription: RefCell<Option<Subscription>>,
     window_drag_helper: RefCell<Option<Rc<WindowDragHelper>>>,
     external_owner: RefCell<Option<Ref<DockControl>>>,
     external_handle: RefCell<Weak<ExternalSurface>>,
@@ -332,15 +332,11 @@ impl DocumentTabStrip {
         let subscription = self
             .add_disposable_handler(InputElement::double_tapped_event(), move |_, e| {
                 owner.on_double_tapped(e)
-            }).detach();
+            });
         self.double_tapped_subscription.replace(Some(subscription));
     }
     fn detach_double_tapped(&self) {
-        let subscription = self.double_tapped_subscription.borrow().clone();
-        if let Some(subscription) = subscription {
-            subscription.dispose();
-        }
-        self.double_tapped_subscription.replace(None);
+        drop(self.double_tapped_subscription.take());
     }
     fn update_pseudo_classes_create(&self, value: bool) {
         self.pseudo_classes().set(":create", value);
@@ -416,23 +412,17 @@ impl DocumentTabStrip {
         }
     }
     fn detach_scroll_viewer_wheel(&self) {
-        let subscription = self.scroll_viewer_wheel_subscription.borrow().clone();
-        if let Some(subscription) = subscription {
-            subscription.dispose();
-        }
-        self.scroll_viewer_wheel_subscription.replace(None);
+        drop(self.scroll_viewer_wheel_subscription.take());
     }
     fn attach_scroll_viewer_wheel(&self) {
-        let subscription = self.scroll_viewer_wheel_subscription.borrow().clone();
-        if let Some(subscription) = subscription {
-            subscription.dispose();
-        }
+        drop(self.scroll_viewer_wheel_subscription.take());
         let viewer = self.scroll_viewer.borrow().clone();
         let subscription = ScrollViewerMouseWheelHookHelper::attach(
             viewer.as_deref(),
             self.mouse_wheel_scroll_orientation(),
         );
-        self.scroll_viewer_wheel_subscription.replace(subscription);
+        self.scroll_viewer_wheel_subscription
+            .replace(subscription.map(Subscription::new));
     }
 }
 struct ExternalSurface(Ref<DocumentTabStrip>);

@@ -4,7 +4,7 @@ use super::{
 };
 use crate::input::{InputElement, InputMethod};
 use crate::interactivity::{Interactive, RoutedEventHandlerToken};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::{FerroProperty, Rect, Ref, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -70,9 +70,9 @@ pub(crate) struct TextInputMethodManager {
     /// Advanced on every change of the client or its connection, so that the
     /// option publication of a connection client never runs for a stale one.
     generation: Cell<u64>,
-    client_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    client_subscriptions: RefCell<Vec<Subscription>>,
     transform_tracker: Rc<TransformTrackingHelper>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
     disposed: Cell<bool>,
 }
 
@@ -111,7 +111,7 @@ impl TextInputMethodManager {
             })
         };
 
-        manager.subscriptions.borrow_mut().extend([matrix_changed.detach(), is_enabled_changed.detach()]);
+        manager.subscriptions.borrow_mut().extend([matrix_changed, is_enabled_changed]);
         manager
     }
 
@@ -195,10 +195,7 @@ impl TextInputMethodManager {
         if current.is_some() {
             self.retire_connection();
 
-            let subscriptions = std::mem::take(&mut *self.client_subscriptions.borrow_mut());
-            for subscription in subscriptions {
-                subscription.dispose();
-            }
+            drop(self.client_subscriptions.take());
 
             drop(self.client.replace(None));
             drop(self.owner.replace(None));
@@ -240,9 +237,9 @@ impl TextInputMethodManager {
             };
 
             self.client_subscriptions.borrow_mut().extend([
-                cursor_rectangle_changed,
-                text_view_visual_changed,
-                reset_requested,
+                Subscription::new(cursor_rectangle_changed),
+                Subscription::new(text_view_visual_changed),
+                Subscription::new(reset_requested),
             ]);
 
             if uses_connection(&*client) {
@@ -259,7 +256,7 @@ impl TextInputMethodManager {
                             }
                         }
                     });
-                    self.client_subscriptions.borrow_mut().push(options_changed);
+                    self.client_subscriptions.borrow_mut().push(Subscription::new(options_changed));
                 }
                 self.install_connection();
             }
@@ -561,14 +558,8 @@ impl TextInputMethodManager {
         }
 
         self.retire_connection();
-        let subscriptions = std::mem::take(&mut *self.subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
-        let subscriptions = std::mem::take(&mut *self.client_subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(self.subscriptions.take());
+        drop(self.client_subscriptions.take());
         self.transform_tracker.dispose();
     }
 }

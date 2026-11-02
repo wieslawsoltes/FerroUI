@@ -1182,8 +1182,8 @@ impl InteractionTracker {
     // --- states -------------------------------------------------------------
 
     fn stop_runs(&self) {
-        drop(self.inertia.borrow_mut().take());
-        drop(self.custom.borrow_mut().take());
+        drop(self.inertia.take());
+        drop(self.custom.take());
     }
 
     fn enter_idle(&self, request_id: i32) {

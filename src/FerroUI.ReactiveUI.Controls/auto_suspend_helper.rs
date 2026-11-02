@@ -8,7 +8,7 @@ use ferroui_reactive::subjects::{Subject, SubjectBase};
 use ferroui_reactive::Observable;
 use ferroui_reactiveui::RxSuspension;
 use ferroui_splat::{AppLocator, IEnableLogger, ILogManager};
-use ferroui_system::{IDisposable, IObserver};
+use ferroui_system::{IDisposable, IObserver, Subscription};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
@@ -32,7 +32,7 @@ pub struct AutoSuspendHelper {
     /// (`_shouldInvalidateState`).
     should_invalidate_state: Rc<Subject<()>>,
     /// The subscription to the exit of the controlled lifetime (`_controlledLifetime.Exit`).
-    controlled_lifetime_exit: RefCell<Option<Rc<dyn IDisposable>>>,
+    controlled_lifetime_exit: RefCell<Option<Subscription>>,
 }
 
 impl IEnableLogger for AutoSuspendHelper {}
@@ -70,7 +70,7 @@ impl AutoSuspendHelper {
                     helper.on_controlled_application_lifetime_exit();
                 }
             }));
-            *helper.controlled_lifetime_exit.borrow_mut() = Some(exit);
+            *helper.controlled_lifetime_exit.borrow_mut() = Some(Subscription::new(exit));
             host.set_should_persist_state(helper.should_persist_state.as_observable());
         } else if lifetime.is_some() {
             panic!("NotSupportedException: Don't know how to detect app exit event for the application lifetime.");
@@ -136,10 +136,7 @@ impl IDisposable for AutoSuspendHelper {
     /// Releases the helper (`Dispose`): it stops following the exit of the lifetime and completes
     /// nothing more.
     fn dispose(&self) {
-        let exit = self.controlled_lifetime_exit.borrow_mut().take();
-        if let Some(exit) = exit {
-            exit.dispose();
-        }
+        drop(self.controlled_lifetime_exit.take());
 
         self.should_persist_state.dispose();
         self.is_launching_new.dispose();

@@ -10,7 +10,7 @@ use crate::menu_action_callback::MenuActionCallback;
 use crate::predicate_callback::PredicateCallback;
 use ferroui_base::input::KeyGesture;
 use ferroui_base::media::imaging::{BitmapEncoderOptions, IBitmap, PngBitmapEncoderOptions};
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{ObservableExt, Subscription};
 use ferroui_base::{FerroObjectExtensions, Ref};
 use ferroui_controls::{MenuItemToggleType, NativeMenuItem, NativeMenuItemBase};
 use ferroui_microcom::ComPtr;
@@ -44,7 +44,7 @@ pub(crate) struct FrnMenuItem {
     weak_self: Weak<FrnMenuItem>,
     native: ComPtr<IFrnMenuItem>,
     sub_menu: RefCell<Option<Rc<FrnMenu>>>,
-    property_disposables: RefCell<Vec<Rc<dyn IDisposable>>>,
+    property_disposables: RefCell<Vec<Subscription>>,
     /// The callbacks of the current action; kept alive until replaced.
     current_action: RefCell<Option<(ComPtr<IFrnPredicateCallback>, ComPtr<IFrnActionCallback>)>>,
     managed_menu_item: Ref<NativeMenuItemBase>,
@@ -137,7 +137,7 @@ impl FrnMenuItem {
         update: impl Fn(&FrnMenuItem, T) + 'static,
     ) {
         let this = self.weak_self.clone();
-        let subscription = observable.subscribe_fn(move |value| {
+        let subscription = observable.subscribe_fn_guard(move |value| {
             if let Some(this) = this.upgrade() {
                 update(&this, value);
             }
@@ -204,10 +204,7 @@ impl FrnMenuItem {
             sub_menu.deinitialise();
         }
 
-        let property_disposables = std::mem::take(&mut *self.property_disposables.borrow_mut());
-        for disposable in property_disposables {
-            disposable.dispose();
-        }
+        drop(self.property_disposables.take());
         let current_action = self.current_action.borrow_mut().take();
         drop(current_action);
     }

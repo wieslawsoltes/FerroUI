@@ -3,7 +3,7 @@ use super::{ISetterInstance, IStyleInstance, SetterInstance, SetterInstanceKind,
 use crate::animation::IAnimation;
 use crate::data::BindingPriority;
 use crate::property_store::{FrameType, ValueFrame, ValueFrameBase};
-use crate::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
+use crate::reactive::{IObservable, IObserver, LightweightSubject, Subscription};
 use crate::{Ref, StyledElement, WeakRef};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -41,7 +41,7 @@ pub struct StyleInstance {
     is_active: Cell<bool>,
     setters: RefCell<Vec<Rc<dyn ISetterInstance>>>,
     animations: RefCell<Option<Vec<Rc<dyn IAnimation>>>>,
-    animation_apply_disposables: RefCell<Option<Vec<Rc<dyn IDisposable>>>>,
+    animation_apply_disposables: RefCell<Option<Vec<Subscription>>>,
     animation_trigger: RefCell<Option<LightweightSubject<bool>>>,
     source: WeakRef<StyleBase>,
 }
@@ -124,7 +124,10 @@ impl StyleInstance {
             let match_: Rc<dyn IObservable<bool>> = Rc::new(trigger.clone());
             for animation in &animations {
                 let disposable = animation.apply(control, None, match_.clone(), None, false);
-                self.animation_apply_disposables.borrow_mut().get_or_insert_with(Vec::new).push(disposable);
+                self.animation_apply_disposables
+                    .borrow_mut()
+                    .get_or_insert_with(Vec::new)
+                    .push(Subscription::new(disposable));
             }
 
             if self.activator.is_none() {
@@ -209,12 +212,7 @@ impl ValueFrame for StyleInstance {
         if let Some(activator) = &self.activator {
             activator.dispose();
         }
-        let disposables = self.animation_apply_disposables.borrow().clone();
-        if let Some(disposables) = disposables {
-            for item in disposables {
-                item.dispose();
-            }
-        }
+        drop(self.animation_apply_disposables.take());
     }
 
     fn as_any(&self) -> &dyn Any {

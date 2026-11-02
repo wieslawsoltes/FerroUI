@@ -17,8 +17,8 @@ pub struct TransformTrackingHelper {
     defer_after_render_pass: bool,
     visual: RefCell<Option<WeakRef<Visual>>>,
     queued_for_update: Cell<bool>,
-    attachment_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
-    property_changed_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    attachment_subscriptions: RefCell<Vec<Subscription>>,
+    property_changed_subscriptions: RefCell<Vec<Subscription>>,
     matrix: Cell<Option<Matrix>>,
     matrix_changed: HandlerList<dyn Fn()>,
 }
@@ -62,7 +62,7 @@ impl TransformTrackingHelper {
                 let this = self.strong();
                 visual.detached_from_visual_tree(move |_| this.on_detached_from_visual_tree())
             };
-            self.attachment_subscriptions.borrow_mut().extend([attached.detach(), detached.detach()]);
+            self.attachment_subscriptions.borrow_mut().extend([attached, detached]);
 
             if visual.is_attached_to_visual_tree() {
                 self.subscribe_to_parents();
@@ -97,10 +97,7 @@ impl TransformTrackingHelper {
         }
 
         self.unsubscribe_from_parents();
-        let subscriptions = std::mem::take(&mut *self.attachment_subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(self.attachment_subscriptions.take());
         *self.visual.borrow_mut() = None;
     }
 
@@ -110,16 +107,13 @@ impl TransformTrackingHelper {
         while let Some(v) = visual {
             let this = self.strong();
             let subscription = v.property_changed(move |e| this.property_changed_handler(e));
-            self.property_changed_subscriptions.borrow_mut().push(subscription);
+            self.property_changed_subscriptions.borrow_mut().push(Subscription::new(subscription));
             visual = v.visual_parent();
         }
     }
 
     fn unsubscribe_from_parents(&self) {
-        let subscriptions = std::mem::take(&mut *self.property_changed_subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(self.property_changed_subscriptions.take());
     }
 
     fn update_matrix(&self) {

@@ -10,7 +10,7 @@ use ferroui_base::platform::{
     DefaultPlatformSettings, IPlatformSettings, PlatformColorValues,
     PlatformThemeVariant,
 };
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::Size;
 use std::cell::{Cell, RefCell};
@@ -108,7 +108,7 @@ pub(crate) fn build_platform_color_values(
 pub struct DBusPlatformSettings {
     base: DefaultPlatformSettings,
     settings: RefCell<Option<SettingsProxy<'static>>>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
     color_values: Cell<PlatformColorValues>,
     theme_variant: Cell<Option<PlatformThemeVariant>>,
     accent_color: Cell<Option<Color>>,
@@ -170,7 +170,7 @@ impl DBusPlatformSettings {
                     }
                 });
                 match weak.upgrade() {
-                    Some(this) => *this.subscription.borrow_mut() = Some(subscription),
+                    Some(this) => *this.subscription.borrow_mut() = Some(Subscription::new(subscription)),
                     None => subscription.dispose(),
                 }
             }
@@ -233,14 +233,6 @@ impl DBusPlatformSettings {
                 self.update_color_values();
             }
             _ => {}
-        }
-    }
-}
-
-impl Drop for DBusPlatformSettings {
-    fn drop(&mut self) {
-        if let Some(subscription) = self.subscription.borrow_mut().take() {
-            subscription.dispose();
         }
     }
 }

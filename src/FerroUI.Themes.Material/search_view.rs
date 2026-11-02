@@ -15,7 +15,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::media::MediaContext;
-use ferroui_base::reactive::{IDisposable, Subscription};
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, Size,
     StyledElementImpl, StyledProperty, StyledPropertyOptions, VisualImpl, VisualImplExt,
@@ -30,7 +30,6 @@ use ferroui_controls::{
     Button, ContentControl, ContentControlImpl, ControlImpl, ScrollViewer, TextBox, TopLevel,
 };
 use std::cell::{Cell, RefCell};
-use std::rc::Rc;
 
 /// A 56dp search field with an animated docked results surface.
 /// `Content` supplies the application's results; `Query` is two-way bindable.
@@ -42,7 +41,7 @@ pub struct MaterialSearchView {
     editor: RefCell<Option<Ref<TextBox>>>,
     results: RefCell<Option<Ref<ScrollViewer>>>,
     result_content: RefCell<Option<Ref<ContentPresenter>>>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
     visibility_subscription: RefCell<Option<Subscription>>,
     progress: RefCell<MaterialSpringState>,
     result_height: Cell<f64>,
@@ -186,9 +185,7 @@ impl LayoutableImpl for MaterialSearchView {
 impl TemplatedControlImpl for MaterialSearchView {
     fn on_apply_template(this: &Self, event: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, event);
-        for subscription in this.subscriptions.borrow_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(this.subscriptions.take());
         let editor = event.name_scope().find_as::<TextBox>("PART_QueryBox");
         *this.editor.borrow_mut() = editor.clone();
         *this.results.borrow_mut() = event.name_scope().find_as::<ScrollViewer>("PART_Results");
@@ -201,7 +198,7 @@ impl TemplatedControlImpl for MaterialSearchView {
             let editor_weak = editor.downgrade();
             this.subscriptions
                 .borrow_mut()
-                .push(editor.property_changed(move |change| {
+                .push(Subscription::new(editor.property_changed(move |change| {
                     if change.property() != TextBox::text_property().as_property() {
                         return;
                     }
@@ -212,7 +209,7 @@ impl TemplatedControlImpl for MaterialSearchView {
                             this.synchronizing.set(false);
                         }
                     }
-                }));
+                })));
         }
         for (part, action) in [("PART_BackButton", false), ("PART_ClearButton", true)] {
             if let Some(button) = event.name_scope().find_as::<Button>(part) {
@@ -233,7 +230,7 @@ impl TemplatedControlImpl for MaterialSearchView {
                         },
                         RoutingStrategies::BUBBLE,
                         false,
-                    ).detach());
+                    ));
             }
         }
         this.apply_progress();

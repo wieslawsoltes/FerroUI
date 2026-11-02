@@ -23,7 +23,7 @@ use crate::automation::{INodeInfoProvider, NodeActionArguments};
 use crate::explore_by_touch_helper::{
     ExploreByTouchHelper, IAccessibilityHost, IExploreByTouchCallbacks, IVirtualViewOwner, INVALID_ID,
 };
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{PixelPoint, PixelRect, Point, Ref};
 use ferroui_controls::automation::peers::{
     AutomationControlType, AutomationPeer, ControlAutomationPeer, InteropAutomationPeer,
@@ -90,15 +90,12 @@ pub(crate) trait IAccessHelperView {
 struct PeerRegistration {
     node_info_providers: Vec<Box<dyn INodeInfoProvider>>,
     /// The handlers on the events of the peer and of its control.
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
 }
 
 impl PeerRegistration {
     fn dispose(&self) {
-        let subscriptions = std::mem::take(&mut *self.subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(self.subscriptions.take());
     }
 }
 
@@ -178,14 +175,14 @@ impl FerroAccessHelper {
         self.peers.borrow_mut().insert(peer_view_id, peer.clone());
         self.peer_ids.borrow_mut().insert(key, peer_view_id);
 
-        let mut subscriptions: Vec<Rc<dyn IDisposable>> = Vec::new();
+        let mut subscriptions: Vec<Subscription> = Vec::new();
 
         let weak = self.this.clone();
         subscriptions.push(peer.children_changed(move || {
             if let Some(this) = weak.upgrade() {
                 this.base.invalidate_virtual_view_with(peer_view_id, CONTENT_CHANGE_TYPE_SUBTREE);
             }
-        }).detach());
+        }));
         let weak = self.this.clone();
         subscriptions.push(peer.property_changed(move |ev| {
             let Some(this) = weak.upgrade() else {
@@ -200,7 +197,7 @@ impl FerroAccessHelper {
             {
                 this.base.invalidate_virtual_view(peer_view_id);
             }
-        }).detach());
+        }));
 
         // Drop the registration once the peer's control leaves the visual tree, otherwise
         // every control ever explored by accessibility is kept alive for the lifetime of
@@ -225,7 +222,7 @@ impl FerroAccessHelper {
                         if let Some(registration) = registration {
                             registration.dispose();
                         }
-                    }).detach());
+                    }));
                 }
             }
         }
