@@ -329,7 +329,7 @@ pub fn resolve_property_editor_metadata(
             "GridLength" => PropertyEditorKind::GridLength,
             "FontFamily" => PropertyEditorKind::FontFamily,
             "FontWeight" => PropertyEditorKind::FontWeight,
-            "TimeSpan" => PropertyEditorKind::TimeSpan,
+            "TimeSpan" | "SignedDuration" => PropertyEditorKind::TimeSpan,
             "Duration" => PropertyEditorKind::Duration,
             _ if runtime_type.is_empty() && super::is_color_property(context) => {
                 PropertyEditorKind::Brush
