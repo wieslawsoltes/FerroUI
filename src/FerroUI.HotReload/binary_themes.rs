@@ -1,5 +1,5 @@
 //! Rebuild a mounted native theme when its binary resource operands change.
-use crate::{catch_reload, styles::StyleSlot, FileBatch, FileWatcher, PreparedReload, ReloadError};
+use crate::{styles::StyleSlot, FileBatch, FileWatcher, ReloadError};
 use ferroui_base::{
     styling::{IStyle, Styles},
     Ref,
@@ -270,26 +270,7 @@ impl BinaryThemeWatcher {
             .contents
             .map_err(ReloadError::Failed)?;
         let snapshot = candidate.snapshot.clone()?;
-        let mut change = catch_reload(|| self.slot.prepare(|| Rc::new(snapshot).run(build)))?;
-        if stale() {
-            return Ok(false);
-        }
-        if let Err(err) = catch_reload(|| change.commit()) {
-            catch_reload(|| {
-                change.rollback();
-                Ok(())
-            })?;
-            return Err(err);
-        }
-        if stale() {
-            catch_reload(|| {
-                change.rollback();
-                Ok(())
-            })?;
-            return Ok(false);
-        }
-        change.finish();
-        Ok(true)
+        self.slot.replace_if_current(stale, || Rc::new(snapshot).run(build))
     }
 }
 

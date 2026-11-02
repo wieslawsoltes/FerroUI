@@ -17,6 +17,7 @@ group = "tools"
 
 [features]
 binary-resources = ["ferroui-markup-xaml/binary-resources"]
+portable-xaml = ["ferroui-markup-xaml-loader/portable-xaml"]
 
 [dependencies]
 serde_json = "1"

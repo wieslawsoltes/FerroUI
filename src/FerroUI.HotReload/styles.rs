@@ -66,6 +66,25 @@ impl StyleReloadTarget {
             configuration,
         })
     }
+    /// Replace this mounted contribution with a complete FXD document on the UI thread.
+    /// Editors may deliver bytes after an atomic file rename or a transport message.
+    /// Resolve includes against the registered URI and commit only a fully built style.
+    #[cfg(feature = "portable-xaml")]
+    pub fn replace_portable(&self, bytes: Vec<u8>) -> Result<(), ReloadError> {
+        if !ferroui_markup_xaml_loader::binary_document::is_binary(&bytes) {
+            return Err(ReloadError::Failed("Expected an FXD document".into()));
+        }
+        self.slot.replace_if_current(|| false, || {
+            let uri = ferroui_base::utilities::Uri::absolute(&self.uri)
+                .map_err(|error| ReloadError::Failed(error.to_string()))?;
+            let document = RuntimeXamlLoaderDocument::from_stream_with_base_uri(Some(uri), Box::new(std::io::Cursor::new(bytes)));
+            let candidate = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(document, Some(self.configuration.clone()))
+                .map_err(|error| ReloadError::Failed(error.to_string()))?;
+            Rc::<dyn IStyle>::from_xaml_object(&candidate).ok_or_else(|| ReloadError::Failed("Expected style".into()))
+        })?;
+        Ok(())
+    }
+
     /// Discovers direct style includes without evaluating their markup.
     pub fn discover(
         container: &Ref<Styles>,
@@ -205,6 +224,34 @@ impl StyleReloadTarget {
     }
 }
 impl StyleSlot {
+    #[cfg(any(feature = "binary-resources", feature = "portable-xaml"))]
+    pub(crate) fn replace_if_current(
+        &self,
+        stale: impl Fn() -> bool,
+        build: impl FnOnce() -> Result<Rc<dyn IStyle>, ReloadError>,
+    ) -> Result<bool, ReloadError> {
+        let mut change = crate::catch_reload(|| self.prepare(build))?;
+        if stale() {
+            return Ok(false);
+        }
+        if let Err(err) = crate::catch_reload(|| change.commit()) {
+            crate::catch_reload(|| {
+                change.rollback();
+                Ok(())
+            })?;
+            return Err(err);
+        }
+        if stale() {
+            crate::catch_reload(|| {
+                change.rollback();
+                Ok(())
+            })?;
+            return Ok(false);
+        }
+        change.finish();
+        Ok(true)
+    }
+
     pub(crate) fn prepare(
         &self,
         build: impl FnOnce() -> Result<Rc<dyn IStyle>, ReloadError>,
@@ -238,5 +285,31 @@ impl StyleSlot {
             current: self.current.clone(),
             started: false,
         })
+    }
+}
+
+#[cfg(all(test, feature = "portable-xaml"))]
+mod portable_tests {
+    use super::*;
+    use ferroui_base::threading::Dispatcher;
+    use ferroui_markup_xaml_loader::binary_document;
+
+    #[test]
+    fn changing_the_style_graph_replaces_one_slot_and_an_invalid_image_keeps_it() {
+        let _scope = Dispatcher::unit_test_scope();
+        ferroui_markup_xaml::register_types();
+        let container = Styles::new();
+        let initial: Rc<dyn IStyle> = Styles::new().into();
+        let sibling: Rc<dyn IStyle> = Styles::new().into();
+        container.add(initial.clone());
+        container.add(sibling.clone());
+        let target = StyleReloadTarget::contribution(&container, 0, "ferres://Editor/Main.xaml".into(), Default::default()).unwrap();
+        let revision = binary_document::compile(r#"<Styles xmlns="https://github.com/ferroui"><Style Selector="Button"/></Styles>"#).unwrap();
+        target.replace_portable(revision).unwrap();
+        let applied = container.get(0);
+        assert!(!style_ptr_eq(&applied, &initial));
+        assert!(target.replace_portable(b"FXD\0bad".to_vec()).is_err());
+        assert!(style_ptr_eq(&applied, &container.get(0)));
+        assert!(style_ptr_eq(&sibling, &container.get(1)));
     }
 }
