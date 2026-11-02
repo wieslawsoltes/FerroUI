@@ -40,6 +40,7 @@ signal_seen() { grep -Fq -- "$1" "$output/signals.log"; }
 # presented pixels synchronizes captures with the delivered notifications.
 convert -size 64x64 xc:none -fill '#B83F69' -draw 'roundrectangle 1,1 62,62 14,14' \
   -fill white -draw 'polygon 14,31 19,26 27,34 44,17 50,23 27,46' "$scratch/build.png"
+convert "$scratch/build.png" -fill '#A2E453' -draw 'circle 49,49 49,38' "$scratch/coverage.png"
 convert -size 64x64 xc:none -fill '#316EC9' -draw 'roundrectangle 1,1 62,62 14,14' \
   -fill white -draw 'roundrectangle 13,17 50,49 4,4' -fill '#316EC9' -draw 'rectangle 15,27 48,29' "$scratch/calendar.png"
 convert -size 64x64 xc:none -fill '#C77F2A' -draw 'roundrectangle 1,1 62,62 14,14' \
@@ -52,7 +53,7 @@ notify() {
     Files) icon=files; desktop=org.ferroui.Files ;;
     *) icon=build; desktop=org.ferroui.Build ;;
   esac
-  call Notify "${6:-Build service}" "$1" "$scratch/$icon.png" "$2" "$3" "$4" "{'desktop-entry': <'$desktop'>}" "$5" |
+  call Notify "${6:-Build service}" "$1" "$scratch/${7:-$icon}.png" "$2" "$3" "$4" "{'desktop-entry': <'$desktop'>}" "$5" |
     sed -nE 's/^\(uint32 ([0-9]+),\)$/\1/p'
 }
 # An ordinary preview must leave the session-bus name available.
@@ -130,7 +131,7 @@ silent=$(notify 0 'New review requested' 'Desktop appearance and keyboard naviga
 calendar=$(notify 0 'Design review in 15 minutes' 'Studio · planning calendar' '[]' 0 'Calendar')
 files=$(notify 0 'Project copied' '18 files copied to the workspace.' '[]' 0 'Files')
 more1=$(notify 0 'Package archived' 'Artifacts are ready to download.' '[]' 0)
-more2=$(notify 0 'Coverage report' 'All reviewed branches passed.' '[]' 0)
+more2=$(notify 0 'Coverage report' 'All reviewed branches passed.' '[]' 0 'Build service' coverage)
 [[ -n $silent && -n $calendar && -n $files && -n $more1 && -n $more2 ]]
 no_toast
 card_count() {
@@ -139,9 +140,16 @@ card_count() {
 import sys
 from PIL import Image, ImageChops
 im = Image.open(sys.argv[1]).convert("RGB")
-bands = [band.point([255 * (abs(i - value) <= 3) for i in range(256)])
-         for band, value in zip(im.split(), (0xb8, 0x3f, 0x69))]
-mask = ImageChops.multiply(ImageChops.multiply(*bands[:2]), bands[2])
+def pixels(rgb):
+    bands = [band.point([255 * (abs(i - value) <= 3) for i in range(256)])
+             for band, value in zip(im.split(), rgb)]
+    return ImageChops.multiply(ImageChops.multiply(*bands[:2]), bands[2])
+
+# One collapsed app icon could also be an earlier, incomplete history. Require
+# the last delivery's contrasting status dot before accepting any capture.
+if pixels((0xa2, 0xe4, 0x53)).histogram()[255] < 4:
+    sys.exit(1)
+mask = pixels((0xb8, 0x3f, 0x69))
 # Each icon occupies one contiguous band of rows. The check mark is
 # surrounded by the colored tile on every row where it occurs.
 occupied = [mask.crop((0, y, im.width, y + 1)).histogram()[255] >= 4 for y in range(im.height)]
@@ -155,7 +163,7 @@ cp "$scratch/history.png" "$output/notification-center.png"
 # clear action retires that group and leaves the other two senders active.
 xdotool key --clearmodifiers Tab Tab
 # A replacement while the disclosure has keyboard focus must preserve it.
-[[ $(notify "$more2" 'Coverage report updated' 'All reviewed branches passed.' '[]' 0) == "$more2" ]]
+[[ $(notify "$more2" 'Coverage report updated' 'All reviewed branches passed.' '[]' 0 'Build service' coverage) == "$more2" ]]
 sleep .25
 xdotool key --clearmodifiers space
 until_ok card_count 4
