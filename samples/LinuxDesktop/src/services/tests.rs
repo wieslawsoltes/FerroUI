@@ -68,6 +68,8 @@ fn xdg_precedence_visibility_and_launch() {
         assert_eq!(app.name, "User Utility");
         assert_eq!(app.description, "Catalog fixture");
         assert!(app.icon.contains("utilities-terminal"));
+        assert_eq!(app.category, "Productivity");
+        assert_eq!(catalog.groups()["Productivity"], [0]);
         app.launch().unwrap();
         for _ in 0..200 {
             if dir.join("launch marker").is_file() {
@@ -87,7 +89,7 @@ fn xdg_precedence_visibility_and_launch() {
     let generic = "[Desktop Entry]\nType=Application\nName=System Utility\nExec=/bin/true\n";
     fs::write(system.join("ferroutil.desktop"), generic).unwrap();
     let user_app = format!(
-        "[Desktop Entry]\nType=Application\nName=User Utility\nComment=Catalog fixture\nIcon=utilities-terminal\nExec=/usr/bin/touch \"{}\" %U\nOnlyShowIn=FerroUI;\n",
+        "[Desktop Entry]\nType=Application\nName=User Utility\nCategories=WordProcessor;Office;Utility;\nComment=Catalog fixture\nIcon=utilities-terminal\nExec=/usr/bin/touch \"{}\" %U\nOnlyShowIn=FerroUI;\n",
         dir.join("launch marker").display(),
     );
     fs::write(user.join("ferroutil.desktop"), user_app).unwrap();

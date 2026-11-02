@@ -32,6 +32,9 @@ ferroui_base::native_functions! {
         gio::g_app_info_get_description: unsafe extern "C" fn(*mut c_void) -> *const c_char;
         gio::g_app_info_get_icon: unsafe extern "C" fn(*mut c_void) -> *mut c_void;
         gio::g_icon_to_string: unsafe extern "C" fn(*mut c_void) -> *mut c_char;
+        gio::g_desktop_app_info_get_type: unsafe extern "C" fn() -> usize;
+        gio::g_desktop_app_info_get_categories: unsafe extern "C" fn(*mut c_void) -> *const c_char;
+        object::g_type_check_instance_is_a: unsafe extern "C" fn(*mut c_void, usize) -> c_int;
         gio::g_desktop_app_info_new: unsafe extern "C" fn(*const c_char) -> *mut c_void;
         gio::g_app_launch_context_new: unsafe extern "C" fn() -> *mut c_void;
         gio::g_app_launch_context_setenv: unsafe extern "C" fn(*mut c_void, *const c_char, *const c_char);
@@ -98,7 +101,12 @@ pub(super) fn applications() -> io::Result<Vec<DesktopApplication>> {
                 (api.g_free)(serialized.cast());
                 name
             };
-            result.push(DesktopApplication::new(id, name, description, icon_name));
+            let mut app = DesktopApplication::new(id, name, description, icon_name);
+            if (api.g_type_check_instance_is_a)(info, (api.g_desktop_app_info_get_type)()) != 0 {
+                let categories = text((api.g_desktop_app_info_get_categories)(info));
+                app.category = super::catalog::main_category(&categories);
+            }
+            result.push(app);
         }
         (api.g_list_free_full)(list, Some(api.g_object_unref));
     }

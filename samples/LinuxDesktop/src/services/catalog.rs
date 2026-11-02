@@ -1,6 +1,6 @@
 //! Immutable application metadata and exact substring search. The index only
 //! supplies candidates; the final string checks define matching semantics.
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 #[derive(Clone, Debug)]
 pub struct DesktopApplication {
@@ -10,6 +10,7 @@ pub struct DesktopApplication {
     pub description: String,
     /// Serialized GIcon, usually a single theme icon name.
     pub icon: String,
+    pub(super) category: &'static str,
     search_text: String,
 }
 
@@ -21,14 +22,38 @@ impl DesktopApplication {
             name,
             description,
             icon,
+            category: "Other",
             search_text,
         }
     }
 }
 
+/// A desktop entry can list supplemental categories before its main one.
+pub(super) fn main_category(categories: &str) -> &'static str {
+    categories
+        .split(';')
+        .find_map(|key| {
+            Some(match key {
+                "AudioVideo" | "Audio" | "Video" => "Music & video",
+                "Development" => "Development",
+                "Education" | "Science" => "Education & science",
+                "Game" => "Games",
+                "Graphics" => "Graphics & design",
+                "Network" => "Internet",
+                "Office" => "Productivity",
+                "Settings" => "Settings",
+                "System" => "System",
+                "Utility" => "Utilities",
+                _ => return None,
+            })
+        })
+        .unwrap_or("Other")
+}
+
 #[derive(Default, Debug)]
 pub struct ApplicationCatalog {
     applications: Vec<DesktopApplication>,
+    groups: BTreeMap<&'static str, Vec<usize>>,
     ids: HashMap<String, usize>,
     /// Keyed without the desktop-file suffix for allocation-free xdg app ID lookup.
     window_ids: HashMap<Box<str>, usize>,
@@ -40,10 +65,12 @@ pub struct ApplicationCatalog {
 impl ApplicationCatalog {
     pub(super) fn from_applications(mut applications: Vec<DesktopApplication>) -> Self {
         applications.sort_by_cached_key(|app| (app.name.to_lowercase(), app.id.clone()));
+        let mut groups = BTreeMap::<_, Vec<_>>::new();
         let mut ids = HashMap::with_capacity(applications.len());
         let mut window_ids = HashMap::with_capacity(applications.len());
         let mut trigrams: HashMap<_, Vec<usize>> = HashMap::new();
         for (i, app) in applications.iter().enumerate() {
+            groups.entry(app.category).or_default().push(i);
             ids.insert(app.id.clone(), i);
             if let Some(id) = app.id.strip_suffix(".desktop") {
                 window_ids.insert(Box::<str>::from(id), i);
@@ -61,6 +88,7 @@ impl ApplicationCatalog {
         }
         Self {
             applications,
+            groups,
             ids,
             window_ids,
             trigrams,
@@ -79,6 +107,10 @@ impl ApplicationCatalog {
         &self.applications
     }
 
+    pub fn groups(&self) -> &BTreeMap<&'static str, Vec<usize>> {
+        &self.groups
+    }
+
     pub fn index_of(&self, id: &str) -> Option<usize> {
         self.ids.get(id).copied()
     }
@@ -92,7 +124,9 @@ impl ApplicationCatalog {
         let id = app_id.strip_suffix(".desktop").unwrap_or(app_id);
         self.window_ids.get(id).copied().or_else(|| {
             if id.bytes().any(|byte| byte.is_ascii_uppercase()) {
-                self.window_ids.get(id.to_ascii_lowercase().as_str()).copied()
+                self.window_ids
+                    .get(id.to_ascii_lowercase().as_str())
+                    .copied()
             } else {
                 None
             }
