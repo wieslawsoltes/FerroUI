@@ -201,7 +201,7 @@ impl FerroPropertyRegistry {
         property: &'static DirectPropertyBase<T>,
     ) -> &'static DirectPropertyBase<T> {
         self.find_registered_direct(o, property).unwrap_or_else(|| {
-            panic!("Property '{}.{}' not registered on '{}'", property.owner(), property.name(), o.get_type())
+            Self::missing_direct(property, o)
         })
     }
 
@@ -213,23 +213,35 @@ impl FerroPropertyRegistry {
         property: &'static DirectPropertyBase<T>,
     ) -> Option<&'static DirectPropertyBase<T>> {
         let object_type = o.get_type();
-        if property.owner().is_assignable_from(object_type) {
-            // Fast path: the property is owned by the object's class chain. A
-            // more derived owner that re-registered it still takes priority.
-            if std::ptr::eq(property.owner(), object_type) {
-                return Some(property);
-            }
+        if std::ptr::eq(property.owner(), object_type) {
+            return Some(property);
         }
+        self.direct_for_type(object_type, property.id())?.as_any().downcast_ref()
+    }
+
+    // The owner walk uses only class and property identity. The caller checks
+    // the concrete value type once, after selecting the nearest registration.
+    #[inline(never)]
+    fn direct_for_type(
+        &self,
+        object_type: &'static TypeInfo,
+        id: u32,
+    ) -> Option<&'static dyn DirectPropertyDyn> {
         let inner = self.inner.borrow();
         let mut current = Some(object_type);
         while let Some(t) = current {
-            if let Some(found) = inner.direct.get(&key(t)).and_then(|m| m.get(&property.id())) {
-                let found: &'static dyn DirectPropertyDyn = *found;
-                return found.as_any().downcast_ref::<DirectPropertyBase<T>>();
+            if let Some(found) = inner.direct.get(&key(t)).and_then(|m| m.get(&id)) {
+                return Some(*found);
             }
             current = t.base_type();
         }
         None
+    }
+
+    #[cold]
+    #[inline(never)]
+    fn missing_direct(property: &FerroProperty, o: &FerroObject) -> ! {
+        panic!("Property '{}.{}' not registered on '{}'", property.owner_type(), property.name(), o.get_type())
     }
 
     /// Finds a registered property on a type by name.

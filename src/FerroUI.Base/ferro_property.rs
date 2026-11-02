@@ -301,11 +301,24 @@ impl FerroProperty {
         init: FerroPropertyInit,
         notifying: Option<NotifyingCallback>,
     ) -> Self {
+        Self::new_for_type(name, owner_type, TypeId::of::<T>(), std::any::type_name::<T>(), init, notifying)
+    }
+
+    // Only the identity of the value type is needed to initialize the base.
+    #[inline(never)]
+    fn new_for_type(
+        name: &str,
+        owner_type: &'static TypeInfo,
+        property_type: TypeId,
+        property_type_name: &'static str,
+        init: FerroPropertyInit,
+        notifying: Option<NotifyingCallback>,
+    ) -> Self {
         assert!(!name.contains('.'), "'name' may not contain periods.");
         Self {
             name: name.into(),
-            property_type: TypeId::of::<T>(),
-            property_type_name: std::any::type_name::<T>(),
+            property_type,
+            property_type_name,
             owner_type,
             id: NEXT_ID.fetch_add(1, Ordering::Relaxed),
             inherits: init.inherits,
@@ -529,7 +542,7 @@ impl FerroProperty {
         name: &str,
         default_value: TValue,
     ) -> &'static StyledProperty<TValue> {
-        Self::register_with::<TOwner, TValue>(name, StyledPropertyOptions::new(default_value))
+        Self::register_styled_for(TOwner::TYPE, name, StyledPropertyOptions::new(default_value))
     }
 
     /// Registers a styled property.
@@ -537,11 +550,22 @@ impl FerroProperty {
         name: &str,
         options: StyledPropertyOptions<TValue>,
     ) -> &'static StyledProperty<TValue> {
+        Self::register_styled_for(TOwner::TYPE, name, options)
+    }
+
+    // The registration depends on the value type, but the owner only supplies
+    // its runtime type descriptor. Share the registration across owners.
+    #[inline(never)]
+    fn register_styled_for<TValue: PropertyValue>(
+        owner: &'static TypeInfo,
+        name: &str,
+        options: StyledPropertyOptions<TValue>,
+    ) -> &'static StyledProperty<TValue> {
         let assign_binding = options.assign_binding;
         let (metadata, inherits, validate, notifying) = options.into_parts();
-        let result = StyledProperty::create(name, TOwner::TYPE, TOwner::TYPE, metadata, inherits, validate, notifying, false);
+        let result = StyledProperty::create(name, owner, owner, metadata, inherits, validate, notifying, false);
         result.set_assign_binding(assign_binding);
-        FerroPropertyRegistry::instance().register(TOwner::TYPE, result);
+        FerroPropertyRegistry::instance().register(owner, result);
         result
     }
 
@@ -553,7 +577,7 @@ impl FerroProperty {
         name: &str,
         default_value: TValue,
     ) -> &'static AttachedProperty<TValue> {
-        Self::register_attached_with::<TOwner, THost, TValue>(name, StyledPropertyOptions::new(default_value))
+        Self::register_attached_for(TOwner::TYPE, THost::TYPE, name, StyledPropertyOptions::new(default_value))
     }
 
     /// Registers an attached property.
@@ -561,14 +585,24 @@ impl FerroProperty {
         name: &str,
         options: StyledPropertyOptions<TValue>,
     ) -> &'static AttachedProperty<TValue> {
+        Self::register_attached_for(TOwner::TYPE, THost::TYPE, name, options)
+    }
+
+    #[inline(never)]
+    fn register_attached_for<TValue: PropertyValue>(
+        owner: &'static TypeInfo,
+        host: &'static TypeInfo,
+        name: &str,
+        options: StyledPropertyOptions<TValue>,
+    ) -> &'static AttachedProperty<TValue> {
         let assign_binding = options.assign_binding;
         let (metadata, inherits, validate, notifying) = options.into_parts();
-        let result = AttachedProperty::create(name, TOwner::TYPE, THost::TYPE, metadata, inherits, validate, notifying);
+        let result = AttachedProperty::create(name, owner, host, metadata, inherits, validate, notifying);
         result.set_assign_binding(assign_binding);
-        result.host_type.set(Some(THost::TYPE));
+        result.host_type.set(Some(host));
         let registry = FerroPropertyRegistry::instance();
-        registry.register(TOwner::TYPE, result);
-        registry.register_attached(THost::TYPE, result);
+        registry.register(owner, result);
+        registry.register_attached(host, result);
         result
     }
 
