@@ -87,6 +87,6 @@ changed on purpose.
 ## 4. Not in scope
 
 - The names `IDisposable`, `Dispose` in XAML-visible or .NET-named APIs (they stay).
-- `CancellationToken` and its registrations (phase C4).
+- `CancellationToken` and its registrations (phase C4, [idiomatic-rust-async.md](idiomatic-rust-async.md), section 3.7).
 - The column disposal of TreeDataGrid (`IDisposableColumn`): an explicit release by the
   presentation, which is the upstream contract.
