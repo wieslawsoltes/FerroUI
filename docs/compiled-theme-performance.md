@@ -18,6 +18,8 @@ With full runtime lookup available, FXB saved 2,119,432 bytes from the baseline 
 
 Cargo timings measure the build script and theme rustc unit separately. The full-theme build script took longer in these samples. Cross-revision Cargo wall times also include different dependency rebuilds, so the table reports the directly comparable theme units. The results apply to this headless downstream release profile. The repo's LTO-enabled distribution profile and time to first rendered frame were outside this run.
 
+A follow-up removed a second parse for class modifiers and stopped cloning unchanged Rust statements. A host-only check ran the baseline, compact emitter and final compact emitter twice in reversed order against the same WinUI sources and type models, writing to fresh output directories. Mean build-script wall times were 26.12 s, 26.85 s and 26.86 s. The last two produced identical Rust and exported document metadata. The measured full-theme gains come from compiling the smaller Rust program. Selecting roots also reduces the amount of XAML to transform.
+
 The baseline was `df8b92d9`, the measured full representations were `9e4065b9`, and the rooted measurements used `4c6b82c7`, including the sparse theme-dictionary merge fix. Exact byte counts, section sizes, toolchain and all 105 measurements are in the [raw benchmark report](benchmarks/compiled-theme-linux-x86_64.json).
 
 ## Choosing the representation
