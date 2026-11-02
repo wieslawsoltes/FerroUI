@@ -68,7 +68,7 @@ On Linux x86-64 with Rust 1.99.1 in release mode, the 690 XAML files across the 
 
 ## Indexed theme archives
 
-FXP v1 packages an inventory of original relative XAML asset paths and independently decodable FXD images. A member retains its source coordinates, namespace scopes and the full syntax graph. A development host can replace an individual member through the existing portable style reload API. When replacing an entire untrusted archive, call `ThemePack::open` and `ThemePack::validate` before publishing the new generation. The latter walks the graphs without executing application code.
+FXP v1 packages an inventory of original relative XAML asset paths and independently decodable FXD images. A member retains its source coordinates, namespace scopes and the full syntax graph. A development host can replace an individual member through the existing portable style reload API. For a complete change, `StyleReloadTarget::replace_packed(&revision)` validates the archive, resolves the registered style and its includes from the candidate revision, and replaces the owned style slot after construction succeeds. A corrupt unrelated member also rejects the revision. Custom hosts can call `ThemePack::open` and `ThemePack::validate` to validate all graphs without executing application code.
 
 ```sh
 cargo run --release -p ferroui-markup-xaml-loader --no-default-features \

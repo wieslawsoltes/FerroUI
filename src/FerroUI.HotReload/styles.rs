@@ -85,6 +85,27 @@ impl StyleReloadTarget {
         Ok(())
     }
 
+    /// Replace this contribution from a complete FXP revision. All member graphs
+    /// must validate, including any outside this style's include closure. Relative
+    /// includes resolve in the candidate archive during preparation.
+    #[cfg(feature = "portable-xaml")]
+    pub fn replace_packed(&self, bytes: &[u8]) -> Result<(), ReloadError> {
+        use ferroui_markup_xaml_loader::{binary_document::pack::ThemePack, FerroRuntimeXamlLoader};
+        self.slot.replace_if_current(|| false, || {
+            let archive = ThemePack::open(bytes)
+                .map_err(|error| ReloadError::Failed(error.to_string()))?;
+            archive.validate().map_err(|error| ReloadError::Failed(error.to_string()))?;
+            let uri = ferroui_base::utilities::Uri::absolute(&self.uri)
+                .map_err(|error| ReloadError::Failed(error.to_string()))?;
+            let candidate = FerroRuntimeXamlLoader::load_packed_document(
+                &archive, uri, None, None, self.configuration.clone(),
+            ).map_err(|error| ReloadError::Failed(error.to_string()))?;
+            Rc::<dyn IStyle>::from_xaml_object(&candidate)
+                .ok_or_else(|| ReloadError::Failed("Expected style".into()))
+        })?;
+        Ok(())
+    }
+
     /// Discovers direct style includes without evaluating their markup.
     pub fn discover(
         container: &Ref<Styles>,
@@ -310,6 +331,39 @@ mod portable_tests {
         assert!(!style_ptr_eq(&applied, &initial));
         assert!(target.replace_portable(b"FXD\0bad".to_vec()).is_err());
         assert!(style_ptr_eq(&applied, &container.get(0)));
+        assert!(style_ptr_eq(&sibling, &container.get(1)));
+    }
+
+    #[test]
+    fn packed_style_reloads_transitive_includes_and_rejects_an_invalid_unrelated_member() {
+        let _scope = Dispatcher::unit_test_scope();
+        ferroui_markup_xaml::register_types();
+        let container = Styles::new();
+        let initial: Rc<dyn IStyle> = Styles::new().into();
+        let sibling: Rc<dyn IStyle> = Styles::new().into();
+        container.add(initial.clone());
+        container.add(sibling.clone());
+        let target = StyleReloadTarget::contribution(
+            &container, 0, "ferres://Editor/Views/Main.xaml".into(), Default::default(),
+        ).unwrap();
+        let revision = binary_document::pack::compile_documents(&[
+            ("Views/Main.xaml", r#"<Styles xmlns="https://github.com/ferroui"><StyleInclude Source="../Parts/Child.xaml"/></Styles>"#),
+            ("Parts/Child.xaml", r#"<Styles xmlns="https://github.com/ferroui"><Style Selector="Button"/></Styles>"#),
+            ("Z/Unrelated.xaml", r#"<Styles xmlns="https://github.com/ferroui"/>"#),
+        ]).unwrap();
+        // An editor may still have XML for the preceding generation in scope.
+        // Members present in the new pack must win as a coherent revision.
+        let stale = [(crate::document_key("ferres://Editor/Parts/Child.xaml"), "invalid xml".to_owned())]
+            .into_iter().collect();
+        ferroui_markup_xaml::source_overlay::with_sources(Rc::new(stale), || {
+            target.replace_packed(&revision).unwrap();
+        });
+        let accepted = container.get(0);
+        assert!(!style_ptr_eq(&initial, &accepted));
+        let mut corrupt = revision;
+        *corrupt.last_mut().unwrap() = 0xff;
+        assert!(target.replace_packed(&corrupt).is_err());
+        assert!(style_ptr_eq(&accepted, &container.get(0)));
         assert!(style_ptr_eq(&sibling, &container.get(1)));
     }
 }

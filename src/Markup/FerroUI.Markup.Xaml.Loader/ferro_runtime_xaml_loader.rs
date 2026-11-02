@@ -107,27 +107,29 @@ impl FerroRuntimeXamlLoader {
     #[cfg(feature = "portable-xaml")]
     pub fn load_packed_document(
         pack: &crate::binary_document::pack::ThemePack<'_>,
-        assembly: &'static MarkupAssembly,
-        path: &str,
+        uri: Uri,
         root: Option<BoxedValue>,
         parent: Option<Rc<dyn IServiceProvider>>,
+        configuration: RuntimeXamlLoaderConfiguration,
     ) -> Result<BoxedValue, XamlLoadError> {
-        let base = Uri::absolute(&format!("ferres://{}/", assembly.name))
-            .map_err(|e| XamlLoadError::with_message(e.to_string()))?;
-        let uri = Uri::absolute(&format!("{}{path}", base.absolute_uri()))
-            .map_err(|e| XamlLoadError::with_message(e.to_string()))?;
+        use ferroui_base::utilities::UriExtensions;
+        if !uri.is_absolute_uri() || !UriExtensions::is_asset(&uri) || UriExtensions::authority(&uri).is_empty() {
+            return Err(XamlLoadError::with_message("A packed document requires an absolute ferres asset URI"));
+        }
+        let authority = UriExtensions::authority(&uri).to_owned();
+        let path = UriExtensions::get_unescape_absolute_path(&uri);
+        let path = path.trim_start_matches('/');
         let mut document = RuntimeXamlLoaderDocument::from_stream_with_base_uri_and_root_instance(
             Some(uri), root, Box::new(std::io::empty()),
         );
         document.document = Some(path.to_string());
         document.service_provider = parent;
-        let mut configuration = RuntimeXamlLoaderConfiguration::new();
-        configuration.local_assembly = Some(assembly);
         let input = |path: &str| pack.document(path).map(DocumentInput::from_portable).map_err(load_exception);
         let assets = asset_loader();
         Self::load_root(document, input(path)?, &configuration, &|uri| {
-            if uri.absolute_uri().starts_with(base.absolute_uri()) {
-                let name = uri.absolute_path().trim_start_matches('/');
+            if UriExtensions::is_asset(uri) && UriExtensions::authority(uri).eq_ignore_ascii_case(&authority) {
+                let name = UriExtensions::get_unescape_absolute_path(uri);
+                let name = name.trim_start_matches('/');
                 if pack.contains(name) {
                     return input(name).map(Some);
                 }
@@ -377,6 +379,10 @@ fn open_class_asset(
 type OpenInclude<'a> = dyn Fn(&Uri) -> Result<Option<DocumentInput>, XamlLoadError> + 'a;
 
 fn read_included_asset(assets: &dyn IAssetLoader, uri: &Uri) -> Result<Option<DocumentInput>, XamlLoadError> {
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    if let Some(text) = ferroui_markup_xaml::source_overlay::source(uri.absolute_uri()) {
+        return Ok(Some(DocumentInput::xml(text)));
+    }
     let Ok(mut stream) = assets.open(uri, None) else { return Ok(None) };
     DocumentInput::read(&mut *stream).map(Some).map_err(|error|
         XamlLoadError::with_inner(format!("Could not read included XAML document {uri}: {error}"), error)
@@ -406,17 +412,7 @@ fn collect_included_documents(
             continue;
         }
         visited.push(key);
-        #[cfg(all(feature = "hot-reload", debug_assertions))]
-        let overlay = ferroui_markup_xaml::source_overlay::source(included.absolute_uri());
-        #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
-        let overlay: Option<String> = None;
-        let mut input = match overlay {
-            Some(text) => DocumentInput::xml(text),
-            None => {
-                let Some(input) = open(&included)? else { continue };
-                input
-            }
-        };
+        let Some(mut input) = open(&included)? else { continue };
         let sources = input.include_sources().map_err(load_exception)?;
         documents.push((included.clone(), input));
         collect_included_documents(open, Some(&included), sources, visited, skip, documents)?;
@@ -471,7 +467,8 @@ mod portable_tests {
         let pack = ThemePack::open(&bytes).unwrap();
         let target = ResourceDictionary::new();
         let value = FerroRuntimeXamlLoader::load_packed_document(
-            &pack, &ferroui_markup_xaml::ASSEMBLY, "View/Root.xaml", Some(Rc::new(target.clone())), None,
+            &pack, Uri::absolute("ferres://test/View/Root.xaml").unwrap(), Some(Rc::new(target.clone())), None,
+            RuntimeXamlLoaderConfiguration::new(),
         ).unwrap();
         assert!(from_markup_value::<Ref<ResourceDictionary>>(&Some(value)).unwrap().ptr_eq(&target));
         assert_eq!(from_markup_value::<String>(&target.get(&"Message".into())).as_deref(), Some("packed"));
