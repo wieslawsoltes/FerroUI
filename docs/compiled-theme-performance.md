@@ -2,6 +2,40 @@
 
 The native Rust backend uses XamlX to resolve types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
 
+## Complete editable WinUI after sharing property dispatch
+
+The full editable Linux x86-64 consumer at `e2e681c1` includes the complete typed theme, external FXP loading and the structural-edit fallback. The original ordinary main executable at `df3e12ad` was 54,577,848 bytes, giving a 50% budget of **27,288,924 bytes**.
+
+| Full-theme consumer | Ordinary ThinLTO (bytes) | Compact ThinLTO (bytes) | Compact final FatLTO (bytes) |
+|---|---:|---:|---:|
+| Original main | 54,577,848 | 44,441,808 | — |
+| Previous editable, `71d44ae8` | 45,249,656 | 36,361,272 | — |
+| Editable, `e2e681c1` | 43,163,008 | 34,759,256 | 29,116,824 |
+
+With the same compact ThinLTO settings, the editable consumer is **1,602,016 bytes smaller** than the preceding PR checkpoint and **21.8% smaller** than original main. Retaining the same dependency bitcode and using one final FatLTO unit saves a further 5,642,432 bytes. That experiment is 46.65% smaller than ordinary main and exceeds the absolute budget by 1,827,900 bytes. It preserves panic unwinding, PIE and eager binding. The unwind, search-index and landing-pad tables together occupy 6,954,348 bytes under compact ThinLTO and 5,233,256 under FatLTO.
+
+| Fresh process to first typed Button lookup | Median | p95 | Median after executable pages were evicted |
+|---|---:|---:|---:|
+| Original main, compact ThinLTO | 17.65 ms | 23.70 ms | 33.39 ms |
+| Editable, compact ThinLTO | 12.40 ms | 15.35 ms | 24.21 ms |
+| Editable, compact final FatLTO | 11.10 ms | 13.53 ms | 19.41 ms |
+
+Each configuration ran in 81 rotating fresh processes, with 31 additional launches after executable-page eviction. Readiness includes theme construction and the first deferred Button resource lookup. The probe ends before creating a window. The FatLTO final compile and link took 329 seconds on this machine.
+
+At registration, bindings now retain the observer adapter for their actual source representation. Partial virtual overrides copy the parent table once, then replace the slots a class implements. Property metadata retains its typed values and shares a non-generic owner-to-slot lookup across all value types. A 96-type metadata fixture fell from 2,700,464 to 2,390,936 bytes. An independent inheritance model matched 589,824 queries during registration and removal. All 894 FXB blocks, the 296,347-byte FXP and the 4,921,299-byte generated typed theme source matched the preceding checkpoint byte for byte.
+
+The tests covered 299 public property, conversion and binding cases and 35 dispatch and registration cases. The compatibility probe resolved typed resources in seven cases spanning the embedded theme, three FXP versions, scalar edits, a structural edit and the full fallback. A paired public API benchmark uncovered a remaining regression. In 102 blocks, style-binding emission followed by a read took **3.7% longer** with editable ThinLTO than on original main (95% interval 2.5–5.6%). Compared with editable ThinLTO, FatLTO improved mixed property access from 30.04 to 26.41 ns and binding emission from 158.65 to 139.47 ns. Plain reads increased from 7.77 to 8.40 ns and effective-local reads from 7.39 to 8.14 ns. FatLTO remains an explicit benchmark option.
+
+The following command measures the complete editable build with the experimental final link and checks the absolute size budget. Omit `--fat-app-link` for the compact ThinLTO measurement. The byte gate is expected to fail for both recorded builds.
+
+```sh
+python3 scripts/themes/bench/measure.py --work-dir /tmp/ferroui-winui-fat \
+  --solid --compact-app --linux-safe-icf --linux-packed-relocations \
+  --fat-app-link --rebuilds 0 --launches 81 --max-executable-bytes 27288924
+```
+
+[ELF sections, hashes, archive checks, startup samples and property workloads](benchmarks/compiled-theme-binding-dispatch-linux-x86_64.json)
+
 ## Complete WinUI after sharing property, reflection and template code
 
 The measured production revision is `71d44ae8`. The editable executable includes every WinUI theme resource, the typed compiled path, the external FXP reader and the fallback for structural edits. Process readiness means completion of the first deferred Button theme lookup in a fresh process. These are stripped ELF files for x86-64 GNU/Linux.

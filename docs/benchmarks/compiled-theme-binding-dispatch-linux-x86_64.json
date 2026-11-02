@@ -1,0 +1,1249 @@
+{
+  "source_commit": "e2e681c16b5ddcd72817711ed27f9210defc190a",
+  "source_tree": "8ebffde6f57ca32431aca8223f8f729a371ea73b",
+  "main_commit": "df3e12ad721fb8877699ea1f5ff157e22b45e9a7",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.39",
+  "toolchain": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1",
+  "target": {
+    "reference": "main native, ordinary stripped ThinLTO",
+    "main_bytes": 54577848,
+    "fraction": 0.5,
+    "maximum_bytes": 27288924,
+    "workload": "Unrooted complete WinUI theme. The editable candidate includes compiled startup, the external FXP loader and structural edit fallback."
+  },
+  "method": {
+    "ordinary": "opt-level=s, ThinLTO, 16 CGUs, stripped, unwind, PIE",
+    "compact": "Same plus LLVM address-significance metadata, safe identical-code folding, packed relative relocations (RELR).",
+    "fat": "Same dependencies and features as compact. Final consumer uses -Clto=fat -Ccodegen-units=1.",
+    "readiness": "Process launch through flushed output after typed Button ControlTheme lookup. Window creation and first paint are outside this endpoint.",
+    "rotating_fresh_processes": 81,
+    "page_evicting_launches": 31
+  },
+  "elf": {
+    "main_ordinary": {
+      "bytes": 54577848,
+      "cies": 2,
+      "fdes": 148115,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2496,
+        ".gnu.version": 208,
+        ".gnu.version_r": 384,
+        ".gnu.hash": 28,
+        ".dynstr": 1358,
+        ".rela.dyn": 5809872,
+        ".rela.plt": 48,
+        ".rodata": 1479014,
+        ".gcc_except_table": 2760248,
+        ".eh_frame_hdr": 1184932,
+        ".eh_frame": 6890396,
+        ".text": 33241381,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2816,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 2379168,
+        ".dynamic": 464,
+        ".got": 625632,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195754
+      },
+      "sha256": "9e37447e98f55a9daab7ea93521f7977a7ba2c19afdeb4b6d749ed4d998505e7"
+    },
+    "main_compact": {
+      "bytes": 44441808,
+      "cies": 2,
+      "fdes": 126415,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2496,
+        ".gnu.version": 208,
+        ".gnu.version_r": 400,
+        ".gnu.hash": 28,
+        ".dynstr": 1376,
+        ".rela.dyn": 2448,
+        ".relr.dyn": 41976,
+        ".rela.plt": 48,
+        ".rodata": 1146126,
+        ".gcc_except_table": 945400,
+        ".eh_frame_hdr": 1011332,
+        ".eh_frame": 6332016,
+        ".text": 32115077,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2816,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 2021584,
+        ".dynamic": 496,
+        ".got": 618512,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195754
+      },
+      "sha256": "b570cc52197c8f3bb64f8983943ccfd4492c2679eac1af8469cbcb8846cf1217"
+    },
+    "previous_compact": {
+      "bytes": 36361272,
+      "cies": 2,
+      "fdes": 113432,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2496,
+        ".gnu.version": 208,
+        ".gnu.version_r": 400,
+        ".gnu.hash": 28,
+        ".dynstr": 1376,
+        ".rela.dyn": 2448,
+        ".relr.dyn": 38064,
+        ".rela.plt": 48,
+        ".rodata": 1724771,
+        ".gcc_except_table": 887196,
+        ".eh_frame_hdr": 907468,
+        ".eh_frame": 5409724,
+        ".text": 24790325,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2784,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 1881784,
+        ".dynamic": 496,
+        ".got": 512064,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195880
+      },
+      "sha256": "bfb7eb2cdeeb51ec35f2ebbaae920491af6445fb84498b54ffa323a24312dd9d"
+    },
+    "previous_ordinary": {
+      "bytes": 45249656,
+      "cies": 2,
+      "fdes": 133634,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2496,
+        ".gnu.version": 208,
+        ".gnu.version_r": 384,
+        ".gnu.hash": 28,
+        ".dynstr": 1358,
+        ".rela.dyn": 5208144,
+        ".rela.plt": 48,
+        ".rodata": 2094581,
+        ".gcc_except_table": 2232532,
+        ".eh_frame_hdr": 1069084,
+        ".eh_frame": 5924676,
+        ".text": 25749637,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2784,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 2247448,
+        ".dynamic": 464,
+        ".got": 516264,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195880
+      },
+      "sha256": "ae449defcb2f06396afba8f5e4b467798c1c169b8e91fd40e7dee51f305f9bbd"
+    },
+    "candidate_ordinary": {
+      "bytes": 43163008,
+      "cies": 2,
+      "fdes": 129379,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2496,
+        ".gnu.version": 208,
+        ".gnu.version_r": 384,
+        ".gnu.hash": 28,
+        ".dynstr": 1358,
+        ".rela.dyn": 4997352,
+        ".rela.plt": 48,
+        ".rodata": 2085133,
+        ".gcc_except_table": 2114816,
+        ".eh_frame_hdr": 1035044,
+        ".eh_frame": 5684440,
+        ".text": 24359221,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2784,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 2200800,
+        ".dynamic": 464,
+        ".got": 478896,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195888
+      },
+      "sha256": "63d4395368cedbeaa16b117b49d4245a578378fa8273a86618f36305a8d0b32c"
+    },
+    "candidate_compact": {
+      "bytes": 34759256,
+      "cies": 2,
+      "fdes": 109553,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2496,
+        ".gnu.version": 208,
+        ".gnu.version_r": 400,
+        ".gnu.hash": 28,
+        ".dynstr": 1376,
+        ".rela.dyn": 2448,
+        ".relr.dyn": 36568,
+        ".rela.plt": 48,
+        ".rodata": 1724571,
+        ".gcc_except_table": 877716,
+        ".eh_frame_hdr": 876436,
+        ".eh_frame": 5200196,
+        ".text": 23534181,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2784,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 1830128,
+        ".dynamic": 496,
+        ".got": 469568,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195888
+      },
+      "sha256": "c09450548a7a3461298cf21e393b37164cdebd68e3464435e110006831866e15"
+    },
+    "candidate_fat": {
+      "bytes": 29116824,
+      "cies": 2,
+      "fdes": 74010,
+      "allocated_file_sections": {
+        ".interp": 28,
+        ".note.ABI-tag": 32,
+        ".note.gnu.build-id": 36,
+        ".dynsym": 2448,
+        ".gnu.version": 204,
+        ".gnu.version_r": 384,
+        ".gnu.hash": 28,
+        ".dynstr": 1333,
+        ".rela.dyn": 2400,
+        ".relr.dyn": 26656,
+        ".rela.plt": 48,
+        ".gcc_except_table": 985316,
+        ".rodata": 1719096,
+        ".eh_frame_hdr": 592092,
+        ".eh_frame": 3655848,
+        ".text": 20252741,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 2736,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 1674472,
+        ".dynamic": 496,
+        ".got": 928,
+        ".got.plt": 40,
+        ".tm_clone_table": 0,
+        ".data": 195880
+      },
+      "sha256": "63e26d456e9eba7c3e27cbed58024a322f573eb61698b790f19b99ecaeeb4c10"
+    }
+  },
+  "generated": {
+    "source_sha256": "7a275ec948d0fe868b72a18c236a785a48281934cf37de9096e49fb0dd807f05",
+    "compared_with": "71d44ae80b7766ad95fda83e60834964f83f2f1a",
+    "artifacts": {
+      ".rs": {
+        "files": 4,
+        "bytes": 4967181,
+        "equal_previous": false
+      },
+      ".fxb": {
+        "files": 894,
+        "bytes": 180091,
+        "equal_previous": true
+      },
+      ".fxp": {
+        "files": 1,
+        "bytes": 296347,
+        "equal_previous": true
+      }
+    },
+    "differences": [
+      "assets.rs",
+      "xaml/mod.rs"
+    ],
+    "differences_after_checkout_and_out_dir_normalization": []
+  },
+  "full_theme_source_bytes": 4921299,
+  "compiler_and_single_fat_link_s": 329.04630403699775,
+  "final_link_input_hashes": {
+    "libferroui_base-628a0579e6170704.rlib": {
+      "bytes": 214767714,
+      "sha256": "3a0007c2ae58665594918cbf76fb8eead857f2dc04af4daa8c4b195916679353"
+    },
+    "libferroui_controls-19af4cc4da5f242c.rlib": {
+      "bytes": 258241066,
+      "sha256": "f236898c6c08208811aadc16ad7ff9cefca5c7c7557f9404cc8de146842dfe07"
+    },
+    "libferroui_markup_xaml-246748067558b031.rlib": {
+      "bytes": 22138232,
+      "sha256": "22e700e4a815eed2fcc343ec40fed29c3f67b2371e7ab37b27a973425cb56d5d"
+    },
+    "libferroui_markup_xaml_loader-cac1295583ce8707.rlib": {
+      "bytes": 19511436,
+      "sha256": "a985c4fd9db69bb2777bfb6e2963be4ae2a8af916ed0d86df7dff201b3f32a68"
+    },
+    "libferroui_themes_winui-9ebf0d5f76a35c0b.rlib": {
+      "bytes": 19344322,
+      "sha256": "cafad6974edfb2408db51550442a45c1fadcd075f78fa19dcb44905cae332a5b"
+    }
+  },
+  "compatibility": {
+    "checks": {
+      "embedded": {
+        "normal": 14,
+        "compact": 14
+      },
+      "v3-installed": {
+        "normal": 14,
+        "compact": 14,
+        "external_sha256": "70e56b58375dfc7d31d4304b4ec0da69f515d41c937187ba9c035fde84d9a7fb"
+      },
+      "v3-scalar": {
+        "normal": 14,
+        "compact": 17,
+        "external_sha256": "3e209b649ca465fed259065111c90defe2823d282fe581ad89f20e140b8a528f"
+      },
+      "v2-scalar": {
+        "normal": 14,
+        "compact": 17,
+        "external_sha256": "0e4fcec590bf9f786f65d0da502b55b4cd0706e355ad49ccdc921d6f5a4b4e8b"
+      },
+      "v1-scalar": {
+        "normal": 14,
+        "compact": 17,
+        "external_sha256": "dc14da19ec977d16302ec2e806d011eaac467f08986279498333b621088333b4"
+      },
+      "v3-structural": {
+        "normal": 14,
+        "compact": 29,
+        "external_sha256": "f258743cc9601170e31fc45f84b55f5fcb869273e61d4ccf061f8a7efd9123b9"
+      },
+      "full-fallback": {
+        "normal": 19,
+        "compact": 17,
+        "external_sha256": "ac7712e2a7611f71432a7aaf6dd2f61c5ffa771a3574ca6834722245933e5cf0"
+      }
+    },
+    "sha256": "63e26d456e9eba7c3e27cbed58024a322f573eb61698b790f19b99ecaeeb4c10",
+    "elf_verified": [
+      "PIE",
+      "GNU_RELRO",
+      "BIND_NOW",
+      "DT_RELR"
+    ]
+  },
+  "startup": {
+    "candidate_compact": {
+      "median_ms": 12.395,
+      "p95_ms": 15.348,
+      "paired_ratio_ci95": [
+        1.0,
+        1.0
+      ],
+      "evicted_median_ms": 24.209,
+      "evicted_samples_ns": [
+        80667149,
+        24735666,
+        24209332,
+        22596519,
+        21422737,
+        24751656,
+        24200997,
+        21406167,
+        22126705,
+        21897328,
+        20736933,
+        23850010,
+        23035718,
+        22647895,
+        30558750,
+        30222978,
+        28756904,
+        26399624,
+        30861701,
+        24032229,
+        24961191,
+        25021283,
+        21264223,
+        26365344,
+        25147806,
+        23890750,
+        24281196,
+        22909020,
+        27385529,
+        22875682,
+        28174033
+      ],
+      "ready_ns": [
+        13414511,
+        13566465,
+        15154870,
+        13262305,
+        9817591,
+        11344865,
+        14360061,
+        14835558,
+        11648845,
+        12374995,
+        12640628,
+        18885991,
+        11143398,
+        11652189,
+        12865330,
+        12648019,
+        12484768,
+        11309463,
+        12488163,
+        13474509,
+        10816666,
+        10054481,
+        10665984,
+        12068453,
+        13352689,
+        10559687,
+        10367143,
+        10708066,
+        11563668,
+        10387728,
+        13526531,
+        11208203,
+        11410452,
+        10759952,
+        11830786,
+        12130459,
+        15727901,
+        10620654,
+        12111881,
+        9930112,
+        11724378,
+        14665152,
+        11306359,
+        13576941,
+        13098673,
+        13034608,
+        13631412,
+        12466277,
+        12856424,
+        15347953,
+        12333030,
+        14906269,
+        11695706,
+        13972938,
+        10986585,
+        12475310,
+        12801823,
+        14057422,
+        10926347,
+        13387390,
+        13283021,
+        12327000,
+        13125262,
+        12871506,
+        12395311,
+        11223407,
+        11737167,
+        13975170,
+        17615400,
+        12623399,
+        10792168,
+        10606253,
+        10632872,
+        12847456,
+        10650318,
+        11734183,
+        13438942,
+        11971825,
+        15571634,
+        14290908,
+        9628405
+      ]
+    },
+    "main_compact": {
+      "median_ms": 17.648,
+      "p95_ms": 23.701,
+      "paired_ratio_ci95": [
+        1.406,
+        1.54
+      ],
+      "evicted_median_ms": 33.385,
+      "evicted_samples_ns": [
+        38745763,
+        43104166,
+        35322379,
+        32144509,
+        31856810,
+        32087016,
+        34920793,
+        32762762,
+        31548896,
+        32191059,
+        48772327,
+        33000800,
+        32002795,
+        32261959,
+        46361038,
+        34895657,
+        40856636,
+        38973252,
+        32436036,
+        31945781,
+        33385117,
+        33572077,
+        32669489,
+        33928208,
+        35398628,
+        35263920,
+        31715452,
+        37314948,
+        33167436,
+        33890674,
+        33086156
+      ],
+      "ready_ns": [
+        15871858,
+        19689643,
+        24530648,
+        18608547,
+        18073167,
+        16491121,
+        14711455,
+        13374361,
+        20971605,
+        18726766,
+        17647899,
+        14644997,
+        21688899,
+        20589341,
+        17852101,
+        17561932,
+        17423158,
+        19285998,
+        17898078,
+        18743937,
+        14689302,
+        16547800,
+        18704539,
+        15896484,
+        16698317,
+        17099009,
+        16340950,
+        19619529,
+        18660865,
+        16008099,
+        23700955,
+        16182395,
+        17569383,
+        17745573,
+        16880041,
+        18853984,
+        20997102,
+        18610263,
+        15142859,
+        17463094,
+        17210510,
+        18446861,
+        15736518,
+        16903166,
+        19223540,
+        14623179,
+        16402364,
+        14915352,
+        17418729,
+        16975223,
+        22987694,
+        26136276,
+        20285082,
+        16264419,
+        16739123,
+        17851219,
+        19257942,
+        23805474,
+        20741217,
+        19804861,
+        17755547,
+        24273147,
+        17351078,
+        19853548,
+        17600488,
+        18204893,
+        17677992,
+        16321565,
+        17671578,
+        16036677,
+        15174626,
+        17730180,
+        16496183,
+        17222438,
+        16599286,
+        17144072,
+        17419845,
+        18335686,
+        22356835,
+        22209762,
+        17109566
+      ]
+    },
+    "candidate_fat": {
+      "median_ms": 11.096,
+      "p95_ms": 13.525,
+      "paired_ratio_ci95": [
+        0.85,
+        0.934
+      ],
+      "evicted_median_ms": 19.408,
+      "evicted_samples_ns": [
+        20762320,
+        21033436,
+        35125628,
+        16823557,
+        17721171,
+        18311238,
+        20126372,
+        16906343,
+        18338482,
+        18116289,
+        20911446,
+        17889720,
+        18524553,
+        16922893,
+        29299064,
+        20017641,
+        23148014,
+        23581202,
+        17090795,
+        21951652,
+        20213631,
+        23885693,
+        17772197,
+        18073332,
+        19102716,
+        18339736,
+        19626566,
+        18140642,
+        24341095,
+        20964770,
+        19407971
+      ],
+      "ready_ns": [
+        11006335,
+        10777688,
+        10369115,
+        9719657,
+        10084555,
+        11952372,
+        8240243,
+        12977986,
+        10935687,
+        11453996,
+        10473709,
+        15456900,
+        12618446,
+        11369522,
+        12119739,
+        11049359,
+        10136722,
+        9182854,
+        9361388,
+        11454998,
+        11281532,
+        10879989,
+        12485990,
+        9101744,
+        11760830,
+        11520135,
+        10879398,
+        10898317,
+        12459415,
+        10470515,
+        10107659,
+        11121246,
+        12564490,
+        11461046,
+        10296874,
+        11132141,
+        13371557,
+        9504352,
+        9620954,
+        11985315,
+        9510019,
+        13396243,
+        12124070,
+        14899079,
+        13499877,
+        9863013,
+        10616007,
+        9937593,
+        9981228,
+        10589248,
+        11169867,
+        13524738,
+        11876193,
+        10658505,
+        10260941,
+        11284037,
+        10812117,
+        12362483,
+        12191159,
+        10411665,
+        12100280,
+        9862442,
+        13681245,
+        11729977,
+        12394961,
+        9997691,
+        12550711,
+        11095777,
+        10601085,
+        9306538,
+        9169796,
+        10934248,
+        8934718,
+        11791648,
+        17920341,
+        11603589,
+        10998102,
+        12558483,
+        13445456,
+        11956101,
+        9617229
+      ]
+    }
+  },
+  "property": {
+    "previous_production": "Linux x86-64, compact ELF, per-thread CPU ns/op; balanced ABBA/BAAB pairs with rotating workload order on CPU8. First 3 blocks excluded. Bootstrap interval for median of within-block candidate/previous ratios.",
+    "fixture": "All Base markup registrations and four public property host types. Steady-state property and observer operations use 200,000 iterations by default and 20,000 for installation, binding, and coercion.",
+    "confidence": "2.5th and 97.5th percentiles of 4,000 bootstrap median resamples of 32 within-block candidate/previous CPU ratios.",
+    "previous_to_current_thin": {
+      "metadata_default": {
+        "previous_cpu_ns_per_op": 6.226448749999999,
+        "candidate_cpu_ns_per_op": 5.551995,
+        "paired_median_ratio": 0.8747222533330474,
+        "bootstrap_95_percent_interval": [
+          0.8344398845677833,
+          0.917772247888937
+        ]
+      },
+      "metadata_scoped": {
+        "previous_cpu_ns_per_op": 6.901315,
+        "candidate_cpu_ns_per_op": 6.20529125,
+        "paired_median_ratio": 0.8837015968510851,
+        "bootstrap_95_percent_interval": [
+          0.8531798487843432,
+          0.9256966566782392
+        ]
+      },
+      "metadata_cached_override": {
+        "previous_cpu_ns_per_op": 7.9534525,
+        "candidate_cpu_ns_per_op": 6.098885,
+        "paired_median_ratio": 0.7754876278624506,
+        "bootstrap_95_percent_interval": [
+          0.7259543600195121,
+          0.7849690713525866
+        ]
+      },
+      "get_plain": {
+        "previous_cpu_ns_per_op": 6.99128625,
+        "candidate_cpu_ns_per_op": 6.9845250000000005,
+        "paired_median_ratio": 1.0108176959402095,
+        "bootstrap_95_percent_interval": [
+          0.9624410256982645,
+          1.0438946708946366
+        ]
+      },
+      "get_derived_default": {
+        "previous_cpu_ns_per_op": 12.98721625,
+        "candidate_cpu_ns_per_op": 11.37446875,
+        "paired_median_ratio": 0.864652500698873,
+        "bootstrap_95_percent_interval": [
+          0.8516959398006754,
+          0.8838027506452304
+        ]
+      },
+      "get_mixed_hosts": {
+        "previous_cpu_ns_per_op": 14.220548749999999,
+        "candidate_cpu_ns_per_op": 12.408155,
+        "paired_median_ratio": 0.8686892778563969,
+        "bootstrap_95_percent_interval": [
+          0.8517084438650886,
+          0.8774963846942759
+        ]
+      },
+      "get_effective_local": {
+        "previous_cpu_ns_per_op": 6.6058975,
+        "candidate_cpu_ns_per_op": 6.81120375,
+        "paired_median_ratio": 1.007721293553961,
+        "bootstrap_95_percent_interval": [
+          0.9791253030034092,
+          1.0493133313649337
+        ]
+      },
+      "mixed_75read_25write": {
+        "previous_cpu_ns_per_op": 27.6047075,
+        "candidate_cpu_ns_per_op": 27.400190000000002,
+        "paired_median_ratio": 0.9689218657757455,
+        "bootstrap_95_percent_interval": [
+          0.9534945595887862,
+          0.9940701931384297
+        ]
+      },
+      "style_set_read_dispose": {
+        "previous_cpu_ns_per_op": 335.7926875,
+        "candidate_cpu_ns_per_op": 327.212175,
+        "paired_median_ratio": 0.9663079009427908,
+        "bootstrap_95_percent_interval": [
+          0.9597051465955456,
+          0.9793845986991969
+        ]
+      },
+      "style_binding_emit_read": {
+        "previous_cpu_ns_per_op": 138.34277500000002,
+        "candidate_cpu_ns_per_op": 137.500125,
+        "paired_median_ratio": 0.9729388928421375,
+        "bootstrap_95_percent_interval": [
+          0.9408568767767721,
+          0.995990084913103
+        ]
+      },
+      "coerce_scoped_local": {
+        "previous_cpu_ns_per_op": 20.0585875,
+        "candidate_cpu_ns_per_op": 20.1644875,
+        "paired_median_ratio": 0.9940812262606825,
+        "bootstrap_95_percent_interval": [
+          0.9543599416837325,
+          1.0348837707856715
+        ]
+      }
+    },
+    "original_main_and_both_lto_policies": {
+      "source": "current integrated ELF at c09450548a7a3461298cf21e393b37164cdebd68e3464435e110006831866e15",
+      "bytes": {
+        "integrated-thin": 10511600,
+        "integrated-fat": 8820624,
+        "main": 13001304
+      },
+      "lanes": {
+        "metadata_default": {
+          "median_cpu_ns_per_operation": {
+            "integrated-thin": 6.371775,
+            "integrated-fat": 5.6145,
+            "main": 6.74964
+          },
+          "paired_fat_over_thin": [
+            0.892,
+            [
+              0.88,
+              0.906
+            ]
+          ]
+        },
+        "metadata_scoped": {
+          "median_cpu_ns_per_operation": {
+            "integrated-thin": 6.94398,
+            "integrated-fat": 6.559305,
+            "main": 7.42514
+          },
+          "paired_fat_over_thin": [
+            0.942,
+            [
+              0.927,
+              0.952
+            ]
+          ]
+        },
+        "metadata_cached_override": {
+          "median_cpu_ns_per_operation": {
+            "integrated-thin": 7.038065,
+            "integrated-fat": 6.44864,
+            "main": 8.408205
+          },
+          "paired_fat_over_thin": [
+            0.918,
+            [
+              0.91,
+              0.934
+            ]
+          ]
+        },
+        "get_plain": {
+          "median_cpu_ns_per_operation": {
+            "integrated-thin": 7.767705,
+            "integrated-fat": 8.401945,
+            "main": 7.740415
+          },
+          "paired_fat_over_thin": [
+            1.088,
+            [
+              1.075,
+              1.095
+            ]
+          ]
+        },
+        "get_derived_default": {
+          "median_cpu_ns_per_operation": {
+            "integrated-thin": 12.904845,
+            "integrated-fat": 12.59303,
+            "main": 14.45029
+          },
+          "paired_fat_over_thin": [
+            0.978,
+            [
+              0.965,
+              0.987
+            ]
+          ]
+        },
+        "get_mixed_hosts": {
+          "median_cpu_ns_per_operation": {
+            "integrated-thin": 13.87744,
+            "integrated-fat": 13.66993,
+            "main": 15.285585
+          },
+          "paired_fat_over_thin": [
+            0.994,
+            [
+              0.975,
+              1.01
+            ]
+          ]
+        },
+        "get_effective_local": {
+          "median_cpu_ns_per_operation": {
+            "integrated-thin": 7.39109,
+            "integrated-fat": 8.13515,
+            "main": 7.398055
+          },
+          "paired_fat_over_thin": [
+            1.096,
+            [
+              1.08,
+              1.113
+            ]
+          ]
+        },
+        "mixed_75read_25write": {
+          "median_cpu_ns_per_operation": {
+            "integrated-thin": 30.03983,
+            "integrated-fat": 26.41053,
+            "main": 29.606585
+          },
+          "paired_fat_over_thin": [
+            0.879,
+            [
+              0.878,
+              0.886
+            ]
+          ]
+        },
+        "style_set_read_dispose": {
+          "median_cpu_ns_per_operation": {
+            "integrated-thin": 379.4083,
+            "integrated-fat": 323.7445,
+            "main": 377.50045
+          },
+          "paired_fat_over_thin": [
+            0.858,
+            [
+              0.851,
+              0.873
+            ]
+          ]
+        },
+        "style_binding_emit_read": {
+          "median_cpu_ns_per_operation": {
+            "integrated-thin": 158.64645,
+            "integrated-fat": 139.47045,
+            "main": 154.98705
+          },
+          "paired_fat_over_thin": [
+            0.88,
+            [
+              0.874,
+              0.892
+            ]
+          ]
+        },
+        "coerce_scoped_local": {
+          "median_cpu_ns_per_operation": {
+            "integrated-thin": 24.2621,
+            "integrated-fat": 22.2601,
+            "main": 24.6121
+          },
+          "paired_fat_over_thin": [
+            0.915,
+            [
+              0.891,
+              0.942
+            ]
+          ]
+        }
+      }
+    },
+    "three_arm_trial": {
+      "method": "randomized sequence of three arms followed by reverse; same round order and CPU7; discard 3 warm blocks",
+      "timed_blocks": 102,
+      "thin_over_main_paired_ratio_and_95_ci": {
+        "metadata_default": [
+          0.9638304726116003,
+          0.9439277155594865,
+          0.9748756328749242
+        ],
+        "metadata_scoped": [
+          0.9313105765275816,
+          0.9062975638335469,
+          0.9598040697585264
+        ],
+        "metadata_cached_override": [
+          0.8263335430149952,
+          0.8147352861234397,
+          0.8410548929653963
+        ],
+        "get_plain": [
+          1.0104426665674902,
+          0.9946399688057359,
+          1.0287541386383563
+        ],
+        "get_derived_default": [
+          0.8951428188394221,
+          0.8845932246921583,
+          0.9014294272805166
+        ],
+        "get_mixed_hosts": [
+          0.8834986247317409,
+          0.8665083981603856,
+          0.8989593344921527
+        ],
+        "get_effective_local": [
+          1.0111484047305166,
+          0.9921140711399469,
+          1.0261879705489314
+        ],
+        "mixed_75read_25write": [
+          1.0050454558122142,
+          0.9919726774724313,
+          1.0128851489978776
+        ],
+        "style_set_read_dispose": [
+          0.9660575542975455,
+          0.9461987091985642,
+          0.9810007330155268
+        ],
+        "style_binding_emit_read": [
+          1.0373826494659626,
+          1.0254130422284398,
+          1.0564872183018088
+        ],
+        "coerce_scoped_local": [
+          0.9617295258426317,
+          0.9220789231207952,
+          0.9881317741354254
+        ]
+      }
+    },
+    "property_workload_source": "#![allow(dead_code)]\nuse ferroui_base::*;\nuse ferroui_base::data::BindingPriority;\nuse ferroui_base::reactive::{IObserver,LightweightSubject};\nuse std::rc::Rc;\nuse std::hint::black_box;\nuse std::time::Instant;\n#[repr(C)] struct Timespec { seconds:i64, nanos:i64 }\nunsafe extern \"C\" { fn clock_gettime(id:i32, ts:*mut Timespec) -> i32; }\nfn cpu_ns()->u64 { let mut t=Timespec { seconds:0, nanos:0 }; assert_eq!(unsafe { clock_gettime(3,&mut t) },0); t.seconds as u64*1_000_000_000 +t.nanos as u64 }\nmacro_rules! class {($n:ident,$b:ident)=>{ #[repr(C)]pub struct $n {base:$b} ferro_class!($n: $b); ferro_impl_classes!($n: FerroObjectImpl); impl $n {pub fn construct()->Self{Self {base:$b::construct()}}pub fn object()->Ref<FerroObject>{instantiate(Self::construct()).cast::<FerroObject>().unwrap()}} }}\nclass!(Node,FerroObject);class!(Branch,Node);class!(Leaf,Branch);class!(Sibling,Node);\nimpl Node {\n ferro_property!(fn plain() -> StyledProperty<i32> {FerroProperty::register::<Node,_>(\"Plain\",17)});\n ferro_property!(fn scoped() -> StyledProperty<i32> {FerroProperty::register_with::<Node,_>(\"Scoped\",StyledPropertyOptions::new(17).coerce(|_,n| n.max(0)))});\n ferro_property!(fn varied() -> StyledProperty<i32> {FerroProperty::register::<Node,_>(\"Varied\",17)});\n ferro_property!(fn local() -> StyledProperty<i32> {FerroProperty::register::<Node,_>(\"Local\",13)});\n}\n#[derive(Copy,Clone)]enum Lane{MetaPlain,MetaScoped,MetaOverride,GetPlain,GetOverride,GetMixedHost,GetEffective,MixedReadWrite,StyleInstallDispose,StyledBinding,Coercion}\nimpl Lane {\n fn name(self)->&'static str {match self {Self::MetaPlain=>\"metadata_default\",Self::MetaScoped=>\"metadata_scoped\",Self::MetaOverride=>\"metadata_cached_override\",Self::GetPlain=>\"get_plain\",Self::GetOverride=>\"get_derived_default\",Self::GetMixedHost=>\"get_mixed_hosts\",Self::GetEffective=>\"get_effective_local\",Self::MixedReadWrite=>\"mixed_75read_25write\", Self::StyleInstallDispose=>\"style_set_read_dispose\", Self::StyledBinding=>\"style_binding_emit_read\",Self::Coercion=>\"coerce_scoped_local\"}}\n}\nstruct Work {hosts:[Ref<FerroObject>;4],plain:&'static StyledProperty<i32>,scoped:&'static StyledProperty<i32>,varied:&'static StyledProperty<i32>,local:&'static StyledProperty<i32>}\nimpl Work {\n fn setup()->Self {let varied=Node::varied();varied.override_default_value::<Branch>(29);varied.override_default_value::<Sibling>(31);let hosts=[Node::object(),Branch::object(),Leaf::object(),Sibling::object()];for (i,h) in hosts.iter().enumerate() {h.set_value(Node::local(),100+i as i32);}\n Self {hosts,plain:Node::plain(),scoped:Node::scoped(),varied,local:Node::local()}}\n #[inline(never)] fn execute(&self,lane:Lane,steps:usize)->i64 {\n let order=black_box([2usize,2,1,0,2,3,2,1,0,3,2,1,3,2,2,0]);let mut sum=0i64;\n macro_rules! read {($code:expr)=>{{for i in 0..steps {sum+=black_box($code(i)) as i64;}}}}\n match lane {\n Lane::MetaPlain=> read!(|i:usize| *self.plain.get_metadata_for(black_box(&self.hosts[order[i&15]])).default_value()),\n Lane::MetaScoped=> read!(|i:usize| *self.scoped.get_metadata_for(black_box(&self.hosts[order[i&15]])).default_value()),\n Lane::MetaOverride=>read!(|_:usize| *self.varied.get_metadata_for(black_box(&self.hosts[2])).default_value()),\n Lane::GetPlain=> read!(|i:usize| black_box(&self.hosts[order[i&15]]).get_value(self.plain)),\n Lane::GetOverride=> read!(|_:usize| black_box(&self.hosts[2]).get_value(self.varied)),\n Lane::GetMixedHost=> read!(|i:usize| black_box(&self.hosts[order[i&15]]).get_value(self.varied)),\n Lane::GetEffective=> read!(|i:usize| black_box(&self.hosts[order[i&15]]).get_value(self.local)),\n Lane::StyleInstallDispose=> {\n   let host=black_box(&self.hosts[2]);\n   for i in 0..steps {\n     let slot=host.set_value_with_priority(self.varied,(i&1023) as i32,BindingPriority::Style).unwrap();\n     sum+=host.get_value(self.varied) as i64;\n     slot.dispose();\n     sum+=host.get_value(self.varied) as i64;\n   }\n }\n Lane::StyledBinding=> {\n   let host=black_box(&self.hosts[2]);\n   let source=Rc::new(LightweightSubject::<i32>::new());\n   let lease=host.bind(self.varied,source.clone(),BindingPriority::Style);\n   for i in 0..steps {source.on_next((i&1023) as i32);sum+=host.get_value(self.varied) as i64;}\n   lease.dispose();\n }\n Lane::Coercion=> {\n   let host=black_box(&self.hosts[2]);host.set_value(self.scoped,7);\n   for _ in 0..steps {host.coerce_value(self.scoped);sum+=host.get_value(self.scoped) as i64;}\n   host.clear_value(self.scoped);\n }\n Lane::MixedReadWrite=> {\n  for i in 0..steps {let host=black_box(&self.hosts[order[(i>>3)&15]]);match i&7 {\n    0=>{host.set_value(self.varied,(i&1023) as i32);},\n    1|2=>sum+=host.get_value(self.varied) as i64,\n    3=>host.clear_value(self.varied),\n    4=>sum+=host.get_value(self.plain) as i64,\n    5=>sum+=host.get_value(self.local) as i64,\n    _=>sum+=host.get_value(self.varied) as i64,\n  }}\n }\n }; sum\n }\n}\nfn main(){let round:usize=std::env::args().nth(1).unwrap().parse().unwrap();let n=200_000;ferroui_base::register_types(); assert!(black_box(TypeInfo::registered_types().len())>100);let w=Work::setup();let lanes=[Lane::MetaPlain,Lane::MetaScoped,Lane::MetaOverride,Lane::GetPlain,Lane::GetOverride,Lane::GetMixedHost,Lane::GetEffective,Lane::MixedReadWrite,Lane::StyleInstallDispose,Lane::StyledBinding,Lane::Coercion];\nfor off in 0..lanes.len(){let lane=lanes[(off+round)%lanes.len()];let n=if matches!(lane,Lane::StyleInstallDispose|Lane::StyledBinding|Lane::Coercion){20_000}else{n};black_box(w.execute(lane,n/25));let wall=Instant::now();let cpu=cpu_ns();let sum=w.execute(lane,n);let dt=cpu_ns()-cpu;println!(\"{} {} {} {} {}\",lane.name(),n,sum,dt,wall.elapsed().as_nanos());}}\n"
+  },
+  "elf_fixture": {
+    "previous": {
+      "ordinary": {
+        "bytes": 14099192,
+        "sha256": "523d8870efbaf56f44401ff79e2ad78b623aadde9fd812cbb2325b5034c67283",
+        "text": 7596629,
+        "unwind": 2899732,
+        "sections": {
+          ".interp": 28,
+          ".note.ABI-tag": 32,
+          ".note.gnu.build-id": 36,
+          ".dynsym": 2232,
+          ".gnu.version": 186,
+          ".gnu.version_r": 336,
+          ".gnu.hash": 28,
+          ".dynstr": 1230,
+          ".rela.dyn": 1922016,
+          ".rela.plt": 48,
+          ".rodata": 593253,
+          ".gcc_except_table": 643120,
+          ".eh_frame_hdr": 359796,
+          ".eh_frame": 1896816,
+          ".text": 7596629,
+          ".init": 27,
+          ".fini": 13,
+          ".plt": 48,
+          ".tdata": 1448,
+          ".tbss": 4328,
+          ".fini_array": 8,
+          ".init_array": 16,
+          ".data.rel.ro": 872584,
+          ".dynamic": 464,
+          ".got": 181464,
+          ".got.plt": 40,
+          ".relro_padding": 1176,
+          ".tm_clone_table": 0,
+          ".data": 23888,
+          ".bss": 251,
+          ".comment": 184
+        }
+      },
+      "compact": {
+        "bytes": 11010912,
+        "sha256": "c614bb535ee53bd0472277b341fea77a0305cbabce735ed6a5e37202b8e80bbb",
+        "text": 7286165,
+        "unwind": 2266840,
+        "sections": {
+          ".interp": 28,
+          ".note.ABI-tag": 32,
+          ".note.gnu.build-id": 36,
+          ".dynsym": 2232,
+          ".gnu.version": 186,
+          ".gnu.version_r": 352,
+          ".gnu.hash": 28,
+          ".dynstr": 1248,
+          ".rela.dyn": 2184,
+          ".relr.dyn": 14864,
+          ".rela.plt": 48,
+          ".rodata": 474493,
+          ".gcc_except_table": 217988,
+          ".eh_frame_hdr": 310260,
+          ".eh_frame": 1738592,
+          ".text": 7286165,
+          ".init": 27,
+          ".fini": 13,
+          ".plt": 48,
+          ".tdata": 1448,
+          ".tbss": 4328,
+          ".fini_array": 8,
+          ".init_array": 16,
+          ".data.rel.ro": 753296,
+          ".dynamic": 496,
+          ".got": 179424,
+          ".got.plt": 40,
+          ".relro_padding": 1144,
+          ".tm_clone_table": 0,
+          ".data": 23888,
+          ".bss": 251,
+          ".comment": 184
+        }
+      }
+    },
+    "candidate": {
+      "ordinary": {
+        "bytes": 13403080,
+        "sha256": "be6cbd4507f4bc80e1d303f393ccac39cb31b7436d8b8e45f5d78b5af1ae0c10",
+        "text": 7135429,
+        "unwind": 2776312,
+        "sections": {
+          ".interp": 28,
+          ".note.ABI-tag": 32,
+          ".note.gnu.build-id": 36,
+          ".dynsym": 2232,
+          ".gnu.version": 186,
+          ".gnu.version_r": 336,
+          ".gnu.hash": 28,
+          ".dynstr": 1230,
+          ".rela.dyn": 1855200,
+          ".rela.plt": 48,
+          ".rodata": 577125,
+          ".gcc_except_table": 601288,
+          ".eh_frame_hdr": 350092,
+          ".eh_frame": 1824932,
+          ".text": 7135429,
+          ".init": 27,
+          ".fini": 13,
+          ".plt": 48,
+          ".tdata": 1448,
+          ".tbss": 4344,
+          ".fini_array": 8,
+          ".init_array": 16,
+          ".data.rel.ro": 853744,
+          ".dynamic": 464,
+          ".got": 171736,
+          ".got.plt": 40,
+          ".relro_padding": 976,
+          ".tm_clone_table": 0,
+          ".data": 23896,
+          ".bss": 243,
+          ".comment": 184
+        }
+      },
+      "compact": {
+        "bytes": 10511600,
+        "sha256": "625b06ca3fd9116a58d93e4a85cc0d4115ed875d95c2f1de68faf233ffd6704d",
+        "text": 6893397,
+        "unwind": 2193248,
+        "sections": {
+          ".interp": 28,
+          ".note.ABI-tag": 32,
+          ".note.gnu.build-id": 36,
+          ".dynsym": 2232,
+          ".gnu.version": 186,
+          ".gnu.version_r": 352,
+          ".gnu.hash": 28,
+          ".dynstr": 1248,
+          ".rela.dyn": 2184,
+          ".relr.dyn": 14352,
+          ".rela.plt": 48,
+          ".rodata": 474453,
+          ".gcc_except_table": 211456,
+          ".eh_frame_hdr": 302564,
+          ".eh_frame": 1679228,
+          ".text": 6893397,
+          ".init": 27,
+          ".fini": 13,
+          ".plt": 48,
+          ".tdata": 1448,
+          ".tbss": 4344,
+          ".fini_array": 8,
+          ".init_array": 16,
+          ".data.rel.ro": 732208,
+          ".dynamic": 496,
+          ".got": 168104,
+          ".got.plt": 40,
+          ".relro_padding": 752,
+          ".tm_clone_table": 0,
+          ".data": 23896,
+          ".bss": 243,
+          ".comment": 184
+        }
+      }
+    }
+  },
+  "validation": {
+    "property_observer_conversion_and_binding_cases": 299,
+    "virtual_dispatch_and_class_registration_cases": 35,
+    "standalone_metadata_table_cases": 2,
+    "metadata_model_lookups": 589824,
+    "notification_cases": 27,
+    "notification_differential_cases": 30
+  }
+}
