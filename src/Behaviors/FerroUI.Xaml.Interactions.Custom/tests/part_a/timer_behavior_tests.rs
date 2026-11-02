@@ -10,13 +10,18 @@
 //! the interval would have elapsed.
 
 use super::command::Command;
-use super::support::{run_jobs, start_app};
+use super::support::{load, run_jobs, start_app};
 use crate::{DelayedLoadBehavior, DelayedLoadTrigger, DelayedShowControlAction, InactivityTrigger, VisualDebugBehavior};
 use ferroui_base::animation::SignedDuration;
+use ferroui_base::data::core::Value;
+use ferroui_base::data::model::{Event, INotifyPropertyChanged, Model};
+use ferroui_base::data::ReflectionBinding;
 use ferroui_base::threading::{Dispatcher, DispatcherTimer};
-use ferroui_base::{FerroObject, Ref};
+use ferroui_base::{ferro_model, BoxedValue, FerroObject, FerroProperty, Ref};
 use ferroui_controls::primitives::AdornerLayer;
 use ferroui_controls::{Border, Control, Window};
+use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument};
+use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use ferroui_xaml_interactions::InvokeCommandAction;
 use ferroui_xaml_interactivity::{IAction, Interaction};
 use std::cell::Cell;
@@ -26,9 +31,9 @@ use std::time::Duration;
 /// The interval of the tests: one no timer of the test application has.
 const INTERVAL: Duration = Duration::from_millis(1234);
 
-/// The interval of the tests as the time span the properties take.
-fn interval() -> SignedDuration {
-    SignedDuration::from_milliseconds(1234.0)
+/// The interval of the tests as the properties take it.
+fn interval() -> Duration {
+    INTERVAL
 }
 
 /// An action that counts its runs.
@@ -166,4 +171,151 @@ fn visual_debug_behavior_removes_its_highlight_when_its_duration_elapses() {
     Dispatcher::force_fire_timer_for_unit_tests(&timer);
     assert_eq!(adorners - 1, adorner_layer.children().count());
     assert!(timers_with(INTERVAL).is_empty());
+}
+
+// --- negative intervals (decision O2) -----------------------------------------------------
+//
+// Not from upstream (C5 of #423, step T3): the delays, the timeout and the duration of the
+// highlight are `Duration` properties. A negative time span is a load error of markup, and a
+// binding that gives one reports a conversion error and leaves the property at the value it
+// has without the binding.
+
+/// The documents of the timer properties; `{}` is the time span.
+const TIMER_DOCUMENTS: &[(&str, &str)] = &[
+    ("DelayedLoadBehavior.Delay", "<DelayedLoadBehavior xmlns='https://github.com/ferroui' Delay='{}'/>"),
+    ("DelayedLoadTrigger.Delay", "<DelayedLoadTrigger xmlns='https://github.com/ferroui' Delay='{}'/>"),
+    ("DelayedShowControlAction.Delay", "<DelayedShowControlAction xmlns='https://github.com/ferroui' Delay='{}'/>"),
+    ("InactivityTrigger.Timeout", "<InactivityTrigger xmlns='https://github.com/ferroui' Timeout='{}'/>"),
+    ("VisualDebugBehavior.Duration", "<VisualDebugBehavior xmlns='https://github.com/ferroui' Duration='{}'/>"),
+];
+
+/// Loads `xaml` with the run-time loader: the root object, or the error in its debug form
+/// (with the errors it wraps).
+fn try_load(xaml: &str) -> Result<BoxedValue, String> {
+    let mut configuration = RuntimeXamlLoaderConfiguration::new();
+    configuration.local_assembly = Some(&crate::ASSEMBLY);
+    FerroRuntimeXamlLoader::load_document(RuntimeXamlLoaderDocument::new(xaml), Some(configuration))
+        .map_err(|error| format!("{error:?}"))
+}
+
+/// The document of `TIMER_DOCUMENTS` at `index` with the time span `span`.
+fn timer_document(index: usize, span: &str) -> String {
+    TIMER_DOCUMENTS[index].1.replace("{}", span)
+}
+
+#[test]
+fn a_time_span_literal_sets_the_timer_properties() {
+    let _app = start_app();
+    assert_eq!(INTERVAL, load::<DelayedLoadBehavior>("behavior", &timer_document(0, "0:0:1.234")).delay());
+    assert_eq!(INTERVAL, load::<DelayedLoadTrigger>("trigger", &timer_document(1, "0:0:1.234")).delay());
+    assert_eq!(INTERVAL, load::<DelayedShowControlAction>("action", &timer_document(2, "1.234")).delay());
+    assert_eq!(Duration::from_secs(30), load::<InactivityTrigger>("trigger", &timer_document(3, "00:00:30")).timeout());
+    assert_eq!(Duration::ZERO, load::<VisualDebugBehavior>("behavior", &timer_document(4, "0:0:0")).duration());
+}
+
+#[test]
+fn a_negative_time_span_literal_for_a_timer_property_is_an_error() {
+    let _app = start_app();
+    for (index, (property, _)) in TIMER_DOCUMENTS.iter().enumerate() {
+        let error = match try_load(&timer_document(index, "-0:0:1")) {
+            Ok(_) => panic!("{property}: a negative time span is not a duration"),
+            Err(error) => error,
+        };
+        assert!(error.contains("The TimeSpan -00:00:01 is negative and cannot be converted to a Duration."), "{property}: {error}");
+    }
+}
+
+/// A view model with a time span.
+struct Timing {
+    span: Cell<SignedDuration>,
+    property_changed: Event<str>,
+}
+
+impl Timing {
+    fn new(span: SignedDuration) -> Rc<Self> {
+        Model::new_model(Self { span: Cell::new(span), property_changed: Event::new() })
+    }
+
+    fn set_span(&self, value: SignedDuration) {
+        self.span.set(value);
+        self.property_changed.raise("Span");
+    }
+}
+
+impl INotifyPropertyChanged for Timing {
+    fn property_changed(&self) -> &Event<str> {
+        &self.property_changed
+    }
+}
+
+ferro_model!(Timing, |b| b
+    .notify_property_changed()
+    .property::<Value<SignedDuration>>("Span", |o| o.span.get(), |o, v| o.set_span(v)));
+
+/// Binds `property` of `target` to a time span that starts negative: the property keeps
+/// `default` (what `get` reads without the binding); a span that is not negative is set as the
+/// duration of the same value; a negative one again returns the property to `default`.
+fn a_negative_span_keeps_the_default(
+    target: &FerroObject,
+    property: &'static FerroProperty,
+    get: impl Fn() -> Duration,
+    default: Duration,
+) {
+    let name = property.name();
+    assert_eq!(get(), default, "{name}: the default");
+    let source = Timing::new(SignedDuration::from_seconds(-1.0));
+    let binding = ReflectionBinding::new("Span");
+    binding.set_source(Some(source.clone() as BoxedValue));
+    target.bind_binding(property, &*binding);
+    assert_eq!(get(), default, "{name}: a negative span is not set");
+
+    source.set_span(SignedDuration::from_milliseconds(1234.0));
+    assert_eq!(get(), INTERVAL, "{name}: a span that is not negative is set");
+
+    source.set_span(SignedDuration::from_seconds(-2.0));
+    assert_eq!(get(), default, "{name}: a negative span returns the property to its default");
+}
+
+#[test]
+fn a_negative_span_from_a_binding_leaves_the_timer_properties_at_their_defaults() {
+    let _app = start_app();
+    let behavior = DelayedLoadBehavior::new();
+    a_negative_span_keeps_the_default(
+        &behavior,
+        DelayedLoadBehavior::delay_property().as_property(),
+        || behavior.delay(),
+        Duration::from_millis(500),
+    );
+
+    let trigger = DelayedLoadTrigger::new();
+    a_negative_span_keeps_the_default(
+        &trigger,
+        DelayedLoadTrigger::delay_property().as_property(),
+        || trigger.delay(),
+        Duration::from_millis(500),
+    );
+
+    let action = DelayedShowControlAction::new();
+    a_negative_span_keeps_the_default(
+        &action,
+        DelayedShowControlAction::delay_property().as_property(),
+        || action.delay(),
+        Duration::from_millis(500),
+    );
+
+    let trigger = InactivityTrigger::new();
+    a_negative_span_keeps_the_default(
+        &trigger,
+        InactivityTrigger::timeout_property().as_property(),
+        || trigger.timeout(),
+        Duration::from_secs(5),
+    );
+
+    let behavior = VisualDebugBehavior::new();
+    a_negative_span_keeps_the_default(
+        &behavior,
+        VisualDebugBehavior::duration_property().as_property(),
+        || behavior.duration(),
+        Duration::from_millis(500),
+    );
 }

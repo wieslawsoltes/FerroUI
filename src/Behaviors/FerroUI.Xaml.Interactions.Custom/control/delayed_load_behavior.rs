@@ -1,7 +1,6 @@
 //! Port of `Control/DelayedLoadBehavior.cs`.
 
 use crate::{AttachedToVisualTreeBehavior, AttachedToVisualTreeBehaviorImpl};
-use ferroui_base::animation::SignedDuration;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::DispatcherTimer;
 use ferroui_base::{
@@ -12,6 +11,7 @@ use ferroui_controls::Control;
 use ferroui_xaml_interactivity::{DisposableAction, DisposingBehaviorImpl, StyledElementBehaviorImpl};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::time::Duration;
 
 /// Hides the associated control when it is attached to the visual tree and shows it again after
 /// a delay.
@@ -34,8 +34,8 @@ ferroui_base::ferro_impl_classes!(
 ferro_properties! {
     impl DelayedLoadBehavior {
         /// Identifies the `Delay` property.
-        pub fn delay_property() -> StyledProperty<SignedDuration> {
-            FerroProperty::register::<DelayedLoadBehavior, _>("Delay", SignedDuration::from_milliseconds(500.0))
+        pub fn delay_property() -> StyledProperty<Duration> {
+            FerroProperty::register::<DelayedLoadBehavior, _>("Delay", Duration::from_millis(500))
         }
     }
 }
@@ -50,7 +50,7 @@ ferroui_base::ferro_overrides! {
             associated_object.set_is_visible(false);
 
             let timer = DispatcherTimer::new();
-            timer.set_interval(this.delay().to_duration().unwrap_or_default());
+            timer.set_interval(this.delay());
             let behavior = this.to_ref().downgrade();
             let tick = timer.tick(move |_timer: &DispatcherTimer| {
                 if let Some(behavior) = behavior.upgrade() {
@@ -85,11 +85,11 @@ impl DelayedLoadBehavior {
 
     /// Gets or sets the delay before the associated control is shown. This is a property of the
     /// object model.
-    pub fn delay(&self) -> SignedDuration {
+    pub fn delay(&self) -> Duration {
         self.get_value(Self::delay_property())
     }
 
-    pub fn set_delay(&self, value: SignedDuration) {
+    pub fn set_delay(&self, value: Duration) {
         self.set_value(Self::delay_property(), value)
     }
 

@@ -1,7 +1,6 @@
 //! Port of `Debugging/VisualDebugBehavior.cs`.
 
 use super::visual_debug_adorner::VisualDebugAdorner;
-use ferroui_base::animation::SignedDuration;
 use ferroui_base::media::{Color, Colors, SolidColorBrush};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::{
@@ -13,6 +12,7 @@ use ferroui_controls::Control;
 use ferroui_xaml_interactivity::{
     EventTriggerBase, EventTriggerBaseImpl, EventTriggerBaseImplExt, StyledElementBehaviorImpl,
 };
+use std::time::Duration;
 
 /// A behavior that visualizes events on the attached control for debugging purposes: each time
 /// the event fires, the actions run and the control is highlighted for
@@ -38,8 +38,8 @@ ferro_properties! {
         }
 
         /// Identifies the `Duration` property.
-        pub fn duration_property() -> StyledProperty<SignedDuration> {
-            FerroProperty::register::<VisualDebugBehavior, _>("Duration", SignedDuration::from_seconds(0.5))
+        pub fn duration_property() -> StyledProperty<Duration> {
+            FerroProperty::register::<VisualDebugBehavior, _>("Duration", Duration::from_millis(500))
         }
     }
 }
@@ -78,11 +78,11 @@ impl VisualDebugBehavior {
     }
 
     /// Gets or sets the duration of the highlight.
-    pub fn duration(&self) -> SignedDuration {
+    pub fn duration(&self) -> Duration {
         self.get_value(Self::duration_property())
     }
 
-    pub fn set_duration(&self, value: SignedDuration) {
+    pub fn set_duration(&self, value: Duration) {
         self.set_value(Self::duration_property(), value)
     }
 
@@ -103,7 +103,7 @@ impl VisualDebugBehavior {
             move || {
                 adorner_layer.children().remove(adorner.clone());
             },
-            self.duration().to_duration().unwrap_or_default(),
+            self.duration(),
             DispatcherPriority::BACKGROUND,
         )
         .detach();
