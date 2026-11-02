@@ -94,14 +94,18 @@ def measure_launches(executables, rounds):
     return samples
 
 
-def lld_sections(link_map, archive, executable):
-    # LLD prints input sections, including anonymous constants, unwind records and TLS.
-    # Restrict to SHF_ALLOC output sections. Padding and synthesized dynamic relocations
-    # belong to the linker and have no unique input crate.
+def lld_allocations(link_map, executable):
+    """Read allocated ELF output sizes and each archive's allocated input sections."""
     report = command_output(["readelf", "-SW", str(executable)])
-    allocated = set(re.findall(r"^\s*\[\s*\d+\]\s+(\S+)\s+\S+\s+\w+\s+\w+\s+\w+\s+\w+\s+\S*A\S*\s", report, re.M))
     sections = {}
+    for name, kind, size, flags in re.findall(
+        r"^\s*\[\s*\d+\]\s+(\S+)\s+(\S+)\s+\w+\s+\w+\s+(\w+)\s+\w+\s+(\S+)", report, re.M
+    ):
+        if "A" in flags:
+            sections[name] = {"allocated_bytes": int(size, 16), "file_bytes": 0 if kind == "NOBITS" else int(size, 16)}
+    by_archive = {}
     output = None
+    archive_name = re.compile(r"(?:^|/)([^/(]+\.(?:rlib|a))\(")
     with link_map.open() as stream:
         for line in stream:
             fields = line.split(maxsplit=4)
@@ -109,15 +113,14 @@ def lld_sections(link_map, archive, executable):
                 continue
             _, _, size, _, entry = fields
             entry = entry.strip()
-            if entry in allocated:
-                output = entry
-            elif entry.startswith("."):
-                output = None
-            elif output and f"/{archive}(" in entry and "):(" in entry:
-                sections[output] = sections.get(output, 0) + int(size, 16)
-    if not sections:
-        raise ValueError(f"no allocated input sections from {archive} in {link_map}")
-    return sections
+            if entry.startswith("."):
+                output = entry if entry in sections else None
+            elif output and "):(" in entry:
+                match = archive_name.search(entry)
+                if match:
+                    totals = by_archive.setdefault(match.group(1), {})
+                    totals[output] = totals.get(output, 0) + int(size, 16)
+    return {"elf_sections": sections, "archive_input_sections": by_archive}
 
 
 def main():
@@ -194,12 +197,16 @@ def main():
     referenced = set(re.findall(rb'include_bytes!\("([a-zA-Z0-9_-]+\.fxb)"\)', source_bytes))
     last_units = cargo_timings(target)
     sections = None
+    allocations = None
     if args.lld_link_map:
         link_map = work / "consumer.link.map"
         subprocess.run(["cargo", "rustc", "--locked", "--release", *cargo_args, "--bin", PROBE, "--",
                         "-Clink-arg=-fuse-ld=lld", "-Clink-arg=-Wl,-Map," + str(link_map)],
                        cwd=package, env=env, check=True)
-        sections = lld_sections(link_map, rlib.name, executable)
+        allocations = lld_allocations(link_map, executable)
+        sections = allocations["archive_input_sections"].get(rlib.name)
+        if not sections:
+            raise ValueError(f"no allocated input sections from {rlib.name} in {link_map}")
     stripped = work / "stripped-probe"
     shutil.copy2(executable, stripped)
     subprocess.run(["strip", str(stripped)], check=True)
@@ -217,6 +224,7 @@ def main():
         "rustc": command_output(["rustc", "-vV"]), "cargo": command_output(["cargo", "-V"]),
         "platform": platform.platform(), "jobs": env.get("CARGO_BUILD_JOBS", "cargo default"),
         "packed_theme": packed, "solid_theme": args.solid, "size_optimized_theme": args.size_optimize_theme,
+        "linked_allocations": allocations,
         "theme_allocated_sections": sections, "theme_allocated_bytes": sum(sections.values()) if sections else None,
         "fxp_bytes": (out / "winui.fxp").stat().st_size if packed else 0,
         "generated_registration_rust_bytes": (generated / "mod.rs").stat().st_size,
