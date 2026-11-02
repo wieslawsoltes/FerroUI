@@ -786,8 +786,8 @@ mod tests {
     use super::*;
     use crate::media::Colors;
     use crate::rendering::composition::effects::{
-        ArithmeticCompositeEffect, BlendEffect, ColorSourceEffect, CompositionEffectSourceParameter, SaturationEffect,
-        SceneLightingEffect,
+        ArithmeticCompositeEffect, BlendEffect, ColorSourceEffect, CompositionEffectSourceParameter,
+        LinearTransferEffect, SaturationEffect, SceneLightingEffect, SepiaEffect, ShadowEffect,
     };
 
     fn parameter(name: &str) -> Option<GraphicsEffectSource> {
@@ -861,5 +861,63 @@ mod tests {
         let graph = EffectGraph::load(&effect, &["Light.DiffuseAmount"]).expect("loads");
         assert_eq!(graph.animatable, vec![("Light.DiffuseAmount".to_owned(), EffectPropertyValue::Scalar(1.0))]);
         assert!(graph.layer_path.is_none());
+    }
+
+    #[test]
+    fn sepia_and_linear_transfer_load_as_animatable_colour_matrices() {
+        let sepia: GraphicsEffect =
+            SepiaEffect { name: "Sepia".into(), intensity: 0.75, source: parameter("source"), ..Default::default() }.into();
+        let graph = EffectGraph::load(&sepia, &["Sepia.Intensity"]).expect("loads");
+        assert_eq!(graph.animatable, vec![("Sepia.Intensity".to_owned(), EffectPropertyValue::Scalar(0.75))]);
+        assert!(matches!(graph.root.unwrap().kind, EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Sepia(_), .. }));
+
+        let transfer: GraphicsEffect = LinearTransferEffect {
+            name: "Transfer".into(),
+            red_slope: 2.0,
+            alpha_disable: true,
+            source: parameter("source"),
+            ..Default::default()
+        }
+        .into();
+        let graph = EffectGraph::load(&transfer, &["Transfer.RedSlope", "Transfer.BlueOffset"]).expect("loads");
+        assert_eq!(
+            graph.animatable,
+            vec![
+                ("Transfer.RedSlope".to_owned(), EffectPropertyValue::Scalar(2.0)),
+                ("Transfer.BlueOffset".to_owned(), EffectPropertyValue::Scalar(0.0)),
+            ]
+        );
+        let Some(EffectNode { kind: EffectNodeKind::ColorMatrix { matrix: EffectMatrix::LinearTransfer { disabled, .. }, .. }, .. }) =
+            graph.root
+        else {
+            panic!("a linear transfer");
+        };
+        assert_eq!([false, false, false, true], disabled);
+        assert!(EffectGraph::load(&transfer, &["Transfer.Saturation"]).is_err());
+    }
+
+    #[test]
+    fn members_named_by_an_effect_alone_take_its_property_of_their_kind() {
+        let shadow: GraphicsEffect = ShadowEffect { name: "glow".into(), source: parameter("content"), ..Default::default() }.into();
+        let (graph, keys) = EffectGraph::load_with_members(
+            &shadow,
+            &[("glow", EffectMemberKind::Scalar), ("glow", EffectMemberKind::Color)],
+        )
+        .expect("loads");
+        assert_eq!(vec!["glow.BlurAmount".to_owned(), "glow.ShadowColor".to_owned()], keys);
+        assert_eq!(2, graph.animatable.len());
+
+        // A full name is taken as it is; its kind is checked.
+        let (_, keys) =
+            EffectGraph::load_with_members(&shadow, &[("glow.ShadowColor", EffectMemberKind::Color)]).expect("loads");
+        assert_eq!(vec!["glow.ShadowColor".to_owned()], keys);
+        assert!(EffectGraph::load_with_members(&shadow, &[("glow.ShadowColor", EffectMemberKind::Scalar)]).is_err());
+
+        // No effect of that name, or more than one property of the kind.
+        assert!(EffectGraph::load_with_members(&shadow, &[("other", EffectMemberKind::Scalar)]).is_err());
+        let transfer: GraphicsEffect =
+            LinearTransferEffect { name: "amount".into(), source: parameter("content"), ..Default::default() }.into();
+        let error = EffectGraph::load_with_members(&transfer, &[("amount", EffectMemberKind::Scalar)]).unwrap_err();
+        assert_eq!(CompositionEffectFactoryError::InvalidAnimatableProperty("amount".into()), error.1);
     }
 }

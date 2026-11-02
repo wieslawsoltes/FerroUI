@@ -15,6 +15,8 @@ mod i_drop_shadow_effect;
 mod i_effect;
 mod immutable_luminance_to_alpha_effect;
 pub mod library;
+#[cfg(test)]
+mod library_tests;
 
 pub use blur_effect::BlurEffect;
 pub use custom_effect::{

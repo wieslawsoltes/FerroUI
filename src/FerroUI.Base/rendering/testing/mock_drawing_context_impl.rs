@@ -105,6 +105,11 @@ pub struct MockDrawingContextImpl {
     /// (`PushRenderOptions <text> <interpolation> <edge> <blending>
     /// <full opacity>`) rather than as `PushRenderOptions`. Off by default.
     pub log_render_options: bool,
+    /// Whether pushed colour matrix layers are recorded with their matrix
+    /// (`PushColorMatrixLayer <bounds> <alpha mode> <matrix>`, the twenty
+    /// members of the row-major 4 x 5 form, rounded to three decimals). Off
+    /// by default.
+    pub log_matrices: bool,
 }
 
 impl MockDrawingContextImpl {
@@ -120,6 +125,7 @@ impl MockDrawingContextImpl {
             supports_layer_effects: false,
             supports_gpu_effects: false,
             log_render_options: false,
+            log_matrices: false,
         }
     }
 
@@ -369,10 +375,16 @@ impl crate::platform::IDrawingContextImplWithLayerEffects for MockDrawingContext
     fn push_color_matrix_layer(
         &mut self,
         bounds: Rect,
-        _matrix: &crate::media::ColorMatrix,
+        matrix: &crate::media::ColorMatrix,
         alpha_mode: crate::media::ColorMatrixAlphaMode,
     ) {
-        self.log.push(format!("PushColorMatrixLayer {bounds} {alpha_mode:?}"));
+        if self.log_matrices {
+            let members: Vec<String> =
+                matrix.to_row_major_4x5().iter().map(|value| format!("{}", (value * 1000.0).round() / 1000.0)).collect();
+            self.log.push(format!("PushColorMatrixLayer {bounds} {alpha_mode:?} [{}]", members.join(" ")));
+        } else {
+            self.log.push(format!("PushColorMatrixLayer {bounds} {alpha_mode:?}"));
+        }
     }
 
     fn pop_color_matrix_layer(&mut self) {
