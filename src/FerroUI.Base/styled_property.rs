@@ -269,14 +269,7 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
         priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
         let this = self;
-        if value.is::<UnsetValueType>() {
-            if priority == BindingPriority::LocalValue {
-                o.clear_value(this);
-            }
-            None
-        } else if value.is::<DoNothingType>() {
-            None
-        } else if let Some(v) = value.downcast_ref::<T>() {
+        if let Some(v) = value.downcast_ref::<T>() {
             o.set_value_with_priority(this, v.clone(), priority)
         } else if let Some(v) = Self::convert_untyped(value) {
             o.set_value_with_priority(this, v, priority)
@@ -287,10 +280,7 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
 
     fn route_set_current_value(&'static self, o: &FerroObject, value: &dyn Any) {
         let this = self;
-        if value.is::<UnsetValueType>() {
-            o.clear_value(this);
-        } else if value.is::<DoNothingType>() {
-        } else if let Some(v) = value.downcast_ref::<T>() {
+        if let Some(v) = value.downcast_ref::<T>() {
             o.set_current_value(this, v.clone());
         } else if let Some(v) = Self::convert_untyped(value) {
             o.set_current_value(this, v);

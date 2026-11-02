@@ -126,6 +126,20 @@ fn clear_value_reverts_to_default() {
 }
 
 #[test]
+fn untyped_unset_at_style_priority_clears_only_a_direct_property() {
+    let target = Class1::new();
+    let styled = Class1::foo_property();
+    let direct = Class1::direct_property();
+    target.set_value(styled, "local".to_owned());
+
+    target.set_value_untyped(styled, &UnsetValueType, BindingPriority::Style);
+    target.set_value_untyped(direct, &UnsetValueType, BindingPriority::Style);
+
+    assert_eq!(target.get_value(styled), "local");
+    assert_eq!(target.get_direct_value(direct), "");
+}
+
+#[test]
 fn virtual_dispatch_and_inherited_overrides() {
     let c2 = Class2::new();
     assert_eq!(c2.describe(), "class2:class1");

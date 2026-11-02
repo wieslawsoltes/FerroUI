@@ -4,7 +4,7 @@ use crate::ferro_property_metadata::MetadataTable;
 use crate::property_store::{EffectiveValueDyn, IValueEntry};
 use crate::reactive::{IDisposable, IObservable};
 use crate::{
-    BoxedValue, ObjectType, DirectPropertyMetadata, DoNothingType, FerroObject, FerroProperty,
+    BoxedValue, ObjectType, DirectPropertyMetadata, FerroObject, FerroProperty,
     FerroPropertyMetadata, FerroPropertyRegistry, PropertyValue, TypeInfo, UnsetValueType,
 };
 use std::any::Any;
@@ -150,10 +150,7 @@ impl<T: PropertyValue> PropertyRoutes for DirectPropertyBase<T> {
         _priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
         let this = self;
-        if value.is::<UnsetValueType>() {
-            o.clear_direct_value(this);
-        } else if value.is::<DoNothingType>() {
-        } else if let Some(v) = value.downcast_ref::<T>() {
+        if let Some(v) = value.downcast_ref::<T>() {
             o.set_direct_value(this, v.clone());
         } else if let Some(v) = Self::convert_untyped(value) {
             o.set_direct_value(this, v);
