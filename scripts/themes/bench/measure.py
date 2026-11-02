@@ -102,6 +102,13 @@ def measure_commands(commands, rounds):
     return samples
 
 
+def startup_comparison(samples, reference, case):
+    baseline = statistics.median(row["process_ready_ns"] for row in samples[reference])
+    candidate = statistics.median(row["process_ready_ns"] for row in samples[case])
+    return {"baseline": str(reference), "baseline_median_ns": baseline, "candidate_median_ns": candidate,
+            "ratio": candidate / baseline, "passed": candidate <= baseline}
+
+
 def lld_allocations(link_map, executable):
     """Read allocated ELF output sizes and each archive's allocated input sections."""
     report = command_output(["readelf", "-SW", str(executable)])
@@ -160,6 +167,10 @@ def main():
                         help="interleave this reference executable and require median time to Button at or below its median")
     parser.add_argument("--compare-archive", type=Path, action="append", default=[],
                         help="also launch the precompiled consumer with an FXP file on disk")
+    parser.add_argument("--require-archive-startup", type=Path, action="append", default=[],
+                        help="time this external revision and require its median to meet --startup-baseline")
+    parser.add_argument("--compiled-updates", action="store_true",
+                        help="enable the shipping consumer to load FXU operand updates as well as FXP")
     args = parser.parse_args()
     source = args.source.resolve()
     with (source / "src/FerroUI.Themes.WinUI/Cargo.toml").open("rb") as stream:
@@ -167,7 +178,11 @@ def main():
     # Older revisions used solid-theme for the compact interpreter.
     separate_portable = "portable-solid-theme" in theme_features
     precompiled = args.precompiled or (args.solid and separate_portable)
-    if args.compare_archive and not precompiled:
+    if args.require_archive_startup and not args.startup_baseline:
+        parser.error("--require-archive-startup requires --startup-baseline")
+    if args.compiled_updates and (not precompiled or "compiled-updates" not in theme_features):
+        parser.error("--compiled-updates requires a precompiled source with FXU support")
+    if (args.compare_archive or args.require_archive_startup) and not precompiled:
         parser.error("--compare-archive requires a precompiled solid theme")
     if args.max_theme_bytes and not args.lld_link_map:
         parser.error("--max-theme-bytes requires --lld-link-map")
@@ -202,7 +217,7 @@ def main():
         manifest += f'ferroui-markup-xaml = {{ path = {json.dumps(str(markup / "FerroUI.Markup.Xaml"))} }}\n'
         loader = json.dumps(str(markup / "FerroUI.Markup.Xaml.Loader"))
         manifest += f'ferroui-markup-xaml-loader = {{ path = {loader}, features = ["runtime", "portable-xaml"] }}\n'
-    manifest += '\n[features]\nretain-archive = []\n'
+    manifest += '\n[features]\nretain-archive = []\nlegacy-archive = []\noperand-updates = []\n'
     if args.compact_app:
         manifest += '\n[profile.release]\nopt-level = "s"\ncodegen-units = 16\n'
     if args.size_optimize_theme:
@@ -218,6 +233,10 @@ def main():
     if precompiled:
         feature = "solid-theme" if args.solid else "precompiled-theme"
         features = [f"{THEME}/{feature}", "retain-archive"]
+        if not (markup / "FerroUI.Markup.Xaml.Loader/compiled_archive.rs").exists():
+            features.append("legacy-archive")
+        if args.compiled_updates:
+            features.extend(["operand-updates", f"{THEME}/compiled-updates"])
     elif args.packed:
         features = [f"{THEME}/packed-theme"]
     elif packed:
@@ -274,8 +293,9 @@ def main():
     # Warm the OS page cache first. Each timed sample performs actual theme
     # construction and a checked deferred lookup in a fresh process.
     commands = {path: [path] for path in executables}
-    for path in args.compare_archive:
-        archive = path.resolve()
+    required = list(dict.fromkeys(p.resolve() for p in args.require_archive_startup))
+    archives = list(dict.fromkeys(p.resolve() for p in [*args.compare_archive, *required]))
+    for archive in archives:
         if archive in commands:
             parser.error("each comparison must have a distinct path")
         commands[archive] = [stripped, archive]
@@ -306,20 +326,20 @@ def main():
         "median": {k: statistics.median(sample[k] for sample in launches) for k in launches[0]},
     }
     if baseline:
-        baseline_ns = statistics.median(row["process_ready_ns"] for row in samples[baseline])
-        candidate_ns = result["median"]["process_ready_ns"]
-        result["startup_comparison"] = {
-            "baseline": str(baseline), "baseline_median_ns": baseline_ns,
-            "candidate_median_ns": candidate_ns, "ratio": candidate_ns / baseline_ns,
-            "passed": candidate_ns <= baseline_ns,
-        }
-    if baseline or args.compare_with or args.compare_archive:
+        result["startup_comparison"] = startup_comparison(samples, baseline, stripped)
+        result["archive_startup_comparisons"] = {str(p): startup_comparison(samples, baseline, p) for p in required}
+    if baseline or args.compare_with or archives:
         result["interleaved_launches"] = {str(path): rows for path, rows in samples.items()}
     report = json.dumps(result, indent=2) + "\n"
     (work / "report.json").write_text(report)
     print(report, end="")
-    if baseline and not result["startup_comparison"]["passed"]:
-        raise SystemExit(f"median startup exceeded reference ({candidate_ns / 1e6:.3f} ms vs {baseline_ns / 1e6:.3f} ms)")
+    if baseline:
+        checks = {"installed": result["startup_comparison"], **result["archive_startup_comparisons"]}
+        failures = [f"{name} {check['candidate_median_ns'] / 1e6:.3f} ms"
+                    for name, check in checks.items() if not check["passed"]]
+        if failures:
+            reference_ms = result["startup_comparison"]["baseline_median_ns"] / 1e6
+            raise SystemExit(f"median startup exceeded {reference_ms:.3f} ms: " + ", ".join(failures))
     if args.max_theme_bytes and result["theme_allocated_bytes"] > args.max_theme_bytes:
         raise SystemExit(f"WinUI contributed {result['theme_allocated_bytes']} bytes; limit {args.max_theme_bytes}")
 

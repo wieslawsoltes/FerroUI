@@ -16,14 +16,20 @@ fn load_archive(path: std::ffi::OsString) -> ferroui_base::Ref<WinUITheme> {
     };
 
     let image = std::fs::read(path).expect("read replacement archive");
+    #[cfg(feature = "operand-updates")]
+    if image.starts_with(b"FXU\x01") {
+        return ferroui_themes_winui::load_theme_update(&image).expect("load compiled operands");
+    }
     ferroui_themes_winui::register_types();
     let mut config = RuntimeXamlLoaderConfiguration::new();
     config.local_assembly = Some(&ferroui_themes_winui::ASSEMBLY);
     let uri = Uri::absolute(WinUITheme::DOCUMENT_URI).unwrap();
-    if let Some(value) = FerroRuntimeXamlLoader::try_load_compiled_archive(
-        &ferroui_themes_winui::compiled_archive_root(), &image, &uri, &config, None)
-        .expect("load matching installed archive")
-    {
+    let root = ferroui_themes_winui::compiled_archive_root();
+    #[cfg(feature = "legacy-archive")]
+    let native = root.try_load(&image, &uri, &config, None);
+    #[cfg(not(feature = "legacy-archive"))]
+    let native = FerroRuntimeXamlLoader::try_load_compiled_archive(&root, &image, &uri, &config, None);
+    if let Some(value) = native.expect("load compiled archive") {
         return from_markup_value(&Some(value)).expect("compiled WinUI theme class");
     }
     let indexed = if is_solid(&image) {
