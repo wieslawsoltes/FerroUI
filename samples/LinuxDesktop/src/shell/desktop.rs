@@ -110,6 +110,11 @@ fn date(t: OffsetDateTime) -> String {
 }
 
 fn desktop_shortcut(state: &Rc<Shell>, scene: Scene, name: &str, icon: Icon) -> Element {
+    let (symbol, label) = match look().winui().map(|style| style.mode) {
+        Some(ColorMode::Light) => ("#07528F", "#102641"),
+        Some(ColorMode::HighContrast) => (colors().bar_ink, colors().text),
+        _ => ("#DFF3FF", "#FFFFFF"),
+    };
     command(state, scene, name)
         .width(85.0)
         .height(70.0)
@@ -119,8 +124,8 @@ fn desktop_shortcut(state: &Rc<Shell>, scene: Scene, name: &str, icon: Icon) -> 
         .child(
             stack_panel()
                 .spacing(5.0)
-                .child(glyph(icon, 28.0, "#DFF3FF"))
-                .child(shell_text(name, 12.0, "#FFFFFF").horizontal_alignment(H::Center)),
+                .child(glyph(icon, 28.0, symbol))
+                .child(shell_text(name, 12.0, label).horizontal_alignment(H::Center)),
         )
         .into()
 }
@@ -320,7 +325,7 @@ fn menubar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
         })
     });
     let width = state.metrics().width;
-    let compact = memo(move |_| width.get() < 550.0);
+    let compact = memo(move |_| width.get() < 680.0);
     let menu = |scene, title: &'static str| {
         command(state, scene, title)
             .is_visible(move || !compact.get())
