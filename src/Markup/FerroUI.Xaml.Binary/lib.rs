@@ -84,10 +84,10 @@ impl fmt::Display for Error {
 impl std::error::Error for Error {}
 
 /// A deferred resource may outlive the file or its replacement during hot reload.
-/// All text retained by one generation shares a single allocation.
+/// Deferred values share the generation's expanded UTF-8 buffer.
 #[derive(Debug, Clone)]
 pub struct SharedText {
-    text: Arc<str>,
+    text: Arc<String>,
     start: u32,
     end: u32,
 }
@@ -115,10 +115,26 @@ pub struct Record<'a> {
     pub value_column: i32,
 }
 
+/// Only text-valued factories let a payload escape the decoded batch.
+#[derive(Debug)]
+enum TextPool {
+    Keys(String),
+    Values(Arc<String>),
+}
+
+impl TextPool {
+    fn as_str(&self) -> &str {
+        match self {
+            Self::Keys(text) => text,
+            Self::Values(text) => text,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct Batch {
     kind: Kind,
-    text: Arc<str>,
+    text: TextPool,
     ends: Vec<u32>,
     rows: Vec<[u32; 6]>,
     numbers: Vec<u64>,
@@ -170,14 +186,23 @@ impl Batch {
             previous_start = start;
         }
 
+        let components = match kind {
+            Kind::Double => 1,
+            Kind::Thickness | Kind::CornerRadius => 4,
+            _ => 0,
+        };
+        // Counts have already been bounded. Each numeric component needs at least
+        // one wire byte before any backing storage is reserved.
+        if count * (5 + components) > bytes.len() {
+            return Err(Error("truncated FXB block"));
+        }
         let mut rows = Vec::with_capacity(count);
-        let mut numbers = Vec::new();
+        let mut numbers = Vec::with_capacity(count * components);
         for _ in 0..count {
             let key = uint(&mut bytes)?;
             let value = match kind {
                 Kind::Double | Kind::Thickness | Kind::CornerRadius => {
                     let start = numbers.len() as u32;
-                    let components = if kind == Kind::Double { 1 } else { 4 };
                     for _ in 0..components {
                         let tag = take(&mut bytes, 1)?[0];
                         let bits = if tag == 255 {
@@ -212,7 +237,12 @@ impl Batch {
         }
         Ok(Self {
             kind,
-            text: Arc::from(text),
+            // Move the expanded buffer into the shared owner. Converting the String
+            // to Arc<str> would allocate and copy every reconstructed byte again.
+            text: match kind {
+                Kind::Alias | Kind::DynamicBrush | Kind::StaticBrush => TextPool::Values(Arc::new(text)),
+                _ => TextPool::Keys(text),
+            },
             ends,
             rows,
             numbers,
@@ -246,14 +276,15 @@ impl Batch {
                     Payload::Import(value)
                 } else {
                     let (start, end) = range(value);
+                    let TextPool::Values(text) = &self.text else { unreachable!("validated text factory") };
                     Payload::Text(SharedText {
-                        text: self.text.clone(),
+                        text: text.clone(),
                         start,
                         end,
                     })
                 };
                 Record {
-                    key: &self.text[a as usize..b as usize],
+                    key: &self.text.as_str()[a as usize..b as usize],
                     payload,
                     line: line as i32,
                     column: column as i32,
