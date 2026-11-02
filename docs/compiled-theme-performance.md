@@ -1,8 +1,53 @@
 # Compiled XAML themes
 
-XamlX resolves types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
+The native Rust backend uses XamlX to resolve types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
 
-## Shared styles, scalar tables and local factory imports
+## The 600 KB full-theme target
+
+The complete WinUI crate occupies **585,562 allocated bytes** with the solid FXP backend on Linux x86-64. This includes the 245,385-byte archive of all 169 WinUI documents, native code, metadata, writable data, TLS and unwind tables. The size profile sets only the WinUI crate to `opt-level="z"` and `codegen-units=1`. The remaining dependencies use release optimization for speed. The resulting application occupies 59,498,592 bytes after stripping.
+
+| Full WinUI configuration | Generated theme Rust B | Embedded FXB/FXP B | LLD WinUI input sections B | Stripped application B | WinUI rustc s | Spawn to first Button ms |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Previous native AOT | 7,903,409 | 0 | — | 68,233,648 | 168.68 | 19.03 |
+| Native AOT | 6,085,047 | 0 | 10,306,856 | 67,059,216 | 163.74 | 18.02 |
+| Previous AOT with FXB blocks | 7,289,507 | 236,219 | — | 67,923,400 | 160.16 | 20.11 |
+| AOT with FXB blocks | 5,471,145 | 236,219 | 10,272,682 | 66,749,008 | 145.88 | 19.14 |
+| Native AOT, size profile | 6,085,047 | 0 | 7,229,830 | 63,949,880 | 76.77 | 19.65 |
+| Independent FXP | 0 | 432,438 | 884,983 | 59,764,712 | 9.09 | 2,152.60 |
+| Solid FXP, size profile | 0 | 245,385 | 585,562 | 59,498,592 | 4.46 | 1,907.43 |
+
+All rows retain open-ended resource lookup. Native measurements used 25 interleaved fresh processes per executable. The indexed and solid medians come from separate seven-launch rotating runs on the same shared host. The solid table row uses the final class-metadata consumer. Its compilation figures come from the preceding build with identical WinUI settings and archive. Each run warmed the filesystem cache and timed through the ready marker after the first Button lookup in a headless application. Cargo timings measure only the theme crate's rustc invocation and are single samples. Compiling the runtime loader in the solid consumer took 42.54 s with the other dependencies warm. Its theme build script took 1.90 s.
+
+The native emitter shares typed deferred factory bodies, repeats property getters only at their original execution sites, and interns the construction and attachment of matching child styles. Large modules use private path aliases for the symbols their generated code references. No import table enumerates unrelated controls. Full native generated Rust fell 23.0% against the previous PR release probe. The native symbols in `ferroui_themes_winui::compiled_xaml` fell from 4,657,569 to 3,574,920 bytes (23.2%). The full FXB application saved 1,174,392 linked bytes while retaining every one of its 894 resource blocks byte for byte. Native and FXB still link several megabytes of typed builders.
+
+The solid image stores the parsed graphs with shared strings, per-opcode streams and original diagnostic coordinates. WinUI expands that image once. XamlX still resolves types and runs semantic transforms on first use. Both indexed and solid FXP support transactional whole-archive reload. A candidate must pass validation, including its unreferenced members, before it replaces the live contribution.
+
+Bringing packed startup near the 18 ms native result requires moving the remaining semantic work to the compiler. The measured solid consumer spent about 1.37 ms resolving Button after the constructor returned. An execution-ready representation would store the resolved constructor, property, overload and deferred-template plans with document-local typed imports. The runtime could then execute the root plan immediately and open a template plan on first use. A reload would validate the import signatures before publishing a replacement. The current solid format retains portable pre-transform graphs.
+
+LLD assigns each input section to its supplying crate. Shared framework code, linker padding and synthesized dynamic relocations are outside the WinUI input-section figure and inside the total executable. The older release probes have no saved linker maps. Their executable sizes and generated text-symbol totals are available for comparison. Closing the dictionary over explicit roots prunes theme declarations, while the framework's open reflection and conversion registries can still retain control implementations.
+
+```sh
+python3 scripts/themes/bench/measure.py --work-dir /tmp/winui-native --lld-link-map
+python3 scripts/themes/bench/measure.py --work-dir /tmp/winui-fxb --binary --lld-link-map
+python3 scripts/themes/bench/measure.py --work-dir /tmp/winui-solid \
+    --solid --size-optimize-theme --lld-link-map --max-theme-bytes 599999
+```
+
+The size setting belongs in the root manifest of a downstream Cargo consumer.
+
+```toml
+[dependencies.ferroui-themes-winui]
+path = "FerroUI/src/FerroUI.Themes.WinUI"
+features = ["solid-theme"]
+
+[profile.release.package.ferroui-themes-winui]
+opt-level = "z"
+codegen-units = 1
+```
+
+[Native compilation, linker sections and startup samples](benchmarks/compiled-theme-full-600k-linux-x86_64.json) · [Packed compilation, linker sections and startup samples](benchmarks/packed-theme-linux-x86_64.json) · [Paired compiler-host measurements](benchmarks/compiled-theme-generator-600k.json) · [Solid FXP format](porting/xaml-compiler/fxp-solid.md)
+
+## Earlier comparison of shared styles, scalar tables and local factory imports
 
 The following comparison starts at PR #496’s previous head, with the first four resource factories already batched. The release consumer resolves Button from WinUI. It uses one Cargo job, rustc 1.99.0, opt-level 3, no cross-crate LTO and no incremental compilation. The full and candidate rooted configurations were rebuilt. For the two prior rooted configurations, the existing release probes and original Cargo timings were retained after verifying their generated Rust and embedded leaves byte for byte against a fresh generation at the starting head. All eight startup medians come from the same 25 interleaved fresh-process launches per mode with a warm page cache.
 

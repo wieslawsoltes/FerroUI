@@ -364,14 +364,14 @@
     }
   },
   "benchmarked_probe": "scripts/themes/bench/winui.rs",
-  "revision_notes": "The solid distribution is the shipping implementation in 7f05a8fa. Its dependencies were built from a benchmark-only working tree with the same source files for the binary format and runtime, before the subsequent type resolver cache fix. The pre-merge fixture preceded the copy-on-write variant merge and retained-child visitor changes. The row is a comparison of the two binaries, not a single-change ablation.",
+  "revision_notes": "The solid distribution is the shipping implementation in ecce41778. Its dependencies were built from a benchmark-only working tree with the same source files for the binary format and runtime, before the subsequent type resolver cache fix. The pre-merge fixture preceded the copy-on-write variant merge and retained-child visitor changes. The row is a comparison of the two binaries, not a single-change ablation.",
   "functional_checks": [
     "All 169 documents compared equal to the XML parser after canonical stored-FXD re-encoding.",
     "A production consumer built WinUITheme by its public URI and the private Button document URI remained inaccessible. The consumer checked light, dark and high-contrast colors, normal and compact padding, memoized Button/DatePicker/ComboBox/Window control themes, and built the Button template.",
     "Seven interleaved fresh-process samples per variant checked successful Button resolution before reporting elapsed time."
   ],
   "class_metadata_followup": {
-    "method": "Paired fresh processes, seven rotating samples per executable after warm-up, unchanged binary theme payload. The newer executable adds the same-type-system class-ancestry fast path from bc06a0f0. Capture is separate from the original four-way matrix.",
+    "method": "Paired fresh processes, seven rotating samples per executable after warm-up, unchanged binary theme payload. The newer executable adds the same-type-system class-ancestry fast path from 8b1ca5ad6. Capture is separate from the original four-way matrix.",
     "data": {
       "solid_class_metadata": {
         "stripped_executable_bytes": 59498592,
