@@ -6,7 +6,7 @@ use ferroui_base::controls::{ResourceDictionary, ResourceValue};
 use ferroui_base::media::{Color, Colors, IBrush};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_controls::UserControl;
-use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
+use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument};
 
 use crate::support::app::xaml_test_base;
 use crate::support::helpers::{assert_throws_xaml_diagnostic, assert_value_is_type, value_of};
@@ -70,6 +70,76 @@ fn merge_resource_include_works_with_single_resource(create_source_info: bool) {
 
     let merged_resource = solid_color(&resources.get(&"brush2".into()));
     assert_eq!(Colors::RED, merged_resource);
+}
+
+fn merge_only(path: &str, source: &str) -> RuntimeXamlLoaderDocument {
+    document(path, &format!(
+        "<ResourceDictionary xmlns='https://github.com/ferroui'>
+           <ResourceDictionary.MergedDictionaries>
+             <MergeResourceInclude Source='{source}'/>
+           </ResourceDictionary.MergedDictionaries>
+         </ResourceDictionary>"
+    ))
+}
+
+#[test]
+fn dictionaries_with_only_a_merge_include_inline_transitive_resources() {
+    let _base = xaml_test_base();
+    for root_first in [true, false] {
+        let root = merge_only("ferres://Tests/Root.xaml", "Dir/Child.xaml");
+        let child = merge_only("ferres://Tests/Dir/Child.xaml", "Leaf.xaml");
+        let leaf = document(
+            "ferres://Tests/Dir/Leaf.xaml",
+            "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+               <SolidColorBrush x:Key='Brush'>Red</SolidColorBrush>
+             </ResourceDictionary>",
+        );
+        let (docs, root_index) = if root_first {
+            (vec![root, child, leaf], 0)
+        } else {
+            (vec![leaf, child, root], 2)
+        };
+        let loaded = load_group(docs, None);
+        let root = assert_value_is_type::<ResourceDictionary>(&loaded[root_index]);
+        assert!(root.merged_dictionaries().is_empty());
+        assert_eq!(Colors::RED, solid_color(&root.get(&"Brush".into())));
+    }
+}
+
+#[test]
+fn nested_dictionary_in_an_included_document_uses_its_declaring_uri() {
+    let _base = xaml_test_base();
+    let root = merge_only("ferres://Tests/Root.xaml", "Sub/Holder.xaml");
+    let holder = document(
+        "ferres://Tests/Sub/Holder.xaml",
+        "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+           <ResourceDictionary x:Key='Inner'>
+             <ResourceDictionary.MergedDictionaries><MergeResourceInclude Source='Leaf.xaml'/></ResourceDictionary.MergedDictionaries>
+           </ResourceDictionary>
+         </ResourceDictionary>",
+    );
+    let leaf = document(
+        "ferres://Tests/Sub/Leaf.xaml",
+        "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+           <SolidColorBrush x:Key='Brush'>Blue</SolidColorBrush>
+         </ResourceDictionary>",
+    );
+    let docs = load_group(vec![root, holder, leaf], None);
+    let root = assert_value_is_type::<ResourceDictionary>(&docs[0]);
+    let inner = assert_value_is_type::<ResourceDictionary>(&root.get(&"Inner".into()));
+    assert!(inner.merged_dictionaries().is_empty());
+    assert_eq!(Colors::BLUE, solid_color(&inner.get(&"Brush".into())));
+}
+
+#[test]
+fn cyclic_merge_only_dictionaries_report_the_offending_uri() {
+    let _base = xaml_test_base();
+    let docs = vec![
+        merge_only("ferres://Tests/A.xaml", "B.xaml"),
+        merge_only("ferres://Tests/B.xaml", "A.xaml"),
+    ];
+    let error = try_load_group(docs, None).err().expect("a merge cycle must fail the group");
+    assert!(describe(&error).contains("Cyclic MergeResourceInclude of 'ferres://tests/A.xaml'"));
 }
 
 #[test]
@@ -255,6 +325,12 @@ fn merge_resource_include_works_with_theme_dictionaries() {
     ];
 
     let objects = load_group(documents, None);
+    let first = assert_value_is_type::<ResourceDictionary>(&objects[0]);
+    let second = assert_value_is_type::<ResourceDictionary>(&objects[1]);
+    for theme in [ThemeVariant::light(), ThemeVariant::dark()] {
+        assert!(first.try_get_resource(&"brush3".into(), Some(&theme)).is_none());
+        assert!(second.try_get_resource(&"brush1".into(), Some(&theme)).is_none());
+    }
     let resources = assert_value_is_type::<ResourceDictionary>(&objects[2]);
     assert!(resources.merged_dictionaries().is_empty());
 
@@ -274,6 +350,37 @@ fn merge_resource_include_works_with_theme_dictionaries() {
     assert_eq!(Colors::BLUE, get("brush4", ThemeVariant::light()));
     assert_eq!(Colors::BLUE, get("brush3", ThemeVariant::dark()));
     assert_eq!(Colors::RED, get("brush4", ThemeVariant::dark()));
+}
+
+#[test]
+fn empty_theme_variants_merge_with_each_other_and_with_nonempty_variants() {
+    let _base = xaml_test_base();
+    let source = |light: &str, dark: &str| format!(
+        "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key='Default'/>
+                <ResourceDictionary x:Key='Light'>{light}</ResourceDictionary>
+                <ResourceDictionary x:Key='Dark'>{dark}</ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>"
+    );
+    let red = "<SolidColorBrush x:Key='Brush'>Red</SolidColorBrush>";
+    let blue = "<SolidColorBrush x:Key='Brush'>Blue</SolidColorBrush>";
+    let objects = load_group(vec![
+        document("ferres://Tests/A.xaml", &source("", blue)),
+        document("ferres://Tests/B.xaml", &source(red, "")),
+        document_without_uri("<ResourceDictionary xmlns='https://github.com/ferroui'>
+            <ResourceDictionary.MergedDictionaries>
+                <MergeResourceInclude Source='ferres://Tests/A.xaml'/>
+                <MergeResourceInclude Source='ferres://Tests/B.xaml'/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>"),
+    ], None);
+    let dictionary = assert_value_is_type::<ResourceDictionary>(&objects[2]);
+    assert_eq!(dictionary.theme_dictionaries().count(), 3);
+    for (variant, color) in [(ThemeVariant::light(), Colors::RED), (ThemeVariant::dark(), Colors::BLUE)] {
+        assert_eq!(solid_color(&dictionary.try_get_resource(&"Brush".into(), Some(&variant)).unwrap()), color);
+    }
 }
 
 #[test]

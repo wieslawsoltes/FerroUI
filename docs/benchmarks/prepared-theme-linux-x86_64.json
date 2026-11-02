@@ -1,0 +1,90 @@
+{
+  "platform": "Linux x86_64",
+  "rustc": "1.99.0",
+  "revision": "Prepare immutable portable XAML execution plans once per revision",
+  "mode": "Same opt-level=3 release probe for both arms with the original solid WinUI archive (245385 bytes, 169 documents). A compatibility adapter at the class-document registry linked these routines against the existing PR release dependency artifacts. Fresh process per arm, pinned to one allowed CPU; warm filesystem cache. Timings are in-process, from setup or activation through the first successful Button resource lookup. Setup includes type registration, solid expansion, index open and, for prepare, the first semantic transform. Other builds were active on the host.",
+  "reproduction": "cargo build --release -p ferroui-themes-winui --features portable-solid-theme --example packed_activation; run target/release/examples/packed_activation with load or prepare in separate processes",
+  "units": "ns",
+  "sample_order": [
+    "load",
+    "prepare",
+    "prepare",
+    "load",
+    "load",
+    "prepare"
+  ],
+  "samples": [
+    {
+      "mode": "load",
+      "setup_ns": 16353247,
+      "build_ns": [
+        1844038483,
+        155657553,
+        143858710,
+        123876390,
+        125329305,
+        137446352
+      ]
+    },
+    {
+      "mode": "prepare",
+      "setup_ns": 1789156937,
+      "build_ns": [
+        131294177,
+        52585246,
+        50976271,
+        52697768,
+        56330253,
+        52873962
+      ]
+    },
+    {
+      "mode": "prepare",
+      "setup_ns": 1588019029,
+      "build_ns": [
+        129221739,
+        40549508,
+        48165660,
+        52341854,
+        48327057,
+        59281889
+      ]
+    },
+    {
+      "mode": "load",
+      "setup_ns": 13067469,
+      "build_ns": [
+        1807259705,
+        119530424,
+        115752197,
+        125214439,
+        113947038,
+        124720936
+      ]
+    },
+    {
+      "mode": "load",
+      "setup_ns": 12452412,
+      "build_ns": [
+        1658686564,
+        154060205,
+        138088809,
+        109440429,
+        104247485,
+        122466624
+      ]
+    },
+    {
+      "mode": "prepare",
+      "setup_ns": 1494217405,
+      "build_ns": [
+        124366117,
+        49663816,
+        37833658,
+        34589654,
+        38020077,
+        39438531
+      ]
+    }
+  ]
+}

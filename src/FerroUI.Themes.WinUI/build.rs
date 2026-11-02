@@ -132,19 +132,59 @@ fn main() {
             (asset_path.trim_start_matches('/').to_string(), text)
         })
         .collect();
-    let documents: Vec<(&str, &str)> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
-    ferroui_build::Build::from_env()
-        .type_system(ferroui_build::TypeSystem::Model)
-        .compile_group(
-            ferroui_build::XamlGroup::new("compiled_xaml")
-                .documents(&documents)
-                .class_document("WinUITheme.xaml")
-                .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_service_provider")),
-        )
-        .run();
+    println!("cargo::rerun-if-env-changed=FERROUI_WINUI_THEME_ROOTS");
+    let roots = env::var_os("FERROUI_WINUI_THEME_ROOTS").map(|value| {
+        let value = value.into_string().expect("FERROUI_WINUI_THEME_ROOTS must be UTF-8");
+        let mut roots: Vec<_> = value.split(',').map(str::trim).filter(|s| !s.is_empty()).map(str::to_owned).collect();
+        // The constructor looks this up from Rust.
+        roots.push("CompactStyles".to_string());
+        roots
+    });
+    compile_theme(documents, roots);
 
     // Written only when it changed, so that the crate is not rebuilt for nothing.
     if fs::read_to_string(&out).ok().as_deref() != Some(text.as_str()) {
         fs::write(&out, text).unwrap_or_else(|e| panic!("cannot write {}: {e}", out.display()));
+    }
+}
+
+fn compile_theme(mut documents: Vec<(String, String)>, roots: Option<Vec<String>>) {
+    if let Some(roots) = roots {
+        ferroui_build::trim_resource_documents(&mut documents, &roots).expect("trim WinUI theme");
+    }
+    let documents: Vec<_> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
+    #[cfg(any(feature = "precompiled-theme", feature = "packed-theme"))]
+    write_archive(&documents);
+
+    let build = ferroui_build::Build::from_env();
+    #[cfg(any(feature = "precompiled-theme", not(feature = "packed-theme")))]
+    let build = {
+        let group = ferroui_build::XamlGroup::new("compiled_xaml")
+            .documents(&documents)
+            .binary_resources(cfg!(feature = "binary-resources"))
+            .class_document("WinUITheme.xaml")
+            .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_service_provider"));
+        build.type_system(ferroui_build::TypeSystem::Model).compile_group(group)
+    };
+    #[cfg(all(feature = "packed-theme", not(feature = "precompiled-theme")))]
+    let build = build.export_metadata()
+        .checked_in_metadata("compiled_xaml.xamlmeta")
+        .loader("crate::compiled_xaml::try_load");
+    build.run();
+}
+
+#[cfg(any(feature = "precompiled-theme", feature = "packed-theme"))]
+fn write_archive(documents: &[(&str, &str)]) {
+    #[cfg(feature = "precompiled-theme")]
+    use ferroui_build::compile_paged_archive as encode;
+    #[cfg(all(feature = "portable-solid-theme", not(feature = "precompiled-theme")))]
+    use ferroui_build::compile_solid_archive as encode;
+    #[cfg(not(any(feature = "portable-solid-theme", feature = "precompiled-theme")))]
+    use ferroui_build::compile_archive as encode;
+    let pack = encode(documents)
+        .unwrap_or_else(|error| panic!("cannot compile WinUI theme pack: {error}"));
+    let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR")).join("winui.fxp");
+    if fs::read(&out).ok().as_deref() != Some(&pack) {
+        fs::write(out, pack).expect("write WinUI theme pack");
     }
 }

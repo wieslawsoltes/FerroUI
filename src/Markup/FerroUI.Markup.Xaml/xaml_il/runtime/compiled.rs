@@ -9,6 +9,11 @@
 //! document built by generated code fails exactly where and as the run-time
 //! loader fails.
 
+#[cfg(feature = "binary-resources")]
+pub mod binary_resources;
+pub mod theme_resources;
+pub mod style_program;
+
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -141,8 +146,14 @@ pub fn bind<V: PartialEq + 'static>(
     line: i32,
     position: i32,
 ) -> Result<(), XamlLoadError> {
-    let value = to_value(value);
-    let binding = from_markup_value::<Rc<dyn BindingBase>>(&value).ok_or_else(|| match &value {
+    bind_value(target, property, &to_value(value), line, position)
+}
+
+#[inline(never)]
+fn bind_value(
+    target: &Ref<FerroObject>, property: &'static FerroProperty, value: &MarkupValue, line: i32, position: i32,
+) -> Result<(), XamlLoadError> {
+    let binding = from_markup_value::<Rc<dyn BindingBase>>(value).ok_or_else(|| match value {
         None => at("NullReferenceException", "The binding is null", line, position),
         Some(value) => at(
             "InvalidCastException",
@@ -228,25 +239,28 @@ pub fn exact<T: Clone + 'static>(
         (Some(boxed), true) => untyped_object_form(boxed).map(Some).unwrap_or(value),
         _ => value,
     };
-    let converted = match &value {
-        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed.clone()),
+    cast_value(&value, target)
+        .as_ref().and_then(|value| value.downcast_ref::<T>()).cloned()
+        .ok_or_else(|| argument_error(member, index, target, &value, line, position))
+}
+
+// The registry already handles an exact TypeId before consulting any conversions.
+#[inline(never)]
+fn cast_value(value: &MarkupValue, target: ValueType) -> MarkupValue {
+    match value {
         Some(boxed) => ValueTypes::try_cast(boxed, target),
         None => ValueTypes::try_convert(None, target).flatten(),
-    };
-    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
-        Some(converted) => Ok(converted.clone()),
-        None => {
-            let error = MarkupInvokeError::Argument {
-                index,
-                expected: target.name(),
-                actual: match &value {
-                    Some(value) => value.type_name().to_string(),
-                    None => "null".to_string(),
-                },
-            };
-            Err(at("InvalidCastException", format!("{member}: {error}"), line, position))
-        }
     }
+}
+
+#[cold]
+#[inline(never)]
+fn argument_error(
+    member: &str, index: usize, target: ValueType, value: &MarkupValue, line: i32, position: i32,
+) -> XamlLoadError {
+    let actual = value.as_ref().map_or("null", |value| value.type_name());
+    let error = MarkupInvokeError::Argument { index, expected: target.name(), actual: actual.to_owned() };
+    at("InvalidCastException", format!("{member}: {error}"), line, position)
 }
 
 /// The type name of the exception a member call of generated code that
@@ -417,6 +431,51 @@ pub fn bind_template_binding(
     bind(target, property, provided, line, position)
 }
 
+/// Property getters are evaluated at the original operation, including first-use registration.
+pub type TemplateBindingProperties = (fn() -> &'static FerroProperty, fn() -> &'static FerroProperty);
+
+/// A resolved property pair and the XAML position of its binding setter.
+pub type TemplateBindingRow = (&'static TemplateBindingProperties, i32, i32);
+
+/// The source operand is evaluated by the caller. Resolve the destination after ProvideValue,
+/// as the interpreter does when it applies the property's binding setter.
+#[inline(never)]
+pub fn apply_template_binding(
+    target: &Ref<FerroObject>, source: &'static FerroProperty, destination: fn() -> &'static FerroProperty,
+    line: i32, column: i32,
+) -> Result<(), XamlLoadError> {
+    use ferroui_base::data::TemplateBinding;
+    let binding = TemplateBinding::__markup_new_1(source);
+    let provided = TemplateBinding::__markup_ProvideValue_0(&binding);
+    bind(target, destination(), provided, line, column)
+}
+
+/// Apply an adjacent run in declaration order. A failure stops before the next source getter.
+#[inline(never)]
+pub fn bind_template_rows(
+    target: &Ref<FerroObject>, rows: &[TemplateBindingRow],
+) -> Result<(), XamlLoadError> {
+    for &(&(source, destination), line, column) in rows {
+        apply_template_binding(target, source(), destination, line, column)?;
+    }
+    Ok(())
+}
+
+/// A literal-key StaticResource assignment. Evaluate the target descriptor after
+/// constructing the extension, including any first-use property registration.
+#[inline(never)]
+pub fn provide_static_resource(
+    context: &Rc<XamlIlContext>,
+    key: &str,
+    target: fn() -> MarkupValue,
+    line: i32,
+    position: i32,
+) -> Result<MarkupValue, XamlLoadError> {
+    use crate::markup_extensions::StaticResourceExtension;
+    let extension = StaticResourceExtension::__markup_new_1(string_object(key));
+    provide_value_invoked(context, target(), &extension, StaticResourceExtension::__markup_ProvideValue_0, line, position)
+}
+
 /// The build of deferred content that is `{StaticResource key}` alone (a resource of a
 /// dictionary that names another resource): the context of the build ([`deferred_context`]
 /// of `document`), the extension created (`StaticResourceExtension::__markup_new_0`) with its
@@ -454,9 +513,8 @@ pub fn add_deferred_resource(
     line: i32,
     position: i32,
 ) -> Result<(), XamlLoadError> {
-    use ferroui_base::controls::{IDeferredContent, ResourceDictionary};
     let deferred = defer(result_type, context, build, line, position)?;
-    invoked(ResourceDictionary::__markup_AddDeferred_1(dictionary, string_object(key), deferred as Rc<dyn IDeferredContent>), line, position)
+    invoked(dictionary.try_add_deferred(key.into(), deferred), line, position)
 }
 
 /// `target.SetValue(property, FerroProperty.UnsetValue, BindingPriority.LocalValue)`:
@@ -502,6 +560,84 @@ pub fn cast_checked(
         line,
         position,
     ))
+}
+
+/// The ordered BindingBase / styled-value overloads of a template assignment.
+/// The type and property accessors run in the same branch as the expanded
+/// setter plan. In particular a binding never initializes the value type.
+#[inline(never)]
+#[allow(clippy::too_many_arguments)]
+pub fn bind_or_set_priority<T: ferroui_base::PropertyValue>(
+    target: &Ref<FerroObject>,
+    property: fn() -> &'static ferroui_base::StyledProperty<T>,
+    value: MarkupValue,
+    priority: BindingPriority,
+    expected: fn() -> ValueType,
+    nullable: bool,
+    member: &str,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    use ferroui_base::metadata::MarkupTyped;
+    if is_instance(&value, markup_handle(<dyn BindingBase>::MARKUP)) {
+        return bind(target, property(), value, line, position);
+    }
+    if is_instance(&value, expected()) || (nullable && value.is_none()) {
+        target.set_value_with_priority(property(), exact(value, member, 1, line, position)?, priority);
+        return Ok(());
+    }
+    let name = member.rsplit('.').next().unwrap_or(member);
+    Err(no_setter(name, &value, line, position))
+}
+
+/// For a statically binding-valued expression the first overload only tests for
+/// null. Preserve the original value conversion, priority, position and evaluation
+/// of its property getter in the selected branch.
+#[inline(never)]
+pub fn bind_or_set_null<T: ferroui_base::PropertyValue>(
+    target: &Ref<FerroObject>,
+    property: fn() -> &'static ferroui_base::StyledProperty<T>,
+    value: &MarkupValue,
+    priority: BindingPriority,
+    member: &str,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    if value.is_some() {
+        bind(target, property(), value.clone(), line, position)
+    } else {
+        target.set_value_with_priority(property(), exact(value.clone(), member, 1, line, position)?, priority);
+        Ok(())
+    }
+}
+
+/// XamlX's local-value overload sequence for a writable styled property. The
+/// getter runs only in the branch that takes the value. An invalid value never
+/// registers the property and the binding branch never registers the value type.
+#[inline(never)]
+#[allow(clippy::too_many_arguments)]
+pub fn set_local_value<T: ferroui_base::PropertyValue>(
+    target: &Ref<FerroObject>,
+    property: fn() -> &'static ferroui_base::StyledProperty<T>,
+    value: MarkupValue,
+    expected: fn() -> ValueType,
+    nullable: bool,
+    member: &str,
+    name: &str,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    use ferroui_base::metadata::MarkupTyped;
+    if is_instance(&value, markup_handle(UnsetValueType::MARKUP)) {
+        unset_value(target, property());
+    } else if is_instance(&value, markup_handle(<dyn BindingBase>::MARKUP)) {
+        return bind(target, property(), value, line, position);
+    } else if is_instance(&value, expected()) || (nullable && value.is_none()) {
+        target.set_value(property(), exact(value, member, 0, line, position)?);
+    } else {
+        return Err(no_setter(name, &value, line, position));
+    }
+    Ok(())
 }
 
 /// The error of a property assignment whose setter is chosen at run time
@@ -1054,7 +1190,10 @@ pub fn defer(
 /// [`create_context`], with the root object and the intermediate root object
 /// set to `root`.
 pub fn populate_context(parent: Option<Rc<dyn IServiceProvider>>, document: &DocumentInfo, root: MarkupValue) -> Rc<XamlIlContext> {
-    let context = create_context(parent, document.base_uri, document.namespaces);
+    // A standalone exported builder has no enclosing document to supply its name scope.
+    // Includes and class populators already pass the service provider for their invocation.
+    let parent = parent.unwrap_or_else(XamlIlRuntimeHelpers::create_root_service_provider_v2);
+    let context = create_context(Some(parent), document.base_uri, document.namespaces);
     context.set_root_object(root.clone());
     context.set_intermediate_root_object(root);
     context
@@ -1072,6 +1211,43 @@ pub fn register_name(
     position: i32,
 ) -> Result<(), XamlLoadError> {
     register_name_value(scope, name, Rc::new(element), line, position)
+}
+
+/// Put the concrete typed parent on the XAML stack. A single function per parent
+/// representation performs the clone and the framework's canonical boxing.
+#[inline(never)]
+pub fn push_parent<T: Clone + PartialEq + 'static>(context: &XamlIlContext, parent: &T) {
+    context.push_parent(to_value(parent.clone()));
+}
+
+/// Leave a nested parent scope before its virtual EndInit runs.
+#[inline(never)]
+pub fn pop_parent_and_end_init(
+    context: &XamlIlContext, element: &StyledElement, line: i32, position: i32,
+) -> Result<(), XamlLoadError> {
+    context.pop_parent();
+    end_init(element, line, position)
+}
+
+/// Complete initialization through the styled element's virtual slot. Share the
+/// result conversion and its unwind path across every generated template.
+#[inline(never)]
+pub fn end_init(element: &StyledElement, line: i32, position: i32) -> Result<(), XamlLoadError> {
+    invoked(element.try_end_init(), line, position)
+}
+
+/// Set the built-in Name before registering the original concrete class handle.
+/// The property notification still precedes a missing, completed or duplicate scope error.
+#[inline(never)]
+pub fn set_and_register_name<T: ferroui_base::ObjectType + ferroui_base::Upcast<StyledElement>>(
+    scope: Option<&Rc<dyn INameScope>>,
+    element: &Ref<T>,
+    name: &str,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    element.upcast_ref::<StyledElement>().set_direct_value(StyledElement::name_property(), Some(name.to_owned()));
+    register_name_value(scope, name, Rc::new(element.clone()), line, position)
 }
 
 /// Registers any non-null named object in the shared context scope, including
@@ -1158,7 +1334,11 @@ pub fn object_assignment_value(value: MarkupValue) -> MarkupValue {
 /// ([`untyped_object_form`]), then cast to the untyped value, which is what
 /// a member typed `object` receives from the run-time loader.
 pub fn to_object<T: PartialEq + 'static>(value: T) -> MarkupValue {
-    let boxed: BoxedValue = Rc::new(value);
+    boxed_to_object(Rc::new(value))
+}
+
+#[inline(never)]
+fn boxed_to_object(boxed: BoxedValue) -> MarkupValue {
     let boxed = untyped_object_form(&boxed).unwrap_or(boxed);
     if let Some(untyped) = boxed.downcast_ref::<Option<BoxedValue>>() {
         return untyped.clone();
@@ -1253,17 +1433,8 @@ pub fn argument<T: Clone + 'static, V: PartialEq + 'static>(
     position: i32,
 ) -> Result<T, XamlLoadError> {
     let value = to_untyped(Rc::new(value));
-    from_markup_value::<T>(&value).ok_or_else(|| {
-        let error = MarkupInvokeError::Argument {
-            index,
-            expected: std::any::type_name::<T>(),
-            actual: match &value {
-                Some(value) => value.type_name().to_string(),
-                None => "null".to_string(),
-            },
-        };
-        at("InvalidCastException", format!("{member}: {error}"), line, position)
-    })
+    from_markup_value::<T>(&value)
+        .ok_or_else(|| argument_error(member, index, ValueType::of::<T>(), &value, line, position))
 }
 
 /// A nullable form (`Option<T>`, `Option<Rc<T>>`) the instance `T` of a member is borrowed
@@ -1295,10 +1466,7 @@ pub fn instance<'a, T: 'static>(
     line: i32,
     position: i32,
 ) -> Result<&'a T, XamlLoadError> {
-    value.instance().ok_or_else(|| {
-        let error = MarkupInvokeError::Argument { index: 0, expected: std::any::type_name::<T>(), actual: "null".to_string() };
-        at("InvalidCastException", format!("{member}: {error}"), line, position)
-    })
+    value.instance().ok_or_else(|| argument_error(member, 0, ValueType::of::<T>(), &None, line, position))
 }
 
 /// `value` as the value of a member that declares the Rust type `T`, through
@@ -1311,15 +1479,15 @@ pub fn instance<'a, T: 'static>(
 /// the `InvalidCastException` of the loader at `line`, `position`.
 pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, position: i32) -> Result<T, XamlLoadError> {
     let target = ValueType::of::<T>();
-    let converted = match into_markup_value(value) {
-        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
-        Some(boxed) => ValueTypes::try_cast(&boxed, target),
-        None => ValueTypes::try_convert(None, target).flatten(),
-    };
-    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
-        Some(value) => Ok(value.clone()),
-        None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
-    }
+    cast_value(&into_markup_value(value), target)
+        .as_ref().and_then(|converted| converted.downcast_ref::<T>()).cloned()
+        .ok_or_else(|| cast_error(target, line, position))
+}
+
+#[cold]
+#[inline(never)]
+fn cast_error(target: ValueType, line: i32, position: i32) -> XamlLoadError {
+    at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)
 }
 
 /// `value` cast to the type with the handle `target`, then held untyped as the run-time
@@ -1333,15 +1501,9 @@ pub fn cast_untyped<V: PartialEq + 'static>(
     line: i32,
     position: i32,
 ) -> Result<MarkupValue, XamlLoadError> {
-    let converted = match into_markup_value(value) {
-        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
-        Some(boxed) => ValueTypes::try_cast(&boxed, target),
-        None => ValueTypes::try_convert(None, target).flatten(),
-    };
-    match converted {
-        Some(converted) => Ok(to_untyped(converted)),
-        None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
-    }
+    cast_value(&into_markup_value(value), target)
+        .map(to_untyped)
+        .ok_or_else(|| cast_error(target, line, position))
 }
 
 /// The list of the runtime library markup creates (`new List<T>()`, `new ArrayList()`), as

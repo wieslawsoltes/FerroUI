@@ -122,9 +122,26 @@ fn the_parent_stack_is_the_pushed_objects_then_the_parents_of_the_parent() {
     let stack = provider.get_service_of::<Rc<dyn IFerroXamlIlParentStackProvider>>().expect("a parent stack");
     assert_eq!(values(&stack.parents()), [2, 1, 11, 10]);
     let eager: Rc<dyn IFerroXamlIlEagerParentStackProvider> = context.clone();
-    assert_eq!(values(&eager.direct_parents_stack()), [1, 2]);
+    let snapshot = eager.direct_parents_stack();
+    assert!(Rc::ptr_eq(&snapshot, &eager.direct_parents_stack()));
     context.pop_parent();
+    assert_eq!(values(&snapshot), [1, 2]);
+    assert_eq!(values(&eager.direct_parents_stack()), [1]);
     assert_eq!(values(&stack.parents()), [1, 11, 10]);
+}
+
+#[test]
+fn standalone_populates_have_fresh_scopes_and_nested_populates_keep_their_provider() {
+    let document = DocumentInfo { base_uri: None, namespaces: NAMESPACES };
+    let first = populate_context(None, &document, None).name_scope_field().unwrap();
+    let second = populate_context(None, &document, None).name_scope_field().unwrap();
+    assert!(!Rc::ptr_eq(&first, &second));
+
+    let parent = TestServiceProvider::new().with_name_scope(NameScopeRef(first.clone())).sp();
+    let nested = populate_context(Some(parent.clone()), &document, None).name_scope_field().unwrap();
+    assert!(Rc::ptr_eq(&first, &nested));
+    let deferred = super::compiled::deferred_context(&parent, &document).name_scope_field().unwrap();
+    assert!(Rc::ptr_eq(&first, &deferred));
 }
 
 #[test]
@@ -217,4 +234,111 @@ fn the_error_of_an_assignment_without_a_setter_names_the_type_of_the_value() {
     );
     let error = no_setter("Background", &None, 1, 2);
     assert_eq!(error.message(), "No setter of property Background accepts null Line 1, position 2. (line 1 position 2)");
+}
+
+#[test]
+fn compact_template_setter_preserves_priority_null_and_error_location() {
+    use super::compiled::{bind_or_set_priority, no_setter};
+    use ferroui_base::data::{core::ValueType, BindingPriority};
+    use ferroui_base::{FerroObject, Visual};
+    use ferroui_controls::TextBlock;
+
+    crate::register_types();
+    let text = TextBlock::new();
+    let object = text.upcast_ref::<FerroObject>();
+    let priority = BindingPriority::Template;
+    bind_or_set_priority(object, Visual::opacity_property, to_value(0.25_f64), priority,
+        ValueType::of::<f64>, false, "Visual.Opacity", 8, 13).unwrap();
+    assert_eq!(text.get_value(Visual::opacity_property()), 0.25);
+    text.set_value(Visual::opacity_property(), 0.75);
+    assert_eq!(text.get_value(Visual::opacity_property()), 0.75);
+    text.clear_value(Visual::opacity_property());
+    assert_eq!(text.get_value(Visual::opacity_property()), 0.25);
+
+    for invalid in [None, to_value("bad".to_owned())] {
+        let expected = no_setter("Opacity", &invalid, 8, 13);
+        let error = bind_or_set_priority(object, Visual::opacity_property, invalid, priority,
+            ValueType::of::<f64>, false, "Visual.Opacity", 8, 13).unwrap_err();
+        assert_eq!(error.message(), expected.message());
+    }
+    bind_or_set_priority(object, TextBlock::text_property, None, priority, ValueType::of::<String>,
+        true, "TextBlock.Text", 8, 13).unwrap();
+    assert_eq!(text.get_value(TextBlock::text_property()), None);
+}
+
+#[test]
+fn nullable_binding_overload_matches_the_expanded_calls_for_both_branches() {
+    use super::compiled::{bind, bind_or_set_null};
+    use ferroui_base::{data::BindingPriority, FerroObject};
+    use ferroui_controls::TextBlock;
+
+    crate::register_types();
+    let text = TextBlock::new();
+    let target = text.upcast_ref::<FerroObject>();
+    let property = TextBlock::text_property;
+    text.set_value_with_priority(property(), Some("initial".into()), BindingPriority::Template);
+    bind_or_set_null(target, property, &None, BindingPriority::Template, "TextBlock.Text", 8, 13).unwrap();
+    assert_eq!(text.text(), None);
+    let invalid = to_value("bad binding".to_owned());
+    let expected = bind(target, property(), invalid.clone(), 8, 13).unwrap_err();
+    let actual = bind_or_set_null(target, property, &invalid, BindingPriority::Template, "TextBlock.Text", 8, 13).unwrap_err();
+    assert_eq!(actual.message(), expected.message());
+}
+
+#[test]
+fn local_setter_checks_the_overloads_before_registering_the_property() {
+    use super::compiled::{no_setter, set_local_value};
+    use ferroui_base::{data::core::ValueType, FerroObject, FerroProperty, Visual};
+    use ferroui_controls::TextBlock;
+
+    crate::register_types();
+    let text = TextBlock::new();
+    let object = text.upcast_ref::<FerroObject>();
+    let member = "FerroUI.Visual.set_Opacity";
+    set_local_value(object, Visual::opacity_property, to_value(0.25_f64), ValueType::of::<f64>,
+        false, member, "Opacity", 7, 19).unwrap();
+    assert_eq!(text.get_value(Visual::opacity_property()), 0.25);
+    set_local_value(object, Visual::opacity_property, Some(FerroProperty::unset_value()),
+        || panic!("unset must bypass the expected value type"), false, member, "Opacity", 7, 19).unwrap();
+    assert_eq!(text.get_value(Visual::opacity_property()), 1.0);
+    let wrong = to_value("x".to_owned());
+    let expected = no_setter("Opacity", &wrong, 7, 19);
+    let actual = set_local_value::<f64>(object, || panic!("an invalid value must not read the accessor"),
+        wrong, ValueType::of::<f64>, false, member, "Opacity", 7, 19).unwrap_err();
+    assert_eq!(actual.message(), expected.message());
+    set_local_value(object, TextBlock::text_property, None, ValueType::of::<String>,
+        true, "FerroUI.Controls.TextBlock.set_Text", "Text", 7, 19).unwrap();
+    assert_eq!(text.get_value(TextBlock::text_property()), None);
+}
+
+#[test]
+fn template_binding_rows_resolve_operands_in_order_and_stop_on_unwind() {
+    use ferroui_base::{FerroObject, FerroProperty};
+    use ferroui_controls::Border;
+    use std::cell::RefCell;
+    use super::compiled::{bind_template_rows, property};
+
+    ferroui_base::ferro_thread_local! { static TRACE: RefCell<Vec<&'static str>> = const { RefCell::new(Vec::new()) }; }
+    fn source() -> &'static FerroProperty {
+        TRACE.with(|trace| trace.borrow_mut().push("source"));
+        property(Border::background_property())
+    }
+    fn destination() -> &'static FerroProperty {
+        TRACE.with(|trace| trace.borrow_mut().push("destination"));
+        property(Border::background_property())
+    }
+    fn fail() -> &'static FerroProperty {
+        TRACE.with(|trace| trace.borrow_mut().push("fail"));
+        panic!("property initializer");
+    }
+    let target = Border::new();
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        bind_template_rows(target.upcast_ref::<FerroObject>(), &[
+            (&(source, destination), 2, 3),
+            (&(fail, destination), 3, 4),
+            (&(source, destination), 4, 5),
+        ]).unwrap();
+    }));
+    assert!(result.is_err());
+    TRACE.with(|trace| assert_eq!(*trace.borrow(), ["source", "destination", "fail"]));
 }

@@ -56,7 +56,7 @@ pub fn build_root_xaml(
     let context = rt::populate_context(service_provider, &BUILD_ROOT_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
-    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    rt::push_parent(&context, &stack_panel_0);
     // root.xaml(3,13) Tag
     stack_panel_0.set_value(::ferroui_controls::Control::tag_property(), rt::string_object("construction value"));
     // root.xaml(4,4) Children
@@ -65,10 +65,9 @@ pub fn build_root_xaml(
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // root.xaml(4,14) Name
-    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("initial")));
-    rt::register_name_value(name_scope.as_ref(), "initial", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 4, 14)?;
+    rt::set_and_register_name(name_scope.as_ref(), &text_block_0, "initial", 4, 14)?;
     // root.xaml(4,31) Text
     let win_ui_bind_extension_0 = ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_new_0();
     // root.xaml(4,31) Path
@@ -83,18 +82,16 @@ pub fn build_root_xaml(
     ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceColumn(&win_ui_bind_extension_0, 37_i32);
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &win_ui_bind_extension_0, ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_ProvideValue_0, 4, 31)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 4, 31)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 4, 4)?;
+    rt::pop_parent_and_end_init(&context, &text_block_0, 4, 4)?;
     // root.xaml(5,4) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // root.xaml(5,4) TextBox
     let text_box_0 = ::ferroui_controls::TextBox::new();
     text_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_0.clone()));
+    rt::push_parent(&context, &text_box_0);
     // root.xaml(5,12) Name
-    text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("editor")));
-    rt::register_name_value(name_scope.as_ref(), "editor", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 5, 12)?;
+    rt::set_and_register_name(name_scope.as_ref(), &text_box_0, "editor", 5, 12)?;
     // root.xaml(5,28) Text
     let win_ui_bind_extension_1 = ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_new_0();
     // root.xaml(5,28) Path
@@ -109,18 +106,16 @@ pub fn build_root_xaml(
     ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceColumn(&win_ui_bind_extension_1, 34_i32);
     let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &win_ui_bind_extension_1, ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_ProvideValue_0, 5, 28)?;
     rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_1, 5, 28)?;
-    context.pop_parent();
-    rt::invoked(text_box_0.try_end_init(), 5, 4)?;
+    rt::pop_parent_and_end_init(&context, &text_box_0, 5, 4)?;
     // root.xaml(6,4) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // root.xaml(6,4) TextBlock
     let text_block_1 = ::ferroui_controls::TextBlock::new();
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_1.clone()));
+    rt::push_parent(&context, &text_block_1);
     // root.xaml(6,14) Name
-    text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("mirror")));
-    rt::register_name_value(name_scope.as_ref(), "mirror", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 6, 14)?;
+    rt::set_and_register_name(name_scope.as_ref(), &text_block_1, "mirror", 6, 14)?;
     // root.xaml(6,30) Text
     let win_ui_bind_extension_2 = ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_new_0();
     // root.xaml(6,30) Path
@@ -135,10 +130,8 @@ pub fn build_root_xaml(
     ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_SourceColumn(&win_ui_bind_extension_2, 36_i32);
     let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &win_ui_bind_extension_2, ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_ProvideValue_0, 6, 30)?;
     rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_2, 6, 30)?;
-    context.pop_parent();
-    rt::invoked(text_block_1.try_end_init(), 6, 4)?;
-    context.pop_parent();
-    rt::invoked(stack_panel_0.try_end_init(), 1, 2)?;
+    rt::pop_parent_and_end_init(&context, &text_block_1, 6, 4)?;
+    rt::pop_parent_and_end_init(&context, &stack_panel_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(stack_panel_0)
 }
@@ -162,10 +155,10 @@ pub fn build_template_xaml(
     let context = rt::populate_context(service_provider, &BUILD_TEMPLATE_XAML_DOCUMENT, rt::to_value(content_control_0.clone()));
     let name_scope = context.name_scope_field();
     content_control_0.begin_init();
-    context.push_parent(rt::to_value(content_control_0.clone()));
+    rt::push_parent(&context, &content_control_0);
     // template.xaml(4,6) ContentTemplate
     let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(data_template_0.clone()));
+    rt::push_parent(&context, &data_template_0);
     // template.xaml(4,6) DataType
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_DataType(&data_template_0, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
     // template.xaml(5,8) Content
@@ -173,8 +166,7 @@ pub fn build_template_xaml(
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     content_control_0.set_value(::ferroui_controls::ContentControl::content_template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&data_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate>));
-    context.pop_parent();
-    rt::invoked(content_control_0.try_end_init(), 1, 2)?;
+    rt::pop_parent_and_end_init(&context, &content_control_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&content_control_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(content_control_0)
 }
@@ -189,17 +181,16 @@ fn build_template_xaml_deferred_0(
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     context.set_intermediate_root_object(rt::to_value(stack_panel_0.clone()));
     stack_panel_0.begin_init();
-    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    rt::push_parent(&context, &stack_panel_0);
     // template.xaml(6,10) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // template.xaml(6,10) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_0.clone()));
+    rt::push_parent(&context, &text_block_0);
     // template.xaml(6,20) Name
-    text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("initial")));
-    rt::register_name_value(name_scope.as_ref(), "initial", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 6, 20)?;
+    rt::set_and_register_name(name_scope.as_ref(), &text_block_0, "initial", 6, 20)?;
     // template.xaml(6,37) Text
     let win_ui_bind_extension_0 = ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_new_0();
     // template.xaml(6,37) Path
@@ -216,18 +207,16 @@ fn build_template_xaml_deferred_0(
     ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_DataType(&win_ui_bind_extension_0, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
     let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &win_ui_bind_extension_0, ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_ProvideValue_0, 6, 37)?;
     rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 6, 37)?;
-    context.pop_parent();
-    rt::invoked(text_block_0.try_end_init(), 6, 10)?;
+    rt::pop_parent_and_end_init(&context, &text_block_0, 6, 10)?;
     // template.xaml(7,10) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // template.xaml(7,10) TextBox
     let text_box_0 = ::ferroui_controls::TextBox::new();
     text_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_box_0.clone()));
+    rt::push_parent(&context, &text_box_0);
     // template.xaml(7,18) Name
-    text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("editor")));
-    rt::register_name_value(name_scope.as_ref(), "editor", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 7, 18)?;
+    rt::set_and_register_name(name_scope.as_ref(), &text_box_0, "editor", 7, 18)?;
     // template.xaml(7,34) Text
     let win_ui_bind_extension_1 = ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_new_0();
     // template.xaml(7,34) Path
@@ -246,18 +235,16 @@ fn build_template_xaml_deferred_0(
     ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_UpdateSourceTrigger(&win_ui_bind_extension_1, ::ferroui_base::data::UpdateSourceTrigger::PropertyChanged);
     let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &win_ui_bind_extension_1, ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_ProvideValue_0, 7, 34)?;
     rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), provided_1, 7, 34)?;
-    context.pop_parent();
-    rt::invoked(text_box_0.try_end_init(), 7, 10)?;
+    rt::pop_parent_and_end_init(&context, &text_box_0, 7, 10)?;
     // template.xaml(8,10) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // template.xaml(8,10) TextBlock
     let text_block_1 = ::ferroui_controls::TextBlock::new();
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(text_block_1.clone()));
+    rt::push_parent(&context, &text_block_1);
     // template.xaml(8,20) Name
-    text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("mirror")));
-    rt::register_name_value(name_scope.as_ref(), "mirror", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 8, 20)?;
+    rt::set_and_register_name(name_scope.as_ref(), &text_block_1, "mirror", 8, 20)?;
     // template.xaml(8,36) Text
     let win_ui_bind_extension_2 = ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_new_0();
     // template.xaml(8,36) Path
@@ -274,10 +261,8 @@ fn build_template_xaml_deferred_0(
     ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_set_DataType(&win_ui_bind_extension_2, ::core::option::Option::Some(rt::class_handle(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE)));
     let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &win_ui_bind_extension_2, ::ferroui_markup_xaml_winui::WinUIBindExtension::__markup_ProvideValue_0, 8, 36)?;
     rt::bind(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_2, 8, 36)?;
-    context.pop_parent();
-    rt::invoked(text_block_1.try_end_init(), 8, 10)?;
-    context.pop_parent();
-    rt::invoked(stack_panel_0.try_end_init(), 5, 8)?;
+    rt::pop_parent_and_end_init(&context, &text_block_1, 8, 10)?;
+    rt::pop_parent_and_end_init(&context, &stack_panel_0, 5, 8)?;
     ::core::result::Result::Ok(rt::to_value(stack_panel_0.clone()))
 }
 
@@ -301,8 +286,7 @@ pub fn build_navigation_xaml(
     let name_scope = context.name_scope_field();
     navigation_view_0.begin_init();
     // navigation.xaml(3,17) Name
-    navigation_view_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Navigation")));
-    rt::register_name_value(name_scope.as_ref(), "Navigation", ::std::rc::Rc::new(::core::clone::Clone::clone(&navigation_view_0)), 3, 17)?;
+    rt::set_and_register_name(name_scope.as_ref(), &navigation_view_0, "Navigation", 3, 17)?;
     // navigation.xaml(1,2) PaneDisplayMode
     navigation_view_0.set_value(::ferroui_controls::NavigationView::pane_display_mode_property(), ::ferroui_controls::NavigationViewPaneDisplayMode::Left);
     // navigation.xaml(3,60) Header
@@ -317,8 +301,7 @@ pub fn build_navigation_xaml(
     auto_suggest_box_0.begin_init();
     navigation_view_0.set_value(::ferroui_controls::NavigationView::auto_suggest_box_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&auto_suggest_box_0)));
     // navigation.xaml(6,26) Name
-    auto_suggest_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Search")));
-    rt::register_name_value(name_scope.as_ref(), "Search", ::std::rc::Rc::new(::core::clone::Clone::clone(&auto_suggest_box_0)), 6, 26)?;
+    rt::set_and_register_name(name_scope.as_ref(), &auto_suggest_box_0, "Search", 6, 26)?;
     // navigation.xaml(6,43) PlaceholderText
     auto_suggest_box_0.set_value(::ferroui_controls::AutoSuggestBox::placeholder_text_property(), ::std::string::String::from("Search messages"));
     // navigation.xaml(6,110) QueryIcon
@@ -328,8 +311,8 @@ pub fn build_navigation_xaml(
     auto_suggest_box_0.set_value(::ferroui_controls::AutoSuggestBox::query_icon_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&symbol_icon_0).upcast::<::ferroui_controls::IconElement>()));
     // navigation.xaml(6,110) Symbol
     symbol_icon_0.set_value(::ferroui_controls::SymbolIcon::symbol_property(), ::ferroui_controls::Symbol::Find);
-    rt::invoked(symbol_icon_0.try_end_init(), 6, 110)?;
-    rt::invoked(auto_suggest_box_0.try_end_init(), 6, 6)?;
+    rt::end_init(&symbol_icon_0, 6, 110)?;
+    rt::end_init(&auto_suggest_box_0, 6, 6)?;
     // navigation.xaml(9,6) MenuItems
     let menu_items_collection_0 = navigation_view_0.get_direct_value(::ferroui_controls::NavigationView::menu_items_property());
     // navigation.xaml(9,6) NavigationViewItem
@@ -337,8 +320,7 @@ pub fn build_navigation_xaml(
     navigation_view_item_0.begin_init();
     ::ferroui_controls::ItemCollection::__markup_Add_0(&menu_items_collection_0, rt::to_object(::core::clone::Clone::clone(&navigation_view_item_0)));
     // navigation.xaml(9,30) Name
-    navigation_view_item_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Inbox")));
-    rt::register_name_value(name_scope.as_ref(), "Inbox", ::std::rc::Rc::new(::core::clone::Clone::clone(&navigation_view_item_0)), 9, 30)?;
+    rt::set_and_register_name(name_scope.as_ref(), &navigation_view_item_0, "Inbox", 9, 30)?;
     // navigation.xaml(9,45) Content
     navigation_view_item_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::string_object("Inbox"));
     // navigation.xaml(9,6) IsExpanded
@@ -350,18 +332,17 @@ pub fn build_navigation_xaml(
     navigation_view_item_0.set_value(::ferroui_controls::NavigationViewItem::icon_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&symbol_icon_1).upcast::<::ferroui_controls::IconElement>()));
     // navigation.xaml(9,111) Symbol
     symbol_icon_1.set_value(::ferroui_controls::SymbolIcon::symbol_property(), ::ferroui_controls::Symbol::Mail);
-    rt::invoked(symbol_icon_1.try_end_init(), 9, 111)?;
+    rt::end_init(&symbol_icon_1, 9, 111)?;
     // navigation.xaml(11,10) InfoBadge
     // navigation.xaml(11,10) InfoBadge
     let info_badge_0 = ::ferroui_controls::InfoBadge::new();
     info_badge_0.begin_init();
     navigation_view_item_0.set_value(::ferroui_controls::NavigationViewItem::info_badge_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&info_badge_0)));
     // navigation.xaml(11,25) Name
-    info_badge_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Badge")));
-    rt::register_name_value(name_scope.as_ref(), "Badge", ::std::rc::Rc::new(::core::clone::Clone::clone(&info_badge_0)), 11, 25)?;
+    rt::set_and_register_name(name_scope.as_ref(), &info_badge_0, "Badge", 11, 25)?;
     // navigation.xaml(11,10) Value
     info_badge_0.set_value(::ferroui_controls::InfoBadge::value_property(), 5_i32);
-    rt::invoked(info_badge_0.try_end_init(), 11, 10)?;
+    rt::end_init(&info_badge_0, 11, 10)?;
     // navigation.xaml(14,10) MenuItems
     let menu_items_collection_1 = navigation_view_item_0.get_direct_value(::ferroui_controls::NavigationViewItem::menu_items_property());
     // navigation.xaml(14,10) NavigationViewItem
@@ -369,8 +350,7 @@ pub fn build_navigation_xaml(
     navigation_view_item_1.begin_init();
     ::ferroui_controls::ItemCollection::__markup_Add_0(&menu_items_collection_1, rt::to_object(::core::clone::Clone::clone(&navigation_view_item_1)));
     // navigation.xaml(14,34) Name
-    navigation_view_item_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Archive")));
-    rt::register_name_value(name_scope.as_ref(), "Archive", ::std::rc::Rc::new(::core::clone::Clone::clone(&navigation_view_item_1)), 14, 34)?;
+    rt::set_and_register_name(name_scope.as_ref(), &navigation_view_item_1, "Archive", 14, 34)?;
     // navigation.xaml(14,51) Content
     navigation_view_item_1.set_value(::ferroui_controls::ContentControl::content_property(), rt::string_object("Archive"));
     // navigation.xaml(14,102) Icon
@@ -380,9 +360,9 @@ pub fn build_navigation_xaml(
     navigation_view_item_1.set_value(::ferroui_controls::NavigationViewItem::icon_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&symbol_icon_2).upcast::<::ferroui_controls::IconElement>()));
     // navigation.xaml(14,102) Symbol
     symbol_icon_2.set_value(::ferroui_controls::SymbolIcon::symbol_property(), ::ferroui_controls::Symbol::Save);
-    rt::invoked(symbol_icon_2.try_end_init(), 14, 102)?;
-    rt::invoked(navigation_view_item_1.try_end_init(), 14, 10)?;
-    rt::invoked(navigation_view_item_0.try_end_init(), 9, 6)?;
+    rt::end_init(&symbol_icon_2, 14, 102)?;
+    rt::end_init(&navigation_view_item_1, 14, 10)?;
+    rt::end_init(&navigation_view_item_0, 9, 6)?;
     // navigation.xaml(17,6) MenuItems
     let menu_items_collection_2 = navigation_view_0.get_direct_value(::ferroui_controls::NavigationView::menu_items_property());
     // navigation.xaml(17,6) NavigationViewItemHeader
@@ -391,14 +371,14 @@ pub fn build_navigation_xaml(
     ::ferroui_controls::ItemCollection::__markup_Add_0(&menu_items_collection_2, rt::to_object(::core::clone::Clone::clone(&navigation_view_item_header_0)));
     // navigation.xaml(17,36) Content
     navigation_view_item_header_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::string_object("Other"));
-    rt::invoked(navigation_view_item_header_0.try_end_init(), 17, 6)?;
+    rt::end_init(&navigation_view_item_header_0, 17, 6)?;
     // navigation.xaml(18,6) MenuItems
     let menu_items_collection_3 = navigation_view_0.get_direct_value(::ferroui_controls::NavigationView::menu_items_property());
     // navigation.xaml(18,6) NavigationViewItemSeparator
     let navigation_view_item_separator_0 = ::ferroui_controls::NavigationViewItemSeparator::new();
     navigation_view_item_separator_0.begin_init();
     ::ferroui_controls::ItemCollection::__markup_Add_0(&menu_items_collection_3, rt::to_object(::core::clone::Clone::clone(&navigation_view_item_separator_0)));
-    rt::invoked(navigation_view_item_separator_0.try_end_init(), 18, 6)?;
+    rt::end_init(&navigation_view_item_separator_0, 18, 6)?;
     // navigation.xaml(21,6) FooterMenuItems
     let footer_menu_items_collection_0 = navigation_view_0.get_direct_value(::ferroui_controls::NavigationView::footer_menu_items_property());
     // navigation.xaml(21,6) NavigationViewItem
@@ -406,8 +386,7 @@ pub fn build_navigation_xaml(
     navigation_view_item_2.begin_init();
     ::ferroui_controls::ItemCollection::__markup_Add_0(&footer_menu_items_collection_0, rt::to_object(::core::clone::Clone::clone(&navigation_view_item_2)));
     // navigation.xaml(21,30) Name
-    navigation_view_item_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Help")));
-    rt::register_name_value(name_scope.as_ref(), "Help", ::std::rc::Rc::new(::core::clone::Clone::clone(&navigation_view_item_2)), 21, 30)?;
+    rt::set_and_register_name(name_scope.as_ref(), &navigation_view_item_2, "Help", 21, 30)?;
     // navigation.xaml(21,44) Content
     navigation_view_item_2.set_value(::ferroui_controls::ContentControl::content_property(), rt::string_object("Help"));
     // navigation.xaml(21,6) SelectsOnInvoked
@@ -419,18 +398,17 @@ pub fn build_navigation_xaml(
     navigation_view_item_2.set_value(::ferroui_controls::NavigationViewItem::icon_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&symbol_icon_3).upcast::<::ferroui_controls::IconElement>()));
     // navigation.xaml(21,117) Symbol
     symbol_icon_3.set_value(::ferroui_controls::SymbolIcon::symbol_property(), ::ferroui_controls::Symbol::Help);
-    rt::invoked(symbol_icon_3.try_end_init(), 21, 117)?;
-    rt::invoked(navigation_view_item_2.try_end_init(), 21, 6)?;
+    rt::end_init(&symbol_icon_3, 21, 117)?;
+    rt::end_init(&navigation_view_item_2, 21, 6)?;
     // navigation.xaml(23,4) Content
     // navigation.xaml(23,4) Frame
     let frame_0 = ::ferroui_controls::Frame::new();
     frame_0.begin_init();
     navigation_view_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&frame_0)));
     // navigation.xaml(23,15) Name
-    frame_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentFrame")));
-    rt::register_name_value(name_scope.as_ref(), "ContentFrame", ::std::rc::Rc::new(::core::clone::Clone::clone(&frame_0)), 23, 15)?;
-    rt::invoked(frame_0.try_end_init(), 23, 4)?;
-    rt::invoked(navigation_view_0.try_end_init(), 1, 2)?;
+    rt::set_and_register_name(name_scope.as_ref(), &frame_0, "ContentFrame", 23, 15)?;
+    rt::end_init(&frame_0, 23, 4)?;
+    rt::end_init(&navigation_view_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&navigation_view_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(navigation_view_0)
 }
@@ -454,7 +432,7 @@ pub fn build_native_controls_xaml(
     let context = rt::populate_context(service_provider, &BUILD_NATIVE_CONTROLS_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
     let name_scope = context.name_scope_field();
     stack_panel_0.begin_init();
-    context.push_parent(rt::to_value(stack_panel_0.clone()));
+    rt::push_parent(&context, &stack_panel_0);
     let resources_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(::ferroui_base::StyledElement::__markup_get_Resources(stack_panel_0.upcast_ref::<::ferroui_base::StyledElement>()));
     if rt::is_instance(&resources_0, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
         let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 1, 2)?);
@@ -499,11 +477,10 @@ pub fn build_native_controls_xaml(
     content_page_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_page_0).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(13,16) Name
-    content_page_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExistingPage")));
-    rt::register_name_value(name_scope.as_ref(), "ExistingPage", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_page_0)), 13, 16)?;
+    rt::set_and_register_name(name_scope.as_ref(), &content_page_0, "ExistingPage", 13, 16)?;
     // native_controls.xaml(13,38) Tag
     content_page_0.set_value(::ferroui_controls::Control::tag_property(), rt::boxed(<::ferroui_controls::Page as ::ferroui_base::StaticType>::TYPE));
-    rt::invoked(content_page_0.try_end_init(), 13, 4)?;
+    rt::end_init(&content_page_0, 13, 4)?;
     // native_controls.xaml(14,4) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(14,4) FramePage
@@ -511,8 +488,7 @@ pub fn build_native_controls_xaml(
     frame_page_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&frame_page_0).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(14,14) Name
-    frame_page_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NativePage")));
-    rt::register_name_value(name_scope.as_ref(), "NativePage", ::std::rc::Rc::new(::core::clone::Clone::clone(&frame_page_0)), 14, 14)?;
+    rt::set_and_register_name(name_scope.as_ref(), &frame_page_0, "NativePage", 14, 14)?;
     // native_controls.xaml(14,4) NavigationCacheMode
     frame_page_0.set_value(::ferroui_controls::FramePage::navigation_cache_mode_property(), ::ferroui_controls::navigation::NavigationCacheMode::Required);
     // native_controls.xaml(15,6) Content
@@ -522,8 +498,8 @@ pub fn build_native_controls_xaml(
     frame_page_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&text_block_0)));
     // native_controls.xaml(15,16) Text
     text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("Native frame page")));
-    rt::invoked(text_block_0.try_end_init(), 15, 6)?;
-    rt::invoked(frame_page_0.try_end_init(), 14, 4)?;
+    rt::end_init(&text_block_0, 15, 6)?;
+    rt::end_init(&frame_page_0, 14, 4)?;
     // native_controls.xaml(17,4) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(17,4) Frame
@@ -531,11 +507,10 @@ pub fn build_native_controls_xaml(
     frame_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&frame_0).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(17,10) Name
-    frame_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NativeFrame")));
-    rt::register_name_value(name_scope.as_ref(), "NativeFrame", ::std::rc::Rc::new(::core::clone::Clone::clone(&frame_0)), 17, 10)?;
+    rt::set_and_register_name(name_scope.as_ref(), &frame_0, "NativeFrame", 17, 10)?;
     // native_controls.xaml(17,31) SourcePageType
     frame_0.set_direct_value(::ferroui_controls::Frame::source_page_type_property(), ::core::option::Option::Some(<::ferroui_controls::FramePage as ::ferroui_base::StaticType>::TYPE));
-    rt::invoked(frame_0.try_end_init(), 17, 4)?;
+    rt::end_init(&frame_0, 17, 4)?;
     // native_controls.xaml(18,4) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(18,4) NumericUpDown
@@ -543,12 +518,11 @@ pub fn build_native_controls_xaml(
     numeric_up_down_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&numeric_up_down_0).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(18,18) Name
-    numeric_up_down_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExistingNumeric")));
-    rt::register_name_value(name_scope.as_ref(), "ExistingNumeric", ::std::rc::Rc::new(::core::clone::Clone::clone(&numeric_up_down_0)), 18, 18)?;
+    rt::set_and_register_name(name_scope.as_ref(), &numeric_up_down_0, "ExistingNumeric", 18, 18)?;
     // native_controls.xaml(18,4) Value
     let value_0 = rt::invoked(::ferroui_base::utilities::Decimal::__markup_parse(::std::string::String::from("4")), 18, 43)?;
     numeric_up_down_0.set_value(::ferroui_controls::NumericUpDown::value_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_0)));
-    rt::invoked(numeric_up_down_0.try_end_init(), 18, 4)?;
+    rt::end_init(&numeric_up_down_0, 18, 4)?;
     // native_controls.xaml(19,4) Children
     let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(19,4) NumberBox
@@ -556,13 +530,12 @@ pub fn build_native_controls_xaml(
     number_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&number_box_0).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(19,14) Name
-    number_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Number")));
-    rt::register_name_value(name_scope.as_ref(), "Number", ::std::rc::Rc::new(::core::clone::Clone::clone(&number_box_0)), 19, 14)?;
+    rt::set_and_register_name(name_scope.as_ref(), &number_box_0, "Number", 19, 14)?;
     // native_controls.xaml(19,4) Value
     number_box_0.set_value(::ferroui_controls::NumberBox::value_property(), 12.0_f64);
     // native_controls.xaml(19,4) SpinButtonPlacementMode
     number_box_0.set_value(::ferroui_controls::NumberBox::spin_button_placement_mode_property(), ::ferroui_controls::NumberBoxSpinButtonPlacementMode::Inline);
-    rt::invoked(number_box_0.try_end_init(), 19, 4)?;
+    rt::end_init(&number_box_0, 19, 4)?;
     // native_controls.xaml(20,4) Children
     let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(20,4) RadioButtons
@@ -570,8 +543,7 @@ pub fn build_native_controls_xaml(
     radio_buttons_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&radio_buttons_0).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(20,17) Name
-    radio_buttons_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Options")));
-    rt::register_name_value(name_scope.as_ref(), "Options", ::std::rc::Rc::new(::core::clone::Clone::clone(&radio_buttons_0)), 20, 17)?;
+    rt::set_and_register_name(name_scope.as_ref(), &radio_buttons_0, "Options", 20, 17)?;
     // native_controls.xaml(20,4) SelectedIndex
     radio_buttons_0.set_direct_value(::ferroui_controls::primitives::SelectingItemsControl::selected_index_property(), 1_i32);
     // native_controls.xaml(21,6) Items
@@ -582,7 +554,7 @@ pub fn build_native_controls_xaml(
     ::ferroui_controls::ItemCollection::__markup_Add_0(&items_collection_0, rt::to_object(::core::clone::Clone::clone(&radio_button_0)));
     // native_controls.xaml(21,18) Content
     radio_button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::string_object("First"));
-    rt::invoked(radio_button_0.try_end_init(), 21, 6)?;
+    rt::end_init(&radio_button_0, 21, 6)?;
     // native_controls.xaml(22,6) Items
     let items_collection_1 = ::ferroui_controls::ItemsControl::__markup_get_Items(radio_buttons_0.upcast_ref::<::ferroui_controls::ItemsControl>());
     // native_controls.xaml(22,6) RadioButton
@@ -591,8 +563,8 @@ pub fn build_native_controls_xaml(
     ::ferroui_controls::ItemCollection::__markup_Add_0(&items_collection_1, rt::to_object(::core::clone::Clone::clone(&radio_button_1)));
     // native_controls.xaml(22,18) Content
     radio_button_1.set_value(::ferroui_controls::ContentControl::content_property(), rt::string_object("Second"));
-    rt::invoked(radio_button_1.try_end_init(), 22, 6)?;
-    rt::invoked(radio_buttons_0.try_end_init(), 20, 4)?;
+    rt::end_init(&radio_button_1, 22, 6)?;
+    rt::end_init(&radio_buttons_0, 20, 4)?;
     // native_controls.xaml(24,4) Children
     let children_collection_6 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(24,4) FontIcon
@@ -600,11 +572,10 @@ pub fn build_native_controls_xaml(
     font_icon_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&font_icon_0).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(24,13) Name
-    font_icon_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Font")));
-    rt::register_name_value(name_scope.as_ref(), "Font", ::std::rc::Rc::new(::core::clone::Clone::clone(&font_icon_0)), 24, 13)?;
+    rt::set_and_register_name(name_scope.as_ref(), &font_icon_0, "Font", 24, 13)?;
     // native_controls.xaml(24,27) Glyph
     font_icon_0.set_value(::ferroui_controls::FontIcon::glyph_property(), ::std::string::String::from("B"));
-    rt::invoked(font_icon_0.try_end_init(), 24, 4)?;
+    rt::end_init(&font_icon_0, 24, 4)?;
     // native_controls.xaml(25,4) Children
     let children_collection_7 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(25,4) SymbolIcon
@@ -612,11 +583,10 @@ pub fn build_native_controls_xaml(
     symbol_icon_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&symbol_icon_0).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(25,15) Name
-    symbol_icon_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Symbol")));
-    rt::register_name_value(name_scope.as_ref(), "Symbol", ::std::rc::Rc::new(::core::clone::Clone::clone(&symbol_icon_0)), 25, 15)?;
+    rt::set_and_register_name(name_scope.as_ref(), &symbol_icon_0, "Symbol", 25, 15)?;
     // native_controls.xaml(25,4) Symbol
     symbol_icon_0.set_value(::ferroui_controls::SymbolIcon::symbol_property(), ::ferroui_controls::Symbol::Accept);
-    rt::invoked(symbol_icon_0.try_end_init(), 25, 4)?;
+    rt::end_init(&symbol_icon_0, 25, 4)?;
     // native_controls.xaml(26,4) Children
     let children_collection_8 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(26,4) AutoSuggestBox
@@ -624,8 +594,7 @@ pub fn build_native_controls_xaml(
     auto_suggest_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&auto_suggest_box_0).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(26,19) Name
-    auto_suggest_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Search")));
-    rt::register_name_value(name_scope.as_ref(), "Search", ::std::rc::Rc::new(::core::clone::Clone::clone(&auto_suggest_box_0)), 26, 19)?;
+    rt::set_and_register_name(name_scope.as_ref(), &auto_suggest_box_0, "Search", 26, 19)?;
     // native_controls.xaml(26,35) Text
     auto_suggest_box_0.set_value(::ferroui_controls::AutoSuggestBox::text_property(), ::std::string::String::from("Find"));
     // native_controls.xaml(28,8) QueryIcon
@@ -635,8 +604,8 @@ pub fn build_native_controls_xaml(
     auto_suggest_box_0.set_value(::ferroui_controls::AutoSuggestBox::query_icon_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&symbol_icon_1).upcast::<::ferroui_controls::IconElement>()));
     // native_controls.xaml(28,8) Symbol
     symbol_icon_1.set_value(::ferroui_controls::SymbolIcon::symbol_property(), ::ferroui_controls::Symbol::Find);
-    rt::invoked(symbol_icon_1.try_end_init(), 28, 8)?;
-    rt::invoked(auto_suggest_box_0.try_end_init(), 26, 4)?;
+    rt::end_init(&symbol_icon_1, 28, 8)?;
+    rt::end_init(&auto_suggest_box_0, 26, 4)?;
     // native_controls.xaml(31,4) Children
     let children_collection_9 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(31,4) InfoBar
@@ -644,42 +613,28 @@ pub fn build_native_controls_xaml(
     info_bar_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_9, ::core::clone::Clone::clone(&info_bar_0).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(31,12) Name
-    info_bar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Bar")));
-    rt::register_name_value(name_scope.as_ref(), "Bar", ::std::rc::Rc::new(::core::clone::Clone::clone(&info_bar_0)), 31, 12)?;
+    rt::set_and_register_name(name_scope.as_ref(), &info_bar_0, "Bar", 31, 12)?;
     // native_controls.xaml(31,4) IsOpen
     info_bar_0.set_value(::ferroui_controls::InfoBar::is_open_property(), ::core::clone::Clone::clone(&true));
     // native_controls.xaml(31,39) Title
     info_bar_0.set_value(::ferroui_controls::InfoBar::title_property(), ::std::string::String::from("Native controls"));
-    rt::invoked(info_bar_0.try_end_init(), 31, 4)?;
+    rt::end_init(&info_bar_0, 31, 4)?;
     // native_controls.xaml(32,4) Children
     let children_collection_10 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(32,4) InfoBadge
     let info_badge_0 = ::ferroui_controls::InfoBadge::new();
     info_badge_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_10, ::core::clone::Clone::clone(&info_badge_0).upcast::<::ferroui_controls::Control>());
-    context.push_parent(rt::to_value(info_badge_0.clone()));
+    rt::push_parent(&context, &info_badge_0);
     // native_controls.xaml(32,14) Name
-    info_badge_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Badge")));
-    rt::register_name_value(name_scope.as_ref(), "Badge", ::std::rc::Rc::new(::core::clone::Clone::clone(&info_badge_0)), 32, 14)?;
+    rt::set_and_register_name(name_scope.as_ref(), &info_badge_0, "Badge", 32, 14)?;
     // native_controls.xaml(32,4) Value
     info_badge_0.set_value(::ferroui_controls::InfoBadge::value_property(), 7_i32);
     // native_controls.xaml(32,39) IconSource (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FontSource"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::InfoBadge::icon_source_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 32, 39)?;
+    let provided_0 = rt::provide_static_resource(&context, "FontSource", || rt::property_value(::ferroui_controls::InfoBadge::icon_source_property()), 32, 39)?;
     let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_1, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(info_badge_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::InfoBadge::icon_source_property());
-    } else if rt::is_instance(&value_1, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(info_badge_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::InfoBadge::icon_source_property(), value_1.clone(), 32, 39)?;
-    } else if rt::is_instance(&value_1, rt::class_handle(<::ferroui_controls::IconSource as ::ferroui_base::StaticType>::TYPE)) {
-        info_badge_0.set_value(::ferroui_controls::InfoBadge::icon_source_property(), rt::exact(value_1.clone(), "FerroUI.Controls.InfoBadge.set_IconSource", 0, 32, 39)?);
-    } else if value_1.is_none() {
-        info_badge_0.set_value(::ferroui_controls::InfoBadge::icon_source_property(), rt::exact(value_1.clone(), "FerroUI.Controls.InfoBadge.set_IconSource", 0, 32, 39)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("IconSource", &value_1, 32, 39));
-    }
-    context.pop_parent();
-    rt::invoked(info_badge_0.try_end_init(), 32, 4)?;
+    rt::set_local_value(info_badge_0.upcast_ref::<::ferroui_base::FerroObject>(), || ::ferroui_controls::InfoBadge::icon_source_property(), value_1, || rt::class_handle(<::ferroui_controls::IconSource as ::ferroui_base::StaticType>::TYPE), true, "FerroUI.Controls.InfoBadge.set_IconSource", "IconSource", 32, 39)?;
+    rt::pop_parent_and_end_init(&context, &info_badge_0, 32, 4)?;
     // native_controls.xaml(33,4) Children
     let children_collection_11 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(33,4) ProgressRing
@@ -687,15 +642,14 @@ pub fn build_native_controls_xaml(
     progress_ring_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_11, ::core::clone::Clone::clone(&progress_ring_0).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(33,17) Name
-    progress_ring_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Ring")));
-    rt::register_name_value(name_scope.as_ref(), "Ring", ::std::rc::Rc::new(::core::clone::Clone::clone(&progress_ring_0)), 33, 17)?;
+    rt::set_and_register_name(name_scope.as_ref(), &progress_ring_0, "Ring", 33, 17)?;
     // native_controls.xaml(33,4) IsIndeterminate
     progress_ring_0.set_value(::ferroui_controls::ProgressRing::is_indeterminate_property(), ::core::clone::Clone::clone(&false));
     // native_controls.xaml(33,4) Maximum
     progress_ring_0.set_value(::ferroui_controls::ProgressRing::maximum_property(), 200.0_f64);
     // native_controls.xaml(33,4) Value
     progress_ring_0.set_value(::ferroui_controls::ProgressRing::value_property(), 42.0_f64);
-    rt::invoked(progress_ring_0.try_end_init(), 33, 4)?;
+    rt::end_init(&progress_ring_0, 33, 4)?;
     // native_controls.xaml(34,4) Children
     let children_collection_12 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(34,4) RatingControl
@@ -703,8 +657,7 @@ pub fn build_native_controls_xaml(
     rating_control_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_12, ::core::clone::Clone::clone(&rating_control_0).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(34,18) Name
-    rating_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Rating")));
-    rt::register_name_value(name_scope.as_ref(), "Rating", ::std::rc::Rc::new(::core::clone::Clone::clone(&rating_control_0)), 34, 18)?;
+    rt::set_and_register_name(name_scope.as_ref(), &rating_control_0, "Rating", 34, 18)?;
     // native_controls.xaml(34,4) PlaceholderValue
     rating_control_0.set_value(::ferroui_controls::RatingControl::placeholder_value_property(), 2.5_f64);
     // native_controls.xaml(36,8) ItemInfo
@@ -715,7 +668,7 @@ pub fn build_native_controls_xaml(
     // native_controls.xaml(36,37) UnsetGlyph
     rating_item_font_info_0.set_value(::ferroui_controls::RatingItemFontInfo::unset_glyph_property(), ::std::string::String::from("D"));
     rating_control_0.set_value(::ferroui_controls::RatingControl::item_info_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&rating_item_font_info_0).upcast::<::ferroui_controls::RatingItemInfo>()));
-    rt::invoked(rating_control_0.try_end_init(), 34, 4)?;
+    rt::end_init(&rating_control_0, 34, 4)?;
     // native_controls.xaml(39,4) Children
     let children_collection_13 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(39,4) InfoBarPanel
@@ -723,8 +676,7 @@ pub fn build_native_controls_xaml(
     info_bar_panel_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_13, ::core::clone::Clone::clone(&info_bar_panel_0).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(39,17) Name
-    info_bar_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BarPanel")));
-    rt::register_name_value(name_scope.as_ref(), "BarPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&info_bar_panel_0)), 39, 17)?;
+    rt::set_and_register_name(name_scope.as_ref(), &info_bar_panel_0, "BarPanel", 39, 17)?;
     // native_controls.xaml(40,6) Children
     let children_collection_14 = ::ferroui_controls::Panel::__markup_get_Children(info_bar_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(40,6) TextBlock
@@ -733,8 +685,8 @@ pub fn build_native_controls_xaml(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_14, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(40,16) Text
     text_block_1.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("Primitive from the default namespace")));
-    rt::invoked(text_block_1.try_end_init(), 40, 6)?;
-    rt::invoked(info_bar_panel_0.try_end_init(), 39, 4)?;
+    rt::end_init(&text_block_1, 40, 6)?;
+    rt::end_init(&info_bar_panel_0, 39, 4)?;
     // native_controls.xaml(42,4) Children
     let children_collection_15 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // native_controls.xaml(42,4) NavigationView
@@ -742,8 +694,7 @@ pub fn build_native_controls_xaml(
     navigation_view_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_15, ::core::clone::Clone::clone(&navigation_view_0).upcast::<::ferroui_controls::Control>());
     // native_controls.xaml(42,19) Name
-    navigation_view_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Navigation")));
-    rt::register_name_value(name_scope.as_ref(), "Navigation", ::std::rc::Rc::new(::core::clone::Clone::clone(&navigation_view_0)), 42, 19)?;
+    rt::set_and_register_name(name_scope.as_ref(), &navigation_view_0, "Navigation", 42, 19)?;
     // native_controls.xaml(42,4) PaneDisplayMode
     navigation_view_0.set_value(::ferroui_controls::NavigationView::pane_display_mode_property(), ::ferroui_controls::NavigationViewPaneDisplayMode::Left);
     // native_controls.xaml(44,8) MenuItems
@@ -753,8 +704,7 @@ pub fn build_native_controls_xaml(
     navigation_view_item_0.begin_init();
     ::ferroui_controls::ItemCollection::__markup_Add_0(&menu_items_collection_0, rt::to_object(::core::clone::Clone::clone(&navigation_view_item_0)));
     // native_controls.xaml(44,27) Name
-    navigation_view_item_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Inbox")));
-    rt::register_name_value(name_scope.as_ref(), "Inbox", ::std::rc::Rc::new(::core::clone::Clone::clone(&navigation_view_item_0)), 44, 27)?;
+    rt::set_and_register_name(name_scope.as_ref(), &navigation_view_item_0, "Inbox", 44, 27)?;
     // native_controls.xaml(44,42) Content
     navigation_view_item_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::string_object("Inbox"));
     // native_controls.xaml(46,12) Icon
@@ -764,8 +714,8 @@ pub fn build_native_controls_xaml(
     navigation_view_item_0.set_value(::ferroui_controls::NavigationViewItem::icon_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&symbol_icon_2).upcast::<::ferroui_controls::IconElement>()));
     // native_controls.xaml(46,12) Symbol
     symbol_icon_2.set_value(::ferroui_controls::SymbolIcon::symbol_property(), ::ferroui_controls::Symbol::Mail);
-    rt::invoked(symbol_icon_2.try_end_init(), 46, 12)?;
-    rt::invoked(navigation_view_item_0.try_end_init(), 44, 8)?;
+    rt::end_init(&symbol_icon_2, 46, 12)?;
+    rt::end_init(&navigation_view_item_0, 44, 8)?;
     // native_controls.xaml(49,8) MenuItems
     let menu_items_collection_1 = navigation_view_0.get_direct_value(::ferroui_controls::NavigationView::menu_items_property());
     // native_controls.xaml(49,8) NavigationViewItemHeader
@@ -774,17 +724,16 @@ pub fn build_native_controls_xaml(
     ::ferroui_controls::ItemCollection::__markup_Add_0(&menu_items_collection_1, rt::to_object(::core::clone::Clone::clone(&navigation_view_item_header_0)));
     // native_controls.xaml(49,33) Content
     navigation_view_item_header_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::string_object("Other"));
-    rt::invoked(navigation_view_item_header_0.try_end_init(), 49, 8)?;
+    rt::end_init(&navigation_view_item_header_0, 49, 8)?;
     // native_controls.xaml(50,8) MenuItems
     let menu_items_collection_2 = navigation_view_0.get_direct_value(::ferroui_controls::NavigationView::menu_items_property());
     // native_controls.xaml(50,8) NavigationViewItemSeparator
     let navigation_view_item_separator_0 = ::ferroui_controls::NavigationViewItemSeparator::new();
     navigation_view_item_separator_0.begin_init();
     ::ferroui_controls::ItemCollection::__markup_Add_0(&menu_items_collection_2, rt::to_object(::core::clone::Clone::clone(&navigation_view_item_separator_0)));
-    rt::invoked(navigation_view_item_separator_0.try_end_init(), 50, 8)?;
-    rt::invoked(navigation_view_0.try_end_init(), 42, 4)?;
-    context.pop_parent();
-    rt::invoked(stack_panel_0.try_end_init(), 1, 2)?;
+    rt::end_init(&navigation_view_item_separator_0, 50, 8)?;
+    rt::end_init(&navigation_view_0, 42, 4)?;
+    rt::pop_parent_and_end_init(&context, &stack_panel_0, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(stack_panel_0)
 }

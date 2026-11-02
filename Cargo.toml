@@ -75,6 +75,7 @@ members = [
     "src/StaticViewLocator/FerroUI.StaticViewLocator.Macros",
     "src/StaticViewLocator/FerroUI.StaticViewLocator.Build",
     "src/Markup/FerroUI.Markup",
+    "src/Markup/FerroUI.Xaml.Binary",
     "src/Markup/FerroUI.Markup.Xaml",
     "src/Markup/FerroUI.Markup.Xaml.WinUI",
     "src/Markup/FerroUI.Markup.Xaml.Loader",
@@ -292,6 +293,7 @@ ferroui-static-view-locator = { version = "=0.5.0-preview.1", path = "src/Static
 ferroui-static-view-locator-macros = { version = "=0.5.0-preview.1", path = "src/StaticViewLocator/FerroUI.StaticViewLocator.Macros" }
 ferroui-static-view-locator-build = { version = "=0.5.0-preview.1", path = "src/StaticViewLocator/FerroUI.StaticViewLocator.Build" }
 ferroui-markup = { version = "=0.5.0-preview.1", path = "src/Markup/FerroUI.Markup" }
+ferroui-xaml-binary = { version = "=0.5.0-preview.1", path = "src/Markup/FerroUI.Xaml.Binary" }
 ferroui-markup-xaml = { version = "=0.5.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml" }
 ferroui-markup-xaml-winui = { version = "=0.5.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml.WinUI" }
 # Without the default features: the default is the run-time back end, which links the XAML runtime library
@@ -483,6 +485,15 @@ lto = "thin"
 [profile.fast-release]
 inherits = "release"
 lto = false
+
+# A compact native application with open-ended XAML lookup and ordinary unwinding.
+# See docs/compiled-theme-performance.md for the complete WinUI startup comparison.
+[profile.compact-release]
+inherits = "release"
+opt-level = "s"
+lto = "thin"
+codegen-units = 16
+strip = "symbols"
 
 # The build that is shipped and measured (`cargo build --profile dist`, `scripts/perf-report.py
 # --profile dist`): whole-program optimisation in one code generation unit. The executables are

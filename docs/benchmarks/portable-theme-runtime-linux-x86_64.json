@@ -1,0 +1,715 @@
+{
+  "release_encoder": {
+    "method": "Native release ferroui-fxd CLI, compiled from the same source and runtime+portable loader as the consumers. Fresh process for each invocation. Includes XML read, XamlX parse, FXD compression, atomic file publication and process exit; file cache warm. All output hashes match the embedded runtime FXD files.",
+    "samples_ns": {
+      "winui": [
+        1434662,
+        1298841,
+        1705323,
+        1356376,
+        1706079,
+        1116711,
+        1679454,
+        1314454,
+        1559026,
+        1308606,
+        1359541,
+        1230761,
+        2162058,
+        1559416,
+        2134738,
+        1751300,
+        1426330,
+        1173937,
+        1787794,
+        1304700,
+        1710770,
+        1060318,
+        1420231,
+        1281095,
+        3820451
+      ],
+      "fluent": [
+        4482840,
+        4232851,
+        4730526,
+        4456556,
+        4455480,
+        5664698,
+        5677298,
+        3935401,
+        4523420,
+        3878226,
+        4043541,
+        6433406,
+        4930253,
+        4694744,
+        5093093,
+        5367128,
+        5442270,
+        5527075,
+        5654053,
+        4598391,
+        5126047,
+        5748908,
+        5315922,
+        4835402,
+        7042521
+      ]
+    },
+    "median_ns": {
+      "winui": 1426330,
+      "fluent": 4930253
+    }
+  },
+  "fixtures": {
+    "winui": {
+      "source_tree": "51c43bedb156eb3d51bc6af8c7b1fc6eead69072",
+      "consumer": "scripts/themes/bench/runtime_document.rs",
+      "input": "src/FerroUI.Themes.WinUI/Resources/ThemeShadows.xaml",
+      "resource": "WinUIThemeShadow",
+      "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1",
+      "jobs": "1",
+      "profile": "release, opt-level 3, cross-crate LTO off, incremental off",
+      "method": "Embedded bytes, normal runtime load_stream, checked deferred resource and typed first lookup. Fresh interleaved processes, warm file cache. Consumer timings include link time; they exclude the standalone encoder.",
+      "cases": {
+        "xml": {
+          "payload_bytes": 2648,
+          "payload_sha256": "d1f70ac4b90cb6021dabb53fad8c366daf9c9d13ee7a913163ee73fd3e1d9612",
+          "stripped_bytes": 56781736,
+          "initial_units": [
+            {
+              "package": "ferroui-markup-xaml-loader",
+              "target": "",
+              "seconds": 34.59
+            },
+            {
+              "package": "runtime-document-probe",
+              "target": "runtime-document-probe \"bin\"",
+              "seconds": 0.85
+            }
+          ],
+          "warm_consumer_build_seconds": 0.7834055479997915,
+          "warm_consumer_units": [
+            {
+              "package": "runtime-document-probe",
+              "target": "runtime-document-probe \"bin\"",
+              "seconds": 0.7
+            }
+          ],
+          "samples_ns": [
+            {
+              "load_ns": 4554506,
+              "lookup_ns": 20190,
+              "process_ready_ns": 10077941
+            },
+            {
+              "load_ns": 4558523,
+              "lookup_ns": 16474,
+              "process_ready_ns": 9758034
+            },
+            {
+              "load_ns": 6142676,
+              "lookup_ns": 16795,
+              "process_ready_ns": 14374817
+            },
+            {
+              "load_ns": 4645110,
+              "lookup_ns": 14762,
+              "process_ready_ns": 9567701
+            },
+            {
+              "load_ns": 5069589,
+              "lookup_ns": 17616,
+              "process_ready_ns": 8464165
+            },
+            {
+              "load_ns": 5150608,
+              "lookup_ns": 21742,
+              "process_ready_ns": 8694270
+            },
+            {
+              "load_ns": 4516711,
+              "lookup_ns": 15323,
+              "process_ready_ns": 8648126
+            },
+            {
+              "load_ns": 4834922,
+              "lookup_ns": 17095,
+              "process_ready_ns": 10243666
+            },
+            {
+              "load_ns": 5174443,
+              "lookup_ns": 19199,
+              "process_ready_ns": 8328168
+            },
+            {
+              "load_ns": 22828050,
+              "lookup_ns": 16033,
+              "process_ready_ns": 38470446
+            },
+            {
+              "load_ns": 4217588,
+              "lookup_ns": 16865,
+              "process_ready_ns": 9134466
+            },
+            {
+              "load_ns": 4640093,
+              "lookup_ns": 15723,
+              "process_ready_ns": 8469157
+            },
+            {
+              "load_ns": 5653282,
+              "lookup_ns": 15964,
+              "process_ready_ns": 9998629
+            },
+            {
+              "load_ns": 4502038,
+              "lookup_ns": 16054,
+              "process_ready_ns": 7984159
+            },
+            {
+              "load_ns": 3951966,
+              "lookup_ns": 14922,
+              "process_ready_ns": 7271821
+            },
+            {
+              "load_ns": 8668281,
+              "lookup_ns": 28282,
+              "process_ready_ns": 12900090
+            },
+            {
+              "load_ns": 6235452,
+              "lookup_ns": 16955,
+              "process_ready_ns": 9853600
+            },
+            {
+              "load_ns": 5858265,
+              "lookup_ns": 22463,
+              "process_ready_ns": 9813666
+            },
+            {
+              "load_ns": 5632492,
+              "lookup_ns": 25998,
+              "process_ready_ns": 9526921
+            },
+            {
+              "load_ns": 4675525,
+              "lookup_ns": 17176,
+              "process_ready_ns": 7945021
+            },
+            {
+              "load_ns": 5047796,
+              "lookup_ns": 16605,
+              "process_ready_ns": 8301053
+            },
+            {
+              "load_ns": 4518623,
+              "lookup_ns": 16264,
+              "process_ready_ns": 9295018
+            },
+            {
+              "load_ns": 6367407,
+              "lookup_ns": 19399,
+              "process_ready_ns": 10437447
+            },
+            {
+              "load_ns": 5691929,
+              "lookup_ns": 15483,
+              "process_ready_ns": 9343354
+            },
+            {
+              "load_ns": 5611701,
+              "lookup_ns": 20800,
+              "process_ready_ns": 9398707
+            }
+          ],
+          "median_ns": {
+            "load_ns": 5069589,
+            "lookup_ns": 16865,
+            "process_ready_ns": 9398707
+          },
+          "stripped_sha256": "a290181af026f3f08284a9563ce26143d20e53494c26c8991ccbba20bfdabdcf"
+        },
+        "fxd": {
+          "payload_bytes": 732,
+          "payload_sha256": "09f0ea0f6463af026a60f7d8d88ac9b465b432943bb9f43d133494c55e424cd2",
+          "stripped_bytes": 56853272,
+          "initial_units": [
+            {
+              "package": "ferroui-markup-xaml-loader",
+              "target": "",
+              "seconds": 36.24
+            },
+            {
+              "package": "runtime-document-probe",
+              "target": "runtime-document-probe \"bin\"",
+              "seconds": 0.82
+            }
+          ],
+          "warm_consumer_build_seconds": 0.9535094330003631,
+          "warm_consumer_units": [
+            {
+              "package": "runtime-document-probe",
+              "target": "runtime-document-probe \"bin\"",
+              "seconds": 0.84
+            }
+          ],
+          "samples_ns": [
+            {
+              "load_ns": 5758107,
+              "lookup_ns": 17987,
+              "process_ready_ns": 11271191
+            },
+            {
+              "load_ns": 4616368,
+              "lookup_ns": 11707,
+              "process_ready_ns": 9370915
+            },
+            {
+              "load_ns": 4158390,
+              "lookup_ns": 11758,
+              "process_ready_ns": 9027347
+            },
+            {
+              "load_ns": 3601437,
+              "lookup_ns": 10966,
+              "process_ready_ns": 7482267
+            },
+            {
+              "load_ns": 5035248,
+              "lookup_ns": 11877,
+              "process_ready_ns": 9135358
+            },
+            {
+              "load_ns": 4562678,
+              "lookup_ns": 12208,
+              "process_ready_ns": 10004202
+            },
+            {
+              "load_ns": 5534976,
+              "lookup_ns": 11227,
+              "process_ready_ns": 11668179
+            },
+            {
+              "load_ns": 3873419,
+              "lookup_ns": 12729,
+              "process_ready_ns": 7023808
+            },
+            {
+              "load_ns": 4233656,
+              "lookup_ns": 11417,
+              "process_ready_ns": 8996447
+            },
+            {
+              "load_ns": 3579544,
+              "lookup_ns": 11807,
+              "process_ready_ns": 7433094
+            },
+            {
+              "load_ns": 10428755,
+              "lookup_ns": 12749,
+              "process_ready_ns": 16203706
+            },
+            {
+              "load_ns": 4521538,
+              "lookup_ns": 11677,
+              "process_ready_ns": 8046492
+            },
+            {
+              "load_ns": 3971865,
+              "lookup_ns": 11837,
+              "process_ready_ns": 7449779
+            },
+            {
+              "load_ns": 4774813,
+              "lookup_ns": 13349,
+              "process_ready_ns": 8434435
+            },
+            {
+              "load_ns": 4708584,
+              "lookup_ns": 11697,
+              "process_ready_ns": 8334242
+            },
+            {
+              "load_ns": 4175676,
+              "lookup_ns": 12669,
+              "process_ready_ns": 9253562
+            },
+            {
+              "load_ns": 10064436,
+              "lookup_ns": 12658,
+              "process_ready_ns": 17635899
+            },
+            {
+              "load_ns": 4338567,
+              "lookup_ns": 13090,
+              "process_ready_ns": 7665017
+            },
+            {
+              "load_ns": 4130078,
+              "lookup_ns": 12028,
+              "process_ready_ns": 7514735
+            },
+            {
+              "load_ns": 3772389,
+              "lookup_ns": 12689,
+              "process_ready_ns": 6931162
+            },
+            {
+              "load_ns": 4923182,
+              "lookup_ns": 11717,
+              "process_ready_ns": 8757993
+            },
+            {
+              "load_ns": 3886328,
+              "lookup_ns": 12358,
+              "process_ready_ns": 7381228
+            },
+            {
+              "load_ns": 4534718,
+              "lookup_ns": 13049,
+              "process_ready_ns": 8033438
+            },
+            {
+              "load_ns": 4409623,
+              "lookup_ns": 12158,
+              "process_ready_ns": 7536192
+            },
+            {
+              "load_ns": 5373017,
+              "lookup_ns": 11166,
+              "process_ready_ns": 10428590
+            }
+          ],
+          "median_ns": {
+            "load_ns": 4521538,
+            "lookup_ns": 12028,
+            "process_ready_ns": 8434435
+          },
+          "stripped_sha256": "720595caaea1c22377fbbd487c1ddb8f53ae5e455b1f1ac8a94e52f0fa432e55"
+        }
+      },
+      "consumer_sha256": "09e17ce719bdebb0b1059fb5632b09feb0f97f66f987e5ae0cc5e9e201400d3b"
+    },
+    "fluent": {
+      "source_tree": "51c43bedb156eb3d51bc6af8c7b1fc6eead69072",
+      "consumer": "scripts/themes/bench/runtime_document.rs",
+      "consumer_sha256": "09e17ce719bdebb0b1059fb5632b09feb0f97f66f987e5ae0cc5e9e201400d3b",
+      "input": "src/FerroUI.Themes.Fluent/Accents/BaseResources.xaml",
+      "resource": "SystemControlTransparentBrush",
+      "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1",
+      "jobs": "1",
+      "profile": "release, opt-level 3, cross-crate LTO off, incremental off",
+      "method": "Embedded bytes, normal runtime load_stream, checked deferred resource and typed first lookup. Fresh interleaved processes, warm file cache. Consumer timings include link time; they exclude the standalone encoder.",
+      "cases": {
+        "xml": {
+          "payload_bytes": 35412,
+          "payload_sha256": "bf302e6daeb862a03e781826c2582e77887fb803fbddb7950d4bc628462e214d",
+          "stripped_bytes": 56815640,
+          "initial_units": [
+            {
+              "package": "runtime-document-probe",
+              "target": "runtime-document-probe \"bin\"",
+              "seconds": 0.67
+            }
+          ],
+          "warm_consumer_build_seconds": 0.750334438000209,
+          "warm_consumer_units": [
+            {
+              "package": "runtime-document-probe",
+              "target": "runtime-document-probe \"bin\"",
+              "seconds": 0.67
+            }
+          ],
+          "samples_ns": [
+            {
+              "load_ns": 28351575,
+              "lookup_ns": 60790,
+              "process_ready_ns": 35647871
+            },
+            {
+              "load_ns": 30446955,
+              "lookup_ns": 55542,
+              "process_ready_ns": 34938532
+            },
+            {
+              "load_ns": 32255233,
+              "lookup_ns": 162260,
+              "process_ready_ns": 38106462
+            },
+            {
+              "load_ns": 26425515,
+              "lookup_ns": 64195,
+              "process_ready_ns": 30145408
+            },
+            {
+              "load_ns": 31328033,
+              "lookup_ns": 57846,
+              "process_ready_ns": 38084381
+            },
+            {
+              "load_ns": 37303035,
+              "lookup_ns": 102922,
+              "process_ready_ns": 44025959
+            },
+            {
+              "load_ns": 25949632,
+              "lookup_ns": 58547,
+              "process_ready_ns": 30992095
+            },
+            {
+              "load_ns": 28928368,
+              "lookup_ns": 70193,
+              "process_ready_ns": 34477771
+            },
+            {
+              "load_ns": 38309933,
+              "lookup_ns": 106448,
+              "process_ready_ns": 42815103
+            },
+            {
+              "load_ns": 29579156,
+              "lookup_ns": 64646,
+              "process_ready_ns": 34192830
+            },
+            {
+              "load_ns": 27423562,
+              "lookup_ns": 75301,
+              "process_ready_ns": 33985872
+            },
+            {
+              "load_ns": 26907800,
+              "lookup_ns": 53799,
+              "process_ready_ns": 30539230
+            },
+            {
+              "load_ns": 33677577,
+              "lookup_ns": 68952,
+              "process_ready_ns": 40732783
+            },
+            {
+              "load_ns": 26246422,
+              "lookup_ns": 55512,
+              "process_ready_ns": 31731479
+            },
+            {
+              "load_ns": 32951509,
+              "lookup_ns": 61681,
+              "process_ready_ns": 39488627
+            },
+            {
+              "load_ns": 40625188,
+              "lookup_ns": 72057,
+              "process_ready_ns": 44963194
+            },
+            {
+              "load_ns": 34204280,
+              "lookup_ns": 92387,
+              "process_ready_ns": 40765105
+            },
+            {
+              "load_ns": 32686692,
+              "lookup_ns": 66939,
+              "process_ready_ns": 36781443
+            },
+            {
+              "load_ns": 38404618,
+              "lookup_ns": 99357,
+              "process_ready_ns": 45725020
+            },
+            {
+              "load_ns": 33009384,
+              "lookup_ns": 67359,
+              "process_ready_ns": 37669126
+            },
+            {
+              "load_ns": 33202860,
+              "lookup_ns": 146887,
+              "process_ready_ns": 38515708
+            },
+            {
+              "load_ns": 29839991,
+              "lookup_ns": 74600,
+              "process_ready_ns": 33601971
+            },
+            {
+              "load_ns": 22997034,
+              "lookup_ns": 50775,
+              "process_ready_ns": 26837926
+            },
+            {
+              "load_ns": 32808937,
+              "lookup_ns": 73208,
+              "process_ready_ns": 36734103
+            },
+            {
+              "load_ns": 27871600,
+              "lookup_ns": 62042,
+              "process_ready_ns": 31091548
+            }
+          ],
+          "median_ns": {
+            "load_ns": 31328033,
+            "lookup_ns": 67359,
+            "process_ready_ns": 36734103
+          },
+          "stripped_sha256": "e2ea3013101f43ae1011b37a9518c2c98b01ff2e39d782b4e46699ab42bd7c5c"
+        },
+        "fxd": {
+          "payload_bytes": 15760,
+          "payload_sha256": "88c391789a6b241ac03fbb040c648856c1e100e74bca2638eb3306aad88370ec",
+          "stripped_bytes": 56869448,
+          "initial_units": [
+            {
+              "package": "runtime-document-probe",
+              "target": "runtime-document-probe \"bin\"",
+              "seconds": 0.66
+            }
+          ],
+          "warm_consumer_build_seconds": 0.8064574599993648,
+          "warm_consumer_units": [
+            {
+              "package": "runtime-document-probe",
+              "target": "runtime-document-probe \"bin\"",
+              "seconds": 0.71
+            }
+          ],
+          "samples_ns": [
+            {
+              "load_ns": 25663534,
+              "lookup_ns": 90975,
+              "process_ready_ns": 31075443
+            },
+            {
+              "load_ns": 29128794,
+              "lookup_ns": 85046,
+              "process_ready_ns": 36221411
+            },
+            {
+              "load_ns": 33080079,
+              "lookup_ns": 86628,
+              "process_ready_ns": 39553463
+            },
+            {
+              "load_ns": 26279199,
+              "lookup_ns": 98195,
+              "process_ready_ns": 31388586
+            },
+            {
+              "load_ns": 25386199,
+              "lookup_ns": 71375,
+              "process_ready_ns": 31000737
+            },
+            {
+              "load_ns": 25529710,
+              "lookup_ns": 59308,
+              "process_ready_ns": 30557798
+            },
+            {
+              "load_ns": 26220773,
+              "lookup_ns": 137694,
+              "process_ready_ns": 30566866
+            },
+            {
+              "load_ns": 25222256,
+              "lookup_ns": 53839,
+              "process_ready_ns": 28722994
+            },
+            {
+              "load_ns": 30546525,
+              "lookup_ns": 73679,
+              "process_ready_ns": 34891457
+            },
+            {
+              "load_ns": 25509151,
+              "lookup_ns": 55221,
+              "process_ready_ns": 29098199
+            },
+            {
+              "load_ns": 27645060,
+              "lookup_ns": 75461,
+              "process_ready_ns": 31122878
+            },
+            {
+              "load_ns": 39506894,
+              "lookup_ns": 121480,
+              "process_ready_ns": 46612235
+            },
+            {
+              "load_ns": 27610729,
+              "lookup_ns": 110353,
+              "process_ready_ns": 32742053
+            },
+            {
+              "load_ns": 37756415,
+              "lookup_ns": 77845,
+              "process_ready_ns": 45109962
+            },
+            {
+              "load_ns": 31201520,
+              "lookup_ns": 59898,
+              "process_ready_ns": 39058162
+            },
+            {
+              "load_ns": 31694539,
+              "lookup_ns": 66649,
+              "process_ready_ns": 38145336
+            },
+            {
+              "load_ns": 29880817,
+              "lookup_ns": 55793,
+              "process_ready_ns": 35803816
+            },
+            {
+              "load_ns": 31996425,
+              "lookup_ns": 64245,
+              "process_ready_ns": 35901917
+            },
+            {
+              "load_ns": 145845008,
+              "lookup_ns": 67049,
+              "process_ready_ns": 154359253
+            },
+            {
+              "load_ns": 33431858,
+              "lookup_ns": 75362,
+              "process_ready_ns": 37650569
+            },
+            {
+              "load_ns": 25795904,
+              "lookup_ns": 57505,
+              "process_ready_ns": 30618116
+            },
+            {
+              "load_ns": 27070169,
+              "lookup_ns": 75401,
+              "process_ready_ns": 31008354
+            },
+            {
+              "load_ns": 25698410,
+              "lookup_ns": 71656,
+              "process_ready_ns": 29329381
+            },
+            {
+              "load_ns": 28256404,
+              "lookup_ns": 65297,
+              "process_ready_ns": 32162742
+            },
+            {
+              "load_ns": 24598273,
+              "lookup_ns": 64035,
+              "process_ready_ns": 27852407
+            }
+          ],
+          "median_ns": {
+            "load_ns": 27645060,
+            "lookup_ns": 71656,
+            "process_ready_ns": 32162742
+          },
+          "stripped_sha256": "cf40ecf3cccc3216df8ebf7d5d153e93c797840dbc57bfd5915321ceb9cbf578"
+        }
+      }
+    }
+  }
+}

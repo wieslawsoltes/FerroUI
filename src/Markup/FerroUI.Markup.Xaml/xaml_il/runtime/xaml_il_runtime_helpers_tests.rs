@@ -211,6 +211,29 @@ fn resource_node_stacks_of_the_same_parents_are_shared() {
     assert!(Rc::ptr_eq(&stacks[0], &stacks[1]));
 }
 
+#[test]
+fn a_replaced_outer_frame_is_visible_to_later_declarations() {
+    let inner = Button::new();
+    let old = Border::new();
+    let new = Border::new();
+    let outer = TestServiceProvider::new().with_parents(vec![boxed(old.clone())]);
+    let provider = TestServiceProvider::new().with_parents(vec![boxed(inner.clone())])
+        .with_outer_parents(outer.clone()).with_root(Some(boxed(inner))).sp();
+    let capture = || XamlIlRuntimeHelpers::deferred_transformation_factory_for(
+        ValueType::object(),
+        DeferredContentBuilder::new(|sp| sp.get_first_parent::<Ref<Border>>().map(boxed)),
+        &provider,
+    );
+    let first = capture();
+    let second = capture();
+    outer.with_parents(vec![boxed(new.clone())]);
+    let third = capture();
+    let parent = |content: Rc<DeferredContent>| from_markup_value::<Ref<Border>>(&content.build_with(None).result).unwrap();
+    assert!(parent(first).ptr_eq(&old));
+    assert!(parent(second).ptr_eq(&old));
+    assert!(parent(third).ptr_eq(&new));
+}
+
 /// Not a port: upstream's deferred content holds what it captured, and its
 /// collector frees the cycle (DEVIATIONS.md, Markup).
 #[test]

@@ -100,6 +100,9 @@
 //! `runtime_types`) is the `emitter` feature, which adds the `runtime` feature
 //! and the accessor table of the base crate.
 
+mod binary_files;
+pub use binary_files::{BinaryLeaf, BinaryResourceFiles};
+pub use ferroui_xaml_binary::fingerprint as binary_fingerprint;
 mod compiled;
 mod compiled_resources;
 pub mod emit_types;
@@ -112,13 +115,21 @@ mod runtime_host;
 pub mod runtime_types;
 mod source;
 mod transform;
+mod theme_tables;
+mod template_bindings;
+mod template_values;
+mod factory_shapes;
+mod imports;
+mod selector_plans;
+mod style_setters;
 
 pub use compiled::{
+    generate_class_file_with_binary_resources, generate_file_with_binary_resources,
     class_document_group, class_of_document, compile_documents_with, generate_class_file_with, generate_file_with, ClassConstructor, ClassFile,
     ClassGroup, CompiledDocument, EmitterHost, GeneratedFile, CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED,
 };
 #[cfg(any(feature = "emitter", all(test, feature = "runtime")))]
-pub use runtime_host::{compile_documents, generate_class_file, generate_file};
+pub use runtime_host::{compile_documents, generate_class_file, generate_class_file_binary, generate_file, generate_file_binary};
 #[cfg(all(any(test, feature = "testing"), any(feature = "emitter", all(test, feature = "runtime"))))]
 pub use runtime_host::{transformed_class_group, transformed_tree};
 pub use transform::{transform_group, DiagnosticHandler, DocumentSource, TransformOptions, TransformedDocument, METHOD_NOT_FOUND};

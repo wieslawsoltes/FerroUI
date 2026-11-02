@@ -55,6 +55,10 @@ pub fn register_types() {
         ValueTypes::register_global(register_value_types);
         MarkupAssembly::register(&ASSEMBLY);
         crate::assets::register();
+        // When a replacement archive names the class, let its constructor initialize the
+        // compact dictionary against that revision through the scoped populate override.
+        #[cfg(any(feature = "packed-theme", feature = "precompiled-theme"))]
+        FerroXamlLoader::register_class_document(WinUITheme::TYPE, WinUITheme::DOCUMENT_URI);
         FerroXamlLoader::register_compiled_xaml(ASSEMBLY.name, crate::compiled_xaml::try_load);
     });
 }

@@ -442,13 +442,25 @@ impl FerroXamlIlCompiler {
         xaml: &str,
         override_root_type: Option<Rc<dyn IXamlType>>,
     ) -> XamlResult<XamlDocument> {
+        self.resolve_document_root(Self::parse_source_syntax(xaml)?, override_root_type)
+    }
+
+    /// Lexical XamlX syntax, before root substitution or any type-system-dependent pass.
+    pub(crate) fn parse_source_syntax(xaml: &str) -> XamlResult<XamlDocument> {
         let mut compatibility_mappings = HashMap::new();
         compatibility_mappings.insert(
             XamlNamespaces::BLEND2008.to_string(),
             XamlNamespaces::BLEND2008.to_string(),
         );
         compatibility_mappings.insert(DEVELOPMENT_NAMESPACE.into(), DEVELOPMENT_NAMESPACE.into());
-        let parsed = XDocumentXamlParser::parse(xaml, Some(&compatibility_mappings))?;
+        XDocumentXamlParser::parse(xaml, Some(&compatibility_mappings))
+    }
+
+    pub(crate) fn resolve_document_root(
+        &self,
+        parsed: XamlDocument,
+        override_root_type: Option<Rc<dyn IXamlType>>,
+    ) -> XamlResult<XamlDocument> {
 
         let root = parsed.root()?;
         let root_object = root.cast::<XamlAstObjectNode>().ok_or_else(|| {

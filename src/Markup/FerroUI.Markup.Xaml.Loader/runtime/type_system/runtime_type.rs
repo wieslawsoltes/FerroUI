@@ -410,16 +410,26 @@ impl IXamlType for RuntimeType {
     }
     fn is_assignable_from(&self, type_: &dyn IXamlType) -> bool {
         let this: &dyn IXamlType = self;
-        if XamlPseudoType::is_null(type_) {
+        if let Some(source) = type_.as_any().downcast_ref::<RuntimeType>() {
+            if self.hash == source.hash && self.key == source.key {
+                return true;
+            }
+            // Projected object-model classes have exactly the TypeInfo base
+            // chain. Checking it does not require projecting any members.
+            if self.system.ptr_eq(&source.system) {
+                if let (Some(target), Some(source)) = (self.type_info(), source.type_info()) {
+                    return target.is_assignable_from(source);
+                }
+            }
+        } else if XamlPseudoType::is_null(type_) {
             return !self.is_value_type() || this.is_nullable();
-        }
-        if type_.is_value_type() && this.is_nullable_of(type_) {
+        } else if type_.equals(self) {
             return true;
         }
-        if this.is("System", "Object") && type_.is_interface() {
+        if self.generic_definition.is_some() && type_.is_value_type() && this.is_nullable_of(type_) {
             return true;
         }
-        if type_.equals(self) {
+        if self.name == "Object" && self.namespace == "System" && type_.is_interface() {
             return true;
         }
         let mut base_type = type_.base_type();
@@ -516,7 +526,7 @@ impl IXamlType for RuntimeType {
     }
     fn equals(&self, other: &dyn IXamlType) -> bool {
         match other.as_any().downcast_ref::<RuntimeType>() {
-            Some(other) => self.key == other.key,
+            Some(other) => self.hash == other.hash && self.key == other.key,
             None => false,
         }
     }

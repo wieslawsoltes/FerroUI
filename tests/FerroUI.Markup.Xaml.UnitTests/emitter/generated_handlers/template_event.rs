@@ -47,16 +47,15 @@ pub fn populate_handlers_templateevent_xaml(
     button_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_controls::Control>());
     // Handlers/TemplateEvent.xaml(1,159) Name
-    button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("target")));
-    rt::register_name_value(name_scope.as_ref(), "target", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 1, 159)?;
+    rt::set_and_register_name(name_scope.as_ref(), &button_0, "target", 1, 159)?;
     // Handlers/TemplateEvent.xaml(1,191) Template
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     // Handlers/TemplateEvent.xaml(1,208) Content
     let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, populate_handlers_templateevent_xaml_deferred_0, 1, 208)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     button_0.set_value(::ferroui_controls::primitives::TemplatedControl::template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&control_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IControlTemplate>));
-    rt::invoked(button_0.try_end_init(), 1, 152)?;
-    rt::invoked(root.try_end_init(), 1, 2)?;
+    rt::end_init(&button_0, 1, 152)?;
+    rt::end_init(&root, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&root), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(())
 }
@@ -72,11 +71,10 @@ fn populate_handlers_templateevent_xaml_deferred_0(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Handlers/TemplateEvent.xaml(1,215) Name
-    border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("part")));
-    rt::register_name_value(name_scope.as_ref(), "part", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 1, 215)?;
+    rt::set_and_register_name(name_scope.as_ref(), &border_0, "part", 1, 215)?;
     // Handlers/TemplateEvent.xaml(1,208) Tapped
     rt::add_handler_with_context(&context, &border_0, &::ferroui_base::input::InputElement::__markup_field_TappedEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyPanel::__markup_OnTapped_1(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
-    rt::invoked(border_0.try_end_init(), 1, 208)?;
+    rt::end_init(&border_0, 1, 208)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 

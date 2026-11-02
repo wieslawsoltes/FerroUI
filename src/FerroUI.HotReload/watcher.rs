@@ -11,15 +11,15 @@ use std::{
     time::Duration,
 };
 #[derive(Debug)]
-pub struct FileChange {
+pub struct FileChange<T = String> {
     pub uri: String,
-    pub contents: Result<String, String>,
+    pub contents: Result<T, String>,
 }
 /// One stable read of the entire watched set. Includes unchanged documents so a
 /// failed/missing dependency can recover without losing edits observed beside it.
 #[derive(Debug)]
-pub struct FileBatch {
-    pub files: Vec<FileChange>,
+pub struct FileBatch<T = String> {
+    pub files: Vec<FileChange<T>>,
     pub diagnostics: Vec<String>,
     /// The watcher invalidates this as soon as a different read is observed,
     /// including an unstable/partial save which has not passed debounce yet.
@@ -42,10 +42,10 @@ pub struct WatchDirectory {
     pub path: PathBuf,
     pub uri_prefix: String,
 }
-pub struct FileWatcher {
+pub struct FileWatcher<T = String> {
     stop: Arc<AtomicBool>,
     worker: Option<JoinHandle<()>>,
-    pub changes: Receiver<FileBatch>,
+    pub changes: Receiver<FileBatch<T>>,
 }
 impl FileWatcher {
     /// Files map canonical document URI to source path. Two identical reads debounce partial saves.
@@ -73,10 +73,24 @@ impl FileWatcher {
         Self::start(files, interval, Some(baseline), directories)
     }
     fn start(
-        mut files: BTreeMap<String, PathBuf>,
+        files: BTreeMap<String, PathBuf>,
         interval: Duration,
         baseline: Option<BTreeMap<String, String>>,
         directories: Vec<WatchDirectory>,
+    ) -> Self {
+        Self::poll_files(files, interval, baseline, directories, |path| {
+            std::fs::read_to_string(path).map_err(|error| error.to_string())
+        })
+    }
+}
+
+impl<T: Clone + Eq + Send + 'static> FileWatcher<T> {
+    pub(crate) fn poll_files(
+        mut files: BTreeMap<String, PathBuf>,
+        interval: Duration,
+        baseline: Option<BTreeMap<String, T>>,
+        directories: Vec<WatchDirectory>,
+        mut read: impl FnMut(&PathBuf) -> Result<T, String> + Send + 'static,
     ) -> Self {
         let stop = Arc::new(AtomicBool::new(false));
         let worker_stop = stop.clone();
@@ -84,8 +98,6 @@ impl FileWatcher {
         let worker = thread::spawn(move || {
             let generation = Arc::new(AtomicU64::new(0));
             let mut delivered_generation = 0;
-            let read =
-                |path: &PathBuf| std::fs::read_to_string(path).map_err(|error| error.to_string());
             let mut accepted: BTreeMap<_, _> = match baseline {
                 Some(baseline) => baseline
                     .into_iter()
@@ -225,7 +237,7 @@ fn discover(
     }
     Ok(())
 }
-impl Drop for FileWatcher {
+impl<T> Drop for FileWatcher<T> {
     fn drop(&mut self) {
         self.stop.store(true, Ordering::Release);
         if let Some(worker) = self.worker.take() {

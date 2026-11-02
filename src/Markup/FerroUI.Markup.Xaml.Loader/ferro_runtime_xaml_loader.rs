@@ -24,10 +24,8 @@
 //! A class without a registered document reports the error of the managed
 //! original ("No precompiled XAML found for ..").
 
-use std::collections::HashMap;
 use std::io::{Cursor, Read};
 use std::rc::Rc;
-use std::sync::{OnceLock, RwLock};
 
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{from_markup_value, IServiceProvider, MarkupAssembly};
@@ -37,7 +35,7 @@ use ferroui_base::{BoxedValue, FerroLocator, LocatorExtensions, TypeInfo};
 use ferroui_markup_xaml::{
     IRuntimeXamlLoader, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError,
 };
-use crate::back_end::include_sources;
+use crate::runtime_document_input::DocumentInput;
 use crate::runtime::framework::load_exception;
 
 use crate::ferro_xaml_il_runtime_compiler::FerroXamlIlRuntimeCompiler;
@@ -69,7 +67,7 @@ impl FerroRuntimeXamlLoader {
         Self::load_stream(stream, local_assembly, root_instance, uri, design_mode)
     }
 
-    /// Loads XAML from a stream of UTF-8 text.
+    /// Loads a UTF-8 XAML stream or, with `portable-xaml`, an FXD syntax document.
     pub fn load_stream(
         stream: Box<dyn Read>,
         local_assembly: Option<&'static MarkupAssembly>,
@@ -95,33 +93,100 @@ impl FerroRuntimeXamlLoader {
         // then link them as the compiler links the documents of a project (a style or
         // resource include becomes the included object, merged resource includes are
         // merged into the including dictionary).
-        let uri = document.base_uri.clone().filter(|uri| uri.is_absolute_uri());
-        let text = document
-            .read_to_string()
+        let input = DocumentInput::read(&mut **document.xaml_stream())
             .map_err(|e| XamlLoadError::with_inner(format!("Unable to read the XAML document: {e}"), e))?;
+        let assets = asset_loader();
+        let inputs = Self::collect_inputs(document, input, &|uri| read_included_asset(&*assets, uri))?;
+        Self::build_root(inputs, &configuration)
+    }
+
+    /// Loads one document and its transitive includes from an FXP archive. References
+    /// outside its assembly still use the application's asset loader. An existing root
+    /// and a parent service provider have the same semantics as a normal class populate.
+    #[cfg(feature = "portable-xaml")]
+    pub fn load_packed_document(
+        pack: &crate::binary_document::pack::ThemePack<'_>,
+        uri: Uri,
+        root: Option<BoxedValue>,
+        parent: Option<Rc<dyn IServiceProvider>>,
+        configuration: RuntimeXamlLoaderConfiguration,
+    ) -> Result<BoxedValue, XamlLoadError> {
+        let inputs = Self::packed_inputs(pack, uri, root, parent)?;
+        Self::build_root(inputs, &configuration)
+    }
+
+    /// Resolve a complete include closure once. The returned plan constructs a fresh
+    /// root on each call, retaining the resolved program independently of the source
+    /// archive and the process-wide registrations used to resolve its members.
+    #[cfg(feature = "portable-xaml")]
+    pub fn prepare_packed_document(
+        pack: &crate::binary_document::pack::ThemePack<'_>,
+        uri: Uri,
+        configuration: RuntimeXamlLoaderConfiguration,
+    ) -> Result<crate::PreparedPackedDocument, XamlLoadError> {
+        let inputs = Self::packed_inputs(pack, uri, None, None)?;
+        crate::PreparedPackedDocument::prepare(inputs, &configuration).map_err(load_exception)
+    }
+
+    #[cfg(feature = "portable-xaml")]
+    fn packed_inputs(
+        pack: &crate::binary_document::pack::ThemePack<'_>, uri: Uri,
+        root: Option<BoxedValue>, parent: Option<Rc<dyn IServiceProvider>>,
+    ) -> Result<Vec<(RuntimeXamlLoaderDocument, DocumentInput)>, XamlLoadError> {
+        use ferroui_base::utilities::UriExtensions;
+        if !uri.is_absolute_uri() || !UriExtensions::is_asset(&uri) || UriExtensions::authority(&uri).is_empty() {
+            return Err(XamlLoadError::with_message("A packed document requires an absolute ferres asset URI"));
+        }
+        let authority = UriExtensions::authority(&uri).to_owned();
+        let path = UriExtensions::get_unescape_absolute_path(&uri);
+        let path = path.trim_start_matches('/');
+        let mut document = RuntimeXamlLoaderDocument::from_stream_with_base_uri_and_root_instance(
+            Some(uri), root, Box::new(std::io::empty()),
+        );
+        document.document = Some(path.to_string());
+        document.service_provider = parent;
+        let input = |path: &str| pack.document(path).map(DocumentInput::from_portable).map_err(load_exception);
+        let assets = asset_loader();
+        Self::collect_inputs(document, input(path)?, &|uri| {
+            if UriExtensions::is_asset(uri) && UriExtensions::authority(uri).eq_ignore_ascii_case(&authority) {
+                let name = UriExtensions::get_unescape_absolute_path(uri);
+                let name = name.trim_start_matches('/');
+                if pack.contains(name) {
+                    return input(name).map(Some);
+                }
+            }
+            read_included_asset(&*assets, uri)
+        })
+    }
+
+    fn collect_inputs(
+        document: RuntimeXamlLoaderDocument,
+        mut input: DocumentInput,
+        open: &OpenInclude<'_>,
+    ) -> Result<Vec<(RuntimeXamlLoaderDocument, DocumentInput)>, XamlLoadError> {
+        let uri = document.base_uri.clone().filter(|uri| uri.is_absolute_uri());
         let mut included = Vec::new();
         let mut visited: Vec<String> = uri.iter().map(|uri| uri.absolute_uri().to_string()).collect();
-        collect_included_documents(&*asset_loader(), uri.as_ref(), &text, &mut visited, &|_| false, &mut included);
+        collect_included_documents(open, uri.as_ref(), input.include_sources().map_err(load_exception)?, &mut visited, &|_| false, &mut included)?;
+        let mut documents = vec![(document, input)];
+        documents.extend(included.into_iter().map(|(uri, input)| {
+            let name = uri.absolute_path().trim_start_matches('/').to_string();
+            let mut included = RuntimeXamlLoaderDocument::from_stream_with_base_uri(Some(uri), Box::new(std::io::empty()));
+            included.document = Some(name);
+            (included, input)
+        }));
+        Ok(documents)
+    }
 
-        // The text was read: the document is given again, with the same properties.
-        let stream: Box<dyn Read> = Box::new(Cursor::new(text.into_bytes()));
-        let mut root = RuntimeXamlLoaderDocument::from_stream_with_base_uri_and_root_instance(
-            document.base_uri.clone(),
-            document.root_instance.clone(),
-            stream,
-        );
-        root.service_provider = document.service_provider.clone();
-        root.document = document.document.clone();
-        if included.is_empty() {
-            return FerroXamlIlRuntimeCompiler::load(root, &configuration).map_err(load_exception);
-        }
-        let mut documents = vec![root];
-        documents.extend(included.into_iter().map(|(uri, text)| included_document(uri, text)));
-        let loaded = FerroXamlIlRuntimeCompiler::load_group(documents, &configuration).map_err(load_exception)?;
-        match loaded.into_iter().next() {
-            Some(Some(root)) => Ok(root),
-            _ => Err(XamlLoadError::with_message("The document built a null root object".to_string())),
-        }
+    fn build_root(
+        documents: Vec<(RuntimeXamlLoaderDocument, DocumentInput)>,
+        configuration: &RuntimeXamlLoaderConfiguration,
+    ) -> Result<BoxedValue, XamlLoadError> {
+        // A root load creates a single object. Included documents participate in
+        // group transforms and are built by their referring sites, with the parent
+        // services and ambient resources of that site.
+        let loaded = FerroXamlIlRuntimeCompiler::load_inputs(documents, configuration, 1).map_err(load_exception)?;
+        loaded.into_iter().next().flatten().ok_or_else(|| XamlLoadError::with_message("The document built a null root object".to_string()))
     }
 
     /// Loads a group of documents that may refer to each other. Returns the
@@ -152,33 +217,18 @@ impl FerroRuntimeXamlLoader {
         })
     }
 
-    /// States that the markup of `class` (the class its root element names with
-    /// `x:Class`) is the document with the absolute URI `uri`, an asset of the crate.
-    /// Process-wide; a later registration for the same class replaces the earlier one.
-    /// See the module documentation.
+    /// Registers the class with the XAML runtime shared by compiled markup and the interpreter.
     pub fn register_class_document(class: &'static TypeInfo, uri: &str) {
-        let mut documents = class_documents().write().unwrap_or_else(|e| e.into_inner());
-        documents.insert(class as *const TypeInfo as usize, uri.to_string());
+        ferroui_markup_xaml::FerroXamlLoader::register_class_document(class, uri);
     }
 
-    /// The URI of the document registered for `class` or, failing that, for the
-    /// nearest of its base classes that has one.
+    /// The registered document for this class or its nearest registered base class.
     pub fn class_document(class: &'static TypeInfo) -> Option<String> {
-        let documents = class_documents().read().unwrap_or_else(|e| e.into_inner());
-        let mut current = Some(class);
-        while let Some(class) = current {
-            if let Some(uri) = documents.get(&(class as *const TypeInfo as usize)) {
-                return Some(uri.clone());
-            }
-            current = class.base_type();
-        }
-        None
+        ferroui_markup_xaml::FerroXamlLoader::class_document(class)
     }
 
-    /// Whether a document is registered for exactly `class`.
     pub(crate) fn has_class_document(class: &'static TypeInfo) -> bool {
-        let documents = class_documents().read().unwrap_or_else(|e| e.into_inner());
-        documents.contains_key(&(class as *const TypeInfo as usize))
+        ferroui_markup_xaml::FerroXamlLoader::has_class_document(class)
     }
 
     /// Runs `create` (the constructor of `class`) with `populate` in place of the
@@ -225,18 +275,14 @@ impl FerroRuntimeXamlLoader {
                 "No precompiled XAML found for {type_name}, make sure to specify x:Class and include your XAML file as FerroResource"
             )));
         };
-        let group = Self::document_group(&uri_text, &type_name)?;
-        let (uri, text, included, assembly) = (group.uri, group.text, group.included, group.assembly);
-
-        let stream: Box<dyn Read> = Box::new(Cursor::new(text.into_bytes()));
-        let mut document =
-            RuntimeXamlLoaderDocument::from_stream_with_base_uri_and_root_instance(Some(uri), Some(instance.clone()), stream);
+        let (uri, stream, assembly) = open_class_asset(&*asset_loader(), &uri_text, &type_name)?;
+        let mut document = RuntimeXamlLoaderDocument::from_stream_with_base_uri_and_root_instance(
+            Some(uri), Some(instance.clone()), stream,
+        );
         document.service_provider = service_provider.cloned();
-        let mut documents = vec![document];
-        documents.extend(included.into_iter().map(|(uri, text)| included_document(uri, text)));
         let mut configuration = RuntimeXamlLoaderConfiguration::new();
         configuration.local_assembly = assembly;
-        Self::load_group(documents, Some(configuration)).map(|_| ())
+        Self::load_document(document, Some(configuration)).map(|_| ())
     }
 
     /// The document at `uri_text` (of the class named `type_name`, for the
@@ -257,30 +303,15 @@ impl FerroRuntimeXamlLoader {
         type_name: &str,
         skip: &dyn Fn(&Uri) -> bool,
     ) -> Result<DocumentGroup, XamlLoadError> {
-        let uri = Uri::new(uri_text, UriKind::Absolute).map_err(|e| {
-            XamlLoadError::with_message(format!("The URI '{uri_text}' of the XAML document of {type_name} is invalid: {e}"))
-        })?;
-        // The document of a class is found wherever the class is created, as compiled
-        // markup is: without an asset loader service the registered assets are read
-        // directly.
         let assets = asset_loader();
-        let (mut stream, assembly) = assets.open_and_get_assembly(&uri, None).map_err(|e| {
-            XamlLoadError::with_inner(format!("Could not open the XAML document {uri} of {type_name}: {e}"), e)
-        })?;
-        let mut text = String::new();
-        stream.read_to_string(&mut text).map_err(|e| {
-            XamlLoadError::with_inner(format!("Could not read the XAML document {uri} of {type_name}: {e}"), e)
-        })?;
-
-        // The document of a class is loaded as a group with every document it includes,
-        // directly or not: the group transformers then link the documents to each other
-        // as the compiler links the documents of a project (merged resource includes are
-        // merged into the including dictionary, style and resource includes become the
-        // included objects), so that the populated instance is the one compiled markup
-        // builds.
+        let (uri, mut stream, assembly) = open_class_asset(&*assets, uri_text, type_name)?;
+        let read_error = |e| XamlLoadError::with_inner(format!("Could not read the XAML source group {uri} of {type_name}: {e}"), e);
+        let mut input = DocumentInput::read(&mut *stream).map_err(read_error)?;
         let mut included = Vec::new();
-        collect_included_documents(&*assets, Some(&uri), &text, &mut vec![uri.absolute_uri().to_string()], skip, &mut included);
-        Ok(DocumentGroup { uri, text, included, assembly: MarkupAssembly::find(assembly.name()) })
+        collect_included_documents(&|uri| read_included_asset(&*assets, uri), Some(&uri), input.include_sources().map_err(load_exception)?, &mut vec![uri.absolute_uri().to_string()], skip, &mut included)?;
+        let text = input.into_text().map_err(read_error)?;
+        let included = included.into_iter().map(|(uri, doc)| doc.into_text().map(|text| (uri, text))).collect::<std::io::Result<_>>().map_err(read_error)?;
+        Ok(DocumentGroup { uri, text, included, assembly })
     }
 
     /// Makes the run-time loader the loader `FerroXamlLoader` falls back to
@@ -329,12 +360,6 @@ impl IRuntimeXamlLoader for RuntimeXamlLoaderService {
     }
 }
 
-/// The documents of the classes with markup, by class.
-fn class_documents() -> &'static RwLock<HashMap<usize, String>> {
-    static DOCUMENTS: OnceLock<RwLock<HashMap<usize, String>>> = OnceLock::new();
-    DOCUMENTS.get_or_init(Default::default)
-}
-
 /// The asset loader service, or the loader of the registered assets when there is none:
 /// the documents of a group are found wherever they are loaded, as compiled markup is.
 fn asset_loader() -> Rc<dyn IAssetLoader> {
@@ -344,26 +369,43 @@ fn asset_loader() -> Rc<dyn IAssetLoader> {
     }
 }
 
-/// An included document of a group, named by its path as the compiler names it.
-fn included_document(uri: Uri, text: String) -> RuntimeXamlLoaderDocument {
-    let name = uri.absolute_path().trim_start_matches('/').to_string();
-    let stream: Box<dyn Read> = Box::new(Cursor::new(text.into_bytes()));
-    let mut document = RuntimeXamlLoaderDocument::from_stream_with_base_uri(Some(uri), stream);
-    document.document = Some(name);
-    document
+/// Open the registered asset as a stream so runtime class population accepts both encodings.
+fn open_class_asset(
+    assets: &dyn IAssetLoader, uri_text: &str, type_name: &str,
+) -> Result<(Uri, Box<dyn Read>, Option<&'static MarkupAssembly>), XamlLoadError> {
+    let uri = Uri::new(uri_text, UriKind::Absolute).map_err(|e| {
+        XamlLoadError::with_message(format!("The URI '{uri_text}' of the XAML document of {type_name} is invalid: {e}"))
+    })?;
+    let (stream, assembly) = assets.open_and_get_assembly(&uri, None).map_err(|e| {
+        XamlLoadError::with_inner(format!("Could not open the XAML document {uri} of {type_name}: {e}"), e)
+    })?;
+    Ok((uri, stream, MarkupAssembly::find(assembly.name())))
+}
+
+type OpenInclude<'a> = dyn Fn(&Uri) -> Result<Option<DocumentInput>, XamlLoadError> + 'a;
+
+fn read_included_asset(assets: &dyn IAssetLoader, uri: &Uri) -> Result<Option<DocumentInput>, XamlLoadError> {
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    if let Some(text) = ferroui_markup_xaml::source_overlay::source(uri.absolute_uri()) {
+        return Ok(Some(DocumentInput::xml(text)));
+    }
+    let Ok(mut stream) = assets.open(uri, None) else { return Ok(None) };
+    DocumentInput::read(&mut *stream).map(Some).map_err(|error|
+        XamlLoadError::with_inner(format!("Could not read included XAML document {uri}: {error}"), error)
+    )
 }
 
 /// Adds to `documents` the documents `xaml` (at `uri`, if it has one) includes, directly or not, that
 /// the asset loader has and that are not in `visited` yet, each with its text.
 fn collect_included_documents(
-    assets: &dyn IAssetLoader,
+    open: &OpenInclude<'_>,
     uri: Option<&Uri>,
-    xaml: &str,
+    sources: Vec<String>,
     visited: &mut Vec<String>,
     skip: &dyn Fn(&Uri) -> bool,
-    documents: &mut Vec<(Uri, String)>,
-) {
-    for source in include_sources(xaml) {
+    documents: &mut Vec<(Uri, DocumentInput)>,
+) -> Result<(), XamlLoadError> {
+    for source in sources {
         let Some(relative) = Uri::try_create(&source, UriKind::RelativeOrAbsolute) else { continue };
         // A relative source needs the URI of the including document.
         let included = match (relative.is_absolute_uri(), uri) {
@@ -376,22 +418,108 @@ fn collect_included_documents(
             continue;
         }
         visited.push(key);
-        #[cfg(all(feature = "hot-reload", debug_assertions))]
-        let overlay = ferroui_markup_xaml::source_overlay::source(included.absolute_uri());
-        #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
-        let overlay: Option<String> = None;
-        let text = match overlay {
-            Some(text) => text,
-            None => {
-                let Ok(mut stream) = assets.open(&included, None) else { continue };
-                let mut text = String::new();
-                if stream.read_to_string(&mut text).is_err() { continue; }
-                text
-            }
+        let Some(mut input) = open(&included)? else { continue };
+        let sources = input.include_sources().map_err(load_exception)?;
+        documents.push((included.clone(), input));
+        collect_included_documents(open, Some(&included), sources, visited, skip, documents)?;
+    }
+    Ok(())
+}
+
+#[cfg(all(test, feature = "portable-xaml"))]
+mod portable_tests {
+    use super::*;
+    use crate::binary_document;
+    use ferroui_base::{Ref, controls::ResourceDictionary, media::{Colors, SolidColorBrush}};
+    use std::sync::OnceLock;
+
+    #[test]
+    fn mixed_xml_and_fxd_asset_groups_follow_nested_relative_includes() {
+        const LEAF: &str = r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:String x:Key="Message">from the leaf</x:String></ResourceDictionary>"#;
+        fn include(path: &str) -> String {
+            format!(r#"<ResourceDictionary xmlns="https://github.com/ferroui"><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="{path}"/></ResourceDictionary.MergedDictionaries></ResourceDictionary>"#)
+        }
+        static CHILD: OnceLock<Vec<u8>> = OnceLock::new();
+        ferroui_base::platform::register_assets("fxd-includes", &[
+            ("Child.xaml", CHILD.get_or_init(|| binary_document::compile(&include("Dir/A&amp;B.xaml")).unwrap())),
+            ("Dir/A&B.xaml", LEAF.as_bytes()),
+        ]);
+        // An XML property element and an entity-escaped filename must discover the
+        // same assets through both encodings, including the FXD child's dependency.
+        let source = include("Child.xaml").replace(
+            "<MergeResourceInclude Source=\"Child.xaml\"/>",
+            "<MergeResourceInclude><MergeResourceInclude.Source>Child.xaml</MergeResourceInclude.Source></MergeResourceInclude>",
+        );
+        for bytes in [source.as_bytes().to_vec(), binary_document::compile(&source).unwrap()] {
+            let root = FerroRuntimeXamlLoader::load_stream(Box::new(Cursor::new(bytes)), None, None,
+                Some(Uri::absolute("ferres://fxd-includes/Root.xaml").unwrap()), false).unwrap();
+            let dictionary = from_markup_value::<Ref<ResourceDictionary>>(&Some(root)).unwrap();
+            assert_eq!(from_markup_value::<String>(&dictionary.get(&"Message".into())).as_deref(), Some("from the leaf"));
+        }
+    }
+
+    #[test]
+    fn prepared_document_keeps_its_includes_but_builds_fresh_instances() {
+        use crate::binary_document::pack::{compile_documents, ThemePack};
+        let prepare = |text: &str| {
+            let root = r#"<ResourceDictionary xmlns="https://github.com/ferroui"><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="Child.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary>"#;
+            let child = format!(r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:String x:Key="Label">{text}</x:String></ResourceDictionary>"#);
+            let bytes = compile_documents(&[("Root.xaml", root), ("Child.xaml", &child)]).unwrap();
+            let pack = ThemePack::open(&bytes).unwrap();
+            FerroRuntimeXamlLoader::prepare_packed_document(
+                &pack, Uri::absolute("ferres://prepared-test/Root.xaml").unwrap(), Default::default(),
+            ).unwrap()
         };
-        let at = documents.len();
-        documents.push((included.clone(), String::new()));
-        collect_included_documents(assets, Some(&included), &text, visited, skip, documents);
-        documents[at].1 = text;
+        let first = prepare("one");
+        let second = prepare("two");
+        let build = |plan: &crate::PreparedPackedDocument| {
+            from_markup_value::<Ref<ResourceDictionary>>(&Some(plan.build(None).unwrap())).unwrap()
+        };
+        let label = |dict: &Ref<ResourceDictionary>| from_markup_value::<String>(&dict.get(&"Label".into())).unwrap();
+        let a = build(&first);
+        let b = build(&second);
+        assert_eq!(label(&b), "two");
+        a.remove(&"Label".into());
+        let c = build(&first);
+        assert!(!c.ptr_eq(&a));
+        assert_eq!(label(&c), "one");
+    }
+
+    #[test]
+    fn archive_load_preserves_root_identity_and_nested_include_locations() {
+        use crate::binary_document::pack::{compile_documents, ThemePack};
+        let leaf = r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:String x:Key="Message">packed</x:String></ResourceDictionary>"#;
+        let include = |source: &str| format!(r#"<ResourceDictionary xmlns="https://github.com/ferroui"><ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="{source}"/></ResourceDictionary.MergedDictionaries></ResourceDictionary>"#);
+        let bytes = compile_documents(&[
+            ("View/Root.xaml", &include("Child/Middle.xaml")),
+            ("View/Child/Middle.xaml", &include("../Leaf.xaml")),
+            ("View/Leaf.xaml", leaf),
+            // A sibling that was never referenced must not be transformed or constructed.
+            ("Unused.xaml", "<Missing xmlns='using:Not.Registered'/>"),
+        ]).unwrap();
+        let pack = ThemePack::open(&bytes).unwrap();
+        let target = ResourceDictionary::new();
+        let value = FerroRuntimeXamlLoader::load_packed_document(
+            &pack, Uri::absolute("ferres://test/View/Root.xaml").unwrap(), Some(Rc::new(target.clone())), None,
+            RuntimeXamlLoaderConfiguration::new(),
+        ).unwrap();
+        assert!(from_markup_value::<Ref<ResourceDictionary>>(&Some(value)).unwrap().ptr_eq(&target));
+        assert_eq!(from_markup_value::<String>(&target.get(&"Message".into())).as_deref(), Some("packed"));
+    }
+
+    #[test]
+    fn portable_stream_populates_existing_root_and_preserves_diagnostics() {
+        let markup = "<SolidColorBrush xmlns='https://github.com/ferroui' Color='Red'/>";
+        let brush = SolidColorBrush::new();
+        let bytes = binary_document::compile(markup).unwrap();
+        let root = FerroRuntimeXamlLoader::load_stream(Box::new(Cursor::new(bytes)), None,
+            Some(Rc::new(brush.clone())), None, false).unwrap();
+        assert!(from_markup_value::<Ref<SolidColorBrush>>(&Some(root)).unwrap().ptr_eq(&brush));
+        assert_eq!(brush.color(), Colors::RED);
+        let invalid = "<SolidColorBrush xmlns='https://github.com/ferroui'\n Color='not-a-color'/>";
+        let load_error = |bytes| FerroRuntimeXamlLoader::load_stream(Box::new(Cursor::new(bytes)), None, None, None, false)
+            .err().expect("invalid color").message().to_owned();
+        assert_eq!(load_error(invalid.as_bytes().to_vec()), load_error(binary_document::compile(invalid).unwrap()));
+        assert!(load_error(b"FXD\0\xff".to_vec()).contains("FXD"));
     }
 }

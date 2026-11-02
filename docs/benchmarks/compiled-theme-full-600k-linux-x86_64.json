@@ -1,0 +1,1113 @@
+{
+  "method": "Full unrooted WinUI theme. Linux x86-64, rustc 1.99.0, Cargo release opt-level 3, cross-crate LTO and incremental off, one build job. native_size sets only WinUI to opt-level z with one CGU. Previous binaries are the preserved full-dictionary release probes reported in compiled-theme-dedup-linux-x86_64.json. Candidate uses a dependency-warm replay of the PR sources at the same Cargo source paths. Both outputs have the hash of clean model-host generation. Warm filesystem cache, one untimed prelaunch per executable, 25 rotating fresh processes per executable, time to a flushed successful first Button lookup. Cargo units are independent single measurements on a shared host. LLD input section sums exclude unattributable linker alignment, synthesized relocations and shared dependencies. Symbol sums count distinct address/size pairs under ferroui_themes_winui::compiled_xaml in nm -S -C on the unstripped executable.",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.39",
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1",
+  "source_reference": "PR #496 native shared selectors, deferred factories, static-resource operations, private type imports and isolated merged dictionaries. Consult the generated-source SHA-256 values for exact inputs to rustc.",
+  "measurements": {
+    "previous_native": {
+      "generated_rust_bytes": 7903409,
+      "generated_rust_sha256": "84f0be9ec2d2585d2953fa3728a58dffe317a5b23c9e2f5d1a3b951b28ed3c78",
+      "fxb_bytes": 0,
+      "stripped_app_bytes": 68233648,
+      "app_sha256": "cf10c3034c34888f3b752a72883e6f82647db0a3ba8d9f7a8896f065e99a1110",
+      "winui_rlib_bytes": 45134718,
+      "cargo_units": [
+        {
+          "package": "ferroui-themes-winui",
+          "target": "build-script",
+          "seconds": 0.8
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "build-script (run)",
+          "seconds": 25.22
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "",
+          "seconds": 168.68
+        },
+        {
+          "package": "winui-theme-probe",
+          "target": "winui-theme-probe \"bin\"",
+          "seconds": 1.21
+        }
+      ],
+      "generated_machine_text_bytes": 4657569,
+      "launches": [
+        {
+          "create_ns": 15078290,
+          "button_lookup_ns": 180367,
+          "create_and_button_ns": 15258657,
+          "process_ready_ns": 19887446,
+          "process_ns": 24195255
+        },
+        {
+          "create_ns": 14445198,
+          "button_lookup_ns": 292352,
+          "create_and_button_ns": 14737550,
+          "process_ready_ns": 19153390,
+          "process_ns": 23088363
+        },
+        {
+          "create_ns": 8375573,
+          "button_lookup_ns": 193276,
+          "create_and_button_ns": 8568849,
+          "process_ready_ns": 12176934,
+          "process_ns": 14296789
+        },
+        {
+          "create_ns": 10107024,
+          "button_lookup_ns": 184052,
+          "create_and_button_ns": 10291076,
+          "process_ready_ns": 14647467,
+          "process_ns": 23502791
+        },
+        {
+          "create_ns": 17659792,
+          "button_lookup_ns": 183762,
+          "create_and_button_ns": 17843554,
+          "process_ready_ns": 25233069,
+          "process_ns": 27958369
+        },
+        {
+          "create_ns": 16253062,
+          "button_lookup_ns": 657102,
+          "create_and_button_ns": 16910164,
+          "process_ready_ns": 21145961,
+          "process_ns": 23881976
+        },
+        {
+          "create_ns": 13523566,
+          "button_lookup_ns": 279724,
+          "create_and_button_ns": 13803290,
+          "process_ready_ns": 18322482,
+          "process_ns": 21278362
+        },
+        {
+          "create_ns": 20600079,
+          "button_lookup_ns": 187277,
+          "create_and_button_ns": 20787356,
+          "process_ready_ns": 24817750,
+          "process_ns": 28369658
+        },
+        {
+          "create_ns": 22982972,
+          "button_lookup_ns": 293534,
+          "create_and_button_ns": 23276506,
+          "process_ready_ns": 28600524,
+          "process_ns": 32111375
+        },
+        {
+          "create_ns": 13674688,
+          "button_lookup_ns": 271912,
+          "create_and_button_ns": 13946600,
+          "process_ready_ns": 19793626,
+          "process_ns": 22871037
+        },
+        {
+          "create_ns": 14003244,
+          "button_lookup_ns": 256289,
+          "create_and_button_ns": 14259533,
+          "process_ready_ns": 19071905,
+          "process_ns": 22088325
+        },
+        {
+          "create_ns": 10721072,
+          "button_lookup_ns": 273154,
+          "create_and_button_ns": 10994226,
+          "process_ready_ns": 15256648,
+          "process_ns": 17366537
+        },
+        {
+          "create_ns": 12477730,
+          "button_lookup_ns": 234337,
+          "create_and_button_ns": 12712067,
+          "process_ready_ns": 16895787,
+          "process_ns": 20230412
+        },
+        {
+          "create_ns": 10257116,
+          "button_lookup_ns": 181719,
+          "create_and_button_ns": 10438835,
+          "process_ready_ns": 14294215,
+          "process_ns": 16842543
+        },
+        {
+          "create_ns": 10555707,
+          "button_lookup_ns": 414393,
+          "create_and_button_ns": 10970100,
+          "process_ready_ns": 15291309,
+          "process_ns": 18407076
+        },
+        {
+          "create_ns": 16693153,
+          "button_lookup_ns": 184713,
+          "create_and_button_ns": 16877866,
+          "process_ready_ns": 21778392,
+          "process_ns": 24601100
+        },
+        {
+          "create_ns": 16720092,
+          "button_lookup_ns": 253425,
+          "create_and_button_ns": 16973517,
+          "process_ready_ns": 22302086,
+          "process_ns": 26091554
+        },
+        {
+          "create_ns": 12454515,
+          "button_lookup_ns": 222790,
+          "create_and_button_ns": 12677305,
+          "process_ready_ns": 17538002,
+          "process_ns": 21573949
+        },
+        {
+          "create_ns": 10740671,
+          "button_lookup_ns": 178715,
+          "create_and_button_ns": 10919386,
+          "process_ready_ns": 17771813,
+          "process_ns": 19987679
+        },
+        {
+          "create_ns": 13076495,
+          "button_lookup_ns": 274045,
+          "create_and_button_ns": 13350540,
+          "process_ready_ns": 18590548,
+          "process_ns": 21841995
+        },
+        {
+          "create_ns": 9887169,
+          "button_lookup_ns": 260515,
+          "create_and_button_ns": 10147684,
+          "process_ready_ns": 15717811,
+          "process_ns": 18784325
+        },
+        {
+          "create_ns": 12686403,
+          "button_lookup_ns": 179155,
+          "create_and_button_ns": 12865558,
+          "process_ready_ns": 19032191,
+          "process_ns": 21303379
+        },
+        {
+          "create_ns": 14260635,
+          "button_lookup_ns": 286584,
+          "create_and_button_ns": 14547219,
+          "process_ready_ns": 19221650,
+          "process_ns": 22497514
+        },
+        {
+          "create_ns": 14125606,
+          "button_lookup_ns": 309437,
+          "create_and_button_ns": 14435043,
+          "process_ready_ns": 20281809,
+          "process_ns": 23411081
+        },
+        {
+          "create_ns": 13567851,
+          "button_lookup_ns": 235338,
+          "create_and_button_ns": 13803189,
+          "process_ready_ns": 18828635,
+          "process_ns": 21547805
+        }
+      ],
+      "median": {
+        "create_ns": 13567851,
+        "button_lookup_ns": 253425,
+        "create_and_button_ns": 13803290,
+        "process_ready_ns": 19032191,
+        "process_ns": 22088325
+      }
+    },
+    "native": {
+      "generated_rust_bytes": 6085047,
+      "generated_rust_sha256": "ae1115397423eaa01c83a578d001df7f6163fb387d693e16587cb1bcbf6733a8",
+      "fxb_bytes": 0,
+      "stripped_app_bytes": 67059216,
+      "app_sha256": "aaf88b995ba7ce8fcefa9e6218357ee3ecdf227cf08fbb6718225367bfc3beea",
+      "winui_rlib_bytes": 43262258,
+      "cargo_units": [
+        {
+          "package": "ferroui-themes-winui",
+          "target": "build-script",
+          "seconds": 0.92
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "build-script (run)",
+          "seconds": 12.32
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "",
+          "seconds": 163.74
+        },
+        {
+          "package": "winui-theme-probe",
+          "target": "winui-theme-probe \"bin\"",
+          "seconds": 0.91
+        }
+      ],
+      "generated_machine_text_bytes": 3574920,
+      "allocated_sections": {
+        ".gcc_except_table": 647184,
+        ".rodata": 175926,
+        ".eh_frame": 1139372,
+        ".text": 7756198,
+        ".tbss": 76,
+        ".data.rel.ro": 586560,
+        ".data": 1540
+      },
+      "allocated_bytes": 10306856,
+      "launches": [
+        {
+          "create_ns": 11353617,
+          "button_lookup_ns": 269940,
+          "create_and_button_ns": 11623557,
+          "process_ready_ns": 15557644,
+          "process_ns": 19690299
+        },
+        {
+          "create_ns": 14392581,
+          "button_lookup_ns": 301555,
+          "create_and_button_ns": 14694136,
+          "process_ready_ns": 19053967,
+          "process_ns": 22200430
+        },
+        {
+          "create_ns": 14093809,
+          "button_lookup_ns": 334144,
+          "create_and_button_ns": 14427953,
+          "process_ready_ns": 18956294,
+          "process_ns": 21767450
+        },
+        {
+          "create_ns": 11568665,
+          "button_lookup_ns": 216660,
+          "create_and_button_ns": 11785325,
+          "process_ready_ns": 16372178,
+          "process_ns": 19128518
+        },
+        {
+          "create_ns": 10606512,
+          "button_lookup_ns": 225363,
+          "create_and_button_ns": 10831875,
+          "process_ready_ns": 14652705,
+          "process_ns": 17102487
+        },
+        {
+          "create_ns": 13039121,
+          "button_lookup_ns": 305051,
+          "create_and_button_ns": 13344172,
+          "process_ready_ns": 17732945,
+          "process_ns": 20798297
+        },
+        {
+          "create_ns": 12327637,
+          "button_lookup_ns": 193205,
+          "create_and_button_ns": 12520842,
+          "process_ready_ns": 17155425,
+          "process_ns": 19608082
+        },
+        {
+          "create_ns": 23113154,
+          "button_lookup_ns": 727205,
+          "create_and_button_ns": 23840359,
+          "process_ready_ns": 28642821,
+          "process_ns": 32379235
+        },
+        {
+          "create_ns": 16009440,
+          "button_lookup_ns": 299794,
+          "create_and_button_ns": 16309234,
+          "process_ready_ns": 21358469,
+          "process_ns": 25172384
+        },
+        {
+          "create_ns": 16534723,
+          "button_lookup_ns": 339222,
+          "create_and_button_ns": 16873945,
+          "process_ready_ns": 27987357,
+          "process_ns": 32049503
+        },
+        {
+          "create_ns": 15212067,
+          "button_lookup_ns": 291070,
+          "create_and_button_ns": 15503137,
+          "process_ready_ns": 25378224,
+          "process_ns": 25767004
+        },
+        {
+          "create_ns": 10113823,
+          "button_lookup_ns": 267997,
+          "create_and_button_ns": 10381820,
+          "process_ready_ns": 14506493,
+          "process_ns": 17187056
+        },
+        {
+          "create_ns": 16960578,
+          "button_lookup_ns": 670582,
+          "create_and_button_ns": 17631160,
+          "process_ready_ns": 21664813,
+          "process_ns": 26528604
+        },
+        {
+          "create_ns": 11982728,
+          "button_lookup_ns": 192615,
+          "create_and_button_ns": 12175343,
+          "process_ready_ns": 17976029,
+          "process_ns": 20100370
+        },
+        {
+          "create_ns": 12493453,
+          "button_lookup_ns": 205333,
+          "create_and_button_ns": 12698786,
+          "process_ready_ns": 17021062,
+          "process_ns": 19906808
+        },
+        {
+          "create_ns": 12140261,
+          "button_lookup_ns": 260495,
+          "create_and_button_ns": 12400756,
+          "process_ready_ns": 20313179,
+          "process_ns": 23284888
+        },
+        {
+          "create_ns": 12655692,
+          "button_lookup_ns": 231482,
+          "create_and_button_ns": 12887174,
+          "process_ready_ns": 18791805,
+          "process_ns": 21780214
+        },
+        {
+          "create_ns": 10148697,
+          "button_lookup_ns": 343217,
+          "create_and_button_ns": 10491914,
+          "process_ready_ns": 14208515,
+          "process_ns": 17252555
+        },
+        {
+          "create_ns": 9065423,
+          "button_lookup_ns": 207297,
+          "create_and_button_ns": 9272720,
+          "process_ready_ns": 12526066,
+          "process_ns": 15072240
+        },
+        {
+          "create_ns": 10961217,
+          "button_lookup_ns": 206706,
+          "create_and_button_ns": 11167923,
+          "process_ready_ns": 14891558,
+          "process_ns": 17398805
+        },
+        {
+          "create_ns": 9708425,
+          "button_lookup_ns": 231553,
+          "create_and_button_ns": 9939978,
+          "process_ready_ns": 13477914,
+          "process_ns": 16335739
+        },
+        {
+          "create_ns": 13755965,
+          "button_lookup_ns": 260625,
+          "create_and_button_ns": 14016590,
+          "process_ready_ns": 18476619,
+          "process_ns": 21682785
+        },
+        {
+          "create_ns": 17745959,
+          "button_lookup_ns": 568581,
+          "create_and_button_ns": 18314540,
+          "process_ready_ns": 23824041,
+          "process_ns": 27144010
+        },
+        {
+          "create_ns": 14156011,
+          "button_lookup_ns": 335997,
+          "create_and_button_ns": 14492008,
+          "process_ready_ns": 19025751,
+          "process_ns": 21965438
+        },
+        {
+          "create_ns": 12843301,
+          "button_lookup_ns": 196240,
+          "create_and_button_ns": 13039541,
+          "process_ready_ns": 18019414,
+          "process_ns": 21407387
+        }
+      ],
+      "median": {
+        "create_ns": 12655692,
+        "button_lookup_ns": 267997,
+        "create_and_button_ns": 12887174,
+        "process_ready_ns": 18019414,
+        "process_ns": 21407387
+      }
+    },
+    "previous_fxb": {
+      "generated_rust_bytes": 7289507,
+      "generated_rust_sha256": "2478be11e58d141d4ebc36eb394580b776db7fd685159921606842bc87f5a16d",
+      "fxb_bytes": 236219,
+      "stripped_app_bytes": 67923400,
+      "app_sha256": "fc66c2a2635c937dcab20749c7c037d6b4bb2db691e5164559a808b26b59b7ee",
+      "winui_rlib_bytes": 43871298,
+      "cargo_units": [
+        {
+          "package": "ferroui-themes-winui",
+          "target": "build-script",
+          "seconds": 0.96
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "build-script (run)",
+          "seconds": 25.34
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "",
+          "seconds": 160.16
+        },
+        {
+          "package": "winui-theme-probe",
+          "target": "winui-theme-probe \"bin\"",
+          "seconds": 0.93
+        }
+      ],
+      "generated_machine_text_bytes": 4691965,
+      "launches": [
+        {
+          "create_ns": 14384659,
+          "button_lookup_ns": 182039,
+          "create_and_button_ns": 14566698,
+          "process_ready_ns": 23664550,
+          "process_ns": 25907005
+        },
+        {
+          "create_ns": 12285295,
+          "button_lookup_ns": 492077,
+          "create_and_button_ns": 12777372,
+          "process_ready_ns": 24306739,
+          "process_ns": 27357420
+        },
+        {
+          "create_ns": 15744870,
+          "button_lookup_ns": 247336,
+          "create_and_button_ns": 15992206,
+          "process_ready_ns": 21196291,
+          "process_ns": 24477887
+        },
+        {
+          "create_ns": 15361393,
+          "button_lookup_ns": 255968,
+          "create_and_button_ns": 15617361,
+          "process_ready_ns": 20161305,
+          "process_ns": 23488054
+        },
+        {
+          "create_ns": 10867589,
+          "button_lookup_ns": 274526,
+          "create_and_button_ns": 11142115,
+          "process_ready_ns": 15917746,
+          "process_ns": 18443460
+        },
+        {
+          "create_ns": 19167251,
+          "button_lookup_ns": 549382,
+          "create_and_button_ns": 19716633,
+          "process_ready_ns": 23657179,
+          "process_ns": 29242387
+        },
+        {
+          "create_ns": 18536888,
+          "button_lookup_ns": 311461,
+          "create_and_button_ns": 18848349,
+          "process_ready_ns": 29252272,
+          "process_ns": 32317915
+        },
+        {
+          "create_ns": 16355313,
+          "button_lookup_ns": 188088,
+          "create_and_button_ns": 16543401,
+          "process_ready_ns": 20405377,
+          "process_ns": 23363210
+        },
+        {
+          "create_ns": 16547607,
+          "button_lookup_ns": 298061,
+          "create_and_button_ns": 16845668,
+          "process_ready_ns": 22113743,
+          "process_ns": 26494018
+        },
+        {
+          "create_ns": 11894347,
+          "button_lookup_ns": 262618,
+          "create_and_button_ns": 12156965,
+          "process_ready_ns": 18946904,
+          "process_ns": 24222375
+        },
+        {
+          "create_ns": 12311264,
+          "button_lookup_ns": 453560,
+          "create_and_button_ns": 12764824,
+          "process_ready_ns": 17136122,
+          "process_ns": 19843385
+        },
+        {
+          "create_ns": 11106342,
+          "button_lookup_ns": 236941,
+          "create_and_button_ns": 11343283,
+          "process_ready_ns": 14795443,
+          "process_ns": 17448350
+        },
+        {
+          "create_ns": 20987731,
+          "button_lookup_ns": 624404,
+          "create_and_button_ns": 21612135,
+          "process_ready_ns": 27952261,
+          "process_ns": 33567413
+        },
+        {
+          "create_ns": 12599639,
+          "button_lookup_ns": 264842,
+          "create_and_button_ns": 12864481,
+          "process_ready_ns": 16887960,
+          "process_ns": 19672778
+        },
+        {
+          "create_ns": 15100237,
+          "button_lookup_ns": 341745,
+          "create_and_button_ns": 15441982,
+          "process_ready_ns": 19722216,
+          "process_ns": 22496548
+        },
+        {
+          "create_ns": 15349756,
+          "button_lookup_ns": 292112,
+          "create_and_button_ns": 15641868,
+          "process_ready_ns": 20105247,
+          "process_ns": 23324367
+        },
+        {
+          "create_ns": 13755689,
+          "button_lookup_ns": 189200,
+          "create_and_button_ns": 13944889,
+          "process_ready_ns": 18646035,
+          "process_ns": 21790454
+        },
+        {
+          "create_ns": 11334159,
+          "button_lookup_ns": 203481,
+          "create_and_button_ns": 11537640,
+          "process_ready_ns": 15527073,
+          "process_ns": 17798842
+        },
+        {
+          "create_ns": 20562082,
+          "button_lookup_ns": 181669,
+          "create_and_button_ns": 20743751,
+          "process_ready_ns": 26669718,
+          "process_ns": 29887445
+        },
+        {
+          "create_ns": 15117473,
+          "button_lookup_ns": 244932,
+          "create_and_button_ns": 15362405,
+          "process_ready_ns": 19963908,
+          "process_ns": 23219031
+        },
+        {
+          "create_ns": 17412501,
+          "button_lookup_ns": 291491,
+          "create_and_button_ns": 17703992,
+          "process_ready_ns": 22966046,
+          "process_ns": 26567060
+        },
+        {
+          "create_ns": 12234489,
+          "button_lookup_ns": 300985,
+          "create_and_button_ns": 12535474,
+          "process_ready_ns": 16671940,
+          "process_ns": 19801202
+        },
+        {
+          "create_ns": 16708831,
+          "button_lookup_ns": 215108,
+          "create_and_button_ns": 16923939,
+          "process_ready_ns": 23906782,
+          "process_ns": 27089828
+        },
+        {
+          "create_ns": 14448619,
+          "button_lookup_ns": 406761,
+          "create_and_button_ns": 14855380,
+          "process_ready_ns": 19299010,
+          "process_ns": 22122019
+        },
+        {
+          "create_ns": 11116386,
+          "button_lookup_ns": 243200,
+          "create_and_button_ns": 11359586,
+          "process_ready_ns": 15655047,
+          "process_ns": 18322341
+        }
+      ],
+      "median": {
+        "create_ns": 15100237,
+        "button_lookup_ns": 264842,
+        "create_and_button_ns": 15362405,
+        "process_ready_ns": 20105247,
+        "process_ns": 23363210
+      }
+    },
+    "fxb": {
+      "generated_rust_bytes": 5471145,
+      "generated_rust_sha256": "b8eae03e6492755cce1d13292313d983d7a8e98ecb924d3c011e2d3e68a9c9bf",
+      "fxb_bytes": 236219,
+      "stripped_app_bytes": 66749008,
+      "app_sha256": "cf49854db84d9bec8c0fd91dbc5036dbbe0543bf93f81eb47b5a85b83080fd1e",
+      "winui_rlib_bytes": 42046708,
+      "cargo_units": [
+        {
+          "package": "ferroui-themes-winui",
+          "target": "build-script",
+          "seconds": 3.26
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "build-script (run)",
+          "seconds": 10.4
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "",
+          "seconds": 145.88
+        },
+        {
+          "package": "winui-theme-probe",
+          "target": "winui-theme-probe \"bin\"",
+          "seconds": 0.67
+        }
+      ],
+      "generated_machine_text_bytes": 3609316,
+      "allocated_sections": {
+        ".gcc_except_table": 647488,
+        ".rodata": 433692,
+        ".eh_frame": 1139404,
+        ".text": 7790594,
+        ".tbss": 76,
+        ".data.rel.ro": 259888,
+        ".data": 1540
+      },
+      "allocated_bytes": 10272682,
+      "launches": [
+        {
+          "create_ns": 17946661,
+          "button_lookup_ns": 305221,
+          "create_and_button_ns": 18251882,
+          "process_ready_ns": 22947840,
+          "process_ns": 26368438
+        },
+        {
+          "create_ns": 34975355,
+          "button_lookup_ns": 207967,
+          "create_and_button_ns": 35183322,
+          "process_ready_ns": 40387122,
+          "process_ns": 44196734
+        },
+        {
+          "create_ns": 12873475,
+          "button_lookup_ns": 216029,
+          "create_and_button_ns": 13089504,
+          "process_ready_ns": 17607054,
+          "process_ns": 21223251
+        },
+        {
+          "create_ns": 11522116,
+          "button_lookup_ns": 253344,
+          "create_and_button_ns": 11775460,
+          "process_ready_ns": 16039700,
+          "process_ns": 18612805
+        },
+        {
+          "create_ns": 14769849,
+          "button_lookup_ns": 351950,
+          "create_and_button_ns": 15121799,
+          "process_ready_ns": 20087401,
+          "process_ns": 23764077
+        },
+        {
+          "create_ns": 16561367,
+          "button_lookup_ns": 344730,
+          "create_and_button_ns": 16906097,
+          "process_ready_ns": 21692955,
+          "process_ns": 25313759
+        },
+        {
+          "create_ns": 12260062,
+          "button_lookup_ns": 306283,
+          "create_and_button_ns": 12566345,
+          "process_ready_ns": 16206722,
+          "process_ns": 19461545
+        },
+        {
+          "create_ns": 16447670,
+          "button_lookup_ns": 373122,
+          "create_and_button_ns": 16820792,
+          "process_ready_ns": 21151510,
+          "process_ns": 24887854
+        },
+        {
+          "create_ns": 15091774,
+          "button_lookup_ns": 267776,
+          "create_and_button_ns": 15359550,
+          "process_ready_ns": 20741584,
+          "process_ns": 25000486
+        },
+        {
+          "create_ns": 13289789,
+          "button_lookup_ns": 195720,
+          "create_and_button_ns": 13485509,
+          "process_ready_ns": 17159842,
+          "process_ns": 20953121
+        },
+        {
+          "create_ns": 17169396,
+          "button_lookup_ns": 281216,
+          "create_and_button_ns": 17450612,
+          "process_ready_ns": 23132303,
+          "process_ns": 27042550
+        },
+        {
+          "create_ns": 15842895,
+          "button_lookup_ns": 631664,
+          "create_and_button_ns": 16474559,
+          "process_ready_ns": 21484636,
+          "process_ns": 31061342
+        },
+        {
+          "create_ns": 13992419,
+          "button_lookup_ns": 231923,
+          "create_and_button_ns": 14224342,
+          "process_ready_ns": 18046633,
+          "process_ns": 21750399
+        },
+        {
+          "create_ns": 11817844,
+          "button_lookup_ns": 306874,
+          "create_and_button_ns": 12124718,
+          "process_ready_ns": 15966397,
+          "process_ns": 18700215
+        },
+        {
+          "create_ns": 12039702,
+          "button_lookup_ns": 211583,
+          "create_and_button_ns": 12251285,
+          "process_ready_ns": 15806702,
+          "process_ns": 18651097
+        },
+        {
+          "create_ns": 13240102,
+          "button_lookup_ns": 206104,
+          "create_and_button_ns": 13446206,
+          "process_ready_ns": 17586253,
+          "process_ns": 20795658
+        },
+        {
+          "create_ns": 13182802,
+          "button_lookup_ns": 253465,
+          "create_and_button_ns": 13436267,
+          "process_ready_ns": 17429100,
+          "process_ns": 20714708
+        },
+        {
+          "create_ns": 12508175,
+          "button_lookup_ns": 247986,
+          "create_and_button_ns": 12756161,
+          "process_ready_ns": 16781723,
+          "process_ns": 20177515
+        },
+        {
+          "create_ns": 12459467,
+          "button_lookup_ns": 255758,
+          "create_and_button_ns": 12715225,
+          "process_ready_ns": 16781458,
+          "process_ns": 19669889
+        },
+        {
+          "create_ns": 11420816,
+          "button_lookup_ns": 281416,
+          "create_and_button_ns": 11702232,
+          "process_ready_ns": 19142433,
+          "process_ns": 22090297
+        },
+        {
+          "create_ns": 13808537,
+          "button_lookup_ns": 275377,
+          "create_and_button_ns": 14083914,
+          "process_ready_ns": 20299385,
+          "process_ns": 23326875
+        },
+        {
+          "create_ns": 14643381,
+          "button_lookup_ns": 282798,
+          "create_and_button_ns": 14926179,
+          "process_ready_ns": 20386943,
+          "process_ns": 23766941
+        },
+        {
+          "create_ns": 11647963,
+          "button_lookup_ns": 241687,
+          "create_and_button_ns": 11889650,
+          "process_ready_ns": 15330328,
+          "process_ns": 18425574
+        },
+        {
+          "create_ns": 16211120,
+          "button_lookup_ns": 335426,
+          "create_and_button_ns": 16546546,
+          "process_ready_ns": 22004460,
+          "process_ns": 25454631
+        },
+        {
+          "create_ns": 17768722,
+          "button_lookup_ns": 463595,
+          "create_and_button_ns": 18232317,
+          "process_ready_ns": 22461050,
+          "process_ns": 25746784
+        }
+      ],
+      "median": {
+        "create_ns": 13808537,
+        "button_lookup_ns": 275377,
+        "create_and_button_ns": 14083914,
+        "process_ready_ns": 19142433,
+        "process_ns": 22090297
+      }
+    },
+    "native_size": {
+      "generated_rust_bytes": 6085047,
+      "generated_rust_sha256": "ae1115397423eaa01c83a578d001df7f6163fb387d693e16587cb1bcbf6733a8",
+      "fxb_bytes": 0,
+      "stripped_app_bytes": 63949880,
+      "app_sha256": "9ce8da83a576c480bdafd8ab5d24abed69183be25b14f1cdf573f703b8d49ae5",
+      "winui_rlib_bytes": 36722594,
+      "cargo_units": [
+        {
+          "package": "ferroui-themes-winui",
+          "target": "build-script",
+          "seconds": 1.08
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "build-script (run)",
+          "seconds": 11.24
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "",
+          "seconds": 76.77
+        },
+        {
+          "package": "winui-theme-probe",
+          "target": "winui-theme-probe \"bin\"",
+          "seconds": 0.76
+        }
+      ],
+      "generated_machine_text_bytes": 2063778,
+      "allocated_sections": {
+        ".gcc_except_table": 499592,
+        ".rodata": 141851,
+        ".eh_frame": 1393168,
+        ".text": 4684563,
+        ".tbss": 76,
+        ".data.rel.ro": 509040,
+        ".data": 1540
+      },
+      "allocated_bytes": 7229830,
+      "launches": [
+        {
+          "create_ns": 16617315,
+          "button_lookup_ns": 438789,
+          "create_and_button_ns": 17056104,
+          "process_ready_ns": 20722850,
+          "process_ns": 24535518
+        },
+        {
+          "create_ns": 13570715,
+          "button_lookup_ns": 304961,
+          "create_and_button_ns": 13875676,
+          "process_ready_ns": 20684935,
+          "process_ns": 24119964
+        },
+        {
+          "create_ns": 23506396,
+          "button_lookup_ns": 209700,
+          "create_and_button_ns": 23716096,
+          "process_ready_ns": 35267496,
+          "process_ns": 41684084
+        },
+        {
+          "create_ns": 12372304,
+          "button_lookup_ns": 275527,
+          "create_and_button_ns": 12647831,
+          "process_ready_ns": 17007137,
+          "process_ns": 20364050
+        },
+        {
+          "create_ns": 14622140,
+          "button_lookup_ns": 280675,
+          "create_and_button_ns": 14902815,
+          "process_ready_ns": 19653559,
+          "process_ns": 23166473
+        },
+        {
+          "create_ns": 22936894,
+          "button_lookup_ns": 363317,
+          "create_and_button_ns": 23300211,
+          "process_ready_ns": 31966380,
+          "process_ns": 35237212
+        },
+        {
+          "create_ns": 11441387,
+          "button_lookup_ns": 273234,
+          "create_and_button_ns": 11714621,
+          "process_ready_ns": 17075837,
+          "process_ns": 19682907
+        },
+        {
+          "create_ns": 15270247,
+          "button_lookup_ns": 334745,
+          "create_and_button_ns": 15604992,
+          "process_ready_ns": 34610183,
+          "process_ns": 38863462
+        },
+        {
+          "create_ns": 15796160,
+          "button_lookup_ns": 1220184,
+          "create_and_button_ns": 17016344,
+          "process_ready_ns": 21154659,
+          "process_ns": 25354253
+        },
+        {
+          "create_ns": 15279782,
+          "button_lookup_ns": 300634,
+          "create_and_button_ns": 15580416,
+          "process_ready_ns": 23920323,
+          "process_ns": 27217499
+        },
+        {
+          "create_ns": 15366960,
+          "button_lookup_ns": 315667,
+          "create_and_button_ns": 15682627,
+          "process_ready_ns": 23550992,
+          "process_ns": 27273106
+        },
+        {
+          "create_ns": 15113357,
+          "button_lookup_ns": 307554,
+          "create_and_button_ns": 15420911,
+          "process_ready_ns": 20631004,
+          "process_ns": 24049729
+        },
+        {
+          "create_ns": 10706822,
+          "button_lookup_ns": 234567,
+          "create_and_button_ns": 10941389,
+          "process_ready_ns": 15056262,
+          "process_ns": 17889180
+        },
+        {
+          "create_ns": 14477426,
+          "button_lookup_ns": 326052,
+          "create_and_button_ns": 14803478,
+          "process_ready_ns": 20718604,
+          "process_ns": 23400920
+        },
+        {
+          "create_ns": 14873011,
+          "button_lookup_ns": 311290,
+          "create_and_button_ns": 15184301,
+          "process_ready_ns": 18901206,
+          "process_ns": 22374201
+        },
+        {
+          "create_ns": 14139156,
+          "button_lookup_ns": 272763,
+          "create_and_button_ns": 14411919,
+          "process_ready_ns": 19331012,
+          "process_ns": 22821133
+        },
+        {
+          "create_ns": 12274810,
+          "button_lookup_ns": 207356,
+          "create_and_button_ns": 12482166,
+          "process_ready_ns": 18528387,
+          "process_ns": 21459871
+        },
+        {
+          "create_ns": 10438023,
+          "button_lookup_ns": 203200,
+          "create_and_button_ns": 10641223,
+          "process_ready_ns": 14403646,
+          "process_ns": 17121905
+        },
+        {
+          "create_ns": 12257594,
+          "button_lookup_ns": 241036,
+          "create_and_button_ns": 12498630,
+          "process_ready_ns": 16929826,
+          "process_ns": 19592974
+        },
+        {
+          "create_ns": 11949920,
+          "button_lookup_ns": 304910,
+          "create_and_button_ns": 12254830,
+          "process_ready_ns": 16679623,
+          "process_ns": 19765501
+        },
+        {
+          "create_ns": 14388004,
+          "button_lookup_ns": 293063,
+          "create_and_button_ns": 14681067,
+          "process_ready_ns": 23135313,
+          "process_ns": 26723187
+        },
+        {
+          "create_ns": 14665924,
+          "button_lookup_ns": 315767,
+          "create_and_button_ns": 14981691,
+          "process_ready_ns": 19303531,
+          "process_ns": 23168376
+        },
+        {
+          "create_ns": 10382642,
+          "button_lookup_ns": 193917,
+          "create_and_button_ns": 10576559,
+          "process_ready_ns": 14016074,
+          "process_ns": 16167185
+        },
+        {
+          "create_ns": 14729128,
+          "button_lookup_ns": 364949,
+          "create_and_button_ns": 15094077,
+          "process_ready_ns": 19588293,
+          "process_ns": 23103065
+        },
+        {
+          "create_ns": 15524344,
+          "button_lookup_ns": 307966,
+          "create_and_button_ns": 15832310,
+          "process_ready_ns": 20431746,
+          "process_ns": 23866950
+        }
+      ],
+      "median": {
+        "create_ns": 14622140,
+        "button_lookup_ns": 304910,
+        "create_and_button_ns": 14902815,
+        "process_ready_ns": 19653559,
+        "process_ns": 23168376
+      }
+    }
+  }
+}

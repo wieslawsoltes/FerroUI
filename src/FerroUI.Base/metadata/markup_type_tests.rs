@@ -716,6 +716,12 @@ fn values_convert_to_and_from_their_untyped_form() {
     assert_eq!(unbox::<Option<BoxedValue>>(&None), None);
     assert!(from_markup_value::<BoxedValue>(&None).is_none());
 
+    // An already boxed argument keeps its inner handle when the parameter
+    // is BoxedValue, and keeps the outer box for the nullable untyped form.
+    let nested = boxed(any.clone());
+    assert!(Rc::ptr_eq(&unbox::<BoxedValue>(&nested), &any));
+    assert!(Rc::ptr_eq(&unbox::<MarkupValue>(&nested).unwrap(), nested.as_ref().unwrap()));
+
     // A nullable value type takes the value and null.
     ValueTypes::register_nullable::<f64>();
     assert_eq!(unbox::<Option<f64>>(&boxed(1.5f64)), Some(1.5));

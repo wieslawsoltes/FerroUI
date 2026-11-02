@@ -18,6 +18,8 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
+# Versioned, portable binary XamlX syntax graphs. Does not enable reflection or runtime loading.
+portable-xaml = ["dep:flate2"]
 hot-reload = ["runtime", "ferroui-markup-xaml/hot-reload"]
 default = ["runtime"]
 # The run-time back end: the run-time type system, the AST interpreter (`ferroui_markup_xaml_loader::runtime`)
@@ -27,7 +29,7 @@ runtime = ["dep:ferroui-markup-xaml", "ferroui-markup-xaml/runtime-populate"]
 # documents and the emitter of Rust source, against the type system the host states. It links neither the
 # XAML runtime library nor the controls: `ferroui-build` compiles with it against the type models of the
 # crates (docs/porting/xaml.md, 9.5).
-compiler = ["dep:ferroui-build-scan"]
+compiler = ["dep:ferroui-build-scan", "dep:ferroui-xaml-binary"]
 # The run-time host of the emitter: the run-time type system as the type system of a transform, with what
 # it states for the emitter (`rust_emitter::runtime_types`). It needs the accessor table of registered
 # properties, which only this feature turns on in the base crate; applications that load markup at run time
@@ -37,6 +39,8 @@ emitter = ["runtime", "compiler", "ferroui-base/compiler-metadata"]
 testing = []
 
 [dependencies]
+flate2 = { workspace = true, optional = true }
+ferroui-xaml-binary = { workspace = true, features = ["encode"], optional = true }
 xamlx = { workspace = true, features = ["testing"] }
 ferroui-markup = { workspace = true }
 # Compile-time value parsers (`Thickness::parse`, `Color::try_parse`, `TimeSpan`, `Uri`, ...).
@@ -50,6 +54,7 @@ ferroui-markup-xaml = { workspace = true, optional = true }
 ferroui-build-scan = { workspace = true, optional = true }
 
 [dev-dependencies]
+ferroui-xaml-binary = { workspace = true, features = ["encode"] }
 # The unit tests of the emitter of Rust source run with the crate's own tests (`rust_emitter` is built
 # for them with the `runtime` feature), which needs the accessor table of the base crate.
 ferroui-base = { workspace = true, features = ["compiler-metadata"] }
@@ -58,3 +63,13 @@ ferroui-build-scan = { workspace = true }
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
 group = "markup"
+
+[[bin]]
+name = "ferroui-fxd"
+path = "bin/ferroui-fxd.rs"
+required-features = ["portable-xaml"]
+
+[[example]]
+name = "portable_document"
+path = "examples/portable_document.rs"
+required-features = ["portable-xaml"]

@@ -18,6 +18,9 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
+compiled-updates = ["portable-xaml", "dep:sha2"]
+# Package the source graphs alongside an AOT group for inspection and replacement.
+portable-xaml = ["ferroui-markup-xaml-loader/portable-xaml"]
 # The run-time host of `Build` (`TypeSystem::Runtime`, with `Build::assembly`): the documents are compiled
 # against the types the build script registered in its process. It links the XAML runtime library and,
 # through it, the controls, which a build script then builds for the host. No crate of the repository
@@ -25,6 +28,7 @@ path = "lib.rs"
 runtime-host = ["dep:ferroui-markup-xaml", "ferroui-markup-xaml-loader/emitter"]
 
 [dependencies]
+sha2 = { version = "0.11", optional = true }
 serde_json = "1"
 roxmltree.workspace = true
 # `MarkupAssembly`, and the attributes of the type model the build-time type system projects.

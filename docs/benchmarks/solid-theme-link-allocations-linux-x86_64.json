@@ -1,0 +1,362 @@
+{
+  "revision": "9c484e4415259767e589a6aeeedc1103d63cd4df",
+  "benchmark": "Linux x86-64 complete WinUI solid FXP, theme opt-level z and one codegen unit, cross-crate LTO disabled; all other crates at ordinary Cargo release settings",
+  "stripped_bytes": 59498592,
+  "stripped_sha256": "47780ba39bb2be113a173001b1bb60232c6d0cf4ebea4961c0ce93f3d0606def",
+  "attribution": "ELF output sections and linker archive inputs overlap. NOBITS contributes no file bytes. Padding and linker synthesis such as dynamic relocations are not assigned to an input archive.",
+  "elf_sections": {
+    ".interp": {
+      "allocated_bytes": 28,
+      "file_bytes": 28
+    },
+    ".note.ABI-tag": {
+      "allocated_bytes": 32,
+      "file_bytes": 32
+    },
+    ".note.gnu.build-id": {
+      "allocated_bytes": 36,
+      "file_bytes": 36
+    },
+    ".dynsym": {
+      "allocated_bytes": 2520,
+      "file_bytes": 2520
+    },
+    ".gnu.version": {
+      "allocated_bytes": 210,
+      "file_bytes": 210
+    },
+    ".gnu.version_r": {
+      "allocated_bytes": 416,
+      "file_bytes": 416
+    },
+    ".gnu.hash": {
+      "allocated_bytes": 28,
+      "file_bytes": 28
+    },
+    ".dynstr": {
+      "allocated_bytes": 1394,
+      "file_bytes": 1394
+    },
+    ".rela.dyn": {
+      "allocated_bytes": 4703640,
+      "file_bytes": 4703640
+    },
+    ".rela.plt": {
+      "allocated_bytes": 48,
+      "file_bytes": 48
+    },
+    ".gcc_except_table": {
+      "allocated_bytes": 3514124,
+      "file_bytes": 3514124
+    },
+    ".rodata": {
+      "allocated_bytes": 1791468,
+      "file_bytes": 1791468
+    },
+    ".eh_frame_hdr": {
+      "allocated_bytes": 1115748,
+      "file_bytes": 1115748
+    },
+    ".eh_frame": {
+      "allocated_bytes": 6580208,
+      "file_bytes": 6580208
+    },
+    ".text": {
+      "allocated_bytes": 38882069,
+      "file_bytes": 38882069
+    },
+    ".init": {
+      "allocated_bytes": 27,
+      "file_bytes": 27
+    },
+    ".fini": {
+      "allocated_bytes": 13,
+      "file_bytes": 13
+    },
+    ".plt": {
+      "allocated_bytes": 48,
+      "file_bytes": 48
+    },
+    ".tdata": {
+      "allocated_bytes": 2824,
+      "file_bytes": 2824
+    },
+    ".tbss": {
+      "allocated_bytes": 17504,
+      "file_bytes": 0
+    },
+    ".fini_array": {
+      "allocated_bytes": 8,
+      "file_bytes": 8
+    },
+    ".init_array": {
+      "allocated_bytes": 16,
+      "file_bytes": 16
+    },
+    ".data.rel.ro": {
+      "allocated_bytes": 2578888,
+      "file_bytes": 2578888
+    },
+    ".dynamic": {
+      "allocated_bytes": 480,
+      "file_bytes": 480
+    },
+    ".got": {
+      "allocated_bytes": 124696,
+      "file_bytes": 124696
+    },
+    ".got.plt": {
+      "allocated_bytes": 40,
+      "file_bytes": 40
+    },
+    ".relro_padding": {
+      "allocated_bytes": 2104,
+      "file_bytes": 0
+    },
+    ".tm_clone_table": {
+      "allocated_bytes": 0,
+      "file_bytes": 0
+    },
+    ".data": {
+      "allocated_bytes": 196192,
+      "file_bytes": 196192
+    },
+    ".bss": {
+      "allocated_bytes": 284,
+      "file_bytes": 0
+    }
+  },
+  "archive_input_sections": {
+    "libferroui_themes_winui-832a33c0419e6a12.rlib": {
+      ".gcc_except_table": 23804,
+      ".rodata": 250757,
+      ".eh_frame": 80676,
+      ".text": 208797,
+      ".tbss": 76,
+      ".data.rel.ro": 19840,
+      ".data": 1612
+    },
+    "libferroui_dialogs-3ffccfcb96d761a7.rlib": {
+      ".gcc_except_table": 122116,
+      ".rodata": 191734,
+      ".eh_frame": 202692,
+      ".text": 1095810,
+      ".tbss": 13,
+      ".data.rel.ro": 70592,
+      ".data": 3012
+    },
+    "libsysinfo-19016cef5bec9bdb.rlib": {
+      ".gcc_except_table": 856
+    },
+    "libferroui_markup_xaml_loader-1db3b363de6f37b3.rlib": {
+      ".gcc_except_table": 154464,
+      ".rodata": 45107,
+      ".eh_frame": 229892,
+      ".text": 1626436,
+      ".tdata": 24,
+      ".tbss": 120,
+      ".data.rel.ro": 71944,
+      ".data": 104
+    },
+    "libflate2-c25b0b7391581af7.rlib": {
+      ".gcc_except_table": 84,
+      ".rodata": 5,
+      ".eh_frame": 104,
+      ".text": 244
+    },
+    "libminiz_oxide-9a71e46b11e36432.rlib": {
+      ".gcc_except_table": 228,
+      ".rodata": 1692,
+      ".eh_frame": 656,
+      ".text": 15832,
+      ".data.rel.ro": 960
+    },
+    "libxamlx-4be98b31a4a3bf42.rlib": {
+      ".gcc_except_table": 52308,
+      ".rodata": 7952,
+      ".eh_frame": 79104,
+      ".text": 469101,
+      ".tbss": 48,
+      ".data.rel.ro": 25072,
+      ".data": 8,
+      ".bss": 8
+    },
+    "libroxmltree-fb6d11a6d97b58cb.rlib": {
+      ".gcc_except_table": 592,
+      ".rodata": 901,
+      ".eh_frame": 4032,
+      ".text": 52422,
+      ".data.rel.ro": 1472
+    },
+    "libferroui_markup_xaml-3a0e493a8412a389.rlib": {
+      ".gcc_except_table": 134592,
+      ".rodata": 62848,
+      ".eh_frame": 244344,
+      ".text": 1264913,
+      ".tdata": 104,
+      ".tbss": 385,
+      ".data.rel.ro": 120336,
+      ".data": 76
+    },
+    "libferroui_markup-110d6b7e10048be1.rlib": {
+      ".gcc_except_table": 4076,
+      ".rodata": 1211,
+      ".eh_frame": 5204,
+      ".text": 35922,
+      ".tdata": 40,
+      ".data.rel.ro": 904
+    },
+    "libferroui_controls-3a6c37e28bc169b3.rlib": {
+      ".gcc_except_table": 1804632,
+      ".rodata": 415694,
+      ".eh_frame": 3512064,
+      ".text": 20361068,
+      ".tdata": 948,
+      ".tbss": 12013,
+      ".data.rel.ro": 1240432,
+      ".data": 163580
+    },
+    "libferroui_remote_protocol-548d40df3a93c9c9.rlib": {
+      ".gcc_except_table": 12996
+    },
+    "libuuid-d24348dfbcf2f9c5.rlib": {
+      ".gcc_except_table": 32
+    },
+    "libferroui_base-02668c56b1c47fcc.rlib": {
+      ".gcc_except_table": 1183456,
+      ".rodata": 578411,
+      ".eh_frame": 2189264,
+      ".text": 12542930,
+      ".tdata": 1656,
+      ".tbss": 4480,
+      ".data.rel.ro": 1016424,
+      ".data": 25113,
+      ".bss": 49
+    },
+    "librust_decimal-774ad04047e22129.rlib": {
+      ".gcc_except_table": 372,
+      ".rodata": 471,
+      ".eh_frame": 920,
+      ".text": 9176,
+      ".data.rel.ro": 336
+    },
+    "liburl-d854244efd9f4ed9.rlib": {
+      ".gcc_except_table": 1656,
+      ".eh_frame": 100,
+      ".text": 275
+    },
+    "libidna-6ec7529bfd5ab08d.rlib": {
+      ".gcc_except_table": 944
+    },
+    "libicu_normalizer-01f6ac234f1320b9.rlib": {
+      ".gcc_except_table": 428
+    },
+    "libicu_collections-007ef05c139e1844.rlib": {
+      ".gcc_except_table": 48
+    },
+    "libicu_provider-27006aa45245f747.rlib": {
+      ".gcc_except_table": 44
+    },
+    "libicu_locale_core-eab0b6a97ac4170b.rlib": {
+      ".gcc_except_table": 1556
+    },
+    "libpercent_encoding-16fc1cbd9036de85.rlib": {
+      ".gcc_except_table": 96
+    },
+    "libferroui_system-e0e8b15a61f3cfbf.rlib": {
+      ".gcc_except_table": 1336,
+      ".rodata": 56,
+      ".eh_frame": 1004,
+      ".text": 4856,
+      ".data.rel.ro": 48,
+      ".data": 8
+    },
+    "libstd-44675f186029a4cd.rlib": {
+      ".gcc_except_table": 11244,
+      ".rodata": 10426,
+      ".eh_frame": 17172,
+      ".text": 199974,
+      ".tdata": 48,
+      ".tbss": 56,
+      ".init_array": 8,
+      ".data.rel.ro": 4208,
+      ".data": 2601,
+      ".bss": 181
+    },
+    "libpanic_unwind-9c7be438a18dddd7.rlib": {
+      ".gcc_except_table": 64,
+      ".rodata": 1,
+      ".eh_frame": 224,
+      ".text": 513
+    },
+    "libobject-3804a19dce00e58e.rlib": {
+      ".gcc_except_table": 148,
+      ".eh_frame": 48,
+      ".text": 78
+    },
+    "libaddr2line-df57c875825aae11.rlib": {
+      ".gcc_except_table": 52,
+      ".eh_frame": 216,
+      ".text": 893,
+      ".data.rel.ro": 48
+    },
+    "libgimli-ccadb29741f100ae.rlib": {
+      ".gcc_except_table": 932,
+      ".rodata": 141,
+      ".eh_frame": 1128,
+      ".text": 5206,
+      ".data.rel.ro": 288
+    },
+    "liballoc-a8d2bee804de7f49.rlib": {
+      ".gcc_except_table": 852,
+      ".rodata": 128,
+      ".eh_frame": 1428,
+      ".text": 9752,
+      ".data.rel.ro": 296
+    },
+    "libcore-667b96598095cbda.rlib": {
+      ".gcc_except_table": 16,
+      ".rodata": 28518,
+      ".eh_frame": 6196,
+      ".text": 63266,
+      ".data.rel.ro": 3048,
+      ".data": 8
+    },
+    "libcompiler_builtins-2ae2df7d631cccc2.rlib": {
+      ".gcc_except_table": 32,
+      ".eh_frame": 624,
+      ".text": 3535
+    },
+    "librustc_demangle-f424ec8139a3c700.rlib": {
+      ".rodata": 811,
+      ".eh_frame": 2168,
+      ".text": 23327,
+      ".data.rel.ro": 1480
+    },
+    "libhashbrown-a866a54442f41e1a.rlib": {
+      ".rodata": 28,
+      ".eh_frame": 56,
+      ".text": 60,
+      ".data.rel.ro": 24
+    },
+    "libminiz_oxide-a9ecb409b41a7a16.rlib": {
+      ".rodata": 668,
+      ".eh_frame": 348,
+      ".text": 10489,
+      ".data.rel.ro": 984
+    },
+    "libsimd_adler32-85e613e70b672494.rlib": {
+      ".eh_frame": 68,
+      ".text": 902
+    },
+    "libmemchr-a82e71cb639e1c05.rlib": {
+      ".eh_frame": 40,
+      ".text": 894,
+      ".data": 8
+    },
+    "libadler2-c92358cf71ab9d80.rlib": {
+      ".eh_frame": 60,
+      ".text": 968
+    }
+  }
+}

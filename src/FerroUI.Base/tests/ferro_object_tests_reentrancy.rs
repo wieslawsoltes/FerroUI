@@ -764,3 +764,41 @@ fn invalid_priorities_are_rejected() {
         });
     }
 }
+
+#[test]
+fn removing_a_validated_style_binding_restores_inheritance_before_clearing_validation() {
+    let property = FerroProperty::register_with::<Class1, _>(
+        "InheritedValidated",
+        StyledPropertyOptions::new(1).inherits(true).enable_data_validation(true),
+    );
+    let parent = Class1::new();
+    let child = Class1::with_parent(&parent);
+    let grandchild = Class1::with_parent(&child);
+    parent.set_value(property, 10);
+    let source = Subject::<i32>::new();
+    let binding = child.bind(property, source.observable(), BindingPriority::Style);
+    source.on_next(20);
+    assert_eq!(20, grandchild.get_value(property));
+
+    let changes = Recorder::new();
+    for (name, target) in [("child", &child), ("grandchild", &grandchild)] {
+        let child = child.downgrade();
+        let changes = changes.clone();
+        target.property_changed(move |event| {
+            if event.property() == property.as_property() {
+                let validation = child.upgrade().unwrap().validation.borrow().last().map(|entry| entry.1);
+                changes.push((name, event.get_old_value::<i32>(), event.get_new_value::<i32>(), validation));
+            }
+        });
+    }
+    binding.dispose();
+    assert_eq!(
+        changes.get(),
+        vec![
+            ("child", Some(20), 10, Some(BindingValueType::VALUE)),
+            ("grandchild", Some(20), 10, Some(BindingValueType::VALUE)),
+        ]
+    );
+    assert_eq!(child.validation.borrow().last().map(|entry| entry.1), Some(BindingValueType::UNSET_VALUE));
+    assert_eq!(10, grandchild.get_value(property));
+}

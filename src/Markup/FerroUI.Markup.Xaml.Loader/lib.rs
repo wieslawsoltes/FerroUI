@@ -22,6 +22,8 @@
 /// What the run-time and the build-time back end share, read from the transformed AST alone.
 pub mod back_end;
 pub mod compiler_extensions;
+#[cfg(feature = "portable-xaml")]
+pub mod binary_document;
 /// The closed table of runtime library types, shared by the run-time and the build-time type system.
 pub mod core_table;
 pub mod parsers;
@@ -37,6 +39,10 @@ pub mod runtime;
 pub mod rust_emitter;
 
 #[cfg(feature = "runtime")]
+mod runtime_document_input;
+#[cfg(all(feature = "runtime", feature = "portable-xaml"))]
+mod compiled_archive;
+#[cfg(feature = "runtime")]
 mod ferro_runtime_xaml_loader;
 #[cfg(feature = "runtime")]
 mod ferro_xaml_il_runtime_compiler;
@@ -45,6 +51,8 @@ mod ferro_xaml_il_runtime_compiler;
 pub use ferro_runtime_xaml_loader::{DocumentGroup, FerroRuntimeXamlLoader};
 #[cfg(feature = "runtime")]
 pub use ferro_xaml_il_runtime_compiler::FerroXamlIlRuntimeCompiler;
+#[cfg(all(feature = "runtime", feature = "portable-xaml"))]
+pub use ferro_xaml_il_runtime_compiler::PreparedPackedDocument;
 
 /// The in-memory framework type system used by unit tests of the compiler extensions.
 #[cfg(any(test, feature = "testing"))]

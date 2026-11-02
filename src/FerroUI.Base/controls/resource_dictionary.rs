@@ -374,15 +374,32 @@ impl ResourceDictionary {
     }
 
     fn add_item(&self, key: ResourceKey, item: ResourceItem) {
-        {
-            let mut inner = self.inner.borrow_mut();
-            if inner.contains_key(&key) {
-                panic!("An item with the same key has already been added. Key: {key}");
+        if let Err(message) = self.try_add_item(key, item) {
+            panic!("{message}");
+        }
+    }
+
+    fn try_add_item(&self, key: ResourceKey, item: ResourceItem) -> Result<(), String> {
+        use std::collections::hash_map::Entry;
+        match self.inner.borrow_mut().entry(key) {
+            Entry::Vacant(slot) => {
+                self.record_write(slot.key());
+                slot.insert(item);
             }
-            self.record_write(&key);
-            inner.insert(key, item);
+            Entry::Occupied(slot) => return Err(format!("An item with the same key has already been added. Key: {}", slot.key())),
         }
         self.raise_resources_changed();
+        Ok(())
+    }
+
+    /// Inserts a value or returns the markup duplicate-key error without replacing the original.
+    pub fn try_add(&self, key: ResourceKey, value: ResourceValue) -> Result<(), String> {
+        self.try_add_item(key, ResourceItem::Value(value))
+    }
+
+    /// Inserts a shared deferred resource or returns the markup duplicate-key error.
+    pub fn try_add_deferred(&self, key: ResourceKey, content: Rc<dyn IDeferredContent>) -> Result<(), String> {
+        self.try_add_item(key, ResourceItem::Deferred(content))
     }
 
     /// Adds a resource that is created by `factory` the first time it is

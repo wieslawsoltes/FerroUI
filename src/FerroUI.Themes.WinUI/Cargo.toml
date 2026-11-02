@@ -25,6 +25,18 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
+# Run editor-produced FXU operand revisions against the installed typed program.
+compiled-updates = ["precompiled-theme", "ferroui-build/compiled-updates", "ferroui-markup-xaml/compiled-updates"]
+# Embed the complete FXP archive and resolve its FXD documents through XamlX on first load.
+packed-theme = ["dep:ferroui-markup-xaml-loader", "ferroui-build/portable-xaml"]
+# Ship the full solid revision with prelinked typed execution on the startup path.
+solid-theme = ["precompiled-theme"]
+# Interpreter-only solid archive distribution: decompress and transform on first use.
+portable-solid-theme = ["packed-theme"]
+binary-resources = ["ferroui-markup-xaml/binary-resources"]
+# Resolve all semantics during the build. Run typed FXB/native code on startup and
+# expose the matching solid FXP revision to reload and designer consumers on demand.
+precompiled-theme = ["binary-resources", "ferroui-build/portable-xaml"]
 # Original control-theme documents for opt-in designer definition libraries.
 # Normal applications continue to ship only compiled markup.
 designer-sources = []
@@ -37,6 +49,7 @@ ferroui-controls = { workspace = true }
 # The managed dialogs, whose control themes are part of the theme (as for the Fluent theme).
 ferroui-dialogs = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
+ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["runtime", "portable-xaml"] }
 
 [build-dependencies]
 # The build script compiles the documents of the theme against the type models (`build.rs`): the
@@ -50,8 +63,13 @@ ferroui-controls = { workspace = true, features = ["testing"] }
 # The theme is loaded from its compiled markup (`compiled_xaml.rs`); the run-time XAML loader and
 # its emitter generate that file and check it (`tests/compiled_xaml_tests.rs`), and the tests load
 # documents at run time.
-ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter", "portable-xaml"] }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
 group = "controls"
+
+[[example]]
+name = "packed_activation"
+path = "examples/packed_activation.rs"
+required-features = ["packed-theme"]

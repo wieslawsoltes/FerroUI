@@ -1,0 +1,5324 @@
+{
+  "previous": "0257f6b66c5fca90d5d4f9e2ba35273e9a55d919",
+  "candidate_production_commit": "58b32389e979bf48b8fd00faaf7d29abeecebac3",
+  "method": "Disjoint ranges of sized ELF text symbols after ThinLTO. Shared addresses count once. Matching stripped and symbolized .text addressed bytes were checked.",
+  "profiles": {
+    "previous": {
+      "text": {
+        "address": 17891328,
+        "bytes": 28530117,
+        "sha256": "f5b8012102d577f25e5964fd633d5fba4137e882e819611102658c5a8ca052ab"
+      },
+      "symbol_records": 190297,
+      "unique_ranges": 143792,
+      "alias_records": 46505,
+      "partial_overlap_bytes": 0,
+      "categories": {
+        "Property registration, stores and observers": 7990849,
+        "Other framework and application code": 5546193,
+        "Generated native XAML functions": 2702121,
+        "Callable entries and trait shims": 1905679,
+        "Compiler-generated destruction": 1801437,
+        "Bindings, reactive operators and events": 1561626,
+        "Other XAML runtime, theme and codecs": 1348763,
+        "Reflection and value conversion": 1340539,
+        "Collection primitives": 1228703,
+        "Other Rust and native code": 887934,
+        "Reference counting and weak handles": 784680,
+        "Class projection, initialization and virtual dispatch": 638549,
+        "Other closure bodies": 465973,
+        "Thread-local and once initialization": 274278,
+        "Other explicit Drop implementations": 44863,
+        "No sized symbol": 4719,
+        "Other async state machines": 3076,
+        "Aliases from multiple categories": 135
+      },
+      "leading_definitions": {
+        "Other Rust and native code": [
+          {
+            "family": "smallvec::SmallVec as core::iter::traits::collect::Extend::extend",
+            "bytes": 55105,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "core::slice::sort::stable::quicksort::stable_partition",
+            "bytes": 36626,
+            "distinct_ranges": 70
+          },
+          {
+            "family": "core::iter::adapters::map::Map as core::iter::traits::iterator::Iterator::fold",
+            "bytes": 34677,
+            "distinct_ranges": 127
+          },
+          {
+            "family": "core::slice::sort::stable::drift::sort",
+            "bytes": 28398,
+            "distinct_ranges": 39
+          },
+          {
+            "family": "core::option::Option as core::any::Any::type_id",
+            "bytes": 27706,
+            "distinct_ranges": 1979
+          },
+          {
+            "family": "core::cell::once::OnceCell::try_init",
+            "bytes": 25649,
+            "distinct_ranges": 56
+          },
+          {
+            "family": "core::slice::sort::stable::quicksort::quicksort",
+            "bytes": 24653,
+            "distinct_ranges": 39
+          },
+          {
+            "family": "dyn xamlx::type_system::type_system::IXamlType::find_method",
+            "bytes": 18195,
+            "distinct_ranges": 18
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::small_sort_general_with_scratch",
+            "bytes": 18152,
+            "distinct_ranges": 38
+          },
+          {
+            "family": "core::slice::sort::stable::drift::create_run",
+            "bytes": 16661,
+            "distinct_ranges": 39
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::sort4_stable",
+            "bytes": 14029,
+            "distinct_ranges": 37
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::bidirectional_merge",
+            "bytes": 13691,
+            "distinct_ranges": 38
+          }
+        ],
+        "No sized symbol": [
+          {
+            "family": "Padding or unlabeled text",
+            "bytes": 4719,
+            "distinct_ranges": 0
+          }
+        ],
+        "Collection primitives": [
+          {
+            "family": "hashbrown::raw::RawTable::reserve_rehash",
+            "bytes": 345969,
+            "distinct_ranges": 462
+          },
+          {
+            "family": "hashbrown::map::HashMap::insert",
+            "bytes": 176981,
+            "distinct_ranges": 436
+          },
+          {
+            "family": "alloc::vec::Vec::retain_mut",
+            "bytes": 119022,
+            "distinct_ranges": 455
+          },
+          {
+            "family": "alloc::vec::Vec as core::ops::drop::Drop::drop",
+            "bytes": 92101,
+            "distinct_ranges": 749
+          },
+          {
+            "family": "alloc::vec::Vec as alloc::vec::spec_from_iter_nested::SpecFromIterNested::from_iter",
+            "bytes": 86897,
+            "distinct_ranges": 367
+          },
+          {
+            "family": "hashbrown::raw::RawTableInner::drop_elements",
+            "bytes": 54902,
+            "distinct_ranges": 417
+          },
+          {
+            "family": "hashbrown::raw::RawTableInner::drop_inner_table",
+            "bytes": 40605,
+            "distinct_ranges": 420
+          },
+          {
+            "family": "alloc::vec::Vec::extend_trusted",
+            "bytes": 35772,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "alloc::vec::into_iter::IntoIter as core::iter::traits::iterator::Iterator::try_fold",
+            "bytes": 29565,
+            "distinct_ranges": 109
+          },
+          {
+            "family": "alloc::vec::Vec::extend_desugared",
+            "bytes": 29467,
+            "distinct_ranges": 130
+          },
+          {
+            "family": "alloc::vec::into_iter::IntoIter as core::ops::drop::Drop::drop",
+            "bytes": 27714,
+            "distinct_ranges": 207
+          },
+          {
+            "family": "alloc::vec::Vec as core::clone::Clone::clone",
+            "bytes": 13693,
+            "distinct_ranges": 48
+          }
+        ],
+        "Compiler-generated destruction": [
+          {
+            "family": "core::ptr::drop_glue",
+            "bytes": 1801437,
+            "distinct_ranges": 15537
+          }
+        ],
+        "Reference counting and weak handles": [
+          {
+            "family": "alloc::rc::Rc::new",
+            "bytes": 255775,
+            "distinct_ranges": 1984
+          },
+          {
+            "family": "alloc::rc::Rc::drop_slow",
+            "bytes": 226288,
+            "distinct_ranges": 1511
+          },
+          {
+            "family": "alloc::rc::Rc::new_cyclic_in",
+            "bytes": 208593,
+            "distinct_ranges": 914
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_system::events::handler_list::MakeMutOrClone::make_mut_or_clone",
+            "bytes": 26322,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_eq",
+            "bytes": 19958,
+            "distinct_ranges": 196
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::data::compiled_binding_path::TypedPropertyElement::create_expression",
+            "bytes": 7119,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "alloc::rc::Rc as core::any::Any::type_id",
+            "bytes": 6398,
+            "distinct_ranges": 457
+          },
+          {
+            "family": "alloc::rc::Rc::clone_from_ref_in",
+            "bytes": 6125,
+            "distinct_ranges": 49
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_as_any",
+            "bytes": 4664,
+            "distinct_ranges": 424
+          },
+          {
+            "family": "alloc::sync::Arc::drop_slow",
+            "bytes": 4183,
+            "distinct_ranges": 37
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::reactive::observable::ObservableExt::subscribe_fn",
+            "bytes": 4154,
+            "distinct_ranges": 46
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_type_name",
+            "bytes": 2548,
+            "distinct_ranges": 196
+          }
+        ],
+        "Other explicit Drop implementations": [
+          {
+            "family": "smallvec::SmallVec as core::ops::drop::Drop::drop",
+            "bytes": 31228,
+            "distinct_ranges": 148
+          },
+          {
+            "family": "::drop::DropGuard as core::ops::drop::Drop::drop",
+            "bytes": 1235,
+            "distinct_ranges": 13
+          },
+          {
+            "family": "ferroui_controls::rich_text_block::RichTextBlock as core::ops::drop::Drop::drop",
+            "bytes": 1204,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::navigation_view::NavigationView as core::ops::drop::Drop::drop",
+            "bytes": 671,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::input::text_input::input_method_manager::TextInputMethodManager as core::ops::drop::Drop::drop",
+            "bytes": 601,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::rich_edit_box::RichEditBox as core::ops::drop::Drop::drop",
+            "bytes": 410,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::utils::collection_changed_event_manager::EntryGuard as core::ops::drop::Drop::drop",
+            "bytes": 365,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::media::text_formatting::text_line_break::TextLineBreak as core::ops::drop::Drop::drop",
+            "bytes": 314,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::auto_suggest_box::AutoSuggestBox as core::ops::drop::Drop::drop",
+            "bytes": 309,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::info_bar::InfoBar as core::ops::drop::Drop::drop",
+            "bytes": 302,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::virtualizing_carousel_panel::ClearSourceOnExit as core::ops::drop::Drop::drop",
+            "bytes": 292,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::documents::text_highlighter::TextHighlighter as core::ops::drop::Drop::drop",
+            "bytes": 289,
+            "distinct_ranges": 1
+          }
+        ],
+        "Other closure bodies": [
+          {
+            "family": "ferroui_base::threading::dispatcher_task::wrap_local_future::{closure}::{closure}",
+            "bytes": 46579,
+            "distinct_ranges": 47
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive::add_handler_as::{closure}",
+            "bytes": 44176,
+            "distinct_ranges": 156
+          },
+          {
+            "family": "ferroui_base::interactivity::routed_event::RoutedEvent::add_class_handler_untyped::{closure}",
+            "bytes": 25862,
+            "distinct_ranges": 74
+          },
+          {
+            "family": "std::sys::backtrace::_print_fmt::{closure}",
+            "bytes": 18344,
+            "distinct_ranges": 2
+          },
+          {
+            "family": "ferroui_base::rendering::composition::expressions::delegate_expression_ffi::DelegateExpressionFfi::add2::{closure}",
+            "bytes": 13016,
+            "distinct_ranges": 63
+          },
+          {
+            "family": "[i32]::sort_by::{closure}",
+            "bytes": 12240,
+            "distinct_ranges": 40
+          },
+          {
+            "family": "ferroui_base::rendering::composition::expressions::delegate_expression_ffi::DelegateExpressionFfi::add3::{closure}",
+            "bytes": 9062,
+            "distinct_ranges": 32
+          },
+          {
+            "family": "ferroui_controls::top_level::TopLevel::create_platform_impl_binding::{closure}",
+            "bytes": 7048,
+            "distinct_ranges": 12
+          },
+          {
+            "family": "ferroui_base::media::media_collection::MediaCollection::for_each_item::{closure}",
+            "bytes": 6663,
+            "distinct_ranges": 19
+          },
+          {
+            "family": "ferroui_controls::rich_edit_box::RichEditBox::paste_from_clipboard_async::{closure}",
+            "bytes": 6462,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::subscribed::{closure}",
+            "bytes": 6453,
+            "distinct_ranges": 55
+          },
+          {
+            "family": "ferroui_controls::page::navigation_page::NavigationPage::pop_modal_async_core::{closure}",
+            "bytes": 5441,
+            "distinct_ranges": 1
+          }
+        ],
+        "Callable entries and trait shims": [
+          {
+            "family": "::MARKUP::MARKUP::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 580619,
+            "distinct_ranges": 5664
+          },
+          {
+            "family": "::__MARKUP::MARKUP::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 226941,
+            "distinct_ranges": 1574
+          },
+          {
+            "family": "::register_conversion::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 168453,
+            "distinct_ranges": 1339
+          },
+          {
+            "family": "::build_vtable::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 157834,
+            "distinct_ranges": 4421
+          },
+          {
+            "family": "::register_cast::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 97462,
+            "distinct_ranges": 1213
+          },
+          {
+            "family": "&::register_object::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 82350,
+            "distinct_ranges": 858
+          },
+          {
+            "family": "::call_once_force::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 73671,
+            "distinct_ranges": 597
+          },
+          {
+            "family": "::__CONSTRUCTOR::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 32379,
+            "distinct_ranges": 299
+          },
+          {
+            "family": "::into_parts::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 29114,
+            "distinct_ranges": 260
+          },
+          {
+            "family": "::MARKUP::MARKUP::{closure}::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 18385,
+            "distinct_ranges": 579
+          },
+          {
+            "family": "::__MARKUP::MARKUP::{closure}::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 16939,
+            "distinct_ranges": 219
+          },
+          {
+            "family": "::register_reference::{closure}::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 16302,
+            "distinct_ranges": 228
+          }
+        ],
+        "Bindings, reactive operators and events": [
+          {
+            "family": "ferroui_base::data::binding_notification::BindingNotification::to_binding_value",
+            "bytes": 186146,
+            "distinct_ranges": 314
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::update_source",
+            "bytes": 126436,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression as ferroui_system::i_disposable::IDisposable::dispose",
+            "bytes": 71198,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression as ferroui_base::data::binding_expression_base::BindingExpressionBase::attach",
+            "bytes": 62779,
+            "distinct_ranges": 68
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::write_source_value_to_target",
+            "bytes": 53666,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::start_core",
+            "bytes": 50180,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::publish_value_now",
+            "bytes": 45991,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::on_target_property_changed",
+            "bytes": 45989,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::reactive::disposable::AnonymousDisposable as ferroui_system::i_disposable::IDisposable::dispose",
+            "bytes": 44025,
+            "distinct_ranges": 238
+          },
+          {
+            "family": "ferroui_system::events::handler_list::HandlerList::add",
+            "bytes": 43228,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::try_get_target_value",
+            "bytes": 41650,
+            "distinct_ranges": 68
+          },
+          {
+            "family": "ferroui_base::data::compiled_binding_path::CompiledBindingPathBuilder::typed_plain_property_info_with",
+            "bytes": 39673,
+            "distinct_ranges": 97
+          }
+        ],
+        "Other framework and application code": [
+          {
+            "family": "ferroui_base::collections::ferro_list::raise_collection_changed",
+            "bytes": 44016,
+            "distinct_ranges": 48
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive::add_handler_as",
+            "bytes": 41461,
+            "distinct_ranges": 163
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject::bind_untyped",
+            "bytes": 40820,
+            "distinct_ranges": 260
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::subscribed",
+            "bytes": 37179,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::animation::animators::animator::get_key_frames",
+            "bytes": 34743,
+            "distinct_ranges": 23
+          },
+          {
+            "family": "ferroui_base::collections::ferro_list::FerroList::modify",
+            "bytes": 25065,
+            "distinct_ranges": 87
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::internal_step",
+            "bytes": 24162,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::ferro_object_extensions::PropertyObservable::property_changed",
+            "bytes": 21182,
+            "distinct_ranges": 29
+          },
+          {
+            "family": "ferroui_base::animation::animators::animator::run",
+            "bytes": 20466,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::update_neutral_value",
+            "bytes": 19983,
+            "distinct_ranges": 23
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::do_play_states",
+            "bytes": 19146,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::animation::animators::animator::apply_with_visual",
+            "bytes": 19143,
+            "distinct_ranges": 27
+          }
+        ],
+        "Property registration, stores and observers": [
+          {
+            "family": "ferroui_base::property_store::binding_entry::BindingEntry::set_value",
+            "bytes": 300175,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue::set_and_raise_core_with_base",
+            "bytes": 294846,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue::set_and_raise_core",
+            "bytes": 256496,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue as ferroui_base::property_store::effective_value::EffectiveValueDyn::dispose_and_raise_unset",
+            "bytes": 243521,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::value_store::ValueStore::set_value",
+            "bytes": 203390,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::local_value_binding_observer::LocalValueBindingObserver::next_value",
+            "bytes": 201702,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::value_store::ValueStore::add_binding",
+            "bytes": 199845,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::binding_entry::BindingEntry::cached_default_value",
+            "bytes": 167973,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "Multiple function definitions",
+            "bytes": 157523,
+            "distinct_ranges": 1367
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject::get_value",
+            "bytes": 156945,
+            "distinct_ranges": 258
+          },
+          {
+            "family": "ferroui_base::ferro_property_metadata::MetadataTable::get",
+            "bytes": 156705,
+            "distinct_ranges": 337
+          },
+          {
+            "family": "ferroui_base::property_store::local_value_binding_observer::LocalValueBindingObserver::start",
+            "bytes": 153768,
+            "distinct_ranges": 267
+          }
+        ],
+        "Class projection, initialization and virtual dispatch": [
+          {
+            "family": "ferroui_base::type_system::instantiate",
+            "bytes": 103776,
+            "distinct_ranges": 376
+          },
+          {
+            "family": "ferroui_base::input::input_element::InputElement as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 69014,
+            "distinct_ranges": 188
+          },
+          {
+            "family": "ferroui_base::type_system::Ref as ferroui_base::ferro_property::AnyValue::any_value_eq",
+            "bytes": 48477,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::styled_element::StyledElement as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 41211,
+            "distinct_ranges": 215
+          },
+          {
+            "family": "ferroui_base::visual::Visual as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 39409,
+            "distinct_ranges": 192
+          },
+          {
+            "family": "ferroui_controls::automation::peers::automation_peer::AutomationPeer as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 33680,
+            "distinct_ranges": 63
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 30779,
+            "distinct_ranges": 187
+          },
+          {
+            "family": "ferroui_base::type_system::__register_class",
+            "bytes": 25795,
+            "distinct_ranges": 385
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 17888,
+            "distinct_ranges": 187
+          },
+          {
+            "family": "ferroui_controls::control::Control as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 12903,
+            "distinct_ranges": 123
+          },
+          {
+            "family": "ferroui_base::layout::layoutable::Layoutable as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 10382,
+            "distinct_ranges": 125
+          },
+          {
+            "family": "ferroui_base::type_system::Ref as core::any::Any::type_id",
+            "bytes": 8386,
+            "distinct_ranges": 599
+          }
+        ],
+        "Other async state machines": [
+          {
+            "family": "core::future::ready::Ready as core::future::future::Future::poll",
+            "bytes": 958,
+            "distinct_ranges": 16
+          },
+          {
+            "family": "ferroui_base::threading::dispatcher_task::DispatcherTask as core::future::future::Future::poll",
+            "bytes": 557,
+            "distinct_ranges": 2
+          },
+          {
+            "family": "ferroui_controls::utils::clipboard_helper::CatchUnwind as core::future::future::Future::poll",
+            "bytes": 370,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::animation::animation_task::AnimationTask as core::future::future::Future::poll",
+            "bytes": 313,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::threading::dispatcher_operation::DispatcherOperation as core::future::future::Future::poll",
+            "bytes": 284,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::rendering::composition::compositor::ServerJobResult as core::future::future::Future::poll",
+            "bytes": 226,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::platform::in_process_drag_source::DragResultFuture as core::future::future::Future::poll",
+            "bytes": 188,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::page::navigation_page::TransitionOutcomeFuture as core::future::future::Future::poll",
+            "bytes": 61,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::tab_control::TransitionOutcomeFuture as core::future::future::Future::poll",
+            "bytes": 61,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::transitioning_content_control::TransitionEnd as core::future::future::Future::poll",
+            "bytes": 58,
+            "distinct_ranges": 1
+          }
+        ],
+        "Aliases from multiple categories": [
+          {
+            "family": "Multiple function definitions",
+            "bytes": 135,
+            "distinct_ranges": 14
+          }
+        ],
+        "Reflection and value conversion": [
+          {
+            "family": "ferroui_base::metadata::markup_type::from_markup_value",
+            "bytes": 248855,
+            "distinct_ranges": 444
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_conversion::{closure}",
+            "bytes": 168429,
+            "distinct_ranges": 1339
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable",
+            "bytes": 158565,
+            "distinct_ranges": 961
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_cast::{closure}",
+            "bytes": 97421,
+            "distinct_ranges": 1213
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object",
+            "bytes": 96518,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable::unwrap",
+            "bytes": 86760,
+            "distinct_ranges": 961
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object::from_object",
+            "bytes": 73350,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object::as_object",
+            "bytes": 61347,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::metadata::markup_type::MarkupArguments::next",
+            "bytes": 55637,
+            "distinct_ranges": 435
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::with_registry",
+            "bytes": 51922,
+            "distinct_ranges": 212
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::register_defaults",
+            "bytes": 25763,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable::null",
+            "bytes": 18013,
+            "distinct_ranges": 934
+          }
+        ],
+        "Thread-local and once initialization": [
+          {
+            "family": "std::thread::local::LocalKey::with",
+            "bytes": 124843,
+            "distinct_ranges": 452
+          },
+          {
+            "family": "std::sync::once::Once::call_once_force::{closure}",
+            "bytes": 74005,
+            "distinct_ranges": 597
+          },
+          {
+            "family": "std::sync::once_lock::OnceLock::initialize",
+            "bytes": 43030,
+            "distinct_ranges": 597
+          },
+          {
+            "family": "std::sys::thread_local::native::lazy::Storage::get_or_init_slow",
+            "bytes": 24269,
+            "distinct_ranges": 93
+          },
+          {
+            "family": "std::sys::thread_local::native::eager::destroy",
+            "bytes": 3163,
+            "distinct_ranges": 52
+          },
+          {
+            "family": "std::sys::thread_local::native::lazy::destroy",
+            "bytes": 2592,
+            "distinct_ranges": 58
+          },
+          {
+            "family": "std::thread::local::LocalKey::initialize_with",
+            "bytes": 912,
+            "distinct_ranges": 12
+          },
+          {
+            "family": "std::sys::thread_local::abort_on_dtor_unwind::DtorUnwindGuard as core::ops::drop::Drop::drop",
+            "bytes": 460,
+            "distinct_ranges": 10
+          },
+          {
+            "family": "std::sys::thread_local::destructors::linux_like::register",
+            "bytes": 371,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::sys::thread_local::guard::key::enable::run",
+            "bytes": 288,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::sys::thread_local::key::racy::LazyKey::lazy_init",
+            "bytes": 190,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::thread::local::panic_access_error",
+            "bytes": 47,
+            "distinct_ranges": 1
+          }
+        ],
+        "Other XAML runtime, theme and codecs": [
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::to_object",
+            "bytes": 37251,
+            "distinct_ranges": 71
+          },
+          {
+            "family": "xamlx::type_system::xaml_type_well_known_types::XamlTypeWellKnownTypes::new",
+            "bytes": 35126,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::compiler_extensions::transformers::ferro_xaml_il_well_known_types::FerroXamlIlWellKnownTypes::new",
+            "bytes": 33385,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::exact",
+            "bytes": 19192,
+            "distinct_ranges": 19
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::cast",
+            "bytes": 17121,
+            "distinct_ranges": 24
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::set_and_register_name",
+            "bytes": 16632,
+            "distinct_ranges": 44
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::compiler_extensions::xaml_il_binding_path_helper::XamlIlBindingPathHelper::transform_binding_path",
+            "bytes": 15897,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::compiler_extensions::ferro_xaml_il_language_parse_intrinsics::FerroXamlIlLanguageParseIntrinsics::try_convert",
+            "bytes": 15154,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::runtime::type_system::runtime_type_system::RuntimeTypeSystem::project_markup",
+            "bytes": 13469,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::runtime::interpreter::evaluators::StandardNodeEvaluator as ferroui_markup_xaml_loader::runtime::interpreter::interpreter::IXamlNodeEvaluator::evaluate",
+            "bytes": 13350,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::core_table::core_types",
+            "bytes": 13303,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::compiler_extensions::group_transformers::xaml_merge_resource_group_transformer::XamlMergeResourceGroupTransformer as ferroui_markup_xaml_loader::compiler_extensions::group_transformers::i_xaml_ast_group_transformer::IXamlAstGroupTransformer::transform",
+            "bytes": 12847,
+            "distinct_ranges": 1
+          }
+        ],
+        "Generated native XAML functions": [
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_336",
+            "bytes": 66761,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml",
+            "bytes": 56128,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_293",
+            "bytes": 40745,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_271",
+            "bytes": 39036,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_220",
+            "bytes": 33140,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_300",
+            "bytes": 32866,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::populate_winuitheme_xaml_part_0",
+            "bytes": 32845,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::populate_winuitheme_xaml_part_4",
+            "bytes": 32503,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_160",
+            "bytes": 32085,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::populate_winuitheme_xaml_part_2",
+            "bytes": 31735,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_193",
+            "bytes": 28671,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_212",
+            "bytes": 27774,
+            "distinct_ranges": 1
+          }
+        ]
+      },
+      "stripped_bytes": 49664936
+    },
+    "editable_ordinary": {
+      "text": {
+        "address": 17513296,
+        "bytes": 27089685,
+        "sha256": "162075699543ff1085d703cb37a79e12d11b8c2252d2a05110018c77f72fee68"
+      },
+      "symbol_records": 186059,
+      "unique_ranges": 141853,
+      "alias_records": 44206,
+      "partial_overlap_bytes": 0,
+      "categories": {
+        "Property registration, stores and observers": 7323458,
+        "Other framework and application code": 5533199,
+        "Generated native XAML functions": 2467205,
+        "Callable entries and trait shims": 1827173,
+        "Compiler-generated destruction": 1618012,
+        "Bindings, reactive operators and events": 1560907,
+        "Reflection and value conversion": 1310782,
+        "Other XAML runtime, theme and codecs": 1290082,
+        "Collection primitives": 1198048,
+        "Other Rust and native code": 887293,
+        "Reference counting and weak handles": 645587,
+        "Class projection, initialization and virtual dispatch": 636432,
+        "Other closure bodies": 467313,
+        "Thread-local and once initialization": 275940,
+        "Other explicit Drop implementations": 40307,
+        "No sized symbol": 4722,
+        "Other async state machines": 3133,
+        "Aliases from multiple categories": 92
+      },
+      "leading_definitions": {
+        "Other Rust and native code": [
+          {
+            "family": "smallvec::SmallVec as core::iter::traits::collect::Extend::extend",
+            "bytes": 55105,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "core::slice::sort::stable::quicksort::stable_partition",
+            "bytes": 36626,
+            "distinct_ranges": 70
+          },
+          {
+            "family": "core::iter::adapters::map::Map as core::iter::traits::iterator::Iterator::fold",
+            "bytes": 34470,
+            "distinct_ranges": 128
+          },
+          {
+            "family": "core::option::Option as core::any::Any::type_id",
+            "bytes": 28504,
+            "distinct_ranges": 2036
+          },
+          {
+            "family": "core::slice::sort::stable::drift::sort",
+            "bytes": 28398,
+            "distinct_ranges": 39
+          },
+          {
+            "family": "core::slice::sort::stable::quicksort::quicksort",
+            "bytes": 24653,
+            "distinct_ranges": 39
+          },
+          {
+            "family": "core::cell::once::OnceCell::try_init",
+            "bytes": 24368,
+            "distinct_ranges": 56
+          },
+          {
+            "family": "dyn xamlx::type_system::type_system::IXamlType::find_method",
+            "bytes": 18195,
+            "distinct_ranges": 18
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::small_sort_general_with_scratch",
+            "bytes": 18152,
+            "distinct_ranges": 38
+          },
+          {
+            "family": "core::slice::sort::stable::drift::create_run",
+            "bytes": 16661,
+            "distinct_ranges": 39
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::sort4_stable",
+            "bytes": 14029,
+            "distinct_ranges": 37
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::bidirectional_merge",
+            "bytes": 13691,
+            "distinct_ranges": 38
+          }
+        ],
+        "No sized symbol": [
+          {
+            "family": "Padding or unlabeled text",
+            "bytes": 4722,
+            "distinct_ranges": 0
+          }
+        ],
+        "Collection primitives": [
+          {
+            "family": "hashbrown::raw::RawTable::reserve_rehash",
+            "bytes": 345995,
+            "distinct_ranges": 462
+          },
+          {
+            "family": "hashbrown::map::HashMap::insert",
+            "bytes": 176975,
+            "distinct_ranges": 436
+          },
+          {
+            "family": "alloc::vec::Vec as alloc::vec::spec_from_iter_nested::SpecFromIterNested::from_iter",
+            "bytes": 87956,
+            "distinct_ranges": 372
+          },
+          {
+            "family": "alloc::vec::Vec as core::ops::drop::Drop::drop",
+            "bytes": 85369,
+            "distinct_ranges": 702
+          },
+          {
+            "family": "hashbrown::raw::RawTable::clear",
+            "bytes": 59664,
+            "distinct_ranges": 339
+          },
+          {
+            "family": "hashbrown::raw::RawTableInner::drop_elements",
+            "bytes": 54902,
+            "distinct_ranges": 417
+          },
+          {
+            "family": "hashbrown::raw::RawTableInner::drop_inner_table",
+            "bytes": 40605,
+            "distinct_ranges": 420
+          },
+          {
+            "family": "alloc::vec::Vec::extend_trusted",
+            "bytes": 40369,
+            "distinct_ranges": 303
+          },
+          {
+            "family": "alloc::vec::Vec::retain_mut",
+            "bytes": 37182,
+            "distinct_ranges": 125
+          },
+          {
+            "family": "alloc::vec::Vec::extend_desugared",
+            "bytes": 29587,
+            "distinct_ranges": 130
+          },
+          {
+            "family": "alloc::vec::into_iter::IntoIter as core::iter::traits::iterator::Iterator::try_fold",
+            "bytes": 29572,
+            "distinct_ranges": 109
+          },
+          {
+            "family": "alloc::vec::into_iter::IntoIter as core::ops::drop::Drop::drop",
+            "bytes": 27714,
+            "distinct_ranges": 207
+          }
+        ],
+        "Compiler-generated destruction": [
+          {
+            "family": "core::ptr::drop_glue",
+            "bytes": 1618012,
+            "distinct_ranges": 15375
+          }
+        ],
+        "Reference counting and weak handles": [
+          {
+            "family": "alloc::rc::Rc::new",
+            "bytes": 263949,
+            "distinct_ranges": 2051
+          },
+          {
+            "family": "alloc::rc::Rc::drop_slow",
+            "bytes": 149000,
+            "distinct_ranges": 1315
+          },
+          {
+            "family": "alloc::rc::Rc::new_cyclic_in",
+            "bytes": 138586,
+            "distinct_ranges": 577
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_system::events::handler_list::MakeMutOrClone::make_mut_or_clone",
+            "bytes": 26322,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_eq",
+            "bytes": 19958,
+            "distinct_ranges": 196
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::data::compiled_binding_path::TypedPropertyElement::create_expression",
+            "bytes": 7119,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "alloc::rc::Rc as core::any::Any::type_id",
+            "bytes": 6426,
+            "distinct_ranges": 459
+          },
+          {
+            "family": "alloc::rc::Rc::clone_from_ref_in",
+            "bytes": 6125,
+            "distinct_ranges": 49
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_as_any",
+            "bytes": 4664,
+            "distinct_ranges": 424
+          },
+          {
+            "family": "alloc::sync::Arc::drop_slow",
+            "bytes": 4183,
+            "distinct_ranges": 37
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::reactive::observable::ObservableExt::subscribe_fn",
+            "bytes": 4154,
+            "distinct_ranges": 46
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_type_name",
+            "bytes": 2548,
+            "distinct_ranges": 196
+          }
+        ],
+        "Other explicit Drop implementations": [
+          {
+            "family": "smallvec::SmallVec as core::ops::drop::Drop::drop",
+            "bytes": 26720,
+            "distinct_ranges": 148
+          },
+          {
+            "family": "ferroui_controls::rich_text_block::RichTextBlock as core::ops::drop::Drop::drop",
+            "bytes": 1241,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "::drop::DropGuard as core::ops::drop::Drop::drop",
+            "bytes": 1235,
+            "distinct_ranges": 13
+          },
+          {
+            "family": "ferroui_controls::navigation_view::NavigationView as core::ops::drop::Drop::drop",
+            "bytes": 671,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::input::text_input::input_method_manager::TextInputMethodManager as core::ops::drop::Drop::drop",
+            "bytes": 601,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::rich_edit_box::RichEditBox as core::ops::drop::Drop::drop",
+            "bytes": 410,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::utils::collection_changed_event_manager::EntryGuard as core::ops::drop::Drop::drop",
+            "bytes": 365,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::media::text_formatting::text_line_break::TextLineBreak as core::ops::drop::Drop::drop",
+            "bytes": 314,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::auto_suggest_box::AutoSuggestBox as core::ops::drop::Drop::drop",
+            "bytes": 309,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::info_bar::InfoBar as core::ops::drop::Drop::drop",
+            "bytes": 302,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::virtualizing_carousel_panel::ClearSourceOnExit as core::ops::drop::Drop::drop",
+            "bytes": 292,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::documents::text_highlighter::TextHighlighter as core::ops::drop::Drop::drop",
+            "bytes": 289,
+            "distinct_ranges": 1
+          }
+        ],
+        "Other closure bodies": [
+          {
+            "family": "ferroui_base::threading::dispatcher_task::wrap_local_future::{closure}::{closure}",
+            "bytes": 46482,
+            "distinct_ranges": 47
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive::add_handler_as::{closure}",
+            "bytes": 44696,
+            "distinct_ranges": 156
+          },
+          {
+            "family": "ferroui_base::interactivity::routed_event::RoutedEvent::add_class_handler_untyped::{closure}",
+            "bytes": 33946,
+            "distinct_ranges": 74
+          },
+          {
+            "family": "std::sys::backtrace::_print_fmt::{closure}",
+            "bytes": 18344,
+            "distinct_ranges": 2
+          },
+          {
+            "family": "ferroui_base::rendering::composition::expressions::delegate_expression_ffi::DelegateExpressionFfi::add2::{closure}",
+            "bytes": 13016,
+            "distinct_ranges": 63
+          },
+          {
+            "family": "ferroui_base::rendering::composition::expressions::delegate_expression_ffi::DelegateExpressionFfi::add3::{closure}",
+            "bytes": 9845,
+            "distinct_ranges": 32
+          },
+          {
+            "family": "[i32]::sort_by::{closure}",
+            "bytes": 9792,
+            "distinct_ranges": 32
+          },
+          {
+            "family": "ferroui_base::media::media_collection::MediaCollection::for_each_item::{closure}",
+            "bytes": 7452,
+            "distinct_ranges": 19
+          },
+          {
+            "family": "ferroui_controls::top_level::TopLevel::create_platform_impl_binding::{closure}",
+            "bytes": 7038,
+            "distinct_ranges": 12
+          },
+          {
+            "family": "ferroui_controls::rich_edit_box::RichEditBox::paste_from_clipboard_async::{closure}",
+            "bytes": 6462,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::subscribed::{closure}",
+            "bytes": 6453,
+            "distinct_ranges": 55
+          },
+          {
+            "family": "ferroui_controls::page::navigation_page::NavigationPage::pop_modal_async_core::{closure}",
+            "bytes": 5441,
+            "distinct_ranges": 1
+          }
+        ],
+        "Callable entries and trait shims": [
+          {
+            "family": "::MARKUP::MARKUP::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 533221,
+            "distinct_ranges": 4250
+          },
+          {
+            "family": "::__MARKUP::MARKUP::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 206778,
+            "distinct_ranges": 949
+          },
+          {
+            "family": "::register_conversion::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 168449,
+            "distinct_ranges": 1339
+          },
+          {
+            "family": "::build_vtable::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 160883,
+            "distinct_ranges": 4469
+          },
+          {
+            "family": "::register_cast::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 97462,
+            "distinct_ranges": 1213
+          },
+          {
+            "family": "&::register_object::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 82350,
+            "distinct_ranges": 858
+          },
+          {
+            "family": "::call_once_force::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 74552,
+            "distinct_ranges": 597
+          },
+          {
+            "family": "::__CONSTRUCTOR::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 30538,
+            "distinct_ranges": 299
+          },
+          {
+            "family": "::into_parts::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 29114,
+            "distinct_ranges": 260
+          },
+          {
+            "family": "::MARKUP::MARKUP::{closure}::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 18385,
+            "distinct_ranges": 579
+          },
+          {
+            "family": "::__MARKUP::MARKUP::{closure}::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 17105,
+            "distinct_ranges": 219
+          },
+          {
+            "family": "::register_reference::{closure}::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 16302,
+            "distinct_ranges": 228
+          }
+        ],
+        "Bindings, reactive operators and events": [
+          {
+            "family": "ferroui_base::data::binding_notification::BindingNotification::to_binding_value",
+            "bytes": 186111,
+            "distinct_ranges": 314
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::update_source",
+            "bytes": 126436,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression as ferroui_system::i_disposable::IDisposable::dispose",
+            "bytes": 71198,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression as ferroui_base::data::binding_expression_base::BindingExpressionBase::attach",
+            "bytes": 62779,
+            "distinct_ranges": 68
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::write_source_value_to_target",
+            "bytes": 53666,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::start_core",
+            "bytes": 50180,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::publish_value_now",
+            "bytes": 45991,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::on_target_property_changed",
+            "bytes": 45989,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::reactive::disposable::AnonymousDisposable as ferroui_system::i_disposable::IDisposable::dispose",
+            "bytes": 44025,
+            "distinct_ranges": 238
+          },
+          {
+            "family": "ferroui_system::events::handler_list::HandlerList::add",
+            "bytes": 43228,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::try_get_target_value",
+            "bytes": 41650,
+            "distinct_ranges": 68
+          },
+          {
+            "family": "ferroui_base::data::compiled_binding_path::CompiledBindingPathBuilder::typed_plain_property_info_with",
+            "bytes": 39673,
+            "distinct_ranges": 97
+          }
+        ],
+        "Other framework and application code": [
+          {
+            "family": "ferroui_base::collections::ferro_list::raise_collection_changed",
+            "bytes": 44016,
+            "distinct_ranges": 48
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive::add_handler_as",
+            "bytes": 41461,
+            "distinct_ranges": 163
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject::bind_untyped",
+            "bytes": 40820,
+            "distinct_ranges": 260
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::subscribed",
+            "bytes": 37179,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::animation::animators::animator::get_key_frames",
+            "bytes": 34743,
+            "distinct_ranges": 23
+          },
+          {
+            "family": "ferroui_base::collections::ferro_list::FerroList::modify",
+            "bytes": 25065,
+            "distinct_ranges": 87
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::internal_step",
+            "bytes": 24162,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::ferro_object_extensions::PropertyObservable::property_changed",
+            "bytes": 21182,
+            "distinct_ranges": 29
+          },
+          {
+            "family": "ferroui_base::animation::animators::animator::run",
+            "bytes": 20466,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::update_neutral_value",
+            "bytes": 19959,
+            "distinct_ranges": 23
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::do_play_states",
+            "bytes": 19146,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::animation::animators::animator::apply_with_visual",
+            "bytes": 19143,
+            "distinct_ranges": 27
+          }
+        ],
+        "Property registration, stores and observers": [
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue::set_and_raise_core_with_base",
+            "bytes": 296784,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue::set_and_raise_core",
+            "bytes": 252303,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue as ferroui_base::property_store::effective_value::EffectiveValueDyn::dispose_and_raise_unset",
+            "bytes": 251735,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::ferro_property_metadata::MetadataTable::unregister",
+            "bytes": 208530,
+            "distinct_ranges": 330
+          },
+          {
+            "family": "ferroui_base::property_store::binding_entry::BindingEntry::set_value",
+            "bytes": 203405,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::value_store::ValueStore::set_value",
+            "bytes": 202736,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::value_store::ValueStore::add_binding",
+            "bytes": 192539,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::ferro_property_metadata::MetadataTable::get",
+            "bytes": 179958,
+            "distinct_ranges": 337
+          },
+          {
+            "family": "Multiple function definitions",
+            "bytes": 179079,
+            "distinct_ranges": 1378
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject::get_value",
+            "bytes": 157853,
+            "distinct_ranges": 264
+          },
+          {
+            "family": "ferroui_base::ferro_property::FerroProperty::new",
+            "bytes": 152272,
+            "distinct_ranges": 307
+          },
+          {
+            "family": "ferroui_base::styled_property::StyledProperty::new",
+            "bytes": 146643,
+            "distinct_ranges": 260
+          }
+        ],
+        "Reflection and value conversion": [
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_conversion::{closure}",
+            "bytes": 168425,
+            "distinct_ranges": 1339
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable",
+            "bytes": 158565,
+            "distinct_ranges": 961
+          },
+          {
+            "family": "ferroui_base::metadata::markup_type::from_markup_value",
+            "bytes": 145442,
+            "distinct_ranges": 444
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_cast::{closure}",
+            "bytes": 97421,
+            "distinct_ranges": 1213
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object",
+            "bytes": 96518,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable::unwrap",
+            "bytes": 86760,
+            "distinct_ranges": 961
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueType::of",
+            "bytes": 73557,
+            "distinct_ranges": 2229
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object::from_object",
+            "bytes": 73350,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object::as_object",
+            "bytes": 61347,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::metadata::markup_type::MarkupArguments::next",
+            "bytes": 55637,
+            "distinct_ranges": 435
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::with_registry",
+            "bytes": 51922,
+            "distinct_ranges": 212
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::register_defaults",
+            "bytes": 25763,
+            "distinct_ranges": 1
+          }
+        ],
+        "Class projection, initialization and virtual dispatch": [
+          {
+            "family": "ferroui_base::type_system::instantiate",
+            "bytes": 103776,
+            "distinct_ranges": 376
+          },
+          {
+            "family": "ferroui_base::input::input_element::InputElement as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 70336,
+            "distinct_ranges": 188
+          },
+          {
+            "family": "ferroui_base::type_system::Ref as ferroui_base::ferro_property::AnyValue::any_value_eq",
+            "bytes": 48477,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::styled_element::StyledElement as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 41897,
+            "distinct_ranges": 217
+          },
+          {
+            "family": "ferroui_base::visual::Visual as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 35465,
+            "distinct_ranges": 192
+          },
+          {
+            "family": "ferroui_controls::automation::peers::automation_peer::AutomationPeer as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 33641,
+            "distinct_ranges": 63
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 30781,
+            "distinct_ranges": 185
+          },
+          {
+            "family": "ferroui_base::type_system::__register_class",
+            "bytes": 25929,
+            "distinct_ranges": 387
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 15428,
+            "distinct_ranges": 187
+          },
+          {
+            "family": "ferroui_controls::control::Control as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 13268,
+            "distinct_ranges": 123
+          },
+          {
+            "family": "ferroui_base::layout::layoutable::Layoutable as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 11372,
+            "distinct_ranges": 125
+          },
+          {
+            "family": "ferroui_base::type_system::Ref as core::any::Any::type_id",
+            "bytes": 8428,
+            "distinct_ranges": 602
+          }
+        ],
+        "Aliases from multiple categories": [
+          {
+            "family": "Multiple function definitions",
+            "bytes": 92,
+            "distinct_ranges": 11
+          }
+        ],
+        "Other async state machines": [
+          {
+            "family": "core::future::ready::Ready as core::future::future::Future::poll",
+            "bytes": 1015,
+            "distinct_ranges": 17
+          },
+          {
+            "family": "ferroui_base::threading::dispatcher_task::DispatcherTask as core::future::future::Future::poll",
+            "bytes": 557,
+            "distinct_ranges": 2
+          },
+          {
+            "family": "ferroui_controls::utils::clipboard_helper::CatchUnwind as core::future::future::Future::poll",
+            "bytes": 370,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::animation::animation_task::AnimationTask as core::future::future::Future::poll",
+            "bytes": 313,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::threading::dispatcher_operation::DispatcherOperation as core::future::future::Future::poll",
+            "bytes": 284,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::rendering::composition::compositor::ServerJobResult as core::future::future::Future::poll",
+            "bytes": 226,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::platform::in_process_drag_source::DragResultFuture as core::future::future::Future::poll",
+            "bytes": 188,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::tab_control::TransitionOutcomeFuture as core::future::future::Future::poll",
+            "bytes": 61,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::page::navigation_page::TransitionOutcomeFuture as core::future::future::Future::poll",
+            "bytes": 61,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::transitioning_content_control::TransitionEnd as core::future::future::Future::poll",
+            "bytes": 58,
+            "distinct_ranges": 1
+          }
+        ],
+        "Thread-local and once initialization": [
+          {
+            "family": "std::thread::local::LocalKey::with",
+            "bytes": 125724,
+            "distinct_ranges": 452
+          },
+          {
+            "family": "std::sync::once::Once::call_once_force::{closure}",
+            "bytes": 74886,
+            "distinct_ranges": 597
+          },
+          {
+            "family": "std::sync::once_lock::OnceLock::initialize",
+            "bytes": 43030,
+            "distinct_ranges": 597
+          },
+          {
+            "family": "std::sys::thread_local::native::lazy::Storage::get_or_init_slow",
+            "bytes": 24131,
+            "distinct_ranges": 93
+          },
+          {
+            "family": "std::sys::thread_local::native::eager::destroy",
+            "bytes": 3128,
+            "distinct_ranges": 52
+          },
+          {
+            "family": "std::sys::thread_local::native::lazy::destroy",
+            "bytes": 2573,
+            "distinct_ranges": 58
+          },
+          {
+            "family": "std::thread::local::LocalKey::initialize_with",
+            "bytes": 912,
+            "distinct_ranges": 12
+          },
+          {
+            "family": "std::sys::thread_local::abort_on_dtor_unwind::DtorUnwindGuard as core::ops::drop::Drop::drop",
+            "bytes": 552,
+            "distinct_ranges": 12
+          },
+          {
+            "family": "std::sys::thread_local::destructors::linux_like::register",
+            "bytes": 371,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::sys::thread_local::guard::key::enable::run",
+            "bytes": 288,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::sys::thread_local::key::racy::LazyKey::lazy_init",
+            "bytes": 190,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::thread::local::panic_access_error",
+            "bytes": 47,
+            "distinct_ranges": 1
+          }
+        ],
+        "Other XAML runtime, theme and codecs": [
+          {
+            "family": "xamlx::type_system::xaml_type_well_known_types::XamlTypeWellKnownTypes::new",
+            "bytes": 35126,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::compiler_extensions::transformers::ferro_xaml_il_well_known_types::FerroXamlIlWellKnownTypes::new",
+            "bytes": 33385,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::set_and_register_name",
+            "bytes": 16280,
+            "distinct_ranges": 44
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::compiler_extensions::xaml_il_binding_path_helper::XamlIlBindingPathHelper::transform_binding_path",
+            "bytes": 15897,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::compiler_extensions::ferro_xaml_il_language_parse_intrinsics::FerroXamlIlLanguageParseIntrinsics::try_convert",
+            "bytes": 15149,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::runtime::type_system::runtime_type_system::RuntimeTypeSystem::project_markup",
+            "bytes": 13469,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::runtime::interpreter::evaluators::StandardNodeEvaluator as ferroui_markup_xaml_loader::runtime::interpreter::interpreter::IXamlNodeEvaluator::evaluate",
+            "bytes": 13350,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::core_table::core_types",
+            "bytes": 13303,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::compiler_extensions::group_transformers::xaml_merge_resource_group_transformer::XamlMergeResourceGroupTransformer as ferroui_markup_xaml_loader::compiler_extensions::group_transformers::i_xaml_ast_group_transformer::IXamlAstGroupTransformer::transform",
+            "bytes": 12847,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::runtime::type_system::runtime_type_system::RuntimeTypeSystem::project_class",
+            "bytes": 12045,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::compiler_extensions::transformers::ferro_xaml_il_binding_path_parser::FerroXamlIlBindingPathParser::convert_long_form_properties_to_binding_expression_node",
+            "bytes": 10994,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::runtime::type_system::object_model::project_object_model_members",
+            "bytes": 10851,
+            "distinct_ranges": 1
+          }
+        ],
+        "Generated native XAML functions": [
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_336",
+            "bytes": 58550,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml",
+            "bytes": 43906,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_293",
+            "bytes": 36424,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_271",
+            "bytes": 35562,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_300",
+            "bytes": 31775,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_160",
+            "bytes": 30720,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_220",
+            "bytes": 30127,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::populate_winuitheme_xaml_part_0",
+            "bytes": 28061,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::populate_winuitheme_xaml_part_4",
+            "bytes": 27762,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::populate_winuitheme_xaml_part_2",
+            "bytes": 27381,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_193",
+            "bytes": 27229,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_337",
+            "bytes": 26809,
+            "distinct_ranges": 1
+          }
+        ]
+      },
+      "stripped_bytes": 47817336
+    },
+    "editable_packed": {
+      "text": {
+        "address": 9237232,
+        "bytes": 25852453,
+        "sha256": "03cf6cf0eb64191ef41826d108decc7f831a1e36e202eb17661271e0038018f2"
+      },
+      "symbol_records": 186059,
+      "unique_ranges": 118504,
+      "alias_records": 67555,
+      "partial_overlap_bytes": 0,
+      "categories": {
+        "Property registration, stores and observers": 7227223,
+        "Other framework and application code": 5466903,
+        "Generated native XAML functions": 2462821,
+        "Bindings, reactive operators and events": 1540735,
+        "Compiler-generated destruction": 1466900,
+        "Callable entries and trait shims": 1300064,
+        "Other XAML runtime, theme and codecs": 1277164,
+        "Reflection and value conversion": 998815,
+        "Collection primitives": 915620,
+        "Other Rust and native code": 827134,
+        "Class projection, initialization and virtual dispatch": 631795,
+        "Reference counting and weak handles": 626287,
+        "Aliases from multiple categories": 462588,
+        "Other closure bodies": 401423,
+        "Thread-local and once initialization": 199570,
+        "Other explicit Drop implementations": 40064,
+        "No sized symbol": 4531,
+        "Other async state machines": 2816
+      },
+      "leading_definitions": {
+        "Other Rust and native code": [
+          {
+            "family": "smallvec::SmallVec as core::iter::traits::collect::Extend::extend",
+            "bytes": 55105,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "core::slice::sort::stable::quicksort::stable_partition",
+            "bytes": 36626,
+            "distinct_ranges": 70
+          },
+          {
+            "family": "core::iter::adapters::map::Map as core::iter::traits::iterator::Iterator::fold",
+            "bytes": 33668,
+            "distinct_ranges": 122
+          },
+          {
+            "family": "core::slice::sort::stable::drift::sort",
+            "bytes": 25470,
+            "distinct_ranges": 35
+          },
+          {
+            "family": "core::cell::once::OnceCell::try_init",
+            "bytes": 24368,
+            "distinct_ranges": 56
+          },
+          {
+            "family": "core::slice::sort::stable::quicksort::quicksort",
+            "bytes": 22625,
+            "distinct_ranges": 35
+          },
+          {
+            "family": "dyn xamlx::type_system::type_system::IXamlType::find_method",
+            "bytes": 18195,
+            "distinct_ranges": 18
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::small_sort_general_with_scratch",
+            "bytes": 18152,
+            "distinct_ranges": 38
+          },
+          {
+            "family": "core::option::Option as core::any::Any::type_id",
+            "bytes": 16226,
+            "distinct_ranges": 1159
+          },
+          {
+            "family": "core::slice::sort::stable::drift::create_run",
+            "bytes": 15415,
+            "distinct_ranges": 35
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::sort4_stable",
+            "bytes": 13855,
+            "distinct_ranges": 36
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::bidirectional_merge",
+            "bytes": 13393,
+            "distinct_ranges": 37
+          }
+        ],
+        "No sized symbol": [
+          {
+            "family": "Padding or unlabeled text",
+            "bytes": 4531,
+            "distinct_ranges": 0
+          }
+        ],
+        "Collection primitives": [
+          {
+            "family": "hashbrown::map::HashMap::insert",
+            "bytes": 175495,
+            "distinct_ranges": 432
+          },
+          {
+            "family": "hashbrown::raw::RawTable::reserve_rehash",
+            "bytes": 156626,
+            "distinct_ranges": 203
+          },
+          {
+            "family": "alloc::vec::Vec as alloc::vec::spec_from_iter_nested::SpecFromIterNested::from_iter",
+            "bytes": 87956,
+            "distinct_ranges": 372
+          },
+          {
+            "family": "alloc::vec::Vec as core::ops::drop::Drop::drop",
+            "bytes": 84945,
+            "distinct_ranges": 695
+          },
+          {
+            "family": "hashbrown::raw::RawTable::clear",
+            "bytes": 59664,
+            "distinct_ranges": 339
+          },
+          {
+            "family": "alloc::vec::Vec::retain_mut",
+            "bytes": 36869,
+            "distinct_ranges": 123
+          },
+          {
+            "family": "alloc::vec::Vec::extend_desugared",
+            "bytes": 29587,
+            "distinct_ranges": 130
+          },
+          {
+            "family": "alloc::vec::into_iter::IntoIter as core::iter::traits::iterator::Iterator::try_fold",
+            "bytes": 29572,
+            "distinct_ranges": 109
+          },
+          {
+            "family": "alloc::vec::into_iter::IntoIter as core::ops::drop::Drop::drop",
+            "bytes": 27358,
+            "distinct_ranges": 204
+          },
+          {
+            "family": "alloc::vec::Vec::extend_trusted",
+            "bytes": 26121,
+            "distinct_ranges": 189
+          },
+          {
+            "family": "hashbrown::raw::RawTableInner::drop_elements",
+            "bytes": 21641,
+            "distinct_ranges": 167
+          },
+          {
+            "family": "hashbrown::raw::RawTableInner::drop_inner_table",
+            "bytes": 16251,
+            "distinct_ranges": 168
+          }
+        ],
+        "Compiler-generated destruction": [
+          {
+            "family": "core::ptr::drop_glue",
+            "bytes": 1466900,
+            "distinct_ranges": 11073
+          }
+        ],
+        "Reference counting and weak handles": [
+          {
+            "family": "alloc::rc::Rc::new",
+            "bytes": 255486,
+            "distinct_ranges": 1900
+          },
+          {
+            "family": "alloc::rc::Rc::drop_slow",
+            "bytes": 148357,
+            "distinct_ranges": 1297
+          },
+          {
+            "family": "alloc::rc::Rc::new_cyclic_in",
+            "bytes": 138586,
+            "distinct_ranges": 577
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_system::events::handler_list::MakeMutOrClone::make_mut_or_clone",
+            "bytes": 26322,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_eq",
+            "bytes": 19958,
+            "distinct_ranges": 196
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::data::compiled_binding_path::TypedPropertyElement::create_expression",
+            "bytes": 7119,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "alloc::rc::Rc::clone_from_ref_in",
+            "bytes": 6125,
+            "distinct_ranges": 49
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::reactive::observable::ObservableExt::subscribe_fn",
+            "bytes": 4154,
+            "distinct_ranges": 46
+          },
+          {
+            "family": "alloc::sync::Arc::drop_slow",
+            "bytes": 4071,
+            "distinct_ranges": 34
+          },
+          {
+            "family": "alloc::rc::Rc as core::any::Any::type_id",
+            "bytes": 3094,
+            "distinct_ranges": 221
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_type_name",
+            "bytes": 2548,
+            "distinct_ranges": 196
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_as_any",
+            "bytes": 2156,
+            "distinct_ranges": 196
+          }
+        ],
+        "Other explicit Drop implementations": [
+          {
+            "family": "smallvec::SmallVec as core::ops::drop::Drop::drop",
+            "bytes": 26720,
+            "distinct_ranges": 148
+          },
+          {
+            "family": "ferroui_controls::rich_text_block::RichTextBlock as core::ops::drop::Drop::drop",
+            "bytes": 1241,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "::drop::DropGuard as core::ops::drop::Drop::drop",
+            "bytes": 1071,
+            "distinct_ranges": 11
+          },
+          {
+            "family": "ferroui_controls::navigation_view::NavigationView as core::ops::drop::Drop::drop",
+            "bytes": 671,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::input::text_input::input_method_manager::TextInputMethodManager as core::ops::drop::Drop::drop",
+            "bytes": 601,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::rich_edit_box::RichEditBox as core::ops::drop::Drop::drop",
+            "bytes": 410,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::utils::collection_changed_event_manager::EntryGuard as core::ops::drop::Drop::drop",
+            "bytes": 365,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::media::text_formatting::text_line_break::TextLineBreak as core::ops::drop::Drop::drop",
+            "bytes": 314,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::auto_suggest_box::AutoSuggestBox as core::ops::drop::Drop::drop",
+            "bytes": 309,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::info_bar::InfoBar as core::ops::drop::Drop::drop",
+            "bytes": 302,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::virtualizing_carousel_panel::ClearSourceOnExit as core::ops::drop::Drop::drop",
+            "bytes": 292,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::documents::text_highlighter::TextHighlighter as core::ops::drop::Drop::drop",
+            "bytes": 289,
+            "distinct_ranges": 1
+          }
+        ],
+        "Other closure bodies": [
+          {
+            "family": "ferroui_base::threading::dispatcher_task::wrap_local_future::{closure}::{closure}",
+            "bytes": 46482,
+            "distinct_ranges": 47
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive::add_handler_as::{closure}",
+            "bytes": 42218,
+            "distinct_ranges": 142
+          },
+          {
+            "family": "ferroui_base::interactivity::routed_event::RoutedEvent::add_class_handler_untyped::{closure}",
+            "bytes": 25775,
+            "distinct_ranges": 47
+          },
+          {
+            "family": "std::sys::backtrace::_print_fmt::{closure}",
+            "bytes": 18344,
+            "distinct_ranges": 2
+          },
+          {
+            "family": "ferroui_base::media::media_collection::MediaCollection::for_each_item::{closure}",
+            "bytes": 7452,
+            "distinct_ranges": 19
+          },
+          {
+            "family": "ferroui_controls::top_level::TopLevel::create_platform_impl_binding::{closure}",
+            "bytes": 7038,
+            "distinct_ranges": 12
+          },
+          {
+            "family": "ferroui_controls::rich_edit_box::RichEditBox::paste_from_clipboard_async::{closure}",
+            "bytes": 6462,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::subscribed::{closure}",
+            "bytes": 6453,
+            "distinct_ranges": 55
+          },
+          {
+            "family": "ferroui_base::rendering::composition::expressions::delegate_expression_ffi::DelegateExpressionFfi::add3::{closure}",
+            "bytes": 5595,
+            "distinct_ranges": 13
+          },
+          {
+            "family": "ferroui_controls::page::navigation_page::NavigationPage::pop_modal_async_core::{closure}",
+            "bytes": 5441,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::primitives::selecting_items_control::SelectingItemsControl::initialize_selection_model::{closure}",
+            "bytes": 5003,
+            "distinct_ranges": 3
+          },
+          {
+            "family": "ferroui_controls::page::navigation_page::NavigationPage::push_modal_async_private::{closure}",
+            "bytes": 4728,
+            "distinct_ranges": 1
+          }
+        ],
+        "Aliases from multiple categories": [
+          {
+            "family": "Multiple function definitions",
+            "bytes": 462588,
+            "distinct_ranges": 4837
+          }
+        ],
+        "Callable entries and trait shims": [
+          {
+            "family": "::MARKUP::MARKUP::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 527871,
+            "distinct_ranges": 4143
+          },
+          {
+            "family": "::__MARKUP::MARKUP::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 206598,
+            "distinct_ranges": 937
+          },
+          {
+            "family": "::build_vtable::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 146867,
+            "distinct_ranges": 4092
+          },
+          {
+            "family": "&::register_object::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 82006,
+            "distinct_ranges": 854
+          },
+          {
+            "family": "::into_parts::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 29114,
+            "distinct_ranges": 260
+          },
+          {
+            "family": "::__CONSTRUCTOR::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 16160,
+            "distinct_ranges": 197
+          },
+          {
+            "family": "::start_core::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 15430,
+            "distinct_ranges": 116
+          },
+          {
+            "family": "::register_interface::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 11138,
+            "distinct_ranges": 98
+          },
+          {
+            "family": "::add_handler_as::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 10758,
+            "distinct_ranges": 142
+          },
+          {
+            "family": "::TYPE::TYPE::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 10700,
+            "distinct_ranges": 428
+          },
+          {
+            "family": "::update_source::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 9718,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::threading::dispatcher_operation::box_local_callback::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 8551,
+            "distinct_ranges": 40
+          }
+        ],
+        "Bindings, reactive operators and events": [
+          {
+            "family": "ferroui_base::data::binding_notification::BindingNotification::to_binding_value",
+            "bytes": 186111,
+            "distinct_ranges": 314
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::update_source",
+            "bytes": 126436,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression as ferroui_system::i_disposable::IDisposable::dispose",
+            "bytes": 71198,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression as ferroui_base::data::binding_expression_base::BindingExpressionBase::attach",
+            "bytes": 62779,
+            "distinct_ranges": 68
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::write_source_value_to_target",
+            "bytes": 53666,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::start_core",
+            "bytes": 50180,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::publish_value_now",
+            "bytes": 45991,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::on_target_property_changed",
+            "bytes": 45989,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::reactive::disposable::AnonymousDisposable as ferroui_system::i_disposable::IDisposable::dispose",
+            "bytes": 43938,
+            "distinct_ranges": 235
+          },
+          {
+            "family": "ferroui_system::events::handler_list::HandlerList::add",
+            "bytes": 43228,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::try_get_target_value",
+            "bytes": 41650,
+            "distinct_ranges": 68
+          },
+          {
+            "family": "ferroui_base::data::compiled_binding_path::CompiledBindingPathBuilder::typed_plain_property_info_with",
+            "bytes": 39673,
+            "distinct_ranges": 97
+          }
+        ],
+        "Other framework and application code": [
+          {
+            "family": "ferroui_base::collections::ferro_list::raise_collection_changed",
+            "bytes": 44016,
+            "distinct_ranges": 48
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive::add_handler_as",
+            "bytes": 41461,
+            "distinct_ranges": 163
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject::bind_untyped",
+            "bytes": 40820,
+            "distinct_ranges": 260
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::subscribed",
+            "bytes": 37179,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::animation::animators::animator::get_key_frames",
+            "bytes": 34743,
+            "distinct_ranges": 23
+          },
+          {
+            "family": "ferroui_base::collections::ferro_list::FerroList::modify",
+            "bytes": 25065,
+            "distinct_ranges": 87
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::internal_step",
+            "bytes": 24162,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::ferro_object_extensions::PropertyObservable::property_changed",
+            "bytes": 21182,
+            "distinct_ranges": 29
+          },
+          {
+            "family": "ferroui_base::animation::animators::animator::run",
+            "bytes": 20466,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::update_neutral_value",
+            "bytes": 19959,
+            "distinct_ranges": 23
+          },
+          {
+            "family": "Multiple function definitions",
+            "bytes": 19263,
+            "distinct_ranges": 377
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::do_play_states",
+            "bytes": 19146,
+            "distinct_ranges": 27
+          }
+        ],
+        "Property registration, stores and observers": [
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue::set_and_raise_core_with_base",
+            "bytes": 296784,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue::set_and_raise_core",
+            "bytes": 252303,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue as ferroui_base::property_store::effective_value::EffectiveValueDyn::dispose_and_raise_unset",
+            "bytes": 251735,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::ferro_property_metadata::MetadataTable::unregister",
+            "bytes": 208530,
+            "distinct_ranges": 330
+          },
+          {
+            "family": "ferroui_base::property_store::binding_entry::BindingEntry::set_value",
+            "bytes": 203405,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::value_store::ValueStore::set_value",
+            "bytes": 202736,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::value_store::ValueStore::add_binding",
+            "bytes": 192539,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "Multiple function definitions",
+            "bytes": 182698,
+            "distinct_ranges": 1407
+          },
+          {
+            "family": "ferroui_base::ferro_property_metadata::MetadataTable::get",
+            "bytes": 179958,
+            "distinct_ranges": 337
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject::get_value",
+            "bytes": 157853,
+            "distinct_ranges": 264
+          },
+          {
+            "family": "ferroui_base::ferro_property::FerroProperty::new",
+            "bytes": 152272,
+            "distinct_ranges": 307
+          },
+          {
+            "family": "ferroui_base::styled_property::StyledProperty::new",
+            "bytes": 146643,
+            "distinct_ranges": 260
+          }
+        ],
+        "Reflection and value conversion": [
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable",
+            "bytes": 158565,
+            "distinct_ranges": 961
+          },
+          {
+            "family": "ferroui_base::metadata::markup_type::from_markup_value",
+            "bytes": 145442,
+            "distinct_ranges": 444
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object",
+            "bytes": 96518,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable::unwrap",
+            "bytes": 86760,
+            "distinct_ranges": 961
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object::from_object",
+            "bytes": 73350,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object::as_object",
+            "bytes": 61347,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueType::of",
+            "bytes": 56529,
+            "distinct_ranges": 1713
+          },
+          {
+            "family": "ferroui_base::metadata::markup_type::MarkupArguments::next",
+            "bytes": 55637,
+            "distinct_ranges": 435
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::with_registry",
+            "bytes": 51922,
+            "distinct_ranges": 212
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::register_defaults",
+            "bytes": 25763,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable::null",
+            "bytes": 18013,
+            "distinct_ranges": 934
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_display::display",
+            "bytes": 14281,
+            "distinct_ranges": 50
+          }
+        ],
+        "Class projection, initialization and virtual dispatch": [
+          {
+            "family": "ferroui_base::type_system::instantiate",
+            "bytes": 103776,
+            "distinct_ranges": 376
+          },
+          {
+            "family": "ferroui_base::input::input_element::InputElement as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 70336,
+            "distinct_ranges": 188
+          },
+          {
+            "family": "ferroui_base::type_system::Ref as ferroui_base::ferro_property::AnyValue::any_value_eq",
+            "bytes": 48477,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::styled_element::StyledElement as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 41897,
+            "distinct_ranges": 217
+          },
+          {
+            "family": "ferroui_base::visual::Visual as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 35465,
+            "distinct_ranges": 192
+          },
+          {
+            "family": "ferroui_controls::automation::peers::automation_peer::AutomationPeer as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 33641,
+            "distinct_ranges": 63
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 30781,
+            "distinct_ranges": 185
+          },
+          {
+            "family": "ferroui_base::type_system::__register_class",
+            "bytes": 25929,
+            "distinct_ranges": 387
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 15428,
+            "distinct_ranges": 187
+          },
+          {
+            "family": "ferroui_controls::control::Control as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 13268,
+            "distinct_ranges": 123
+          },
+          {
+            "family": "ferroui_base::layout::layoutable::Layoutable as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 11372,
+            "distinct_ranges": 125
+          },
+          {
+            "family": "ferroui_controls::content_control::ContentControl as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 7084,
+            "distinct_ranges": 48
+          }
+        ],
+        "Other async state machines": [
+          {
+            "family": "core::future::ready::Ready as core::future::future::Future::poll",
+            "bytes": 759,
+            "distinct_ranges": 13
+          },
+          {
+            "family": "ferroui_base::threading::dispatcher_task::DispatcherTask as core::future::future::Future::poll",
+            "bytes": 557,
+            "distinct_ranges": 2
+          },
+          {
+            "family": "ferroui_controls::utils::clipboard_helper::CatchUnwind as core::future::future::Future::poll",
+            "bytes": 370,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::animation::animation_task::AnimationTask as core::future::future::Future::poll",
+            "bytes": 313,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::threading::dispatcher_operation::DispatcherOperation as core::future::future::Future::poll",
+            "bytes": 284,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::rendering::composition::compositor::ServerJobResult as core::future::future::Future::poll",
+            "bytes": 226,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::platform::in_process_drag_source::DragResultFuture as core::future::future::Future::poll",
+            "bytes": 188,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "Multiple function definitions",
+            "bytes": 61,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::transitioning_content_control::TransitionEnd as core::future::future::Future::poll",
+            "bytes": 58,
+            "distinct_ranges": 1
+          }
+        ],
+        "Thread-local and once initialization": [
+          {
+            "family": "std::thread::local::LocalKey::with",
+            "bytes": 125027,
+            "distinct_ranges": 438
+          },
+          {
+            "family": "std::sync::once_lock::OnceLock::initialize",
+            "bytes": 42961,
+            "distinct_ranges": 596
+          },
+          {
+            "family": "std::sys::thread_local::native::lazy::Storage::get_or_init_slow",
+            "bytes": 23665,
+            "distinct_ranges": 90
+          },
+          {
+            "family": "std::sys::thread_local::native::eager::destroy",
+            "bytes": 3128,
+            "distinct_ranges": 52
+          },
+          {
+            "family": "std::sys::thread_local::native::lazy::destroy",
+            "bytes": 2547,
+            "distinct_ranges": 57
+          },
+          {
+            "family": "std::sync::once::Once::call_once_force::{closure}",
+            "bytes": 629,
+            "distinct_ranges": 2
+          },
+          {
+            "family": "std::thread::local::LocalKey::initialize_with",
+            "bytes": 471,
+            "distinct_ranges": 5
+          },
+          {
+            "family": "std::sys::thread_local::destructors::linux_like::register",
+            "bytes": 371,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::sys::thread_local::guard::key::enable::run",
+            "bytes": 288,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::sys::thread_local::key::racy::LazyKey::lazy_init",
+            "bytes": 190,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::sys::thread_local::abort_on_dtor_unwind::DtorUnwindGuard as core::ops::drop::Drop::drop",
+            "bytes": 138,
+            "distinct_ranges": 3
+          },
+          {
+            "family": "std::thread::local::panic_access_error",
+            "bytes": 47,
+            "distinct_ranges": 1
+          }
+        ],
+        "Other XAML runtime, theme and codecs": [
+          {
+            "family": "xamlx::type_system::xaml_type_well_known_types::XamlTypeWellKnownTypes::new",
+            "bytes": 35126,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::compiler_extensions::transformers::ferro_xaml_il_well_known_types::FerroXamlIlWellKnownTypes::new",
+            "bytes": 33385,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::set_and_register_name",
+            "bytes": 16280,
+            "distinct_ranges": 44
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::compiler_extensions::xaml_il_binding_path_helper::XamlIlBindingPathHelper::transform_binding_path",
+            "bytes": 15897,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::compiler_extensions::ferro_xaml_il_language_parse_intrinsics::FerroXamlIlLanguageParseIntrinsics::try_convert",
+            "bytes": 15149,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::runtime::type_system::runtime_type_system::RuntimeTypeSystem::project_markup",
+            "bytes": 13469,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::runtime::interpreter::evaluators::StandardNodeEvaluator as ferroui_markup_xaml_loader::runtime::interpreter::interpreter::IXamlNodeEvaluator::evaluate",
+            "bytes": 13350,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::core_table::core_types",
+            "bytes": 13303,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::compiler_extensions::group_transformers::xaml_merge_resource_group_transformer::XamlMergeResourceGroupTransformer as ferroui_markup_xaml_loader::compiler_extensions::group_transformers::i_xaml_ast_group_transformer::IXamlAstGroupTransformer::transform",
+            "bytes": 12847,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::runtime::type_system::runtime_type_system::RuntimeTypeSystem::project_class",
+            "bytes": 12045,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::compiler_extensions::transformers::ferro_xaml_il_binding_path_parser::FerroXamlIlBindingPathParser::convert_long_form_properties_to_binding_expression_node",
+            "bytes": 10994,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml_loader::runtime::type_system::object_model::project_object_model_members",
+            "bytes": 10851,
+            "distinct_ranges": 1
+          }
+        ],
+        "Generated native XAML functions": [
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_336",
+            "bytes": 58550,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml",
+            "bytes": 43906,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_293",
+            "bytes": 36424,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_271",
+            "bytes": 35562,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_300",
+            "bytes": 31775,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_160",
+            "bytes": 30720,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_220",
+            "bytes": 30127,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::populate_winuitheme_xaml_part_0",
+            "bytes": 28061,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::populate_winuitheme_xaml_part_4",
+            "bytes": 27762,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::populate_winuitheme_xaml_part_2",
+            "bytes": 27381,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_193",
+            "bytes": 27229,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_337",
+            "bytes": 26809,
+            "distinct_ranges": 1
+          }
+        ]
+      },
+      "stripped_bytes": 37920960
+    },
+    "native_ordinary": {
+      "text": {
+        "address": 16442352,
+        "bytes": 25374229,
+        "sha256": "2398a1d650fc31edf6344dd4ff8d8848f6d8b9a2a56aadef9e5c1a3d0ceb608c"
+      },
+      "symbol_records": 178657,
+      "unique_ranges": 135452,
+      "alias_records": 43205,
+      "partial_overlap_bytes": 0,
+      "categories": {
+        "Property registration, stores and observers": 7313409,
+        "Other framework and application code": 5517715,
+        "Generated native XAML functions": 2439558,
+        "Callable entries and trait shims": 1809915,
+        "Bindings, reactive operators and events": 1555872,
+        "Compiler-generated destruction": 1464652,
+        "Reflection and value conversion": 1306861,
+        "Collection primitives": 1038584,
+        "Other Rust and native code": 720812,
+        "Class projection, initialization and virtual dispatch": 636283,
+        "Reference counting and weak handles": 601507,
+        "Other closure bodies": 466291,
+        "Thread-local and once initialization": 268777,
+        "Other XAML runtime, theme and codecs": 186180,
+        "Other explicit Drop implementations": 40008,
+        "No sized symbol": 4580,
+        "Other async state machines": 3133,
+        "Aliases from multiple categories": 92
+      },
+      "leading_definitions": {
+        "Other Rust and native code": [
+          {
+            "family": "smallvec::SmallVec as core::iter::traits::collect::Extend::extend",
+            "bytes": 55105,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "core::slice::sort::stable::quicksort::stable_partition",
+            "bytes": 35953,
+            "distinct_ranges": 68
+          },
+          {
+            "family": "core::option::Option as core::any::Any::type_id",
+            "bytes": 28168,
+            "distinct_ranges": 2012
+          },
+          {
+            "family": "core::slice::sort::stable::drift::sort",
+            "bytes": 27662,
+            "distinct_ranges": 38
+          },
+          {
+            "family": "core::slice::sort::stable::quicksort::quicksort",
+            "bytes": 24057,
+            "distinct_ranges": 38
+          },
+          {
+            "family": "core::iter::adapters::map::Map as core::iter::traits::iterator::Iterator::fold",
+            "bytes": 23736,
+            "distinct_ranges": 82
+          },
+          {
+            "family": "core::cell::once::OnceCell::try_init",
+            "bytes": 23159,
+            "distinct_ranges": 53
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::small_sort_general_with_scratch",
+            "bytes": 17709,
+            "distinct_ranges": 37
+          },
+          {
+            "family": "core::slice::sort::stable::drift::create_run",
+            "bytes": 16252,
+            "distinct_ranges": 38
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::sort4_stable",
+            "bytes": 13724,
+            "distinct_ranges": 36
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::bidirectional_merge",
+            "bytes": 13334,
+            "distinct_ranges": 37
+          },
+          {
+            "family": "std::backtrace_rs::symbolize::gimli::Context::new",
+            "bytes": 12516,
+            "distinct_ranges": 1
+          }
+        ],
+        "No sized symbol": [
+          {
+            "family": "Padding or unlabeled text",
+            "bytes": 4580,
+            "distinct_ranges": 0
+          }
+        ],
+        "Collection primitives": [
+          {
+            "family": "hashbrown::raw::RawTable::reserve_rehash",
+            "bytes": 323279,
+            "distinct_ranges": 434
+          },
+          {
+            "family": "hashbrown::map::HashMap::insert",
+            "bytes": 163531,
+            "distinct_ranges": 412
+          },
+          {
+            "family": "alloc::vec::Vec as core::ops::drop::Drop::drop",
+            "bytes": 76177,
+            "distinct_ranges": 622
+          },
+          {
+            "family": "alloc::vec::Vec as alloc::vec::spec_from_iter_nested::SpecFromIterNested::from_iter",
+            "bytes": 65807,
+            "distinct_ranges": 276
+          },
+          {
+            "family": "hashbrown::raw::RawTable::clear",
+            "bytes": 59488,
+            "distinct_ranges": 338
+          },
+          {
+            "family": "hashbrown::raw::RawTableInner::drop_elements",
+            "bytes": 51806,
+            "distinct_ranges": 393
+          },
+          {
+            "family": "hashbrown::raw::RawTableInner::drop_inner_table",
+            "bytes": 38225,
+            "distinct_ranges": 395
+          },
+          {
+            "family": "alloc::vec::Vec::retain_mut",
+            "bytes": 34225,
+            "distinct_ranges": 116
+          },
+          {
+            "family": "alloc::vec::Vec::extend_trusted",
+            "bytes": 30914,
+            "distinct_ranges": 229
+          },
+          {
+            "family": "alloc::vec::into_iter::IntoIter as core::ops::drop::Drop::drop",
+            "bytes": 21436,
+            "distinct_ranges": 172
+          },
+          {
+            "family": "alloc::vec::Vec::extend_desugared",
+            "bytes": 20610,
+            "distinct_ranges": 89
+          },
+          {
+            "family": "alloc::vec::Vec as core::clone::Clone::clone",
+            "bytes": 9584,
+            "distinct_ranges": 36
+          }
+        ],
+        "Compiler-generated destruction": [
+          {
+            "family": "core::ptr::drop_glue",
+            "bytes": 1464652,
+            "distinct_ranges": 14138
+          }
+        ],
+        "Reference counting and weak handles": [
+          {
+            "family": "alloc::rc::Rc::new",
+            "bytes": 241892,
+            "distinct_ranges": 1883
+          },
+          {
+            "family": "alloc::rc::Rc::drop_slow",
+            "bytes": 135760,
+            "distinct_ranges": 1183
+          },
+          {
+            "family": "alloc::rc::Rc::new_cyclic_in",
+            "bytes": 134934,
+            "distinct_ranges": 573
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_system::events::handler_list::MakeMutOrClone::make_mut_or_clone",
+            "bytes": 26322,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_eq",
+            "bytes": 19757,
+            "distinct_ranges": 194
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::data::compiled_binding_path::TypedPropertyElement::create_expression",
+            "bytes": 7119,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "alloc::rc::Rc as core::any::Any::type_id",
+            "bytes": 6202,
+            "distinct_ranges": 443
+          },
+          {
+            "family": "alloc::rc::Rc::clone_from_ref_in",
+            "bytes": 6125,
+            "distinct_ranges": 49
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_as_any",
+            "bytes": 4554,
+            "distinct_ranges": 414
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::reactive::observable::ObservableExt::subscribe_fn",
+            "bytes": 4154,
+            "distinct_ranges": 46
+          },
+          {
+            "family": "alloc::sync::Arc::drop_slow",
+            "bytes": 4008,
+            "distinct_ranges": 34
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_type_name",
+            "bytes": 2522,
+            "distinct_ranges": 194
+          }
+        ],
+        "Other explicit Drop implementations": [
+          {
+            "family": "smallvec::SmallVec as core::ops::drop::Drop::drop",
+            "bytes": 26720,
+            "distinct_ranges": 148
+          },
+          {
+            "family": "ferroui_controls::rich_text_block::RichTextBlock as core::ops::drop::Drop::drop",
+            "bytes": 1241,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "::drop::DropGuard as core::ops::drop::Drop::drop",
+            "bytes": 1033,
+            "distinct_ranges": 11
+          },
+          {
+            "family": "ferroui_controls::navigation_view::NavigationView as core::ops::drop::Drop::drop",
+            "bytes": 671,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::input::text_input::input_method_manager::TextInputMethodManager as core::ops::drop::Drop::drop",
+            "bytes": 601,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::rich_edit_box::RichEditBox as core::ops::drop::Drop::drop",
+            "bytes": 410,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::utils::collection_changed_event_manager::EntryGuard as core::ops::drop::Drop::drop",
+            "bytes": 365,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::media::text_formatting::text_line_break::TextLineBreak as core::ops::drop::Drop::drop",
+            "bytes": 314,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::auto_suggest_box::AutoSuggestBox as core::ops::drop::Drop::drop",
+            "bytes": 309,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::info_bar::InfoBar as core::ops::drop::Drop::drop",
+            "bytes": 302,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::virtualizing_carousel_panel::ClearSourceOnExit as core::ops::drop::Drop::drop",
+            "bytes": 292,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::documents::text_highlighter::TextHighlighter as core::ops::drop::Drop::drop",
+            "bytes": 289,
+            "distinct_ranges": 1
+          }
+        ],
+        "Callable entries and trait shims": [
+          {
+            "family": "::MARKUP::MARKUP::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 532789,
+            "distinct_ranges": 4250
+          },
+          {
+            "family": "::__MARKUP::MARKUP::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 206778,
+            "distinct_ranges": 949
+          },
+          {
+            "family": "::register_conversion::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 168449,
+            "distinct_ranges": 1339
+          },
+          {
+            "family": "::build_vtable::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 160883,
+            "distinct_ranges": 4469
+          },
+          {
+            "family": "::register_cast::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 97380,
+            "distinct_ranges": 1212
+          },
+          {
+            "family": "&::register_object::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 82350,
+            "distinct_ranges": 858
+          },
+          {
+            "family": "::call_once_force::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 74535,
+            "distinct_ranges": 596
+          },
+          {
+            "family": "::__CONSTRUCTOR::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 30538,
+            "distinct_ranges": 299
+          },
+          {
+            "family": "::into_parts::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 29114,
+            "distinct_ranges": 260
+          },
+          {
+            "family": "::MARKUP::MARKUP::{closure}::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 18385,
+            "distinct_ranges": 579
+          },
+          {
+            "family": "::__MARKUP::MARKUP::{closure}::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 17105,
+            "distinct_ranges": 219
+          },
+          {
+            "family": "::register_reference::{closure}::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 16302,
+            "distinct_ranges": 228
+          }
+        ],
+        "Bindings, reactive operators and events": [
+          {
+            "family": "ferroui_base::data::binding_notification::BindingNotification::to_binding_value",
+            "bytes": 186111,
+            "distinct_ranges": 314
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::update_source",
+            "bytes": 126436,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression as ferroui_system::i_disposable::IDisposable::dispose",
+            "bytes": 71198,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression as ferroui_base::data::binding_expression_base::BindingExpressionBase::attach",
+            "bytes": 62779,
+            "distinct_ranges": 68
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::write_source_value_to_target",
+            "bytes": 53666,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::start_core",
+            "bytes": 50180,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::publish_value_now",
+            "bytes": 45991,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::on_target_property_changed",
+            "bytes": 45989,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::reactive::disposable::AnonymousDisposable as ferroui_system::i_disposable::IDisposable::dispose",
+            "bytes": 43877,
+            "distinct_ranges": 237
+          },
+          {
+            "family": "ferroui_system::events::handler_list::HandlerList::add",
+            "bytes": 43228,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::try_get_target_value",
+            "bytes": 41650,
+            "distinct_ranges": 68
+          },
+          {
+            "family": "ferroui_base::data::compiled_binding_path::CompiledBindingPathBuilder::typed_plain_property_info_with",
+            "bytes": 39673,
+            "distinct_ranges": 97
+          }
+        ],
+        "Other framework and application code": [
+          {
+            "family": "ferroui_base::collections::ferro_list::raise_collection_changed",
+            "bytes": 44016,
+            "distinct_ranges": 48
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive::add_handler_as",
+            "bytes": 41461,
+            "distinct_ranges": 163
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject::bind_untyped",
+            "bytes": 40820,
+            "distinct_ranges": 260
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::subscribed",
+            "bytes": 37179,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::animation::animators::animator::get_key_frames",
+            "bytes": 34743,
+            "distinct_ranges": 23
+          },
+          {
+            "family": "ferroui_base::collections::ferro_list::FerroList::modify",
+            "bytes": 24722,
+            "distinct_ranges": 86
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::internal_step",
+            "bytes": 24162,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::ferro_object_extensions::PropertyObservable::property_changed",
+            "bytes": 21182,
+            "distinct_ranges": 29
+          },
+          {
+            "family": "ferroui_base::animation::animators::animator::run",
+            "bytes": 20466,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::update_neutral_value",
+            "bytes": 19959,
+            "distinct_ranges": 23
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::do_play_states",
+            "bytes": 19146,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::animation::animators::animator::apply_with_visual",
+            "bytes": 19143,
+            "distinct_ranges": 27
+          }
+        ],
+        "Property registration, stores and observers": [
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue::set_and_raise_core_with_base",
+            "bytes": 296984,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue::set_and_raise_core",
+            "bytes": 252400,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue as ferroui_base::property_store::effective_value::EffectiveValueDyn::dispose_and_raise_unset",
+            "bytes": 251759,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::ferro_property_metadata::MetadataTable::unregister",
+            "bytes": 208530,
+            "distinct_ranges": 330
+          },
+          {
+            "family": "ferroui_base::property_store::binding_entry::BindingEntry::set_value",
+            "bytes": 203413,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::value_store::ValueStore::set_value",
+            "bytes": 202743,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::value_store::ValueStore::add_binding",
+            "bytes": 192516,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::ferro_property_metadata::MetadataTable::get",
+            "bytes": 179958,
+            "distinct_ranges": 337
+          },
+          {
+            "family": "Multiple function definitions",
+            "bytes": 179079,
+            "distinct_ranges": 1378
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject::get_value",
+            "bytes": 157853,
+            "distinct_ranges": 264
+          },
+          {
+            "family": "ferroui_base::ferro_property::FerroProperty::new",
+            "bytes": 152272,
+            "distinct_ranges": 307
+          },
+          {
+            "family": "ferroui_base::styled_property::StyledProperty::new",
+            "bytes": 146651,
+            "distinct_ranges": 260
+          }
+        ],
+        "Reflection and value conversion": [
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_conversion::{closure}",
+            "bytes": 168425,
+            "distinct_ranges": 1339
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable",
+            "bytes": 158400,
+            "distinct_ranges": 960
+          },
+          {
+            "family": "ferroui_base::metadata::markup_type::from_markup_value",
+            "bytes": 143101,
+            "distinct_ranges": 437
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_cast::{closure}",
+            "bytes": 97339,
+            "distinct_ranges": 1212
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object",
+            "bytes": 96518,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable::unwrap",
+            "bytes": 86667,
+            "distinct_ranges": 960
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueType::of",
+            "bytes": 73689,
+            "distinct_ranges": 2233
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object::from_object",
+            "bytes": 73350,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object::as_object",
+            "bytes": 61347,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::metadata::markup_type::MarkupArguments::next",
+            "bytes": 55637,
+            "distinct_ranges": 435
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::with_registry",
+            "bytes": 51922,
+            "distinct_ranges": 212
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::register_defaults",
+            "bytes": 25763,
+            "distinct_ranges": 1
+          }
+        ],
+        "Class projection, initialization and virtual dispatch": [
+          {
+            "family": "ferroui_base::type_system::instantiate",
+            "bytes": 103776,
+            "distinct_ranges": 376
+          },
+          {
+            "family": "ferroui_base::input::input_element::InputElement as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 70336,
+            "distinct_ranges": 188
+          },
+          {
+            "family": "ferroui_base::type_system::Ref as ferroui_base::ferro_property::AnyValue::any_value_eq",
+            "bytes": 48477,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::styled_element::StyledElement as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 41897,
+            "distinct_ranges": 217
+          },
+          {
+            "family": "ferroui_base::visual::Visual as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 35465,
+            "distinct_ranges": 192
+          },
+          {
+            "family": "ferroui_controls::automation::peers::automation_peer::AutomationPeer as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 33641,
+            "distinct_ranges": 63
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 30781,
+            "distinct_ranges": 185
+          },
+          {
+            "family": "ferroui_base::type_system::__register_class",
+            "bytes": 25929,
+            "distinct_ranges": 387
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 15428,
+            "distinct_ranges": 187
+          },
+          {
+            "family": "ferroui_controls::control::Control as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 13268,
+            "distinct_ranges": 123
+          },
+          {
+            "family": "ferroui_base::layout::layoutable::Layoutable as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 11372,
+            "distinct_ranges": 125
+          },
+          {
+            "family": "ferroui_base::type_system::Ref as core::any::Any::type_id",
+            "bytes": 8372,
+            "distinct_ranges": 598
+          }
+        ],
+        "Other closure bodies": [
+          {
+            "family": "ferroui_base::threading::dispatcher_task::wrap_local_future::{closure}::{closure}",
+            "bytes": 46482,
+            "distinct_ranges": 47
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive::add_handler_as::{closure}",
+            "bytes": 44696,
+            "distinct_ranges": 156
+          },
+          {
+            "family": "ferroui_base::interactivity::routed_event::RoutedEvent::add_class_handler_untyped::{closure}",
+            "bytes": 33946,
+            "distinct_ranges": 74
+          },
+          {
+            "family": "std::sys::backtrace::_print_fmt::{closure}",
+            "bytes": 18344,
+            "distinct_ranges": 2
+          },
+          {
+            "family": "ferroui_base::rendering::composition::expressions::delegate_expression_ffi::DelegateExpressionFfi::add2::{closure}",
+            "bytes": 13016,
+            "distinct_ranges": 63
+          },
+          {
+            "family": "ferroui_base::rendering::composition::expressions::delegate_expression_ffi::DelegateExpressionFfi::add3::{closure}",
+            "bytes": 9845,
+            "distinct_ranges": 32
+          },
+          {
+            "family": "[i32]::sort_by::{closure}",
+            "bytes": 9792,
+            "distinct_ranges": 32
+          },
+          {
+            "family": "ferroui_base::media::media_collection::MediaCollection::for_each_item::{closure}",
+            "bytes": 7452,
+            "distinct_ranges": 19
+          },
+          {
+            "family": "ferroui_controls::top_level::TopLevel::create_platform_impl_binding::{closure}",
+            "bytes": 7038,
+            "distinct_ranges": 12
+          },
+          {
+            "family": "ferroui_controls::rich_edit_box::RichEditBox::paste_from_clipboard_async::{closure}",
+            "bytes": 6462,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::subscribed::{closure}",
+            "bytes": 6453,
+            "distinct_ranges": 55
+          },
+          {
+            "family": "ferroui_controls::page::navigation_page::NavigationPage::pop_modal_async_core::{closure}",
+            "bytes": 5441,
+            "distinct_ranges": 1
+          }
+        ],
+        "Aliases from multiple categories": [
+          {
+            "family": "Multiple function definitions",
+            "bytes": 92,
+            "distinct_ranges": 11
+          }
+        ],
+        "Other async state machines": [
+          {
+            "family": "core::future::ready::Ready as core::future::future::Future::poll",
+            "bytes": 1015,
+            "distinct_ranges": 17
+          },
+          {
+            "family": "ferroui_base::threading::dispatcher_task::DispatcherTask as core::future::future::Future::poll",
+            "bytes": 557,
+            "distinct_ranges": 2
+          },
+          {
+            "family": "ferroui_controls::utils::clipboard_helper::CatchUnwind as core::future::future::Future::poll",
+            "bytes": 370,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::animation::animation_task::AnimationTask as core::future::future::Future::poll",
+            "bytes": 313,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::threading::dispatcher_operation::DispatcherOperation as core::future::future::Future::poll",
+            "bytes": 284,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::rendering::composition::compositor::ServerJobResult as core::future::future::Future::poll",
+            "bytes": 226,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::platform::in_process_drag_source::DragResultFuture as core::future::future::Future::poll",
+            "bytes": 188,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::tab_control::TransitionOutcomeFuture as core::future::future::Future::poll",
+            "bytes": 61,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::page::navigation_page::TransitionOutcomeFuture as core::future::future::Future::poll",
+            "bytes": 61,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::transitioning_content_control::TransitionEnd as core::future::future::Future::poll",
+            "bytes": 58,
+            "distinct_ranges": 1
+          }
+        ],
+        "Thread-local and once initialization": [
+          {
+            "family": "std::thread::local::LocalKey::with",
+            "bytes": 120851,
+            "distinct_ranges": 421
+          },
+          {
+            "family": "std::sync::once::Once::call_once_force::{closure}",
+            "bytes": 74535,
+            "distinct_ranges": 596
+          },
+          {
+            "family": "std::sync::once_lock::OnceLock::initialize",
+            "bytes": 42888,
+            "distinct_ranges": 595
+          },
+          {
+            "family": "std::sys::thread_local::native::lazy::Storage::get_or_init_slow",
+            "bytes": 22845,
+            "distinct_ranges": 87
+          },
+          {
+            "family": "std::sys::thread_local::native::eager::destroy",
+            "bytes": 3003,
+            "distinct_ranges": 48
+          },
+          {
+            "family": "std::sys::thread_local::native::lazy::destroy",
+            "bytes": 2371,
+            "distinct_ranges": 54
+          },
+          {
+            "family": "std::thread::local::LocalKey::initialize_with",
+            "bytes": 912,
+            "distinct_ranges": 12
+          },
+          {
+            "family": "std::sys::thread_local::destructors::linux_like::register",
+            "bytes": 371,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::sys::thread_local::abort_on_dtor_unwind::DtorUnwindGuard as core::ops::drop::Drop::drop",
+            "bytes": 368,
+            "distinct_ranges": 8
+          },
+          {
+            "family": "std::sys::thread_local::guard::key::enable::run",
+            "bytes": 288,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::sys::thread_local::key::racy::LazyKey::lazy_init",
+            "bytes": 190,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::thread::local::panic_access_error",
+            "bytes": 47,
+            "distinct_ranges": 1
+          }
+        ],
+        "Other XAML runtime, theme and codecs": [
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::set_and_register_name",
+            "bytes": 16280,
+            "distinct_ranges": 44
+          },
+          {
+            "family": "ferroui_markup_xaml::object_casts::rc_of",
+            "bytes": 10440,
+            "distinct_ranges": 30
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::exact",
+            "bytes": 9471,
+            "distinct_ranges": 19
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::cast",
+            "bytes": 9119,
+            "distinct_ranges": 24
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::bind_or_set_priority",
+            "bytes": 7698,
+            "distinct_ranges": 14
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::new_clr_property_info::{closure}::{closure}",
+            "bytes": 5315,
+            "distinct_ranges": 4
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::push_parent",
+            "bytes": 4094,
+            "distinct_ranges": 78
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::invoked",
+            "bytes": 3283,
+            "distinct_ranges": 14
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::xaml_il_runtime_helpers::XamlIlRuntimeHelpers::try_deferred_transformation_factory_for",
+            "bytes": 3175,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml::markup_extensions::static_resource_extension::StaticResourceExtension::provide_value",
+            "bytes": 3119,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup::markup::parsers::property_parser::PropertyParser::parse_reader",
+            "bytes": 2736,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml::ferro_xaml_loader::FerroXamlLoader::try_load_with_service_provider",
+            "bytes": 2617,
+            "distinct_ranges": 1
+          }
+        ],
+        "Generated native XAML functions": [
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_336",
+            "bytes": 58550,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml",
+            "bytes": 42481,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_293",
+            "bytes": 36424,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_271",
+            "bytes": 35562,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_300",
+            "bytes": 31775,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_160",
+            "bytes": 30720,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_220",
+            "bytes": 30127,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_193",
+            "bytes": 27229,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_337",
+            "bytes": 26809,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_212",
+            "bytes": 25204,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_332",
+            "bytes": 23641,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_388",
+            "bytes": 23192,
+            "distinct_ranges": 1
+          }
+        ]
+      },
+      "stripped_bytes": 45231872
+    },
+    "native_packed": {
+      "text": {
+        "address": 8258512,
+        "bytes": 24187189,
+        "sha256": "d0504d86df4829e8a3d5db10690505faf55816fdddf9cf10ff3c4387593a2f88"
+      },
+      "symbol_records": 178657,
+      "unique_ranges": 113532,
+      "alias_records": 65125,
+      "partial_overlap_bytes": 0,
+      "categories": {
+        "Property registration, stores and observers": 7217864,
+        "Other framework and application code": 5452381,
+        "Generated native XAML functions": 2435174,
+        "Bindings, reactive operators and events": 1535801,
+        "Compiler-generated destruction": 1317716,
+        "Callable entries and trait shims": 1285105,
+        "Reflection and value conversion": 994897,
+        "Collection primitives": 765695,
+        "Other Rust and native code": 680922,
+        "Class projection, initialization and virtual dispatch": 631749,
+        "Reference counting and weak handles": 583546,
+        "Aliases from multiple categories": 461647,
+        "Other closure bodies": 400649,
+        "Thread-local and once initialization": 192820,
+        "Other XAML runtime, theme and codecs": 184158,
+        "Other explicit Drop implementations": 39847,
+        "No sized symbol": 4402,
+        "Other async state machines": 2816
+      },
+      "leading_definitions": {
+        "Other Rust and native code": [
+          {
+            "family": "smallvec::SmallVec as core::iter::traits::collect::Extend::extend",
+            "bytes": 55105,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "core::slice::sort::stable::quicksort::stable_partition",
+            "bytes": 35953,
+            "distinct_ranges": 68
+          },
+          {
+            "family": "core::slice::sort::stable::drift::sort",
+            "bytes": 24734,
+            "distinct_ranges": 34
+          },
+          {
+            "family": "core::cell::once::OnceCell::try_init",
+            "bytes": 23159,
+            "distinct_ranges": 53
+          },
+          {
+            "family": "core::iter::adapters::map::Map as core::iter::traits::iterator::Iterator::fold",
+            "bytes": 23087,
+            "distinct_ranges": 78
+          },
+          {
+            "family": "core::slice::sort::stable::quicksort::quicksort",
+            "bytes": 22029,
+            "distinct_ranges": 34
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::small_sort_general_with_scratch",
+            "bytes": 17709,
+            "distinct_ranges": 37
+          },
+          {
+            "family": "core::option::Option as core::any::Any::type_id",
+            "bytes": 16072,
+            "distinct_ranges": 1148
+          },
+          {
+            "family": "core::slice::sort::stable::drift::create_run",
+            "bytes": 15006,
+            "distinct_ranges": 34
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::sort4_stable",
+            "bytes": 13550,
+            "distinct_ranges": 35
+          },
+          {
+            "family": "core::slice::sort::shared::smallsort::bidirectional_merge",
+            "bytes": 13036,
+            "distinct_ranges": 36
+          },
+          {
+            "family": "std::backtrace_rs::symbolize::gimli::Context::new",
+            "bytes": 12516,
+            "distinct_ranges": 1
+          }
+        ],
+        "No sized symbol": [
+          {
+            "family": "Padding or unlabeled text",
+            "bytes": 4402,
+            "distinct_ranges": 0
+          }
+        ],
+        "Collection primitives": [
+          {
+            "family": "hashbrown::map::HashMap::insert",
+            "bytes": 162051,
+            "distinct_ranges": 408
+          },
+          {
+            "family": "hashbrown::raw::RawTable::reserve_rehash",
+            "bytes": 134712,
+            "distinct_ranges": 176
+          },
+          {
+            "family": "alloc::vec::Vec as core::ops::drop::Drop::drop",
+            "bytes": 75879,
+            "distinct_ranges": 617
+          },
+          {
+            "family": "alloc::vec::Vec as alloc::vec::spec_from_iter_nested::SpecFromIterNested::from_iter",
+            "bytes": 65807,
+            "distinct_ranges": 276
+          },
+          {
+            "family": "hashbrown::raw::RawTable::clear",
+            "bytes": 59488,
+            "distinct_ranges": 338
+          },
+          {
+            "family": "alloc::vec::Vec::retain_mut",
+            "bytes": 33912,
+            "distinct_ranges": 114
+          },
+          {
+            "family": "alloc::vec::into_iter::IntoIter as core::ops::drop::Drop::drop",
+            "bytes": 21212,
+            "distinct_ranges": 170
+          },
+          {
+            "family": "alloc::vec::Vec::extend_desugared",
+            "bytes": 20610,
+            "distinct_ranges": 89
+          },
+          {
+            "family": "hashbrown::raw::RawTableInner::drop_elements",
+            "bytes": 18948,
+            "distinct_ranges": 146
+          },
+          {
+            "family": "alloc::vec::Vec::extend_trusted",
+            "bytes": 18436,
+            "distinct_ranges": 130
+          },
+          {
+            "family": "hashbrown::raw::RawTableInner::drop_inner_table",
+            "bytes": 14214,
+            "distinct_ranges": 147
+          },
+          {
+            "family": "alloc::vec::into_iter::IntoIter as core::iter::traits::iterator::Iterator::try_fold",
+            "bytes": 9415,
+            "distinct_ranges": 36
+          }
+        ],
+        "Compiler-generated destruction": [
+          {
+            "family": "core::ptr::drop_glue",
+            "bytes": 1317716,
+            "distinct_ranges": 9962
+          }
+        ],
+        "Reference counting and weak handles": [
+          {
+            "family": "alloc::rc::Rc::new",
+            "bytes": 233982,
+            "distinct_ranges": 1742
+          },
+          {
+            "family": "alloc::rc::Rc::drop_slow",
+            "bytes": 135139,
+            "distinct_ranges": 1166
+          },
+          {
+            "family": "alloc::rc::Rc::new_cyclic_in",
+            "bytes": 134934,
+            "distinct_ranges": 573
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_system::events::handler_list::MakeMutOrClone::make_mut_or_clone",
+            "bytes": 26322,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_eq",
+            "bytes": 19757,
+            "distinct_ranges": 194
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::data::compiled_binding_path::TypedPropertyElement::create_expression",
+            "bytes": 7119,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "alloc::rc::Rc::clone_from_ref_in",
+            "bytes": 6125,
+            "distinct_ranges": 49
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::reactive::observable::ObservableExt::subscribe_fn",
+            "bytes": 4154,
+            "distinct_ranges": 46
+          },
+          {
+            "family": "alloc::sync::Arc::drop_slow",
+            "bytes": 3985,
+            "distinct_ranges": 33
+          },
+          {
+            "family": "alloc::rc::Rc as core::any::Any::type_id",
+            "bytes": 2996,
+            "distinct_ranges": 214
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_type_name",
+            "bytes": 2522,
+            "distinct_ranges": 194
+          },
+          {
+            "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_as_any",
+            "bytes": 2134,
+            "distinct_ranges": 194
+          }
+        ],
+        "Other explicit Drop implementations": [
+          {
+            "family": "smallvec::SmallVec as core::ops::drop::Drop::drop",
+            "bytes": 26720,
+            "distinct_ranges": 148
+          },
+          {
+            "family": "ferroui_controls::rich_text_block::RichTextBlock as core::ops::drop::Drop::drop",
+            "bytes": 1241,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "::drop::DropGuard as core::ops::drop::Drop::drop",
+            "bytes": 951,
+            "distinct_ranges": 10
+          },
+          {
+            "family": "ferroui_controls::navigation_view::NavigationView as core::ops::drop::Drop::drop",
+            "bytes": 671,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::input::text_input::input_method_manager::TextInputMethodManager as core::ops::drop::Drop::drop",
+            "bytes": 601,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::rich_edit_box::RichEditBox as core::ops::drop::Drop::drop",
+            "bytes": 410,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::utils::collection_changed_event_manager::EntryGuard as core::ops::drop::Drop::drop",
+            "bytes": 365,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::media::text_formatting::text_line_break::TextLineBreak as core::ops::drop::Drop::drop",
+            "bytes": 314,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::auto_suggest_box::AutoSuggestBox as core::ops::drop::Drop::drop",
+            "bytes": 309,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::info_bar::InfoBar as core::ops::drop::Drop::drop",
+            "bytes": 302,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::virtualizing_carousel_panel::ClearSourceOnExit as core::ops::drop::Drop::drop",
+            "bytes": 292,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::documents::text_highlighter::TextHighlighter as core::ops::drop::Drop::drop",
+            "bytes": 289,
+            "distinct_ranges": 1
+          }
+        ],
+        "Aliases from multiple categories": [
+          {
+            "family": "Multiple function definitions",
+            "bytes": 461647,
+            "distinct_ranges": 4798
+          }
+        ],
+        "Callable entries and trait shims": [
+          {
+            "family": "::MARKUP::MARKUP::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 527439,
+            "distinct_ranges": 4143
+          },
+          {
+            "family": "::__MARKUP::MARKUP::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 206598,
+            "distinct_ranges": 937
+          },
+          {
+            "family": "::build_vtable::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 146888,
+            "distinct_ranges": 4093
+          },
+          {
+            "family": "&::register_object::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 82006,
+            "distinct_ranges": 854
+          },
+          {
+            "family": "::into_parts::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 29114,
+            "distinct_ranges": 260
+          },
+          {
+            "family": "::__CONSTRUCTOR::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 16160,
+            "distinct_ranges": 197
+          },
+          {
+            "family": "::start_core::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 15430,
+            "distinct_ranges": 116
+          },
+          {
+            "family": "::register_interface::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 11138,
+            "distinct_ranges": 98
+          },
+          {
+            "family": "::add_handler_as::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 10758,
+            "distinct_ranges": 142
+          },
+          {
+            "family": "::TYPE::TYPE::{closure} as core::ops::function::FnOnce::call_once",
+            "bytes": 10700,
+            "distinct_ranges": 428
+          },
+          {
+            "family": "::update_source::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 9718,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::threading::dispatcher_operation::box_local_callback::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+            "bytes": 8404,
+            "distinct_ranges": 39
+          }
+        ],
+        "Bindings, reactive operators and events": [
+          {
+            "family": "ferroui_base::data::binding_notification::BindingNotification::to_binding_value",
+            "bytes": 186111,
+            "distinct_ranges": 314
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::update_source",
+            "bytes": 126436,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression as ferroui_system::i_disposable::IDisposable::dispose",
+            "bytes": 71198,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression as ferroui_base::data::binding_expression_base::BindingExpressionBase::attach",
+            "bytes": 62779,
+            "distinct_ranges": 68
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::write_source_value_to_target",
+            "bytes": 53666,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::start_core",
+            "bytes": 50180,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::publish_value_now",
+            "bytes": 45991,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::on_target_property_changed",
+            "bytes": 45989,
+            "distinct_ranges": 113
+          },
+          {
+            "family": "ferroui_base::reactive::disposable::AnonymousDisposable as ferroui_system::i_disposable::IDisposable::dispose",
+            "bytes": 43790,
+            "distinct_ranges": 234
+          },
+          {
+            "family": "ferroui_system::events::handler_list::HandlerList::add",
+            "bytes": 43228,
+            "distinct_ranges": 107
+          },
+          {
+            "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::try_get_target_value",
+            "bytes": 41650,
+            "distinct_ranges": 68
+          },
+          {
+            "family": "ferroui_base::data::compiled_binding_path::CompiledBindingPathBuilder::typed_plain_property_info_with",
+            "bytes": 39673,
+            "distinct_ranges": 97
+          }
+        ],
+        "Other framework and application code": [
+          {
+            "family": "ferroui_base::collections::ferro_list::raise_collection_changed",
+            "bytes": 44016,
+            "distinct_ranges": 48
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive::add_handler_as",
+            "bytes": 41461,
+            "distinct_ranges": 163
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject::bind_untyped",
+            "bytes": 40820,
+            "distinct_ranges": 260
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::subscribed",
+            "bytes": 37179,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::animation::animators::animator::get_key_frames",
+            "bytes": 34743,
+            "distinct_ranges": 23
+          },
+          {
+            "family": "ferroui_base::collections::ferro_list::FerroList::modify",
+            "bytes": 24722,
+            "distinct_ranges": 86
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::internal_step",
+            "bytes": 24162,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::ferro_object_extensions::PropertyObservable::property_changed",
+            "bytes": 21182,
+            "distinct_ranges": 29
+          },
+          {
+            "family": "ferroui_base::animation::animators::animator::run",
+            "bytes": 20466,
+            "distinct_ranges": 27
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::update_neutral_value",
+            "bytes": 19959,
+            "distinct_ranges": 23
+          },
+          {
+            "family": "Multiple function definitions",
+            "bytes": 19255,
+            "distinct_ranges": 380
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::do_play_states",
+            "bytes": 19146,
+            "distinct_ranges": 27
+          }
+        ],
+        "Property registration, stores and observers": [
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue::set_and_raise_core_with_base",
+            "bytes": 296984,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue::set_and_raise_core",
+            "bytes": 252400,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::effective_value::EffectiveValue as ferroui_base::property_store::effective_value::EffectiveValueDyn::dispose_and_raise_unset",
+            "bytes": 251759,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::ferro_property_metadata::MetadataTable::unregister",
+            "bytes": 208530,
+            "distinct_ranges": 330
+          },
+          {
+            "family": "ferroui_base::property_store::binding_entry::BindingEntry::set_value",
+            "bytes": 203413,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::value_store::ValueStore::set_value",
+            "bytes": 202743,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "ferroui_base::property_store::value_store::ValueStore::add_binding",
+            "bytes": 192516,
+            "distinct_ranges": 267
+          },
+          {
+            "family": "Multiple function definitions",
+            "bytes": 182692,
+            "distinct_ranges": 1406
+          },
+          {
+            "family": "ferroui_base::ferro_property_metadata::MetadataTable::get",
+            "bytes": 179958,
+            "distinct_ranges": 337
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject::get_value",
+            "bytes": 157853,
+            "distinct_ranges": 264
+          },
+          {
+            "family": "ferroui_base::ferro_property::FerroProperty::new",
+            "bytes": 152272,
+            "distinct_ranges": 307
+          },
+          {
+            "family": "ferroui_base::styled_property::StyledProperty::new",
+            "bytes": 146651,
+            "distinct_ranges": 260
+          }
+        ],
+        "Reflection and value conversion": [
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable",
+            "bytes": 158400,
+            "distinct_ranges": 960
+          },
+          {
+            "family": "ferroui_base::metadata::markup_type::from_markup_value",
+            "bytes": 143101,
+            "distinct_ranges": 437
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object",
+            "bytes": 96518,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable::unwrap",
+            "bytes": 86667,
+            "distinct_ranges": 960
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object::from_object",
+            "bytes": 73350,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_object::as_object",
+            "bytes": 61347,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueType::of",
+            "bytes": 56529,
+            "distinct_ranges": 1713
+          },
+          {
+            "family": "ferroui_base::metadata::markup_type::MarkupArguments::next",
+            "bytes": 55637,
+            "distinct_ranges": 435
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::with_registry",
+            "bytes": 51922,
+            "distinct_ranges": 212
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::register_defaults",
+            "bytes": 25763,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable::null",
+            "bytes": 17995,
+            "distinct_ranges": 933
+          },
+          {
+            "family": "ferroui_base::data::core::value_type::ValueTypes::register_display::display",
+            "bytes": 14281,
+            "distinct_ranges": 50
+          }
+        ],
+        "Class projection, initialization and virtual dispatch": [
+          {
+            "family": "ferroui_base::type_system::instantiate",
+            "bytes": 103776,
+            "distinct_ranges": 376
+          },
+          {
+            "family": "ferroui_base::input::input_element::InputElement as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 70336,
+            "distinct_ranges": 188
+          },
+          {
+            "family": "ferroui_base::type_system::Ref as ferroui_base::ferro_property::AnyValue::any_value_eq",
+            "bytes": 48477,
+            "distinct_ranges": 429
+          },
+          {
+            "family": "ferroui_base::styled_element::StyledElement as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 41897,
+            "distinct_ranges": 217
+          },
+          {
+            "family": "ferroui_base::visual::Visual as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 35465,
+            "distinct_ranges": 192
+          },
+          {
+            "family": "ferroui_controls::automation::peers::automation_peer::AutomationPeer as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 33641,
+            "distinct_ranges": 63
+          },
+          {
+            "family": "ferroui_base::ferro_object::FerroObject as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 30781,
+            "distinct_ranges": 185
+          },
+          {
+            "family": "ferroui_base::type_system::__register_class",
+            "bytes": 25929,
+            "distinct_ranges": 387
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 15428,
+            "distinct_ranges": 187
+          },
+          {
+            "family": "ferroui_controls::control::Control as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 13268,
+            "distinct_ranges": 123
+          },
+          {
+            "family": "ferroui_base::layout::layoutable::Layoutable as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 11372,
+            "distinct_ranges": 125
+          },
+          {
+            "family": "ferroui_controls::content_control::ContentControl as ferroui_base::type_system::Subclassable::build_vtable",
+            "bytes": 7006,
+            "distinct_ranges": 48
+          }
+        ],
+        "Other closure bodies": [
+          {
+            "family": "ferroui_base::threading::dispatcher_task::wrap_local_future::{closure}::{closure}",
+            "bytes": 46482,
+            "distinct_ranges": 47
+          },
+          {
+            "family": "ferroui_base::interactivity::interactive::Interactive::add_handler_as::{closure}",
+            "bytes": 42218,
+            "distinct_ranges": 142
+          },
+          {
+            "family": "ferroui_base::interactivity::routed_event::RoutedEvent::add_class_handler_untyped::{closure}",
+            "bytes": 25775,
+            "distinct_ranges": 47
+          },
+          {
+            "family": "std::sys::backtrace::_print_fmt::{closure}",
+            "bytes": 18344,
+            "distinct_ranges": 2
+          },
+          {
+            "family": "ferroui_base::media::media_collection::MediaCollection::for_each_item::{closure}",
+            "bytes": 7452,
+            "distinct_ranges": 19
+          },
+          {
+            "family": "ferroui_controls::top_level::TopLevel::create_platform_impl_binding::{closure}",
+            "bytes": 7038,
+            "distinct_ranges": 12
+          },
+          {
+            "family": "ferroui_controls::rich_edit_box::RichEditBox::paste_from_clipboard_async::{closure}",
+            "bytes": 6462,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::animation::animation_instance::AnimationInstance::subscribed::{closure}",
+            "bytes": 6453,
+            "distinct_ranges": 55
+          },
+          {
+            "family": "ferroui_base::rendering::composition::expressions::delegate_expression_ffi::DelegateExpressionFfi::add3::{closure}",
+            "bytes": 5595,
+            "distinct_ranges": 13
+          },
+          {
+            "family": "ferroui_controls::page::navigation_page::NavigationPage::pop_modal_async_core::{closure}",
+            "bytes": 5441,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::primitives::selecting_items_control::SelectingItemsControl::initialize_selection_model::{closure}",
+            "bytes": 5003,
+            "distinct_ranges": 3
+          },
+          {
+            "family": "ferroui_controls::page::navigation_page::NavigationPage::push_modal_async_private::{closure}",
+            "bytes": 4728,
+            "distinct_ranges": 1
+          }
+        ],
+        "Other async state machines": [
+          {
+            "family": "core::future::ready::Ready as core::future::future::Future::poll",
+            "bytes": 759,
+            "distinct_ranges": 13
+          },
+          {
+            "family": "ferroui_base::threading::dispatcher_task::DispatcherTask as core::future::future::Future::poll",
+            "bytes": 557,
+            "distinct_ranges": 2
+          },
+          {
+            "family": "ferroui_controls::utils::clipboard_helper::CatchUnwind as core::future::future::Future::poll",
+            "bytes": 370,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::animation::animation_task::AnimationTask as core::future::future::Future::poll",
+            "bytes": 313,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::threading::dispatcher_operation::DispatcherOperation as core::future::future::Future::poll",
+            "bytes": 284,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_base::rendering::composition::compositor::ServerJobResult as core::future::future::Future::poll",
+            "bytes": 226,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::platform::in_process_drag_source::DragResultFuture as core::future::future::Future::poll",
+            "bytes": 188,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "Multiple function definitions",
+            "bytes": 61,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_controls::transitioning_content_control::TransitionEnd as core::future::future::Future::poll",
+            "bytes": 58,
+            "distinct_ranges": 1
+          }
+        ],
+        "Thread-local and once initialization": [
+          {
+            "family": "std::thread::local::LocalKey::with",
+            "bytes": 120308,
+            "distinct_ranges": 410
+          },
+          {
+            "family": "std::sync::once_lock::OnceLock::initialize",
+            "bytes": 42888,
+            "distinct_ranges": 595
+          },
+          {
+            "family": "std::sys::thread_local::native::lazy::Storage::get_or_init_slow",
+            "bytes": 22477,
+            "distinct_ranges": 85
+          },
+          {
+            "family": "std::sys::thread_local::native::eager::destroy",
+            "bytes": 3003,
+            "distinct_ranges": 48
+          },
+          {
+            "family": "std::sys::thread_local::native::lazy::destroy",
+            "bytes": 2345,
+            "distinct_ranges": 53
+          },
+          {
+            "family": "std::thread::local::LocalKey::initialize_with",
+            "bytes": 471,
+            "distinct_ranges": 5
+          },
+          {
+            "family": "std::sys::thread_local::destructors::linux_like::register",
+            "bytes": 371,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::sys::thread_local::guard::key::enable::run",
+            "bytes": 288,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::sync::once::Once::call_once_force::{closure}",
+            "bytes": 278,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::sys::thread_local::key::racy::LazyKey::lazy_init",
+            "bytes": 190,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::thread::local::panic_access_error",
+            "bytes": 47,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "std::sys::thread_local::abort_on_dtor_unwind::DtorUnwindGuard as core::ops::drop::Drop::drop",
+            "bytes": 46,
+            "distinct_ranges": 1
+          }
+        ],
+        "Other XAML runtime, theme and codecs": [
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::set_and_register_name",
+            "bytes": 16280,
+            "distinct_ranges": 44
+          },
+          {
+            "family": "ferroui_markup_xaml::object_casts::rc_of",
+            "bytes": 10440,
+            "distinct_ranges": 30
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::exact",
+            "bytes": 9471,
+            "distinct_ranges": 19
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::cast",
+            "bytes": 9119,
+            "distinct_ranges": 24
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::bind_or_set_priority",
+            "bytes": 7698,
+            "distinct_ranges": 14
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::new_clr_property_info::{closure}::{closure}",
+            "bytes": 5315,
+            "distinct_ranges": 4
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::push_parent",
+            "bytes": 4094,
+            "distinct_ranges": 78
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::invoked",
+            "bytes": 3283,
+            "distinct_ranges": 14
+          },
+          {
+            "family": "ferroui_markup_xaml::xaml_il::runtime::xaml_il_runtime_helpers::XamlIlRuntimeHelpers::try_deferred_transformation_factory_for",
+            "bytes": 3175,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml::markup_extensions::static_resource_extension::StaticResourceExtension::provide_value",
+            "bytes": 3119,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup::markup::parsers::property_parser::PropertyParser::parse_reader",
+            "bytes": 2736,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_markup_xaml::ferro_xaml_loader::FerroXamlLoader::try_load_with_service_provider",
+            "bytes": 2617,
+            "distinct_ranges": 1
+          }
+        ],
+        "Generated native XAML functions": [
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_336",
+            "bytes": 58550,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml",
+            "bytes": 42481,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_293",
+            "bytes": 36424,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_271",
+            "bytes": 35562,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_300",
+            "bytes": 31775,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_160",
+            "bytes": 30720,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_220",
+            "bytes": 30127,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_193",
+            "bytes": 27229,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_337",
+            "bytes": 26809,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_212",
+            "bytes": 25204,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_332",
+            "bytes": 23641,
+            "distinct_ranges": 1
+          },
+          {
+            "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_388",
+            "bytes": 23192,
+            "distinct_ranges": 1
+          }
+        ]
+      },
+      "stripped_bytes": 35491312
+    }
+  },
+  "native_representation_families": {
+    "method": {
+      "Declared enum": {
+        "bytes": 58313,
+        "types": 117,
+        "ranges": 117
+      },
+      "Nullable Class handle Ref<T>": {
+        "bytes": 52884,
+        "types": 26,
+        "ranges": 26
+      },
+      "Nullable Other by-value": {
+        "bytes": 38195,
+        "types": 20,
+        "ranges": 20
+      },
+      "Nullable Rc<dyn interface>": {
+        "bytes": 37410,
+        "types": 18,
+        "ranges": 18
+      },
+      "Nullable Declared class": {
+        "bytes": 26656,
+        "types": 15,
+        "ranges": 15
+      },
+      "Declared struct": {
+        "bytes": 20616,
+        "types": 21,
+        "ranges": 21
+      },
+      "Nullable Rc<concrete value>": {
+        "bytes": 18362,
+        "types": 10,
+        "ranges": 10
+      },
+      "Nullable ElementRef<T>": {
+        "bytes": 8644,
+        "types": 4,
+        "ranges": 4
+      },
+      "Primitive": {
+        "bytes": 5739,
+        "types": 11,
+        "ranges": 11
+      },
+      "Declared class": {
+        "bytes": 5716,
+        "types": 3,
+        "ranges": 3
+      },
+      "Rc<dyn interface>": {
+        "bytes": 5526,
+        "types": 3,
+        "ranges": 3
+      },
+      "Nullable Declared struct": {
+        "bytes": 4778,
+        "types": 5,
+        "ranges": 5
+      },
+      "Nullable String": {
+        "bytes": 2312,
+        "types": 1,
+        "ranges": 1
+      },
+      "Nullable Vec": {
+        "bytes": 2165,
+        "types": 1,
+        "ranges": 1
+      },
+      "Nullable Declared interface": {
+        "bytes": 2153,
+        "types": 1,
+        "ranges": 1
+      },
+      "Nullable Declared enum": {
+        "bytes": 1984,
+        "types": 4,
+        "ranges": 4
+      },
+      "Nullable Primitive": {
+        "bytes": 1890,
+        "types": 3,
+        "ranges": 3
+      },
+      "Other by-value": {
+        "bytes": 1843,
+        "types": 3,
+        "ranges": 3
+      },
+      "String": {
+        "bytes": 1798,
+        "types": 1,
+        "ranges": 1
+      }
+    },
+    "families": {
+      "EffectiveValue": {
+        "Declared enum": {
+          "bytes": 473079,
+          "types": 117,
+          "ranges": 2223
+        },
+        "Nullable Class handle Ref<T>": {
+          "bytes": 231582,
+          "types": 26,
+          "ranges": 494
+        },
+        "Nullable Other by-value": {
+          "bytes": 170991,
+          "types": 20,
+          "ranges": 382
+        },
+        "Nullable Rc<dyn interface>": {
+          "bytes": 162575,
+          "types": 18,
+          "ranges": 342
+        },
+        "Nullable Declared class": {
+          "bytes": 123108,
+          "types": 15,
+          "ranges": 289
+        },
+        "Declared struct": {
+          "bytes": 118800,
+          "types": 21,
+          "ranges": 412
+        },
+        "Nullable Rc<concrete value>": {
+          "bytes": 83311,
+          "types": 10,
+          "ranges": 190
+        },
+        "Primitive": {
+          "bytes": 45887,
+          "types": 11,
+          "ranges": 208
+        },
+        "Nullable ElementRef<T>": {
+          "bytes": 36616,
+          "types": 4,
+          "ranges": 76
+        },
+        "Nullable Declared struct": {
+          "bytes": 29310,
+          "types": 5,
+          "ranges": 100
+        },
+        "Declared class": {
+          "bytes": 26267,
+          "types": 3,
+          "ranges": 60
+        },
+        "Rc<dyn interface>": {
+          "bytes": 24039,
+          "types": 3,
+          "ranges": 57
+        },
+        "Nullable Declared enum": {
+          "bytes": 16194,
+          "types": 4,
+          "ranges": 76
+        },
+        "Nullable Primitive": {
+          "bytes": 13590,
+          "types": 3,
+          "ranges": 59
+        },
+        "Other by-value": {
+          "bytes": 13417,
+          "types": 3,
+          "ranges": 58
+        },
+        "Nullable String": {
+          "bytes": 10472,
+          "types": 1,
+          "ranges": 20
+        },
+        "Nullable Vec": {
+          "bytes": 9815,
+          "types": 1,
+          "ranges": 20
+        },
+        "Nullable Declared interface": {
+          "bytes": 9489,
+          "types": 1,
+          "ranges": 19
+        },
+        "String": {
+          "bytes": 8643,
+          "types": 1,
+          "ranges": 20
+        },
+        "Multiple representations": {
+          "bytes": 816,
+          "types": 267,
+          "ranges": 19
+        }
+      },
+      "BindingEntry": {
+        "Declared enum": {
+          "bytes": 204884,
+          "types": 117,
+          "ranges": 848
+        },
+        "Nullable Class handle Ref<T>": {
+          "bytes": 58823,
+          "types": 26,
+          "ranges": 187
+        },
+        "Nullable Other by-value": {
+          "bytes": 50295,
+          "types": 20,
+          "ranges": 192
+        },
+        "Declared struct": {
+          "bytes": 47150,
+          "types": 21,
+          "ranges": 184
+        },
+        "Nullable Rc<dyn interface>": {
+          "bytes": 47011,
+          "types": 18,
+          "ranges": 167
+        },
+        "Nullable Declared class": {
+          "bytes": 37487,
+          "types": 15,
+          "ranges": 150
+        },
+        "Nullable Rc<concrete value>": {
+          "bytes": 25375,
+          "types": 10,
+          "ranges": 100
+        },
+        "Primitive": {
+          "bytes": 20826,
+          "types": 11,
+          "ranges": 85
+        },
+        "Nullable Declared struct": {
+          "bytes": 12274,
+          "types": 5,
+          "ranges": 45
+        },
+        "Nullable ElementRef<T>": {
+          "bytes": 9569,
+          "types": 4,
+          "ranges": 31
+        },
+        "Declared class": {
+          "bytes": 7994,
+          "types": 3,
+          "ranges": 30
+        },
+        "Rc<dyn interface>": {
+          "bytes": 7582,
+          "types": 3,
+          "ranges": 29
+        },
+        "Nullable Declared enum": {
+          "bytes": 7387,
+          "types": 4,
+          "ranges": 32
+        },
+        "Nullable Primitive": {
+          "bytes": 6061,
+          "types": 3,
+          "ranges": 25
+        },
+        "Other by-value": {
+          "bytes": 5531,
+          "types": 3,
+          "ranges": 23
+        },
+        "Nullable String": {
+          "bytes": 2874,
+          "types": 1,
+          "ranges": 10
+        },
+        "Nullable Declared interface": {
+          "bytes": 2699,
+          "types": 1,
+          "ranges": 9
+        },
+        "String": {
+          "bytes": 2636,
+          "types": 1,
+          "ranges": 10
+        },
+        "Nullable Vec": {
+          "bytes": 2597,
+          "types": 1,
+          "ranges": 10
+        },
+        "Multiple representations": {
+          "bytes": 2587,
+          "types": 267,
+          "ranges": 33
+        }
+      },
+      "LocalValueBindingObserver": {
+        "Declared enum": {
+          "bytes": 181968,
+          "types": 117,
+          "ranges": 585
+        },
+        "Nullable Class handle Ref<T>": {
+          "bytes": 52844,
+          "types": 26,
+          "ranges": 132
+        },
+        "Nullable Other by-value": {
+          "bytes": 41527,
+          "types": 20,
+          "ranges": 118
+        },
+        "Declared struct": {
+          "bytes": 37378,
+          "types": 21,
+          "ranges": 109
+        },
+        "Nullable Rc<dyn interface>": {
+          "bytes": 37191,
+          "types": 18,
+          "ranges": 108
+        },
+        "Nullable Declared class": {
+          "bytes": 31038,
+          "types": 15,
+          "ranges": 89
+        },
+        "Nullable Rc<concrete value>": {
+          "bytes": 20666,
+          "types": 10,
+          "ranges": 60
+        },
+        "Primitive": {
+          "bytes": 17362,
+          "types": 11,
+          "ranges": 55
+        },
+        "Nullable Declared struct": {
+          "bytes": 8703,
+          "types": 5,
+          "ranges": 25
+        },
+        "Nullable ElementRef<T>": {
+          "bytes": 8041,
+          "types": 4,
+          "ranges": 21
+        },
+        "Declared class": {
+          "bytes": 6478,
+          "types": 3,
+          "ranges": 18
+        },
+        "Nullable Declared enum": {
+          "bytes": 6229,
+          "types": 4,
+          "ranges": 20
+        },
+        "Rc<dyn interface>": {
+          "bytes": 6105,
+          "types": 3,
+          "ranges": 18
+        },
+        "Other by-value": {
+          "bytes": 4906,
+          "types": 3,
+          "ranges": 15
+        },
+        "Nullable Primitive": {
+          "bytes": 4899,
+          "types": 3,
+          "ranges": 15
+        },
+        "Nullable String": {
+          "bytes": 2253,
+          "types": 1,
+          "ranges": 6
+        },
+        "Nullable Vec": {
+          "bytes": 2213,
+          "types": 1,
+          "ranges": 6
+        },
+        "String": {
+          "bytes": 2138,
+          "types": 1,
+          "ranges": 6
+        },
+        "Nullable Declared interface": {
+          "bytes": 2122,
+          "types": 1,
+          "ranges": 6
+        },
+        "Multiple representations": {
+          "bytes": 399,
+          "types": 162,
+          "ranges": 7
+        }
+      }
+    },
+    "native_packed_sha256": "06407375b83acd274076258d8d5368c3b0f84d35a6fd7e41661f615b4172a3f0",
+    "nm_gz_sha256": "f55723e1b32eb7c45c213d3e5dcb35bd9e96d12820bd5cdbdfd00553fafe8f91",
+    "symbols_vs_shipping_text": {
+      "symbolized_text_sha256": "d0504d86df4829e8a3d5db10690505faf55816fdddf9cf10ff3c4387593a2f88",
+      "stripped_text_sha256": "d0504d86df4829e8a3d5db10690505faf55816fdddf9cf10ff3c4387593a2f88"
+    }
+  },
+  "cold_invalidation_fixture": {
+    "compatref": {
+      "bytes": 3033480,
+      "text": 1050214,
+      "unwind": 1924428,
+      "checksum": "4704"
+    },
+    "outline": {
+      "bytes": 3037512,
+      "text": 1051558,
+      "unwind": 1927116,
+      "checksum": "4704"
+    },
+    "take": {
+      "bytes": 3052344,
+      "text": 1076374,
+      "unwind": 1917148,
+      "checksum": "4704"
+    },
+    "empty": {
+      "bytes": 3034248,
+      "text": 1050214,
+      "unwind": 1925196,
+      "checksum": "4704"
+    }
+  },
+  "nullable_adapter_fixture": {
+    "types": 42,
+    "framework_types": 30,
+    "ordinary_bytes_before_after": [
+      1637296,
+      1625184
+    ],
+    "modern_bytes_before_after": [
+      1599240,
+      1595240
+    ],
+    "checks": "Per-type boxed and borrowed conversions, nonmatching values, nullable wrapping and unwrapping, and a stateful custom converter"
+  }
+}

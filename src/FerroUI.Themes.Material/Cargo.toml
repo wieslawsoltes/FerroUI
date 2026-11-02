@@ -25,6 +25,7 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
+binary-resources = ["ferroui-markup-xaml/binary-resources"]
 default = []
 # Reads Android 12+ system palettes through the existing platform context.
 android-dynamic-color = ["dep:ferroui-android"]

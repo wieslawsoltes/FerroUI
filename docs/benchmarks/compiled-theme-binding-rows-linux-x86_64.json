@@ -1,0 +1,229 @@
+{
+  "platform": "Linux x86-64",
+  "method": [
+    "Generated each shipping theme through its own build.rs with the model host. Compared all four tracked native references byte for byte. Material generates its reference at build time.",
+    "Ran WinUI build.rs with binary-resources and precompiled-theme. Repeated in a separate output directory with FERROUI_WINUI_THEME_ROOTS=Button. Both builds use the default source-info and compiled-binding settings.",
+    "Counted direct and table declarations of each named style in Rust plus the validated key records decoded from each unique referenced FXB. Checked that the generated functions reference every emitted run, that runs reference every emitted pair, and that those pairs reference every emitted property getter.",
+    "The FXB digest covers sorted unique referenced filenames. For each file hash its filename length (u64 LE), filename bytes, payload length (u64 LE), and payload bytes using SHA-256. The full set of 894 files is byte-identical to the preceding implementation."
+  ],
+  "prior_full_winui_bytes": {
+    "native_rust": 6085047,
+    "fxb_rust": 5471145
+  },
+  "native_themes": {
+    "Simple": {
+      "bytes": 2301448,
+      "sha256": "37104b5ec48b28389e294b1bf86b4a49c55325bc292a3fd82e307ba9bb5d1d8a",
+      "prior_bytes": 2359783
+    },
+    "Fluent": {
+      "bytes": 3077348,
+      "sha256": "5148269f2dcc43fbbcedaedb0a0725758e28836dfd7b8a790ed5042dc4b8330d",
+      "prior_bytes": 3139796
+    },
+    "MacOS": {
+      "bytes": 5671451,
+      "sha256": "e835c229382f0603f29bb57ded3a77e6df1c2a424a053b25feedda28d4af555b",
+      "prior_bytes": 5809244
+    },
+    "WinUI": {
+      "bytes": 5939605,
+      "sha256": "c2c3dd828e085cb7102ab98300cb3d90eaa40aa49754e98bd505973ecae94b83",
+      "prior_bytes": 6085047
+    },
+    "Material": {
+      "bytes": 7211981,
+      "sha256": "1d5ebffe337a277968d32b0702ce13f20f0a958adda63afab3617fdb93efff80",
+      "prior_bytes": 7307816
+    }
+  },
+  "winui_cases": {
+    "full-native": {
+      "generated_bytes": 5939605,
+      "source_sha256": "c2c3dd828e085cb7102ab98300cb3d90eaa40aa49754e98bd505973ecae94b83",
+      "template_rows": 1272,
+      "template_pairs": 186,
+      "template_runs": 373,
+      "fxb_blocks": 0,
+      "fxb_bytes": 0,
+      "fxb_digest": null,
+      "registrations": {
+        "DefaultButtonStyle": 1,
+        "DefaultDatePickerStyle": 1
+      },
+      "archive_bytes": null,
+      "archive_sha256": null
+    },
+    "full-FXB": {
+      "generated_bytes": 5325703,
+      "source_sha256": "7097cbc090d126361d1a3ac951dfc60a9e72f9ff27570661dbdbc119dc8debd6",
+      "template_rows": 1272,
+      "template_pairs": 186,
+      "template_runs": 373,
+      "fxb_blocks": 894,
+      "fxb_bytes": 236219,
+      "fxb_digest": "916c375f32596f729b5b41bd4ed77131f48438732f89f369cf5338e3228ee42a",
+      "registrations": {
+        "DefaultButtonStyle": 1,
+        "DefaultDatePickerStyle": 1
+      },
+      "archive_bytes": null,
+      "archive_sha256": null
+    },
+    "Button-precompiled": {
+      "generated_bytes": 738978,
+      "source_sha256": "5b37638b2e5597605dc9314495a94851098a0784f3d11db9f2a75b0a56f2bb4e",
+      "template_rows": 91,
+      "template_pairs": 37,
+      "template_runs": 33,
+      "fxb_blocks": 137,
+      "fxb_bytes": 31016,
+      "fxb_digest": "e58e2d847030051bb12fe2a7b8a01da6770feb0797749b1e721e200bf416f471",
+      "registrations": {
+        "DefaultButtonStyle": 1,
+        "DefaultDatePickerStyle": 0
+      },
+      "archive_bytes": 84321,
+      "archive_sha256": "342a596688e95d8e4730751b868d18e49e3b78d3acf8786ae9851866bc2beb26"
+    },
+    "full-precompiled": {
+      "generated_bytes": 5325703,
+      "source_sha256": "7097cbc090d126361d1a3ac951dfc60a9e72f9ff27570661dbdbc119dc8debd6",
+      "template_rows": 1272,
+      "template_pairs": 186,
+      "template_runs": 373,
+      "fxb_blocks": 894,
+      "fxb_bytes": 236219,
+      "fxb_digest": "916c375f32596f729b5b41bd4ed77131f48438732f89f369cf5338e3228ee42a",
+      "registrations": {
+        "DefaultButtonStyle": 1,
+        "DefaultDatePickerStyle": 1
+      },
+      "archive_bytes": 245385,
+      "archive_sha256": "2d9c358630fc3a746ba120fafbcd352ddf0d06d7dc344c86d623a403527e5444"
+    }
+  },
+  "pair_layout_probe": {
+    "method": "Isolated x86-64 PIEs using all 373 actual WinUI runs, their property-getter identities, row order and positions. The probe dispatches each getter into a checked aggregate result. Its code and payload exclude the UI framework. rustc 1.99.0, opt-level=s, one codegen unit, symbols stripped. The one-run variant references only the first emitted run.",
+    "size_fields": "All sizes are on-disk bytes. relro and rela are .data.rel.ro and .rela.dyn respectively. ref selects a shared two-getter static per pair. trim selects the one-run variant.",
+    "results": [
+      {
+        "ref": false,
+        "trim": false,
+        "lto": false,
+        "file": 445200,
+        "text": 253123,
+        "relro": 37144,
+        "rela": 76248,
+        "value": "3359885386"
+      },
+      {
+        "ref": false,
+        "trim": false,
+        "lto": true,
+        "file": 420456,
+        "text": 242721,
+        "relro": 36672,
+        "rela": 74352,
+        "value": "3359885386"
+      },
+      {
+        "ref": false,
+        "trim": true,
+        "lto": false,
+        "file": 337256,
+        "text": 241811,
+        "relro": 7024,
+        "rela": 16008,
+        "value": "231"
+      },
+      {
+        "ref": false,
+        "trim": true,
+        "lto": true,
+        "file": 312512,
+        "text": 231409,
+        "relro": 6552,
+        "rela": 14112,
+        "value": "231"
+      },
+      {
+        "ref": true,
+        "trim": false,
+        "lto": false,
+        "file": 416872,
+        "text": 253123,
+        "relro": 30064,
+        "rela": 55008,
+        "value": "3359885386"
+      },
+      {
+        "ref": true,
+        "trim": false,
+        "lto": true,
+        "file": 392144,
+        "text": 242721,
+        "relro": 29592,
+        "rela": 53112,
+        "value": "3359885386"
+      },
+      {
+        "ref": true,
+        "trim": true,
+        "lto": false,
+        "file": 337320,
+        "text": 241811,
+        "relro": 7040,
+        "rela": 16056,
+        "value": "231"
+      },
+      {
+        "ref": true,
+        "trim": true,
+        "lto": true,
+        "file": 312576,
+        "text": 231409,
+        "relro": 6568,
+        "rela": 14160,
+        "value": "231"
+      }
+    ]
+  },
+  "verification": {
+    "compiler_host_tests": 286,
+    "markup_runtime_tests": 224,
+    "markup_runtime_features": [
+      "binary-resources",
+      "hot-reload",
+      "runtime-populate",
+      "source-overlays"
+    ],
+    "native_model_outputs_type_checked": [
+      "Simple",
+      "Fluent",
+      "Material",
+      "MacOS",
+      "WinUI"
+    ],
+    "full_precompiled_execution": {
+      "archive_retained": true,
+      "resource": "Button type key",
+      "template_part": "PART_ContentPresenter",
+      "live_bindings": "Applying the templated parent and updating Button.Padding to 27 then 31 made ContentPresenter.Padding follow both updates.",
+      "scope": "Correctness probe against the conventional full-release consumer with shared-pair tables."
+    },
+    "button_rooted_execution": {
+      "included": [
+        "Button type key",
+        "DefaultButtonStyle",
+        "PART_ContentPresenter"
+      ],
+      "absent": [
+        "DatePicker type key",
+        "DefaultDatePickerStyle"
+      ],
+      "live_bindings": "Button.Padding updates to 27 and 31 both reached the realized ContentPresenter.",
+      "scope": "Executed the final shared-pair AOT/FXB group generated by the rooted precompiled build using the cached Linux release framework dependencies."
+    }
+  }
+}

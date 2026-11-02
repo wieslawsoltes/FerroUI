@@ -363,11 +363,18 @@ pub fn visit_node(
     node: &Rc<dyn IXamlAstNode>,
     visitor: &mut dyn IXamlAstVisitor,
 ) -> XamlResult<Rc<dyn IXamlAstNode>> {
+    visit_node_owned(node.clone(), visitor)
+}
+
+fn visit_node_owned(
+    node: Rc<dyn IXamlAstNode>,
+    visitor: &mut dyn IXamlAstVisitor,
+) -> XamlResult<Rc<dyn IXamlAstNode>> {
     if node.is_skipped() {
-        return Ok(node.clone());
+        return Ok(node);
     }
 
-    let node = visitor.visit(node.clone())?;
+    let node = visitor.visit(node)?;
     visitor.push(node.clone());
     let result = node.visit_children(visitor);
     visitor.pop();
@@ -387,7 +394,16 @@ pub fn visit<K: ?Sized + XamlAstCast>(
     node: &Rc<K>,
     visitor: &mut dyn IXamlAstVisitor,
 ) -> XamlResult<Rc<K>> {
-    let result = visit_node(&K::upcast(node.clone()), visitor)?;
+    visit_owned(node.clone(), visitor)
+}
+
+// A child list or property already retained the node before releasing its
+// RefCell borrow. Pass that handle through the visitor and into its new slot.
+fn visit_owned<K: ?Sized + XamlAstCast>(
+    node: Rc<K>,
+    visitor: &mut dyn IXamlAstVisitor,
+) -> XamlResult<Rc<K>> {
+    let result = visit_node_owned(K::upcast(node), visitor)?;
     let name = result.type_name();
     K::cast_from(result).ok_or_else(|| invalid_cast::<K>(name))
 }
@@ -398,7 +414,7 @@ pub fn visit_cell<K: ?Sized + XamlAstCast>(
     visitor: &mut dyn IXamlAstVisitor,
 ) -> XamlResult<()> {
     let current = cell.borrow().clone();
-    let visited = visit(&current, visitor)?;
+    let visited = visit_owned(current, visitor)?;
     *cell.borrow_mut() = visited;
     Ok(())
 }
@@ -410,7 +426,7 @@ pub fn visit_optional_cell<K: ?Sized + XamlAstCast>(
 ) -> XamlResult<()> {
     let current = cell.borrow().clone();
     if let Some(current) = current {
-        let visited = visit(&current, visitor)?;
+        let visited = visit_owned(current, visitor)?;
         *cell.borrow_mut() = Some(visited);
     }
     Ok(())
@@ -427,7 +443,7 @@ pub fn visit_list<K: ?Sized + XamlAstCast>(
         let Some(current) = list.borrow().get(c).cloned() else {
             break;
         };
-        let visited = visit(&current, visitor)?;
+        let visited = visit_owned(current, visitor)?;
         if let Some(slot) = list.borrow_mut().get_mut(c) {
             *slot = visited;
         }

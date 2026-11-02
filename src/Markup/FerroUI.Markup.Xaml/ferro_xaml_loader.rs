@@ -4,7 +4,7 @@ use crate::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadE
 use ferroui_base::metadata::{IServiceProvider, MarkupAssembly};
 use ferroui_base::platform::IAssetLoader;
 use ferroui_base::utilities::Uri;
-use ferroui_base::{ferro_markup_type, BoxedValue, FerroLocator, LocatorExtensions};
+use ferroui_base::{ferro_markup_type, BoxedValue, FerroLocator, LocatorExtensions, TypeInfo};
 use std::collections::HashMap;
 use std::io::Read;
 use std::rc::Rc;
@@ -47,9 +47,64 @@ pub trait IRuntimeXamlLoader {
 pub type CompiledXamlLoader =
     fn(service_provider: Option<&Rc<dyn IServiceProvider>>, uri: &str) -> Result<Option<BoxedValue>, XamlLoadError>;
 
+/// A closed, prelinked class document and the complete portable image it was
+/// compiled from. A host explicitly offers this descriptor when installing an
+/// archive. Its loader must execute the revision represented by `bytes`.
+#[derive(Clone, Copy)]
+pub struct CompiledArchiveRoot {
+    pub bytes: &'static [u8],
+    pub uri: &'static str,
+    pub assembly: &'static MarkupAssembly,
+    pub class: &'static TypeInfo,
+    pub create_source_info: bool,
+    pub use_compiled_bindings_by_default: bool,
+    pub load: CompiledXamlLoader,
+    /// Paths and normalized build URIs certified by the compiler as never inlined.
+    pub dictionaries: &'static [(&'static str, &'static str)],
+}
+
+impl CompiledArchiveRoot {
+    /// Execute a byte-identical revision in its compiled configuration. Return
+    /// `None` when the caller should resolve the supplied portable program.
+    pub fn try_load(
+        &self, bytes: &[u8], uri: &Uri, configuration: &RuntimeXamlLoaderConfiguration,
+        parent: Option<&Rc<dyn IServiceProvider>>,
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
+        if bytes != self.bytes || !self.accepts(uri, configuration) { return Ok(None); }
+        (self.load)(parent, self.uri)
+    }
+
+    /// Shared by exact and independently replaceable dictionary execution.
+    pub fn accepts(&self, uri: &Uri, configuration: &RuntimeXamlLoaderConfiguration) -> bool {
+        if configuration.design_mode || configuration.diagnostic_handler.is_some()
+            || configuration.create_source_info() != self.create_source_info
+            || configuration.use_compiled_bindings_by_default != self.use_compiled_bindings_by_default
+            || !configuration.local_assembly.is_some_and(|assembly| std::ptr::eq(assembly, self.assembly))
+            || !uri.is_absolute_uri()
+            || !Uri::absolute(self.uri).is_ok_and(|expected| expected.absolute_uri() == uri.absolute_uri())
+            || FerroXamlLoader::populate_override(self.class).is_some()
+        {
+            return false;
+        }
+        #[cfg(all(feature = "binary-resources", feature = "hot-reload", debug_assertions))]
+        if crate::xaml_il::runtime::compiled::binary_resources::reload::capture().is_some() {
+            // The active FXB snapshot can supersede the linked revision.
+            return false;
+        }
+        true
+    }
+}
+
 fn compiled_loaders() -> &'static RwLock<HashMap<String, CompiledXamlLoader>> {
     static LOADERS: OnceLock<RwLock<HashMap<String, CompiledXamlLoader>>> = OnceLock::new();
     LOADERS.get_or_init(Default::default)
+}
+
+/// The documents of the classes with markup, by class.
+#[cfg(feature = "runtime-populate")]
+fn class_documents() -> &'static RwLock<HashMap<usize, String>> {
+    static DOCUMENTS: OnceLock<RwLock<HashMap<usize, String>>> = OnceLock::new();
+    DOCUMENTS.get_or_init(Default::default)
 }
 
 const NO_ASSET_LOADER: &str = "Could not create IAssetLoader : maybe Application.RegisterServices() wasn't called?";
@@ -59,6 +114,41 @@ const RELATIVE_WITHOUT_BASE: &str = "Cannot load relative Uri when BaseUri is nu
 pub struct FerroXamlLoader;
 
 impl FerroXamlLoader {
+    /// States that the markup of `class` (the class its root element names with
+    /// `x:Class`) is the document with the absolute URI `uri`, an asset of the crate.
+    /// Process-wide; a later registration for the same class replaces the earlier one.
+    pub fn register_class_document(class: &'static TypeInfo, uri: &str) {
+        #[cfg(not(feature = "runtime-populate"))]
+        let _ = (class, uri);
+        #[cfg(feature = "runtime-populate")]
+        let mut documents = class_documents().write().unwrap_or_else(|e| e.into_inner());
+        #[cfg(feature = "runtime-populate")]
+        documents.insert(class as *const TypeInfo as usize, uri.to_string());
+    }
+
+    /// The URI of the document registered for `class` or, failing that, for the
+    /// nearest of its base classes that has one.
+    #[cfg(feature = "runtime-populate")]
+    pub fn class_document(class: &'static TypeInfo) -> Option<String> {
+        let documents = class_documents().read().unwrap_or_else(|e| e.into_inner());
+        let mut current = Some(class);
+        while let Some(class) = current {
+            if let Some(uri) = documents.get(&(class as *const TypeInfo as usize)) {
+                return Some(uri.clone());
+            }
+            current = class.base_type();
+        }
+        None
+    }
+
+    /// Whether a document is registered for exactly `class`.
+    #[cfg(feature = "runtime-populate")]
+    pub fn has_class_document(class: &'static TypeInfo) -> bool {
+        let documents = class_documents().read().unwrap_or_else(|e| e.into_inner());
+        documents.contains_key(&(class as *const TypeInfo as usize))
+    }
+
+
     /// Registers the loader of the compiled documents of the assembly
     /// (crate) named `assembly_name`, replacing a previous registration.
     /// Called by the generated startup code of a crate with compiled XAML.

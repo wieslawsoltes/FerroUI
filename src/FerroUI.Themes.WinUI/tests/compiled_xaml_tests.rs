@@ -17,7 +17,7 @@
 //! ```
 
 use ferroui_base::StaticType;
-use ferroui_markup_xaml_loader::rust_emitter::{generate_class_file, ClassConstructor, ClassFile, XamlMetadata};
+use ferroui_markup_xaml_loader::rust_emitter::{generate_class_file_binary, BinaryResourceFiles, ClassConstructor, ClassFile, XamlMetadata};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 
 use super::support::start_application;
@@ -26,25 +26,26 @@ use crate::WinUITheme;
 const PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/compiled_xaml.rs");
 const METADATA_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/compiled_xaml.xamlmeta");
 
-fn generate() -> ClassFile {
+fn generate(binary: Option<&BinaryResourceFiles>) -> ClassFile {
     let _app = start_application();
     crate::register_types();
     // The emitter reads the documents of the class as the run-time loader does.
     FerroRuntimeXamlLoader::register_class_document(<WinUITheme as StaticType>::TYPE, WinUITheme::DOCUMENT_URI);
     // The constructor is stated: the markup metadata of the theme declares `new()` next to the
     // constructor that takes the service provider, so the compiler would pick `new()`.
-    generate_class_file(
+    generate_class_file_binary(
         <WinUITheme as StaticType>::TYPE,
         Some(ClassConstructor::ServiceProvider("with_service_provider")),
         "::ferroui_themes_winui::compiled_xaml",
         &[],
+        binary,
     )
     .unwrap_or_else(|reasons| panic!("the documents of the theme are not eligible:\n{reasons}"))
 }
 
 #[test]
 fn compiled_xaml_is_up_to_date() {
-    let file = generate();
+    let file = generate(None);
     let metadata = std::fs::read_to_string(METADATA_PATH).expect("compiled_xaml.xamlmeta can be read");
     assert!(
         file.metadata(&[]).to_json() == metadata,
@@ -71,15 +72,18 @@ fn compiled_xaml_is_up_to_date() {
 /// refused document fails the build of the crate).
 #[test]
 fn build_script_output_is_the_checked_in_reference() {
-    let built = include_str!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml.rs"));
-    let checked_in = std::fs::read_to_string(PATH).expect("compiled_xaml.rs can be read");
-    if built != checked_in {
-        let line = built
-            .lines()
-            .zip(checked_in.lines())
-            .position(|(a, b)| a != b)
-            .unwrap_or_else(|| built.lines().count().min(checked_in.lines().count()));
-        panic!("compiled_xaml.rs of the build script differs from the checked-in reference (first difference at line {})", line + 1);
+    #[cfg(any(feature = "precompiled-theme", not(feature = "packed-theme")))]
+    {
+        let built = include_str!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml.rs"));
+        let checked_in = std::fs::read_to_string(PATH).expect("compiled_xaml.rs can be read");
+        if !cfg!(feature = "binary-resources") && built != checked_in {
+            let line = built
+                .lines()
+                .zip(checked_in.lines())
+                .position(|(a, b)| a != b)
+                .unwrap_or_else(|| built.lines().count().min(checked_in.lines().count()));
+            panic!("compiled_xaml.rs of the build script differs from the checked-in reference (first difference at line {})", line + 1);
+        }
     }
     // The `.xamlmeta` of the build has the same documents, next to the type model of the crate
     // and the files of the crates it is built on.
@@ -92,10 +96,180 @@ fn build_script_output_is_the_checked_in_reference() {
     assert!(built.documents == checked_in.documents, "the documents of the .xamlmeta of the build script differ from the checked-in reference");
 }
 
+/// Every archive must match the compiled source inventory. The historical
+/// distribution budget applies only to the interpreter-only profiles.
+#[cfg(any(feature = "packed-theme", feature = "precompiled-theme"))]
+#[test]
+fn packed_theme_contains_every_compiled_document_within_budget() {
+    use ferroui_markup_xaml_loader::binary_document::pack::ThemePack;
+    let bytes = crate::theme_archive();
+    #[cfg(not(feature = "precompiled-theme"))]
+    assert!(bytes.len() < 600_000, "portable WinUI archive is {} bytes", bytes.len());
+    #[cfg(any(feature = "portable-solid-theme", feature = "precompiled-theme"))]
+    let indexed = ferroui_markup_xaml_loader::binary_document::pack::expand_solid(bytes).unwrap();
+    #[cfg(any(feature = "portable-solid-theme", feature = "precompiled-theme"))]
+    let bytes = &indexed;
+    let archive = ThemePack::open(bytes).unwrap();
+    let expected: Vec<_> = crate::assets::documents().iter()
+        .filter(|(name, _)| !crate::assets::is_excluded(name))
+        .map(|(name, _)| name.trim_start_matches('/'))
+        .collect();
+    assert_eq!(archive.paths().collect::<Vec<_>>(), expected);
+    archive.validate().unwrap();
+}
+
+#[cfg(feature = "precompiled-theme")]
+#[test]
+fn compiled_archive_dispatch_requires_the_exact_revision_and_load_configuration() {
+    use ferroui_base::{metadata::from_markup_value, utilities::Uri, Ref};
+    use ferroui_markup_xaml::{RuntimeXamlDiagnosticSeverity, RuntimeXamlLoaderConfiguration};
+
+    let _app = start_application();
+    crate::register_types();
+    let linked = crate::compiled_archive_root();
+    let mut configuration = RuntimeXamlLoaderConfiguration::new();
+    configuration.local_assembly = Some(&crate::ASSEMBLY);
+    let uri = Uri::absolute(WinUITheme::DOCUMENT_URI).unwrap();
+    let bytes = crate::theme_archive().to_vec();
+    let theme = linked.try_load(&bytes, &uri, &configuration, None).unwrap().unwrap();
+    assert!(from_markup_value::<Ref<WinUITheme>>(&Some(theme)).is_some());
+
+    let mut changed = bytes.clone();
+    *changed.last_mut().unwrap() ^= 1;
+    assert!(linked.try_load(&changed, &uri, &configuration, None).unwrap().is_none());
+    let fragment = Uri::absolute(&format!("{}#designer", WinUITheme::DOCUMENT_URI)).unwrap();
+    assert!(linked.try_load(&bytes, &fragment, &configuration, None).unwrap().is_none());
+    configuration.set_create_source_info(!linked.create_source_info);
+    assert!(linked.try_load(&bytes, &uri, &configuration, None).unwrap().is_none());
+    configuration.set_create_source_info(linked.create_source_info);
+    configuration.use_compiled_bindings_by_default = !linked.use_compiled_bindings_by_default;
+    assert!(linked.try_load(&bytes, &uri, &configuration, None).unwrap().is_none());
+    configuration.use_compiled_bindings_by_default = linked.use_compiled_bindings_by_default;
+    configuration.diagnostic_handler = Some(std::rc::Rc::new(|_| RuntimeXamlDiagnosticSeverity::Warning));
+    assert!(linked.try_load(&bytes, &uri, &configuration, None).unwrap().is_none());
+}
+
+/// Model and runtime hosts must choose the same rows, factory order, source locations,
+/// reload identifiers and payload bytes even with different host-side type tables.
+#[cfg(all(feature = "binary-resources", any(feature = "precompiled-theme", not(feature = "packed-theme"))))]
+#[test]
+fn binary_build_matches_runtime_host() {
+    let binary = BinaryResourceFiles::new("compiled_xaml");
+    let file = generate(Some(&binary));
+    let directory = std::path::Path::new(env!("OUT_DIR")).join("xaml");
+    assert!(file.source == std::fs::read_to_string(directory.join("compiled_xaml.rs")).unwrap());
+    let files = binary.take();
+    assert!(!files.is_empty(), "WinUI should emit binary resource blocks");
+    for (name, expected) in files {
+        let actual = std::fs::read(directory.join(&name)).unwrap();
+        assert!(expected == actual, "FXB payload differs in {name}");
+    }
+}
+
 #[test]
 #[ignore = "writes compiled_xaml.rs and compiled_xaml.xamlmeta; run it to regenerate the checked-in output"]
 fn regenerate_compiled_xaml() {
-    let file = generate();
+    let file = generate(None);
     std::fs::write(PATH, &file.source).expect("compiled_xaml.rs can be written");
     std::fs::write(METADATA_PATH, file.metadata(&[]).to_json()).expect("compiled_xaml.xamlmeta can be written");
+}
+
+/// A replacement revision must initialize the class's private compact dictionary
+/// in its real constructor, including when the embedded revision uses AOT entry points.
+#[cfg(any(feature = "precompiled-theme", feature = "packed-theme"))]
+#[test]
+fn replacement_archive_initializes_compact_density_from_its_own_revision() {
+    use ferroui_base::{metadata::from_markup_value, utilities::Uri, Ref};
+    use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
+    use ferroui_markup_xaml_loader::binary_document::pack::{compile_documents, ThemePack};
+
+    let _app = start_application();
+    crate::register_types();
+    let xml = r#"<Styles xmlns="https://github.com/ferroui"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         x:Class="FerroUI.Themes.WinUI.WinUITheme">
+        <Styles.Resources><ResourceDictionary>
+            <ResourceDictionary x:Key="CompactStyles">
+                <x:String x:Key="Revision">compact</x:String>
+            </ResourceDictionary>
+            <x:String x:Key="Revision">normal</x:String>
+        </ResourceDictionary></Styles.Resources>
+    </Styles>"#;
+    let bytes = compile_documents(&[("WinUITheme.xaml", xml)]).unwrap();
+    let pack = ThemePack::open(&bytes).unwrap();
+    let mut configuration = RuntimeXamlLoaderConfiguration::new();
+    configuration.local_assembly = Some(&crate::ASSEMBLY);
+    let value = FerroRuntimeXamlLoader::load_packed_document(
+        &pack, Uri::absolute(WinUITheme::DOCUMENT_URI).unwrap(), None, None, configuration,
+    ).unwrap();
+    let theme = from_markup_value::<Ref<WinUITheme>>(&Some(value)).unwrap();
+    let read = || from_markup_value::<String>(&theme.try_get_resource(&"Revision".into(), None).unwrap()).unwrap();
+    assert!(!theme.resources().contains_key(&"CompactStyles".into()));
+    assert_eq!(read(), "normal");
+    theme.set_density_style(crate::DensityStyle::Compact);
+    assert_eq!(read(), "compact");
+}
+
+/// Replacing an entire private dictionary must preserve its declaration site,
+/// its own deferred resources, and every existing theme generation.
+#[cfg(feature = "precompiled-theme")]
+#[test]
+fn independent_dictionary_edit_executes_inside_the_compiled_theme() {
+    use ferroui_base::{media::Color, metadata::from_markup_value, utilities::Uri, Ref};
+    use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
+    use ferroui_markup_xaml_loader::binary_document::pack::compile_paged_documents;
+
+    let _app = start_application();
+    crate::register_types();
+    let linked = crate::compiled_archive_root();
+    assert!(linked.dictionaries.iter().any(|(p, _)| *p == "DensityStyles/Compact.xaml"));
+    assert!(linked.dictionaries.iter().all(|(p, _)| *p != "Resources/Generic.xaml"));
+    let mut config = RuntimeXamlLoaderConfiguration::new();
+    config.local_assembly = Some(&crate::ASSEMBLY);
+    let uri = Uri::absolute(WinUITheme::DOCUMENT_URI).unwrap();
+    let before = WinUITheme::new();
+    let replacement = r#"<ResourceDictionary xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        <x:Double x:Key="ControlContentThemeFontSize">29</x:Double>
+        <Color x:Key="RevisionColor">#FF112233</Color>
+        <StaticResource x:Key="RevisionAlias" ResourceKey="RevisionColor"/>
+    </ResourceDictionary>"#;
+    let documents: Vec<_> = crate::assets::documents().iter()
+        .filter(|(p, _)| !crate::assets::is_excluded(p))
+        .map(|(p, b)| (p.trim_start_matches('/'), if *p == "/DensityStyles/Compact.xaml" { replacement } else { std::str::from_utf8(b).unwrap() }))
+        .collect();
+    let image = compile_paged_documents(&documents).unwrap();
+    // Class constructors return native handles; a fallible markup operation in
+    // them reports its typed error by unwinding to the nearest loader scope.
+    let throwing = ferroui_markup_xaml::CompiledArchiveRoot {
+        load: |_, _| ferroui_markup_xaml::xaml_error_scope::throw(
+            ferroui_markup_xaml::XamlLoadError::with_message("failed during edited populate")),
+        ..linked
+    };
+    match FerroRuntimeXamlLoader::try_load_compiled_archive(&throwing, &image, &uri, &config, None) {
+        Err(error) => assert_eq!(error.message(), "failed during edited populate"),
+        Ok(_) => panic!("expected the original markup error"),
+    }
+    let edited = FerroRuntimeXamlLoader::try_load_compiled_archive(&linked, &image, &uri, &config, None)
+        .unwrap().expect("the entire edit stays behind a single native include boundary");
+    let edited = from_markup_value::<Ref<WinUITheme>>(&Some(edited)).unwrap();
+    // A public Build call made by application code during population is not
+    // a linked include edge of this group.
+    let (_, leaf_uri) = linked.dictionaries.iter().find(|(path, _)| *path == "DensityStyles/Compact.xaml").unwrap();
+    let mut includes = ferroui_markup_xaml::archive_includes::Includes::new();
+    includes.insert(leaf_uri, std::rc::Rc::new(|_| panic!("unrelated public builder consumed an edit")));
+    ferroui_markup_xaml::archive_includes::with_revision(WinUITheme::TYPE, includes, || {
+        ferroui_markup_xaml::archive_includes::populate(WinUITheme::TYPE, || {
+            let direct = crate::compiled_xaml::build_densitystyles_compact_xaml(None).unwrap();
+            assert_eq!(from_markup_value::<f64>(&direct.get(&"ControlContentThemeFontSize".into())), Some(14.0));
+        })
+    });
+    let after = WinUITheme::new();
+    let font = |theme: &Ref<WinUITheme>| {
+        theme.set_density_style(crate::DensityStyle::Compact);
+        from_markup_value::<f64>(&theme.try_get_resource(&"ControlContentThemeFontSize".into(), None).unwrap())
+    };
+    assert_eq!((font(&before), font(&edited), font(&after)), (Some(14.0), Some(29.0), Some(14.0)));
+    let alias = edited.try_get_resource(&"RevisionAlias".into(), None).unwrap();
+    assert_eq!(from_markup_value::<Color>(&alias), Some(Color::from_rgb(17, 34, 51)));
 }

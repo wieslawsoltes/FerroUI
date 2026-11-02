@@ -350,3 +350,25 @@ pub const STYLE_WITH_SERVICE_PROVIDER: (&str, &str) = (
 </Style>
 "#,
 );
+
+/// One dictionary containing each compact factory plus a brush whose extra property requires
+/// a typed factory import beside a nested ControlTemplate. Kept private to the integration fixture's two backend groups.
+pub const TABLE_TEST: &[(&str, &str)] = &[("Compact.xaml", r##"
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="Accent">#ff102030</Color>
+    <x:Double x:Key="Scale">0.8125</x:Double>
+    <Thickness x:Key="Margin">1,2,3,4</Thickness>
+    <CornerRadius x:Key="Radii">4,3,2,1</CornerRadius>
+    <SolidColorBrush x:Key="Literal1" Color="#ff112233"/>
+    <SolidColorBrush x:Key="Literal2" Color="#ff445566"/>
+    <SolidColorBrush x:Key="Static1" Color="{StaticResource Accent}"/>
+    <SolidColorBrush x:Key="Static2" Color="{StaticResource Accent}"/>
+    <SolidColorBrush x:Key="Dynamic1" Color="{DynamicResource Accent}"/>
+    <SolidColorBrush x:Key="Dynamic2" Color="{DynamicResource Accent}"/>
+    <StaticResource x:Key="Aliás1" ResourceKey="Literal1"/>
+    <StaticResource x:Key="Alias2" ResourceKey="Aliás1"/>
+    <SolidColorBrush x:Key="Fallback" Color="#ff112233" Opacity="0.5"/>
+    <ControlTemplate x:Key="ImportedTemplate" TargetType="ContentControl">
+        <ContentControl Name="ImportedChild"/>
+    </ControlTemplate>
+</ResourceDictionary>"##)];

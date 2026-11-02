@@ -699,9 +699,22 @@ impl<T: PropertyValue> StyledPropertyOptions<T> {
             .with_default_binding_mode(self.default_binding_mode)
             .with_enable_data_validation(self.enable_data_validation);
         if let Some(coerce) = self.coerce {
-            metadata = metadata.with_coerce(move |o, v| coerce(o, v));
+            metadata = metadata.with_coerce_callback(coerce);
         }
         (metadata, self.inherits, self.validate, self.notifying)
+    }
+}
+
+#[cfg(test)]
+mod styled_property_options_tests {
+    use super::*;
+
+    #[test]
+    fn registration_transfers_the_original_coercer() {
+        let options = StyledPropertyOptions::new(0_i32).coerce(|_, n| n.max(0));
+        let registered = options.coerce.as_ref().unwrap().clone();
+        let (metadata, _, _, _) = options.into_parts();
+        assert!(Rc::ptr_eq(&registered, metadata.coerce_value().unwrap()));
     }
 }
 

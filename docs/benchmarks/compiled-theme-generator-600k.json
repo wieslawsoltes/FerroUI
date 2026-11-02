@@ -1,0 +1,177 @@
+{
+  "method": "Reversed-order paired executions of the WinUI build script with a fresh output directory on Linux x86-64 and a warm file cache. Each backend and revision ran twice on the same complete theme inputs and four dependency models. Wall and process CPU exclude building the generator, downstream rustc and linking. Other builds ran on the machine. The before executables reproduce the previous PR head outputs byte for byte.",
+  "baseline": "b55fceeefc24e7335dfcb276129653faac419a72",
+  "candidate": "Compiler sources at this report revision",
+  "toolchain": "rustc 1.99.1 (58cf8f9c3 2026-10-13), debug compiler, opt-level 0, debuginfo 0, incremental disabled",
+  "reproduce": "Use scripts/themes/bench/measure_host.py with the baseline and candidate WinUI build-script executables, four identical dependency .xamlmeta inputs and --allow-output-change. Repeat with binary-resources compiled into each build script.",
+  "models_sha256": {
+    "ferroui-base": "5e1a35b64725f9cdf5933bf5d2161406c0e93d59638315cd0d60a96f39435b14",
+    "ferroui-controls": "506318cb0cae2360b8a72aebadf18918583cf6febe19de694c3ed96f69b9fa6a",
+    "ferroui-dialogs": "cf3383c300e9d3f129edff28a49109b02f5e0c0ed0ff271cf31a0d0bc002e1c2",
+    "ferroui-markup-xaml": "5b1f43e1e6b037ac428f1734580e88349301554e6ca67bd2788fa7f7c475adeb"
+  },
+  "host_executable_sha256": {
+    "before": {
+      "native": "a30bc151f0f520228168f942759e258f0520c9d59018ff6487d59f6cee69bbc2",
+      "binary": "aed0863dccd179046600d6648f582a5a918516a3b6f7d094b85a04ff81c6e3c2"
+    },
+    "after": {
+      "native": "36da957feae435ac4d72df11f1fe974f2bb81627d942ff08a4234da9bfbc5c36",
+      "binary": "c60bb6ad58c2e1a0899a75556928160f4d865c2c13bee93daec7af97e061084c"
+    }
+  },
+  "means": {
+    "native": {
+      "before": {
+        "wall_s": 21.33378,
+        "cpu_s": 19.74936
+      },
+      "after": {
+        "wall_s": 13.043,
+        "cpu_s": 12.99815
+      }
+    },
+    "binary": {
+      "before": {
+        "wall_s": 19.9091,
+        "cpu_s": 19.61895
+      },
+      "after": {
+        "wall_s": 15.45622,
+        "cpu_s": 13.4181
+      }
+    }
+  },
+  "full_native_generated_rust": {
+    "Simple": {
+      "before_bytes": 2855051,
+      "after_bytes": 2359783,
+      "before_sha256": "9ae4ae03141ab235403cbdfd2046a964054807d306825d017e694d969a3c3590",
+      "after_sha256": "1b817a11e0d5c68c50392689f06aa857134bf5d16e33e96224dad71618c48bf4"
+    },
+    "Fluent": {
+      "before_bytes": 3809295,
+      "after_bytes": 3139796,
+      "before_sha256": "5a0f59d259075510c039096e1cabdf9596a1b0aa6e74c556a8c443fc46010ae8",
+      "after_sha256": "66482381e1ec43cbeeb6e911c0073e003f6f7278a8478c151a788eeb89e326b6"
+    },
+    "MacOS": {
+      "before_bytes": 7123236,
+      "after_bytes": 5809244,
+      "before_sha256": "68a5dacc5bb5b33993879304aa145f323a60748ee6dc47e075ff4a1fa5ed7f74",
+      "after_sha256": "c7d8b44bb29b6c3a8335d5aa08688ef3b14a9c107ab327dd4cfc78fc93821537"
+    },
+    "WinUI": {
+      "before_bytes": 7903409,
+      "after_bytes": 6085047,
+      "before_sha256": "84f0be9ec2d2585d2953fa3728a58dffe317a5b23c9e2f5d1a3b951b28ed3c78",
+      "after_sha256": "ae1115397423eaa01c83a578d001df7f6163fb387d693e16587cb1bcbf6733a8"
+    },
+    "Material": {
+      "before_bytes": 9207472,
+      "after_bytes": 7307816,
+      "before_sha256": "3e3102c3af60c02c21507506d7e9924042aea1068d4f5050084f324974fcfaad",
+      "after_sha256": "42df894a226afef95f60b485d8ee8c5fbbdb6102f08dc77564a7d9ee829b5368"
+    }
+  },
+  "full_fxb": {
+    "glue_bytes": 5471145,
+    "blocks": 894,
+    "payload_bytes": 236219,
+    "all_blocks_identical_to_previous_pr_head": true
+  },
+  "button_rooted": {
+    "WinUI-button": {
+      "rust_bytes": 814387,
+      "rust_sha256": "69d2e2ed6f0db797ee117c42469c13e6dd45ae1d84a109c066d7cf202a8e8fc5",
+      "fxb_bytes": 0
+    },
+    "WinUI-button-fxb": {
+      "rust_bytes": 740305,
+      "rust_sha256": "6674487b1acd9a571d625ca8bd584d01504ed219552b9a96b8180178221a0ab9",
+      "fxb_bytes": 31016
+    }
+  },
+  "runs": [
+    {
+      "i": 0,
+      "revision": "before",
+      "kind": "native",
+      "wall_s": 22.33064,
+      "cpu_s": 20.04197,
+      "rust_sha256": "84f0be9ec2d2585d2953fa3728a58dffe317a5b23c9e2f5d1a3b951b28ed3c78",
+      "rust_bytes": 7903409,
+      "fxb_bytes": 0
+    },
+    {
+      "i": 1,
+      "revision": "before",
+      "kind": "binary",
+      "wall_s": 18.06331,
+      "cpu_s": 18.04397,
+      "rust_sha256": "2478be11e58d141d4ebc36eb394580b776db7fd685159921606842bc87f5a16d",
+      "rust_bytes": 7289507,
+      "fxb_bytes": 236219
+    },
+    {
+      "i": 2,
+      "revision": "after",
+      "kind": "native",
+      "wall_s": 12.79289,
+      "cpu_s": 12.79159,
+      "rust_sha256": "ae1115397423eaa01c83a578d001df7f6163fb387d693e16587cb1bcbf6733a8",
+      "rust_bytes": 6085047,
+      "fxb_bytes": 0
+    },
+    {
+      "i": 3,
+      "revision": "after",
+      "kind": "binary",
+      "wall_s": 15.85242,
+      "cpu_s": 13.4935,
+      "rust_sha256": "b8eae03e6492755cce1d13292313d983d7a8e98ecb924d3c011e2d3e68a9c9bf",
+      "rust_bytes": 5471145,
+      "fxb_bytes": 236219
+    },
+    {
+      "i": 4,
+      "revision": "after",
+      "kind": "binary",
+      "wall_s": 15.06002,
+      "cpu_s": 13.3427,
+      "rust_sha256": "b8eae03e6492755cce1d13292313d983d7a8e98ecb924d3c011e2d3e68a9c9bf",
+      "rust_bytes": 5471145,
+      "fxb_bytes": 236219
+    },
+    {
+      "i": 5,
+      "revision": "after",
+      "kind": "native",
+      "wall_s": 13.2931,
+      "cpu_s": 13.20471,
+      "rust_sha256": "ae1115397423eaa01c83a578d001df7f6163fb387d693e16587cb1bcbf6733a8",
+      "rust_bytes": 6085047,
+      "fxb_bytes": 0
+    },
+    {
+      "i": 6,
+      "revision": "before",
+      "kind": "binary",
+      "wall_s": 21.75488,
+      "cpu_s": 21.19394,
+      "rust_sha256": "2478be11e58d141d4ebc36eb394580b776db7fd685159921606842bc87f5a16d",
+      "rust_bytes": 7289507,
+      "fxb_bytes": 236219
+    },
+    {
+      "i": 7,
+      "revision": "before",
+      "kind": "native",
+      "wall_s": 20.33692,
+      "cpu_s": 19.45674,
+      "rust_sha256": "84f0be9ec2d2585d2953fa3728a58dffe317a5b23c9e2f5d1a3b951b28ed3c78",
+      "rust_bytes": 7903409,
+      "fxb_bytes": 0
+    }
+  ]
+}

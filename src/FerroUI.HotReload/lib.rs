@@ -1,5 +1,9 @@
 //! Development reload transactions. All targets and commits remain on the creating UI thread.
 #![cfg(debug_assertions)]
+#[cfg(feature = "binary-resources")]
+mod binary_themes;
+#[cfg(feature = "binary-resources")]
+pub use binary_themes::BinaryThemeWatcher;
 mod component;
 mod state_scope;
 mod handlers;
@@ -30,6 +34,8 @@ mod styles;
 pub use panel::PanelReloadTarget;
 pub use resources::ResourceReloadTarget;
 pub use styles::StyleReloadTarget;
+#[cfg(feature = "portable-xaml")]
+pub use styles::PreparedStyleArchive;
 mod content;
 mod control_state;
 pub use control_state::{CapturedControlState, ControlStateAdapter, ControlStateRestoreContext};

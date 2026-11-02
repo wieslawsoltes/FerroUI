@@ -126,7 +126,7 @@ impl WinUITheme {
     pub fn with_service_provider(sp: Option<Rc<dyn IServiceProvider>>) -> Ref<Self> {
         let this = instantiate(Self::construct());
         if let Err(error) = Self::load(sp, &this) {
-            panic!("{error}");
+            ferroui_markup_xaml::xaml_error_scope::throw(error);
         }
 
         let compact_styles = this.get_and_remove("CompactStyles");

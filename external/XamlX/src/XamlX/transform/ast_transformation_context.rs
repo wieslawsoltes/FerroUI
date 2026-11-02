@@ -228,21 +228,10 @@ impl<'a, C: IContextXamlAstVisitorCore> ContextXamlAstVisitor<'a, C> {
 
 impl<C: IContextXamlAstVisitorCore> IXamlAstVisitor for ContextXamlAstVisitor<'_, C> {
     fn visit(&mut self, node: Rc<dyn IXamlAstNode>) -> XamlResult<Rc<dyn IXamlAstNode>> {
-        let inherited = self
-            .context
-            .current_namespace_scope
-            .borrow()
-            .clone()
-            .or_else(|| {
-                self.context
-                    .parent_nodes()
-                    .iter()
-                    .find_map(|parent| parent.namespace_scope())
-            });
-        let previous = self
-            .context
-            .current_namespace_scope
-            .replace(node.namespace_scope().or(inherited));
+        let scope = node.namespace_scope()
+            .or_else(|| self.context.current_namespace_scope.borrow().clone())
+            .or_else(|| self.context.parent_namespace_scope());
+        let previous = self.context.current_namespace_scope.replace(scope);
         let result = self.core.visit_core(self.context, node.clone());
         self.context.current_namespace_scope.replace(previous);
         match result {

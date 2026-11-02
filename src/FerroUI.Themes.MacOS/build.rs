@@ -119,6 +119,7 @@ fn main() {
         .compile_group(
             ferroui_build::XamlGroup::new("compiled_xaml")
                 .documents(&documents)
+                .binary_resources(cfg!(feature = "binary-resources"))
                 .class_document("MacOSTheme.xaml")
                 .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_service_provider")),
         )

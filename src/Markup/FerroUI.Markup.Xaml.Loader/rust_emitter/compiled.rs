@@ -29,6 +29,7 @@
 //! group and the class of a class document from the documents themselves,
 //! where a host with the run-time type system asks the run-time loader.
 
+use std::collections::HashMap;
 use std::rc::Rc;
 
 use xamlx::type_system::IXamlTypeSystem;
@@ -37,7 +38,7 @@ use crate::compiler_extensions::IXamlCompileTimeValueParser;
 
 use super::emit_types::{EmitClass, EmitTypes, Known};
 use super::emitter::{emit_function, root_value_handle_of, DocumentFunctions};
-use super::transform::{transform_group, DocumentSource, TransformOptions};
+use super::transform::{transform_group, transform_group_with_parsed, DocumentSource, TransformOptions};
 use super::source::{function_name_of, rust_string_literal};
 use ferroui_build_scan::xaml_metadata::{DocumentModel, XamlMetadata};
 
@@ -134,6 +135,16 @@ pub fn compile_documents_with(
     root_uri: Option<&str>,
     options: &TransformOptions,
 ) -> Vec<CompiledDocument> {
+    compile_documents_with_binary(host, documents, root_uri, options, None)
+}
+
+pub(super) fn compile_documents_with_binary(
+    host: &EmitterHost<'_>,
+    documents: &[(&str, &str)],
+    root_uri: Option<&str>,
+    options: &TransformOptions,
+    binary: Option<&super::BinaryResourceFiles>,
+) -> Vec<CompiledDocument> {
     let mut compiled: Vec<CompiledDocument> = Vec::with_capacity(documents.len());
     // The items of the file each document defines, with the document that defines them.
     let mut items: Vec<(String, &str)> = Vec::with_capacity(documents.len() * 2);
@@ -192,21 +203,18 @@ pub fn compile_documents_with(
             // The build methods of the documents of the group, by their functions: what
             // an include the group transformers linked calls.
             let names: Vec<String> = group.iter().map(|(index, _, _, _)| compiled[*index].function_name.clone()).collect();
-            let functions_of_group = || {
-                let mut functions = DocumentFunctions::default();
-                for (name, transformed) in names.iter().zip(&transformed) {
-                    if let (Some(build), Some(root_class)) = (&transformed.build, root_value_handle_of(types, &transformed.root)) {
-                        functions.insert_value(build, name, root_class);
-                    }
+            let mut functions = DocumentFunctions::default();
+            functions.binary = binary.cloned();
+            for (name, document) in names.iter().zip(&transformed) {
+                if let (Some(build), Some(root_class)) = (&document.build, root_value_handle_of(types, &document.root)) {
+                    functions.insert_value(build, name, root_class);
                 }
-                functions
-            };
+            }
             // The functions each document calls.
             let mut calls: Vec<(usize, Vec<String>)> = Vec::with_capacity(group.len());
             // The namespace information of the documents, one constant per distinct table.
             let mut tables: Vec<String> = Vec::new();
             for ((index, name, _, _), transformed) in group.iter().zip(&transformed) {
-                let functions = functions_of_group();
                 let document = &mut compiled[*index];
                 let Some(table) = transformed.namespaces.clone() else {
                     document.source = Err("the document has no namespace information".to_string());
@@ -242,7 +250,7 @@ pub fn compile_documents_with(
                     document.source = Err(format!("the type system of the host cannot answer: {}", unanswered.join("; ")));
                 }
                 document.namespaces = Some((constant, table));
-                calls.push((*index, functions.called()));
+                calls.push((*index, functions.take_called()));
             }
             // A document that calls the function of a document that is not eligible is not
             // eligible either.
@@ -283,6 +291,16 @@ pub fn generate_file_with(
     options: &TransformOptions,
 ) -> GeneratedFile {
     file_of(assembly_name, root_uri, compile_documents_with(host, documents, Some(root_uri), options))
+}
+
+/// Compiles against the same type model, emitting eligible resource runs into `binary`.
+pub fn generate_file_with_binary_resources(
+    host: &EmitterHost<'_>, assembly_name: &str, root_uri: &str, documents: &[(&str, &str)],
+    options: &TransformOptions, binary: Option<&super::BinaryResourceFiles>,
+) -> GeneratedFile {
+    let mut file = file_of(assembly_name, root_uri, compile_documents_with_binary(host, documents, Some(root_uri), options, binary));
+    if let Some(binary) = binary { binary.declare_manifest(&mut file.source); }
+    file
 }
 
 /// The generated file of the compiled documents of an assembly.
@@ -387,6 +405,7 @@ pub(super) fn file_of(assembly_name: &str, root_uri: &str, compiled: Vec<Compile
         .filter(|document| document.source.is_ok())
         .map(|document| (document.function_name.clone(), document.name.clone()))
         .collect();
+    let source = super::imports::finish(source, None);
     let position_map = position_map(&source, &names);
     GeneratedFile {
         source,
@@ -420,44 +439,85 @@ fn root_type_name(root: &std::rc::Rc<dyn xamlx::ast::IXamlAstNode>) -> Option<St
 /// {"file_lines": [first, last], "document": "name.xaml", "line": 3, "position": 7}
 /// ```
 ///
-/// Generated lines are counted from 1. The text is deterministic.
+/// Native resource table initializers map one Rust row to one declaration. For an FXB
+/// batch only the call is Rust code. The payload stores each declaration and evaluation
+/// location for runtime diagnostics. Generated lines are counted from 1.
 pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
-    let mut entries: Vec<String> = Vec::new();
-    let mut document: Option<&str> = None;
-    // (first line, document line, document position) of the open range.
+    use std::fmt::Write as _;
+    let mut documents = HashMap::with_capacity(functions.len());
+    for (function, name) in functions {
+        documents.entry(function.as_str()).or_insert_with(|| (name.as_str(), name.replace(['\r', '\n'], " ")));
+    }
+    let mut table_document: Option<(&str, bool)> = None;
+    let mut binding_document = None;
+    let mut document = None;
+    let mut map = String::from("{\n  \"entries\": [\n");
+    let mut first_entry = true;
     let mut open: Option<(usize, i32, i32)> = None;
-    let close = |entries: &mut Vec<String>, open: &mut Option<(usize, i32, i32)>, document: &str, last: usize| {
+    let mut close = |open: &mut Option<(usize, i32, i32)>, document: &str, last: usize| {
         if let Some((first, line, position)) = open.take() {
-            entries.push(format!(
-                "    {{\"file_lines\": [{first}, {last}], \"document\": {}, \"line\": {line}, \"position\": {position}}}",
-                json_string(document)
-            ));
+            if !first_entry {
+                map.push_str(",\n");
+            }
+            first_entry = false;
+            write!(map, "    {{\"file_lines\": [{first}, {last}], \"document\": {}, \"line\": {line}, \"position\": {position}}}", json_string(document)).unwrap();
         }
     };
     for (index, text) in source.lines().enumerate() {
         let number = index + 1;
-        if let Some(name) = functions.iter().find_map(|(function, name)| {
-            let build = text
-                .strip_prefix("pub fn ")
-                .or_else(|| text.strip_prefix("pub(crate) fn "))
-                .and_then(|rest| rest.strip_prefix(function.as_str()));
-            let deferred = || {
-                let rest = text.strip_prefix("fn ")?.strip_prefix(function.as_str())?;
-                let rest = rest.strip_prefix("_deferred_").or_else(|| rest.strip_prefix("_part_"))?;
-                rest.trim_start_matches(|c: char| c.is_ascii_digit()).starts_with('(').then_some(rest)
-            };
-            build.filter(|rest| rest.starts_with('(')).or_else(deferred).map(|_| name)
-        }) {
-            document = Some(name);
+        if let Some((current, value_position)) = table_document {
+            if text.trim_start() == "];" {
+                table_document = None;
+            } else if let Some((line, column)) = native_row_position(text, value_position) {
+                close(&mut Some((number, line, column)), current, number);
+            }
             continue;
         }
-        let Some(current) = document else { continue };
+        if let Some(function) = text.strip_prefix("mod __").and_then(|s| s.strip_suffix("_bindings {")) {
+            binding_document = documents.get(function).map(|(doc, _)| *doc);
+        } else if text == "}" {
+            binding_document = None;
+        } else if text.starts_with("    pub(super) const R") && text.ends_with(": &[rt::TemplateBindingRow] = &[") {
+            table_document = binding_document.map(|document| (document, false));
+            continue;
+        }
+        if let Some((name, row_type)) = text.strip_prefix("static ").and_then(|s| s.split_once(": &[rt::theme_resources::")) {
+            // Intrinsic factories carry two positions; immediate values and imported
+            // factories carry their declaration only. The binary import vector has no rows.
+            let table = if row_type.starts_with("Row<") {
+                name.rsplit_once("_THEME_ROWS_").map(|(function, _)| (function, true))
+            } else if row_type.starts_with("ConstantRow<") {
+                name.rsplit_once("_THEME_CONSTANTS_").map(|(function, _)| (function, false))
+            } else if row_type.starts_with("FactoryRow]") {
+                name.rsplit_once("_THEME_FACTORIES_").map(|(function, _)| (function, false))
+            } else {
+                None
+            };
+            if let Some((function, value_position)) = table {
+                table_document = documents.get(function.to_ascii_lowercase().as_str()).map(|(doc, _)| (*doc, value_position));
+                continue;
+            }
+        }
+        let build = text.strip_prefix("pub fn ").or_else(|| text.strip_prefix("pub(crate) fn "))
+            .and_then(|rest| rest.split_once('(')).map(|(name, _)| name);
+        let helper = || {
+            let (name, _) = text.strip_prefix("fn ")?.split_once('(')?;
+            let (family, index) = name.rsplit_once('_')?;
+            if !index.bytes().all(|b| b.is_ascii_digit()) { return None; }
+            family.strip_suffix("_deferred").or_else(|| family.strip_suffix("_part"))
+                .or_else(|| family.strip_prefix("__")?.strip_suffix("_factory_shape"))
+                .or_else(|| family.strip_prefix("__")?.strip_suffix("_template_setter"))
+        };
+        if let Some(info) = build.or_else(helper).and_then(|name| documents.get(name)) {
+            document = Some(info);
+            continue;
+        }
+        let Some((current, marker)) = document else { continue };
         if text == "}" {
-            close(&mut entries, &mut open, current, number - 1);
+            close(&mut open, current, number - 1);
             document = None;
             continue;
         }
-        let marker = current.replace(['\r', '\n'], " ");
         if let Some(rest) = text.trim_start().strip_prefix("// ").and_then(|rest| rest.strip_prefix(marker.as_str())) {
             let position = rest
                 .strip_prefix('(')
@@ -465,18 +525,30 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
                 .and_then(|(numbers, _)| numbers.split_once(','))
                 .and_then(|(line, position)| Some((line.parse::<i32>().ok()?, position.parse::<i32>().ok()?)));
             if let Some((line, position)) = position {
-                close(&mut entries, &mut open, current, number - 1);
+                close(&mut open, current, number - 1);
                 open = Some((number, line, position));
             }
         }
     }
-    let mut map = String::from("{\n  \"entries\": [\n");
-    map.push_str(&entries.join(",\n"));
-    if !entries.is_empty() {
+    if !first_entry {
         map.push('\n');
     }
     map.push_str("  ]\n}\n");
     map
+}
+
+// Rows end in the declaration line/column followed by the evaluation line/column.
+// Read from the right so a quoted operand may itself contain commas or escaped quotes.
+fn native_row_position(text: &str, value_position: bool) -> Option<(i32, i32)> {
+    let tuple = text.trim_start().strip_prefix('(')?.strip_suffix("),")?;
+    let mut tail = tuple.rsplitn(5, ", ");
+    if value_position {
+        tail.next()?.parse::<i32>().ok()?;
+        tail.next()?.parse::<i32>().ok()?;
+    }
+    let column = tail.next()?.parse().ok()?;
+    let line = tail.next()?.parse().ok()?;
+    Some((line, column))
 }
 
 /// `text` as a JSON string literal.
@@ -602,8 +674,12 @@ impl Constructor {
 /// The text of the directive `x:<name>` of the root of the document `xaml`: `Ok(None)`
 /// when the root has no such directive, `Ok(Some(None))` when its value is not text.
 fn root_directive(xaml: &str, name: &str) -> Result<Option<Option<String>>, String> {
-    use xamlx::ast::{XamlAstNodeExtensions, XamlAstObjectNode, XamlAstTextNode, XamlAstXmlDirective};
     let parsed = xamlx::parsers::XDocumentXamlParser::parse(xaml, None).map_err(|e| e.message())?;
+    parsed_root_directive(&parsed, name)
+}
+
+fn parsed_root_directive(parsed: &xamlx::ast::XamlDocument, name: &str) -> Result<Option<Option<String>>, String> {
+    use xamlx::ast::{XamlAstNodeExtensions, XamlAstObjectNode, XamlAstTextNode, XamlAstXmlDirective};
     let root = parsed.root().map_err(|e| e.message())?;
     let Some(root) = root.cast::<XamlAstObjectNode>() else {
         return Ok(None);
@@ -625,9 +701,11 @@ fn root_directive(xaml: &str, name: &str) -> Result<Option<Option<String>>, Stri
 /// `Internal` are not (compared without regard to case), a document without the
 /// directive is public. `Ok(None)` when the directive is absent.
 fn class_modifier_public(xaml: &str) -> Result<Option<bool>, String> {
-    let Some(text) = root_directive(xaml, "ClassModifier")? else {
-        return Ok(None);
-    };
+    modifier_visibility(root_directive(xaml, "ClassModifier")?)
+}
+
+fn modifier_visibility(directive: Option<Option<String>>) -> Result<Option<bool>, String> {
+    let Some(text) = directive else { return Ok(None); };
     match text.map(|text| text.trim().to_lowercase()).as_deref() {
         Some("public") => Ok(Some(true)),
         // The XAML specification uses "Public" and "NotPublic", the WPF documentation "public" and "internal".
@@ -666,24 +744,29 @@ pub fn class_document_group(
         .iter()
         .position(|(name, _)| *name == class_document)
         .ok_or_else(|| format!("the document `{class_document}` of the class is not a document of the group"))?;
-    // The documents in the order they are found; a document is found once.
-    fn collect(documents: &[(&str, &str)], uris: &[Uri], index: usize, found: &mut Vec<usize>) {
-        for source in crate::back_end::include_sources(documents[index].1) {
+    let mut by_uri = HashMap::with_capacity(uris.len());
+    for (index, uri) in uris.iter().enumerate() {
+        by_uri.entry(uri.absolute_uri()).or_insert(index);
+    }
+    // Mark on visit so a diamond keeps depth-first source order. A repeated or cyclic
+    // include costs one lookup, and deeply nested dictionaries do not grow the call stack.
+    let mut visited = vec![false; uris.len()];
+    let mut found = Vec::new();
+    let mut pending = vec![start];
+    while let Some(index) = pending.pop() {
+        if std::mem::replace(&mut visited[index], true) { continue; }
+        found.push(index);
+        for source in crate::back_end::include_sources(documents[index].1).into_iter().rev() {
             let Some(relative) = Uri::try_create(&source, UriKind::RelativeOrAbsolute) else { continue };
             let included = match relative.is_absolute_uri() {
                 true => relative,
                 false => Uri::combine(&uris[index], &relative),
             };
-            let Some(next) = uris.iter().position(|uri| uri.absolute_uri() == included.absolute_uri()) else { continue };
-            if found.contains(&next) {
-                continue;
+            if let Some(&next) = by_uri.get(included.absolute_uri()) {
+                pending.push(next);
             }
-            found.push(next);
-            collect(documents, uris, next, found);
         }
     }
-    let mut found = vec![start];
-    collect(documents, &uris, start, &mut found);
     Ok(found
         .into_iter()
         .map(|index| (uris[index].absolute_path().trim_start_matches('/').to_string(), documents[index].1.to_string(), Some(uris[index].to_string())))
@@ -710,6 +793,14 @@ pub struct ClassGroup<'a> {
 /// ones the type system of the host states for that type. A question the type system
 /// cannot answer for a document makes the class not eligible, with the question.
 pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, options: &TransformOptions) -> Result<ClassFile, String> {
+    generate_class_file_with_binary_resources(host, group, options, None)
+}
+
+/// The class emitter with separately addressable binary resource runs.
+pub fn generate_class_file_with_binary_resources(
+    host: &EmitterHost<'_>, group: &ClassGroup<'_>, options: &TransformOptions,
+    binary: Option<&super::BinaryResourceFiles>,
+) -> Result<ClassFile, String> {
     let types = host.types;
     let (documents, module_path) = (group.documents, group.module_path);
     if documents.is_empty() {
@@ -728,7 +819,11 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
             root_type: (index == 0).then(|| group.class.clone()),
         })
         .collect();
-    let transformed = transform_group(host.type_system.clone(), &sources, options, &host.parsers)
+    let mut modifiers = Vec::with_capacity(sources.len());
+    let mut read_modifier = |parsed: &xamlx::ast::XamlDocument| {
+        modifiers.push(parsed_root_directive(parsed, "ClassModifier").and_then(modifier_visibility));
+    };
+    let transformed = transform_group_with_parsed(host.type_system.clone(), &sources, options, &host.parsers, binary.is_some(), Some(&mut read_modifier))
         .map_err(|error| format!("{CLASS_GROUP_NOT_TRANSFORMED}{}", error.message()))?;
     let constructor = match group.constructor {
         Some(constructor) => Some(Constructor::from(constructor)),
@@ -745,8 +840,8 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
     // Whether each document is public. A class document follows its class, which has a
     // public Rust path; the directive, if present, must agree, as upstream validates it.
     let mut public = Vec::with_capacity(documents.len());
-    for (index, document) in documents.iter().enumerate() {
-        let modifier = class_modifier_public(&document.1).map_err(|reason| format!("{}: {reason}", document.0))?;
+    for (index, (document, modifier)) in documents.iter().zip(modifiers).enumerate() {
+        let modifier = modifier.map_err(|reason| format!("{}: {reason}", document.0))?;
         if index == 0 && modifier == Some(false) {
             return Err(format!("{}: XAML file x:ClassModifier doesn't match the x:Class type modifiers.", document.0));
         }
@@ -755,6 +850,7 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
 
     // The functions of the documents, by their build methods.
     let mut functions = DocumentFunctions::default();
+    functions.binary = binary.cloned();
     let mut names = Vec::with_capacity(documents.len());
     let mut has_build = vec![false; documents.len()];
     for (index, (document, transformed)) in documents.iter().zip(&transformed).enumerate() {
@@ -766,6 +862,14 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
             if let (Some(build), Some(root_class)) = (&transformed.build, root_value_handle_of(types, &transformed.root)) {
                 functions.insert_value(build, &function_name, root_class);
                 has_build[index] = true;
+                if binary.is_some() && !crate::back_end::may_include(&document.1)
+                    && root_type_name(&transformed.root).as_deref() == Some("FerroUI.Controls.ResourceDictionary")
+                {
+                    let inlined = transformed.configuration.get_extra::<crate::compiler_extensions::group_transformers::InlinedDocuments>();
+                    if let Some(uri) = transformed.base_uri.as_ref().filter(|uri| inlined.is_ok_and(|set| !set.0.borrow().contains(*uri))) {
+                        functions.editable_dictionaries.insert(function_name.clone(), (document.0.clone(), uri.clone()));
+                    }
+                }
             }
         }
         names.push(function_name);
@@ -778,16 +882,17 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
     let mut tables: Vec<String> = Vec::new();
     let mut sources = Vec::with_capacity(documents.len());
     let mut not_eligible = Vec::new();
-    let mut emitted: Vec<usize> = Vec::new();
+    let mut by_function = HashMap::with_capacity(names.len());
+    for (index, name) in names.iter().enumerate() {
+        by_function.entry(name.as_str()).or_insert(index);
+    }
     let loadable: Vec<usize> =
         (1..documents.len()).filter(|index| public[*index] && has_build[*index]).collect();
     let mut pending: Vec<usize> = loadable.iter().rev().copied().collect();
     pending.push(0);
+    let mut scheduled = vec![false; documents.len()];
+    for &index in &pending { scheduled[index] = true; }
     while let Some(index) = pending.pop() {
-        if emitted.contains(&index) {
-            continue;
-        }
-        emitted.push(index);
         let (document, transformed, function_name) = (&documents[index], &transformed[index], &names[index]);
         let table = transformed.namespaces.clone().ok_or_else(|| format!("{}: no namespace information", document.0))?;
         let table_index = match tables.iter().position(|known| *known == table) {
@@ -819,9 +924,9 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         if !unanswered.is_empty() {
             not_eligible.push(format!("{}: the type system of the host cannot answer: {}", document.0, unanswered.join("; ")));
         }
-        for called in functions.called() {
-            if let Some(next) = names.iter().position(|name| *name == called) {
-                if !emitted.contains(&next) && !pending.contains(&next) {
+        for called in functions.take_called() {
+            if let Some(&next) = by_function.get(called.as_str()) {
+                if !std::mem::replace(&mut scheduled[next], true) {
                     pending.push(next);
                 }
             }
@@ -866,7 +971,11 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
     source.push_str("        return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));\n    }\n");
     source.push_str("    let service_provider =\n");
     source.push_str("        ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider);\n");
-    source.push_str(&format!("    {}(::core::option::Option::Some(service_provider), root)\n", names[0]));
+    if binary.is_some() {
+        source.push_str(&format!("    ::ferroui_markup_xaml::archive_includes::populate(<::{} as ::ferroui_base::StaticType>::TYPE, || {}(::core::option::Option::Some(service_provider), root))\n", class_path.trim_start_matches("::"), names[0]));
+    } else {
+        source.push_str(&format!("    {}(::core::option::Option::Some(service_provider), root)\n", names[0]));
+    }
     source.push_str("}\n");
     for function in &sources {
         source.push('\n');
@@ -876,12 +985,22 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
     source.push_str(&loader_table(documents, &names, &loadable, class_path, constructor.as_ref()));
     // The file is a module of the crate of the class: that crate is `crate` in it.
     let own_crate = class_path.trim_start_matches("::").split("::").next().unwrap_or_default();
-    let source = source.replace(&format!("::{own_crate}::"), "crate::");
+    if let Some(binary) = binary {
+        binary.declare_manifest(&mut source);
+        source.push_str("\n/// Complete native call boundaries for isolated resource dictionaries.\npub const ARCHIVE_DICTIONARIES: &[(&str, &str)] = &[\n");
+        for (index, name) in names.iter().enumerate() {
+            if let Some((path, uri)) = functions.editable_dictionaries.get(name).filter(|_| scheduled[index]) {
+                source.push_str(&format!("    ({}, {}),\n", rust_string_literal(path), rust_string_literal(uri)));
+            }
+        }
+        source.push_str("];\n");
+    }
+    let source = super::imports::finish(source, Some(own_crate));
 
     // The emitted documents, as other crates see them: the class, and every other
     // document with its build function.
-    let mut exported = Vec::with_capacity(emitted.len());
-    for index in std::iter::once(0).chain((1..documents.len()).filter(|index| emitted.contains(index))) {
+    let mut exported = Vec::with_capacity(sources.len());
+    for index in (0..documents.len()).filter(|&index| scheduled[index]) {
         let root_type = root_type_name(&transformed[index].root).unwrap_or_default();
         let uri = documents[index].2.clone().unwrap_or_default();
         exported.push(match index {
@@ -987,6 +1106,33 @@ fn loader_table(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn native_theme_row_lines_map_to_each_resource_declaration() {
+        let source = r#"static BUILD_FOO_XAML_THEME_ROWS_2: &[rt::theme_resources::Row<&str>] = &[
+    ("a, \"7, 8\"", "target, 2, 4", 17, 3, 20, 5),
+    ("b", "value", 22, 7, 31, 11),
+];
+static OTHER: &[u8] = &[1, 2, 3];
+pub fn build_foo_xaml() {
+    // foo.xaml(41,2) Content (resource)
+    call();
+}
+static BUILD_FOO_XAML_THEME_CONSTANTS_3: &[rt::theme_resources::ConstantRow<[u64; 4]>] = &[
+    ("a, 1", [0, 1, 2, 3], 59, 31),
+];
+static BUILD_FOO_XAML_THEME_FACTORIES_4: &[rt::theme_resources::FactoryRow] = &[
+    ("x, 2", closure, 99, 32),
+];
+"#;
+        let map = super::position_map(source, &[("build_foo_xaml".into(), "foo.xaml".into())]);
+        assert_eq!(map.matches("\"file_lines\"").count(), 5);
+        assert!(map.contains(r#""file_lines": [11, 11], "document": "foo.xaml", "line": 59, "position": 31"#));
+        assert!(map.contains(r#""file_lines": [14, 14], "document": "foo.xaml", "line": 99, "position": 32"#));
+        assert!(map.contains(r#""file_lines": [2, 2], "document": "foo.xaml", "line": 17, "position": 3"#));
+        assert!(map.contains(r#""file_lines": [3, 3], "document": "foo.xaml", "line": 22, "position": 7"#));
+        assert!(map.contains(r#""file_lines": [7, 8], "document": "foo.xaml", "line": 41, "position": 2"#));
+    }
+
     use super::*;
 
     /// Not from upstream: `x:ClassModifier` as `XamlCompilerTaskExecutor` reads it.

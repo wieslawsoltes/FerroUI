@@ -1,5 +1,7 @@
 # Binary size
 
+For the later XAML compiler changes, WinUI release measurements and application-specific resource roots, see [compiled theme performance](compiled-theme-performance.md).
+
 Issue #306 reported that the release executable of the ControlCatalog on Windows
 (`control-catalog-desktop.exe`, built with `cargo build --release`) was 193 MB, bigger than the
 gallery of the upstream C# framework, and asked whether Direct3D 12 was the reason for the memory

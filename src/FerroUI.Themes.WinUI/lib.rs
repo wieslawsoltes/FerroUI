@@ -47,10 +47,53 @@ pub mod primitives;
 // is the reference `tests/compiled_xaml_tests.rs` compares the output of the build with, byte
 // for byte; it is not a module of the crate. (`compiled_markup`, which the same file declares,
 // is not used: the theme registers its assets and its loader table itself.)
+#[cfg(all(feature = "packed-theme", not(feature = "precompiled-theme")))]
+#[doc(hidden)]
+#[path = "packed_xaml.rs"]
+pub mod compiled_xaml;
 ferroui_markup_xaml::include_compiled_xaml!();
 mod register_types;
 mod rust_paths;
 mod winui_theme;
+
+/// The original compiled FXP revision for a designer or hot-reload host. In a
+/// precompiled build, startup executes the linked group without opening this archive.
+#[cfg(any(feature = "packed-theme", feature = "precompiled-theme"))]
+pub fn theme_archive() -> &'static [u8] {
+    include_bytes!(concat!(env!("OUT_DIR"), "/winui.fxp"))
+}
+
+/// Offers the installed execution plan to a portable archive loader or style
+/// reload target. A changed revision still goes through ordinary XamlX resolution.
+#[cfg(feature = "precompiled-theme")]
+pub fn compiled_archive_root() -> ferroui_markup_xaml::CompiledArchiveRoot {
+    let (create_source_info, use_compiled_bindings_by_default) =
+        include!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml.fxp-options.rs"));
+    ferroui_markup_xaml::CompiledArchiveRoot {
+        bytes: theme_archive(), uri: WinUITheme::DOCUMENT_URI, class: WinUITheme::TYPE,
+        assembly: &ASSEMBLY, create_source_info, use_compiled_bindings_by_default,
+        load: compiled_xaml::try_load, dictionaries: compiled_xaml::ARCHIVE_DICTIONARIES,
+    }
+}
+
+/// Construct the theme from an editor-compiled FXU operand revision. Structural
+/// edits that change the native program are distributed as full FXP archives.
+#[cfg(feature = "compiled-updates")]
+pub fn load_theme_update(bytes: &[u8]) -> Result<ferroui_base::Ref<WinUITheme>, ferroui_markup_xaml::XamlLoadError> {
+    use ferroui_base::{metadata::from_markup_value, utilities::Uri};
+    use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, XamlLoadError};
+    register_types();
+    let root = compiled_archive_root();
+    let uri = Uri::absolute(root.uri).map_err(|e| XamlLoadError::with_message(e.to_string()))?;
+    let mut configuration = RuntimeXamlLoaderConfiguration::new();
+    configuration.local_assembly = Some(root.assembly);
+    configuration.set_create_source_info(root.create_source_info);
+    configuration.use_compiled_bindings_by_default = root.use_compiled_bindings_by_default;
+    let result = ferroui_markup_xaml::archive_includes::load_operand_update(
+        &root, include_bytes!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml.fxs")), bytes, &uri, &configuration, None,
+    )?;
+    from_markup_value(&result).ok_or_else(|| XamlLoadError::with_message("The installed WinUI class cannot execute this update in the active loader scope"))
+}
 
 pub use assets::{excluded_documents, ExcludedDocument};
 #[cfg(feature = "designer-sources")]

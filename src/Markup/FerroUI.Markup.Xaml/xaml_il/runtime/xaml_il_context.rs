@@ -124,6 +124,7 @@ pub trait IStaticServiceProvider: 'static {
     fn get_static_service(&self, service_type: TypeId) -> Option<Rc<dyn Any>>;
 }
 
+#[derive(Clone)]
 struct ScopedStaticProvider {
     token: Rc<()>,
     provider: Rc<dyn IStaticServiceProvider>,
@@ -144,7 +145,7 @@ impl Drop for XamlStaticProviderScope {
                 .iter()
                 .rposition(|entry| Rc::ptr_eq(&entry.token, &self.token))
             {
-                providers.remove(index);
+                Rc::make_mut(&mut providers).remove(index);
             }
         }
     }
@@ -159,10 +160,11 @@ pub struct XamlIlContext {
     root_object: RefCell<MarkupValue>,
     intermediate_root: RefCell<MarkupValue>,
     parents: RefCell<Vec<MarkupValue>>,
+    direct_stack: RefCell<Option<Rc<Vec<BoxedValue>>>>,
     parent_service_provider: Option<Rc<dyn IServiceProvider>>,
     inner_service_provider: RefCell<Option<Rc<dyn IServiceProvider>>>,
     static_providers: Rc<[Rc<dyn IStaticServiceProvider>]>,
-    scoped_static_providers: RefCell<Vec<ScopedStaticProvider>>,
+    scoped_static_providers: RefCell<Rc<Vec<ScopedStaticProvider>>>,
     target_object: RefCell<MarkupValue>,
     target_property: RefCell<MarkupValue>,
     base_uri: RefCell<Option<Uri>>,
@@ -186,10 +188,11 @@ impl XamlIlContext {
             root_object: RefCell::new(None),
             intermediate_root: RefCell::new(None),
             parents: RefCell::new(Vec::new()),
+            direct_stack: RefCell::new(None),
             parent_service_provider,
             inner_service_provider: RefCell::new(None),
             static_providers,
-            scoped_static_providers: RefCell::new(Vec::new()),
+            scoped_static_providers: RefCell::default(),
             target_object: RefCell::new(None),
             target_property: RefCell::new(None),
             base_uri: RefCell::new(if definition.uri_context_provider {
@@ -212,12 +215,10 @@ impl XamlIlContext {
         provider: Rc<dyn IStaticServiceProvider>,
     ) -> XamlStaticProviderScope {
         let token = Rc::new(());
-        self.scoped_static_providers
-            .borrow_mut()
-            .push(ScopedStaticProvider {
-                token: token.clone(),
-                provider,
-            });
+        Rc::make_mut(&mut self.scoped_static_providers.borrow_mut()).push(ScopedStaticProvider {
+            token: token.clone(),
+            provider,
+        });
         XamlStaticProviderScope {
             context: Rc::downgrade(self),
             token,
@@ -259,6 +260,7 @@ impl XamlIlContext {
     /// `PushParent`: adds an object to the parent stack and makes it the
     /// provide-value target object.
     pub fn push_parent(&self, value: MarkupValue) {
+        self.direct_stack.borrow_mut().take();
         self.parents.borrow_mut().push(value.clone());
         if self.definition.provide_value_target {
             *self.target_object.borrow_mut() = value;
@@ -268,6 +270,7 @@ impl XamlIlContext {
     /// `PopParent`: removes the last object from the parent stack; the
     /// provide-value target object becomes the new last object (or null).
     pub fn pop_parent(&self) {
+        self.direct_stack.borrow_mut().take();
         let last = {
             let mut parents = self.parents.borrow_mut();
             parents.pop();
@@ -387,15 +390,9 @@ impl XamlIlContext {
         }
         // Release the collection borrow before calling host code, which may create nested
         // markup scopes or resolve other services reentrantly.
-        let scoped = self
-            .scoped_static_providers
-            .borrow()
-            .iter()
-            .rev()
-            .map(|entry| entry.provider.clone())
-            .collect::<Vec<_>>();
-        for provider in scoped {
-            if let Some(service) = provider.get_static_service(service_type) {
+        let scoped = self.scoped_static_providers.borrow().clone();
+        for entry in scoped.iter().rev() {
+            if let Some(service) = entry.provider.get_static_service(service_type) {
                 return Some(service);
             }
         }
@@ -487,7 +484,9 @@ impl IFerroXamlIlParentStackProvider for XamlIlContext {
 impl IFerroXamlIlEagerParentStackProvider for XamlIlContext {
     /// `DirectParentsStack => (IReadOnlyList<object>) ParentsStack`.
     fn direct_parents_stack(&self) -> Rc<Vec<BoxedValue>> {
-        Rc::new(self.parents_stack().into_iter().flatten().collect())
+        self.direct_stack.borrow_mut().get_or_insert_with(|| {
+            Rc::new(self.parents.borrow().iter().flatten().cloned().collect())
+        }).clone()
     }
 
     /// `ParentProvider => XamlIlRuntimeHelpers.AsEagerParentStackProvider(

@@ -295,39 +295,33 @@ fn untyped_markup_value(boxed: BoxedValue) -> MarkupValue {
 /// Converts an untyped value to the Rust type `T` with the assignability
 /// casts of [`ValueTypes`]. `None` if the value is not assignable to `T`.
 pub fn from_markup_value<T: Clone + 'static>(value: &MarkupValue) -> Option<T> {
-    let target = TypeId::of::<T>();
-    if target == TypeId::of::<Option<BoxedValue>>() {
-        let any: &dyn Any = value;
-        return any.downcast_ref::<T>().cloned();
+    if TypeId::of::<T>() == TypeId::of::<MarkupValue>() {
+        return (value as &dyn Any).downcast_ref().cloned();
     }
-    match value {
-        Some(boxed) => {
-            if let Some(exact) = boxed.downcast_ref::<T>() {
-                return Some(exact.clone());
-            }
-            if target == TypeId::of::<BoxedValue>() {
-                let any: &dyn Any = boxed;
-                return any.downcast_ref::<T>().cloned();
-            }
-            if let Some(cast) = ValueTypes::try_cast(boxed, ValueType::of::<T>()) {
-                return cast.downcast_ref::<T>().cloned();
-            }
-            // A handle of a base class whose object is an instance of the class `T` names:
-            // an untyped call checks its arguments against the run-time class of the object
-            // (a binding reads a member of the class of the element it found through a
-            // handle of `Control` or of the root class).
-            let object = ValueTypes::as_object(&**boxed)?;
-            let cast = match ValueTypes::from_object(target, object.clone()) {
-                Some(cast) => cast,
-                None => ValueTypes::try_convert_registered(&(Rc::new(object) as BoxedValue), ValueType::of::<T>())?,
-            };
-            cast.downcast_ref::<T>().cloned()
+    if let Some(boxed) = value {
+        if let Some(exact) = boxed.downcast_ref::<T>() {
+            return Some(exact.clone());
         }
-        None => {
-            let null = ValueTypes::try_convert(None, ValueType::of::<T>())??;
-            null.downcast_ref::<T>().cloned()
+        if TypeId::of::<T>() == TypeId::of::<BoxedValue>() {
+            return (boxed as &dyn Any).downcast_ref().cloned();
         }
     }
+    let coerced = coerce_markup_argument(value, ValueType::of::<T>())?;
+    coerced.downcast_ref::<T>().cloned()
+}
+
+// The exact-type path in a generated invoker only clones its typed argument.
+// Share null materialization and all registry/class conversions across invokers.
+#[inline(never)]
+fn coerce_markup_argument(value: &MarkupValue, target: ValueType) -> MarkupValue {
+    let Some(value) = value else { return ValueTypes::try_convert(None, target)? };
+    if let Some(cast) = ValueTypes::try_cast(value, target) {
+        return Some(cast);
+    }
+    // A base handle can carry an instance of the class the parameter names.
+    let object = ValueTypes::as_object(&**value)?;
+    ValueTypes::from_object(target.id(), object.clone())
+        .or_else(|| ValueTypes::try_convert_registered(&(Rc::new(object) as BoxedValue), target))
 }
 
 /// Maps the error of a fallible member to [`MarkupInvokeError::Failed`]; see

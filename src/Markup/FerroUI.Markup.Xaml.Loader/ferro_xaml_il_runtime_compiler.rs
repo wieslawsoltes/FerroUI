@@ -29,6 +29,7 @@ use crate::compiler_extensions::{
     FerroXamlDiagnosticCodes, FerroXamlIlCompiler, FerroXamlIlCompilerConfiguration, FerroXamlIlLanguage,
     IXamlDocumentResource, IXamlDocumentTypeBuilderProvider, XamlDocumentResource,
 };
+use crate::runtime_document_input::DocumentInput;
 use crate::runtime::framework::{self, DocumentBody, RuntimeDocumentTypeBuilderProvider};
 use crate::runtime::type_system::RuntimeTypeSystem;
 
@@ -38,7 +39,7 @@ ferroui_base::ferro_thread_local! {
 
 /// What a document is transformed from.
 struct DocumentSource {
-    xaml: String,
+    input: DocumentInput,
     /// The type of the root instance the document populates.
     override_type: Option<Rc<dyn IXamlType>>,
     /// The name of the document in diagnostics.
@@ -53,6 +54,58 @@ struct DocumentSource {
 struct TransformedGroup {
     providers: Vec<Rc<RuntimeDocumentTypeBuilderProvider>>,
     root_types: Vec<Rc<dyn IXamlType>>,
+}
+
+/// A UI-thread execution plan for one portable document and its resolved includes.
+/// Preparation runs semantic analysis against the registrations and configuration of
+/// the caller. Re-prepare after changing those inputs. Each build has its own object
+/// graph, parent services, deferred factories and class initialization.
+#[cfg(all(feature = "runtime", feature = "portable-xaml"))]
+pub struct PreparedPackedDocument {
+    provider: Rc<RuntimeDocumentTypeBuilderProvider>,
+    class: Option<&'static ferroui_base::TypeInfo>,
+    name: String,
+}
+
+#[cfg(all(feature = "runtime", feature = "portable-xaml"))]
+impl PreparedPackedDocument {
+    pub(crate) fn prepare(
+        inputs: Vec<(RuntimeXamlLoaderDocument, DocumentInput)>,
+        configuration: &RuntimeXamlLoaderConfiguration,
+    ) -> XamlResult<Self> {
+        let system = FerroXamlIlRuntimeCompiler::type_system();
+        let (_, mut sources) = FerroXamlIlRuntimeCompiler::document_sources(inputs, &system);
+        let name = sources.first().ok_or_else(|| XamlError::invalid_operation("Missing packed root"))?.name.clone();
+        // An explicit plan binds the current revision and diagnostics. Do not import
+        // a transformed group from the thread's content-keyed edit cache.
+        let group = FerroXamlIlRuntimeCompiler::transform_group(&system, system.as_type_system(), &mut sources, configuration)?;
+        let class = FerroXamlIlRuntimeCompiler::registered_class(&group.root_types[0]);
+        Ok(Self { provider: group.providers[0].clone(), class, name })
+    }
+
+    /// Constructs the root. This does not parse inputs, revisit transitive URIs or
+    /// rerun diagnostics. It executes the ordinary constructor and markup factories.
+    pub fn build(&self, parent: Option<Rc<dyn IServiceProvider>>) -> Result<BoxedValue, ferroui_markup_xaml::XamlLoadError> {
+        let provider = XamlIlRuntimeHelpers::create_root_service_provider_v3(parent);
+        self.result(FerroXamlIlRuntimeCompiler::build_new(&self.provider, self.class, provider))
+    }
+
+    /// An include calls the document's Build method directly with its established
+    /// provider. Only an independent class-root load runs the populate override.
+    pub(crate) fn build_include(&self, provider: Rc<dyn IServiceProvider>) -> Result<BoxedValue, ferroui_markup_xaml::XamlLoadError> {
+        self.result(self.provider.build(Some(provider)))
+    }
+
+    fn result(&self, value: XamlResult<MarkupValue>) -> Result<BoxedValue, ferroui_markup_xaml::XamlLoadError> {
+        let value = value.map_err(|error| {
+                let error = match error.document() {
+                    Some(_) => error,
+                    None => error.with_document(Some(self.name.clone())),
+                };
+                framework::load_exception(error)
+            })?;
+        value.ok_or_else(|| ferroui_markup_xaml::XamlLoadError::with_message("The document built a null root object"))
+    }
 }
 
 /// The environment variable that makes the loader print, for every load, the time it
@@ -118,19 +171,20 @@ fn group_key(sources: &[DocumentSource], configuration: &RuntimeXamlLoaderConfig
         configuration.local_assembly.map_or("", |assembly| assembly.name),
     );
     for source in sources {
-        // Two independent hashes of the text and its length stand for the text.
+        // The original bytes distinguish different revisions of either representation.
+        let bytes = source.input.bytes();
         let mut first = std::collections::hash_map::DefaultHasher::new();
-        source.xaml.hash(&mut first);
+        bytes.hash(&mut first);
         let mut second = std::collections::hash_map::DefaultHasher::new();
-        (source.xaml.len(), "ferro-xaml").hash(&mut second);
-        source.xaml.bytes().rev().for_each(|byte| byte.hash(&mut second));
+        (bytes.len(), "ferro-xaml").hash(&mut second);
+        bytes.iter().rev().for_each(|byte| byte.hash(&mut second));
         let _ = write!(
             key,
             "\n{}|{}|{}|{}|{:016x}{:016x}",
             source.name,
             source.base_uri.as_deref().unwrap_or(""),
             source.override_type.as_ref().map(|type_| type_.get_full_name()).unwrap_or_default(),
-            source.xaml.len(),
+            bytes.len(),
             first.finish(),
             second.finish(),
         );
@@ -179,28 +233,23 @@ impl FerroXamlIlRuntimeCompiler {
         documents: Vec<RuntimeXamlLoaderDocument>,
         configuration: &RuntimeXamlLoaderConfiguration,
     ) -> XamlResult<Vec<Option<BoxedValue>>> {
-        let runtime_type_system = Self::type_system();
-
-        // The text of the documents and the types of their root instances: what, with the
-        // configuration, determines the transformed documents.
-        let mut sources: Vec<DocumentSource> = Vec::with_capacity(documents.len());
-        for (index, document) in documents.iter().enumerate() {
-            let xaml = document.read_to_string().map_err(|e| {
+        let inputs = documents.into_iter().map(|document| {
+            let input = DocumentInput::read(&mut **document.xaml_stream()).map_err(|e| {
                 XamlError::internal("IOException", format!("Unable to read the XAML document: {e}"))
             })?;
-            let override_type: Option<Rc<dyn IXamlType>> =
-                document.root_instance.as_ref().map(|root| runtime_type_system.runtime_type_of(root));
-            #[cfg(all(feature = "hot-reload", debug_assertions))]
-            let override_type = document.service_provider.as_ref()
-                .and_then(|provider| ferroui_markup_xaml::reload_events::code_behind(&**provider, &document.root_instance))
-                .map(|root| runtime_type_system.runtime_type_of(&root)).or(override_type);
-            sources.push(DocumentSource {
-                xaml,
-                override_type,
-                name: document.document.clone().unwrap_or_else(|| format!("runtimexaml{index}")),
-                base_uri: document.base_uri.as_ref().map(|uri| uri.to_string()),
-            });
-        }
+            Ok((document, input))
+        }).collect::<XamlResult<Vec<_>>>()?;
+        let count = inputs.len();
+        Self::load_inputs(inputs, configuration, count)
+    }
+
+    pub(crate) fn load_inputs(
+        inputs: Vec<(RuntimeXamlLoaderDocument, DocumentInput)>,
+        configuration: &RuntimeXamlLoaderConfiguration,
+        roots: usize,
+    ) -> XamlResult<Vec<Option<BoxedValue>>> {
+        let runtime_type_system = Self::type_system();
+        let (documents, mut sources) = Self::document_sources(inputs, &runtime_type_system);
 
         // A group whose documents were transformed before on this thread is only
         // interpreted again. A diagnostic handler sees the diagnostics of the transform,
@@ -215,10 +264,10 @@ impl FerroXamlIlRuntimeCompiler {
             None => {
                 let type_system = runtime_type_system.as_type_system();
                 let group =
-                    Rc::new(Self::transform_group(&runtime_type_system, type_system, &sources, configuration)?);
+                    Rc::new(Self::transform_group(&runtime_type_system, type_system, &mut sources, configuration)?);
                 if let Some(key) = cache_key {
                     GROUPS.with(|groups| {
-                        let source_bytes = sources.iter().map(|source| source.xaml.len()).sum();
+                        let source_bytes = sources.iter().fold(0usize, |total, source| total.saturating_add(source.input.cache_weight()));
                         groups.borrow_mut().insert(key, source_bytes, group.clone());
                     });
                 }
@@ -226,8 +275,8 @@ impl FerroXamlIlRuntimeCompiler {
             }
         };
 
-        let mut loaded = Vec::with_capacity(documents.len());
-        for ((document, provider), root_type) in documents.iter().zip(&group.providers).zip(&group.root_types) {
+        let mut loaded = Vec::with_capacity(roots);
+        for ((document, provider), root_type) in documents.iter().take(roots).zip(&group.providers).zip(&group.root_types) {
             let name = document.document.clone();
             let result = Self::load_or_populate(
                 provider,
@@ -252,6 +301,30 @@ impl FerroXamlIlRuntimeCompiler {
         Ok(loaded)
     }
 
+    fn document_sources(
+        inputs: Vec<(RuntimeXamlLoaderDocument, DocumentInput)>,
+        runtime_type_system: &RuntimeTypeSystem,
+    ) -> (Vec<RuntimeXamlLoaderDocument>, Vec<DocumentSource>) {
+        let mut sources = Vec::with_capacity(inputs.len());
+        let mut documents = Vec::with_capacity(inputs.len());
+        for (index, (document, input)) in inputs.into_iter().enumerate() {
+            let override_type: Option<Rc<dyn IXamlType>> =
+                document.root_instance.as_ref().map(|root| runtime_type_system.runtime_type_of(root));
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            let override_type = document.service_provider.as_ref()
+                .and_then(|provider| ferroui_markup_xaml::reload_events::code_behind(&**provider, &document.root_instance))
+                .map(|root| runtime_type_system.runtime_type_of(&root)).or(override_type);
+            sources.push(DocumentSource {
+                input,
+                override_type,
+                name: document.document.clone().unwrap_or_else(|| format!("runtimexaml{index}")),
+                base_uri: document.base_uri.as_ref().map(|uri| uri.to_string()),
+            });
+            documents.push(document);
+        }
+        (documents, sources)
+    }
+
     /// Removes the transformed documents this thread keeps (see [`Self::load_group`]).
     pub fn clear_cache() {
         GROUPS.with(|groups| *groups.borrow_mut() = GroupCache::default());
@@ -268,7 +341,7 @@ impl FerroXamlIlRuntimeCompiler {
     fn transform_group(
         runtime_type_system: &Rc<RuntimeTypeSystem>,
         type_system: Rc<dyn IXamlTypeSystem>,
-        sources: &[DocumentSource],
+        sources: &mut [DocumentSource],
         configuration: &RuntimeXamlLoaderConfiguration,
     ) -> XamlResult<TransformedGroup> {
         let runtime_type_system = runtime_type_system.clone();
@@ -345,9 +418,9 @@ impl FerroXamlIlRuntimeCompiler {
 
         let timings = std::env::var_os(TIMINGS_VARIABLE).is_some();
         let (mut parse_time, mut transform_time) = (std::time::Duration::ZERO, std::time::Duration::ZERO);
-        for document in sources {
+        for document in sources.iter_mut() {
             let start = std::time::Instant::now();
-            let mut parsed: XamlDocument = compiler.parse(&document.xaml, document.override_type.clone())?;
+            let mut parsed: XamlDocument = document.input.parse(&compiler, document.override_type.clone())?;
             parse_time += start.elapsed();
             parsed.document = Some(document.name.clone());
             let start = std::time::Instant::now();
@@ -395,12 +468,12 @@ impl FerroXamlIlRuntimeCompiler {
         throw_exception_if_any_error(&diagnostics.borrow())?;
 
         // The counterpart of compiling each document into its builder type.
-        for ((resource, provider), source) in parsed_documents.iter().zip(&providers).zip(sources) {
+        for ((resource, provider), source) in parsed_documents.iter().zip(&providers).zip(sources.iter()) {
             let xaml_document = resource.xaml_document();
             let xaml_document = xaml_document.borrow();
             let runtime_document = interpreter.document(&xaml_document, resource.uri().as_deref())?;
             #[cfg(all(feature = "hot-reload", debug_assertions))]
-            { *runtime_document.source_text.borrow_mut() = Some(Rc::from(source.xaml.as_str())); }
+            { *runtime_document.source_text.borrow_mut() = source.input.source_text().map(Rc::from); }
             #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
             let _ = source;
             provider.set_body(DocumentBody {
@@ -434,36 +507,44 @@ impl FerroXamlIlRuntimeCompiler {
     ) -> XamlResult<MarkupValue> {
         let service_provider = XamlIlRuntimeHelpers::create_root_service_provider_v3(parent_service_provider);
         match root_instance {
-            None => {
-                let class = root_type
-                    .as_any()
-                    .downcast_ref::<crate::runtime::type_system::RuntimeType>()
-                    .and_then(crate::runtime::type_system::RuntimeType::type_info)
-                    .filter(|class| crate::FerroRuntimeXamlLoader::has_class_document(class));
-                if let Some((class, constructor)) = class.and_then(|class| Some((class, class.default_constructor()?))) {
-                    let populate = {
-                        let provider = provider.clone();
-                        let service_provider = service_provider.clone();
-                        Rc::new(move |target: &BoxedValue| {
-                            let target = Some(crate::runtime::type_system::normalize_object(target.clone()));
-                            provider.populate(Some(service_provider.clone()), &target)
-                        })
-                    };
-                    let (created, populated) =
-                        crate::FerroRuntimeXamlLoader::with_populate_override(class, populate, constructor);
-                    if let Some(Err(error)) = populated {
-                        return Err(error);
-                    }
-                    return Ok(crate::runtime::type_system::box_object(created));
-                }
-                provider.build(Some(service_provider))
-            }
+            None => Self::build_new(provider, Self::registered_class(root_type), service_provider),
             Some(root_instance) => {
                 let root_instance = Some(crate::runtime::type_system::normalize_object(root_instance));
                 provider.populate(Some(service_provider), &root_instance)?;
                 Ok(root_instance)
             }
         }
+    }
+
+    fn registered_class(root_type: &Rc<dyn IXamlType>) -> Option<&'static ferroui_base::TypeInfo> {
+        root_type
+            .as_any()
+            .downcast_ref::<crate::runtime::type_system::RuntimeType>()
+            .and_then(crate::runtime::type_system::RuntimeType::type_info)
+            .filter(|class| crate::FerroRuntimeXamlLoader::has_class_document(class))
+    }
+
+    fn build_new(
+        provider: &Rc<RuntimeDocumentTypeBuilderProvider>, class: Option<&'static ferroui_base::TypeInfo>,
+        service_provider: Rc<dyn IServiceProvider>,
+    ) -> XamlResult<MarkupValue> {
+        if let Some((class, constructor)) = class.and_then(|class| Some((class, class.default_constructor()?))) {
+            let populate = {
+                let provider = provider.clone();
+                let service_provider = service_provider.clone();
+                Rc::new(move |target: &BoxedValue| {
+                    let target = Some(crate::runtime::type_system::normalize_object(target.clone()));
+                    provider.populate(Some(service_provider.clone()), &target)
+                })
+            };
+            let (created, populated) =
+                crate::FerroRuntimeXamlLoader::with_populate_override(class, populate, constructor);
+            if let Some(Err(error)) = populated {
+                return Err(error);
+            }
+            return Ok(crate::runtime::type_system::box_object(created));
+        }
+        provider.build(Some(service_provider))
     }
 
     /// `GetSafeUriIdentifier(uri)`.

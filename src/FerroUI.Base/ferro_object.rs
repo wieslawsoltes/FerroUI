@@ -1,5 +1,5 @@
 use crate::data::{BindingBase, BindingError, BindingExpressionBase, BindingPriority, BindingValue, BindingValueType};
-use crate::property_store::{BindingSource, ValueStore};
+use crate::property_store::{BindingSource, DirectBindingObserver, LocalValueBindingObserver, ValueStore};
 use crate::reactive::{Disposable, IDisposable, IObservable};
 use crate::threading::Dispatcher;
 use crate::type_system::{__forwards_to_parent, cast_this, parent_vtable};
@@ -160,50 +160,73 @@ pub trait FerroObjectImplExt: FerroObjectImpl {
 impl<T: FerroObjectImpl> FerroObjectImplExt for T {}
 
 impl<T: FerroObjectImpl> Subclassable<T> for FerroObject {
-    fn build_vtable() -> FerroObjectVTable {
-        // SAFETY (all casts): the table is only attached to objects whose
-        // most-derived class is `T`.
-        let mut table = FerroObjectVTable {
-            type_info: T::TYPE,
-            constructed: |this| T::constructed(unsafe { cast_this::<FerroObject, T>(this) }),
-            on_property_changed_core: |this, change| {
-                T::on_property_changed_core(unsafe { cast_this::<FerroObject, T>(this) }, change)
-            },
-            on_property_changed: |this, change| {
-                T::on_property_changed(unsafe { cast_this::<FerroObject, T>(this) }, change)
-            },
-            update_data_validation: |this, property, state, error| {
-                T::update_data_validation(unsafe { cast_this::<FerroObject, T>(this) }, property, state, error)
-            },
-        };
+    const __INHERITS_VTABLE: bool = matches!(<T as FerroObjectImpl>::__OVERRIDES, Some([]));
 
-        // A member `T` states it does not override is the default, which
-        // calls the same slot of the parent table and does nothing else: the
-        // slot itself is taken, so that a call reaches the implementation
-        // without a forwarding function of every class in between. A change
-        // of a property goes through two of these members.
-        let forwards: [bool; 4] = const {
-            let overrides = <T as FerroObjectImpl>::__OVERRIDES;
-            [
-                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "constructed"),
-                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "on_property_changed_core"),
-                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "on_property_changed"),
-                __forwards_to_parent::<T, FerroObjectVTable>(overrides, "update_data_validation"),
-            ]
-        };
-        if forwards[0] {
-            table.constructed = parent_vtable::<T, FerroObjectVTable>().constructed;
+    #[inline]
+    fn __inherit_vtable(parent: &FerroObjectVTable) -> FerroObjectVTable {
+        FerroObjectVTable { type_info: T::TYPE, ..*parent }
+    }
+
+    const __USES_PARENT_SLOTS: bool = {
+        let forwards = root_forwarded_slots::<T>();
+        forwards[0] || forwards[1] || forwards[2] || forwards[3]
+    };
+
+    #[inline]
+    fn __patch_parent_vtable(table: &mut FerroObjectVTable) {
+        let forwards = const { root_forwarded_slots::<T>() };
+        let own = root_vtable::<T>();
+        table.type_info = own.type_info;
+        if !forwards[0] {
+            table.constructed = own.constructed;
         }
-        if forwards[1] {
-            table.on_property_changed_core = parent_vtable::<T, FerroObjectVTable>().on_property_changed_core;
+        if !forwards[1] {
+            table.on_property_changed_core = own.on_property_changed_core;
         }
-        if forwards[2] {
-            table.on_property_changed = parent_vtable::<T, FerroObjectVTable>().on_property_changed;
+        if !forwards[2] {
+            table.on_property_changed = own.on_property_changed;
         }
-        if forwards[3] {
-            table.update_data_validation = parent_vtable::<T, FerroObjectVTable>().update_data_validation;
+        if !forwards[3] {
+            table.update_data_validation = own.update_data_validation;
         }
-        table
+    }
+
+    fn build_vtable() -> FerroObjectVTable {
+        if <Self as Subclassable<T>>::__USES_PARENT_SLOTS {
+            let mut table = *parent_vtable::<T, FerroObjectVTable>();
+            <Self as Subclassable<T>>::__patch_parent_vtable(&mut table);
+            table
+        } else {
+            root_vtable::<T>()
+        }
+    }
+}
+
+const fn root_forwarded_slots<T: FerroObjectImpl>() -> [bool; 4] {
+    let overrides = <T as FerroObjectImpl>::__OVERRIDES;
+    [
+        __forwards_to_parent::<T, FerroObjectVTable>(overrides, "constructed"),
+        __forwards_to_parent::<T, FerroObjectVTable>(overrides, "on_property_changed_core"),
+        __forwards_to_parent::<T, FerroObjectVTable>(overrides, "on_property_changed"),
+        __forwards_to_parent::<T, FerroObjectVTable>(overrides, "update_data_validation"),
+    ]
+}
+
+#[inline]
+fn root_vtable<T: FerroObjectImpl>() -> FerroObjectVTable {
+    // SAFETY: this table is only attached to objects whose most-derived class is T.
+    FerroObjectVTable {
+        type_info: T::TYPE,
+        constructed: |this| T::constructed(unsafe { cast_this::<FerroObject, T>(this) }),
+        on_property_changed_core: |this, change| {
+            T::on_property_changed_core(unsafe { cast_this::<FerroObject, T>(this) }, change)
+        },
+        on_property_changed: |this, change| {
+            T::on_property_changed(unsafe { cast_this::<FerroObject, T>(this) }, change)
+        },
+        update_data_validation: |this, property, state, error| {
+            T::update_data_validation(unsafe { cast_this::<FerroObject, T>(this) }, property, state, error)
+        },
     }
 }
 
@@ -671,7 +694,9 @@ impl FerroObject {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         Self::validate_priority(priority);
-        self.values.add_binding(self, property, BindingSource::Typed(source), priority)
+        self.values.add_binding(
+            self, property, source, priority, LocalValueBindingObserver::start_typed, BindingSource::typed,
+        )
     }
 
     /// Binds a property to an observable of binding values.
@@ -682,7 +707,9 @@ impl FerroObject {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         Self::validate_priority(priority);
-        self.values.add_binding(self, property, BindingSource::Value(source), priority)
+        self.values.add_binding(
+            self, property, source, priority, LocalValueBindingObserver::start_value, BindingSource::value,
+        )
     }
 
     /// Binds a property to an observable of untyped values.
@@ -693,7 +720,9 @@ impl FerroObject {
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         Self::validate_priority(priority);
-        self.values.add_binding(self, property, BindingSource::Untyped(source), priority)
+        self.values.add_binding(
+            self, property, source, priority, LocalValueBindingObserver::start_untyped, BindingSource::untyped,
+        )
     }
 
     /// Coerces the specified property.
@@ -754,7 +783,7 @@ impl FerroObject {
         source: Rc<dyn IObservable<T>>,
     ) -> Rc<dyn IDisposable> {
         let property = self.writable_direct(property);
-        self.values.add_direct_binding(self, property, BindingSource::Typed(source))
+        self.values.add_direct_binding(self, property, source, DirectBindingObserver::start_typed)
     }
 
     /// Binds a direct property to an observable of binding values.
@@ -764,7 +793,7 @@ impl FerroObject {
         source: Rc<dyn IObservable<BindingValue<T>>>,
     ) -> Rc<dyn IDisposable> {
         let property = self.writable_direct(property);
-        self.values.add_direct_binding(self, property, BindingSource::Value(source))
+        self.values.add_direct_binding(self, property, source, DirectBindingObserver::start_value)
     }
 
     /// Binds a direct property to an observable of untyped values.
@@ -774,7 +803,7 @@ impl FerroObject {
         source: Rc<dyn IObservable<BoxedValue>>,
     ) -> Rc<dyn IDisposable> {
         let property = self.writable_direct(property);
-        self.values.add_direct_binding(self, property, BindingSource::Untyped(source))
+        self.values.add_direct_binding(self, property, source, DirectBindingObserver::start_untyped)
     }
 
     fn writable_direct<T: PropertyValue>(
@@ -903,22 +932,26 @@ impl FerroObject {
         priority: BindingPriority,
         is_effective_value: bool,
     ) {
-        let e = FerroPropertyChangedEventArgs::new(
-            self,
-            property,
-            old_value.map(|v| v as &dyn Any),
-            new_value,
-            priority,
-            is_effective_value,
-        );
+        self.raise_property_changed_values(property, old_value.map(|v| v as &dyn Any), new_value, priority, is_effective_value);
+    }
+
+    pub(crate) fn raise_property_changed_values(
+        &self,
+        property: &'static FerroProperty,
+        old_value: Option<&dyn Any>,
+        new_value: &dyn Any,
+        priority: BindingPriority,
+        is_effective_value: bool,
+    ) {
+        let e = FerroPropertyChangedEventArgs::new(self, property, old_value, new_value, priority, is_effective_value);
         self.notify_property_changed(&e);
     }
 
-    pub(crate) fn raise_inherited_property_changed<T: PropertyValue>(
+    pub(crate) fn raise_inherited_property_changed(
         &self,
         property: &'static FerroProperty,
-        old_value: &T,
-        new_value: &T,
+        old_value: &dyn Any,
+        new_value: &dyn Any,
         priority: BindingPriority,
     ) {
         let e = FerroPropertyChangedEventArgs::new(

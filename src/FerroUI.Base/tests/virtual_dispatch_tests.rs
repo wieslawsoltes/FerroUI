@@ -331,6 +331,18 @@ fn slot_of_a_member_stated_as_not_overridden_is_the_slot_of_the_base_class() {
 }
 
 #[test]
+fn fully_inherited_tables_keep_their_own_identity_and_dynamic_type() {
+    for (parent, child, class) in [
+        (DispatchLevel1::vtable(), DispatchLevel2::vtable(), DispatchLevel2::TYPE),
+        (DispatchLevel4::vtable(), DispatchLevel5::vtable(), DispatchLevel5::TYPE),
+    ] {
+        assert!(!std::ptr::eq(parent, child));
+        assert!(std::ptr::eq(child.base.type_info, class));
+        assert!(!std::ptr::eq(parent.base.type_info, class));
+    }
+}
+
+#[test]
 fn slot_is_not_taken_from_a_base_class_that_has_no_such_member() {
     // Nothing stated: the slot is a function of the class.
     assert!(!__forwards_to_parent::<DispatchLevel1, DispatchRootVTable>(None, "visit"));

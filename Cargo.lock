@@ -1538,6 +1538,7 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "roxmltree 0.20.0",
  "serde_json",
+ "sha2",
  "xamlx",
 ]
 
@@ -2064,6 +2065,8 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-markup",
+ "ferroui-xaml-binary",
+ "sha2",
 ]
 
 [[package]]
@@ -2074,6 +2077,8 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-markup",
  "ferroui-markup-xaml",
+ "ferroui-xaml-binary",
+ "flate2",
  "xamlx",
 ]
 
@@ -2718,6 +2723,10 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
 ]
+
+[[package]]
+name = "ferroui-xaml-binary"
+version = "0.5.0-preview.1"
 
 [[package]]
 name = "ferroui-xaml-interactions"
@@ -7118,6 +7127,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build",
  "ferroui-controls",
+ "ferroui-hot-reload",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
 ]
