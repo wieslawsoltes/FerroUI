@@ -4485,6 +4485,11 @@ pub trait InputElementProps: ElementBuilder {
         self.prop(<ferroui_base::input::InputElement>::focusable_property(), value)
     }
 
+    /// Sets [`InputElement::allow_focus_on_interaction_property`](ferroui_base::input::InputElement::allow_focus_on_interaction_property).
+    fn allow_focus_on_interaction<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_base::input::InputElement>::allow_focus_on_interaction_property(), value)
+    }
+
     /// Sets [`InputElement::is_enabled_property`](ferroui_base::input::InputElement::is_enabled_property).
     fn is_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::InputElement>::is_enabled_property(), value)

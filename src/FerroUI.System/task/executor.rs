@@ -36,12 +36,13 @@ pub(crate) type LocalFuture = Pin<Box<dyn Future<Output = ()>>>;
 pub(crate) type OnFailure = Box<dyn FnOnce(Failure)>;
 pub(crate) type LocalCallbackFn = Box<dyn FnOnce()>;
 
-/// What another thread asks of a thread: to poll a task of its queue, or to run a callback that
-/// was registered there.
+/// What another thread asks of a thread: to poll a task of its queue, to run a callback that
+/// was registered there, or to forget one (and drop it there).
 #[derive(Clone, Copy)]
 enum Pending {
     Task(u64),
     Callback(u64),
+    Forget(u64),
 }
 
 /// The queue of a thread: the wakes and callbacks that came from other threads, and the schedule
@@ -491,6 +492,7 @@ pub fn run_pending() -> bool {
                     poll_task(id);
                 }
                 Pending::Callback(id) => run_callback(id),
+                Pending::Forget(id) => forget_callback(id),
             }
         }
     }
@@ -547,8 +549,7 @@ impl LocalCallback {
 
     /// Forgets the callback unless it ran; on the thread of the callback only.
     pub(crate) fn remove(&self) {
-        let removed = CALLBACKS.try_with(|callbacks| callbacks.borrow_mut().remove(&self.id)).ok().flatten();
-        drop(removed);
+        forget_callback(self.id);
     }
 }
 
@@ -565,6 +566,17 @@ impl LocalCallbackHandle {
             run_callback(self.id);
         } else {
             self.inbox.push(Pending::Callback(self.id));
+        }
+    }
+
+    /// Forgets the callback unless it ran, from any thread: at once on the thread of the
+    /// callback; from another thread through the queue of the callback's thread, which drops the
+    /// callback there (it need not be `Send`).
+    pub(crate) fn forget(&self) {
+        if std::thread::current().id() == self.thread {
+            forget_callback(self.id);
+        } else {
+            self.inbox.push(Pending::Forget(self.id));
         }
     }
 }
@@ -584,4 +596,10 @@ fn run_callback(id: u64) {
     if let Some(callback) = callback {
         callback();
     }
+}
+
+fn forget_callback(id: u64) {
+    // Dropped outside of the borrow: the callback may own something that registers another.
+    let removed = CALLBACKS.try_with(|callbacks| callbacks.borrow_mut().remove(&id)).ok().flatten();
+    drop(removed);
 }

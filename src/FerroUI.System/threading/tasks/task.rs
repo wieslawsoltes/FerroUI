@@ -1,6 +1,7 @@
 //! `Task<TResult>`, `TaskStatus`, `TaskCompletionSource<TResult>` and `TaskCanceledException`
 //! (`System.Threading.Tasks`), single-threaded (docs/porting/reactive.md, section 5.8).
 
+use crate::task::Canceled;
 use crate::ObservableError;
 use std::cell::{Cell, RefCell};
 use std::error::Error;
@@ -47,6 +48,22 @@ impl TaskCanceledError {
     /// Whether `error` is a cancellation: a [`TaskCanceledError`].
     pub fn is_cancellation(error: &ObservableError) -> bool {
         error.downcast_ref::<TaskCanceledError>().is_some()
+    }
+}
+
+/// The one cancellation error of the workspace (docs/idiomatic-rust-async.md, section 3.7): a
+/// cancellation that names no task.
+impl From<Canceled> for TaskCanceledError {
+    fn from(_: Canceled) -> Self {
+        Self::default()
+    }
+}
+
+/// The one cancellation error of the workspace (docs/idiomatic-rust-async.md, section 3.7); the
+/// id of the task is not kept.
+impl From<TaskCanceledError> for Canceled {
+    fn from(_: TaskCanceledError) -> Self {
+        Canceled
     }
 }
 

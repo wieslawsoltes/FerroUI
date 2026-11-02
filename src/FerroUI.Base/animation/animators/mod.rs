@@ -39,7 +39,7 @@ pub use byte_animator::ByteAnimator;
 pub use color_animator::ColorAnimator;
 pub use corner_radius_animator::CornerRadiusAnimator;
 pub use double_animator::DoubleAnimator;
-pub use effect_animator::{BlurEffectAnimator, DropShadowEffectAnimator, EffectAnimator};
+pub use effect_animator::{BlurEffectAnimator, CustomEffectAnimator, DropShadowEffectAnimator, EffectAnimator};
 pub use float_animator::FloatAnimator;
 pub use gradient_brush_animator::GradientBrushAnimator;
 pub use int16_animator::Int16Animator;
