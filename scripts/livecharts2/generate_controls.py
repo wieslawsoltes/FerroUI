@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Generate repetitive native property declarations, not chart algorithms.
 
-From the LiveCharts2 port of #312 (docs/porting/livecharts2.md): the Cartesian and pie charts of L2
-and the polar chart of L4; the Sankey, treemap and geographic charts add their rows with their
-engines.
+From the LiveCharts2 port of #312 (docs/porting/livecharts2.md): the Cartesian and pie charts of L2,
+the polar chart of L4 and the Sankey and treemap charts of L4b; the geographic charts add their
+rows with their engine.
 
 The generated classes remain ordinary FerroUI classes visible to the XAML source
 scanner. This replaces the managed UI-property generator for this native host.
@@ -226,18 +226,36 @@ families = [('LineSeries','Line'),('StepLineSeries','StepLine'),('AreaSeries','A
 ('ColumnSeries','Column'),('RowSeries','Row'),('StackedColumnSeries','StackedColumn'),
 ('StackedRowSeries','StackedRow'),('ScatterSeries','Scatter'),('HeatSeries','Heat'),
 ('RangeColumnSeries','RangeColumn'),('RangeRowSeries','RangeRow'),('RangeLineSeries','RangeLine'),
-('CandlesticksSeries','Financial'),('BoxSeries','Box'),('PieSeries','Pie'),('PolarLineSeries','PolarLine')]
-classes = HEADER + '''use crate::ChartSeries;
-use ferroui_base::{ferro_class,ferro_class_info,instantiate,FerroObjectImpl,FerroObjectImplExt,Ref};
-use ferroui_livecharts::SeriesKind;
+('CandlesticksSeries','Financial'),('BoxSeries','Box'),('PieSeries','Pie'),('PolarLineSeries','PolarLine'),
+('SankeySeries','Sankey'),('TreemapSeries','Treemap')]
+# The Sankey and treemap series hold nodes (and links) instead of chart points: the collections
+# each instance owns, its markup content (`Nodes`) and the properties of the source series
+# (ISankeySeries; the treemap's padding and corner radius are the shared Padding and CornerRadius).
+node_collections = {'SankeySeries':[('nodes','SankeyNodes'),('links','SankeyLinks')],
+                    'TreemapSeries':[('nodes','TreemapNodes')]}
+node_props = {
+ 'SankeySeries':[('nodes','Nodes','SankeyNodes','SankeyNodes::new()'),('links','Links','SankeyLinks','SankeyLinks::new()'),
+  ('node_width','NodeWidth','f64','12.0'),('node_padding','NodePadding','f64','8.0'),
+  ('node_corner_radius','NodeCornerRadius','f64','0.0'),('layout_iterations','LayoutIterations','u32','32'),
+  ('node_label_position','NodeLabelPosition','SankeyLabelPosition','SankeyLabelPosition::Auto'),
+  ('layout','Layout','SankeyLayoutKind','SankeyLayoutKind::Vertical'),
+  ('arc_span_degrees','ArcSpanDegrees','f64','150.0'),('link_fill','LinkFill','Option<Color>','None')],
+ 'TreemapSeries':[('nodes','Nodes','TreemapNodes','TreemapNodes::new()')]}
+classes = HEADER + '''use crate::{ChartSeries,SankeyLinks,SankeyNodes,TreemapNodes};
+use ferroui_base::{ferro_class,ferro_class_info,ferro_properties,instantiate,FerroObjectImpl,FerroObjectImplExt,FerroProperty,Ref,StyledProperty};
+use ferroui_base::media::Color;
+use ferroui_livecharts::{SankeyLabelPosition,SankeyLayoutKind,SeriesKind};
 '''
 for name,kind in families:
+    owned=''.join(f'this.set_{prop}({typ}::new());' for prop,typ in node_collections.get(name,[]))
+    info=(f'ferro_class_info!({name} {{ new: {name}::new, markup: {{ content: Nodes }} }});' if name in node_collections
+          else f'ferro_class_info!({name} {{ new:{name}::new }});')
     classes += f'''\n#[repr(C)]
 pub struct {name} {{ base:ChartSeries }}
 ferro_class!({name}: ChartSeries);
-ferro_class_info!({name} {{ new:{name}::new }});
+{info}
 impl FerroObjectImpl for {name} {{
-    fn constructed(this:&Self) {{ Self::parent_constructed(this);this.set_kind(SeriesKind::{kind}); }}
+    fn constructed(this:&Self) {{ Self::parent_constructed(this);this.set_kind(SeriesKind::{kind});{owned} }}
 }}
 impl {name} {{
     fn static_constructor() {{
@@ -253,12 +271,15 @@ impl {name} {{
     pub fn new()->Ref<Self> {{instantiate(Self::construct())}}
 }}
 '''
+for name,props in node_props.items():
+    classes += '\n' + properties(name,props)
 
-collections = HEADER + '''use crate::{ChartPoint,ChartSeries,Axis};
+collections = HEADER + '''use crate::{ChartPoint,ChartSeries,Axis,SankeyNode,SankeyLink,TreemapNode};
 use ferroui_base::{collections::FerroList,ferro_markup_type,Ref};
 use std::ops::Deref;
 '''
-for name,typ in [('ChartPoints','ChartPoint'),('ChartSeriesCollection','ChartSeries'),('Axes','Axis')]:
+for name,typ in [('ChartPoints','ChartPoint'),('ChartSeriesCollection','ChartSeries'),('Axes','Axis'),
+                 ('SankeyNodes','SankeyNode'),('SankeyLinks','SankeyLink'),('TreemapNodes','TreemapNode')]:
     collections += f'''
 #[derive(Clone,Debug,PartialEq)]
 pub struct {name}(FerroList<Ref<{typ}>>);
@@ -313,7 +334,8 @@ use ferroui_controls::ControlImpl;
 # The chart classes, their kind and the defaults their source view takes from LiveChartsSettings
 # (PolarInitialRotation = -90: the angle zero points up).
 chart_families=[('CartesianChart','Cartesian',[]),('PieChart','Pie',[]),
-                ('PolarChart','Polar',[('initial_rotation','-90.0')])]
+                ('PolarChart','Polar',[('initial_rotation','-90.0')]),
+                ('SankeyChart','Sankey',[]),('TreemapChart','Treemap',[])]
 for cls,kind,defaults in chart_families:
     overrides=''.join(f'Chart::{prop}_property().override_default_value::<{cls}>({value});' for prop,value in defaults)
     static=f'fn static_constructor(){{{overrides}}}' if overrides else ''

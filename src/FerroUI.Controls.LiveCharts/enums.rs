@@ -1,5 +1,5 @@
-/// The chart calculation selected by a native host. The Sankey, treemap and geographic families
-/// join with their engines (docs/porting/livecharts2.md, L4), hence `non_exhaustive`.
+/// The chart calculation selected by a native host. The geographic family joins with its engine
+/// (docs/porting/livecharts2.md, L4), hence `non_exhaustive`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 #[non_exhaustive]
 pub enum ChartKind {
@@ -7,11 +7,15 @@ pub enum ChartKind {
     Cartesian,
     Pie,
     Polar,
+    Sankey,
+    Treemap,
 }
 ferroui_base::ferro_markup_enum!(ChartKind {
     Cartesian,
     Pie,
-    Polar
+    Polar,
+    Sankey,
+    Treemap
 });
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
