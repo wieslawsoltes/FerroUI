@@ -11,6 +11,7 @@
 #define RADIO "/org/bluez/hci0"
 #define MANAGER "/org/freedesktop/NetworkManager"
 #define ACTIVE MANAGER "/ActiveConnection/1"
+#define WIRED MANAGER "/ActiveConnection/2"
 #define DISPLAY_DEVICE "/org/freedesktop/UPower/devices/DisplayDevice"
 
 static const char xml[] =
@@ -18,10 +19,13 @@ static const char xml[] =
     "<interface name='" NETWORK "'>"
     "<property name='WirelessEnabled' type='b' access='readwrite'/>"
     "<property name='WirelessHardwareEnabled' type='b' access='read'/>"
+    "<property name='ActiveConnections' type='ao' access='read'/>"
     "<property name='PrimaryConnection' type='o' access='read'/>"
     "</interface>"
     "<interface name='" NETWORK ".Connection.Active'>"
     "<property name='Id' type='s' access='read'/>"
+    "<property name='Type' type='s' access='read'/>"
+    "<property name='State' type='u' access='read'/>"
     "</interface>"
     "<interface name='" POWER ".Device'>"
     "<property name='IsPresent' type='b' access='read'/>"
@@ -61,8 +65,16 @@ static GVariant *read_property(GDBusConnection *connection, const gchar *sender,
     if (!strcmp(property, "WirelessEnabled")) return g_variant_new_boolean(wifi);
     if (!strcmp(property, "WirelessHardwareEnabled") || !strcmp(property, "IsPresent"))
         return g_variant_new_boolean(TRUE);
-    if (!strcmp(property, "PrimaryConnection")) return g_variant_new_object_path(wifi ? ACTIVE : "/");
-    if (!strcmp(property, "Id")) return g_variant_new_string("Studio Wi-Fi");
+    if (!strcmp(property, "ActiveConnections")) {
+        const gchar *ids[] = {WIRED, ACTIVE, NULL};
+        return g_variant_new_objv(ids, wifi ? 2 : 1);
+    }
+    if (!strcmp(property, "PrimaryConnection")) return g_variant_new_object_path(WIRED);
+    if (!strcmp(property, "Type")) return g_variant_new_string(!strcmp(path, ACTIVE) ? "802-11-wireless" : "802-3-ethernet");
+    if (!strcmp(property, "Id")) {
+        g_print("Read connection ID at %s\n", path);
+        return g_variant_new_string(!strcmp(path, ACTIVE) ? "Studio Wi-Fi" : "Office Ethernet");
+    }
     if (!strcmp(property, "Percentage")) return g_variant_new_double(76.0);
     if (!strcmp(property, "State")) return g_variant_new_uint32(2);
     g_set_error(error, G_DBUS_ERROR, G_DBUS_ERROR_UNKNOWN_PROPERTY, "Unknown property %s", property);
@@ -99,6 +111,8 @@ int main(void) {
         if (!g_dbus_connection_register_object(bus, paths[i], node->interfaces[i], &properties,
                                                NULL, NULL, &error)) g_error("%s", error->message);
     }
+    if (!g_dbus_connection_register_object(bus, WIRED, node->interfaces[1], &properties, NULL, NULL, &error))
+        g_error("%s", error->message);
     const GDBusInterfaceVTable manager = {.method_call = managed_objects};
     if (!g_dbus_connection_register_object(bus, "/", node->interfaces[4], &manager, NULL, NULL, &error))
         g_error("%s", error->message);

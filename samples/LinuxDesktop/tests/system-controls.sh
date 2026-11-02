@@ -134,6 +134,10 @@ press_until minus volume_is 45
 press_until w wifi_is false
 press_until w wifi_is true
 wait_until grep -q 'Set WirelessEnabled=1' "$output/system-bus.log"
+grep -q 'Read connection ID at .*/ActiveConnection/1$' "$output/system-bus.log"
+if grep -q 'Read connection ID at .*/ActiveConnection/2$' "$output/system-bus.log"; then
+    echo "Used the Ethernet profile as the Wi-Fi name" >&2; exit 1
+fi
 bluetooth_cycle quick-settings
 # Discover the native Slider in normal tab order. Optional monitor controls
 # and each profile's spatial layout may change the number of preceding tabs.
@@ -170,11 +174,14 @@ original_month_visible() {
 wait_until original_month_visible
 # Exercise both remaining layouts in the same shell and audio session. The
 # external D-Bus readbacks prove the active panel, including after a rebuild.
+appearance_is() {
+    [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/appearance" 2>/dev/null || :) == "$1" ]]
+}
 for entry in '2 macos macos-control-center' '3 material material-quick-settings'; do
     read -r choice profile frame <<<"$entry"
     key Escape ctrl+comma
     key "$choice"
-    wait_until grep -qx "$profile" "$XDG_CONFIG_HOME/ferro-desktop/appearance"
+    wait_until appearance_is "$profile"
     key Escape ctrl+shift+q
     press_until w wifi_is false
     press_until w wifi_is true

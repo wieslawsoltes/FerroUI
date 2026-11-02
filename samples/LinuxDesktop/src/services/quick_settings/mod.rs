@@ -77,21 +77,32 @@ fn wifi(bus: &Connection) -> Option<Wifi> {
     let nm = proxy(bus, NETWORK, NETWORK_PATH, NETWORK).ok()?;
     let enabled = nm.get_property("WirelessEnabled").ok()?;
     let hardware_enabled = nm.get_property("WirelessHardwareEnabled").ok()?;
-    let connection = nm
-        .get_property::<zbus::zvariant::OwnedObjectPath>("PrimaryConnection")
-        .ok()
-        .filter(|path| path.as_str() != "/")
-        .and_then(|path| {
-            proxy(
-                bus,
-                NETWORK,
-                path.as_str(),
-                "org.freedesktop.NetworkManager.Connection.Active",
-            )
-            .and_then(|active| active.get_property::<String>("Id"))
-            .ok()
-        })
-        .unwrap_or_default();
+    // The prioritized/default route can be Ethernet while Wi-Fi is connected.
+    // Report the name of an activated wireless connection, even in that case.
+    let connection = if enabled && hardware_enabled {
+        nm.get_property::<Vec<zbus::zvariant::OwnedObjectPath>>("ActiveConnections")
+            .unwrap_or_default()
+            .iter()
+            .find_map(|path| {
+                let active = proxy(
+                    bus,
+                    NETWORK,
+                    path.as_str(),
+                    "org.freedesktop.NetworkManager.Connection.Active",
+                )
+                .ok()?;
+                if active.get_property::<String>("Type").ok()? == "802-11-wireless"
+                    && active.get_property::<u32>("State").ok()? == 2
+                {
+                    active.get_property::<String>("Id").ok()
+                } else {
+                    None
+                }
+            })
+            .unwrap_or_default()
+    } else {
+        String::new()
+    };
     Some(Wifi {
         enabled,
         hardware_enabled,
