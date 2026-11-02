@@ -5,6 +5,8 @@ actor-bound operation validation, deterministic synchronization, presence and of
 The `server` feature exposes the room service through the existing `ferroui-mcp` transport.
 The `client` feature supplies an HTTPS MCP peer and a durable reconnecting replica.
 
+The `client` feature is off by default. With it, `ReconnectingPeer` connects only to the MCP endpoint URL that the application gives it, over HTTPS (or plain HTTP to a loopback address for local development). It sends the room's operations and reads the room's state from that endpoint; it opens no other connection and starts no listener.
+
 ```sh
 cargo run -p ferroui-designer-collaboration-host --features server --bin ferroui-collaboration-server -- --storage ./private-rooms
 ```
