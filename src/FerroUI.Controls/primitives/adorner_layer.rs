@@ -386,7 +386,7 @@ impl AdornerLayer {
         let mut info = adorner.get_value(Self::adorned_element_info_property());
 
         if let Some(existing) = &info {
-            if let Some(subscription) = existing.0.subscription.borrow().clone() {
+            if let Some(subscription) = existing.0.subscription.borrow_mut().take() {
                 subscription.dispose();
             }
 
