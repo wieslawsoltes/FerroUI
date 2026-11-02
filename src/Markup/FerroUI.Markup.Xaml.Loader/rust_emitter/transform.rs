@@ -133,6 +133,18 @@ pub fn transform_group(
     options: &TransformOptions,
     parsers: &[Rc<dyn IXamlCompileTimeValueParser>],
 ) -> XamlResult<Vec<TransformedDocument>> {
+    transform_group_with_parsed(type_system, sources, options, parsers, None)
+}
+
+/// A class group also reads its root directives. Expose the already-parsed XML AST
+/// before the framework's ignored-directives transform removes x:ClassModifier.
+pub(super) fn transform_group_with_parsed(
+    type_system: Rc<dyn IXamlTypeSystem>,
+    sources: &[DocumentSource<'_>],
+    options: &TransformOptions,
+    parsers: &[Rc<dyn IXamlCompileTimeValueParser>],
+    mut inspect: Option<&mut dyn FnMut(&XamlDocument)>,
+) -> XamlResult<Vec<TransformedDocument>> {
     let (mut mappings, emit_mappings) = FerroXamlIlLanguage::configure(&type_system)?;
     adapt_type_mappings(&mut mappings);
 
@@ -197,6 +209,7 @@ pub fn transform_group(
     let mut providers: Vec<Rc<DocumentTypeBuilderProvider>> = Vec::with_capacity(sources.len());
     for document in sources {
         let mut parsed: XamlDocument = compiler.parse(document.xaml, document.root_type.clone())?;
+        if let Some(inspect) = inspect.as_mut() { inspect(&parsed); }
         parsed.document = Some(document.name.to_string());
         compiler.transform(&mut parsed).map_err(|error| described_error(&diagnostics, error))?;
 

@@ -38,7 +38,7 @@ use crate::compiler_extensions::IXamlCompileTimeValueParser;
 
 use super::emit_types::{EmitClass, EmitTypes, Known};
 use super::emitter::{emit_function, root_value_handle_of, DocumentFunctions};
-use super::transform::{transform_group, DocumentSource, TransformOptions};
+use super::transform::{transform_group, transform_group_with_parsed, DocumentSource, TransformOptions};
 use super::source::{function_name_of, rust_string_literal};
 use ferroui_build_scan::xaml_metadata::{DocumentModel, XamlMetadata};
 
@@ -650,8 +650,12 @@ impl Constructor {
 /// The text of the directive `x:<name>` of the root of the document `xaml`: `Ok(None)`
 /// when the root has no such directive, `Ok(Some(None))` when its value is not text.
 fn root_directive(xaml: &str, name: &str) -> Result<Option<Option<String>>, String> {
-    use xamlx::ast::{XamlAstNodeExtensions, XamlAstObjectNode, XamlAstTextNode, XamlAstXmlDirective};
     let parsed = xamlx::parsers::XDocumentXamlParser::parse(xaml, None).map_err(|e| e.message())?;
+    parsed_root_directive(&parsed, name)
+}
+
+fn parsed_root_directive(parsed: &xamlx::ast::XamlDocument, name: &str) -> Result<Option<Option<String>>, String> {
+    use xamlx::ast::{XamlAstNodeExtensions, XamlAstObjectNode, XamlAstTextNode, XamlAstXmlDirective};
     let root = parsed.root().map_err(|e| e.message())?;
     let Some(root) = root.cast::<XamlAstObjectNode>() else {
         return Ok(None);
@@ -673,9 +677,11 @@ fn root_directive(xaml: &str, name: &str) -> Result<Option<Option<String>>, Stri
 /// `Internal` are not (compared without regard to case), a document without the
 /// directive is public. `Ok(None)` when the directive is absent.
 fn class_modifier_public(xaml: &str) -> Result<Option<bool>, String> {
-    let Some(text) = root_directive(xaml, "ClassModifier")? else {
-        return Ok(None);
-    };
+    modifier_visibility(root_directive(xaml, "ClassModifier")?)
+}
+
+fn modifier_visibility(directive: Option<Option<String>>) -> Result<Option<bool>, String> {
+    let Some(text) = directive else { return Ok(None); };
     match text.map(|text| text.trim().to_lowercase()).as_deref() {
         Some("public") => Ok(Some(true)),
         // The XAML specification uses "Public" and "NotPublic", the WPF documentation "public" and "internal".
@@ -789,7 +795,11 @@ pub fn generate_class_file_with_binary_resources(
             root_type: (index == 0).then(|| group.class.clone()),
         })
         .collect();
-    let transformed = transform_group(host.type_system.clone(), &sources, options, &host.parsers)
+    let mut modifiers = Vec::with_capacity(sources.len());
+    let mut read_modifier = |parsed: &xamlx::ast::XamlDocument| {
+        modifiers.push(parsed_root_directive(parsed, "ClassModifier").and_then(modifier_visibility));
+    };
+    let transformed = transform_group_with_parsed(host.type_system.clone(), &sources, options, &host.parsers, Some(&mut read_modifier))
         .map_err(|error| format!("{CLASS_GROUP_NOT_TRANSFORMED}{}", error.message()))?;
     let constructor = match group.constructor {
         Some(constructor) => Some(Constructor::from(constructor)),
@@ -806,8 +816,8 @@ pub fn generate_class_file_with_binary_resources(
     // Whether each document is public. A class document follows its class, which has a
     // public Rust path; the directive, if present, must agree, as upstream validates it.
     let mut public = Vec::with_capacity(documents.len());
-    for (index, document) in documents.iter().enumerate() {
-        let modifier = class_modifier_public(&document.1).map_err(|reason| format!("{}: {reason}", document.0))?;
+    for (index, (document, modifier)) in documents.iter().zip(modifiers).enumerate() {
+        let modifier = modifier.map_err(|reason| format!("{}: {reason}", document.0))?;
         if index == 0 && modifier == Some(false) {
             return Err(format!("{}: XAML file x:ClassModifier doesn't match the x:Class type modifiers.", document.0));
         }

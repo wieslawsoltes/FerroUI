@@ -424,10 +424,10 @@ fn fused_setter_add(types: &dyn EmitTypes, lines: &[String], call: &str) -> Opti
 /// `None` (the statements are kept as they are) for any other shape: the constructor with the
 /// key, other members, another service provider.
 fn fused_static_resource_content(types: &dyn EmitTypes, lines: &[String], returned: &str, document: &str) -> Option<(Vec<String>, Option<Factory>)> {
+    let [create, marker, set_key, provide] = lines else { return None };
+    let [create, marker, set_key, provide] = [create, marker, set_key, provide].map(|line| line.strip_prefix("    ").unwrap_or(line));
     let extension = types.framework_path(FrameworkType::StaticResourceExtension)?;
-    let statements: Vec<&str> = lines.iter().map(|line| line.strip_prefix("    ").unwrap_or(line)).collect();
-    let [create, marker, set_key, provide] = statements.as_slice() else { return None };
-    if *create != format!("let static_resource_extension_0 = {extension}::__markup_new_0();") || !marker.starts_with("// ") {
+    if create != format!("let static_resource_extension_0 = {extension}::__markup_new_0();") || !marker.starts_with("// ") {
         return None;
     }
     let key = set_key
@@ -2563,10 +2563,13 @@ impl<'a> Emitter<'a> {
         let declaration_aliases = node.namespace_scope().map(|scope| scope.aliases().clone())
             .unwrap_or_else(|| self.namespace_aliases.clone());
         let outer_aliases = std::mem::replace(&mut self.namespace_aliases, declaration_aliases.clone());
+        let sites_before_body = self.theme_tables.site_count();
         let body = self.deferred_body(deferred);
         self.namespace_aliases = outer_aliases;
         let mut body_lines = std::mem::replace(&mut self.lines, outer_lines);
-        self.theme_tables.lower(&mut body_lines, &mut self.deferred_functions, self.function_name, self.documents);
+        if self.theme_tables.site_count() != sites_before_body {
+            self.theme_tables.lower(&mut body_lines, &mut self.deferred_functions, self.function_name, self.documents);
+        }
         self.assignments = outer_assignments;
         self.local_names = outer_names;
         let (uses_context, uses_name_scope) = (self.uses_context || self.uses_name_scope, self.uses_name_scope);

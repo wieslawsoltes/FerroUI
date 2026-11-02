@@ -225,6 +225,9 @@ fn site(line: &str) -> Option<usize> {
 }
 
 impl ThemeTables {
+    pub fn site_count(&self) -> usize { self.sites.len() }
+
+
     pub fn factory(&mut self, build: &str, slot: usize, document: &str, factory: Factory) {
         self.factories.insert(
             build.to_owned(),
@@ -274,6 +277,7 @@ impl ThemeTables {
             return;
         }
         let count = lines.iter().filter_map(|line| site(line)).take(8).count();
+        if count == 0 { return; }
         if count < 8 {
             for line in lines {
                 if let Some(index) = site(line) {
@@ -284,11 +288,11 @@ impl ThemeTables {
             return;
         }
 
-        let input = std::mem::take(lines);
+        let mut input = std::mem::take(lines);
         let mut at = 0;
         while at < input.len() {
             let Some(first) = site(&input[at]) else {
-                lines.push(input[at].clone());
+                lines.push(std::mem::take(&mut input[at]));
                 at += 1;
                 continue;
             };
