@@ -11,6 +11,7 @@ use ferroui_base::animation::SignedDuration;
 use ferroui_base::{Ref, Visual};
 use std::cell::Cell;
 use std::rc::Rc;
+use std::time::Duration;
 
 mod connected_animation_configuration_tests {
     use super::*;
@@ -55,7 +56,7 @@ mod connected_animation_configuration_tests {
     #[test]
     fn direct_config_duration_round_trips() {
         let _scope = test_scope();
-        let d = SignedDuration::from_milliseconds(200.0);
+        let d = Duration::from_millis(200);
         let config = DirectConnectedAnimationConfiguration::new().with_duration(Some(d));
         assert_eq!(Some(d), config.duration());
     }
@@ -64,7 +65,7 @@ mod connected_animation_configuration_tests {
     fn direct_config_duration_can_be_set_to_null() {
         let _scope = test_scope();
         let config =
-            DirectConnectedAnimationConfiguration::new().with_duration(Some(SignedDuration::from_milliseconds(100.0)));
+            DirectConnectedAnimationConfiguration::new().with_duration(Some(Duration::from_millis(100)));
         config.set_duration(None);
         assert_eq!(None, config.duration());
     }
@@ -111,7 +112,7 @@ mod connected_animation_service_tests {
     fn default_duration_initially_is_300ms() {
         let _scope = test_scope();
         let service = create_service();
-        assert_eq!(SignedDuration::from_milliseconds(300.0), service.default_duration());
+        assert_eq!(Duration::from_millis(300), service.default_duration());
     }
 
     #[test]
@@ -125,7 +126,7 @@ mod connected_animation_service_tests {
     fn default_duration_can_be_set() {
         let _scope = test_scope();
         let service = create_service();
-        let d = SignedDuration::from_milliseconds(500.0);
+        let d = Duration::from_millis(500);
         service.set_default_duration(d);
         assert_eq!(d, service.default_duration());
     }
@@ -257,7 +258,7 @@ mod connected_animation_tests {
         let service = create_service();
         let animation = service.prepare_to_animate("hero", &border());
         let config: Rc<dyn ConnectedAnimationConfiguration> =
-            DirectConnectedAnimationConfiguration::new().with_duration(Some(SignedDuration::from_milliseconds(100.0)));
+            DirectConnectedAnimationConfiguration::new().with_duration(Some(Duration::from_millis(100)));
         animation.set_configuration(Some(config.clone()));
         assert!(animation.configuration().is_some_and(|c| Rc::ptr_eq(&c, &config)));
     }
@@ -483,51 +484,51 @@ mod connected_animation_tests {
         let service = create_service();
         let animation = service.prepare_to_animate("hero", &border());
         animation.set_configuration(Some(
-            DirectConnectedAnimationConfiguration::new().with_duration(Some(SignedDuration::from_milliseconds(250.0))),
+            DirectConnectedAnimationConfiguration::new().with_duration(Some(Duration::from_millis(250))),
         ));
 
         let resolved = animation.resolve_timing_and_easing(&service);
 
-        assert_eq!(SignedDuration::from_milliseconds(250.0), resolved.duration);
+        assert_eq!(Duration::from_millis(250), resolved.duration);
     }
 
     #[test]
     fn configuration_direct_with_null_duration_uses_service_default_duration() {
         let _scope = test_scope();
         let service = create_service();
-        service.set_default_duration(SignedDuration::from_milliseconds(400.0));
+        service.set_default_duration(Duration::from_millis(400));
         let animation = service.prepare_to_animate("hero", &border());
         animation.set_configuration(Some(DirectConnectedAnimationConfiguration::new().with_duration(None)));
 
         let resolved = animation.resolve_timing_and_easing(&service);
 
-        assert_eq!(SignedDuration::from_milliseconds(400.0), resolved.duration);
+        assert_eq!(Duration::from_millis(400), resolved.duration);
     }
 
     #[test]
     fn configuration_basic_uses_service_default_duration() {
         let _scope = test_scope();
         let service = create_service();
-        service.set_default_duration(SignedDuration::from_milliseconds(400.0));
+        service.set_default_duration(Duration::from_millis(400));
         let animation = service.prepare_to_animate("hero", &border());
         animation.set_configuration(Some(BasicConnectedAnimationConfiguration::new()));
 
         let resolved = animation.resolve_timing_and_easing(&service);
 
-        assert_eq!(SignedDuration::from_milliseconds(400.0), resolved.duration);
+        assert_eq!(Duration::from_millis(400), resolved.duration);
     }
 
     #[test]
     fn configuration_gravity_uses_service_default_duration() {
         let _scope = test_scope();
         let service = create_service();
-        service.set_default_duration(SignedDuration::from_milliseconds(350.0));
+        service.set_default_duration(Duration::from_millis(350));
         let animation = service.prepare_to_animate("hero", &border());
         animation.set_configuration(Some(GravityConnectedAnimationConfiguration::new()));
 
         let resolved = animation.resolve_timing_and_easing(&service);
 
-        assert_eq!(SignedDuration::from_milliseconds(350.0), resolved.duration);
+        assert_eq!(Duration::from_millis(350), resolved.duration);
     }
 
     #[test]

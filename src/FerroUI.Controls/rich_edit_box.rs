@@ -24,7 +24,6 @@ use crate::{
     Application, ContentControl, ContextMenuEventArgs, Control, ControlImpl, Decorator, Panel, RichEditBoxTextPresenter,
     RichTextBlock, TextBox, TopLevel,
 };
-use ferroui_base::animation::SignedDuration;
 use ferroui_base::input::platform::{
     ClipboardError, ClipboardErrorKind, IClipboard, PlatformHotkeyConfiguration,
 };
@@ -58,6 +57,7 @@ use ferroui_base::metadata::{MarkupType, MarkupTyped};
 use std::cell::{Cell, RefCell};
 use std::ops::Range;
 use std::rc::Rc;
+use std::time::Duration;
 
 #[path = "rich_edit_box_format_commands.rs"]
 mod format_commands;
@@ -797,7 +797,7 @@ ferroui_base::ferro_properties! { impl RichEditBox {
     pub fn is_read_only_property() -> StyledProperty<bool> { FerroProperty::register::<RichEditBox, _>("IsReadOnly", false) }
     pub fn accepts_return_property() -> StyledProperty<bool> { FerroProperty::register::<RichEditBox, _>("AcceptsReturn", true) }
     pub fn accepts_tab_property() -> StyledProperty<bool> { FerroProperty::register::<RichEditBox, _>("AcceptsTab", false) }
-    pub fn caret_blink_interval_property() -> StyledProperty<SignedDuration> { TextBox::caret_blink_interval_property().add_owner::<RichEditBox>() }
+    pub fn caret_blink_interval_property() -> StyledProperty<Duration> { TextBox::caret_blink_interval_property().add_owner::<RichEditBox>() }
     pub fn max_length_property() -> StyledProperty<i32> { FerroProperty::register_with::<RichEditBox, _>("MaxLength", StyledPropertyOptions::new(0).validate(|value| *value >= 0)) }
     pub fn clipboard_copy_format_property() -> StyledProperty<RichEditClipboardFormat> { FerroProperty::register::<RichEditBox, _>("ClipboardCopyFormat", RichEditClipboardFormat::AllFormats) }
     pub fn disabled_formatting_accelerators_property() -> StyledProperty<DisabledFormattingAccelerators> { FerroProperty::register::<RichEditBox, _>("DisabledFormattingAccelerators", DisabledFormattingAccelerators::NONE) }
@@ -1328,10 +1328,10 @@ impl RichEditBox {
         self.set_value(Self::is_read_only_property(), value);
     }
     /// The framework caret period. Zero or a negative interval keeps the caret steady.
-    pub fn caret_blink_interval(&self) -> SignedDuration {
+    pub fn caret_blink_interval(&self) -> Duration {
         self.get_value(Self::caret_blink_interval_property())
     }
-    pub fn set_caret_blink_interval(&self, value: SignedDuration) {
+    pub fn set_caret_blink_interval(&self, value: Duration) {
         self.set_value(Self::caret_blink_interval_property(), value);
     }
     pub fn accepts_return(&self) -> bool {
@@ -1906,7 +1906,7 @@ impl RichEditBox {
         self.caret_phase.set(active);
         self.invalidate_text_view();
         let interval = self.caret_blink_interval();
-        if !active || interval <= SignedDuration::ZERO || self.editor().is_composing() {
+        if !active || interval.is_zero() || self.editor().is_composing() {
             return;
         }
         let timer = timer.unwrap_or_else(|| {
@@ -1930,10 +1930,9 @@ impl RichEditBox {
         });
         // The dispatcher uses signed millisecond due times. Keep submillisecond
         // values from spinning the UI queue and bound unusually long intervals.
-        let duration = interval.to_duration().unwrap_or_default();
-        timer.set_interval(duration.clamp(
-            std::time::Duration::from_millis(1),
-            std::time::Duration::from_millis(i32::MAX as u64),
+        timer.set_interval(interval.clamp(
+            Duration::from_millis(1),
+            Duration::from_millis(i32::MAX as u64),
         ));
         timer.start();
     }

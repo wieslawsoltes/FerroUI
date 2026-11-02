@@ -1260,19 +1260,18 @@ fn rich_edit_caret_timer_blinks_resets_after_input_and_stops_for_selection_or_bl
 
 #[test]
 fn rich_edit_zero_caret_interval_is_steady_and_detaching_stops_the_timer() {
-    use ferroui_base::animation::SignedDuration;
     use ferroui_base::input::{FocusChangedEventArgs, InputElement};
     let _scope = crate::test_support::test_scope();
     let editor = RichEditBox::new();
     editor.set_template(Some(rich_edit_box_template()));
-    editor.set_caret_blink_interval(SignedDuration::ZERO);
+    editor.set_caret_blink_interval(std::time::Duration::ZERO);
     let root = crate::test_support::TestRoot::with_child(editor.clone());
     rich_edit_layout(&root, Size::new(200.0, 80.0));
     let before = Dispatcher::timers_for_unit_tests().len();
     editor.raise_event(&FocusChangedEventArgs::new(InputElement::got_focus_event()));
     assert!(editor.caret_visible());
     assert_eq!(Dispatcher::timers_for_unit_tests().len(), before);
-    editor.set_caret_blink_interval(SignedDuration::from_milliseconds(750.0));
+    editor.set_caret_blink_interval(std::time::Duration::from_millis(750));
     let timer = Dispatcher::timers_for_unit_tests()
         .into_iter()
         .find(|timer| timer.interval() == std::time::Duration::from_millis(750))

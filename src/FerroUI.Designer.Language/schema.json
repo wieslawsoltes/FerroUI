@@ -608,8 +608,8 @@
       },
       "MinimumPopulateDelay": {
         "name": "MinimumPopulateDelay",
-        "type_name": "SignedDuration",
-        "documentation": "AutoCompleteBox.MinimumPopulateDelay: SignedDuration",
+        "type_name": "Duration",
+        "documentation": "AutoCompleteBox.MinimumPopulateDelay: Duration",
         "values": [],
         "attached": false
       },
@@ -17948,8 +17948,8 @@
       },
       "CaretBlinkInterval": {
         "name": "CaretBlinkInterval",
-        "type_name": "SignedDuration",
-        "documentation": "RichEditBox.CaretBlinkInterval: SignedDuration",
+        "type_name": "Duration",
+        "documentation": "RichEditBox.CaretBlinkInterval: Duration",
         "values": [],
         "attached": false
       },
@@ -18997,15 +18997,15 @@
       },
       "HideDelay": {
         "name": "HideDelay",
-        "type_name": "SignedDuration",
-        "documentation": "ScrollBar.HideDelay: SignedDuration",
+        "type_name": "Duration",
+        "documentation": "ScrollBar.HideDelay: Duration",
         "values": [],
         "attached": false
       },
       "ShowDelay": {
         "name": "ShowDelay",
-        "type_name": "SignedDuration",
-        "documentation": "ScrollBar.ShowDelay: SignedDuration",
+        "type_name": "Duration",
+        "documentation": "ScrollBar.ShowDelay: Duration",
         "values": [],
         "attached": false
       }
@@ -22903,8 +22903,8 @@
       },
       "CaretBlinkInterval": {
         "name": "CaretBlinkInterval",
-        "type_name": "SignedDuration",
-        "documentation": "TextBox.CaretBlinkInterval: SignedDuration",
+        "type_name": "Duration",
+        "documentation": "TextBox.CaretBlinkInterval: Duration",
         "values": [],
         "attached": false
       },
@@ -23651,8 +23651,8 @@
       },
       "CaretBlinkInterval": {
         "name": "CaretBlinkInterval",
-        "type_name": "SignedDuration",
-        "documentation": "TextPresenter.CaretBlinkInterval: SignedDuration",
+        "type_name": "Duration",
+        "documentation": "TextPresenter.CaretBlinkInterval: Duration",
         "values": [],
         "attached": false
       },

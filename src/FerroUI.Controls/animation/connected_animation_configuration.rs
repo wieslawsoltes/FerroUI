@@ -1,7 +1,7 @@
-use ferroui_base::animation::SignedDuration;
 use std::any::Any;
 use std::cell::Cell;
 use std::rc::Rc;
+use std::time::Duration;
 
 /// Base class for connected animation configurations that control the
 /// visual style and physics of the transition.
@@ -68,7 +68,7 @@ impl ConnectedAnimationConfiguration for GravityConnectedAnimationConfiguration 
 /// [`ConnectedAnimation`](super::ConnectedAnimation) before starting the
 /// return animation to animate back to the source view.
 pub struct DirectConnectedAnimationConfiguration {
-    duration: Cell<Option<SignedDuration>>,
+    duration: Cell<Option<Duration>>,
 }
 
 impl DirectConnectedAnimationConfiguration {
@@ -80,17 +80,17 @@ impl DirectConnectedAnimationConfiguration {
     /// Gets the duration of the animation. When `None`, the default duration
     /// of the [`ConnectedAnimationService`](super::ConnectedAnimationService)
     /// is used.
-    pub fn duration(&self) -> Option<SignedDuration> {
+    pub fn duration(&self) -> Option<Duration> {
         self.duration.get()
     }
 
     /// Sets the duration of the animation.
-    pub fn set_duration(&self, value: Option<SignedDuration>) {
+    pub fn set_duration(&self, value: Option<Duration>) {
         self.duration.set(value);
     }
 
     /// Sets [`duration`](Self::duration) and returns the configuration.
-    pub fn with_duration(self: Rc<Self>, value: Option<SignedDuration>) -> Rc<Self> {
+    pub fn with_duration(self: Rc<Self>, value: Option<Duration>) -> Rc<Self> {
         self.set_duration(value);
         self
     }

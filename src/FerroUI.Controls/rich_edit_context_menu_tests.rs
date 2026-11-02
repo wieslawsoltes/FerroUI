@@ -11,7 +11,6 @@ use crate::{
     Border, ContextMenu, ContextMenuEventArgs, Control, Flyout, FlyoutShowMode,
     PlacementMode, RichEditBox, StackPanel, Window,
 };
-use ferroui_base::animation::SignedDuration;
 use ferroui_base::input::platform::PlatformHotkeyConfiguration;
 use ferroui_base::input::text_input::{
     ITextInputMethodImpl, TextInputMethodClient, TextInputMethodConnection, TextInputOptions,
@@ -140,7 +139,7 @@ impl Fixture {
         let owner = RichEditBox::new();
         owner.set_template(Some(crate::rich_edit_box_tests::rich_edit_box_template()));
         owner.set_font_size(12.0);
-        owner.set_caret_blink_interval(SignedDuration::ZERO);
+        owner.set_caret_blink_interval(std::time::Duration::ZERO);
         owner.set_width(240.0);
         owner.set_height(100.0);
         owner.set_margin(Thickness::new(31.0, 19.0, 0.0, 0.0));

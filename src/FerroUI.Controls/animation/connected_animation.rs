@@ -70,7 +70,7 @@ ferroui_base::ferro_thread_local! {
 /// ([`ConnectedAnimation::resolve_timing_and_easing`]).
 #[derive(Clone)]
 pub(crate) struct ResolvedTiming {
-    pub(crate) duration: SignedDuration,
+    pub(crate) duration: Duration,
     pub(crate) easing: Easing,
     pub(crate) use_gravity_dip: bool,
     pub(crate) use_shadow: bool,
@@ -736,7 +736,7 @@ impl ConnectedAnimation {
         })));
 
         let animation = Animation::new();
-        animation.set_duration(duration);
+        animation.set_duration(SignedDuration::from(duration));
         animation.set_easing(LinearEasing::new());
         animation.set_fill_mode(FillMode::Forward);
         animation.children().add(KeyFrame::with_cue(
@@ -782,7 +782,7 @@ impl ConnectedAnimation {
         destination: &Ref<Visual>,
         coordinated_elements: &[Ref<Visual>],
         top_level: &TopLevel,
-        duration: SignedDuration,
+        duration: Duration,
         easing: Easing,
         use_gravity_dip: bool,
         use_shadow: bool,
@@ -859,7 +859,7 @@ impl ConnectedAnimation {
             let tcs = tcs.clone();
             move |_| {
                 let elapsed = (Dispatcher::ui_thread().now() - start_timestamp) as f64;
-                let progress = f64::min(1.0, elapsed / duration.total_milliseconds());
+                let progress = f64::min(1.0, elapsed / (duration.as_secs_f64() * 1000.0));
                 let ep = easing.ease(progress);
 
                 let bsx = sx + (1.0 - sx) * ep;
