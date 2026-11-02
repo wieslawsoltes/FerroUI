@@ -13,6 +13,7 @@ mod dispatcher_options;
 mod dispatcher_priority;
 mod dispatcher_priority_awaitable;
 mod dispatcher_priority_queue;
+mod dispatcher_spawn;
 mod dispatcher_task;
 mod dispatcher_queue;
 mod dispatcher_thread_storage;

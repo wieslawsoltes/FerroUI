@@ -1,8 +1,11 @@
-//! Tests of `task`: the executor of the crate (step A1 of phase C4 of #423,
+//! Tests of `task`: the executor of the crate (steps A1 and A2 of phase C4 of #423,
 //! docs/idiomatic-rust-async.md, section 3.1): spawning and polling, the reentrancy rule, wakes
 //! from other threads, schedules, aborts, panics, and the handles of tasks.
 
-use crate::task::{block_on, run_pending, set_thread_schedule, spawn_local, spawn_local_on, FirstPoll, JoinError, JoinHandle, Schedule};
+use crate::task::{
+    block_on, poll_now, run_pending, set_thread_schedule, spawn_local, spawn_local_on, spawn_on, try_id, AbortHandle, FirstPoll, JoinError,
+    JoinHandle, Schedule,
+};
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
 use std::future::Future;
@@ -545,5 +548,168 @@ fn a_closure_is_a_schedule() {
     for poll in polls {
         poll();
     }
+    assert!(handle.is_finished());
+}
+
+/// A schedule that keeps the abort handles of its tasks, as a dispatcher does.
+#[derive(Default)]
+struct TrackingSchedule {
+    queue: QueueSchedule,
+    spawned: Mutex<Vec<AbortHandle>>,
+}
+
+impl Schedule for TrackingSchedule {
+    fn schedule(&self, poll: Box<dyn FnOnce() + Send>) {
+        self.queue.schedule(poll);
+    }
+
+    fn spawned(&self, task: AbortHandle) {
+        self.spawned.lock().unwrap().push(task);
+    }
+}
+
+/// A schedule that aborts every task it is given.
+struct Refusing;
+
+impl Schedule for Refusing {
+    fn schedule(&self, _poll: Box<dyn FnOnce() + Send>) {}
+
+    fn spawned(&self, task: AbortHandle) {
+        task.abort();
+    }
+}
+
+#[test]
+fn a_schedule_is_told_of_its_tasks_and_can_abort_them() {
+    let schedule = Arc::new(TrackingSchedule::default());
+    let dropped = Rc::new(Cell::new(false));
+    let flag = DropFlag(dropped.clone());
+    let handle = spawn_local_on(
+        async move {
+            let _flag = flag;
+            std::future::pending::<()>().await;
+        },
+        schedule.clone(),
+        FirstPoll::Now,
+    );
+    let tasks = schedule.spawned.lock().unwrap().clone();
+    assert_eq!(tasks.len(), 1);
+    assert_eq!(tasks[0].id(), handle.id());
+    assert!(!tasks[0].is_finished());
+    tasks[0].abort();
+    assert!(dropped.get());
+    assert!(tasks[0].is_finished());
+    assert!(matches!(now_or_never(handle).unwrap(), Err(ref error) if error.is_canceled()));
+
+    // Aborted when the schedule is told of it: the future is never polled.
+    let refused = spawn_local_on(async { explode() }, Arc::new(Refusing), FirstPoll::Now);
+    assert_eq!(describe(&now_or_never(refused).unwrap()), "canceled");
+}
+
+#[test]
+fn spawn_on_makes_the_future_on_the_thread_of_the_schedule_and_polls_it_there() {
+    let schedule = Arc::new(TrackingSchedule::default());
+    let s = schedule.clone();
+    let handle = thread::spawn(move || {
+        spawn_on(
+            || {
+                // Not `Send`: made on the thread that runs the work of the schedule.
+                let made_on = Rc::new(thread::current().id());
+                async move { (*made_on, try_id()) }
+            },
+            s,
+        )
+    })
+    .join()
+    .unwrap();
+    assert!(!handle.is_finished());
+    assert_eq!(schedule.queue.len(), 1);
+    assert!(schedule.spawned.lock().unwrap().is_empty());
+
+    // The closure and the first poll run in that one piece of work.
+    schedule.queue.run_all();
+    let id = handle.id();
+    assert!(handle.is_finished());
+    assert_eq!(schedule.spawned.lock().unwrap().iter().map(AbortHandle::id).collect::<Vec<_>>(), [id]);
+    assert_eq!(now_or_never(handle).unwrap().unwrap(), (thread::current().id(), Some(id)));
+}
+
+#[test]
+fn a_task_of_spawn_on_is_canceled_when_its_first_work_is_dropped_or_it_is_aborted_before() {
+    let schedule = Arc::new(QueueSchedule::default());
+    let dropped = spawn_on(|| async { 1 }, schedule.clone());
+    let aborted = spawn_on(|| async { 2 }, schedule.clone());
+    aborted.abort();
+    assert!(!aborted.is_finished());
+    assert_eq!(schedule.len(), 2);
+
+    // A schedule that drops the work (a dispatcher that has shut down) cancels the task.
+    let mut polls = std::mem::take(&mut *schedule.polls.lock().unwrap());
+    drop(polls.pop_front());
+    assert_eq!(describe(&now_or_never(dropped).unwrap()), "canceled");
+    for poll in polls {
+        poll();
+    }
+    assert_eq!(describe(&now_or_never(aborted).unwrap()), "canceled");
+
+    // A panic of the closure faults the task.
+    let panicked = spawn_on(explode_closure, schedule.clone());
+    schedule.run_all();
+    let error = now_or_never(panicked).unwrap().unwrap_err();
+    assert_eq!(error.to_string(), "the task panicked: boom");
+}
+
+fn explode_closure() -> std::future::Ready<i32> {
+    panic!("boom")
+}
+
+#[test]
+fn try_id_is_the_task_being_polled_and_poll_now_polls_a_task_inside_the_caller() {
+    assert!(try_id().is_none());
+    let schedule = Arc::new(QueueSchedule::default());
+    let seen = Rc::new(RefCell::new(Vec::new()));
+    let gate = Gate::default();
+    let (s, g) = (seen.clone(), gate.clone());
+    let handle = spawn_local_on(
+        async move {
+            s.borrow_mut().push(try_id());
+            g.wait().await;
+            s.borrow_mut().push(try_id());
+        },
+        schedule.clone(),
+        FirstPoll::Now,
+    );
+    let id = handle.id();
+    assert_eq!(*seen.borrow(), [Some(id)]);
+    assert!(try_id().is_none());
+
+    // The wake queues a poll; `poll_now` polls the task inside this call instead.
+    gate.open();
+    assert_eq!(schedule.len(), 1);
+    assert!(poll_now(id));
+    assert!(handle.is_finished());
+    assert_eq!(*seen.borrow(), [Some(id), Some(id)]);
+    // The queued poll finds no task, and neither does `poll_now`.
+    schedule.run_all();
+    assert!(!poll_now(id));
+
+    // Inside its own poll, the task is marked and polled again through its schedule.
+    let mut polls = 0;
+    let handle = spawn_local_on(
+        std::future::poll_fn(move |_| {
+            polls += 1;
+            if polls == 1 {
+                assert!(poll_now(try_id().unwrap()));
+                Poll::Pending
+            } else {
+                Poll::Ready(())
+            }
+        }),
+        schedule.clone(),
+        FirstPoll::Now,
+    );
+    assert!(!handle.is_finished());
+    assert_eq!(schedule.len(), 1);
+    schedule.run_all();
     assert!(handle.is_finished());
 }
