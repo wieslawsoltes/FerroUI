@@ -441,22 +441,13 @@ impl Realm {
         self.handles.borrow_mut().clear();
         err
     }
-    fn read(&self, deadline: Instant) -> Result<Json, Error> {
+    fn exchange(&self, value: Json, deadline: Instant) -> Result<Json, Error> {
         let result = self
             .worker
             .borrow()
             .as_ref()
             .ok_or_else(|| Error::new("WebScene worker unavailable"))?
-            .read(deadline);
-        result.map_err(|e| self.poison(e))
-    }
-    fn send(&self, value: Json, deadline: Instant) -> Result<(), Error> {
-        let result = self
-            .worker
-            .borrow_mut()
-            .as_mut()
-            .ok_or_else(|| Error::new("WebScene worker unavailable"))?
-            .send(value, deadline);
+            .exchange(value, deadline);
         result.map_err(|e| self.poison(e))
     }
     fn ensure_worker(&self, deadline: Instant) -> Result<(), Error> {
@@ -471,8 +462,7 @@ impl Realm {
                 "await prepare_browser_instance before starting or replacing a QML browser realm",
             )
         })?;
-        *self.worker.borrow_mut() = Some(worker);
-        let hello = self.read(deadline)?;
+        let hello = worker.read(deadline).map_err(|e| self.poison(e))?;
         if hello["ready"] != true {
             return Err(self.poison(Error::new(
                 hello["failure"]
@@ -481,6 +471,7 @@ impl Realm {
             )));
         }
         self.reuse_descriptors.set(hello["evalCache"] == 1);
+        *self.worker.borrow_mut() = Some(worker);
         Ok(())
     }
 
@@ -528,13 +519,13 @@ impl Realm {
             }
         }
         let result = (|| {
-            if outer.is_some() {
-                self.send(json!({"nested":command}), deadline)?;
+            let mut outgoing = if outer.is_some() {
+                json!({"nested":command})
             } else {
-                self.send(command, deadline)?;
-            }
+                command
+            };
             loop {
-                let msg = self.read(deadline)?;
+                let msg = self.exchange(outgoing, deadline)?;
                 if let Some(error) = msg.get("failure") {
                     return Err(Error::new(format!("WebScene: {error}")));
                 }
@@ -564,11 +555,10 @@ impl Realm {
                 } else {
                     self.host(ctx, host)
                 };
-                let answer = match result {
+                outgoing = match result {
                     Ok(value) => json!({"ok":value}),
                     Err(e) => json!({"error":e.message}),
                 };
-                self.send(answer, deadline)?;
             }
         })();
         if outer.is_none() {

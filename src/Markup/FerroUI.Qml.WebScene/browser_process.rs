@@ -39,10 +39,11 @@ impl Worker {
             .map(Self)
             .map_err(error)
     }
-    pub(super) fn send(&self, msg: Json, deadline: Instant) -> Result<(), Error> {
+    pub(super) fn exchange(&self, msg: Json, deadline: Instant) -> Result<Json, Error> {
         let begin = msg.get("op").is_some();
         let text = serde_json::to_string(&msg).map_err(|e| Error::new(e.to_string()))?;
-        send_frame(&self.0, &text, begin, remaining(deadline)).map_err(error)
+        send_frame(&self.0, &text, begin, remaining(deadline)).map_err(error)?;
+        self.read(deadline)
     }
     pub(super) fn read(&self, deadline: Instant) -> Result<Json, Error> {
         let text = read_frame(&self.0, remaining(deadline)).map_err(error)?;

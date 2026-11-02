@@ -106,13 +106,12 @@ impl Supervisor {
         Ok(())
     }
 
-    fn exchange(&self, child: &process::Worker, message: Json) -> Result<(), Error> {
+    fn exchange(&self, child: &process::Worker, mut message: Json) -> Result<(), Error> {
         let deadline = Instant::now()
             .checked_add(self.timeout)
             .ok_or_else(|| Error::new("invalid worker deadline"))?;
-        child.send(message, deadline)?;
         loop {
-            let reply = child.read_cancellable(deadline, &self.cancelled)?;
+            let reply = child.exchange_cancellable(message, deadline, &self.cancelled)?;
             if let Some(reason) = reply["failure"].as_str() {
                 return Err(Error::new(reason));
             }
@@ -140,7 +139,7 @@ impl Supervisor {
                     None
                 }
             };
-            let reply = match sync {
+            message = match sync {
                 Some((ack, single)) => loop {
                     if self.cancelled.load(Ordering::Acquire) {
                         return Err(Error::new("WorkerScript stopped"));
@@ -168,7 +167,6 @@ impl Supervisor {
                 },
                 None => json!({"ok":true}),
             };
-            child.send(reply, deadline)?;
         }
     }
 }
