@@ -6,7 +6,9 @@ use crate::documents::{
     RichTextDocument, Span, TextElement, TextGravity, TextHighlightRegion,
     TextHighlighterCollection, TextPosition, Typography,
 };
-use crate::rich_text_layout::{RichTextBreak, RichTextLayout, RichTextLineMetrics, RichTextSource};
+use crate::rich_text_layout::{
+    RichTextBreak, RichTextLayout, RichTextLineMetrics, RichTextSource, SelectionOverlay,
+};
 use crate::{Border, Control, ControlImpl, RichTextBlockOverflow, TextBlock, TopLevel};
 use ferroui_base::collections::FerroList;
 use ferroui_base::controls::ResourceKey;
@@ -117,7 +119,8 @@ ferro_class! {
         fn default_incremental_tab(this, font_size: f64) -> f64;
         /// Shared origin for text, inline controls, caret, selection and hit testing.
         fn text_origin(this) -> Point;
-        /// Whether selection formatting is currently visible in this view.
+        /// Whether the selection is currently drawn in this view (its highlight, and the
+        /// selection foreground of the selected text).
         fn selection_is_visible(this) -> bool;
         /// The selection background after the host's focus policy is applied.
         fn selection_render_brush(this) -> Option<Rc<dyn IBrush>>;
@@ -188,11 +191,12 @@ impl FerroObjectImpl for RichTextBlock {
             | "LineHeight"
             | "LineStackingStrategy"
             | "TextIndent"
-            | "TextDecorations"
-            | "SelectionForegroundBrush"
-            | "SelectionHighlightColor"
-            | "IsTextSelectionEnabled" => {
+            | "TextDecorations" => {
                 this.invalidate_document_layout();
+            }
+            // The selection is drawn over the lines (#439): its brushes do not format the runs.
+            "SelectionForegroundBrush" | "SelectionHighlightColor" | "IsTextSelectionEnabled" => {
+                this.invalidate_selection_visual();
             }
             "TextLineBounds" => {
                 this.invalidate_document_layout();
@@ -261,7 +265,9 @@ impl VisualImpl for RichTextBlock {
 
 impl RichTextBlockImpl for RichTextBlock {
     fn render_text(this: &Self, context: &mut DrawingContext) {
-        this.page_layout().draw(context, this.text_origin());
+        let overlay = this.selected_text_overlay();
+        this.page_layout()
+            .draw_with_selection(context, this.text_origin(), overlay.as_ref());
     }
 
     fn caret_visible(_this: &Self) -> bool {
@@ -1306,14 +1312,9 @@ impl RichTextBlock {
             &String::new(),
             &self.selected_text(),
         );
-        if self.selection_foreground_brush().is_some()
-            || args.start != args.end
-            || args.old_start != args.old_end
-        {
-            self.invalidate_changed_paragraphs();
-        } else {
-            self.invalidate_visual();
-        }
+        // The selection is drawn over the lines (#439): a change of it keeps the source, the
+        // shaping caches and the lines of every paragraph, and only draws the view again.
+        self.invalidate_visual();
         for (_, handler) in self.selection_changed.snapshot().iter() {
             handler(args);
         }
@@ -1798,15 +1799,52 @@ impl RichTextBlock {
         self.source.borrow_mut().take();
         self.invalidate_layout();
     }
-    /// Rebuilds the formatter input after an edit of the document or a change of the selection:
-    /// the paragraphs that format as before keep their runs and shaping caches (F1, #243 review
-    /// S7), so a keystroke reshapes the paragraphs it changed, not the document.
+    /// Rebuilds the formatter input after an edit of the document: the paragraphs that format
+    /// as before keep their runs and shaping caches (F1, #243 review S7), so a keystroke
+    /// reshapes the paragraphs it changed, not the document.
     pub(crate) fn invalidate_changed_paragraphs(&self) {
         let stale = self.source.borrow_mut().take();
         if let Some(stale) = stale {
             *self.previous_source.borrow_mut() = Some(stale);
         }
         self.invalidate_layout();
+    }
+    /// Draws this view and the overflow views it continues into again after a change of how
+    /// the selection is drawn (its brushes, its visibility): the selection is drawn over the
+    /// lines (#439), so their source, shaping caches and lines stay. The selected text of an
+    /// overflow view is drawn with the brushes of the view whose source it shares.
+    pub(crate) fn invalidate_selection_visual(&self) {
+        self.invalidate_visual();
+        let mut target = self.overflow_content_target();
+        while let Some(view) = target {
+            view.invalidate_visual();
+            target = view.overflow_content_target();
+        }
+    }
+    /// How the selected text is drawn over the selection highlight (#439), or `None` when it is
+    /// drawn as the rest of the text. The view that built the source (the first of an overflow
+    /// chain) decides it; the highlight of each view is drawn with the view's own brush.
+    pub(crate) fn selected_text_overlay(&self) -> Option<SelectionOverlay> {
+        let start = self.selection_start();
+        let end = self.selection_end();
+        let range = start.min(end)..start.max(end);
+        if range.is_empty() {
+            return None;
+        }
+        let mut view = self.to_ref();
+        while let Some(parent) = view.previous_flow_parent() {
+            view = parent;
+        }
+        if !view.selection_is_visible() {
+            return None;
+        }
+        let foreground = view.selection_foreground_brush();
+        let hides_backgrounds = view.selection_render_brush().is_some();
+        (foreground.is_some() || hides_backgrounds).then_some(SelectionOverlay {
+            range,
+            foreground,
+            hides_backgrounds,
+        })
     }
     fn invalidate_layout(&self) {
         self.clear_page_layout();
