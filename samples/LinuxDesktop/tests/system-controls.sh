@@ -154,11 +154,17 @@ sleep .2; key Left
 wait_until volume_is 46
 sleep .3
 changed_from desktop quick-settings
-key Escape ctrl+shift+c
-sleep .6
-capture calendar
-changed_from desktop calendar
-changed_from quick-settings calendar
+# The window can present the previous scene after key delivery, especially
+# under synchronization validation. Ctrl+Shift+C selects Calendar from the
+# active panel directly and can be retried without toggling it closed.
+calendar_visible() {
+    capture calendar
+    if changed_from desktop calendar && changed_from quick-settings calendar; then return 0; fi
+    key ctrl+shift+c
+    return 1
+}
+key ctrl+shift+c
+wait_until calendar_visible
 # Move focus from the panel close button into Calendar. Page Down and Page Up
 # must repaint the month grid, then restore the previous month's rendering.
 key Tab; sleep .25; capture calendar-focused
@@ -179,10 +185,10 @@ appearance_is() {
 }
 for entry in '2 macos macos-control-center' '3 material material-quick-settings'; do
     read -r choice profile frame <<<"$entry"
-    key Escape ctrl+comma
+    key ctrl+comma
     key "$choice"
     wait_until appearance_is "$profile"
-    key Escape ctrl+shift+q
+    key ctrl+shift+q
     press_until w wifi_is false
     press_until w wifi_is true
     bluetooth_cycle "$frame"
