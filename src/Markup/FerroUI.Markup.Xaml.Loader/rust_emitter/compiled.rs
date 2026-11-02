@@ -29,6 +29,7 @@
 //! group and the class of a class document from the documents themselves,
 //! where a host with the run-time type system asks the run-time loader.
 
+use std::collections::HashMap;
 use std::rc::Rc;
 
 use xamlx::type_system::IXamlTypeSystem;
@@ -441,42 +442,43 @@ fn root_type_name(root: &std::rc::Rc<dyn xamlx::ast::IXamlAstNode>) -> Option<St
 ///
 /// Generated lines are counted from 1. The text is deterministic.
 pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
-    let mut entries: Vec<String> = Vec::new();
-    let mut document: Option<&str> = None;
-    // (first line, document line, document position) of the open range.
+    use std::fmt::Write as _;
+    let documents: HashMap<_, _> = functions.iter().map(|(function, name)| {
+        (function.as_str(), (name.as_str(), name.replace(['\r', '\n'], " ")))
+    }).collect();
+    let mut document = None;
+    let mut map = String::from("{\n  \"entries\": [\n");
+    let mut first_entry = true;
     let mut open: Option<(usize, i32, i32)> = None;
-    let close = |entries: &mut Vec<String>, open: &mut Option<(usize, i32, i32)>, document: &str, last: usize| {
+    let mut close = |open: &mut Option<(usize, i32, i32)>, document: &str, last: usize| {
         if let Some((first, line, position)) = open.take() {
-            entries.push(format!(
-                "    {{\"file_lines\": [{first}, {last}], \"document\": {}, \"line\": {line}, \"position\": {position}}}",
-                json_string(document)
-            ));
+            if !first_entry {
+                map.push_str(",\n");
+            }
+            first_entry = false;
+            write!(map, "    {{\"file_lines\": [{first}, {last}], \"document\": {}, \"line\": {line}, \"position\": {position}}}", json_string(document)).unwrap();
         }
     };
     for (index, text) in source.lines().enumerate() {
         let number = index + 1;
-        if let Some(name) = functions.iter().find_map(|(function, name)| {
-            let build = text
-                .strip_prefix("pub fn ")
-                .or_else(|| text.strip_prefix("pub(crate) fn "))
-                .and_then(|rest| rest.strip_prefix(function.as_str()));
-            let deferred = || {
-                let rest = text.strip_prefix("fn ")?.strip_prefix(function.as_str())?;
-                let rest = rest.strip_prefix("_deferred_").or_else(|| rest.strip_prefix("_part_"))?;
-                rest.trim_start_matches(|c: char| c.is_ascii_digit()).starts_with('(').then_some(rest)
-            };
-            build.filter(|rest| rest.starts_with('(')).or_else(deferred).map(|_| name)
-        }) {
-            document = Some(name);
+        let build = text.strip_prefix("pub fn ").or_else(|| text.strip_prefix("pub(crate) fn "))
+            .and_then(|rest| rest.split_once('(')).map(|(name, _)| name);
+        let helper = || {
+            let (name, _) = text.strip_prefix("fn ")?.split_once('(')?;
+            let (family, index) = name.rsplit_once('_')?;
+            if !index.bytes().all(|b| b.is_ascii_digit()) { return None; }
+            family.strip_suffix("_deferred").or_else(|| family.strip_suffix("_part"))
+        };
+        if let Some(info) = build.or_else(helper).and_then(|name| documents.get(name)) {
+            document = Some(info);
             continue;
         }
-        let Some(current) = document else { continue };
+        let Some((current, marker)) = document else { continue };
         if text == "}" {
-            close(&mut entries, &mut open, current, number - 1);
+            close(&mut open, current, number - 1);
             document = None;
             continue;
         }
-        let marker = current.replace(['\r', '\n'], " ");
         if let Some(rest) = text.trim_start().strip_prefix("// ").and_then(|rest| rest.strip_prefix(marker.as_str())) {
             let position = rest
                 .strip_prefix('(')
@@ -484,14 +486,12 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
                 .and_then(|(numbers, _)| numbers.split_once(','))
                 .and_then(|(line, position)| Some((line.parse::<i32>().ok()?, position.parse::<i32>().ok()?)));
             if let Some((line, position)) = position {
-                close(&mut entries, &mut open, current, number - 1);
+                close(&mut open, current, number - 1);
                 open = Some((number, line, position));
             }
         }
     }
-    let mut map = String::from("{\n  \"entries\": [\n");
-    map.push_str(&entries.join(",\n"));
-    if !entries.is_empty() {
+    if !first_entry {
         map.push('\n');
     }
     map.push_str("  ]\n}\n");
@@ -685,24 +685,29 @@ pub fn class_document_group(
         .iter()
         .position(|(name, _)| *name == class_document)
         .ok_or_else(|| format!("the document `{class_document}` of the class is not a document of the group"))?;
-    // The documents in the order they are found; a document is found once.
-    fn collect(documents: &[(&str, &str)], uris: &[Uri], index: usize, found: &mut Vec<usize>) {
-        for source in crate::back_end::include_sources(documents[index].1) {
+    let mut by_uri = HashMap::with_capacity(uris.len());
+    for (index, uri) in uris.iter().enumerate() {
+        by_uri.entry(uri.absolute_uri()).or_insert(index);
+    }
+    // Mark on visit so a diamond keeps depth-first source order. A repeated or cyclic
+    // include costs one lookup, and deeply nested dictionaries do not grow the call stack.
+    let mut visited = vec![false; uris.len()];
+    let mut found = Vec::new();
+    let mut pending = vec![start];
+    while let Some(index) = pending.pop() {
+        if std::mem::replace(&mut visited[index], true) { continue; }
+        found.push(index);
+        for source in crate::back_end::include_sources(documents[index].1).into_iter().rev() {
             let Some(relative) = Uri::try_create(&source, UriKind::RelativeOrAbsolute) else { continue };
             let included = match relative.is_absolute_uri() {
                 true => relative,
                 false => Uri::combine(&uris[index], &relative),
             };
-            let Some(next) = uris.iter().position(|uri| uri.absolute_uri() == included.absolute_uri()) else { continue };
-            if found.contains(&next) {
-                continue;
+            if let Some(&next) = by_uri.get(included.absolute_uri()) {
+                pending.push(next);
             }
-            found.push(next);
-            collect(documents, uris, next, found);
         }
     }
-    let mut found = vec![start];
-    collect(documents, &uris, start, &mut found);
     Ok(found
         .into_iter()
         .map(|index| (uris[index].absolute_path().trim_start_matches('/').to_string(), documents[index].1.to_string(), Some(uris[index].to_string())))
