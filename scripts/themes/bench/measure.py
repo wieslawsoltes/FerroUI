@@ -94,13 +94,44 @@ def measure_launches(executables, rounds):
     return samples
 
 
+def lld_sections(link_map, archive, executable):
+    # LLD prints input sections, including anonymous constants, unwind records and TLS.
+    # Restrict to SHF_ALLOC output sections. Padding and synthesized dynamic relocations
+    # belong to the linker and have no unique input crate.
+    report = command_output(["readelf", "-SW", str(executable)])
+    allocated = set(re.findall(r"^\s*\[\s*\d+\]\s+(\S+)\s+\S+\s+\w+\s+\w+\s+\w+\s+\w+\s+\S*A\S*\s", report, re.M))
+    sections = {}
+    output = None
+    with link_map.open() as stream:
+        for line in stream:
+            fields = line.split(maxsplit=4)
+            if len(fields) != 5:
+                continue
+            _, _, size, _, entry = fields
+            entry = entry.strip()
+            if entry in allocated:
+                output = entry
+            elif entry.startswith("."):
+                output = None
+            elif output and f"/{archive}(" in entry and "):(" in entry:
+                sections[output] = sections.get(output, 0) + int(size, 16)
+    if not sections:
+        raise ValueError(f"no allocated input sections from {archive} in {link_map}")
+    return sections
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=HERE.parents[2])
     parser.add_argument("--work-dir", type=Path, required=True, help="dedicated directory for the consumer, target and results")
     backend = parser.add_mutually_exclusive_group()
     backend.add_argument("--packed", action="store_true", help="embed the complete FXP theme archive")
+    backend.add_argument("--solid", action="store_true", help="embed the solid-compressed complete FXP archive")
     backend.add_argument("--binary", action="store_true", help="enable the theme's binary-resources feature")
+    parser.add_argument("--size-optimize-theme", action="store_true",
+                        help="compile just the WinUI crate with opt-level=z and one codegen unit")
+    parser.add_argument("--lld-link-map", action="store_true",
+                        help="measure allocated WinUI input sections with the ELF LLD linker")
     parser.add_argument("--rebuilds", type=int, default=1, help="number of dependency-warm theme rebuilds, zero to measure the initial build only")
     parser.add_argument("--launches", type=positive_int, default=15, help="number of measured, fresh-process launches")
     parser.add_argument("--compare-with", type=Path, action="append", default=[],
@@ -127,6 +158,8 @@ def main():
     )
     for name, path in deps.items():
         manifest += f'{name} = {{ path = {json.dumps(str(path))} }}\n'
+    if args.size_optimize_theme:
+        manifest += f'\n[profile.release.package."{THEME}"]\nopt-level = "z"\ncodegen-units = 1\n'
     (package / "Cargo.toml").write_text(manifest)
     shutil.copyfile(HERE / "winui.rs", package / "main.rs")
     # Cargo restricts this lock to the consumer's dependency graph on the first build.
@@ -134,7 +167,8 @@ def main():
     # The standalone shipping-dependency consumer uses Cargo's release profile at
     # opt-level 3, without cross-crate LTO. Stripping is a separate measured copy.
     env = {**os.environ, "CARGO_TARGET_DIR": str(target), "CARGO_INCREMENTAL": "0", "CARGO_PROFILE_RELEASE_LTO": "false"}
-    feature = "packed-theme" if args.packed else "binary-resources" if args.binary else None
+    packed = args.packed or args.solid
+    feature = "solid-theme" if args.solid else "packed-theme" if args.packed else "binary-resources" if args.binary else None
     cargo_args = ["--features", f"{THEME}/{feature}"] if feature else []
     first_build, messages = build(cargo_args, package, env)
     initial_units = cargo_timings(target)
@@ -150,10 +184,18 @@ def main():
     generated = out / "xaml"
     # Packed mode exports the same entry points from a handwritten adapter and emits no
     # per-document Rust module. Count its small generated registration module separately.
-    source_bytes = b"" if args.packed else (generated / "compiled_xaml.rs").read_bytes()
+    source_bytes = b"" if packed else (generated / "compiled_xaml.rs").read_bytes()
     # Earlier feature/root combinations can have left other blocks in OUT_DIR.
     # Only files included by this compiled consumer contribute to its payload.
     referenced = set(re.findall(rb'include_bytes!\("([a-zA-Z0-9_-]+\.fxb)"\)', source_bytes))
+    last_units = cargo_timings(target)
+    sections = None
+    if args.lld_link_map:
+        link_map = work / "consumer.link.map"
+        subprocess.run(["cargo", "rustc", "--locked", "--release", *cargo_args, "--bin", PROBE, "--",
+                        "-Clink-arg=-fuse-ld=lld", "-Clink-arg=-Wl,-Map," + str(link_map)],
+                       cwd=package, env=env, check=True)
+        sections = lld_sections(link_map, rlib.name, executable)
     stripped = work / "stripped-probe"
     shutil.copy2(executable, stripped)
     subprocess.run(["strip", str(stripped)], check=True)
@@ -170,12 +212,14 @@ def main():
         "source_dirty": bool(command_output(["git", "status", "--porcelain", "--untracked-files=no"], source)),
         "rustc": command_output(["rustc", "-vV"]), "cargo": command_output(["cargo", "-V"]),
         "platform": platform.platform(), "jobs": env.get("CARGO_BUILD_JOBS", "cargo default"),
-        "packed_theme": args.packed, "fxp_bytes": (out / "winui.fxp").stat().st_size if args.packed else 0,
+        "packed_theme": packed, "solid_theme": args.solid, "size_optimized_theme": args.size_optimize_theme,
+        "theme_allocated_sections": sections, "theme_allocated_bytes": sum(sections.values()) if sections else None,
+        "fxp_bytes": (out / "winui.fxp").stat().st_size if packed else 0,
         "generated_registration_rust_bytes": (generated / "mod.rs").stat().st_size,
         "binary_resources": args.binary, "resource_roots": env.get("FERROUI_WINUI_THEME_ROOTS"),
         "profile": "release, LTO off, incremental off", "initial_target_empty": target_was_empty,
         "initial_build_seconds": first_build, "theme_rebuild_seconds": rebuilds,
-        "initial_cargo_units": initial_units, "last_cargo_units": cargo_timings(target),
+        "initial_cargo_units": initial_units, "last_cargo_units": last_units,
         "generated_rust_bytes": len(source_bytes), "generated_rust_sha256": hashlib.sha256(source_bytes).hexdigest(),
         "theme_rlib_bytes": rlib.stat().st_size, "fxb_blocks": len(referenced),
         "fxb_bytes": sum((generated / name.decode("ascii")).stat().st_size for name in referenced),
