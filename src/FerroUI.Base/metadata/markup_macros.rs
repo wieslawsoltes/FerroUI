@@ -694,9 +694,15 @@ macro_rules! __ferro_markup_getter {
     };
     ($this:ty, $type_:ty; get: $get:expr $(, $($rest:tt)*)?) => {
         ::std::option::Option::Some(|arguments| {
-            let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 1)?;
-            let this = arguments.next::<$this>()?;
-            ::std::result::Result::Ok($crate::metadata::into_markup_value::<$type_>(($get)(&this)))
+            let [receiver] = arguments else {
+                return ::std::result::Result::Err($crate::metadata::MarkupInvokeError::ArgumentCount {
+                    expected: 1,
+                    actual: arguments.len(),
+                });
+            };
+            $crate::metadata::MarkupArguments::get::<$this>(receiver, |this| {
+                $crate::metadata::into_markup_value::<$type_>(($get)(this))
+            })
         })
     };
     ($this:ty, $type_:ty; try_get: $get:expr $(, $($rest:tt)*)?) => {
