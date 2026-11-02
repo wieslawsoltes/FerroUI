@@ -1,6 +1,6 @@
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTyped, XmlnsDefinition};
-use ferroui_base::{Ref, TypeInfo};
+use ferroui_base::TypeInfo;
 
 const NAMESPACES: &[(&str, &str)] = &[("ferroui_controls_livecharts", "FerroUI.LiveCharts")];
 pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
@@ -90,9 +90,9 @@ pub fn register_types() {
 }
 
 /// What the untyped value conversions must know: the children of a treemap node and the ends of a
-/// Sankey link are nullable, so a collection or a node converts to them (a null child list is a
-/// leaf).
+/// Sankey link are nullable, so a collection or a node object converts to them (a null child list
+/// is a leaf).
 fn register_value_types() {
     ValueTypes::register_nullable::<crate::TreemapNodes>();
-    ValueTypes::register_nullable::<Ref<crate::SankeyNode>>();
+    ValueTypes::register_object::<crate::SankeyNode>();
 }
