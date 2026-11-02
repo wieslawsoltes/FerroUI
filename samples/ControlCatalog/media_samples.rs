@@ -7,7 +7,7 @@ use ferroui_base::{
     instantiate,
     interactivity::InteractiveImpl,
     layout::LayoutableImpl,
-    media::{Stretch, TextWrapping, imaging::Bitmap},
+    media::{Color, Stretch, TextWrapping, imaging::Bitmap, immutable::ImmutableSolidColorBrush},
     reactive::Subscription,
     rendering::composition::{ElementComposition, ICompositionGpuInterop, frames::*},
     threading::{Dispatcher, DispatcherPriority, DispatcherTimer},
@@ -599,8 +599,16 @@ fn page(mode: Mode) -> Ref<Page> {
                 })));
         }
         state.video.set_are_transport_controls_enabled(true);
+        state
+            .video
+            .set_background(Some(Rc::new(ImmutableSolidColorBrush::new(
+                Color::from_rgb(0, 0, 0),
+            ))));
         state.video.set_height(320.);
         let placeholder = TextBlock::new();
+        placeholder.set_foreground(Some(Rc::new(ImmutableSolidColorBrush::new(
+            Color::from_rgb(190, 190, 190),
+        ))));
         placeholder.set_text(Some("Load a video to show its first frame."));
         state.video.set_placeholder(Some(placeholder.upcast()));
         state

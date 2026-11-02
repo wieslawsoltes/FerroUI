@@ -1,25 +1,94 @@
 use ferroui_base::{
+    CornerRadius, FerroObjectImpl, FerroObjectImplExt, Ref, RelativePoint, RelativeUnit, Size,
+    StyledElementImpl, Thickness, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
     ferro_class, ferro_class_info, ferro_impl_classes,
     input::InputElementImpl,
     instantiate,
     interactivity::InteractiveImpl,
-    layout::{LayoutableImpl, Orientation},
+    layout::{
+        HorizontalAlignment, LayoutableImpl, LayoutableImplExt, Orientation, VerticalAlignment,
+    },
+    media::immutable::ImmutableSolidColorBrush,
+    media::{
+        Color, FontFeatureCollection, GradientStop, IBrush, LinearGradientBrush, StreamGeometry,
+        TextTrimming, TextWrapping,
+    },
+    styling::ThemeVariant,
     threading::Dispatcher,
-    FerroObjectImpl, FerroObjectImplExt, Ref, StyledElementImpl, VisualImpl, VisualImplExt,
-    VisualTreeAttachmentEventArgs,
 };
 use ferroui_controls::{
-    automation::AutomationProperties, Button, ControlImpl, PanelImpl, Slider, StackPanel,
-    StackPanelImpl, TextBlock,
+    Border, Button, ColumnDefinitions, Control, ControlImpl, Grid, PanelImpl, PathIcon, Slider,
+    StackPanel, StackPanelImpl, TextBlock, ThemeVariantScope, ToolTip,
+    automation::AutomationProperties,
 };
 use ferroui_media_video::{
-    MediaFuture, MediaPlaybackState, MediaPlayer, MediaSubscription, WeakMediaPlayer,
+    MediaErrorKind, MediaFuture, MediaPlaybackState, MediaPlayer, MediaSubscription,
+    WeakMediaPlayer,
 };
 use std::{
     cell::{Cell, RefCell},
     rc::Rc,
     time::Duration,
 };
+
+const ACCENT: Color = Color::from_rgb(128, 197, 255);
+const PRIMARY: Color = Color::from_rgb(32, 109, 168);
+const PLAY: &str = "M6 3 L17 10 L6 17 Z";
+const PAUSE: &str = "M5 3 H8 V17 H5 Z M12 3 H15 V17 H12 Z";
+const STOP: &str = "M5 5 H15 V15 H5 Z";
+const SPEAKER: &str = "M2 7 H6 L11 3 V17 L6 13 H2 Z M13 6 V8 C15 9 15 11 13 12 V14 C18 12 18 8 13 6 Z M15 2 V4 C21 7 21 13 15 16 V18 C24 14 24 6 15 2 Z";
+const MUTED: &str = "M2 7 H6 L11 3 V17 L6 13 H2 Z M14 6 L16 8 L18 6 L19.5 7.5 L17.5 9.5 L19.5 11.5 L18 13 L16 11 L14 13 L12.5 11.5 L14.5 9.5 L12.5 7.5 Z";
+fn solid(color: Color) -> Rc<dyn IBrush> {
+    Rc::new(ImmutableSolidColorBrush::new(color))
+}
+fn set_icon(button: &Button, path: &str) {
+    let icon = PathIcon::new();
+    icon.set_width(18.);
+    icon.set_height(18.);
+    icon.set_data(Some(
+        StreamGeometry::parse(path)
+            .expect("media icon geometry")
+            .upcast::<ferroui_base::media::Geometry>(),
+    ));
+    icon.set_foreground(Some(solid(Color::from_rgb(255, 255, 255))));
+    button.set_content(Some(Control::boxed(icon)));
+}
+fn icon_button(name: &str, label: &str, path: &str, primary: bool) -> Ref<Button> {
+    let button = Button::new();
+    button.set_name(Some(name.into()));
+    button.set_width(40.);
+    button.set_height(40.);
+    button.set_min_width(0.);
+    button.set_min_height(0.);
+    button.set_padding(Thickness::uniform(0.));
+    button.set_corner_radius(CornerRadius::uniform(if primary { 20. } else { 10. }));
+    button.set_background(Some(solid(if primary {
+        PRIMARY
+    } else {
+        Color::from_argb(0, 0, 0, 0)
+    })));
+    button.set_border_thickness(Thickness::uniform(0.));
+    button.set_vertical_alignment(VerticalAlignment::Center);
+    button.set_horizontal_content_alignment(HorizontalAlignment::Center);
+    button.set_vertical_content_alignment(VerticalAlignment::Center);
+    AutomationProperties::set_name(&button, Some(label));
+    ToolTip::set_tip(&button, Some(Rc::new(label.to_owned())));
+    set_icon(&button, path);
+    button
+}
+fn clock_text(value: Duration) -> String {
+    let seconds = value.as_secs();
+    if seconds >= 3600 {
+        format!(
+            "{}:{:02}:{:02}",
+            seconds / 3600,
+            seconds / 60 % 60,
+            seconds % 60
+        )
+    } else {
+        format!("{}:{:02}", seconds / 60, seconds % 60)
+    }
+}
 #[repr(C)]
 pub struct MediaTransportControls {
     base: StackPanel,
@@ -31,6 +100,11 @@ pub struct MediaTransportControls {
     seek: RefCell<Option<Ref<Slider>>>,
     volume: RefCell<Option<Ref<Slider>>>,
     status: RefCell<Option<Ref<TextBlock>>>,
+    clock: RefCell<Option<Ref<TextBlock>>>,
+    error: RefCell<Option<Ref<TextBlock>>>,
+    playing_icon: Cell<bool>,
+    muted_icon: Cell<bool>,
+    command_generation: Cell<u64>,
     updating: Cell<bool>,
 }
 
@@ -40,6 +114,53 @@ mod option_tests {
     use ferroui_controls::testing::{TestServices, UnitTestApplication};
     use ferroui_media_video::{MediaPlayerProvider, MediaSource, NativeMediaSession};
     struct Unopened;
+    #[test]
+    fn overlay_stays_inside_player_and_aligns_visible_actions_at_multiple_widths() {
+        use ferroui_base::{Point, Rect, Size};
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let transport = MediaTransportControls::new();
+        for width in [160., 240., 320., 640., 960.] {
+            // Bounds determine compact visibility. Run the subsequent layout
+            // pass just as the layout manager does after a resize.
+            for _ in 0..2 {
+                transport.measure(Size::new(width, 200.));
+                transport.arrange(Rect::new(0., 0., width, transport.desired_size().height));
+            }
+            let seek = transport.seek.borrow().as_ref().unwrap().clone();
+            let origin = seek
+                .translate_point(Point::new(0., 0.), &transport)
+                .unwrap();
+            assert!(
+                origin.x >= 0. && origin.x + seek.bounds().width <= width,
+                "seek width {width}"
+            );
+            let mut centers = Vec::new();
+            for button in [&transport.play, &transport.stop, &transport.mute] {
+                let button = button.borrow().as_ref().unwrap().clone();
+                if !button.is_visible() {
+                    continue;
+                }
+                let origin = button
+                    .translate_point(Point::new(0., 0.), &transport)
+                    .unwrap();
+                assert!(
+                    origin.x >= 0. && origin.x + button.bounds().width <= width,
+                    "action width {width}"
+                );
+                centers.push(origin.y + button.bounds().height / 2.);
+            }
+            assert!(
+                centers.iter().all(|y| (*y - centers[0]).abs() < 0.01),
+                "baseline width {width}: {centers:?}"
+            );
+        }
+    }
+    #[test]
+    fn clock_formats_minutes_and_hours_without_decimal_jitter() {
+        assert_eq!(clock_text(Duration::from_millis(4999)), "0:04");
+        assert_eq!(clock_text(Duration::from_secs(65)), "1:05");
+        assert_eq!(clock_text(Duration::from_secs(3723)), "1:02:03");
+    }
     impl MediaPlayerProvider for Unopened {
         fn open(
             &self,
@@ -76,7 +197,24 @@ ferro_class!(MediaTransportControls:StackPanel);
 ferro_class_info!(MediaTransportControls {
     new: MediaTransportControls::new
 });
-ferro_impl_classes!(MediaTransportControls:StyledElementImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl,PanelImpl,StackPanelImpl);
+ferro_impl_classes!(MediaTransportControls:StyledElementImpl,InteractiveImpl,InputElementImpl,ControlImpl,PanelImpl,StackPanelImpl);
+impl LayoutableImpl for MediaTransportControls {
+    fn measure_override(this: &Self, available: Size) -> Size {
+        // Choose compact content from the parent's constraint before measuring.
+        // Waiting for Bounds would let an oversized auto row keep itself wide.
+        let width = available.width;
+        if let Some(status) = this.status.borrow().as_ref() {
+            status.set_is_visible(width >= 640.);
+        }
+        if let Some(volume) = this.volume.borrow().as_ref() {
+            volume.set_is_visible(width >= 500.);
+        }
+        if let Some(clock) = this.clock.borrow().as_ref() {
+            clock.set_is_visible(width >= 280.);
+        }
+        Self::parent_measure_override(this, available)
+    }
+}
 impl VisualImpl for MediaTransportControls {
     fn on_detached_from_visual_tree(this: &Self, args: &VisualTreeAttachmentEventArgs) {
         this.subscription.borrow_mut().take();
@@ -90,40 +228,111 @@ impl VisualImpl for MediaTransportControls {
 impl FerroObjectImpl for MediaTransportControls {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
-        this.set_orientation(Orientation::Horizontal);
-        this.set_spacing(8.);
-        let button = |label: &str| {
-            let b = Button::new();
-            b.set_content(Some(Rc::new(label.to_owned())));
-            AutomationProperties::set_name(&b, Some(label));
-            b
-        };
-        let play = button("Play");
-        let stop = button("Stop");
-        let mute = button("Mute");
+        this.set_orientation(Orientation::Vertical);
+        this.set_clip_to_bounds(true);
+        let play = icon_button("MediaPlayPause", "Play", PLAY, true);
+        let stop = icon_button("MediaStop", "Stop", STOP, false);
+        let mute = icon_button("MediaMute", "Mute", SPEAKER, false);
         let seek = Slider::new();
-        seek.set_width(200.);
+        seek.set_name(Some("MediaSeek".into()));
+        seek.set_height(24.);
+        seek.set_horizontal_alignment(HorizontalAlignment::Stretch);
+        seek.set_foreground(Some(solid(ACCENT)));
         seek.set_minimum(0.);
         seek.set_maximum(1.);
         AutomationProperties::set_name(&seek, Some("Playback position".into()));
         let volume = Slider::new();
-        volume.set_width(80.);
+        volume.set_name(Some("MediaVolume".into()));
+        volume.set_height(40.);
+        volume.set_vertical_alignment(VerticalAlignment::Center);
+        volume.set_foreground(Some(solid(ACCENT)));
         volume.set_minimum(0.);
         volume.set_maximum(1.);
         volume.set_range_value(1.);
         AutomationProperties::set_name(&volume, Some("Volume".into()));
         let status = TextBlock::new();
+        status.set_name(Some("MediaStatus".into()));
+        status.set_font_size(12.);
+        status.set_max_width(120.);
+        status.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+        status.set_foreground(Some(solid(Color::from_argb(210, 255, 255, 255))));
+        status.set_vertical_alignment(VerticalAlignment::Center);
+        status.set_margin(Thickness::new(8., 0., 12., 0.));
         status.set_text(Some("No media"));
-        for child in [
-            play.clone().upcast::<ferroui_controls::Control>(),
-            stop.clone().upcast::<ferroui_controls::Control>(),
-            seek.clone().upcast::<ferroui_controls::Control>(),
-            volume.clone().upcast::<ferroui_controls::Control>(),
-            mute.clone().upcast::<ferroui_controls::Control>(),
-            status.clone().upcast::<ferroui_controls::Control>(),
+        let clock = TextBlock::new();
+        clock.set_name(Some("MediaTime".into()));
+        clock.set_font_size(12.);
+        clock.set_max_width(126.);
+        clock.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+        clock.set_font_features(Some(FontFeatureCollection::parse("tnum").unwrap()));
+        clock.set_foreground(Some(solid(Color::from_rgb(255, 255, 255))));
+        clock.set_vertical_alignment(VerticalAlignment::Center);
+        clock.set_margin(Thickness::new(8., 0., 8., 0.));
+        let row = Grid::new();
+        row.set_column_definitions(
+            ColumnDefinitions::parse("44,Auto,Auto,*,Auto,40,Auto").unwrap(),
+        );
+        for (column, child) in [
+            (0, play.clone().upcast::<Control>()),
+            (1, stop.clone().upcast::<Control>()),
+            (2, clock.clone().upcast::<Control>()),
+            (4, status.clone().upcast::<Control>()),
+            (5, mute.clone().upcast::<Control>()),
+            (6, volume.clone().upcast::<Control>()),
         ] {
-            this.children().add(child);
+            Grid::set_column(&child, column);
+            row.children().add(child);
         }
+        volume.set_width(88.);
+        let chrome = StackPanel::new();
+        let error = TextBlock::new();
+        error.set_name(Some("MediaError".into()));
+        error.set_font_size(12.);
+        error.set_foreground(Some(solid(Color::from_rgb(255, 255, 255))));
+        error.set_text_wrapping(TextWrapping::Wrap);
+        error.set_max_height(80.);
+        error.set_margin(Thickness::new(0., 0., 0., 8.));
+        error.set_is_visible(false);
+        chrome.children().add(&error);
+        chrome.children().add(&seek);
+        chrome.children().add(&row);
+        let backdrop = Border::new();
+        backdrop.set_padding(Thickness::new(16., 16., 16., 12.));
+        let gradient = LinearGradientBrush::new();
+        gradient.set_start_point(RelativePoint::new(0., 0., RelativeUnit::Relative));
+        gradient.set_end_point(RelativePoint::new(0., 1., RelativeUnit::Relative));
+        for (alpha, offset) in [(0, 0.), (175, 0.45), (225, 1.)] {
+            gradient
+                .gradient_stops()
+                .add(GradientStop::with_color_and_offset(
+                    Color::from_argb(alpha, 8, 12, 18),
+                    offset,
+                ));
+        }
+        backdrop.set_background(Some(gradient.into()));
+        backdrop.set_child(Some(chrome.upcast()));
+        let scope = ThemeVariantScope::new();
+        scope.set_requested_theme_variant(Some(ThemeVariant::dark()));
+        // Keep the real themed Slider/Thumb and its focus, keyboard and pointer
+        // behavior, with smaller visual thumbs inside the full-height hit area.
+        for (name, value) in [
+            ("SliderHorizontalThumbWidth", 12.),
+            ("SliderHorizontalThumbHeight", 12.),
+            ("SliderInnerThumbWidth", 8.),
+            ("SliderInnerThumbHeight", 8.),
+            ("SliderTrackThemeHeight", 3.),
+        ] {
+            scope.resources().add_value(name, value);
+        }
+        for (name, color) in [
+            ("SliderThumbBackground", Color::from_rgb(255, 255, 255)),
+            ("SliderOuterThumbBackground", Color::from_argb(0, 0, 0, 0)),
+            ("SliderThumbBorderBrush", Color::from_argb(0, 0, 0, 0)),
+        ] {
+            scope.resources().add(name, Some(Rc::new(solid(color))));
+        }
+        scope.set_child(Some(backdrop.upcast()));
+        this.children().add(scope);
         let weak = this.to_ref().downgrade();
         play.click(move |_, _| {
             if let Some(view) = weak.upgrade() {
@@ -198,6 +407,8 @@ impl FerroObjectImpl for MediaTransportControls {
         *this.seek.borrow_mut() = Some(seek);
         *this.volume.borrow_mut() = Some(volume);
         *this.status.borrow_mut() = Some(status);
+        *this.clock.borrow_mut() = Some(clock);
+        *this.error.borrow_mut() = Some(error);
         this.refresh();
     }
 }
@@ -213,6 +424,11 @@ impl MediaTransportControls {
             seek: RefCell::new(None),
             volume: RefCell::new(None),
             status: RefCell::new(None),
+            clock: RefCell::new(None),
+            error: RefCell::new(None),
+            playing_icon: Cell::new(false),
+            muted_icon: Cell::new(false),
+            command_generation: Cell::new(0),
             updating: Cell::new(false),
         }
     }
@@ -220,6 +436,9 @@ impl MediaTransportControls {
         instantiate(Self::construct())
     }
     pub fn set_media_player(&self, player: Option<&MediaPlayer>) {
+        self.command_generation
+            .set(self.command_generation.get().wrapping_add(1));
+        self.clear_error();
         self.subscription.borrow_mut().take();
         *self.player.borrow_mut() = player.as_ref().map(|p| p.downgrade());
         self.subscribe();
@@ -240,18 +459,34 @@ impl MediaTransportControls {
         }
     }
     fn command(&self, task: MediaFuture<()>) {
+        let generation = self.command_generation.get().wrapping_add(1);
+        self.command_generation.set(generation);
         let weak = self.to_ref().downgrade();
         Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            if let Err(error) = task.await {
-                if let Some(view) = weak.upgrade() {
-                    view.show_error(&error.to_string());
+            let result = task.await;
+            if let Some(view) = weak
+                .upgrade()
+                .filter(|v| v.command_generation.get() == generation)
+            {
+                match result {
+                    Err(error) if error.kind == MediaErrorKind::Cancelled => {}
+                    Err(error) => view.show_error(&error.to_string()),
+                    Ok(()) => view.clear_error(),
                 }
             }
         });
     }
     fn show_error(&self, error: &str) {
-        if let Some(status) = self.status.borrow().as_ref() {
-            status.set_text(Some(error));
+        if let Some(label) = self.error.borrow().as_ref() {
+            label.set_text(Some(error));
+            label.set_is_visible(true);
+            ToolTip::set_tip(label, Some(Rc::new(error.to_owned())));
+        }
+    }
+    fn clear_error(&self) {
+        if let Some(label) = self.error.borrow().as_ref() {
+            label.set_is_visible(false);
+            label.set_text(None);
         }
     }
     pub fn refresh(&self) {
@@ -271,7 +506,11 @@ impl MediaTransportControls {
             } else {
                 "Play"
             };
-            play.set_content(Some(Rc::new(label.to_owned())));
+            let playing = state.state == MediaPlaybackState::Playing;
+            if self.playing_icon.replace(playing) != playing {
+                set_icon(play, if playing { PAUSE } else { PLAY });
+                ToolTip::set_tip(play, Some(Rc::new(label.to_owned())));
+            }
             AutomationProperties::set_name(play, Some(label.into()));
             play.set_is_enabled(enabled);
         }
@@ -296,17 +535,40 @@ impl MediaTransportControls {
             }
             if let Some(mute) = self.mute.borrow().as_ref() {
                 let label = if options.muted { "Unmute" } else { "Mute" };
-                mute.set_content(Some(Rc::new(label.to_owned())));
+                if self.muted_icon.replace(options.muted) != options.muted {
+                    set_icon(mute, if options.muted { MUTED } else { SPEAKER });
+                    ToolTip::set_tip(mute, Some(Rc::new(label.to_owned())));
+                }
                 AutomationProperties::set_name(mute, Some(label.into()));
             }
         }
+        if let Some(error) = state.error {
+            self.show_error(&error.to_string());
+        }
         if let Some(status) = self.status.borrow().as_ref() {
-            let text = if let Some(error) = state.error {
-                error.to_string()
-            } else {
-                format!("{:?} · {:.1}s", state.state, state.position.as_secs_f64())
+            let text = {
+                match state.state {
+                    MediaPlaybackState::Closed => "No media",
+                    MediaPlaybackState::Opening => "Loading",
+                    MediaPlaybackState::Buffering => "Buffering",
+                    MediaPlaybackState::Playing => "Playing",
+                    MediaPlaybackState::Paused => "Paused",
+                    MediaPlaybackState::Ended => "Ended",
+                    MediaPlaybackState::Failed => "Unavailable",
+                }
+                .to_owned()
             };
             status.set_text(Some(&text));
+        }
+        if let Some(clock) = self.clock.borrow().as_ref() {
+            clock.set_text(Some(&format!(
+                "{} / {}",
+                clock_text(state.position),
+                state
+                    .duration
+                    .map(clock_text)
+                    .unwrap_or_else(|| "--:--".into())
+            )));
         }
         self.updating.set(false);
     }

@@ -33,7 +33,7 @@ const page = drive(await open(site, {
     query: "?RenderingMode=WebGL2&Threads=false&RenderThread=false",
     width: 1100, height: 1000, network: true,
     angle: process.env.FERROUI_BROWSER_ANGLE ?? "metal", initScript,
-    chromeArgs: ["--use-fake-device-for-media-stream"],
+    chromeArgs: ["--use-fake-device-for-media-stream", "--mute-audio"],
 }));
 const state = () => page.evaluate("JSON.parse(controlCatalog.catalogMediaState())");
 async function until(predicate, description) {
@@ -72,12 +72,13 @@ try {
     assert.ok(Math.abs(native.duration - 12) < 0.1);
     assert.equal(new URL(native.src).origin, new URL(page.url).origin);
     assert.ok(native.src.endsWith("/media/sintel-sample.mp4"), "use native URL loading, not a fetched byte/blob copy");
-    await click("Play");
+    await page.clickElement(await page.element("Play transport button", e => e.name === "MediaPlayPause" && inContent(e)));
     const playing = await until(s => s?.playing && s.imports > 1, "native playback and GPU presentation");
     assert.equal(playing.previewAttempts, 0);
     assert.equal(playing.previewBytes, 0);
     console.log("CATALOG_BROWSER_VIDEO_PASS", JSON.stringify(playing));
     if (process.env.FERROUI_CATALOG_MEDIA_SCREENSHOT) {
+        await sleep(1200);
         const picture = await page.send("Page.captureScreenshot", { format: "png" });
         fs.writeFileSync(process.env.FERROUI_CATALOG_MEDIA_SCREENSHOT, Buffer.from(picture.data, "base64"));
     }

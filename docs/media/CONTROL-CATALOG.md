@@ -85,6 +85,38 @@ The fixture test checks both expected payloads. Screenshots exercise the idle
 pages without starting capture. The native smoke proves playback rendering and
 retirement separately; idle screenshots alone are not that evidence.
 
+## Reusable video overlay
+
+`MediaTransportControls` now presents a full-width timeline above an aligned
+row of vector play/pause, stop and mute buttons, tabular elapsed/total time,
+playback status and volume. Its dark gradient scrim stays inside the player;
+the catalog supplies a black stage for aspect-fit letterboxing. This is native
+composited UI, not a generated bitmap or a browser video-control overlay.
+
+Play/Pause, Stop and Mute remain visible at small widths. Clock, volume and
+status progressively collapse when space is insufficient. A constraint-based
+layout test checks 160, 240, 320, 640 and 960 unit widths, actual action bounds
+and common vertical centers. A separate test checks minute/hour time formatting.
+Errors have a wrapping row so compact mode does not hide failures. Canceled or
+superseded command completions cannot replace a newer command's error state.
+
+The controls retain the framework's themed Button/Slider interaction, native
+accessibility names, tooltips, focus and keyboard behavior. Named visual parts
+include `MediaPlayPause`, `MediaStop`, `MediaMute`, `MediaSeek`, `MediaVolume`,
+`MediaTime`, `MediaStatus` and `MediaError`. Status text is no longer appended to
+the timestamp. Unsupported fullscreen/settings/subtitle actions are not shown.
+
+The 12 video-control unit tests pass, including player ownership/source ordering,
+option synchronization and responsive overlay layout. A native Metal replay
+passes `MACOS_TRANSPORT_AX_PASS` and `MACOS_TRANSPORT_KEYBOARD_PASS` with three
+named buttons and two sliders; actual Space, seeking, volume and Stop/zero-frame
+actions still reach the player. The real browser media smoke also passes after
+switching from text-button lookup to its stable named play control. These checks
+do not replace a full VoiceOver or high-contrast review.
+
+The catalog camera's 30 fps boundary fix has separate native regression evidence
+in [macOS verification](MACOS-VERIFICATION.md#catalog-camera-frame-rate-boundary-regression).
+
 ## Reproduce the browser check
 
 Activate the repository's Emscripten/wasm-bindgen toolchain, then:

@@ -68,9 +68,11 @@ ferro_properties! {impl MediaPlayerElement {
 impl FerroObjectImpl for MediaPlayerElement {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
+        this.set_clip_to_bounds(true);
         let presenter = TexturePresenter::new();
         let chrome = MediaTransportControls::new();
         chrome.set_vertical_alignment(VerticalAlignment::Bottom);
+        chrome.set_horizontal_alignment(ferroui_base::layout::HorizontalAlignment::Stretch);
         chrome.set_is_visible(false);
         let placeholder = TextBlock::new();
         placeholder.set_text(Some("No media"));
