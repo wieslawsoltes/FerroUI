@@ -11,11 +11,10 @@ use std::time::{Duration, Instant};
 
 use super::dispatcher_tests_exception::{message_of, DispatcherTests};
 use super::{
-    CancellationToken, CancellationTokenSource, Dispatcher, DispatcherFrame, DispatcherImplEvent, DispatcherOperation,
+    CancellationToken, Canceled, Dispatcher, DispatcherFrame, DispatcherImplEvent, DispatcherOperation,
     DispatcherInvokeError, DispatcherOperationStatus, DispatcherPriority, DispatcherTask, DispatcherTaskScheduler,
     DispatcherTimer, FerroSynchronizationContext, IControlledDispatcherImpl, IDispatcher, IDispatcherImpl,
     IDispatcherImplWithExplicitBackgroundProcessing, IDispatcherImplWithPendingInput, IDispatcherSignal,
-    OperationCanceledError,
 };
 use crate::platform::ManagedDispatcherImpl;
 use ferroui_system::task::{JoinError, JoinHandle};
@@ -213,7 +212,7 @@ impl IControlledDispatcherImpl for SimpleDispatcherImpl {
     fn run_loop(&self, token: CancellationToken) {
         self.state.lock().unwrap().run_loop_count += 1;
         let st = Instant::now();
-        while !token.is_cancellation_requested() {
+        while !token.is_cancelled() {
             self.fire_background_processing();
             self.execute_signal();
             assert!(st.elapsed() < Duration::from_millis(4000), "run_loop exceeded test time quota");
@@ -231,8 +230,8 @@ fn add(actions: &Rc<RefCell<Vec<String>>>, name: &'static str) -> impl FnOnce() 
 }
 
 /// Cancels the returned source after `timeout`, as a safety net for loops.
-fn cancel_after(timeout: Duration) -> CancellationTokenSource {
-    let source = CancellationTokenSource::new();
+fn cancel_after(timeout: Duration) -> CancellationToken {
+    let source = CancellationToken::new();
     let to_cancel = source.clone();
     thread::spawn(move || {
         thread::sleep(timeout);
@@ -536,7 +535,7 @@ fn exit_all_frames_should_exit_all_frames_and_be_able_to_continue() {
     assert_eq!(names(&actions), ["Nested frame", "ExitAllFrames", "Nested frame exited"]);
     actions.borrow_mut().clear();
 
-    let second_loop = CancellationTokenSource::new();
+    let second_loop = CancellationToken::new();
     {
         let actions = actions.clone();
         let second_loop = second_loop.clone();
@@ -548,7 +547,7 @@ fn exit_all_frames_should_exit_all_frames_and_be_able_to_continue() {
             DispatcherPriority::DEFAULT,
         );
     }
-    disp.main_loop(&second_loop.token());
+    disp.main_loop(&second_loop);
     assert_eq!(names(&actions), ["Callback after exit"]);
 }
 
@@ -710,7 +709,7 @@ fn shutdown_from_operation_aborts_queued_operations_without_running_them(kind: T
 
     if disp.supports_run_loops() {
         let timeout = cancel_after(Duration::from_secs(5));
-        disp.main_loop(&timeout.token());
+        disp.main_loop(&timeout);
     } else {
         let TestImpl::Simple(simple) = &impl_ else { unreachable!() };
         assert!(simple.asked_for_signal());
@@ -720,7 +719,7 @@ fn shutdown_from_operation_aborts_queued_operations_without_running_them(kind: T
     assert_eq!(names(&actions), ["op1", "ShutdownFinished"]);
     assert_eq!(op1.status(), DispatcherOperationStatus::Completed);
     assert_eq!(op2.status(), DispatcherOperationStatus::Aborted);
-    assert_eq!(op2.wait(), Err(OperationCanceledError));
+    assert_eq!(op2.wait(), Err(Canceled));
 }
 
 #[test]
@@ -810,7 +809,7 @@ fn operations_are_only_aborted_after_last_frame_exits(kind: TestDispatcherImplKi
     });
 
     let timeout = cancel_after(Duration::from_secs(5));
-    disp.main_loop(&timeout.token());
+    disp.main_loop(&timeout);
 
     assert_eq!(names(&actions), ["op1", "op2", "invoke", "op3", "ShutdownFinished"]);
     assert_eq!(op4.borrow().as_ref().unwrap().status(), DispatcherOperationStatus::Aborted);
@@ -951,7 +950,7 @@ fn invoke_from_another_thread_blocks_until_the_dispatcher_ran_the_callback() {
     let t = DispatcherTests::new();
     let dispatcher = t.ui_thread.clone();
     let ui_thread_id = thread::current().id();
-    let done = CancellationTokenSource::new();
+    let done = CancellationToken::new();
     let finish = done.clone();
     let worker = thread::spawn(move || {
         let result = dispatcher.invoke(move || (thread::current().id(), 42)).unwrap();
@@ -963,8 +962,8 @@ fn invoke_from_another_thread_blocks_until_the_dispatcher_ran_the_callback() {
 
     let timeout = cancel_after(Duration::from_secs(10));
     let stop = timeout.clone();
-    done.token().register(move || stop.cancel());
-    t.ui_thread.main_loop(&timeout.token());
+    done.register(move || stop.cancel()).detach();
+    t.ui_thread.main_loop(&timeout);
 
     let ((ran_on, value), async_result) = worker.join().unwrap();
     assert_eq!(ran_on, ui_thread_id);
@@ -1000,21 +999,21 @@ fn invoke_on_the_dispatcher_thread_at_send_priority_runs_inline() {
 #[test]
 fn invoke_with_canceled_token_does_not_run() {
     let t = DispatcherTests::new();
-    let source = CancellationTokenSource::new();
+    let source = CancellationToken::new();
     source.cancel();
     let ran = Arc::new(AtomicBool::new(false));
     let r = ran.clone();
     let result = t.ui_thread.invoke_with_cancellation(
         move || r.store(true, Ordering::SeqCst),
         DispatcherPriority::SEND,
-        &source.token(),
+        &source,
     );
-    assert_eq!(result, Err(OperationCanceledError));
+    assert_eq!(result, Err(Canceled));
     let r = ran.clone();
     let op = t.ui_thread.invoke_async_with_cancellation(
         move || r.store(true, Ordering::SeqCst),
         DispatcherPriority::NORMAL,
-        &source.token(),
+        &source,
     );
     assert_eq!(op.status(), DispatcherOperationStatus::Aborted);
     t.ui_thread.run_jobs(None);
@@ -1024,12 +1023,12 @@ fn invoke_with_canceled_token_does_not_run() {
 #[test]
 fn cancellation_aborts_a_pending_operation() {
     let t = DispatcherTests::new();
-    let source = CancellationTokenSource::new();
+    let source = CancellationToken::new();
     let ran = Rc::new(Cell::new(false));
     let aborted = Arc::new(AtomicBool::new(false));
     let r = ran.clone();
     let op =
-        t.ui_thread.invoke_async_local_with_cancellation(move || r.set(true), DispatcherPriority::NORMAL, &source.token());
+        t.ui_thread.invoke_async_local_with_cancellation(move || r.set(true), DispatcherPriority::NORMAL, &source);
     let a = aborted.clone();
     op.aborted(move || a.store(true, Ordering::SeqCst));
     assert_eq!(op.status(), DispatcherOperationStatus::Pending);
@@ -1040,7 +1039,7 @@ fn cancellation_aborts_a_pending_operation() {
     assert!(!op.abort());
     t.ui_thread.run_jobs(None);
     assert!(!ran.get());
-    assert_eq!(op.result(), Err(OperationCanceledError));
+    assert_eq!(op.result(), Err(Canceled));
 }
 
 #[test]
@@ -1134,7 +1133,7 @@ fn dispatcher_operation_is_a_future() {
     assert!(poll_once(&mut aborted, &waker).is_pending());
     aborted.abort();
     assert_eq!(waker.wakes.load(Ordering::SeqCst), 2);
-    assert_eq!(poll_once(&mut aborted, &waker), Poll::Ready(Err(OperationCanceledError)));
+    assert_eq!(poll_once(&mut aborted, &waker), Poll::Ready(Err(Canceled)));
 
     let mut panicking = t.ui_thread.invoke_async(|| panic!("boom"));
     t.ui_thread.run_jobs(None);
@@ -1147,7 +1146,7 @@ fn dispatcher_resume_continues_on_dispatcher_thread() {
     let _t = DispatcherTests::new();
     let _services = DispatcherServices::new(SimpleDispatcherImpl::new(SimpleKind::Controlled));
     let dispatcher = Dispatcher::current_dispatcher();
-    let token_source = CancellationTokenSource::new();
+    let token_source = CancellationToken::new();
 
     let waker = CountingWaker::new();
     let stop = token_source.clone();
@@ -1165,7 +1164,7 @@ fn dispatcher_resume_continues_on_dispatcher_thread() {
     assert_eq!(waker.wakes.load(Ordering::SeqCst), 0);
 
     // ...and resumed from the dispatcher thread.
-    dispatcher.main_loop(&token_source.token());
+    dispatcher.main_loop(&token_source);
     assert_eq!(waker.wakes.load(Ordering::SeqCst), 1);
     assert_eq!(*waker.woken_on.lock().unwrap(), Some(thread::current().id()));
     assert!(poll_once(&mut awaitable, &waker).is_ready());
@@ -1371,7 +1370,7 @@ fn shutdown_events_are_raised_once_each() {
     // Nothing can be queued anymore.
     let late = t.ui_thread.invoke_async(|| ());
     assert_eq!(late.status(), DispatcherOperationStatus::Aborted);
-    assert_eq!(t.ui_thread.invoke_local_with_priority(|| 1, DispatcherPriority::NORMAL), Err(OperationCanceledError));
+    assert_eq!(t.ui_thread.invoke_local_with_priority(|| 1, DispatcherPriority::NORMAL), Err(Canceled));
     t.ui_thread.invoke_shutdown();
     assert_eq!(names(&events), ["started", "finished"]);
 }
@@ -1393,8 +1392,8 @@ fn operations_queued_on_an_exited_thread_are_aborted() {
 
     // The thread is gone: waiting must not block forever.
     assert_eq!(op.status(), DispatcherOperationStatus::Aborted);
-    assert_eq!(op.result(), Err(OperationCanceledError));
-    assert_eq!(dispatcher.invoke_async(|| 2).result(), Err(OperationCanceledError));
+    assert_eq!(op.result(), Err(Canceled));
+    assert_eq!(dispatcher.invoke_async(|| 2).result(), Err(Canceled));
     assert!(Dispatcher::from_thread(dispatcher.thread()).is_some());
 }
 
@@ -1437,7 +1436,6 @@ fn handles_are_thread_safe() {
     assert_send_sync::<DispatcherFrame>();
     assert_send_sync::<DispatcherOperation<i32>>();
     assert_send_sync::<CancellationToken>();
-    assert_send_sync::<CancellationTokenSource>();
     assert_send_sync::<DispatcherTask<i32>>();
     assert_send_sync::<FerroSynchronizationContext>();
     assert_send_sync::<DispatcherTaskScheduler>();
@@ -1644,7 +1642,7 @@ fn dispatcher_invoke_async_unwraps_tasks() {
     let t = Dispatcher::ui_thread().to_task_scheduler().spawn_local(test);
     assert!(!t.is_completed());
     let cts = cancel_after(Duration::from_secs(3));
-    Dispatcher::ui_thread().main_loop(&cts.token());
+    Dispatcher::ui_thread().main_loop(&cts);
     assert!(t.is_completed_successfully());
     t.result().unwrap();
 }
@@ -1654,7 +1652,7 @@ fn dispatcher_resume_continues_on_current_thread() {
     let _t = DispatcherTests::new();
     let _services = DispatcherServices::new(SimpleDispatcherImpl::new(SimpleKind::Controlled));
 
-    let token_source = CancellationTokenSource::new();
+    let token_source = CancellationToken::new();
     let dispatcher = Dispatcher::current_dispatcher();
 
     let d = dispatcher.clone();
@@ -1679,8 +1677,8 @@ fn dispatcher_resume_continues_on_current_thread() {
 
     let timeout = cancel_after(Duration::from_secs(5));
     let stop = token_source.clone();
-    timeout.token().register(move || stop.cancel());
-    dispatcher.main_loop(&token_source.token());
+    timeout.register(move || stop.cancel()).detach();
+    dispatcher.main_loop(&token_source);
     assert!(workload.is_completed_successfully());
 }
 
@@ -1689,7 +1687,7 @@ fn dispatcher_yield_continues_on_current_thread_in_a_task() {
     let _t = DispatcherTests::new();
     let _services = DispatcherServices::new(SimpleDispatcherImpl::new(SimpleKind::Controlled));
 
-    let token_source = CancellationTokenSource::new();
+    let token_source = CancellationToken::new();
     let dispatcher = Dispatcher::current_dispatcher();
     let order = Rc::new(RefCell::new(Vec::new()));
 
@@ -1709,7 +1707,7 @@ fn dispatcher_yield_continues_on_current_thread_in_a_task() {
         stop.cancel();
     });
 
-    dispatcher.main_loop(&token_source.token());
+    dispatcher.main_loop(&token_source);
     assert!(workload.is_completed_successfully());
     assert_eq!(names(&order), ["posted", "resumed"]);
 }
@@ -1719,7 +1717,7 @@ fn await_with_priority_runs_on_current_thread() {
     let _t = DispatcherTests::new();
     let _services = DispatcherServices::new(SimpleDispatcherImpl::new(SimpleKind::Controlled));
 
-    let token_source = CancellationTokenSource::new();
+    let token_source = CancellationToken::new();
     let dispatcher = Dispatcher::current_dispatcher();
 
     let d = dispatcher.clone();
@@ -1759,8 +1757,8 @@ fn await_with_priority_runs_on_current_thread() {
 
     let timeout = cancel_after(Duration::from_secs(5));
     let stop = token_source.clone();
-    timeout.token().register(move || stop.cancel());
-    dispatcher.main_loop(&token_source.token());
+    timeout.register(move || stop.cancel()).detach();
+    dispatcher.main_loop(&token_source);
     assert!(workload.is_completed_successfully());
     // A result that is not `Send` is read on the dispatcher thread.
     assert_ne!(*workload.result().unwrap(), thread::current().id());
@@ -1873,7 +1871,7 @@ fn synchronization_context_post_and_send() {
 
     // From another thread `send` queues at the context's priority and waits.
     let ui_thread_id = thread::current().id();
-    let done = CancellationTokenSource::new();
+    let done = CancellationToken::new();
     let finish = done.clone();
     let c = context.clone();
     let posted = Arc::new(Mutex::new(None));
@@ -1894,8 +1892,8 @@ fn synchronization_context_post_and_send() {
     });
     let timeout = cancel_after(Duration::from_secs(10));
     let stop = timeout.clone();
-    done.token().register(move || stop.cancel());
-    t.ui_thread.main_loop(&timeout.token());
+    done.register(move || stop.cancel()).detach();
+    t.ui_thread.main_loop(&timeout);
     assert_eq!(worker.join().unwrap(), Some((ui_thread_id, DispatcherPriority::BACKGROUND)));
     assert_eq!(*posted.lock().unwrap(), Some((ui_thread_id, DispatcherPriority::BACKGROUND)));
 }
@@ -1984,11 +1982,11 @@ fn invoke_async_task_outcomes() {
     // Shutting the dispatcher down cancels what is still running...
     t.ui_thread.invoke_shutdown();
     assert!(stuck.is_canceled());
-    assert_eq!(stuck.wait(), Err(OperationCanceledError));
+    assert_eq!(stuck.wait(), Err(Canceled));
     // ...and what can no longer start.
     let late = t.ui_thread.invoke_async_task(|| async { 1 });
     assert!(late.is_canceled());
-    assert_eq!(late.result(), Err(OperationCanceledError));
+    assert_eq!(late.result(), Err(Canceled));
     assert!(t.ui_thread.try_local().unwrap().tasks.borrow().is_empty());
 }
 
@@ -1997,7 +1995,7 @@ fn invoke_async_task_from_another_thread() {
     let t = DispatcherTests::new();
     let dispatcher = t.ui_thread.clone();
     let ui_thread_id = thread::current().id();
-    let done = CancellationTokenSource::new();
+    let done = CancellationToken::new();
     let finish = done.clone();
     let worker = thread::spawn(move || {
         let task = dispatcher.invoke_async_task(|| async {
@@ -2014,8 +2012,8 @@ fn invoke_async_task_from_another_thread() {
 
     let timeout = cancel_after(Duration::from_secs(10));
     let stop = timeout.clone();
-    done.token().register(move || stop.cancel());
-    t.ui_thread.main_loop(&timeout.token());
+    done.register(move || stop.cancel()).detach();
+    t.ui_thread.main_loop(&timeout);
     assert_eq!(worker.join().unwrap(), Ok((ui_thread_id, ui_thread_id)));
 }
 
@@ -2288,7 +2286,7 @@ fn invoke_with_timeout_from_another_thread() {
 
     // Within the timeout.
     let dispatcher = t.ui_thread.clone();
-    let done = CancellationTokenSource::new();
+    let done = CancellationToken::new();
     let finish = done.clone();
     let worker = thread::spawn(move || {
         let result = dispatcher.invoke_with_timeout(
@@ -2302,8 +2300,8 @@ fn invoke_with_timeout_from_another_thread() {
     });
     let timeout = cancel_after(Duration::from_secs(10));
     let stop = timeout.clone();
-    done.token().register(move || stop.cancel());
-    t.ui_thread.main_loop(&timeout.token());
+    done.register(move || stop.cancel()).detach();
+    t.ui_thread.main_loop(&timeout);
     assert_eq!(worker.join().unwrap(), Ok(7));
 }
 
@@ -2349,9 +2347,9 @@ fn invoke_with_timeout_on_the_dispatcher_thread() {
     assert_eq!(result, Err(DispatcherInvokeError::Timeout));
 
     // Cancellation is reported as such.
-    let canceled = CancellationTokenSource::new();
+    let canceled = CancellationToken::new();
     canceled.cancel();
-    let result = t.ui_thread.invoke_with_timeout(|| (), DispatcherPriority::NORMAL, &canceled.token(), Duration::ZERO);
+    let result = t.ui_thread.invoke_with_timeout(|| (), DispatcherPriority::NORMAL, &canceled, Duration::ZERO);
     assert_eq!(result, Err(DispatcherInvokeError::Canceled));
 }
 
@@ -2400,7 +2398,7 @@ fn operation_wait_with_timeout() {
     assert_eq!(DispatcherTimer::active_timers_count(), 0);
 
     inactive.abort();
-    assert_eq!(inactive.wait_with_timeout(Duration::from_secs(1)), Err(OperationCanceledError));
+    assert_eq!(inactive.wait_with_timeout(Duration::from_secs(1)), Err(Canceled));
 
     let panicking = t.ui_thread.invoke_async(|| panic!("boom"));
     let result = catch_unwind(AssertUnwindSafe(|| panicking.wait_with_timeout(Duration::from_secs(1))));

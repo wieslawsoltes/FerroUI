@@ -53,7 +53,7 @@ impl IPageTransition for CompositePageTransition {
                 canceled |= task.await.is_err();
             }
             if canceled {
-                panic!("{}", crate::threading::OperationCanceledError);
+                panic!("{}", crate::threading::Canceled);
             }
         })
     }

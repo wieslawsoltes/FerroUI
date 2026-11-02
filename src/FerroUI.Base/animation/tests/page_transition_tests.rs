@@ -3,7 +3,7 @@ use crate::animation::{
     CompositePageTransition, CrossFade, IPageTransition, IProgressPageTransition, IterationCount, PageSlide,
     Rotate3DTransition, SlideAxis,
 };
-use crate::threading::{CancellationToken, CancellationTokenSource, Dispatcher};
+use crate::threading::{CancellationToken, Dispatcher};
 
 fn pages() -> (Ref<TestRoot>, Ref<Visual>, Ref<Visual>) {
     let root = TestRoot::new();
@@ -55,9 +55,9 @@ fn cancelled_cross_fade_completes_and_leaves_the_old_page_visible() {
     let clock = start();
     let (_root, from, to) = pages();
     let transition = CrossFade::with_duration(seconds(1.0));
-    let source = CancellationTokenSource::new();
+    let source = CancellationToken::new();
 
-    let task = transition.start(Some(&from), Some(&to), true, source.token());
+    let task = transition.start(Some(&from), Some(&to), true, source.clone());
     clock.pulse(seconds(0.0));
     clock.pulse(seconds(0.5));
 
@@ -72,14 +72,14 @@ fn cancelled_cross_fade_completes_and_leaves_the_old_page_visible() {
 fn transition_started_with_a_cancelled_token_completes_immediately() {
     start();
     let (_root, from, to) = pages();
-    let source = CancellationTokenSource::new();
+    let source = CancellationToken::new();
     source.cancel();
 
     let task = PageSlide::with_duration(seconds(1.0), SlideAxis::Horizontal).start(
         Some(&from),
         Some(&to),
         true,
-        source.token(),
+        source.clone(),
     );
 
     assert!(task.is_completed_successfully());

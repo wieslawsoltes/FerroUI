@@ -80,7 +80,7 @@ fn using_async_cancel_resource() {
                     run(move || {
                         s.set();
                         e.wait_one();
-                        while !ct.is_cancellation_requested() {
+                        while !ct.is_cancelled() {
                             std::hint::spin_loop();
                         }
 
@@ -141,7 +141,7 @@ fn using_async_cancel_factory() {
                     run(move || {
                         s.set();
                         e.wait_one();
-                        while !ct.is_cancellation_requested() {
+                        while !ct.is_cancelled() {
                             std::hint::spin_loop();
                         }
 

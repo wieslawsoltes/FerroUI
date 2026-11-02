@@ -11,7 +11,7 @@ use crate::models::StateData;
 use ferroui_base::data::converters::FuncMultiValueConverter;
 use ferroui_base::data::core::TypedClrPropertyInfo;
 use ferroui_base::data::{BindingBase, CompiledBinding, CompiledBindingPathBuilder, MultiBinding};
-use ferroui_base::threading::{CancellationToken, CancellationTokenRegistration, OperationCanceledError};
+use ferroui_base::threading::{CancellationGuard, CancellationToken, Canceled};
 use ferroui_base::utilities::StringComparison;
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref};
 use ferroui_controls::{
@@ -33,7 +33,8 @@ struct CancellableDelay {
     cancellation_token: CancellationToken,
     /// Who waits, for the callback of the token.
     waker: Arc<Mutex<Option<Waker>>>,
-    registration: Option<CancellationTokenRegistration>,
+    /// The callback of the token, removed when the delay is dropped.
+    registration: Option<CancellationGuard>,
 }
 
 impl CancellableDelay {
@@ -43,12 +44,12 @@ impl CancellableDelay {
 }
 
 impl Future for CancellableDelay {
-    type Output = Result<(), OperationCanceledError>;
+    type Output = Result<(), Canceled>;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let this = &mut *self;
-        if this.cancellation_token.is_cancellation_requested() {
-            return Poll::Ready(Err(OperationCanceledError));
+        if this.cancellation_token.is_cancelled() {
+            return Poll::Ready(Err(Canceled));
         }
         if Pin::new(&mut this.delay).poll(cx).is_ready() {
             return Poll::Ready(Ok(()));
@@ -65,14 +66,6 @@ impl Future for CancellableDelay {
             }));
         }
         Poll::Pending
-    }
-}
-
-impl Drop for CancellableDelay {
-    fn drop(&mut self) {
-        if let Some(registration) = &self.registration {
-            registration.dispose();
-        }
     }
 }
 
@@ -205,7 +198,7 @@ impl AutoCompleteBoxPage {
                     Box::pin(async move {
                         match this {
                             Some(this) => this.populate_async(search_text, cancellation_token).await,
-                            None => Err(OperationCanceledError),
+                            None => Err(Canceled),
                         }
                     })
                 },
@@ -268,7 +261,7 @@ impl AutoCompleteBoxPage {
         &self,
         search_text: Option<String>,
         cancellation_token: CancellationToken,
-    ) -> Result<Vec<Option<BoxedValue>>, OperationCanceledError> {
+    ) -> Result<Vec<Option<BoxedValue>>, Canceled> {
         CancellableDelay::new(Duration::from_secs_f64(1.5), cancellation_token).await?;
 
         Ok(self

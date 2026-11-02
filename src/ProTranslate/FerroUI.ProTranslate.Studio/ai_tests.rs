@@ -1,13 +1,15 @@
 use super::*;
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
-use std::task::{Context, Wake};
+use std::sync::atomic::Ordering;
+use std::sync::Arc;
+use std::task::{Context, Wake, Waker};
 
 #[derive(Default)]
 struct FakeTransport {
     requests: RefCell<Vec<AiHttpRequest>>,
     responses: RefCell<VecDeque<Result<AiHttpResponse, StudioError>>>,
-    cancel_on_send: RefCell<Option<AiCancellationToken>>,
+    cancel_on_send: RefCell<Option<CancellationToken>>,
 }
 impl FakeTransport {
     fn push(&self, response: AiHttpResponse) {
@@ -18,7 +20,7 @@ impl AiTransport for FakeTransport {
     fn send<'a>(
         &'a self,
         request: AiHttpRequest,
-        _: &'a AiCancellationToken,
+        _: &'a CancellationToken,
     ) -> AiFuture<'a, AiHttpResponse> {
         self.requests.borrow_mut().push(request);
         if let Some(cancellation) = self.cancel_on_send.borrow().as_ref() {
@@ -105,7 +107,7 @@ fn provider_protocols_encode_exact_inputs_and_decode_validated_output() {
         let mut request = request(&["A", "B"]);
         request.entries[0].source_text = "Quoted \"text\"\nUnicode 日本語 {0:N2}".into();
         let result =
-            ready(manager.translate_with_provider(provider, &request, &AiCancellationToken::new()))
+            ready(manager.translate_with_provider(provider, &request, &CancellationToken::new()))
                 .unwrap();
         assert_eq!(
             result
@@ -231,7 +233,7 @@ fn endpoint_composition_preserves_proxy_paths_and_explicit_model_options() {
     ready(manager.translate_with_provider(
         AiProvider::OpenAI,
         &request(&["A"]),
-        &AiCancellationToken::new(),
+        &CancellationToken::new(),
     ))
     .unwrap();
     let sent = transport.requests.borrow();
@@ -264,7 +266,7 @@ fn malformed_partial_duplicate_and_unrequested_translations_never_succeed() {
             ready(manager.translate_with_provider(
                 AiProvider::OpenAI,
                 &request(&["A", "B"]),
-                &AiCancellationToken::new()
+                &CancellationToken::new()
             ))
             .is_err(),
             "{content}"
@@ -281,7 +283,7 @@ fn malformed_partial_duplicate_and_unrequested_translations_never_succeed() {
         "en",
         "pl",
         "",
-        &AiCancellationToken::new()
+        &CancellationToken::new()
     ))
     .is_err());
 }
@@ -299,7 +301,7 @@ fn fences_empty_translations_and_split_content_blocks_are_supported() {
     let result = ready(manager.translate_with_provider(
         AiProvider::Claude,
         &request(&["A"]),
-        &AiCancellationToken::new(),
+        &CancellationToken::new(),
     ))
     .unwrap();
     assert_eq!(result.entries[0].translated_text, "");
@@ -315,7 +317,7 @@ fn fences_empty_translations_and_split_content_blocks_are_supported() {
         ready(manager.translate_with_provider(
             AiProvider::Gemini,
             &request(&["A"]),
-            &AiCancellationToken::new()
+            &CancellationToken::new()
         ))
         .unwrap()
         .entries[0]
@@ -336,7 +338,7 @@ fn http_errors_refusals_truncation_and_invalid_usage_are_propagated() {
         let error = ready(manager.translate_with_provider(
             provider,
             &request(&["A"]),
-            &AiCancellationToken::new(),
+            &CancellationToken::new(),
         ))
         .unwrap_err()
         .to_string();
@@ -358,7 +360,7 @@ fn http_errors_refusals_truncation_and_invalid_usage_are_propagated() {
         assert!(ready(manager.translate_with_provider(
             provider,
             &request(&["A"]),
-            &AiCancellationToken::new()
+            &CancellationToken::new()
         ))
         .is_err());
     }
@@ -374,7 +376,7 @@ fn http_errors_refusals_truncation_and_invalid_usage_are_propagated() {
     assert!(ready(manager.translate_with_provider(
         AiProvider::OpenAI,
         &request(&["A"]),
-        &AiCancellationToken::new()
+        &CancellationToken::new()
     ))
     .is_err());
 }
@@ -389,7 +391,7 @@ fn batches_report_stable_offsets_and_do_not_return_source_text_on_failure() {
         AiProvider::OpenAI,
         &request(&["A", "B", "C"]),
         2,
-        &AiCancellationToken::new(),
+        &CancellationToken::new(),
         &mut |progress, result| {
             updates.push((
                 progress,
@@ -415,7 +417,7 @@ fn batches_report_stable_offsets_and_do_not_return_source_text_on_failure() {
         AiProvider::OpenAI,
         &request(&[]),
         1,
-        &AiCancellationToken::new(),
+        &CancellationToken::new(),
         &mut |_, _| panic!("No empty batch callback"),
     ))
     .unwrap();
@@ -425,7 +427,7 @@ fn batches_report_stable_offsets_and_do_not_return_source_text_on_failure() {
         AiProvider::OpenAI,
         &request(&["A"]),
         0,
-        &AiCancellationToken::new(),
+        &CancellationToken::new(),
         &mut |_, _| {}
     ))
     .is_err());
@@ -434,14 +436,14 @@ fn batches_report_stable_offsets_and_do_not_return_source_text_on_failure() {
 #[test]
 fn cancellation_stops_before_send_after_send_and_between_batches() {
     let (manager, transport) = configured_manager(AiProvider::OpenAI);
-    let cancellation = AiCancellationToken::new();
+    let cancellation = CancellationToken::new();
     cancellation.cancel();
     assert_eq!(
         ready(manager.translate_with_provider(AiProvider::OpenAI, &request(&["A"]), &cancellation)),
         Err(StudioError::Cancelled)
     );
     assert!(transport.requests.borrow().is_empty());
-    let cancellation = AiCancellationToken::new();
+    let cancellation = CancellationToken::new();
     *transport.cancel_on_send.borrow_mut() = Some(cancellation.clone());
     transport.push(response(AiProvider::OpenAI, &translation(&["A"])));
     assert_eq!(
@@ -449,7 +451,7 @@ fn cancellation_stops_before_send_after_send_and_between_batches() {
         Err(StudioError::Cancelled)
     );
     *transport.cancel_on_send.borrow_mut() = None;
-    let cancellation = AiCancellationToken::new();
+    let cancellation = CancellationToken::new();
     transport.push(response(AiProvider::OpenAI, &translation(&["A"])));
     let calls = Cell::new(0);
     let result = ready(manager.translate_batches(
@@ -486,7 +488,7 @@ fn cancellation_wakes_pending_transport_and_drops_its_future_without_listener_le
         fn send<'a>(
             &'a self,
             _: AiHttpRequest,
-            _: &'a AiCancellationToken,
+            _: &'a CancellationToken,
         ) -> AiFuture<'a, AiHttpResponse> {
             Box::pin(PendingResponse(self.0.clone()))
         }
@@ -504,7 +506,7 @@ fn cancellation_wakes_pending_transport_and_drops_its_future_without_listener_le
     let drops = Rc::new(Cell::new(0));
     let mut manager = AiTranslationManager::new(Rc::new(PendingTransport(drops.clone())));
     manager.configure(configured(AiProvider::OpenAI)).unwrap();
-    let cancellation = AiCancellationToken::new();
+    let cancellation = CancellationToken::new();
     let request = request(&["A"]);
     let counter = Arc::new(Counter::default());
     let waker = Waker::from(counter.clone());
@@ -522,8 +524,7 @@ fn cancellation_wakes_pending_transport_and_drops_its_future_without_listener_le
     );
     drop(future);
     assert_eq!(drops.get(), 1);
-    assert!(cancellation.state.listeners.lock().unwrap().is_empty());
-    let cancellation = AiCancellationToken::new();
+    let cancellation = CancellationToken::new();
     let mut future =
         Box::pin(manager.translate_with_provider(AiProvider::OpenAI, &request, &cancellation));
     assert!(future
@@ -531,7 +532,9 @@ fn cancellation_wakes_pending_transport_and_drops_its_future_without_listener_le
         .poll(&mut Context::from_waker(&waker))
         .is_pending());
     drop(future);
-    assert!(cancellation.state.listeners.lock().unwrap().is_empty());
+    // The dropped request left no waker with the token: canceling it wakes nothing.
+    cancellation.cancel();
+    assert_eq!(counter.0.load(Ordering::Relaxed), 1);
     assert_eq!(drops.get(), 2);
 }
 
@@ -548,7 +551,7 @@ fn model_discovery_paginates_filters_capabilities_and_propagates_failures() {
             duration_ms: 1,
         });
     }
-    let list = ready(manager.list_models(AiProvider::Gemini, &AiCancellationToken::new())).unwrap();
+    let list = ready(manager.list_models(AiProvider::Gemini, &CancellationToken::new())).unwrap();
     assert_eq!(list.models, ["gemini-a", "gemini-b"]);
     assert_eq!(list.source, AiModelListSource::Live);
     assert!(list.warning.is_none());
@@ -562,7 +565,7 @@ fn model_discovery_paginates_filters_capabilities_and_propagates_failures() {
         "cursor/a+b"
     );
     drop(requests);
-    assert!(ready(manager.list_models(AiProvider::Claude, &AiCancellationToken::new())).is_err());
+    assert!(ready(manager.list_models(AiProvider::Claude, &CancellationToken::new())).is_err());
     assert_eq!(transport.requests.borrow().len(), 2);
     transport.push(AiHttpResponse {
         status: 429,
@@ -570,9 +573,9 @@ fn model_discovery_paginates_filters_capabilities_and_propagates_failures() {
         duration_ms: 1,
     });
     let error =
-        ready(manager.list_models(AiProvider::Gemini, &AiCancellationToken::new())).unwrap_err();
+        ready(manager.list_models(AiProvider::Gemini, &CancellationToken::new())).unwrap_err();
     assert!(error.to_string().contains("429"));
-    let cancellation = AiCancellationToken::new();
+    let cancellation = CancellationToken::new();
     cancellation.cancel();
     assert_eq!(
         ready(manager.list_models(AiProvider::Gemini, &cancellation)),
@@ -592,7 +595,7 @@ fn claude_model_cursor_loops_are_diagnosed_and_best_provider_does_not_retry() {
         });
     }
     let error =
-        ready(manager.list_models(AiProvider::Claude, &AiCancellationToken::new())).unwrap_err();
+        ready(manager.list_models(AiProvider::Claude, &CancellationToken::new())).unwrap_err();
     assert!(error.to_string().contains("repeated"));
     assert!(transport.requests.borrow()[1].url.contains("after_id=same"));
     manager.configure(configured(AiProvider::OpenAI)).unwrap();
@@ -602,7 +605,7 @@ fn claude_model_cursor_loops_are_diagnosed_and_best_provider_does_not_retry() {
         duration_ms: 1,
     });
     assert!(ready(
-        manager.translate_with_best_available(&request(&["A"]), &AiCancellationToken::new())
+        manager.translate_with_best_available(&request(&["A"]), &CancellationToken::new())
     )
     .is_err());
     assert_eq!(transport.requests.borrow().len(), 3);
@@ -615,7 +618,7 @@ fn request_validation_rejects_duplicates_without_sending_or_faking_connection_su
     assert!(ready(manager.translate_with_provider(
         AiProvider::OpenAI,
         &request(&["A", "A"]),
-        &AiCancellationToken::new()
+        &CancellationToken::new()
     ))
     .is_err());
     assert!(transport.requests.borrow().is_empty());
@@ -623,20 +626,16 @@ fn request_validation_rejects_duplicates_without_sending_or_faking_connection_su
         AiProvider::OpenAI,
         r#"[{"key":"single","text":"Hola"}]"#,
     ));
-    assert!(
-        ready(manager.test_connection(AiProvider::OpenAI, &AiCancellationToken::new())).unwrap()
-    );
+    assert!(ready(manager.test_connection(AiProvider::OpenAI, &CancellationToken::new())).unwrap());
     transport.push(response(AiProvider::OpenAI, "broken JSON"));
-    assert!(
-        ready(manager.test_connection(AiProvider::OpenAI, &AiCancellationToken::new())).is_err()
-    );
+    assert!(ready(manager.test_connection(AiProvider::OpenAI, &CancellationToken::new())).is_err());
 }
 
 #[test]
 fn discovery_rejects_malformed_pagination_and_excludes_non_text_openai_models() {
     let (manager, transport) = configured_manager(AiProvider::OpenAI);
     transport.push(AiHttpResponse { status: 200, body: json!({"data":[{"id":"gpt-text"},{"id":"text-embedding-model"},{"id":"gpt-audio"},{"id":"gpt-image"}]}).to_string(), duration_ms: 1 });
-    let list = ready(manager.list_models(AiProvider::OpenAI, &AiCancellationToken::new())).unwrap();
+    let list = ready(manager.list_models(AiProvider::OpenAI, &CancellationToken::new())).unwrap();
     assert_eq!(list.models, ["gpt-text"]);
     let (manager, transport) = configured_manager(AiProvider::Claude);
     transport.push(AiHttpResponse {
@@ -645,7 +644,7 @@ fn discovery_rejects_malformed_pagination_and_excludes_non_text_openai_models() 
         duration_ms: 1,
     });
     let error =
-        ready(manager.list_models(AiProvider::Claude, &AiCancellationToken::new())).unwrap_err();
+        ready(manager.list_models(AiProvider::Claude, &CancellationToken::new())).unwrap_err();
     assert!(error.to_string().contains("pagination"));
     for provider in AiProvider::ALL {
         let (manager, transport) = configured_manager(provider);
@@ -659,7 +658,7 @@ fn discovery_rejects_malformed_pagination_and_excludes_non_text_openai_models() 
             body: malformed.to_string(),
             duration_ms: 1,
         });
-        assert!(ready(manager.list_models(provider, &AiCancellationToken::new())).is_err());
+        assert!(ready(manager.list_models(provider, &CancellationToken::new())).is_err());
     }
 }
 
@@ -674,7 +673,7 @@ fn discovery_works_before_explicit_selection_and_never_changes_configuration() {
     let error = ready(manager.translate_with_provider(
         AiProvider::OpenAI,
         &request(&["A"]),
-        &AiCancellationToken::new(),
+        &CancellationToken::new(),
     ))
     .unwrap_err();
     assert!(error.to_string().contains("Select a model"));
@@ -686,10 +685,9 @@ fn discovery_works_before_explicit_selection_and_never_changes_configuration() {
             duration_ms: 1,
         });
     }
-    let list = ready(manager.list_models(AiProvider::OpenAI, &AiCancellationToken::new())).unwrap();
+    let list = ready(manager.list_models(AiProvider::OpenAI, &CancellationToken::new())).unwrap();
     assert_eq!(list.models, ["live-model"]);
-    let empty =
-        ready(manager.list_models(AiProvider::OpenAI, &AiCancellationToken::new())).unwrap();
+    let empty = ready(manager.list_models(AiProvider::OpenAI, &CancellationToken::new())).unwrap();
     assert!(empty.models.is_empty());
     assert_eq!(empty.source, AiModelListSource::Live);
     assert!(empty.warning.is_none());
@@ -707,7 +705,7 @@ fn discovery_works_before_explicit_selection_and_never_changes_configuration() {
     ready(manager.translate_with_provider(
         AiProvider::OpenAI,
         &request(&["A"]),
-        &AiCancellationToken::new(),
+        &CancellationToken::new(),
     ))
     .unwrap();
     let requests = transport.requests.borrow();
@@ -738,7 +736,7 @@ fn a_failed_later_discovery_page_never_returns_a_partial_success() {
             body: json!({"error":{"message":"test-secret-only unavailable"}}).to_string(),
             duration_ms: 1,
         });
-        let error = ready(manager.list_models(provider, &AiCancellationToken::new())).unwrap_err();
+        let error = ready(manager.list_models(provider, &CancellationToken::new())).unwrap_err();
         assert!(error.to_string().contains("503"));
         assert!(!error.to_string().contains("test-secret-only"));
         assert_eq!(transport.requests.borrow().len(), 2);
@@ -767,7 +765,7 @@ fn cancellation_during_a_later_discovery_page_discards_partial_models() {
         fn send<'a>(
             &'a self,
             _: AiHttpRequest,
-            _: &'a AiCancellationToken,
+            _: &'a CancellationToken,
         ) -> AiFuture<'a, AiHttpResponse> {
             self.calls.set(self.calls.get() + 1);
             if self.calls.get() == 1 {
@@ -789,7 +787,7 @@ fn cancellation_during_a_later_discovery_page_discards_partial_models() {
     });
     let mut manager = AiTranslationManager::new(transport.clone());
     manager.configure(configured(AiProvider::Claude)).unwrap();
-    let token = AiCancellationToken::new();
+    let token = CancellationToken::new();
     let mut future = Box::pin(manager.list_models(AiProvider::Claude, &token));
     assert!(future
         .as_mut()
@@ -805,7 +803,9 @@ fn cancellation_during_a_later_discovery_page_discards_partial_models() {
     );
     assert!(transport.pending_dropped.get());
     assert_eq!(transport.calls.get(), 2);
-    assert!(token.state.listeners.lock().unwrap().is_empty());
+    // The wait of the dropped request leaves nothing in the token: the cancellation tests of
+    // ferroui-system check that a dropped `cancelled()` future unregisters itself.
+    assert!(token.is_cancelled());
 }
 
 #[test]
@@ -815,7 +815,7 @@ fn decoding_errors_redact_keys_and_token_totals_cannot_overflow() {
     let error = ready(manager.translate_with_provider(
         AiProvider::OpenAI,
         &request(&["A"]),
-        &AiCancellationToken::new(),
+        &CancellationToken::new(),
     ))
     .unwrap_err();
     assert!(!error.to_string().contains("test-secret-only"));
@@ -831,7 +831,7 @@ fn decoding_errors_redact_keys_and_token_totals_cannot_overflow() {
     let error = ready(manager.translate_with_provider(
         AiProvider::Claude,
         &request(&["A"]),
-        &AiCancellationToken::new(),
+        &CancellationToken::new(),
     ))
     .unwrap_err();
     assert!(error.to_string().contains("overflow"));

@@ -88,7 +88,7 @@ impl GlibDispatcherImpl {
                 // If we don't actually drain our X11 socket, GLib _will_ call us again even if
                 // we request the run loop to quit
                 self.x11_events.dispatch_x11_events(&CancellationToken::none());
-                if !token.is_cancellation_requested() {
+                if !token.is_cancelled() {
                     while queue.has_jobs() {
                         self.base.check_signaled();
                         queue.dispatch_next();

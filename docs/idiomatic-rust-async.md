@@ -439,7 +439,7 @@ where they are large.
 | A2 (done) | The dispatcher on the core: its schedule per priority, `Dispatcher::spawn_local`, `spawn_local_with_priority` and `spawn`; `DispatcherTask`, `DispatcherTaskScheduler` and `invoke_async_task*` as wrappers over them; `resume`, `yield_now`, `await_with_priority` on the core; the lost wake (F1) fixed, with a test | additions | high: every asynchronous step of the user interface; G1 to G17 unchanged |
 | A3 (done) | `task::oneshot`; the ten local completions move to it, by crate (X11, remote protocol, dialogs, headless, iOS, Android, FreeDesktop, WinUI) | additions; `ferroui-x11`'s public `TaskCompletionSource` deprecated | low per crate; a dropped sender now cancels (F6, a DEVIATIONS row where the copy did not) |
 | A4a (done) | One cancellation type: `CancellationToken` reshaped (section 3.7), `CancellationGuard` (`register_guarded`, `register_local_guarded`), `cancelled()`, `child_token()`, `drop_guard()`; `CancellationTokenSource` over it; `OperationCanceledError` and `TaskCanceledError` convert to and from `task::Canceled`; F4 recorded | additions | low: the old API keeps working and is not deprecated yet |
-| A4b | The uses move, by crate (602: `ferroui-reactive`, `ferroui-base`, `ferroui-dynamic-data`, dock, `ferroui-controls`, ...); the local cancellation types replaced: `LocalCancellationRegistration` of `ferroui-base::animation` (`register_local_guarded`), `CancellationFlag` and `Cancelled` of `ferroui-freedesktop` (`cancelled()`), `AiCancellationToken` of ProTranslate, `LoopCancellation` of `ferroui-native` and `CancelOnDrop` of `ferroui-headless` (`drop_guard()`); `register` gives the guard; then the old names deprecated and the `upstream-names.toml` rows | 0.5: the old names deprecated | medium: registrations that were dropped get `detach()` (the compiler lists them, as in D4) |
+| A4b (done) | The uses move, by crate (602: `ferroui-reactive`, `ferroui-base`, `ferroui-dynamic-data`, dock, `ferroui-controls`, ...); the local cancellation types replaced: `LocalCancellationRegistration` of `ferroui-base::animation` (`register_local_guarded`), `CancellationFlag` and `Cancelled` of `ferroui-freedesktop` (`cancelled()`), `AiCancellationToken` of ProTranslate, `LoopCancellation` of `ferroui-native` and `CancelOnDrop` of `ferroui-headless` (`drop_guard()`); `register` gives the guard; then the old names deprecated and the `upstream-names.toml` rows | 0.5: the old names deprecated | medium: registrations that were dropped get `detach()` (the compiler lists them, as in D4) |
 | A5 | `SynchronizationContext` to the thread's schedule: `set_thread_schedule`, `Dispatcher::current_priority`, `FerroScheduler::install_on_ui_thread`, the Rx forms that capture a context, the dock services; the rule for the tasks of the reactive libraries on a dispatcher thread decided (F3) and its order tested | 0.5: the trait, `FerroSynchronizationContext` and `RestoreContext` deprecated | high where F3 changes an order; the Rx, ReactiveUI and dock tests guard it |
 | A6 | The asynchronous public APIs of the controls and platforms return `JoinHandle` or `impl Future` (navigation, dialogs, the behaviors' `TaskHandle`, the callers of `invoke_async_task*` and `to_task_scheduler`), by area | 0.5 | medium: callers visited; deprecated `..._task` variants where needed |
 | A7 | The `Task` forms of Rx, DynamicData and ReactiveUI on futures and `Shared<T>` (section 3.8) | 0.5 (names kept) | medium: the ported upstream tests drive them through completion sources |
@@ -553,6 +553,43 @@ were no linked sources to map to children. `task::Canceled` is the cancellation 
 `OperationCanceledError` (`ferroui-base`) and `TaskCanceledError` convert to and from it with `From`
 and keep their shape until A4b. Nothing is deprecated yet (section 4), and the rows of
 `upstream-names.toml` come with A4b.
+
+A4b is done: `CancellationToken::register` and `register_local` give the `CancellationGuard`;
+`register_guarded` and `register_local_guarded` are deprecated aliases of them, and the forms that
+give a registration that dropping keeps are the deprecated `register_handle` and
+`register_local_handle`. `CancellationTokenSource`, `CancellationTokenRegistration`,
+`LocalCancellationTokenRegistration`, `is_cancellation_requested`, `can_be_canceled` and
+`OperationCanceledError` are `#[deprecated(since = "0.5.0")]`, with `From` conversions to the
+token, the guard and `task::Canceled`; nothing in the workspace uses them but their own tests (G18
+and the tests of the source keep the deprecated forms, under `#[allow(deprecated)]`, with their
+assertions). The uses moved crate by crate (about 540 in 100 files: `ferroui-base` 106,
+`ferroui-controls` 78, `ferroui-system` 59, the Rx tests 54, ProTranslate 52, `ferroui-reactive`
+51, the control catalog 32, then headless, X11, FreeDesktop, ReactiveUI, the platforms): a source
+is `CancellationToken::new()` and its clones (an `Rc` of it where a control compares the current
+transition by identity); a source linked to another token by a registration is a
+`child_token()` (the run loops of macOS and GLib, `FromAsync` of ReactiveUI); a registration whose
+result was ignored is `.detach()`ed (the six `done`/`timeout` links of the dispatcher tests, the
+cancel actions of the tests of `TransitioningContentControl`, two producers of the Rx tests); a
+registration kept to be disposed holds the guard, which is disposed or dropped where the
+registration was disposed (the abort of a queued operation keeps it in a slot that the completed
+and aborted handlers take). `TokenRegistration` of `ferroui-reactive` detaches its guard when it is
+dropped, as the `IDisposable` it is. The dispatcher operations, the invokes, `DispatcherTask`,
+`AutoCompletePopulation`, `HeadlessUnitTestTask` and the behaviors' `TaskHandle` give `Canceled`.
+`threading::tasks::canceled()` and the cancellations of `RunAsync` and of the scheduler operations
+end with `Canceled`; `TaskCanceledError::is_cancellation` recognizes both errors, and
+`TaskCanceledError` stays (not deprecated) as the error of a canceled `Task` that names it, until
+A7. The local types: `CancellationFlag` and `Cancelled` of `ferroui-freedesktop` are deprecated
+wrappers, their uses take the token and `signal_watch::run_until_cancelled`;
+`AiCancellationToken` of ProTranslate is a deprecated wrapper and `AiTransport` takes the token
+(the crate depends on `ferroui-system`); `CancelOnDrop` of `ferroui-headless` is `drop_guard()`;
+`CancellationDisposable` wraps the token (`with_token`; `with_source` deprecated). Two stay:
+`LoopCancellation` of `ferroui-native` is the bridge to the native loop's own cancellation object
+(it releases it on the loop thread and ignores a cancellation after the loop exited), and the local
+registration of the animations posts its action to the dispatcher of its thread, which
+`register_local` does not do before the dispatcher is the schedule of its thread (A5); it holds the
+guard and removes its action when dropped. The rows of `upstream-names.toml` map
+`CancellationTokenSource`, `CancellationTokenRegistration`, `OperationCanceledException` and
+`TaskCanceledException`.
 
 ## 6. Not in scope
 

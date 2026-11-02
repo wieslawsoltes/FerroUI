@@ -2,7 +2,7 @@
 
 use crate::interop::*;
 use ferroui_base::threading::{
-    CancellationToken, CancellationTokenSource, DispatcherImplEvent, IControlledDispatcherImpl, IDispatcherImpl,
+    CancellationToken, DispatcherImplEvent, IControlledDispatcherImpl, IDispatcherImpl,
     IDispatcherImplWithExplicitBackgroundProcessing, IDispatcherImplWithPendingInput, IDispatcherSignal,
 };
 use ferroui_microcom::ComPtr;
@@ -75,7 +75,8 @@ impl LoopCancellation {
 /// One nested run of the native loop.
 struct RunLoopFrame {
     exception: RefCell<Option<Box<dyn Any + Send>>>,
-    cancellation_token_source: CancellationTokenSource,
+    /// A child of the token of the run, which `propagate_callback_exception` also cancels.
+    cancellation_token: CancellationToken,
 }
 
 /// The dispatcher platform implementation of the macOS backend.
@@ -166,7 +167,7 @@ impl DispatcherImpl {
         };
 
         *frame.exception.borrow_mut() = Some(capture);
-        frame.cancellation_token_source.cancel();
+        frame.cancellation_token.cancel();
     }
 }
 
@@ -241,23 +242,18 @@ impl IDispatcherImplWithExplicitBackgroundProcessing for DispatcherImpl {
 
 impl IControlledDispatcherImpl for DispatcherImpl {
     fn run_loop(&self, token: CancellationToken) {
-        if token.is_cancellation_requested() {
+        if token.is_cancelled() {
             return;
         }
 
-        // The frame's source is linked to `token` and can also be canceled
+        // The frame's token is a child of `token` and can also be canceled
         // by `propagate_callback_exception`.
-        let frame = Rc::new(RunLoopFrame {
-            exception: RefCell::new(None),
-            cancellation_token_source: CancellationTokenSource::new(),
-        });
-        let linked = frame.cancellation_token_source.clone();
-        let link_registration = token.register(move || linked.cancel());
+        let frame = Rc::new(RunLoopFrame { exception: RefCell::new(None), cancellation_token: token.child_token() });
 
         let cancel = self.native.create_loop_cancellation();
         let shared = Arc::new(LoopCancellation(Mutex::new(LoopCancellationState { exited: false, cancel: cancel.clone() })));
         let on_cancel = shared.clone();
-        let cancel_registration = frame.cancellation_token_source.token().register(move || on_cancel.cancel());
+        let cancel_registration = frame.cancellation_token.register(move || on_cancel.cancel());
 
         self.managed_frames.borrow_mut().push(frame.clone());
         self.native.run_loop(cancel.as_deref());
@@ -266,7 +262,6 @@ impl IControlledDispatcherImpl for DispatcherImpl {
         drop(shared.exit());
         self.managed_frames.borrow_mut().pop();
         cancel_registration.dispose();
-        link_registration.dispose();
         let exception = frame.exception.borrow_mut().take();
         if let Some(exception) = exception {
             resume_unwind(exception);

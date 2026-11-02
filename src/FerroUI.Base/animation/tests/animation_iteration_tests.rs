@@ -7,7 +7,7 @@ use crate::animation::{
 };
 use crate::reactive::Observable;
 use crate::styling::Setter;
-use crate::threading::{CancellationToken, CancellationTokenSource, Dispatcher};
+use crate::threading::{CancellationToken, Dispatcher};
 
 fn width_key_frame(width: f64, cue: f64) -> Ref<KeyFrame> {
     KeyFrame::with_cue(Cue::new(cue), [Setter::new(Layoutable::width_property(), width) as _])
@@ -302,10 +302,10 @@ fn do_not_run_cancelled_animation() {
     let property_changed_count = count_width_changes(&border);
 
     let clock = TestClock::new();
-    let cancellation_token_source = CancellationTokenSource::new();
+    let cancellation_token_source = CancellationToken::new();
     cancellation_token_source.cancel();
     let animation_run =
-        animation.run_async_with_clock(&border, Some(clock.as_clock()), cancellation_token_source.token());
+        animation.run_async_with_clock(&border, Some(clock.as_clock()), cancellation_token_source.clone());
 
     clock.step(seconds(10.0));
     assert!(animation_run.is_completed());
@@ -320,9 +320,9 @@ fn cancellation_should_stop_animation() {
     let property_changed_count = count_width_changes(&border);
 
     let clock = TestClock::new();
-    let cancellation_token_source = CancellationTokenSource::new();
+    let cancellation_token_source = CancellationToken::new();
     let animation_run =
-        animation.run_async_with_clock(&border, Some(clock.as_clock()), cancellation_token_source.token());
+        animation.run_async_with_clock(&border, Some(clock.as_clock()), cancellation_token_source.clone());
 
     assert!(!animation_run.is_completed());
     assert_eq!(property_changed_count.get(), 0);
@@ -348,9 +348,9 @@ fn cancellation_from_another_thread_stops_animation_on_the_dispatcher() {
     let border = border(50.0);
 
     let clock = TestClock::new();
-    let cancellation_token_source = CancellationTokenSource::new();
+    let cancellation_token_source = CancellationToken::new();
     let animation_run =
-        animation.run_async_with_clock(&border, Some(clock.as_clock()), cancellation_token_source.token());
+        animation.run_async_with_clock(&border, Some(clock.as_clock()), cancellation_token_source.clone());
     clock.step(seconds(0.0));
     assert_eq!(border.width(), 100.0);
 
@@ -384,9 +384,9 @@ fn cancellation_of_completed_animation_does_not_fail() {
     let property_changed_count = count_width_changes(&border);
 
     let clock = TestClock::new();
-    let cancellation_token_source = CancellationTokenSource::new();
+    let cancellation_token_source = CancellationToken::new();
     let animation_run =
-        animation.run_async_with_clock(&border, Some(clock.as_clock()), cancellation_token_source.token());
+        animation.run_async_with_clock(&border, Some(clock.as_clock()), cancellation_token_source.clone());
 
     assert_eq!(property_changed_count.get(), 0);
 
@@ -870,9 +870,9 @@ fn cancelling_expand_animation_mid_flight_then_collapsing_works() {
     border.set_is_visible(false);
 
     // Start expand.
-    let cts1 = CancellationTokenSource::new();
+    let cts1 = CancellationToken::new();
     let clock1 = TestClock::new();
-    let expand_run = expand_animation.run_async_with_clock(&border, Some(clock1.as_clock()), cts1.token());
+    let expand_run = expand_animation.run_async_with_clock(&border, Some(clock1.as_clock()), cts1.clone());
 
     clock1.step(SignedDuration::ZERO);
     assert!(border.is_visible());
@@ -882,9 +882,9 @@ fn cancelling_expand_animation_mid_flight_then_collapsing_works() {
     cts1.cancel();
     assert_eq!(expand_run.result(), Some(Ok(())));
 
-    let cts2 = CancellationTokenSource::new();
+    let cts2 = CancellationToken::new();
     let clock2 = TestClock::new();
-    let collapse_run = collapse_animation.run_async_with_clock(&border, Some(clock2.as_clock()), cts2.token());
+    let collapse_run = collapse_animation.run_async_with_clock(&border, Some(clock2.as_clock()), cts2.clone());
 
     clock2.step(SignedDuration::ZERO);
     clock2.step(seconds(0.3));

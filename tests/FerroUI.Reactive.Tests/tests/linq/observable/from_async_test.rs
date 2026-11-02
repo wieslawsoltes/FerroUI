@@ -12,7 +12,8 @@
 use ferroui_reactive::concurrency::Scheduler;
 use ferroui_reactive::{Observable, ObservableError, ObservableExt};
 use ferroui_reactive_testing::new_error;
-use ferroui_system::threading::tasks::{block_on, run, Task, TaskCanceledError, TaskCompletionSource, TaskWorkError};
+use ferroui_system::task::Canceled;
+use ferroui_system::threading::tasks::{block_on, run, Task, TaskCompletionSource, TaskWorkError};
 use ferroui_system::threading::CancellationToken;
 use std::cell::{Cell, RefCell};
 use std::error::Error;
@@ -36,11 +37,11 @@ fn work_error(error: &ObservableError) -> Option<String> {
 /// (`finally { f.Set(); }`).
 fn spin_until_canceled<T>(token: CancellationToken, started: Sender<()>, finished: Sender<()>) -> Result<T, Box<dyn Error + Send + Sync>> {
     let _ = started.send(());
-    while !token.is_cancellation_requested() {
+    while !token.is_cancelled() {
         std::hint::spin_loop();
     }
     let _ = finished.send(());
-    Err(Box::new(TaskCanceledError::default()))
+    Err(Box::new(Canceled))
 }
 
 #[test]

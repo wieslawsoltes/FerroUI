@@ -14,7 +14,7 @@
 
 use ferroui_reactive::concurrency::Scheduler;
 use ferroui_reactive::{IDisposable, IObservable, Observable, ObservableError, ObservableExt, Observer};
-use ferroui_system::threading::{CancellationToken, CancellationTokenSource};
+use ferroui_system::threading::CancellationToken;
 use ferroui_reactive_testing::{assert_messages, assert_subscriptions, assert_throws, new_error, ReactiveTest as RT, Subscription, TestScheduler};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -311,12 +311,12 @@ fn subscribe_ct_cancel_before_begin() {
 
     let xs = scheduler.create_hot_observable(vec![RT::on_next(210, 1), RT::on_next(220, 2), RT::on_next(230, 3), RT::on_completed(240)]);
 
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
     let obs = scheduler.create_observer::<i32>();
 
     {
-        let (source, observer, token) = (xs.as_observable(), obs.clone(), cts.token());
+        let (source, observer, token) = (xs.as_observable(), obs.clone(), cts.clone());
         scheduler.schedule_absolute_action(200, move || source.subscribe_with_token(observer, token));
     }
     {
@@ -337,12 +337,12 @@ fn subscribe_ct_cancel_middle() {
 
     let xs = scheduler.create_hot_observable(vec![RT::on_next(210, 1), RT::on_next(220, 2), RT::on_next(230, 3), RT::on_completed(240)]);
 
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
     let obs = scheduler.create_observer::<i32>();
 
     {
-        let (source, observer, token) = (xs.as_observable(), obs.clone(), cts.token());
+        let (source, observer, token) = (xs.as_observable(), obs.clone(), cts.clone());
         scheduler.schedule_absolute_action(200, move || source.subscribe_with_token(observer, token));
     }
     {
@@ -365,12 +365,12 @@ fn subscribe_ct_cancel_after_end() {
 
     let xs = scheduler.create_hot_observable(vec![RT::on_next(210, 1), RT::on_next(220, 2), RT::on_next(230, 3), RT::on_error(240, ex.clone())]);
 
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
     let obs = scheduler.create_observer::<i32>();
 
     {
-        let (source, observer, token) = (xs.as_observable(), obs.clone(), cts.token());
+        let (source, observer, token) = (xs.as_observable(), obs.clone(), cts.clone());
         scheduler.schedule_absolute_action(200, move || source.subscribe_with_token(observer, token));
     }
     {
@@ -392,12 +392,12 @@ fn subscribe_ct_never_cancel() {
 
     let xs = scheduler.create_hot_observable(vec![RT::on_next(210, 1), RT::on_next(220, 2), RT::on_next(230, 3), RT::on_completed(240)]);
 
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
     let obs = scheduler.create_observer::<i32>();
 
     {
-        let (source, observer, token) = (xs.as_observable(), obs.clone(), cts.token());
+        let (source, observer, token) = (xs.as_observable(), obs.clone(), cts.clone());
         scheduler.schedule_absolute_action(200, move || source.subscribe_with_token(observer, token));
     }
 
@@ -415,15 +415,15 @@ fn subscribe_ct_overloads_already_cancelled() {
         panic!("the factory of the deferred sequence ran");
     });
 
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     cts.cancel();
 
-    xs.subscribe_ignore_with_token(cts.token());
-    xs.subscribe_next_with_token(|_| {}, cts.token());
-    xs.subscribe_next_error_with_token(|_| {}, |_| {}, cts.token());
-    xs.subscribe_next_completed_with_token(|_| {}, || {}, cts.token());
-    xs.subscribe_all_with_token(|_| {}, |_| {}, || {}, cts.token());
-    xs.subscribe_with_token(Observer::create_all(|_: i32| {}, |_| {}, || {}), cts.token());
+    xs.subscribe_ignore_with_token(cts.clone());
+    xs.subscribe_next_with_token(|_| {}, cts.clone());
+    xs.subscribe_next_error_with_token(|_| {}, |_| {}, cts.clone());
+    xs.subscribe_next_completed_with_token(|_| {}, || {}, cts.clone());
+    xs.subscribe_all_with_token(|_| {}, |_| {}, || {}, cts.clone());
+    xs.subscribe_with_token(Observer::create_all(|_: i32| {}, |_| {}, || {}), cts.clone());
 }
 
 #[test]
@@ -480,12 +480,12 @@ fn subscribe_ct_cancel_during_callback() {
 
     let xs = scheduler.create_hot_observable(vec![RT::on_next(210, 1), RT::on_next(220, 2), RT::on_next(230, 3), RT::on_completed(240)]);
 
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
     let n = Rc::new(Cell::new(0));
 
     {
-        let (source, token, cts, n) = (xs.as_observable(), cts.token(), cts.clone(), n.clone());
+        let (source, token, cts, n) = (xs.as_observable(), cts.clone(), cts.clone(), n.clone());
         scheduler.schedule_absolute_action(200, move || {
             source.subscribe_next_with_token(
                 move |x| {

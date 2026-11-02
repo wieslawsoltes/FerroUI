@@ -11,7 +11,7 @@ use ferroui_reactive::disposables::{Disposable, StableCompositeDisposable};
 use ferroui_reactive::{ConnectableObservableExt, IDisposable, IObservable, IObserver, Observable, ObservableExt};
 use ferroui_reactive_testing::{assert_subscriptions, ReactiveTest as RT, TestScheduler};
 use ferroui_system::threading::tasks::{Task, TaskCanceledError};
-use ferroui_system::threading::{set_synchronization_context, CancellationToken, CancellationTokenSource};
+use ferroui_system::threading::{set_synchronization_context, CancellationToken};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -91,7 +91,7 @@ fn run_async_simple() {
 fn run_async_cancelled() {
     set_synchronization_context(None);
 
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     cts.cancel();
 
     let scheduler = TestScheduler::new();
@@ -105,7 +105,7 @@ fn run_async_cancelled() {
     let t = Rc::new(Cell::new(i64::MAX));
 
     {
-        let (xs, awaiter, token) = (xs.clone(), awaiter.clone(), cts.token());
+        let (xs, awaiter, token) = (xs.clone(), awaiter.clone(), cts.clone());
         scheduler.schedule_absolute_action(100, move || {
             *awaiter.borrow_mut() = Some(xs.as_observable().run_async(token));
         });
@@ -132,7 +132,7 @@ fn run_async_cancelled() {
 fn run_async_cancel() {
     set_synchronization_context(None);
 
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
     let scheduler = TestScheduler::new();
 
@@ -145,7 +145,7 @@ fn run_async_cancel() {
     let t = Rc::new(Cell::new(i64::MAX));
 
     {
-        let (xs, awaiter, token) = (xs.clone(), awaiter.clone(), cts.token());
+        let (xs, awaiter, token) = (xs.clone(), awaiter.clone(), cts.clone());
         scheduler.schedule_absolute_action(100, move || {
             *awaiter.borrow_mut() = Some(xs.as_observable().run_async(token));
         });
@@ -215,7 +215,7 @@ fn run_async_connectable() {
 fn run_async_connectable_cancelled() {
     set_synchronization_context(None);
 
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     cts.cancel();
 
     let scheduler = TestScheduler::new();
@@ -230,7 +230,7 @@ fn run_async_connectable_cancelled() {
     let t = Rc::new(Cell::new(i64::MAX));
 
     {
-        let (awaiter, token) = (awaiter.clone(), cts.token());
+        let (awaiter, token) = (awaiter.clone(), cts.clone());
         scheduler.schedule_absolute_action(100, move || {
             *awaiter.borrow_mut() = Some(ys.run_async(token));
         });
@@ -256,7 +256,7 @@ fn run_async_connectable_cancelled() {
 fn run_async_connectable_cancel() {
     set_synchronization_context(None);
 
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
     let scheduler = TestScheduler::new();
 
@@ -271,7 +271,7 @@ fn run_async_connectable_cancel() {
     let t = Rc::new(Cell::new(i64::MAX));
 
     {
-        let (awaiter, token) = (awaiter.clone(), cts.token());
+        let (awaiter, token) = (awaiter.clone(), cts.clone());
         scheduler.schedule_absolute_action(100, move || {
             *awaiter.borrow_mut() = Some(ys.run_async(token));
         });

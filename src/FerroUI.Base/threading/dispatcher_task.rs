@@ -19,7 +19,8 @@ use std::sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError};
 use std::task::{Context, Poll, Waker};
 
 use super::dispatcher_operation::{next_operation_id, DispatcherException};
-use super::{Dispatcher, OperationCanceledError};
+use super::Dispatcher;
+use ferroui_system::task::Canceled;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum TaskStatus {
@@ -110,13 +111,13 @@ impl TaskShared {
         self.lock().status != TaskStatus::Running
     }
 
-    fn take_outcome<T: 'static>(&self) -> Result<T, OperationCanceledError> {
+    fn take_outcome<T: 'static>(&self) -> Result<T, Canceled> {
         let (status, panic, result) = {
             let mut state = self.lock();
             (state.status, state.panic.take(), state.result.take())
         };
         match status {
-            TaskStatus::Canceled => return Err(OperationCanceledError),
+            TaskStatus::Canceled => return Err(Canceled),
             TaskStatus::Faulted => match panic {
                 Some(payload) => resume_unwind(payload),
                 None => panic!("The failure of the dispatcher task has already been observed."),
@@ -172,7 +173,7 @@ impl Drop for TaskCompletion {
 ///
 /// The handle can be cloned and sent to other threads. It is a [`Future`]
 /// that resolves to `Ok(result)` when the future has completed and to
-/// `Err(OperationCanceledError)` when it was dropped before completing (the
+/// `Err(Canceled)` when it was dropped before completing (the
 /// dispatcher shut down, or the operation that was going to start it was
 /// aborted). A panic raised by the future is re-raised to whoever observes
 /// the outcome.
@@ -239,7 +240,7 @@ impl<T: 'static> DispatcherTask<T> {
     /// # Panics
     /// Re-raises the panic of the future. Panics when the task is still
     /// running and the calling thread is the dispatcher thread.
-    pub fn wait(&self) -> Result<(), OperationCanceledError> {
+    pub fn wait(&self) -> Result<(), Canceled> {
         self.block_until_finished();
         let (status, panic) = {
             let mut state = self.shared.lock();
@@ -249,7 +250,7 @@ impl<T: 'static> DispatcherTask<T> {
             resume_unwind(payload);
         }
         match status {
-            TaskStatus::Canceled => Err(OperationCanceledError),
+            TaskStatus::Canceled => Err(Canceled),
             _ => Ok(()),
         }
     }
@@ -260,14 +261,14 @@ impl<T: 'static> DispatcherTask<T> {
     /// See [`wait`](Self::wait). Also panics when the result has already been
     /// taken, and when a result that is not `Send` is requested from another
     /// thread.
-    pub fn result(&self) -> Result<T, OperationCanceledError> {
+    pub fn result(&self) -> Result<T, Canceled> {
         self.block_until_finished();
         self.shared.take_outcome()
     }
 }
 
 impl<T: 'static> Future for DispatcherTask<T> {
-    type Output = Result<T, OperationCanceledError>;
+    type Output = Result<T, Canceled>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         {

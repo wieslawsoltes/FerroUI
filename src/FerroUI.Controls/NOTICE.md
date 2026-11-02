@@ -139,7 +139,11 @@ The rich text of `documents/` (the sources are listed in `documents/NOTICE.md`),
 context-menu events) are ported from the WinUI project directly (`dxaml/xcp/core/text/RichTextBlock/`,
 `dxaml/xcp/core/text/BlockLayout/`, `dxaml/xcp/dxaml/lib/RichTextBlock_Partial.cpp`,
 `RichTextBlockOverflow_Partial.cpp` and `TextControlFlyoutHelper.cpp` at the same commit), under the
-same license (`docs/porting/winui-rich-text.md`).
+same license (`docs/porting/winui-rich-text.md`). The selection drawn over the lines in
+`rich_text_block.rs` and `rich_text_layout.rs` follows `dxaml/xcp/components/text/TextHighlightRenderer.cpp`
+(the highlight behind the text) and `D2DTextDrawingContext::DrawGlyphRun` of
+`dxaml/xcp/core/native/text/Common/D2DTextDrawingContext.cpp` (the selected part of a glyph run in the
+selection foreground) at the same commit.
 
 `rich_text/` (the editor, the text object model, RTF and the rich clipboard), `rich_edit_box*.rs`,
 `rich_edit_*.rs`, `automation/provider/i_text_*.rs`, `automation/provider/rich_text_automation.rs`

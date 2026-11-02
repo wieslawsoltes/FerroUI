@@ -4,7 +4,7 @@
 
 use super::support::*;
 use crate::pages::AutoCompleteBoxPage;
-use ferroui_base::threading::{CancellationTokenSource, Dispatcher, OperationCanceledError};
+use ferroui_base::threading::{CancellationToken, Canceled, Dispatcher};
 use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::{AutoCompleteBox, Control, Window};
 use std::task::{Context, Poll, Waker};
@@ -108,13 +108,13 @@ fn the_population_of_the_asynchronous_box_waits_and_ends_when_it_is_cancelled() 
     let mut context = Context::from_waker(Waker::noop());
 
     // The population waits for its delay.
-    let source = CancellationTokenSource::new();
-    let mut population = populator.invoke(Some("mont".to_string()), source.token());
+    let source = CancellationToken::new();
+    let mut population = populator.invoke(Some("mont".to_string()), source.clone());
     assert!(population.as_mut().poll(&mut context).is_pending());
     source.cancel();
-    assert!(matches!(population.as_mut().poll(&mut context), Poll::Ready(Err(OperationCanceledError))));
+    assert!(matches!(population.as_mut().poll(&mut context), Poll::Ready(Err(Canceled))));
 
     // A population that is cancelled before it starts does not wait.
-    let mut population = populator.invoke(Some("mont".to_string()), source.token());
-    assert!(matches!(population.as_mut().poll(&mut context), Poll::Ready(Err(OperationCanceledError))));
+    let mut population = populator.invoke(Some("mont".to_string()), source.clone());
+    assert!(matches!(population.as_mut().poll(&mut context), Poll::Ready(Err(Canceled))));
 }

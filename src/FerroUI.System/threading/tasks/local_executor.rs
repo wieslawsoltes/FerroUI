@@ -10,7 +10,8 @@
 //! thread. A panic of a future faults its task with a [`TaskWorkError`] that holds the message of
 //! the panic.
 
-use super::task::{Task, TaskCanceledError};
+use super::task::Task;
+use crate::task::Canceled;
 use crate::task::executor::{panic_message, spawn_task, Failure};
 use crate::task::{FirstPoll, Schedule};
 use crate::ObservableError;
@@ -32,9 +33,9 @@ impl Schedule for PosterSchedule {
 }
 
 /// Runs `future` on the current thread and gives its task: the output of the future ends it, an
-/// error that is a [`TaskCanceledError`] cancels it, and a panic faults it with a
-/// [`TaskWorkError`]. The future is polled at once, and again whenever it is woken (the module's
-/// documentation).
+/// error that is a cancellation ([`Canceled`], [`TaskCanceledError`](super::TaskCanceledError))
+/// cancels it, and a panic faults it with a [`TaskWorkError`]. The future is polled at once, and
+/// again whenever it is woken (the module's documentation).
 pub fn spawn_local<T: 'static>(future: impl Future<Output = Result<T, ObservableError>> + 'static) -> Task<T> {
     let task = Task::with_status(super::TaskStatus::Running);
     let (target, failed) = (task.clone(), task.clone());
@@ -148,5 +149,5 @@ pub fn run<T: Send + 'static>(work: impl FnOnce() -> Result<T, Box<dyn std::erro
 /// A future that ends with a cancellation (`Task.FromCanceled` awaited): for code that stops
 /// because its token was cancelled.
 pub fn canceled<T>() -> Result<T, ObservableError> {
-    Err(Rc::new(TaskCanceledError::default()))
+    Err(Rc::new(Canceled))
 }

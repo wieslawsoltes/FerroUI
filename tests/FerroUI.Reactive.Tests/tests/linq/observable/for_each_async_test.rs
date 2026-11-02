@@ -7,7 +7,7 @@
 use ferroui_reactive::{Observable, ObservableError, ObservableExt};
 use ferroui_reactive_testing::{assert_subscriptions, new_error, ReactiveTest as RT, Recorded, TestScheduler};
 use ferroui_system::threading::tasks::{block_on, Task, TaskStatus};
-use ferroui_system::threading::CancellationTokenSource;
+use ferroui_system::threading::CancellationToken;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -36,11 +36,11 @@ fn for_each_async_never() {
     ]);
 
     let task: TaskSlot = Rc::new(RefCell::new(None));
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     let list: Rc<RefCell<Vec<Recorded<i32>>>> = Rc::new(RefCell::new(Vec::new()));
 
     {
-        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.token());
+        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.clone());
         scheduler.schedule_absolute_action(150, move || {
             *task.borrow_mut() =
                 Some(xs.as_observable().for_each_async_with_token(move |x| list.borrow_mut().push(Recorded::new(clock.clock(), x)), token));
@@ -70,11 +70,11 @@ fn for_each_async_completed() {
     ]);
 
     let task: TaskSlot = Rc::new(RefCell::new(None));
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     let list: Rc<RefCell<Vec<Recorded<i32>>>> = Rc::new(RefCell::new(Vec::new()));
 
     {
-        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.token());
+        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.clone());
         scheduler.schedule_absolute_action(150, move || {
             *task.borrow_mut() =
                 Some(xs.as_observable().for_each_async_with_token(move |x| list.borrow_mut().push(Recorded::new(clock.clock(), x)), token));
@@ -106,11 +106,11 @@ fn for_each_async_error() {
     ]);
 
     let task: TaskSlot = Rc::new(RefCell::new(None));
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     let list: Rc<RefCell<Vec<Recorded<i32>>>> = Rc::new(RefCell::new(Vec::new()));
 
     {
-        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.token());
+        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.clone());
         scheduler.schedule_absolute_action(150, move || {
             *task.borrow_mut() =
                 Some(xs.as_observable().for_each_async_with_token(move |x| list.borrow_mut().push(Recorded::new(clock.clock(), x)), token));
@@ -144,11 +144,11 @@ fn for_each_async_throw() {
     ]);
 
     let task: TaskSlot = Rc::new(RefCell::new(None));
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     let list: Rc<RefCell<Vec<Recorded<i32>>>> = Rc::new(RefCell::new(Vec::new()));
 
     {
-        let (xs, task, list, clock, token, exception) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.token(), exception.clone());
+        let (xs, task, list, clock, token, exception) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.clone(), exception.clone());
         scheduler.schedule_absolute_action(150, move || {
             *task.borrow_mut() = Some(xs.as_observable().try_for_each_async_with_token(
                 move |x| {
@@ -189,11 +189,11 @@ fn for_each_async_cancel_during() {
     ]);
 
     let task: TaskSlot = Rc::new(RefCell::new(None));
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     let list: Rc<RefCell<Vec<Recorded<i32>>>> = Rc::new(RefCell::new(Vec::new()));
 
     {
-        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.token());
+        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.clone());
         scheduler.schedule_absolute_action(150, move || {
             *task.borrow_mut() =
                 Some(xs.as_observable().for_each_async_with_token(move |x| list.borrow_mut().push(Recorded::new(clock.clock(), x)), token));
@@ -227,13 +227,13 @@ fn for_each_async_cancel_before() {
     ]);
 
     let task: TaskSlot = Rc::new(RefCell::new(None));
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     let list: Rc<RefCell<Vec<Recorded<i32>>>> = Rc::new(RefCell::new(Vec::new()));
 
     cts.cancel();
 
     {
-        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.token());
+        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.clone());
         scheduler.schedule_absolute_action(150, move || {
             *task.borrow_mut() =
                 Some(xs.as_observable().for_each_async_with_token(move |x| list.borrow_mut().push(Recorded::new(clock.clock(), x)), token));
@@ -263,11 +263,11 @@ fn for_each_async_cancel_after() {
     ]);
 
     let task: TaskSlot = Rc::new(RefCell::new(None));
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
     let list: Rc<RefCell<Vec<Recorded<i32>>>> = Rc::new(RefCell::new(Vec::new()));
 
     {
-        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.token());
+        let (xs, task, list, clock, token) = (xs.clone(), task.clone(), list.clone(), scheduler.clone(), cts.clone());
         scheduler.schedule_absolute_action(150, move || {
             *task.borrow_mut() =
                 Some(xs.as_observable().for_each_async_with_token(move |x| list.borrow_mut().push(Recorded::new(clock.clock(), x)), token));
