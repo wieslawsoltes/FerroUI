@@ -277,6 +277,37 @@ fn merge_resource_include_works_with_theme_dictionaries() {
 }
 
 #[test]
+fn empty_theme_variants_merge_with_each_other_and_with_nonempty_variants() {
+    let _base = xaml_test_base();
+    let source = |light: &str, dark: &str| format!(
+        "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key='Default'/>
+                <ResourceDictionary x:Key='Light'>{light}</ResourceDictionary>
+                <ResourceDictionary x:Key='Dark'>{dark}</ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>"
+    );
+    let red = "<SolidColorBrush x:Key='Brush'>Red</SolidColorBrush>";
+    let blue = "<SolidColorBrush x:Key='Brush'>Blue</SolidColorBrush>";
+    let objects = load_group(vec![
+        document("ferres://Tests/A.xaml", &source("", blue)),
+        document("ferres://Tests/B.xaml", &source(red, "")),
+        document_without_uri("<ResourceDictionary xmlns='https://github.com/ferroui'>
+            <ResourceDictionary.MergedDictionaries>
+                <MergeResourceInclude Source='ferres://Tests/A.xaml'/>
+                <MergeResourceInclude Source='ferres://Tests/B.xaml'/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>"),
+    ], None);
+    let dictionary = assert_value_is_type::<ResourceDictionary>(&objects[2]);
+    assert_eq!(dictionary.theme_dictionaries().count(), 3);
+    for (variant, color) in [(ThemeVariant::light(), Colors::RED), (ThemeVariant::dark(), Colors::BLUE)] {
+        assert_eq!(solid_color(&dictionary.try_get_resource(&"Brush".into(), Some(&variant)).unwrap()), color);
+    }
+}
+
+#[test]
 fn merge_resource_include_fails_with_theme_dictionaries_duplicate_resources() {
     let _base = xaml_test_base();
     let documents = vec![

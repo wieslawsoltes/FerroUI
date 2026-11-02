@@ -28,17 +28,24 @@ pub(super) fn invariant_ignore_case_equals(a: Option<&str>, b: &str) -> bool {
     a.is_some_and(|a| a.to_lowercase() == b.to_lowercase())
 }
 
-/// `value is XamlValueWithManipulationNode { Manipulation: XamlObjectInitializationNode {
-/// Manipulation: XamlManipulationGroupNode group } }`.
+/// Get the mutable list of operations for a theme dictionary. XamlX flattens a
+/// single operation: a dictionary whose resource entries were pruned may contain
+/// just its Key assignment. It still participates in a same-variant merge.
 fn theme_dictionary_value_group(
     value: &Rc<dyn IXamlAstValueNode>,
+    dictionary_type: &dyn xamlx::type_system::IXamlType,
 ) -> Option<Rc<XamlManipulationGroupNode>> {
-    value
-        .as_value_with_manipulation_node()?
-        .manipulation()?
-        .cast::<XamlObjectInitializationNode>()?
-        .manipulation()
-        .cast::<XamlManipulationGroupNode>()
+    let initialization = value.as_value_with_manipulation_node()?.manipulation()?.cast::<XamlObjectInitializationNode>()?;
+    let operation = initialization.manipulation();
+    if let Some(group) = operation.cast::<XamlManipulationGroupNode>() {
+        return Some(group);
+    }
+    if !initialization.type_.borrow().equals(dictionary_type) {
+        return None;
+    }
+    let group = XamlManipulationGroupNode::new(&*initialization, Some(vec![operation]));
+    *initialization.manipulation.borrow_mut() = group.clone();
+    Some(group)
 }
 
 /// A `MergeResourceInclude` taken out of the merged dictionaries of a dictionary.
@@ -388,7 +395,7 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
                 continue;
             }
             let key = values[0].clone();
-            let Some(value_group) = theme_dictionary_value_group(&values[1]) else {
+            let Some(value_group) = theme_dictionary_value_group(&values[1], &*resource_dictionary_type) else {
                 continue;
             };
 
@@ -407,7 +414,7 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
                 if prev_values.len() != 2 {
                     continue;
                 }
-                let Some(same_key_prev_value_group) = theme_dictionary_value_group(&prev_values[1])
+                let Some(same_key_prev_value_group) = theme_dictionary_value_group(&prev_values[1], &*resource_dictionary_type)
                 else {
                     continue;
                 };
