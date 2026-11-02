@@ -13,7 +13,7 @@ use ferroui_base::media::{
     StreamGeometry, Typeface,
 };
 use ferroui_base::platform::IGeometryContext;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, FerroObjectImplExt,
@@ -44,7 +44,7 @@ pub struct InkCanvas {
     captured: RefCell<BTreeMap<i32, Rc<dyn IPointer>>>,
     stencil_input: RefCell<InkStencilInput>,
     stencil_labels: RefCell<[Option<CachedStencilLabel>; 2]>,
-    color_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    color_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(InkCanvas: Control);
@@ -111,7 +111,7 @@ impl VisualImpl for InkCanvas {
                     canvas.invalidate_visual();
                 }
             }));
-            let old = this.color_subscription.replace(Some(subscription));
+            let old = this.color_subscription.replace(Some(Subscription::new(subscription)));
             if let Some(old) = old {
                 old.dispose();
             }

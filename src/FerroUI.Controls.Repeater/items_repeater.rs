@@ -26,7 +26,7 @@ use ferroui_base::input::{
 };
 use ferroui_base::interactivity::{InteractiveImpl, RoutingStrategies};
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::FerroObjectExtensions;
 use ferroui_base::{
@@ -59,7 +59,7 @@ pub struct ItemsRepeater {
     context: OnceCell<Ref<VirtualizingLayoutContext>>,
     layout_state: RefCell<Option<BoxedValue>>,
     layout_origin: Cell<Point>,
-    layout_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    layout_subscriptions: RefCell<Vec<Subscription>>,
     phaser: OnceCell<Rc<Phaser>>,
     transitions: OnceCell<Rc<TransitionManager>>,
     pub(crate) view_manager: ViewManager,
@@ -753,9 +753,7 @@ impl ItemsRepeater {
         if let Some(old) = old {
             self.stack_measure_count.set(0);
             old.uninitialize_for_context(&context);
-            for subscription in std::mem::take(&mut *self.layout_subscriptions.borrow_mut()) {
-                subscription.dispose();
-            }
+            drop(self.layout_subscriptions.take());
             for element in self.realized_elements() {
                 self.clear_element_impl(&element);
             }
@@ -780,7 +778,7 @@ impl ItemsRepeater {
         });
         self.layout_subscriptions
             .borrow_mut()
-            .extend([measure, arrange]);
+            .extend([Subscription::new(measure), Subscription::new(arrange)]);
         if self.owns_transition_provider.get() {
             self.transition_manager()
                 .on_transition_provider_changed(layout.create_default_item_transition_provider());
@@ -901,8 +899,6 @@ impl Drop for ItemsRepeater {
         {
             view.remove_collection_changed(token);
         }
-        for subscription in self.layout_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(std::mem::take(self.layout_subscriptions.get_mut()));
     }
 }

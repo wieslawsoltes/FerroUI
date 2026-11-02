@@ -22,7 +22,7 @@ use ferroui_base::input::{FocusChangedEventArgs, InputElement, InputElementImpl,
 use ferroui_base::interactivity::{InteractiveImpl, RoutingStrategies};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -200,7 +200,7 @@ fn set_for_scope(flag: &Cell<bool>) -> Restore<'_> {
 pub struct AutoSuggestBox {
     base: HeaderedItemsControl,
     parts: RefCell<Parts>,
-    template_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    template_subscriptions: RefCell<Vec<Subscription>>,
     text_changed_event_timer: RefCell<Option<Rc<DispatcherTimer>>>,
     text_changed_event_args: RefCell<Option<AutoSuggestBoxTextChangedEventArgs>>,
     generation: Cell<u64>,
@@ -337,9 +337,7 @@ impl InputElementImpl for AutoSuggestBox {
 impl TemplatedControlImpl for AutoSuggestBox {
     fn on_apply_template(this: &Self, args: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, args);
-        for subscription in this.template_subscriptions.take() {
-            subscription.dispose();
-        }
+        drop(this.template_subscriptions.take());
         if let Some(popup) = this.parts.take().suggestions_popup {
             popup.set_is_open(false);
         }
@@ -355,13 +353,13 @@ impl TemplatedControlImpl for AutoSuggestBox {
         let mut subscriptions = Vec::new();
         if let Some(text_box) = &parts.text_box {
             let weak = this.to_ref().downgrade();
-            subscriptions.push(text_box.property_changed(move |change| {
+            subscriptions.push(Subscription::new(text_box.property_changed(move |change| {
                 if change.property() == TextBox::text_property().as_property() {
                     if let Some(this) = weak.upgrade() {
                         this.on_text_box_text_changed();
                     }
                 }
-            }));
+            })));
         }
         if let Some(list) = &parts.suggestions_list {
             let weak = this.to_ref().downgrade();
@@ -371,11 +369,11 @@ impl TemplatedControlImpl for AutoSuggestBox {
                 }
             });
             let weak_list = list.downgrade();
-            subscriptions.push(Disposable::create(move || {
+            subscriptions.push(Subscription::new(Disposable::create(move || {
                 if let Some(list) = weak_list.upgrade() {
                     list.remove_handler(SelectingItemsControl::selection_changed_event(), token);
                 }
-            }));
+            })));
             // OnListViewItemClick: a release of the left button over a suggestion submits it.
             let weak = this.to_ref().downgrade();
             let weak_list = list.downgrade();
@@ -411,11 +409,11 @@ impl TemplatedControlImpl for AutoSuggestBox {
                 true,
             );
             let weak_list = list.downgrade();
-            subscriptions.push(Disposable::create(move || {
+            subscriptions.push(Subscription::new(Disposable::create(move || {
                 if let Some(list) = weak_list.upgrade() {
                     list.remove_handler(InputElement::pointer_released_event(), token);
                 }
-            }));
+            })));
         }
         if let Some(query_button) = &parts.query_button {
             // OnTextBoxQueryButtonClick
@@ -426,11 +424,11 @@ impl TemplatedControlImpl for AutoSuggestBox {
                 }
             });
             let weak_button = query_button.downgrade();
-            subscriptions.push(Disposable::create(move || {
+            subscriptions.push(Subscription::new(Disposable::create(move || {
                 if let Some(button) = weak_button.upgrade() {
                     button.remove_handler(Button::click_event(), token);
                 }
-            }));
+            })));
         }
         if let Some(popup) = &parts.suggestions_popup {
             let weak = this.to_ref().downgrade();
@@ -438,7 +436,7 @@ impl TemplatedControlImpl for AutoSuggestBox {
                 if let Some(this) = weak.upgrade() {
                     this.set_current_value(Self::is_suggestion_list_open_property(), false);
                 }
-            }).detach());
+            }));
         }
         *this.template_subscriptions.borrow_mut() = subscriptions;
         this.set_text_box_query_button_icon();
@@ -902,9 +900,6 @@ impl Drop for AutoSuggestBox {
     fn drop(&mut self) {
         if let Some(timer) = self.text_changed_event_timer.get_mut().take() {
             timer.stop();
-        }
-        for subscription in self.template_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
         }
     }
 }

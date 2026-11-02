@@ -6,7 +6,7 @@ use super::at_spi_constants::{BUS_NAME_A11Y, PATH_A11Y};
 use crate::event::Event;
 use crate::signal_watch::watch_stream;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -16,7 +16,7 @@ const INTERFACE_STATUS: &str = "org.a11y.Status";
 
 pub struct AtSpiAccessibilityWatcher {
     session_connection: RefCell<Option<zbus::Connection>>,
-    properties_watcher: RefCell<Option<Rc<dyn IDisposable>>>,
+    properties_watcher: RefCell<Option<Subscription>>,
     is_enabled: Cell<bool>,
     is_enabled_changed: Event<bool>,
 }
@@ -97,7 +97,7 @@ impl AtSpiAccessibilityWatcher {
             this.is_enabled.set(enabled);
             this.is_enabled_changed.invoke(enabled);
         });
-        *self.properties_watcher.borrow_mut() = Some(watcher);
+        *self.properties_watcher.borrow_mut() = Some(Subscription::new(watcher));
         Ok(())
     }
 

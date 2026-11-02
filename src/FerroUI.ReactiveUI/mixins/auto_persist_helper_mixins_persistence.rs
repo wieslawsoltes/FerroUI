@@ -9,7 +9,7 @@ use ferroui_reactive::disposables::{Disposable, ICancelable, SerialDisposable, S
 use ferroui_reactive::Observer;
 use ferroui_system::collections::object_model::ObservableCollection;
 use ferroui_system::collections::specialized::{NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs};
-use ferroui_system::{IDisposable, IObservable};
+use ferroui_system::{IDisposable, IObservable, SubscribeGuard, Subscription};
 use std::any::TypeId;
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
@@ -364,9 +364,9 @@ struct AutoPersistDriver<T> {
     scheduler: Rc<dyn IScheduler>,
     /// The pending save; scheduling another one disposes it (`_debounce`).
     debounce: Rc<SerialDisposable>,
-    change_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    manual_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    persist_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    change_subscription: RefCell<Option<Subscription>>,
+    manual_subscription: RefCell<Option<Subscription>>,
+    persist_subscription: RefCell<Option<Subscription>>,
     disposed: Cell<bool>,
 }
 
@@ -393,7 +393,7 @@ impl<T: IReactiveObject> AutoPersistDriver<T> {
             disposed: Cell::new(false),
         });
         let observed = driver.clone();
-        let change_subscription = target.changed().subscribe(Observer::create_all(
+        let change_subscription = target.changed().subscribe_guard(Observer::create_all(
             move |args: ReactivePropertyChangedEventArgs<Rc<T>>| {
                 observed.clone().on_property_changed(&args.property_name);
             },
@@ -402,7 +402,7 @@ impl<T: IReactiveObject> AutoPersistDriver<T> {
         ));
         *driver.change_subscription.borrow_mut() = Some(change_subscription);
         let signalled = driver.clone();
-        let manual_subscription = manual_save_signal.subscribe(Observer::create_all(
+        let manual_subscription = manual_save_signal.subscribe_guard(Observer::create_all(
             move |_: S| {
                 signalled.clone().request_save();
             },
@@ -453,15 +453,13 @@ impl<T: IReactiveObject> AutoPersistDriver<T> {
             return;
         };
         let persist = (self.do_persist)(target);
-        let subscription = persist.subscribe(Observer::create_all(|_: ()| {}, |_| {}, || {}));
+        let subscription = persist.subscribe_guard(Observer::create_all(|_: ()| {}, |_| {}, || {}));
         if self.disposed.get() {
             subscription.dispose();
             return;
         }
         let previous = self.persist_subscription.borrow_mut().replace(subscription);
-        if let Some(previous) = previous {
-            previous.dispose();
-        }
+        drop(previous);
     }
 }
 
@@ -470,13 +468,9 @@ impl<T> IDisposable for AutoPersistDriver<T> {
         if self.disposed.replace(true) {
             return;
         }
-        for subscription in [self.change_subscription.borrow_mut().take(), self.manual_subscription.borrow_mut().take()].into_iter().flatten() {
-            subscription.dispose();
-        }
+        drop(self.change_subscription.take());
+        drop(self.manual_subscription.take());
         self.debounce.dispose();
-        let persist = self.persist_subscription.borrow_mut().take();
-        if let Some(persist) = persist {
-            persist.dispose();
-        }
+        drop(self.persist_subscription.take());
     }
 }

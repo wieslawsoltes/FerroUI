@@ -26,7 +26,7 @@ use ferroui_base::media::{
     BackgroundSizing, BoxShadows, DrawingContext, FontWeight, IBrush, ITransform, MatrixTransform,
     PenLineCap, PenLineJoin, PolylineGeometry, TransformGroup, TranslateTransform,
 };
-use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, Observable};
+use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, Observable, Subscription};
 use ferroui_base::styling::Setter;
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -83,7 +83,7 @@ pub struct InkToolbarPenConfigurationControl {
     base: StackPanel,
     // The pen's flyout owns its configuration. Keep the reverse owner link weak.
     pen: RefCell<Option<WeakRef<InkToolbarPenButton>>>,
-    pen_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    pen_subscription: RefCell<Option<Subscription>>,
     palette_subscription: RefCell<Option<(FerroList<Rc<dyn IBrush>>, u64)>>,
     palette_panel: RefCell<Option<Ref<WrapPanel>>>,
     slider: RefCell<Option<Ref<InkToolbarStrokeWidthSlider>>>,
@@ -464,7 +464,7 @@ impl InkToolbarPenConfigurationControl {
                     config.synchronize();
                 }
             });
-            *self.pen_subscription.borrow_mut() = Some(subscription);
+            *self.pen_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
         self.bind_palette();
         self.synchronize();

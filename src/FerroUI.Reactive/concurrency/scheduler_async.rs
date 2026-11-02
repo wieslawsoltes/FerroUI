@@ -200,7 +200,7 @@ impl AwaiterInner {
             }
             continuation();
             // The work has run or been disposed; dropping it ends its hold on this awaiter.
-            drop(self.work.borrow_mut().take());
+            drop(self.work.take());
         }
     }
 

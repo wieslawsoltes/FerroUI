@@ -269,7 +269,7 @@ pub struct AutoCompleteBox {
 
     /// The selection adapter, with the subscriptions to its events.
     adapter: RefCell<Option<Rc<dyn ISelectionAdapter>>>,
-    adapter_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    adapter_subscriptions: RefCell<Vec<Subscription>>,
 
     /// A control that can provide updated string values from a binding.
     value_member_binding_evaluator: RefCell<Option<Ref<BindingEvaluator>>>,
@@ -1393,9 +1393,7 @@ impl AutoCompleteBox {
     pub fn set_selection_adapter(&self, value: Option<Rc<dyn ISelectionAdapter>>) {
         let old = self.adapter.borrow().clone();
         if let Some(old) = old {
-            for subscription in self.adapter_subscriptions.take() {
-                subscription.dispose();
-            }
+            drop(self.adapter_subscriptions.take());
             old.set_items_source(None);
         }
 
@@ -1432,7 +1430,8 @@ impl AutoCompleteBox {
                     this.on_adapter_selection_complete();
                 }
             }));
-            *self.adapter_subscriptions.borrow_mut() = vec![selection_changed, commit, cancel, cancel_complete];
+            *self.adapter_subscriptions.borrow_mut() =
+                [selection_changed, commit, cancel, cancel_complete].map(Subscription::new).into();
             adapter.set_items_source(Some(self.view_source.clone()));
         }
     }

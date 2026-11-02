@@ -6,7 +6,7 @@ use super::at_spi_constants::{BUS_NAME_REGISTRY, REGISTRY_PATH};
 use super::dbus::proxies::OrgA11yAtspiRegistryProxy;
 use crate::signal_watch::watch_stream;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeSet;
 use std::rc::Rc;
@@ -15,8 +15,8 @@ use zbus::proxy::CacheProperties;
 pub(crate) struct AtSpiRegistryEventTracker {
     connection: zbus::Connection,
     registered_events: RefCell<BTreeSet<String>>,
-    registry_registered_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    registry_deregistered_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    registry_registered_subscription: RefCell<Option<Subscription>>,
+    registry_deregistered_subscription: RefCell<Option<Subscription>>,
     has_event_listeners: Cell<bool>,
     disposed: Cell<bool>,
 }
@@ -100,15 +100,15 @@ impl AtSpiRegistryEventTracker {
         }
 
         let weak = Rc::downgrade(self);
-        *self.registry_registered_subscription.borrow_mut() = Some(watch_stream(registered, move |signal| {
+        *self.registry_registered_subscription.borrow_mut() = Some(Subscription::new(watch_stream(registered, move |signal| {
             let (Some(this), Ok(arguments)) = (weak.upgrade(), signal.args()) else { return };
             this.on_registry_event_listener_registered(&arguments.event);
-        }));
+        })));
         let weak = Rc::downgrade(self);
-        *self.registry_deregistered_subscription.borrow_mut() = Some(watch_stream(deregistered, move |signal| {
+        *self.registry_deregistered_subscription.borrow_mut() = Some(Subscription::new(watch_stream(deregistered, move |signal| {
             let (Some(this), Ok(arguments)) = (weak.upgrade(), signal.args()) else { return };
             this.on_registry_event_listener_deregistered(&arguments.event);
-        }));
+        })));
     }
 
     fn on_registry_event_listener_registered(&self, event: &str) {

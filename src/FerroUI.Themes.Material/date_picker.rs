@@ -32,7 +32,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::{FlowDirection, IBrush, TextAlignment, TranslateTransform};
-use ferroui_base::reactive::{AnonymousObserver, IDisposable, Subscription};
+use ferroui_base::reactive::{AnonymousObserver, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::{CultureInfo, DateTime, DayOfWeek};
 use ferroui_base::{
@@ -149,7 +149,7 @@ pub struct MaterialDatePicker {
     date_policy: RefCell<Option<Rc<dyn Fn(DateTime) -> bool>>>,
     year_policy: RefCell<Option<Rc<dyn Fn(i32) -> bool>>>,
     parts: RefCell<Option<Rc<Parts>>>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
     clock_subscription: RefCell<Option<Subscription>>,
     visibility_subscription: RefCell<Option<Subscription>>,
     motion: RefCell<Motion>,
@@ -297,9 +297,7 @@ impl VisualImpl for MaterialDatePicker {
 impl TemplatedControlImpl for MaterialDatePicker {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
-        for subscription in this.subscriptions.borrow_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(this.subscriptions.take());
         this.parts.borrow_mut().take();
         macro_rules! part {
             ($ty:ty,$name:literal) => {
@@ -400,7 +398,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                     },
                     RoutingStrategies::BUBBLE,
                     false,
-                ).detach());
+                ));
         }
         for (index, editor) in [&p.start_input, &p.end_input].iter().enumerate() {
             TextInputOptions::set_content_type(editor, TextInputContentType::Digits);
@@ -418,7 +416,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                     },
                     RoutingStrategies::TUNNEL,
                     false,
-                ).detach());
+                ));
             this.subscriptions
                 .borrow_mut()
                 .push(editor.add_disposable_handler_with(
@@ -434,17 +432,17 @@ impl TemplatedControlImpl for MaterialDatePicker {
                     },
                     RoutingStrategies::TUNNEL,
                     false,
-                ).detach());
+                ));
             let weak = this.to_ref().downgrade();
             this.subscriptions
                 .borrow_mut()
-                .push(editor.property_changed(move |change| {
+                .push(Subscription::new(editor.property_changed(move |change| {
                     if change.property() == TextBox::text_property().as_property() {
                         if let Some(this) = weak.upgrade() {
                             this.input_changed(index);
                         }
                     }
-                }));
+                })));
         }
         let weak = this.to_ref().downgrade();
         this.subscriptions
@@ -458,7 +456,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                 },
                 RoutingStrategies::BUBBLE,
                 false,
-            ).detach());
+            ));
         let weak = this.to_ref().downgrade();
         this.subscriptions
             .borrow_mut()
@@ -468,7 +466,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                         this.scroll_range_to_month();
                     }
                 }
-            }).detach());
+            }));
         let weak = this.to_ref().downgrade();
         this.subscriptions
             .borrow_mut()
@@ -483,7 +481,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                         }
                     }
                 }
-            }).detach());
+            }));
         for kind in 0..3 {
             let weak = this.to_ref().downgrade();
             let subscription = match kind {
@@ -518,7 +516,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                     true,
                 ),
             };
-            this.subscriptions.borrow_mut().push(subscription.detach());
+            this.subscriptions.borrow_mut().push(subscription);
         }
         let weak = this.to_ref().downgrade();
         this.subscriptions
@@ -534,7 +532,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
                 },
                 RoutingStrategies::BUBBLE,
                 true,
-            ).detach());
+            ));
         p.range_months.set_owner(this);
         this.rebuild_weekdays();
         this.refresh_calendar();
@@ -1805,9 +1803,7 @@ impl Drop for MaterialDatePicker {
         if let Some(token) = self.blackout_handler.take() {
             self.blackout_dates().remove_collection_changed(token);
         }
-        for subscription in self.subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(std::mem::take(self.subscriptions.get_mut()));
         if let Some(subscription) = self.clock_subscription.get_mut().take() {
             subscription.dispose();
         }

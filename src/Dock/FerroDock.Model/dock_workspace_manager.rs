@@ -11,7 +11,7 @@ use crate::{
 };
 use ferroui_system::collections::generic::Dictionary;
 use ferroui_system::events::Event;
-use ferroui_system::IDisposable;
+use ferroui_system::{IDisposable, Subscription};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
@@ -96,7 +96,7 @@ pub struct DockWorkspaceManager<S: IDockSerializer> {
     tracking_factory: RefCell<Option<Rc<dyn IFactory>>>,
     tracked_root: RefCell<Option<Rc<dyn IRootDock>>>,
     tracking_options: RefCell<Rc<DockWorkspaceTrackingOptions>>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
     layout_dirty: Cell<bool>,
     last_reported_dirty: Cell<bool>,
     changed: Rc<Event<DockWorkspaceDirtyChangedEventArgs>>,
@@ -304,10 +304,7 @@ impl<S: IDockSerializer> DockWorkspaceManager<S> {
         if self.tracking_factory.borrow().is_none() {
             return;
         }
-        let subscriptions = std::mem::take(&mut *self.subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(self.subscriptions.take());
         self.tracking_factory.replace(None);
         self.tracked_root.replace(None);
         self.tracking_options
@@ -419,7 +416,7 @@ impl<S: IDockSerializer> DockWorkspaceManager<S> {
                         manager.mark_dirty(args.dockable());
                     }
                 }));
-                self.subscriptions.borrow_mut().push(subscription);
+                self.subscriptions.borrow_mut().push(subscription.into());
             }};
         }
         macro_rules! window {
@@ -430,7 +427,7 @@ impl<S: IDockSerializer> DockWorkspaceManager<S> {
                         manager.mark_dirty_window(args.window());
                     }
                 }));
-                self.subscriptions.borrow_mut().push(subscription);
+                self.subscriptions.borrow_mut().push(subscription.into());
             }};
         }
         dockable!(dockable_added);
@@ -456,15 +453,7 @@ impl<S: IDockSerializer> DockWorkspaceManager<S> {
                 }
             }
         }));
-        self.subscriptions.borrow_mut().push(subscription);
-    }
-}
-impl<S: IDockSerializer> Drop for DockWorkspaceManager<S> {
-    fn drop(&mut self) {
-        // Native weak callbacks do not keep managers alive through factory events.
-        for subscription in self.subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
+        self.subscriptions.borrow_mut().push(subscription.into());
     }
 }
 

@@ -390,7 +390,7 @@ mod uikit {
         RawInputModifiers,
     };
     use ferroui_base::logging::{LogEventLevel, Logger};
-    use ferroui_base::reactive::IDisposable;
+    use ferroui_base::reactive::Subscription;
     use ferroui_base::Point;
     use ferroui_controls::presenters::TextPresenter;
     use objc2::rc::{Retained, Weak};
@@ -645,7 +645,7 @@ mod uikit {
         is_in_update: Cell<bool>,
         marked_text: RefCell<Option<Vec<u16>>>,
         input_delegate: RefCell<Option<Weak<ProtocolObject<dyn UITextInputDelegate>>>>,
-        surrounding_text_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+        surrounding_text_changed: RefCell<Option<Subscription>>,
 
         enables_return_key_automatically: Cell<bool>,
         text_content_type: RefCell<Retained<NSString>>,
@@ -741,7 +741,7 @@ mod uikit {
                             this.surrounding_text_changed();
                         }
                     }));
-                    let old = self.ivars().surrounding_text_changed.replace(Some(subscription));
+                    let old = self.ivars().surrounding_text_changed.replace(Some(Subscription::new(subscription)));
                     if let Some(old) = old {
                         old.dispose();
                     }

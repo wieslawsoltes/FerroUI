@@ -7,7 +7,7 @@ use ferroui_base::data::BindingPriority;
 use ferroui_base::input::{InputElementImpl, PullDirection};
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment};
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{ObservableExt, Subscription};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, DirectProperty, FerroObject,
     FerroObjectExtensions, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Rect, Ref,
@@ -24,7 +24,7 @@ pub struct RefreshContainer {
     has_default_refresh_info_provider_adapter: Cell<bool>,
     refresh_info_provider_adapter: RefCell<Option<Rc<ScrollViewerIRefreshInfoProviderAdapter>>>,
     refresh_info_provider: RefCell<Option<Ref<RefreshInfoProvider>>>,
-    visualizer_size_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    visualizer_size_subscription: RefCell<Option<Subscription>>,
     visualizer_presenter: RefCell<Option<Ref<Grid>>>,
     refresh_visualizer: RefCell<Option<Ref<RefreshVisualizer>>>,
     /// The subscription to the refresh requested event of the visualizer.
@@ -109,7 +109,7 @@ impl FerroObjectImpl for RefreshContainer {
                 let object: &FerroObject = &refresh_visualizer;
                 let subscription =
                     FerroObjectExtensions::get_observable(object, Visual::bounds_property())
-                        .subscribe_fn(move |bounds| {
+                        .subscribe_fn_guard(move |bounds| {
                             if let Some(this) = weak.upgrade() {
                                 this.on_visualizer_size_changed(bounds);
                             }
@@ -253,10 +253,7 @@ impl RefreshContainer {
     pub fn set_visualizer(&self, value: Option<Ref<RefreshVisualizer>>) {
         let refresh_visualizer = self.refresh_visualizer.borrow().clone();
         if let Some(refresh_visualizer) = refresh_visualizer {
-            let subscription = self.visualizer_size_subscription.borrow().clone();
-            if let Some(subscription) = subscription {
-                subscription.dispose();
-            }
+            drop(self.visualizer_size_subscription.take());
             if let Some(token) = self.visualizer_refresh_requested.take() {
                 refresh_visualizer.remove_handler(RefreshVisualizer::refresh_requested_event(), token);
             }

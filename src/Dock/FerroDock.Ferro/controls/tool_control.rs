@@ -7,7 +7,7 @@ use ferroui_base::{
     instantiate,
     interactivity::{InteractiveImpl, RoutingStrategies},
     layout::LayoutableImpl,
-    reactive::IDisposable,
+    reactive::Subscription,
     BoxedValue, FerroObjectImpl, FerroProperty, Ref, StyledElementImpl, StyledProperty, VisualImpl,
     VisualImplExt, VisualTreeAttachmentEventArgs,
 };
@@ -22,7 +22,7 @@ use std::{cell::RefCell, rc::Rc};
 #[repr(C)]
 pub struct ToolControl {
     base: TemplatedControl,
-    pressed: RefCell<Option<Rc<dyn IDisposable>>>,
+    pressed: RefCell<Option<Subscription>>,
 }
 ferro_class!(ToolControl:TemplatedControl);
 ferro_class_info!(ToolControl {
@@ -51,15 +51,12 @@ impl VisualImpl for ToolControl {
             move |_, _| owner.pressed_handler(),
             RoutingStrategies::TUNNEL,
             false,
-        ).detach();
+        );
         this.pressed.replace(Some(pressed));
     }
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree(this, e);
-        let pressed = this.pressed.borrow().clone();
-        if let Some(pressed) = pressed {
-            pressed.dispose();
-        }
+        drop(this.pressed.take());
     }
 }
 impl ToolControl {

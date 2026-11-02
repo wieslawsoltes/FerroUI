@@ -10,7 +10,7 @@ mod native_reentrancy_tests {
         TextInputMethodTextBounds,
     };
     use ferroui_base::layout::{ILayoutManager, ILayoutRoot, LayoutManager, Layoutable};
-    use ferroui_base::reactive::Disposable;
+    use ferroui_base::reactive::{Disposable, IDisposable};
     use ferroui_base::rendering::{
         IHitTester, IPresentationSource, IRenderer, ManagedHitTester, RendererDiagnostics,
         SceneInvalidatedEventArgs,
@@ -139,7 +139,7 @@ mod native_reentrancy_tests {
         method
             .client_events
             .borrow_mut()
-            .push(Disposable::create(remove_client(&method)));
+            .push(Disposable::create(remove_client(&method)).into());
         method.set_client(Some(client.clone()));
         assert_removed(&method);
         assert_eq!(client.live_subscriptions.get(), 0);

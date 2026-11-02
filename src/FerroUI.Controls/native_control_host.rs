@@ -7,7 +7,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutHelper, LayoutableImpl};
 use ferroui_base::platform::IOptionalFeatureProvider;
-use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -29,11 +29,11 @@ pub struct NativeControlHost {
     native_control_handle: RefCell<Option<Rc<dyn IPlatformHandle>>>,
     queued_for_destruction: Cell<bool>,
     queued_for_move_resize: Cell<bool>,
-    property_changed_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    property_changed_subscriptions: RefCell<Vec<Subscription>>,
     /// The subscriptions to the changes of the render transforms of the
     /// host and of its visual ancestors (not upstream: see
     /// `subscribe_render_transforms`).
-    render_transform_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    render_transform_subscriptions: RefCell<Vec<Subscription>>,
     native_control_handle_changed: HandlerList<dyn Fn()>,
 }
 
@@ -70,7 +70,7 @@ impl VisualImpl for NativeControlHost {
                     this.property_changed_handler(e);
                 }
             });
-            this.property_changed_subscriptions.borrow_mut().push(subscription);
+            this.property_changed_subscriptions.borrow_mut().push(Subscription::new(subscription));
 
             visual = current.get_visual_parent();
         }
@@ -82,10 +82,7 @@ impl VisualImpl for NativeControlHost {
     // As upstream, the base implementation is not called.
     fn on_detached_from_visual_tree(this: &Self, _e: &VisualTreeAttachmentEventArgs) {
         *this.current_root.borrow_mut() = None;
-        let subscriptions = std::mem::take(&mut *this.property_changed_subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(this.property_changed_subscriptions.take());
         this.unsubscribe_render_transforms();
         this.update_host();
     }
@@ -237,11 +234,11 @@ impl NativeControlHost {
                 render_transform.as_ref().and_then(|render_transform| render_transform.as_mutable_transform())
             {
                 let weak = self.to_ref().downgrade();
-                subscriptions.push(mutable_transform.changed(Rc::new(move || {
+                subscriptions.push(Subscription::new(mutable_transform.changed(Rc::new(move || {
                     if let Some(this) = weak.upgrade() {
                         this.enqueue_for_move_resize();
                     }
-                })));
+                }))));
             }
 
             visual = current.get_visual_parent();
@@ -250,10 +247,7 @@ impl NativeControlHost {
     }
 
     fn unsubscribe_render_transforms(&self) {
-        let subscriptions = std::mem::take(&mut *self.render_transform_subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(self.render_transform_subscriptions.take());
     }
 
     fn update_host(&self) {

@@ -15,7 +15,7 @@ use ferroui_controls::{
 
 use crate::{controls::generated_theme, model_projection};
 use ferroui_base::{
-    reactive::{AnonymousObserver, IDisposable},
+    reactive::{AnonymousObserver, SubscribeGuard, Subscription},
     BoxedValue,
 };
 use std::cell::RefCell;
@@ -24,7 +24,7 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct ToolContentControl {
     base: TemplatedControl,
-    data_context_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    data_context_subscription: RefCell<Option<Subscription>>,
 }
 ferro_class!(ToolContentControl:TemplatedControl);
 ferro_class_info!(ToolContentControl {
@@ -37,7 +37,7 @@ impl VisualImpl for ToolContentControl {
         let weak = this.to_ref().downgrade();
         let subscription =
             FerroObject::get_observable(this, ferroui_base::StyledElement::data_context_property())
-                .subscribe(Rc::new(AnonymousObserver::new(
+                .subscribe_guard(Rc::new(AnonymousObserver::new(
                     move |value: Option<BoxedValue>| {
                         if let Some(this) = weak.upgrade() {
                             this.apply_generated_theme(value.as_ref());
@@ -59,12 +59,7 @@ impl VisualImpl for ToolContentControl {
     }
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree(this, e);
-        let subscription = this.data_context_subscription.borrow().clone();
-        if let Some(subscription) = subscription {
-            subscription.dispose();
-        }
-        let previous = this.data_context_subscription.replace(None);
-        drop(previous);
+        drop(this.data_context_subscription.take());
         this.clear_value(ferroui_base::StyledElement::theme_property());
         if let Some(dockable) = model_projection::dockable(this.data_context().as_ref()) {
             if let Some(factory) = dockable.factory() {

@@ -6,7 +6,7 @@ use ferroui_base::data::core::{Publish, UntypedBindingExpression, UntypedBinding
 use ferroui_base::data::BindingPriority;
 use ferroui_base::logging::LogEventLevel;
 use ferroui_base::media::IBrush;
-use ferroui_base::reactive::{IDisposable, Subscription};
+use ferroui_base::reactive::Subscription;
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{BoxedValue, DoNothingType, FerroProperty, Ref, StyledElement, UnsetValueType, WeakRef};
 use ferroui_controls::Application;
@@ -66,7 +66,7 @@ pub(crate) struct DynamicResourceExpression {
     target_type_is_brush: Cell<bool>,
     theme_variant: RefCell<Option<ThemeVariant>>,
     owner_changed_subscription: RefCell<Option<Subscription>>,
-    host_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    host_subscriptions: RefCell<Vec<Subscription>>,
 }
 
 impl DynamicResourceExpression {
@@ -275,21 +275,21 @@ impl DynamicResourceExpression {
         let mut subscriptions = Vec::with_capacity(2);
 
         let weak = self.this.clone();
-        subscriptions.push(host.resources_changed(Rc::new(move |_: &ResourcesChangedEventArgs| {
+        subscriptions.push(Subscription::new(host.resources_changed(Rc::new(move |_: &ResourcesChangedEventArgs| {
             if let Some(this) = weak.upgrade() {
                 this.publish_value();
             }
-        })));
+        }))));
 
         if !self.override_theme_variant.get() {
             if let Some(theme_variant_host) = host.as_theme_variant_host() {
                 *self.theme_variant.borrow_mut() = theme_variant_host.actual_theme_variant();
                 let weak = self.this.clone();
-                subscriptions.push(theme_variant_host.actual_theme_variant_changed(Rc::new(move || {
+                subscriptions.push(Subscription::new(theme_variant_host.actual_theme_variant_changed(Rc::new(move || {
                     if let Some(this) = weak.upgrade() {
                         this.actual_theme_variant_changed();
                     }
-                })));
+                }))));
             }
         }
 
@@ -297,10 +297,7 @@ impl DynamicResourceExpression {
     }
 
     fn unsubscribe(&self) {
-        let subscriptions = std::mem::take(&mut *self.host_subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(self.host_subscriptions.take());
     }
 }
 

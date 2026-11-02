@@ -1,5 +1,5 @@
 use super::operators::{CombineLatest, CombineLatestEnumerable, Switch};
-use super::{AnonymousObserver, Disposable, IDisposable, IObservable, IObserver, ObservableError};
+use super::{AnonymousObserver, Disposable, IDisposable, IObservable, IObserver, ObservableError, Subscription};
 use std::cell::{Cell, RefCell};
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -133,6 +133,13 @@ impl<T, F: Fn(&T) -> bool> IObserver<T> for FilterObserver<T, F> {
 pub trait ObservableExt<T: 'static> {
     /// Subscribes with a closure invoked for every value.
     fn subscribe_fn(&self, on_next: impl Fn(T) + 'static) -> Rc<dyn IDisposable>;
+
+    /// Subscribes with a closure invoked for every value and returns the guard of the
+    /// subscription: dropping it unsubscribes ([`subscribe_fn`](Self::subscribe_fn) returns the
+    /// handle, which keeps the subscription when it is dropped).
+    fn subscribe_fn_guard(&self, on_next: impl Fn(T) + 'static) -> Subscription {
+        Subscription::new(self.subscribe_fn(on_next))
+    }
 
     /// Projects each value.
     fn select<U: 'static>(&self, f: impl Fn(T) -> U + 'static) -> Rc<dyn IObservable<U>>;

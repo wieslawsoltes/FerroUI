@@ -248,7 +248,7 @@ mod imp {
             let statics = factory::<IApplicationStatics>("Microsoft.UI.Xaml.Application")?;
             step("Application.Start");
             let result = statics.start(Some(&callback));
-            drop(application.borrow_mut().take());
+            drop(application.take());
             wnd_proc_guard::set_pending_hook(None);
             wnd_proc_guard::resume_pending();
             result
