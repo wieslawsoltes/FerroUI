@@ -161,7 +161,7 @@ mod resource_roots;
 pub use resource_roots::trim as trim_resource_documents;
 /// Build-time FXP packaging. Both encoders consume the same document inventory as an AOT group.
 #[cfg(feature = "portable-xaml")]
-pub use ferroui_markup_xaml_loader::binary_document::pack::{compile_documents as compile_archive, compile_solid_documents as compile_solid_archive};
+pub use ferroui_markup_xaml_loader::binary_document::pack::{compile_documents as compile_archive, compile_paged_documents as compile_paged_archive, compile_solid_documents as compile_solid_archive};
 // The model, the scanner and the export are the crate the framework crates scan themselves
 // with (`ferroui-build-scan`, which links nothing of the framework); they are exported
 // here under the names they had in this crate.

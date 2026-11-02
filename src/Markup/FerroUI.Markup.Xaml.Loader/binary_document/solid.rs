@@ -88,6 +88,11 @@ fn graph_size(graph: &EncodedGraph) -> usize {
 /// Compile a complete file for distribution. Random-access editors can use the
 /// independently compressed v1 representation via `compile_documents`.
 pub fn compile_solid_documents(documents: &[(&str, &str)]) -> XamlResult<Vec<u8>> {
+    Ok(compile_page(documents)?.0)
+}
+
+// Return the exact reconstructed indexed size along with the compressed frame.
+pub(super) fn compile_page(documents: &[(&str, &str)]) -> XamlResult<(Vec<u8>, usize)> {
     if documents.is_empty() || documents.len() > MAX_DOCUMENTS {
         return Err(invalid("invalid document count"));
     }
@@ -180,7 +185,7 @@ pub fn compile_solid_documents(documents: &[(&str, &str)]) -> XamlResult<Vec<u8>
     if output.len() > MAX_PACK_BYTES {
         return Err(invalid("solid image too large"));
     }
-    Ok(output)
+    Ok((output, total))
 }
 
 struct Entry<'a> {

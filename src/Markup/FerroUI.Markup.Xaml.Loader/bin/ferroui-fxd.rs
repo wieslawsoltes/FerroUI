@@ -9,12 +9,13 @@ use std::{
     process,
 };
 
-const USAGE: &str = "Usage: ferroui-fxd <input.xaml> <output.fxd>\n       ferroui-fxd --pack <source-directory> <output.fxp>\n       ferroui-fxd --pack-solid <source-directory> <output.fxp>";
+const USAGE: &str = "Usage: ferroui-fxd <input.xaml> <output.fxd>\n       ferroui-fxd --pack <source-directory> <output.fxp>\n       ferroui-fxd --pack-solid <source-directory> <output.fxp>\n       ferroui-fxd --pack-paged <source-directory> <output.fxp>";
 
 enum Format {
     Document,
     IndexedPack,
     SolidPack,
+    PagedPack,
 }
 
 fn run() -> Result<(), Box<dyn Error>> {
@@ -27,6 +28,7 @@ fn run() -> Result<(), Box<dyn Error>> {
         [input, output] => (Format::Document, input, output),
         [flag, input, output] if flag == "--pack" => (Format::IndexedPack, input, output),
         [flag, input, output] if flag == "--pack-solid" => (Format::SolidPack, input, output),
+        [flag, input, output] if flag == "--pack-paged" => (Format::PagedPack, input, output),
         _ => return Err(USAGE.into()),
     };
     let input = Path::new(input);
@@ -37,6 +39,7 @@ fn run() -> Result<(), Box<dyn Error>> {
     let compiled = match mode {
         Format::Document => binary_document::compile(&fs::read_to_string(input)?),
         Format::IndexedPack => binary_document::pack::compile_directory(input),
+        Format::PagedPack => binary_document::pack::compile_paged_directory(input),
         Format::SolidPack => binary_document::pack::compile_solid_directory(input),
     }
     .map_err(|e| e.message())?;

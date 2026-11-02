@@ -8,7 +8,23 @@ use xamlx::exceptions::{XamlError, XamlResult};
 
 #[path = "solid.rs"]
 mod solid;
-pub use solid::{compile_solid_documents, expand_solid, is_solid};
+#[path = "pages.rs"]
+mod pages;
+pub use pages::{changed_documents, compile_paged_documents};
+pub use solid::compile_solid_documents;
+
+/// Both solid encodings expand to the same indexed FXD document model.
+pub fn is_solid(bytes: &[u8]) -> bool {
+    solid::is_solid(bytes) || pages::is_paged(bytes)
+}
+
+pub fn expand_solid(image: &[u8]) -> XamlResult<Vec<u8>> {
+    if pages::is_paged(image) {
+        pages::expand(image)
+    } else {
+        solid::expand_solid(image)
+    }
+}
 
 const MAGIC: &[u8; 4] = b"FXP\0";
 const PACK_VERSION: u8 = 1;
@@ -172,6 +188,11 @@ pub fn compile_directory(root: &Path) -> XamlResult<Vec<u8>> {
 /// Package a directory with cross-document compression for distribution.
 pub fn compile_solid_directory(root: &Path) -> XamlResult<Vec<u8>> {
     compile_directory_with(root, compile_solid_documents)
+}
+
+/// Package a directory for a precompiled installation that accepts edits.
+pub fn compile_paged_directory(root: &Path) -> XamlResult<Vec<u8>> {
+    compile_directory_with(root, compile_paged_documents)
 }
 
 fn compile_directory_with(root: &Path, encode: fn(&[(&str, &str)]) -> XamlResult<Vec<u8>>) -> XamlResult<Vec<u8>> {

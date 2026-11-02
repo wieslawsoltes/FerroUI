@@ -175,7 +175,9 @@ fn compile_theme(mut documents: Vec<(String, String)>, roots: Option<Vec<String>
 
 #[cfg(any(feature = "precompiled-theme", feature = "packed-theme"))]
 fn write_archive(documents: &[(&str, &str)]) {
-    #[cfg(any(feature = "portable-solid-theme", feature = "precompiled-theme"))]
+    #[cfg(feature = "precompiled-theme")]
+    use ferroui_build::compile_paged_archive as encode;
+    #[cfg(all(feature = "portable-solid-theme", not(feature = "precompiled-theme")))]
     use ferroui_build::compile_solid_archive as encode;
     #[cfg(not(any(feature = "portable-solid-theme", feature = "precompiled-theme")))]
     use ferroui_build::compile_archive as encode;
