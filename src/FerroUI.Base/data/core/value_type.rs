@@ -1876,6 +1876,7 @@ fn register_defaults() {
             .map(|duration| crate::animation::SignedDuration::from(*duration).to_string())
             .unwrap_or_default()
     }
+    ValueTypes::register_display::<crate::animation::SignedDuration>();
     with_registry(|r| {
         r.display.insert(TypeId::of::<std::time::Duration>(), display_duration);
     });

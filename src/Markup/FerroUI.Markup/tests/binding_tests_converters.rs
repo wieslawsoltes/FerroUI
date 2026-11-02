@@ -2,14 +2,20 @@
 
 use super::test_support::*;
 use crate::data::Binding;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::converters::{IValueConverter, StringConverters};
 use ferroui_base::data::core::{BindingExpression, Value, ValueType};
-use ferroui_base::data::model::Model;
+use ferroui_base::data::model::{Event, INotifyPropertyChanged, Model};
 use ferroui_base::data::{BindingBase, BindingError, BindingMode};
+use ferroui_base::input::InputElementImpl;
+use ferroui_base::interactivity::InteractiveImpl;
+use ferroui_base::layout::LayoutableImpl;
+use ferroui_base::logging::LogEventLevel;
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::*;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::time::Duration;
 
 struct Class1 {
     foo: RefCell<String>,
@@ -152,4 +158,130 @@ fn converter_culture_should_be_passed_to_converter_convert_back() {
 
     let expected: ConverterCall = ("ConvertBack", Some(s("bar")), ValueType::of::<String>(), false, culture);
     assert_eq!(converter.calls_of("ConvertBack"), [expected]);
+}
+
+// --- the two Rust forms of a time span ------------------------------------------------
+//
+// Not from upstream (C5 of #423, docs/idiomatic-rust-signatures.md): `SignedDuration` and
+// `Duration` are both `System.TimeSpan`, and a binding converts between them with the casts
+// of the untyped value conversions. A negative time span is not a duration: its conversion
+// fails like any conversion a binding cannot make (decision O2), never clamped to zero.
+
+control_class!(
+    /// A control with a property of each Rust form of a time span.
+    DurationControl: Control [interval_property, span_property]
+);
+
+impl DurationControl {
+    ferro_property!(pub fn interval_property() -> StyledProperty<Duration> {
+        FerroProperty::register::<DurationControl, _>("Interval", Duration::from_millis(500))
+    });
+
+    ferro_property!(pub fn span_property() -> StyledProperty<SignedDuration> {
+        FerroProperty::register::<DurationControl, _>("Span", SignedDuration::ZERO)
+    });
+
+    fn interval(&self) -> Duration {
+        self.get_value(Self::interval_property())
+    }
+
+    fn span(&self) -> SignedDuration {
+        self.get_value(Self::span_property())
+    }
+}
+
+/// A view model with a time span and a duration.
+struct Timing {
+    span: Cell<SignedDuration>,
+    interval: Cell<Duration>,
+    property_changed: Event<str>,
+}
+
+impl Timing {
+    fn new(span: SignedDuration, interval: Duration) -> Rc<Self> {
+        Model::new_model(Self { span: Cell::new(span), interval: Cell::new(interval), property_changed: Event::new() })
+    }
+
+    fn set_span(&self, value: SignedDuration) {
+        self.span.set(value);
+        self.property_changed.raise("Span");
+    }
+
+    fn set_interval(&self, value: Duration) {
+        self.interval.set(value);
+        self.property_changed.raise("Interval");
+    }
+}
+
+impl INotifyPropertyChanged for Timing {
+    fn property_changed(&self) -> &Event<str> {
+        &self.property_changed
+    }
+}
+
+ferro_model!(Timing, |b| b
+    .notify_property_changed()
+    .property::<Value<SignedDuration>>("Span", |o| o.span.get(), |o, v| o.set_span(v))
+    .property::<Value<Duration>>("Interval", |o| o.interval.get(), |o, v| o.set_interval(v)));
+
+#[test]
+fn a_binding_casts_between_signed_duration_and_duration() {
+    let source = Timing::new(SignedDuration::from_seconds(1.5), Duration::from_millis(250));
+    let target = DurationControl::new();
+    target.set_data_context(Some(source.clone()));
+
+    // A time span is the duration of the same value.
+    target.bind_binding(DurationControl::interval_property(), &Binding::with_path("Span"));
+    assert_eq!(target.interval(), Duration::from_millis(1500));
+    source.set_span(SignedDuration::from_seconds(2.0));
+    assert_eq!(target.interval(), Duration::from_secs(2));
+
+    // A duration is the time span of the same value, and the binding writes a time span
+    // back as a duration.
+    target.bind_binding(DurationControl::span_property(), &Binding::with_path_and_mode("Interval", BindingMode::TwoWay));
+    assert_eq!(target.span(), SignedDuration::from_seconds(0.25));
+    source.set_interval(Duration::from_secs(3));
+    assert_eq!(target.span(), SignedDuration::from_seconds(3.0));
+    target.set_value(DurationControl::span_property(), SignedDuration::from_seconds(4.0));
+    assert_eq!(source.interval.get(), Duration::from_secs(4));
+}
+
+#[test]
+fn a_negative_span_from_a_binding_is_a_conversion_error_and_keeps_the_value() {
+    let source = Timing::new(SignedDuration::from_seconds(-1.0), Duration::ZERO);
+    let target = DurationControl::new();
+    let _root = TestRoot::with_child(&target);
+    target.set_data_context(Some(source.clone()));
+
+    // The binding reports the conversion error, and the property keeps its value: not the
+    // negative span, not zero.
+    let sink = TestLogSink::start(LogEventLevel::Warning);
+    target.bind_binding(DurationControl::interval_property(), &Binding::with_path("Span"));
+    let logs = sink.stop();
+    assert_eq!(target.interval(), Duration::from_millis(500));
+    assert_eq!(logs.len(), 1, "{logs:?}");
+    assert!(
+        logs[0].property_values.iter().any(|value| value.starts_with("Could not convert '-00:00:01'")),
+        "{logs:?}"
+    );
+
+    // A span that is not negative is set; a negative one again is the unset value of a
+    // binding that fails, as for any value it cannot convert: the property returns to the
+    // value it has without the binding.
+    source.set_span(SignedDuration::from_seconds(1.0));
+    assert_eq!(target.interval(), Duration::from_secs(1));
+    let sink = TestLogSink::start(LogEventLevel::Warning);
+    source.set_span(SignedDuration::from_seconds(-2.0));
+    assert!(!sink.stop().is_empty());
+    assert_eq!(target.interval(), Duration::from_millis(500));
+
+    // The fallback rules of the binding apply: its fallback value stands in for the value
+    // it cannot convert.
+    let target = DurationControl::new();
+    let _root = TestRoot::with_child(&target);
+    target.set_data_context(Some(source.clone()));
+    let binding = Binding::with_path("Span");
+    binding.set_fallback_value(Some(Rc::new(Duration::from_secs(9))));
+    target.bind_binding(DurationControl::interval_property(), &binding);
+    assert_eq!(target.interval(), Duration::from_secs(9));
 }
