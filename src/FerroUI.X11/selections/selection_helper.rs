@@ -7,7 +7,9 @@
 //!   between two waits, so that a transfer can run against a connection
 //!   that is not a server (the tests);
 //! - [`TaskCompletionSource`]: the completion a waiting transfer awaits
-//!   (the class of that name of the reference's base library);
+//!   (the class of that name of the reference's base library), deprecated
+//!   for the one-shot channel of `ferroui_system::task::oneshot`, which it
+//!   wraps;
 //! - [`create_event_window`]: `XLib.CreateEventWindow` of the reference,
 //!   which needs the platform and so does not live with the Xlib calls.
 
@@ -15,12 +17,13 @@ use crate::dispatching::x11_event_dispatcher::EventHandler;
 use crate::x11_platform::FerroX11Platform;
 use crate::x11_window_info::X11WindowInfo;
 use crate::xlib::{self, Atom, PropertyMode, WindowProperty, XDisplay, XID};
+use ferroui_system::task::oneshot;
 use std::cell::RefCell;
 use std::ffi::{c_long, c_ulong};
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
-use std::task::{Context, Poll, Waker};
+use std::task::{Context, Poll};
 use std::time::Duration;
 
 /// How long a transfer waits for the other client.
@@ -110,67 +113,70 @@ pub fn create_event_window(platform: &FerroX11Platform, handler: EventHandler) -
     win
 }
 
-struct CompletionState<T> {
-    result: Option<T>,
-    wakers: Vec<Waker>,
-}
-
-/// A result that is set once and that any number of futures wait for.
+/// A result that is set once and that any number of futures wait for: a one-shot channel
+/// ([`oneshot`]) whose receiver is shared by the futures of [`task`](Self::task).
+#[deprecated(
+    since = "0.5.0",
+    note = "use `ferroui_system::task::oneshot::channel`, with `Receiver::shared` for several waiters"
+)]
 pub struct TaskCompletionSource<T> {
-    state: RefCell<CompletionState<T>>,
+    sender: RefCell<Option<oneshot::Sender<T>>>,
+    receiver: oneshot::SharedReceiver<T>,
 }
 
+#[allow(deprecated)]
 impl<T: Clone> TaskCompletionSource<T> {
     pub fn new() -> Rc<Self> {
-        Rc::new(Self { state: RefCell::new(CompletionState { result: None, wakers: Vec::new() }) })
+        let (sender, receiver) = oneshot::channel();
+        Rc::new(Self { sender: RefCell::new(Some(sender)), receiver: receiver.shared() })
     }
 
     /// Whether the result was set.
     pub fn is_completed(&self) -> bool {
-        self.state.borrow().result.is_some()
+        self.sender.borrow().is_none()
     }
 
     /// Sets the result and wakes whoever waits for it. Returns `false`
     /// when the result was already set.
     pub fn try_set_result(&self, result: T) -> bool {
-        let wakers = {
-            let mut state = self.state.borrow_mut();
-            if state.result.is_some() {
-                return false;
+        // Taken before it sends: the wakers run with the source released, and a waker may poll.
+        let sender = self.sender.borrow_mut().take();
+        match sender {
+            Some(sender) => {
+                // The source keeps a receiver: the value cannot come back.
+                let _ = sender.send(result);
+                true
             }
-            state.result = Some(result);
-            std::mem::take(&mut state.wakers)
-        };
-        // The wakers run with the state released: a waker may poll.
-        for waker in wakers {
-            waker.wake();
+            None => false,
         }
-        true
     }
 
     /// The future that resolves to the result.
     pub fn task(self: &Rc<Self>) -> TaskCompletionFuture<T> {
-        TaskCompletionFuture { source: self.clone() }
+        TaskCompletionFuture { _source: self.clone(), receiver: self.receiver.clone() }
     }
 }
 
 /// The future of a [`TaskCompletionSource`].
+#[deprecated(since = "0.5.0", note = "use `ferroui_system::task::oneshot::SharedReceiver`")]
+#[allow(deprecated)]
 pub struct TaskCompletionFuture<T> {
-    source: Rc<TaskCompletionSource<T>>,
+    /// Keeps the sender of the source: the future waits for the result, never for a
+    /// cancellation, as the source it ports.
+    _source: Rc<TaskCompletionSource<T>>,
+    receiver: oneshot::SharedReceiver<T>,
 }
 
+#[allow(deprecated)]
 impl<T: Clone> Future for TaskCompletionFuture<T> {
     type Output = T;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<T> {
-        let mut state = self.source.state.borrow_mut();
-        if let Some(result) = &state.result {
-            return Poll::Ready(result.clone());
+        match Pin::new(&mut self.get_mut().receiver).poll(cx) {
+            Poll::Ready(Ok(result)) => Poll::Ready(result),
+            // Not while the future keeps the source; a source never canceled its waiters.
+            Poll::Ready(Err(_)) | Poll::Pending => Poll::Pending,
         }
-        if !state.wakers.iter().any(|waker| waker.will_wake(cx.waker())) {
-            state.wakers.push(cx.waker().clone());
-        }
-        Poll::Pending
     }
 }
 
@@ -179,6 +185,7 @@ pub(crate) mod test_support {
     // Not from the reference: what the tests of the selection transfers
     // share.
     use super::*;
+    use std::task::Waker;
     use crate::selections::i_x_event_waiter::{IXEventWaiter, XEventPredicate};
     use crate::xlib::XEvent;
     use ferroui_base::input::LocalBoxFuture;
@@ -332,12 +339,13 @@ pub(crate) mod test_support {
 }
 
 #[cfg(test)]
+#[allow(deprecated)]
 mod tests {
     // Not from the reference, which has no tests for this file.
     use super::*;
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::Arc;
-    use std::task::Wake;
+    use std::task::{Wake, Waker};
 
     struct CountingWaker(AtomicUsize);
 

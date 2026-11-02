@@ -1,6 +1,6 @@
 use super::{StyleActivator, StyleActivatorBase};
 use crate::layout::Layoutable;
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::styling::{Container, ContainerSizing, VisualQueryProvider};
 use crate::{Ref, StyledElement, Visual, WeakRef};
 use std::cell::RefCell;
@@ -16,9 +16,9 @@ pub(crate) struct ContainerQueryActivatorBase {
     container_name: Option<String>,
     visual: RefCell<Option<WeakRef<Visual>>>,
     current_screen_size_provider: RefCell<Option<WeakRef<Layoutable>>>,
-    provider_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
-    visual_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
-    target_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    provider_subscriptions: RefCell<Vec<Subscription>>,
+    visual_subscriptions: RefCell<Vec<Subscription>>,
+    target_subscriptions: RefCell<Vec<Subscription>>,
 }
 
 impl ContainerQueryActivatorBase {
@@ -53,10 +53,7 @@ impl ContainerQueryActivatorBase {
     fn de_initialize_screen_size_provider(&self) {
         let has_provider = self.current_container().is_some_and(|c| Container::get_query_provider(&c).is_some());
         if has_provider {
-            let subscriptions = std::mem::take(&mut *self.provider_subscriptions.borrow_mut());
-            for subscription in subscriptions {
-                subscription.dispose();
-            }
+            drop(self.provider_subscriptions.take());
             *self.current_screen_size_provider.borrow_mut() = None;
         }
     }
@@ -91,8 +88,8 @@ pub(crate) trait ContainerQueryActivator: StyleActivator + Sized {
                         })
                     };
                     let subscriptions = vec![
-                        provider.width_changed(reevaluate(self.weak())),
-                        provider.height_changed(reevaluate(self.weak())),
+                        Subscription::new(provider.width_changed(reevaluate(self.weak()))),
+                        Subscription::new(provider.height_changed(reevaluate(self.weak()))),
                     ];
                     *this.provider_subscriptions.borrow_mut() = subscriptions;
                 }
@@ -119,10 +116,7 @@ pub(crate) trait ContainerQueryActivator: StyleActivator + Sized {
 
         this.de_initialize_screen_size_provider();
 
-        let subscriptions = std::mem::take(&mut *this.visual_subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(this.visual_subscriptions.take());
 
         *this.visual.borrow_mut() = visual.as_ref().map(Ref::downgrade);
 
@@ -139,7 +133,7 @@ pub(crate) trait ContainerQueryActivator: StyleActivator + Sized {
                     this.container_base().de_initialize_screen_size_provider();
                 }
             });
-            *this.visual_subscriptions.borrow_mut() = vec![attached.detach(), detached.detach()];
+            *this.visual_subscriptions.borrow_mut() = vec![attached, detached];
         }
     }
 
@@ -164,7 +158,7 @@ pub(crate) trait ContainerQueryActivator: StyleActivator + Sized {
                         this.reevaluate_is_active();
                     }
                 });
-                *this.target_subscriptions.borrow_mut() = vec![attached.detach(), detached.detach()];
+                *this.target_subscriptions.borrow_mut() = vec![attached, detached];
             }
         }
 
@@ -174,10 +168,7 @@ pub(crate) trait ContainerQueryActivator: StyleActivator + Sized {
 
     fn deinitialize_container_query(&self) {
         let this = self.container_base();
-        let subscriptions = std::mem::take(&mut *this.target_subscriptions.borrow_mut());
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
+        drop(this.target_subscriptions.take());
 
         self.set_visual(None);
     }

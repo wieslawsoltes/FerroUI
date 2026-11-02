@@ -19,7 +19,7 @@ use ferroui_base::layout::{
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::{BackgroundSizing, BoxShadows, DrawingContext, IBrush};
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::{EventArgs, HandlerList};
 use ferroui_base::BoxedValue;
 use ferroui_base::{
@@ -49,7 +49,7 @@ pub struct InkToolbar {
     selection_sync: Cell<bool>,
     recent_tool: RefCell<Option<WeakRef<InkToolbarToolButton>>>,
     current_presenter: RefCell<Option<Rc<InkPresenter>>>,
-    presenter_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    presenter_subscription: RefCell<Option<Subscription>>,
     drawing_attributes: Cell<Option<InkDrawingAttributes>>,
     active_tool_changed: ToolbarHandlers,
     ink_drawing_attributes_changed: ToolbarHandlers,
@@ -855,7 +855,7 @@ impl InkToolbar {
                         }
                     }
                 });
-                *self.presenter_subscription.borrow_mut() = Some(subscription);
+                *self.presenter_subscription.borrow_mut() = Some(Subscription::new(subscription));
             }
         }
         self.refresh_pen_palettes();

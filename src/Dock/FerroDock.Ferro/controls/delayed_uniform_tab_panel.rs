@@ -8,7 +8,7 @@ use ferroui_base::{
     instantiate,
     interactivity::InteractiveImpl,
     layout::{Layoutable, LayoutableImpl},
-    reactive::{AnonymousObserver, IDisposable},
+    reactive::{AnonymousObserver, SubscribeGuard, Subscription},
     threading::DispatcherTimer,
     FerroObject, FerroObjectExtensions, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, Rect, Ref, Size, StyledElement, StyledElementImpl,
@@ -29,7 +29,7 @@ const WIDTH_EPSILON: f64 = 0.1;
 pub struct DelayedUniformTabPanel {
     base: Panel,
     expansion_timer: Rc<DispatcherTimer>,
-    layout_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    layout_subscriptions: RefCell<Vec<Subscription>>,
     current_tab_width: Cell<f64>,
     pending_expansion_width: Cell<f64>,
     last_visible_count: Cell<i32>,
@@ -285,20 +285,20 @@ impl DelayedUniformTabPanel {
         if let Some(dock) = self.find_ancestor_of_type::<DockPanel>() {
             let owner = self.to_ref();
             let subscription = FerroObject::get_observable(&dock, Visual::bounds_property())
-                .subscribe(Rc::new(AnonymousObserver::new(move |_: Rect| {
+                .subscribe_guard(Rc::new(AnonymousObserver::new(move |_: Rect| {
                     owner.invalidate_measure()
                 })));
             self.layout_subscriptions.borrow_mut().push(subscription);
             for child in source_children(dock.children()) {
                 let owner = self.to_ref();
                 let subscription = FerroObject::get_observable(&child, Visual::bounds_property())
-                    .subscribe(Rc::new(AnonymousObserver::new(move |_: Rect| {
+                    .subscribe_guard(Rc::new(AnonymousObserver::new(move |_: Rect| {
                         owner.invalidate_measure()
                     })));
                 self.layout_subscriptions.borrow_mut().push(subscription);
                 let owner = self.to_ref();
                 let subscription =
-                    FerroObject::get_observable(&child, Visual::is_visible_property()).subscribe(
+                    FerroObject::get_observable(&child, Visual::is_visible_property()).subscribe_guard(
                         Rc::new(AnonymousObserver::new(move |_: bool| {
                             owner.invalidate_measure()
                         })),
@@ -308,11 +308,7 @@ impl DelayedUniformTabPanel {
         }
     }
     fn clear_layout_observers(&self) {
-        let subscriptions = self.layout_subscriptions.borrow().clone();
-        for subscription in subscriptions {
-            subscription.dispose();
-        }
-        self.layout_subscriptions.borrow_mut().clear();
+        drop(self.layout_subscriptions.take());
     }
     fn queue_expansion(&self, target: f64) {
         if self.expansion_delay() <= TimeSpan::ZERO {

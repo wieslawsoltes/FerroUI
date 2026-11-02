@@ -1,6 +1,6 @@
 //! Port of `InteractionTriggerBehavior.cs` (`InteractionTriggerBehavior<TInput, TOutput>`).
 
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObjectImpl, FerroProperty, Ref,
     StaticType, StyledElementImpl, StyledProperty, Visual,
@@ -122,7 +122,7 @@ impl fmt::Debug for AnyInteraction {
 #[repr(C)]
 pub struct InteractionTriggerBehavior {
     base: StyledElementTriggerOfT,
-    disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    disposable: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(InteractionTriggerBehavior: StyledElementTriggerOfT);
@@ -155,16 +155,13 @@ ferroui_base::ferro_overrides! {
                 let sender = behavior.associated_object().map(|associated_object| Rc::new(associated_object) as BoxedValue);
                 Interaction::execute_actions(sender.as_ref(), behavior.actions().as_ref(), input.as_ref());
             });
-            *this.disposable.borrow_mut() = Some(disposable);
+            *this.disposable.borrow_mut() = Some(Subscription::new(disposable));
         }
 
         fn on_detached_from_visual_tree(this: &Self) {
             Self::parent_on_detached_from_visual_tree(this);
 
-            let disposable = this.disposable.borrow().clone();
-            if let Some(disposable) = disposable {
-                disposable.dispose();
-            }
+            drop(this.disposable.take());
         }
     }
 }

@@ -26,7 +26,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::{LayoutableImpl, Orientation};
 use ferroui_base::media::FlowDirection;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{
     DirectProperty, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -95,7 +95,7 @@ struct Parts {
 pub struct MaterialTimePicker {
     base: TemplatedControl,
     parts: RefCell<Parts>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
     synchronizing: Cell<bool>,
     editing: Cell<bool>,
     selected_time: Cell<TimeSpan>,
@@ -244,7 +244,7 @@ impl TemplatedControlImpl for MaterialTimePicker {
                         }
                     }
                 });
-                this.subscriptions.borrow_mut().push(subscription);
+                this.subscriptions.borrow_mut().push(Subscription::new(subscription));
                 if role < 2 {
                     let owner = weak.clone();
                     let subscription = button.add_disposable_handler_with(
@@ -256,7 +256,7 @@ impl TemplatedControlImpl for MaterialTimePicker {
                         },
                         RoutingStrategies::BUBBLE,
                         false,
-                    ).detach();
+                    );
                     this.subscriptions.borrow_mut().push(subscription);
                 }
             }
@@ -513,9 +513,7 @@ impl MaterialTimePicker {
         self.raise_event(&e);
     }
     fn release_parts(&self) {
-        for subscription in self.subscriptions.borrow_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(self.subscriptions.take());
         let old = self.parts.replace(Parts::default());
         if let Some(layout) = old.layout {
             layout.owner.borrow_mut().take();
@@ -781,13 +779,6 @@ impl MaterialTimePicker {
             {
                 next.focus_with(NavigationMethod::Tab, KeyModifiers::empty());
             }
-        }
-    }
-}
-impl Drop for MaterialTimePicker {
-    fn drop(&mut self) {
-        for subscription in self.subscriptions.get_mut().drain(..) {
-            subscription.dispose();
         }
     }
 }

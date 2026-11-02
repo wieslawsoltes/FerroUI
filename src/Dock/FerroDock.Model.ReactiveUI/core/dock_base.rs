@@ -11,7 +11,7 @@ use ferroui_reactiveui::{
     reactive_object, ICommand, IReactiveObjectExt, ReactiveCommand, ReactiveObject,
     ReactiveUIBindingExtensions,
 };
-use ferroui_system::{prop, IDisposable};
+use ferroui_system::{prop, IDisposable, Subscription};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::{Rc, Weak};
@@ -29,7 +29,7 @@ pub struct DockBase {
     navigate: Rc<dyn ICommand>,
     close: Rc<dyn ICommand>,
     initialized: Cell<bool>,
-    subscriptions: OnceCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: OnceCell<Vec<Subscription>>,
     visible_dockables: RefCell<Option<DockableList>>,
     active_dockable: RefCell<Option<Rc<dyn IDockable>>>,
     default_dockable: RefCell<Option<Rc<dyn IDockable>>>,
@@ -109,7 +109,7 @@ impl DockBase {
         let dock = Rc::downgrade(runtime);
         let active = runtime
             .when_any_value(prop!(T => active_dockable))
-            .subscribe_next(move |value: Option<Rc<dyn IDockable>>| {
+            .subscribe_next_guard(move |value: Option<Rc<dyn IDockable>>| {
                 if let Some(dock) = dock.upgrade() {
                     if let Some(factory) = dock.factory() {
                         factory.init_active_dockable(value, Some(dock.clone()));
@@ -121,7 +121,7 @@ impl DockBase {
         let dock = Rc::downgrade(runtime);
         let focused = runtime
             .when_any_value(prop!(T => focused_dockable))
-            .subscribe_next(move |value: Option<Rc<dyn IDockable>>| {
+            .subscribe_next_guard(move |value: Option<Rc<dyn IDockable>>| {
                 if let Some(factory) = dock.upgrade().and_then(|dock| dock.factory()) {
                     factory.on_focused_dockable_changed(value);
                 }
@@ -269,11 +269,8 @@ impl DockBase {
 
 impl Drop for DockBase {
     fn drop(&mut self) {
-        if let Some(subscriptions) = self.subscriptions.get_mut() {
-            for subscription in subscriptions {
-                subscription.dispose();
-            }
-        }
+        // The observations of the dock's own properties end before its base drops.
+        drop(self.subscriptions.take());
     }
 }
 

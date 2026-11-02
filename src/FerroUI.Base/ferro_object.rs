@@ -489,6 +489,15 @@ impl FerroObject {
         }
     }
 
+    /// The number of entries of the list of inheritance children, children dropped and not yet
+    /// forgotten included: the length that adding and removing a child walks. For tests that
+    /// check that the list stays proportional to the live children.
+    #[cfg(feature = "testing")]
+    #[doc(hidden)]
+    pub fn inheritance_child_entries(&self) -> usize {
+        self.inheritance_children.borrow().len()
+    }
+
     pub(crate) fn inheritance_children(&self) -> Vec<Ref<FerroObject>> {
         let mut children = self.inheritance_children.borrow_mut();
         if children.is_empty() {

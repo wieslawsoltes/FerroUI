@@ -131,13 +131,13 @@ mod tests {
     // Not from the reference: these types stand for facilities of its
     // runtime and of its D-Bus library.
     use super::*;
-    use crate::dbus_call_queue::completion;
+    use ferroui_system::task::oneshot;
 
     #[test]
     fn a_future_runs_until_the_flag_is_set() {
         let _scope = crate::test_support::scope();
         let flag = CancellationFlag::new();
-        let (_never, pending) = completion::<()>();
+        let (_never, pending) = oneshot::channel::<()>();
         let outcome = Rc::new(RefCell::new(Vec::new()));
 
         {
@@ -147,7 +147,7 @@ mod tests {
                 outcome.borrow_mut().push(first);
                 let second = flag
                     .run(async {
-                        pending.await;
+                        let _ = pending.await;
                         8
                     })
                     .await;

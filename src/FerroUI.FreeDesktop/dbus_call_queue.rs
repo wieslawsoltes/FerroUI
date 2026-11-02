@@ -9,13 +9,12 @@
 
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::threading::Dispatcher;
+use ferroui_system::task::oneshot;
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
 use std::fmt;
 use std::future::Future;
-use std::pin::Pin;
 use std::rc::Rc;
-use std::task::{Context, Poll, Waker};
 
 /// Why a queued call did not give a result.
 #[derive(Debug)]
@@ -101,16 +100,19 @@ impl DBusCallQueue {
     where
         F: Future<Output = DBusResult> + 'static,
     {
-        let (sender, receiver) = completion::<DBusResult>();
+        let (sender, receiver) = oneshot::channel::<DBusResult>();
         self.inner.q.borrow_mut().push_back(Item {
             callback: Box::new(move || Box::pin(cb())),
-            on_finish: Some(Box::new(move |e| match e {
-                None => sender.try_set(Ok(())),
-                Some(e) => sender.try_set(Err(e)),
+            on_finish: Some(Box::new(move |e| {
+                // A caller that dropped the future does not want the result.
+                let _ = sender.send(match e {
+                    None => Ok(()),
+                    Some(e) => Err(e),
+                });
             })),
         });
         self.process();
-        receiver
+        result_of(receiver)
     }
 
     /// Queues a call with a result and gives the future of the result
@@ -123,24 +125,27 @@ impl DBusCallQueue {
         T: 'static,
         F: Future<Output = DBusResult<T>> + 'static,
     {
-        let (sender, receiver) = completion::<DBusResult<T>>();
+        let (sender, receiver) = oneshot::channel::<DBusResult<T>>();
+        // The call sends its value, the end of its item a failure: the first of the two takes the
+        // sender.
+        let sender = Rc::new(RefCell::new(Some(sender)));
         let result_sender = sender.clone();
         self.inner.q.borrow_mut().push_back(Item {
             callback: Box::new(move || {
                 Box::pin(async move {
                     let res = cb().await?;
-                    result_sender.try_set(Ok(res));
+                    try_send(&*result_sender, Ok(res));
                     Ok(())
                 })
             }),
             on_finish: Some(Box::new(move |e| {
                 if let Some(e) = e {
-                    sender.try_set(Err(e));
+                    try_send(&*sender, Err(e));
                 }
             })),
         });
         self.process();
-        receiver
+        result_of(receiver)
     }
 
     /// Makes the queued calls, one after the other (`Process`, an
@@ -200,94 +205,22 @@ impl DBusCallQueue {
     }
 }
 
-/// The two ends of a result that is set once (a `TaskCompletionSource`).
-/// A receiver whose sender is gone without a result resolves as canceled
-/// where the task of the reference would never complete: nothing waits
-/// for ever on a call that was dropped.
-pub(crate) fn completion<T: CanceledValue>() -> (CompletionSender<T>, CompletionReceiver<T>) {
-    let state = Rc::new(CompletionState { value: RefCell::new(None), waker: RefCell::new(None), senders: Cell::new(1) });
-    (CompletionSender { state: state.clone() }, CompletionReceiver { state })
+/// The future of the result of a queued call, the receiver of a one-shot channel (a
+/// `TaskCompletionSource`). A call whose sender is gone without a result resolves as canceled
+/// where the task of the reference would never complete: nothing waits for ever on a call that
+/// was dropped.
+async fn result_of<T>(receiver: oneshot::Receiver<DBusResult<T>>) -> DBusResult<T> {
+    receiver.await.unwrap_or(Err(DBusCallError::Canceled))
 }
 
-/// A result type that can say "canceled".
-pub(crate) trait CanceledValue {
-    fn canceled() -> Self;
-}
-
-impl<T> CanceledValue for DBusResult<T> {
-    fn canceled() -> Self {
-        Err(DBusCallError::Canceled)
-    }
-}
-
-impl CanceledValue for () {
-    fn canceled() -> Self {}
-}
-
-struct CompletionState<T> {
-    value: RefCell<Option<T>>,
-    waker: RefCell<Option<Waker>>,
-    senders: Cell<usize>,
-}
-
-impl<T> CompletionState<T> {
-    fn wake(&self) {
-        if let Some(waker) = self.waker.borrow_mut().take() {
-            waker.wake();
-        }
-    }
-}
-
-pub(crate) struct CompletionSender<T> {
-    state: Rc<CompletionState<T>>,
-}
-
-impl<T> CompletionSender<T> {
-    /// Sets the result unless one was set (`TrySetResult`).
-    pub(crate) fn try_set(&self, value: T) {
-        {
-            let mut slot = self.state.value.borrow_mut();
-            if slot.is_some() {
-                return;
-            }
-            *slot = Some(value);
-        }
-        self.state.wake();
-    }
-}
-
-impl<T> Clone for CompletionSender<T> {
-    fn clone(&self) -> Self {
-        self.state.senders.set(self.state.senders.get() + 1);
-        Self { state: self.state.clone() }
-    }
-}
-
-impl<T> Drop for CompletionSender<T> {
-    fn drop(&mut self) {
-        self.state.senders.set(self.state.senders.get() - 1);
-        if self.state.senders.get() == 0 {
-            self.state.wake();
-        }
-    }
-}
-
-pub(crate) struct CompletionReceiver<T> {
-    state: Rc<CompletionState<T>>,
-}
-
-impl<T: CanceledValue> Future for CompletionReceiver<T> {
-    type Output = T;
-
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<T> {
-        if let Some(value) = self.state.value.borrow_mut().take() {
-            return Poll::Ready(value);
-        }
-        if self.state.senders.get() == 0 {
-            return Poll::Ready(T::canceled());
-        }
-        *self.state.waker.borrow_mut() = Some(cx.waker().clone());
-        Poll::Pending
+/// Sends `value` unless the sender was taken already (`TrySetResult` of a source two callbacks
+/// share).
+fn try_send<T>(sender: &RefCell<Option<oneshot::Sender<T>>>, value: T) {
+    // Taken before it sends: sending may poll the task that waits right away.
+    let sender = sender.borrow_mut().take();
+    if let Some(sender) = sender {
+        // A caller that dropped the future does not want the result.
+        let _ = sender.send(value);
     }
 }
 
@@ -315,13 +248,13 @@ mod tests {
         let _scope = crate::test_support::scope();
         let log = Rc::new(RefCell::new(Vec::new()));
         let queue = queue_with_log(&log);
-        let (release_first, first_released) = completion::<()>();
+        let (release_first, first_released) = oneshot::channel::<()>();
 
         {
             let log = log.clone();
             queue.enqueue(move || async move {
                 log.borrow_mut().push("first starts".to_string());
-                first_released.await;
+                let _ = first_released.await;
                 log.borrow_mut().push("first ends".to_string());
                 Ok(())
             });
@@ -338,7 +271,7 @@ mod tests {
         // The second call waits for the first.
         assert_eq!(*log.borrow(), ["first starts"]);
 
-        release_first.try_set(());
+        release_first.send(()).unwrap();
         Dispatcher::ui_thread().run_jobs(None);
         assert_eq!(*log.borrow(), ["first starts", "first ends", "second"]);
     }
@@ -397,10 +330,10 @@ mod tests {
         let _scope = crate::test_support::scope();
         let log = Rc::new(RefCell::new(Vec::new()));
         let queue = queue_with_log(&log);
-        let (release_first, first_released) = completion::<()>();
+        let (release_first, first_released) = oneshot::channel::<()>();
 
         queue.enqueue(move || async move {
-            first_released.await;
+            let _ = first_released.await;
             Ok(())
         });
         let waiting = queue.enqueue_async_with_result(|| async { Ok(1) });
@@ -414,7 +347,7 @@ mod tests {
         Dispatcher::ui_thread().run_jobs(None);
 
         queue.fail_all();
-        release_first.try_set(());
+        release_first.send(()).unwrap();
 
         let result = Rc::new(RefCell::new(None));
         {

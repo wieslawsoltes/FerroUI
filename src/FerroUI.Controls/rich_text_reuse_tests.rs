@@ -64,3 +64,37 @@ fn a_font_change_of_the_view_rebuilds_every_paragraph() {
         }
     }
 }
+
+#[test]
+fn a_paragraph_break_and_its_undo_keep_the_paragraphs_they_do_not_touch() {
+    // F1c (#439): a structural edit, and the undo that restores the snapshot from before it,
+    // rebuild the paragraphs they change; the others keep their elements and so their runs,
+    // shaping caches and lines.
+    use crate::rich_text::{EditKind, EditorSelection, RichTextEditor};
+    let _scope = crate::test_support::test_scope();
+    let view = view();
+    let editor = RichTextEditor::new(view.rich_document());
+    let before = caches(&view);
+    let before_lines = lines(&view);
+    // "first paragraph\nsecond| paragraph\nthird paragraph"
+    editor.set_selection(EditorSelection::caret(22)).unwrap();
+    editor.insert_text("\n", EditKind::Typing).unwrap();
+    view.measure(Size::new(300.0, f64::INFINITY));
+    let split = caches(&view);
+    let split_lines = lines(&view);
+    assert_eq!(split.len(), 4);
+    assert!(Rc::ptr_eq(&before[0], &split[0]));
+    assert!(!Rc::ptr_eq(&before[1], &split[1]));
+    assert!(Rc::ptr_eq(&before[2], &split[3]));
+    assert!(Rc::ptr_eq(&before_lines[0], &split_lines[0]));
+    assert!(Rc::ptr_eq(&before_lines[2], &split_lines[3]));
+    editor.undo().unwrap();
+    view.measure(Size::new(300.0, f64::INFINITY));
+    let undone = caches(&view);
+    let undone_lines = lines(&view);
+    assert_eq!(undone.len(), 3);
+    assert!(Rc::ptr_eq(&before[0], &undone[0]));
+    assert!(Rc::ptr_eq(&before[2], &undone[2]));
+    assert!(Rc::ptr_eq(&before_lines[0], &undone_lines[0]));
+    assert!(Rc::ptr_eq(&before_lines[2], &undone_lines[2]));
+}

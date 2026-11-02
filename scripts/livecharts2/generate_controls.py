@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Generate repetitive native property declarations, not chart algorithms.
 
-From the LiveCharts2 port of #312 (docs/porting/livecharts2.md): the Cartesian and pie charts of L2;
-the polar, Sankey, treemap and geographic charts add their rows with their engines (L4).
+From the LiveCharts2 port of #312 (docs/porting/livecharts2.md): the Cartesian and pie charts of L2
+and the polar chart of L4; the Sankey, treemap and geographic charts add their rows with their
+engines.
 
 The generated classes remain ordinary FerroUI classes visible to the XAML source
 scanner. This replaces the managed UI-property generator for this native host.
@@ -72,12 +73,12 @@ axis_props = [
  ('min_step','MinStep','f64','0.0'),('force_step','ForceStep','bool','false'),
  ('unit_width','UnitWidth','f64','1.0'),('inverted','IsInverted','bool','false'),
  ('visible','IsVisible','bool','true'),('show_separator_lines','ShowSeparatorLines','bool','true'),
- ('position','Position','AxisPosition','AxisPosition::Start'),('text_size','TextSize','f64','12.0'),
+ ('position','Position','AxisPosition','AxisPosition::Start'),('text_size','TextSize','f64','16.0'),
  ('labels_rotation','LabelsRotation','f64','0.0'),('labels_color','LabelsColor','Color','Color::from_rgb(75,85,99)'),
  ('separators_color','SeparatorsColor','Color','Color::from_argb(50,107,114,128)'),
  ('logarithmic_base','LogarithmicBase','Option<f64>','None'),('padding','Padding','f64','0.0'),
  ('min_separators','MinSeparators','u32','3'),('labels_angle','LabelsAngle','f64','0.0'),
- ('custom_separators','CustomSeparators','Vec<f64>','Vec::new()'),('labels_padding','LabelsPadding','f64','3.0'),
+ ('custom_separators','CustomSeparators','Vec<f64>','Vec::new()'),('labels_padding','LabelsPadding','Option<f64>','None'),
  ('labels_density','LabelsDensity','f64','0.85')]
 axis = HEADER + IMPORTS + '''use ferroui_base::media::Color;
 use ferroui_livecharts::{Axis as AxisSnapshot, AxisPosition};
@@ -140,7 +141,7 @@ pub struct ChartSeries {
     base: FerroObject,
     entity_id:u64,
     values_listener: RefCell<Option<(ChartPoints,u64)>>,
-    point_listeners: RefCell<Vec<Rc<dyn IDisposable>>>,
+    point_listeners: RefCell<Vec<Subscription>>,
     brush_listeners: RefCell<Vec<Subscription>>,
     changed: HandlerList<dyn Fn()>,
 }
@@ -192,8 +193,7 @@ impl ChartSeries {
     fn clear_values_listener(&self) {
         let old=self.values_listener.borrow_mut().take();
         if let Some((values,token))=old { values.remove_collection_changed(token); }
-        let previous=std::mem::take(&mut *self.point_listeners.borrow_mut());
-        for listener in previous {listener.dispose();}
+        drop(self.point_listeners.take());
     }
     fn rebind_values(&self) {
         self.clear_values_listener();
@@ -205,7 +205,7 @@ impl ChartSeries {
         let mut listeners=Vec::new();
         for point in values.to_vec() {
             let weak=self.to_ref().downgrade();
-            listeners.push(point.property_changed(move |_|{if let Some(this)=weak.upgrade(){this.notify_changed();}}));
+            listeners.push(Subscription::new(point.property_changed(move |_|{if let Some(this)=weak.upgrade(){this.notify_changed();}})));
         }
         *self.point_listeners.borrow_mut()=listeners;
     }
@@ -216,7 +216,7 @@ impl ChartSeries {
 }
 impl Drop for ChartSeries { fn drop(&mut self) {
     if let Some((values,token))=self.values_listener.get_mut().take(){values.remove_collection_changed(token);}
-    for listener in self.point_listeners.get_mut().drain(..){listener.dispose();}
+    drop(std::mem::take(self.point_listeners.get_mut()));
     for listener in self.brush_listeners.get_mut().drain(..){listener.dispose();}
 } }
 ''' + properties('ChartSeries',series_props)
@@ -226,7 +226,7 @@ families = [('LineSeries','Line'),('StepLineSeries','StepLine'),('AreaSeries','A
 ('ColumnSeries','Column'),('RowSeries','Row'),('StackedColumnSeries','StackedColumn'),
 ('StackedRowSeries','StackedRow'),('ScatterSeries','Scatter'),('HeatSeries','Heat'),
 ('RangeColumnSeries','RangeColumn'),('RangeRowSeries','RangeRow'),('RangeLineSeries','RangeLine'),
-('CandlesticksSeries','Financial'),('BoxSeries','Box'),('PieSeries','Pie')]
+('CandlesticksSeries','Financial'),('BoxSeries','Box'),('PieSeries','Pie'),('PolarLineSeries','PolarLine')]
 classes = HEADER + '''use crate::ChartSeries;
 use ferroui_base::{ferro_class,ferro_class_info,instantiate,FerroObjectImpl,FerroObjectImplExt,Ref};
 use ferroui_livecharts::SeriesKind;
@@ -241,8 +241,13 @@ impl FerroObjectImpl for {name} {{
 }}
 impl {name} {{
     fn static_constructor() {{
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults=ferroui_livecharts::Series::new(SeriesKind::{kind});
         ChartSeries::kind_property().override_default_value::<{name}>(SeriesKind::{kind});
-        ChartSeries::data_padding_property().override_default_value::<{name}>(ferroui_livecharts::Series::default_data_padding(SeriesKind::{kind}));
+        ChartSeries::data_padding_property().override_default_value::<{name}>(defaults.data_padding);
+        ChartSeries::geometry_size_property().override_default_value::<{name}>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<{name}>(defaults.padding);
+        ChartSeries::max_bar_width_property().override_default_value::<{name}>(defaults.max_bar_width);
     }}
     pub fn construct()->Self {{Self{{base:ChartSeries::construct()}}}}
     pub fn new()->Ref<Self> {{instantiate(Self::construct())}}
@@ -305,7 +310,13 @@ use ferroui_base::{ferro_class,ferro_class_info,ferro_impl_classes,instantiate,F
 use ferroui_base::{input::InputElementImpl,interactivity::InteractiveImpl,layout::LayoutableImpl};
 use ferroui_controls::ControlImpl;
 '''
-for cls,kind in [('CartesianChart','Cartesian'),('PieChart','Pie')]:
+# The chart classes, their kind and the defaults their source view takes from LiveChartsSettings
+# (PolarInitialRotation = -90: the angle zero points up).
+chart_families=[('CartesianChart','Cartesian',[]),('PieChart','Pie',[]),
+                ('PolarChart','Polar',[('initial_rotation','-90.0')])]
+for cls,kind,defaults in chart_families:
+    overrides=''.join(f'Chart::{prop}_property().override_default_value::<{cls}>({value});' for prop,value in defaults)
+    static=f'fn static_constructor(){{{overrides}}}' if overrides else ''
     chart_classes+=f'''
 #[repr(C)]
 pub struct {cls}{{base:Chart}}
@@ -316,6 +327,7 @@ impl FerroObjectImpl for {cls}{{
     fn constructed(this:&Self){{Self::parent_constructed(this);this.set_chart_kind(ChartKind::{kind});}}
 }}
 impl {cls}{{
+    {static}
     pub fn construct()->Self{{Self{{base:Chart::construct()}}}}
     pub fn new()->Ref<Self>{{instantiate(Self::construct())}}
 }}

@@ -6,7 +6,7 @@ use ferroui_base::media::{
     subscribe_invalidated, Brushes, FontFamily, FontFeatureCollection, FontStretch, FontStyle,
     FontWeight, IBrush,
 };
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{
     ferro_class, ferro_property, AttachedProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt, Ref,
@@ -34,7 +34,7 @@ mod text_element_namescope_tests;
 pub struct TextElement {
     base: StyledElement,
     inline_host: RefCell<Option<Rc<dyn IInlineHost>>>,
-    media_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    media_subscriptions: RefCell<Vec<Subscription>>,
 }
 
 ferro_class! {
@@ -77,13 +77,6 @@ impl FerroObjectImpl for TextElement {
     }
 }
 
-impl Drop for TextElement {
-    fn drop(&mut self) {
-        for subscription in self.media_subscriptions.get_mut().drain(..) {
-            subscription.dispose();
-        }
-    }
-}
 
 impl TextElementImpl for TextElement {
     fn on_inline_host_changed(
@@ -300,10 +293,7 @@ impl TextElement {
     }
 
     fn refresh_media_subscriptions(&self) {
-        let old = std::mem::take(&mut *self.media_subscriptions.borrow_mut());
-        for subscription in old {
-            subscription.dispose();
-        }
+        drop(self.media_subscriptions.take());
         let mut subscriptions = Vec::new();
         if let Some(features) = self.font_features() {
             let weak = self.to_ref().downgrade();
@@ -320,7 +310,7 @@ impl TextElement {
                         }
                     }
                 }
-            }).detach());
+            }));
         }
         for brush in [self.foreground(), self.background()] {
             if brush.as_ref().and_then(|brush| brush.as_object()).is_none() {
@@ -333,7 +323,7 @@ impl TextElement {
                 }
             });
             if let Some(subscription) = subscribe_invalidated(&brush, changed) {
-                subscriptions.push(subscription);
+                subscriptions.push(Subscription::new(subscription));
             }
         }
         *self.media_subscriptions.borrow_mut() = subscriptions;

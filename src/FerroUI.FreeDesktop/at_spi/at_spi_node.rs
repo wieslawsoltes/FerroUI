@@ -18,7 +18,7 @@ use super::handlers::at_spi_selection_handler::AtSpiSelectionHandler;
 use super::handlers::at_spi_text_handler::AtSpiTextHandler;
 use super::handlers::at_spi_value_handler::AtSpiValueHandler;
 use super::root_at_spi_node::RootAtSpiNode;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{BoxedValue, Ref};
 use super::dbus::types::AtSpiAttributeSet;
 use ferroui_controls::automation::peers::{AutomationControlType, AutomationPeer, ControlAutomationPeer};
@@ -62,9 +62,9 @@ pub(crate) struct AtSpiNode {
     peer: Ref<AutomationPeer>,
     server: Weak<AtSpiServer>,
     parent: RefCell<Option<Weak<AtSpiNode>>>,
-    path_registration: RefCell<Option<Rc<dyn IDisposable>>>,
+    path_registration: RefCell<Option<Subscription>>,
     handlers: RefCell<NodeHandlers>,
-    peer_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    peer_subscriptions: RefCell<Vec<Subscription>>,
     /// The part of a node of a window (`RootAtSpiNode`).
     root: Option<RootAtSpiNode>,
 }
@@ -237,7 +237,7 @@ impl AtSpiNode {
         if let Some(previous) = previous_registration {
             previous.dispose();
         }
-        *self.path_registration.borrow_mut() = Some(connection.register_objects(&self.path, targets));
+        *self.path_registration.borrow_mut() = Some(Subscription::new(connection.register_objects(&self.path, targets)));
     }
 
     pub(crate) fn get_accessible_name(peer: &AutomationPeer) -> String {
@@ -316,13 +316,13 @@ impl AtSpiNode {
             if let Some(node) = weak.upgrade() {
                 node.on_peer_children_changed();
             }
-        }).detach();
+        });
         let weak = self.weak_self.clone();
         let property_changed = self.peer.property_changed(move |e| {
             if let Some(node) = weak.upgrade() {
                 node.on_peer_property_changed(e);
             }
-        }).detach();
+        });
         *self.peer_subscriptions.borrow_mut() = vec![children_changed, property_changed];
 
         if let Some(connection) = self.server().and_then(|server| server.a11y_connection()) {
@@ -531,9 +531,7 @@ impl AtSpiNode {
         self.children_dirty.set(true);
         self.attached_children.borrow_mut().clear();
         *self.parent.borrow_mut() = None;
-        for subscription in self.peer_subscriptions.borrow_mut().drain(..) {
-            subscription.dispose();
-        }
+        drop(self.peer_subscriptions.take());
         self.dispose_path_registration();
     }
 
