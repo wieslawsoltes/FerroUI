@@ -68,23 +68,28 @@ def positive_int(text):
 
 
 def measure_launches(executables, rounds):
+    return measure_commands({path: [path] for path in executables}, rounds)
+
+
+def measure_commands(commands, rounds):
     # Rotate each executable through first and last positions so slow drift
     # during the run does not systematically favor the candidate or baseline.
+    executables = list(commands)
     samples = {path: [] for path in executables}
-    for executable in executables:
-        command_output([executable])
+    for command in commands.values():
+        command_output(command)
     for index in range(rounds):
         offset = index % len(executables)
         for executable in executables[offset:] + executables[:offset]:
             start = time.perf_counter_ns()
             # The probe flushes a line after resolving Button. Waiting for process
             # exit here would also charge theme destruction to user-visible startup.
-            with subprocess.Popen([executable], stdout=subprocess.PIPE, text=True) as process:
+            with subprocess.Popen(commands[executable], stdout=subprocess.PIPE, text=True) as process:
                 output = process.stdout.readline()
                 ready = time.perf_counter_ns() - start
                 return_code = process.wait()
                 if return_code:
-                    raise subprocess.CalledProcessError(return_code, [executable])
+                    raise subprocess.CalledProcessError(return_code, commands[executable])
             elapsed = time.perf_counter_ns() - start
             create, lookup = map(int, output.split())
             samples[executable].append({
@@ -145,7 +150,11 @@ def main():
     parser.add_argument("--launches", type=positive_int, default=15, help="number of measured, fresh-process launches")
     parser.add_argument("--compare-with", type=Path, action="append", default=[],
                         help="also time a previous work directory's stripped-probe, interleaved with the new one")
+    parser.add_argument("--compare-archive", type=Path, action="append", default=[],
+                        help="also launch the precompiled consumer with an FXP file on disk")
     args = parser.parse_args()
+    if args.compare_archive and not args.precompiled:
+        parser.error("--compare-archive requires --precompiled")
     if args.max_theme_bytes and not args.lld_link_map:
         parser.error("--max-theme-bytes requires --lld-link-map")
     if args.compact_app and args.lld_link_map:
@@ -237,7 +246,13 @@ def main():
         parser.error("each probe must have a distinct path")
     # Warm the OS page cache first. Each timed sample performs actual theme
     # construction and a checked deferred lookup in a fresh process.
-    samples = measure_launches(executables, args.launches)
+    commands = {path: [path] for path in executables}
+    for path in args.compare_archive:
+        archive = path.resolve()
+        if archive in commands:
+            parser.error("each comparison must have a distinct path")
+        commands[archive] = [stripped, archive]
+    samples = measure_commands(commands, args.launches)
     launches = samples[stripped]
     result = {
         "revision": command_output(["git", "rev-parse", "HEAD"], source),
@@ -262,7 +277,7 @@ def main():
         "launches": launches,
         "median": {k: statistics.median(sample[k] for sample in launches) for k in launches[0]},
     }
-    if args.compare_with:
+    if args.compare_with or args.compare_archive:
         result["interleaved_launches"] = {str(path): rows for path, rows in samples.items()}
     report = json.dumps(result, indent=2) + "\n"
     (work / "report.json").write_text(report)
