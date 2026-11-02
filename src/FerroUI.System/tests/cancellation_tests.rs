@@ -1,9 +1,10 @@
 //! Tests of `threading::CancellationToken` in the shape of `tokio_util` (step A4 of phase C4 of
 //! #423, docs/idiomatic-rust-async.md, section 3.7): the callbacks and their guards, the local
 //! callbacks, child tokens, the future of the cancellation, the drop guard, reentrant callbacks,
-//! and the source over the token.
+//! the source over the token, and the conversions of the cancellation errors.
 
-use crate::task::{block_on, run_pending};
+use crate::task::{block_on, run_pending, Canceled};
+use crate::threading::tasks::TaskCanceledError;
 use crate::threading::{
     CancellationGuard, CancellationToken, CancellationTokenSource, DropGuard, WaitForCancellation,
 };
@@ -352,4 +353,12 @@ fn a_source_is_a_token_that_can_be_canceled_and_its_registrations_stay_when_drop
     let source = CancellationTokenSource::new();
     source.token().cancel();
     assert!(source.is_cancellation_requested());
+}
+
+#[test]
+fn the_cancellation_errors_convert_to_and_from_canceled() {
+    let error: TaskCanceledError = Canceled.into();
+    assert_eq!(error, TaskCanceledError::default());
+    let canceled: Canceled = TaskCanceledError { task_id: Some(7) }.into();
+    assert_eq!(canceled, Canceled);
 }
