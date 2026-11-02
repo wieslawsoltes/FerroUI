@@ -155,6 +155,14 @@ wait_for grep -qx 'received F8' "$output/gtk.log"
 kill "$gtk_second"; wait "$gtk_second" || :; gtk_second=
 pointer set 20 445
 wait_for has_color 9354ba absent
+# The same app slot now has one window. A click minimizes it, and the
+# next restores both the client pixels and the native keyboard seat.
+wait_for has_color d76a3d
+click "$tx" "$ty"; wait_for has_color d76a3d absent
+click "$tx" "$ty"; wait_for has_color d76a3d
+wtype -s 90 -k F8
+received_again() { [[ $(grep -cx 'received F8' "$output/gtk.log") == 2 ]]; }
+wait_for received_again
 echo "Verified grouped taskbar previews, live client repaint and selection of a specific native window."
 scene_is() { [[ $("$binary" --platform=wayland --current-scene 2>/dev/null) == "$1" ]]; }
 "$binary" --platform=wayland --show=workspaces
