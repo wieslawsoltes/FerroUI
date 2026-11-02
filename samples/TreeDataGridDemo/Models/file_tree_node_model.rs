@@ -16,7 +16,7 @@ use ferroui_base::animation::TimeSpan;
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::model::{Event, INotifyPropertyChanged, ModelTypes};
 use ferroui_base::ferro_markup_type;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::{DateTimeOffset, StringComparison};
 use ferroui_controls_treedatagrid::models::{register_editable_model, IEditableObject};
@@ -73,7 +73,7 @@ pub struct FileTreeNodeModel {
     size: Cell<Option<i64>>,
     modified: Cell<Option<DateTimeOffset>>,
     // The polling timer that stands in for the reference's `FileSystemWatcher`.
-    watcher: RefCell<Option<Rc<dyn IDisposable>>>,
+    watcher: RefCell<Option<Subscription>>,
     children: RefCell<Option<Rc<FerroList<Rc<FileTreeNodeModel>>>>>,
     has_children: Cell<bool>,
     is_expanded: Cell<bool>,

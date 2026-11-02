@@ -381,7 +381,8 @@ impl TextSelectionHandleCanvas {
                     },
                     Duration::from_secs(5),
                     DispatcherPriority::BACKGROUND,
-                );
+                )
+                .detach();
                 *self.show_disposable.borrow_mut() = Some(show_disposable);
             }
         }

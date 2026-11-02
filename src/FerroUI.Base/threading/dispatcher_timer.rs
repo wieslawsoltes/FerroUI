@@ -4,7 +4,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use super::{Dispatcher, DispatcherOperation, DispatcherPriority};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::utilities::HandlerList;
 use crate::BoxedValue;
 
@@ -198,12 +198,10 @@ impl DispatcherTimer {
     /// Starts a new timer.
     ///
     /// `action` is called on each tick; the timer stops when it returns
-    /// `false`. Disposing the returned value stops the timer.
-    pub fn run(
-        action: impl Fn() -> bool + 'static,
-        interval: Duration,
-        priority: DispatcherPriority,
-    ) -> Rc<dyn IDisposable> {
+    /// `false`. Dropping the returned guard (or calling
+    /// [`Subscription::dispose`]) stops the timer; [`Subscription::detach`]
+    /// keeps it running for the life of the timer.
+    pub fn run(action: impl Fn() -> bool + 'static, interval: Duration, priority: DispatcherPriority) -> Subscription {
         let timer = DispatcherTimer::with_priority(priority);
         timer.set_interval(interval);
 
@@ -215,13 +213,15 @@ impl DispatcherTimer {
 
         timer.start();
 
-        Disposable::create(move || timer.stop())
+        Subscription::new(Disposable::create(move || timer.stop()))
     }
 
     /// Runs a method once, after the specified interval.
     ///
-    /// Disposing the returned value cancels the timer.
-    pub fn run_once(action: impl Fn() + 'static, interval: Duration, priority: DispatcherPriority) -> Rc<dyn IDisposable> {
+    /// Dropping the returned guard (or calling [`Subscription::dispose`])
+    /// cancels the timer; [`Subscription::detach`] keeps it until its only
+    /// tick.
+    pub fn run_once(action: impl Fn() + 'static, interval: Duration, priority: DispatcherPriority) -> Subscription {
         // One tick (100ns) when the interval is zero.
         let interval = if interval != Duration::ZERO { interval } else { Duration::from_nanos(100) };
 
@@ -235,7 +235,7 @@ impl DispatcherTimer {
 
         timer.start();
 
-        Disposable::create(move || timer.stop())
+        Subscription::new(Disposable::create(move || timer.stop()))
     }
 
     /// Occurs when the specified timer interval has elapsed and the timer is

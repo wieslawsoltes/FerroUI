@@ -1191,7 +1191,8 @@ mod app {
                 },
                 duration,
                 DispatcherPriority::BACKGROUND,
-            );
+            )
+            .detach();
             std::future::poll_fn(move |cx| {
                 let _keep = &timer;
                 let mut state = state.borrow_mut();
@@ -3746,7 +3747,8 @@ mod app {
                 },
                 CLOSE_TIMEOUT,
                 DispatcherPriority::BACKGROUND,
-            );
+            )
+            .detach();
         }
     }
 }

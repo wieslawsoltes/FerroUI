@@ -924,7 +924,7 @@ impl TreeDataGrid {
         self.hide_drag_adorner.set(true);
 
         let weak = self.to_ref().downgrade();
-        let _ = DispatcherTimer::run_once(
+        DispatcherTimer::run_once(
             move || {
                 let Some(this) = weak.upgrade() else {
                     return;
@@ -942,7 +942,8 @@ impl TreeDataGrid {
             },
             Duration::from_millis(50),
             DispatcherPriority::DEFAULT,
-        );
+        )
+        .detach();
     }
 
     fn stop_drag(&self) {

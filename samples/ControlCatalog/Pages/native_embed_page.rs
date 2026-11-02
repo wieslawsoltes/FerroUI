@@ -93,7 +93,8 @@ impl NativeEmbedPage {
             move || this.show_popup(&sender, args.as_routed_event_args()),
             Duration::from_millis(3000),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 
     /// # Panics

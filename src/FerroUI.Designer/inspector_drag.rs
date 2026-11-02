@@ -7,7 +7,7 @@ use ferroui_base::input::{
     PointerType,
 };
 use ferroui_base::interactivity::RoutingStrategies;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_controls::Control;
 use ferroui_controls_treedatagrid::{
@@ -683,7 +683,7 @@ fn outline_reference(
 #[derive(Default)]
 struct OutlineHover {
     target: Cell<Option<NodeId>>,
-    timer: RefCell<Option<Rc<dyn IDisposable>>>,
+    timer: RefCell<Option<Subscription>>,
 }
 
 impl OutlineHover {

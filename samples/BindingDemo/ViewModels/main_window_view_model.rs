@@ -349,12 +349,14 @@ fn timer(due_time: Duration, period: Duration) -> Rc<dyn IObservable<i64>> {
                         },
                         period,
                         DispatcherPriority::DEFAULT,
-                    );
+                    )
+                    .detach();
                     *periodic.borrow_mut() = Some(ticks);
                 },
                 due_time,
                 DispatcherPriority::DEFAULT,
             )
+            .detach()
         };
         Disposable::create(move || {
             first.dispose();

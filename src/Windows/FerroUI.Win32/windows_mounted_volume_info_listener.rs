@@ -51,7 +51,8 @@ mod imp {
         pub(crate) fn new(mounted_drives: FerroList<MountedVolumeInfo>) -> Self {
             let polled = mounted_drives.clone();
             let disposable =
-                DispatcherTimer::run(move || Self::poll(&polled), Duration::from_secs(1), DispatcherPriority::default());
+                DispatcherTimer::run(move || Self::poll(&polled), Duration::from_secs(1), DispatcherPriority::default())
+                    .detach();
 
             Self::poll(&mounted_drives);
 

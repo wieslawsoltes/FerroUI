@@ -51,7 +51,8 @@ pub fn capture_if_asked(window: &Ref<Window>, name: &'static str) {
         // `FERROUI_TODOMVC_SHOTS_DELAY_MS` waits longer.
         Duration::from_millis(std::env::var("FERROUI_TODOMVC_SHOTS_DELAY_MS").ok().and_then(|ms| ms.parse().ok()).unwrap_or(1500)),
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
 }
 
 fn capture(window: &Ref<Window>, file: &Path) {

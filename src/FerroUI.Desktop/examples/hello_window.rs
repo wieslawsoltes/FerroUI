@@ -120,7 +120,8 @@ fn create_main_window() -> Ref<Window> {
             },
             Duration::from_millis(ms),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 
     window
@@ -155,7 +156,8 @@ fn smoke_menu(window: &Ref<Window>) {
         },
         Duration::from_millis(800),
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
 }
 
 /// Creates a tray icon with a menu and disposes it a little later.
@@ -185,7 +187,8 @@ fn smoke_tray(application: &Application) {
         },
         Duration::from_millis(1200),
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
 }
 
 /// Reads the main menu AppKit holds for this application and performs item

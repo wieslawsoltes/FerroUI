@@ -172,7 +172,8 @@ mod program {
             },
             Duration::from_millis(ms / 2),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
         let window = window as usize;
         let _timer = DispatcherTimer::run_once(
             move || {
@@ -183,7 +184,8 @@ mod program {
             },
             Duration::from_millis(ms),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 
     /// Draws a control into a bitmap of its size through the render target of the framework

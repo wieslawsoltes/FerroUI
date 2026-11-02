@@ -152,7 +152,8 @@ impl Future for Delay {
                 },
                 self.duration,
                 DispatcherPriority::NORMAL,
-            );
+            )
+            .detach();
         }
         Poll::Pending
     }

@@ -816,15 +816,18 @@ fn backdrop_run(directory: PathBuf) {
                         },
                         step,
                         DispatcherPriority::NORMAL,
-                    );
+                    )
+                    .detach();
                 },
                 step,
                 DispatcherPriority::NORMAL,
-            );
+            )
+            .detach();
         },
         step,
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
 }
 
 #[cfg(not(windows))]
@@ -858,7 +861,8 @@ fn open_popups_of_pages(interval: Duration) {
     let seen: std::cell::RefCell<Option<Vec<Ref<Visual>>>> = std::cell::RefCell::new(None);
     let opened: std::cell::RefCell<Option<Ref<Visual>>> = std::cell::RefCell::new(None);
     let candidate: std::cell::RefCell<Option<(Ref<Visual>, Option<ferroui_base::Point>)>> = std::cell::RefCell::new(None);
-    let timer = DispatcherTimer::run(
+    // The timer lives as long as the run.
+    DispatcherTimer::run(
         move || {
             let Some(window) = main_window() else { return true };
             // One look after a popup was opened: where the platform put it.
@@ -963,9 +967,8 @@ fn open_popups_of_pages(interval: Duration) {
         },
         interval / looks,
         DispatcherPriority::BACKGROUND,
-    );
-    // The timer lives as long as the run.
-    std::mem::forget(timer);
+    )
+    .detach();
 }
 
 /// Says where the popup of a control that was just opened is, on a platform that can tell: on
@@ -1062,11 +1065,12 @@ fn screenshot_run(directory: PathBuf) {
     // acrylic) is set on the window half an interval after the page is selected. Not in the
     // managed original.
     if let Some(index) = std::env::var("FERROUI_SMOKE_MATERIALS_BACKDROP").ok().and_then(|value| value.parse::<usize>().ok()) {
-        let _ = DispatcherTimer::run_once(
+        DispatcherTimer::run_once(
             move || println!("Materials: set the backdrop {index}: {}", control_catalog::pages::smoke_set_materials_backdrop(index)),
             interval + interval / 2,
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
     // Before the first page is shown: the window is made to fit its screen.
     // The timer stops itself after its only tick.
@@ -1121,7 +1125,8 @@ fn screenshot_run(directory: PathBuf) {
         },
         interval / 2,
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
     control_catalog::show_pages(
         headers,
         interval,
@@ -1149,7 +1154,7 @@ fn screenshot_run(directory: PathBuf) {
 fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
     let open_at = selected_at + Duration::from_millis(400);
     let back_at = selected_at + Duration::from_millis(2000);
-    let _ = DispatcherTimer::run_once(
+    DispatcherTimer::run_once(
         || {
             // `FERROUI_SMOKE_WINUI_FLIGHT=1` (direct) or `2` (basic) chooses the configuration;
             // any other value keeps the gravity one.
@@ -1161,14 +1166,16 @@ fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
         },
         open_at,
         DispatcherPriority::NORMAL,
-    );
-    let _ = DispatcherTimer::run_once(
+    )
+    .detach();
+    DispatcherTimer::run_once(
         || {
             println!("Flight: back to the list: {}", control_catalog::pages::smoke_close_card());
         },
         back_at,
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
     // Then the implicit hide and show animations of the box, and the parallax header, each on its
     // page of the section "Composition".
     let steps: [(u64, fn() -> bool, &str); 5] = [
@@ -1179,16 +1186,17 @@ fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
         (4700, || control_catalog::pages::smoke_scroll_parallax(160.0), "scroll the parallax scroller"),
     ];
     for (at, step, name) in steps {
-        let _ = DispatcherTimer::run_once(
+        DispatcherTimer::run_once(
             move || println!("Flight: {name}: {}", step()),
             selected_at + Duration::from_millis(at),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
     for at in [3160u64, 3350, 3860, 4000, 5100] {
         let at = selected_at + Duration::from_millis(at);
         let path = directory.join(format!("steps-{}.png", (at - selected_at).as_millis()));
-        let _ = DispatcherTimer::run_once(
+        DispatcherTimer::run_once(
             move || {
                 if let Some(window) = main_window() {
                     save_composed(&window, path.clone(), format!("step at {} ms", (at - selected_at).as_millis()));
@@ -1196,7 +1204,8 @@ fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
             },
             at,
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
     // The pages of the demos of the later phases (the sections of the earlier single page): each
     // selected in turn, its demo run as its buttons do once the page is shown, and the window saved.
@@ -1210,19 +1219,21 @@ fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
     for (slot, section) in (first..control_catalog::pages::smoke_section_count()).enumerate() {
         let shown = 5400 + slot as u64 * spacing;
         let header = control_catalog::pages::smoke_section_header(section).unwrap_or_default();
-        let _ = DispatcherTimer::run_once(
+        DispatcherTimer::run_once(
             move || println!("Flight: show section {section} ({header}): {}", control_catalog::pages::smoke_show_section(section)),
             selected_at + Duration::from_millis(shown),
             DispatcherPriority::NORMAL,
-        );
-        let _ = DispatcherTimer::run_once(
+        )
+        .detach();
+        DispatcherTimer::run_once(
             move || println!("Flight: run the demo of section {section}: {}", control_catalog::pages::smoke_run_section(section)),
             selected_at + Duration::from_millis(shown + 500),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
         let at = selected_at + Duration::from_millis(shown + 1300);
         let path = directory.join(format!("section-{section}-{}.png", (at - selected_at).as_millis()));
-        let _ = DispatcherTimer::run_once(
+        DispatcherTimer::run_once(
             move || {
                 if let Some(window) = main_window() {
                     save_composed(&window, path.clone(), format!("section {section} ({header})"));
@@ -1230,7 +1241,8 @@ fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
             },
             at,
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
     let mut index = 0;
     // `FERROUI_SMOKE_WINUI_FLIGHT_FEW`: two frames of each flight, for a build whose encoding of
@@ -1246,7 +1258,7 @@ fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
             index += 1;
             let at = start + Duration::from_millis(offset);
             let path = directory.join(format!("flight-{index:02}-{}.png", (at - selected_at).as_millis()));
-            let _ = DispatcherTimer::run_once(
+            DispatcherTimer::run_once(
                 move || {
                     if let Some(window) = main_window() {
                         save_composed(&window, path.clone(), format!("flight at {} ms", (at - selected_at).as_millis()));
@@ -1254,7 +1266,8 @@ fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
                 },
                 at,
                 DispatcherPriority::NORMAL,
-            );
+            )
+            .detach();
         }
     }
 }
@@ -1344,7 +1357,8 @@ fn accessibility_tree_run(path: PathBuf) {
         },
         Duration::from_millis(milliseconds),
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
 }
 
 /// `FERROUI_SMOKE_DEVTOOLS=<directory>` (debug builds): F12 goes to the input manager as the
@@ -1565,11 +1579,13 @@ fn dev_tools_run(directory: PathBuf) {
                 },
                 interval,
                 DispatcherPriority::NORMAL,
-            );
+            )
+            .detach();
         },
         interval * 2,
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
 }
 
 #[cfg(not(debug_assertions))]
@@ -1607,7 +1623,8 @@ fn smoke_run() {
             },
             Duration::from_millis(ms),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 }
 

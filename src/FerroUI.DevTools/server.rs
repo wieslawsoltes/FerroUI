@@ -88,7 +88,8 @@ fn run(server: u64, port: u16, request: Request) {
             },
             Duration::from_millis(10),
             DispatcherPriority::BACKGROUND,
-        );
+        )
+        .detach();
         return;
     };
     let value = match request.operation {

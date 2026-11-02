@@ -241,7 +241,8 @@ impl TimelineQueue {
                 },
                 delay.to_duration().expect("positive delay"),
                 DispatcherPriority::BACKGROUND,
-            );
+            )
+            .detach();
         }
     }
     fn cancel_scheduling(&self) {

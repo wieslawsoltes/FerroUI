@@ -880,7 +880,8 @@ async fn dispatcher_delay(duration: Duration) {
         },
         duration,
         ferroui_base::threading::DispatcherPriority::BACKGROUND,
-    );
+    )
+    .detach();
     std::future::poll_fn(move |cx| {
         if ready.get() {
             std::task::Poll::Ready(())

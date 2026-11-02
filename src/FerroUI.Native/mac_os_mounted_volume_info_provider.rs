@@ -20,7 +20,9 @@ pub(crate) struct MacOSMountedVolumeInfoListener {
 impl MacOSMountedVolumeInfoListener {
     pub(crate) fn new(mounted_drives: FerroList<MountedVolumeInfo>) -> Self {
         let polled = mounted_drives.clone();
-        let disposable = DispatcherTimer::run(move || Self::poll(&polled), Duration::from_secs(1), DispatcherPriority::default());
+        let disposable =
+            DispatcherTimer::run(move || Self::poll(&polled), Duration::from_secs(1), DispatcherPriority::default())
+                .detach();
 
         Self::poll(&mounted_drives);
 

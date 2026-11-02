@@ -21,7 +21,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::{FontWeight, IBrush, SolidColorBrush, TextAlignment};
-use ferroui_base::reactive::{AnonymousObserver, IDisposable, Subscription};
+use ferroui_base::reactive::{AnonymousObserver, Subscription};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::{
     BoxedValue, DirectProperty, ElementRef, FerroLocator, FerroObjectImpl, FerroObjectImplExt,
@@ -122,7 +122,7 @@ pub struct MaterialAppBar {
     color_brush: RefCell<Option<Ref<SolidColorBrush>>>,
     clock_subscription: RefCell<Option<Subscription>>,
     visibility_subscription: RefCell<Option<Subscription>>,
-    idle_timer: RefCell<Option<Rc<dyn IDisposable>>>,
+    idle_timer: RefCell<Option<Subscription>>,
     last_frame: Cell<Option<f64>>,
 }
 ferro_class!(MaterialAppBar: TemplatedControl);

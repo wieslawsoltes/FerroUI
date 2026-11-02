@@ -12,7 +12,7 @@
 use crate::element::{rerender, Element};
 use crate::hooks::{after, use_hook, use_signal};
 use crate::reactive::{on_cleanup, Signal};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_system::ObservableError;
 use std::cell::{Cell, RefCell};
@@ -227,7 +227,8 @@ struct SleepState {
 struct Sleep {
     duration: Duration,
     state: Rc<SleepState>,
-    timer: Option<Rc<dyn IDisposable>>,
+    /// The timer; a sleep dropped before its time stops it with the guard.
+    timer: Option<Subscription>,
 }
 
 impl Future for Sleep {
@@ -255,17 +256,6 @@ impl Future for Sleep {
             self.timer = Some(timer);
         }
         Poll::Pending
-    }
-}
-
-impl Drop for Sleep {
-    fn drop(&mut self) {
-        // A sleep dropped before its time stops its timer.
-        if let Some(timer) = self.timer.take() {
-            if !self.state.done.get() {
-                timer.dispose();
-            }
-        }
     }
 }
 

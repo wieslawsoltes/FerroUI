@@ -48,7 +48,8 @@ async fn dispatcher_timer_works_on_the_same_thread(interval: u64) {
         },
         Duration::from_nanos(interval * 100),
         DispatcherPriority::DEFAULT,
-    );
+    )
+    .detach();
 
     if let Err(ex) = task.await {
         std::panic::resume_unwind(ex);

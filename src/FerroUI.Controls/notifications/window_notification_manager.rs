@@ -273,7 +273,8 @@ impl WindowNotificationManager {
             move || notification_control.close(),
             expiration.unwrap_or(Duration::from_secs(5)),
             DispatcherPriority::DEFAULT,
-        );
+        )
+        .detach();
     }
 
     /// Closes a notification.
