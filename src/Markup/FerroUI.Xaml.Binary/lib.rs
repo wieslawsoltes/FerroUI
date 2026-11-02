@@ -6,7 +6,7 @@
 
 #![forbid(unsafe_code)]
 
-use std::{fmt, rc::Rc};
+use std::{fmt, sync::Arc};
 
 const HEADER: &[u8; 5] = b"FXB\0\x01";
 const MAX_BYTES: usize = 16 << 20;
@@ -53,7 +53,7 @@ impl std::error::Error for Error {}
 /// All text retained by one generation shares a single allocation.
 #[derive(Debug, Clone)]
 pub struct SharedText {
-    text: Rc<str>,
+    text: Arc<str>,
     start: u32,
     end: u32,
 }
@@ -81,7 +81,7 @@ pub struct Record<'a> {
 #[derive(Debug)]
 pub struct Batch {
     kind: Kind,
-    text: Rc<str>,
+    text: Arc<str>,
     ends: Vec<u32>,
     rows: Vec<[u32; 6]>,
 }
@@ -158,7 +158,7 @@ impl Batch {
         }
         Ok(Self {
             kind,
-            text: Rc::from(text),
+            text: Arc::from(text),
             ends,
             rows,
         })

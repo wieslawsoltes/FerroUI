@@ -3,8 +3,8 @@
 
 use super::{theme_resources, DocumentInfo, XamlIlContext, XamlLoadError};
 use ferroui_base::{controls::ResourceDictionary, Ref};
-pub use ferroui_xaml_binary::Kind;
-use ferroui_xaml_binary::{Batch, Payload};
+use ferroui_xaml_binary::Payload;
+pub use ferroui_xaml_binary::{Batch, Kind};
 use std::rc::Rc;
 
 /// An individually linkable compiled block. The stable identifier is used by reload
@@ -105,9 +105,22 @@ pub mod reload {
             expected: Kind,
             bytes: &[u8],
         ) -> Result<(), XamlLoadError> {
-            let decoded = Rc::new(Batch::decode(bytes).map_err(|e| error(id, e))?);
+            self.replace_decoded(
+                id,
+                expected,
+                Batch::decode(bytes).map_err(|e| error(id, e))?,
+            )
+        }
+
+        /// Stage an image already decoded and validated on a worker thread.
+        pub fn replace_decoded(
+            &mut self,
+            id: &str,
+            expected: Kind,
+            batch: Batch,
+        ) -> Result<(), XamlLoadError> {
             self.blocks
-                .insert(id.to_owned(), checked(id, expected, decoded)?);
+                .insert(id.to_owned(), checked(id, expected, Rc::new(batch))?);
             Ok(())
         }
 
@@ -180,7 +193,10 @@ mod tests {
             XamlIlRuntimeHelpers::deferred_transformation_factory_for(
                 ValueType::object(),
                 DeferredContentBuilder::new(|_| Some(Rc::new(color()))),
-                &TestServiceProvider::new().with_parents(vec![]).with_root(None).sp(),
+                &TestServiceProvider::new()
+                    .with_parents(vec![])
+                    .with_root(None)
+                    .sp(),
             )
         };
         let original = declare();

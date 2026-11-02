@@ -27,7 +27,7 @@ All numeric fields other than the signature, version, kind and ARGB word use can
 
 A reload client can decode and replace one run independently. Build the candidate using the same emitter to obtain the new bytes. Each block has a module-qualified ID, for example `my_app::compiled_xaml/compiled_xaml-0123456789abcdef.fxb`. The suffix is derived from the compiled function name, factory kind and first key, with deterministic disambiguation. Editing another run usually leaves the ID intact. Changing the set of calls, the factory kind, or the first key of a run can change the generated Rust and requires rebuilding.
 
-A debug host with both `hot-reload` and `binary-resources` can stage bytes under that ID and reconstruct the theme under the candidate snapshot. Publish the new theme after successful reconstruction. Existing deferred resources keep their original generation alive. The API does not watch files or mutate a live resource dictionary.
+A debug host with both `hot-reload` and `binary-resources` can stage bytes under that ID and reconstruct the theme under the candidate snapshot. A host can also call `Batch::decode` on a worker thread, transfer the validated batch to the UI thread, and call `replace_decoded` there. Publish the new theme after successful reconstruction. Existing deferred resources keep their original generation alive. The API does not watch files or mutate a live resource dictionary.
 
 ```rust
 use std::rc::Rc;

@@ -20,7 +20,8 @@ fn lexical_pool_preserves_unicode_insertion_order_and_old_generation_handles() {
     ];
     let image = encode(Kind::Alias, &rows).unwrap();
     assert_eq!(image, encode(Kind::Alias, &rows).unwrap());
-    let batch = Batch::decode(&image).unwrap();
+    let batch =
+        std::thread::scope(|scope| scope.spawn(|| Batch::decode(&image)).join().unwrap()).unwrap();
     let mut values = Vec::new();
     for (r, expected) in batch.records().zip(rows) {
         assert_eq!(r.key, expected.key);
