@@ -1044,9 +1044,18 @@ fn collect(root: &Path, directory: &Path, found: &mut Vec<(String, PathBuf)>) ->
 /// Materialize only the binary leaves referenced by this compilation.
 fn write_binary_files(directory: &Path, files: Option<&BinaryResourceFiles>, errors: &mut Vec<String>) {
     let Some(files) = files else { return };
-    for (name, bytes) in files.take() {
-        if let Err(error) = ferroui_build_scan::export::write_bytes_if_changed(&directory.join(name), &bytes) {
-            errors.push(error);
+    let files = files.take();
+    if files.is_empty() { return; }
+    if let Err(error) = fs::create_dir_all(directory) {
+        errors.push(format!("{}: {error}", directory.display()));
+        return;
+    }
+    for (name, bytes) in files {
+        let path = directory.join(name);
+        if fs::read(&path).ok().as_deref() != Some(bytes.as_slice()) {
+            if let Err(error) = fs::write(&path, bytes) {
+                errors.push(format!("{}: {error}", path.display()));
+            }
         }
     }
 }
