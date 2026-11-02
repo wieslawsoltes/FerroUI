@@ -8,7 +8,7 @@ use ferroui_base::input::{
     Key, KeyModifiers, KeyboardNavigationHandler, KeyboardNavigationMode, NavigationDirection,
     PointerType,
 };
-use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_controls::{Control, Flyout, FlyoutPresenter, FlyoutShowMode, PlacementMode};
 use std::{cell::RefCell, time::Duration};
 
@@ -95,7 +95,14 @@ fn group_button(shell: &Rc<Shell>, entry: Memo<Option<Entry>>) -> Element {
                         })
                     },
                     |id| *id as usize,
-                    move |id| window_card(id, snapshot, session.clone(), tiles, flyout.clone()),
+                    move |id| {
+                        let first = entry.with(|e| {
+                            e.as_ref()
+                                .and_then(|e| e.windows.first())
+                                .is_some_and(|w| w.id == id)
+                        });
+                        window_card(id, first, snapshot, session.clone(), tiles, flyout.clone())
+                    },
                 );
                 stack_panel()
                     .spacing(3.0)
@@ -220,6 +227,7 @@ fn group_button(shell: &Rc<Shell>, entry: Memo<Option<Entry>>) -> Element {
 
 fn window_card(
     id: u32,
+    first: bool,
     snapshot: Signal<Snapshot>,
     session: Option<Rc<crate::session::Session>>,
     tiles: Memo<bool>,
@@ -245,10 +253,36 @@ fn window_card(
     let target = NodeRef::<Button>::new();
     let hovered = signal(false);
     let focused = signal(false);
+    let focus_flyout = flyout.clone();
     let activate = session.clone();
     let close = session.clone();
     let select = button()
         .node_ref(target)
+        .on_loaded(move |_| {
+            if !first {
+                return;
+            }
+            let Some(button) = target.get_untracked() else {
+                return;
+            };
+            let weak = button.downgrade();
+            let flyout = focus_flyout.clone();
+            // A native popup can map after Flyout's synchronous focus pass.
+            // Give a keyboard-opened group its first actual window button.
+            Dispatcher::ui_thread().post_local(
+                move || {
+                    if flyout
+                        .upgrade()
+                        .is_some_and(|f| f.is_open() && f.show_mode() == FlyoutShowMode::Standard)
+                    {
+                        if let Some(button) = weak.upgrade() {
+                            button.focus();
+                        }
+                    }
+                },
+                DispatcherPriority::INPUT,
+            );
+        })
         .automation_properties_name(move || title.get())
         .tool_tip_tip(move || title.get())
         .padding((7.0, 5.0))
