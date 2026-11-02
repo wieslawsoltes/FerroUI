@@ -14,7 +14,6 @@ type EntryObserver<T, U> = fn(Weak<BindingEntry<T>>) -> Rc<dyn IObserver<U>>;
 pub(crate) enum BindingSource<T: PropertyValue> {
     Typed(Rc<dyn IObservable<T>>, EntryObserver<T, T>),
     Value(Rc<dyn IObservable<BindingValue<T>>>, EntryObserver<T, BindingValue<T>>),
-    Untyped(Rc<dyn IObservable<BoxedValue>>, EntryObserver<T, BoxedValue>),
 }
 
 impl<T: PropertyValue> BindingSource<T> {
@@ -26,9 +25,6 @@ impl<T: PropertyValue> BindingSource<T> {
         Self::Value(source, |entry| Rc::new(ValueObserver(entry)))
     }
 
-    pub(crate) fn untyped(source: Rc<dyn IObservable<BoxedValue>>) -> Self {
-        Self::Untyped(source, |entry| Rc::new(UntypedObserver(entry)))
-    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -144,8 +140,13 @@ pub(crate) struct BindingEntry<T: PropertyValue> {
     // Drop the subscription before any of the objects its callbacks can use.
     state: BindingEntryState,
     this: Weak<BindingEntry<T>>,
-    property: &'static StyledProperty<T>,
     source: BindingSource<T>,
+    values: BindingValues<T>,
+}
+
+// Only the comparison, conversion and storage of the payload need T.
+struct BindingValues<T: PropertyValue> {
+    property: &'static StyledProperty<T>,
     value: RefCell<Option<T>>,
     default_value: RefCell<Option<T>>,
 }
@@ -161,10 +162,8 @@ impl<T: PropertyValue> BindingEntry<T> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
             state: BindingEntryState::new(frame, has_data_validation),
-            property,
             source,
-            value: RefCell::new(None),
-            default_value: RefCell::new(None),
+            values: BindingValues::new(property),
         })
     }
 
@@ -190,9 +189,28 @@ impl<T: PropertyValue> BindingEntry<T> {
         let subscription = match &self.source {
             BindingSource::Typed(source, observer) => source.subscribe(observer(this)),
             BindingSource::Value(source, observer) => source.subscribe(observer(this)),
-            BindingSource::Untyped(source, observer) => source.subscribe(observer(this)),
         };
         self.state.finish(subscription);
+    }
+
+    fn set_value(self: &Rc<Self>, value: BindingValue<T>) {
+        if value.value_type() == BindingValueType::DO_NOTHING {
+            return;
+        }
+        let Some(bound) = self.state.bound_frame() else { return };
+        if self.values.update(&bound.owner, &self.state, value) && self.state.publishes() {
+            bound.publish(self.clone());
+        }
+    }
+
+    fn binding_completed(&self) {
+        self.state.completed(self.values.property);
+    }
+}
+
+impl<T: PropertyValue> BindingValues<T> {
+    fn new(property: &'static StyledProperty<T>) -> Self {
+        Self { property, value: RefCell::new(None), default_value: RefCell::new(None) }
     }
 
     /// A value that fails validation becomes a binding error; the entry then
@@ -217,17 +235,12 @@ impl<T: PropertyValue> BindingEntry<T> {
         BindingValue::binding_error(invalid_value_error(self.property))
     }
 
-    fn set_value(self: &Rc<Self>, mut value: BindingValue<T>) {
-        if value.value_type() == BindingValueType::DO_NOTHING {
-            return;
-        }
-        let Some(bound) = self.state.bound_frame() else { return };
-
+    fn update(&self, owner: &FerroObject, state: &BindingEntryState, mut value: BindingValue<T>) -> bool {
         if !value.has_value() && value.value_type() != BindingValueType::DATA_VALIDATION_ERROR {
-            value = value.with_value(self.property.binding_default(&bound.owner, &self.default_value));
+            value = value.with_value(self.property.binding_default(owner, &self.default_value));
         }
 
-        self.state.set_validation(value.value_type(), value.error());
+        state.set_validation(value.value_type(), value.error());
 
         if value.has_value() {
             let changed = self.value.borrow().as_ref() != Some(value.value());
@@ -235,30 +248,12 @@ impl<T: PropertyValue> BindingEntry<T> {
                 // `replace` releases the borrow before the previous value is
                 // dropped: dropping a value may run code that reads the property.
                 self.value.replace(value.into_option());
-                if self.state.publishes() {
-                    bound.publish(self.clone());
-                }
+                return true;
             }
         }
+        false
     }
-
-    fn binding_completed(&self) {
-        self.state.completed(self.property);
-    }
-}
-
-impl<T: PropertyValue> IValueEntry for BindingEntry<T> {
-    fn property(&self) -> &'static FerroProperty {
-        self.property
-    }
-
-    fn has_value(&self) -> bool {
-        self.start_core(false);
-        self.value.borrow().is_some()
-    }
-
     fn try_get_value(&self, out: &mut dyn Any) -> bool {
-        self.start_core(false);
         match (out.downcast_mut::<Option<T>>(), &*self.value.borrow()) {
             (Some(out), Some(value)) => {
                 *out = Some(value.clone());
@@ -269,8 +264,28 @@ impl<T: PropertyValue> IValueEntry for BindingEntry<T> {
     }
 
     fn get_value_boxed(&self) -> Option<BoxedValue> {
-        self.start_core(false);
         self.value.borrow().as_ref().map(|v| Rc::new(v.clone()) as BoxedValue)
+    }
+}
+
+impl<T: PropertyValue> IValueEntry for BindingEntry<T> {
+    fn property(&self) -> &'static FerroProperty {
+        self.values.property
+    }
+
+    fn has_value(&self) -> bool {
+        self.start_core(false);
+        self.values.value.borrow().is_some()
+    }
+
+    fn try_get_value(&self, out: &mut dyn Any) -> bool {
+        self.start_core(false);
+        self.values.try_get_value(out)
+    }
+
+    fn get_value_boxed(&self) -> Option<BoxedValue> {
+        self.start_core(false);
+        self.values.get_value_boxed()
     }
 
     fn get_data_validation_state(&self) -> Option<(BindingValueType, Option<BindingError>)> {
@@ -301,7 +316,7 @@ struct TypedObserver<T: PropertyValue>(Weak<BindingEntry<T>>);
 impl<T: PropertyValue> IObserver<T> for TypedObserver<T> {
     fn on_next(&self, value: T) {
         let Some(entry) = self.0.upgrade() else { return };
-        let value = entry.validate(value);
+        let value = entry.values.validate(value);
         entry.set_value(value);
     }
     fn on_error(&self, _error: ObservableError) {
@@ -321,7 +336,7 @@ struct ValueObserver<T: PropertyValue>(Weak<BindingEntry<T>>);
 impl<T: PropertyValue> IObserver<BindingValue<T>> for ValueObserver<T> {
     fn on_next(&self, value: BindingValue<T>) {
         let Some(entry) = self.0.upgrade() else { return };
-        let value = entry.convert_and_validate(value);
+        let value = entry.values.convert_and_validate(value);
         entry.set_value(value);
     }
     fn on_error(&self, _error: ObservableError) {
@@ -336,23 +351,123 @@ impl<T: PropertyValue> IObserver<BindingValue<T>> for ValueObserver<T> {
     }
 }
 
-struct UntypedObserver<T: PropertyValue>(Weak<BindingEntry<T>>);
+/// A frame reached through a boxed observable has the same subscription and
+/// observer ABI for every property. The typed payload lives in the same Rc
+/// allocation; publication and completion need only this erased interface.
+pub(crate) trait BoxedFrameBinding: IValueEntry + IDisposable {
+    fn binding(&self) -> &BoxedBindingState;
+    fn receive(self: Rc<Self>, value: BoxedValue);
+}
 
-impl<T: PropertyValue> IObserver<BoxedValue> for UntypedObserver<T> {
+pub(crate) struct BoxedBindingState {
+    state: BindingEntryState,
+    this: Weak<dyn BoxedFrameBinding>,
+    source: Rc<dyn IObservable<BoxedValue>>,
+}
+
+impl BoxedBindingState {
+    pub(crate) fn start(&self, publish: bool) {
+        if self.state.begin(publish) {
+            let subscription = self.source.subscribe(Rc::new(BoxedObserver(self.this.clone())));
+            self.state.finish(subscription);
+        }
+    }
+}
+
+struct BoxedObserver(Weak<dyn BoxedFrameBinding>);
+
+impl IObserver<BoxedValue> for BoxedObserver {
     fn on_next(&self, value: BoxedValue) {
         let Some(entry) = self.0.upgrade() else { return };
-        let value = entry.property.from_untyped(value.as_any());
-        let value = entry.convert_and_validate(value);
-        entry.set_value(value);
+        entry.receive(value);
     }
+
     fn on_error(&self, _error: ObservableError) {
-        if let Some(entry) = self.0.upgrade() {
-            entry.binding_completed()
-        }
+        self.on_completed();
     }
+
     fn on_completed(&self) {
         if let Some(entry) = self.0.upgrade() {
-            entry.binding_completed()
+            entry.binding().state.completed(entry.property());
         }
+    }
+}
+
+pub(crate) struct BoxedBindingEntry<T: PropertyValue> {
+    binding: BoxedBindingState,
+    values: BindingValues<T>,
+}
+
+impl<T: PropertyValue> BoxedBindingEntry<T> {
+    pub(crate) fn new(
+        target: &FerroObject,
+        frame: Weak<dyn ValueFrame>,
+        property: &'static StyledProperty<T>,
+        source: Rc<dyn IObservable<BoxedValue>>,
+    ) -> Rc<dyn BoxedFrameBinding> {
+        let validate = property.get_metadata_for(target).enable_data_validation() == Some(true);
+        let entry: Rc<Self> = Rc::new_cyclic(|this: &Weak<Self>| Self {
+            binding: BoxedBindingState {
+                state: BindingEntryState::new(frame, validate),
+                this: this.clone(),
+                source,
+            },
+            values: BindingValues::new(property),
+        });
+        entry
+    }
+}
+
+impl<T: PropertyValue> BoxedFrameBinding for BoxedBindingEntry<T> {
+    fn binding(&self) -> &BoxedBindingState {
+        &self.binding
+    }
+
+    fn receive(self: Rc<Self>, value: BoxedValue) {
+        let converted = self.values.property.from_untyped(value.as_any());
+        let validated = self.values.convert_and_validate(converted);
+        if validated.value_type() == BindingValueType::DO_NOTHING {
+            return;
+        }
+        let Some(bound) = self.binding.state.bound_frame() else { return };
+        if self.values.update(&bound.owner, &self.binding.state, validated) && self.binding.state.publishes() {
+            bound.publish(self);
+        }
+    }
+}
+
+impl<T: PropertyValue> IValueEntry for BoxedBindingEntry<T> {
+    fn property(&self) -> &'static FerroProperty {
+        self.values.property
+    }
+
+    fn has_value(&self) -> bool {
+        self.binding.start(false);
+        self.values.value.borrow().is_some()
+    }
+
+    fn try_get_value(&self, out: &mut dyn Any) -> bool {
+        self.binding.start(false);
+        self.values.try_get_value(out)
+    }
+
+    fn get_value_boxed(&self) -> Option<BoxedValue> {
+        self.binding.start(false);
+        self.values.get_value_boxed()
+    }
+
+    fn get_data_validation_state(&self) -> Option<(BindingValueType, Option<BindingError>)> {
+        self.binding.state.validation()
+    }
+
+    fn unsubscribe(&self) {
+        self.binding.state.unsubscribe();
+    }
+}
+
+impl<T: PropertyValue> IDisposable for BoxedBindingEntry<T> {
+    fn dispose(&self) {
+        self.unsubscribe();
+        self.binding.state.completed(self.values.property);
     }
 }

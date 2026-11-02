@@ -185,11 +185,10 @@ impl<T: PropertyValue> PropertyRoutes for DirectPropertyBase<T> {
         }
     }
 
-    fn route_bind(
+    fn route_bind_local(
         &'static self,
         o: &FerroObject,
         source: Rc<dyn IObservable<BoxedValue>>,
-        _priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
         o.bind_direct_untyped(self, source)
     }
@@ -231,7 +230,7 @@ impl<T: PropertyValue> PropertyRoutes for DirectPropertyBase<T> {
         _o: &FerroObject,
         _frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
         _source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn IValueEntry> {
+    ) -> Rc<dyn crate::property_store::BoxedFrameBinding> {
         panic!("direct properties have no value entries");
     }
 }

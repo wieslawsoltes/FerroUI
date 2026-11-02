@@ -185,11 +185,10 @@ pub(crate) trait PropertyRoutes {
         -> Option<Rc<dyn IDisposable>>;
     fn route_set_current_value(&'static self, o: &FerroObject, value: &dyn Any);
     fn route_set_direct_value_unchecked(&'static self, o: &FerroObject, entry: &dyn IValueEntry);
-    fn route_bind(
+    fn route_bind_local(
         &'static self,
         o: &FerroObject,
         source: Rc<dyn IObservable<BoxedValue>>,
-        priority: BindingPriority,
     ) -> Rc<dyn IDisposable>;
     fn route_get_metadata(&'static self, type_: &'static TypeInfo) -> FerroPropertyMetadata;
     fn route_unregister(&'static self, type_: &'static TypeInfo);
@@ -210,7 +209,7 @@ pub(crate) trait PropertyRoutes {
         o: &FerroObject,
         frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
         source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn IValueEntry>;
+    ) -> Rc<dyn crate::property_store::BoxedFrameBinding>;
 }
 
 type ChangedHandler = dyn Fn(&FerroPropertyChangedEventArgs<'_>);

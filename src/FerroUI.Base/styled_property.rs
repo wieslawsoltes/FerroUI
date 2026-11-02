@@ -303,13 +303,15 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
         panic!("not supported for styled properties");
     }
 
-    fn route_bind(
+    fn route_bind_local(
         &'static self,
         o: &FerroObject,
         source: Rc<dyn IObservable<BoxedValue>>,
-        priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
-        o.bind_untyped(self, source, priority)
+        let observer = crate::property_store::LocalValueBindingObserver::new(o, self);
+        o.values().replace_local_binding(self, observer.clone());
+        observer.start_untyped(source);
+        observer
     }
 
     fn route_get_metadata(&'static self, type_: &'static TypeInfo) -> FerroPropertyMetadata {
@@ -352,13 +354,8 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
         o: &FerroObject,
         frame: std::rc::Weak<dyn crate::property_store::ValueFrame>,
         source: Rc<dyn IObservable<BoxedValue>>,
-    ) -> Rc<dyn IValueEntry> {
-        crate::property_store::BindingEntry::new(
-            o,
-            frame,
-            self,
-            crate::property_store::BindingSource::untyped(source),
-        )
+    ) -> Rc<dyn crate::property_store::BoxedFrameBinding> {
+        crate::property_store::BoxedBindingEntry::new(o, frame, self, source)
     }
 }
 

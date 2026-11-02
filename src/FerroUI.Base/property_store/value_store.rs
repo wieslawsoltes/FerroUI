@@ -186,6 +186,32 @@ impl ValueStore {
         }
     }
 
+    pub(crate) fn add_boxed_binding(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        source: Rc<dyn IObservable<crate::BoxedValue>>,
+        priority: BindingPriority,
+    ) -> Rc<dyn IDisposable> {
+        if priority == BindingPriority::LocalValue {
+            return property.routes().route_bind_local(owner, source);
+        }
+        let effective = self.get_effective_value(property);
+        let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
+        let weak = Rc::downgrade(&frame);
+        let entry = property.routes().route_create_binding_entry(owner, weak, source);
+        frame.base().add(entry.clone());
+        if effective.is_none_or(|e| priority <= e.priority()) {
+            entry.binding().start(true);
+        }
+        entry
+    }
+
+    pub(crate) fn replace_local_binding(&self, property: &'static FerroProperty, binding: Rc<dyn IDisposable>) {
+        self.dispose_existing_local_value_binding(property);
+        self.set_local_value_binding(property, binding);
+    }
+
     /// Adds a binding to a direct property.
     pub fn add_direct_binding<T: PropertyValue, U: 'static>(
         &self,
