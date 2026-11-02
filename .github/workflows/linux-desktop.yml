@@ -61,6 +61,9 @@ jobs:
         run: |
           samples/LinuxDesktop/tests/favorites.sh target/debug/ferro-desktop desktop-captures/favorites
           samples/LinuxDesktop/tests/notifications.sh target/debug/ferro-desktop desktop-captures/notifications
+          for profile in macos material; do
+            samples/LinuxDesktop/tests/notifications.sh target/debug/ferro-desktop "desktop-captures/notifications-$profile" "$profile"
+          done
           samples/LinuxDesktop/tests/system-controls.sh target/debug/ferro-desktop desktop-captures/system
       - name: Test and capture a managed login session
         run: |

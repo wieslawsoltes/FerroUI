@@ -78,6 +78,7 @@ samples/LinuxDesktop/build.sh run -- --theme=material --scene=applications
 | In the shell | Action |
 | --- | --- |
 | Ctrl+K or Ctrl+Space | Open the launcher. Pin an installed application to put it on the taskbar, Dock or Material home screen. |
+| Ctrl+1 / Ctrl+2 / Ctrl+3 in Windows Start | Browse by grid, alphabetical list or category. Enter opens the selected app or category. Alt+Left returns to categories. |
 | Ctrl+P / Ctrl+Shift+P in search | Pin or unpin the selected result / switch between all applications and pins. In the pinned list, Alt+Left or Alt+Right moves the entry. |
 | Ctrl+W | Switch or create workspaces, arrange a client, or move it to a named workspace. The overview exposes actions supported by the window manager. |
 | Ctrl+N | Read or dismiss notifications, invoke actions and toggle Do Not Disturb. Banners leave the active application's keyboard focus intact. |

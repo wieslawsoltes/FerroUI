@@ -713,14 +713,16 @@ fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
                     }
                 }))
                 .child(dynamic(move || {
-                    if overlays.switching_profile.get() { return Element::Empty; }
+                    if overlays.switching_profile.get() {
+                        return Element::Empty;
+                    }
                     match (current.get(), appearance.get()) {
-                    (Scene::QuickSettings, _) => quick_settings::view(&overlays),
-                    (Scene::Calendar, _) => quick_settings::calendar_view(&overlays),
-                    (Scene::Notifications, _) => notifications::view(&overlays),
-                    (Scene::Appearance, _) => desktop::picker(&overlays),
-                    (Scene::Workspaces, _) => workspaces::view(&overlays),
-                    _ => Element::Empty,
+                        (Scene::QuickSettings, _) => quick_settings::view(&overlays),
+                        (Scene::Calendar, _) => quick_settings::calendar_view(&overlays),
+                        (Scene::Notifications, _) => notifications::view(&overlays),
+                        (Scene::Appearance, _) => desktop::picker(&overlays),
+                        (Scene::Workspaces, _) => workspaces::view(&overlays),
+                        _ => Element::Empty,
                     }
                 })),
         )

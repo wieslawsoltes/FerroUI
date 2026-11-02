@@ -4,7 +4,7 @@ The default Windows 11 appearance uses FerroUI's compiled WinUI 3 theme. Open **
 
 | Appearance | Native control theme | Shell composition |
 | --- | --- | --- |
-| Windows 11 | WinUI 3, light by default | Centered taskbar, desktop shortcuts and a Start panel with an application grid |
+| Windows 11 | WinUI 3, light by default | Centered taskbar, desktop shortcuts and Start with Grid, List and Category views |
 | macOS | macOS, dark by default | Top menu bar, floating Dock and a centered application search panel |
 | Material 3 | Material, dark by default with bundled Roboto | Clock home screen, status strip, app taskbar and bottom sheets |
 
@@ -14,9 +14,15 @@ The setting persists as an appearance ID in `$XDG_CONFIG_HOME/ferro-desktop/appe
 
 ## Desktop panels
 
+Windows Start remembers the selected **All apps** view. With the search field focused, **Ctrl+1** selects Grid, **Ctrl+2** selects the alphabetical List and **Ctrl+3** selects Category. Each category tile shows icons from installed desktop entries. Use the arrow keys and **Enter** to open a category, and **Alt+Left** to go back. Typing a query searches the full catalog. [Start in Category view](screenshots/windows-launcher.webp) · [Start in List view](screenshots/windows-start-list.webp)
+
+Start, Spotlight and the Material app drawer share recent launches for the current shell session. An app moves to the front when its launch succeeds. **Clear** empties the history across all three profiles.
+
 Pinned and running windows share an app button when the client identifies its installed desktop entry. The shell reads xdg-shell app IDs, Sway client metadata and X11 resource classes. Selecting a pin launches the application if it has no window on this workspace. Selecting a running app activates its window, and repeated clicks cycle its windows. A click on a single active, minimizable Windows taskbar button minimizes it. The macOS Dock marks running apps with a dot, and its menu bar shows the focused application alongside Spotlight, Control Center and the clock.
 
 The Android profile reserves 48 logical pixels for the status strip and 72 for its tablet taskbar. The time opens the calendar, the bell opens notifications and the controls button opens Quick Settings. Swipe up on empty home wallpaper to open all apps, or swipe down to open notifications. Swipe up from the bottom handle and release to show Home, or pause before releasing to open recent windows. Mouse drags work as well as touch and pen. The app grid and recents buttons provide keyboard-accessible alternatives.
+
+On macOS, the **Window** menu lists the session’s windows and offers commands for the focused client. Right-click a Dock app to select one of its windows or change whether the app stays in the Dock. [Window menu above a maximized GTK client](screenshots/macos-window-menu.webp) · [Dock menu for a running app](screenshots/macos-dock-menu.webp)
 
 ## Materials in the desktop scene
 
