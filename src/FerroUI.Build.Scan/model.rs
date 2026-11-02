@@ -1038,7 +1038,8 @@ pub struct HandleModel {
     pub type_: RustType,
 }
 
-/// A cast a crate registers between two Rust types (`ValueTypes::register_cast::<From, To>(..)`):
+/// A cast a crate registers between two Rust types (`ValueTypes::register_cast::<From, To>(..)`,
+/// or `register_boxed_cast` and `register_try_cast`, which state the same pair of types):
 /// a value of the one is a value of the other. A collection that declares an
 /// instantiation of the notifying list as its `base:` is that list only when the cast from
 /// the collection to the list is registered.
@@ -1080,9 +1081,20 @@ pub struct ValueTypeModel {
 }
 
 /// The registration functions of the untyped value conversions the scanner reads
-/// ([`ValueTypeModel`], and `cast` for [`CastModel`]), with the number of type arguments.
-pub const VALUE_REGISTRATIONS: &[(&str, usize)] =
-    &[("nullable", 1), ("reference", 1), ("object", 1), ("element_ref", 1), ("interface", 2), ("upcast", 2), ("cast", 2), ("boxed_cast", 2), ("deref", 2)];
+/// ([`ValueTypeModel`], and `cast`, `boxed_cast` and `try_cast` for [`CastModel`]), with
+/// the number of type arguments.
+pub const VALUE_REGISTRATIONS: &[(&str, usize)] = &[
+    ("nullable", 1),
+    ("reference", 1),
+    ("object", 1),
+    ("element_ref", 1),
+    ("interface", 2),
+    ("upcast", 2),
+    ("cast", 2),
+    ("boxed_cast", 2),
+    ("try_cast", 2),
+    ("deref", 2),
+];
 
 /// A public function of an inherent `impl` block of a type of a crate, as far as the choice
 /// of a call form reads it (9.5.3, form B).
