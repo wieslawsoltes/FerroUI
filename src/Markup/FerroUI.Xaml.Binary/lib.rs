@@ -131,7 +131,10 @@ impl Batch {
         if strings > MAX_ITEMS || count > MAX_ITEMS || strings * 2 + count * 6 > bytes.len() {
             return Err(Error("invalid FXB counts"));
         }
-        let mut text = String::new();
+        // A resource name is often longer than its compressed spelling. Seed the
+        // pool without trusting a count alone or reserving space used by records.
+        let estimated_text = strings.saturating_mul(32).min(bytes.len() - count * 6);
+        let mut text = String::with_capacity(estimated_text);
         let mut ends = Vec::with_capacity(strings + 1);
         ends.push(0);
         let mut previous_start = 0;
@@ -236,7 +239,20 @@ fn take<'a>(bytes: &mut &'a [u8], count: usize) -> Result<&'a [u8], Error> {
     Ok(value)
 }
 
+// Inline the common one-byte operand. All call sites share the checked slow path.
+#[inline(always)]
 fn uint(bytes: &mut &[u8]) -> Result<u32, Error> {
+    match bytes.split_first() {
+        Some((&value @ 0..=127, rest)) => {
+            *bytes = rest;
+            Ok(u32::from(value))
+        }
+        _ => multibyte_uint(bytes),
+    }
+}
+
+#[inline(never)]
+fn multibyte_uint(bytes: &mut &[u8]) -> Result<u32, Error> {
     let mut value = 0;
     for shift in (0..32).step_by(7) {
         let byte = take(bytes, 1)?[0];
