@@ -1847,6 +1847,7 @@ dependencies = [
  "ferroui-build",
  "ferroui-controls",
  "ferroui-markup-xaml",
+ "ferroui-system",
  "sysinfo",
 ]
 
