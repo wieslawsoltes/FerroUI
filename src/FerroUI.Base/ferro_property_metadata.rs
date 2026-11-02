@@ -96,8 +96,12 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
         self
     }
 
-    pub fn with_coerce(mut self, coerce: impl Fn(&FerroObject, T) -> T + 'static) -> Self {
-        self.coerce = Some(Rc::new(coerce));
+    pub fn with_coerce(self, coerce: impl Fn(&FerroObject, T) -> T + 'static) -> Self {
+        self.with_coerce_callback(Rc::new(coerce))
+    }
+
+    pub(crate) fn with_coerce_callback(mut self, coerce: CoerceValueCallback<T>) -> Self {
+        self.coerce = Some(coerce);
         self
     }
 
