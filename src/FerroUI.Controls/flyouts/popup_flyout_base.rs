@@ -787,30 +787,30 @@ impl PopupFlyoutBase {
         // The flyout owns the popup and lives as long as it: the handlers
         // are never removed.
         let weak = self.to_ref().downgrade();
-        let _ = popup.opened({
+        popup.opened({
             let weak = weak.clone();
             move || {
                 if let Some(this) = weak.upgrade() {
                     this.on_popup_opened();
                 }
             }
-        });
-        let _ = popup.closed({
+        }).detach();
+        popup.closed({
             let weak = weak.clone();
             move || {
                 if let Some(this) = weak.upgrade() {
                     this.on_popup_closed();
                 }
             }
-        });
-        let _ = popup.closing({
+        }).detach();
+        popup.closing({
             let weak = weak.clone();
             move |e| {
                 if let Some(this) = weak.upgrade() {
                     this.on_popup_closing(e);
                 }
             }
-        });
+        }).detach();
         popup.add_handler(InputElement::key_up_event(), move |_, e: &KeyEventArgs| {
             if let Some(this) = weak.upgrade() {
                 this.on_placement_target_or_popup_key_up(e);

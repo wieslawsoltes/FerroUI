@@ -244,12 +244,12 @@ fn watch_host_position(popup: &Popup, expected: Option<PixelPoint>) -> Rc<Cell<b
     let host = popup.host().expect("the popup is open");
     if let Some(popup_root) = host.as_popup_root() {
         let raised = raised.clone();
-        let _ = popup_root.position_changed(move |args| {
+        popup_root.position_changed(move |args| {
             if let Some(expected) = expected {
                 assert_eq!(expected, args.point());
             }
             raised.set(true);
-        });
+        }).detach();
     } else if let Some(overlay_popup_host) = host.as_overlay_popup_host() {
         let raised = raised.clone();
         let weak = overlay_popup_host.downgrade();
@@ -292,10 +292,10 @@ fn closing_window_closes_its_open_popup_and_frees_both(use_popup_host: bool) {
         assert_eq!(1, window.opened_popups().len());
 
         let closed = Rc::new(Cell::new(false));
-        let _ = popup.closed({
+        popup.closed({
             let closed = closed.clone();
             move || closed.set(true)
-        });
+        }).detach();
 
         window.close();
         assert!(!popup.is_open());
@@ -350,7 +350,7 @@ fn popup_open_without_target_should_attach_itself_later(use_popup_host: bool) {
     let opened_event = Rc::new(Cell::new(0));
     let target = Popup::new();
     let count = opened_event.clone();
-    let _ = target.opened(move || count.set(count.get() + 1));
+    target.opened(move || count.set(count.get() + 1)).detach();
     target.set_is_open(true);
 
     let window = prepared_window(Some(target.clone().upcast()));
@@ -363,7 +363,7 @@ fn popup_without_top_level_shouldnt_call_open(_use_popup_host: bool) {
     let opened_event = Rc::new(Cell::new(0));
     let target = Popup::new();
     let count = opened_event.clone();
-    let _ = target.opened(move || count.set(count.get() + 1));
+    target.opened(move || count.set(count.get() + 1)).detach();
     target.set_is_open(true);
 
     assert_eq!(0, opened_event.get());
@@ -544,7 +544,7 @@ fn popup_open_should_raise_single_opened_event(use_popup_host: bool) {
     let opened_count = Rc::new(Cell::new(0));
 
     let count = opened_count.clone();
-    let _ = target.opened(move || count.set(count.get() + 1));
+    target.opened(move || count.set(count.get() + 1)).detach();
 
     target.open();
 
@@ -564,7 +564,7 @@ fn popup_close_should_raise_single_closed_event(use_popup_host: bool) {
     let closed_count = Rc::new(Cell::new(0));
 
     let count = closed_count.clone();
-    let _ = target.closed(move || count.set(count.get() + 1));
+    target.closed(move || count.set(count.get() + 1)).detach();
 
     target.close();
 
@@ -585,7 +585,7 @@ fn popup_cancelled_closing_keeps_is_open_true(use_popup_host: bool) {
 
     let closed_count = Rc::new(Cell::new(0));
     let count = closed_count.clone();
-    let _ = target.closed(move || count.set(count.get() + 1));
+    target.closed(move || count.set(count.get() + 1)).detach();
     let cancel = target.closing(|e| e.set_cancel(true));
 
     target.set_is_open(false);
@@ -612,7 +612,7 @@ fn popup_close_on_closed_popup_should_not_raise_closed_event(use_popup_host: boo
     let closed_count = Rc::new(Cell::new(0));
 
     let count = closed_count.clone();
-    let _ = target.closed(move || count.set(count.get() + 1));
+    target.closed(move || count.set(count.get() + 1)).detach();
 
     target.close();
     target.close();
@@ -1107,13 +1107,13 @@ fn popup_should_follow_popup_root_placement_target(use_popup_host: bool) {
     if let Some(popup_root) = child_popup.host().unwrap().as_popup_root() {
         let raised = Rc::new(Cell::new(false));
         let flag = raised.clone();
-        let _ = popup_root.position_changed(move |args| {
+        popup_root.position_changed(move |args| {
             // The parent's initial placement is (395,295) which is a 10x10 popup centered
             // in a 800x600 window. When the window is moved, the child's final placement is (405, 305)
             // which is the parent's placement moved 10 pixels left and down.
             assert_eq!(PixelPoint::new(405, 305), args.point());
             flag.set(true);
-        });
+        }).detach();
 
         window.set_position(PixelPoint::new(10, 10));
         assert!(raised.get());

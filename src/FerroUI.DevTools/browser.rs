@@ -1,6 +1,6 @@
 use crate::protocol::{response, string, CdpSession, Error, Result};
 use ferroui_base::logging::LogEventLevel;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{Ref, WeakRef};
 use ferroui_controls::{Application, TopLevel, Window};
 use ferroui_inspect::{LogCapture, LogEntry, LogGuard};
@@ -12,12 +12,8 @@ use std::rc::Rc;
 struct Target {
     root: WeakRef<TopLevel>,
     closed: Rc<Cell<bool>>,
-    subscription: Rc<dyn IDisposable>,
-}
-impl Drop for Target {
-    fn drop(&mut self) {
-        self.subscription.dispose();
-    }
+    /// The closed handler of the root, removed when the target is dropped.
+    _subscription: Subscription,
 }
 struct Connection {
     direct: Option<String>,
@@ -76,7 +72,7 @@ impl Browser {
             Target {
                 root: root.downgrade(),
                 closed,
-                subscription,
+                _subscription: subscription,
             },
         );
         id

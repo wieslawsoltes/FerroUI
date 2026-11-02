@@ -405,10 +405,10 @@ fn additional_spin_is_ignored_when_not_allowed_read_only_or_from_the_wheel_witho
     run_test(|control, _textbox| {
         control.set_numeric_value(Some(d("1")));
         let spinned = Rc::new(std::cell::Cell::new(0));
-        let _subscription = control.spinned({
+        control.spinned({
             let spinned = spinned.clone();
             move |_| spinned.set(spinned.get() + 1)
-        });
+        }).detach();
 
         control.set_allow_spin(false);
         let e = spin(control, SpinDirection::Increase);

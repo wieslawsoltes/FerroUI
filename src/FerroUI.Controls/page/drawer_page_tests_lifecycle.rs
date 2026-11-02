@@ -30,8 +30,8 @@ fn is_open_changes_never_fire_page_lifecycle_events() {
     dp.set_content(boxed(&page)); // fires initial NavigatedTo
 
     let events = log();
-    page.navigated_to(record(&events, "NavigatedTo"));
-    page.navigated_from(record(&events, "NavigatedFrom"));
+    page.navigated_to(record(&events, "NavigatedTo")).detach();
+    page.navigated_from(record(&events, "NavigatedFrom")).detach();
 
     dp.set_is_open(true);
     dp.set_is_open(false);
@@ -45,7 +45,7 @@ fn content_set_initially_fires_navigated_to() {
     let _scope = test_scope();
     let page = page_h("Home");
     let events = log();
-    page.navigated_to(record(&events, "NavigatedTo"));
+    page.navigated_to(record(&events, "NavigatedTo")).detach();
 
     let dp = DrawerPage::new();
     let _root = TestRoot::with_child(dp.clone());
@@ -73,8 +73,8 @@ fn content_changed_fires_lifecycle_events_in_order() {
     dp.set_content(boxed(&first));
 
     let order = log();
-    first.navigated_from(record(&order, "NavigatedFrom"));
-    second.navigated_to(record(&order, "NavigatedTo"));
+    first.navigated_from(record(&order, "NavigatedFrom")).detach();
+    second.navigated_to(record(&order, "NavigatedTo")).detach();
 
     dp.set_content(boxed(&second));
 
@@ -86,7 +86,7 @@ fn content_set_initially_navigated_to_navigation_type_is_replace() {
     let _scope = test_scope();
     let page = page_h("Home");
     let args = slot::<NavigatedToEventArgs>();
-    page.navigated_to(store(&args));
+    page.navigated_to(store(&args)).detach();
 
     let dp = DrawerPage::new();
     let _root = TestRoot::with_child(dp.clone());
@@ -107,8 +107,8 @@ fn content_changed_navigated_from_and_to_navigation_type_is_replace() {
 
     let from_args = slot::<NavigatedFromEventArgs>();
     let to_args = slot::<NavigatedToEventArgs>();
-    first.navigated_from(store(&from_args));
-    second.navigated_to(store(&to_args));
+    first.navigated_from(store(&from_args)).detach();
+    second.navigated_to(store(&to_args)).detach();
 
     dp.set_content(boxed(&second));
 
@@ -130,8 +130,8 @@ fn content_changed_while_overlay_drawer_open_non_page_drawer_fires_lifecycle_eve
     dp.set_content(boxed(&home));
 
     let events = log();
-    home.navigated_from(record(&events, "Home: NavigatedFrom"));
-    profile.navigated_to(record(&events, "Profile: NavigatedTo"));
+    home.navigated_from(record(&events, "Home: NavigatedFrom")).detach();
+    profile.navigated_to(record(&events, "Profile: NavigatedTo")).detach();
 
     dp.set_is_open(true);
     assert!(events.borrow().is_empty());
@@ -148,7 +148,7 @@ fn content_set_before_attach_suppressed_until_load() {
     // Events must NOT fire during markup parsing (before the visual root is set).
     let page = page_h("Home");
     let events = log();
-    page.navigated_to(record(&events, "NavigatedTo"));
+    page.navigated_to(record(&events, "NavigatedTo")).detach();
 
     let dp = DrawerPage::new();
     dp.set_content(boxed(&page));
@@ -163,7 +163,7 @@ fn content_set_before_attach_fires_lifecycle_events_on_load() {
     // Events must fire exactly once when the control is attached and Loaded fires.
     let page = page_h("Home");
     let events = log();
-    page.navigated_to(record(&events, "NavigatedTo"));
+    page.navigated_to(record(&events, "NavigatedTo")).detach();
 
     let dp = DrawerPage::new();
     dp.set_content(boxed(&page));
@@ -187,8 +187,8 @@ fn content_set_before_attach_then_changed_after_attach_no_double_fire() {
     Dispatcher::ui_thread().run_jobs(None); // fire the deferred NavigatedTo on first
 
     let events = log();
-    first.navigated_from(record(&events, "First: NavigatedFrom"));
-    second.navigated_to(record(&events, "Second: NavigatedTo"));
+    first.navigated_from(record(&events, "First: NavigatedFrom")).detach();
+    second.navigated_to(record(&events, "Second: NavigatedTo")).detach();
 
     dp.set_content(boxed(&second));
 
@@ -200,7 +200,7 @@ fn content_set_before_attach_navigated_to_navigation_type_is_push() {
     let _scope = test_scope();
     let page = page_h("Home");
     let args = slot::<NavigatedToEventArgs>();
-    page.navigated_to(store(&args));
+    page.navigated_to(store(&args)).detach();
 
     let dp = DrawerPage::new();
     dp.set_content(boxed(&page));
@@ -221,8 +221,8 @@ fn content_set_to_same_instance_no_lifecycle_events() {
     dp.set_content(boxed(&page)); // initial assignment fires NavigatedTo
 
     let events = log();
-    page.navigated_to(record(&events, "NavigatedTo"));
-    page.navigated_from(record(&events, "NavigatedFrom"));
+    page.navigated_to(record(&events, "NavigatedTo")).detach();
+    page.navigated_from(record(&events, "NavigatedFrom")).detach();
 
     dp.set_content(boxed(&page)); // same instance: must not fire anything
 

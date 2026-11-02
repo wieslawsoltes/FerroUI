@@ -115,7 +115,7 @@ impl CarouselPageEventsPage {
                 if let Some(this) = weak.upgrade() {
                     this.append_log(&format!("NavigatedTo: {name} (from {})", header_text(args.previous_page())));
                 }
-            });
+            }).detach();
             let weak = self.to_ref().downgrade();
             page.navigated_from(move |args| {
                 if let Some(this) = weak.upgrade() {
@@ -124,7 +124,7 @@ impl CarouselPageEventsPage {
                         header_text(args.destination_page())
                     ));
                 }
-            });
+            }).detach();
 
             demo_carousel.pages().expect("the pages of the carousel page").add(page.upcast());
         }

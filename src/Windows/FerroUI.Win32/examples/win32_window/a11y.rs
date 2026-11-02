@@ -221,8 +221,8 @@ fn create_main_window() -> Ref<Window> {
             DispatcherPriority::NORMAL,
         )
         .detach();
-    });
-    window.closed(|| println!("-- accessibility: the window is closed"));
+    }).detach();
+    window.closed(|| println!("-- accessibility: the window is closed")).detach();
     window
 }
 

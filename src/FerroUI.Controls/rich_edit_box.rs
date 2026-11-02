@@ -473,7 +473,7 @@ impl FerroObjectImpl for RichEditBox {
                 this.ensure_caret_visible();
             }
         });
-        *this.selection_subscription.borrow_mut() = Some(Subscription::new(selection_subscription));
+        *this.selection_subscription.borrow_mut() = Some(selection_subscription);
         this.update_input_options();
     }
 
@@ -974,10 +974,14 @@ impl RichEditBox {
     pub fn selected_text(&self) -> String {
         self.text_presenter.selected_text()
     }
+    /// Adds a handler of the changes of the selection.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the box.
     pub fn selection_changed(
         &self,
         handler: impl Fn(&RichTextSelectionChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         self.text_presenter.selection_changed(handler)
     }
     pub fn is_text_selection_enabled(&self) -> bool {
@@ -1662,8 +1666,8 @@ impl RichEditBox {
         });
         *self.editor_subscription.borrow_mut() =
             Some(Subscription::new(Rc::new(CompositeDisposable::from_disposables([
-                subscription,
-                composition_subscription,
+                subscription.detach(),
+                composition_subscription.detach(),
             ]))));
         editor
     }
@@ -2470,22 +2474,30 @@ impl RichEditBox {
             }
         }
     }
-    pub fn edit_failed(&self, handler: impl Fn(&EditError) + 'static) -> Rc<dyn IDisposable> {
+    /// Adds a handler of the edits that failed.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the box.
+    pub fn edit_failed(&self, handler: impl Fn(&EditError) + 'static) -> Subscription {
         let token = self.errors.add(Rc::new(handler));
         let events = self.errors.clone();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             events.remove(token);
-        })
+        }))
     }
+    /// Adds a handler of the clipboard operations that failed.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the box.
     pub fn clipboard_failed(
         &self,
         handler: impl Fn(&ClipboardError) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.clipboard_errors.add(Rc::new(handler));
         let events = self.clipboard_errors.clone();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             events.remove(token);
-        })
+        }))
     }
     pub fn text_input_method_client(&self) -> Rc<dyn TextInputMethodClient> {
         self.im_client.clone()

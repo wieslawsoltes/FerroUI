@@ -54,7 +54,7 @@ pub struct MenuItem {
     command_binding_error: Cell<bool>,
     popup: RefCell<Option<Ref<Popup>>>,
     /// The subscriptions to the `Opened` and `Closed` events of the popup.
-    popup_events: RefCell<Option<(Rc<dyn IDisposable>, Rc<dyn IDisposable>)>>,
+    popup_events: RefCell<Option<(Subscription, Subscription)>>,
     hotkey: Cell<Option<KeyGesture>>,
     is_embedded_in_menu: Cell<bool>,
     /// The shared size scope of the visual parent; see `constructed`.

@@ -3,6 +3,7 @@
 // accepted finalization, and an empty finalization for cancellation.
 use super::*;
 use ferroui_base::media::FontWeight;
+use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::Dispatcher;
 
 fn preview(text: &str) -> RichTextCompositionChange {
@@ -28,7 +29,7 @@ fn collect_changes(
     let subscription = editor.composition_changed(move |change| {
         observed.borrow_mut().push(change.clone());
     });
-    (changes, subscription)
+    (changes, subscription.detach())
 }
 
 #[test]
@@ -92,23 +93,23 @@ fn rich_composition_model_and_editor_callbacks_observe_the_complete_accepted_pre
     });
     let observed = order.clone();
     let weak = Rc::downgrade(&editor);
-    let _editor = editor.changed(move || {
+    editor.changed(move || {
         assert_eq!(
             weak.upgrade().unwrap().active_composition_range(),
             Some(1..4)
         );
         observed.borrow_mut().push("editor");
-    });
+    }).detach();
     let observed = order.clone();
     let weak = Rc::downgrade(&editor);
-    let _composition = editor.composition_changed(move |change| {
+    editor.composition_changed(move |change| {
         assert_eq!(*change, preview("日😀"));
         assert_eq!(
             weak.upgrade().unwrap().active_composition_range(),
             Some(1..4)
         );
         observed.borrow_mut().push("composition");
-    });
+    }).detach();
     editor.set_preedit("日😀", Some(1)).unwrap();
     assert_eq!(*order.borrow(), vec!["model", "editor", "composition"]);
 }
@@ -201,7 +202,7 @@ fn rich_composition_read_only_and_reentrant_errors_preserve_preview_without_fals
     let calls = Rc::new(Cell::new(0));
     let observed = calls.clone();
     let weak = Rc::downgrade(&editor);
-    let _subscription = editor.composition_changed(move |_| {
+    editor.composition_changed(move |_| {
         let editor = weak.upgrade().unwrap();
         let before = editor.document().snapshot();
         assert!(matches!(
@@ -218,7 +219,7 @@ fn rich_composition_read_only_and_reentrant_errors_preserve_preview_without_fals
         ));
         assert_eq!(editor.document().snapshot(), before);
         observed.set(observed.get() + 1);
-    });
+    }).detach();
     editor.set_preedit("日", None).unwrap();
     let before = editor.document().snapshot();
     let selection = editor.selection();
@@ -283,12 +284,12 @@ fn rich_composition_nested_groups_deliver_causes_in_order_after_the_group_settle
     let in_group = Rc::new(Cell::new(true));
     let flag = in_group.clone();
     let weak = Rc::downgrade(&editor);
-    let _observer = editor.composition_changed(move |_| {
+    editor.composition_changed(move |_| {
         assert!(!flag.get());
         let editor = weak.upgrade().unwrap();
         assert_eq!(editor.document().text(), "a日本語!");
         assert_eq!(editor.active_composition_range(), None);
-    });
+    }).detach();
     editor
         .edit_group(|editor| {
             editor.insert_text("a", EditKind::Programmatic)?;

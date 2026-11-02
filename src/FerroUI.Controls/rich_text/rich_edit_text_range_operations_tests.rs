@@ -500,9 +500,9 @@ fn rich_range_delete_layout_callback_preserves_external_model_edits_in_nested_gr
         let observed = changed.clone();
         let composition_changes = Rc::new(Cell::new(0));
         let observed_composition_changes = composition_changes.clone();
-        let _composition_subscription = document.editor().composition_changed(move |_| {
+        document.editor().composition_changed(move |_| {
             composition_changes.set(composition_changes.get() + 1);
-        });
+        }).detach();
         let model = document.document();
         let subscription = view.property_changed(move |change| {
             if change.property().name() == "BaselineOffset" && !changed.replace(true) {
@@ -622,18 +622,18 @@ fn rich_range_editor_publication_in_an_outer_batch_discards_history_and_composit
     let changed = Rc::new(Cell::new(false));
     let observed = changed.clone();
     let callback_model = model.clone();
-    let _subscription = document.editor().changed(move || {
+    document.editor().changed(move || {
         if !changed.replace(true) {
             callback_model
                 .replace_text(0..callback_model.text_length(), "q")
                 .unwrap();
         }
-    });
+    }).detach();
     let composition_changes = Rc::new(Cell::new(0));
     let observed_composition_changes = composition_changes.clone();
-    let _composition_subscription = document.editor().composition_changed(move |_| {
+    document.editor().composition_changed(move |_| {
         composition_changes.set(composition_changes.get() + 1);
-    });
+    }).detach();
     let result = document.edit_group(|_| {
         document.editor().set_preedit("preview", Some(2))?;
         range.set_character_scalar('X')?;

@@ -190,7 +190,7 @@ impl DevTools {
                 Self::dev_tools_closed(&window, &handler_subscription);
             }
         });
-        *closed_subscription.borrow_mut() = Some(closed);
+        *closed_subscription.borrow_mut() = Some(closed.detach());
 
         S_OPEN.with(|open| open.borrow_mut().push((top_level_group, window.clone())));
         match owner.filter(|_| options.show_as_child_window()) {

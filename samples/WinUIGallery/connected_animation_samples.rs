@@ -657,7 +657,7 @@ fn wire_cards(root: &Ref<Control>) -> Result<(), NavigationError> {
                             smoke.children().add(restored_destination.clone());
                         }
                     }
-                });
+                }).detach();
                 target.bring_into_view();
                 cards.update_layout();
                 if !animation.try_start(&target) {

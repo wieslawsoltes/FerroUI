@@ -23,13 +23,13 @@ impl FerroObjectImpl for PopupAutomationPeer {
             if let Some(this) = weak.upgrade() {
                 this.popup_opened_closed();
             }
-        });
+        }).detach();
         let weak = this.to_ref().downgrade();
         owner.closed(move || {
             if let Some(this) = weak.upgrade() {
                 this.popup_opened_closed();
             }
-        });
+        }).detach();
     }
 }
 

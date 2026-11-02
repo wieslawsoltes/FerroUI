@@ -92,15 +92,15 @@ impl NavigationPageStackPage {
             }
         };
         let pushed = refresh();
-        demo_nav.pushed(move |_ev| pushed());
+        demo_nav.pushed(move |_ev| pushed()).detach();
         let popped = refresh();
-        demo_nav.popped(move |_ev| popped());
+        demo_nav.popped(move |_ev| popped()).detach();
         let popped_to_root = refresh();
-        demo_nav.popped_to_root(move |_ev| popped_to_root());
+        demo_nav.popped_to_root(move |_ev| popped_to_root()).detach();
         let page_inserted = refresh();
-        demo_nav.page_inserted(move |_ev| page_inserted());
+        demo_nav.page_inserted(move |_ev| page_inserted()).detach();
         let page_removed = refresh();
-        demo_nav.page_removed(move |_ev| page_removed());
+        demo_nav.page_removed(move |_ev| page_removed()).detach();
 
         self.page_count.set(self.page_count.get() + 1);
         let page_count = self.page_count.get();

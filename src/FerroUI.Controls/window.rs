@@ -10,7 +10,7 @@ use ferroui_base::input::{IFocusScope, InputElementImpl, PointerPressedEventArgs
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEvent, RoutedEventArgs, RoutingStrategies};
 use ferroui_base::layout::{ILayoutManager, Layoutable, LayoutableImpl, LayoutableImplExt, MinMax};
 use ferroui_base::media::{Brushes, IBrush};
-use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::threading::{Dispatcher, DispatcherTask};
 use ferroui_base::utilities::{HandlerList, MathUtilities};
@@ -685,14 +685,14 @@ impl Window {
                 }
             }
         });
-        let _ = self.scaling_changed({
+        self.scaling_changed({
             let weak = weak.clone();
             move || {
                 if let Some(this) = weak.upgrade() {
                     this.on_scaling_changed_update_decorations();
                 }
             }
-        });
+        }).detach();
 
         self.bind_impl(Self::title_property(), |_, platform_impl, title| platform_impl.set_title(title.as_deref()));
         self.bind_impl(Self::icon_property(), |this, _, icon| this.set_effective_icon(icon));
@@ -1048,16 +1048,18 @@ impl Window {
         }
     }
 
-    /// Fired before a window is closed. Disposing the returned handle
-    /// unsubscribes.
-    pub fn closing(&self, handler: impl Fn(&WindowClosingEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Fired before a window is closed.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the window.
+    pub fn closing(&self, handler: impl Fn(&WindowClosingEventArgs) + 'static) -> Subscription {
         let token = self.closing.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.closing.remove(token);
             }
-        })
+        }))
     }
 
     /// Closes the window.
@@ -1159,20 +1161,22 @@ impl Window {
         self.update_drawn_decoration_parts();
     }
 
-    /// Fired when the window actions allowed by the platform change
-    /// (internal upstream: for the window decorations). Disposing the
-    /// returned handle unsubscribes.
+    /// Fired when the window actions allowed by the platform change (internal
+    /// upstream: for the window decorations).
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the window.
     pub fn allowed_window_actions_changed(
         &self,
         handler: impl Fn(PlatformAllowedWindowActions) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.allowed_window_actions_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.allowed_window_actions_changed.remove(token);
             }
-        })
+        }))
     }
 
     fn on_allowed_window_actions_changed(&self, actions: PlatformAllowedWindowActions) {
@@ -1543,7 +1547,7 @@ impl Window {
             });
 
             let disposables: Rc<dyn IDisposable> =
-                Rc::new(CompositeDisposable::from_disposables([closed_subscription, complete]));
+                Rc::new(CompositeDisposable::from_disposables([closed_subscription.detach(), complete]));
             *self.modal_subscription.borrow_mut() = Some(disposables);
             result = Some(completion);
         }

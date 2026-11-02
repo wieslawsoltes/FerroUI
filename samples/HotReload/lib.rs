@@ -193,7 +193,7 @@ impl ApplicationImpl for App {
                             .acknowledge()
                             .expect("acknowledge initialized replacement");
                     }
-                }));
+                }).detach());
             }
         }
         let session = RefCell::new(session);

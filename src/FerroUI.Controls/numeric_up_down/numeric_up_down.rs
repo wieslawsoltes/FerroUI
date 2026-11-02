@@ -18,7 +18,7 @@ use ferroui_base::interactivity::{
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::text_formatting::unicode::{Codepoint, GeneralCategory};
 use ferroui_base::media::{IBrush, TextAlignment};
-use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt, Subscription};
+use ferroui_base::reactive::{Disposable, ObservableExt, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::number_format::format_decimal_composite;
 use ferroui_base::utilities::{CultureInfo, Decimal, HandlerList, NumberFormatInfo, NumberParseError, NumberStyles};
@@ -859,14 +859,17 @@ impl NumericUpDown {
     }
 
     /// Occurs when spinning is initiated by the end-user.
-    pub fn spinned(&self, handler: impl Fn(&SpinEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the control.
+    pub fn spinned(&self, handler: impl Fn(&SpinEventArgs) + 'static) -> Subscription {
         let token = self.spinned.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.spinned.remove(token);
             }
-        })
+        }))
     }
 
     /// Raised when the `Value` changes.

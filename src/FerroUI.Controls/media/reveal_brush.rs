@@ -239,8 +239,8 @@ pub(crate) fn on_top_level_created(top_level: &TopLevel) {
 /// application to another does not count as none being active.
 fn track_window_activation(top_level: &TopLevel) {
     let Some(window) = top_level.to_ref().cast::<crate::WindowBase>() else { return };
-    let _ = window.activated(|| ferroui_base::media::MaterialPolicy::set_window_active(true));
-    let _ = window.deactivated(|| {
+    window.activated(|| ferroui_base::media::MaterialPolicy::set_window_active(true)).detach();
+    window.deactivated(|| {
         let _ = ferroui_base::threading::Dispatcher::ui_thread().invoke_async_local_with_priority(
             || {
                 let any_active = TOP_LEVELS.with(|top_levels| {
@@ -252,7 +252,7 @@ fn track_window_activation(top_level: &TopLevel) {
             },
             ferroui_base::threading::DispatcherPriority::BACKGROUND,
         );
-    });
+    }).detach();
 }
 
 /// `AttachLightsToElement`: two border lights (normal and wide) for each

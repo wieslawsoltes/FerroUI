@@ -180,9 +180,9 @@ fn secondary_window_cancellation_is_overridden(
     window.closing(move |args| {
         executed.set(true);
         args.set_cancel(true);
-    });
+    }).detach();
     let executed = secondary_window_closed_executed.clone();
-    window.closed(move || executed.set(true));
+    window.closed(move || executed.set(true)).detach();
     window.show();
 
     shutdown(&lifetime, &main_window);
@@ -422,7 +422,7 @@ fn try_shutdown_cancellable_by_preventing_window_close() {
     window_a.closing(move |e| {
         e.set_cancel(true);
         r.set(r.get() + 1);
-    });
+    }).detach();
 
     lifetime.try_shutdown(0);
 
@@ -450,9 +450,9 @@ fn shutdown_not_cancellable_by_preventing_window_close() {
     window_a.closing(move |e| {
         e.set_cancel(true);
         r.set(r.get() + 1);
-    });
+    }).detach();
     let r = closed_raised.clone();
-    window_a.closed(move || r.set(r.get() + 1));
+    window_a.closed(move || r.set(r.get() + 1)).detach();
 
     lifetime.shutdown(0);
 
@@ -730,7 +730,7 @@ fn platform_shutdown_request_closes_the_windows_for_an_os_shutdown() {
     let window = shown_window();
     let reason = Rc::new(Cell::new(None));
     let r = reason.clone();
-    window.closing(move |e| r.set(Some((e.close_reason(), e.is_programmatic()))));
+    window.closing(move |e| r.set(Some((e.close_reason(), e.is_programmatic())))).detach();
 
     let e = ShutdownRequestedEventArgs::with_is_os_shutdown(true);
     lifetime_events.raise_shutdown_requested(&e);

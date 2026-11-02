@@ -60,7 +60,7 @@ ferroui_base::ferro_overrides! {
                         trigger.on_closed();
                     }
                 });
-                let previous = this.subscription.borrow_mut().replace(Subscription::new(subscription));
+                let previous = this.subscription.borrow_mut().replace(subscription);
                 if let Some(previous) = previous {
                     previous.dispose();
                 }

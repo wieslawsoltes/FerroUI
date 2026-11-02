@@ -120,7 +120,7 @@ ferroui_base::ferro_overrides! {
                     behavior.popup_on_closed();
                 }
             });
-            *this.popup_closed.borrow_mut() = Some(Subscription::new(popup_closed));
+            *this.popup_closed.borrow_mut() = Some(popup_closed);
 
             let behavior = this.to_ref().downgrade();
             DisposableAction::create(move || {

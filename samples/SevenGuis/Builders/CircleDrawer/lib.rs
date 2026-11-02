@@ -108,7 +108,7 @@ fn adjust(drawer: Drawer, circle: Circle) {
                     .child(slider().minimum(4.0).maximum(200.0).value(diameter.two_way())),
             )
             .with(move |window| {
-                let _ = window.closed(move || drawer.commit_adjustment());
+                window.closed(move || drawer.commit_adjustment()).detach();
             })
             .into()
     });

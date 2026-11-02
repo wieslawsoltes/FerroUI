@@ -35,11 +35,11 @@ impl MainWindow {
         this.initialize_component();
         let _ = Self::typed(&this);
         let window = this.downgrade();
-        let _ = this.closed(move || {
+        this.closed(move || {
             if let Some(window) = window.upgrade() {
                 Self::on_closed(&window);
             }
-        });
+        }).detach();
         this
     }
 

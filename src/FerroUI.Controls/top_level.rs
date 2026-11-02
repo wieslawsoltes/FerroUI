@@ -272,14 +272,14 @@ fn property_key(property: &'static FerroProperty) -> usize {
     property as *const FerroProperty as usize
 }
 
-fn subscribe(handlers: &HandlerList<dyn Fn()>, owner: &TopLevel, select: fn(&TopLevel) -> &HandlerList<dyn Fn()>, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+fn subscribe(handlers: &HandlerList<dyn Fn()>, owner: &TopLevel, select: fn(&TopLevel) -> &HandlerList<dyn Fn()>, handler: Rc<dyn Fn()>) -> Subscription {
     let token = handlers.add(handler);
     let weak = owner.to_ref().downgrade();
-    Disposable::create(move || {
+    Subscription::new(Disposable::create(move || {
         if let Some(owner) = weak.upgrade() {
             select(&owner).remove(token);
         }
-    })
+    }))
 }
 
 /// Chains `handler` onto the lost-focus callback of a platform
@@ -823,55 +823,69 @@ impl TopLevel {
         }
     }
 
-    /// Fired when the window is opened. Disposing the returned handle
-    /// unsubscribes.
-    pub fn opened(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Fired when the window is opened.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the top-level.
+    pub fn opened(&self, handler: impl Fn() + 'static) -> Subscription {
         subscribe(&self.opened, self, |tl| &tl.opened, Rc::new(handler))
     }
 
-    /// Fired when the window is closed. Disposing the returned handle
-    /// unsubscribes.
-    pub fn closed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Fired when the window is closed.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the top-level.
+    pub fn closed(&self, handler: impl Fn() + 'static) -> Subscription {
         subscribe(&self.closed, self, |tl| &tl.closed, Rc::new(handler))
     }
 
-    /// Fired when the top-level's scaling changes. Disposing the returned
-    /// handle unsubscribes.
-    pub fn scaling_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Fired when the top-level's scaling changes.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the top-level.
+    pub fn scaling_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         subscribe(&self.scaling_changed, self, |tl| &tl.scaling_changed, Rc::new(handler))
     }
 
     /// Adds a handler to the lost-focus notification of the platform
-    /// implementation (C# `PlatformImpl.LostFocus += handler`); it runs
-    /// after the top-level's own handling. Disposing the returned handle
-    /// removes it.
+    /// implementation (C# `PlatformImpl.LostFocus += handler`); it runs after
+    /// the top-level's own handling.
     ///
     /// The callbacks of a platform implementation hold a single function,
     /// so handlers that come and go (an open popup watching its parent) are
     /// kept in a list of the top-level instead of being chained onto the
     /// callback, where a removed handler would stay behind.
-    pub fn platform_lost_focus(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the top-level.
+    pub fn platform_lost_focus(&self, handler: impl Fn() + 'static) -> Subscription {
         subscribe(&self.platform_lost_focus, self, |tl| &tl.platform_lost_focus, Rc::new(handler))
     }
 
     /// Adds a handler to the deactivated notification of a window platform
     /// implementation (C# `impl.Deactivated += handler`); see
     /// [`platform_lost_focus`](Self::platform_lost_focus).
-    pub fn platform_deactivated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the top-level.
+    pub fn platform_deactivated(&self, handler: impl Fn() + 'static) -> Subscription {
         subscribe(&self.platform_deactivated, self, |tl| &tl.platform_deactivated, Rc::new(handler))
     }
 
     /// Adds a handler to the position-changed notification of a window
     /// platform implementation (C# `impl.PositionChanged += handler`); see
     /// [`platform_lost_focus`](Self::platform_lost_focus).
-    pub fn platform_position_changed(&self, handler: impl Fn(PixelPoint) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the top-level.
+    pub fn platform_position_changed(&self, handler: impl Fn(PixelPoint) + 'static) -> Subscription {
         let token = self.platform_position_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.platform_position_changed.remove(token);
             }
-        })
+        }))
     }
 
     pub(crate) fn raise_platform_deactivated(&self) {
@@ -1484,7 +1498,7 @@ struct TopLevelCloseable(Ref<TopLevel>);
 
 impl ferroui_base::input::ICloseable for TopLevelCloseable {
     fn closed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        self.0.closed(move || handler())
+        self.0.closed(move || handler()).detach()
     }
 }
 

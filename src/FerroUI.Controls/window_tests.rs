@@ -304,10 +304,10 @@ fn closing_should_only_be_invoked_once() {
     let window = Window::new();
     let count = Rc::new(Cell::new(0));
 
-    let _ = window.closing({
+    window.closing({
         let count = count.clone();
         move |_| count.set(count.get() + 1)
-    });
+    }).detach();
 
     window.show();
     window.close();
@@ -340,33 +340,33 @@ fn child_windows_should_be_closed_before_parent(programmatic_close: bool) {
 
     let order = Rc::new(CloseOrder::default());
 
-    let _ = window.closing({
+    window.closing({
         let order = order.clone();
         move |e| {
             assert_eq!(WindowCloseReason::WindowClosing, e.close_reason());
             assert_eq!(programmatic_close, e.is_programmatic());
             order.window_closing.set(order.next());
         }
-    });
+    }).detach();
 
-    let _ = child.closing({
+    child.closing({
         let order = order.clone();
         move |e| {
             assert_eq!(WindowCloseReason::OwnerWindowClosing, e.close_reason());
             assert_eq!(programmatic_close, e.is_programmatic());
             order.child_closing.set(order.next());
         }
-    });
+    }).detach();
 
-    let _ = window.closed({
+    window.closed({
         let order = order.clone();
         move || order.window_closed.set(order.next())
-    });
+    }).detach();
 
-    let _ = child.closed({
+    child.closed({
         let order = order.clone();
         move || order.child_closed.set(order.next())
-    });
+    }).detach();
 
     window.show();
     child.show_with_owner(&window);
@@ -403,28 +403,28 @@ fn child_windows_must_not_close_before_parent_has_chance_to_cancel_os_close_butt
 
     let order = Rc::new(CloseOrder::default());
 
-    let _ = window.closing({
+    window.closing({
         let order = order.clone();
         move |e| {
             order.window_closing.set(order.next());
             e.set_cancel(true);
         }
-    });
+    }).detach();
 
-    let _ = child.closing({
+    child.closing({
         let order = order.clone();
         move |_| order.child_closing.set(order.next())
-    });
+    }).detach();
 
-    let _ = window.closed({
+    window.closed({
         let order = order.clone();
         move || order.window_closed.set(order.next())
-    });
+    }).detach();
 
-    let _ = child.closed({
+    child.closed({
         let order = order.clone();
         move || order.child_closed.set(order.next())
-    });
+    }).detach();
 
     window.show();
     child.show_with_owner(&window);
@@ -483,10 +483,10 @@ fn show_dialog_should_raise_opened() {
     let raised = Rc::new(Cell::new(false));
 
     parent.show();
-    let _ = target.opened({
+    target.opened({
         let raised = raised.clone();
         move || raised.set(true)
-    });
+    }).detach();
 
     let _task = target.show_dialog(&parent);
 
@@ -559,10 +559,10 @@ fn calling_show_on_closed_window_should_throw() {
     target.close();
 
     let opened_raised = Rc::new(Cell::new(false));
-    let _ = target.opened({
+    target.opened({
         let opened_raised = opened_raised.clone();
         move || opened_raised.set(true)
-    });
+    }).detach();
 
     let message = panic_message(|| target.show());
     assert_eq!("Cannot re-show a closed window.", message);
@@ -587,10 +587,10 @@ fn calling_show_dialog_on_closed_window_should_throw() {
     assert!(task.is_completed());
 
     let opened_raised = Rc::new(Cell::new(false));
-    let _ = target.opened({
+    target.opened({
         let opened_raised = opened_raised.clone();
         move || opened_raised.set(true)
-    });
+    }).detach();
 
     let message = panic_message(|| {
         let _ = target.show_dialog_typed::<bool>(&parent);
@@ -1206,10 +1206,10 @@ macro_rules! sizing_tests {
                 let target = Window::new();
                 let raised = Rc::new(Cell::new(false));
 
-                let _ = target.opened({
+                target.opened({
                     let raised = raised.clone();
                     move || raised.set(true)
-                });
+                }).detach();
                 target.set_is_visible(true);
 
                 assert!(raised.get());

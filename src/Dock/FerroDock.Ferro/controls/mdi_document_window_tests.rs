@@ -856,7 +856,7 @@ fn window_activation_preserves_hidden_native_window_guard_and_stable_managed_zor
             Dispatcher::ui_thread().run_jobs(None);
             let activations = Rc::new(Cell::new(0));
             let n = activations.clone();
-            let _sub = hidden.activated(move || n.set(n.get() + 1));
+            hidden.activated(move || n.set(n.get() + 1)).detach();
             let log = Rc::new(RefCell::new(Vec::new()));
             let first = HostProbe::new("native", 0, Some(hidden.clone()), log.clone());
             let high = HostProbe::new("high", 9, None, log.clone());

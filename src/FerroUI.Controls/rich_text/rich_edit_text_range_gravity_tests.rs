@@ -360,7 +360,8 @@ fn rich_range_gravity_mode_is_observational_on_readonly_composition_and_history(
     let observed = notifications.clone();
     let _subscription = document
         .editor()
-        .changed(move || observed.set(observed.get() + 1));
+        .changed(move || observed.set(observed.get() + 1))
+        .detach();
     document.editor().set_is_read_only(true);
     for gravity in [
         RangeGravity::Backward,
@@ -473,7 +474,7 @@ fn rich_range_gravity_set_text_publishes_range_before_newer_mode_or_endpoint_req
         let changed_range = range.clone();
         let called = Rc::new(Cell::new(false));
         let observed = called.clone();
-        let _subscription = document.editor().changed(move || {
+        document.editor().changed(move || {
             if !observed.replace(true) {
                 assert_eq!(changed_range.range(), 2..3);
                 changed_range.set_gravity(RangeGravity::Backward);
@@ -481,7 +482,7 @@ fn rich_range_gravity_set_text_publishes_range_before_newer_mode_or_endpoint_req
                     changed_range.set_range(0, 0).unwrap();
                 }
             }
-        });
+        }).detach();
         range.set_text("X").unwrap();
         assert!(called.get());
         assert_eq!(document.text(), "abXCD");
@@ -502,7 +503,7 @@ fn rich_range_gravity_external_publication_write_survives_interrupted_set_text()
     let changed_range = range.clone();
     let called = Rc::new(Cell::new(false));
     let observed = called.clone();
-    let _subscription = document.editor().changed(move || {
+    document.editor().changed(move || {
         if !observed.replace(true) {
             model
                 .replace_text(0..model.text_length(), "external")
@@ -510,7 +511,7 @@ fn rich_range_gravity_external_publication_write_survives_interrupted_set_text()
             changed_range.set_range(1, 1).unwrap();
             changed_range.set_gravity(RangeGravity::Backward);
         }
-    });
+    }).detach();
     assert!(matches!(range.set_text("X"), Err(EditError::ReentrantEdit)));
     assert_eq!(document.text(), "external");
     assert_eq!(range.range(), 1..1);
@@ -722,7 +723,7 @@ fn rich_range_gravity_rich_snapshot_publishes_endpoints_and_defaults_before_call
         let changed_range = range.clone();
         let called = Rc::new(Cell::new(false));
         let observed = called.clone();
-        let _subscription = document.editor().changed(move || {
+        document.editor().changed(move || {
             if !observed.replace(true) {
                 assert_eq!(changed_range.range(), 2..2 + text.len());
                 if text.is_empty() {
@@ -731,7 +732,7 @@ fn rich_range_gravity_rich_snapshot_publishes_endpoints_and_defaults_before_call
                 changed_range.set_range(0, 0).unwrap();
                 changed_range.set_gravity(RangeGravity::Backward);
             }
-        });
+        }).detach();
         range.set_snapshot(&fragment).unwrap();
         assert!(called.get());
         assert_eq!(range.range(), 0..0);

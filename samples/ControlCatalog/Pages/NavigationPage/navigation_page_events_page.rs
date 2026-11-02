@@ -114,19 +114,19 @@ impl NavigationPageEventsPage {
             }
         };
         let pushed = log(|header| format!("Pushed \u{2192} {header}"));
-        demo_nav.pushed(move |ev| pushed(header_text(&ev.page())));
+        demo_nav.pushed(move |ev| pushed(header_text(&ev.page()))).detach();
         let popped = log(|header| format!("Popped \u{2190} {header}"));
-        demo_nav.popped(move |ev| popped(header_text(&ev.page())));
+        demo_nav.popped(move |ev| popped(header_text(&ev.page()))).detach();
         let popped_to_root = log(|_| String::from("PoppedToRoot"));
-        demo_nav.popped_to_root(move |_ev| popped_to_root(String::new()));
+        demo_nav.popped_to_root(move |_ev| popped_to_root(String::new())).detach();
         let page_inserted = log(|header| format!("PageInserted: {header}"));
-        demo_nav.page_inserted(move |ev| page_inserted(header_text(&ev.page())));
+        demo_nav.page_inserted(move |ev| page_inserted(header_text(&ev.page()))).detach();
         let page_removed = log(|header| format!("PageRemoved: {header}"));
-        demo_nav.page_removed(move |ev| page_removed(header_text(&ev.page())));
+        demo_nav.page_removed(move |ev| page_removed(header_text(&ev.page()))).detach();
         let modal_pushed = log(|header| format!("ModalPushed \u{2192} {header}"));
-        demo_nav.modal_pushed(move |ev| modal_pushed(header_text(&ev.modal())));
+        demo_nav.modal_pushed(move |ev| modal_pushed(header_text(&ev.modal()))).detach();
         let modal_popped = log(|header| format!("ModalPopped \u{2190} {header}"));
-        demo_nav.modal_popped(move |ev| modal_popped(header_text(&ev.modal())));
+        demo_nav.modal_popped(move |ev| modal_popped(header_text(&ev.modal()))).detach();
 
         let root = NavigationDemoHelper::make_page(
             "Home",
@@ -149,14 +149,14 @@ impl NavigationPageEventsPage {
             }
         };
         let navigated_to = log("NavigatedTo");
-        page.navigated_to(move |_e| navigated_to());
+        page.navigated_to(move |_e| navigated_to()).detach();
         let navigated_from = log("NavigatedFrom");
-        page.navigated_from(move |_e| navigated_from());
+        page.navigated_from(move |_e| navigated_from()).detach();
         let navigating = log("Navigating");
         page.navigating(move |_args| {
             navigating();
             Box::pin(async {})
-        });
+        }).detach();
     }
 
     /// `async void`: nothing follows the push.

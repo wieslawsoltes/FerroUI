@@ -13,7 +13,7 @@ use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::FlowDirection;
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_property, instantiate, AttachedProperty,
@@ -465,25 +465,31 @@ impl TitleBar {
     }
 
     /// Adds a handler of `BackRequested`: the back button was clicked.
-    pub fn back_requested(&self, handler: impl Fn(&TitleBar) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the title bar.
+    pub fn back_requested(&self, handler: impl Fn(&TitleBar) + 'static) -> Subscription {
         let token = self.back_requested.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        ferroui_base::reactive::Disposable::create(move || {
+        Subscription::new(ferroui_base::reactive::Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.back_requested.remove(token);
             }
-        })
+        }))
     }
 
     /// Adds a handler of `PaneToggleRequested`: the pane toggle button was clicked.
-    pub fn pane_toggle_requested(&self, handler: impl Fn(&TitleBar) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`]
+    /// keeps it for the life of the title bar.
+    pub fn pane_toggle_requested(&self, handler: impl Fn(&TitleBar) + 'static) -> Subscription {
         let token = self.pane_toggle_requested.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        ferroui_base::reactive::Disposable::create(move || {
+        Subscription::new(ferroui_base::reactive::Disposable::create(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.pane_toggle_requested.remove(token);
             }
-        })
+        }))
     }
 
     fn raise_back_requested(&self) {

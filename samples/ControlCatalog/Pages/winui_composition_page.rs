@@ -213,9 +213,9 @@ impl Gallery {
         let started = animation.try_start_with_coordinated_elements(&self.detail_image, &coordinated);
         self.status.set_text(Some(if started { "Flying to the detail view" } else { "The animation did not start" }));
         let status = self.status.clone();
-        let _subscription = animation.completed(move |e| {
+        animation.completed(move |e| {
             status.set_text(Some(if e.cancelled() { "Cancelled" } else { "Arrived" }));
-        });
+        }).detach();
     }
 
     /// Returns to the list: the image flies back to its card, with the direct configuration as

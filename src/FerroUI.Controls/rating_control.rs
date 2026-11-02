@@ -494,15 +494,17 @@ impl RatingControl {
     }
 
     /// Adds a handler of the `ValueChanged` event, raised for the changes of the user only.
-    /// Disposing the result removes the handler.
-    pub fn value_changed(&self, handler: impl Fn(&RatingControl) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it
+    /// for the life of the control.
+    pub fn value_changed(&self, handler: impl Fn(&RatingControl) + 'static) -> Subscription {
         let token = self.value_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.value_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Sets a rating chosen by the user (WinUI's `SetRatingTo`): choosing the rating again clears

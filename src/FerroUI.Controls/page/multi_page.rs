@@ -9,7 +9,7 @@ use ferroui_base::data::core::ValueTypes;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, BoxedValue, FerroObjectImpl,
@@ -237,31 +237,35 @@ impl MultiPage {
         self.set_value(Self::page_template_property(), value)
     }
 
-    /// Occurs when the `CurrentPage` property changes. Disposing the
-    /// returned handle unsubscribes.
-    pub fn current_page_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Occurs when the `CurrentPage` property changes.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the page.
+    pub fn current_page_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.current_page_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.current_page_changed.remove(token);
             }
-        })
+        }))
     }
 
-    /// Occurs when the `Pages` collection changes. Disposing the returned
-    /// handle unsubscribes.
+    /// Occurs when the `Pages` collection changes.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the page.
     pub fn pages_changed(
         &self,
         handler: impl for<'a> Fn(&NotifyCollectionChangedEventArgs<'a, Ref<Page>>) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.pages_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.pages_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// The untyped items list of a collection of pages, for the items source

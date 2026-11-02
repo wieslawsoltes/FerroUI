@@ -419,7 +419,7 @@ impl RetroGamingAppPage {
                 let transparent: Rc<dyn IBrush> = Brushes::transparent();
                 nav.resources().set("NavigationBarBackground", Some(Rc::new(transparent)));
             }
-        });
+        }).detach();
         let weak = self.to_ref().downgrade();
         page.navigated_from(move |_| {
             let Some(this) = weak.upgrade() else {
@@ -429,7 +429,7 @@ impl RetroGamingAppPage {
             if let Some(nav) = nav {
                 nav.resources().set("NavigationBarBackground", solid_resource(surface_color()));
             }
-        });
+        }).detach();
 
         let cmd_bar = StackPanel::new();
         cmd_bar.set_orientation(Orientation::Horizontal);

@@ -140,13 +140,13 @@ impl DrawerPageEventsPage {
                 if let Some(this) = weak.upgrade() {
                     this.log(&format!("{label}: NavigatedTo"));
                 }
-            });
+            }).detach();
             let weak = this.downgrade();
             page.navigated_from(move |_| {
                 if let Some(this) = weak.upgrade() {
                     this.log(&format!("{label}: NavigatedFrom"));
                 }
-            });
+            }).detach();
         }
         this
     }

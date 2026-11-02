@@ -134,9 +134,7 @@ impl<T: AdornerTarget> AdornerHelper<T> {
             let window = self.geometry_window.borrow().clone();
             if let Some(window) = window {
                 let owner = self.clone();
-                self.position_subscription.replace(Some(Subscription::new(
-                    window.position_changed(move |_| owner.update_geometry()),
-                )));
+                self.position_subscription.replace(Some(window.position_changed(move |_| owner.update_geometry())));
             }
             self.update_geometry();
         } else {

@@ -98,11 +98,11 @@ impl ControlImpl for ContentPagePerformancePage {
             }
         };
         let pushed = on_stack_changed();
-        nav_page.pushed(move |_e| pushed());
+        nav_page.pushed(move |_e| pushed()).detach();
         let popped = on_stack_changed();
-        nav_page.popped(move |_e| popped());
+        nav_page.popped(move |_e| popped()).detach();
         let popped_to_root = on_stack_changed();
-        nav_page.popped_to_root(move |_e| popped_to_root());
+        nav_page.popped_to_root(move |_e| popped_to_root()).detach();
 
         this.page_counter.set(this.page_counter.get() + 1);
         let this = this.to_ref();

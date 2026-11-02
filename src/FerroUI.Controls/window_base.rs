@@ -7,7 +7,7 @@ use crate::{
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{ILayoutManager, LayoutHelper, LayoutableImpl};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::styling::Container;
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -344,37 +344,45 @@ impl WindowBase {
         &self,
         select: fn(&WindowBase) -> &HandlerList<F>,
         handler: Rc<F>,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = select(self).add(handler);
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 select(&this).remove(token);
             }
-        })
+        }))
     }
 
-    /// Fired when the window is activated. Disposing the returned handle
-    /// unsubscribes.
-    pub fn activated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Fired when the window is activated.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the window.
+    pub fn activated(&self, handler: impl Fn() + 'static) -> Subscription {
         self.subscribe::<dyn Fn()>(|w| &w.activated, Rc::new(handler))
     }
 
-    /// Fired when the window is deactivated. Disposing the returned handle
-    /// unsubscribes.
-    pub fn deactivated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Fired when the window is deactivated.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the window.
+    pub fn deactivated(&self, handler: impl Fn() + 'static) -> Subscription {
         self.subscribe::<dyn Fn()>(|w| &w.deactivated, Rc::new(handler))
     }
 
-    /// Fired when the window position is changed. Disposing the returned
-    /// handle unsubscribes.
-    pub fn position_changed(&self, handler: impl Fn(&PixelPointEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Fired when the window position is changed.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the window.
+    pub fn position_changed(&self, handler: impl Fn(&PixelPointEventArgs) + 'static) -> Subscription {
         self.subscribe::<dyn Fn(&PixelPointEventArgs)>(|w| &w.position_changed, Rc::new(handler))
     }
 
-    /// Fired when the window is resized. Disposing the returned handle
-    /// unsubscribes.
-    pub fn resized(&self, handler: impl Fn(&WindowResizedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Fired when the window is resized.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the window.
+    pub fn resized(&self, handler: impl Fn(&WindowResizedEventArgs) + 'static) -> Subscription {
         self.subscribe::<dyn Fn(&WindowResizedEventArgs)>(|w| &w.resized, Rc::new(handler))
     }
 

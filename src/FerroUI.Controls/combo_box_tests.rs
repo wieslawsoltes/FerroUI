@@ -794,7 +794,7 @@ fn close_window_on_alt_f4_when_combo_box_is_focus() {
     window.set_content(Some(Control::boxed(target.clone())));
 
     let counter = count.clone();
-    window.closing(move |_| counter.set(counter.get() + 1));
+    window.closing(move |_| counter.set(counter.get() + 1)).detach();
 
     window.show();
 

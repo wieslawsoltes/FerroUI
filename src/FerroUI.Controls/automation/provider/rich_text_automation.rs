@@ -307,7 +307,7 @@ fn observe_text_edit_changes(
             change_type,
             changed_data: vec![text.clone()],
         });
-    })
+    }).detach()
 }
 
 impl<T: RichTextAutomationPeer> ITextProvider2 for ProviderAdapter<T> {
@@ -509,12 +509,13 @@ impl<T: RichTextAutomationPeer> ITextProvider for ProviderAdapter<T> {
         let context = TextContext::from_peer(&*self.0)?;
         match &context.host {
             RichTextAutomationHost::Block(_) => {
-                Ok(context.view()?.selection_changed(move |_| handler()))
+                Ok(context.view()?.selection_changed(move |_| handler()).detach())
             }
             RichTextAutomationHost::Editor(editor) => Ok(editor
                 .upgrade()
                 .ok_or(TextProviderError::ElementNotAvailable)?
-                .selection_changed(move |_| handler())),
+                .selection_changed(move |_| handler())
+                .detach()),
         }
     }
 }

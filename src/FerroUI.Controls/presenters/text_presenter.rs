@@ -15,7 +15,7 @@ use ferroui_base::media::{
     FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, IImmutableBrush, IPen, TextAlignment,
     TextWrapping, Typeface,
 };
-use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::{HandlerList, MathUtilities, ReadOnlyMemory, ValueSpan};
 use ferroui_base::{
@@ -580,14 +580,17 @@ impl TextPresenter {
     }
 
     /// Occurs when the bounds of the caret change.
-    pub fn caret_bounds_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the presenter.
+    pub fn caret_bounds_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.caret_bounds_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.caret_bounds_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// A brush used to paint the control's background.

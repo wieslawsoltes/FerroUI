@@ -9,7 +9,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::{ITransform, MatrixTransform};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, AttachedProperty, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Matrix, Nullable, Point, Rect, Ref,
@@ -422,7 +422,7 @@ impl AdornerLayer {
 struct AdornedElementInfo {
     adorner: WeakRef<Visual>,
     layer: RefCell<Option<WeakRef<AdornerLayer>>>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
     adorned_element: RefCell<Option<WeakRef<Visual>>>,
 }
 

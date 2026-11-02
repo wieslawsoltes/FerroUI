@@ -126,7 +126,7 @@ impl RootDockDebugExtensions {
                     let closed = state.clone();
                     created.closed(move || {
                         closed.replace(None);
-                    });
+                    }).detach();
                     created.show();
                 }
             },
@@ -141,7 +141,7 @@ impl RootDockDebugExtensions {
                     current.close();
                     state.replace(None);
                 }
-            })
+            }).detach()
         });
         Rc::new(ActionDisposable(Box::new(move || {
             let _owner = &top_level;
