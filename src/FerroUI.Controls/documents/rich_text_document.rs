@@ -1530,6 +1530,7 @@ impl RichTextDocument {
         range: Range<usize>,
         format: &CharacterFormat,
     ) -> Result<(), DocumentError> {
+        let version = self.mutation_version();
         let source = found.run.text().unwrap_or_default();
         let length = source.encode_utf16().count();
         let local = range.start - found.offset..range.end - found.offset;
@@ -1541,9 +1542,9 @@ impl RichTextDocument {
         let _batch = self.begin_edit();
         self.0.change_kind.set(Some(DocumentChangeKind::Formatting));
         // The journals of the edits being recorded hold this paragraph (S8). With link fields
-        // the observation of the change reconciles fields in any paragraph: the journals cannot
-        // follow it.
-        if self.0.link_fields.borrow().is_empty() {
+        // the observation of the change reconciles fields in any paragraph, and a write while
+        // the format was read may have moved the paragraph: the journals cannot follow those.
+        if self.0.link_fields.borrow().is_empty() && self.mutation_version() == version {
             self.journal_replacement(found.block, 1, 1, None);
         } else {
             self.journal_untracked_change();
