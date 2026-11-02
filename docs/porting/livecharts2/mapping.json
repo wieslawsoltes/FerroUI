@@ -111,6 +111,27 @@
       ],
       "status": "partial"
     },
+    "src/LiveChartsCore/CorePolarAxis.cs": {
+      "reason": "Angle separators run from the inner to the outer radius and radius separators are circles; the ticks use the polar nice step, custom separators and logarithmic bases; labels are placed at LabelsAngle with the tangent and cotangent rotation flags and kept upright.",
+      "remaining": [
+        "Axis names, label backgrounds, sub-separators and the animated separator lifecycle are not ported."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs"
+      ],
+      "status": "partial"
+    },
+    "src/LiveChartsCore/CorePolarLineSeries.cs": {
+      "reason": "The source spline of a polar line (open or closed, null splitting), its area filled with the theme's alpha 50, stacked radii, the five data label positions with the rotation flags, markers and hover areas.",
+      "remaining": [
+        "The geometry fill and stroke paints of the markers and the per-point animation of the source segments are not ported; markers take the series paint."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/series_classes.rs"
+      ],
+      "status": "partial"
+    },
     "src/LiveChartsCore/CoreRangeColumnSeries.cs": {
       "reason": "Vertical range bars include both endpoints in bounds, including reversed ranges, and show both values in tooltip labels.",
       "remaining": [
@@ -595,6 +616,17 @@
       ],
       "status": "partial"
     },
+    "src/LiveChartsCore/PolarChartEngine.cs": {
+      "reason": "The polar engine measures independent angle and radius axes, the empty and zero-width bounds, the series padding, the automatic margin of the angle labels, an explicit draw margin and the fit-to-bounds plot into a retained scene; the native PolarChart hosts it with the title and legend layout.",
+      "remaining": [
+        "Tooltips, legends and visual elements of the source chart view, and its animated frame lifecycle, are the native host's; the polar axis name labels are not drawn."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs",
+        "src/FerroUI.Controls.LiveCharts/chart.rs"
+      ],
+      "status": "partial"
+    },
     "src/LiveChartsCore/VerticalBarSeries.cs": {
       "reason": "The shared Rust measurement pipeline implements orientation, bar grouping, pivot, signed stacks, range endpoints, errors, max width and exact-vs-category hover separation.",
       "remaining": [
@@ -794,6 +826,14 @@
   },
   "schema": 1,
   "tests": {
+    "tests/CoreTests/ChartTests/PolarDrawMarginTests.cs::CoreTests.ChartTests.PolarDrawMarginTests::void ExplicitDrawMargin_IsHonored()#L18": {
+      "reason": "An explicit draw margin of distinct sides is the plot of the polar scene, and the centre is its middle.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs::tests::source_explicit_draw_margin_is_honored"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/CoreObjectsTests/CubicBezierEasingTests.cs::CoreTests.CoreObjectsTests.CubicBezierEasingTests::void LinearShortcutIsReturnedForIdentityCurve()#L96": {
       "reason": "The source six-curve matrix and 201 samples per curve are verified against an independent 80-iteration double-precision solve with source tolerances; the identity fixture is extended outside [0,1].",
       "remaining": [],
@@ -1601,6 +1641,14 @@
       ],
       "status": "ported"
     },
+    "tests/CoreTests/SeriesTests/PolarLineSeriesTest.cs::CoreTests.SeriesTests.PolarLineSeriesTest::void ShouldScaleProperly()#L15": {
+      "reason": "The source series, values, chart size and hidden axis limits; the distance of each point from the centre is a multiple of the first, read from the retained scene.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/polar_chart_engine.rs::tests::source_should_scale_properly"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/SeriesTests/RangeSeriesAutoBoundsTests.cs::CoreTests.SeriesTests.RangeSeriesAutoBoundsTests::void RangeColumnSeries_AutoBounds_IncludeLowestLowEndpoint()#L76": {
       "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
       "remaining": [],
@@ -1660,9 +1708,8 @@
     "tests/SnapshotTests/BoxSeriesTests.cs::SnapshotTests.BoxSeriesTests::void BasicBox()#L11": {
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
-        "The native engine draws the boxes of several series at one position of a category instead of side by side, with a cap on every whisker.",
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1674,7 +1721,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1686,7 +1733,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1698,7 +1745,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1710,7 +1757,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1722,7 +1769,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1734,7 +1781,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1746,7 +1793,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1758,7 +1805,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1769,9 +1816,8 @@
     "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void Gaps()#L309": {
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
-        "The single remaining point does not render, and the axis of a zero-width range lays out dozens of separators.",
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1783,7 +1829,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1795,7 +1841,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1807,7 +1853,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1818,9 +1864,9 @@
     "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void VectorOperationsClear()#L285": {
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
-        "An empty series gives an inverted default axis range.",
+        "The upstream reference image draws the X axis from 10 to 0: for an empty series the source's Scaler passes its sentinel bounds to AxisLimit.ValidateLimits in swapped order (max, min). The native axis keeps the default range from 0 to 10 in the order of the axis.",
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1832,7 +1878,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1844,7 +1890,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1856,7 +1902,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1868,7 +1914,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1880,7 +1926,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1892,7 +1938,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1904,7 +1950,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1916,7 +1962,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1928,7 +1974,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1940,7 +1986,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1953,7 +1999,7 @@
       "remaining": [
         "The data label formatter of the source (value and series name) has no native counterpart; labels show the value.",
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1965,7 +2011,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1977,7 +2023,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -1989,7 +2035,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2001,7 +2047,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2013,7 +2059,68 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/PolarChartTests.cs::SnapshotTests.PolarChartTests::void Basic()#L12": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/PolarChartTests.cs::SnapshotTests.PolarChartTests::void FilledArea()#L90": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/PolarChartTests.cs::SnapshotTests.PolarChartTests::void MultipleSeries()#L60": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/PolarChartTests.cs::SnapshotTests.PolarChartTests::void OpenLine()#L140": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "The marker paints of the source (GeometryFill, GeometryStroke) have no native counterpart; the markers take the series paint.",
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/PolarChartTests.cs::SnapshotTests.PolarChartTests::void WithInnerRadius()#L119": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2025,7 +2132,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2037,7 +2144,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2049,7 +2156,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2061,7 +2168,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2073,7 +2180,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2085,7 +2192,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2097,7 +2204,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2109,7 +2216,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2121,7 +2228,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2133,7 +2240,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2145,7 +2252,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2157,7 +2264,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2169,7 +2276,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2181,7 +2288,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2192,9 +2299,8 @@
     "tests/SnapshotTests/StackedAreaTests.cs::SnapshotTests.StackedAreaTests::void Step()#L36": {
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
-        "The stacked step areas leave unfilled cells between the steps of adjacent series.",
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2207,7 +2313,7 @@
       "remaining": [
         "The tooltip label formatter of the source has no native counterpart.",
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2219,7 +2325,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2231,7 +2337,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2243,7 +2349,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2255,7 +2361,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2267,7 +2373,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2279,7 +2385,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2291,7 +2397,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2303,7 +2409,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",
@@ -2315,7 +2421,7 @@
       "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
         "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
-        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+        "Native defaults still differ from the source theme: the stroke width and the light 12 px markers of line series, the corner radius and the missing stroke of bars, the scatter and candle colours, and the separators of X axes, which the theme hides."
       ],
       "rust": [
         "samples/LiveChartsDemo/snapshots.rs",

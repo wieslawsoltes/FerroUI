@@ -145,6 +145,54 @@ fn logarithmic_inverted_zoom_keeps_pointer_value_fixed() {
 
 
 #[test]
+fn polar_multiple_axes_convert_in_control_coordinates_with_title_layout() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = Chart::new();
+    chart.set_chart_kind(ChartKind::Polar);
+    chart.set_title("Independent polar axes".into());
+    chart.set_initial_rotation(-90.0);
+    chart.set_animations_speed(0.0);
+    chart.x_axes().add(Axis::new());
+    chart.y_axes().add(Axis::new());
+    let angle = Axis::new();
+    angle.set_min_limit(Some(0.0));
+    angle.set_max_limit(Some(8.0));
+    angle.set_inverted(true);
+    chart.x_axes().add(angle);
+    let radius = Axis::new();
+    radius.set_min_limit(Some(0.0));
+    radius.set_max_limit(Some(100.0));
+    chart.y_axes().add(radius);
+    let series = crate::PolarLineSeries::new();
+    series.set_x_axis(1);
+    series.set_y_axis(1);
+    series.set_coordinates([
+        ferroui_livecharts::kernel::Coordinate::new(1.0, 20.0),
+        ferroui_livecharts::kernel::Coordinate::new(5.0, 80.0),
+    ]);
+    chart.series().add(series.upcast());
+    let scene = chart.scene(Size::new(640.0, 360.0)).unwrap();
+    let data = Point::new(2.0, 60.0);
+    let pixel = chart.scale_data_to_pixels(data, 1, 1).unwrap().unwrap();
+    let restored = chart.scale_pixels_to_data(pixel, 1, 1).unwrap().unwrap();
+    assert!((restored.x - data.x).abs() < 1e-9);
+    assert!((restored.y - data.y).abs() < 1e-9);
+    // The title takes the top of the control; the polar plot is measured below it.
+    assert!(scene.plot_bounds.y >= 48.0);
+    assert_eq!(chart.axis_scales().0.len(), 2);
+    assert_eq!(chart.axis_scales().1.len(), 2);
+    assert!(chart.polar_scale(2, 0).unwrap().is_none());
+    assert!(chart
+        .scale_data_to_pixels(Point::new(f64::NAN, 1.0), 0, 0)
+        .unwrap()
+        .is_none());
+    // A polar chart has no zoom, pan or section gestures.
+    assert!(!chart.zoom_at(pixel, 0.5).unwrap());
+    let cartesian = cartesian();
+    assert!(cartesian.polar_scale(0, 0).unwrap().is_none());
+}
+
+#[test]
 fn virtual_axes_support_input_without_mutating_the_declared_collections() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let chart = Chart::new();
