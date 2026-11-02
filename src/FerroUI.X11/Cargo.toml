@@ -20,6 +20,7 @@ ferroui-controls.workspace = true
 ferroui-dialogs.workspace = true
 ferroui-freedesktop.workspace = true
 ferroui-opengl.workspace = true
+ferroui-system.workspace = true
 ferroui-vulkan.workspace = true
 bitflags.workspace = true
 

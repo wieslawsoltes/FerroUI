@@ -141,9 +141,7 @@ mod imp {
         new_string_array, JavaClass, JavaLocal, JavaObject, JavaRef, JavaValue,
     };
     use crate::interop::natives::sdk_int;
-    use crate::platform::platform_support::{
-        add_activity_result, get_next_request_code, ActivityResultSubscription, Completion,
-    };
+    use crate::platform::platform_support::{add_activity_result, get_next_request_code, ActivityResultSubscription};
     use crate::platform::storage::android_storage_item::{
         helper, object, take_last_error, text_of, uri_of, Activity, AndroidStorageFile, AndroidStorageFolder,
         AndroidStorageItem, AndroidUri, COLUMN_MIME_TYPE, MIME_TYPE_DIR,
@@ -156,6 +154,7 @@ mod imp {
         SaveFilePickerResult, WellKnownFolder,
     };
     use ferroui_base::utilities::Uri;
+    use ferroui_system::task::oneshot;
     use std::cell::RefCell;
     use std::io;
     use std::rc::Rc;
@@ -394,7 +393,10 @@ mod imp {
             picker_intent: Option<&JavaLocal>,
             single_result: bool,
         ) -> LocalBoxFuture<io::Result<Vec<AndroidUri>>> {
-            let (tcs, task) = Completion::<Option<JavaObject>>::new();
+            let (tcs, task) = oneshot::channel::<Option<JavaObject>>();
+            // The handler is called for every result of the activity: the first of its request
+            // takes the sender.
+            let tcs = RefCell::new(Some(tcs));
             let current_request_code = get_next_request_code();
 
             let Some(main_activity) = FerroActivity::from_java(&self.activity) else {
@@ -416,7 +418,10 @@ mod imp {
                         subscription.remove(&*main_activity);
                     }
 
-                    let _ = tcs.try_set_result(if result_code == RESULT_OK { data.cloned() } else { None });
+                    if let Some(tcs) = tcs.take() {
+                        // A pick whose wait was dropped does not want the result.
+                        let _ = tcs.send(if result_code == RESULT_OK { data.cloned() } else { None });
+                    }
                 })
             };
             *subscription.borrow_mut() = Some(add_activity_result(&*main_activity, on_activity_result));
@@ -432,7 +437,10 @@ mod imp {
 
             Box::pin(async move {
                 let mut result_list = Vec::with_capacity(1);
-                let result = task.await;
+                // Deviation (DEVIATIONS.md, Android platform): a handler that is dropped without a
+                // result (its activity is gone) is a canceled pick; the task of the reference would
+                // never complete.
+                let result = task.await.ok().flatten();
 
                 if let Some(result) = &result {
                     // ClipData first to avoid issue with multiple files selection.
