@@ -145,7 +145,7 @@ impl PolylineGeometry {
                     this.invalidate_geometry();
                 }
             });
-            *self.points_observer.borrow_mut() = Some(Subscription::new(observer));
+            *self.points_observer.borrow_mut() = Some(observer);
         }
     }
 }

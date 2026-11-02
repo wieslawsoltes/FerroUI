@@ -1,6 +1,6 @@
 use crate::media::effects::{Effect, IEffect};
 use crate::media::{DrawingContext, IImage, Transform};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::utilities::HandlerList;
 use crate::{
     ferro_class, FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Rect,
@@ -10,7 +10,7 @@ use std::any::Any;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-type ValueSubscription = (&'static FerroProperty, Rc<dyn IDisposable>);
+type ValueSubscription = (&'static FerroProperty, Subscription);
 
 /// Abstract base class of the objects describing drawn content.
 #[repr(C)]
@@ -69,15 +69,15 @@ impl Drawing {
     }
 
     /// Raised when the drawing changed in a way that requires its content to
-    /// be recorded again.
-    pub(crate) fn invalidated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// be recorded again. Dropping the returned guard removes the handler.
+    pub(crate) fn invalidated(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.invalidated.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.invalidated.remove(token);
             }
-        })
+        }))
     }
 
     pub(crate) fn raise_invalidated(&self) {
@@ -126,7 +126,7 @@ impl Drawing {
             value
                 .as_ref()
                 .and_then(|image| image.as_affects_render())
-                .map(|affects_render| affects_render.invalidated(Rc::new(value_invalidated)))
+                .map(|affects_render| Subscription::new(affects_render.invalidated(Rc::new(value_invalidated))))
         } else {
             None
         };

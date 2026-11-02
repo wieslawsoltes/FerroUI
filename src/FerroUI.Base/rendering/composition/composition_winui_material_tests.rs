@@ -621,7 +621,7 @@ fn a_mica_controller_follows_its_configuration() {
     assert_eq!(SystemBackdropState::Hidden, controller.state());
     let states = Rc::new(RefCell::new(Vec::new()));
     let recorded = states.clone();
-    let _subscription = controller.state_changed(move |state| recorded.borrow_mut().push(state));
+    let _subscription = controller.state_changed(move |state| recorded.borrow_mut().push(state)).detach();
 
     let configuration = SystemBackdropConfiguration::new();
     configuration.set_is_input_active(true);

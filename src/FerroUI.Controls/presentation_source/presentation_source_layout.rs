@@ -74,7 +74,7 @@ impl LayoutDiagnosticBridge {
             }
         });
 
-        Self { state, property_changed_subscription: RefCell::new(Some(Subscription::new(subscription))) }
+        Self { state, property_changed_subscription: RefCell::new(Some(subscription)) }
     }
 
     pub fn setup_bridge(&self) {

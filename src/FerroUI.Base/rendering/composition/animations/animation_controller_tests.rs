@@ -153,7 +153,7 @@ fn paused_animation_does_not_end_until_resumed() {
     set.start_animation_with_controller("A", &*animation, &controller);
     batch.end();
     let (completed, handler) = counter();
-    let _subscription = batch.completed(handler);
+    let _subscription = batch.completed(handler).detach();
 
     fixture.test.run_jobs();
     fixture.run_for(Duration::from_millis(200));

@@ -94,7 +94,7 @@ fn polyline_should_invalidate_geometry_when_points_collection_changes() {
     assert!(geometry.is_some());
     let invalidated = Rc::new(std::cell::Cell::new(false));
     let i = invalidated.clone();
-    geometry.unwrap().changed(move || i.set(true));
+    geometry.unwrap().changed(move || i.set(true)).detach();
 
     points.add(Point::new(10.0, 10.0));
 

@@ -396,7 +396,7 @@ impl XamlCompositionBrushBaseImpl for RevealBrush {
                 }
             }
         });
-        this.state.borrow_mut().policy_subscription = Some(Subscription::new(subscription));
+        this.state.borrow_mut().policy_subscription = Some(subscription);
         this.state.borrow_mut().is_high_contrast = platform_is_high_contrast();
         let settings = {
             use ferroui_base::LocatorExtensions;

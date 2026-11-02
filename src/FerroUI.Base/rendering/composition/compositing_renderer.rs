@@ -160,7 +160,7 @@ impl CompositingRenderer {
                 renderer.on_diagnostics_property_changed(diagnostics, property_name);
             }
         });
-        *renderer.diagnostics_subscription.borrow_mut() = Some(Subscription::new(subscription));
+        *renderer.diagnostics_subscription.borrow_mut() = Some(subscription);
         RENDERERS.with(|renderers| {
             let mut renderers = renderers.borrow_mut();
             renderers.retain(|_, r| r.strong_count() > 0);

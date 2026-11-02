@@ -2,7 +2,7 @@ use std::cell::Cell;
 use std::rc::{Rc, Weak};
 
 use super::{LayoutPassTiming, RendererDebugOverlays};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::utilities::HandlerList;
 
 /// Manages configurable diagnostics that can be displayed by a renderer.
@@ -58,15 +58,16 @@ impl RendererDiagnostics {
     }
 
     /// Occurs when a property value changes. The handler receives the name
-    /// of the property.
-    pub fn property_changed(&self, handler: impl Fn(&RendererDiagnostics, &str) + 'static) -> Rc<dyn IDisposable> {
+    /// of the property. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the diagnostics.
+    pub fn property_changed(&self, handler: impl Fn(&RendererDiagnostics, &str) + 'static) -> Subscription {
         let token = self.property_changed.add(Rc::new(handler));
         let this = self.weak_self.clone();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = this.upgrade() {
                 this.property_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Called when a property changes on the object.

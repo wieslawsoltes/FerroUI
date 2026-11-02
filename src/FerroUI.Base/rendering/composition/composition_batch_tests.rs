@@ -77,7 +77,7 @@ fn scoped_batch_completes_when_its_key_frame_animation_ends() {
     assert!(batch.is_ended());
     // As in WinUI, the handler may be subscribed after `End`.
     let (completed, handler) = counter();
-    let _subscription = batch.completed(handler);
+    let _subscription = batch.completed(handler).detach();
 
     fixture.test.run_jobs();
     assert_eq!(completed.get(), 0, "the animation is running");
@@ -97,7 +97,7 @@ fn scoped_batch_ended_without_animations_completes_asynchronously() {
     let batch = fixture.test.compositor.create_scoped_batch(CompositionBatchTypes::ANIMATION);
     batch.end();
     let (completed, handler) = counter();
-    let _subscription = batch.completed(handler);
+    let _subscription = batch.completed(handler).detach();
     assert_eq!(completed.get(), 0);
     Dispatcher::ui_thread().run_jobs(None);
     assert_eq!(completed.get(), 1);
@@ -113,7 +113,7 @@ fn dropped_scoped_batch_still_raises_completed() {
     let fixture = Fixture::new();
     let batch = fixture.test.compositor.create_scoped_batch(CompositionBatchTypes::ANIMATION);
     let (completed, handler) = counter();
-    let _subscription = batch.completed(handler);
+    let _subscription = batch.completed(handler).detach();
     batch.end();
     drop(batch);
     Dispatcher::ui_thread().run_jobs(None);
@@ -139,7 +139,7 @@ fn suspended_scoped_batch_excludes_animations() {
     fixture.visual.start_animation("Opacity", &*short);
     batch.end();
     let (completed, handler) = counter();
-    let _subscription = batch.completed(handler);
+    let _subscription = batch.completed(handler).detach();
 
     fixture.test.run_jobs();
     assert_eq!(completed.get(), 0);
@@ -168,7 +168,7 @@ fn scoped_batch_completes_when_its_animation_is_stopped() {
     fixture.visual.start_animation("Opacity", &*animation);
     batch.end();
     let (completed, handler) = counter();
-    let _subscription = batch.completed(handler);
+    let _subscription = batch.completed(handler).detach();
 
     fixture.test.run_jobs();
     fixture.run_for(Duration::from_millis(20));
@@ -187,7 +187,7 @@ fn scoped_batch_completes_when_its_animation_is_replaced() {
     fixture.visual.start_animation("Opacity", &*animation);
     batch.end();
     let (completed, handler) = counter();
-    let _subscription = batch.completed(handler);
+    let _subscription = batch.completed(handler).detach();
     fixture.test.run_jobs();
     assert_eq!(completed.get(), 0);
 
@@ -210,7 +210,7 @@ fn scoped_batch_completes_when_its_pending_animation_is_overwritten() {
     fixture.visual.set_opacity(0.75);
     batch.end();
     let (completed, handler) = counter();
-    let _subscription = batch.completed(handler);
+    let _subscription = batch.completed(handler).detach();
     fixture.test.run_jobs();
     assert_eq!(completed.get(), 1);
     assert_eq!(fixture.server.opacity(), 0.75);
@@ -224,7 +224,7 @@ fn scoped_batch_completes_when_the_target_is_disposed() {
     fixture.visual.start_animation("Opacity", &*animation);
     batch.end();
     let (completed, handler) = counter();
-    let _subscription = batch.completed(handler);
+    let _subscription = batch.completed(handler).detach();
     fixture.test.run_jobs();
     assert_eq!(completed.get(), 0);
 
@@ -245,9 +245,9 @@ fn infinite_animations_belong_to_infinite_batches_only() {
     finite_batch.end();
     all_batch.end();
     let (finite_completed, finite_handler) = counter();
-    let _finite = finite_batch.completed(finite_handler);
+    let _finite = finite_batch.completed(finite_handler).detach();
     let (all_completed, all_handler) = counter();
-    let _all = all_batch.completed(all_handler);
+    let _all = all_batch.completed(all_handler).detach();
 
     fixture.test.run_jobs();
     fixture.run_for(Duration::from_millis(150));
@@ -272,9 +272,9 @@ fn nested_scoped_batches_both_track_an_animation() {
     fixture.visual.start_animation("RotationAngle", &*late);
     outer.end();
     let (inner_completed, inner_handler) = counter();
-    let _inner = inner.completed(inner_handler);
+    let _inner = inner.completed(inner_handler).detach();
     let (outer_completed, outer_handler) = counter();
-    let _outer = outer.completed(outer_handler);
+    let _outer = outer.completed(outer_handler).detach();
 
     fixture.test.run_jobs();
     fixture.run_for(Duration::from_millis(150));
@@ -296,7 +296,7 @@ fn commit_batch_tracks_the_animations_of_its_frame() {
     assert!(!batch.is_ended());
     assert!(Rc::ptr_eq(&batch, &compositor.get_commit_batch(CompositionBatchTypes::ANIMATION)));
     let (completed, handler) = counter();
-    let _subscription = batch.completed(handler);
+    let _subscription = batch.completed(handler).detach();
 
     fixture.test.run_jobs();
     assert!(batch.is_ended());
@@ -307,7 +307,7 @@ fn commit_batch_tracks_the_animations_of_its_frame() {
     let next = compositor.get_commit_batch(CompositionBatchTypes::ANIMATION);
     assert!(!Rc::ptr_eq(&batch, &next));
     let (next_completed, next_handler) = counter();
-    let _next = next.completed(next_handler);
+    let _next = next.completed(next_handler).detach();
 
     fixture.run_for(Duration::from_millis(150));
     assert_eq!(completed.get(), 1);

@@ -413,7 +413,7 @@ impl XamlCompositionBrushBaseImpl for AcrylicBrush {
                 }
             }
         });
-        this.state.borrow_mut().policy_subscription = Some(Subscription::new(subscription));
+        this.state.borrow_mut().policy_subscription = Some(subscription);
         let weak = this.to_ref().downgrade();
         let activation = MaterialPolicy::window_activation_changed(move |_| {
             if let Some(this) = weak.upgrade() {
@@ -422,7 +422,7 @@ impl XamlCompositionBrushBaseImpl for AcrylicBrush {
                 }
             }
         });
-        this.state.borrow_mut().activation_subscription = Some(Subscription::new(activation));
+        this.state.borrow_mut().activation_subscription = Some(activation);
         this.update_acrylic_brush();
     }
 
@@ -674,7 +674,8 @@ impl AcrylicBrush {
                 // cross-fade.
                 this.create_acrylic_brush(false, false);
             }
-        });
+        })
+        .detach();
         self.state.borrow_mut().waiting_for_fallback = Some((batch, subscription));
     }
 
