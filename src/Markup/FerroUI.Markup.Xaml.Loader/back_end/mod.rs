@@ -28,6 +28,8 @@ pub(crate) use assignment::{assignment_plan, last_parameter};
 pub use context::{context_definition, ContextDefinition, FRAMEWORK_CONTEXT};
 pub use includes::include_sources;
 #[cfg(feature = "runtime")]
+pub(crate) use includes::{may_include, syntax_includes};
+#[cfg(feature = "runtime")]
 pub(crate) use methods::{document_method, DocumentMethodSignature};
 pub use methods::{
     adapt_type_mappings, DeferredTransformationFactoryMethod, DocumentBuildSignature, DocumentPopulateSignature, DocumentTypeBuilderProvider,

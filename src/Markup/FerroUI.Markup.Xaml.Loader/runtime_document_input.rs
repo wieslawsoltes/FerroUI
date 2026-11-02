@@ -5,18 +5,32 @@ use std::{
 };
 use xamlx::{ast::XamlDocument, exceptions::XamlResult, type_system::IXamlType};
 
-use crate::{back_end::include_sources, compiler_extensions::FerroXamlIlCompiler};
+use crate::{
+    back_end::{may_include, syntax_includes},
+    compiler_extensions::FerroXamlIlCompiler,
+};
 
-pub(crate) enum DocumentInput {
+enum Encoding {
     Xml(String),
     #[cfg(feature = "portable-xaml")]
-    Portable {
-        bytes: Vec<u8>,
-        syntax: Option<XamlDocument>,
-    },
+    Portable(Vec<u8>),
+}
+
+pub(crate) struct DocumentInput {
+    encoding: Encoding,
+    // Discovery may already have parsed this exact source. Consume that tree once
+    // when resolving the root, which mutates type references for this load.
+    syntax: Option<XamlDocument>,
 }
 
 impl DocumentInput {
+    pub(crate) fn xml(text: String) -> Self {
+        Self {
+            encoding: Encoding::Xml(text),
+            syntax: None,
+        }
+    }
+
     pub(crate) fn read(stream: &mut dyn Read) -> io::Result<Self> {
         #[cfg(feature = "portable-xaml")]
         {
@@ -33,8 +47,8 @@ impl DocumentInput {
                         "FXD document exceeds size limit",
                     ));
                 }
-                return Ok(Self::Portable {
-                    bytes: prefix,
+                return Ok(Self {
+                    encoding: Encoding::Portable(prefix),
                     syntax: None,
                 });
             }
@@ -48,48 +62,72 @@ impl DocumentInput {
     fn read_xml(stream: &mut dyn Read) -> io::Result<Self> {
         let mut text = String::new();
         stream.read_to_string(&mut text)?;
-        Ok(Self::Xml(text))
+        Ok(Self::xml(text))
     }
 
     pub(crate) fn bytes(&self) -> &[u8] {
-        match self {
-            Self::Xml(text) => text.as_bytes(),
+        match &self.encoding {
+            Encoding::Xml(text) => text.as_bytes(),
             #[cfg(feature = "portable-xaml")]
-            Self::Portable { bytes, .. } => bytes,
+            Encoding::Portable(bytes) => bytes,
         }
+    }
+
+    /// Admission cost for a successfully transformed source. Compression must not
+    /// permit a large syntax image to bypass the group's bounded edit history.
+    pub(crate) fn cache_weight(&self) -> usize {
+        #[cfg(feature = "portable-xaml")]
+        if let Encoding::Portable(bytes) = &self.encoding {
+            if bytes.get(5) == Some(&1) {
+                // Compression mode 1 starts with the validated expanded payload size.
+                return bytes
+                    .get(6..10)
+                    .and_then(|size| size.try_into().ok())
+                    .map_or(usize::MAX, |size| {
+                        (u32::from_le_bytes(size) as usize).saturating_add(6)
+                    });
+            }
+        }
+        self.bytes().len()
     }
 
     #[cfg(all(feature = "hot-reload", debug_assertions))]
     pub(crate) fn source_text(&self) -> Option<&str> {
-        match self {
-            Self::Xml(text) => Some(text),
+        match &self.encoding {
+            Encoding::Xml(text) => Some(text),
             #[cfg(feature = "portable-xaml")]
-            Self::Portable { .. } => None,
+            Encoding::Portable(_) => None,
         }
     }
 
     pub(crate) fn into_text(self) -> io::Result<String> {
-        match self {
-            Self::Xml(text) => Ok(text),
+        match self.encoding {
+            Encoding::Xml(text) => Ok(text),
             #[cfg(feature = "portable-xaml")]
-            Self::Portable { .. } => Err(io::Error::new(
+            Encoding::Portable(_) => Err(io::Error::new(
                 io::ErrorKind::InvalidData,
-                "the asset contains FXD syntax rather than XML source",
+                "this asset contains binary FXD syntax",
             )),
         }
     }
 
-    pub(crate) fn include_sources(&mut self) -> XamlResult<Vec<String>> {
-        match self {
-            Self::Xml(text) => Ok(include_sources(text)),
+    fn syntax(&self) -> XamlResult<XamlDocument> {
+        match &self.encoding {
+            Encoding::Xml(text) => FerroXamlIlCompiler::parse_source_syntax(text),
             #[cfg(feature = "portable-xaml")]
-            Self::Portable { bytes, syntax } => {
-                let parsed = crate::binary_document::decode(bytes)?;
-                let sources = syntax_includes(&parsed)?;
-                *syntax = Some(parsed);
-                Ok(sources)
-            }
+            Encoding::Portable(bytes) => crate::binary_document::decode(bytes),
         }
+    }
+
+    pub(crate) fn include_sources(&mut self) -> XamlResult<Vec<String>> {
+        match &self.encoding {
+            Encoding::Xml(text) if !may_include(text) => return Ok(Vec::new()),
+            _ => {}
+        }
+        let syntax = self.syntax()?;
+        let sources = syntax_includes(&syntax)?;
+        self.syntax = Some(syntax);
+        Ok(sources)
     }
 
     pub(crate) fn parse(
@@ -97,70 +135,26 @@ impl DocumentInput {
         compiler: &FerroXamlIlCompiler,
         root: Option<Rc<dyn IXamlType>>,
     ) -> XamlResult<XamlDocument> {
-        match self {
-            Self::Xml(text) => compiler.parse(text, root),
-            #[cfg(feature = "portable-xaml")]
-            Self::Portable { bytes, syntax } => {
-                let parsed = match syntax.take() {
-                    Some(parsed) => parsed,
-                    None => crate::binary_document::decode(bytes)?,
-                };
-                compiler.resolve_document_root(parsed, root)
-            }
-        }
+        let syntax = match self.syntax.take() {
+            Some(syntax) => syntax,
+            None => self.syntax()?,
+        };
+        compiler.resolve_document_root(syntax, root)
     }
 }
 
-#[cfg(feature = "portable-xaml")]
-fn syntax_includes(document: &XamlDocument) -> XamlResult<Vec<String>> {
-    use xamlx::ast::{
-        visit_node, IXamlAstNode, IXamlAstVisitor, XamlAstNamePropertyReference,
-        XamlAstNodeExtensions, XamlAstObjectNode, XamlAstTextNode, XamlAstXamlPropertyValueNode,
-        XamlAstXmlTypeReference,
-    };
-    fn literal_source(object: &XamlAstObjectNode) -> Option<String> {
-        let ty = object.type_.borrow().cast::<XamlAstXmlTypeReference>()?;
-        if !matches!(
-            ty.name().as_str(),
-            "MergeResourceInclude" | "ResourceInclude" | "StyleInclude"
-        ) {
-            return None;
-        }
-        object.children.borrow().iter().find_map(|child| {
-            let property = child.cast::<XamlAstXamlPropertyValueNode>()?;
-            let member = property.property().cast::<XamlAstNamePropertyReference>()?;
-            if member.name() != "Source"
-                || !member
-                    .declaring_type
-                    .borrow()
-                    .equals(&**object.type_.borrow())
-            {
-                return None;
-            }
-            let values = property.values.borrow();
-            let [value] = values.as_slice() else {
-                return None;
-            };
-            let source = value.cast::<XamlAstTextNode>()?.text();
-            (!source.is_empty()).then_some(source)
-        })
+#[cfg(all(test, feature = "portable-xaml"))]
+mod tests {
+    use super::*;
+    #[test]
+    fn cache_charges_the_expanded_document() {
+        let text = "abcd".repeat(100_000);
+        let xml = format!("<TextBlock xmlns='https://github.com/ferroui' Text='{text}'/>");
+        let syntax = FerroXamlIlCompiler::parse_source_syntax(&xml).unwrap();
+        let stored = crate::binary_document::encode_stored(&syntax).unwrap();
+        let compressed = crate::binary_document::encode(&syntax).unwrap();
+        assert!(compressed.len() < stored.len());
+        let input = DocumentInput::read(&mut &compressed[..]).unwrap();
+        assert_eq!(input.cache_weight(), stored.len());
     }
-
-    struct Includes(Vec<String>);
-    impl IXamlAstVisitor for Includes {
-        fn visit(&mut self, node: Rc<dyn IXamlAstNode>) -> XamlResult<Rc<dyn IXamlAstNode>> {
-            if let Some(source) = node
-                .cast::<XamlAstObjectNode>()
-                .and_then(|object| literal_source(&object))
-            {
-                self.0.push(source);
-            }
-            Ok(node)
-        }
-        fn push(&mut self, _: Rc<dyn IXamlAstNode>) {}
-        fn pop(&mut self) {}
-    }
-    let mut includes = Includes(Vec::new());
-    visit_node(&document.root()?, &mut includes)?;
-    Ok(includes.0)
 }

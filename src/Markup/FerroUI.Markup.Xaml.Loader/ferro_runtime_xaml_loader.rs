@@ -357,7 +357,7 @@ fn collect_included_documents(
         #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
         let overlay: Option<String> = None;
         let mut input = match overlay {
-            Some(text) => DocumentInput::Xml(text),
+            Some(text) => DocumentInput::xml(text),
             None => {
                 let Ok(mut stream) = assets.open(&included, None) else { continue };
                 DocumentInput::read(&mut *stream).map_err(|e| XamlLoadError::with_inner(
@@ -387,10 +387,15 @@ mod portable_tests {
         }
         static CHILD: OnceLock<Vec<u8>> = OnceLock::new();
         ferroui_base::platform::register_assets("fxd-includes", &[
-            ("Child.xaml", CHILD.get_or_init(|| binary_document::compile(&include("Dir/Leaf.xaml")).unwrap())),
-            ("Dir/Leaf.xaml", LEAF.as_bytes()),
+            ("Child.xaml", CHILD.get_or_init(|| binary_document::compile(&include("Dir/A&amp;B.xaml")).unwrap())),
+            ("Dir/A&B.xaml", LEAF.as_bytes()),
         ]);
-        let source = include("Child.xaml");
+        // An XML property element and an entity-escaped filename must discover the
+        // same assets through both encodings, including the FXD child's dependency.
+        let source = include("Child.xaml").replace(
+            "<MergeResourceInclude Source=\"Child.xaml\"/>",
+            "<MergeResourceInclude><MergeResourceInclude.Source>Child.xaml</MergeResourceInclude.Source></MergeResourceInclude>",
+        );
         for bytes in [source.as_bytes().to_vec(), binary_document::compile(&source).unwrap()] {
             let root = FerroRuntimeXamlLoader::load_stream(Box::new(Cursor::new(bytes)), None, None,
                 Some(Uri::absolute("ferres://fxd-includes/Root.xaml").unwrap()), false).unwrap();

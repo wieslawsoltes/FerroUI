@@ -1,50 +1,74 @@
-//! The includes of a document as its text states them: what the run-time loader and a
-//! host of the emitter collect the group of a document with, before anything is parsed.
+//! Discover literal include sources from the same pre-transform syntax as the loader.
+use crate::compiler_extensions::FerroXamlIlCompiler;
+use std::rc::Rc;
+use xamlx::{ast::XamlDocument, exceptions::XamlResult};
 
-/// The element names of the includes the group transformers link.
-const INCLUDE_ELEMENTS: [&str; 3] = ["MergeResourceInclude", "ResourceInclude", "StyleInclude"];
+/// Most documents have no includes. XML names cannot contain character references.
+pub(crate) fn may_include(xml: &str) -> bool {
+    xml.contains("ResourceInclude") || xml.contains("StyleInclude")
+}
 
-/// The `Source` values of the include elements of a document, in document order. The
-/// text is scanned without parsing it: a document that is not well formed fails when it
-/// is loaded, with the position of the error. Sources given by a markup extension are
-/// left to the run time.
-pub fn include_sources(xaml: &str) -> Vec<String> {
-    let mut sources = Vec::new();
-    let mut rest = xaml;
-    while let Some(start) = rest.find('<') {
-        rest = &rest[start + 1..];
-        if let Some(comment) = rest.strip_prefix("!--") {
-            rest = comment.find("-->").map_or("", |end| &comment[end + 3..]);
-            continue;
-        }
-        let name_end = rest.find(|c: char| c.is_whitespace() || c == '>' || c == '/').unwrap_or(rest.len());
-        let name = &rest[..name_end];
-        let local_name = name.rsplit(':').next().unwrap_or(name);
-        if !INCLUDE_ELEMENTS.contains(&local_name) {
-            continue;
-        }
-        let tag = &rest[name_end..rest[name_end..].find('>').map_or(rest.len(), |end| name_end + end)];
-        let mut attributes = tag;
-        while let Some(at) = attributes.find("Source") {
-            let before_is_boundary = attributes[..at].chars().next_back().is_none_or(char::is_whitespace);
-            let after = attributes[at + "Source".len()..].trim_start();
-            attributes = &attributes[at + "Source".len()..];
-            let Some(value) = after.strip_prefix('=') else { continue };
-            if !before_is_boundary {
-                continue;
-            }
-            let value = value.trim_start();
-            let Some(quote) = value.chars().next().filter(|c| *c == '"' || *c == '\'') else { continue };
-            if let Some(end) = value[1..].find(quote) {
-                let source = &value[1..1 + end];
-                if !source.is_empty() && !source.starts_with('{') {
-                    sources.push(source.to_string());
-                }
-            }
-            break;
-        }
+/// Include discovery is advisory. A malformed document is diagnosed during its normal compilation.
+pub fn include_sources(xml: &str) -> Vec<String> {
+    if !may_include(xml) {
+        return Vec::new();
     }
-    sources
+    FerroXamlIlCompiler::parse_source_syntax(xml)
+        .and_then(|doc| syntax_includes(&doc))
+        .unwrap_or_default()
+}
+
+pub(crate) fn syntax_includes(document: &XamlDocument) -> XamlResult<Vec<String>> {
+    use xamlx::ast::{
+        visit_node, IXamlAstNode, IXamlAstVisitor, XamlAstNamePropertyReference,
+        XamlAstNodeExtensions, XamlAstObjectNode, XamlAstTextNode, XamlAstXamlPropertyValueNode,
+        XamlAstXmlTypeReference,
+    };
+    fn literal_source(object: &XamlAstObjectNode) -> Option<String> {
+        let ty = object.type_.borrow().cast::<XamlAstXmlTypeReference>()?;
+        if !matches!(
+            ty.name().as_str(),
+            "MergeResourceInclude" | "ResourceInclude" | "StyleInclude"
+        ) {
+            return None;
+        }
+        object.children.borrow().iter().find_map(|child| {
+            let property = child.cast::<XamlAstXamlPropertyValueNode>()?;
+            let member = property.property().cast::<XamlAstNamePropertyReference>()?;
+            if member.name() != "Source"
+                || !member
+                    .declaring_type
+                    .borrow()
+                    .equals(&**object.type_.borrow())
+            {
+                return None;
+            }
+            let values = property.values.borrow();
+            let [value] = values.as_slice() else {
+                return None;
+            };
+            let source = value.cast::<XamlAstTextNode>()?.text();
+            (!source.is_empty()).then_some(source)
+        })
+    }
+
+    struct Includes(Vec<String>);
+    impl IXamlAstVisitor for Includes {
+        fn visit(&mut self, node: Rc<dyn IXamlAstNode>) -> XamlResult<Rc<dyn IXamlAstNode>> {
+            if let Some(source) = node
+                .cast::<XamlAstObjectNode>()
+                .and_then(|object| literal_source(&object))
+            {
+                self.0.push(source);
+            }
+            Ok(node)
+        }
+        fn push(&mut self, _: Rc<dyn IXamlAstNode>) {}
+        fn pop(&mut self) {}
+    }
+    let mut includes = Includes(Vec::new());
+    visit_node(&document.root()?, &mut includes)?;
+    Ok(includes.0)
 }
 
 #[cfg(test)]
@@ -53,7 +77,7 @@ mod tests {
 
     #[test]
     fn include_sources_are_found_in_document_order() {
-        let xaml = r#"<Styles xmlns="https://github.com/ferroui" xmlns:x="x">
+        let xaml = r#"<Styles xmlns="https://github.com/ferroui" xmlns:x="x" xmlns:local="urn:local">
   <!-- <StyleInclude Source="/Commented.xaml" /> -->
   <Styles.Resources>
     <ResourceDictionary>
@@ -66,12 +90,21 @@ mod tests {
   </Styles.Resources>
   <StyleInclude
       Source = "ferres://Other/Styles.xaml" />
+  <ResourceInclude Source="/A&amp;B.xaml" />
+  <StyleInclude><StyleInclude.Source>Child.xaml</StyleInclude.Source></StyleInclude>
   <Border Tag="Source=x" DataSource="y" />
   <local:StyleInclude Source="/Local.xaml" />
 </Styles>"#;
         assert_eq!(
             include_sources(xaml),
-            ["/Accents/Base.xaml", "Controls/Button.xaml", "ferres://Other/Styles.xaml", "/Local.xaml"]
+            [
+                "/Accents/Base.xaml",
+                "Controls/Button.xaml",
+                "ferres://Other/Styles.xaml",
+                "/A&B.xaml",
+                "Child.xaml",
+                "/Local.xaml"
+            ]
         );
     }
 }

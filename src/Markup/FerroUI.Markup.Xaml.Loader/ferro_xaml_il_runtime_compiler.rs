@@ -229,7 +229,7 @@ impl FerroXamlIlRuntimeCompiler {
                     Rc::new(Self::transform_group(&runtime_type_system, type_system, &mut sources, configuration)?);
                 if let Some(key) = cache_key {
                     GROUPS.with(|groups| {
-                        let source_bytes = sources.iter().map(|source| source.input.bytes().len()).sum();
+                        let source_bytes = sources.iter().fold(0usize, |total, source| total.saturating_add(source.input.cache_weight()));
                         groups.borrow_mut().insert(key, source_bytes, group.clone());
                     });
                 }
