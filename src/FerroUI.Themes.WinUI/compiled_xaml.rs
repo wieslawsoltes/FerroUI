@@ -15859,6 +15859,2440 @@ fn __build_controls_winuicontrols_xaml_style_property_22() -> &'static __t::Ferr
 fn __build_controls_winuicontrols_xaml_style_property_23() -> &'static __t::FerroProperty { rt::property(__t::Layoutable::min_height_property()) }
 fn __build_controls_winuicontrols_xaml_style_property_24() -> &'static __t::FerroProperty { rt::property(__t::Panel::background_property()) }
 fn __build_controls_winuicontrols_xaml_style_property_25() -> &'static __t::FerroProperty { rt::property(__t::TickBar::fill_property()) }
+mod __build_controls_winuicontrols_xaml_bindings {
+    use super::*;
+    use super::__build_controls_winuicontrols_xaml_style_property_2 as g0;
+    use super::__build_controls_winuicontrols_xaml_style_property_13 as g1;
+    fn g2() -> &'static __t::FerroProperty { rt::property(__t::ContentControl::content_template_property()) }
+    fn g3() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::content_template_property()) }
+    fn g4() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::padding_property()) }
+    use super::__build_controls_winuicontrols_xaml_style_property_10 as g5;
+    fn g6() -> &'static __t::FerroProperty { rt::property(__t::ContentControl::horizontal_content_alignment_property()) }
+    fn g7() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::horizontal_content_alignment_property()) }
+    fn g8() -> &'static __t::FerroProperty { rt::property(__t::ContentControl::vertical_content_alignment_property()) }
+    fn g9() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::vertical_content_alignment_property()) }
+    use super::__build_controls_winuicontrols_xaml_style_property_3 as g10;
+    use super::__build_controls_winuicontrols_xaml_style_property_17 as g11;
+    use super::__build_controls_winuicontrols_xaml_style_property_1 as g12;
+    fn g13() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::border_thickness_property()) }
+    use super::__build_controls_winuicontrols_xaml_style_property_9 as g14;
+    fn g15() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::corner_radius_property()) }
+    use super::__build_controls_winuicontrols_xaml_style_property_21 as g16;
+    use super::__build_controls_winuicontrols_xaml_style_property_8 as g17;
+    fn g18() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::background_sizing_property()) }
+    use super::__build_controls_winuicontrols_xaml_style_property_14 as g19;
+    use super::__build_controls_winuicontrols_xaml_style_property_12 as g20;
+    fn g21() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::border_thickness_property()) }
+    fn g22() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::corner_radius_property()) }
+    fn g23() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::padding_property()) }
+    fn g24() -> &'static __t::FerroProperty { rt::property(__t::Decorator::padding_property()) }
+    fn g25() -> &'static __t::FerroProperty { rt::property(__t::Border::background_sizing_property()) }
+    use super::__build_controls_winuicontrols_xaml_style_property_23 as g26;
+    use super::__build_controls_winuicontrols_xaml_style_property_15 as g27;
+    use super::__build_controls_winuicontrols_xaml_style_property_0 as g28;
+    fn g29() -> &'static __t::FerroProperty { rt::property(__t::Layoutable::horizontal_alignment_property()) }
+    fn g30() -> &'static __t::FerroProperty { rt::property(__t::Layoutable::vertical_alignment_property()) }
+    fn g31() -> &'static __t::FerroProperty { rt::property(__t::HeaderedContentControl::header_template_property()) }
+    fn g32() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::font_weight_property()) }
+    use super::__build_controls_winuicontrols_xaml_style_property_4 as g33;
+    fn g34() -> &'static __t::FerroProperty { rt::property(__t::TabItem::icon_template_property()) }
+    fn g35() -> &'static __t::FerroProperty { rt::property(__t::ContentPage::horizontal_content_alignment_property()) }
+    fn g36() -> &'static __t::FerroProperty { rt::property(__t::ContentPage::vertical_content_alignment_property()) }
+    fn g37() -> &'static __t::FerroProperty { rt::property(__t::ContentPage::content_template_property()) }
+    fn g38() -> &'static __t::FerroProperty { rt::property(::ferroui_controls::MultiPage::page_template_property()) }
+    fn g39() -> &'static __t::FerroProperty { rt::property(__t::ItemsControl::item_template_property()) }
+    fn g40() -> &'static __t::FerroProperty { rt::property(__t::CarouselPage::page_transition_property()) }
+    fn g41() -> &'static __t::FerroProperty { rt::property(__t::Carousel::page_transition_property()) }
+    fn g42() -> &'static __t::FerroProperty { rt::property(__t::CarouselPage::items_panel_property()) }
+    fn g43() -> &'static __t::FerroProperty { rt::property(__t::ItemsControl::items_panel_property()) }
+    fn g44() -> &'static __t::FerroProperty { rt::property(__t::Layoutable::min_width_property()) }
+    fn g45() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()) }
+    fn g46() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()) }
+    use super::__build_controls_winuicontrols_xaml_style_property_24 as g47;
+    use super::__build_controls_winuicontrols_xaml_style_property_5 as g48;
+    fn g49() -> &'static __t::FerroProperty { rt::property(__t::RangeBase::minimum_property()) }
+    fn g50() -> &'static __t::FerroProperty { rt::property(__t::Track::minimum_property()) }
+    fn g51() -> &'static __t::FerroProperty { rt::property(__t::RangeBase::maximum_property()) }
+    fn g52() -> &'static __t::FerroProperty { rt::property(__t::Track::maximum_property()) }
+    fn g53() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()) }
+    fn g54() -> &'static __t::FerroProperty { rt::property(__t::Track::defer_thumb_drag_property()) }
+    fn g55() -> &'static __t::FerroProperty { rt::property(__t::ScrollBar::viewport_size_property()) }
+    fn g56() -> &'static __t::FerroProperty { rt::property(__t::Track::viewport_size_property()) }
+    fn g57() -> &'static __t::FerroProperty { rt::property(__t::ScrollBar::orientation_property()) }
+    fn g58() -> &'static __t::FerroProperty { rt::property(__t::Track::orientation_property()) }
+    fn g59() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::horizontal_snap_points_type_property()) }
+    fn g60() -> &'static __t::FerroProperty { rt::property(__t::ScrollContentPresenter::horizontal_snap_points_type_property()) }
+    fn g61() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::vertical_snap_points_type_property()) }
+    fn g62() -> &'static __t::FerroProperty { rt::property(__t::ScrollContentPresenter::vertical_snap_points_type_property()) }
+    fn g63() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::horizontal_snap_points_alignment_property()) }
+    fn g64() -> &'static __t::FerroProperty { rt::property(__t::ScrollContentPresenter::horizontal_snap_points_alignment_property()) }
+    fn g65() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::vertical_snap_points_alignment_property()) }
+    fn g66() -> &'static __t::FerroProperty { rt::property(__t::ScrollContentPresenter::vertical_snap_points_alignment_property()) }
+    fn g67() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::is_scroll_inertia_enabled_property()) }
+    fn g68() -> &'static __t::FerroProperty { rt::property(__t::TextBox::caret_blink_interval_property()) }
+    fn g69() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::caret_blink_interval_property()) }
+    fn g70() -> &'static __t::FerroProperty { rt::property(__t::TextBox::caret_index_property()) }
+    fn g71() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::caret_index_property()) }
+    fn g72() -> &'static __t::FerroProperty { rt::property(__t::TextBox::selection_start_property()) }
+    fn g73() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::selection_start_property()) }
+    fn g74() -> &'static __t::FerroProperty { rt::property(__t::TextBox::selection_end_property()) }
+    fn g75() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::selection_end_property()) }
+    fn g76() -> &'static __t::FerroProperty { rt::property(__t::TextBox::text_alignment_property()) }
+    fn g77() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::text_alignment_property()) }
+    fn g78() -> &'static __t::FerroProperty { rt::property(__t::TextBox::text_wrapping_property()) }
+    fn g79() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::text_wrapping_property()) }
+    fn g80() -> &'static __t::FerroProperty { rt::property(__t::TextBox::line_height_property()) }
+    fn g81() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::line_height_property()) }
+    fn g82() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::letter_spacing_property()) }
+    fn g83() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::letter_spacing_property()) }
+    fn g84() -> &'static __t::FerroProperty { rt::property(__t::TextBox::password_char_property()) }
+    fn g85() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::password_char_property()) }
+    fn g86() -> &'static __t::FerroProperty { rt::property(__t::TextBox::reveal_password_property()) }
+    fn g87() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::reveal_password_property()) }
+    fn g88() -> &'static __t::FerroProperty { rt::property(__t::TextBox::selection_brush_property()) }
+    fn g89() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::selection_brush_property()) }
+    fn g90() -> &'static __t::FerroProperty { rt::property(__t::TextBox::selection_foreground_brush_property()) }
+    fn g91() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::selection_foreground_brush_property()) }
+    fn g92() -> &'static __t::FerroProperty { rt::property(__t::TextBox::caret_brush_property()) }
+    fn g93() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::caret_brush_property()) }
+    fn g94() -> &'static __t::FerroProperty { rt::property(__t::TextBox::horizontal_content_alignment_property()) }
+    fn g95() -> &'static __t::FerroProperty { rt::property(__t::TextBox::vertical_content_alignment_property()) }
+    use super::__build_controls_winuicontrols_xaml_style_property_16 as g96;
+    use super::__build_controls_winuicontrols_xaml_style_property_6 as g97;
+    fn g98() -> &'static __t::FerroProperty { rt::property(__t::TextBlock::padding_property()) }
+    fn g99() -> &'static __t::FerroProperty { rt::property(__t::TextBox::placeholder_text_property()) }
+    fn g100() -> &'static __t::FerroProperty { rt::property(__t::TextBlock::text_property()) }
+    fn g101() -> &'static __t::FerroProperty { rt::property(__t::TextBlock::text_alignment_property()) }
+    fn g102() -> &'static __t::FerroProperty { rt::property(__t::TextBlock::text_wrapping_property()) }
+    fn g103() -> &'static __t::FerroProperty { rt::property(__t::Layoutable::max_width_property()) }
+    fn g104() -> &'static __t::FerroProperty { rt::property(__t::PathIcon::data_property()) }
+    fn g105() -> &'static __t::FerroProperty { rt::property(__t::Path::data_property()) }
+    use super::__build_controls_winuicontrols_xaml_style_property_20 as g106;
+    use super::__build_controls_winuicontrols_xaml_style_property_19 as g107;
+    fn g108() -> &'static __t::FerroProperty { rt::property(__t::Calendar::header_background_property()) }
+    fn g109() -> &'static __t::FerroProperty { rt::property(__t::CalendarItem::header_background_property()) }
+    fn g110() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::placeholder_text_property()) }
+    fn g111() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::placeholder_foreground_property()) }
+    fn g112() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::use_floating_placeholder_property()) }
+    fn g113() -> &'static __t::FerroProperty { rt::property(__t::TextBox::use_floating_placeholder_property()) }
+    fn g114() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::horizontal_content_alignment_property()) }
+    fn g115() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::vertical_content_alignment_property()) }
+    fn g116() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::first_day_of_week_property()) }
+    fn g117() -> &'static __t::FerroProperty { rt::property(__t::Calendar::first_day_of_week_property()) }
+    fn g118() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::is_today_highlighted_property()) }
+    fn g119() -> &'static __t::FerroProperty { rt::property(__t::Calendar::is_today_highlighted_property()) }
+    fn g120() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::display_date_property()) }
+    fn g121() -> &'static __t::FerroProperty { rt::property(__t::Calendar::display_date_property()) }
+    fn g122() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::display_date_start_property()) }
+    fn g123() -> &'static __t::FerroProperty { rt::property(__t::Calendar::display_date_start_property()) }
+    fn g124() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::display_date_end_property()) }
+    fn g125() -> &'static __t::FerroProperty { rt::property(__t::Calendar::display_date_end_property()) }
+    fn g126() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::is_week_number_visible_property()) }
+    fn g127() -> &'static __t::FerroProperty { rt::property(__t::Calendar::is_week_number_visible_property()) }
+    fn g128() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::week_number_rule_property()) }
+    fn g129() -> &'static __t::FerroProperty { rt::property(__t::Calendar::week_number_rule_property()) }
+    fn g130() -> &'static __t::FerroProperty { rt::property(__t::InputElement::is_enabled_property()) }
+    fn g131() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::font_family_property()) }
+    fn g132() -> &'static __t::FerroProperty { rt::property(__t::TextBlock::font_family_property()) }
+    fn g133() -> &'static __t::FerroProperty { rt::property(__t::TextBlock::font_weight_property()) }
+    fn g134() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::font_size_property()) }
+    fn g135() -> &'static __t::FerroProperty { rt::property(__t::TextBlock::font_size_property()) }
+    fn g136() -> &'static __t::FerroProperty { rt::property(__t::WindowDrawnDecorations::title_bar_height_property()) }
+    fn g137() -> &'static __t::FerroProperty { rt::property(__t::WindowDrawnDecorations::has_title_bar_property()) }
+    fn g138() -> &'static __t::FerroProperty { rt::property(__t::Visual::is_visible_property()) }
+    fn g139() -> &'static __t::FerroProperty { rt::property(__t::Visual::clip_to_bounds_property()) }
+    fn g140() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::is_scroll_chaining_enabled_property()) }
+    fn g141() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::allow_auto_hide_property()) }
+    fn g142() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::bring_into_view_on_focus_change_property()) }
+    fn g143() -> &'static __t::FerroProperty { rt::property(__t::ItemsPresenter::items_panel_property()) }
+    fn g144() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::font_family_property()) }
+    fn g145() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::font_size_property()) }
+    fn g146() -> &'static __t::FerroProperty { rt::property(__t::TabControl::tab_strip_placement_property()) }
+    fn g147() -> &'static __t::FerroProperty { rt::property(__t::DockPanel::dock_property()) }
+    fn g148() -> &'static __t::FerroProperty { rt::property(__t::TabControl::horizontal_content_alignment_property()) }
+    fn g149() -> &'static __t::FerroProperty { rt::property(__t::TabControl::vertical_content_alignment_property()) }
+    use super::__build_controls_winuicontrols_xaml_style_property_22 as g150;
+    fn g151() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::display_mode_property()) }
+    fn g152() -> &'static __t::FerroProperty { rt::property(__t::SplitView::display_mode_property()) }
+    fn g153() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::drawer_length_property()) }
+    fn g154() -> &'static __t::FerroProperty { rt::property(__t::SplitView::open_pane_length_property()) }
+    fn g155() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::compact_drawer_length_property()) }
+    fn g156() -> &'static __t::FerroProperty { rt::property(__t::SplitView::compact_pane_length_property()) }
+    fn g157() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::drawer_header_template_property()) }
+    fn g158() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::drawer_header_background_property()) }
+    fn g159() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::drawer_footer_template_property()) }
+    fn g160() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::drawer_footer_background_property()) }
+    fn g161() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::horizontal_content_alignment_property()) }
+    fn g162() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::vertical_content_alignment_property()) }
+    fn g163() -> &'static __t::FerroProperty { rt::property(__t::CommandBarButton::label_property()) }
+    fn g164() -> &'static __t::FerroProperty { rt::property(__t::CommandBarToggleButton::label_property()) }
+    fn g165() -> &'static __t::FerroProperty { rt::property(__t::SplitButton::command_property()) }
+    fn g166() -> &'static __t::FerroProperty { rt::property(__t::Button::command_property()) }
+    fn g167() -> &'static __t::FerroProperty { rt::property(__t::ToggleSwitch::off_content_template_property()) }
+    fn g168() -> &'static __t::FerroProperty { rt::property(__t::ToggleSwitch::on_content_template_property()) }
+    fn g169() -> &'static __t::FerroProperty { rt::property(__t::Slider::ticks_property()) }
+    fn g170() -> &'static __t::FerroProperty { rt::property(__t::TickBar::ticks_property()) }
+    fn g171() -> &'static __t::FerroProperty { rt::property(__t::Slider::tick_frequency_property()) }
+    fn g172() -> &'static __t::FerroProperty { rt::property(__t::TickBar::tick_frequency_property()) }
+    fn g173() -> &'static __t::FerroProperty { rt::property(__t::Slider::orientation_property()) }
+    fn g174() -> &'static __t::FerroProperty { rt::property(__t::TickBar::orientation_property()) }
+    fn g175() -> &'static __t::FerroProperty { rt::property(__t::TickBar::minimum_property()) }
+    fn g176() -> &'static __t::FerroProperty { rt::property(__t::TickBar::maximum_property()) }
+    fn g177() -> &'static __t::FerroProperty { rt::property(__t::Slider::is_direction_reversed_property()) }
+    fn g178() -> &'static __t::FerroProperty { rt::property(__t::TickBar::is_direction_reversed_property()) }
+    fn g179() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::allow_spin_property()) }
+    fn g180() -> &'static __t::FerroProperty { rt::property(__t::ButtonSpinner::allow_spin_property()) }
+    fn g181() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::show_button_spinner_property()) }
+    fn g182() -> &'static __t::FerroProperty { rt::property(__t::ButtonSpinner::show_button_spinner_property()) }
+    fn g183() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::button_spinner_location_property()) }
+    fn g184() -> &'static __t::FerroProperty { rt::property(__t::ButtonSpinner::button_spinner_location_property()) }
+    fn g185() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::text_alignment_property()) }
+    fn g186() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::placeholder_text_property()) }
+    fn g187() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::placeholder_foreground_property()) }
+    fn g188() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::is_read_only_property()) }
+    fn g189() -> &'static __t::FerroProperty { rt::property(__t::TextBox::is_read_only_property()) }
+    fn g190() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::text_property()) }
+    fn g191() -> &'static __t::FerroProperty { rt::property(__t::TextBox::text_property()) }
+    fn g192() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::horizontal_content_alignment_property()) }
+    fn g193() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::vertical_content_alignment_property()) }
+    fn g194() -> &'static __t::FerroProperty { rt::property(__t::NumberBox::placeholder_text_property()) }
+    fn g195() -> &'static __t::FerroProperty { rt::property(__t::NumberBox::text_alignment_property()) }
+    fn g196() -> &'static __t::FerroProperty { rt::property(__t::Expander::is_expanded_property()) }
+    fn g197() -> &'static __t::FerroProperty { rt::property(__t::PipsPager::orientation_property()) }
+    fn g198() -> &'static __t::FerroProperty { rt::property(__t::StackPanel::orientation_property()) }
+    fn g199() -> &'static __t::FerroProperty { rt::property(__t::PipsPager::previous_button_theme_property()) }
+    fn g200() -> &'static __t::FerroProperty { rt::property(__t::StyledElement::theme_property()) }
+    fn g201() -> &'static __t::FerroProperty { rt::property(__t::PipsPager::is_previous_button_visible_property()) }
+    fn g202() -> &'static __t::FerroProperty { rt::property(__t::PipsPager::next_button_theme_property()) }
+    fn g203() -> &'static __t::FerroProperty { rt::property(__t::PipsPager::is_next_button_visible_property()) }
+    fn g204() -> &'static __t::FerroProperty { rt::property(__t::HeaderedSelectingItemsControl::header_template_property()) }
+    fn g205() -> &'static __t::FerroProperty { rt::property(__t::ComboBox::selection_box_item_template_property()) }
+    fn g206() -> &'static __t::FerroProperty { rt::property(__t::ComboBox::horizontal_content_alignment_property()) }
+    fn g207() -> &'static __t::FerroProperty { rt::property(__t::ComboBox::vertical_content_alignment_property()) }
+    fn g208() -> &'static __t::FerroProperty { rt::property(__t::ComboBox::placeholder_text_property()) }
+    fn g209() -> &'static __t::FerroProperty { rt::property(__t::ComboBox::placeholder_foreground_property()) }
+    fn g210() -> &'static __t::FerroProperty { rt::property(__t::ComboBox::is_editable_property()) }
+    fn g211() -> &'static __t::FerroProperty { rt::property(__t::HeaderedItemsControl::header_template_property()) }
+    fn g212() -> &'static __t::FerroProperty { rt::property(__t::TreeViewItem::is_expanded_property()) }
+    fn g213() -> &'static __t::FerroProperty { rt::property(__t::AutoCompleteBox::placeholder_text_property()) }
+    fn g214() -> &'static __t::FerroProperty { rt::property(__t::AutoCompleteBox::placeholder_foreground_property()) }
+    fn g215() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::font_stretch_property()) }
+    fn g216() -> &'static __t::FerroProperty { rt::property(__t::AutoCompleteBox::clear_selection_on_lost_focus_property()) }
+    fn g217() -> &'static __t::FerroProperty { rt::property(__t::TextBox::clear_selection_on_lost_focus_property()) }
+    fn g218() -> &'static __t::FerroProperty { rt::property(__t::AutoCompleteBox::max_length_property()) }
+    fn g219() -> &'static __t::FerroProperty { rt::property(__t::TextBox::max_length_property()) }
+    fn g220() -> &'static __t::FerroProperty { rt::property(__t::DataValidationErrors::errors_property()) }
+    fn g221() -> &'static __t::FerroProperty { rt::property(__t::AutoSuggestBox::placeholder_text_property()) }
+    fn g222() -> &'static __t::FerroProperty { rt::property(__t::RichEditBox::placeholder_foreground_property()) }
+    fn g223() -> &'static __t::FerroProperty { rt::property(__t::RichEditBox::placeholder_text_property()) }
+    fn g224() -> &'static __t::FerroProperty { rt::property(__t::RichEditBox::text_alignment_property()) }
+    fn g225() -> &'static __t::FerroProperty { rt::property(__t::RichEditBox::text_wrapping_property()) }
+    const P0: rt::TemplateBindingProperties = (g0, g1);
+    const P1: rt::TemplateBindingProperties = (g2, g3);
+    const P2: rt::TemplateBindingProperties = (g4, g5);
+    const P3: rt::TemplateBindingProperties = (g6, g7);
+    const P4: rt::TemplateBindingProperties = (g8, g9);
+    const P5: rt::TemplateBindingProperties = (g0, g10);
+    const P6: rt::TemplateBindingProperties = (g11, g12);
+    const P7: rt::TemplateBindingProperties = (g13, g14);
+    const P8: rt::TemplateBindingProperties = (g15, g16);
+    const P9: rt::TemplateBindingProperties = (g0, g17);
+    const P10: rt::TemplateBindingProperties = (g18, g19);
+    const P11: rt::TemplateBindingProperties = (g11, g20);
+    const P12: rt::TemplateBindingProperties = (g13, g21);
+    const P13: rt::TemplateBindingProperties = (g15, g22);
+    const P14: rt::TemplateBindingProperties = (g4, g23);
+    const P15: rt::TemplateBindingProperties = (g4, g24);
+    const P16: rt::TemplateBindingProperties = (g18, g25);
+    const P17: rt::TemplateBindingProperties = (g26, g26);
+    const P18: rt::TemplateBindingProperties = (g27, g28);
+    const P19: rt::TemplateBindingProperties = (g6, g29);
+    const P20: rt::TemplateBindingProperties = (g8, g30);
+    const P21: rt::TemplateBindingProperties = (g31, g3);
+    const P22: rt::TemplateBindingProperties = (g32, g33);
+    const P23: rt::TemplateBindingProperties = (g34, g3);
+    const P24: rt::TemplateBindingProperties = (g35, g7);
+    const P25: rt::TemplateBindingProperties = (g36, g9);
+    const P26: rt::TemplateBindingProperties = (g37, g3);
+    const P27: rt::TemplateBindingProperties = (g0, g0);
+    const P28: rt::TemplateBindingProperties = (g38, g39);
+    const P29: rt::TemplateBindingProperties = (g40, g41);
+    const P30: rt::TemplateBindingProperties = (g42, g43);
+    const P31: rt::TemplateBindingProperties = (g44, g44);
+    const P32: rt::TemplateBindingProperties = (g45, g45);
+    const P33: rt::TemplateBindingProperties = (g46, g46);
+    const P34: rt::TemplateBindingProperties = (g0, g47);
+    const P35: rt::TemplateBindingProperties = (g11, g48);
+    const P36: rt::TemplateBindingProperties = (g49, g50);
+    const P37: rt::TemplateBindingProperties = (g51, g52);
+    const P38: rt::TemplateBindingProperties = (g53, g54);
+    const P39: rt::TemplateBindingProperties = (g55, g56);
+    const P40: rt::TemplateBindingProperties = (g57, g58);
+    const P41: rt::TemplateBindingProperties = (g59, g60);
+    const P42: rt::TemplateBindingProperties = (g61, g62);
+    const P43: rt::TemplateBindingProperties = (g63, g64);
+    const P44: rt::TemplateBindingProperties = (g65, g66);
+    const P45: rt::TemplateBindingProperties = (g67, g67);
+    const P46: rt::TemplateBindingProperties = (g53, g53);
+    const P47: rt::TemplateBindingProperties = (g13, g5);
+    const P48: rt::TemplateBindingProperties = (g4, g4);
+    const P49: rt::TemplateBindingProperties = (g27, g27);
+    const P50: rt::TemplateBindingProperties = (g68, g69);
+    const P51: rt::TemplateBindingProperties = (g70, g71);
+    const P52: rt::TemplateBindingProperties = (g72, g73);
+    const P53: rt::TemplateBindingProperties = (g74, g75);
+    const P54: rt::TemplateBindingProperties = (g76, g77);
+    const P55: rt::TemplateBindingProperties = (g78, g79);
+    const P56: rt::TemplateBindingProperties = (g80, g81);
+    const P57: rt::TemplateBindingProperties = (g82, g83);
+    const P58: rt::TemplateBindingProperties = (g84, g85);
+    const P59: rt::TemplateBindingProperties = (g86, g87);
+    const P60: rt::TemplateBindingProperties = (g88, g89);
+    const P61: rt::TemplateBindingProperties = (g90, g91);
+    const P62: rt::TemplateBindingProperties = (g92, g93);
+    const P63: rt::TemplateBindingProperties = (g94, g29);
+    const P64: rt::TemplateBindingProperties = (g95, g30);
+    const P65: rt::TemplateBindingProperties = (g96, g97);
+    const P66: rt::TemplateBindingProperties = (g4, g98);
+    const P67: rt::TemplateBindingProperties = (g99, g100);
+    const P68: rt::TemplateBindingProperties = (g76, g101);
+    const P69: rt::TemplateBindingProperties = (g78, g102);
+    const P70: rt::TemplateBindingProperties = (g13, g13);
+    const P71: rt::TemplateBindingProperties = (g15, g15);
+    const P72: rt::TemplateBindingProperties = (g103, g103);
+    const P73: rt::TemplateBindingProperties = (g27, g10);
+    const P74: rt::TemplateBindingProperties = (g104, g105);
+    const P75: rt::TemplateBindingProperties = (g27, g17);
+    const P76: rt::TemplateBindingProperties = (g106, g106);
+    const P77: rt::TemplateBindingProperties = (g107, g107);
+    const P78: rt::TemplateBindingProperties = (g11, g11);
+    const P79: rt::TemplateBindingProperties = (g108, g109);
+    const P80: rt::TemplateBindingProperties = (g110, g99);
+    const P81: rt::TemplateBindingProperties = (g111, g96);
+    const P82: rt::TemplateBindingProperties = (g112, g113);
+    const P83: rt::TemplateBindingProperties = (g114, g94);
+    const P84: rt::TemplateBindingProperties = (g115, g95);
+    const P85: rt::TemplateBindingProperties = (g116, g117);
+    const P86: rt::TemplateBindingProperties = (g118, g119);
+    const P87: rt::TemplateBindingProperties = (g120, g121);
+    const P88: rt::TemplateBindingProperties = (g122, g123);
+    const P89: rt::TemplateBindingProperties = (g124, g125);
+    const P90: rt::TemplateBindingProperties = (g126, g127);
+    const P91: rt::TemplateBindingProperties = (g128, g129);
+    const P92: rt::TemplateBindingProperties = (g130, g130);
+    const P93: rt::TemplateBindingProperties = (g131, g132);
+    const P94: rt::TemplateBindingProperties = (g32, g133);
+    const P95: rt::TemplateBindingProperties = (g134, g135);
+    const P96: rt::TemplateBindingProperties = (g136, g106);
+    const P97: rt::TemplateBindingProperties = (g137, g138);
+    const P98: rt::TemplateBindingProperties = (g139, g139);
+    const P99: rt::TemplateBindingProperties = (g61, g61);
+    const P100: rt::TemplateBindingProperties = (g59, g59);
+    const P101: rt::TemplateBindingProperties = (g140, g140);
+    const P102: rt::TemplateBindingProperties = (g141, g141);
+    const P103: rt::TemplateBindingProperties = (g142, g142);
+    const P104: rt::TemplateBindingProperties = (g43, g143);
+    const P105: rt::TemplateBindingProperties = (g131, g144);
+    const P106: rt::TemplateBindingProperties = (g134, g145);
+    const P107: rt::TemplateBindingProperties = (g146, g147);
+    const P108: rt::TemplateBindingProperties = (g148, g7);
+    const P109: rt::TemplateBindingProperties = (g149, g9);
+    const P110: rt::TemplateBindingProperties = (g150, g10);
+    const P111: rt::TemplateBindingProperties = (g26, g106);
+    const P112: rt::TemplateBindingProperties = (g151, g152);
+    const P113: rt::TemplateBindingProperties = (g153, g154);
+    const P114: rt::TemplateBindingProperties = (g155, g156);
+    const P115: rt::TemplateBindingProperties = (g157, g3);
+    const P116: rt::TemplateBindingProperties = (g158, g1);
+    const P117: rt::TemplateBindingProperties = (g159, g3);
+    const P118: rt::TemplateBindingProperties = (g160, g1);
+    const P119: rt::TemplateBindingProperties = (g161, g7);
+    const P120: rt::TemplateBindingProperties = (g162, g9);
+    const P121: rt::TemplateBindingProperties = (g163, g100);
+    const P122: rt::TemplateBindingProperties = (g27, g97);
+    const P123: rt::TemplateBindingProperties = (g164, g100);
+    const P124: rt::TemplateBindingProperties = (g2, g2);
+    const P125: rt::TemplateBindingProperties = (g165, g166);
+    const P126: rt::TemplateBindingProperties = (g131, g131);
+    const P127: rt::TemplateBindingProperties = (g134, g134);
+    const P128: rt::TemplateBindingProperties = (g32, g32);
+    const P129: rt::TemplateBindingProperties = (g6, g6);
+    const P130: rt::TemplateBindingProperties = (g8, g8);
+    const P131: rt::TemplateBindingProperties = (g167, g3);
+    const P132: rt::TemplateBindingProperties = (g168, g3);
+    const P133: rt::TemplateBindingProperties = (g169, g170);
+    const P134: rt::TemplateBindingProperties = (g171, g172);
+    const P135: rt::TemplateBindingProperties = (g173, g174);
+    const P136: rt::TemplateBindingProperties = (g49, g175);
+    const P137: rt::TemplateBindingProperties = (g51, g176);
+    const P138: rt::TemplateBindingProperties = (g177, g178);
+    const P139: rt::TemplateBindingProperties = (g27, g0);
+    const P140: rt::TemplateBindingProperties = (g95, g9);
+    const P141: rt::TemplateBindingProperties = (g179, g180);
+    const P142: rt::TemplateBindingProperties = (g181, g182);
+    const P143: rt::TemplateBindingProperties = (g183, g184);
+    const P144: rt::TemplateBindingProperties = (g185, g76);
+    const P145: rt::TemplateBindingProperties = (g186, g99);
+    const P146: rt::TemplateBindingProperties = (g187, g96);
+    const P147: rt::TemplateBindingProperties = (g188, g189);
+    const P148: rt::TemplateBindingProperties = (g190, g191);
+    const P149: rt::TemplateBindingProperties = (g192, g94);
+    const P150: rt::TemplateBindingProperties = (g193, g95);
+    const P151: rt::TemplateBindingProperties = (g194, g99);
+    const P152: rt::TemplateBindingProperties = (g195, g76);
+    const P153: rt::TemplateBindingProperties = (g29, g29);
+    const P154: rt::TemplateBindingProperties = (g196, g138);
+    const P155: rt::TemplateBindingProperties = (g134, g107);
+    const P156: rt::TemplateBindingProperties = (g134, g106);
+    const P157: rt::TemplateBindingProperties = (g197, g198);
+    const P158: rt::TemplateBindingProperties = (g199, g200);
+    const P159: rt::TemplateBindingProperties = (g201, g138);
+    const P160: rt::TemplateBindingProperties = (g202, g200);
+    const P161: rt::TemplateBindingProperties = (g203, g138);
+    const P162: rt::TemplateBindingProperties = (g204, g3);
+    const P163: rt::TemplateBindingProperties = (g205, g2);
+    const P164: rt::TemplateBindingProperties = (g206, g6);
+    const P165: rt::TemplateBindingProperties = (g207, g8);
+    const P166: rt::TemplateBindingProperties = (g208, g100);
+    const P167: rt::TemplateBindingProperties = (g209, g97);
+    const P168: rt::TemplateBindingProperties = (g206, g29);
+    const P169: rt::TemplateBindingProperties = (g207, g30);
+    const P170: rt::TemplateBindingProperties = (g208, g99);
+    const P171: rt::TemplateBindingProperties = (g209, g27);
+    const P172: rt::TemplateBindingProperties = (g210, g138);
+    const P173: rt::TemplateBindingProperties = (g211, g3);
+    const P174: rt::TemplateBindingProperties = (g212, g138);
+    const P175: rt::TemplateBindingProperties = (g213, g99);
+    const P176: rt::TemplateBindingProperties = (g214, g96);
+    const P177: rt::TemplateBindingProperties = (g215, g215);
+    const P178: rt::TemplateBindingProperties = (g216, g217);
+    const P179: rt::TemplateBindingProperties = (g218, g219);
+    const P180: rt::TemplateBindingProperties = (g220, g220);
+    const P181: rt::TemplateBindingProperties = (g221, g99);
+    const P182: rt::TemplateBindingProperties = (g222, g97);
+    const P183: rt::TemplateBindingProperties = (g223, g100);
+    const P184: rt::TemplateBindingProperties = (g224, g101);
+    const P185: rt::TemplateBindingProperties = (g225, g102);
+    pub(super) const R0: &[rt::TemplateBindingRow] = &[
+        (P0, 25, 31),
+        (P1, 26, 31),
+    ];
+    pub(super) const R1: &[rt::TemplateBindingRow] = &[
+        (P0, 31, 33),
+        (P1, 32, 33),
+    ];
+    pub(super) const R2: &[rt::TemplateBindingRow] = &[
+        (P2, 34, 31),
+        (P3, 35, 31),
+        (P4, 36, 31),
+    ];
+    pub(super) const R3: &[rt::TemplateBindingRow] = &[
+        (P5, 24, 19),
+        (P6, 25, 19),
+    ];
+    pub(super) const R4: &[rt::TemplateBindingRow] = &[
+        (P7, 27, 19),
+        (P8, 28, 19),
+    ];
+    pub(super) const R5: &[rt::TemplateBindingRow] = &[
+        (P7, 33, 19),
+        (P8, 34, 19),
+    ];
+    pub(super) const R6: &[rt::TemplateBindingRow] = &[
+        (P7, 40, 19),
+        (P8, 41, 19),
+    ];
+    pub(super) const R7: &[rt::TemplateBindingRow] = &[
+        (P9, 34, 20),
+        (P2, 35, 20),
+    ];
+    pub(super) const R8: &[rt::TemplateBindingRow] = &[
+        (P0, 44, 27),
+        (P10, 45, 27),
+        (P11, 46, 27),
+        (P12, 47, 27),
+        (P13, 48, 27),
+    ];
+    pub(super) const R9: &[rt::TemplateBindingRow] = &[
+        (P1, 50, 27),
+        (P14, 51, 27),
+        (P3, 52, 27),
+        (P4, 53, 27),
+    ];
+    pub(super) const R10: &[rt::TemplateBindingRow] = &[
+        (P5, 27, 17),
+        (P6, 28, 17),
+    ];
+    pub(super) const R11: &[rt::TemplateBindingRow] = &[
+        (P7, 30, 17),
+        (P8, 31, 17),
+        (P15, 32, 17),
+    ];
+    pub(super) const R12: &[rt::TemplateBindingRow] = &[
+        (P5, 36, 17),
+        (P16, 37, 17),
+        (P6, 38, 17),
+        (P7, 39, 17),
+        (P8, 40, 17),
+        (P15, 41, 17),
+    ];
+    pub(super) const R13: &[rt::TemplateBindingRow] = &[
+        (P3, 52, 31),
+        (P4, 53, 31),
+    ];
+    pub(super) const R14: &[rt::TemplateBindingRow] = &[
+        (P1, 59, 31),
+        (P3, 60, 31),
+        (P4, 61, 31),
+    ];
+    pub(super) const R15: &[rt::TemplateBindingRow] = &[
+        (P5, 82, 19),
+        (P16, 83, 19),
+    ];
+    pub(super) const R16: &[rt::TemplateBindingRow] = &[
+        (P6, 85, 19),
+        (P7, 86, 19),
+        (P17, 87, 19),
+        (P15, 88, 19),
+    ];
+    pub(super) const R17: &[rt::TemplateBindingRow] = &[
+        (P1, 91, 31),
+        (P3, 92, 31),
+        (P4, 93, 31),
+    ];
+    pub(super) const R18: &[rt::TemplateBindingRow] = &[
+        (P0, 37, 29),
+        (P10, 38, 29),
+        (P11, 39, 29),
+        (P12, 40, 29),
+        (P13, 41, 29),
+        (P1, 42, 29),
+        (P14, 43, 29),
+        (P3, 44, 29),
+        (P4, 45, 29),
+    ];
+    pub(super) const R19: &[rt::TemplateBindingRow] = &[
+        (P0, 47, 29),
+        (P10, 48, 29),
+        (P11, 49, 29),
+        (P12, 50, 29),
+        (P13, 51, 29),
+        (P1, 52, 29),
+        (P14, 53, 29),
+        (P3, 54, 29),
+        (P4, 55, 29),
+    ];
+    pub(super) const R20: &[rt::TemplateBindingRow] = &[
+        (P5, 37, 17),
+        (P6, 38, 17),
+    ];
+    pub(super) const R21: &[rt::TemplateBindingRow] = &[
+        (P7, 40, 17),
+        (P8, 41, 17),
+    ];
+    pub(super) const R22: &[rt::TemplateBindingRow] = &[
+        (P5, 75, 19),
+        (P6, 76, 19),
+    ];
+    pub(super) const R23: &[rt::TemplateBindingRow] = &[
+        (P7, 78, 19),
+        (P8, 79, 19),
+    ];
+    pub(super) const R24: &[rt::TemplateBindingRow] = &[
+        (P1, 89, 31),
+        (P18, 90, 31),
+        (P2, 91, 31),
+    ];
+    pub(super) const R25: &[rt::TemplateBindingRow] = &[
+        (P3, 93, 31),
+        (P4, 94, 31),
+    ];
+    pub(super) const R26: &[rt::TemplateBindingRow] = &[
+        (P5, 63, 19),
+        (P6, 64, 19),
+    ];
+    pub(super) const R27: &[rt::TemplateBindingRow] = &[
+        (P7, 66, 19),
+        (P8, 67, 19),
+    ];
+    pub(super) const R28: &[rt::TemplateBindingRow] = &[
+        (P1, 72, 31),
+        (P18, 73, 31),
+        (P2, 74, 31),
+    ];
+    pub(super) const R29: &[rt::TemplateBindingRow] = &[
+        (P3, 76, 31),
+        (P4, 77, 31),
+    ];
+    pub(super) const R30: &[rt::TemplateBindingRow] = &[
+        (P7, 58, 17),
+        (P8, 59, 17),
+    ];
+    pub(super) const R31: &[rt::TemplateBindingRow] = &[
+        (P5, 62, 19),
+        (P8, 63, 19),
+    ];
+    pub(super) const R32: &[rt::TemplateBindingRow] = &[
+        (P5, 32, 17),
+        (P6, 33, 17),
+    ];
+    pub(super) const R33: &[rt::TemplateBindingRow] = &[
+        (P7, 35, 17),
+        (P15, 36, 17),
+    ];
+    pub(super) const R34: &[rt::TemplateBindingRow] = &[
+        (P1, 39, 29),
+        (P3, 40, 29),
+        (P4, 41, 29),
+    ];
+    pub(super) const R35: &[rt::TemplateBindingRow] = &[
+        (P5, 44, 19),
+        (P7, 45, 19),
+        (P8, 46, 19),
+        (P15, 47, 19),
+        (P19, 48, 19),
+        (P20, 49, 19),
+    ];
+    pub(super) const R36: &[rt::TemplateBindingRow] = &[
+        (P6, 79, 19),
+        (P7, 80, 19),
+        (P8, 81, 19),
+    ];
+    pub(super) const R37: &[rt::TemplateBindingRow] = &[
+        (P5, 135, 21),
+        (P6, 136, 21),
+        (P7, 137, 21),
+    ];
+    pub(super) const R38: &[rt::TemplateBindingRow] = &[
+        (P19, 164, 35),
+        (P20, 165, 35),
+    ];
+    pub(super) const R39: &[rt::TemplateBindingRow] = &[
+        (P21, 167, 35),
+        (P22, 168, 35),
+    ];
+    pub(super) const R40: &[rt::TemplateBindingRow] = &[
+        (P5, 273, 19),
+        (P8, 274, 19),
+    ];
+    pub(super) const R41: &[rt::TemplateBindingRow] = &[
+        (P23, 302, 39),
+        (P18, 303, 39),
+    ];
+    pub(super) const R42: &[rt::TemplateBindingRow] = &[
+        (P21, 323, 35),
+        (P18, 324, 35),
+        (P19, 325, 35),
+        (P20, 326, 35),
+        (P14, 327, 35),
+    ];
+    pub(super) const R43: &[rt::TemplateBindingRow] = &[
+        (P5, 402, 19),
+        (P8, 403, 19),
+    ];
+    pub(super) const R44: &[rt::TemplateBindingRow] = &[
+        (P23, 431, 39),
+        (P18, 432, 39),
+    ];
+    pub(super) const R45: &[rt::TemplateBindingRow] = &[
+        (P21, 452, 35),
+        (P18, 453, 35),
+        (P19, 454, 35),
+        (P20, 455, 35),
+        (P14, 456, 35),
+    ];
+    pub(super) const R46: &[rt::TemplateBindingRow] = &[
+        (P24, 39, 29),
+        (P25, 40, 29),
+        (P0, 41, 29),
+        (P11, 42, 29),
+    ];
+    pub(super) const R47: &[rt::TemplateBindingRow] = &[
+        (P26, 46, 29),
+        (P13, 47, 29),
+    ];
+    pub(super) const R48: &[rt::TemplateBindingRow] = &[
+        (P0, 35, 27),
+        (P11, 36, 27),
+        (P12, 37, 27),
+        (P13, 38, 27),
+        (P1, 39, 27),
+        (P14, 40, 27),
+        (P3, 41, 27),
+        (P4, 42, 27),
+    ];
+    pub(super) const R49: &[rt::TemplateBindingRow] = &[
+        (P27, 34, 19),
+        (P28, 35, 19),
+        (P29, 36, 19),
+        (P30, 37, 19),
+    ];
+    pub(super) const R50: &[rt::TemplateBindingRow] = &[
+        (P5, 55, 21),
+        (P6, 56, 21),
+        (P7, 57, 21),
+        (P8, 58, 21),
+    ];
+    pub(super) const R51: &[rt::TemplateBindingRow] = &[
+        (P31, 60, 21),
+        (P17, 61, 21),
+    ];
+    pub(super) const R52: &[rt::TemplateBindingRow] = &[
+        (P1, 92, 33),
+        (P18, 93, 33),
+        (P14, 94, 33),
+        (P3, 95, 33),
+        (P4, 96, 33),
+    ];
+    pub(super) const R53: &[rt::TemplateBindingRow] = &[
+        (P5, 66, 19),
+        (P6, 67, 19),
+        (P7, 68, 19),
+        (P8, 69, 19),
+    ];
+    pub(super) const R54: &[rt::TemplateBindingRow] = &[
+        (P2, 73, 27),
+        (P32, 74, 27),
+        (P33, 75, 27),
+    ];
+    pub(super) const R55: &[rt::TemplateBindingRow] = &[
+        (P0, 64, 27),
+        (P18, 65, 27),
+        (P10, 66, 27),
+        (P11, 67, 27),
+        (P12, 68, 27),
+    ];
+    pub(super) const R56: &[rt::TemplateBindingRow] = &[
+        (P1, 70, 27),
+        (P13, 71, 27),
+        (P14, 72, 27),
+        (P3, 73, 27),
+        (P4, 74, 27),
+    ];
+    pub(super) const R57: &[rt::TemplateBindingRow] = &[
+        (P0, 142, 27),
+        (P10, 143, 27),
+        (P18, 144, 27),
+        (P11, 145, 27),
+        (P12, 146, 27),
+    ];
+    pub(super) const R58: &[rt::TemplateBindingRow] = &[
+        (P1, 148, 27),
+        (P13, 149, 27),
+        (P14, 150, 27),
+        (P3, 151, 27),
+        (P4, 152, 27),
+    ];
+    pub(super) const R59: &[rt::TemplateBindingRow] = &[
+        (P2, 227, 16),
+        (P34, 227, 51),
+    ];
+    pub(super) const R60: &[rt::TemplateBindingRow] = &[
+        (P1, 230, 29),
+        (P19, 231, 29),
+        (P20, 232, 29),
+    ];
+    pub(super) const R61: &[rt::TemplateBindingRow] = &[
+        (P0, 54, 27),
+        (P18, 55, 27),
+        (P10, 56, 27),
+        (P11, 57, 27),
+        (P12, 58, 27),
+    ];
+    pub(super) const R62: &[rt::TemplateBindingRow] = &[
+        (P1, 60, 27),
+        (P13, 61, 27),
+        (P14, 62, 27),
+        (P3, 63, 27),
+        (P4, 64, 27),
+    ];
+    pub(super) const R63: &[rt::TemplateBindingRow] = &[
+        (P0, 59, 27),
+        (P18, 60, 27),
+        (P10, 61, 27),
+        (P11, 62, 27),
+        (P12, 63, 27),
+    ];
+    pub(super) const R64: &[rt::TemplateBindingRow] = &[
+        (P1, 65, 27),
+        (P13, 66, 27),
+        (P14, 67, 27),
+        (P3, 68, 27),
+        (P4, 69, 27),
+    ];
+    pub(super) const R65: &[rt::TemplateBindingRow] = &[
+        (P5, 64, 17),
+        (P8, 65, 17),
+    ];
+    pub(super) const R66: &[rt::TemplateBindingRow] = &[
+        (P18, 67, 29),
+        (P11, 68, 29),
+        (P12, 69, 29),
+    ];
+    pub(super) const R67: &[rt::TemplateBindingRow] = &[
+        (P1, 71, 29),
+        (P13, 72, 29),
+        (P14, 73, 29),
+        (P3, 74, 29),
+        (P4, 75, 29),
+    ];
+    pub(super) const R68: &[rt::TemplateBindingRow] = &[
+        (P5, 135, 17),
+        (P8, 136, 17),
+    ];
+    pub(super) const R69: &[rt::TemplateBindingRow] = &[
+        (P18, 138, 29),
+        (P11, 139, 29),
+        (P12, 140, 29),
+    ];
+    pub(super) const R70: &[rt::TemplateBindingRow] = &[
+        (P1, 142, 29),
+        (P13, 143, 29),
+        (P14, 144, 29),
+        (P3, 145, 29),
+        (P4, 146, 29),
+    ];
+    pub(super) const R71: &[rt::TemplateBindingRow] = &[
+        (P5, 206, 17),
+        (P8, 207, 17),
+    ];
+    pub(super) const R72: &[rt::TemplateBindingRow] = &[
+        (P18, 209, 29),
+        (P11, 210, 29),
+        (P12, 211, 29),
+    ];
+    pub(super) const R73: &[rt::TemplateBindingRow] = &[
+        (P1, 213, 29),
+        (P13, 214, 29),
+        (P14, 215, 29),
+        (P3, 216, 29),
+        (P4, 217, 29),
+    ];
+    pub(super) const R74: &[rt::TemplateBindingRow] = &[
+        (P0, 56, 27),
+        (P10, 57, 27),
+        (P11, 58, 27),
+        (P12, 59, 27),
+    ];
+    pub(super) const R75: &[rt::TemplateBindingRow] = &[
+        (P1, 61, 27),
+        (P14, 62, 27),
+        (P13, 63, 27),
+        (P3, 64, 27),
+        (P4, 65, 27),
+    ];
+    pub(super) const R76: &[rt::TemplateBindingRow] = &[
+        (P5, 63, 17),
+        (P6, 64, 17),
+    ];
+    pub(super) const R77: &[rt::TemplateBindingRow] = &[
+        (P7, 66, 17),
+        (P8, 67, 17),
+    ];
+    pub(super) const R78: &[rt::TemplateBindingRow] = &[
+        (P18, 98, 31),
+        (P2, 99, 31),
+        (P19, 100, 31),
+        (P20, 101, 31),
+    ];
+    pub(super) const R79: &[rt::TemplateBindingRow] = &[
+        (P5, 62, 17),
+        (P6, 63, 17),
+    ];
+    pub(super) const R80: &[rt::TemplateBindingRow] = &[
+        (P7, 65, 17),
+        (P8, 66, 17),
+    ];
+    pub(super) const R81: &[rt::TemplateBindingRow] = &[
+        (P1, 120, 31),
+        (P18, 121, 31),
+        (P2, 122, 31),
+        (P19, 123, 31),
+        (P20, 124, 31),
+    ];
+    pub(super) const R82: &[rt::TemplateBindingRow] = &[
+        (P9, 199, 20),
+        (P35, 200, 20),
+    ];
+    pub(super) const R83: &[rt::TemplateBindingRow] = &[
+        (P9, 224, 20),
+        (P35, 225, 20),
+    ];
+    pub(super) const R84: &[rt::TemplateBindingRow] = &[
+        (P5, 260, 21),
+        (P6, 261, 21),
+    ];
+    pub(super) const R85: &[rt::TemplateBindingRow] = &[
+        (P36, 295, 24),
+        (P37, 296, 24),
+    ];
+    pub(super) const R86: &[rt::TemplateBindingRow] = &[
+        (P38, 298, 24),
+        (P39, 299, 24),
+        (P40, 300, 24),
+    ];
+    pub(super) const R87: &[rt::TemplateBindingRow] = &[
+        (P5, 360, 21),
+        (P6, 361, 21),
+    ];
+    pub(super) const R88: &[rt::TemplateBindingRow] = &[
+        (P36, 396, 24),
+        (P37, 397, 24),
+    ];
+    pub(super) const R89: &[rt::TemplateBindingRow] = &[
+        (P38, 399, 24),
+        (P39, 400, 24),
+        (P40, 401, 24),
+    ];
+    pub(super) const R90: &[rt::TemplateBindingRow] = &[
+        (P6, 77, 17),
+        (P7, 78, 17),
+        (P8, 79, 17),
+    ];
+    pub(super) const R91: &[rt::TemplateBindingRow] = &[
+        (P1, 87, 37),
+        (P14, 88, 37),
+        (P41, 89, 37),
+        (P42, 90, 37),
+        (P43, 91, 37),
+        (P44, 92, 37),
+        (P45, 93, 37),
+    ];
+    pub(super) const R92: &[rt::TemplateBindingRow] = &[
+        (P1, 167, 31),
+        (P14, 168, 31),
+        (P41, 169, 31),
+        (P42, 170, 31),
+        (P43, 171, 31),
+        (P44, 172, 31),
+        (P45, 173, 31),
+    ];
+    pub(super) const R93: &[rt::TemplateBindingRow] = &[
+        (P16, 77, 17),
+        (P8, 78, 17),
+    ];
+    pub(super) const R94: &[rt::TemplateBindingRow] = &[
+        (P5, 266, 21),
+        (P16, 267, 21),
+        (P6, 268, 21),
+        (P7, 269, 21),
+        (P8, 270, 21),
+        (P31, 271, 21),
+        (P17, 272, 21),
+    ];
+    pub(super) const R95: &[rt::TemplateBindingRow] = &[
+        (P32, 282, 27),
+        (P33, 283, 27),
+        (P46, 284, 27),
+        (P47, 285, 27),
+        (P48, 286, 27),
+        (P49, 287, 27),
+    ];
+    pub(super) const R96: &[rt::TemplateBindingRow] = &[
+        (P50, 291, 30),
+        (P51, 292, 30),
+        (P52, 293, 30),
+        (P53, 294, 30),
+        (P54, 295, 30),
+        (P55, 296, 30),
+        (P56, 297, 30),
+        (P57, 298, 30),
+        (P58, 299, 30),
+        (P59, 300, 30),
+        (P60, 301, 30),
+        (P61, 302, 30),
+        (P62, 303, 30),
+        (P63, 304, 30),
+        (P64, 305, 30),
+    ];
+    pub(super) const R97: &[rt::TemplateBindingRow] = &[
+        (P64, 315, 24),
+        (P65, 316, 24),
+        (P47, 317, 24),
+        (P66, 318, 24),
+        (P67, 319, 24),
+        (P68, 320, 24),
+        (P69, 321, 24),
+    ];
+    pub(super) const R98: &[rt::TemplateBindingRow] = &[
+        (P70, 334, 21),
+        (P71, 335, 21),
+    ];
+    pub(super) const R99: &[rt::TemplateBindingRow] = &[
+        (P70, 348, 27),
+        (P71, 349, 27),
+    ];
+    pub(super) const R100: &[rt::TemplateBindingRow] = &[
+        (P12, 61, 29),
+        (P0, 62, 29),
+        (P10, 63, 29),
+        (P11, 64, 29),
+        (P72, 65, 29),
+    ];
+    pub(super) const R101: &[rt::TemplateBindingRow] = &[
+        (P1, 67, 29),
+        (P14, 68, 29),
+    ];
+    pub(super) const R102: &[rt::TemplateBindingRow] = &[
+        (P6, 79, 19),
+        (P7, 80, 19),
+        (P15, 81, 19),
+        (P8, 82, 19),
+    ];
+    pub(super) const R103: &[rt::TemplateBindingRow] = &[
+        (P73, 89, 25),
+        (P8, 90, 25),
+    ];
+    pub(super) const R104: &[rt::TemplateBindingRow] = &[
+        (P73, 92, 25),
+        (P8, 93, 25),
+    ];
+    pub(super) const R105: &[rt::TemplateBindingRow] = &[
+        (P73, 96, 25),
+        (P8, 97, 25),
+    ];
+    pub(super) const R106: &[rt::TemplateBindingRow] = &[
+        (P74, 39, 13),
+        (P75, 40, 13),
+    ];
+    pub(super) const R107: &[rt::TemplateBindingRow] = &[
+        (P76, 52, 20),
+        (P77, 52, 54),
+    ];
+    pub(super) const R108: &[rt::TemplateBindingRow] = &[
+        (P74, 54, 19),
+        (P75, 55, 19),
+    ];
+    pub(super) const R109: &[rt::TemplateBindingRow] = &[
+        (P14, 38, 29),
+        (P0, 39, 29),
+        (P11, 40, 29),
+    ];
+    pub(super) const R110: &[rt::TemplateBindingRow] = &[
+        (P1, 44, 29),
+        (P13, 45, 29),
+    ];
+    pub(super) const R111: &[rt::TemplateBindingRow] = &[
+        (P14, 75, 29),
+        (P0, 76, 29),
+        (P11, 77, 29),
+    ];
+    pub(super) const R112: &[rt::TemplateBindingRow] = &[
+        (P1, 81, 29),
+        (P13, 82, 29),
+    ];
+    pub(super) const R113: &[rt::TemplateBindingRow] = &[
+        (P0, 93, 29),
+        (P10, 94, 29),
+    ];
+    pub(super) const R114: &[rt::TemplateBindingRow] = &[
+        (P1, 98, 29),
+        (P14, 99, 29),
+        (P3, 100, 29),
+        (P4, 101, 29),
+        (P13, 102, 29),
+    ];
+    pub(super) const R115: &[rt::TemplateBindingRow] = &[
+        (P16, 140, 19),
+        (P15, 141, 19),
+    ];
+    pub(super) const R116: &[rt::TemplateBindingRow] = &[
+        (P1, 145, 31),
+        (P19, 146, 31),
+        (P20, 147, 31),
+    ];
+    pub(super) const R117: &[rt::TemplateBindingRow] = &[
+        (P1, 253, 29),
+        (P14, 254, 29),
+    ];
+    pub(super) const R118: &[rt::TemplateBindingRow] = &[
+        (P3, 256, 29),
+        (P4, 257, 29),
+    ];
+    pub(super) const R119: &[rt::TemplateBindingRow] = &[
+        (P18, 100, 27),
+        (P0, 101, 27),
+        (P10, 102, 27),
+    ];
+    pub(super) const R120: &[rt::TemplateBindingRow] = &[
+        (P1, 106, 27),
+        (P14, 107, 27),
+        (P3, 108, 27),
+        (P4, 109, 27),
+        (P13, 110, 27),
+    ];
+    pub(super) const R121: &[rt::TemplateBindingRow] = &[
+        (P0, 161, 27),
+        (P10, 162, 27),
+    ];
+    pub(super) const R122: &[rt::TemplateBindingRow] = &[
+        (P1, 166, 27),
+        (P14, 167, 27),
+        (P3, 168, 27),
+        (P4, 169, 27),
+        (P13, 170, 27),
+    ];
+    pub(super) const R123: &[rt::TemplateBindingRow] = &[
+        (P5, 213, 17),
+        (P6, 214, 17),
+    ];
+    pub(super) const R124: &[rt::TemplateBindingRow] = &[
+        (P7, 216, 17),
+        (P8, 217, 17),
+    ];
+    pub(super) const R125: &[rt::TemplateBindingRow] = &[
+        (P49, 50, 25),
+        (P27, 51, 25),
+        (P78, 52, 25),
+        (P70, 53, 25),
+        (P71, 54, 25),
+        (P79, 55, 25),
+    ];
+    pub(super) const R126: &[rt::TemplateBindingRow] = &[
+        (P65, 79, 24),
+        (P67, 80, 24),
+    ];
+    pub(super) const R127: &[rt::TemplateBindingRow] = &[
+        (P32, 83, 27),
+        (P33, 84, 27),
+        (P49, 85, 27),
+    ];
+    pub(super) const R128: &[rt::TemplateBindingRow] = &[
+        (P65, 89, 28),
+        (P67, 90, 28),
+        (P68, 91, 28),
+        (P69, 92, 28),
+        (P63, 93, 28),
+        (P64, 94, 28),
+    ];
+    pub(super) const R129: &[rt::TemplateBindingRow] = &[
+        (P50, 105, 32),
+        (P51, 106, 32),
+        (P52, 107, 32),
+        (P53, 108, 32),
+        (P54, 109, 32),
+        (P55, 110, 32),
+        (P56, 111, 32),
+        (P57, 112, 32),
+        (P58, 113, 32),
+        (P59, 114, 32),
+        (P60, 115, 32),
+        (P61, 116, 32),
+        (P62, 117, 32),
+        (P63, 118, 32),
+        (P64, 119, 32),
+    ];
+    pub(super) const R130: &[rt::TemplateBindingRow] = &[
+        (P1, 151, 27),
+        (P3, 152, 27),
+        (P4, 153, 27),
+    ];
+    pub(super) const R131: &[rt::TemplateBindingRow] = &[
+        (P7, 192, 21),
+        (P6, 193, 21),
+    ];
+    pub(super) const R132: &[rt::TemplateBindingRow] = &[
+        (P5, 195, 21),
+        (P8, 196, 21),
+    ];
+    pub(super) const R133: &[rt::TemplateBindingRow] = &[
+        (P49, 202, 22),
+        (P48, 203, 22),
+        (P80, 204, 22),
+        (P81, 205, 22),
+        (P82, 206, 22),
+    ];
+    pub(super) const R134: &[rt::TemplateBindingRow] = &[
+        (P83, 209, 22),
+        (P84, 210, 22),
+    ];
+    pub(super) const R135: &[rt::TemplateBindingRow] = &[
+        (P85, 234, 27),
+        (P86, 235, 27),
+    ];
+    pub(super) const R136: &[rt::TemplateBindingRow] = &[
+        (P87, 237, 27),
+        (P88, 238, 27),
+        (P89, 239, 27),
+        (P90, 240, 27),
+        (P91, 241, 27),
+    ];
+    pub(super) const R137: &[rt::TemplateBindingRow] = &[
+        (P0, 78, 29),
+        (P18, 79, 29),
+        (P11, 80, 29),
+    ];
+    pub(super) const R138: &[rt::TemplateBindingRow] = &[
+        (P27, 147, 21),
+        (P49, 148, 21),
+        (P78, 149, 21),
+        (P70, 150, 21),
+        (P92, 151, 21),
+        (P31, 152, 21),
+        (P72, 153, 21),
+    ];
+    pub(super) const R139: &[rt::TemplateBindingRow] = &[
+        (P93, 164, 28),
+        (P94, 165, 28),
+        (P95, 166, 28),
+    ];
+    pub(super) const R140: &[rt::TemplateBindingRow] = &[
+        (P93, 172, 28),
+        (P94, 173, 28),
+        (P95, 174, 28),
+    ];
+    pub(super) const R141: &[rt::TemplateBindingRow] = &[
+        (P93, 179, 28),
+        (P94, 180, 28),
+        (P95, 181, 28),
+    ];
+    pub(super) const R142: &[rt::TemplateBindingRow] = &[
+        (P5, 250, 17),
+        (P6, 251, 17),
+        (P7, 252, 17),
+        (P8, 253, 17),
+    ];
+    pub(super) const R143: &[rt::TemplateBindingRow] = &[
+        (P0, 72, 29),
+        (P18, 73, 29),
+        (P11, 74, 29),
+    ];
+    pub(super) const R144: &[rt::TemplateBindingRow] = &[
+        (P27, 138, 21),
+        (P49, 139, 21),
+        (P78, 140, 21),
+        (P70, 141, 21),
+        (P92, 142, 21),
+        (P31, 143, 21),
+        (P72, 144, 21),
+    ];
+    pub(super) const R145: &[rt::TemplateBindingRow] = &[
+        (P93, 157, 30),
+        (P94, 158, 30),
+        (P95, 159, 30),
+    ];
+    pub(super) const R146: &[rt::TemplateBindingRow] = &[
+        (P93, 171, 30),
+        (P94, 172, 30),
+        (P95, 173, 30),
+    ];
+    pub(super) const R147: &[rt::TemplateBindingRow] = &[
+        (P93, 185, 30),
+        (P94, 186, 30),
+        (P95, 187, 30),
+    ];
+    pub(super) const R148: &[rt::TemplateBindingRow] = &[
+        (P93, 198, 30),
+        (P94, 199, 30),
+        (P95, 200, 30),
+    ];
+    pub(super) const R149: &[rt::TemplateBindingRow] = &[
+        (P5, 260, 17),
+        (P6, 261, 17),
+        (P7, 262, 17),
+        (P8, 263, 17),
+    ];
+    pub(super) const R150: &[rt::TemplateBindingRow] = &[
+        (P16, 66, 17),
+        (P6, 67, 17),
+        (P7, 68, 17),
+        (P8, 69, 17),
+        (P15, 70, 17),
+    ];
+    pub(super) const R151: &[rt::TemplateBindingRow] = &[
+        (P1, 73, 29),
+        (P18, 74, 29),
+    ];
+    pub(super) const R152: &[rt::TemplateBindingRow] = &[
+        (P5, 132, 17),
+        (P8, 133, 17),
+    ];
+    pub(super) const R153: &[rt::TemplateBindingRow] = &[
+        (P19, 140, 17),
+        (P20, 141, 17),
+    ];
+    pub(super) const R154: &[rt::TemplateBindingRow] = &[
+        (P5, 183, 17),
+        (P8, 184, 17),
+    ];
+    pub(super) const R155: &[rt::TemplateBindingRow] = &[
+        (P19, 191, 17),
+        (P20, 192, 17),
+    ];
+    pub(super) const R156: &[rt::TemplateBindingRow] = &[
+        (P1, 227, 27),
+        (P18, 228, 27),
+    ];
+    pub(super) const R157: &[rt::TemplateBindingRow] = &[
+        (P96, 283, 27),
+        (P97, 284, 27),
+    ];
+    pub(super) const R158: &[rt::TemplateBindingRow] = &[
+        (P7, 112, 17),
+        (P8, 113, 17),
+    ];
+    pub(super) const R159: &[rt::TemplateBindingRow] = &[
+        (P5, 122, 19),
+        (P8, 123, 19),
+    ];
+    pub(super) const R160: &[rt::TemplateBindingRow] = &[
+        (P1, 150, 33),
+        (P3, 151, 33),
+        (P4, 152, 33),
+    ];
+    pub(super) const R161: &[rt::TemplateBindingRow] = &[
+        (P6, 50, 17),
+        (P7, 51, 17),
+        (P8, 52, 17),
+    ];
+    pub(super) const R162: &[rt::TemplateBindingRow] = &[
+        (P1, 69, 37),
+        (P14, 70, 37),
+        (P41, 71, 37),
+        (P42, 72, 37),
+        (P43, 73, 37),
+        (P44, 74, 37),
+        (P45, 75, 37),
+    ];
+    pub(super) const R163: &[rt::TemplateBindingRow] = &[
+        (P98, 149, 17),
+        (P5, 150, 17),
+        (P6, 151, 17),
+    ];
+    pub(super) const R164: &[rt::TemplateBindingRow] = &[
+        (P7, 153, 17),
+        (P8, 154, 17),
+    ];
+    pub(super) const R165: &[rt::TemplateBindingRow] = &[
+        (P99, 157, 25),
+        (P100, 158, 25),
+        (P32, 159, 25),
+        (P33, 160, 25),
+        (P101, 161, 25),
+        (P45, 162, 25),
+        (P46, 163, 25),
+        (P102, 164, 25),
+        (P103, 165, 25),
+    ];
+    pub(super) const R166: &[rt::TemplateBindingRow] = &[
+        (P104, 167, 29),
+        (P2, 168, 29),
+    ];
+    pub(super) const R167: &[rt::TemplateBindingRow] = &[
+        (P0, 89, 29),
+        (P11, 90, 29),
+    ];
+    pub(super) const R168: &[rt::TemplateBindingRow] = &[
+        (P12, 92, 29),
+        (P13, 93, 29),
+    ];
+    pub(super) const R169: &[rt::TemplateBindingRow] = &[
+        (P1, 95, 29),
+        (P14, 96, 29),
+        (P3, 97, 29),
+        (P4, 98, 29),
+    ];
+    pub(super) const R170: &[rt::TemplateBindingRow] = &[
+        (P98, 80, 17),
+        (P5, 81, 17),
+        (P6, 82, 17),
+    ];
+    pub(super) const R171: &[rt::TemplateBindingRow] = &[
+        (P7, 84, 17),
+        (P8, 85, 17),
+    ];
+    pub(super) const R172: &[rt::TemplateBindingRow] = &[
+        (P99, 87, 25),
+        (P100, 88, 25),
+        (P32, 89, 25),
+        (P33, 90, 25),
+        (P101, 91, 25),
+        (P45, 92, 25),
+        (P46, 93, 25),
+        (P102, 94, 25),
+        (P103, 95, 25),
+    ];
+    pub(super) const R173: &[rt::TemplateBindingRow] = &[
+        (P104, 97, 29),
+        (P2, 98, 29),
+    ];
+    pub(super) const R174: &[rt::TemplateBindingRow] = &[
+        (P5, 138, 19),
+        (P6, 139, 19),
+    ];
+    pub(super) const R175: &[rt::TemplateBindingRow] = &[
+        (P7, 141, 19),
+        (P8, 142, 19),
+    ];
+    pub(super) const R176: &[rt::TemplateBindingRow] = &[
+        (P1, 145, 29),
+        (P18, 146, 29),
+        (P14, 147, 29),
+        (P3, 148, 29),
+        (P4, 149, 29),
+    ];
+    pub(super) const R177: &[rt::TemplateBindingRow] = &[
+        (P5, 227, 17),
+        (P6, 228, 17),
+    ];
+    pub(super) const R178: &[rt::TemplateBindingRow] = &[
+        (P7, 230, 17),
+        (P8, 231, 17),
+        (P15, 232, 17),
+    ];
+    pub(super) const R179: &[rt::TemplateBindingRow] = &[
+        (P5, 445, 17),
+        (P7, 446, 17),
+        (P6, 447, 17),
+    ];
+    pub(super) const R180: &[rt::TemplateBindingRow] = &[
+        (P8, 449, 17),
+        (P15, 450, 17),
+    ];
+    pub(super) const R181: &[rt::TemplateBindingRow] = &[
+        (P5, 50, 17),
+        (P8, 51, 17),
+    ];
+    pub(super) const R182: &[rt::TemplateBindingRow] = &[
+        (P104, 53, 27),
+        (P2, 54, 27),
+    ];
+    pub(super) const R183: &[rt::TemplateBindingRow] = &[
+        (P5, 88, 17),
+        (P8, 89, 17),
+    ];
+    pub(super) const R184: &[rt::TemplateBindingRow] = &[
+        (P1, 94, 31),
+        (P18, 95, 31),
+        (P105, 96, 31),
+        (P22, 97, 31),
+        (P106, 98, 31),
+        (P2, 99, 31),
+    ];
+    pub(super) const R185: &[rt::TemplateBindingRow] = &[
+        (P19, 101, 31),
+        (P20, 102, 31),
+    ];
+    pub(super) const R186: &[rt::TemplateBindingRow] = &[
+        (P0, 100, 27),
+        (P11, 101, 27),
+        (P12, 102, 27),
+        (P10, 103, 27),
+        (P18, 104, 27),
+    ];
+    pub(super) const R187: &[rt::TemplateBindingRow] = &[
+        (P1, 106, 27),
+        (P13, 107, 27),
+        (P106, 108, 27),
+        (P105, 109, 27),
+        (P22, 110, 27),
+        (P3, 111, 27),
+        (P4, 112, 27),
+    ];
+    pub(super) const R188: &[rt::TemplateBindingRow] = &[
+        (P0, 164, 27),
+        (P10, 165, 27),
+        (P11, 166, 27),
+        (P12, 167, 27),
+        (P18, 168, 27),
+    ];
+    pub(super) const R189: &[rt::TemplateBindingRow] = &[
+        (P1, 170, 27),
+        (P13, 171, 27),
+        (P106, 172, 27),
+        (P105, 173, 27),
+        (P22, 174, 27),
+        (P3, 175, 27),
+        (P4, 176, 27),
+    ];
+    pub(super) const R190: &[rt::TemplateBindingRow] = &[
+        (P10, 217, 27),
+        (P0, 218, 27),
+        (P11, 219, 27),
+        (P12, 220, 27),
+        (P18, 221, 27),
+        (P1, 222, 27),
+    ];
+    pub(super) const R191: &[rt::TemplateBindingRow] = &[
+        (P13, 224, 27),
+        (P3, 225, 27),
+        (P4, 226, 27),
+    ];
+    pub(super) const R192: &[rt::TemplateBindingRow] = &[
+        (P5, 254, 17),
+        (P6, 255, 17),
+        (P7, 256, 17),
+    ];
+    pub(super) const R193: &[rt::TemplateBindingRow] = &[
+        (P107, 374, 19),
+        (P5, 375, 19),
+    ];
+    pub(super) const R194: &[rt::TemplateBindingRow] = &[
+        (P6, 424, 19),
+        (P7, 425, 19),
+        (P8, 426, 19),
+    ];
+    pub(super) const R195: &[rt::TemplateBindingRow] = &[
+        (P108, 429, 33),
+        (P109, 430, 33),
+    ];
+    pub(super) const R196: &[rt::TemplateBindingRow] = &[
+        (P108, 433, 33),
+        (P109, 434, 33),
+    ];
+    pub(super) const R197: &[rt::TemplateBindingRow] = &[
+        (P110, 79, 21),
+        (P6, 80, 21),
+    ];
+    pub(super) const R198: &[rt::TemplateBindingRow] = &[
+        (P7, 82, 21),
+        (P8, 83, 21),
+    ];
+    pub(super) const R199: &[rt::TemplateBindingRow] = &[
+        (P1, 101, 31),
+        (P3, 102, 31),
+        (P4, 103, 31),
+    ];
+    pub(super) const R200: &[rt::TemplateBindingRow] = &[
+        (P110, 150, 23),
+        (P6, 151, 23),
+    ];
+    pub(super) const R201: &[rt::TemplateBindingRow] = &[
+        (P7, 153, 23),
+        (P8, 154, 23),
+    ];
+    pub(super) const R202: &[rt::TemplateBindingRow] = &[
+        (P1, 171, 33),
+        (P3, 172, 33),
+        (P4, 173, 33),
+    ];
+    pub(super) const R203: &[rt::TemplateBindingRow] = &[
+        (P110, 215, 23),
+        (P6, 216, 23),
+    ];
+    pub(super) const R204: &[rt::TemplateBindingRow] = &[
+        (P7, 218, 23),
+        (P8, 219, 23),
+    ];
+    pub(super) const R205: &[rt::TemplateBindingRow] = &[
+        (P1, 236, 33),
+        (P3, 237, 33),
+        (P4, 238, 33),
+    ];
+    pub(super) const R206: &[rt::TemplateBindingRow] = &[
+        (P110, 281, 23),
+        (P6, 282, 23),
+    ];
+    pub(super) const R207: &[rt::TemplateBindingRow] = &[
+        (P7, 284, 23),
+        (P8, 285, 23),
+    ];
+    pub(super) const R208: &[rt::TemplateBindingRow] = &[
+        (P1, 302, 33),
+        (P3, 303, 33),
+        (P4, 304, 33),
+    ];
+    pub(super) const R209: &[rt::TemplateBindingRow] = &[
+        (P107, 75, 19),
+        (P5, 76, 19),
+    ];
+    pub(super) const R210: &[rt::TemplateBindingRow] = &[
+        (P5, 160, 17),
+        (P8, 161, 17),
+    ];
+    pub(super) const R211: &[rt::TemplateBindingRow] = &[
+        (P23, 173, 37),
+        (P18, 174, 37),
+    ];
+    pub(super) const R212: &[rt::TemplateBindingRow] = &[
+        (P21, 194, 33),
+        (P19, 195, 33),
+    ];
+    pub(super) const R213: &[rt::TemplateBindingRow] = &[
+        (P5, 79, 17),
+        (P8, 80, 17),
+    ];
+    pub(super) const R214: &[rt::TemplateBindingRow] = &[
+        (P19, 88, 19),
+        (P20, 89, 19),
+    ];
+    pub(super) const R215: &[rt::TemplateBindingRow] = &[
+        (P1, 93, 31),
+        (P18, 94, 31),
+        (P3, 95, 31),
+        (P4, 96, 31),
+    ];
+    pub(super) const R216: &[rt::TemplateBindingRow] = &[
+        (P111, 116, 17),
+        (P2, 117, 17),
+        (P5, 118, 17),
+    ];
+    pub(super) const R217: &[rt::TemplateBindingRow] = &[
+        (P1, 136, 31),
+        (P18, 137, 31),
+        (P106, 138, 31),
+    ];
+    pub(super) const R218: &[rt::TemplateBindingRow] = &[
+        (P111, 193, 17),
+        (P2, 194, 17),
+        (P5, 195, 17),
+    ];
+    pub(super) const R219: &[rt::TemplateBindingRow] = &[
+        (P1, 213, 33),
+        (P18, 214, 33),
+    ];
+    pub(super) const R220: &[rt::TemplateBindingRow] = &[
+        (P5, 245, 17),
+        (P8, 246, 17),
+    ];
+    pub(super) const R221: &[rt::TemplateBindingRow] = &[
+        (P1, 267, 33),
+        (P18, 268, 33),
+        (P19, 269, 33),
+        (P20, 270, 33),
+        (P14, 271, 33),
+    ];
+    pub(super) const R222: &[rt::TemplateBindingRow] = &[
+        (P5, 356, 17),
+        (P6, 357, 17),
+    ];
+    pub(super) const R223: &[rt::TemplateBindingRow] = &[
+        (P7, 359, 17),
+        (P8, 360, 17),
+    ];
+    pub(super) const R224: &[rt::TemplateBindingRow] = &[
+        (P48, 363, 25),
+        (P32, 364, 25),
+        (P33, 365, 25),
+    ];
+    pub(super) const R225: &[rt::TemplateBindingRow] = &[
+        (P112, 382, 20),
+        (P113, 383, 20),
+        (P114, 384, 20),
+    ];
+    pub(super) const R226: &[rt::TemplateBindingRow] = &[
+        (P115, 407, 33),
+        (P116, 408, 33),
+    ];
+    pub(super) const R227: &[rt::TemplateBindingRow] = &[
+        (P117, 417, 33),
+        (P118, 418, 33),
+    ];
+    pub(super) const R228: &[rt::TemplateBindingRow] = &[
+        (P119, 489, 35),
+        (P120, 490, 35),
+        (P0, 491, 35),
+        (P11, 492, 35),
+    ];
+    pub(super) const R229: &[rt::TemplateBindingRow] = &[
+        (P5, 504, 21),
+        (P8, 505, 21),
+    ];
+    pub(super) const R230: &[rt::TemplateBindingRow] = &[
+        (P18, 549, 39),
+        (P19, 550, 39),
+        (P20, 551, 39),
+        (P14, 552, 39),
+    ];
+    pub(super) const R231: &[rt::TemplateBindingRow] = &[
+        (P5, 63, 17),
+        (P6, 64, 17),
+    ];
+    pub(super) const R232: &[rt::TemplateBindingRow] = &[
+        (P7, 66, 17),
+        (P8, 67, 17),
+    ];
+    pub(super) const R233: &[rt::TemplateBindingRow] = &[
+        (P32, 69, 25),
+        (P33, 70, 25),
+    ];
+    pub(super) const R234: &[rt::TemplateBindingRow] = &[
+        (P104, 74, 29),
+        (P2, 75, 29),
+    ];
+    pub(super) const R235: &[rt::TemplateBindingRow] = &[
+        (P5, 134, 19),
+        (P6, 135, 19),
+        (P7, 136, 19),
+        (P8, 137, 19),
+        (P16, 138, 19),
+    ];
+    pub(super) const R236: &[rt::TemplateBindingRow] = &[
+        (P121, 168, 24),
+        (P122, 169, 24),
+    ];
+    pub(super) const R237: &[rt::TemplateBindingRow] = &[
+        (P121, 176, 24),
+        (P122, 177, 24),
+    ];
+    pub(super) const R238: &[rt::TemplateBindingRow] = &[
+        (P5, 342, 19),
+        (P6, 343, 19),
+        (P7, 344, 19),
+        (P8, 345, 19),
+        (P16, 346, 19),
+    ];
+    pub(super) const R239: &[rt::TemplateBindingRow] = &[
+        (P123, 387, 24),
+        (P122, 388, 24),
+    ];
+    pub(super) const R240: &[rt::TemplateBindingRow] = &[
+        (P123, 395, 24),
+        (P122, 396, 24),
+    ];
+    pub(super) const R241: &[rt::TemplateBindingRow] = &[
+        (P75, 728, 22),
+        (P2, 729, 22),
+    ];
+    pub(super) const R242: &[rt::TemplateBindingRow] = &[
+        (P0, 775, 29),
+        (P11, 776, 29),
+    ];
+    pub(super) const R243: &[rt::TemplateBindingRow] = &[
+        (P12, 778, 29),
+        (P13, 779, 29),
+    ];
+    pub(super) const R244: &[rt::TemplateBindingRow] = &[
+        (P1, 781, 29),
+        (P18, 782, 29),
+    ];
+    pub(super) const R245: &[rt::TemplateBindingRow] = &[
+        (P3, 785, 29),
+        (P4, 786, 29),
+    ];
+    pub(super) const R246: &[rt::TemplateBindingRow] = &[
+        (P15, 836, 17),
+        (P6, 837, 17),
+    ];
+    pub(super) const R247: &[rt::TemplateBindingRow] = &[
+        (P32, 840, 25),
+        (P33, 841, 25),
+    ];
+    pub(super) const R248: &[rt::TemplateBindingRow] = &[
+        (P5, 64, 17),
+        (P15, 65, 17),
+        (P6, 66, 17),
+        (P7, 67, 17),
+        (P8, 68, 17),
+        (P16, 69, 17),
+    ];
+    pub(super) const R249: &[rt::TemplateBindingRow] = &[
+        (P1, 78, 31),
+        (P18, 79, 31),
+        (P3, 80, 31),
+        (P4, 81, 31),
+    ];
+    pub(super) const R250: &[rt::TemplateBindingRow] = &[
+        (P18, 92, 29),
+        (P11, 93, 29),
+        (P12, 94, 29),
+    ];
+    pub(super) const R251: &[rt::TemplateBindingRow] = &[
+        (P1, 96, 29),
+        (P14, 97, 29),
+        (P3, 98, 29),
+        (P4, 99, 29),
+    ];
+    pub(super) const R252: &[rt::TemplateBindingRow] = &[
+        (P49, 175, 21),
+        (P27, 176, 21),
+    ];
+    pub(super) const R253: &[rt::TemplateBindingRow] = &[
+        (P124, 180, 21),
+        (P125, 181, 21),
+    ];
+    pub(super) const R254: &[rt::TemplateBindingRow] = &[
+        (P126, 183, 21),
+        (P127, 184, 21),
+        (P128, 185, 21),
+    ];
+    pub(super) const R255: &[rt::TemplateBindingRow] = &[
+        (P129, 188, 21),
+        (P130, 189, 21),
+        (P48, 190, 21),
+    ];
+    pub(super) const R256: &[rt::TemplateBindingRow] = &[
+        (P18, 408, 29),
+        (P11, 409, 29),
+        (P12, 410, 29),
+    ];
+    pub(super) const R257: &[rt::TemplateBindingRow] = &[
+        (P1, 412, 29),
+        (P14, 413, 29),
+        (P3, 414, 29),
+        (P4, 415, 29),
+    ];
+    pub(super) const R258: &[rt::TemplateBindingRow] = &[
+        (P6, 484, 21),
+        (P7, 485, 21),
+        (P8, 486, 21),
+    ];
+    pub(super) const R259: &[rt::TemplateBindingRow] = &[
+        (P49, 490, 21),
+        (P27, 491, 21),
+        (P70, 492, 21),
+    ];
+    pub(super) const R260: &[rt::TemplateBindingRow] = &[
+        (P124, 495, 21),
+        (P125, 496, 21),
+    ];
+    pub(super) const R261: &[rt::TemplateBindingRow] = &[
+        (P126, 498, 21),
+        (P127, 499, 21),
+        (P128, 500, 21),
+    ];
+    pub(super) const R262: &[rt::TemplateBindingRow] = &[
+        (P129, 503, 21),
+        (P130, 504, 21),
+        (P48, 505, 21),
+    ];
+    pub(super) const R263: &[rt::TemplateBindingRow] = &[
+        (P27, 512, 21),
+        (P70, 513, 21),
+    ];
+    pub(super) const R264: &[rt::TemplateBindingRow] = &[
+        (P5, 80, 17),
+        (P6, 81, 17),
+    ];
+    pub(super) const R265: &[rt::TemplateBindingRow] = &[
+        (P7, 83, 17),
+        (P8, 84, 17),
+    ];
+    pub(super) const R266: &[rt::TemplateBindingRow] = &[
+        (P131, 130, 33),
+        (P19, 131, 33),
+        (P20, 132, 33),
+    ];
+    pub(super) const R267: &[rt::TemplateBindingRow] = &[
+        (P132, 140, 33),
+        (P19, 141, 33),
+        (P20, 142, 33),
+    ];
+    pub(super) const R268: &[rt::TemplateBindingRow] = &[
+        (P133, 204, 28),
+        (P134, 205, 28),
+        (P135, 206, 28),
+        (P136, 207, 28),
+        (P137, 208, 28),
+        (P138, 209, 28),
+    ];
+    pub(super) const R269: &[rt::TemplateBindingRow] = &[
+        (P133, 219, 28),
+        (P134, 220, 28),
+        (P135, 221, 28),
+        (P136, 222, 28),
+        (P137, 223, 28),
+        (P138, 224, 28),
+    ];
+    pub(super) const R270: &[rt::TemplateBindingRow] = &[
+        (P36, 229, 26),
+        (P37, 230, 26),
+    ];
+    pub(super) const R271: &[rt::TemplateBindingRow] = &[
+        (P139, 237, 37),
+        (P71, 238, 37),
+    ];
+    pub(super) const R272: &[rt::TemplateBindingRow] = &[
+        (P133, 301, 28),
+        (P134, 302, 28),
+        (P135, 303, 28),
+        (P136, 304, 28),
+        (P137, 305, 28),
+        (P138, 306, 28),
+    ];
+    pub(super) const R273: &[rt::TemplateBindingRow] = &[
+        (P133, 316, 28),
+        (P134, 317, 28),
+        (P135, 318, 28),
+        (P136, 319, 28),
+        (P137, 320, 28),
+        (P138, 321, 28),
+    ];
+    pub(super) const R274: &[rt::TemplateBindingRow] = &[
+        (P36, 326, 26),
+        (P37, 327, 26),
+    ];
+    pub(super) const R275: &[rt::TemplateBindingRow] = &[
+        (P139, 334, 37),
+        (P71, 335, 37),
+    ];
+    pub(super) const R276: &[rt::TemplateBindingRow] = &[
+        (P5, 133, 19),
+        (P6, 134, 19),
+    ];
+    pub(super) const R277: &[rt::TemplateBindingRow] = &[
+        (P7, 136, 19),
+        (P8, 137, 19),
+        (P31, 138, 19),
+        (P17, 139, 19),
+    ];
+    pub(super) const R278: &[rt::TemplateBindingRow] = &[
+        (P47, 147, 29),
+        (P140, 148, 29),
+    ];
+    pub(super) const R279: &[rt::TemplateBindingRow] = &[
+        (P32, 152, 25),
+        (P33, 153, 25),
+        (P46, 154, 25),
+        (P47, 155, 25),
+        (P48, 156, 25),
+        (P49, 157, 25),
+    ];
+    pub(super) const R280: &[rt::TemplateBindingRow] = &[
+        (P50, 161, 28),
+        (P51, 162, 28),
+        (P52, 163, 28),
+        (P53, 164, 28),
+        (P54, 165, 28),
+        (P55, 166, 28),
+        (P56, 167, 28),
+        (P57, 168, 28),
+        (P58, 169, 28),
+        (P59, 170, 28),
+        (P60, 171, 28),
+        (P61, 172, 28),
+        (P62, 173, 28),
+        (P63, 174, 28),
+        (P64, 175, 28),
+    ];
+    pub(super) const R281: &[rt::TemplateBindingRow] = &[
+        (P65, 185, 22),
+        (P47, 186, 22),
+        (P66, 187, 22),
+        (P67, 188, 22),
+        (P68, 189, 22),
+        (P69, 190, 22),
+    ];
+    pub(super) const R282: &[rt::TemplateBindingRow] = &[
+        (P47, 202, 29),
+        (P140, 203, 29),
+    ];
+    pub(super) const R283: &[rt::TemplateBindingRow] = &[
+        (P70, 209, 19),
+        (P71, 210, 19),
+    ];
+    pub(super) const R284: &[rt::TemplateBindingRow] = &[
+        (P1, 261, 29),
+        (P3, 262, 29),
+        (P4, 263, 29),
+    ];
+    pub(super) const R285: &[rt::TemplateBindingRow] = &[
+        (P71, 318, 26),
+        (P141, 319, 26),
+        (P142, 320, 26),
+        (P143, 321, 26),
+    ];
+    pub(super) const R286: &[rt::TemplateBindingRow] = &[
+        (P127, 326, 22),
+        (P128, 327, 22),
+        (P126, 328, 22),
+        (P27, 329, 22),
+        (P70, 330, 22),
+        (P78, 331, 22),
+        (P48, 332, 22),
+        (P49, 333, 22),
+        (P144, 334, 22),
+        (P71, 335, 22),
+        (P145, 336, 22),
+        (P146, 337, 22),
+        (P147, 338, 22),
+        (P148, 339, 22),
+        (P149, 340, 22),
+        (P150, 341, 22),
+    ];
+    pub(super) const R287: &[rt::TemplateBindingRow] = &[
+        (P106, 117, 29),
+        (P105, 118, 29),
+    ];
+    pub(super) const R288: &[rt::TemplateBindingRow] = &[
+        (P151, 126, 20),
+        (P127, 127, 20),
+        (P128, 128, 20),
+        (P126, 129, 20),
+        (P27, 130, 20),
+        (P70, 131, 20),
+        (P78, 132, 20),
+        (P48, 133, 20),
+        (P49, 134, 20),
+        (P152, 135, 20),
+        (P71, 136, 20),
+    ];
+    pub(super) const R289: &[rt::TemplateBindingRow] = &[
+        (P8, 91, 17),
+        (P16, 92, 17),
+        (P5, 93, 17),
+        (P17, 94, 17),
+        (P31, 95, 17),
+        (P72, 96, 17),
+        (P153, 97, 17),
+    ];
+    pub(super) const R290: &[rt::TemplateBindingRow] = &[
+        (P7, 99, 17),
+        (P15, 100, 17),
+    ];
+    pub(super) const R291: &[rt::TemplateBindingRow] = &[
+        (P1, 104, 31),
+        (P3, 105, 31),
+        (P4, 106, 31),
+    ];
+    pub(super) const R292: &[rt::TemplateBindingRow] = &[
+        (P8, 202, 17),
+        (P16, 203, 17),
+        (P5, 204, 17),
+        (P17, 205, 17),
+        (P31, 206, 17),
+        (P72, 207, 17),
+        (P153, 208, 17),
+    ];
+    pub(super) const R293: &[rt::TemplateBindingRow] = &[
+        (P7, 210, 17),
+        (P15, 211, 17),
+    ];
+    pub(super) const R294: &[rt::TemplateBindingRow] = &[
+        (P1, 215, 31),
+        (P3, 216, 31),
+        (P4, 217, 31),
+    ];
+    pub(super) const R295: &[rt::TemplateBindingRow] = &[
+        (P31, 291, 20),
+        (P72, 291, 58),
+    ];
+    pub(super) const R296: &[rt::TemplateBindingRow] = &[
+        (P17, 298, 25),
+        (P71, 299, 25),
+        (P92, 300, 25),
+    ];
+    pub(super) const R297: &[rt::TemplateBindingRow] = &[
+        (P154, 312, 21),
+        (P5, 313, 21),
+        (P16, 314, 21),
+    ];
+    pub(super) const R298: &[rt::TemplateBindingRow] = &[
+        (P1, 324, 33),
+        (P3, 325, 33),
+        (P4, 326, 33),
+    ];
+    pub(super) const R299: &[rt::TemplateBindingRow] = &[
+        (P5, 86, 17),
+        (P6, 87, 17),
+    ];
+    pub(super) const R300: &[rt::TemplateBindingRow] = &[
+        (P7, 89, 17),
+        (P8, 90, 17),
+    ];
+    pub(super) const R301: &[rt::TemplateBindingRow] = &[
+        (P155, 96, 19),
+        (P19, 97, 19),
+        (P20, 98, 19),
+    ];
+    pub(super) const R302: &[rt::TemplateBindingRow] = &[
+        (P5, 178, 17),
+        (P6, 179, 17),
+    ];
+    pub(super) const R303: &[rt::TemplateBindingRow] = &[
+        (P155, 190, 17),
+        (P156, 191, 17),
+        (P19, 192, 17),
+        (P20, 193, 17),
+    ];
+    pub(super) const R304: &[rt::TemplateBindingRow] = &[
+        (P5, 281, 17),
+        (P6, 282, 17),
+    ];
+    pub(super) const R305: &[rt::TemplateBindingRow] = &[
+        (P7, 284, 17),
+        (P8, 285, 17),
+    ];
+    pub(super) const R306: &[rt::TemplateBindingRow] = &[
+        (P155, 290, 17),
+        (P156, 291, 17),
+        (P19, 292, 17),
+        (P20, 293, 17),
+    ];
+    pub(super) const R307: &[rt::TemplateBindingRow] = &[
+        (P157, 368, 21),
+        (P34, 369, 21),
+    ];
+    pub(super) const R308: &[rt::TemplateBindingRow] = &[
+        (P158, 371, 19),
+        (P159, 372, 19),
+    ];
+    pub(super) const R309: &[rt::TemplateBindingRow] = &[
+        (P160, 392, 19),
+        (P161, 393, 19),
+    ];
+    pub(super) const R310: &[rt::TemplateBindingRow] = &[
+        (P1, 27, 29),
+        (P14, 28, 29),
+        (P11, 29, 29),
+    ];
+    pub(super) const R311: &[rt::TemplateBindingRow] = &[
+        (P12, 31, 29),
+        (P13, 32, 29),
+        (P3, 33, 29),
+        (P4, 34, 29),
+    ];
+    pub(super) const R312: &[rt::TemplateBindingRow] = &[
+        (P5, 65, 19),
+        (P6, 66, 19),
+        (P7, 67, 19),
+        (P8, 68, 19),
+    ];
+    pub(super) const R313: &[rt::TemplateBindingRow] = &[
+        (P32, 71, 27),
+        (P33, 72, 27),
+    ];
+    pub(super) const R314: &[rt::TemplateBindingRow] = &[
+        (P1, 75, 33),
+        (P2, 76, 33),
+        (P19, 77, 33),
+        (P20, 78, 33),
+    ];
+    pub(super) const R315: &[rt::TemplateBindingRow] = &[
+        (P5, 66, 19),
+        (P6, 67, 19),
+        (P7, 68, 19),
+        (P8, 69, 19),
+    ];
+    pub(super) const R316: &[rt::TemplateBindingRow] = &[
+        (P2, 73, 27),
+        (P32, 74, 27),
+        (P33, 75, 27),
+    ];
+    pub(super) const R317: &[rt::TemplateBindingRow] = &[
+        (P15, 96, 19),
+        (P5, 97, 19),
+        (P6, 98, 19),
+    ];
+    pub(super) const R318: &[rt::TemplateBindingRow] = &[
+        (P162, 141, 33),
+        (P18, 142, 33),
+    ];
+    pub(super) const R319: &[rt::TemplateBindingRow] = &[
+        (P5, 84, 19),
+        (P8, 85, 19),
+    ];
+    pub(super) const R320: &[rt::TemplateBindingRow] = &[
+        (P5, 88, 23),
+        (P8, 89, 23),
+        (P7, 90, 23),
+        (P6, 91, 23),
+    ];
+    pub(super) const R321: &[rt::TemplateBindingRow] = &[
+        (P162, 97, 33),
+        (P18, 98, 33),
+    ];
+    pub(super) const R322: &[rt::TemplateBindingRow] = &[
+        (P5, 183, 17),
+        (P6, 184, 17),
+    ];
+    pub(super) const R323: &[rt::TemplateBindingRow] = &[
+        (P7, 186, 17),
+        (P8, 187, 17),
+        (P15, 188, 17),
+    ];
+    pub(super) const R324: &[rt::TemplateBindingRow] = &[
+        (P5, 80, 17),
+        (P6, 81, 17),
+    ];
+    pub(super) const R325: &[rt::TemplateBindingRow] = &[
+        (P7, 83, 17),
+        (P8, 84, 17),
+    ];
+    pub(super) const R326: &[rt::TemplateBindingRow] = &[
+        (P19, 99, 31),
+        (P20, 100, 31),
+        (P2, 101, 31),
+    ];
+    pub(super) const R327: &[rt::TemplateBindingRow] = &[
+        (P5, 191, 19),
+        (P6, 192, 19),
+    ];
+    pub(super) const R328: &[rt::TemplateBindingRow] = &[
+        (P1, 224, 29),
+        (P18, 225, 29),
+        (P3, 226, 29),
+        (P4, 227, 29),
+    ];
+    pub(super) const R329: &[rt::TemplateBindingRow] = &[
+        (P5, 318, 17),
+        (P6, 319, 17),
+    ];
+    pub(super) const R330: &[rt::TemplateBindingRow] = &[
+        (P7, 321, 17),
+        (P8, 322, 17),
+    ];
+    pub(super) const R331: &[rt::TemplateBindingRow] = &[
+        (P1, 333, 33),
+        (P19, 334, 33),
+        (P20, 335, 33),
+        (P2, 336, 33),
+    ];
+    pub(super) const R332: &[rt::TemplateBindingRow] = &[
+        (P5, 52, 17),
+        (P6, 53, 17),
+    ];
+    pub(super) const R333: &[rt::TemplateBindingRow] = &[
+        (P7, 55, 17),
+        (P8, 56, 17),
+        (P98, 57, 17),
+    ];
+    pub(super) const R334: &[rt::TemplateBindingRow] = &[
+        (P48, 59, 25),
+        (P32, 60, 25),
+        (P33, 61, 25),
+        (P46, 62, 25),
+        (P103, 63, 25),
+        (P101, 64, 25),
+        (P45, 65, 25),
+        (P99, 66, 25),
+        (P100, 67, 25),
+        (P102, 68, 25),
+    ];
+    pub(super) const R335: &[rt::TemplateBindingRow] = &[
+        (P5, 74, 17),
+        (P6, 75, 17),
+    ];
+    pub(super) const R336: &[rt::TemplateBindingRow] = &[
+        (P1, 94, 31),
+        (P18, 95, 31),
+        (P19, 96, 31),
+        (P20, 97, 31),
+        (P2, 98, 31),
+    ];
+    pub(super) const R337: &[rt::TemplateBindingRow] = &[
+        (P5, 87, 19),
+        (P6, 88, 19),
+    ];
+    pub(super) const R338: &[rt::TemplateBindingRow] = &[
+        (P7, 90, 19),
+        (P8, 91, 19),
+    ];
+    pub(super) const R339: &[rt::TemplateBindingRow] = &[
+        (P32, 94, 25),
+        (P33, 95, 25),
+        (P46, 96, 25),
+        (P47, 97, 25),
+        (P48, 98, 25),
+        (P49, 99, 25),
+    ];
+    pub(super) const R340: &[rt::TemplateBindingRow] = &[
+        (P50, 103, 28),
+        (P51, 104, 28),
+        (P52, 105, 28),
+        (P53, 106, 28),
+        (P54, 107, 28),
+        (P55, 108, 28),
+        (P56, 109, 28),
+        (P57, 110, 28),
+        (P58, 111, 28),
+        (P59, 112, 28),
+        (P60, 113, 28),
+        (P61, 114, 28),
+        (P62, 115, 28),
+        (P63, 116, 28),
+        (P64, 117, 28),
+    ];
+    pub(super) const R341: &[rt::TemplateBindingRow] = &[
+        (P65, 125, 22),
+        (P47, 126, 22),
+        (P66, 127, 22),
+        (P67, 128, 22),
+        (P68, 129, 22),
+        (P69, 130, 22),
+    ];
+    pub(super) const R342: &[rt::TemplateBindingRow] = &[
+        (P5, 219, 21),
+        (P6, 220, 21),
+    ];
+    pub(super) const R343: &[rt::TemplateBindingRow] = &[
+        (P7, 222, 21),
+        (P8, 223, 21),
+    ];
+    pub(super) const R344: &[rt::TemplateBindingRow] = &[
+        (P163, 234, 29),
+        (P49, 235, 29),
+        (P2, 236, 29),
+        (P164, 237, 29),
+        (P165, 238, 29),
+    ];
+    pub(super) const R345: &[rt::TemplateBindingRow] = &[
+        (P166, 242, 24),
+        (P167, 243, 24),
+        (P2, 244, 24),
+        (P168, 245, 24),
+        (P169, 246, 24),
+    ];
+    pub(super) const R346: &[rt::TemplateBindingRow] = &[
+        (P168, 260, 22),
+        (P169, 261, 22),
+        (P170, 262, 22),
+        (P171, 263, 22),
+    ];
+    pub(super) const R347: &[rt::TemplateBindingRow] = &[
+        (P71, 265, 22),
+        (P172, 266, 22),
+    ];
+    pub(super) const R348: &[rt::TemplateBindingRow] = &[
+        (P32, 318, 33),
+        (P33, 319, 33),
+        (P46, 320, 33),
+        (P103, 321, 33),
+    ];
+    pub(super) const R349: &[rt::TemplateBindingRow] = &[
+        (P5, 71, 17),
+        (P15, 72, 17),
+    ];
+    pub(super) const R350: &[rt::TemplateBindingRow] = &[
+        (P5, 139, 19),
+        (P6, 140, 19),
+    ];
+    pub(super) const R351: &[rt::TemplateBindingRow] = &[
+        (P8, 145, 19),
+        (P17, 146, 19),
+    ];
+    pub(super) const R352: &[rt::TemplateBindingRow] = &[
+        (P173, 171, 37),
+        (P18, 172, 37),
+    ];
+    pub(super) const R353: &[rt::TemplateBindingRow] = &[
+        (P174, 183, 27),
+        (P104, 184, 27),
+    ];
+    pub(super) const R354: &[rt::TemplateBindingRow] = &[
+        (P5, 48, 17),
+        (P7, 49, 17),
+        (P8, 50, 17),
+    ];
+    pub(super) const R355: &[rt::TemplateBindingRow] = &[
+        (P32, 52, 25),
+        (P33, 53, 25),
+        (P46, 54, 25),
+        (P103, 55, 25),
+        (P101, 56, 25),
+        (P102, 57, 25),
+    ];
+    pub(super) const R356: &[rt::TemplateBindingRow] = &[
+        (P104, 59, 29),
+        (P2, 60, 29),
+    ];
+    pub(super) const R357: &[rt::TemplateBindingRow] = &[
+        (P5, 125, 21),
+        (P6, 126, 21),
+    ];
+    pub(super) const R358: &[rt::TemplateBindingRow] = &[
+        (P7, 128, 21),
+        (P8, 129, 21),
+    ];
+    pub(super) const R359: &[rt::TemplateBindingRow] = &[
+        (P32, 139, 27),
+        (P33, 140, 27),
+        (P46, 141, 27),
+        (P64, 142, 27),
+        (P63, 143, 27),
+        (P47, 144, 27),
+        (P48, 145, 27),
+        (P49, 146, 27),
+    ];
+    pub(super) const R360: &[rt::TemplateBindingRow] = &[
+        (P50, 150, 30),
+        (P51, 151, 30),
+        (P52, 152, 30),
+        (P53, 153, 30),
+        (P54, 154, 30),
+        (P55, 155, 30),
+        (P56, 156, 30),
+        (P57, 157, 30),
+        (P58, 158, 30),
+        (P59, 159, 30),
+        (P60, 160, 30),
+        (P61, 161, 30),
+        (P62, 162, 30),
+    ];
+    pub(super) const R361: &[rt::TemplateBindingRow] = &[
+        (P65, 172, 24),
+        (P47, 173, 24),
+        (P66, 174, 24),
+        (P67, 175, 24),
+        (P64, 176, 24),
+        (P63, 177, 24),
+    ];
+    pub(super) const R362: &[rt::TemplateBindingRow] = &[
+        (P71, 190, 21),
+        (P70, 191, 21),
+    ];
+    pub(super) const R363: &[rt::TemplateBindingRow] = &[
+        (P175, 265, 20),
+        (P176, 266, 20),
+        (P77, 267, 20),
+        (P49, 268, 20),
+        (P27, 269, 20),
+        (P78, 270, 20),
+        (P70, 271, 20),
+        (P127, 272, 20),
+        (P126, 273, 20),
+        (P128, 274, 20),
+        (P177, 275, 20),
+    ];
+    pub(super) const R364: &[rt::TemplateBindingRow] = &[
+        (P71, 280, 20),
+        (P48, 281, 20),
+    ];
+    pub(super) const R365: &[rt::TemplateBindingRow] = &[
+        (P178, 283, 20),
+        (P179, 284, 20),
+        (P180, 285, 20),
+    ];
+    pub(super) const R366: &[rt::TemplateBindingRow] = &[
+        (P13, 76, 27),
+        (P1, 77, 27),
+    ];
+    pub(super) const R367: &[rt::TemplateBindingRow] = &[
+        (P14, 81, 27),
+        (P3, 82, 27),
+        (P4, 83, 27),
+    ];
+    pub(super) const R368: &[rt::TemplateBindingRow] = &[
+        (P181, 150, 20),
+        (P77, 151, 20),
+        (P49, 152, 20),
+        (P27, 153, 20),
+        (P78, 154, 20),
+        (P70, 155, 20),
+        (P127, 156, 20),
+        (P126, 157, 20),
+        (P128, 158, 20),
+        (P177, 159, 20),
+    ];
+    pub(super) const R369: &[rt::TemplateBindingRow] = &[
+        (P71, 166, 23),
+        (P70, 167, 23),
+    ];
+    pub(super) const R370: &[rt::TemplateBindingRow] = &[
+        (P5, 83, 19),
+        (P6, 84, 19),
+        (P7, 85, 19),
+        (P8, 86, 19),
+    ];
+    pub(super) const R371: &[rt::TemplateBindingRow] = &[
+        (P47, 91, 25),
+        (P48, 92, 25),
+        (P49, 93, 25),
+        (P32, 94, 25),
+        (P33, 95, 25),
+        (P46, 96, 25),
+        (P101, 97, 25),
+    ];
+    pub(super) const R372: &[rt::TemplateBindingRow] = &[
+        (P47, 108, 22),
+        (P66, 109, 22),
+        (P182, 110, 22),
+        (P183, 111, 22),
+        (P184, 112, 22),
+        (P185, 113, 22),
+    ];
+}
+
 /// The base URI and the XML namespaces of `Controls/WinUIControls.xaml`.
 static BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: __t::Option::Some("ferres://ferroui.themes.winui/Controls/WinUIControls.xaml"), namespaces: XML_NAMESPACES_1 };
 
@@ -16521,7 +18955,7 @@ fn build_controls_winuicontrols_xaml_deferred_3(
     border_1.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&border_1).upcast::<__t::Control>());
     // Controls/WinUIControls.xaml(24,19) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 24, 19)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 24, 19)?;
     // Controls/WinUIControls.xaml(25,14) Child
     // Controls/WinUIControls.xaml(25,14) VisualLayerManager
     let visual_layer_manager_0 = __t::VisualLayerManager::new();
@@ -16539,7 +18973,7 @@ fn build_controls_winuicontrols_xaml_deferred_3(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 26, 33)?;
     // Controls/WinUIControls.xaml(27,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 27, 33)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 27, 33)?;
     // Controls/WinUIControls.xaml(28,33) Content (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -16551,7 +18985,7 @@ fn build_controls_winuicontrols_xaml_deferred_3(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 28, 33)?, priority_1);
     }
     // Controls/WinUIControls.xaml(29,33) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 29, 33)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 29, 33)?;
     rt::invoked(content_presenter_0.try_end_init(), 26, 16)?;
     rt::invoked(visual_layer_manager_0.try_end_init(), 25, 14)?;
     rt::invoked(border_1.try_end_init(), 24, 12)?;
@@ -16615,7 +19049,7 @@ fn build_controls_winuicontrols_xaml_deferred_5(
     context.set_intermediate_root_object(rt::to_value(layout_transform_control_0.clone()));
     layout_transform_control_0.begin_init();
     // Controls/WinUIControls.xaml(22,33) LayoutTransform
-    rt::bind_template_binding(layout_transform_control_0.upcast_ref::<__t::FerroObject>(), __t::LayoutTransformControl::layout_transform_property(), rt::property(__t::OverlayPopupHost::transform_property()), 22, 33)?;
+    rt::apply_template_binding(layout_transform_control_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::OverlayPopupHost::transform_property()), || rt::property(__t::LayoutTransformControl::layout_transform_property()), 22, 33)?;
     // Controls/WinUIControls.xaml(23,12) Child
     // Controls/WinUIControls.xaml(23,12) VisualLayerManager
     let visual_layer_manager_0 = __t::VisualLayerManager::new();
@@ -16633,9 +19067,7 @@ fn build_controls_winuicontrols_xaml_deferred_5(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 24, 31)?;
     // Controls/WinUIControls.xaml(25,31) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 25, 31)?;
-    // Controls/WinUIControls.xaml(26,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 26, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R0)?;
     // Controls/WinUIControls.xaml(27,31) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -16647,7 +19079,7 @@ fn build_controls_winuicontrols_xaml_deferred_5(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 27, 31)?, priority_0);
     }
     // Controls/WinUIControls.xaml(28,31) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 28, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::ContentPresenter::padding_property()), 28, 31)?;
     rt::invoked(content_presenter_0.try_end_init(), 24, 14)?;
     rt::invoked(visual_layer_manager_0.try_end_init(), 23, 12)?;
     rt::invoked(layout_transform_control_0.try_end_init(), 22, 10)?;
@@ -16717,7 +19149,7 @@ fn build_controls_winuicontrols_xaml_deferred_7(
     context.set_intermediate_root_object(rt::to_value(layout_transform_control_0.clone()));
     layout_transform_control_0.begin_init();
     // Controls/WinUIControls.xaml(26,33) LayoutTransform
-    rt::bind_template_binding(layout_transform_control_0.upcast_ref::<__t::FerroObject>(), __t::LayoutTransformControl::layout_transform_property(), rt::property(__t::PopupRoot::transform_property()), 26, 33)?;
+    rt::apply_template_binding(layout_transform_control_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::PopupRoot::transform_property()), || rt::property(__t::LayoutTransformControl::layout_transform_property()), 26, 33)?;
     // Controls/WinUIControls.xaml(27,12) Child
     // Controls/WinUIControls.xaml(27,12) Panel
     let panel_0 = __t::Panel::new();
@@ -16754,9 +19186,7 @@ fn build_controls_winuicontrols_xaml_deferred_7(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 30, 33)?;
     // Controls/WinUIControls.xaml(31,33) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 31, 33)?;
-    // Controls/WinUIControls.xaml(32,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 32, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R1)?;
     // Controls/WinUIControls.xaml(33,33) Content (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -16768,7 +19198,7 @@ fn build_controls_winuicontrols_xaml_deferred_7(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 33, 33)?, priority_1);
     }
     // Controls/WinUIControls.xaml(34,33) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 34, 33)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::ContentPresenter::padding_property()), 34, 33)?;
     rt::invoked(content_presenter_0.try_end_init(), 30, 16)?;
     rt::invoked(visual_layer_manager_0.try_end_init(), 29, 14)?;
     rt::invoked(panel_0.try_end_init(), 27, 12)?;
@@ -16874,7 +19304,7 @@ fn build_controls_winuicontrols_xaml_deferred_10(
     border_1.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&border_1).upcast::<__t::Control>());
     // Controls/WinUIControls.xaml(28,19) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 28, 19)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 28, 19)?;
     // Controls/WinUIControls.xaml(28,12) IsHitTestVisible
     let priority_1 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_1);
@@ -16889,7 +19319,7 @@ fn build_controls_winuicontrols_xaml_deferred_10(
     let priority_2 = __t::BindingPriority::Template;
     panel_1.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_2);
     // Controls/WinUIControls.xaml(29,43) Margin
-    rt::bind_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(::ferroui_controls::Window::window_decoration_margin_property()), 29, 43)?;
+    rt::apply_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), rt::property(::ferroui_controls::Window::window_decoration_margin_property()), || rt::property(__t::Layoutable::margin_property()), 29, 43)?;
     rt::invoked(panel_1.try_end_init(), 29, 12)?;
     // Controls/WinUIControls.xaml(30,12) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(&panel_0);
@@ -16909,7 +19339,7 @@ fn build_controls_winuicontrols_xaml_deferred_10(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 31, 31)?;
     // Controls/WinUIControls.xaml(32,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 32, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 32, 31)?;
     // Controls/WinUIControls.xaml(33,31) Content (setter chosen at run time)
     let priority_3 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -16921,11 +19351,7 @@ fn build_controls_winuicontrols_xaml_deferred_10(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 33, 31)?, priority_3);
     }
     // Controls/WinUIControls.xaml(34,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 34, 31)?;
-    // Controls/WinUIControls.xaml(35,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 35, 31)?;
-    // Controls/WinUIControls.xaml(36,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 36, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R2)?;
     rt::invoked(content_presenter_0.try_end_init(), 31, 14)?;
     rt::invoked(visual_layer_manager_0.try_end_init(), 30, 12)?;
     rt::invoked(panel_0.try_end_init(), 26, 10)?;
@@ -17046,16 +19472,12 @@ fn build_controls_winuicontrols_xaml_deferred_12(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Background")));
     rt::register_name_value(name_scope.as_ref(), "Background", __t::Rc::new(__t::Clone::clone(&border_0)), 23, 19)?;
     // Controls/WinUIControls.xaml(24,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 24, 19)?;
-    // Controls/WinUIControls.xaml(25,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 25, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R3)?;
     // Controls/WinUIControls.xaml(23,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(27,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 27, 19)?;
-    // Controls/WinUIControls.xaml(28,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 28, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R4)?;
     rt::invoked(border_0.try_end_init(), 23, 12)?;
     // Controls/WinUIControls.xaml(29,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -17075,9 +19497,7 @@ fn build_controls_winuicontrols_xaml_deferred_12(
     let priority_1 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/WinUIControls.xaml(33,19) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 33, 19)?;
-    // Controls/WinUIControls.xaml(34,19) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 34, 19)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R5)?;
     // Controls/WinUIControls.xaml(29,12) Opacity
     let priority_2 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Visual::opacity_property(), 0.0_f64, priority_2);
@@ -17101,9 +19521,7 @@ fn build_controls_winuicontrols_xaml_deferred_12(
     let priority_3 = __t::BindingPriority::Template;
     border_2.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_3);
     // Controls/WinUIControls.xaml(40,19) BorderThickness
-    rt::bind_template_binding(border_2.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 40, 19)?;
-    // Controls/WinUIControls.xaml(41,19) CornerRadius
-    rt::bind_template_binding(border_2.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 41, 19)?;
+    rt::bind_template_rows(border_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R6)?;
     // Controls/WinUIControls.xaml(36,12) Opacity
     let priority_4 = __t::BindingPriority::Template;
     border_2.set_value_with_priority(__t::Visual::opacity_property(), 0.0_f64, priority_4);
@@ -17157,9 +19575,7 @@ fn build_controls_winuicontrols_xaml_deferred_14(
     rectangle_0.begin_init();
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(34,20) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 34, 20)?;
-    // Controls/WinUIControls.xaml(35,20) Margin
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 35, 20)?;
+    rt::bind_template_rows(rectangle_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R7)?;
     // Controls/WinUIControls.xaml(36,20) Height (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let provided_2 = rt::provide_static_resource(&context, "MenuFlyoutSeparatorHeight", || rt::property_value(__t::Layoutable::height_property()), 36, 20)?;
@@ -17331,15 +19747,7 @@ fn build_controls_winuicontrols_xaml_deferred_20(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 43, 27)?;
     // Controls/WinUIControls.xaml(44,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 44, 27)?;
-    // Controls/WinUIControls.xaml(45,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 45, 27)?;
-    // Controls/WinUIControls.xaml(46,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 46, 27)?;
-    // Controls/WinUIControls.xaml(47,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 47, 27)?;
-    // Controls/WinUIControls.xaml(48,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 48, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R8)?;
     // Controls/WinUIControls.xaml(49,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -17351,13 +19759,7 @@ fn build_controls_winuicontrols_xaml_deferred_20(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 49, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(50,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 50, 27)?;
-    // Controls/WinUIControls.xaml(51,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 51, 27)?;
-    // Controls/WinUIControls.xaml(52,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 52, 27)?;
-    // Controls/WinUIControls.xaml(53,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 53, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R9)?;
     // Controls/WinUIControls.xaml(43,10) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -17396,18 +19798,12 @@ fn build_controls_winuicontrols_xaml_deferred_22(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Controls/WinUIControls.xaml(27,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 27, 17)?;
-    // Controls/WinUIControls.xaml(28,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 28, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R10)?;
     // Controls/WinUIControls.xaml(27,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(30,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 30, 17)?;
-    // Controls/WinUIControls.xaml(31,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 31, 17)?;
-    // Controls/WinUIControls.xaml(32,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 32, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R11)?;
     // Controls/WinUIControls.xaml(33,12) Child
     // Controls/WinUIControls.xaml(33,12) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -17417,7 +19813,7 @@ fn build_controls_winuicontrols_xaml_deferred_22(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 33, 27)?;
     // Controls/WinUIControls.xaml(34,27) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 34, 27)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 34, 27)?;
     rt::invoked(items_presenter_0.try_end_init(), 33, 12)?;
     rt::invoked(border_0.try_end_init(), 27, 10)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
@@ -17472,17 +19868,7 @@ fn build_controls_winuicontrols_xaml_deferred_24(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 35, 17)?;
     // Controls/WinUIControls.xaml(36,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 36, 17)?;
-    // Controls/WinUIControls.xaml(37,17) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 37, 17)?;
-    // Controls/WinUIControls.xaml(38,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 38, 17)?;
-    // Controls/WinUIControls.xaml(39,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 39, 17)?;
-    // Controls/WinUIControls.xaml(40,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 40, 17)?;
-    // Controls/WinUIControls.xaml(41,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 41, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R12)?;
     // Controls/WinUIControls.xaml(42,12) Child
     // Controls/WinUIControls.xaml(42,12) Grid
     let grid_0 = __t::Grid::new();
@@ -17523,7 +19909,7 @@ fn build_controls_winuicontrols_xaml_deferred_24(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 45, 31)?, priority_1);
     }
     // Controls/WinUIControls.xaml(46,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedContentControl::header_template_property()), 46, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::HeaderedContentControl::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 46, 31)?;
     // Controls/WinUIControls.xaml(43,14) FontWeight
     let value_1 = rt::invoked(__t::FontWeight::__markup_parse(__t::String::from("Normal")), 47, 31)?;
     let priority_2 = __t::BindingPriority::Template;
@@ -17539,9 +19925,7 @@ fn build_controls_winuicontrols_xaml_deferred_24(
     let priority_4 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_4);
     // Controls/WinUIControls.xaml(52,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 52, 31)?;
-    // Controls/WinUIControls.xaml(53,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 53, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R13)?;
     // Controls/WinUIControls.xaml(54,31) IsVisible
     let template_binding_10 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedContentControl::header_property()));
     // Controls/WinUIControls.xaml(54,31) Converter
@@ -17577,11 +19961,7 @@ fn build_controls_winuicontrols_xaml_deferred_24(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 58, 31)?, priority_7);
     }
     // Controls/WinUIControls.xaml(59,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 59, 31)?;
-    // Controls/WinUIControls.xaml(60,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 60, 31)?;
-    // Controls/WinUIControls.xaml(61,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 61, 31)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R14)?;
     // Controls/WinUIControls.xaml(56,14) RecognizesAccessKey
     let priority_8 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_8);
@@ -17707,7 +20087,7 @@ fn build_controls_winuicontrols_xaml_deferred_26(
     // Controls/WinUIControls.xaml(65,19) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "ExpanderHeaderBackground", 65, 19)?;
     // Controls/WinUIControls.xaml(66,19) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 66, 19)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_sizing_property()), || rt::property(__t::Border::background_sizing_property()), 66, 19)?;
     // Controls/WinUIControls.xaml(67,19) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "ExpanderHeaderBorderBrush", 67, 19)?;
     // Controls/WinUIControls.xaml(68,19) BorderThickness
@@ -17722,7 +20102,7 @@ fn build_controls_winuicontrols_xaml_deferred_26(
     let provided_5 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_1);
     rt::bind(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), provided_5, 69, 19)?;
     // Controls/WinUIControls.xaml(70,19) MinHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 70, 19)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::Layoutable::min_height_property()), || rt::property(__t::Layoutable::min_height_property()), 70, 19)?;
     // Controls/WinUIControls.xaml(71,19) Padding (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let provided_7 = rt::provide_static_resource(&context, "ExpanderHeaderPadding", || rt::property_value(__t::Decorator::padding_property()), 71, 19)?;
@@ -17748,7 +20128,7 @@ fn build_controls_winuicontrols_xaml_deferred_26(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 73, 31)?, priority_2);
     }
     // Controls/WinUIControls.xaml(74,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedContentControl::header_template_property()), 74, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::HeaderedContentControl::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 74, 31)?;
     // Controls/WinUIControls.xaml(75,31) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "ExpanderHeaderForeground", 75, 31)?;
     // Controls/WinUIControls.xaml(76,31) HorizontalContentAlignment (setter chosen at run time)
@@ -17782,9 +20162,7 @@ fn build_controls_winuicontrols_xaml_deferred_26(
     let priority_6 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_6);
     // Controls/WinUIControls.xaml(82,19) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 82, 19)?;
-    // Controls/WinUIControls.xaml(83,19) BackgroundSizing
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 83, 19)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R15)?;
     // Controls/WinUIControls.xaml(84,19) CornerRadius
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TemplatedControl::corner_radius_property()));
     context.push_parent(rt::to_value(template_binding_7.clone()));
@@ -17795,13 +20173,7 @@ fn build_controls_winuicontrols_xaml_deferred_26(
     let provided_16 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_7);
     rt::bind(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), provided_16, 84, 19)?;
     // Controls/WinUIControls.xaml(85,19) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 85, 19)?;
-    // Controls/WinUIControls.xaml(86,19) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 86, 19)?;
-    // Controls/WinUIControls.xaml(87,19) MinHeight
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 87, 19)?;
-    // Controls/WinUIControls.xaml(88,19) Padding
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 88, 19)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R16)?;
     // Controls/WinUIControls.xaml(89,14) Child
     // Controls/WinUIControls.xaml(89,14) ContentPresenter
     let content_presenter_1 = __t::ContentPresenter::new();
@@ -17821,11 +20193,7 @@ fn build_controls_winuicontrols_xaml_deferred_26(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_4.clone(), "ContentControl.Content", 1, 90, 31)?, priority_7);
     }
     // Controls/WinUIControls.xaml(91,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 91, 31)?;
-    // Controls/WinUIControls.xaml(92,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 92, 31)?;
-    // Controls/WinUIControls.xaml(93,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 93, 31)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R17)?;
     // Controls/WinUIControls.xaml(89,14) RecognizesAccessKey
     let priority_8 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_8);
@@ -17910,23 +20278,7 @@ fn build_controls_winuicontrols_xaml_deferred_29(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 36, 29)?;
     // Controls/WinUIControls.xaml(37,29) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 37, 29)?;
-    // Controls/WinUIControls.xaml(38,29) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 38, 29)?;
-    // Controls/WinUIControls.xaml(39,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 39, 29)?;
-    // Controls/WinUIControls.xaml(40,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 40, 29)?;
-    // Controls/WinUIControls.xaml(41,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 41, 29)?;
-    // Controls/WinUIControls.xaml(42,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 42, 29)?;
-    // Controls/WinUIControls.xaml(43,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 43, 29)?;
-    // Controls/WinUIControls.xaml(44,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 44, 29)?;
-    // Controls/WinUIControls.xaml(45,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 45, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R18)?;
     rt::invoked(content_presenter_0.try_end_init(), 36, 12)?;
     // Controls/WinUIControls.xaml(46,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
@@ -17938,23 +20290,7 @@ fn build_controls_winuicontrols_xaml_deferred_29(
     content_presenter_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter2")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter2", __t::Rc::new(__t::Clone::clone(&content_presenter_1)), 46, 29)?;
     // Controls/WinUIControls.xaml(47,29) Background
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 47, 29)?;
-    // Controls/WinUIControls.xaml(48,29) BackgroundSizing
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 48, 29)?;
-    // Controls/WinUIControls.xaml(49,29) BorderBrush
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 49, 29)?;
-    // Controls/WinUIControls.xaml(50,29) BorderThickness
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 50, 29)?;
-    // Controls/WinUIControls.xaml(51,29) CornerRadius
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 51, 29)?;
-    // Controls/WinUIControls.xaml(52,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 52, 29)?;
-    // Controls/WinUIControls.xaml(53,29) Padding
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 53, 29)?;
-    // Controls/WinUIControls.xaml(54,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 54, 29)?;
-    // Controls/WinUIControls.xaml(55,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 55, 29)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R19)?;
     rt::invoked(content_presenter_1.try_end_init(), 46, 12)?;
     rt::invoked(panel_0.try_end_init(), 35, 10)?;
     __t::Result::Ok(rt::to_value(panel_0.clone()))
@@ -18178,16 +20514,12 @@ fn build_controls_winuicontrols_xaml_deferred_34(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("SplitterBorder")));
     rt::register_name_value(name_scope.as_ref(), "SplitterBorder", __t::Rc::new(__t::Clone::clone(&border_0)), 36, 17)?;
     // Controls/WinUIControls.xaml(37,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 37, 17)?;
-    // Controls/WinUIControls.xaml(38,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 38, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R20)?;
     // Controls/WinUIControls.xaml(36,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(40,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 40, 17)?;
-    // Controls/WinUIControls.xaml(41,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 41, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R21)?;
     rt::invoked(border_0.try_end_init(), 36, 10)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
 }
@@ -18736,16 +21068,12 @@ fn build_controls_winuicontrols_xaml_deferred_36(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("OuterBorder")));
     rt::register_name_value(name_scope.as_ref(), "OuterBorder", __t::Rc::new(__t::Clone::clone(&border_0)), 74, 19)?;
     // Controls/WinUIControls.xaml(75,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 75, 19)?;
-    // Controls/WinUIControls.xaml(76,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 76, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R22)?;
     // Controls/WinUIControls.xaml(74,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(78,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 78, 19)?;
-    // Controls/WinUIControls.xaml(79,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 79, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R23)?;
     // Controls/WinUIControls.xaml(74,12) IsHitTestVisible
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_1);
@@ -18760,7 +21088,7 @@ fn build_controls_winuicontrols_xaml_deferred_36(
     border_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("InnerBorder")));
     rt::register_name_value(name_scope.as_ref(), "InnerBorder", __t::Rc::new(__t::Clone::clone(&border_1)), 81, 19)?;
     // Controls/WinUIControls.xaml(82,19) Margin
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 82, 19)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 82, 19)?;
     // Controls/WinUIControls.xaml(81,12) BorderThickness
     let priority_2 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64), priority_2);
@@ -18779,7 +21107,7 @@ fn build_controls_winuicontrols_xaml_deferred_36(
     __t::Controls::__markup_Add_0(&children_collection_2, __t::Clone::clone(&panel_1).upcast::<__t::Control>());
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/WinUIControls.xaml(86,18) Margin
-    rt::bind_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 86, 18)?;
+    rt::apply_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 86, 18)?;
     // Controls/WinUIControls.xaml(87,14) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(&panel_1);
     // Controls/WinUIControls.xaml(87,14) ContentPresenter
@@ -18801,17 +21129,11 @@ fn build_controls_winuicontrols_xaml_deferred_36(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 88, 31)?, priority_5);
     }
     // Controls/WinUIControls.xaml(89,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 89, 31)?;
-    // Controls/WinUIControls.xaml(90,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 90, 31)?;
-    // Controls/WinUIControls.xaml(91,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 91, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R24)?;
     // Controls/WinUIControls.xaml(92,31) Padding
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), "CalendarViewDayItemMargin", 92, 31)?;
     // Controls/WinUIControls.xaml(93,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 93, 31)?;
-    // Controls/WinUIControls.xaml(94,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 94, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R25)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 87, 14)?;
     context.pop_parent();
@@ -19217,16 +21539,12 @@ fn build_controls_winuicontrols_xaml_deferred_38(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("OuterBorder")));
     rt::register_name_value(name_scope.as_ref(), "OuterBorder", __t::Rc::new(__t::Clone::clone(&border_0)), 62, 19)?;
     // Controls/WinUIControls.xaml(63,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 63, 19)?;
-    // Controls/WinUIControls.xaml(64,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 64, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R26)?;
     // Controls/WinUIControls.xaml(62,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(66,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 66, 19)?;
-    // Controls/WinUIControls.xaml(67,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 67, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R27)?;
     // Controls/WinUIControls.xaml(62,12) IsHitTestVisible
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_1);
@@ -19239,7 +21557,7 @@ fn build_controls_winuicontrols_xaml_deferred_38(
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&panel_1).upcast::<__t::Control>());
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/WinUIControls.xaml(69,18) Margin
-    rt::bind_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 69, 18)?;
+    rt::apply_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 69, 18)?;
     // Controls/WinUIControls.xaml(70,14) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(&panel_1);
     // Controls/WinUIControls.xaml(70,14) ContentPresenter
@@ -19261,17 +21579,11 @@ fn build_controls_winuicontrols_xaml_deferred_38(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 71, 31)?, priority_2);
     }
     // Controls/WinUIControls.xaml(72,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 72, 31)?;
-    // Controls/WinUIControls.xaml(73,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 73, 31)?;
-    // Controls/WinUIControls.xaml(74,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 74, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R28)?;
     // Controls/WinUIControls.xaml(75,31) Padding
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), "CalendarViewMonthYearItemMargin", 75, 31)?;
     // Controls/WinUIControls.xaml(76,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 76, 31)?;
-    // Controls/WinUIControls.xaml(77,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 77, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R29)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 70, 14)?;
     context.pop_parent();
@@ -19586,14 +21898,12 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     // Controls/WinUIControls.xaml(55,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "InfoBarInformationalSeverityBackgroundBrush", 55, 17)?;
     // Controls/WinUIControls.xaml(56,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 56, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 56, 17)?;
     // Controls/WinUIControls.xaml(53,10) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/WinUIControls.xaml(58,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 58, 17)?;
-    // Controls/WinUIControls.xaml(59,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 59, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R30)?;
     // Controls/WinUIControls.xaml(61,12) Child
     // Controls/WinUIControls.xaml(61,12) Border
     let border_1 = __t::Border::new();
@@ -19604,9 +21914,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     let priority_2 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_2);
     // Controls/WinUIControls.xaml(62,19) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 62, 19)?;
-    // Controls/WinUIControls.xaml(63,19) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 63, 19)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R31)?;
     // Controls/WinUIControls.xaml(64,19) Padding (setter chosen at run time)
     let priority_3 = __t::BindingPriority::Template;
     let provided_6 = rt::provide_static_resource(&context, "InfoBarContentRootPadding", || rt::property_value(__t::Decorator::padding_property()), 64, 19)?;
@@ -19799,7 +22107,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     text_block_2.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Title")));
     rt::register_name_value(name_scope.as_ref(), "Title", __t::Rc::new(__t::Clone::clone(&text_block_2)), 96, 28)?;
     // Controls/WinUIControls.xaml(97,28) Text
-    rt::bind_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::InfoBar::title_property()), 97, 28)?;
+    rt::apply_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::InfoBar::title_property()), || rt::property(__t::TextBlock::text_property()), 97, 28)?;
     // Controls/WinUIControls.xaml(98,28) Foreground
     rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), "InfoBarTitleForeground", 98, 28)?;
     // Controls/WinUIControls.xaml(99,28) HorizontalOrientationMargin (setter chosen at run time)
@@ -19838,7 +22146,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     text_block_3.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Message")));
     rt::register_name_value(name_scope.as_ref(), "Message", __t::Rc::new(__t::Clone::clone(&text_block_3)), 104, 28)?;
     // Controls/WinUIControls.xaml(105,28) Text
-    rt::bind_template_binding(text_block_3.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::InfoBar::message_property()), 105, 28)?;
+    rt::apply_template_binding(text_block_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::InfoBar::message_property()), || rt::property(__t::TextBlock::text_property()), 105, 28)?;
     // Controls/WinUIControls.xaml(106,28) Foreground
     rt::bind_dynamic_resource(&context, text_block_3.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), "InfoBarMessageForeground", 106, 28)?;
     // Controls/WinUIControls.xaml(107,28) HorizontalOrientationMargin (setter chosen at run time)
@@ -19944,7 +22252,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_21.clone(), "ContentControl.Content", 1, 127, 33)?, priority_36);
     }
     // Controls/WinUIControls.xaml(128,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 128, 33)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 128, 33)?;
     // Controls/WinUIControls.xaml(124,16) VerticalAlignment
     let priority_37 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_37);
@@ -19963,7 +22271,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     let priority_38 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_38);
     // Controls/WinUIControls.xaml(132,23) Command
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), rt::property(__t::InfoBar::close_button_command_property()), 132, 23)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::InfoBar::close_button_command_property()), || rt::property(__t::Button::command_property()), 132, 23)?;
     // Controls/WinUIControls.xaml(133,23) CommandParameter (setter chosen at run time)
     let priority_39 = __t::BindingPriority::Template;
     let template_binding_11 = __t::TemplateBinding::__markup_new_1(rt::property(__t::InfoBar::close_button_command_parameter_property()));
@@ -19975,7 +22283,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
         button_0.set_value_with_priority(__t::Button::command_parameter_property(), rt::exact(value_22.clone(), "Button.CommandParameter", 1, 133, 23)?, priority_39);
     }
     // Controls/WinUIControls.xaml(134,23) Theme
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::StyledElement::theme_property(), rt::property(__t::InfoBar::close_button_style_property()), 134, 23)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::InfoBar::close_button_style_property()), || rt::property(__t::StyledElement::theme_property()), 134, 23)?;
     // Controls/WinUIControls.xaml(135,18) Content
     // Controls/WinUIControls.xaml(135,18) Viewbox
     let viewbox_1 = __t::Viewbox::new();
@@ -20140,7 +22448,7 @@ fn build_controls_winuicontrols_xaml_deferred_42(
     let priority_7 = __t::BindingPriority::Template;
     arc_0.set_value_with_priority(__t::Arc::sweep_angle_property(), 360.0_f64, priority_7);
     // Controls/WinUIControls.xaml(63,20) Stroke
-    rt::bind_template_binding(arc_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), rt::property(__t::TemplatedControl::background_property()), 63, 20)?;
+    rt::apply_template_binding(arc_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::stroke_property()), 63, 20)?;
     // Controls/WinUIControls.xaml(58,16) StrokeThickness
     let priority_8 = __t::BindingPriority::Template;
     arc_0.set_value_with_priority(__t::Shape::stroke_thickness_property(), 7.5_f64, priority_8);
@@ -20170,7 +22478,7 @@ fn build_controls_winuicontrols_xaml_deferred_42(
     let priority_13 = __t::BindingPriority::Template;
     arc_1.set_value_with_priority(__t::Arc::sweep_angle_property(), 0.0_f64, priority_13);
     // Controls/WinUIControls.xaml(71,20) Stroke
-    rt::bind_template_binding(arc_1.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), rt::property(__t::TemplatedControl::foreground_property()), 71, 20)?;
+    rt::apply_template_binding(arc_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::stroke_property()), 71, 20)?;
     // Controls/WinUIControls.xaml(66,16) StrokeThickness
     let priority_14 = __t::BindingPriority::Template;
     arc_1.set_value_with_priority(__t::Shape::stroke_thickness_property(), 7.5_f64, priority_14);
@@ -20551,16 +22859,12 @@ fn build_controls_winuicontrols_xaml_deferred_48(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("CellWrapper")));
     rt::register_name_value(name_scope.as_ref(), "CellWrapper", __t::Rc::new(__t::Clone::clone(&border_0)), 31, 17)?;
     // Controls/WinUIControls.xaml(32,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 32, 17)?;
-    // Controls/WinUIControls.xaml(33,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 33, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R32)?;
     // Controls/WinUIControls.xaml(31,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(35,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 35, 17)?;
-    // Controls/WinUIControls.xaml(36,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 36, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R33)?;
     // Controls/WinUIControls.xaml(37,12) Child
     // Controls/WinUIControls.xaml(37,12) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -20580,11 +22884,7 @@ fn build_controls_winuicontrols_xaml_deferred_48(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 38, 29)?, priority_1);
     }
     // Controls/WinUIControls.xaml(39,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 39, 29)?;
-    // Controls/WinUIControls.xaml(40,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 40, 29)?;
-    // Controls/WinUIControls.xaml(41,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 41, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R34)?;
     rt::invoked(content_presenter_0.try_end_init(), 37, 12)?;
     rt::invoked(border_0.try_end_init(), 31, 10)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
@@ -20810,17 +23110,7 @@ fn build_controls_winuicontrols_xaml_deferred_50(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_RootBorder")));
     rt::register_name_value(name_scope.as_ref(), "PART_RootBorder", __t::Rc::new(__t::Clone::clone(&border_0)), 43, 19)?;
     // Controls/WinUIControls.xaml(44,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 44, 19)?;
-    // Controls/WinUIControls.xaml(45,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 45, 19)?;
-    // Controls/WinUIControls.xaml(46,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 46, 19)?;
-    // Controls/WinUIControls.xaml(47,19) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 47, 19)?;
-    // Controls/WinUIControls.xaml(48,19) HorizontalAlignment
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 48, 19)?;
-    // Controls/WinUIControls.xaml(49,19) VerticalAlignment
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 49, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R35)?;
     // Controls/WinUIControls.xaml(50,14) Child
     // Controls/WinUIControls.xaml(50,14) Panel
     let panel_1 = __t::Panel::new();
@@ -20918,11 +23208,7 @@ fn build_controls_winuicontrols_xaml_deferred_50(
     border_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_GridLineBorder")));
     rt::register_name_value(name_scope.as_ref(), "PART_GridLineBorder", __t::Rc::new(__t::Clone::clone(&border_1)), 78, 19)?;
     // Controls/WinUIControls.xaml(79,19) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 79, 19)?;
-    // Controls/WinUIControls.xaml(80,19) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 80, 19)?;
-    // Controls/WinUIControls.xaml(81,19) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 81, 19)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R36)?;
     // Controls/WinUIControls.xaml(78,12) IsHitTestVisible
     let priority_11 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_11);
@@ -21657,7 +23943,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 78, 17)?;
     // Controls/WinUIControls.xaml(79,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 79, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Decorator::padding_property()), 79, 17)?;
     // Controls/WinUIControls.xaml(78,10) UseLayoutRounding
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::use_layout_rounding_property(), __t::Clone::clone(&false), priority_0);
@@ -21922,11 +24208,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     let priority_34 = __t::BindingPriority::Template;
     border_4.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_34);
     // Controls/WinUIControls.xaml(135,21) Background
-    rt::bind_template_binding(border_4.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 135, 21)?;
-    // Controls/WinUIControls.xaml(136,21) BorderBrush
-    rt::bind_template_binding(border_4.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 136, 21)?;
-    // Controls/WinUIControls.xaml(137,21) BorderThickness
-    rt::bind_template_binding(border_4.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 137, 21)?;
+    rt::bind_template_rows(border_4.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R37)?;
     // Controls/WinUIControls.xaml(138,21) Padding (setter chosen at run time)
     let priority_35 = __t::BindingPriority::Template;
     let provided_14 = rt::provide_static_resource(&context, "TabViewItemHeaderPaddingWithoutCloseButton", || rt::property_value(__t::Decorator::padding_property()), 138, 21)?;
@@ -22006,7 +24288,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_6.clone(), "ContentControl.Content", 1, 149, 37)?, priority_37);
     }
     // Controls/WinUIControls.xaml(150,37) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::TabItem::icon_template_property()), 150, 37)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TabItem::icon_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 150, 37)?;
     // Controls/WinUIControls.xaml(151,37) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "TabViewItemIconForeground", 151, 37)?;
     // Controls/WinUIControls.xaml(154,24) Styles
@@ -22046,9 +24328,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     let priority_38 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_38);
     // Controls/WinUIControls.xaml(164,35) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 164, 35)?;
-    // Controls/WinUIControls.xaml(165,35) VerticalAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 165, 35)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R38)?;
     // Controls/WinUIControls.xaml(166,35) Content (setter chosen at run time)
     let priority_39 = __t::BindingPriority::Template;
     let template_binding_11 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedContentControl::header_property()));
@@ -22060,9 +24340,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_7.clone(), "ContentControl.Content", 1, 166, 35)?, priority_39);
     }
     // Controls/WinUIControls.xaml(167,35) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedContentControl::header_template_property()), 167, 35)?;
-    // Controls/WinUIControls.xaml(168,35) FontWeight
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 168, 35)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R39)?;
     // Controls/WinUIControls.xaml(169,35) FontSize
     rt::bind_dynamic_resource(&context, content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_size_property(), "TabViewItemHeaderFontSize", 169, 35)?;
     // Controls/WinUIControls.xaml(170,35) Foreground
@@ -22100,9 +24378,7 @@ fn build_controls_winuicontrols_xaml_deferred_53(
     // Controls/WinUIControls.xaml(272,19) MinHeight
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 272, 19)?;
     // Controls/WinUIControls.xaml(273,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 273, 19)?;
-    // Controls/WinUIControls.xaml(274,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 274, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R40)?;
     // Controls/WinUIControls.xaml(275,19) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "NavigationViewItemButtonMargin", 275, 19)?;
     // Controls/WinUIControls.xaml(276,14) Child
@@ -22244,9 +24520,7 @@ fn build_controls_winuicontrols_xaml_deferred_53(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 301, 39)?, priority_9);
     }
     // Controls/WinUIControls.xaml(302,39) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::TabItem::icon_template_property()), 302, 39)?;
-    // Controls/WinUIControls.xaml(303,39) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 303, 39)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R41)?;
     // Controls/WinUIControls.xaml(304,39) Background
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), "NavigationViewItemIconBackground", 304, 39)?;
     // Controls/WinUIControls.xaml(307,26) Styles
@@ -22320,15 +24594,7 @@ fn build_controls_winuicontrols_xaml_deferred_53(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_5.clone(), "ContentControl.Content", 1, 322, 35)?, priority_12);
     }
     // Controls/WinUIControls.xaml(323,35) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedContentControl::header_template_property()), 323, 35)?;
-    // Controls/WinUIControls.xaml(324,35) Foreground
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 324, 35)?;
-    // Controls/WinUIControls.xaml(325,35) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 325, 35)?;
-    // Controls/WinUIControls.xaml(326,35) VerticalAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 326, 35)?;
-    // Controls/WinUIControls.xaml(327,35) Padding
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 327, 35)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R42)?;
     // Controls/WinUIControls.xaml(319,18) RecognizesAccessKey
     let priority_13 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_13);
@@ -22360,9 +24626,7 @@ fn build_controls_winuicontrols_xaml_deferred_54(
     // Controls/WinUIControls.xaml(401,19) MinHeight
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 401, 19)?;
     // Controls/WinUIControls.xaml(402,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 402, 19)?;
-    // Controls/WinUIControls.xaml(403,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 403, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R43)?;
     // Controls/WinUIControls.xaml(404,19) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "NavigationViewItemButtonMargin", 404, 19)?;
     // Controls/WinUIControls.xaml(405,14) Child
@@ -22504,9 +24768,7 @@ fn build_controls_winuicontrols_xaml_deferred_54(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 430, 39)?, priority_9);
     }
     // Controls/WinUIControls.xaml(431,39) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::TabItem::icon_template_property()), 431, 39)?;
-    // Controls/WinUIControls.xaml(432,39) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 432, 39)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R44)?;
     // Controls/WinUIControls.xaml(433,39) Background
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), "NavigationViewItemIconBackground", 433, 39)?;
     // Controls/WinUIControls.xaml(436,26) Styles
@@ -22580,15 +24842,7 @@ fn build_controls_winuicontrols_xaml_deferred_54(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_5.clone(), "ContentControl.Content", 1, 451, 35)?, priority_12);
     }
     // Controls/WinUIControls.xaml(452,35) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedContentControl::header_template_property()), 452, 35)?;
-    // Controls/WinUIControls.xaml(453,35) Foreground
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 453, 35)?;
-    // Controls/WinUIControls.xaml(454,35) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 454, 35)?;
-    // Controls/WinUIControls.xaml(455,35) VerticalAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 455, 35)?;
-    // Controls/WinUIControls.xaml(456,35) Padding
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 456, 35)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R45)?;
     // Controls/WinUIControls.xaml(448,18) RecognizesAccessKey
     let priority_13 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_13);
@@ -22689,18 +24943,12 @@ fn build_controls_winuicontrols_xaml_deferred_56(
     content_presenter_2.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_2)), 38, 29)?;
     // Controls/WinUIControls.xaml(39,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentPage::horizontal_content_alignment_property()), 39, 29)?;
-    // Controls/WinUIControls.xaml(40,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentPage::vertical_content_alignment_property()), 40, 29)?;
-    // Controls/WinUIControls.xaml(41,29) Background
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 41, 29)?;
-    // Controls/WinUIControls.xaml(42,29) BorderBrush
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 42, 29)?;
+    rt::bind_template_rows(content_presenter_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R46)?;
     // Controls/WinUIControls.xaml(38,12) BackgroundSizing
     let priority_6 = __t::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_6);
     // Controls/WinUIControls.xaml(44,29) BorderThickness
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 44, 29)?;
+    rt::apply_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 44, 29)?;
     // Controls/WinUIControls.xaml(45,29) Content (setter chosen at run time)
     let priority_7 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentPage::content_property()));
@@ -22712,9 +24960,7 @@ fn build_controls_winuicontrols_xaml_deferred_56(
         content_presenter_2.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 45, 29)?, priority_7);
     }
     // Controls/WinUIControls.xaml(46,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentPage::content_template_property()), 46, 29)?;
-    // Controls/WinUIControls.xaml(47,29) CornerRadius
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 47, 29)?;
+    rt::bind_template_rows(content_presenter_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R47)?;
     rt::invoked(content_presenter_2.try_end_init(), 38, 12)?;
     rt::invoked(dock_panel_0.try_end_init(), 27, 10)?;
     __t::Result::Ok(rt::to_value(dock_panel_0.clone()))
@@ -22770,21 +25016,7 @@ fn build_controls_winuicontrols_xaml_deferred_58(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 34, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(35,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 35, 27)?;
-    // Controls/WinUIControls.xaml(36,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 36, 27)?;
-    // Controls/WinUIControls.xaml(37,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 37, 27)?;
-    // Controls/WinUIControls.xaml(38,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 38, 27)?;
-    // Controls/WinUIControls.xaml(39,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 39, 27)?;
-    // Controls/WinUIControls.xaml(40,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 40, 27)?;
-    // Controls/WinUIControls.xaml(41,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 41, 27)?;
-    // Controls/WinUIControls.xaml(42,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 42, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R48)?;
     rt::invoked(content_presenter_0.try_end_init(), 33, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
 }
@@ -22828,13 +25060,7 @@ fn build_controls_winuicontrols_xaml_deferred_60(
     carousel_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_Carousel")));
     rt::register_name_value(name_scope.as_ref(), "PART_Carousel", __t::Rc::new(__t::Clone::clone(&carousel_0)), 33, 19)?;
     // Controls/WinUIControls.xaml(34,19) Background
-    rt::bind_template_binding(carousel_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 34, 19)?;
-    // Controls/WinUIControls.xaml(35,19) ItemTemplate
-    rt::bind_template_binding(carousel_0.upcast_ref::<__t::FerroObject>(), __t::ItemsControl::item_template_property(), rt::property(::ferroui_controls::MultiPage::page_template_property()), 35, 19)?;
-    // Controls/WinUIControls.xaml(36,19) PageTransition
-    rt::bind_template_binding(carousel_0.upcast_ref::<__t::FerroObject>(), __t::Carousel::page_transition_property(), rt::property(__t::CarouselPage::page_transition_property()), 36, 19)?;
-    // Controls/WinUIControls.xaml(37,19) ItemsPanel
-    rt::bind_template_binding(carousel_0.upcast_ref::<__t::FerroObject>(), __t::ItemsControl::items_panel_property(), rt::property(__t::CarouselPage::items_panel_property()), 37, 19)?;
+    rt::bind_template_rows(carousel_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R49)?;
     // Controls/WinUIControls.xaml(33,10) HorizontalAlignment
     let priority_0 = __t::BindingPriority::Template;
     carousel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
@@ -23008,20 +25234,12 @@ fn build_controls_winuicontrols_xaml_deferred_62(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("BorderElement")));
     rt::register_name_value(name_scope.as_ref(), "BorderElement", __t::Rc::new(__t::Clone::clone(&border_0)), 54, 21)?;
     // Controls/WinUIControls.xaml(55,21) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 55, 21)?;
-    // Controls/WinUIControls.xaml(56,21) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 56, 21)?;
-    // Controls/WinUIControls.xaml(57,21) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 57, 21)?;
-    // Controls/WinUIControls.xaml(58,21) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 58, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R50)?;
     // Controls/WinUIControls.xaml(54,14) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(60,21) MinWidth
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 60, 21)?;
-    // Controls/WinUIControls.xaml(61,21) MinHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 61, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R51)?;
     rt::invoked(border_0.try_end_init(), 54, 14)?;
     // Controls/WinUIControls.xaml(62,14) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -23031,7 +25249,7 @@ fn build_controls_winuicontrols_xaml_deferred_62(
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&dock_panel_0).upcast::<__t::Control>());
     context.push_parent(rt::to_value(dock_panel_0.clone()));
     // Controls/WinUIControls.xaml(62,24) Margin
-    rt::bind_template_binding(dock_panel_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 62, 24)?;
+    rt::apply_template_binding(dock_panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 62, 24)?;
     // Controls/WinUIControls.xaml(63,16) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(63,16) StackPanel
@@ -23049,7 +25267,7 @@ fn build_controls_winuicontrols_xaml_deferred_62(
     let priority_2 = __t::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(__t::StackPanel::orientation_property(), __t::Orientation::Horizontal, priority_2);
     // Controls/WinUIControls.xaml(66,27) IsVisible
-    rt::bind_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::ButtonSpinner::show_button_spinner_property()), 66, 27)?;
+    rt::apply_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ButtonSpinner::show_button_spinner_property()), || rt::property(__t::Visual::is_visible_property()), 66, 27)?;
     // Controls/WinUIControls.xaml(67,18) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(67,18) RepeatButton
@@ -23069,7 +25287,7 @@ fn build_controls_winuicontrols_xaml_deferred_62(
     let priority_4 = __t::BindingPriority::Template;
     repeat_button_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), priority_4);
     // Controls/WinUIControls.xaml(70,31) CornerRadius
-    rt::bind_template_binding(repeat_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 70, 31)?;
+    rt::apply_template_binding(repeat_button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 70, 31)?;
     // Controls/WinUIControls.xaml(71,20) Content
     // Controls/WinUIControls.xaml(71,20) Path
     let path_0 = __t::Path::new();
@@ -23120,7 +25338,7 @@ fn build_controls_winuicontrols_xaml_deferred_62(
     let priority_11 = __t::BindingPriority::Template;
     repeat_button_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), priority_11);
     // Controls/WinUIControls.xaml(81,31) CornerRadius
-    rt::bind_template_binding(repeat_button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 81, 31)?;
+    rt::apply_template_binding(repeat_button_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 81, 31)?;
     // Controls/WinUIControls.xaml(82,20) Content
     // Controls/WinUIControls.xaml(82,20) Path
     let path_1 = __t::Path::new();
@@ -23174,15 +25392,7 @@ fn build_controls_winuicontrols_xaml_deferred_62(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_4.clone(), "ContentControl.Content", 1, 91, 33)?, priority_17);
     }
     // Controls/WinUIControls.xaml(92,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 92, 33)?;
-    // Controls/WinUIControls.xaml(93,33) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 93, 33)?;
-    // Controls/WinUIControls.xaml(94,33) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 94, 33)?;
-    // Controls/WinUIControls.xaml(95,33) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 95, 33)?;
-    // Controls/WinUIControls.xaml(96,33) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 96, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R52)?;
     rt::invoked(content_presenter_0.try_end_init(), 90, 16)?;
     context.pop_parent();
     rt::invoked(dock_panel_0.try_end_init(), 62, 14)?;
@@ -23366,7 +25576,7 @@ fn build_controls_winuicontrols_xaml_deferred_65(
     grid_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&grid_0)), 78, 15)?;
     // Controls/WinUIControls.xaml(78,35) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 78, 35)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 78, 35)?;
     // Controls/WinUIControls.xaml(79,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(79,12) StackPanel
@@ -23441,7 +25651,7 @@ fn build_controls_winuicontrols_xaml_deferred_65(
     let priority_10 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::TextBlock::font_size_property(), 12.0_f64, priority_10);
     // Controls/WinUIControls.xaml(92,24) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 92, 24)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TextBlock::foreground_property()), 92, 24)?;
     // Controls/WinUIControls.xaml(87,14) VerticalAlignment
     let priority_11 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_11);
@@ -23449,7 +25659,7 @@ fn build_controls_winuicontrols_xaml_deferred_65(
     let priority_12 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_12);
     // Controls/WinUIControls.xaml(95,24) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(::ferroui_controls::RatingControl::caption_property()), 95, 24)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(::ferroui_controls::RatingControl::caption_property()), || rt::property(__t::TextBlock::text_property()), 95, 24)?;
     context.pop_parent();
     rt::invoked(text_block_0.try_end_init(), 87, 14)?;
     context.pop_parent();
@@ -23634,7 +25844,7 @@ fn build_controls_winuicontrols_xaml_deferred_68(
     let priority_0 = __t::BindingPriority::Template;
     grid_0.set_value_with_priority(__t::Layoutable::min_height_property(), 80.0_f64, priority_0);
     // Controls/WinUIControls.xaml(46,49) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 46, 49)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 46, 49)?;
     rt::invoked(grid_0.try_end_init(), 46, 10)?;
     __t::Result::Ok(rt::to_value(grid_0.clone()))
 }
@@ -23733,13 +25943,6 @@ fn build_controls_winuicontrols_xaml_deferred_70(
 fn build_controls_winuicontrols_xaml_deferred_71(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    __build_controls_winuicontrols_xaml_factory_shape_71(service_provider)
-}
-
-#[inline(never)]
-fn __build_controls_winuicontrols_xaml_factory_shape_71(
-    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
-) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(63,10) Border
@@ -23759,7 +25962,7 @@ fn __build_controls_winuicontrols_xaml_factory_shape_71(
     let value_1: __t::MarkupValue = rt::to_value(provided_0);
     rt::bind_or_set_priority(border_0.upcast_ref::<__t::FerroObject>(), || __t::Visual::shadow_property(), value_1, priority_0, || rt::class_handle(<__t::Shadow as __t::StaticType>::TYPE), true, "Visual.Shadow", 64, 38)?;
     // Controls/WinUIControls.xaml(65,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 65, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 65, 17)?;
     // Controls/WinUIControls.xaml(66,12) Child
     // Controls/WinUIControls.xaml(66,12) Border
     let border_1 = __t::Border::new();
@@ -23767,13 +25970,7 @@ fn __build_controls_winuicontrols_xaml_factory_shape_71(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&border_1).upcast::<__t::Control>()));
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(66,19) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 66, 19)?;
-    // Controls/WinUIControls.xaml(67,19) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 67, 19)?;
-    // Controls/WinUIControls.xaml(68,19) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 68, 19)?;
-    // Controls/WinUIControls.xaml(69,19) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 69, 19)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R53)?;
     // Controls/WinUIControls.xaml(66,12) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
@@ -23792,11 +25989,7 @@ fn __build_controls_winuicontrols_xaml_factory_shape_71(
     let value_2: __t::MarkupValue = rt::to_value(provided_6);
     rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_2, priority_2, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 72, 27)?;
     // Controls/WinUIControls.xaml(73,27) Margin
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 73, 27)?;
-    // Controls/WinUIControls.xaml(74,27) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 74, 27)?;
-    // Controls/WinUIControls.xaml(75,27) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 75, 27)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R54)?;
     // Controls/WinUIControls.xaml(76,16) Content
     // Controls/WinUIControls.xaml(76,16) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -23806,7 +25999,7 @@ fn __build_controls_winuicontrols_xaml_factory_shape_71(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 76, 31)?;
     // Controls/WinUIControls.xaml(77,31) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 77, 31)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 77, 31)?;
     // Controls/WinUIControls.xaml(76,16) TabNavigation
     let priority_3 = __t::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(__t::KeyboardNavigation::tab_navigation_property(), __t::KeyboardNavigationMode::Continue, priority_3);
@@ -24338,15 +26531,7 @@ fn build_controls_winuicontrols_xaml_deferred_86(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 63, 27)?;
     // Controls/WinUIControls.xaml(64,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 64, 27)?;
-    // Controls/WinUIControls.xaml(65,27) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 65, 27)?;
-    // Controls/WinUIControls.xaml(66,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 66, 27)?;
-    // Controls/WinUIControls.xaml(67,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 67, 27)?;
-    // Controls/WinUIControls.xaml(68,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 68, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R55)?;
     // Controls/WinUIControls.xaml(69,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -24358,15 +26543,7 @@ fn build_controls_winuicontrols_xaml_deferred_86(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 69, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(70,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 70, 27)?;
-    // Controls/WinUIControls.xaml(71,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 71, 27)?;
-    // Controls/WinUIControls.xaml(72,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 72, 27)?;
-    // Controls/WinUIControls.xaml(73,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 73, 27)?;
-    // Controls/WinUIControls.xaml(74,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 74, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R56)?;
     // Controls/WinUIControls.xaml(63,10) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -24488,15 +26665,7 @@ fn build_controls_winuicontrols_xaml_deferred_88(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 141, 27)?;
     // Controls/WinUIControls.xaml(142,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 142, 27)?;
-    // Controls/WinUIControls.xaml(143,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 143, 27)?;
-    // Controls/WinUIControls.xaml(144,27) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 144, 27)?;
-    // Controls/WinUIControls.xaml(145,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 145, 27)?;
-    // Controls/WinUIControls.xaml(146,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 146, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R57)?;
     // Controls/WinUIControls.xaml(147,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -24508,15 +26677,7 @@ fn build_controls_winuicontrols_xaml_deferred_88(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 147, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(148,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 148, 27)?;
-    // Controls/WinUIControls.xaml(149,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 149, 27)?;
-    // Controls/WinUIControls.xaml(150,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 150, 27)?;
-    // Controls/WinUIControls.xaml(151,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 151, 27)?;
-    // Controls/WinUIControls.xaml(152,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 152, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R58)?;
     // Controls/WinUIControls.xaml(141,10) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -24733,9 +26894,7 @@ fn build_controls_winuicontrols_xaml_deferred_91(
     context.set_intermediate_root_object(rt::to_value(panel_0.clone()));
     panel_0.begin_init();
     // Controls/WinUIControls.xaml(227,16) Margin
-    rt::bind_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 227, 16)?;
-    // Controls/WinUIControls.xaml(227,51) Background
-    rt::bind_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 227, 51)?;
+    rt::bind_template_rows(panel_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R59)?;
     // Controls/WinUIControls.xaml(228,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(228,12) ContentPresenter
@@ -24756,11 +26915,7 @@ fn build_controls_winuicontrols_xaml_deferred_91(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 229, 29)?, priority_0);
     }
     // Controls/WinUIControls.xaml(230,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 230, 29)?;
-    // Controls/WinUIControls.xaml(231,29) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 231, 29)?;
-    // Controls/WinUIControls.xaml(232,29) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 232, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R60)?;
     // Controls/WinUIControls.xaml(228,12) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -24938,15 +27093,7 @@ fn build_controls_winuicontrols_xaml_deferred_95(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 53, 27)?;
     // Controls/WinUIControls.xaml(54,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 54, 27)?;
-    // Controls/WinUIControls.xaml(55,27) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 55, 27)?;
-    // Controls/WinUIControls.xaml(56,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 56, 27)?;
-    // Controls/WinUIControls.xaml(57,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 57, 27)?;
-    // Controls/WinUIControls.xaml(58,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 58, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R61)?;
     // Controls/WinUIControls.xaml(59,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -24958,15 +27105,7 @@ fn build_controls_winuicontrols_xaml_deferred_95(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 59, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(60,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 60, 27)?;
-    // Controls/WinUIControls.xaml(61,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 61, 27)?;
-    // Controls/WinUIControls.xaml(62,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 62, 27)?;
-    // Controls/WinUIControls.xaml(63,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 63, 27)?;
-    // Controls/WinUIControls.xaml(64,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 64, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R62)?;
     // Controls/WinUIControls.xaml(53,10) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -25364,15 +27503,7 @@ fn build_controls_winuicontrols_xaml_deferred_99(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 58, 27)?;
     // Controls/WinUIControls.xaml(59,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 59, 27)?;
-    // Controls/WinUIControls.xaml(60,27) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 60, 27)?;
-    // Controls/WinUIControls.xaml(61,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 61, 27)?;
-    // Controls/WinUIControls.xaml(62,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 62, 27)?;
-    // Controls/WinUIControls.xaml(63,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 63, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R63)?;
     // Controls/WinUIControls.xaml(64,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -25384,15 +27515,7 @@ fn build_controls_winuicontrols_xaml_deferred_99(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 64, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(65,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 65, 27)?;
-    // Controls/WinUIControls.xaml(66,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 66, 27)?;
-    // Controls/WinUIControls.xaml(67,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 67, 27)?;
-    // Controls/WinUIControls.xaml(68,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 68, 27)?;
-    // Controls/WinUIControls.xaml(69,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 69, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R64)?;
     // Controls/WinUIControls.xaml(58,10) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -25607,9 +27730,7 @@ fn build_controls_winuicontrols_xaml_deferred_103(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 63, 17)?;
     // Controls/WinUIControls.xaml(64,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 64, 17)?;
-    // Controls/WinUIControls.xaml(65,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 65, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R65)?;
     // Controls/WinUIControls.xaml(66,12) Child
     // Controls/WinUIControls.xaml(66,12) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -25619,11 +27740,7 @@ fn build_controls_winuicontrols_xaml_deferred_103(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 66, 29)?;
     // Controls/WinUIControls.xaml(67,29) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 67, 29)?;
-    // Controls/WinUIControls.xaml(68,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 68, 29)?;
-    // Controls/WinUIControls.xaml(69,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 69, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R66)?;
     // Controls/WinUIControls.xaml(70,29) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -25635,15 +27752,7 @@ fn build_controls_winuicontrols_xaml_deferred_103(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 70, 29)?, priority_0);
     }
     // Controls/WinUIControls.xaml(71,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 71, 29)?;
-    // Controls/WinUIControls.xaml(72,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 72, 29)?;
-    // Controls/WinUIControls.xaml(73,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 73, 29)?;
-    // Controls/WinUIControls.xaml(74,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 74, 29)?;
-    // Controls/WinUIControls.xaml(75,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 75, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R67)?;
     // Controls/WinUIControls.xaml(66,12) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -25829,9 +27938,7 @@ fn build_controls_winuicontrols_xaml_deferred_106(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 134, 17)?;
     // Controls/WinUIControls.xaml(135,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 135, 17)?;
-    // Controls/WinUIControls.xaml(136,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 136, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R68)?;
     // Controls/WinUIControls.xaml(137,12) Child
     // Controls/WinUIControls.xaml(137,12) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -25841,11 +27948,7 @@ fn build_controls_winuicontrols_xaml_deferred_106(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 137, 29)?;
     // Controls/WinUIControls.xaml(138,29) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 138, 29)?;
-    // Controls/WinUIControls.xaml(139,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 139, 29)?;
-    // Controls/WinUIControls.xaml(140,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 140, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R69)?;
     // Controls/WinUIControls.xaml(141,29) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -25857,15 +27960,7 @@ fn build_controls_winuicontrols_xaml_deferred_106(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 141, 29)?, priority_0);
     }
     // Controls/WinUIControls.xaml(142,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 142, 29)?;
-    // Controls/WinUIControls.xaml(143,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 143, 29)?;
-    // Controls/WinUIControls.xaml(144,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 144, 29)?;
-    // Controls/WinUIControls.xaml(145,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 145, 29)?;
-    // Controls/WinUIControls.xaml(146,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 146, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R70)?;
     // Controls/WinUIControls.xaml(137,12) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -26247,9 +28342,7 @@ fn build_controls_winuicontrols_xaml_deferred_109(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 205, 17)?;
     // Controls/WinUIControls.xaml(206,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 206, 17)?;
-    // Controls/WinUIControls.xaml(207,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 207, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R71)?;
     // Controls/WinUIControls.xaml(208,12) Child
     // Controls/WinUIControls.xaml(208,12) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -26259,11 +28352,7 @@ fn build_controls_winuicontrols_xaml_deferred_109(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 208, 29)?;
     // Controls/WinUIControls.xaml(209,29) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 209, 29)?;
-    // Controls/WinUIControls.xaml(210,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 210, 29)?;
-    // Controls/WinUIControls.xaml(211,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 211, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R72)?;
     // Controls/WinUIControls.xaml(212,29) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -26275,15 +28364,7 @@ fn build_controls_winuicontrols_xaml_deferred_109(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 212, 29)?, priority_0);
     }
     // Controls/WinUIControls.xaml(213,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 213, 29)?;
-    // Controls/WinUIControls.xaml(214,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 214, 29)?;
-    // Controls/WinUIControls.xaml(215,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 215, 29)?;
-    // Controls/WinUIControls.xaml(216,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 216, 29)?;
-    // Controls/WinUIControls.xaml(217,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 217, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R73)?;
     // Controls/WinUIControls.xaml(208,12) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -26439,13 +28520,7 @@ fn build_controls_winuicontrols_xaml_deferred_112(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 55, 27)?;
     // Controls/WinUIControls.xaml(56,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 56, 27)?;
-    // Controls/WinUIControls.xaml(57,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 57, 27)?;
-    // Controls/WinUIControls.xaml(58,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 58, 27)?;
-    // Controls/WinUIControls.xaml(59,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 59, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R74)?;
     // Controls/WinUIControls.xaml(60,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -26457,15 +28532,7 @@ fn build_controls_winuicontrols_xaml_deferred_112(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 60, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(61,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 61, 27)?;
-    // Controls/WinUIControls.xaml(62,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 62, 27)?;
-    // Controls/WinUIControls.xaml(63,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 63, 27)?;
-    // Controls/WinUIControls.xaml(64,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 64, 27)?;
-    // Controls/WinUIControls.xaml(65,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 65, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R75)?;
     // Controls/WinUIControls.xaml(55,10) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -27212,16 +29279,12 @@ fn build_controls_winuicontrols_xaml_deferred_116(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 62, 17)?;
     // Controls/WinUIControls.xaml(63,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 63, 17)?;
-    // Controls/WinUIControls.xaml(64,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 64, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R76)?;
     // Controls/WinUIControls.xaml(62,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(66,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 66, 17)?;
-    // Controls/WinUIControls.xaml(67,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 67, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R77)?;
     // Controls/WinUIControls.xaml(68,12) Child
     // Controls/WinUIControls.xaml(68,12) Grid
     let grid_0 = __t::Grid::new();
@@ -27368,7 +29431,7 @@ fn build_controls_winuicontrols_xaml_deferred_116(
     let priority_17 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_17);
     // Controls/WinUIControls.xaml(96,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 96, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 96, 31)?;
     // Controls/WinUIControls.xaml(97,31) Content (setter chosen at run time)
     let priority_18 = __t::BindingPriority::Template;
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -27380,13 +29443,7 @@ fn build_controls_winuicontrols_xaml_deferred_116(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_6.clone(), "ContentControl.Content", 1, 97, 31)?, priority_18);
     }
     // Controls/WinUIControls.xaml(98,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 98, 31)?;
-    // Controls/WinUIControls.xaml(99,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 99, 31)?;
-    // Controls/WinUIControls.xaml(100,31) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 100, 31)?;
-    // Controls/WinUIControls.xaml(101,31) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 101, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R78)?;
     // Controls/WinUIControls.xaml(94,14) TextWrapping
     let priority_19 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::text_wrapping_property(), __t::TextWrapping::Wrap, priority_19);
@@ -27792,16 +29849,12 @@ fn build_controls_winuicontrols_xaml_deferred_120(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 61, 17)?;
     // Controls/WinUIControls.xaml(62,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 62, 17)?;
-    // Controls/WinUIControls.xaml(63,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 63, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R79)?;
     // Controls/WinUIControls.xaml(61,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(65,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 65, 17)?;
-    // Controls/WinUIControls.xaml(66,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 66, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R80)?;
     // Controls/WinUIControls.xaml(67,12) Child
     // Controls/WinUIControls.xaml(67,12) Grid
     let grid_0 = __t::Grid::new();
@@ -28029,15 +30082,7 @@ fn build_controls_winuicontrols_xaml_deferred_120(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_8.clone(), "ContentControl.Content", 1, 119, 31)?, priority_21);
     }
     // Controls/WinUIControls.xaml(120,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 120, 31)?;
-    // Controls/WinUIControls.xaml(121,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 121, 31)?;
-    // Controls/WinUIControls.xaml(122,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 122, 31)?;
-    // Controls/WinUIControls.xaml(123,31) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 123, 31)?;
-    // Controls/WinUIControls.xaml(124,31) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 124, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R81)?;
     // Controls/WinUIControls.xaml(117,14) TextWrapping
     let priority_22 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::text_wrapping_property(), __t::TextWrapping::Wrap, priority_22);
@@ -28610,9 +30655,7 @@ fn build_controls_winuicontrols_xaml_deferred_134(
     rectangle_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ThumbVisual")));
     rt::register_name_value(name_scope.as_ref(), "ThumbVisual", __t::Rc::new(__t::Clone::clone(&rectangle_0)), 198, 20)?;
     // Controls/WinUIControls.xaml(199,20) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 199, 20)?;
-    // Controls/WinUIControls.xaml(200,20) Stroke
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), rt::property(__t::TemplatedControl::border_brush_property()), 200, 20)?;
+    rt::bind_template_rows(rectangle_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R82)?;
     // Controls/WinUIControls.xaml(201,20) StrokeThickness
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_thickness_property(), "ScrollBarThumbStrokeThickness", 201, 20)?;
     // Controls/WinUIControls.xaml(202,20) RadiusX
@@ -28701,9 +30744,7 @@ fn build_controls_winuicontrols_xaml_deferred_136(
     rectangle_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ThumbVisual")));
     rt::register_name_value(name_scope.as_ref(), "ThumbVisual", __t::Rc::new(__t::Clone::clone(&rectangle_0)), 223, 20)?;
     // Controls/WinUIControls.xaml(224,20) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 224, 20)?;
-    // Controls/WinUIControls.xaml(225,20) Stroke
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), rt::property(__t::TemplatedControl::border_brush_property()), 225, 20)?;
+    rt::bind_template_rows(rectangle_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R83)?;
     // Controls/WinUIControls.xaml(226,20) StrokeThickness
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_thickness_property(), "ScrollBarThumbStrokeThickness", 226, 20)?;
     // Controls/WinUIControls.xaml(227,20) RadiusX
@@ -28973,9 +31014,7 @@ fn build_controls_winuicontrols_xaml_deferred_138(
     border_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("VerticalRoot")));
     rt::register_name_value(name_scope.as_ref(), "VerticalRoot", __t::Rc::new(__t::Clone::clone(&border_1)), 259, 21)?;
     // Controls/WinUIControls.xaml(260,21) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 260, 21)?;
-    // Controls/WinUIControls.xaml(261,21) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 261, 21)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R84)?;
     // Controls/WinUIControls.xaml(259,14) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
@@ -29115,9 +31154,7 @@ fn build_controls_winuicontrols_xaml_deferred_138(
     let priority_14 = __t::BindingPriority::Template;
     track_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_14);
     // Controls/WinUIControls.xaml(295,24) Minimum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 295, 24)?;
-    // Controls/WinUIControls.xaml(296,24) Maximum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 296, 24)?;
+    rt::bind_template_rows(track_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R85)?;
     // Controls/WinUIControls.xaml(297,24) Value
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::RangeBase::value_property()));
     // Controls/WinUIControls.xaml(297,24) Mode
@@ -29125,11 +31162,7 @@ fn build_controls_winuicontrols_xaml_deferred_138(
     let provided_13 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
     rt::bind(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::value_property(), provided_13, 297, 24)?;
     // Controls/WinUIControls.xaml(298,24) DeferThumbDrag
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::defer_thumb_drag_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 298, 24)?;
-    // Controls/WinUIControls.xaml(299,24) ViewportSize
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::viewport_size_property(), rt::property(__t::ScrollBar::viewport_size_property()), 299, 24)?;
-    // Controls/WinUIControls.xaml(300,24) Orientation
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::orientation_property(), rt::property(__t::ScrollBar::orientation_property()), 300, 24)?;
+    rt::bind_template_rows(track_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R86)?;
     // Controls/WinUIControls.xaml(294,18) IsDirectionReversed
     let priority_15 = __t::BindingPriority::Template;
     track_0.set_value_with_priority(__t::Track::is_direction_reversed_property(), __t::Clone::clone(&true), priority_15);
@@ -29212,7 +31245,7 @@ fn build_controls_winuicontrols_xaml_deferred_138(
     let priority_27 = __t::BindingPriority::Template;
     thumb_0.set_value_with_priority(__t::Visual::render_transform_property(), rt::cast(__t::Clone::clone(&value_9), 321, 26)?, priority_27);
     // Controls/WinUIControls.xaml(322,26) CornerRadius
-    rt::bind_template_binding(thumb_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 322, 26)?;
+    rt::apply_template_binding(thumb_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 322, 26)?;
     // Controls/WinUIControls.xaml(325,24) Transitions
     let transitions_2 = __t::Transitions::__markup_new_0();
     // Controls/WinUIControls.xaml(326,26) Content
@@ -29335,14 +31368,12 @@ fn build_controls_winuicontrols_xaml_deferred_139(
     border_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("HorizontalRoot")));
     rt::register_name_value(name_scope.as_ref(), "HorizontalRoot", __t::Rc::new(__t::Clone::clone(&border_1)), 359, 21)?;
     // Controls/WinUIControls.xaml(360,21) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 360, 21)?;
-    // Controls/WinUIControls.xaml(361,21) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 361, 21)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R87)?;
     // Controls/WinUIControls.xaml(359,14) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(363,21) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 363, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 363, 21)?;
     // Controls/WinUIControls.xaml(364,16) Child
     // Controls/WinUIControls.xaml(364,16) Grid
     let grid_0 = __t::Grid::new();
@@ -29479,9 +31510,7 @@ fn build_controls_winuicontrols_xaml_deferred_139(
     let priority_14 = __t::BindingPriority::Template;
     track_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_14);
     // Controls/WinUIControls.xaml(396,24) Minimum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 396, 24)?;
-    // Controls/WinUIControls.xaml(397,24) Maximum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 397, 24)?;
+    rt::bind_template_rows(track_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R88)?;
     // Controls/WinUIControls.xaml(398,24) Value
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::RangeBase::value_property()));
     // Controls/WinUIControls.xaml(398,24) Mode
@@ -29489,11 +31518,7 @@ fn build_controls_winuicontrols_xaml_deferred_139(
     let provided_14 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
     rt::bind(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::value_property(), provided_14, 398, 24)?;
     // Controls/WinUIControls.xaml(399,24) DeferThumbDrag
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::defer_thumb_drag_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 399, 24)?;
-    // Controls/WinUIControls.xaml(400,24) ViewportSize
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::viewport_size_property(), rt::property(__t::ScrollBar::viewport_size_property()), 400, 24)?;
-    // Controls/WinUIControls.xaml(401,24) Orientation
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::orientation_property(), rt::property(__t::ScrollBar::orientation_property()), 401, 24)?;
+    rt::bind_template_rows(track_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R89)?;
     // Controls/WinUIControls.xaml(403,22) DecreaseButton
     // Controls/WinUIControls.xaml(403,22) RepeatButton
     let repeat_button_1 = __t::RepeatButton::new();
@@ -29573,7 +31598,7 @@ fn build_controls_winuicontrols_xaml_deferred_139(
     let priority_26 = __t::BindingPriority::Template;
     thumb_0.set_value_with_priority(__t::Visual::render_transform_property(), rt::cast(__t::Clone::clone(&value_9), 421, 26)?, priority_26);
     // Controls/WinUIControls.xaml(422,26) CornerRadius
-    rt::bind_template_binding(thumb_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 422, 26)?;
+    rt::apply_template_binding(thumb_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 422, 26)?;
     // Controls/WinUIControls.xaml(425,24) Transitions
     let transitions_2 = __t::Transitions::__markup_new_0();
     // Controls/WinUIControls.xaml(426,26) Content
@@ -29779,11 +31804,7 @@ fn build_controls_winuicontrols_xaml_deferred_142(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Root")));
     rt::register_name_value(name_scope.as_ref(), "Root", __t::Rc::new(__t::Clone::clone(&border_0)), 76, 17)?;
     // Controls/WinUIControls.xaml(77,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 77, 17)?;
-    // Controls/WinUIControls.xaml(78,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 78, 17)?;
-    // Controls/WinUIControls.xaml(79,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 79, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R90)?;
     // Controls/WinUIControls.xaml(80,12) Child
     // Controls/WinUIControls.xaml(80,12) Grid
     let grid_0 = __t::Grid::new();
@@ -29791,7 +31812,7 @@ fn build_controls_winuicontrols_xaml_deferred_142(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&grid_0).upcast::<__t::Control>()));
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(80,17) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 80, 17)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 80, 17)?;
     // Controls/WinUIControls.xaml(80,12) ColumnDefinitions
     let column_definitions_0 = __t::ColumnDefinitions::__markup_new_0();
     rt::invoked(<__t::FerroListOf<__t::Ref<__t::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 81, 17)?;
@@ -29832,19 +31853,7 @@ fn build_controls_winuicontrols_xaml_deferred_142(
     let priority_2 = __t::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_2);
     // Controls/WinUIControls.xaml(87,37) ContentTemplate
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 87, 37)?;
-    // Controls/WinUIControls.xaml(88,37) Padding
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 88, 37)?;
-    // Controls/WinUIControls.xaml(89,37) HorizontalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::horizontal_snap_points_type_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_type_property()), 89, 37)?;
-    // Controls/WinUIControls.xaml(90,37) VerticalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::vertical_snap_points_type_property(), rt::property(__t::ScrollViewer::vertical_snap_points_type_property()), 90, 37)?;
-    // Controls/WinUIControls.xaml(91,37) HorizontalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::horizontal_snap_points_alignment_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_alignment_property()), 91, 37)?;
-    // Controls/WinUIControls.xaml(92,37) VerticalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::vertical_snap_points_alignment_property(), rt::property(__t::ScrollViewer::vertical_snap_points_alignment_property()), 92, 37)?;
-    // Controls/WinUIControls.xaml(93,37) IsScrollInertiaEnabled
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_inertia_enabled_property()), 93, 37)?;
+    rt::bind_template_rows(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R91)?;
     // Controls/WinUIControls.xaml(95,18) GestureRecognizers
     let gesture_recognizers_collection_0 = __t::InputElement::__markup_get_GestureRecognizers(scroll_content_presenter_0.upcast_ref::<__t::InputElement>());
     // Controls/WinUIControls.xaml(95,18) ScrollGestureRecognizer
@@ -30074,7 +32083,7 @@ fn build_controls_winuicontrols_xaml_deferred_145(
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(164,11) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 164, 11)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 164, 11)?;
     // Controls/WinUIControls.xaml(165,8) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(165,8) ScrollContentPresenter
@@ -30089,19 +32098,7 @@ fn build_controls_winuicontrols_xaml_deferred_145(
     let priority_0 = __t::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
     // Controls/WinUIControls.xaml(167,31) ContentTemplate
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 167, 31)?;
-    // Controls/WinUIControls.xaml(168,31) Padding
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 168, 31)?;
-    // Controls/WinUIControls.xaml(169,31) HorizontalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::horizontal_snap_points_type_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_type_property()), 169, 31)?;
-    // Controls/WinUIControls.xaml(170,31) VerticalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::vertical_snap_points_type_property(), rt::property(__t::ScrollViewer::vertical_snap_points_type_property()), 170, 31)?;
-    // Controls/WinUIControls.xaml(171,31) HorizontalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::horizontal_snap_points_alignment_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_alignment_property()), 171, 31)?;
-    // Controls/WinUIControls.xaml(172,31) VerticalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::vertical_snap_points_alignment_property(), rt::property(__t::ScrollViewer::vertical_snap_points_alignment_property()), 172, 31)?;
-    // Controls/WinUIControls.xaml(173,31) IsScrollInertiaEnabled
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_inertia_enabled_property()), 173, 31)?;
+    rt::bind_template_rows(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R92)?;
     // Controls/WinUIControls.xaml(175,12) GestureRecognizers
     let gesture_recognizers_collection_0 = __t::InputElement::__markup_get_GestureRecognizers(scroll_content_presenter_0.upcast_ref::<__t::InputElement>());
     // Controls/WinUIControls.xaml(175,12) ScrollGestureRecognizer
@@ -30264,13 +32261,11 @@ fn build_controls_winuicontrols_xaml_deferred_147(
     // Controls/WinUIControls.xaml(74,17) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "TextControlButtonBorderBrush", 74, 17)?;
     // Controls/WinUIControls.xaml(75,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 75, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 75, 17)?;
     // Controls/WinUIControls.xaml(76,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "TextControlButtonBackground", 76, 17)?;
     // Controls/WinUIControls.xaml(77,17) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 77, 17)?;
-    // Controls/WinUIControls.xaml(78,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 78, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R93)?;
     // Controls/WinUIControls.xaml(80,12) Child
     // Controls/WinUIControls.xaml(80,12) Path
     let path_0 = __t::Path::new();
@@ -30422,11 +32417,11 @@ fn build_controls_winuicontrols_xaml_deferred_149(
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(126,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 126, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 126, 17)?;
     // Controls/WinUIControls.xaml(127,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "TextControlButtonBackground", 127, 17)?;
     // Controls/WinUIControls.xaml(128,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 128, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 128, 17)?;
     // Controls/WinUIControls.xaml(130,12) Child
     // Controls/WinUIControls.xaml(130,12) Path
     let path_0 = __t::Path::new();
@@ -31104,19 +33099,7 @@ fn build_controls_winuicontrols_xaml_deferred_153(
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Grid::column_span_property(), 5_i32, priority_1);
     // Controls/WinUIControls.xaml(266,21) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 266, 21)?;
-    // Controls/WinUIControls.xaml(267,21) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 267, 21)?;
-    // Controls/WinUIControls.xaml(268,21) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 268, 21)?;
-    // Controls/WinUIControls.xaml(269,21) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 269, 21)?;
-    // Controls/WinUIControls.xaml(270,21) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 270, 21)?;
-    // Controls/WinUIControls.xaml(271,21) MinWidth
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 271, 21)?;
-    // Controls/WinUIControls.xaml(272,21) MinHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 272, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R94)?;
     rt::invoked(border_0.try_end_init(), 263, 14)?;
     // Controls/WinUIControls.xaml(274,14) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -31138,7 +33121,7 @@ fn build_controls_winuicontrols_xaml_deferred_153(
     let priority_2 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_2);
     // Controls/WinUIControls.xaml(277,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 277, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 277, 31)?;
     // Controls/WinUIControls.xaml(278,31) Content (setter chosen at run time)
     let priority_3 = __t::BindingPriority::Template;
     let template_binding_9 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TextBox::inner_left_content_property()));
@@ -31150,7 +33133,7 @@ fn build_controls_winuicontrols_xaml_deferred_153(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 278, 31)?, priority_3);
     }
     // Controls/WinUIControls.xaml(279,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 279, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TextBox::vertical_content_alignment_property()), || rt::property(__t::ContentPresenter::vertical_content_alignment_property()), 279, 31)?;
     rt::invoked(content_presenter_0.try_end_init(), 274, 14)?;
     // Controls/WinUIControls.xaml(280,14) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -31165,17 +33148,7 @@ fn build_controls_winuicontrols_xaml_deferred_153(
     let priority_4 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_4);
     // Controls/WinUIControls.xaml(282,27) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 282, 27)?;
-    // Controls/WinUIControls.xaml(283,27) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 283, 27)?;
-    // Controls/WinUIControls.xaml(284,27) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 284, 27)?;
-    // Controls/WinUIControls.xaml(285,27) Margin
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 285, 27)?;
-    // Controls/WinUIControls.xaml(286,27) Padding
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 286, 27)?;
-    // Controls/WinUIControls.xaml(287,27) Foreground
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 287, 27)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R95)?;
     // Controls/WinUIControls.xaml(280,14) Focusable
     let priority_5 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_5);
@@ -31207,35 +33180,7 @@ fn build_controls_winuicontrols_xaml_deferred_153(
     let provided_17 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_17);
     rt::bind(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_property(), provided_17, 290, 30)?;
     // Controls/WinUIControls.xaml(291,30) CaretBlinkInterval
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_blink_interval_property(), rt::property(__t::TextBox::caret_blink_interval_property()), 291, 30)?;
-    // Controls/WinUIControls.xaml(292,30) CaretIndex
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_index_property(), rt::property(__t::TextBox::caret_index_property()), 292, 30)?;
-    // Controls/WinUIControls.xaml(293,30) SelectionStart
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_start_property(), rt::property(__t::TextBox::selection_start_property()), 293, 30)?;
-    // Controls/WinUIControls.xaml(294,30) SelectionEnd
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_end_property(), rt::property(__t::TextBox::selection_end_property()), 294, 30)?;
-    // Controls/WinUIControls.xaml(295,30) TextAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 295, 30)?;
-    // Controls/WinUIControls.xaml(296,30) TextWrapping
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 296, 30)?;
-    // Controls/WinUIControls.xaml(297,30) LineHeight
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::line_height_property(), rt::property(__t::TextBox::line_height_property()), 297, 30)?;
-    // Controls/WinUIControls.xaml(298,30) LetterSpacing
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::letter_spacing_property(), rt::property(__t::TemplatedControl::letter_spacing_property()), 298, 30)?;
-    // Controls/WinUIControls.xaml(299,30) PasswordChar
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::password_char_property(), rt::property(__t::TextBox::password_char_property()), 299, 30)?;
-    // Controls/WinUIControls.xaml(300,30) RevealPassword
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::reveal_password_property(), rt::property(__t::TextBox::reveal_password_property()), 300, 30)?;
-    // Controls/WinUIControls.xaml(301,30) SelectionBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_brush_property(), rt::property(__t::TextBox::selection_brush_property()), 301, 30)?;
-    // Controls/WinUIControls.xaml(302,30) SelectionForegroundBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_foreground_brush_property(), rt::property(__t::TextBox::selection_foreground_brush_property()), 302, 30)?;
-    // Controls/WinUIControls.xaml(303,30) CaretBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_brush_property(), rt::property(__t::TextBox::caret_brush_property()), 303, 30)?;
-    // Controls/WinUIControls.xaml(304,30) HorizontalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::TextBox::horizontal_content_alignment_property()), 304, 30)?;
-    // Controls/WinUIControls.xaml(305,30) VerticalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 305, 30)?;
+    rt::bind_template_rows(text_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R96)?;
     rt::invoked(text_presenter_0.try_end_init(), 289, 16)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 280, 14)?;
     // Controls/WinUIControls.xaml(312,14) Children
@@ -31255,19 +33200,7 @@ fn build_controls_winuicontrols_xaml_deferred_153(
     let priority_7 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_7);
     // Controls/WinUIControls.xaml(315,24) VerticalAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 315, 24)?;
-    // Controls/WinUIControls.xaml(316,24) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TextBox::placeholder_foreground_property()), 316, 24)?;
-    // Controls/WinUIControls.xaml(317,24) Margin
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 317, 24)?;
-    // Controls/WinUIControls.xaml(318,24) Padding
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 318, 24)?;
-    // Controls/WinUIControls.xaml(319,24) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TextBox::placeholder_text_property()), 319, 24)?;
-    // Controls/WinUIControls.xaml(320,24) TextAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 320, 24)?;
-    // Controls/WinUIControls.xaml(321,24) TextWrapping
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 321, 24)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R97)?;
     // Controls/WinUIControls.xaml(312,14) IsHitTestVisible
     let priority_8 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_8);
@@ -31332,9 +33265,7 @@ fn build_controls_winuicontrols_xaml_deferred_153(
     let provided_44 = rt::provide_value(&context, rt::property_value(__t::Button::command_property()), &reflection_binding_extension_2, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(button_0.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), provided_44, 333, 21)?;
     // Controls/WinUIControls.xaml(334,21) BorderThickness
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 334, 21)?;
-    // Controls/WinUIControls.xaml(335,21) CornerRadius
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 335, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R98)?;
     // Controls/WinUIControls.xaml(336,21) Padding
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), "HelperButtonThemePadding", 336, 21)?;
     // Controls/WinUIControls.xaml(330,14) Focusable
@@ -31344,7 +33275,7 @@ fn build_controls_winuicontrols_xaml_deferred_153(
     let priority_12 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_12);
     // Controls/WinUIControls.xaml(339,21) FontSize
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 339, 21)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_size_property()), || rt::property(__t::TemplatedControl::font_size_property()), 339, 21)?;
     // Controls/WinUIControls.xaml(330,14) Width
     let priority_13 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::width_property(), 30.0_f64, priority_13);
@@ -31378,9 +33309,7 @@ fn build_controls_winuicontrols_xaml_deferred_153(
     let provided_50 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_43);
     rt::bind(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::ToggleButton::is_checked_property(), provided_50, 347, 27)?;
     // Controls/WinUIControls.xaml(348,27) BorderThickness
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 348, 27)?;
-    // Controls/WinUIControls.xaml(349,27) CornerRadius
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 349, 27)?;
+    rt::bind_template_rows(toggle_button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R99)?;
     // Controls/WinUIControls.xaml(350,27) Padding
     rt::bind_dynamic_resource(&context, toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), "HelperButtonThemePadding", 350, 27)?;
     // Controls/WinUIControls.xaml(344,14) Focusable
@@ -31390,7 +33319,7 @@ fn build_controls_winuicontrols_xaml_deferred_153(
     let priority_18 = __t::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_18);
     // Controls/WinUIControls.xaml(353,27) FontSize
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 353, 27)?;
+    rt::apply_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_size_property()), || rt::property(__t::TemplatedControl::font_size_property()), 353, 27)?;
     // Controls/WinUIControls.xaml(344,14) Width
     let priority_19 = __t::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(__t::Layoutable::width_property(), 30.0_f64, priority_19);
@@ -31419,7 +33348,7 @@ fn build_controls_winuicontrols_xaml_deferred_153(
     let priority_21 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::Grid::column_property(), 4_i32, priority_21);
     // Controls/WinUIControls.xaml(360,31) Margin
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 360, 31)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 360, 31)?;
     // Controls/WinUIControls.xaml(361,31) Content (setter chosen at run time)
     let priority_22 = __t::BindingPriority::Template;
     let template_binding_49 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TextBox::inner_right_content_property()));
@@ -31431,7 +33360,7 @@ fn build_controls_winuicontrols_xaml_deferred_153(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_9.clone(), "ContentControl.Content", 1, 361, 31)?, priority_22);
     }
     // Controls/WinUIControls.xaml(362,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 362, 31)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TextBox::vertical_content_alignment_property()), || rt::property(__t::ContentPresenter::vertical_content_alignment_property()), 362, 31)?;
     rt::invoked(content_presenter_1.try_end_init(), 357, 14)?;
     context.pop_parent();
     rt::invoked(grid_0.try_end_init(), 262, 12)?;
@@ -31626,7 +33555,7 @@ fn build_controls_winuicontrols_xaml_deferred_157(
     let value_0 = rt::invoked(__t::Vector3D::__markup_parse(__t::String::from("0,0,16")), 59, 45)?;
     border_0.set_direct_value(__t::Visual::translation_property(), __t::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(59,66) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 59, 66)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 59, 66)?;
     // Controls/WinUIControls.xaml(60,12) Child
     // Controls/WinUIControls.xaml(60,12) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -31636,15 +33565,7 @@ fn build_controls_winuicontrols_xaml_deferred_157(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 60, 29)?;
     // Controls/WinUIControls.xaml(61,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 61, 29)?;
-    // Controls/WinUIControls.xaml(62,29) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 62, 29)?;
-    // Controls/WinUIControls.xaml(63,29) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 63, 29)?;
-    // Controls/WinUIControls.xaml(64,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 64, 29)?;
-    // Controls/WinUIControls.xaml(65,29) MaxWidth
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_width_property(), rt::property(__t::Layoutable::max_width_property()), 65, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R100)?;
     // Controls/WinUIControls.xaml(66,29) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -31656,14 +33577,12 @@ fn build_controls_winuicontrols_xaml_deferred_157(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 66, 29)?, priority_0);
     }
     // Controls/WinUIControls.xaml(67,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 67, 29)?;
-    // Controls/WinUIControls.xaml(68,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 68, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R101)?;
     // Controls/WinUIControls.xaml(60,12) TextWrapping
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::text_wrapping_property(), __t::TextWrapping::Wrap, priority_1);
     // Controls/WinUIControls.xaml(70,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 70, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::ContentPresenter::corner_radius_property()), 70, 29)?;
     rt::invoked(content_presenter_0.try_end_init(), 60, 12)?;
     rt::invoked(border_0.try_end_init(), 59, 10)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
@@ -32349,13 +34268,7 @@ fn build_controls_winuicontrols_xaml_deferred_161(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ProgressBarRoot")));
     rt::register_name_value(name_scope.as_ref(), "ProgressBarRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 78, 19)?;
     // Controls/WinUIControls.xaml(79,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 79, 19)?;
-    // Controls/WinUIControls.xaml(80,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 80, 19)?;
-    // Controls/WinUIControls.xaml(81,19) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 81, 19)?;
-    // Controls/WinUIControls.xaml(82,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 82, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R102)?;
     // Controls/WinUIControls.xaml(83,14) Child
     // Controls/WinUIControls.xaml(83,14) Border
     let border_1 = __t::Border::new();
@@ -32388,7 +34301,7 @@ fn build_controls_winuicontrols_xaml_deferred_161(
     border_2.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ProgressBarTrack")));
     rt::register_name_value(name_scope.as_ref(), "ProgressBarTrack", __t::Rc::new(__t::Clone::clone(&border_2)), 85, 25)?;
     // Controls/WinUIControls.xaml(86,25) Background
-    rt::bind_template_binding(border_2.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 86, 25)?;
+    rt::apply_template_binding(border_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 86, 25)?;
     // Controls/WinUIControls.xaml(87,25) CornerRadius (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let provided_5 = rt::provide_static_resource(&context, "ProgressBarTrackCornerRadius", || rt::property_value(__t::Border::corner_radius_property()), 87, 25)?;
@@ -32406,9 +34319,7 @@ fn build_controls_winuicontrols_xaml_deferred_161(
     border_3.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_Indicator")));
     rt::register_name_value(name_scope.as_ref(), "PART_Indicator", __t::Rc::new(__t::Clone::clone(&border_3)), 88, 25)?;
     // Controls/WinUIControls.xaml(89,25) Background
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::foreground_property()), 89, 25)?;
-    // Controls/WinUIControls.xaml(90,25) CornerRadius
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 90, 25)?;
+    rt::bind_template_rows(border_3.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R103)?;
     rt::invoked(border_3.try_end_init(), 88, 18)?;
     // Controls/WinUIControls.xaml(91,18) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
@@ -32420,9 +34331,7 @@ fn build_controls_winuicontrols_xaml_deferred_161(
     border_4.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("IndeterminateProgressBarIndicator")));
     rt::register_name_value(name_scope.as_ref(), "IndeterminateProgressBarIndicator", __t::Rc::new(__t::Clone::clone(&border_4)), 91, 25)?;
     // Controls/WinUIControls.xaml(92,25) Background
-    rt::bind_template_binding(border_4.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::foreground_property()), 92, 25)?;
-    // Controls/WinUIControls.xaml(93,25) CornerRadius
-    rt::bind_template_binding(border_4.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 93, 25)?;
+    rt::bind_template_rows(border_4.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R104)?;
     // Controls/WinUIControls.xaml(91,18) Opacity
     let priority_2 = __t::BindingPriority::Template;
     border_4.set_value_with_priority(__t::Visual::opacity_property(), 0.0_f64, priority_2);
@@ -32437,9 +34346,7 @@ fn build_controls_winuicontrols_xaml_deferred_161(
     border_5.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("IndeterminateProgressBarIndicator2")));
     rt::register_name_value(name_scope.as_ref(), "IndeterminateProgressBarIndicator2", __t::Rc::new(__t::Clone::clone(&border_5)), 95, 25)?;
     // Controls/WinUIControls.xaml(96,25) Background
-    rt::bind_template_binding(border_5.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::foreground_property()), 96, 25)?;
-    // Controls/WinUIControls.xaml(97,25) CornerRadius
-    rt::bind_template_binding(border_5.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 97, 25)?;
+    rt::bind_template_rows(border_5.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R105)?;
     // Controls/WinUIControls.xaml(95,18) Opacity
     let priority_3 = __t::BindingPriority::Template;
     border_5.set_value_with_priority(__t::Visual::opacity_property(), 0.0_f64, priority_3);
@@ -32470,7 +34377,7 @@ fn build_controls_winuicontrols_xaml_deferred_161(
     let priority_6 = __t::BindingPriority::Template;
     layout_transform_control_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_6);
     // Controls/WinUIControls.xaml(106,35) IsVisible
-    rt::bind_template_binding(layout_transform_control_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::ProgressBar::show_progress_text_property()), 106, 35)?;
+    rt::apply_template_binding(layout_transform_control_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ProgressBar::show_progress_text_property()), || rt::property(__t::Visual::is_visible_property()), 106, 35)?;
     // Controls/WinUIControls.xaml(107,14) Child
     // Controls/WinUIControls.xaml(107,14) TextBlock
     let text_block_0 = __t::TextBlock::new();
@@ -32582,7 +34489,7 @@ fn build_controls_winuicontrols_xaml_deferred_164(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Controls/WinUIControls.xaml(37,13) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 37, 13)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 37, 13)?;
     // Controls/WinUIControls.xaml(38,8) Child
     // Controls/WinUIControls.xaml(38,8) Path
     let path_0 = __t::Path::new();
@@ -32592,9 +34499,7 @@ fn build_controls_winuicontrols_xaml_deferred_164(
     path_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Path")));
     rt::register_name_value(name_scope.as_ref(), "Path", __t::Rc::new(__t::Clone::clone(&path_0)), 38, 13)?;
     // Controls/WinUIControls.xaml(39,13) Data
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Path::data_property(), rt::property(__t::PathIcon::data_property()), 39, 13)?;
-    // Controls/WinUIControls.xaml(40,13) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 40, 13)?;
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R106)?;
     rt::invoked(path_0.try_end_init(), 38, 8)?;
     rt::invoked(border_0.try_end_init(), 37, 6)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
@@ -32635,16 +34540,14 @@ fn build_controls_winuicontrols_xaml_deferred_166(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Controls/WinUIControls.xaml(51,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 51, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 51, 17)?;
     // Controls/WinUIControls.xaml(52,12) Child
     // Controls/WinUIControls.xaml(52,12) Viewbox
     let viewbox_0 = __t::Viewbox::new();
     viewbox_0.begin_init();
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&viewbox_0).upcast::<__t::Control>()));
     // Controls/WinUIControls.xaml(52,20) Height
-    rt::bind_template_binding(viewbox_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::Layoutable::height_property()), 52, 20)?;
-    // Controls/WinUIControls.xaml(52,54) Width
-    rt::bind_template_binding(viewbox_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::Layoutable::width_property()), 52, 54)?;
+    rt::bind_template_rows(viewbox_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R107)?;
     // Controls/WinUIControls.xaml(53,14) Child
     // Controls/WinUIControls.xaml(53,14) Path
     let path_0 = __t::Path::new();
@@ -32654,9 +34557,7 @@ fn build_controls_winuicontrols_xaml_deferred_166(
     path_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Path")));
     rt::register_name_value(name_scope.as_ref(), "Path", __t::Rc::new(__t::Clone::clone(&path_0)), 53, 19)?;
     // Controls/WinUIControls.xaml(54,19) Data
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Path::data_property(), rt::property(__t::PathIcon::data_property()), 54, 19)?;
-    // Controls/WinUIControls.xaml(55,19) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 55, 19)?;
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R108)?;
     // Controls/WinUIControls.xaml(53,14) Stretch
     let priority_0 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_0);
@@ -32740,7 +34641,7 @@ fn build_controls_winuicontrols_xaml_deferred_168(
         content_control_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 32, 27)?, priority_2);
     }
     // Controls/WinUIControls.xaml(33,27) ContentTemplate
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::DataValidationErrors::error_template_property()), 33, 27)?;
+    rt::apply_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::DataValidationErrors::error_template_property()), || rt::property(__t::ContentControl::content_template_property()), 33, 27)?;
     // Controls/WinUIControls.xaml(34,27) DataContext (setter chosen at run time)
     let priority_3 = __t::BindingPriority::Template;
     let template_binding_1 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DataValidationErrors::owner_property()));
@@ -32770,16 +34671,12 @@ fn build_controls_winuicontrols_xaml_deferred_168(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 37, 29)?;
     // Controls/WinUIControls.xaml(38,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 38, 29)?;
-    // Controls/WinUIControls.xaml(39,29) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 39, 29)?;
-    // Controls/WinUIControls.xaml(40,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 40, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R109)?;
     // Controls/WinUIControls.xaml(37,12) BackgroundSizing
     let priority_5 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_5);
     // Controls/WinUIControls.xaml(42,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 42, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 42, 29)?;
     // Controls/WinUIControls.xaml(43,29) Content (setter chosen at run time)
     let priority_6 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -32791,9 +34688,7 @@ fn build_controls_winuicontrols_xaml_deferred_168(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 43, 29)?, priority_6);
     }
     // Controls/WinUIControls.xaml(44,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 44, 29)?;
-    // Controls/WinUIControls.xaml(45,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 45, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R110)?;
     rt::invoked(content_presenter_0.try_end_init(), 37, 12)?;
     context.pop_parent();
     rt::invoked(dock_panel_0.try_end_init(), 29, 10)?;
@@ -32902,7 +34797,7 @@ fn build_controls_winuicontrols_xaml_deferred_171(
         content_control_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 69, 27)?, priority_1);
     }
     // Controls/WinUIControls.xaml(70,27) ContentTemplate
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::DataValidationErrors::error_template_property()), 70, 27)?;
+    rt::apply_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::DataValidationErrors::error_template_property()), || rt::property(__t::ContentControl::content_template_property()), 70, 27)?;
     // Controls/WinUIControls.xaml(71,27) DataContext (setter chosen at run time)
     let priority_2 = __t::BindingPriority::Template;
     let template_binding_1 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DataValidationErrors::owner_property()));
@@ -32932,16 +34827,12 @@ fn build_controls_winuicontrols_xaml_deferred_171(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 74, 29)?;
     // Controls/WinUIControls.xaml(75,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 75, 29)?;
-    // Controls/WinUIControls.xaml(76,29) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 76, 29)?;
-    // Controls/WinUIControls.xaml(77,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 77, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R111)?;
     // Controls/WinUIControls.xaml(74,12) BackgroundSizing
     let priority_4 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_4);
     // Controls/WinUIControls.xaml(79,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 79, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 79, 29)?;
     // Controls/WinUIControls.xaml(80,29) Content (setter chosen at run time)
     let priority_5 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -32953,9 +34844,7 @@ fn build_controls_winuicontrols_xaml_deferred_171(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 80, 29)?, priority_5);
     }
     // Controls/WinUIControls.xaml(81,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 81, 29)?;
-    // Controls/WinUIControls.xaml(82,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 82, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R112)?;
     rt::invoked(content_presenter_0.try_end_init(), 74, 12)?;
     context.pop_parent();
     rt::invoked(dock_panel_0.try_end_init(), 67, 10)?;
@@ -33192,7 +35081,7 @@ fn build_controls_winuicontrols_xaml_deferred_175(
     panel_0.begin_init();
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(91,16) Background
-    rt::bind_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 91, 16)?;
+    rt::apply_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 91, 16)?;
     // Controls/WinUIControls.xaml(92,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(92,12) ContentPresenter
@@ -33204,9 +35093,7 @@ fn build_controls_winuicontrols_xaml_deferred_175(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 92, 29)?;
     // Controls/WinUIControls.xaml(93,29) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 93, 29)?;
-    // Controls/WinUIControls.xaml(94,29) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 94, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R113)?;
     // Controls/WinUIControls.xaml(95,29) BorderBrush
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), "DateTimePickerFlyoutButtonBorderBrush", 95, 29)?;
     // Controls/WinUIControls.xaml(96,29) BorderThickness
@@ -33222,15 +35109,7 @@ fn build_controls_winuicontrols_xaml_deferred_175(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 97, 29)?, priority_0);
     }
     // Controls/WinUIControls.xaml(98,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 98, 29)?;
-    // Controls/WinUIControls.xaml(99,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 99, 29)?;
-    // Controls/WinUIControls.xaml(100,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 100, 29)?;
-    // Controls/WinUIControls.xaml(101,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 101, 29)?;
-    // Controls/WinUIControls.xaml(102,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 102, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R114)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 92, 12)?;
     context.pop_parent();
@@ -33340,7 +35219,7 @@ fn build_controls_winuicontrols_xaml_deferred_177(
     context.set_intermediate_root_object(rt::to_value(panel_0.clone()));
     panel_0.begin_init();
     // Controls/WinUIControls.xaml(138,16) Background
-    rt::bind_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 138, 16)?;
+    rt::apply_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 138, 16)?;
     // Controls/WinUIControls.xaml(139,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(139,12) Border
@@ -33351,9 +35230,7 @@ fn build_controls_winuicontrols_xaml_deferred_177(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootBorder")));
     rt::register_name_value(name_scope.as_ref(), "RootBorder", __t::Rc::new(__t::Clone::clone(&border_0)), 139, 19)?;
     // Controls/WinUIControls.xaml(140,19) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 140, 19)?;
-    // Controls/WinUIControls.xaml(141,19) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 141, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R115)?;
     // Controls/WinUIControls.xaml(142,14) Child
     // Controls/WinUIControls.xaml(142,14) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -33363,7 +35240,7 @@ fn build_controls_winuicontrols_xaml_deferred_177(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 142, 31)?;
     // Controls/WinUIControls.xaml(143,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 143, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 143, 31)?;
     // Controls/WinUIControls.xaml(144,31) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -33375,11 +35252,7 @@ fn build_controls_winuicontrols_xaml_deferred_177(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 144, 31)?, priority_0);
     }
     // Controls/WinUIControls.xaml(145,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 145, 31)?;
-    // Controls/WinUIControls.xaml(146,31) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 146, 31)?;
-    // Controls/WinUIControls.xaml(147,31) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 147, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R116)?;
     // Controls/WinUIControls.xaml(142,14) RenderTransformOrigin
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Visual::render_transform_origin_property(), __t::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, __t::RelativeUnit::Relative), priority_1);
@@ -33773,7 +35646,7 @@ fn build_controls_winuicontrols_xaml_deferred_183(
     let value_0: __t::MarkupValue = rt::to_value(provided_0);
     rt::bind_or_set_priority(border_0.upcast_ref::<__t::FerroObject>(), || __t::Layoutable::margin_property(), value_0, priority_1, || rt::markup_handle(<__t::Thickness as __t::MarkupTyped>::MARKUP), false, "Layoutable.Margin", 248, 17)?;
     // Controls/WinUIControls.xaml(249,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 249, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 249, 17)?;
     // Controls/WinUIControls.xaml(250,12) Child
     // Controls/WinUIControls.xaml(250,12) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -33783,7 +35656,7 @@ fn build_controls_winuicontrols_xaml_deferred_183(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 250, 29)?;
     // Controls/WinUIControls.xaml(251,29) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 251, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 251, 29)?;
     // Controls/WinUIControls.xaml(252,29) Content (setter chosen at run time)
     let priority_2 = __t::BindingPriority::Template;
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -33795,16 +35668,12 @@ fn build_controls_winuicontrols_xaml_deferred_183(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 252, 29)?, priority_2);
     }
     // Controls/WinUIControls.xaml(253,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 253, 29)?;
-    // Controls/WinUIControls.xaml(254,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 254, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R117)?;
     // Controls/WinUIControls.xaml(250,12) Margin
     let priority_3 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 0.0_f64, 2.0_f64, 0.0_f64), priority_3);
     // Controls/WinUIControls.xaml(256,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 256, 29)?;
-    // Controls/WinUIControls.xaml(257,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 257, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R118)?;
     rt::invoked(content_presenter_0.try_end_init(), 250, 12)?;
     context.pop_parent();
     rt::invoked(border_0.try_end_init(), 246, 10)?;
@@ -33978,15 +35847,11 @@ fn build_controls_winuicontrols_xaml_deferred_187(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 99, 27)?;
     // Controls/WinUIControls.xaml(100,27) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 100, 27)?;
-    // Controls/WinUIControls.xaml(101,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 101, 27)?;
-    // Controls/WinUIControls.xaml(102,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 102, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R119)?;
     // Controls/WinUIControls.xaml(103,27) BorderBrush
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), "CalendarViewNavigationButtonBorderBrush", 103, 27)?;
     // Controls/WinUIControls.xaml(104,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 104, 27)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 104, 27)?;
     // Controls/WinUIControls.xaml(105,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -33998,15 +35863,7 @@ fn build_controls_winuicontrols_xaml_deferred_187(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 105, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(106,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 106, 27)?;
-    // Controls/WinUIControls.xaml(107,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 107, 27)?;
-    // Controls/WinUIControls.xaml(108,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 108, 27)?;
-    // Controls/WinUIControls.xaml(109,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 109, 27)?;
-    // Controls/WinUIControls.xaml(110,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 110, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R120)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 99, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
@@ -34168,13 +36025,11 @@ fn build_controls_winuicontrols_xaml_deferred_190(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 160, 27)?;
     // Controls/WinUIControls.xaml(161,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 161, 27)?;
-    // Controls/WinUIControls.xaml(162,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 162, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R121)?;
     // Controls/WinUIControls.xaml(163,27) BorderBrush
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), "CalendarViewNavigationButtonBorderBrush", 163, 27)?;
     // Controls/WinUIControls.xaml(164,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 164, 27)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 164, 27)?;
     // Controls/WinUIControls.xaml(165,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -34186,15 +36041,7 @@ fn build_controls_winuicontrols_xaml_deferred_190(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 165, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(166,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 166, 27)?;
-    // Controls/WinUIControls.xaml(167,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 167, 27)?;
-    // Controls/WinUIControls.xaml(168,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 168, 27)?;
-    // Controls/WinUIControls.xaml(169,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 169, 27)?;
-    // Controls/WinUIControls.xaml(170,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 170, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R122)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 160, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
@@ -34315,16 +36162,12 @@ fn build_controls_winuicontrols_xaml_deferred_193(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootBorder")));
     rt::register_name_value(name_scope.as_ref(), "RootBorder", __t::Rc::new(__t::Clone::clone(&border_0)), 212, 17)?;
     // Controls/WinUIControls.xaml(213,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 213, 17)?;
-    // Controls/WinUIControls.xaml(214,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 214, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R123)?;
     // Controls/WinUIControls.xaml(212,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(216,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 216, 17)?;
-    // Controls/WinUIControls.xaml(217,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 217, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R124)?;
     // Controls/WinUIControls.xaml(218,12) Child
     // Controls/WinUIControls.xaml(218,12) Grid
     let grid_0 = __t::Grid::new();
@@ -34365,7 +36208,7 @@ fn build_controls_winuicontrols_xaml_deferred_193(
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_0, __t::Clone::clone(&column_definition_2));
     __t::Grid::__markup_set_ColumnDefinitions(&grid_1, __t::Clone::clone(&column_definitions_0));
     // Controls/WinUIControls.xaml(219,51) Background
-    rt::bind_template_binding(grid_1.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::CalendarItem::header_background_property()), 219, 51)?;
+    rt::apply_template_binding(grid_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::CalendarItem::header_background_property()), || rt::property(__t::Panel::background_property()), 219, 51)?;
     // Controls/WinUIControls.xaml(220,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(220,16) Button
@@ -34382,7 +36225,7 @@ fn build_controls_winuicontrols_xaml_deferred_193(
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_1, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 221, 23)?;
     // Controls/WinUIControls.xaml(222,23) Foreground
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 222, 23)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TemplatedControl::foreground_property()), 222, 23)?;
     // Controls/WinUIControls.xaml(220,16) HorizontalContentAlignment
     let priority_2 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Left, priority_2);
@@ -34407,7 +36250,7 @@ fn build_controls_winuicontrols_xaml_deferred_193(
     let value_1: __t::MarkupValue = rt::to_value(provided_7);
     rt::bind_or_set_priority(button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_4, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 226, 23)?;
     // Controls/WinUIControls.xaml(227,23) Foreground
-    rt::bind_template_binding(button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 227, 23)?;
+    rt::apply_template_binding(button_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TemplatedControl::foreground_property()), 227, 23)?;
     // Controls/WinUIControls.xaml(228,23) Margin
     rt::bind_dynamic_resource(&context, button_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "CalendarViewNavigationPreviousButtonMargin", 228, 23)?;
     // Controls/WinUIControls.xaml(224,16) HorizontalContentAlignment
@@ -34478,7 +36321,7 @@ fn build_controls_winuicontrols_xaml_deferred_193(
     let value_3: __t::MarkupValue = rt::to_value(provided_12);
     rt::bind_or_set_priority(button_2.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_3, priority_14, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 242, 23)?;
     // Controls/WinUIControls.xaml(243,23) Foreground
-    rt::bind_template_binding(button_2.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 243, 23)?;
+    rt::apply_template_binding(button_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TemplatedControl::foreground_property()), 243, 23)?;
     // Controls/WinUIControls.xaml(244,23) Margin
     rt::bind_dynamic_resource(&context, button_2.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "CalendarViewNavigationNextButtonMargin", 244, 23)?;
     // Controls/WinUIControls.xaml(240,16) HorizontalContentAlignment
@@ -34545,7 +36388,7 @@ fn build_controls_winuicontrols_xaml_deferred_193(
     let priority_24 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Layoutable::height_property(), 1.0_f64, priority_24);
     // Controls/WinUIControls.xaml(257,45) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::border_brush_property()), 257, 45)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::background_property()), 257, 45)?;
     rt::invoked(border_1.try_end_init(), 257, 14)?;
     // Controls/WinUIControls.xaml(260,14) Children
     let children_collection_7 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -34985,17 +36828,7 @@ fn build_controls_winuicontrols_xaml_deferred_195(
     calendar_item_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_CalendarItem")));
     rt::register_name_value(name_scope.as_ref(), "PART_CalendarItem", __t::Rc::new(__t::Clone::clone(&calendar_item_0)), 49, 25)?;
     // Controls/WinUIControls.xaml(50,25) Foreground
-    rt::bind_template_binding(calendar_item_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 50, 25)?;
-    // Controls/WinUIControls.xaml(51,25) Background
-    rt::bind_template_binding(calendar_item_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 51, 25)?;
-    // Controls/WinUIControls.xaml(52,25) BorderBrush
-    rt::bind_template_binding(calendar_item_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 52, 25)?;
-    // Controls/WinUIControls.xaml(53,25) BorderThickness
-    rt::bind_template_binding(calendar_item_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 53, 25)?;
-    // Controls/WinUIControls.xaml(54,25) CornerRadius
-    rt::bind_template_binding(calendar_item_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 54, 25)?;
-    // Controls/WinUIControls.xaml(55,25) HeaderBackground
-    rt::bind_template_binding(calendar_item_0.upcast_ref::<__t::FerroObject>(), __t::CalendarItem::header_background_property(), rt::property(__t::Calendar::header_background_property()), 55, 25)?;
+    rt::bind_template_rows(calendar_item_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R125)?;
     rt::invoked(calendar_item_0.try_end_init(), 49, 12)?;
     rt::invoked(panel_0.try_end_init(), 48, 10)?;
     __t::Result::Ok(rt::to_value(panel_0.clone()))
@@ -35093,7 +36926,7 @@ fn build_controls_winuicontrols_xaml_deferred_198(
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(74,15) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 74, 15)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 74, 15)?;
     // Controls/WinUIControls.xaml(75,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(75,12) DockPanel
@@ -35102,7 +36935,7 @@ fn build_controls_winuicontrols_xaml_deferred_198(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&dock_panel_0).upcast::<__t::Control>());
     context.push_parent(rt::to_value(dock_panel_0.clone()));
     // Controls/WinUIControls.xaml(75,22) Margin
-    rt::bind_template_binding(dock_panel_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 75, 22)?;
+    rt::apply_template_binding(dock_panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 75, 22)?;
     // Controls/WinUIControls.xaml(77,14) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(77,14) TextBlock
@@ -35116,9 +36949,7 @@ fn build_controls_winuicontrols_xaml_deferred_198(
     let priority_0 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Top, priority_0);
     // Controls/WinUIControls.xaml(79,24) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TextBox::placeholder_foreground_property()), 79, 24)?;
-    // Controls/WinUIControls.xaml(80,24) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TextBox::placeholder_text_property()), 80, 24)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R126)?;
     // Controls/WinUIControls.xaml(77,14) IsVisible
     let priority_1 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_1);
@@ -35134,11 +36965,7 @@ fn build_controls_winuicontrols_xaml_deferred_198(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 82, 27)?;
     // Controls/WinUIControls.xaml(83,27) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 83, 27)?;
-    // Controls/WinUIControls.xaml(84,27) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 84, 27)?;
-    // Controls/WinUIControls.xaml(85,27) Foreground
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 85, 27)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R127)?;
     // Controls/WinUIControls.xaml(82,14) Focusable
     let priority_2 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_2);
@@ -35172,17 +36999,7 @@ fn build_controls_winuicontrols_xaml_deferred_198(
     text_block_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PlaceholderTextContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PlaceholderTextContentPresenter", __t::Rc::new(__t::Clone::clone(&text_block_1)), 88, 28)?;
     // Controls/WinUIControls.xaml(89,28) Foreground
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TextBox::placeholder_foreground_property()), 89, 28)?;
-    // Controls/WinUIControls.xaml(90,28) Text
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TextBox::placeholder_text_property()), 90, 28)?;
-    // Controls/WinUIControls.xaml(91,28) TextAlignment
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 91, 28)?;
-    // Controls/WinUIControls.xaml(92,28) TextWrapping
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 92, 28)?;
-    // Controls/WinUIControls.xaml(93,28) HorizontalAlignment
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::TextBox::horizontal_content_alignment_property()), 93, 28)?;
-    // Controls/WinUIControls.xaml(94,28) VerticalAlignment
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 94, 28)?;
+    rt::bind_template_rows(text_block_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R128)?;
     // Controls/WinUIControls.xaml(88,18) IsHitTestVisible
     let priority_3 = __t::BindingPriority::Template;
     text_block_1.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_3);
@@ -35240,35 +37057,7 @@ fn build_controls_winuicontrols_xaml_deferred_198(
     let provided_16 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_13);
     rt::bind(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_property(), provided_16, 104, 32)?;
     // Controls/WinUIControls.xaml(105,32) CaretBlinkInterval
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_blink_interval_property(), rt::property(__t::TextBox::caret_blink_interval_property()), 105, 32)?;
-    // Controls/WinUIControls.xaml(106,32) CaretIndex
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_index_property(), rt::property(__t::TextBox::caret_index_property()), 106, 32)?;
-    // Controls/WinUIControls.xaml(107,32) SelectionStart
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_start_property(), rt::property(__t::TextBox::selection_start_property()), 107, 32)?;
-    // Controls/WinUIControls.xaml(108,32) SelectionEnd
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_end_property(), rt::property(__t::TextBox::selection_end_property()), 108, 32)?;
-    // Controls/WinUIControls.xaml(109,32) TextAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 109, 32)?;
-    // Controls/WinUIControls.xaml(110,32) TextWrapping
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 110, 32)?;
-    // Controls/WinUIControls.xaml(111,32) LineHeight
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::line_height_property(), rt::property(__t::TextBox::line_height_property()), 111, 32)?;
-    // Controls/WinUIControls.xaml(112,32) LetterSpacing
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::letter_spacing_property(), rt::property(__t::TemplatedControl::letter_spacing_property()), 112, 32)?;
-    // Controls/WinUIControls.xaml(113,32) PasswordChar
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::password_char_property(), rt::property(__t::TextBox::password_char_property()), 113, 32)?;
-    // Controls/WinUIControls.xaml(114,32) RevealPassword
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::reveal_password_property(), rt::property(__t::TextBox::reveal_password_property()), 114, 32)?;
-    // Controls/WinUIControls.xaml(115,32) SelectionBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_brush_property(), rt::property(__t::TextBox::selection_brush_property()), 115, 32)?;
-    // Controls/WinUIControls.xaml(116,32) SelectionForegroundBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_foreground_brush_property(), rt::property(__t::TextBox::selection_foreground_brush_property()), 116, 32)?;
-    // Controls/WinUIControls.xaml(117,32) CaretBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_brush_property(), rt::property(__t::TextBox::caret_brush_property()), 117, 32)?;
-    // Controls/WinUIControls.xaml(118,32) HorizontalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::TextBox::horizontal_content_alignment_property()), 118, 32)?;
-    // Controls/WinUIControls.xaml(119,32) VerticalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 119, 32)?;
+    rt::bind_template_rows(text_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R129)?;
     rt::invoked(text_presenter_0.try_end_init(), 103, 18)?;
     context.pop_parent();
     rt::invoked(panel_0.try_end_init(), 87, 16)?;
@@ -35329,7 +37118,7 @@ fn build_controls_winuicontrols_xaml_deferred_200(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 148, 27)?;
     // Controls/WinUIControls.xaml(149,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 149, 27)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::ContentPresenter::background_property()), 149, 27)?;
     // Controls/WinUIControls.xaml(150,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_1 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -35341,11 +37130,7 @@ fn build_controls_winuicontrols_xaml_deferred_200(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 150, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(151,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 151, 27)?;
-    // Controls/WinUIControls.xaml(152,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 152, 27)?;
-    // Controls/WinUIControls.xaml(153,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 153, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R130)?;
     rt::invoked(content_presenter_0.try_end_init(), 148, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
 }
@@ -35608,16 +37393,12 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_0);
     // Controls/WinUIControls.xaml(192,21) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 192, 21)?;
-    // Controls/WinUIControls.xaml(193,21) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 193, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R131)?;
     // Controls/WinUIControls.xaml(190,14) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/WinUIControls.xaml(195,21) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 195, 21)?;
-    // Controls/WinUIControls.xaml(196,21) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 196, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R132)?;
     // Controls/WinUIControls.xaml(190,14) IsTemplateFocusTarget
     let priority_2 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_2);
@@ -35644,15 +37425,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
     rt::bind_or_set_priority(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_5, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 201, 22)?;
     // Controls/WinUIControls.xaml(202,22) Foreground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 202, 22)?;
-    // Controls/WinUIControls.xaml(203,22) Padding
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 203, 22)?;
-    // Controls/WinUIControls.xaml(204,22) PlaceholderText
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_text_property(), rt::property(__t::CalendarDatePicker::placeholder_text_property()), 204, 22)?;
-    // Controls/WinUIControls.xaml(205,22) PlaceholderForeground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_foreground_property(), rt::property(__t::CalendarDatePicker::placeholder_foreground_property()), 205, 22)?;
-    // Controls/WinUIControls.xaml(206,22) UseFloatingPlaceholder
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::use_floating_placeholder_property(), rt::property(__t::CalendarDatePicker::use_floating_placeholder_property()), 206, 22)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R133)?;
     // Controls/WinUIControls.xaml(199,14) HorizontalAlignment
     let priority_6 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_6);
@@ -35660,9 +37433,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     let priority_7 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_7);
     // Controls/WinUIControls.xaml(209,22) HorizontalContentAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::horizontal_content_alignment_property(), rt::property(__t::CalendarDatePicker::horizontal_content_alignment_property()), 209, 22)?;
-    // Controls/WinUIControls.xaml(210,22) VerticalContentAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::vertical_content_alignment_property(), rt::property(__t::CalendarDatePicker::vertical_content_alignment_property()), 210, 22)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R134)?;
     context.pop_parent();
     rt::invoked(text_box_0.try_end_init(), 199, 14)?;
     // Controls/WinUIControls.xaml(211,14) Children
@@ -35774,9 +37545,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     // Controls/WinUIControls.xaml(233,27) CornerRadius
     rt::bind_dynamic_resource(&context, calendar_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), "OverlayCornerRadius", 233, 27)?;
     // Controls/WinUIControls.xaml(234,27) FirstDayOfWeek
-    rt::bind_template_binding(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::first_day_of_week_property(), rt::property(__t::CalendarDatePicker::first_day_of_week_property()), 234, 27)?;
-    // Controls/WinUIControls.xaml(235,27) IsTodayHighlighted
-    rt::bind_template_binding(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::is_today_highlighted_property(), rt::property(__t::CalendarDatePicker::is_today_highlighted_property()), 235, 27)?;
+    rt::bind_template_rows(calendar_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R135)?;
     // Controls/WinUIControls.xaml(236,27) SelectedDate
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_0();
     context.push_parent(rt::to_value(reflection_binding_extension_0.clone()));
@@ -35792,15 +37561,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     let provided_23 = rt::provide_value(&context, rt::property_value(__t::Calendar::selected_date_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::selected_date_property(), provided_23, 236, 27)?;
     // Controls/WinUIControls.xaml(237,27) DisplayDate
-    rt::bind_template_binding(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::display_date_property(), rt::property(__t::CalendarDatePicker::display_date_property()), 237, 27)?;
-    // Controls/WinUIControls.xaml(238,27) DisplayDateStart
-    rt::bind_template_binding(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::display_date_start_property(), rt::property(__t::CalendarDatePicker::display_date_start_property()), 238, 27)?;
-    // Controls/WinUIControls.xaml(239,27) DisplayDateEnd
-    rt::bind_template_binding(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::display_date_end_property(), rt::property(__t::CalendarDatePicker::display_date_end_property()), 239, 27)?;
-    // Controls/WinUIControls.xaml(240,27) IsWeekNumberVisible
-    rt::bind_template_binding(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::is_week_number_visible_property(), rt::property(__t::CalendarDatePicker::is_week_number_visible_property()), 240, 27)?;
-    // Controls/WinUIControls.xaml(241,27) WeekNumberRule
-    rt::bind_template_binding(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::week_number_rule_property(), rt::property(__t::CalendarDatePicker::week_number_rule_property()), 241, 27)?;
+    rt::bind_template_rows(calendar_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R136)?;
     context.pop_parent();
     rt::invoked(calendar_0.try_end_init(), 232, 18)?;
     context.pop_parent();
@@ -35905,21 +37666,6 @@ fn build_controls_winuicontrols_xaml_deferred_205(
 fn build_controls_winuicontrols_xaml_deferred_206(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    __build_controls_winuicontrols_xaml_factory_shape_206(service_provider, 77, 78, 79, 80, 82, 83, 86, 76)
-}
-
-#[inline(never)]
-fn __build_controls_winuicontrols_xaml_factory_shape_206(
-    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
-    arg0: i32,
-    arg1: i32,
-    arg2: i32,
-    arg3: i32,
-    arg4: i32,
-    arg5: i32,
-    arg6: i32,
-    arg7: i32,
-) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(76,10) Panel
@@ -35934,27 +37680,23 @@ fn __build_controls_winuicontrols_xaml_factory_shape_206(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&content_presenter_0).upcast::<__t::Control>());
     // Controls/WinUIControls.xaml(77,29) Name
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
-    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), arg0, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 77, 29)?;
     // Controls/WinUIControls.xaml(78,29) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), arg1, 29)?;
-    // Controls/WinUIControls.xaml(79,29) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), arg2, 29)?;
-    // Controls/WinUIControls.xaml(80,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), arg3, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R137)?;
     // Controls/WinUIControls.xaml(77,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(82,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), arg4, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 82, 29)?;
     // Controls/WinUIControls.xaml(83,29) Content (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_4 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
     if value_0.is_some() {
-        rt::bind(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_property(), value_0.clone(), arg5, 29)?;
+        rt::bind(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_property(), value_0.clone(), 83, 29)?;
     } else {
-        content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, arg5, 29)?, priority_1);
+        content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 83, 29)?, priority_1);
     }
     // Controls/WinUIControls.xaml(77,12) HorizontalContentAlignment
     let priority_2 = __t::BindingPriority::Template;
@@ -35963,9 +37705,9 @@ fn __build_controls_winuicontrols_xaml_factory_shape_206(
     let priority_3 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_3);
     // Controls/WinUIControls.xaml(86,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), arg6, 29)?;
-    rt::invoked(content_presenter_0.try_end_init(), arg0, 12)?;
-    rt::invoked(panel_0.try_end_init(), arg7, 10)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::ContentPresenter::corner_radius_property()), 86, 29)?;
+    rt::invoked(content_presenter_0.try_end_init(), 77, 12)?;
+    rt::invoked(panel_0.try_end_init(), 76, 10)?;
     __t::Result::Ok(rt::to_value(panel_0.clone()))
 }
 
@@ -36137,7 +37879,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     grid_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&grid_0)), 144, 17)?;
     // Controls/WinUIControls.xaml(144,37) Margin
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 144, 37)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 144, 37)?;
     // Controls/WinUIControls.xaml(145,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(145,14) Button
@@ -36154,19 +37896,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     let value_0: __t::MarkupValue = rt::to_value(provided_1);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_0, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 146, 21)?;
     // Controls/WinUIControls.xaml(147,21) Background
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 147, 21)?;
-    // Controls/WinUIControls.xaml(148,21) Foreground
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 148, 21)?;
-    // Controls/WinUIControls.xaml(149,21) BorderBrush
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 149, 21)?;
-    // Controls/WinUIControls.xaml(150,21) BorderThickness
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 150, 21)?;
-    // Controls/WinUIControls.xaml(151,21) IsEnabled
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::InputElement::is_enabled_property(), rt::property(__t::InputElement::is_enabled_property()), 151, 21)?;
-    // Controls/WinUIControls.xaml(152,21) MinWidth
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 152, 21)?;
-    // Controls/WinUIControls.xaml(153,21) MaxWidth
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_width_property(), rt::property(__t::Layoutable::max_width_property()), 153, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R138)?;
     // Controls/WinUIControls.xaml(145,14) HorizontalAlignment
     let priority_1 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_1);
@@ -36177,7 +37907,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     let priority_3 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_3);
     // Controls/WinUIControls.xaml(157,21) CornerRadius
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 157, 21)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 157, 21)?;
     // Controls/WinUIControls.xaml(145,14) IsTemplateFocusTarget
     let priority_4 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_4);
@@ -36228,11 +37958,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     // Controls/WinUIControls.xaml(163,28) Padding
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "DatePickerHostPadding", 163, 28)?;
     // Controls/WinUIControls.xaml(164,28) FontFamily
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 164, 28)?;
-    // Controls/WinUIControls.xaml(165,28) FontWeight
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 165, 28)?;
-    // Controls/WinUIControls.xaml(166,28) FontSize
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 166, 28)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R139)?;
     context.pop_parent();
     rt::invoked(text_block_0.try_end_init(), 160, 18)?;
     // Controls/WinUIControls.xaml(167,18) Children
@@ -36257,11 +37983,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     let priority_9 = __t::BindingPriority::Template;
     text_block_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(1.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_9);
     // Controls/WinUIControls.xaml(172,28) FontFamily
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 172, 28)?;
-    // Controls/WinUIControls.xaml(173,28) FontWeight
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 173, 28)?;
-    // Controls/WinUIControls.xaml(174,28) FontSize
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 174, 28)?;
+    rt::bind_template_rows(text_block_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R140)?;
     context.pop_parent();
     rt::invoked(text_block_1.try_end_init(), 167, 18)?;
     // Controls/WinUIControls.xaml(175,18) Children
@@ -36283,11 +38005,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     // Controls/WinUIControls.xaml(178,28) Padding
     rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "DatePickerHostPadding", 178, 28)?;
     // Controls/WinUIControls.xaml(179,28) FontFamily
-    rt::bind_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 179, 28)?;
-    // Controls/WinUIControls.xaml(180,28) FontWeight
-    rt::bind_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 180, 28)?;
-    // Controls/WinUIControls.xaml(181,28) FontSize
-    rt::bind_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 181, 28)?;
+    rt::bind_template_rows(text_block_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R141)?;
     context.pop_parent();
     rt::invoked(text_block_2.try_end_init(), 175, 18)?;
     // Controls/WinUIControls.xaml(182,18) Children
@@ -36510,13 +38228,7 @@ fn build_controls_winuicontrols_xaml_deferred_212(
     let value_1: __t::MarkupValue = rt::to_value(provided_0);
     rt::bind_or_set_priority(border_0.upcast_ref::<__t::FerroObject>(), || __t::Visual::shadow_property(), value_1, priority_0, || rt::class_handle(<__t::Shadow as __t::StaticType>::TYPE), true, "Visual.Shadow", 249, 38)?;
     // Controls/WinUIControls.xaml(250,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 250, 17)?;
-    // Controls/WinUIControls.xaml(251,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 251, 17)?;
-    // Controls/WinUIControls.xaml(252,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 252, 17)?;
-    // Controls/WinUIControls.xaml(253,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 253, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R142)?;
     // Controls/WinUIControls.xaml(254,17) Padding
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), "DateTimeFlyoutBorderPadding", 254, 17)?;
     // Controls/WinUIControls.xaml(248,10) MaxHeight
@@ -36582,7 +38294,7 @@ fn build_controls_winuicontrols_xaml_deferred_212(
     // Controls/WinUIControls.xaml(266,23) Background
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "DatePickerFlyoutPresenterHighlightFill", 266, 23)?;
     // Controls/WinUIControls.xaml(267,23) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 267, 23)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 267, 23)?;
     // Controls/WinUIControls.xaml(264,16) Column
     let priority_3 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_3);
@@ -37185,20 +38897,49 @@ fn build_controls_winuicontrols_xaml_deferred_214(
 fn build_controls_winuicontrols_xaml_deferred_215(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(70,10) Panel
+    let panel_0 = __t::Panel::new();
+    context.set_intermediate_root_object(rt::to_value(panel_0.clone()));
+    panel_0.begin_init();
     // Controls/WinUIControls.xaml(71,12) Children
+    let children_collection_0 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(71,12) ContentPresenter
+    let content_presenter_0 = __t::ContentPresenter::new();
+    content_presenter_0.begin_init();
+    __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&content_presenter_0).upcast::<__t::Control>());
     // Controls/WinUIControls.xaml(71,29) Name
+    content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 71, 29)?;
     // Controls/WinUIControls.xaml(72,29) Background
-    // Controls/WinUIControls.xaml(73,29) Foreground
-    // Controls/WinUIControls.xaml(74,29) BorderBrush
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R143)?;
     // Controls/WinUIControls.xaml(71,12) BackgroundSizing
+    let priority_0 = __t::BindingPriority::Template;
+    content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(76,29) BorderThickness
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 76, 29)?;
     // Controls/WinUIControls.xaml(77,29) Content (setter chosen at run time)
+    let priority_1 = __t::BindingPriority::Template;
+    let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
+    let provided_4 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
+    let value_0: __t::MarkupValue = rt::to_value(provided_4);
+    if value_0.is_some() {
+        rt::bind(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_property(), value_0.clone(), 77, 29)?;
+    } else {
+        content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 77, 29)?, priority_1);
+    }
     // Controls/WinUIControls.xaml(71,12) HorizontalContentAlignment
+    let priority_2 = __t::BindingPriority::Template;
+    content_presenter_0.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_2);
     // Controls/WinUIControls.xaml(71,12) VerticalContentAlignment
+    let priority_3 = __t::BindingPriority::Template;
+    content_presenter_0.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_3);
     // Controls/WinUIControls.xaml(80,29) CornerRadius
-    __build_controls_winuicontrols_xaml_factory_shape_206(service_provider, 71, 72, 73, 74, 76, 77, 80, 70)
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::ContentPresenter::corner_radius_property()), 80, 29)?;
+    rt::invoked(content_presenter_0.try_end_init(), 71, 12)?;
+    rt::invoked(panel_0.try_end_init(), 70, 10)?;
+    __t::Result::Ok(rt::to_value(panel_0.clone()))
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(105,4)` (a template or a deferred resource).
@@ -37377,7 +39118,7 @@ fn build_controls_winuicontrols_xaml_deferred_218(
     grid_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&grid_0)), 135, 17)?;
     // Controls/WinUIControls.xaml(135,37) Margin
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 135, 37)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 135, 37)?;
     // Controls/WinUIControls.xaml(136,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(136,14) Button
@@ -37394,19 +39135,7 @@ fn build_controls_winuicontrols_xaml_deferred_218(
     let value_0: __t::MarkupValue = rt::to_value(provided_1);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_0, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 137, 21)?;
     // Controls/WinUIControls.xaml(138,21) Background
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 138, 21)?;
-    // Controls/WinUIControls.xaml(139,21) Foreground
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 139, 21)?;
-    // Controls/WinUIControls.xaml(140,21) BorderBrush
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 140, 21)?;
-    // Controls/WinUIControls.xaml(141,21) BorderThickness
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 141, 21)?;
-    // Controls/WinUIControls.xaml(142,21) IsEnabled
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::InputElement::is_enabled_property(), rt::property(__t::InputElement::is_enabled_property()), 142, 21)?;
-    // Controls/WinUIControls.xaml(143,21) MinWidth
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 143, 21)?;
-    // Controls/WinUIControls.xaml(144,21) MaxWidth
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_width_property(), rt::property(__t::Layoutable::max_width_property()), 144, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R144)?;
     // Controls/WinUIControls.xaml(136,14) HorizontalAlignment
     let priority_1 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_1);
@@ -37417,7 +39146,7 @@ fn build_controls_winuicontrols_xaml_deferred_218(
     let priority_3 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_3);
     // Controls/WinUIControls.xaml(148,21) CornerRadius
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 148, 21)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 148, 21)?;
     // Controls/WinUIControls.xaml(136,14) IsTemplateFocusTarget
     let priority_4 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_4);
@@ -37461,11 +39190,7 @@ fn build_controls_winuicontrols_xaml_deferred_218(
     // Controls/WinUIControls.xaml(156,30) Padding
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "TimePickerHostPadding", 156, 30)?;
     // Controls/WinUIControls.xaml(157,30) FontFamily
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 157, 30)?;
-    // Controls/WinUIControls.xaml(158,30) FontWeight
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 158, 30)?;
-    // Controls/WinUIControls.xaml(159,30) FontSize
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 159, 30)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R145)?;
     context.pop_parent();
     rt::invoked(text_block_0.try_end_init(), 153, 20)?;
     context.pop_parent();
@@ -37523,11 +39248,7 @@ fn build_controls_winuicontrols_xaml_deferred_218(
     // Controls/WinUIControls.xaml(170,30) Padding
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "TimePickerHostPadding", 170, 30)?;
     // Controls/WinUIControls.xaml(171,30) FontFamily
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 171, 30)?;
-    // Controls/WinUIControls.xaml(172,30) FontWeight
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 172, 30)?;
-    // Controls/WinUIControls.xaml(173,30) FontSize
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 173, 30)?;
+    rt::bind_template_rows(text_block_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R146)?;
     context.pop_parent();
     rt::invoked(text_block_1.try_end_init(), 167, 20)?;
     context.pop_parent();
@@ -37585,11 +39306,7 @@ fn build_controls_winuicontrols_xaml_deferred_218(
     // Controls/WinUIControls.xaml(184,30) Padding
     rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "TimePickerHostPadding", 184, 30)?;
     // Controls/WinUIControls.xaml(185,30) FontFamily
-    rt::bind_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 185, 30)?;
-    // Controls/WinUIControls.xaml(186,30) FontWeight
-    rt::bind_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 186, 30)?;
-    // Controls/WinUIControls.xaml(187,30) FontSize
-    rt::bind_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 187, 30)?;
+    rt::bind_template_rows(text_block_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R147)?;
     context.pop_parent();
     rt::invoked(text_block_2.try_end_init(), 181, 20)?;
     context.pop_parent();
@@ -37644,11 +39361,7 @@ fn build_controls_winuicontrols_xaml_deferred_218(
     // Controls/WinUIControls.xaml(197,30) Padding
     rt::bind_dynamic_resource(&context, text_block_3.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "TimePickerHostPadding", 197, 30)?;
     // Controls/WinUIControls.xaml(198,30) FontFamily
-    rt::bind_template_binding(text_block_3.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 198, 30)?;
-    // Controls/WinUIControls.xaml(199,30) FontWeight
-    rt::bind_template_binding(text_block_3.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 199, 30)?;
-    // Controls/WinUIControls.xaml(200,30) FontSize
-    rt::bind_template_binding(text_block_3.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 200, 30)?;
+    rt::bind_template_rows(text_block_3.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R148)?;
     context.pop_parent();
     rt::invoked(text_block_3.try_end_init(), 195, 20)?;
     context.pop_parent();
@@ -37818,13 +39531,7 @@ fn build_controls_winuicontrols_xaml_deferred_220(
     let value_1: __t::MarkupValue = rt::to_value(provided_0);
     rt::bind_or_set_priority(border_0.upcast_ref::<__t::FerroObject>(), || __t::Visual::shadow_property(), value_1, priority_0, || rt::class_handle(<__t::Shadow as __t::StaticType>::TYPE), true, "Visual.Shadow", 259, 38)?;
     // Controls/WinUIControls.xaml(260,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 260, 17)?;
-    // Controls/WinUIControls.xaml(261,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 261, 17)?;
-    // Controls/WinUIControls.xaml(262,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 262, 17)?;
-    // Controls/WinUIControls.xaml(263,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 263, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R149)?;
     // Controls/WinUIControls.xaml(264,17) Padding
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), "DateTimeFlyoutBorderPadding", 264, 17)?;
     // Controls/WinUIControls.xaml(258,10) MaxHeight
@@ -37890,7 +39597,7 @@ fn build_controls_winuicontrols_xaml_deferred_220(
     // Controls/WinUIControls.xaml(276,23) Background
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "TimePickerFlyoutPresenterHighlightFill", 276, 23)?;
     // Controls/WinUIControls.xaml(277,23) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 277, 23)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 277, 23)?;
     // Controls/WinUIControls.xaml(274,16) Column
     let priority_3 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_3);
@@ -38636,15 +40343,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     // Controls/WinUIControls.xaml(65,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "WindowCaptionButtonBackground", 65, 17)?;
     // Controls/WinUIControls.xaml(66,17) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 66, 17)?;
-    // Controls/WinUIControls.xaml(67,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 67, 17)?;
-    // Controls/WinUIControls.xaml(68,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 68, 17)?;
-    // Controls/WinUIControls.xaml(69,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 69, 17)?;
-    // Controls/WinUIControls.xaml(70,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 70, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R150)?;
     // Controls/WinUIControls.xaml(71,12) Child
     // Controls/WinUIControls.xaml(71,12) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -38664,9 +40363,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 72, 29)?, priority_0);
     }
     // Controls/WinUIControls.xaml(73,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 73, 29)?;
-    // Controls/WinUIControls.xaml(74,29) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 74, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R151)?;
     // Controls/WinUIControls.xaml(71,12) HorizontalAlignment
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_1);
@@ -38847,22 +40544,6 @@ fn build_controls_winuicontrols_xaml_deferred_224(
 fn build_controls_winuicontrols_xaml_deferred_225(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    __build_controls_winuicontrols_xaml_factory_shape_225(service_provider, 131, 132, 133, 135, "GlyphGeometryE72B", 136, 137, 140, 141)
-}
-
-#[inline(never)]
-fn __build_controls_winuicontrols_xaml_factory_shape_225(
-    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
-    arg0: i32,
-    arg1: i32,
-    arg2: i32,
-    arg3: i32,
-    arg4: &'static str,
-    arg5: i32,
-    arg6: i32,
-    arg7: i32,
-    arg8: i32,
-) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(131,10) Border
@@ -38872,11 +40553,9 @@ fn __build_controls_winuicontrols_xaml_factory_shape_225(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(131,17) Name
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
-    rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), arg0, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 131, 17)?;
     // Controls/WinUIControls.xaml(132,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), arg1, 17)?;
-    // Controls/WinUIControls.xaml(133,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), arg2, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R152)?;
     // Controls/WinUIControls.xaml(135,12) Child
     // Controls/WinUIControls.xaml(135,12) Path
     let path_0 = __t::Path::new();
@@ -38885,14 +40564,14 @@ fn __build_controls_winuicontrols_xaml_factory_shape_225(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(135,17) Name
     path_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Content")));
-    rt::register_name_value(name_scope.as_ref(), "Content", __t::Rc::new(__t::Clone::clone(&path_0)), arg3, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", __t::Rc::new(__t::Clone::clone(&path_0)), 135, 17)?;
     // Controls/WinUIControls.xaml(136,17) Data (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
-    let provided_2 = rt::provide_static_resource(&context, arg4, || rt::property_value(__t::Path::data_property()), arg5, 17)?;
+    let provided_2 = rt::provide_static_resource(&context, "GlyphGeometryE72B", || rt::property_value(__t::Path::data_property()), 136, 17)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_2);
-    rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, priority_0, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", arg5, 17)?;
+    rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, priority_0, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 136, 17)?;
     // Controls/WinUIControls.xaml(137,17) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), arg6, 17)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 137, 17)?;
     // Controls/WinUIControls.xaml(135,12) Stretch
     let priority_1 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_1);
@@ -38900,13 +40579,11 @@ fn __build_controls_winuicontrols_xaml_factory_shape_225(
     let priority_2 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Layoutable::width_property(), 14.0_f64, priority_2);
     // Controls/WinUIControls.xaml(140,17) HorizontalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), arg7, 17)?;
-    // Controls/WinUIControls.xaml(141,17) VerticalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), arg8, 17)?;
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R153)?;
     context.pop_parent();
-    rt::invoked(path_0.try_end_init(), arg3, 12)?;
+    rt::invoked(path_0.try_end_init(), 135, 12)?;
     context.pop_parent();
-    rt::invoked(border_0.try_end_init(), arg0, 10)?;
+    rt::invoked(border_0.try_end_init(), 131, 10)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
 }
 
@@ -39021,20 +40698,47 @@ fn build_controls_winuicontrols_xaml_deferred_226(
 fn build_controls_winuicontrols_xaml_deferred_227(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(182,10) Border
+    let border_0 = __t::Border::new();
+    context.set_intermediate_root_object(rt::to_value(border_0.clone()));
+    border_0.begin_init();
+    context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(182,17) Name
+    border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 182, 17)?;
     // Controls/WinUIControls.xaml(183,17) Background
-    // Controls/WinUIControls.xaml(184,17) CornerRadius
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R154)?;
     // Controls/WinUIControls.xaml(186,12) Child
     // Controls/WinUIControls.xaml(186,12) Path
+    let path_0 = __t::Path::new();
+    path_0.begin_init();
+    border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&path_0).upcast::<__t::Control>()));
+    context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(186,17) Name
+    path_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Content")));
+    rt::register_name_value(name_scope.as_ref(), "Content", __t::Rc::new(__t::Clone::clone(&path_0)), 186, 17)?;
     // Controls/WinUIControls.xaml(187,17) Data (setter chosen at run time)
+    let priority_0 = __t::BindingPriority::Template;
+    let provided_2 = rt::provide_static_resource(&context, "GlyphGeometryE700", || rt::property_value(__t::Path::data_property()), 187, 17)?;
+    let value_0: __t::MarkupValue = rt::to_value(provided_2);
+    rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, priority_0, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 187, 17)?;
     // Controls/WinUIControls.xaml(188,17) Fill
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 188, 17)?;
     // Controls/WinUIControls.xaml(186,12) Stretch
+    let priority_1 = __t::BindingPriority::Template;
+    path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_1);
     // Controls/WinUIControls.xaml(186,12) Width
+    let priority_2 = __t::BindingPriority::Template;
+    path_0.set_value_with_priority(__t::Layoutable::width_property(), 14.0_f64, priority_2);
     // Controls/WinUIControls.xaml(191,17) HorizontalAlignment
-    // Controls/WinUIControls.xaml(192,17) VerticalAlignment
-    __build_controls_winuicontrols_xaml_factory_shape_225(service_provider, 182, 183, 184, 186, "GlyphGeometryE700", 187, 188, 191, 192)
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R155)?;
+    context.pop_parent();
+    rt::invoked(path_0.try_end_init(), 186, 12)?;
+    context.pop_parent();
+    rt::invoked(border_0.try_end_init(), 182, 10)?;
+    __t::Result::Ok(rt::to_value(border_0.clone()))
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(222,4)` (a template or a deferred resource).
@@ -39081,9 +40785,7 @@ fn build_controls_winuicontrols_xaml_deferred_229(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 226, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(227,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 227, 27)?;
-    // Controls/WinUIControls.xaml(228,27) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 228, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R156)?;
     rt::invoked(content_presenter_0.try_end_init(), 225, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
 }
@@ -39348,7 +41050,7 @@ fn build_controls_winuicontrols_xaml_deferred_231(
     // Controls/WinUIControls.xaml(246,23) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "SystemControlTransparentBrush", 246, 23)?;
     // Controls/WinUIControls.xaml(247,23) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::WindowDrawnDecorations::frame_thickness_property()), 247, 23)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::frame_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 247, 23)?;
     // Controls/WinUIControls.xaml(248,23) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "SurfaceStrokeColorDefaultBrush", 248, 23)?;
     // Controls/WinUIControls.xaml(245,16) IsHitTestVisible
@@ -39370,11 +41072,11 @@ fn build_controls_winuicontrols_xaml_deferred_231(
     let priority_1 = __t::BindingPriority::Template;
     panel_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_1);
     // Controls/WinUIControls.xaml(253,22) Height
-    rt::bind_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::WindowDrawnDecorations::title_bar_height_property()), 253, 22)?;
+    rt::apply_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::title_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 253, 22)?;
     // Controls/WinUIControls.xaml(254,22) Background
     rt::bind_dynamic_resource(&context, panel_1.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), "SolidBackgroundFillColorBaseBrush", 254, 22)?;
     // Controls/WinUIControls.xaml(255,22) IsVisible
-    rt::bind_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::WindowDrawnDecorations::has_title_bar_property()), 255, 22)?;
+    rt::apply_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::has_title_bar_property()), || rt::property(__t::Visual::is_visible_property()), 255, 22)?;
     // Controls/WinUIControls.xaml(251,16) ElementRole
     let priority_2 = __t::BindingPriority::Template;
     panel_1.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::TitleBar, priority_2);
@@ -39405,12 +41107,12 @@ fn build_controls_winuicontrols_xaml_deferred_231(
     let priority_3 = __t::BindingPriority::Template;
     panel_3.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_3);
     // Controls/WinUIControls.xaml(267,22) Height
-    rt::bind_template_binding(panel_3.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::WindowDrawnDecorations::title_bar_height_property()), 267, 22)?;
+    rt::apply_template_binding(panel_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::title_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 267, 22)?;
     // Controls/WinUIControls.xaml(265,16) IsHitTestVisible
     let priority_4 = __t::BindingPriority::Template;
     panel_3.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_4);
     // Controls/WinUIControls.xaml(269,22) IsVisible
-    rt::bind_template_binding(panel_3.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::WindowDrawnDecorations::has_title_bar_property()), 269, 22)?;
+    rt::apply_template_binding(panel_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::has_title_bar_property()), || rt::property(__t::Visual::is_visible_property()), 269, 22)?;
     // Controls/WinUIControls.xaml(270,18) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(&panel_3);
     // Controls/WinUIControls.xaml(270,18) TextBlock
@@ -39427,7 +41129,7 @@ fn build_controls_winuicontrols_xaml_deferred_231(
     let value_0: __t::MarkupValue = rt::to_value(provided_8);
     rt::bind_or_set_priority(text_block_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_5, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 271, 28)?;
     // Controls/WinUIControls.xaml(272,28) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::WindowDrawnDecorations::title_property()), 272, 28)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::title_property()), || rt::property(__t::TextBlock::text_property()), 272, 28)?;
     // Controls/WinUIControls.xaml(273,28) Foreground
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), "TitleBarForegroundBrush", 273, 28)?;
     // Controls/WinUIControls.xaml(270,18) Margin
@@ -39467,9 +41169,7 @@ fn build_controls_winuicontrols_xaml_deferred_231(
     let priority_12 = __t::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_12);
     // Controls/WinUIControls.xaml(283,27) Height
-    rt::bind_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::WindowDrawnDecorations::title_bar_height_property()), 283, 27)?;
-    // Controls/WinUIControls.xaml(284,27) IsVisible
-    rt::bind_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::WindowDrawnDecorations::has_title_bar_property()), 284, 27)?;
+    rt::bind_template_rows(stack_panel_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R157)?;
     // Controls/WinUIControls.xaml(280,16) Orientation
     let priority_13 = __t::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(__t::StackPanel::orientation_property(), __t::Orientation::Horizontal, priority_13);
@@ -39659,7 +41359,7 @@ fn build_controls_winuicontrols_xaml_deferred_231(
     __t::WindowDrawnDecorationsContent::__markup_set_FullscreenPopover(&window_drawn_decorations_content_0, __t::Option::Some(__t::Clone::clone(&panel_4).upcast::<__t::Control>()));
     context.push_parent(rt::to_value(panel_4.clone()));
     // Controls/WinUIControls.xaml(324,20) Height
-    rt::bind_template_binding(panel_4.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::WindowDrawnDecorations::default_title_bar_height_property()), 324, 20)?;
+    rt::apply_template_binding(panel_4.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::default_title_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 324, 20)?;
     // Controls/WinUIControls.xaml(324,14) VerticalAlignment
     let priority_34 = __t::BindingPriority::Template;
     panel_4.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_34);
@@ -39684,7 +41384,7 @@ fn build_controls_winuicontrols_xaml_deferred_231(
     let value_10: __t::MarkupValue = rt::to_value(provided_27);
     rt::bind_or_set_priority(text_block_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_10, priority_36, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 329, 26)?;
     // Controls/WinUIControls.xaml(330,26) Text
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::WindowDrawnDecorations::title_property()), 330, 26)?;
+    rt::apply_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::title_property()), || rt::property(__t::TextBlock::text_property()), 330, 26)?;
     // Controls/WinUIControls.xaml(331,26) Foreground
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), "TitleBarForegroundBrush", 331, 26)?;
     // Controls/WinUIControls.xaml(328,16) Margin
@@ -40167,14 +41867,12 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     // Controls/WinUIControls.xaml(109,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "InfoBarInformationalSeverityBackgroundBrush", 109, 17)?;
     // Controls/WinUIControls.xaml(110,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 110, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 110, 17)?;
     // Controls/WinUIControls.xaml(107,10) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/WinUIControls.xaml(112,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 112, 17)?;
-    // Controls/WinUIControls.xaml(113,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 113, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R158)?;
     // Controls/WinUIControls.xaml(115,14) Transitions
     let transitions_0 = __t::Transitions::__markup_new_0();
     // Controls/WinUIControls.xaml(116,16) Content
@@ -40200,9 +41898,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
     // Controls/WinUIControls.xaml(121,19) MinHeight
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "InfoBarMinHeight", 121, 19)?;
     // Controls/WinUIControls.xaml(122,19) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 122, 19)?;
-    // Controls/WinUIControls.xaml(123,19) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 123, 19)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R159)?;
     // Controls/WinUIControls.xaml(124,19) Padding (setter chosen at run time)
     let priority_4 = __t::BindingPriority::Template;
     let provided_7 = rt::provide_static_resource(&context, "InfoBarContentRootPadding", || rt::property_value(__t::Decorator::padding_property()), 124, 19)?;
@@ -40348,11 +42044,7 @@ fn build_controls_winuicontrols_xaml_deferred_235(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_8.clone(), "ContentControl.Content", 1, 149, 33)?, priority_21);
     }
     // Controls/WinUIControls.xaml(150,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 150, 33)?;
-    // Controls/WinUIControls.xaml(151,33) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 151, 33)?;
-    // Controls/WinUIControls.xaml(152,33) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 152, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R160)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 146, 16)?;
     // Controls/WinUIControls.xaml(153,16) Children
@@ -40514,7 +42206,7 @@ fn build_controls_winuicontrols_xaml_deferred_237(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 45, 17)?;
     // Controls/WinUIControls.xaml(46,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 46, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 46, 17)?;
     // Controls/WinUIControls.xaml(47,17) CornerRadius
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("TemplateSettings.InfoBadgeCornerRadius"));
     context.push_parent(rt::to_value(reflection_binding_extension_0.clone()));
@@ -40526,7 +42218,7 @@ fn build_controls_winuicontrols_xaml_deferred_237(
     let provided_2 = rt::provide_value(&context, rt::property_value(__t::Border::corner_radius_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), provided_2, 47, 17)?;
     // Controls/WinUIControls.xaml(48,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 48, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Decorator::padding_property()), 48, 17)?;
     // Controls/WinUIControls.xaml(49,12) Child
     // Controls/WinUIControls.xaml(49,12) Grid
     let grid_0 = __t::Grid::new();
@@ -41200,7 +42892,7 @@ fn build_controls_winuicontrols_xaml_deferred_255(
     // Controls/WinUIControls.xaml(47,40) Height
     rt::bind_dynamic_resource(&context, grid_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "TitleBarCompactHeight", 47, 40)?;
     // Controls/WinUIControls.xaml(47,89) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 47, 89)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 47, 89)?;
     // Controls/WinUIControls.xaml(50,14) ColumnDefinitions
     let column_definitions_collection_0 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/WinUIControls.xaml(50,14) ColumnDefinition
@@ -41371,7 +43063,7 @@ fn build_controls_winuicontrols_xaml_deferred_255(
     let value_0: __t::MarkupValue = rt::to_value(provided_6);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_16, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 85, 19)?;
     // Controls/WinUIControls.xaml(86,19) IsEnabled
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::InputElement::is_enabled_property(), rt::property(__t::TitleBar::is_back_button_enabled_property()), 86, 19)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TitleBar::is_back_button_enabled_property()), || rt::property(__t::InputElement::is_enabled_property()), 86, 19)?;
     context.pop_parent();
     rt::invoked(button_0.try_end_init(), 82, 12)?;
     // Controls/WinUIControls.xaml(88,12) Children
@@ -41483,14 +43175,14 @@ fn build_controls_winuicontrols_xaml_deferred_255(
     let priority_27 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_27);
     // Controls/WinUIControls.xaml(112,22) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TitleBar::title_property()), 112, 22)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TitleBar::title_property()), || rt::property(__t::TextBlock::text_property()), 112, 22)?;
     // Controls/WinUIControls.xaml(113,22) Theme (setter chosen at run time)
     let priority_28 = __t::BindingPriority::Template;
     let provided_18 = rt::provide_static_resource(&context, "CaptionTextBlockStyle", || rt::property_value(__t::StyledElement::theme_property()), 113, 22)?;
     let value_3: __t::MarkupValue = rt::to_value(provided_18);
     rt::bind_or_set_priority(text_block_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_3, priority_28, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 113, 22)?;
     // Controls/WinUIControls.xaml(114,22) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 114, 22)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TextBlock::foreground_property()), 114, 22)?;
     // Controls/WinUIControls.xaml(115,22) Margin
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "TitleBarTitleMargin", 115, 22)?;
     // Controls/WinUIControls.xaml(109,12) TextTrimming
@@ -41527,7 +43219,7 @@ fn build_controls_winuicontrols_xaml_deferred_255(
     let priority_34 = __t::BindingPriority::Template;
     text_block_1.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_34);
     // Controls/WinUIControls.xaml(125,22) Text
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TitleBar::subtitle_property()), 125, 22)?;
+    rt::apply_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TitleBar::subtitle_property()), || rt::property(__t::TextBlock::text_property()), 125, 22)?;
     // Controls/WinUIControls.xaml(126,22) Theme (setter chosen at run time)
     let priority_35 = __t::BindingPriority::Template;
     let provided_23 = rt::provide_static_resource(&context, "CaptionTextBlockStyle", || rt::property_value(__t::StyledElement::theme_property()), 126, 22)?;
@@ -41694,11 +43386,7 @@ fn build_controls_winuicontrols_xaml_deferred_258(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Root")));
     rt::register_name_value(name_scope.as_ref(), "Root", __t::Rc::new(__t::Clone::clone(&border_0)), 49, 17)?;
     // Controls/WinUIControls.xaml(50,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 50, 17)?;
-    // Controls/WinUIControls.xaml(51,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 51, 17)?;
-    // Controls/WinUIControls.xaml(52,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 52, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R161)?;
     // Controls/WinUIControls.xaml(53,12) Child
     // Controls/WinUIControls.xaml(53,12) Grid
     let grid_0 = __t::Grid::new();
@@ -41706,7 +43394,7 @@ fn build_controls_winuicontrols_xaml_deferred_258(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&grid_0).upcast::<__t::Control>()));
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(53,17) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 53, 17)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 53, 17)?;
     // Controls/WinUIControls.xaml(53,12) ColumnDefinitions
     let column_definitions_0 = __t::ColumnDefinitions::__markup_new_0();
     rt::invoked(<__t::FerroListOf<__t::Ref<__t::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 54, 17)?;
@@ -41787,19 +43475,7 @@ fn build_controls_winuicontrols_xaml_deferred_258(
     let priority_6 = __t::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_6);
     // Controls/WinUIControls.xaml(69,37) ContentTemplate
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 69, 37)?;
-    // Controls/WinUIControls.xaml(70,37) Padding
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 70, 37)?;
-    // Controls/WinUIControls.xaml(71,37) HorizontalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::horizontal_snap_points_type_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_type_property()), 71, 37)?;
-    // Controls/WinUIControls.xaml(72,37) VerticalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::vertical_snap_points_type_property(), rt::property(__t::ScrollViewer::vertical_snap_points_type_property()), 72, 37)?;
-    // Controls/WinUIControls.xaml(73,37) HorizontalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::horizontal_snap_points_alignment_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_alignment_property()), 73, 37)?;
-    // Controls/WinUIControls.xaml(74,37) VerticalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::vertical_snap_points_alignment_property(), rt::property(__t::ScrollViewer::vertical_snap_points_alignment_property()), 74, 37)?;
-    // Controls/WinUIControls.xaml(75,37) IsScrollInertiaEnabled
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_inertia_enabled_property()), 75, 37)?;
+    rt::bind_template_rows(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R162)?;
     // Controls/WinUIControls.xaml(77,18) GestureRecognizers
     let gesture_recognizers_collection_0 = __t::InputElement::__markup_get_GestureRecognizers(scroll_content_presenter_0.upcast_ref::<__t::InputElement>());
     // Controls/WinUIControls.xaml(77,18) ScrollGestureRecognizer
@@ -42042,18 +43718,12 @@ fn build_controls_winuicontrols_xaml_deferred_260(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Root")));
     rt::register_name_value(name_scope.as_ref(), "Root", __t::Rc::new(__t::Clone::clone(&border_0)), 148, 17)?;
     // Controls/WinUIControls.xaml(149,17) ClipToBounds
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Visual::clip_to_bounds_property(), rt::property(__t::Visual::clip_to_bounds_property()), 149, 17)?;
-    // Controls/WinUIControls.xaml(150,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 150, 17)?;
-    // Controls/WinUIControls.xaml(151,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 151, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R163)?;
     // Controls/WinUIControls.xaml(148,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(153,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 153, 17)?;
-    // Controls/WinUIControls.xaml(154,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 154, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R164)?;
     // Controls/WinUIControls.xaml(155,12) Child
     // Controls/WinUIControls.xaml(155,12) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -42069,23 +43739,7 @@ fn build_controls_winuicontrols_xaml_deferred_260(
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
     rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_1, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 156, 25)?;
     // Controls/WinUIControls.xaml(157,25) VerticalSnapPointsType
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_snap_points_type_property(), rt::property(__t::ScrollViewer::vertical_snap_points_type_property()), 157, 25)?;
-    // Controls/WinUIControls.xaml(158,25) HorizontalSnapPointsType
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_snap_points_type_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_type_property()), 158, 25)?;
-    // Controls/WinUIControls.xaml(159,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 159, 25)?;
-    // Controls/WinUIControls.xaml(160,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 160, 25)?;
-    // Controls/WinUIControls.xaml(161,25) IsScrollChainingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_chaining_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_chaining_enabled_property()), 161, 25)?;
-    // Controls/WinUIControls.xaml(162,25) IsScrollInertiaEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_inertia_enabled_property()), 162, 25)?;
-    // Controls/WinUIControls.xaml(163,25) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 163, 25)?;
-    // Controls/WinUIControls.xaml(164,25) AllowAutoHide
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::allow_auto_hide_property(), rt::property(__t::ScrollViewer::allow_auto_hide_property()), 164, 25)?;
-    // Controls/WinUIControls.xaml(165,25) BringIntoViewOnFocusChange
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::bring_into_view_on_focus_change_property(), rt::property(__t::ScrollViewer::bring_into_view_on_focus_change_property()), 165, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R165)?;
     // Controls/WinUIControls.xaml(166,14) Content
     // Controls/WinUIControls.xaml(166,14) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -42095,9 +43749,7 @@ fn build_controls_winuicontrols_xaml_deferred_260(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 166, 29)?;
     // Controls/WinUIControls.xaml(167,29) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 167, 29)?;
-    // Controls/WinUIControls.xaml(168,29) Margin
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 168, 29)?;
+    rt::bind_template_rows(items_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R166)?;
     rt::invoked(items_presenter_0.try_end_init(), 166, 14)?;
     context.pop_parent();
     rt::invoked(scroll_viewer_0.try_end_init(), 155, 12)?;
@@ -42168,7 +43820,7 @@ fn build_controls_winuicontrols_xaml_deferred_262(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 46, 17)?;
     // Controls/WinUIControls.xaml(47,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 47, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 47, 17)?;
     // Controls/WinUIControls.xaml(46,10) HorizontalAlignment
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
@@ -42185,7 +43837,7 @@ fn build_controls_winuicontrols_xaml_deferred_262(
     border_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Separator")));
     rt::register_name_value(name_scope.as_ref(), "Separator", __t::Rc::new(__t::Clone::clone(&border_1)), 50, 19)?;
     // Controls/WinUIControls.xaml(51,19) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 51, 19)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 51, 19)?;
     // Controls/WinUIControls.xaml(52,19) BorderThickness
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), "ResizeGripperSeparatorThickness", 52, 19)?;
     // Controls/WinUIControls.xaml(50,12) Opacity
@@ -42287,16 +43939,12 @@ fn build_controls_winuicontrols_xaml_deferred_264(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 88, 29)?;
     // Controls/WinUIControls.xaml(89,29) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 89, 29)?;
-    // Controls/WinUIControls.xaml(90,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 90, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R167)?;
     // Controls/WinUIControls.xaml(88,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(92,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 92, 29)?;
-    // Controls/WinUIControls.xaml(93,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 93, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R168)?;
     // Controls/WinUIControls.xaml(94,29) Content (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -42308,13 +43956,7 @@ fn build_controls_winuicontrols_xaml_deferred_264(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 94, 29)?, priority_1);
     }
     // Controls/WinUIControls.xaml(95,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 95, 29)?;
-    // Controls/WinUIControls.xaml(96,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 96, 29)?;
-    // Controls/WinUIControls.xaml(97,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 97, 29)?;
-    // Controls/WinUIControls.xaml(98,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 98, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R169)?;
     rt::invoked(content_presenter_0.try_end_init(), 88, 12)?;
     // Controls/WinUIControls.xaml(99,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
@@ -42406,18 +44048,12 @@ fn build_controls_winuicontrols_xaml_deferred_266(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("border")));
     rt::register_name_value(name_scope.as_ref(), "border", __t::Rc::new(__t::Clone::clone(&border_0)), 79, 17)?;
     // Controls/WinUIControls.xaml(80,17) ClipToBounds
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Visual::clip_to_bounds_property(), rt::property(__t::Visual::clip_to_bounds_property()), 80, 17)?;
-    // Controls/WinUIControls.xaml(81,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 81, 17)?;
-    // Controls/WinUIControls.xaml(82,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 82, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R170)?;
     // Controls/WinUIControls.xaml(79,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(84,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 84, 17)?;
-    // Controls/WinUIControls.xaml(85,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 85, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R171)?;
     // Controls/WinUIControls.xaml(86,12) Child
     // Controls/WinUIControls.xaml(86,12) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -42427,23 +44063,7 @@ fn build_controls_winuicontrols_xaml_deferred_266(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 86, 25)?;
     // Controls/WinUIControls.xaml(87,25) VerticalSnapPointsType
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_snap_points_type_property(), rt::property(__t::ScrollViewer::vertical_snap_points_type_property()), 87, 25)?;
-    // Controls/WinUIControls.xaml(88,25) HorizontalSnapPointsType
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_snap_points_type_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_type_property()), 88, 25)?;
-    // Controls/WinUIControls.xaml(89,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 89, 25)?;
-    // Controls/WinUIControls.xaml(90,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 90, 25)?;
-    // Controls/WinUIControls.xaml(91,25) IsScrollChainingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_chaining_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_chaining_enabled_property()), 91, 25)?;
-    // Controls/WinUIControls.xaml(92,25) IsScrollInertiaEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_inertia_enabled_property()), 92, 25)?;
-    // Controls/WinUIControls.xaml(93,25) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 93, 25)?;
-    // Controls/WinUIControls.xaml(94,25) AllowAutoHide
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::allow_auto_hide_property(), rt::property(__t::ScrollViewer::allow_auto_hide_property()), 94, 25)?;
-    // Controls/WinUIControls.xaml(95,25) BringIntoViewOnFocusChange
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::bring_into_view_on_focus_change_property(), rt::property(__t::ScrollViewer::bring_into_view_on_focus_change_property()), 95, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R172)?;
     // Controls/WinUIControls.xaml(96,14) Content
     // Controls/WinUIControls.xaml(96,14) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -42453,9 +44073,7 @@ fn build_controls_winuicontrols_xaml_deferred_266(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 96, 29)?;
     // Controls/WinUIControls.xaml(97,29) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 97, 29)?;
-    // Controls/WinUIControls.xaml(98,29) Margin
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 98, 29)?;
+    rt::bind_template_rows(items_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R173)?;
     rt::invoked(items_presenter_0.try_end_init(), 96, 14)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 86, 12)?;
     rt::invoked(border_0.try_end_init(), 79, 10)?;
@@ -42744,16 +44362,12 @@ fn build_controls_winuicontrols_xaml_deferred_269(
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64), priority_0);
     // Controls/WinUIControls.xaml(138,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 138, 19)?;
-    // Controls/WinUIControls.xaml(139,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 139, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R174)?;
     // Controls/WinUIControls.xaml(136,12) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/WinUIControls.xaml(141,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 141, 19)?;
-    // Controls/WinUIControls.xaml(142,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 142, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R175)?;
     rt::invoked(border_0.try_end_init(), 136, 12)?;
     // Controls/WinUIControls.xaml(143,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
@@ -42775,15 +44389,7 @@ fn build_controls_winuicontrols_xaml_deferred_269(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 144, 29)?, priority_2);
     }
     // Controls/WinUIControls.xaml(145,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 145, 29)?;
-    // Controls/WinUIControls.xaml(146,29) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 146, 29)?;
-    // Controls/WinUIControls.xaml(147,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 147, 29)?;
-    // Controls/WinUIControls.xaml(148,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 148, 29)?;
-    // Controls/WinUIControls.xaml(149,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 149, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R176)?;
     rt::invoked(content_presenter_0.try_end_init(), 143, 12)?;
     // Controls/WinUIControls.xaml(150,12) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(&panel_0);
@@ -42866,18 +44472,12 @@ fn build_controls_winuicontrols_xaml_deferred_271(
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(227,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 227, 17)?;
-    // Controls/WinUIControls.xaml(228,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 228, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R177)?;
     // Controls/WinUIControls.xaml(227,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(230,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 230, 17)?;
-    // Controls/WinUIControls.xaml(231,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 231, 17)?;
-    // Controls/WinUIControls.xaml(232,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 232, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R178)?;
     // Controls/WinUIControls.xaml(233,12) Child
     // Controls/WinUIControls.xaml(233,12) DockPanel
     let dock_panel_0 = __t::DockPanel::new();
@@ -43783,7 +45383,7 @@ fn build_controls_winuicontrols_xaml_deferred_273(
     let priority_4 = __t::BindingPriority::Template;
     rectangle_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_4);
     // Controls/WinUIControls.xaml(354,76) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 354, 76)?;
+    rt::apply_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 354, 76)?;
     rt::invoked(rectangle_0.try_end_init(), 354, 28)?;
     rt::invoked(border_0.try_end_init(), 353, 26)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
@@ -44262,18 +45862,12 @@ fn build_controls_winuicontrols_xaml_deferred_276(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("BackgroundElement")));
     rt::register_name_value(name_scope.as_ref(), "BackgroundElement", __t::Rc::new(__t::Clone::clone(&border_0)), 444, 17)?;
     // Controls/WinUIControls.xaml(445,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 445, 17)?;
-    // Controls/WinUIControls.xaml(446,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 446, 17)?;
-    // Controls/WinUIControls.xaml(447,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 447, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R179)?;
     // Controls/WinUIControls.xaml(444,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(449,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 449, 17)?;
-    // Controls/WinUIControls.xaml(450,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 450, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R180)?;
     // Controls/WinUIControls.xaml(451,17) MinWidth
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), "ContentDialogMinWidth", 451, 17)?;
     // Controls/WinUIControls.xaml(452,17) MaxWidth
@@ -44359,7 +45953,7 @@ fn build_controls_winuicontrols_xaml_deferred_276(
     let value_1: __t::MarkupValue = rt::to_value(provided_15);
     rt::bind_or_set_priority(text_block_0.upcast_ref::<__t::FerroObject>(), || __t::TextBlock::font_family_property(), value_1, priority_7, || rt::markup_handle(<__t::FontFamily as __t::MarkupTyped>::MARKUP), true, "TextElement.FontFamily", 469, 28)?;
     // Controls/WinUIControls.xaml(470,28) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 470, 28)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TextBlock::foreground_property()), 470, 28)?;
     // Controls/WinUIControls.xaml(467,18) TextWrapping
     let priority_8 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::TextBlock::text_wrapping_property(), __t::TextWrapping::Wrap, priority_8);
@@ -44417,7 +46011,7 @@ fn build_controls_winuicontrols_xaml_deferred_276(
     // Controls/WinUIControls.xaml(489,23) Padding
     rt::bind_dynamic_resource(&context, border_3.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), "ContentDialogPadding", 489, 23)?;
     // Controls/WinUIControls.xaml(490,23) Background
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 490, 23)?;
+    rt::apply_template_binding(border_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 490, 23)?;
     // Controls/WinUIControls.xaml(491,18) Child
     // Controls/WinUIControls.xaml(491,18) Grid
     let grid_1 = __t::Grid::new();
@@ -44637,14 +46231,12 @@ fn build_controls_winuicontrols_xaml_deferred_280(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Controls/WinUIControls.xaml(48,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 48, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 48, 17)?;
     // Controls/WinUIControls.xaml(48,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(50,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 50, 17)?;
-    // Controls/WinUIControls.xaml(51,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 51, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R181)?;
     // Controls/WinUIControls.xaml(52,12) Child
     // Controls/WinUIControls.xaml(52,12) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -44654,9 +46246,7 @@ fn build_controls_winuicontrols_xaml_deferred_280(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 52, 27)?;
     // Controls/WinUIControls.xaml(53,27) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 53, 27)?;
-    // Controls/WinUIControls.xaml(54,27) Margin
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 54, 27)?;
+    rt::bind_template_rows(items_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R182)?;
     rt::invoked(items_presenter_0.try_end_init(), 52, 12)?;
     rt::invoked(border_0.try_end_init(), 48, 10)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
@@ -44969,9 +46559,7 @@ fn build_controls_winuicontrols_xaml_deferred_284(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContainerRoot")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContainerRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 87, 17)?;
     // Controls/WinUIControls.xaml(88,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 88, 17)?;
-    // Controls/WinUIControls.xaml(89,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 89, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R183)?;
     // Controls/WinUIControls.xaml(90,12) Child
     // Controls/WinUIControls.xaml(90,12) Grid
     let grid_0 = __t::Grid::new();
@@ -45022,23 +46610,11 @@ fn build_controls_winuicontrols_xaml_deferred_284(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 93, 31)?, priority_1);
     }
     // Controls/WinUIControls.xaml(94,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 94, 31)?;
-    // Controls/WinUIControls.xaml(95,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 95, 31)?;
-    // Controls/WinUIControls.xaml(96,31) FontFamily
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 96, 31)?;
-    // Controls/WinUIControls.xaml(97,31) FontWeight
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 97, 31)?;
-    // Controls/WinUIControls.xaml(98,31) FontSize
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 98, 31)?;
-    // Controls/WinUIControls.xaml(99,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 99, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R184)?;
     // Controls/WinUIControls.xaml(100,31) Padding
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), "SelectorBarItemTextVisualMargin", 100, 31)?;
     // Controls/WinUIControls.xaml(101,31) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 101, 31)?;
-    // Controls/WinUIControls.xaml(102,31) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 102, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R185)?;
     // Controls/WinUIControls.xaml(91,14) TextWrapping
     let priority_2 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::text_wrapping_property(), __t::TextWrapping::Wrap, priority_2);
@@ -45167,7 +46743,7 @@ fn build_controls_winuicontrols_xaml_deferred_284(
     let priority_22 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_22);
     // Controls/WinUIControls.xaml(140,21) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 140, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 140, 21)?;
     context.pop_parent();
     rt::invoked(border_1.try_end_init(), 130, 14)?;
     context.pop_parent();
@@ -45344,15 +46920,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 99, 27)?;
     // Controls/WinUIControls.xaml(100,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 100, 27)?;
-    // Controls/WinUIControls.xaml(101,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 101, 27)?;
-    // Controls/WinUIControls.xaml(102,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 102, 27)?;
-    // Controls/WinUIControls.xaml(103,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 103, 27)?;
-    // Controls/WinUIControls.xaml(104,27) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 104, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R186)?;
     // Controls/WinUIControls.xaml(105,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -45364,19 +46932,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 105, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(106,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 106, 27)?;
-    // Controls/WinUIControls.xaml(107,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 107, 27)?;
-    // Controls/WinUIControls.xaml(108,27) FontSize
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 108, 27)?;
-    // Controls/WinUIControls.xaml(109,27) FontFamily
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 109, 27)?;
-    // Controls/WinUIControls.xaml(110,27) FontWeight
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 110, 27)?;
-    // Controls/WinUIControls.xaml(111,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 111, 27)?;
-    // Controls/WinUIControls.xaml(112,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 112, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R187)?;
     rt::invoked(content_presenter_0.try_end_init(), 99, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
 }
@@ -45501,15 +47057,7 @@ fn build_controls_winuicontrols_xaml_deferred_289(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 163, 27)?;
     // Controls/WinUIControls.xaml(164,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 164, 27)?;
-    // Controls/WinUIControls.xaml(165,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 165, 27)?;
-    // Controls/WinUIControls.xaml(166,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 166, 27)?;
-    // Controls/WinUIControls.xaml(167,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 167, 27)?;
-    // Controls/WinUIControls.xaml(168,27) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 168, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R188)?;
     // Controls/WinUIControls.xaml(169,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -45521,19 +47069,7 @@ fn build_controls_winuicontrols_xaml_deferred_289(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 169, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(170,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 170, 27)?;
-    // Controls/WinUIControls.xaml(171,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 171, 27)?;
-    // Controls/WinUIControls.xaml(172,27) FontSize
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 172, 27)?;
-    // Controls/WinUIControls.xaml(173,27) FontFamily
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 173, 27)?;
-    // Controls/WinUIControls.xaml(174,27) FontWeight
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 174, 27)?;
-    // Controls/WinUIControls.xaml(175,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 175, 27)?;
-    // Controls/WinUIControls.xaml(176,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 176, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R189)?;
     rt::invoked(content_presenter_0.try_end_init(), 163, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
 }
@@ -45667,17 +47203,7 @@ fn build_controls_winuicontrols_xaml_deferred_291(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 216, 27)?;
     // Controls/WinUIControls.xaml(217,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 217, 27)?;
-    // Controls/WinUIControls.xaml(218,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 218, 27)?;
-    // Controls/WinUIControls.xaml(219,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 219, 27)?;
-    // Controls/WinUIControls.xaml(220,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 220, 27)?;
-    // Controls/WinUIControls.xaml(221,27) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 221, 27)?;
-    // Controls/WinUIControls.xaml(222,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 222, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R190)?;
     // Controls/WinUIControls.xaml(223,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -45689,11 +47215,7 @@ fn build_controls_winuicontrols_xaml_deferred_291(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 223, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(224,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 224, 27)?;
-    // Controls/WinUIControls.xaml(225,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 225, 27)?;
-    // Controls/WinUIControls.xaml(226,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 226, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R191)?;
     rt::invoked(content_presenter_0.try_end_init(), 216, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
 }
@@ -45740,11 +47262,7 @@ fn build_controls_winuicontrols_xaml_deferred_293(
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(254,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 254, 17)?;
-    // Controls/WinUIControls.xaml(255,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 255, 17)?;
-    // Controls/WinUIControls.xaml(256,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 256, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R192)?;
     // Controls/WinUIControls.xaml(257,12) Child
     // Controls/WinUIControls.xaml(257,12) Grid
     let grid_0 = __t::Grid::new();
@@ -46039,7 +47557,7 @@ fn build_controls_winuicontrols_xaml_deferred_293(
     let priority_19 = __t::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(__t::ContentPresenter::padding_property(), __t::Thickness::__markup_new_3(1.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_19);
     // Controls/WinUIControls.xaml(308,37) ContentTemplate
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 308, 37)?;
+    rt::apply_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 308, 37)?;
     // Controls/WinUIControls.xaml(310,18) GestureRecognizers
     let gesture_recognizers_collection_0 = __t::InputElement::__markup_get_GestureRecognizers(scroll_content_presenter_0.upcast_ref::<__t::InputElement>());
     // Controls/WinUIControls.xaml(310,18) ScrollGestureRecognizer
@@ -46546,9 +48064,7 @@ fn build_controls_winuicontrols_xaml_deferred_296(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("TabContainerGrid")));
     rt::register_name_value(name_scope.as_ref(), "TabContainerGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 373, 19)?;
     // Controls/WinUIControls.xaml(374,19) Dock
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::DockPanel::dock_property(), rt::property(__t::TabControl::tab_strip_placement_property()), 374, 19)?;
-    // Controls/WinUIControls.xaml(375,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 375, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R193)?;
     // Controls/WinUIControls.xaml(373,12) RenderTransformOrigin
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Visual::render_transform_origin_property(), __t::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, __t::RelativeUnit::Relative), priority_0);
@@ -46652,7 +48168,7 @@ fn build_controls_winuicontrols_xaml_deferred_296(
     dock_panel_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("TabsItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "TabsItemsPresenter", __t::Rc::new(__t::Clone::clone(&dock_panel_1)), 398, 30)?;
     // Controls/WinUIControls.xaml(398,58) Margin
-    rt::bind_template_binding(dock_panel_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 398, 58)?;
+    rt::apply_template_binding(dock_panel_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 398, 58)?;
     // Controls/WinUIControls.xaml(399,22) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(dock_panel_1.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(399,22) Panel
@@ -46710,7 +48226,7 @@ fn build_controls_winuicontrols_xaml_deferred_296(
     let priority_20 = __t::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Left, priority_20);
     // Controls/WinUIControls.xaml(409,37) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 409, 37)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 409, 37)?;
     rt::invoked(items_presenter_0.try_end_init(), 407, 22)?;
     // Controls/WinUIControls.xaml(412,22) Children
     let children_collection_6 = __t::Panel::__markup_get_Children(dock_panel_1.upcast_ref::<__t::Panel>());
@@ -46767,11 +48283,7 @@ fn build_controls_winuicontrols_xaml_deferred_296(
     border_5.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("TabContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "TabContentPresenter", __t::Rc::new(__t::Clone::clone(&border_5)), 423, 19)?;
     // Controls/WinUIControls.xaml(424,19) BorderBrush
-    rt::bind_template_binding(border_5.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 424, 19)?;
-    // Controls/WinUIControls.xaml(425,19) BorderThickness
-    rt::bind_template_binding(border_5.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 425, 19)?;
-    // Controls/WinUIControls.xaml(426,19) CornerRadius
-    rt::bind_template_binding(border_5.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 426, 19)?;
+    rt::bind_template_rows(border_5.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R194)?;
     // Controls/WinUIControls.xaml(427,14) Child
     // Controls/WinUIControls.xaml(427,14) Panel
     let panel_2 = __t::Panel::new();
@@ -46790,9 +48302,7 @@ fn build_controls_winuicontrols_xaml_deferred_296(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_SelectedContentHost2")));
     rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost2", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 428, 33)?;
     // Controls/WinUIControls.xaml(429,33) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::TabControl::horizontal_content_alignment_property()), 429, 33)?;
-    // Controls/WinUIControls.xaml(430,33) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TabControl::vertical_content_alignment_property()), 430, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R195)?;
     // Controls/WinUIControls.xaml(428,16) IsVisible
     let priority_25 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_25);
@@ -46807,9 +48317,7 @@ fn build_controls_winuicontrols_xaml_deferred_296(
     content_presenter_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_SelectedContentHost")));
     rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost", __t::Rc::new(__t::Clone::clone(&content_presenter_1)), 432, 33)?;
     // Controls/WinUIControls.xaml(433,33) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::TabControl::horizontal_content_alignment_property()), 433, 33)?;
-    // Controls/WinUIControls.xaml(434,33) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TabControl::vertical_content_alignment_property()), 434, 33)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R196)?;
     rt::invoked(content_presenter_1.try_end_init(), 432, 16)?;
     rt::invoked(panel_2.try_end_init(), 427, 14)?;
     rt::invoked(border_5.try_end_init(), 423, 12)?;
@@ -47494,7 +49002,7 @@ fn build_controls_winuicontrols_xaml_deferred_301(
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(65,15) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 65, 15)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 65, 15)?;
     // Controls/WinUIControls.xaml(67,14) ColumnDefinitions
     let column_definitions_collection_0 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/WinUIControls.xaml(67,14) ColumnDefinition
@@ -47552,21 +49060,17 @@ fn build_controls_winuicontrols_xaml_deferred_301(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PaneRoot")));
     rt::register_name_value(name_scope.as_ref(), "PaneRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 76, 21)?;
     // Controls/WinUIControls.xaml(77,21) Width
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::SplitView::open_pane_length_property()), 77, 21)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::open_pane_length_property()), || rt::property(__t::Layoutable::width_property()), 77, 21)?;
     // Controls/WinUIControls.xaml(76,14) HorizontalAlignment
     let priority_4 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_4);
     // Controls/WinUIControls.xaml(79,21) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::SplitView::pane_background_property()), 79, 21)?;
-    // Controls/WinUIControls.xaml(80,21) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 80, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R197)?;
     // Controls/WinUIControls.xaml(76,14) BackgroundSizing
     let priority_5 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_5);
     // Controls/WinUIControls.xaml(82,21) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 82, 21)?;
-    // Controls/WinUIControls.xaml(83,21) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 83, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R198)?;
     // Controls/WinUIControls.xaml(84,16) Child
     // Controls/WinUIControls.xaml(84,16) Panel
     let panel_1 = __t::Panel::new();
@@ -47593,7 +49097,7 @@ fn build_controls_winuicontrols_xaml_deferred_301(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 86, 35)?, priority_6);
     }
     // Controls/WinUIControls.xaml(87,35) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::SplitView::pane_template_property()), 87, 35)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 87, 35)?;
     rt::invoked(content_presenter_0.try_end_init(), 85, 18)?;
     // Controls/WinUIControls.xaml(88,18) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(&panel_1);
@@ -47656,11 +49160,7 @@ fn build_controls_winuicontrols_xaml_deferred_301(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 100, 31)?, priority_11);
     }
     // Controls/WinUIControls.xaml(101,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 101, 31)?;
-    // Controls/WinUIControls.xaml(102,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 102, 31)?;
-    // Controls/WinUIControls.xaml(103,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 103, 31)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R199)?;
     rt::invoked(content_presenter_1.try_end_init(), 99, 14)?;
     // Controls/WinUIControls.xaml(104,14) Children
     let children_collection_6 = __t::Panel::__markup_get_Children(&panel_2);
@@ -47696,7 +49196,7 @@ fn build_controls_winuicontrols_xaml_deferred_302(
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(136,17) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 136, 17)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 136, 17)?;
     // Controls/WinUIControls.xaml(138,16) ColumnDefinitions
     let column_definitions_collection_0 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/WinUIControls.xaml(138,16) ColumnDefinition
@@ -47757,21 +49257,17 @@ fn build_controls_winuicontrols_xaml_deferred_302(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PaneRoot")));
     rt::register_name_value(name_scope.as_ref(), "PaneRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 147, 23)?;
     // Controls/WinUIControls.xaml(148,23) Width
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::SplitView::open_pane_length_property()), 148, 23)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::open_pane_length_property()), || rt::property(__t::Layoutable::width_property()), 148, 23)?;
     // Controls/WinUIControls.xaml(147,16) HorizontalAlignment
     let priority_5 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_5);
     // Controls/WinUIControls.xaml(150,23) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::SplitView::pane_background_property()), 150, 23)?;
-    // Controls/WinUIControls.xaml(151,23) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 151, 23)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R200)?;
     // Controls/WinUIControls.xaml(147,16) BackgroundSizing
     let priority_6 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_6);
     // Controls/WinUIControls.xaml(153,23) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 153, 23)?;
-    // Controls/WinUIControls.xaml(154,23) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 154, 23)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R201)?;
     // Controls/WinUIControls.xaml(155,18) Child
     // Controls/WinUIControls.xaml(155,18) Panel
     let panel_1 = __t::Panel::new();
@@ -47798,7 +49294,7 @@ fn build_controls_winuicontrols_xaml_deferred_302(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 157, 37)?, priority_7);
     }
     // Controls/WinUIControls.xaml(158,37) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::SplitView::pane_template_property()), 158, 37)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 158, 37)?;
     rt::invoked(content_presenter_0.try_end_init(), 156, 20)?;
     // Controls/WinUIControls.xaml(159,20) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(&panel_1);
@@ -47861,11 +49357,7 @@ fn build_controls_winuicontrols_xaml_deferred_302(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 170, 33)?, priority_12);
     }
     // Controls/WinUIControls.xaml(171,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 171, 33)?;
-    // Controls/WinUIControls.xaml(172,33) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 172, 33)?;
-    // Controls/WinUIControls.xaml(173,33) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 173, 33)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R202)?;
     rt::invoked(content_presenter_1.try_end_init(), 169, 16)?;
     // Controls/WinUIControls.xaml(174,16) Children
     let children_collection_6 = __t::Panel::__markup_get_Children(&panel_2);
@@ -47901,7 +49393,7 @@ fn build_controls_winuicontrols_xaml_deferred_303(
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(202,17) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 202, 17)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 202, 17)?;
     // Controls/WinUIControls.xaml(204,16) RowDefinitions
     let row_definitions_collection_0 = __t::Grid::__markup_get_RowDefinitions(&grid_0);
     // Controls/WinUIControls.xaml(204,16) RowDefinition
@@ -47959,21 +49451,17 @@ fn build_controls_winuicontrols_xaml_deferred_303(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PaneRoot")));
     rt::register_name_value(name_scope.as_ref(), "PaneRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 212, 23)?;
     // Controls/WinUIControls.xaml(213,23) Height
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::SplitView::open_pane_length_property()), 213, 23)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::open_pane_length_property()), || rt::property(__t::Layoutable::height_property()), 213, 23)?;
     // Controls/WinUIControls.xaml(212,16) VerticalAlignment
     let priority_4 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_4);
     // Controls/WinUIControls.xaml(215,23) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::SplitView::pane_background_property()), 215, 23)?;
-    // Controls/WinUIControls.xaml(216,23) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 216, 23)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R203)?;
     // Controls/WinUIControls.xaml(212,16) BackgroundSizing
     let priority_5 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_5);
     // Controls/WinUIControls.xaml(218,23) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 218, 23)?;
-    // Controls/WinUIControls.xaml(219,23) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 219, 23)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R204)?;
     // Controls/WinUIControls.xaml(220,18) Child
     // Controls/WinUIControls.xaml(220,18) Panel
     let panel_1 = __t::Panel::new();
@@ -48000,7 +49488,7 @@ fn build_controls_winuicontrols_xaml_deferred_303(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 222, 37)?, priority_6);
     }
     // Controls/WinUIControls.xaml(223,37) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::SplitView::pane_template_property()), 223, 37)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 223, 37)?;
     rt::invoked(content_presenter_0.try_end_init(), 221, 20)?;
     // Controls/WinUIControls.xaml(224,20) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(&panel_1);
@@ -48063,11 +49551,7 @@ fn build_controls_winuicontrols_xaml_deferred_303(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 235, 33)?, priority_11);
     }
     // Controls/WinUIControls.xaml(236,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 236, 33)?;
-    // Controls/WinUIControls.xaml(237,33) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 237, 33)?;
-    // Controls/WinUIControls.xaml(238,33) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 238, 33)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R205)?;
     rt::invoked(content_presenter_1.try_end_init(), 234, 16)?;
     // Controls/WinUIControls.xaml(239,16) Children
     let children_collection_6 = __t::Panel::__markup_get_Children(&panel_2);
@@ -48103,7 +49587,7 @@ fn build_controls_winuicontrols_xaml_deferred_304(
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(267,17) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 267, 17)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 267, 17)?;
     // Controls/WinUIControls.xaml(269,16) RowDefinitions
     let row_definitions_collection_0 = __t::Grid::__markup_get_RowDefinitions(&grid_0);
     // Controls/WinUIControls.xaml(269,16) RowDefinition
@@ -48164,21 +49648,17 @@ fn build_controls_winuicontrols_xaml_deferred_304(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PaneRoot")));
     rt::register_name_value(name_scope.as_ref(), "PaneRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 278, 23)?;
     // Controls/WinUIControls.xaml(279,23) Height
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::SplitView::open_pane_length_property()), 279, 23)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::open_pane_length_property()), || rt::property(__t::Layoutable::height_property()), 279, 23)?;
     // Controls/WinUIControls.xaml(278,16) VerticalAlignment
     let priority_5 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Bottom, priority_5);
     // Controls/WinUIControls.xaml(281,23) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::SplitView::pane_background_property()), 281, 23)?;
-    // Controls/WinUIControls.xaml(282,23) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 282, 23)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R206)?;
     // Controls/WinUIControls.xaml(278,16) BackgroundSizing
     let priority_6 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_6);
     // Controls/WinUIControls.xaml(284,23) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 284, 23)?;
-    // Controls/WinUIControls.xaml(285,23) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 285, 23)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R207)?;
     // Controls/WinUIControls.xaml(286,18) Child
     // Controls/WinUIControls.xaml(286,18) Panel
     let panel_1 = __t::Panel::new();
@@ -48205,7 +49685,7 @@ fn build_controls_winuicontrols_xaml_deferred_304(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 288, 37)?, priority_7);
     }
     // Controls/WinUIControls.xaml(289,37) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::SplitView::pane_template_property()), 289, 37)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 289, 37)?;
     rt::invoked(content_presenter_0.try_end_init(), 287, 20)?;
     // Controls/WinUIControls.xaml(290,20) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(&panel_1);
@@ -48268,11 +49748,7 @@ fn build_controls_winuicontrols_xaml_deferred_304(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 301, 33)?, priority_12);
     }
     // Controls/WinUIControls.xaml(302,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 302, 33)?;
-    // Controls/WinUIControls.xaml(303,33) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 303, 33)?;
-    // Controls/WinUIControls.xaml(304,33) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 304, 33)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R208)?;
     rt::invoked(content_presenter_1.try_end_init(), 300, 16)?;
     // Controls/WinUIControls.xaml(305,16) Children
     let children_collection_6 = __t::Panel::__markup_get_Children(&panel_2);
@@ -48473,9 +49949,7 @@ fn build_controls_winuicontrols_xaml_deferred_308(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("TopNavArea")));
     rt::register_name_value(name_scope.as_ref(), "TopNavArea", __t::Rc::new(__t::Clone::clone(&border_0)), 74, 19)?;
     // Controls/WinUIControls.xaml(75,19) Dock
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::DockPanel::dock_property(), rt::property(__t::TabControl::tab_strip_placement_property()), 75, 19)?;
-    // Controls/WinUIControls.xaml(76,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 76, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R209)?;
     // Controls/WinUIControls.xaml(77,14) Child
     // Controls/WinUIControls.xaml(77,14) Border
     let border_1 = __t::Border::new();
@@ -48490,7 +49964,7 @@ fn build_controls_winuicontrols_xaml_deferred_308(
     // Controls/WinUIControls.xaml(79,21) Margin
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "TopNavigationViewTopNavGridMargin", 79, 21)?;
     // Controls/WinUIControls.xaml(80,21) Padding
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 80, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Decorator::padding_property()), 80, 21)?;
     // Controls/WinUIControls.xaml(81,16) Child
     // Controls/WinUIControls.xaml(81,16) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -48500,7 +49974,7 @@ fn build_controls_winuicontrols_xaml_deferred_308(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 81, 31)?;
     // Controls/WinUIControls.xaml(82,31) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 82, 31)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 82, 31)?;
     // Controls/WinUIControls.xaml(81,16) VerticalAlignment
     let priority_0 = __t::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_0);
@@ -48878,9 +50352,7 @@ fn build_controls_winuicontrols_xaml_deferred_311(
     let value_0: __t::MarkupValue = rt::to_value(provided_0);
     rt::bind_or_set_priority(border_0.upcast_ref::<__t::FerroObject>(), || __t::Layoutable::margin_property(), value_0, priority_0, || rt::markup_handle(<__t::Thickness as __t::MarkupTyped>::MARKUP), false, "Layoutable.Margin", 159, 17)?;
     // Controls/WinUIControls.xaml(160,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 160, 17)?;
-    // Controls/WinUIControls.xaml(161,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 161, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R210)?;
     // Controls/WinUIControls.xaml(162,12) Child
     // Controls/WinUIControls.xaml(162,12) Panel
     let panel_0 = __t::Panel::new();
@@ -48969,9 +50441,7 @@ fn build_controls_winuicontrols_xaml_deferred_311(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 172, 37)?, priority_7);
     }
     // Controls/WinUIControls.xaml(173,37) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::TabItem::icon_template_property()), 173, 37)?;
-    // Controls/WinUIControls.xaml(174,37) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 174, 37)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R211)?;
     // Controls/WinUIControls.xaml(177,24) Styles
     let styles_collection_0 = __t::StyledElement::__markup_get_Styles(content_presenter_0.upcast_ref::<__t::StyledElement>());
     // Controls/WinUIControls.xaml(177,24) Style
@@ -49033,7 +50503,7 @@ fn build_controls_winuicontrols_xaml_deferred_311(
     let priority_11 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::ContentPresenter::text_wrapping_property(), __t::TextWrapping::NoWrap, priority_11);
     // Controls/WinUIControls.xaml(192,33) Foreground
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 192, 33)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 192, 33)?;
     // Controls/WinUIControls.xaml(193,33) Content (setter chosen at run time)
     let priority_12 = __t::BindingPriority::Template;
     let template_binding_8 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedContentControl::header_property()));
@@ -49045,9 +50515,7 @@ fn build_controls_winuicontrols_xaml_deferred_311(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_4.clone(), "ContentControl.Content", 1, 193, 33)?, priority_12);
     }
     // Controls/WinUIControls.xaml(194,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedContentControl::header_template_property()), 194, 33)?;
-    // Controls/WinUIControls.xaml(195,33) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 195, 33)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R212)?;
     // Controls/WinUIControls.xaml(188,16) VerticalAlignment
     let priority_13 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_13);
@@ -49089,7 +50557,7 @@ fn build_controls_winuicontrols_xaml_deferred_311(
         content_presenter_2.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_5.clone(), "ContentControl.Content", 1, 204, 31)?, priority_19);
     }
     // Controls/WinUIControls.xaml(205,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::TabItem::indicator_template_property()), 205, 31)?;
+    rt::apply_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TabItem::indicator_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 205, 31)?;
     rt::invoked(content_presenter_2.try_end_init(), 199, 14)?;
     context.pop_parent();
     rt::invoked(panel_0.try_end_init(), 162, 12)?;
@@ -49137,7 +50605,7 @@ fn build_controls_winuicontrols_xaml_deferred_313(
     panel_0.begin_init();
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(275,16) Background
-    rt::bind_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 275, 16)?;
+    rt::apply_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 275, 16)?;
     // Controls/WinUIControls.xaml(276,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(276,12) TabControl
@@ -49398,9 +50866,7 @@ fn build_controls_winuicontrols_xaml_deferred_316(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 78, 17)?;
     // Controls/WinUIControls.xaml(79,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 79, 17)?;
-    // Controls/WinUIControls.xaml(80,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 80, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R213)?;
     // Controls/WinUIControls.xaml(81,12) Child
     // Controls/WinUIControls.xaml(81,12) Panel
     let panel_0 = __t::Panel::new();
@@ -49423,7 +50889,7 @@ fn build_controls_winuicontrols_xaml_deferred_316(
     let value_0: __t::MarkupValue = rt::to_value(provided_2);
     rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, priority_0, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 83, 19)?;
     // Controls/WinUIControls.xaml(84,19) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 84, 19)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 84, 19)?;
     // Controls/WinUIControls.xaml(82,14) Stretch
     let priority_1 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_1);
@@ -49434,9 +50900,7 @@ fn build_controls_winuicontrols_xaml_deferred_316(
     let priority_3 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Layoutable::width_property(), 16.0_f64, priority_3);
     // Controls/WinUIControls.xaml(88,19) HorizontalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 88, 19)?;
-    // Controls/WinUIControls.xaml(89,19) VerticalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 89, 19)?;
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R214)?;
     // Controls/WinUIControls.xaml(90,19) IsVisible
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     // Controls/WinUIControls.xaml(90,19) Converter
@@ -49466,13 +50930,7 @@ fn build_controls_winuicontrols_xaml_deferred_316(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 92, 31)?, priority_4);
     }
     // Controls/WinUIControls.xaml(93,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 93, 31)?;
-    // Controls/WinUIControls.xaml(94,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 94, 31)?;
-    // Controls/WinUIControls.xaml(95,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 95, 31)?;
-    // Controls/WinUIControls.xaml(96,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 96, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R215)?;
     // Controls/WinUIControls.xaml(91,14) RecognizesAccessKey
     let priority_5 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_5);
@@ -49656,7 +51114,7 @@ fn build_controls_winuicontrols_xaml_deferred_319(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_NavBarSpacer")));
     rt::register_name_value(name_scope.as_ref(), "PART_NavBarSpacer", __t::Rc::new(__t::Clone::clone(&border_0)), 188, 21)?;
     // Controls/WinUIControls.xaml(189,21) Height
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::NavigationPage::effective_bar_height_property()), 189, 21)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationPage::effective_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 189, 21)?;
     // Controls/WinUIControls.xaml(188,14) IsVisible
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_1);
@@ -49681,7 +51139,7 @@ fn build_controls_winuicontrols_xaml_deferred_319(
     let priority_4 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_4);
     // Controls/WinUIControls.xaml(196,31) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 196, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::ContentPresenter::background_property()), 196, 31)?;
     // Controls/WinUIControls.xaml(197,31) Content (setter chosen at run time)
     let priority_5 = __t::BindingPriority::Template;
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("CurrentPage?.(NavigationPage.BottomCommandBar)"));
@@ -49712,7 +51170,7 @@ fn build_controls_winuicontrols_xaml_deferred_319(
     grid_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentHost")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentHost", __t::Rc::new(__t::Clone::clone(&grid_0)), 200, 19)?;
     // Controls/WinUIControls.xaml(201,19) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 201, 19)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 201, 19)?;
     // Controls/WinUIControls.xaml(200,14) ClipToBounds
     let priority_6 = __t::BindingPriority::Template;
     grid_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_6);
@@ -49771,7 +51229,7 @@ fn build_controls_winuicontrols_xaml_deferred_319(
     let priority_13 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_13);
     // Controls/WinUIControls.xaml(217,19) Height
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::NavigationPage::effective_bar_height_property()), 217, 19)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationPage::effective_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 217, 19)?;
     // Controls/WinUIControls.xaml(218,14) Child
     // Controls/WinUIControls.xaml(218,14) Grid
     let grid_1 = __t::Grid::new();
@@ -49810,7 +51268,7 @@ fn build_controls_winuicontrols_xaml_deferred_319(
     let value_1: __t::MarkupValue = rt::to_value(provided_6);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_15, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 221, 23)?;
     // Controls/WinUIControls.xaml(222,23) IsVisible
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::NavigationPage::is_back_button_effectively_visible_property()), 222, 23)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationPage::is_back_button_effectively_visible_property()), || rt::property(__t::Visual::is_visible_property()), 222, 23)?;
     // Controls/WinUIControls.xaml(219,16) VerticalAlignment
     let priority_16 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_16);
@@ -50049,7 +51507,7 @@ fn build_controls_winuicontrols_xaml_deferred_319(
     let priority_44 = __t::BindingPriority::Template;
     content_presenter_6.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_44);
     // Controls/WinUIControls.xaml(282,29) Background
-    rt::bind_template_binding(content_presenter_6.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 282, 29)?;
+    rt::apply_template_binding(content_presenter_6.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::ContentPresenter::background_property()), 282, 29)?;
     rt::invoked(content_presenter_6.try_end_init(), 279, 12)?;
     // Controls/WinUIControls.xaml(283,12) Children
     let children_collection_14 = __t::Panel::__markup_get_Children(&panel_0);
@@ -50067,7 +51525,7 @@ fn build_controls_winuicontrols_xaml_deferred_319(
     let priority_46 = __t::BindingPriority::Template;
     content_presenter_7.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_46);
     // Controls/WinUIControls.xaml(286,29) Background
-    rt::bind_template_binding(content_presenter_7.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 286, 29)?;
+    rt::apply_template_binding(content_presenter_7.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::ContentPresenter::background_property()), 286, 29)?;
     rt::invoked(content_presenter_7.try_end_init(), 283, 12)?;
     context.pop_parent();
     rt::invoked(panel_0.try_end_init(), 185, 10)?;
@@ -50317,16 +51775,12 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 115, 17)?;
     // Controls/WinUIControls.xaml(116,17) Height
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::Layoutable::min_height_property()), 116, 17)?;
-    // Controls/WinUIControls.xaml(117,17) Margin
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 117, 17)?;
-    // Controls/WinUIControls.xaml(118,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 118, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R216)?;
     // Controls/WinUIControls.xaml(115,10) HorizontalAlignment
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
     // Controls/WinUIControls.xaml(120,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 120, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 120, 17)?;
     // Controls/WinUIControls.xaml(121,12) Child
     // Controls/WinUIControls.xaml(121,12) Grid
     let grid_0 = __t::Grid::new();
@@ -50351,7 +51805,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&border_1).upcast::<__t::Control>());
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(122,21) Width
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::Layoutable::min_width_property()), 122, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::Layoutable::min_width_property()), || rt::property(__t::Layoutable::width_property()), 122, 21)?;
     // Controls/WinUIControls.xaml(123,16) Child
     // Controls/WinUIControls.xaml(123,16) Path
     let path_0 = __t::Path::new();
@@ -50376,12 +51830,12 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     let priority_4 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_4);
     // Controls/WinUIControls.xaml(128,21) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 128, 21)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 128, 21)?;
     // Controls/WinUIControls.xaml(123,16) HorizontalAlignment
     let priority_5 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_5);
     // Controls/WinUIControls.xaml(130,21) VerticalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 130, 21)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::vertical_content_alignment_property()), || rt::property(__t::Layoutable::vertical_alignment_property()), 130, 21)?;
     context.pop_parent();
     rt::invoked(path_0.try_end_init(), 123, 16)?;
     context.pop_parent();
@@ -50412,11 +51866,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 135, 31)?, priority_8);
     }
     // Controls/WinUIControls.xaml(136,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 136, 31)?;
-    // Controls/WinUIControls.xaml(137,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 137, 31)?;
-    // Controls/WinUIControls.xaml(138,31) FontSize
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 138, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R217)?;
     // Controls/WinUIControls.xaml(132,14) Padding
     let priority_9 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::padding_property(), __t::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_9);
@@ -50473,16 +51923,12 @@ fn build_controls_winuicontrols_xaml_deferred_325(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 192, 17)?;
     // Controls/WinUIControls.xaml(193,17) Height
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::Layoutable::min_height_property()), 193, 17)?;
-    // Controls/WinUIControls.xaml(194,17) Margin
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 194, 17)?;
-    // Controls/WinUIControls.xaml(195,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 195, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R218)?;
     // Controls/WinUIControls.xaml(192,10) HorizontalAlignment
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
     // Controls/WinUIControls.xaml(197,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 197, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 197, 17)?;
     // Controls/WinUIControls.xaml(198,12) Child
     // Controls/WinUIControls.xaml(198,12) Border
     let border_1 = __t::Border::new();
@@ -50490,7 +51936,7 @@ fn build_controls_winuicontrols_xaml_deferred_325(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&border_1).upcast::<__t::Control>()));
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(198,19) Width
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::Layoutable::min_width_property()), 198, 19)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::Layoutable::min_width_property()), || rt::property(__t::Layoutable::width_property()), 198, 19)?;
     // Controls/WinUIControls.xaml(199,14) Child
     // Controls/WinUIControls.xaml(199,14) Panel
     let panel_0 = __t::Panel::new();
@@ -50522,12 +51968,12 @@ fn build_controls_winuicontrols_xaml_deferred_325(
     let priority_4 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_4);
     // Controls/WinUIControls.xaml(205,21) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 205, 21)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 205, 21)?;
     // Controls/WinUIControls.xaml(200,16) HorizontalAlignment
     let priority_5 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_5);
     // Controls/WinUIControls.xaml(207,21) VerticalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 207, 21)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::vertical_content_alignment_property()), || rt::property(__t::Layoutable::vertical_alignment_property()), 207, 21)?;
     // Controls/WinUIControls.xaml(208,21) IsVisible
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     // Controls/WinUIControls.xaml(208,21) Converter
@@ -50563,9 +52009,7 @@ fn build_controls_winuicontrols_xaml_deferred_325(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 212, 33)?, priority_8);
     }
     // Controls/WinUIControls.xaml(213,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 213, 33)?;
-    // Controls/WinUIControls.xaml(214,33) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 214, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R219)?;
     // Controls/WinUIControls.xaml(215,33) IsVisible
     let template_binding_11 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     // Controls/WinUIControls.xaml(215,33) Converter
@@ -50807,9 +52251,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     // Controls/WinUIControls.xaml(244,17) MinHeight
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 244, 17)?;
     // Controls/WinUIControls.xaml(245,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 245, 17)?;
-    // Controls/WinUIControls.xaml(246,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 246, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R220)?;
     // Controls/WinUIControls.xaml(247,17) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "NavigationViewItemButtonMargin", 247, 17)?;
     // Controls/WinUIControls.xaml(248,12) Child
@@ -50921,15 +52363,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 266, 33)?, priority_8);
     }
     // Controls/WinUIControls.xaml(267,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 267, 33)?;
-    // Controls/WinUIControls.xaml(268,33) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 268, 33)?;
-    // Controls/WinUIControls.xaml(269,33) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 269, 33)?;
-    // Controls/WinUIControls.xaml(270,33) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 270, 33)?;
-    // Controls/WinUIControls.xaml(271,33) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 271, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R221)?;
     // Controls/WinUIControls.xaml(263,16) TextWrapping
     let priority_9 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::text_wrapping_property(), __t::TextWrapping::NoWrap, priority_9);
@@ -51024,16 +52458,12 @@ fn build_controls_winuicontrols_xaml_deferred_330(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Controls/WinUIControls.xaml(356,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 356, 17)?;
-    // Controls/WinUIControls.xaml(357,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 357, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R222)?;
     // Controls/WinUIControls.xaml(356,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(359,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 359, 17)?;
-    // Controls/WinUIControls.xaml(360,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 360, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R223)?;
     // Controls/WinUIControls.xaml(362,12) Child
     // Controls/WinUIControls.xaml(362,12) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -51043,11 +52473,7 @@ fn build_controls_winuicontrols_xaml_deferred_330(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 362, 25)?;
     // Controls/WinUIControls.xaml(363,25) Padding
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 363, 25)?;
-    // Controls/WinUIControls.xaml(364,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 364, 25)?;
-    // Controls/WinUIControls.xaml(365,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 365, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R224)?;
     // Controls/WinUIControls.xaml(366,14) Content
     // Controls/WinUIControls.xaml(366,14) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -51057,7 +52483,7 @@ fn build_controls_winuicontrols_xaml_deferred_330(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 366, 29)?;
     // Controls/WinUIControls.xaml(367,29) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 367, 29)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 367, 29)?;
     rt::invoked(items_presenter_0.try_end_init(), 366, 14)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 362, 12)?;
     rt::invoked(border_0.try_end_init(), 356, 10)?;
@@ -51361,7 +52787,7 @@ fn build_controls_winuicontrols_xaml_deferred_332(
     split_view_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_SplitView")));
     rt::register_name_value(name_scope.as_ref(), "PART_SplitView", __t::Rc::new(__t::Clone::clone(&split_view_0)), 378, 20)?;
     // Controls/WinUIControls.xaml(379,20) Background
-    rt::bind_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 379, 20)?;
+    rt::apply_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::TemplatedControl::background_property()), 379, 20)?;
     // Controls/WinUIControls.xaml(380,20) BorderThickness
     rt::bind_dynamic_resource(&context, split_view_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), "NavigationViewBorderThickness", 380, 20)?;
     // Controls/WinUIControls.xaml(381,20) CornerRadius
@@ -51374,11 +52800,7 @@ fn build_controls_winuicontrols_xaml_deferred_332(
     let provided_3 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_1);
     rt::bind(split_view_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), provided_3, 381, 20)?;
     // Controls/WinUIControls.xaml(382,20) DisplayMode
-    rt::bind_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), __t::SplitView::display_mode_property(), rt::property(__t::DrawerPage::display_mode_property()), 382, 20)?;
-    // Controls/WinUIControls.xaml(383,20) OpenPaneLength
-    rt::bind_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), __t::SplitView::open_pane_length_property(), rt::property(__t::DrawerPage::drawer_length_property()), 383, 20)?;
-    // Controls/WinUIControls.xaml(384,20) CompactPaneLength
-    rt::bind_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), __t::SplitView::compact_pane_length_property(), rt::property(__t::DrawerPage::compact_drawer_length_property()), 384, 20)?;
+    rt::bind_template_rows(split_view_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R225)?;
     // Controls/WinUIControls.xaml(385,20) IsPaneOpen
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("IsOpen"));
     context.push_parent(rt::to_value(reflection_binding_extension_0.clone()));
@@ -51440,7 +52862,7 @@ fn build_controls_winuicontrols_xaml_deferred_332(
         toggle_button_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 395, 29)?, priority_3);
     }
     // Controls/WinUIControls.xaml(396,29) ContentTemplate
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::DrawerPage::drawer_icon_template_property()), 396, 29)?;
+    rt::apply_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::drawer_icon_template_property()), || rt::property(__t::ContentControl::content_template_property()), 396, 29)?;
     // Controls/WinUIControls.xaml(390,16) IsVisible
     let priority_4 = __t::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_4);
@@ -51484,9 +52906,7 @@ fn build_controls_winuicontrols_xaml_deferred_332(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 406, 33)?, priority_11);
     }
     // Controls/WinUIControls.xaml(407,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::DrawerPage::drawer_header_template_property()), 407, 33)?;
-    // Controls/WinUIControls.xaml(408,33) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::DrawerPage::drawer_header_background_property()), 408, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R226)?;
     // Controls/WinUIControls.xaml(409,33) IsVisible
     let template_binding_10 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DrawerPage::drawer_header_property()));
     // Controls/WinUIControls.xaml(409,33) Converter
@@ -51527,9 +52947,7 @@ fn build_controls_winuicontrols_xaml_deferred_332(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_4.clone(), "ContentControl.Content", 1, 416, 33)?, priority_16);
     }
     // Controls/WinUIControls.xaml(417,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::DrawerPage::drawer_footer_template_property()), 417, 33)?;
-    // Controls/WinUIControls.xaml(418,33) Background
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::DrawerPage::drawer_footer_background_property()), 418, 33)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R227)?;
     // Controls/WinUIControls.xaml(419,33) IsVisible
     let template_binding_14 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DrawerPage::drawer_footer_property()));
     // Controls/WinUIControls.xaml(419,33) Converter
@@ -51564,7 +52982,7 @@ fn build_controls_winuicontrols_xaml_deferred_332(
         content_presenter_2.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_6.clone(), "ContentControl.Content", 1, 424, 33)?, priority_19);
     }
     // Controls/WinUIControls.xaml(425,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::DrawerPage::drawer_template_property()), 425, 33)?;
+    rt::apply_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::drawer_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 425, 33)?;
     rt::invoked(content_presenter_2.try_end_init(), 421, 16)?;
     context.pop_parent();
     rt::invoked(dock_panel_0.try_end_init(), 388, 14)?;
@@ -51671,7 +53089,7 @@ fn build_controls_winuicontrols_xaml_deferred_332(
         toggle_button_1.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_8.clone(), "ContentControl.Content", 1, 448, 35)?, priority_27);
     }
     // Controls/WinUIControls.xaml(449,35) ContentTemplate
-    rt::bind_template_binding(toggle_button_1.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::DrawerPage::drawer_icon_template_property()), 449, 35)?;
+    rt::apply_template_binding(toggle_button_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::drawer_icon_template_property()), || rt::property(__t::ContentControl::content_template_property()), 449, 35)?;
     // Controls/WinUIControls.xaml(445,22) Dock
     let priority_28 = __t::BindingPriority::Template;
     toggle_button_1.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Left, priority_28);
@@ -51709,7 +53127,7 @@ fn build_controls_winuicontrols_xaml_deferred_332(
         content_control_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_10.clone(), "ContentControl.Content", 1, 455, 37)?, priority_32);
     }
     // Controls/WinUIControls.xaml(456,37) ContentTemplate
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::Page::header_template_property()), 456, 37)?;
+    rt::apply_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::Page::header_template_property()), || rt::property(__t::ContentControl::content_template_property()), 456, 37)?;
     // Controls/WinUIControls.xaml(453,22) VerticalAlignment
     let priority_33 = __t::BindingPriority::Template;
     content_control_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_33);
@@ -51791,7 +53209,7 @@ fn build_controls_winuicontrols_xaml_deferred_332(
         toggle_button_2.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_13.clone(), "ContentControl.Content", 1, 472, 35)?, priority_40);
     }
     // Controls/WinUIControls.xaml(473,35) ContentTemplate
-    rt::bind_template_binding(toggle_button_2.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::DrawerPage::drawer_icon_template_property()), 473, 35)?;
+    rt::apply_template_binding(toggle_button_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::drawer_icon_template_property()), || rt::property(__t::ContentControl::content_template_property()), 473, 35)?;
     // Controls/WinUIControls.xaml(469,22) Dock
     let priority_41 = __t::BindingPriority::Template;
     toggle_button_2.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Left, priority_41);
@@ -51829,7 +53247,7 @@ fn build_controls_winuicontrols_xaml_deferred_332(
         content_control_1.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_15.clone(), "ContentControl.Content", 1, 479, 37)?, priority_45);
     }
     // Controls/WinUIControls.xaml(480,37) ContentTemplate
-    rt::bind_template_binding(content_control_1.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::Page::header_template_property()), 480, 37)?;
+    rt::apply_template_binding(content_control_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::Page::header_template_property()), || rt::property(__t::ContentControl::content_template_property()), 480, 37)?;
     // Controls/WinUIControls.xaml(477,22) VerticalAlignment
     let priority_46 = __t::BindingPriority::Template;
     content_control_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_46);
@@ -51865,18 +53283,12 @@ fn build_controls_winuicontrols_xaml_deferred_332(
     // Controls/WinUIControls.xaml(488,35) Margin
     rt::bind_dynamic_resource(&context, content_presenter_3.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "NavigationViewContentPresenterMargin", 488, 35)?;
     // Controls/WinUIControls.xaml(489,35) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::DrawerPage::horizontal_content_alignment_property()), 489, 35)?;
-    // Controls/WinUIControls.xaml(490,35) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::DrawerPage::vertical_content_alignment_property()), 490, 35)?;
-    // Controls/WinUIControls.xaml(491,35) Background
-    rt::bind_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 491, 35)?;
-    // Controls/WinUIControls.xaml(492,35) BorderBrush
-    rt::bind_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 492, 35)?;
+    rt::bind_template_rows(content_presenter_3.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R228)?;
     // Controls/WinUIControls.xaml(487,18) BackgroundSizing
     let priority_49 = __t::BindingPriority::Template;
     content_presenter_3.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_49);
     // Controls/WinUIControls.xaml(494,35) BorderThickness
-    rt::bind_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 494, 35)?;
+    rt::apply_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 494, 35)?;
     // Controls/WinUIControls.xaml(495,35) Content (setter chosen at run time)
     let priority_50 = __t::BindingPriority::Template;
     let template_binding_32 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DrawerPage::content_property()));
@@ -51888,7 +53300,7 @@ fn build_controls_winuicontrols_xaml_deferred_332(
         content_presenter_3.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_17.clone(), "ContentControl.Content", 1, 495, 35)?, priority_50);
     }
     // Controls/WinUIControls.xaml(496,35) ContentTemplate
-    rt::bind_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::DrawerPage::content_template_property()), 496, 35)?;
+    rt::apply_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 496, 35)?;
     context.pop_parent();
     rt::invoked(content_presenter_3.try_end_init(), 487, 18)?;
     context.pop_parent();
@@ -51905,7 +53317,7 @@ fn build_controls_winuicontrols_xaml_deferred_332(
     border_3.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_Backdrop")));
     rt::register_name_value(name_scope.as_ref(), "PART_Backdrop", __t::Rc::new(__t::Clone::clone(&border_3)), 499, 21)?;
     // Controls/WinUIControls.xaml(500,21) Background
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::DrawerPage::backdrop_brush_property()), 500, 21)?;
+    rt::apply_template_binding(border_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::backdrop_brush_property()), || rt::property(__t::Border::background_property()), 500, 21)?;
     // Controls/WinUIControls.xaml(499,14) IsVisible
     let priority_51 = __t::BindingPriority::Template;
     border_3.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_51);
@@ -52476,7 +53888,7 @@ fn build_controls_winuicontrols_xaml_deferred_336(
     let provided_7 = rt::provide_value(&context, rt::property_value(__t::Visual::is_visible_property()), &reflection_binding_extension_2, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(button_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), provided_7, 168, 23)?;
     // Controls/WinUIControls.xaml(169,23) IsEnabled
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::InputElement::is_enabled_property(), rt::property(__t::NavigationView::is_back_enabled_property()), 169, 23)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationView::is_back_enabled_property()), || rt::property(__t::InputElement::is_enabled_property()), 169, 23)?;
     // Controls/WinUIControls.xaml(170,23) Tip
     let priority_6 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::ToolTip::tip_property(), rt::string_object("Back"), priority_6);
@@ -52516,7 +53928,7 @@ fn build_controls_winuicontrols_xaml_deferred_336(
     button_2.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("TogglePaneButton")));
     rt::register_name_value(name_scope.as_ref(), "TogglePaneButton", __t::Rc::new(__t::Clone::clone(&button_2)), 175, 23)?;
     // Controls/WinUIControls.xaml(176,23) Theme
-    rt::bind_template_binding(button_2.upcast_ref::<__t::FerroObject>(), __t::StyledElement::theme_property(), rt::property(__t::NavigationView::pane_toggle_button_style_property()), 176, 23)?;
+    rt::apply_template_binding(button_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationView::pane_toggle_button_style_property()), || rt::property(__t::StyledElement::theme_property()), 176, 23)?;
     // Controls/WinUIControls.xaml(177,23) IsVisible
     let reflection_binding_extension_3 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("TemplateSettings.PaneToggleButtonVisibility"));
     context.push_parent(rt::to_value(reflection_binding_extension_3.clone()));
@@ -52553,7 +53965,7 @@ fn build_controls_winuicontrols_xaml_deferred_336(
     let priority_11 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, -2.0_f64, 0.0_f64, 0.0_f64), priority_11);
     // Controls/WinUIControls.xaml(182,28) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::NavigationView::pane_title_property()), 182, 28)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationView::pane_title_property()), || rt::property(__t::TextBlock::text_property()), 182, 28)?;
     // Controls/WinUIControls.xaml(180,18) HorizontalAlignment
     let priority_12 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_12);
@@ -52990,13 +54402,13 @@ fn build_controls_winuicontrols_xaml_deferred_336(
     split_view_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootSplitView")));
     rt::register_name_value(name_scope.as_ref(), "RootSplitView", __t::Rc::new(__t::Clone::clone(&split_view_0)), 257, 24)?;
     // Controls/WinUIControls.xaml(258,24) Background
-    rt::bind_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 258, 24)?;
+    rt::apply_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::TemplatedControl::background_property()), 258, 24)?;
     // Controls/WinUIControls.xaml(259,24) BorderBrush
     rt::bind_dynamic_resource(&context, split_view_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), "NavigationViewItemSeparatorForeground", 259, 24)?;
     // Controls/WinUIControls.xaml(260,24) BorderThickness
     rt::bind_dynamic_resource(&context, split_view_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), "NavigationViewBorderThickness", 260, 24)?;
     // Controls/WinUIControls.xaml(261,24) CompactPaneLength
-    rt::bind_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), __t::SplitView::compact_pane_length_property(), rt::property(__t::NavigationView::compact_pane_length_property()), 261, 24)?;
+    rt::apply_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationView::compact_pane_length_property()), || rt::property(__t::SplitView::compact_pane_length_property()), 261, 24)?;
     // Controls/WinUIControls.xaml(257,14) DisplayMode
     let priority_54 = __t::BindingPriority::Template;
     split_view_0.set_value_with_priority(__t::SplitView::display_mode_property(), __t::SplitViewDisplayMode::Inline, priority_54);
@@ -53513,7 +54925,7 @@ fn build_controls_winuicontrols_xaml_deferred_336(
         content_control_10.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_6.clone(), "ContentControl.Content", 1, 353, 35)?, priority_100);
     }
     // Controls/WinUIControls.xaml(354,35) ContentTemplate
-    rt::bind_template_binding(content_control_10.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::NavigationView::header_template_property()), 354, 35)?;
+    rt::apply_template_binding(content_control_10.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationView::header_template_property()), || rt::property(__t::ContentControl::content_template_property()), 354, 35)?;
     // Controls/WinUIControls.xaml(348,20) VerticalContentAlignment
     let priority_101 = __t::BindingPriority::Template;
     content_control_10.set_value_with_priority(__t::ContentControl::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_101);
@@ -53554,7 +54966,7 @@ fn build_controls_winuicontrols_xaml_deferred_336(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_8.clone(), "ContentControl.Content", 1, 361, 37)?, priority_106);
     }
     // Controls/WinUIControls.xaml(362,37) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 362, 37)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 362, 37)?;
     // Controls/WinUIControls.xaml(363,37) Margin
     rt::bind_dynamic_resource(&context, content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "NavigationViewContentPresenterMargin", 363, 37)?;
     context.pop_parent();
@@ -54431,9 +55843,7 @@ fn build_controls_winuicontrols_xaml_deferred_338(
     // Controls/WinUIControls.xaml(503,21) MinHeight
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 503, 21)?;
     // Controls/WinUIControls.xaml(504,21) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 504, 21)?;
-    // Controls/WinUIControls.xaml(505,21) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 505, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R229)?;
     // Controls/WinUIControls.xaml(506,21) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "NavigationViewItemButtonMargin", 506, 21)?;
     // Controls/WinUIControls.xaml(507,16) Child
@@ -54587,7 +55997,7 @@ fn build_controls_winuicontrols_xaml_deferred_338(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 530, 43)?, priority_8);
     }
     // Controls/WinUIControls.xaml(531,43) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 531, 43)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 531, 43)?;
     // Controls/WinUIControls.xaml(532,43) Background
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), "NavigationViewItemIconBackground", 532, 43)?;
     // Controls/WinUIControls.xaml(535,30) Styles
@@ -54631,7 +56041,7 @@ fn build_controls_winuicontrols_xaml_deferred_338(
     // Controls/WinUIControls.xaml(546,39) Margin
     rt::bind_dynamic_resource(&context, content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "NavigationViewItemContentPresenterMargin", 546, 39)?;
     // Controls/WinUIControls.xaml(547,39) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 547, 39)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 547, 39)?;
     // Controls/WinUIControls.xaml(548,39) Content (setter chosen at run time)
     let priority_10 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -54643,13 +56053,7 @@ fn build_controls_winuicontrols_xaml_deferred_338(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 548, 39)?, priority_10);
     }
     // Controls/WinUIControls.xaml(549,39) Foreground
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 549, 39)?;
-    // Controls/WinUIControls.xaml(550,39) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 550, 39)?;
-    // Controls/WinUIControls.xaml(551,39) VerticalAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 551, 39)?;
-    // Controls/WinUIControls.xaml(552,39) Padding
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 552, 39)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R230)?;
     context.pop_parent();
     rt::invoked(content_presenter_1.try_end_init(), 544, 22)?;
     // Controls/WinUIControls.xaml(553,22) Children
@@ -55005,7 +56409,7 @@ fn build_controls_winuicontrols_xaml_deferred_340(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 879, 31)?, priority_4);
     }
     // Controls/WinUIControls.xaml(880,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 880, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 880, 31)?;
     // Controls/WinUIControls.xaml(876,14) FontFamily
     let priority_5 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::font_family_property(), __t::FontFamily::__markup_new_1(context.base_uri(), __t::String::from("Segoe UI Variable Text, Segoe UI, $Default")), priority_5);
@@ -55204,16 +56608,12 @@ fn build_controls_winuicontrols_xaml_deferred_345(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Controls/WinUIControls.xaml(63,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 63, 17)?;
-    // Controls/WinUIControls.xaml(64,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 64, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R231)?;
     // Controls/WinUIControls.xaml(63,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(66,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 66, 17)?;
-    // Controls/WinUIControls.xaml(67,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 67, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R232)?;
     // Controls/WinUIControls.xaml(68,12) Child
     // Controls/WinUIControls.xaml(68,12) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -55223,9 +56623,7 @@ fn build_controls_winuicontrols_xaml_deferred_345(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 68, 25)?;
     // Controls/WinUIControls.xaml(69,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 69, 25)?;
-    // Controls/WinUIControls.xaml(70,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 70, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R233)?;
     // Controls/WinUIControls.xaml(68,12) BringIntoViewOnFocusChange
     let priority_1 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::bring_into_view_on_focus_change_property(), __t::Clone::clone(&false), priority_1);
@@ -55241,9 +56639,7 @@ fn build_controls_winuicontrols_xaml_deferred_345(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 73, 29)?;
     // Controls/WinUIControls.xaml(74,29) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 74, 29)?;
-    // Controls/WinUIControls.xaml(75,29) Margin
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 75, 29)?;
+    rt::bind_template_rows(items_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R234)?;
     rt::invoked(items_presenter_0.try_end_init(), 73, 14)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 68, 12)?;
     rt::invoked(border_0.try_end_init(), 63, 10)?;
@@ -55700,15 +57096,7 @@ fn build_controls_winuicontrols_xaml_deferred_349(
     // Controls/WinUIControls.xaml(133,19) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "AppBarButtonInnerBorderMargin", 133, 19)?;
     // Controls/WinUIControls.xaml(134,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 134, 19)?;
-    // Controls/WinUIControls.xaml(135,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 135, 19)?;
-    // Controls/WinUIControls.xaml(136,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 136, 19)?;
-    // Controls/WinUIControls.xaml(137,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 137, 19)?;
-    // Controls/WinUIControls.xaml(138,19) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 138, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R235)?;
     // Controls/WinUIControls.xaml(140,16) Transitions
     let transitions_0 = __t::Transitions::__markup_new_0();
     // Controls/WinUIControls.xaml(141,18) Content
@@ -55793,7 +57181,7 @@ fn build_controls_winuicontrols_xaml_deferred_349(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 154, 33)?, priority_3);
     }
     // Controls/WinUIControls.xaml(155,33) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 155, 33)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 155, 33)?;
     // Controls/WinUIControls.xaml(158,20) Styles
     let styles_collection_0 = __t::StyledElement::__markup_get_Styles(content_presenter_0.upcast_ref::<__t::StyledElement>());
     // Controls/WinUIControls.xaml(158,20) Style
@@ -55831,13 +57219,11 @@ fn build_controls_winuicontrols_xaml_deferred_349(
     let priority_4 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_4);
     // Controls/WinUIControls.xaml(168,24) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::CommandBarButton::label_property()), 168, 24)?;
-    // Controls/WinUIControls.xaml(169,24) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 169, 24)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R236)?;
     // Controls/WinUIControls.xaml(170,24) FontSize
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), "AppBarButtonLabelFontSize", 170, 24)?;
     // Controls/WinUIControls.xaml(171,24) FontFamily
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 171, 24)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_family_property()), || rt::property(__t::TextBlock::font_family_property()), 171, 24)?;
     // Controls/WinUIControls.xaml(166,14) TextAlignment
     let priority_5 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::TextBlock::text_alignment_property(), __t::TextAlignment::Center, priority_5);
@@ -55859,13 +57245,11 @@ fn build_controls_winuicontrols_xaml_deferred_349(
     text_block_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("OverflowTextLabel")));
     rt::register_name_value(name_scope.as_ref(), "OverflowTextLabel", __t::Rc::new(__t::Clone::clone(&text_block_1)), 175, 24)?;
     // Controls/WinUIControls.xaml(176,24) Text
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::CommandBarButton::label_property()), 176, 24)?;
-    // Controls/WinUIControls.xaml(177,24) Foreground
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 177, 24)?;
+    rt::bind_template_rows(text_block_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R237)?;
     // Controls/WinUIControls.xaml(178,24) FontSize
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), "ControlContentThemeFontSize", 178, 24)?;
     // Controls/WinUIControls.xaml(179,24) FontFamily
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 179, 24)?;
+    rt::apply_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_family_property()), || rt::property(__t::TextBlock::font_family_property()), 179, 24)?;
     // Controls/WinUIControls.xaml(175,14) TextAlignment
     let priority_7 = __t::BindingPriority::Template;
     text_block_1.set_value_with_priority(__t::TextBlock::text_alignment_property(), __t::TextAlignment::Left, priority_7);
@@ -56952,15 +58336,7 @@ fn build_controls_winuicontrols_xaml_deferred_354(
     // Controls/WinUIControls.xaml(341,19) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "AppBarButtonInnerBorderMargin", 341, 19)?;
     // Controls/WinUIControls.xaml(342,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 342, 19)?;
-    // Controls/WinUIControls.xaml(343,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 343, 19)?;
-    // Controls/WinUIControls.xaml(344,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 344, 19)?;
-    // Controls/WinUIControls.xaml(345,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 345, 19)?;
-    // Controls/WinUIControls.xaml(346,19) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 346, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R238)?;
     // Controls/WinUIControls.xaml(348,16) Transitions
     let transitions_0 = __t::Transitions::__markup_new_0();
     // Controls/WinUIControls.xaml(349,18) Content
@@ -57084,7 +58460,7 @@ fn build_controls_winuicontrols_xaml_deferred_354(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 373, 33)?, priority_10);
     }
     // Controls/WinUIControls.xaml(374,33) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 374, 33)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 374, 33)?;
     // Controls/WinUIControls.xaml(377,20) Styles
     let styles_collection_0 = __t::StyledElement::__markup_get_Styles(content_presenter_0.upcast_ref::<__t::StyledElement>());
     // Controls/WinUIControls.xaml(377,20) Style
@@ -57122,14 +58498,12 @@ fn build_controls_winuicontrols_xaml_deferred_354(
     let priority_11 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_11);
     // Controls/WinUIControls.xaml(387,24) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::CommandBarToggleButton::label_property()), 387, 24)?;
-    // Controls/WinUIControls.xaml(388,24) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 388, 24)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R239)?;
     // Controls/WinUIControls.xaml(385,14) FontSize
     let priority_12 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::TextBlock::font_size_property(), 12.0_f64, priority_12);
     // Controls/WinUIControls.xaml(390,24) FontFamily
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 390, 24)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_family_property()), || rt::property(__t::TextBlock::font_family_property()), 390, 24)?;
     // Controls/WinUIControls.xaml(385,14) TextAlignment
     let priority_13 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::TextBlock::text_alignment_property(), __t::TextAlignment::Center, priority_13);
@@ -57151,13 +58525,11 @@ fn build_controls_winuicontrols_xaml_deferred_354(
     text_block_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("OverflowTextLabel")));
     rt::register_name_value(name_scope.as_ref(), "OverflowTextLabel", __t::Rc::new(__t::Clone::clone(&text_block_1)), 394, 24)?;
     // Controls/WinUIControls.xaml(395,24) Text
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::CommandBarToggleButton::label_property()), 395, 24)?;
-    // Controls/WinUIControls.xaml(396,24) Foreground
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 396, 24)?;
+    rt::bind_template_rows(text_block_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R240)?;
     // Controls/WinUIControls.xaml(397,24) FontSize
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), "ControlContentThemeFontSize", 397, 24)?;
     // Controls/WinUIControls.xaml(398,24) FontFamily
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 398, 24)?;
+    rt::apply_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_family_property()), || rt::property(__t::TextBlock::font_family_property()), 398, 24)?;
     // Controls/WinUIControls.xaml(394,14) TextAlignment
     let priority_15 = __t::BindingPriority::Template;
     text_block_1.set_value_with_priority(__t::TextBlock::text_alignment_property(), __t::TextAlignment::Left, priority_15);
@@ -57352,9 +58724,7 @@ fn build_controls_winuicontrols_xaml_deferred_358(
     let priority_3 = __t::BindingPriority::Template;
     rectangle_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_3);
     // Controls/WinUIControls.xaml(728,22) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 728, 22)?;
-    // Controls/WinUIControls.xaml(729,22) Margin
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 729, 22)?;
+    rt::bind_template_rows(rectangle_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R241)?;
     context.pop_parent();
     rt::invoked(rectangle_0.try_end_init(), 723, 12)?;
     context.pop_parent();
@@ -57547,16 +58917,12 @@ fn build_controls_winuicontrols_xaml_deferred_361(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 774, 29)?;
     // Controls/WinUIControls.xaml(775,29) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 775, 29)?;
-    // Controls/WinUIControls.xaml(776,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 776, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R242)?;
     // Controls/WinUIControls.xaml(774,12) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/WinUIControls.xaml(778,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 778, 29)?;
-    // Controls/WinUIControls.xaml(779,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 779, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R243)?;
     // Controls/WinUIControls.xaml(780,29) Content (setter chosen at run time)
     let priority_2 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -57568,9 +58934,7 @@ fn build_controls_winuicontrols_xaml_deferred_361(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 780, 29)?, priority_2);
     }
     // Controls/WinUIControls.xaml(781,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 781, 29)?;
-    // Controls/WinUIControls.xaml(782,29) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 782, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R244)?;
     // Controls/WinUIControls.xaml(783,29) Margin (setter chosen at run time)
     let priority_3 = __t::BindingPriority::Template;
     let provided_7 = rt::provide_static_resource(&context, "AppBarEllipsisButtonInnerBorderMargin", || rt::property_value(__t::Layoutable::margin_property()), 783, 29)?;
@@ -57580,9 +58944,7 @@ fn build_controls_winuicontrols_xaml_deferred_361(
     let priority_4 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_4);
     // Controls/WinUIControls.xaml(785,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 785, 29)?;
-    // Controls/WinUIControls.xaml(786,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 786, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R245)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 774, 12)?;
     context.pop_parent();
@@ -57650,18 +59012,16 @@ fn build_controls_winuicontrols_xaml_deferred_363(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 833, 17)?;
     // Controls/WinUIControls.xaml(834,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 834, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 834, 17)?;
     // Controls/WinUIControls.xaml(833,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(836,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 836, 17)?;
-    // Controls/WinUIControls.xaml(837,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 837, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R246)?;
     // Controls/WinUIControls.xaml(838,17) BorderThickness
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), "CommandBarOverflowPresenterBorderThickness", 838, 17)?;
     // Controls/WinUIControls.xaml(839,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 839, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 839, 17)?;
     // Controls/WinUIControls.xaml(840,12) Child
     // Controls/WinUIControls.xaml(840,12) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -57669,9 +59029,7 @@ fn build_controls_winuicontrols_xaml_deferred_363(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&scroll_viewer_0).upcast::<__t::Control>()));
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/WinUIControls.xaml(840,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 840, 25)?;
-    // Controls/WinUIControls.xaml(841,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 841, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R247)?;
     // Controls/WinUIControls.xaml(842,14) Content
     // Controls/WinUIControls.xaml(842,14) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -57682,7 +59040,7 @@ fn build_controls_winuicontrols_xaml_deferred_363(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 842, 29)?;
     // Controls/WinUIControls.xaml(843,29) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 843, 29)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 843, 29)?;
     // Controls/WinUIControls.xaml(844,29) Margin
     rt::bind_dynamic_resource(&context, items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "CommandBarOverflowPresenterMargin", 844, 29)?;
     context.pop_parent();
@@ -57823,7 +59181,7 @@ fn build_controls_winuicontrols_xaml_deferred_365(
     // Controls/WinUIControls.xaml(868,19) MinHeight
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "AppBarThemeCompactHeight", 868, 19)?;
     // Controls/WinUIControls.xaml(869,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 869, 19)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 869, 19)?;
     // Controls/WinUIControls.xaml(870,14) Child
     // Controls/WinUIControls.xaml(870,14) Grid
     let grid_0 = __t::Grid::new();
@@ -57880,7 +59238,7 @@ fn build_controls_winuicontrols_xaml_deferred_365(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 876, 35)?;
     // Controls/WinUIControls.xaml(877,35) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 877, 35)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 877, 35)?;
     // Controls/WinUIControls.xaml(878,35) Content (setter chosen at run time)
     let priority_4 = __t::BindingPriority::Template;
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::CommandBar::content_property()));
@@ -57892,7 +59250,7 @@ fn build_controls_winuicontrols_xaml_deferred_365(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 878, 35)?, priority_4);
     }
     // Controls/WinUIControls.xaml(879,35) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 879, 35)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 879, 35)?;
     // Controls/WinUIControls.xaml(876,18) HorizontalAlignment
     let priority_5 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_5);
@@ -57967,14 +59325,14 @@ fn build_controls_winuicontrols_xaml_deferred_365(
     let value_2: __t::MarkupValue = rt::to_value(provided_9);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_2, priority_14, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 899, 23)?;
     // Controls/WinUIControls.xaml(900,23) Foreground
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 900, 23)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TemplatedControl::foreground_property()), 900, 23)?;
     // Controls/WinUIControls.xaml(901,23) MinHeight
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "AppBarThemeCompactHeight", 901, 23)?;
     // Controls/WinUIControls.xaml(897,16) VerticalAlignment
     let priority_15 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_15);
     // Controls/WinUIControls.xaml(903,23) IsVisible
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::CommandBar::is_overflow_button_visible_property()), 903, 23)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::CommandBar::is_overflow_button_visible_property()), || rt::property(__t::Visual::is_visible_property()), 903, 23)?;
     // Controls/WinUIControls.xaml(905,18) Content
     // Controls/WinUIControls.xaml(905,18) Path
     let path_0 = __t::Path::new();
@@ -58058,7 +59416,7 @@ fn build_controls_winuicontrols_xaml_deferred_365(
     // Controls/WinUIControls.xaml(924,23) BorderBrush
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "CommandBarBorderBrushOpen", 924, 23)?;
     // Controls/WinUIControls.xaml(925,23) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 925, 23)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 925, 23)?;
     context.pop_parent();
     rt::invoked(border_1.try_end_init(), 919, 16)?;
     context.pop_parent();
@@ -58426,17 +59784,7 @@ fn build_controls_winuicontrols_xaml_deferred_371(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 63, 17)?;
     // Controls/WinUIControls.xaml(64,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 64, 17)?;
-    // Controls/WinUIControls.xaml(65,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 65, 17)?;
-    // Controls/WinUIControls.xaml(66,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 66, 17)?;
-    // Controls/WinUIControls.xaml(67,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 67, 17)?;
-    // Controls/WinUIControls.xaml(68,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 68, 17)?;
-    // Controls/WinUIControls.xaml(69,17) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 69, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R248)?;
     // Controls/WinUIControls.xaml(71,14) Transitions
     let transitions_0 = __t::Transitions::__markup_new_0();
     // Controls/WinUIControls.xaml(72,16) Content
@@ -58486,13 +59834,7 @@ fn build_controls_winuicontrols_xaml_deferred_371(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 77, 31)?, priority_1);
     }
     // Controls/WinUIControls.xaml(78,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 78, 31)?;
-    // Controls/WinUIControls.xaml(79,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 79, 31)?;
-    // Controls/WinUIControls.xaml(80,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 80, 31)?;
-    // Controls/WinUIControls.xaml(81,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 81, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R249)?;
     // Controls/WinUIControls.xaml(76,14) RecognizesAccessKey
     let priority_2 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_2);
@@ -58680,23 +60022,6 @@ fn build_controls_winuicontrols_xaml_deferred_374(
 fn build_controls_winuicontrols_xaml_deferred_375(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    __build_controls_winuicontrols_xaml_factory_shape_375(service_provider, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99)
-}
-
-#[inline(never)]
-fn __build_controls_winuicontrols_xaml_factory_shape_375(
-    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
-    arg0: i32,
-    arg1: i32,
-    arg2: i32,
-    arg3: i32,
-    arg4: i32,
-    arg5: i32,
-    arg6: i32,
-    arg7: i32,
-    arg8: i32,
-    arg9: i32,
-) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(90,10) Grid
@@ -58705,7 +60030,7 @@ fn __build_controls_winuicontrols_xaml_factory_shape_375(
     grid_0.begin_init();
     // Controls/WinUIControls.xaml(90,15) Name
     grid_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
-    rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&grid_0)), arg0, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&grid_0)), 90, 15)?;
     // Controls/WinUIControls.xaml(90,10) Background
     let priority_0 = __t::BindingPriority::Template;
     grid_0.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
@@ -58717,36 +60042,26 @@ fn __build_controls_winuicontrols_xaml_factory_shape_375(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&content_presenter_0).upcast::<__t::Control>());
     // Controls/WinUIControls.xaml(91,29) Name
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
-    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), arg1, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 91, 29)?;
     // Controls/WinUIControls.xaml(92,29) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), arg2, 29)?;
-    // Controls/WinUIControls.xaml(93,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), arg3, 29)?;
-    // Controls/WinUIControls.xaml(94,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), arg4, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R250)?;
     // Controls/WinUIControls.xaml(95,29) Content (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_3 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_3);
     let value_0: __t::MarkupValue = rt::to_value(provided_3);
     if value_0.is_some() {
-        rt::bind(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_property(), value_0.clone(), arg5, 29)?;
+        rt::bind(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_property(), value_0.clone(), 95, 29)?;
     } else {
-        content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, arg5, 29)?, priority_1);
+        content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 95, 29)?, priority_1);
     }
     // Controls/WinUIControls.xaml(96,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), arg6, 29)?;
-    // Controls/WinUIControls.xaml(97,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), arg7, 29)?;
-    // Controls/WinUIControls.xaml(98,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), arg8, 29)?;
-    // Controls/WinUIControls.xaml(99,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), arg9, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R251)?;
     // Controls/WinUIControls.xaml(91,12) RecognizesAccessKey
     let priority_2 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_2);
-    rt::invoked(content_presenter_0.try_end_init(), arg1, 12)?;
-    rt::invoked(grid_0.try_end_init(), arg0, 10)?;
+    rt::invoked(content_presenter_0.try_end_init(), 91, 12)?;
+    rt::invoked(grid_0.try_end_init(), 90, 10)?;
     __t::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
@@ -59256,7 +60571,7 @@ fn build_controls_winuicontrols_xaml_deferred_378(
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
     // Controls/WinUIControls.xaml(152,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 152, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 152, 17)?;
     // Controls/WinUIControls.xaml(150,10) ClipToBounds
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_1);
@@ -59370,14 +60685,12 @@ fn build_controls_winuicontrols_xaml_deferred_378(
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_11, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 174, 21)?;
     // Controls/WinUIControls.xaml(175,21) Foreground
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 175, 21)?;
-    // Controls/WinUIControls.xaml(176,21) Background
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 176, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R252)?;
     // Controls/WinUIControls.xaml(172,14) BorderThickness
     let priority_12 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_12);
     // Controls/WinUIControls.xaml(178,21) BorderBrush
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 178, 21)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::TemplatedControl::border_brush_property()), 178, 21)?;
     // Controls/WinUIControls.xaml(179,21) Content (setter chosen at run time)
     let priority_13 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -59389,9 +60702,7 @@ fn build_controls_winuicontrols_xaml_deferred_378(
         button_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 179, 21)?, priority_13);
     }
     // Controls/WinUIControls.xaml(180,21) ContentTemplate
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 180, 21)?;
-    // Controls/WinUIControls.xaml(181,21) Command
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), rt::property(__t::SplitButton::command_property()), 181, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R253)?;
     // Controls/WinUIControls.xaml(182,21) CommandParameter (setter chosen at run time)
     let priority_14 = __t::BindingPriority::Template;
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::SplitButton::command_parameter_property()));
@@ -59403,11 +60714,7 @@ fn build_controls_winuicontrols_xaml_deferred_378(
         button_0.set_value_with_priority(__t::Button::command_parameter_property(), rt::exact(value_2.clone(), "Button.CommandParameter", 1, 182, 21)?, priority_14);
     }
     // Controls/WinUIControls.xaml(183,21) FontFamily
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 183, 21)?;
-    // Controls/WinUIControls.xaml(184,21) FontSize
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 184, 21)?;
-    // Controls/WinUIControls.xaml(185,21) FontWeight
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 185, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R254)?;
     // Controls/WinUIControls.xaml(172,14) HorizontalAlignment
     let priority_15 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_15);
@@ -59415,11 +60722,7 @@ fn build_controls_winuicontrols_xaml_deferred_378(
     let priority_16 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_16);
     // Controls/WinUIControls.xaml(188,21) HorizontalContentAlignment
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 188, 21)?;
-    // Controls/WinUIControls.xaml(189,21) VerticalContentAlignment
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 189, 21)?;
-    // Controls/WinUIControls.xaml(190,21) Padding
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 190, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R255)?;
     // Controls/WinUIControls.xaml(172,14) IsTabStop
     let priority_17 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::InputElement::is_tab_stop_property(), __t::Clone::clone(&false), priority_17);
@@ -59449,12 +60752,12 @@ fn build_controls_winuicontrols_xaml_deferred_378(
     // Controls/WinUIControls.xaml(196,21) Foreground
     rt::bind_dynamic_resource(&context, button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), "SplitButtonForegroundSecondary", 196, 21)?;
     // Controls/WinUIControls.xaml(197,21) Background
-    rt::bind_template_binding(button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 197, 21)?;
+    rt::apply_template_binding(button_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::TemplatedControl::background_property()), 197, 21)?;
     // Controls/WinUIControls.xaml(193,14) BorderThickness
     let priority_21 = __t::BindingPriority::Template;
     button_1.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_21);
     // Controls/WinUIControls.xaml(199,21) BorderBrush
-    rt::bind_template_binding(button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 199, 21)?;
+    rt::apply_template_binding(button_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::TemplatedControl::border_brush_property()), 199, 21)?;
     // Controls/WinUIControls.xaml(193,14) HorizontalContentAlignment
     let priority_22 = __t::BindingPriority::Template;
     button_1.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_22);
@@ -59706,22 +61009,47 @@ fn build_controls_winuicontrols_xaml_deferred_381(
 fn build_controls_winuicontrols_xaml_deferred_382(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(406,10) Grid
+    let grid_0 = __t::Grid::new();
+    context.set_intermediate_root_object(rt::to_value(grid_0.clone()));
+    grid_0.begin_init();
     // Controls/WinUIControls.xaml(406,15) Name
+    grid_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&grid_0)), 406, 15)?;
     // Controls/WinUIControls.xaml(406,10) Background
+    let priority_0 = __t::BindingPriority::Template;
+    grid_0.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
     // Controls/WinUIControls.xaml(407,12) Children
+    let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(407,12) ContentPresenter
+    let content_presenter_0 = __t::ContentPresenter::new();
+    content_presenter_0.begin_init();
+    __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&content_presenter_0).upcast::<__t::Control>());
     // Controls/WinUIControls.xaml(407,29) Name
+    content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 407, 29)?;
     // Controls/WinUIControls.xaml(408,29) Foreground
-    // Controls/WinUIControls.xaml(409,29) BorderBrush
-    // Controls/WinUIControls.xaml(410,29) BorderThickness
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R256)?;
     // Controls/WinUIControls.xaml(411,29) Content (setter chosen at run time)
+    let priority_1 = __t::BindingPriority::Template;
+    let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
+    let provided_3 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_3);
+    let value_0: __t::MarkupValue = rt::to_value(provided_3);
+    if value_0.is_some() {
+        rt::bind(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_property(), value_0.clone(), 411, 29)?;
+    } else {
+        content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 411, 29)?, priority_1);
+    }
     // Controls/WinUIControls.xaml(412,29) ContentTemplate
-    // Controls/WinUIControls.xaml(413,29) Padding
-    // Controls/WinUIControls.xaml(414,29) HorizontalContentAlignment
-    // Controls/WinUIControls.xaml(415,29) VerticalContentAlignment
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R257)?;
     // Controls/WinUIControls.xaml(407,12) RecognizesAccessKey
-    __build_controls_winuicontrols_xaml_factory_shape_375(service_provider, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415)
+    let priority_2 = __t::BindingPriority::Template;
+    content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_2);
+    rt::invoked(content_presenter_0.try_end_init(), 407, 12)?;
+    rt::invoked(grid_0.try_end_init(), 406, 10)?;
+    __t::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(436,4)` (a template or a deferred resource).
@@ -60311,11 +61639,7 @@ fn build_controls_winuicontrols_xaml_deferred_385(
     let priority_2 = __t::BindingPriority::Template;
     border_3.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_2);
     // Controls/WinUIControls.xaml(484,21) BorderBrush
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 484, 21)?;
-    // Controls/WinUIControls.xaml(485,21) BorderThickness
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 485, 21)?;
-    // Controls/WinUIControls.xaml(486,21) CornerRadius
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 486, 21)?;
+    rt::bind_template_rows(border_3.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R258)?;
     rt::invoked(border_3.try_end_init(), 482, 14)?;
     // Controls/WinUIControls.xaml(487,14) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -60336,11 +61660,7 @@ fn build_controls_winuicontrols_xaml_deferred_385(
     let value_0: __t::MarkupValue = rt::to_value(provided_10);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_4, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 489, 21)?;
     // Controls/WinUIControls.xaml(490,21) Foreground
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 490, 21)?;
-    // Controls/WinUIControls.xaml(491,21) Background
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 491, 21)?;
-    // Controls/WinUIControls.xaml(492,21) BorderThickness
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 492, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R259)?;
     // Controls/WinUIControls.xaml(487,14) BorderBrush
     let priority_5 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::TemplatedControl::border_brush_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_5);
@@ -60355,9 +61675,7 @@ fn build_controls_winuicontrols_xaml_deferred_385(
         button_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 494, 21)?, priority_6);
     }
     // Controls/WinUIControls.xaml(495,21) ContentTemplate
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 495, 21)?;
-    // Controls/WinUIControls.xaml(496,21) Command
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), rt::property(__t::SplitButton::command_property()), 496, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R260)?;
     // Controls/WinUIControls.xaml(497,21) CommandParameter (setter chosen at run time)
     let priority_7 = __t::BindingPriority::Template;
     let template_binding_11 = __t::TemplateBinding::__markup_new_1(rt::property(__t::SplitButton::command_parameter_property()));
@@ -60369,11 +61687,7 @@ fn build_controls_winuicontrols_xaml_deferred_385(
         button_0.set_value_with_priority(__t::Button::command_parameter_property(), rt::exact(value_2.clone(), "Button.CommandParameter", 1, 497, 21)?, priority_7);
     }
     // Controls/WinUIControls.xaml(498,21) FontFamily
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 498, 21)?;
-    // Controls/WinUIControls.xaml(499,21) FontSize
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 499, 21)?;
-    // Controls/WinUIControls.xaml(500,21) FontWeight
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 500, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R261)?;
     // Controls/WinUIControls.xaml(487,14) HorizontalAlignment
     let priority_8 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_8);
@@ -60381,11 +61695,7 @@ fn build_controls_winuicontrols_xaml_deferred_385(
     let priority_9 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_9);
     // Controls/WinUIControls.xaml(503,21) HorizontalContentAlignment
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 503, 21)?;
-    // Controls/WinUIControls.xaml(504,21) VerticalContentAlignment
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 504, 21)?;
-    // Controls/WinUIControls.xaml(505,21) Padding
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 505, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R262)?;
     // Controls/WinUIControls.xaml(487,14) IsTabStop
     let priority_10 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::InputElement::is_tab_stop_property(), __t::Clone::clone(&false), priority_10);
@@ -60415,9 +61725,7 @@ fn build_controls_winuicontrols_xaml_deferred_385(
     // Controls/WinUIControls.xaml(511,21) Foreground
     rt::bind_dynamic_resource(&context, button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), "AppBarButtonForeground", 511, 21)?;
     // Controls/WinUIControls.xaml(512,21) Background
-    rt::bind_template_binding(button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 512, 21)?;
-    // Controls/WinUIControls.xaml(513,21) BorderThickness
-    rt::bind_template_binding(button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 513, 21)?;
+    rt::bind_template_rows(button_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R263)?;
     // Controls/WinUIControls.xaml(508,14) BorderBrush
     let priority_14 = __t::BindingPriority::Template;
     button_1.set_value_with_priority(__t::TemplatedControl::border_brush_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_14);
@@ -60906,16 +62214,12 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(80,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 80, 17)?;
-    // Controls/WinUIControls.xaml(81,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 81, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R264)?;
     // Controls/WinUIControls.xaml(80,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(83,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 83, 17)?;
-    // Controls/WinUIControls.xaml(84,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 84, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R265)?;
     // Controls/WinUIControls.xaml(85,12) Child
     // Controls/WinUIControls.xaml(85,12) Grid
     let grid_0 = __t::Grid::new();
@@ -60956,7 +62260,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 88, 31)?, priority_2);
     }
     // Controls/WinUIControls.xaml(89,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 89, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 89, 31)?;
     // Controls/WinUIControls.xaml(90,31) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "ToggleSwitchHeaderForeground", 90, 31)?;
     // Controls/WinUIControls.xaml(86,14) IsHitTestVisible
@@ -61062,7 +62366,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     let priority_19 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 5.0_f64), priority_19);
     // Controls/WinUIControls.xaml(114,23) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 114, 23)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 114, 23)?;
     // Controls/WinUIControls.xaml(110,16) IsTemplateFocusTarget
     let priority_20 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_20);
@@ -61102,7 +62406,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     let priority_24 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::Visual::opacity_property(), 0.0_f64, priority_24);
     // Controls/WinUIControls.xaml(127,33) Foreground
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 127, 33)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 127, 33)?;
     // Controls/WinUIControls.xaml(123,16) IsHitTestVisible
     let priority_25 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_25);
@@ -61117,11 +62421,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 129, 33)?, priority_26);
     }
     // Controls/WinUIControls.xaml(130,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ToggleSwitch::off_content_template_property()), 130, 33)?;
-    // Controls/WinUIControls.xaml(131,33) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 131, 33)?;
-    // Controls/WinUIControls.xaml(132,33) VerticalAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 132, 33)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R266)?;
     rt::invoked(content_presenter_1.try_end_init(), 123, 16)?;
     // Controls/WinUIControls.xaml(133,16) Children
     let children_collection_4 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
@@ -61142,7 +62442,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
     let priority_29 = __t::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(__t::Visual::opacity_property(), 0.0_f64, priority_29);
     // Controls/WinUIControls.xaml(137,33) Foreground
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 137, 33)?;
+    rt::apply_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 137, 33)?;
     // Controls/WinUIControls.xaml(133,16) IsHitTestVisible
     let priority_30 = __t::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_30);
@@ -61157,11 +62457,7 @@ fn build_controls_winuicontrols_xaml_deferred_388(
         content_presenter_2.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 139, 33)?, priority_31);
     }
     // Controls/WinUIControls.xaml(140,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ToggleSwitch::on_content_template_property()), 140, 33)?;
-    // Controls/WinUIControls.xaml(141,33) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 141, 33)?;
-    // Controls/WinUIControls.xaml(142,33) VerticalAlignment
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 142, 33)?;
+    rt::bind_template_rows(content_presenter_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R267)?;
     rt::invoked(content_presenter_2.try_end_init(), 133, 16)?;
     // Controls/WinUIControls.xaml(143,16) Children
     let children_collection_5 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
@@ -61580,7 +62876,7 @@ fn build_controls_winuicontrols_xaml_deferred_391(
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/WinUIControls.xaml(68,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 68, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 68, 17)?;
     // Controls/WinUIControls.xaml(69,17) CornerRadius
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), "SliderThumbCornerRadius", 69, 17)?;
     // Controls/WinUIControls.xaml(70,12) Child
@@ -61600,7 +62896,7 @@ fn build_controls_winuicontrols_xaml_deferred_391(
     let priority_3 = __t::BindingPriority::Template;
     ellipse_0.set_value_with_priority(__t::Visual::render_transform_property(), rt::cast(__t::Clone::clone(&value_0), 72, 20)?, priority_3);
     // Controls/WinUIControls.xaml(73,20) Fill
-    rt::bind_template_binding(ellipse_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 73, 20)?;
+    rt::apply_template_binding(ellipse_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 73, 20)?;
     // Controls/WinUIControls.xaml(74,20) Width
     rt::bind_dynamic_resource(&context, ellipse_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "SliderInnerThumbWidth", 74, 20)?;
     // Controls/WinUIControls.xaml(75,20) Height
@@ -61677,7 +62973,7 @@ fn build_controls_winuicontrols_xaml_deferred_393(
     rectangle_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("HorizontalDecreaseRect")));
     rt::register_name_value(name_scope.as_ref(), "HorizontalDecreaseRect", __t::Rc::new(__t::Clone::clone(&rectangle_0)), 106, 22)?;
     // Controls/WinUIControls.xaml(107,22) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 107, 22)?;
+    rt::apply_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 107, 22)?;
     // Controls/WinUIControls.xaml(108,22) Height
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "SliderTrackThemeHeight", 108, 22)?;
     // Controls/WinUIControls.xaml(106,12) VerticalAlignment
@@ -61757,7 +63053,7 @@ fn build_controls_winuicontrols_xaml_deferred_395(
     rectangle_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("VerticalDecreaseRect")));
     rt::register_name_value(name_scope.as_ref(), "VerticalDecreaseRect", __t::Rc::new(__t::Clone::clone(&rectangle_0)), 122, 22)?;
     // Controls/WinUIControls.xaml(123,22) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 123, 22)?;
+    rt::apply_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 123, 22)?;
     // Controls/WinUIControls.xaml(124,22) Width
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "SliderTrackThemeHeight", 124, 22)?;
     // Controls/WinUIControls.xaml(122,12) HorizontalAlignment
@@ -62193,7 +63489,7 @@ fn build_controls_winuicontrols_xaml_deferred_400(
     data_validation_errors_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&grid_0)));
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(170,19) Margin
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 170, 19)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 170, 19)?;
     // Controls/WinUIControls.xaml(171,16) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(171,16) Border
@@ -62299,7 +63595,7 @@ fn build_controls_winuicontrols_xaml_deferred_400(
     rectangle_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("HorizontalTrackRect")));
     rt::register_name_value(name_scope.as_ref(), "HorizontalTrackRect", __t::Rc::new(__t::Clone::clone(&rectangle_0)), 189, 30)?;
     // Controls/WinUIControls.xaml(190,30) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 190, 30)?;
+    rt::apply_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 190, 30)?;
     // Controls/WinUIControls.xaml(191,30) Height
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "SliderTrackThemeHeight", 191, 30)?;
     // Controls/WinUIControls.xaml(189,20) Row
@@ -62358,17 +63654,7 @@ fn build_controls_winuicontrols_xaml_deferred_400(
     let priority_10 = __t::BindingPriority::Template;
     tick_bar_0.set_value_with_priority(__t::TickBar::placement_property(), __t::TickBarPlacement::Top, priority_10);
     // Controls/WinUIControls.xaml(204,28) Ticks
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::ticks_property(), rt::property(__t::Slider::ticks_property()), 204, 28)?;
-    // Controls/WinUIControls.xaml(205,28) TickFrequency
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::tick_frequency_property(), rt::property(__t::Slider::tick_frequency_property()), 205, 28)?;
-    // Controls/WinUIControls.xaml(206,28) Orientation
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::orientation_property(), rt::property(__t::Slider::orientation_property()), 206, 28)?;
-    // Controls/WinUIControls.xaml(207,28) Minimum
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 207, 28)?;
-    // Controls/WinUIControls.xaml(208,28) Maximum
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 208, 28)?;
-    // Controls/WinUIControls.xaml(209,28) IsDirectionReversed
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::is_direction_reversed_property(), rt::property(__t::Slider::is_direction_reversed_property()), 209, 28)?;
+    rt::bind_template_rows(tick_bar_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R268)?;
     context.pop_parent();
     rt::invoked(tick_bar_0.try_end_init(), 196, 20)?;
     // Controls/WinUIControls.xaml(210,20) Children
@@ -62404,17 +63690,7 @@ fn build_controls_winuicontrols_xaml_deferred_400(
     let priority_16 = __t::BindingPriority::Template;
     tick_bar_1.set_value_with_priority(__t::TickBar::placement_property(), __t::TickBarPlacement::Bottom, priority_16);
     // Controls/WinUIControls.xaml(219,28) Ticks
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::ticks_property(), rt::property(__t::Slider::ticks_property()), 219, 28)?;
-    // Controls/WinUIControls.xaml(220,28) TickFrequency
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::tick_frequency_property(), rt::property(__t::Slider::tick_frequency_property()), 220, 28)?;
-    // Controls/WinUIControls.xaml(221,28) Orientation
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::orientation_property(), rt::property(__t::Slider::orientation_property()), 221, 28)?;
-    // Controls/WinUIControls.xaml(222,28) Minimum
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 222, 28)?;
-    // Controls/WinUIControls.xaml(223,28) Maximum
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 223, 28)?;
-    // Controls/WinUIControls.xaml(224,28) IsDirectionReversed
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::is_direction_reversed_property(), rt::property(__t::Slider::is_direction_reversed_property()), 224, 28)?;
+    rt::bind_template_rows(tick_bar_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R269)?;
     context.pop_parent();
     rt::invoked(tick_bar_1.try_end_init(), 210, 20)?;
     // Controls/WinUIControls.xaml(225,20) Children
@@ -62437,9 +63713,7 @@ fn build_controls_winuicontrols_xaml_deferred_400(
     let priority_19 = __t::BindingPriority::Template;
     track_0.set_value_with_priority(__t::Grid::column_span_property(), 3_i32, priority_19);
     // Controls/WinUIControls.xaml(229,26) Minimum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 229, 26)?;
-    // Controls/WinUIControls.xaml(230,26) Maximum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 230, 26)?;
+    rt::bind_template_rows(track_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R270)?;
     // Controls/WinUIControls.xaml(231,26) Value
     let template_binding_18 = __t::TemplateBinding::__markup_new_1(rt::property(__t::RangeBase::value_property()));
     // Controls/WinUIControls.xaml(231,26) Mode
@@ -62447,7 +63721,7 @@ fn build_controls_winuicontrols_xaml_deferred_400(
     let provided_29 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_18);
     rt::bind(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::value_property(), provided_29, 231, 26)?;
     // Controls/WinUIControls.xaml(232,26) IsDirectionReversed
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::is_direction_reversed_property(), rt::property(__t::Slider::is_direction_reversed_property()), 232, 26)?;
+    rt::apply_template_binding(track_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::Slider::is_direction_reversed_property()), || rt::property(__t::Track::is_direction_reversed_property()), 232, 26)?;
     // Controls/WinUIControls.xaml(225,20) Orientation
     let priority_20 = __t::BindingPriority::Template;
     track_0.set_value_with_priority(__t::Track::orientation_property(), __t::Orientation::Horizontal, priority_20);
@@ -62467,9 +63741,7 @@ fn build_controls_winuicontrols_xaml_deferred_400(
     let value_0: __t::MarkupValue = rt::to_value(provided_31);
     rt::bind_or_set_priority(repeat_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_22, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 236, 37)?;
     // Controls/WinUIControls.xaml(237,37) Background
-    rt::bind_template_binding(repeat_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::foreground_property()), 237, 37)?;
-    // Controls/WinUIControls.xaml(238,37) CornerRadius
-    rt::bind_template_binding(repeat_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 238, 37)?;
+    rt::bind_template_rows(repeat_button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R271)?;
     // Controls/WinUIControls.xaml(235,24) Focusable
     let priority_23 = __t::BindingPriority::Template;
     repeat_button_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_23);
@@ -62561,7 +63833,7 @@ fn build_controls_winuicontrols_xaml_deferred_401(
     data_validation_errors_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&grid_0)));
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(267,19) Margin
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 267, 19)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 267, 19)?;
     // Controls/WinUIControls.xaml(268,16) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(268,16) Border
@@ -62667,7 +63939,7 @@ fn build_controls_winuicontrols_xaml_deferred_401(
     rectangle_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("VerticalTrackRect")));
     rt::register_name_value(name_scope.as_ref(), "VerticalTrackRect", __t::Rc::new(__t::Clone::clone(&rectangle_0)), 286, 30)?;
     // Controls/WinUIControls.xaml(287,30) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 287, 30)?;
+    rt::apply_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 287, 30)?;
     // Controls/WinUIControls.xaml(288,30) Width
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "SliderTrackThemeHeight", 288, 30)?;
     // Controls/WinUIControls.xaml(286,20) Column
@@ -62726,17 +63998,7 @@ fn build_controls_winuicontrols_xaml_deferred_401(
     let priority_10 = __t::BindingPriority::Template;
     tick_bar_0.set_value_with_priority(__t::TickBar::placement_property(), __t::TickBarPlacement::Left, priority_10);
     // Controls/WinUIControls.xaml(301,28) Ticks
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::ticks_property(), rt::property(__t::Slider::ticks_property()), 301, 28)?;
-    // Controls/WinUIControls.xaml(302,28) TickFrequency
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::tick_frequency_property(), rt::property(__t::Slider::tick_frequency_property()), 302, 28)?;
-    // Controls/WinUIControls.xaml(303,28) Orientation
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::orientation_property(), rt::property(__t::Slider::orientation_property()), 303, 28)?;
-    // Controls/WinUIControls.xaml(304,28) Minimum
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 304, 28)?;
-    // Controls/WinUIControls.xaml(305,28) Maximum
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 305, 28)?;
-    // Controls/WinUIControls.xaml(306,28) IsDirectionReversed
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::is_direction_reversed_property(), rt::property(__t::Slider::is_direction_reversed_property()), 306, 28)?;
+    rt::bind_template_rows(tick_bar_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R272)?;
     context.pop_parent();
     rt::invoked(tick_bar_0.try_end_init(), 293, 20)?;
     // Controls/WinUIControls.xaml(307,20) Children
@@ -62772,17 +64034,7 @@ fn build_controls_winuicontrols_xaml_deferred_401(
     let priority_16 = __t::BindingPriority::Template;
     tick_bar_1.set_value_with_priority(__t::TickBar::placement_property(), __t::TickBarPlacement::Right, priority_16);
     // Controls/WinUIControls.xaml(316,28) Ticks
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::ticks_property(), rt::property(__t::Slider::ticks_property()), 316, 28)?;
-    // Controls/WinUIControls.xaml(317,28) TickFrequency
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::tick_frequency_property(), rt::property(__t::Slider::tick_frequency_property()), 317, 28)?;
-    // Controls/WinUIControls.xaml(318,28) Orientation
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::orientation_property(), rt::property(__t::Slider::orientation_property()), 318, 28)?;
-    // Controls/WinUIControls.xaml(319,28) Minimum
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 319, 28)?;
-    // Controls/WinUIControls.xaml(320,28) Maximum
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 320, 28)?;
-    // Controls/WinUIControls.xaml(321,28) IsDirectionReversed
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::is_direction_reversed_property(), rt::property(__t::Slider::is_direction_reversed_property()), 321, 28)?;
+    rt::bind_template_rows(tick_bar_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R273)?;
     context.pop_parent();
     rt::invoked(tick_bar_1.try_end_init(), 307, 20)?;
     // Controls/WinUIControls.xaml(322,20) Children
@@ -62805,9 +64057,7 @@ fn build_controls_winuicontrols_xaml_deferred_401(
     let priority_19 = __t::BindingPriority::Template;
     track_0.set_value_with_priority(__t::Grid::row_span_property(), 3_i32, priority_19);
     // Controls/WinUIControls.xaml(326,26) Minimum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 326, 26)?;
-    // Controls/WinUIControls.xaml(327,26) Maximum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 327, 26)?;
+    rt::bind_template_rows(track_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R274)?;
     // Controls/WinUIControls.xaml(328,26) Value
     let template_binding_18 = __t::TemplateBinding::__markup_new_1(rt::property(__t::RangeBase::value_property()));
     // Controls/WinUIControls.xaml(328,26) Mode
@@ -62815,7 +64065,7 @@ fn build_controls_winuicontrols_xaml_deferred_401(
     let provided_29 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_18);
     rt::bind(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::value_property(), provided_29, 328, 26)?;
     // Controls/WinUIControls.xaml(329,26) IsDirectionReversed
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::is_direction_reversed_property(), rt::property(__t::Slider::is_direction_reversed_property()), 329, 26)?;
+    rt::apply_template_binding(track_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::Slider::is_direction_reversed_property()), || rt::property(__t::Track::is_direction_reversed_property()), 329, 26)?;
     // Controls/WinUIControls.xaml(322,20) Orientation
     let priority_20 = __t::BindingPriority::Template;
     track_0.set_value_with_priority(__t::Track::orientation_property(), __t::Orientation::Vertical, priority_20);
@@ -62835,9 +64085,7 @@ fn build_controls_winuicontrols_xaml_deferred_401(
     let value_0: __t::MarkupValue = rt::to_value(provided_31);
     rt::bind_or_set_priority(repeat_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_22, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 333, 37)?;
     // Controls/WinUIControls.xaml(334,37) Background
-    rt::bind_template_binding(repeat_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::foreground_property()), 334, 37)?;
-    // Controls/WinUIControls.xaml(335,37) CornerRadius
-    rt::bind_template_binding(repeat_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 335, 37)?;
+    rt::bind_template_rows(repeat_button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R275)?;
     // Controls/WinUIControls.xaml(332,24) Focusable
     let priority_23 = __t::BindingPriority::Template;
     repeat_button_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_23);
@@ -63199,20 +64447,12 @@ fn build_controls_winuicontrols_xaml_deferred_407(
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Grid::column_span_property(), 6_i32, priority_1);
     // Controls/WinUIControls.xaml(133,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 133, 19)?;
-    // Controls/WinUIControls.xaml(134,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 134, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R276)?;
     // Controls/WinUIControls.xaml(130,12) BackgroundSizing
     let priority_2 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_2);
     // Controls/WinUIControls.xaml(136,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 136, 19)?;
-    // Controls/WinUIControls.xaml(137,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 137, 19)?;
-    // Controls/WinUIControls.xaml(138,19) MinWidth
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 138, 19)?;
-    // Controls/WinUIControls.xaml(139,19) MinHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 139, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R277)?;
     rt::invoked(border_0.try_end_init(), 130, 12)?;
     // Controls/WinUIControls.xaml(140,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -63253,9 +64493,7 @@ fn build_controls_winuicontrols_xaml_deferred_407(
     let priority_6 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_6);
     // Controls/WinUIControls.xaml(147,29) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 147, 29)?;
-    // Controls/WinUIControls.xaml(148,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 148, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R278)?;
     // Controls/WinUIControls.xaml(149,29) Content (setter chosen at run time)
     let priority_7 = __t::BindingPriority::Template;
     let template_binding_9 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TextBox::inner_left_content_property()));
@@ -63280,17 +64518,7 @@ fn build_controls_winuicontrols_xaml_deferred_407(
     let priority_8 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_8);
     // Controls/WinUIControls.xaml(152,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 152, 25)?;
-    // Controls/WinUIControls.xaml(153,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 153, 25)?;
-    // Controls/WinUIControls.xaml(154,25) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 154, 25)?;
-    // Controls/WinUIControls.xaml(155,25) Margin
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 155, 25)?;
-    // Controls/WinUIControls.xaml(156,25) Padding
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 156, 25)?;
-    // Controls/WinUIControls.xaml(157,25) Foreground
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 157, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R279)?;
     // Controls/WinUIControls.xaml(150,12) Focusable
     let priority_9 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_9);
@@ -63322,35 +64550,7 @@ fn build_controls_winuicontrols_xaml_deferred_407(
     let provided_16 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_16);
     rt::bind(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_property(), provided_16, 160, 28)?;
     // Controls/WinUIControls.xaml(161,28) CaretBlinkInterval
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_blink_interval_property(), rt::property(__t::TextBox::caret_blink_interval_property()), 161, 28)?;
-    // Controls/WinUIControls.xaml(162,28) CaretIndex
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_index_property(), rt::property(__t::TextBox::caret_index_property()), 162, 28)?;
-    // Controls/WinUIControls.xaml(163,28) SelectionStart
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_start_property(), rt::property(__t::TextBox::selection_start_property()), 163, 28)?;
-    // Controls/WinUIControls.xaml(164,28) SelectionEnd
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_end_property(), rt::property(__t::TextBox::selection_end_property()), 164, 28)?;
-    // Controls/WinUIControls.xaml(165,28) TextAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 165, 28)?;
-    // Controls/WinUIControls.xaml(166,28) TextWrapping
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 166, 28)?;
-    // Controls/WinUIControls.xaml(167,28) LineHeight
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::line_height_property(), rt::property(__t::TextBox::line_height_property()), 167, 28)?;
-    // Controls/WinUIControls.xaml(168,28) LetterSpacing
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::letter_spacing_property(), rt::property(__t::TemplatedControl::letter_spacing_property()), 168, 28)?;
-    // Controls/WinUIControls.xaml(169,28) PasswordChar
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::password_char_property(), rt::property(__t::TextBox::password_char_property()), 169, 28)?;
-    // Controls/WinUIControls.xaml(170,28) RevealPassword
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::reveal_password_property(), rt::property(__t::TextBox::reveal_password_property()), 170, 28)?;
-    // Controls/WinUIControls.xaml(171,28) SelectionBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_brush_property(), rt::property(__t::TextBox::selection_brush_property()), 171, 28)?;
-    // Controls/WinUIControls.xaml(172,28) SelectionForegroundBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_foreground_brush_property(), rt::property(__t::TextBox::selection_foreground_brush_property()), 172, 28)?;
-    // Controls/WinUIControls.xaml(173,28) CaretBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_brush_property(), rt::property(__t::TextBox::caret_brush_property()), 173, 28)?;
-    // Controls/WinUIControls.xaml(174,28) HorizontalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::TextBox::horizontal_content_alignment_property()), 174, 28)?;
-    // Controls/WinUIControls.xaml(175,28) VerticalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 175, 28)?;
+    rt::bind_template_rows(text_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R280)?;
     rt::invoked(text_presenter_0.try_end_init(), 159, 14)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 150, 12)?;
     // Controls/WinUIControls.xaml(182,12) Children
@@ -63370,17 +64570,7 @@ fn build_controls_winuicontrols_xaml_deferred_407(
     let priority_11 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Grid::column_span_property(), 3_i32, priority_11);
     // Controls/WinUIControls.xaml(185,22) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TextBox::placeholder_foreground_property()), 185, 22)?;
-    // Controls/WinUIControls.xaml(186,22) Margin
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 186, 22)?;
-    // Controls/WinUIControls.xaml(187,22) Padding
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 187, 22)?;
-    // Controls/WinUIControls.xaml(188,22) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TextBox::placeholder_text_property()), 188, 22)?;
-    // Controls/WinUIControls.xaml(189,22) TextAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 189, 22)?;
-    // Controls/WinUIControls.xaml(190,22) TextWrapping
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 190, 22)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R281)?;
     // Controls/WinUIControls.xaml(182,12) IsHitTestVisible
     let priority_12 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_12);
@@ -63442,9 +64632,7 @@ fn build_controls_winuicontrols_xaml_deferred_407(
     let priority_13 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::Grid::column_property(), 3_i32, priority_13);
     // Controls/WinUIControls.xaml(202,29) Margin
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 202, 29)?;
-    // Controls/WinUIControls.xaml(203,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 203, 29)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R282)?;
     // Controls/WinUIControls.xaml(204,29) Content (setter chosen at run time)
     let priority_14 = __t::BindingPriority::Template;
     let template_binding_41 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TextBox::inner_right_content_property()));
@@ -63479,9 +64667,7 @@ fn build_controls_winuicontrols_xaml_deferred_407(
     let provided_46 = rt::provide_value(&context, rt::property_value(__t::Button::command_property()), &reflection_binding_extension_2, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(button_0.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), provided_46, 208, 19)?;
     // Controls/WinUIControls.xaml(209,19) BorderThickness
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 209, 19)?;
-    // Controls/WinUIControls.xaml(210,19) CornerRadius
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 210, 19)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R283)?;
     // Controls/WinUIControls.xaml(211,19) Padding
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), "HelperButtonThemePadding", 211, 19)?;
     // Controls/WinUIControls.xaml(205,12) Focusable
@@ -63491,7 +64677,7 @@ fn build_controls_winuicontrols_xaml_deferred_407(
     let priority_18 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_18);
     // Controls/WinUIControls.xaml(214,19) FontSize
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 214, 19)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_size_property()), || rt::property(__t::TemplatedControl::font_size_property()), 214, 19)?;
     // Controls/WinUIControls.xaml(205,12) HorizontalAlignment
     let priority_19 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_19);
@@ -63637,11 +64823,7 @@ fn build_controls_winuicontrols_xaml_deferred_409(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 260, 29)?, priority_0);
     }
     // Controls/WinUIControls.xaml(261,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 261, 29)?;
-    // Controls/WinUIControls.xaml(262,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 262, 29)?;
-    // Controls/WinUIControls.xaml(263,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 263, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R284)?;
     rt::invoked(content_presenter_0.try_end_init(), 259, 12)?;
     // Controls/WinUIControls.xaml(264,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -63660,7 +64842,7 @@ fn build_controls_winuicontrols_xaml_deferred_409(
     let priority_2 = __t::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_2);
     // Controls/WinUIControls.xaml(267,23) IsVisible
-    rt::bind_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::ButtonSpinner::show_button_spinner_property()), 267, 23)?;
+    rt::apply_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ButtonSpinner::show_button_spinner_property()), || rt::property(__t::Visual::is_visible_property()), 267, 23)?;
     // Controls/WinUIControls.xaml(268,14) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(268,14) RepeatButton
@@ -63680,7 +64862,7 @@ fn build_controls_winuicontrols_xaml_deferred_409(
     let priority_4 = __t::BindingPriority::Template;
     repeat_button_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), priority_4);
     // Controls/WinUIControls.xaml(271,27) CornerRadius
-    rt::bind_template_binding(repeat_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 271, 27)?;
+    rt::apply_template_binding(repeat_button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 271, 27)?;
     // Controls/WinUIControls.xaml(272,16) Content
     // Controls/WinUIControls.xaml(272,16) Path
     let path_0 = __t::Path::new();
@@ -63731,7 +64913,7 @@ fn build_controls_winuicontrols_xaml_deferred_409(
     let priority_11 = __t::BindingPriority::Template;
     repeat_button_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), priority_11);
     // Controls/WinUIControls.xaml(282,27) CornerRadius
-    rt::bind_template_binding(repeat_button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 282, 27)?;
+    rt::apply_template_binding(repeat_button_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 282, 27)?;
     // Controls/WinUIControls.xaml(283,16) Content
     // Controls/WinUIControls.xaml(283,16) Path
     let path_1 = __t::Path::new();
@@ -63882,13 +65064,7 @@ fn build_controls_winuicontrols_xaml_deferred_411(
     let value_0: __t::MarkupValue = rt::to_value(provided_0);
     rt::bind_or_set_priority(button_spinner_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_0, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 317, 26)?;
     // Controls/WinUIControls.xaml(318,26) CornerRadius
-    rt::bind_template_binding(button_spinner_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 318, 26)?;
-    // Controls/WinUIControls.xaml(319,26) AllowSpin
-    rt::bind_template_binding(button_spinner_0.upcast_ref::<__t::FerroObject>(), __t::ButtonSpinner::allow_spin_property(), rt::property(__t::NumericUpDown::allow_spin_property()), 319, 26)?;
-    // Controls/WinUIControls.xaml(320,26) ShowButtonSpinner
-    rt::bind_template_binding(button_spinner_0.upcast_ref::<__t::FerroObject>(), __t::ButtonSpinner::show_button_spinner_property(), rt::property(__t::NumericUpDown::show_button_spinner_property()), 320, 26)?;
-    // Controls/WinUIControls.xaml(321,26) ButtonSpinnerLocation
-    rt::bind_template_binding(button_spinner_0.upcast_ref::<__t::FerroObject>(), __t::ButtonSpinner::button_spinner_location_property(), rt::property(__t::NumericUpDown::button_spinner_location_property()), 321, 26)?;
+    rt::bind_template_rows(button_spinner_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R285)?;
     // Controls/WinUIControls.xaml(316,12) HorizontalContentAlignment
     let priority_1 = __t::BindingPriority::Template;
     button_spinner_0.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_1);
@@ -63910,37 +65086,7 @@ fn build_controls_winuicontrols_xaml_deferred_411(
     let value_1: __t::MarkupValue = rt::to_value(provided_5);
     rt::bind_or_set_priority(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_3, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 325, 22)?;
     // Controls/WinUIControls.xaml(326,22) FontSize
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 326, 22)?;
-    // Controls/WinUIControls.xaml(327,22) FontWeight
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 327, 22)?;
-    // Controls/WinUIControls.xaml(328,22) FontFamily
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 328, 22)?;
-    // Controls/WinUIControls.xaml(329,22) Background
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 329, 22)?;
-    // Controls/WinUIControls.xaml(330,22) BorderThickness
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 330, 22)?;
-    // Controls/WinUIControls.xaml(331,22) BorderBrush
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 331, 22)?;
-    // Controls/WinUIControls.xaml(332,22) Padding
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 332, 22)?;
-    // Controls/WinUIControls.xaml(333,22) Foreground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 333, 22)?;
-    // Controls/WinUIControls.xaml(334,22) TextAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::text_alignment_property(), rt::property(__t::NumericUpDown::text_alignment_property()), 334, 22)?;
-    // Controls/WinUIControls.xaml(335,22) CornerRadius
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 335, 22)?;
-    // Controls/WinUIControls.xaml(336,22) PlaceholderText
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_text_property(), rt::property(__t::NumericUpDown::placeholder_text_property()), 336, 22)?;
-    // Controls/WinUIControls.xaml(337,22) PlaceholderForeground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_foreground_property(), rt::property(__t::NumericUpDown::placeholder_foreground_property()), 337, 22)?;
-    // Controls/WinUIControls.xaml(338,22) IsReadOnly
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::is_read_only_property(), rt::property(__t::NumericUpDown::is_read_only_property()), 338, 22)?;
-    // Controls/WinUIControls.xaml(339,22) Text
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::text_property(), rt::property(__t::NumericUpDown::text_property()), 339, 22)?;
-    // Controls/WinUIControls.xaml(340,22) HorizontalContentAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::horizontal_content_alignment_property(), rt::property(__t::NumericUpDown::horizontal_content_alignment_property()), 340, 22)?;
-    // Controls/WinUIControls.xaml(341,22) VerticalContentAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::vertical_content_alignment_property(), rt::property(__t::NumericUpDown::vertical_content_alignment_property()), 341, 22)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R286)?;
     // Controls/WinUIControls.xaml(324,14) AcceptsReturn
     let priority_4 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::TextBox::accepts_return_property(), __t::Clone::clone(&false), priority_4);
@@ -64252,7 +65398,7 @@ fn build_controls_winuicontrols_xaml_deferred_414(
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(107,15) Height
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::Layoutable::height_property()), 107, 15)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::Layoutable::height_property()), || rt::property(__t::Layoutable::height_property()), 107, 15)?;
     // Controls/WinUIControls.xaml(107,10) RowDefinitions
     let row_definitions_0 = __t::RowDefinitions::__markup_new_0();
     rt::invoked(<__t::FerroListOf<__t::Ref<__t::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 3_i32), 108, 15)?;
@@ -64303,7 +65449,7 @@ fn build_controls_winuicontrols_xaml_deferred_414(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 112, 29)?, priority_1);
     }
     // Controls/WinUIControls.xaml(113,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::NumberBox::header_template_property()), 113, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::NumberBox::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 113, 29)?;
     // Controls/WinUIControls.xaml(110,12) FontWeight
     let value_1 = rt::invoked(__t::FontWeight::__markup_parse(__t::String::from("Normal")), 114, 29)?;
     let priority_2 = __t::BindingPriority::Template;
@@ -64313,9 +65459,7 @@ fn build_controls_winuicontrols_xaml_deferred_414(
     // Controls/WinUIControls.xaml(116,29) Margin
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "TextBoxTopHeaderMargin", 116, 29)?;
     // Controls/WinUIControls.xaml(117,29) FontSize
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 117, 29)?;
-    // Controls/WinUIControls.xaml(118,29) FontFamily
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 118, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R287)?;
     // Controls/WinUIControls.xaml(110,12) TextWrapping
     let priority_3 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::text_wrapping_property(), __t::TextWrapping::Wrap, priority_3);
@@ -64349,27 +65493,7 @@ fn build_controls_winuicontrols_xaml_deferred_414(
     let value_2: __t::MarkupValue = rt::to_value(provided_7);
     rt::bind_or_set_priority(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_2, priority_8, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 125, 20)?;
     // Controls/WinUIControls.xaml(126,20) PlaceholderText
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_text_property(), rt::property(__t::NumberBox::placeholder_text_property()), 126, 20)?;
-    // Controls/WinUIControls.xaml(127,20) FontSize
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 127, 20)?;
-    // Controls/WinUIControls.xaml(128,20) FontWeight
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 128, 20)?;
-    // Controls/WinUIControls.xaml(129,20) FontFamily
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 129, 20)?;
-    // Controls/WinUIControls.xaml(130,20) Background
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 130, 20)?;
-    // Controls/WinUIControls.xaml(131,20) BorderThickness
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 131, 20)?;
-    // Controls/WinUIControls.xaml(132,20) BorderBrush
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 132, 20)?;
-    // Controls/WinUIControls.xaml(133,20) Padding
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 133, 20)?;
-    // Controls/WinUIControls.xaml(134,20) Foreground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 134, 20)?;
-    // Controls/WinUIControls.xaml(135,20) TextAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::text_alignment_property(), rt::property(__t::NumberBox::text_alignment_property()), 135, 20)?;
-    // Controls/WinUIControls.xaml(136,20) CornerRadius
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 136, 20)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R288)?;
     // Controls/WinUIControls.xaml(122,12) AcceptsReturn
     let priority_9 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::TextBox::accepts_return_property(), __t::Clone::clone(&false), priority_9);
@@ -64626,7 +65750,7 @@ fn build_controls_winuicontrols_xaml_deferred_414(
     let priority_43 = __t::BindingPriority::Template;
     repeat_button_2.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_43);
     // Controls/WinUIControls.xaml(194,25) FontSize
-    rt::bind_template_binding(repeat_button_2.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 194, 25)?;
+    rt::apply_template_binding(repeat_button_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_size_property()), || rt::property(__t::TemplatedControl::font_size_property()), 194, 25)?;
     // Controls/WinUIControls.xaml(195,25) Theme (setter chosen at run time)
     let priority_44 = __t::BindingPriority::Template;
     let provided_35 = rt::provide_static_resource(&context, "NumericUpDownSpinButtonStyle", || rt::property_value(__t::StyledElement::theme_property()), 195, 25)?;
@@ -64636,7 +65760,7 @@ fn build_controls_winuicontrols_xaml_deferred_414(
     let priority_45 = __t::BindingPriority::Template;
     repeat_button_2.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), priority_45);
     // Controls/WinUIControls.xaml(197,25) CornerRadius
-    rt::bind_template_binding(repeat_button_2.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 197, 25)?;
+    rt::apply_template_binding(repeat_button_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 197, 25)?;
     // Controls/WinUIControls.xaml(198,14) Content
     // Controls/WinUIControls.xaml(198,14) Path
     let path_2 = __t::Path::new();
@@ -64688,7 +65812,7 @@ fn build_controls_winuicontrols_xaml_deferred_414(
     let priority_53 = __t::BindingPriority::Template;
     repeat_button_3.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_53);
     // Controls/WinUIControls.xaml(209,25) FontSize
-    rt::bind_template_binding(repeat_button_3.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 209, 25)?;
+    rt::apply_template_binding(repeat_button_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_size_property()), || rt::property(__t::TemplatedControl::font_size_property()), 209, 25)?;
     // Controls/WinUIControls.xaml(210,25) Theme (setter chosen at run time)
     let priority_54 = __t::BindingPriority::Template;
     let provided_40 = rt::provide_static_resource(&context, "NumericUpDownSpinButtonStyle", || rt::property_value(__t::StyledElement::theme_property()), 210, 25)?;
@@ -64698,7 +65822,7 @@ fn build_controls_winuicontrols_xaml_deferred_414(
     let priority_55 = __t::BindingPriority::Template;
     repeat_button_3.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), priority_55);
     // Controls/WinUIControls.xaml(212,25) CornerRadius
-    rt::bind_template_binding(repeat_button_3.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 212, 25)?;
+    rt::apply_template_binding(repeat_button_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 212, 25)?;
     // Controls/WinUIControls.xaml(213,14) Content
     // Controls/WinUIControls.xaml(213,14) Path
     let path_3 = __t::Path::new();
@@ -65014,25 +66138,11 @@ fn build_controls_winuicontrols_xaml_deferred_417(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ToggleButtonGrid")));
     rt::register_name_value(name_scope.as_ref(), "ToggleButtonGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 90, 17)?;
     // Controls/WinUIControls.xaml(91,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 91, 17)?;
-    // Controls/WinUIControls.xaml(92,17) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 92, 17)?;
-    // Controls/WinUIControls.xaml(93,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 93, 17)?;
-    // Controls/WinUIControls.xaml(94,17) MinHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 94, 17)?;
-    // Controls/WinUIControls.xaml(95,17) MinWidth
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 95, 17)?;
-    // Controls/WinUIControls.xaml(96,17) MaxWidth
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_width_property(), rt::property(__t::Layoutable::max_width_property()), 96, 17)?;
-    // Controls/WinUIControls.xaml(97,17) HorizontalAlignment
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::Layoutable::horizontal_alignment_property()), 97, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R289)?;
     // Controls/WinUIControls.xaml(98,17) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "ExpanderHeaderBorderBrush", 98, 17)?;
     // Controls/WinUIControls.xaml(99,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 99, 17)?;
-    // Controls/WinUIControls.xaml(100,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 100, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R290)?;
     // Controls/WinUIControls.xaml(101,12) Child
     // Controls/WinUIControls.xaml(101,12) Grid
     let grid_0 = __t::Grid::new();
@@ -65070,11 +66180,7 @@ fn build_controls_winuicontrols_xaml_deferred_417(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 103, 31)?, priority_0);
     }
     // Controls/WinUIControls.xaml(104,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 104, 31)?;
-    // Controls/WinUIControls.xaml(105,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 105, 31)?;
-    // Controls/WinUIControls.xaml(106,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 106, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R291)?;
     // Controls/WinUIControls.xaml(107,31) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "ExpanderHeaderForeground", 107, 31)?;
     // Controls/WinUIControls.xaml(102,14) RecognizesAccessKey
@@ -65230,25 +66336,11 @@ fn build_controls_winuicontrols_xaml_deferred_419(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ToggleButtonGrid")));
     rt::register_name_value(name_scope.as_ref(), "ToggleButtonGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 201, 17)?;
     // Controls/WinUIControls.xaml(202,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 202, 17)?;
-    // Controls/WinUIControls.xaml(203,17) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 203, 17)?;
-    // Controls/WinUIControls.xaml(204,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 204, 17)?;
-    // Controls/WinUIControls.xaml(205,17) MinHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 205, 17)?;
-    // Controls/WinUIControls.xaml(206,17) MinWidth
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 206, 17)?;
-    // Controls/WinUIControls.xaml(207,17) MaxWidth
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_width_property(), rt::property(__t::Layoutable::max_width_property()), 207, 17)?;
-    // Controls/WinUIControls.xaml(208,17) HorizontalAlignment
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::Layoutable::horizontal_alignment_property()), 208, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R292)?;
     // Controls/WinUIControls.xaml(209,17) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "ExpanderHeaderBorderBrush", 209, 17)?;
     // Controls/WinUIControls.xaml(210,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 210, 17)?;
-    // Controls/WinUIControls.xaml(211,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 211, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R293)?;
     // Controls/WinUIControls.xaml(212,12) Child
     // Controls/WinUIControls.xaml(212,12) Grid
     let grid_0 = __t::Grid::new();
@@ -65286,11 +66378,7 @@ fn build_controls_winuicontrols_xaml_deferred_419(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 214, 31)?, priority_0);
     }
     // Controls/WinUIControls.xaml(215,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 215, 31)?;
-    // Controls/WinUIControls.xaml(216,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 216, 31)?;
-    // Controls/WinUIControls.xaml(217,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 217, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R294)?;
     // Controls/WinUIControls.xaml(218,31) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "ExpanderHeaderForeground", 218, 31)?;
     // Controls/WinUIControls.xaml(213,14) RecognizesAccessKey
@@ -65739,9 +66827,7 @@ fn build_controls_winuicontrols_xaml_deferred_423(
     dock_panel_0.begin_init();
     context.push_parent(rt::to_value(dock_panel_0.clone()));
     // Controls/WinUIControls.xaml(291,20) MinWidth
-    rt::bind_template_binding(dock_panel_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 291, 20)?;
-    // Controls/WinUIControls.xaml(291,58) MaxWidth
-    rt::bind_template_binding(dock_panel_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_width_property(), rt::property(__t::Layoutable::max_width_property()), 291, 58)?;
+    rt::bind_template_rows(dock_panel_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R295)?;
     // Controls/WinUIControls.xaml(292,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(292,12) ToggleButton
@@ -65758,17 +66844,13 @@ fn build_controls_winuicontrols_xaml_deferred_423(
     // Controls/WinUIControls.xaml(294,25) Background
     rt::bind_dynamic_resource(&context, toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), "ExpanderHeaderBackground", 294, 25)?;
     // Controls/WinUIControls.xaml(295,25) BackgroundSizing
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 295, 25)?;
+    rt::apply_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_sizing_property()), || rt::property(__t::TemplatedControl::background_sizing_property()), 295, 25)?;
     // Controls/WinUIControls.xaml(296,25) BorderBrush
     rt::bind_dynamic_resource(&context, toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), "ExpanderHeaderBorderBrush", 296, 25)?;
     // Controls/WinUIControls.xaml(297,25) BorderThickness
     rt::bind_dynamic_resource(&context, toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), "ExpanderHeaderBorderThickness", 297, 25)?;
     // Controls/WinUIControls.xaml(298,25) MinHeight
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 298, 25)?;
-    // Controls/WinUIControls.xaml(299,25) CornerRadius
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 299, 25)?;
-    // Controls/WinUIControls.xaml(300,25) IsEnabled
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::InputElement::is_enabled_property(), rt::property(__t::InputElement::is_enabled_property()), 300, 25)?;
+    rt::bind_template_rows(toggle_button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R296)?;
     // Controls/WinUIControls.xaml(301,25) Padding (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let provided_9 = rt::provide_static_resource(&context, "ExpanderHeaderPadding", || rt::property_value(__t::TemplatedControl::padding_property()), 301, 25)?;
@@ -65803,7 +66885,7 @@ fn build_controls_winuicontrols_xaml_deferred_423(
         toggle_button_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_4.clone(), "ContentControl.Content", 1, 306, 25)?, priority_6);
     }
     // Controls/WinUIControls.xaml(307,25) ContentTemplate
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::HeaderedContentControl::header_template_property()), 307, 25)?;
+    rt::apply_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::HeaderedContentControl::header_template_property()), || rt::property(__t::ContentControl::content_template_property()), 307, 25)?;
     // Controls/WinUIControls.xaml(308,25) IsChecked
     let template_binding_8 = __t::TemplateBinding::__markup_new_1(rt::property(__t::Expander::is_expanded_property()));
     // Controls/WinUIControls.xaml(308,25) Mode
@@ -65835,11 +66917,7 @@ fn build_controls_winuicontrols_xaml_deferred_423(
     border_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ExpanderContent")));
     rt::register_name_value(name_scope.as_ref(), "ExpanderContent", __t::Rc::new(__t::Clone::clone(&border_1)), 311, 21)?;
     // Controls/WinUIControls.xaml(312,21) IsVisible
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::Expander::is_expanded_property()), 312, 21)?;
-    // Controls/WinUIControls.xaml(313,21) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 313, 21)?;
-    // Controls/WinUIControls.xaml(314,21) BackgroundSizing
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 314, 21)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R297)?;
     // Controls/WinUIControls.xaml(315,21) CornerRadius
     let template_binding_12 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TemplatedControl::corner_radius_property()));
     context.push_parent(rt::to_value(template_binding_12.clone()));
@@ -65850,14 +66928,14 @@ fn build_controls_winuicontrols_xaml_deferred_423(
     let provided_20 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_12);
     rt::bind(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), provided_20, 315, 21)?;
     // Controls/WinUIControls.xaml(316,21) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 316, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 316, 21)?;
     // Controls/WinUIControls.xaml(317,21) BorderThickness (setter chosen at run time)
     let priority_8 = __t::BindingPriority::Template;
     let provided_22 = rt::provide_static_resource(&context, "ExpanderContentDownBorderThickness", || rt::property_value(__t::Border::border_thickness_property()), 317, 21)?;
     let value_5: __t::MarkupValue = rt::to_value(provided_22);
     rt::bind_or_set_priority(border_1.upcast_ref::<__t::FerroObject>(), || __t::Border::border_thickness_property(), value_5, priority_8, || rt::markup_handle(<__t::Thickness as __t::MarkupTyped>::MARKUP), false, "Border.BorderThickness", 317, 21)?;
     // Controls/WinUIControls.xaml(318,21) MinHeight
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 318, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::Layoutable::min_height_property()), || rt::property(__t::Layoutable::min_height_property()), 318, 21)?;
     // Controls/WinUIControls.xaml(311,14) HorizontalAlignment
     let priority_9 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_9);
@@ -65865,7 +66943,7 @@ fn build_controls_winuicontrols_xaml_deferred_423(
     let priority_10 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_10);
     // Controls/WinUIControls.xaml(321,21) Padding
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 321, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Decorator::padding_property()), 321, 21)?;
     // Controls/WinUIControls.xaml(322,16) Child
     // Controls/WinUIControls.xaml(322,16) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -65885,11 +66963,7 @@ fn build_controls_winuicontrols_xaml_deferred_423(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_6.clone(), "ContentControl.Content", 1, 323, 33)?, priority_11);
     }
     // Controls/WinUIControls.xaml(324,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 324, 33)?;
-    // Controls/WinUIControls.xaml(325,33) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 325, 33)?;
-    // Controls/WinUIControls.xaml(326,33) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 326, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R298)?;
     rt::invoked(content_presenter_0.try_end_init(), 322, 16)?;
     context.pop_parent();
     rt::invoked(border_1.try_end_init(), 311, 14)?;
@@ -66122,16 +67196,12 @@ fn build_controls_winuicontrols_xaml_deferred_427(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 85, 17)?;
     // Controls/WinUIControls.xaml(86,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 86, 17)?;
-    // Controls/WinUIControls.xaml(87,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 87, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R299)?;
     // Controls/WinUIControls.xaml(85,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(89,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 89, 17)?;
-    // Controls/WinUIControls.xaml(90,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 90, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R300)?;
     // Controls/WinUIControls.xaml(91,12) Child
     // Controls/WinUIControls.xaml(91,12) Border
     let border_1 = __t::Border::new();
@@ -66152,16 +67222,12 @@ fn build_controls_winuicontrols_xaml_deferred_427(
     path_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Content")));
     rt::register_name_value(name_scope.as_ref(), "Content", __t::Rc::new(__t::Clone::clone(&path_0)), 93, 19)?;
     // Controls/WinUIControls.xaml(94,19) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 94, 19)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 94, 19)?;
     // Controls/WinUIControls.xaml(93,14) Stretch
     let priority_2 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_2);
     // Controls/WinUIControls.xaml(96,19) Width
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::TemplatedControl::font_size_property()), 96, 19)?;
-    // Controls/WinUIControls.xaml(97,19) HorizontalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 97, 19)?;
-    // Controls/WinUIControls.xaml(98,19) VerticalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 98, 19)?;
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R301)?;
     rt::invoked(path_0.try_end_init(), 93, 14)?;
     rt::invoked(border_1.try_end_init(), 91, 12)?;
     rt::invoked(border_0.try_end_init(), 85, 10)?;
@@ -66411,14 +67477,12 @@ fn build_controls_winuicontrols_xaml_deferred_432(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 177, 17)?;
     // Controls/WinUIControls.xaml(178,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 178, 17)?;
-    // Controls/WinUIControls.xaml(179,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 179, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R302)?;
     // Controls/WinUIControls.xaml(177,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(181,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 181, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 181, 17)?;
     // Controls/WinUIControls.xaml(182,17) Width (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let provided_3 = rt::provide_static_resource(&context, "PipsPagerHorizontalOrientationButtonWidth", || rt::property_value(__t::Layoutable::width_property()), 182, 17)?;
@@ -66430,7 +67494,7 @@ fn build_controls_winuicontrols_xaml_deferred_432(
     let value_1: __t::MarkupValue = rt::to_value(provided_4);
     rt::bind_or_set_priority(border_0.upcast_ref::<__t::FerroObject>(), || __t::Layoutable::height_property(), value_1, priority_2, || __t::ValueType::of::<f64>(), false, "Layoutable.Height", 183, 17)?;
     // Controls/WinUIControls.xaml(184,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 184, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 184, 17)?;
     // Controls/WinUIControls.xaml(186,12) Child
     // Controls/WinUIControls.xaml(186,12) Path
     let path_0 = __t::Path::new();
@@ -66446,18 +67510,12 @@ fn build_controls_winuicontrols_xaml_deferred_432(
     let value_2: __t::MarkupValue = rt::to_value(provided_6);
     rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_2, priority_3, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 187, 17)?;
     // Controls/WinUIControls.xaml(188,17) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 188, 17)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 188, 17)?;
     // Controls/WinUIControls.xaml(186,12) Stretch
     let priority_4 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_4);
     // Controls/WinUIControls.xaml(190,17) Width
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::TemplatedControl::font_size_property()), 190, 17)?;
-    // Controls/WinUIControls.xaml(191,17) Height
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::TemplatedControl::font_size_property()), 191, 17)?;
-    // Controls/WinUIControls.xaml(192,17) HorizontalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 192, 17)?;
-    // Controls/WinUIControls.xaml(193,17) VerticalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 193, 17)?;
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R303)?;
     context.pop_parent();
     rt::invoked(path_0.try_end_init(), 186, 12)?;
     context.pop_parent();
@@ -66731,16 +67789,12 @@ fn build_controls_winuicontrols_xaml_deferred_437(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 280, 17)?;
     // Controls/WinUIControls.xaml(281,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 281, 17)?;
-    // Controls/WinUIControls.xaml(282,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 282, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R304)?;
     // Controls/WinUIControls.xaml(280,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(284,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 284, 17)?;
-    // Controls/WinUIControls.xaml(285,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 285, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R305)?;
     // Controls/WinUIControls.xaml(286,12) Child
     // Controls/WinUIControls.xaml(286,12) Path
     let path_0 = __t::Path::new();
@@ -66756,18 +67810,12 @@ fn build_controls_winuicontrols_xaml_deferred_437(
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
     rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, priority_1, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 287, 17)?;
     // Controls/WinUIControls.xaml(288,17) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 288, 17)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 288, 17)?;
     // Controls/WinUIControls.xaml(286,12) Stretch
     let priority_2 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_2);
     // Controls/WinUIControls.xaml(290,17) Width
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::TemplatedControl::font_size_property()), 290, 17)?;
-    // Controls/WinUIControls.xaml(291,17) Height
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::TemplatedControl::font_size_property()), 291, 17)?;
-    // Controls/WinUIControls.xaml(292,17) HorizontalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 292, 17)?;
-    // Controls/WinUIControls.xaml(293,17) VerticalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 293, 17)?;
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R306)?;
     context.pop_parent();
     rt::invoked(path_0.try_end_init(), 286, 12)?;
     context.pop_parent();
@@ -66832,7 +67880,7 @@ fn build_controls_winuicontrols_xaml_deferred_439(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 352, 27)?;
     // Controls/WinUIControls.xaml(352,56) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 352, 56)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 352, 56)?;
     rt::invoked(items_presenter_0.try_end_init(), 352, 12)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 348, 10)?;
     __t::Result::Ok(rt::to_value(scroll_viewer_0.clone()))
@@ -66959,9 +68007,7 @@ fn build_controls_winuicontrols_xaml_deferred_441(
     stack_panel_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootPanel")));
     rt::register_name_value(name_scope.as_ref(), "RootPanel", __t::Rc::new(__t::Clone::clone(&stack_panel_0)), 367, 21)?;
     // Controls/WinUIControls.xaml(368,21) Orientation
-    rt::bind_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), __t::StackPanel::orientation_property(), rt::property(__t::PipsPager::orientation_property()), 368, 21)?;
-    // Controls/WinUIControls.xaml(369,21) Background
-    rt::bind_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 369, 21)?;
+    rt::bind_template_rows(stack_panel_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R307)?;
     // Controls/WinUIControls.xaml(370,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(370,12) Button
@@ -66972,9 +68018,7 @@ fn build_controls_winuicontrols_xaml_deferred_441(
     button_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_PreviousButton")));
     rt::register_name_value(name_scope.as_ref(), "PART_PreviousButton", __t::Rc::new(__t::Clone::clone(&button_0)), 370, 19)?;
     // Controls/WinUIControls.xaml(371,19) Theme
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::StyledElement::theme_property(), rt::property(__t::PipsPager::previous_button_theme_property()), 371, 19)?;
-    // Controls/WinUIControls.xaml(372,19) IsVisible
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::PipsPager::is_previous_button_visible_property()), 372, 19)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R308)?;
     // Controls/WinUIControls.xaml(370,12) HorizontalAlignment
     let priority_0 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_0);
@@ -67057,9 +68101,7 @@ fn build_controls_winuicontrols_xaml_deferred_441(
     button_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_NextButton")));
     rt::register_name_value(name_scope.as_ref(), "PART_NextButton", __t::Rc::new(__t::Clone::clone(&button_1)), 391, 19)?;
     // Controls/WinUIControls.xaml(392,19) Theme
-    rt::bind_template_binding(button_1.upcast_ref::<__t::FerroObject>(), __t::StyledElement::theme_property(), rt::property(__t::PipsPager::next_button_theme_property()), 392, 19)?;
-    // Controls/WinUIControls.xaml(393,19) IsVisible
-    rt::bind_template_binding(button_1.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::PipsPager::is_next_button_visible_property()), 393, 19)?;
+    rt::bind_template_rows(button_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R309)?;
     // Controls/WinUIControls.xaml(391,12) HorizontalAlignment
     let priority_9 = __t::BindingPriority::Template;
     button_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_9);
@@ -67148,7 +68190,7 @@ fn build_controls_winuicontrols_xaml_deferred_444(
     grid_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Root")));
     rt::register_name_value(name_scope.as_ref(), "Root", __t::Rc::new(__t::Clone::clone(&grid_0)), 24, 15)?;
     // Controls/WinUIControls.xaml(24,29) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 24, 29)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 24, 29)?;
     // Controls/WinUIControls.xaml(25,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/WinUIControls.xaml(25,12) ContentPresenter
@@ -67169,22 +68211,12 @@ fn build_controls_winuicontrols_xaml_deferred_444(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 26, 29)?, priority_0);
     }
     // Controls/WinUIControls.xaml(27,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 27, 29)?;
-    // Controls/WinUIControls.xaml(28,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 28, 29)?;
-    // Controls/WinUIControls.xaml(29,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 29, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R310)?;
     // Controls/WinUIControls.xaml(25,12) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/WinUIControls.xaml(31,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 31, 29)?;
-    // Controls/WinUIControls.xaml(32,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 32, 29)?;
-    // Controls/WinUIControls.xaml(33,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 33, 29)?;
-    // Controls/WinUIControls.xaml(34,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 34, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R311)?;
     // Controls/WinUIControls.xaml(25,12) Background
     let priority_2 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_2);
@@ -67313,20 +68345,14 @@ fn build_controls_winuicontrols_xaml_deferred_447(
     let value_1: __t::MarkupValue = rt::to_value(provided_0);
     rt::bind_or_set_priority(border_0.upcast_ref::<__t::FerroObject>(), || __t::Visual::shadow_property(), value_1, priority_0, || rt::class_handle(<__t::Shadow as __t::StaticType>::TYPE), true, "Visual.Shadow", 63, 38)?;
     // Controls/WinUIControls.xaml(64,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 64, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 64, 17)?;
     // Controls/WinUIControls.xaml(65,12) Child
     // Controls/WinUIControls.xaml(65,12) Border
     let border_1 = __t::Border::new();
     border_1.begin_init();
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&border_1).upcast::<__t::Control>()));
     // Controls/WinUIControls.xaml(65,19) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 65, 19)?;
-    // Controls/WinUIControls.xaml(66,19) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 66, 19)?;
-    // Controls/WinUIControls.xaml(67,19) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 67, 19)?;
-    // Controls/WinUIControls.xaml(68,19) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 68, 19)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R312)?;
     // Controls/WinUIControls.xaml(65,12) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
@@ -67339,9 +68365,7 @@ fn build_controls_winuicontrols_xaml_deferred_447(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 70, 27)?;
     // Controls/WinUIControls.xaml(71,27) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 71, 27)?;
-    // Controls/WinUIControls.xaml(72,27) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 72, 27)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R313)?;
     // Controls/WinUIControls.xaml(73,16) Content
     // Controls/WinUIControls.xaml(73,16) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -67361,13 +68385,7 @@ fn build_controls_winuicontrols_xaml_deferred_447(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 74, 33)?, priority_2);
     }
     // Controls/WinUIControls.xaml(75,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 75, 33)?;
-    // Controls/WinUIControls.xaml(76,33) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 76, 33)?;
-    // Controls/WinUIControls.xaml(77,33) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 77, 33)?;
-    // Controls/WinUIControls.xaml(78,33) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 78, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R314)?;
     rt::invoked(content_presenter_0.try_end_init(), 73, 16)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 70, 14)?;
     rt::invoked(border_1.try_end_init(), 65, 12)?;
@@ -67462,32 +68480,77 @@ fn build_controls_winuicontrols_xaml_deferred_449(
 fn build_controls_winuicontrols_xaml_deferred_450(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
+    let name_scope = context.name_scope_field();
     // Controls/WinUIControls.xaml(63,10) Border
+    let border_0 = __t::Border::new();
+    context.set_intermediate_root_object(rt::to_value(border_0.clone()));
+    border_0.begin_init();
+    context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(63,17) Name
+    border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ThemeShadowWrapper")));
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", __t::Rc::new(__t::Clone::clone(&border_0)), 63, 17)?;
     // Controls/WinUIControls.xaml(63,10) Translation
+    let value_0 = rt::invoked(__t::Vector3D::__markup_parse(__t::String::from("0,0,32")), 64, 17)?;
+    border_0.set_direct_value(__t::Visual::translation_property(), __t::Clone::clone(&value_0));
     // Controls/WinUIControls.xaml(64,38) Shadow (setter chosen at run time)
+    let priority_0 = __t::BindingPriority::Template;
+    let provided_0 = rt::provide_static_resource(&context, "WinUIThemeShadow", || rt::property_value(__t::Visual::shadow_property()), 64, 38)?;
+    let value_1: __t::MarkupValue = rt::to_value(provided_0);
+    rt::bind_or_set_priority(border_0.upcast_ref::<__t::FerroObject>(), || __t::Visual::shadow_property(), value_1, priority_0, || rt::class_handle(<__t::Shadow as __t::StaticType>::TYPE), true, "Visual.Shadow", 64, 38)?;
     // Controls/WinUIControls.xaml(65,17) CornerRadius
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 65, 17)?;
     // Controls/WinUIControls.xaml(66,12) Child
     // Controls/WinUIControls.xaml(66,12) Border
+    let border_1 = __t::Border::new();
+    border_1.begin_init();
+    border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&border_1).upcast::<__t::Control>()));
+    context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(66,19) Background
-    // Controls/WinUIControls.xaml(67,19) BorderBrush
-    // Controls/WinUIControls.xaml(68,19) BorderThickness
-    // Controls/WinUIControls.xaml(69,19) CornerRadius
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R315)?;
     // Controls/WinUIControls.xaml(66,12) BackgroundSizing
+    let priority_1 = __t::BindingPriority::Template;
+    border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/WinUIControls.xaml(71,14) Child
     // Controls/WinUIControls.xaml(71,14) ScrollViewer
+    let scroll_viewer_0 = __t::ScrollViewer::new();
+    scroll_viewer_0.begin_init();
+    border_1.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&scroll_viewer_0).upcast::<__t::Control>()));
+    context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/WinUIControls.xaml(71,27) Name
+    scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("MenuFlyoutPresenterScrollViewer")));
+    rt::register_name_value(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 71, 27)?;
     // Controls/WinUIControls.xaml(72,27) Theme (setter chosen at run time)
+    let priority_2 = __t::BindingPriority::Template;
+    let provided_6 = rt::provide_static_resource(&context, "MenuFlyoutPresenterScrollViewer", || rt::property_value(__t::StyledElement::theme_property()), 72, 27)?;
+    let value_2: __t::MarkupValue = rt::to_value(provided_6);
+    rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_2, priority_2, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 72, 27)?;
     // Controls/WinUIControls.xaml(73,27) Margin
-    // Controls/WinUIControls.xaml(74,27) HorizontalScrollBarVisibility
-    // Controls/WinUIControls.xaml(75,27) VerticalScrollBarVisibility
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R316)?;
     // Controls/WinUIControls.xaml(76,16) Content
     // Controls/WinUIControls.xaml(76,16) ItemsPresenter
+    let items_presenter_0 = __t::ItemsPresenter::new();
+    items_presenter_0.begin_init();
+    scroll_viewer_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&items_presenter_0)));
     // Controls/WinUIControls.xaml(76,31) Name
+    items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 76, 31)?;
     // Controls/WinUIControls.xaml(77,31) ItemsPanel
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 77, 31)?;
     // Controls/WinUIControls.xaml(76,16) TabNavigation
+    let priority_3 = __t::BindingPriority::Template;
+    items_presenter_0.set_value_with_priority(__t::KeyboardNavigation::tab_navigation_property(), __t::KeyboardNavigationMode::Continue, priority_3);
     // Controls/WinUIControls.xaml(76,16) IsSharedSizeScope
-    __build_controls_winuicontrols_xaml_factory_shape_71(service_provider)
+    let priority_4 = __t::BindingPriority::Template;
+    items_presenter_0.set_value_with_priority(__t::Grid::is_shared_size_scope_property(), __t::Clone::clone(&true), priority_4);
+    rt::invoked(items_presenter_0.try_end_init(), 76, 16)?;
+    context.pop_parent();
+    rt::invoked(scroll_viewer_0.try_end_init(), 71, 14)?;
+    context.pop_parent();
+    rt::invoked(border_1.try_end_init(), 66, 12)?;
+    context.pop_parent();
+    rt::invoked(border_0.try_end_init(), 63, 10)?;
+    __t::Result::Ok(rt::to_value(border_0.clone()))
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(87,4)` (a template or a deferred resource).
@@ -68254,23 +69317,19 @@ fn build_controls_winuicontrols_xaml_deferred_454(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 95, 19)?;
     // Controls/WinUIControls.xaml(96,19) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 96, 19)?;
-    // Controls/WinUIControls.xaml(97,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 97, 19)?;
-    // Controls/WinUIControls.xaml(98,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 98, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R317)?;
     // Controls/WinUIControls.xaml(95,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(100,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 100, 19)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 100, 19)?;
     // Controls/WinUIControls.xaml(101,19) Margin (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let provided_4 = rt::provide_static_resource(&context, "MenuFlyoutItemMargin", || rt::property_value(__t::Layoutable::margin_property()), 101, 19)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
     rt::bind_or_set_priority(border_0.upcast_ref::<__t::FerroObject>(), || __t::Layoutable::margin_property(), value_0, priority_1, || rt::markup_handle(<__t::Thickness as __t::MarkupTyped>::MARKUP), false, "Layoutable.Margin", 101, 19)?;
     // Controls/WinUIControls.xaml(102,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 102, 19)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 102, 19)?;
     // Controls/WinUIControls.xaml(103,14) Child
     // Controls/WinUIControls.xaml(103,14) Grid
     let grid_0 = __t::Grid::new();
@@ -68415,7 +69474,7 @@ fn build_controls_winuicontrols_xaml_deferred_454(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 135, 35)?, priority_25);
     }
     // Controls/WinUIControls.xaml(136,35) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 136, 35)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 136, 35)?;
     rt::invoked(content_presenter_0.try_end_init(), 134, 18)?;
     rt::invoked(viewbox_0.try_end_init(), 122, 16)?;
     // Controls/WinUIControls.xaml(138,16) Children
@@ -68441,9 +69500,7 @@ fn build_controls_winuicontrols_xaml_deferred_454(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 140, 33)?, priority_27);
     }
     // Controls/WinUIControls.xaml(141,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedSelectingItemsControl::header_template_property()), 141, 33)?;
-    // Controls/WinUIControls.xaml(142,33) Foreground
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 142, 33)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R318)?;
     // Controls/WinUIControls.xaml(138,16) TextTrimming
     let value_4 = <dyn __t::TextTrimming>::__markup_static_get_None();
     let priority_28 = __t::BindingPriority::Template;
@@ -68653,7 +69710,7 @@ fn build_controls_winuicontrols_xaml_deferred_454(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 192, 35)?;
     // Controls/WinUIControls.xaml(193,35) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 193, 35)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 193, 35)?;
     // Controls/WinUIControls.xaml(192,20) TabNavigation
     let priority_55 = __t::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(__t::KeyboardNavigation::tab_navigation_property(), __t::KeyboardNavigationMode::Continue, priority_55);
@@ -69066,9 +70123,7 @@ fn build_controls_winuicontrols_xaml_deferred_463(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ContentRoot")));
     rt::register_name_value(name_scope.as_ref(), "ContentRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 83, 19)?;
     // Controls/WinUIControls.xaml(84,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 84, 19)?;
-    // Controls/WinUIControls.xaml(85,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 85, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R319)?;
     // Controls/WinUIControls.xaml(86,14) Child
     // Controls/WinUIControls.xaml(86,14) Panel
     let panel_1 = __t::Panel::new();
@@ -69085,13 +70140,7 @@ fn build_controls_winuicontrols_xaml_deferred_463(
     border_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Background")));
     rt::register_name_value(name_scope.as_ref(), "Background", __t::Rc::new(__t::Clone::clone(&border_1)), 87, 23)?;
     // Controls/WinUIControls.xaml(88,23) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 88, 23)?;
-    // Controls/WinUIControls.xaml(89,23) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 89, 23)?;
-    // Controls/WinUIControls.xaml(90,23) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 90, 23)?;
-    // Controls/WinUIControls.xaml(91,23) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 91, 23)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R320)?;
     // Controls/WinUIControls.xaml(87,16) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
@@ -69117,9 +70166,7 @@ fn build_controls_winuicontrols_xaml_deferred_463(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 96, 33)?, priority_1);
     }
     // Controls/WinUIControls.xaml(97,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedSelectingItemsControl::header_template_property()), 97, 33)?;
-    // Controls/WinUIControls.xaml(98,33) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 98, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R321)?;
     // Controls/WinUIControls.xaml(95,16) Background
     let priority_2 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_2);
@@ -69261,7 +70308,7 @@ fn build_controls_winuicontrols_xaml_deferred_463(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 133, 35)?;
     // Controls/WinUIControls.xaml(134,35) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 134, 35)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 134, 35)?;
     // Controls/WinUIControls.xaml(133,20) TabNavigation
     let priority_18 = __t::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(__t::KeyboardNavigation::tab_navigation_property(), __t::KeyboardNavigationMode::Continue, priority_18);
@@ -69335,18 +70382,12 @@ fn build_controls_winuicontrols_xaml_deferred_465(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 182, 17)?;
     // Controls/WinUIControls.xaml(183,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 183, 17)?;
-    // Controls/WinUIControls.xaml(184,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 184, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R322)?;
     // Controls/WinUIControls.xaml(182,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(186,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 186, 17)?;
-    // Controls/WinUIControls.xaml(187,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 187, 17)?;
-    // Controls/WinUIControls.xaml(188,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 188, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R323)?;
     // Controls/WinUIControls.xaml(182,10) HorizontalAlignment
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_1);
@@ -69359,7 +70400,7 @@ fn build_controls_winuicontrols_xaml_deferred_465(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 190, 27)?;
     // Controls/WinUIControls.xaml(191,27) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 191, 27)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 191, 27)?;
     // Controls/WinUIControls.xaml(190,12) VerticalAlignment
     let priority_2 = __t::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_2);
@@ -69578,16 +70619,12 @@ fn build_controls_winuicontrols_xaml_deferred_468(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 79, 17)?;
     // Controls/WinUIControls.xaml(80,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 80, 17)?;
-    // Controls/WinUIControls.xaml(81,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 81, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R324)?;
     // Controls/WinUIControls.xaml(79,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(83,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 83, 17)?;
-    // Controls/WinUIControls.xaml(84,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 84, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R325)?;
     // Controls/WinUIControls.xaml(85,12) Child
     // Controls/WinUIControls.xaml(85,12) Panel
     let panel_0 = __t::Panel::new();
@@ -69631,7 +70668,7 @@ fn build_controls_winuicontrols_xaml_deferred_468(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 92, 31)?, priority_3);
     }
     // Controls/WinUIControls.xaml(93,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 93, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 93, 31)?;
     // Controls/WinUIControls.xaml(94,31) FontFamily
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_family_property(), "ContentControlThemeFontFamily", 94, 31)?;
     // Controls/WinUIControls.xaml(91,14) FontWeight
@@ -69647,11 +70684,7 @@ fn build_controls_winuicontrols_xaml_deferred_468(
     let priority_6 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::TextBlock::text_line_bounds_property(), __t::TextLineBounds::Full, priority_6);
     // Controls/WinUIControls.xaml(99,31) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 99, 31)?;
-    // Controls/WinUIControls.xaml(100,31) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 100, 31)?;
-    // Controls/WinUIControls.xaml(101,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 101, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R326)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 91, 14)?;
     context.pop_parent();
@@ -69985,14 +71018,12 @@ fn build_controls_winuicontrols_xaml_deferred_472(
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64), priority_0);
     // Controls/WinUIControls.xaml(191,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 191, 19)?;
-    // Controls/WinUIControls.xaml(192,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 192, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R327)?;
     // Controls/WinUIControls.xaml(189,12) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/WinUIControls.xaml(194,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 194, 19)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 194, 19)?;
     // Controls/WinUIControls.xaml(195,19) CornerRadius
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), "ListViewItemCornerRadius", 195, 19)?;
     // Controls/WinUIControls.xaml(189,12) IsHitTestVisible
@@ -70072,7 +71103,7 @@ fn build_controls_winuicontrols_xaml_deferred_472(
     let priority_13 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(7.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_13);
     // Controls/WinUIControls.xaml(222,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 222, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::ContentPresenter::padding_property()), 222, 29)?;
     // Controls/WinUIControls.xaml(223,29) Content (setter chosen at run time)
     let priority_14 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -70084,13 +71115,7 @@ fn build_controls_winuicontrols_xaml_deferred_472(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 223, 29)?, priority_14);
     }
     // Controls/WinUIControls.xaml(224,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 224, 29)?;
-    // Controls/WinUIControls.xaml(225,29) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 225, 29)?;
-    // Controls/WinUIControls.xaml(226,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 226, 29)?;
-    // Controls/WinUIControls.xaml(227,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 227, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R328)?;
     rt::invoked(content_presenter_0.try_end_init(), 220, 12)?;
     context.pop_parent();
     rt::invoked(panel_0.try_end_init(), 187, 10)?;
@@ -70317,16 +71342,12 @@ fn build_controls_winuicontrols_xaml_deferred_474(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ContentBorder")));
     rt::register_name_value(name_scope.as_ref(), "ContentBorder", __t::Rc::new(__t::Clone::clone(&border_0)), 317, 17)?;
     // Controls/WinUIControls.xaml(318,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 318, 17)?;
-    // Controls/WinUIControls.xaml(319,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 319, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R329)?;
     // Controls/WinUIControls.xaml(317,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(321,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 321, 17)?;
-    // Controls/WinUIControls.xaml(322,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 322, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R330)?;
     // Controls/WinUIControls.xaml(317,10) RenderTransformOrigin
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Visual::render_transform_origin_property(), __t::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, __t::RelativeUnit::Relative), priority_1);
@@ -70391,13 +71412,7 @@ fn build_controls_winuicontrols_xaml_deferred_474(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 332, 33)?, priority_6);
     }
     // Controls/WinUIControls.xaml(333,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 333, 33)?;
-    // Controls/WinUIControls.xaml(334,33) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 334, 33)?;
-    // Controls/WinUIControls.xaml(335,33) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 335, 33)?;
-    // Controls/WinUIControls.xaml(336,33) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 336, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R331)?;
     rt::invoked(content_presenter_0.try_end_init(), 331, 16)?;
     rt::invoked(panel_1.try_end_init(), 330, 14)?;
     context.pop_parent();
@@ -70494,18 +71509,12 @@ fn build_controls_winuicontrols_xaml_deferred_477(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 51, 17)?;
     // Controls/WinUIControls.xaml(52,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 52, 17)?;
-    // Controls/WinUIControls.xaml(53,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 53, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R332)?;
     // Controls/WinUIControls.xaml(51,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(55,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 55, 17)?;
-    // Controls/WinUIControls.xaml(56,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 56, 17)?;
-    // Controls/WinUIControls.xaml(57,17) ClipToBounds
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Visual::clip_to_bounds_property(), rt::property(__t::Visual::clip_to_bounds_property()), 57, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R333)?;
     // Controls/WinUIControls.xaml(58,12) Child
     // Controls/WinUIControls.xaml(58,12) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -70515,25 +71524,7 @@ fn build_controls_winuicontrols_xaml_deferred_477(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 58, 25)?;
     // Controls/WinUIControls.xaml(59,25) Padding
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 59, 25)?;
-    // Controls/WinUIControls.xaml(60,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 60, 25)?;
-    // Controls/WinUIControls.xaml(61,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 61, 25)?;
-    // Controls/WinUIControls.xaml(62,25) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 62, 25)?;
-    // Controls/WinUIControls.xaml(63,25) BringIntoViewOnFocusChange
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::bring_into_view_on_focus_change_property(), rt::property(__t::ScrollViewer::bring_into_view_on_focus_change_property()), 63, 25)?;
-    // Controls/WinUIControls.xaml(64,25) IsScrollChainingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_chaining_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_chaining_enabled_property()), 64, 25)?;
-    // Controls/WinUIControls.xaml(65,25) IsScrollInertiaEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_inertia_enabled_property()), 65, 25)?;
-    // Controls/WinUIControls.xaml(66,25) VerticalSnapPointsType
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_snap_points_type_property(), rt::property(__t::ScrollViewer::vertical_snap_points_type_property()), 66, 25)?;
-    // Controls/WinUIControls.xaml(67,25) HorizontalSnapPointsType
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_snap_points_type_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_type_property()), 67, 25)?;
-    // Controls/WinUIControls.xaml(68,25) AllowAutoHide
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::allow_auto_hide_property(), rt::property(__t::ScrollViewer::allow_auto_hide_property()), 68, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R334)?;
     // Controls/WinUIControls.xaml(69,14) Content
     // Controls/WinUIControls.xaml(69,14) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -70543,7 +71534,7 @@ fn build_controls_winuicontrols_xaml_deferred_477(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 69, 29)?;
     // Controls/WinUIControls.xaml(70,29) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 70, 29)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 70, 29)?;
     rt::invoked(items_presenter_0.try_end_init(), 69, 14)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 58, 12)?;
     rt::invoked(border_0.try_end_init(), 51, 10)?;
@@ -70893,19 +71884,17 @@ fn build_controls_winuicontrols_xaml_deferred_482(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 73, 17)?;
     // Controls/WinUIControls.xaml(74,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 74, 17)?;
-    // Controls/WinUIControls.xaml(75,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 75, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R335)?;
     // Controls/WinUIControls.xaml(73,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(77,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 77, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 77, 17)?;
     // Controls/WinUIControls.xaml(73,10) Margin
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(5.0_f64, 2.0_f64, 5.0_f64, 2.0_f64), priority_1);
     // Controls/WinUIControls.xaml(79,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 79, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 79, 17)?;
     // Controls/WinUIControls.xaml(73,10) IsTemplateFocusTarget
     let priority_2 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_2);
@@ -70971,15 +71960,7 @@ fn build_controls_winuicontrols_xaml_deferred_482(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 93, 31)?, priority_6);
     }
     // Controls/WinUIControls.xaml(94,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 94, 31)?;
-    // Controls/WinUIControls.xaml(95,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 95, 31)?;
-    // Controls/WinUIControls.xaml(96,31) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 96, 31)?;
-    // Controls/WinUIControls.xaml(97,31) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 97, 31)?;
-    // Controls/WinUIControls.xaml(98,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 98, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R336)?;
     rt::invoked(content_presenter_0.try_end_init(), 92, 14)?;
     context.pop_parent();
     rt::invoked(panel_0.try_end_init(), 81, 12)?;
@@ -71152,16 +72133,12 @@ fn build_controls_winuicontrols_xaml_deferred_485(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("BorderElement")));
     rt::register_name_value(name_scope.as_ref(), "BorderElement", __t::Rc::new(__t::Clone::clone(&border_0)), 86, 19)?;
     // Controls/WinUIControls.xaml(87,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 87, 19)?;
-    // Controls/WinUIControls.xaml(88,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 88, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R337)?;
     // Controls/WinUIControls.xaml(86,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(90,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 90, 19)?;
-    // Controls/WinUIControls.xaml(91,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 91, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R338)?;
     // Controls/WinUIControls.xaml(86,12) IsTemplateFocusTarget
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_1);
@@ -71176,17 +72153,7 @@ fn build_controls_winuicontrols_xaml_deferred_485(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 93, 25)?;
     // Controls/WinUIControls.xaml(94,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 94, 25)?;
-    // Controls/WinUIControls.xaml(95,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 95, 25)?;
-    // Controls/WinUIControls.xaml(96,25) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 96, 25)?;
-    // Controls/WinUIControls.xaml(97,25) Margin
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 97, 25)?;
-    // Controls/WinUIControls.xaml(98,25) Padding
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 98, 25)?;
-    // Controls/WinUIControls.xaml(99,25) Foreground
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 99, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R339)?;
     // Controls/WinUIControls.xaml(93,12) Focusable
     let priority_2 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_2);
@@ -71218,35 +72185,7 @@ fn build_controls_winuicontrols_xaml_deferred_485(
     let provided_10 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_10);
     rt::bind(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_property(), provided_10, 102, 28)?;
     // Controls/WinUIControls.xaml(103,28) CaretBlinkInterval
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_blink_interval_property(), rt::property(__t::TextBox::caret_blink_interval_property()), 103, 28)?;
-    // Controls/WinUIControls.xaml(104,28) CaretIndex
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_index_property(), rt::property(__t::TextBox::caret_index_property()), 104, 28)?;
-    // Controls/WinUIControls.xaml(105,28) SelectionStart
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_start_property(), rt::property(__t::TextBox::selection_start_property()), 105, 28)?;
-    // Controls/WinUIControls.xaml(106,28) SelectionEnd
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_end_property(), rt::property(__t::TextBox::selection_end_property()), 106, 28)?;
-    // Controls/WinUIControls.xaml(107,28) TextAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 107, 28)?;
-    // Controls/WinUIControls.xaml(108,28) TextWrapping
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 108, 28)?;
-    // Controls/WinUIControls.xaml(109,28) LineHeight
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::line_height_property(), rt::property(__t::TextBox::line_height_property()), 109, 28)?;
-    // Controls/WinUIControls.xaml(110,28) LetterSpacing
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::letter_spacing_property(), rt::property(__t::TemplatedControl::letter_spacing_property()), 110, 28)?;
-    // Controls/WinUIControls.xaml(111,28) PasswordChar
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::password_char_property(), rt::property(__t::TextBox::password_char_property()), 111, 28)?;
-    // Controls/WinUIControls.xaml(112,28) RevealPassword
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::reveal_password_property(), rt::property(__t::TextBox::reveal_password_property()), 112, 28)?;
-    // Controls/WinUIControls.xaml(113,28) SelectionBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_brush_property(), rt::property(__t::TextBox::selection_brush_property()), 113, 28)?;
-    // Controls/WinUIControls.xaml(114,28) SelectionForegroundBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_foreground_brush_property(), rt::property(__t::TextBox::selection_foreground_brush_property()), 114, 28)?;
-    // Controls/WinUIControls.xaml(115,28) CaretBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_brush_property(), rt::property(__t::TextBox::caret_brush_property()), 115, 28)?;
-    // Controls/WinUIControls.xaml(116,28) HorizontalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::TextBox::horizontal_content_alignment_property()), 116, 28)?;
-    // Controls/WinUIControls.xaml(117,28) VerticalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 117, 28)?;
+    rt::bind_template_rows(text_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R340)?;
     rt::invoked(text_presenter_0.try_end_init(), 101, 14)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 93, 12)?;
     // Controls/WinUIControls.xaml(124,12) Children
@@ -71260,17 +72199,7 @@ fn build_controls_winuicontrols_xaml_deferred_485(
     text_block_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PlaceholderTextContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PlaceholderTextContentPresenter", __t::Rc::new(__t::Clone::clone(&text_block_0)), 124, 22)?;
     // Controls/WinUIControls.xaml(125,22) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TextBox::placeholder_foreground_property()), 125, 22)?;
-    // Controls/WinUIControls.xaml(126,22) Margin
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 126, 22)?;
-    // Controls/WinUIControls.xaml(127,22) Padding
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 127, 22)?;
-    // Controls/WinUIControls.xaml(128,22) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TextBox::placeholder_text_property()), 128, 22)?;
-    // Controls/WinUIControls.xaml(129,22) TextAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 129, 22)?;
-    // Controls/WinUIControls.xaml(130,22) TextWrapping
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 130, 22)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R341)?;
     // Controls/WinUIControls.xaml(124,12) IsHitTestVisible
     let priority_3 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_3);
@@ -71761,16 +72690,12 @@ fn build_controls_winuicontrols_xaml_deferred_487(
     let priority_8 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_8);
     // Controls/WinUIControls.xaml(219,21) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 219, 21)?;
-    // Controls/WinUIControls.xaml(220,21) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 220, 21)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R342)?;
     // Controls/WinUIControls.xaml(216,14) BackgroundSizing
     let priority_9 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_9);
     // Controls/WinUIControls.xaml(222,21) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 222, 21)?;
-    // Controls/WinUIControls.xaml(223,21) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 223, 21)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R343)?;
     // Controls/WinUIControls.xaml(224,21) MinWidth
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), "ComboBoxThemeMinWidth", 224, 21)?;
     // Controls/WinUIControls.xaml(225,21) MinHeight
@@ -71826,15 +72751,7 @@ fn build_controls_winuicontrols_xaml_deferred_487(
         content_control_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 233, 29)?, priority_15);
     }
     // Controls/WinUIControls.xaml(234,29) ContentTemplate
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::ComboBox::selection_box_item_template_property()), 234, 29)?;
-    // Controls/WinUIControls.xaml(235,29) Foreground
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 235, 29)?;
-    // Controls/WinUIControls.xaml(236,29) Margin
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 236, 29)?;
-    // Controls/WinUIControls.xaml(237,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::horizontal_content_alignment_property(), rt::property(__t::ComboBox::horizontal_content_alignment_property()), 237, 29)?;
-    // Controls/WinUIControls.xaml(238,29) VerticalContentAlignment
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::vertical_content_alignment_property(), rt::property(__t::ComboBox::vertical_content_alignment_property()), 238, 29)?;
+    rt::bind_template_rows(content_control_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R344)?;
     // Controls/WinUIControls.xaml(239,29) IsVisible
     let template_binding_10 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ComboBox::is_editable_property()));
     // Controls/WinUIControls.xaml(239,29) Converter
@@ -71857,15 +72774,7 @@ fn build_controls_winuicontrols_xaml_deferred_487(
     let priority_16 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_16);
     // Controls/WinUIControls.xaml(242,24) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::ComboBox::placeholder_text_property()), 242, 24)?;
-    // Controls/WinUIControls.xaml(243,24) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::ComboBox::placeholder_foreground_property()), 243, 24)?;
-    // Controls/WinUIControls.xaml(244,24) Margin
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 244, 24)?;
-    // Controls/WinUIControls.xaml(245,24) HorizontalAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ComboBox::horizontal_content_alignment_property()), 245, 24)?;
-    // Controls/WinUIControls.xaml(246,24) VerticalAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ComboBox::vertical_content_alignment_property()), 246, 24)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R345)?;
     // Controls/WinUIControls.xaml(248,18) IsVisible
     let multi_binding_0 = __t::MultiBinding::__markup_new_0();
     context.push_parent(rt::to_value(multi_binding_0.clone()));
@@ -71932,13 +72841,7 @@ fn build_controls_winuicontrols_xaml_deferred_487(
     let priority_20 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::TemplatedControl::border_brush_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_20);
     // Controls/WinUIControls.xaml(260,22) HorizontalAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ComboBox::horizontal_content_alignment_property()), 260, 22)?;
-    // Controls/WinUIControls.xaml(261,22) VerticalAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ComboBox::vertical_content_alignment_property()), 261, 22)?;
-    // Controls/WinUIControls.xaml(262,22) PlaceholderText
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_text_property(), rt::property(__t::ComboBox::placeholder_text_property()), 262, 22)?;
-    // Controls/WinUIControls.xaml(263,22) Foreground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::ComboBox::placeholder_foreground_property()), 263, 22)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R346)?;
     // Controls/WinUIControls.xaml(264,22) Text
     let template_binding_20 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ComboBox::text_property()));
     // Controls/WinUIControls.xaml(264,22) Mode
@@ -71946,9 +72849,7 @@ fn build_controls_winuicontrols_xaml_deferred_487(
     let provided_33 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_20);
     rt::bind(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::text_property(), provided_33, 264, 22)?;
     // Controls/WinUIControls.xaml(265,22) CornerRadius
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 265, 22)?;
-    // Controls/WinUIControls.xaml(266,22) IsVisible
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::ComboBox::is_editable_property()), 266, 22)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R347)?;
     context.pop_parent();
     rt::invoked(text_box_0.try_end_init(), 254, 14)?;
     // Controls/WinUIControls.xaml(267,14) Children
@@ -72123,7 +73024,7 @@ fn build_controls_winuicontrols_xaml_deferred_487(
     let provided_44 = rt::provide_value(&context, rt::property_value(__t::Layoutable::min_width_property()), &reflection_binding_extension_2, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(border_5.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), provided_44, 308, 25)?;
     // Controls/WinUIControls.xaml(309,25) MaxHeight
-    rt::bind_template_binding(border_5.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_height_property(), rt::property(__t::ComboBox::max_drop_down_height_property()), 309, 25)?;
+    rt::apply_template_binding(border_5.upcast_ref::<__t::FerroObject>(), rt::property(__t::ComboBox::max_drop_down_height_property()), || rt::property(__t::Layoutable::max_height_property()), 309, 25)?;
     // Controls/WinUIControls.xaml(310,25) Background
     rt::bind_dynamic_resource(&context, border_5.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "ComboBoxDropDownBackground", 310, 25)?;
     // Controls/WinUIControls.xaml(307,18) BackgroundSizing
@@ -72149,13 +73050,7 @@ fn build_controls_winuicontrols_xaml_deferred_487(
     // Controls/WinUIControls.xaml(317,33) Foreground
     rt::bind_dynamic_resource(&context, scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), "ComboBoxDropDownForeground", 317, 33)?;
     // Controls/WinUIControls.xaml(318,33) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 318, 33)?;
-    // Controls/WinUIControls.xaml(319,33) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 319, 33)?;
-    // Controls/WinUIControls.xaml(320,33) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 320, 33)?;
-    // Controls/WinUIControls.xaml(321,33) BringIntoViewOnFocusChange
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::bring_into_view_on_focus_change_property(), rt::property(__t::ScrollViewer::bring_into_view_on_focus_change_property()), 321, 33)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R348)?;
     // Controls/WinUIControls.xaml(316,20) IsScrollChainingEnabled
     let priority_48 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::is_scroll_chaining_enabled_property(), __t::Clone::clone(&false), priority_48);
@@ -72171,7 +73066,7 @@ fn build_controls_winuicontrols_xaml_deferred_487(
     // Controls/WinUIControls.xaml(324,37) Margin
     rt::bind_dynamic_resource(&context, items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "ComboBoxDropdownContentMargin", 324, 37)?;
     // Controls/WinUIControls.xaml(325,37) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 325, 37)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 325, 37)?;
     context.pop_parent();
     rt::invoked(items_presenter_0.try_end_init(), 323, 22)?;
     context.pop_parent();
@@ -72291,9 +73186,7 @@ fn build_controls_winuicontrols_xaml_deferred_491(
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(71,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 71, 17)?;
-    // Controls/WinUIControls.xaml(72,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 72, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R349)?;
     // Controls/WinUIControls.xaml(74,12) Child
     // Controls/WinUIControls.xaml(74,12) Panel
     let panel_0 = __t::Panel::new();
@@ -72325,7 +73218,7 @@ fn build_controls_winuicontrols_xaml_deferred_491(
     let value_0: __t::MarkupValue = rt::to_value(provided_2);
     rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, priority_3, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 77, 19)?;
     // Controls/WinUIControls.xaml(78,19) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 78, 19)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 78, 19)?;
     // Controls/WinUIControls.xaml(76,14) Stretch
     let priority_4 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_4);
@@ -72356,7 +73249,7 @@ fn build_controls_winuicontrols_xaml_deferred_491(
     let value_1: __t::MarkupValue = rt::to_value(provided_4);
     rt::bind_or_set_priority(path_1.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_1, priority_8, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 85, 19)?;
     // Controls/WinUIControls.xaml(86,19) Fill
-    rt::bind_template_binding(path_1.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 86, 19)?;
+    rt::apply_template_binding(path_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 86, 19)?;
     // Controls/WinUIControls.xaml(84,14) Stretch
     let priority_9 = __t::BindingPriority::Template;
     path_1.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_9);
@@ -72814,22 +73707,18 @@ fn build_controls_winuicontrols_xaml_deferred_494(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_Header")));
     rt::register_name_value(name_scope.as_ref(), "PART_Header", __t::Rc::new(__t::Clone::clone(&border_0)), 138, 19)?;
     // Controls/WinUIControls.xaml(139,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 139, 19)?;
-    // Controls/WinUIControls.xaml(140,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 140, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R350)?;
     // Controls/WinUIControls.xaml(138,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(142,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 142, 19)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 142, 19)?;
     // Controls/WinUIControls.xaml(143,19) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "TreeViewItemPresenterMargin", 143, 19)?;
     // Controls/WinUIControls.xaml(144,19) Padding
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), "TreeViewItemPresenterPadding", 144, 19)?;
     // Controls/WinUIControls.xaml(145,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 145, 19)?;
-    // Controls/WinUIControls.xaml(146,19) MinHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 146, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R351)?;
     // Controls/WinUIControls.xaml(138,12) IsTemplateFocusTarget
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_1);
@@ -72965,9 +73854,7 @@ fn build_controls_winuicontrols_xaml_deferred_494(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 170, 37)?, priority_12);
     }
     // Controls/WinUIControls.xaml(171,37) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedItemsControl::header_template_property()), 171, 37)?;
-    // Controls/WinUIControls.xaml(172,37) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 172, 37)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R352)?;
     // Controls/WinUIControls.xaml(168,20) HorizontalAlignment
     let priority_13 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_13);
@@ -72977,7 +73864,7 @@ fn build_controls_winuicontrols_xaml_deferred_494(
     // Controls/WinUIControls.xaml(175,37) MinHeight
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "TreeViewItemContentHeight", 175, 37)?;
     // Controls/WinUIControls.xaml(176,37) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 176, 37)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 176, 37)?;
     // Controls/WinUIControls.xaml(168,20) Focusable
     let priority_15 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_15);
@@ -73001,9 +73888,7 @@ fn build_controls_winuicontrols_xaml_deferred_494(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 182, 27)?;
     // Controls/WinUIControls.xaml(183,27) IsVisible
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::TreeViewItem::is_expanded_property()), 183, 27)?;
-    // Controls/WinUIControls.xaml(184,27) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 184, 27)?;
+    rt::bind_template_rows(items_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R353)?;
     rt::invoked(items_presenter_0.try_end_init(), 182, 12)?;
     context.pop_parent();
     rt::invoked(stack_panel_0.try_end_init(), 136, 10)?;
@@ -73070,16 +73955,12 @@ fn build_controls_winuicontrols_xaml_deferred_497(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Controls/WinUIControls.xaml(47,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 47, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 47, 17)?;
     // Controls/WinUIControls.xaml(47,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(48,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 48, 17)?;
-    // Controls/WinUIControls.xaml(49,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 49, 17)?;
-    // Controls/WinUIControls.xaml(50,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 50, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R354)?;
     // Controls/WinUIControls.xaml(51,12) Child
     // Controls/WinUIControls.xaml(51,12) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -73089,17 +73970,7 @@ fn build_controls_winuicontrols_xaml_deferred_497(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 51, 25)?;
     // Controls/WinUIControls.xaml(52,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 52, 25)?;
-    // Controls/WinUIControls.xaml(53,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 53, 25)?;
-    // Controls/WinUIControls.xaml(54,25) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 54, 25)?;
-    // Controls/WinUIControls.xaml(55,25) BringIntoViewOnFocusChange
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::bring_into_view_on_focus_change_property(), rt::property(__t::ScrollViewer::bring_into_view_on_focus_change_property()), 55, 25)?;
-    // Controls/WinUIControls.xaml(56,25) IsScrollChainingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_chaining_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_chaining_enabled_property()), 56, 25)?;
-    // Controls/WinUIControls.xaml(57,25) AllowAutoHide
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::allow_auto_hide_property(), rt::property(__t::ScrollViewer::allow_auto_hide_property()), 57, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R355)?;
     // Controls/WinUIControls.xaml(58,14) Content
     // Controls/WinUIControls.xaml(58,14) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -73109,9 +73980,7 @@ fn build_controls_winuicontrols_xaml_deferred_497(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 58, 29)?;
     // Controls/WinUIControls.xaml(59,29) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 59, 29)?;
-    // Controls/WinUIControls.xaml(60,29) Margin
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 60, 29)?;
+    rt::bind_template_rows(items_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R356)?;
     rt::invoked(items_presenter_0.try_end_init(), 58, 14)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 51, 12)?;
     rt::invoked(border_0.try_end_init(), 47, 10)?;
@@ -73246,7 +74115,7 @@ fn build_controls_winuicontrols_xaml_deferred_500(
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/WinUIControls.xaml(59,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 59, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 59, 17)?;
     // Controls/WinUIControls.xaml(60,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "TextControlButtonBackground", 60, 17)?;
     // Controls/WinUIControls.xaml(61,17) Margin (setter chosen at run time)
@@ -73508,16 +74377,12 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Grid::column_span_property(), 5_i32, priority_1);
     // Controls/WinUIControls.xaml(125,21) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 125, 21)?;
-    // Controls/WinUIControls.xaml(126,21) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 126, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R357)?;
     // Controls/WinUIControls.xaml(122,14) BackgroundSizing
     let priority_2 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_2);
     // Controls/WinUIControls.xaml(128,21) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 128, 21)?;
-    // Controls/WinUIControls.xaml(129,21) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 129, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R358)?;
     rt::invoked(border_0.try_end_init(), 122, 14)?;
     // Controls/WinUIControls.xaml(131,14) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -73539,7 +74404,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     let priority_3 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_3);
     // Controls/WinUIControls.xaml(134,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 134, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 134, 31)?;
     // Controls/WinUIControls.xaml(135,31) Content (setter chosen at run time)
     let priority_4 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TextBox::inner_left_content_property()));
@@ -73551,7 +74416,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 135, 31)?, priority_4);
     }
     // Controls/WinUIControls.xaml(136,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 136, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TextBox::vertical_content_alignment_property()), || rt::property(__t::ContentPresenter::vertical_content_alignment_property()), 136, 31)?;
     rt::invoked(content_presenter_0.try_end_init(), 131, 14)?;
     // Controls/WinUIControls.xaml(137,14) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -73566,21 +74431,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     let priority_5 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_5);
     // Controls/WinUIControls.xaml(139,27) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 139, 27)?;
-    // Controls/WinUIControls.xaml(140,27) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 140, 27)?;
-    // Controls/WinUIControls.xaml(141,27) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 141, 27)?;
-    // Controls/WinUIControls.xaml(142,27) VerticalAlignment
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 142, 27)?;
-    // Controls/WinUIControls.xaml(143,27) HorizontalAlignment
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::TextBox::horizontal_content_alignment_property()), 143, 27)?;
-    // Controls/WinUIControls.xaml(144,27) Margin
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 144, 27)?;
-    // Controls/WinUIControls.xaml(145,27) Padding
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 145, 27)?;
-    // Controls/WinUIControls.xaml(146,27) Foreground
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 146, 27)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R359)?;
     // Controls/WinUIControls.xaml(137,14) Focusable
     let priority_6 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_6);
@@ -73612,31 +74463,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     let provided_16 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_16);
     rt::bind(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_property(), provided_16, 149, 30)?;
     // Controls/WinUIControls.xaml(150,30) CaretBlinkInterval
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_blink_interval_property(), rt::property(__t::TextBox::caret_blink_interval_property()), 150, 30)?;
-    // Controls/WinUIControls.xaml(151,30) CaretIndex
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_index_property(), rt::property(__t::TextBox::caret_index_property()), 151, 30)?;
-    // Controls/WinUIControls.xaml(152,30) SelectionStart
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_start_property(), rt::property(__t::TextBox::selection_start_property()), 152, 30)?;
-    // Controls/WinUIControls.xaml(153,30) SelectionEnd
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_end_property(), rt::property(__t::TextBox::selection_end_property()), 153, 30)?;
-    // Controls/WinUIControls.xaml(154,30) TextAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 154, 30)?;
-    // Controls/WinUIControls.xaml(155,30) TextWrapping
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 155, 30)?;
-    // Controls/WinUIControls.xaml(156,30) LineHeight
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::line_height_property(), rt::property(__t::TextBox::line_height_property()), 156, 30)?;
-    // Controls/WinUIControls.xaml(157,30) LetterSpacing
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::letter_spacing_property(), rt::property(__t::TemplatedControl::letter_spacing_property()), 157, 30)?;
-    // Controls/WinUIControls.xaml(158,30) PasswordChar
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::password_char_property(), rt::property(__t::TextBox::password_char_property()), 158, 30)?;
-    // Controls/WinUIControls.xaml(159,30) RevealPassword
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::reveal_password_property(), rt::property(__t::TextBox::reveal_password_property()), 159, 30)?;
-    // Controls/WinUIControls.xaml(160,30) SelectionBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_brush_property(), rt::property(__t::TextBox::selection_brush_property()), 160, 30)?;
-    // Controls/WinUIControls.xaml(161,30) SelectionForegroundBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_foreground_brush_property(), rt::property(__t::TextBox::selection_foreground_brush_property()), 161, 30)?;
-    // Controls/WinUIControls.xaml(162,30) CaretBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_brush_property(), rt::property(__t::TextBox::caret_brush_property()), 162, 30)?;
+    rt::bind_template_rows(text_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R360)?;
     rt::invoked(text_presenter_0.try_end_init(), 148, 16)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 137, 14)?;
     // Controls/WinUIControls.xaml(169,14) Children
@@ -73656,17 +74483,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     let priority_8 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_8);
     // Controls/WinUIControls.xaml(172,24) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TextBox::placeholder_foreground_property()), 172, 24)?;
-    // Controls/WinUIControls.xaml(173,24) Margin
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 173, 24)?;
-    // Controls/WinUIControls.xaml(174,24) Padding
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 174, 24)?;
-    // Controls/WinUIControls.xaml(175,24) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TextBox::placeholder_text_property()), 175, 24)?;
-    // Controls/WinUIControls.xaml(176,24) VerticalAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 176, 24)?;
-    // Controls/WinUIControls.xaml(177,24) HorizontalAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::TextBox::horizontal_content_alignment_property()), 177, 24)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R361)?;
     // Controls/WinUIControls.xaml(169,14) IsHitTestVisible
     let priority_9 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_9);
@@ -73731,9 +74548,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     let provided_40 = rt::provide_value(&context, rt::property_value(__t::Button::command_property()), &reflection_binding_extension_2, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(button_0.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), provided_40, 189, 21)?;
     // Controls/WinUIControls.xaml(190,21) CornerRadius
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 190, 21)?;
-    // Controls/WinUIControls.xaml(191,21) BorderThickness
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 191, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R362)?;
     // Controls/WinUIControls.xaml(192,21) Padding
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), "HelperButtonThemePadding", 192, 21)?;
     // Controls/WinUIControls.xaml(186,14) Focusable
@@ -73743,7 +74558,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     let priority_13 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_13);
     // Controls/WinUIControls.xaml(195,21) FontSize
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 195, 21)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_size_property()), || rt::property(__t::TemplatedControl::font_size_property()), 195, 21)?;
     // Controls/WinUIControls.xaml(186,14) Width
     let priority_14 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::width_property(), 32.0_f64, priority_14);
@@ -73772,7 +74587,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     let priority_16 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::Grid::column_property(), 4_i32, priority_16);
     // Controls/WinUIControls.xaml(202,31) Margin
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 202, 31)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 202, 31)?;
     // Controls/WinUIControls.xaml(203,31) Content (setter chosen at run time)
     let priority_17 = __t::BindingPriority::Template;
     let template_binding_41 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TextBox::inner_right_content_property()));
@@ -73784,7 +74599,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_8.clone(), "ContentControl.Content", 1, 203, 31)?, priority_17);
     }
     // Controls/WinUIControls.xaml(204,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 204, 31)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TextBox::vertical_content_alignment_property()), || rt::property(__t::ContentPresenter::vertical_content_alignment_property()), 204, 31)?;
     rt::invoked(content_presenter_1.try_end_init(), 199, 14)?;
     context.pop_parent();
     rt::invoked(grid_0.try_end_init(), 121, 12)?;
@@ -73883,27 +74698,7 @@ fn build_controls_winuicontrols_xaml_deferred_504(
     let value_0: __t::MarkupValue = rt::to_value(provided_0);
     rt::bind_or_set_priority(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_0, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 264, 20)?;
     // Controls/WinUIControls.xaml(265,20) PlaceholderText
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_text_property(), rt::property(__t::AutoCompleteBox::placeholder_text_property()), 265, 20)?;
-    // Controls/WinUIControls.xaml(266,20) PlaceholderForeground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_foreground_property(), rt::property(__t::AutoCompleteBox::placeholder_foreground_property()), 266, 20)?;
-    // Controls/WinUIControls.xaml(267,20) Width
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::Layoutable::width_property()), 267, 20)?;
-    // Controls/WinUIControls.xaml(268,20) Foreground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 268, 20)?;
-    // Controls/WinUIControls.xaml(269,20) Background
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 269, 20)?;
-    // Controls/WinUIControls.xaml(270,20) BorderBrush
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 270, 20)?;
-    // Controls/WinUIControls.xaml(271,20) BorderThickness
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 271, 20)?;
-    // Controls/WinUIControls.xaml(272,20) FontSize
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 272, 20)?;
-    // Controls/WinUIControls.xaml(273,20) FontFamily
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 273, 20)?;
-    // Controls/WinUIControls.xaml(274,20) FontWeight
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 274, 20)?;
-    // Controls/WinUIControls.xaml(275,20) FontStretch
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_stretch_property(), rt::property(__t::TemplatedControl::font_stretch_property()), 275, 20)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R363)?;
     // Controls/WinUIControls.xaml(263,12) VerticalContentAlignment
     let priority_1 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::TextBox::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_1);
@@ -73917,9 +74712,7 @@ fn build_controls_winuicontrols_xaml_deferred_504(
     let priority_4 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_4);
     // Controls/WinUIControls.xaml(280,20) CornerRadius
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 280, 20)?;
-    // Controls/WinUIControls.xaml(281,20) Padding
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 281, 20)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R364)?;
     // Controls/WinUIControls.xaml(282,20) CaretIndex
     let template_binding_13 = __t::TemplateBinding::__markup_new_1(rt::property(__t::AutoCompleteBox::caret_index_property()));
     // Controls/WinUIControls.xaml(282,20) Mode
@@ -73927,11 +74720,7 @@ fn build_controls_winuicontrols_xaml_deferred_504(
     let provided_14 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_13);
     rt::bind(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::caret_index_property(), provided_14, 282, 20)?;
     // Controls/WinUIControls.xaml(283,20) ClearSelectionOnLostFocus
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::clear_selection_on_lost_focus_property(), rt::property(__t::AutoCompleteBox::clear_selection_on_lost_focus_property()), 283, 20)?;
-    // Controls/WinUIControls.xaml(284,20) MaxLength
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::max_length_property(), rt::property(__t::AutoCompleteBox::max_length_property()), 284, 20)?;
-    // Controls/WinUIControls.xaml(285,20) Errors
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::DataValidationErrors::errors_property(), rt::property(__t::DataValidationErrors::errors_property()), 285, 20)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R365)?;
     // Controls/WinUIControls.xaml(286,20) InnerLeftContent (setter chosen at run time)
     let priority_5 = __t::BindingPriority::Template;
     let template_binding_17 = __t::TemplateBinding::__markup_new_1(rt::property(__t::AutoCompleteBox::inner_left_content_property()));
@@ -74007,7 +74796,7 @@ fn build_controls_winuicontrols_xaml_deferred_504(
     let provided_24 = rt::provide_value(&context, rt::property_value(__t::Layoutable::min_width_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), provided_24, 295, 21)?;
     // Controls/WinUIControls.xaml(296,21) MaxHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_height_property(), rt::property(__t::AutoCompleteBox::max_drop_down_height_property()), 296, 21)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::AutoCompleteBox::max_drop_down_height_property()), || rt::property(__t::Layoutable::max_height_property()), 296, 21)?;
     // Controls/WinUIControls.xaml(297,21) Padding
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), "AutoSuggestListMargin", 297, 21)?;
     // Controls/WinUIControls.xaml(298,21) BorderThickness
@@ -74028,7 +74817,7 @@ fn build_controls_winuicontrols_xaml_deferred_504(
     list_box_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_SelectingItemsControl")));
     rt::register_name_value(name_scope.as_ref(), "PART_SelectingItemsControl", __t::Rc::new(__t::Clone::clone(&list_box_0)), 302, 24)?;
     // Controls/WinUIControls.xaml(303,24) ItemTemplate
-    rt::bind_template_binding(list_box_0.upcast_ref::<__t::FerroObject>(), __t::ItemsControl::item_template_property(), rt::property(__t::AutoCompleteBox::item_template_property()), 303, 24)?;
+    rt::apply_template_binding(list_box_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::AutoCompleteBox::item_template_property()), || rt::property(__t::ItemsControl::item_template_property()), 303, 24)?;
     // Controls/WinUIControls.xaml(304,24) ItemContainerTheme (setter chosen at run time)
     let priority_11 = __t::BindingPriority::Template;
     let provided_32 = rt::provide_static_resource(&context, "DefaultListViewItemStyle", || rt::property_value(__t::ItemsControl::item_container_theme_property()), 304, 24)?;
@@ -74155,11 +74944,11 @@ fn build_controls_winuicontrols_xaml_deferred_507(
     // Controls/WinUIControls.xaml(71,27) Background
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), "TextControlButtonBackground", 71, 27)?;
     // Controls/WinUIControls.xaml(72,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 72, 27)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_sizing_property()), || rt::property(__t::ContentPresenter::background_sizing_property()), 72, 27)?;
     // Controls/WinUIControls.xaml(73,27) BorderBrush
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), "TextControlButtonBorderBrush", 73, 27)?;
     // Controls/WinUIControls.xaml(74,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 74, 27)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 74, 27)?;
     // Controls/WinUIControls.xaml(75,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -74171,9 +74960,7 @@ fn build_controls_winuicontrols_xaml_deferred_507(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 75, 27)?, priority_0);
     }
     // Controls/WinUIControls.xaml(76,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 76, 27)?;
-    // Controls/WinUIControls.xaml(77,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 77, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R366)?;
     // Controls/WinUIControls.xaml(78,27) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "TextControlButtonForeground", 78, 27)?;
     // Controls/WinUIControls.xaml(79,27) FontSize
@@ -74181,11 +74968,7 @@ fn build_controls_winuicontrols_xaml_deferred_507(
     // Controls/WinUIControls.xaml(80,27) Margin
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "AutoSuggestBoxInnerButtonMargin", 80, 27)?;
     // Controls/WinUIControls.xaml(81,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 81, 27)?;
-    // Controls/WinUIControls.xaml(82,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 82, 27)?;
-    // Controls/WinUIControls.xaml(83,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 83, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R367)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 70, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
@@ -74362,7 +75145,7 @@ fn build_controls_winuicontrols_xaml_deferred_511(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 140, 29)?, priority_1);
     }
     // Controls/WinUIControls.xaml(141,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedItemsControl::header_template_property()), 141, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::HeaderedItemsControl::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 141, 29)?;
     // Controls/WinUIControls.xaml(142,29) IsVisible
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedItemsControl::header_property()));
     // Controls/WinUIControls.xaml(142,29) Converter
@@ -74402,25 +75185,7 @@ fn build_controls_winuicontrols_xaml_deferred_511(
     let value_3: __t::MarkupValue = rt::to_value(provided_5);
     rt::bind_or_set_priority(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_3, priority_5, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 149, 20)?;
     // Controls/WinUIControls.xaml(150,20) PlaceholderText
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_text_property(), rt::property(__t::AutoSuggestBox::placeholder_text_property()), 150, 20)?;
-    // Controls/WinUIControls.xaml(151,20) Width
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::Layoutable::width_property()), 151, 20)?;
-    // Controls/WinUIControls.xaml(152,20) Foreground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 152, 20)?;
-    // Controls/WinUIControls.xaml(153,20) Background
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 153, 20)?;
-    // Controls/WinUIControls.xaml(154,20) BorderBrush
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 154, 20)?;
-    // Controls/WinUIControls.xaml(155,20) BorderThickness
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 155, 20)?;
-    // Controls/WinUIControls.xaml(156,20) FontSize
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 156, 20)?;
-    // Controls/WinUIControls.xaml(157,20) FontFamily
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 157, 20)?;
-    // Controls/WinUIControls.xaml(158,20) FontWeight
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 158, 20)?;
-    // Controls/WinUIControls.xaml(159,20) FontStretch
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_stretch_property(), rt::property(__t::TemplatedControl::font_stretch_property()), 159, 20)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R368)?;
     // Controls/WinUIControls.xaml(147,12) BringIntoViewOnFocusChange
     let priority_6 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::ScrollViewer::bring_into_view_on_focus_change_property(), __t::Clone::clone(&false), priority_6);
@@ -74428,7 +75193,7 @@ fn build_controls_winuicontrols_xaml_deferred_511(
     let priority_7 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_7);
     // Controls/WinUIControls.xaml(162,20) CornerRadius
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 162, 20)?;
+    rt::apply_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 162, 20)?;
     // Controls/WinUIControls.xaml(164,16) InnerRightContent
     // Controls/WinUIControls.xaml(164,16) Button
     let button_0 = __t::Button::new();
@@ -74445,9 +75210,7 @@ fn build_controls_winuicontrols_xaml_deferred_511(
     let value_4: __t::MarkupValue = rt::to_value(provided_17);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_4, priority_9, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 165, 23)?;
     // Controls/WinUIControls.xaml(166,23) CornerRadius
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 166, 23)?;
-    // Controls/WinUIControls.xaml(167,23) BorderThickness
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 167, 23)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R369)?;
     // Controls/WinUIControls.xaml(164,16) Margin
     let priority_10 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(-2.0_f64, 0.0_f64, 4.0_f64, 0.0_f64), priority_10);
@@ -74463,7 +75226,7 @@ fn build_controls_winuicontrols_xaml_deferred_511(
     let priority_13 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_13);
     // Controls/WinUIControls.xaml(173,23) FontSize
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 173, 23)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_size_property()), || rt::property(__t::TemplatedControl::font_size_property()), 173, 23)?;
     // Controls/WinUIControls.xaml(164,16) Width
     let priority_14 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::width_property(), 32.0_f64, priority_14);
@@ -74542,7 +75305,7 @@ fn build_controls_winuicontrols_xaml_deferred_511(
     list_box_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("SuggestionsList")));
     rt::register_name_value(name_scope.as_ref(), "SuggestionsList", __t::Rc::new(__t::Clone::clone(&list_box_0)), 192, 24)?;
     // Controls/WinUIControls.xaml(193,24) ItemTemplate
-    rt::bind_template_binding(list_box_0.upcast_ref::<__t::FerroObject>(), __t::ItemsControl::item_template_property(), rt::property(__t::ItemsControl::item_template_property()), 193, 24)?;
+    rt::apply_template_binding(list_box_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::item_template_property()), || rt::property(__t::ItemsControl::item_template_property()), 193, 24)?;
     // Controls/WinUIControls.xaml(194,24) ItemContainerTheme (setter chosen at run time)
     let priority_22 = __t::BindingPriority::Template;
     let provided_31 = rt::provide_static_resource(&context, "DefaultListViewItemStyle", || rt::property_value(__t::ItemsControl::item_container_theme_property()), 194, 24)?;
@@ -74708,7 +75471,7 @@ fn build_controls_winuicontrols_xaml_deferred_514(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 60, 29)?, priority_0);
     }
     // Controls/WinUIControls.xaml(61,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedSelectingItemsControl::header_template_property()), 61, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::HeaderedSelectingItemsControl::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 61, 29)?;
     // Controls/WinUIControls.xaml(62,29) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "RadioButtonsHeaderForeground", 62, 29)?;
     // Controls/WinUIControls.xaml(63,29) Margin
@@ -74725,7 +75488,7 @@ fn build_controls_winuicontrols_xaml_deferred_514(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 64, 27)?;
     // Controls/WinUIControls.xaml(65,27) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 65, 27)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 65, 27)?;
     rt::invoked(items_presenter_0.try_end_init(), 64, 12)?;
     context.pop_parent();
     rt::invoked(stack_panel_0.try_end_init(), 58, 10)?;
@@ -75288,7 +76051,7 @@ fn build_controls_winuicontrols_xaml_deferred_518(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 75, 29)?, priority_1);
     }
     // Controls/WinUIControls.xaml(76,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::RichEditBox::header_template_property()), 76, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::RichEditBox::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 76, 29)?;
     // Controls/WinUIControls.xaml(77,29) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "TextControlHeaderForeground", 77, 29)?;
     // Controls/WinUIControls.xaml(72,12) FontWeight
@@ -75317,13 +76080,7 @@ fn build_controls_winuicontrols_xaml_deferred_518(
     let priority_5 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_5);
     // Controls/WinUIControls.xaml(83,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 83, 19)?;
-    // Controls/WinUIControls.xaml(84,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 84, 19)?;
-    // Controls/WinUIControls.xaml(85,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 85, 19)?;
-    // Controls/WinUIControls.xaml(86,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 86, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R370)?;
     // Controls/WinUIControls.xaml(87,19) MinWidth
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), "TextControlThemeMinWidth", 87, 19)?;
     // Controls/WinUIControls.xaml(88,19) MinHeight
@@ -75343,19 +76100,7 @@ fn build_controls_winuicontrols_xaml_deferred_518(
     let priority_6 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_6);
     // Controls/WinUIControls.xaml(91,25) Margin
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 91, 25)?;
-    // Controls/WinUIControls.xaml(92,25) Padding
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 92, 25)?;
-    // Controls/WinUIControls.xaml(93,25) Foreground
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 93, 25)?;
-    // Controls/WinUIControls.xaml(94,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 94, 25)?;
-    // Controls/WinUIControls.xaml(95,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 95, 25)?;
-    // Controls/WinUIControls.xaml(96,25) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 96, 25)?;
-    // Controls/WinUIControls.xaml(97,25) IsScrollChainingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_chaining_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_chaining_enabled_property()), 97, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R371)?;
     // Controls/WinUIControls.xaml(89,12) Focusable
     let priority_7 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_7);
@@ -75389,17 +76134,7 @@ fn build_controls_winuicontrols_xaml_deferred_518(
     let priority_9 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_9);
     // Controls/WinUIControls.xaml(108,22) Margin
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 108, 22)?;
-    // Controls/WinUIControls.xaml(109,22) Padding
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 109, 22)?;
-    // Controls/WinUIControls.xaml(110,22) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::RichEditBox::placeholder_foreground_property()), 110, 22)?;
-    // Controls/WinUIControls.xaml(111,22) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::RichEditBox::placeholder_text_property()), 111, 22)?;
-    // Controls/WinUIControls.xaml(112,22) TextAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_alignment_property(), rt::property(__t::RichEditBox::text_alignment_property()), 112, 22)?;
-    // Controls/WinUIControls.xaml(113,22) TextWrapping
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_wrapping_property(), rt::property(__t::RichEditBox::text_wrapping_property()), 113, 22)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_winuicontrols_xaml_bindings::R372)?;
     // Controls/WinUIControls.xaml(106,12) IsHitTestVisible
     let priority_10 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_10);

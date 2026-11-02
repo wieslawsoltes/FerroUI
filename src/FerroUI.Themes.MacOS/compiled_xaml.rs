@@ -13510,6 +13510,2348 @@ fn __build_controls_macoscontrols_xaml_style_property_22() -> &'static __t::Ferr
 fn __build_controls_macoscontrols_xaml_style_property_23() -> &'static __t::FerroProperty { rt::property(__t::TickBar::fill_property()) }
 fn __build_controls_macoscontrols_xaml_style_property_24() -> &'static __t::FerroProperty { rt::property(__t::Layoutable::width_property()) }
 fn __build_controls_macoscontrols_xaml_style_property_25() -> &'static __t::FerroProperty { rt::property(__t::Layoutable::height_property()) }
+mod __build_controls_macoscontrols_xaml_bindings {
+    use super::*;
+    use super::__build_controls_macoscontrols_xaml_style_property_2 as g0;
+    use super::__build_controls_macoscontrols_xaml_style_property_13 as g1;
+    fn g2() -> &'static __t::FerroProperty { rt::property(__t::ContentControl::content_template_property()) }
+    fn g3() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::content_template_property()) }
+    fn g4() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::padding_property()) }
+    use super::__build_controls_macoscontrols_xaml_style_property_15 as g5;
+    fn g6() -> &'static __t::FerroProperty { rt::property(__t::ContentControl::horizontal_content_alignment_property()) }
+    fn g7() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::horizontal_content_alignment_property()) }
+    fn g8() -> &'static __t::FerroProperty { rt::property(__t::ContentControl::vertical_content_alignment_property()) }
+    fn g9() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::vertical_content_alignment_property()) }
+    use super::__build_controls_macoscontrols_xaml_style_property_3 as g10;
+    use super::__build_controls_macoscontrols_xaml_style_property_17 as g11;
+    use super::__build_controls_macoscontrols_xaml_style_property_1 as g12;
+    fn g13() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::border_thickness_property()) }
+    use super::__build_controls_macoscontrols_xaml_style_property_10 as g14;
+    fn g15() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::corner_radius_property()) }
+    use super::__build_controls_macoscontrols_xaml_style_property_19 as g16;
+    use super::__build_controls_macoscontrols_xaml_style_property_7 as g17;
+    fn g18() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::background_sizing_property()) }
+    use super::__build_controls_macoscontrols_xaml_style_property_14 as g19;
+    use super::__build_controls_macoscontrols_xaml_style_property_12 as g20;
+    fn g21() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::border_thickness_property()) }
+    fn g22() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::corner_radius_property()) }
+    fn g23() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::padding_property()) }
+    fn g24() -> &'static __t::FerroProperty { rt::property(__t::Decorator::padding_property()) }
+    fn g25() -> &'static __t::FerroProperty { rt::property(__t::Border::background_sizing_property()) }
+    use super::__build_controls_macoscontrols_xaml_style_property_9 as g26;
+    use super::__build_controls_macoscontrols_xaml_style_property_0 as g27;
+    fn g28() -> &'static __t::FerroProperty { rt::property(__t::Layoutable::horizontal_alignment_property()) }
+    fn g29() -> &'static __t::FerroProperty { rt::property(__t::Layoutable::vertical_alignment_property()) }
+    fn g30() -> &'static __t::FerroProperty { rt::property(__t::TabItem::icon_template_property()) }
+    fn g31() -> &'static __t::FerroProperty { rt::property(__t::HeaderedContentControl::header_template_property()) }
+    fn g32() -> &'static __t::FerroProperty { rt::property(__t::ContentPage::horizontal_content_alignment_property()) }
+    fn g33() -> &'static __t::FerroProperty { rt::property(__t::ContentPage::vertical_content_alignment_property()) }
+    fn g34() -> &'static __t::FerroProperty { rt::property(__t::ContentPage::content_template_property()) }
+    fn g35() -> &'static __t::FerroProperty { rt::property(::ferroui_controls::MultiPage::page_template_property()) }
+    fn g36() -> &'static __t::FerroProperty { rt::property(__t::ItemsControl::item_template_property()) }
+    fn g37() -> &'static __t::FerroProperty { rt::property(__t::CarouselPage::page_transition_property()) }
+    fn g38() -> &'static __t::FerroProperty { rt::property(__t::Carousel::page_transition_property()) }
+    fn g39() -> &'static __t::FerroProperty { rt::property(__t::CarouselPage::items_panel_property()) }
+    fn g40() -> &'static __t::FerroProperty { rt::property(__t::ItemsControl::items_panel_property()) }
+    fn g41() -> &'static __t::FerroProperty { rt::property(__t::Layoutable::min_width_property()) }
+    use super::__build_controls_macoscontrols_xaml_style_property_21 as g42;
+    fn g43() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()) }
+    fn g44() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()) }
+    use super::__build_controls_macoscontrols_xaml_style_property_22 as g45;
+    use super::__build_controls_macoscontrols_xaml_style_property_5 as g46;
+    fn g47() -> &'static __t::FerroProperty { rt::property(__t::RangeBase::minimum_property()) }
+    fn g48() -> &'static __t::FerroProperty { rt::property(__t::Track::minimum_property()) }
+    fn g49() -> &'static __t::FerroProperty { rt::property(__t::RangeBase::maximum_property()) }
+    fn g50() -> &'static __t::FerroProperty { rt::property(__t::Track::maximum_property()) }
+    fn g51() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()) }
+    fn g52() -> &'static __t::FerroProperty { rt::property(__t::Track::defer_thumb_drag_property()) }
+    fn g53() -> &'static __t::FerroProperty { rt::property(__t::ScrollBar::viewport_size_property()) }
+    fn g54() -> &'static __t::FerroProperty { rt::property(__t::Track::viewport_size_property()) }
+    fn g55() -> &'static __t::FerroProperty { rt::property(__t::ScrollBar::orientation_property()) }
+    fn g56() -> &'static __t::FerroProperty { rt::property(__t::Track::orientation_property()) }
+    fn g57() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::horizontal_snap_points_type_property()) }
+    fn g58() -> &'static __t::FerroProperty { rt::property(__t::ScrollContentPresenter::horizontal_snap_points_type_property()) }
+    fn g59() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::vertical_snap_points_type_property()) }
+    fn g60() -> &'static __t::FerroProperty { rt::property(__t::ScrollContentPresenter::vertical_snap_points_type_property()) }
+    fn g61() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::horizontal_snap_points_alignment_property()) }
+    fn g62() -> &'static __t::FerroProperty { rt::property(__t::ScrollContentPresenter::horizontal_snap_points_alignment_property()) }
+    fn g63() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::vertical_snap_points_alignment_property()) }
+    fn g64() -> &'static __t::FerroProperty { rt::property(__t::ScrollContentPresenter::vertical_snap_points_alignment_property()) }
+    fn g65() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::is_scroll_inertia_enabled_property()) }
+    fn g66() -> &'static __t::FerroProperty { rt::property(__t::TextBox::caret_blink_interval_property()) }
+    fn g67() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::caret_blink_interval_property()) }
+    fn g68() -> &'static __t::FerroProperty { rt::property(__t::TextBox::caret_index_property()) }
+    fn g69() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::caret_index_property()) }
+    fn g70() -> &'static __t::FerroProperty { rt::property(__t::TextBox::selection_start_property()) }
+    fn g71() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::selection_start_property()) }
+    fn g72() -> &'static __t::FerroProperty { rt::property(__t::TextBox::selection_end_property()) }
+    fn g73() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::selection_end_property()) }
+    fn g74() -> &'static __t::FerroProperty { rt::property(__t::TextBox::text_alignment_property()) }
+    fn g75() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::text_alignment_property()) }
+    fn g76() -> &'static __t::FerroProperty { rt::property(__t::TextBox::text_wrapping_property()) }
+    fn g77() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::text_wrapping_property()) }
+    fn g78() -> &'static __t::FerroProperty { rt::property(__t::TextBox::line_height_property()) }
+    fn g79() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::line_height_property()) }
+    fn g80() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::letter_spacing_property()) }
+    fn g81() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::letter_spacing_property()) }
+    fn g82() -> &'static __t::FerroProperty { rt::property(__t::TextBox::password_char_property()) }
+    fn g83() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::password_char_property()) }
+    fn g84() -> &'static __t::FerroProperty { rt::property(__t::TextBox::reveal_password_property()) }
+    fn g85() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::reveal_password_property()) }
+    fn g86() -> &'static __t::FerroProperty { rt::property(__t::TextBox::selection_brush_property()) }
+    fn g87() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::selection_brush_property()) }
+    fn g88() -> &'static __t::FerroProperty { rt::property(__t::TextBox::selection_foreground_brush_property()) }
+    fn g89() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::selection_foreground_brush_property()) }
+    fn g90() -> &'static __t::FerroProperty { rt::property(__t::TextBox::caret_brush_property()) }
+    fn g91() -> &'static __t::FerroProperty { rt::property(__t::TextPresenter::caret_brush_property()) }
+    fn g92() -> &'static __t::FerroProperty { rt::property(__t::TextBox::horizontal_content_alignment_property()) }
+    fn g93() -> &'static __t::FerroProperty { rt::property(__t::TextBox::vertical_content_alignment_property()) }
+    use super::__build_controls_macoscontrols_xaml_style_property_16 as g94;
+    use super::__build_controls_macoscontrols_xaml_style_property_11 as g95;
+    fn g96() -> &'static __t::FerroProperty { rt::property(__t::TextBlock::padding_property()) }
+    fn g97() -> &'static __t::FerroProperty { rt::property(__t::TextBox::placeholder_text_property()) }
+    fn g98() -> &'static __t::FerroProperty { rt::property(__t::TextBlock::text_property()) }
+    fn g99() -> &'static __t::FerroProperty { rt::property(__t::TextBlock::text_alignment_property()) }
+    fn g100() -> &'static __t::FerroProperty { rt::property(__t::TextBlock::text_wrapping_property()) }
+    fn g101() -> &'static __t::FerroProperty { rt::property(__t::Layoutable::max_width_property()) }
+    fn g102() -> &'static __t::FerroProperty { rt::property(__t::PathIcon::data_property()) }
+    fn g103() -> &'static __t::FerroProperty { rt::property(__t::Path::data_property()) }
+    use super::__build_controls_macoscontrols_xaml_style_property_25 as g104;
+    use super::__build_controls_macoscontrols_xaml_style_property_24 as g105;
+    fn g106() -> &'static __t::FerroProperty { rt::property(__t::Calendar::header_background_property()) }
+    fn g107() -> &'static __t::FerroProperty { rt::property(__t::CalendarItem::header_background_property()) }
+    fn g108() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::placeholder_text_property()) }
+    fn g109() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::placeholder_foreground_property()) }
+    fn g110() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::use_floating_placeholder_property()) }
+    fn g111() -> &'static __t::FerroProperty { rt::property(__t::TextBox::use_floating_placeholder_property()) }
+    fn g112() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::horizontal_content_alignment_property()) }
+    fn g113() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::vertical_content_alignment_property()) }
+    fn g114() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::first_day_of_week_property()) }
+    fn g115() -> &'static __t::FerroProperty { rt::property(__t::Calendar::first_day_of_week_property()) }
+    fn g116() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::is_today_highlighted_property()) }
+    fn g117() -> &'static __t::FerroProperty { rt::property(__t::Calendar::is_today_highlighted_property()) }
+    fn g118() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::display_date_property()) }
+    fn g119() -> &'static __t::FerroProperty { rt::property(__t::Calendar::display_date_property()) }
+    fn g120() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::display_date_start_property()) }
+    fn g121() -> &'static __t::FerroProperty { rt::property(__t::Calendar::display_date_start_property()) }
+    fn g122() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::display_date_end_property()) }
+    fn g123() -> &'static __t::FerroProperty { rt::property(__t::Calendar::display_date_end_property()) }
+    fn g124() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::is_week_number_visible_property()) }
+    fn g125() -> &'static __t::FerroProperty { rt::property(__t::Calendar::is_week_number_visible_property()) }
+    fn g126() -> &'static __t::FerroProperty { rt::property(__t::CalendarDatePicker::week_number_rule_property()) }
+    fn g127() -> &'static __t::FerroProperty { rt::property(__t::Calendar::week_number_rule_property()) }
+    fn g128() -> &'static __t::FerroProperty { rt::property(__t::InputElement::is_enabled_property()) }
+    fn g129() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::font_family_property()) }
+    fn g130() -> &'static __t::FerroProperty { rt::property(__t::TextBlock::font_family_property()) }
+    fn g131() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::font_weight_property()) }
+    fn g132() -> &'static __t::FerroProperty { rt::property(__t::TextBlock::font_weight_property()) }
+    fn g133() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::font_size_property()) }
+    fn g134() -> &'static __t::FerroProperty { rt::property(__t::TextBlock::font_size_property()) }
+    fn g135() -> &'static __t::FerroProperty { rt::property(__t::WindowDrawnDecorations::title_bar_height_property()) }
+    fn g136() -> &'static __t::FerroProperty { rt::property(__t::WindowDrawnDecorations::has_title_bar_property()) }
+    fn g137() -> &'static __t::FerroProperty { rt::property(__t::Visual::is_visible_property()) }
+    fn g138() -> &'static __t::FerroProperty { rt::property(__t::Visual::clip_to_bounds_property()) }
+    fn g139() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::is_scroll_chaining_enabled_property()) }
+    fn g140() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::allow_auto_hide_property()) }
+    fn g141() -> &'static __t::FerroProperty { rt::property(__t::ScrollViewer::bring_into_view_on_focus_change_property()) }
+    fn g142() -> &'static __t::FerroProperty { rt::property(__t::ItemsPresenter::items_panel_property()) }
+    fn g143() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::font_family_property()) }
+    fn g144() -> &'static __t::FerroProperty { rt::property(__t::ContentPresenter::font_size_property()) }
+    use super::__build_controls_macoscontrols_xaml_style_property_4 as g145;
+    fn g146() -> &'static __t::FerroProperty { rt::property(__t::TabControl::horizontal_content_alignment_property()) }
+    fn g147() -> &'static __t::FerroProperty { rt::property(__t::TabControl::vertical_content_alignment_property()) }
+    use super::__build_controls_macoscontrols_xaml_style_property_20 as g148;
+    fn g149() -> &'static __t::FerroProperty { rt::property(__t::TabControl::tab_strip_placement_property()) }
+    fn g150() -> &'static __t::FerroProperty { rt::property(__t::DockPanel::dock_property()) }
+    fn g151() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::display_mode_property()) }
+    fn g152() -> &'static __t::FerroProperty { rt::property(__t::SplitView::display_mode_property()) }
+    fn g153() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::drawer_length_property()) }
+    fn g154() -> &'static __t::FerroProperty { rt::property(__t::SplitView::open_pane_length_property()) }
+    fn g155() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::compact_drawer_length_property()) }
+    fn g156() -> &'static __t::FerroProperty { rt::property(__t::SplitView::compact_pane_length_property()) }
+    fn g157() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::drawer_header_template_property()) }
+    fn g158() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::drawer_header_background_property()) }
+    fn g159() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::drawer_footer_template_property()) }
+    fn g160() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::drawer_footer_background_property()) }
+    fn g161() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::horizontal_content_alignment_property()) }
+    fn g162() -> &'static __t::FerroProperty { rt::property(__t::DrawerPage::vertical_content_alignment_property()) }
+    fn g163() -> &'static __t::FerroProperty { rt::property(__t::CommandBarButton::label_property()) }
+    fn g164() -> &'static __t::FerroProperty { rt::property(__t::CommandBarToggleButton::label_property()) }
+    fn g165() -> &'static __t::FerroProperty { rt::property(__t::SplitButton::command_property()) }
+    fn g166() -> &'static __t::FerroProperty { rt::property(__t::Button::command_property()) }
+    fn g167() -> &'static __t::FerroProperty { rt::property(__t::ToggleSwitch::off_content_template_property()) }
+    fn g168() -> &'static __t::FerroProperty { rt::property(__t::ToggleSwitch::on_content_template_property()) }
+    fn g169() -> &'static __t::FerroProperty { rt::property(__t::Slider::ticks_property()) }
+    fn g170() -> &'static __t::FerroProperty { rt::property(__t::TickBar::ticks_property()) }
+    fn g171() -> &'static __t::FerroProperty { rt::property(__t::Slider::tick_frequency_property()) }
+    fn g172() -> &'static __t::FerroProperty { rt::property(__t::TickBar::tick_frequency_property()) }
+    fn g173() -> &'static __t::FerroProperty { rt::property(__t::Slider::orientation_property()) }
+    fn g174() -> &'static __t::FerroProperty { rt::property(__t::TickBar::orientation_property()) }
+    fn g175() -> &'static __t::FerroProperty { rt::property(__t::TickBar::minimum_property()) }
+    fn g176() -> &'static __t::FerroProperty { rt::property(__t::TickBar::maximum_property()) }
+    fn g177() -> &'static __t::FerroProperty { rt::property(__t::Slider::is_direction_reversed_property()) }
+    fn g178() -> &'static __t::FerroProperty { rt::property(__t::TickBar::is_direction_reversed_property()) }
+    fn g179() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::allow_spin_property()) }
+    fn g180() -> &'static __t::FerroProperty { rt::property(__t::ButtonSpinner::allow_spin_property()) }
+    fn g181() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::show_button_spinner_property()) }
+    fn g182() -> &'static __t::FerroProperty { rt::property(__t::ButtonSpinner::show_button_spinner_property()) }
+    fn g183() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::button_spinner_location_property()) }
+    fn g184() -> &'static __t::FerroProperty { rt::property(__t::ButtonSpinner::button_spinner_location_property()) }
+    fn g185() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::text_alignment_property()) }
+    fn g186() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::placeholder_text_property()) }
+    fn g187() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::placeholder_foreground_property()) }
+    fn g188() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::is_read_only_property()) }
+    fn g189() -> &'static __t::FerroProperty { rt::property(__t::TextBox::is_read_only_property()) }
+    fn g190() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::text_property()) }
+    fn g191() -> &'static __t::FerroProperty { rt::property(__t::TextBox::text_property()) }
+    fn g192() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::horizontal_content_alignment_property()) }
+    fn g193() -> &'static __t::FerroProperty { rt::property(__t::NumericUpDown::vertical_content_alignment_property()) }
+    fn g194() -> &'static __t::FerroProperty { rt::property(__t::Expander::is_expanded_property()) }
+    fn g195() -> &'static __t::FerroProperty { rt::property(__t::PipsPager::orientation_property()) }
+    fn g196() -> &'static __t::FerroProperty { rt::property(__t::StackPanel::orientation_property()) }
+    fn g197() -> &'static __t::FerroProperty { rt::property(__t::PipsPager::previous_button_theme_property()) }
+    fn g198() -> &'static __t::FerroProperty { rt::property(__t::StyledElement::theme_property()) }
+    fn g199() -> &'static __t::FerroProperty { rt::property(__t::PipsPager::is_previous_button_visible_property()) }
+    fn g200() -> &'static __t::FerroProperty { rt::property(__t::PipsPager::next_button_theme_property()) }
+    fn g201() -> &'static __t::FerroProperty { rt::property(__t::PipsPager::is_next_button_visible_property()) }
+    fn g202() -> &'static __t::FerroProperty { rt::property(__t::HeaderedSelectingItemsControl::header_template_property()) }
+    fn g203() -> &'static __t::FerroProperty { rt::property(__t::ComboBox::selection_box_item_template_property()) }
+    fn g204() -> &'static __t::FerroProperty { rt::property(__t::ComboBox::horizontal_content_alignment_property()) }
+    fn g205() -> &'static __t::FerroProperty { rt::property(__t::ComboBox::vertical_content_alignment_property()) }
+    fn g206() -> &'static __t::FerroProperty { rt::property(__t::ComboBox::placeholder_text_property()) }
+    fn g207() -> &'static __t::FerroProperty { rt::property(__t::ComboBox::is_editable_property()) }
+    fn g208() -> &'static __t::FerroProperty { rt::property(__t::HeaderedItemsControl::header_template_property()) }
+    fn g209() -> &'static __t::FerroProperty { rt::property(__t::TreeViewItem::is_expanded_property()) }
+    fn g210() -> &'static __t::FerroProperty { rt::property(__t::AutoCompleteBox::placeholder_text_property()) }
+    fn g211() -> &'static __t::FerroProperty { rt::property(__t::AutoCompleteBox::placeholder_foreground_property()) }
+    fn g212() -> &'static __t::FerroProperty { rt::property(__t::TemplatedControl::font_stretch_property()) }
+    fn g213() -> &'static __t::FerroProperty { rt::property(__t::AutoCompleteBox::clear_selection_on_lost_focus_property()) }
+    fn g214() -> &'static __t::FerroProperty { rt::property(__t::TextBox::clear_selection_on_lost_focus_property()) }
+    fn g215() -> &'static __t::FerroProperty { rt::property(__t::AutoCompleteBox::max_length_property()) }
+    fn g216() -> &'static __t::FerroProperty { rt::property(__t::TextBox::max_length_property()) }
+    fn g217() -> &'static __t::FerroProperty { rt::property(__t::DataValidationErrors::errors_property()) }
+    fn g218() -> &'static __t::FerroProperty { rt::property(__t::NumberBox::placeholder_text_property()) }
+    fn g219() -> &'static __t::FerroProperty { rt::property(__t::NumberBox::text_alignment_property()) }
+    fn g220() -> &'static __t::FerroProperty { rt::property(__t::AutoSuggestBox::placeholder_text_property()) }
+    fn g221() -> &'static __t::FerroProperty { rt::property(__t::RichEditBox::placeholder_foreground_property()) }
+    fn g222() -> &'static __t::FerroProperty { rt::property(__t::RichEditBox::placeholder_text_property()) }
+    fn g223() -> &'static __t::FerroProperty { rt::property(__t::RichEditBox::text_alignment_property()) }
+    fn g224() -> &'static __t::FerroProperty { rt::property(__t::RichEditBox::text_wrapping_property()) }
+    const P0: rt::TemplateBindingProperties = (g0, g1);
+    const P1: rt::TemplateBindingProperties = (g2, g3);
+    const P2: rt::TemplateBindingProperties = (g4, g5);
+    const P3: rt::TemplateBindingProperties = (g6, g7);
+    const P4: rt::TemplateBindingProperties = (g8, g9);
+    const P5: rt::TemplateBindingProperties = (g0, g10);
+    const P6: rt::TemplateBindingProperties = (g11, g12);
+    const P7: rt::TemplateBindingProperties = (g13, g14);
+    const P8: rt::TemplateBindingProperties = (g15, g16);
+    const P9: rt::TemplateBindingProperties = (g0, g17);
+    const P10: rt::TemplateBindingProperties = (g18, g19);
+    const P11: rt::TemplateBindingProperties = (g11, g20);
+    const P12: rt::TemplateBindingProperties = (g13, g21);
+    const P13: rt::TemplateBindingProperties = (g15, g22);
+    const P14: rt::TemplateBindingProperties = (g4, g23);
+    const P15: rt::TemplateBindingProperties = (g4, g24);
+    const P16: rt::TemplateBindingProperties = (g18, g25);
+    const P17: rt::TemplateBindingProperties = (g26, g27);
+    const P18: rt::TemplateBindingProperties = (g6, g28);
+    const P19: rt::TemplateBindingProperties = (g8, g29);
+    const P20: rt::TemplateBindingProperties = (g30, g3);
+    const P21: rt::TemplateBindingProperties = (g31, g3);
+    const P22: rt::TemplateBindingProperties = (g32, g7);
+    const P23: rt::TemplateBindingProperties = (g33, g9);
+    const P24: rt::TemplateBindingProperties = (g34, g3);
+    const P25: rt::TemplateBindingProperties = (g0, g0);
+    const P26: rt::TemplateBindingProperties = (g35, g36);
+    const P27: rt::TemplateBindingProperties = (g37, g38);
+    const P28: rt::TemplateBindingProperties = (g39, g40);
+    const P29: rt::TemplateBindingProperties = (g41, g41);
+    const P30: rt::TemplateBindingProperties = (g42, g42);
+    const P31: rt::TemplateBindingProperties = (g43, g43);
+    const P32: rt::TemplateBindingProperties = (g44, g44);
+    const P33: rt::TemplateBindingProperties = (g0, g45);
+    const P34: rt::TemplateBindingProperties = (g11, g46);
+    const P35: rt::TemplateBindingProperties = (g47, g48);
+    const P36: rt::TemplateBindingProperties = (g49, g50);
+    const P37: rt::TemplateBindingProperties = (g51, g52);
+    const P38: rt::TemplateBindingProperties = (g53, g54);
+    const P39: rt::TemplateBindingProperties = (g55, g56);
+    const P40: rt::TemplateBindingProperties = (g57, g58);
+    const P41: rt::TemplateBindingProperties = (g59, g60);
+    const P42: rt::TemplateBindingProperties = (g61, g62);
+    const P43: rt::TemplateBindingProperties = (g63, g64);
+    const P44: rt::TemplateBindingProperties = (g65, g65);
+    const P45: rt::TemplateBindingProperties = (g51, g51);
+    const P46: rt::TemplateBindingProperties = (g13, g5);
+    const P47: rt::TemplateBindingProperties = (g4, g4);
+    const P48: rt::TemplateBindingProperties = (g26, g26);
+    const P49: rt::TemplateBindingProperties = (g66, g67);
+    const P50: rt::TemplateBindingProperties = (g68, g69);
+    const P51: rt::TemplateBindingProperties = (g70, g71);
+    const P52: rt::TemplateBindingProperties = (g72, g73);
+    const P53: rt::TemplateBindingProperties = (g74, g75);
+    const P54: rt::TemplateBindingProperties = (g76, g77);
+    const P55: rt::TemplateBindingProperties = (g78, g79);
+    const P56: rt::TemplateBindingProperties = (g80, g81);
+    const P57: rt::TemplateBindingProperties = (g82, g83);
+    const P58: rt::TemplateBindingProperties = (g84, g85);
+    const P59: rt::TemplateBindingProperties = (g86, g87);
+    const P60: rt::TemplateBindingProperties = (g88, g89);
+    const P61: rt::TemplateBindingProperties = (g90, g91);
+    const P62: rt::TemplateBindingProperties = (g92, g28);
+    const P63: rt::TemplateBindingProperties = (g93, g29);
+    const P64: rt::TemplateBindingProperties = (g94, g95);
+    const P65: rt::TemplateBindingProperties = (g4, g96);
+    const P66: rt::TemplateBindingProperties = (g97, g98);
+    const P67: rt::TemplateBindingProperties = (g74, g99);
+    const P68: rt::TemplateBindingProperties = (g76, g100);
+    const P69: rt::TemplateBindingProperties = (g13, g13);
+    const P70: rt::TemplateBindingProperties = (g15, g15);
+    const P71: rt::TemplateBindingProperties = (g101, g101);
+    const P72: rt::TemplateBindingProperties = (g26, g10);
+    const P73: rt::TemplateBindingProperties = (g102, g103);
+    const P74: rt::TemplateBindingProperties = (g26, g17);
+    const P75: rt::TemplateBindingProperties = (g104, g104);
+    const P76: rt::TemplateBindingProperties = (g105, g105);
+    const P77: rt::TemplateBindingProperties = (g11, g11);
+    const P78: rt::TemplateBindingProperties = (g106, g107);
+    const P79: rt::TemplateBindingProperties = (g108, g97);
+    const P80: rt::TemplateBindingProperties = (g109, g94);
+    const P81: rt::TemplateBindingProperties = (g110, g111);
+    const P82: rt::TemplateBindingProperties = (g112, g92);
+    const P83: rt::TemplateBindingProperties = (g113, g93);
+    const P84: rt::TemplateBindingProperties = (g114, g115);
+    const P85: rt::TemplateBindingProperties = (g116, g117);
+    const P86: rt::TemplateBindingProperties = (g118, g119);
+    const P87: rt::TemplateBindingProperties = (g120, g121);
+    const P88: rt::TemplateBindingProperties = (g122, g123);
+    const P89: rt::TemplateBindingProperties = (g124, g125);
+    const P90: rt::TemplateBindingProperties = (g126, g127);
+    const P91: rt::TemplateBindingProperties = (g128, g128);
+    const P92: rt::TemplateBindingProperties = (g129, g130);
+    const P93: rt::TemplateBindingProperties = (g131, g132);
+    const P94: rt::TemplateBindingProperties = (g133, g134);
+    const P95: rt::TemplateBindingProperties = (g135, g104);
+    const P96: rt::TemplateBindingProperties = (g136, g137);
+    const P97: rt::TemplateBindingProperties = (g138, g138);
+    const P98: rt::TemplateBindingProperties = (g59, g59);
+    const P99: rt::TemplateBindingProperties = (g57, g57);
+    const P100: rt::TemplateBindingProperties = (g139, g139);
+    const P101: rt::TemplateBindingProperties = (g140, g140);
+    const P102: rt::TemplateBindingProperties = (g141, g141);
+    const P103: rt::TemplateBindingProperties = (g40, g142);
+    const P104: rt::TemplateBindingProperties = (g129, g143);
+    const P105: rt::TemplateBindingProperties = (g133, g144);
+    const P106: rt::TemplateBindingProperties = (g131, g145);
+    const P107: rt::TemplateBindingProperties = (g146, g7);
+    const P108: rt::TemplateBindingProperties = (g147, g9);
+    const P109: rt::TemplateBindingProperties = (g148, g10);
+    const P110: rt::TemplateBindingProperties = (g149, g150);
+    const P111: rt::TemplateBindingProperties = (g42, g104);
+    const P112: rt::TemplateBindingProperties = (g151, g152);
+    const P113: rt::TemplateBindingProperties = (g153, g154);
+    const P114: rt::TemplateBindingProperties = (g155, g156);
+    const P115: rt::TemplateBindingProperties = (g157, g3);
+    const P116: rt::TemplateBindingProperties = (g158, g1);
+    const P117: rt::TemplateBindingProperties = (g159, g3);
+    const P118: rt::TemplateBindingProperties = (g160, g1);
+    const P119: rt::TemplateBindingProperties = (g161, g7);
+    const P120: rt::TemplateBindingProperties = (g162, g9);
+    const P121: rt::TemplateBindingProperties = (g163, g98);
+    const P122: rt::TemplateBindingProperties = (g26, g95);
+    const P123: rt::TemplateBindingProperties = (g164, g98);
+    const P124: rt::TemplateBindingProperties = (g2, g2);
+    const P125: rt::TemplateBindingProperties = (g165, g166);
+    const P126: rt::TemplateBindingProperties = (g129, g129);
+    const P127: rt::TemplateBindingProperties = (g133, g133);
+    const P128: rt::TemplateBindingProperties = (g131, g131);
+    const P129: rt::TemplateBindingProperties = (g6, g6);
+    const P130: rt::TemplateBindingProperties = (g8, g8);
+    const P131: rt::TemplateBindingProperties = (g167, g3);
+    const P132: rt::TemplateBindingProperties = (g168, g3);
+    const P133: rt::TemplateBindingProperties = (g169, g170);
+    const P134: rt::TemplateBindingProperties = (g171, g172);
+    const P135: rt::TemplateBindingProperties = (g173, g174);
+    const P136: rt::TemplateBindingProperties = (g47, g175);
+    const P137: rt::TemplateBindingProperties = (g49, g176);
+    const P138: rt::TemplateBindingProperties = (g177, g178);
+    const P139: rt::TemplateBindingProperties = (g26, g0);
+    const P140: rt::TemplateBindingProperties = (g93, g9);
+    const P141: rt::TemplateBindingProperties = (g179, g180);
+    const P142: rt::TemplateBindingProperties = (g181, g182);
+    const P143: rt::TemplateBindingProperties = (g183, g184);
+    const P144: rt::TemplateBindingProperties = (g185, g74);
+    const P145: rt::TemplateBindingProperties = (g186, g97);
+    const P146: rt::TemplateBindingProperties = (g187, g94);
+    const P147: rt::TemplateBindingProperties = (g188, g189);
+    const P148: rt::TemplateBindingProperties = (g190, g191);
+    const P149: rt::TemplateBindingProperties = (g192, g92);
+    const P150: rt::TemplateBindingProperties = (g193, g93);
+    const P151: rt::TemplateBindingProperties = (g28, g28);
+    const P152: rt::TemplateBindingProperties = (g194, g137);
+    const P153: rt::TemplateBindingProperties = (g133, g105);
+    const P154: rt::TemplateBindingProperties = (g133, g104);
+    const P155: rt::TemplateBindingProperties = (g195, g196);
+    const P156: rt::TemplateBindingProperties = (g197, g198);
+    const P157: rt::TemplateBindingProperties = (g199, g137);
+    const P158: rt::TemplateBindingProperties = (g200, g198);
+    const P159: rt::TemplateBindingProperties = (g201, g137);
+    const P160: rt::TemplateBindingProperties = (g202, g3);
+    const P161: rt::TemplateBindingProperties = (g203, g2);
+    const P162: rt::TemplateBindingProperties = (g204, g6);
+    const P163: rt::TemplateBindingProperties = (g205, g8);
+    const P164: rt::TemplateBindingProperties = (g206, g98);
+    const P165: rt::TemplateBindingProperties = (g204, g28);
+    const P166: rt::TemplateBindingProperties = (g205, g29);
+    const P167: rt::TemplateBindingProperties = (g206, g97);
+    const P168: rt::TemplateBindingProperties = (g207, g137);
+    const P169: rt::TemplateBindingProperties = (g208, g3);
+    const P170: rt::TemplateBindingProperties = (g209, g137);
+    const P171: rt::TemplateBindingProperties = (g210, g97);
+    const P172: rt::TemplateBindingProperties = (g211, g94);
+    const P173: rt::TemplateBindingProperties = (g212, g212);
+    const P174: rt::TemplateBindingProperties = (g213, g214);
+    const P175: rt::TemplateBindingProperties = (g215, g216);
+    const P176: rt::TemplateBindingProperties = (g217, g217);
+    const P177: rt::TemplateBindingProperties = (g218, g97);
+    const P178: rt::TemplateBindingProperties = (g219, g74);
+    const P179: rt::TemplateBindingProperties = (g220, g97);
+    const P180: rt::TemplateBindingProperties = (g221, g95);
+    const P181: rt::TemplateBindingProperties = (g222, g98);
+    const P182: rt::TemplateBindingProperties = (g223, g99);
+    const P183: rt::TemplateBindingProperties = (g224, g100);
+    pub(super) const R0: &[rt::TemplateBindingRow] = &[
+        (P0, 25, 31),
+        (P1, 26, 31),
+    ];
+    pub(super) const R1: &[rt::TemplateBindingRow] = &[
+        (P0, 31, 33),
+        (P1, 32, 33),
+    ];
+    pub(super) const R2: &[rt::TemplateBindingRow] = &[
+        (P2, 24, 148),
+        (P3, 24, 183),
+        (P4, 24, 257),
+    ];
+    pub(super) const R3: &[rt::TemplateBindingRow] = &[
+        (P5, 24, 19),
+        (P6, 25, 19),
+    ];
+    pub(super) const R4: &[rt::TemplateBindingRow] = &[
+        (P7, 27, 19),
+        (P8, 28, 19),
+    ];
+    pub(super) const R5: &[rt::TemplateBindingRow] = &[
+        (P7, 33, 19),
+        (P8, 34, 19),
+    ];
+    pub(super) const R6: &[rt::TemplateBindingRow] = &[
+        (P7, 40, 19),
+        (P8, 41, 19),
+    ];
+    pub(super) const R7: &[rt::TemplateBindingRow] = &[
+        (P9, 21, 20),
+        (P2, 21, 56),
+    ];
+    pub(super) const R8: &[rt::TemplateBindingRow] = &[
+        (P0, 44, 27),
+        (P10, 45, 27),
+        (P11, 46, 27),
+        (P12, 47, 27),
+        (P13, 48, 27),
+    ];
+    pub(super) const R9: &[rt::TemplateBindingRow] = &[
+        (P1, 50, 27),
+        (P14, 51, 27),
+        (P3, 52, 27),
+        (P4, 53, 27),
+    ];
+    pub(super) const R10: &[rt::TemplateBindingRow] = &[
+        (P5, 27, 17),
+        (P6, 28, 17),
+    ];
+    pub(super) const R11: &[rt::TemplateBindingRow] = &[
+        (P7, 30, 17),
+        (P8, 31, 17),
+        (P15, 32, 17),
+    ];
+    pub(super) const R12: &[rt::TemplateBindingRow] = &[
+        (P5, 36, 17),
+        (P16, 37, 17),
+        (P6, 38, 17),
+        (P7, 39, 17),
+        (P8, 40, 17),
+        (P15, 41, 17),
+    ];
+    pub(super) const R13: &[rt::TemplateBindingRow] = &[
+        (P3, 52, 31),
+        (P4, 53, 31),
+    ];
+    pub(super) const R14: &[rt::TemplateBindingRow] = &[
+        (P1, 59, 31),
+        (P3, 60, 31),
+        (P4, 61, 31),
+    ];
+    pub(super) const R15: &[rt::TemplateBindingRow] = &[
+        (P5, 33, 57),
+        (P16, 33, 99),
+        (P8, 33, 153),
+        (P6, 33, 199),
+        (P7, 33, 243),
+    ];
+    pub(super) const R16: &[rt::TemplateBindingRow] = &[
+        (P1, 34, 98),
+        (P3, 34, 150),
+        (P4, 34, 224),
+    ];
+    pub(super) const R17: &[rt::TemplateBindingRow] = &[
+        (P0, 37, 29),
+        (P10, 38, 29),
+        (P11, 39, 29),
+        (P12, 40, 29),
+        (P13, 41, 29),
+        (P1, 42, 29),
+        (P14, 43, 29),
+        (P3, 44, 29),
+        (P4, 45, 29),
+    ];
+    pub(super) const R18: &[rt::TemplateBindingRow] = &[
+        (P0, 47, 29),
+        (P10, 48, 29),
+        (P11, 49, 29),
+        (P12, 50, 29),
+        (P13, 51, 29),
+        (P1, 52, 29),
+        (P14, 53, 29),
+        (P3, 54, 29),
+        (P4, 55, 29),
+    ];
+    pub(super) const R19: &[rt::TemplateBindingRow] = &[
+        (P5, 37, 17),
+        (P6, 38, 17),
+    ];
+    pub(super) const R20: &[rt::TemplateBindingRow] = &[
+        (P7, 40, 17),
+        (P8, 41, 17),
+    ];
+    pub(super) const R21: &[rt::TemplateBindingRow] = &[
+        (P5, 75, 19),
+        (P6, 76, 19),
+    ];
+    pub(super) const R22: &[rt::TemplateBindingRow] = &[
+        (P7, 78, 19),
+        (P8, 79, 19),
+    ];
+    pub(super) const R23: &[rt::TemplateBindingRow] = &[
+        (P1, 89, 31),
+        (P17, 90, 31),
+        (P2, 91, 31),
+    ];
+    pub(super) const R24: &[rt::TemplateBindingRow] = &[
+        (P3, 93, 31),
+        (P4, 94, 31),
+    ];
+    pub(super) const R25: &[rt::TemplateBindingRow] = &[
+        (P5, 63, 19),
+        (P6, 64, 19),
+    ];
+    pub(super) const R26: &[rt::TemplateBindingRow] = &[
+        (P7, 66, 19),
+        (P8, 67, 19),
+    ];
+    pub(super) const R27: &[rt::TemplateBindingRow] = &[
+        (P1, 72, 31),
+        (P17, 73, 31),
+        (P2, 74, 31),
+    ];
+    pub(super) const R28: &[rt::TemplateBindingRow] = &[
+        (P3, 76, 31),
+        (P4, 77, 31),
+    ];
+    pub(super) const R29: &[rt::TemplateBindingRow] = &[
+        (P5, 32, 17),
+        (P6, 33, 17),
+    ];
+    pub(super) const R30: &[rt::TemplateBindingRow] = &[
+        (P7, 35, 17),
+        (P15, 36, 17),
+    ];
+    pub(super) const R31: &[rt::TemplateBindingRow] = &[
+        (P1, 39, 29),
+        (P3, 40, 29),
+        (P4, 41, 29),
+    ];
+    pub(super) const R32: &[rt::TemplateBindingRow] = &[
+        (P5, 44, 19),
+        (P7, 45, 19),
+        (P8, 46, 19),
+        (P15, 47, 19),
+        (P18, 48, 19),
+        (P19, 49, 19),
+    ];
+    pub(super) const R33: &[rt::TemplateBindingRow] = &[
+        (P6, 79, 19),
+        (P7, 80, 19),
+        (P8, 81, 19),
+    ];
+    pub(super) const R34: &[rt::TemplateBindingRow] = &[
+        (P5, 28, 39),
+        (P6, 28, 81),
+        (P7, 28, 125),
+        (P8, 28, 177),
+    ];
+    pub(super) const R35: &[rt::TemplateBindingRow] = &[
+        (P20, 35, 85),
+        (P17, 35, 134),
+    ];
+    pub(super) const R36: &[rt::TemplateBindingRow] = &[
+        (P21, 36, 113),
+        (P17, 36, 164),
+        (P3, 36, 206),
+        (P4, 36, 280),
+    ];
+    pub(super) const R37: &[rt::TemplateBindingRow] = &[
+        (P22, 39, 29),
+        (P23, 40, 29),
+        (P0, 41, 29),
+        (P11, 42, 29),
+    ];
+    pub(super) const R38: &[rt::TemplateBindingRow] = &[
+        (P24, 46, 29),
+        (P13, 47, 29),
+    ];
+    pub(super) const R39: &[rt::TemplateBindingRow] = &[
+        (P25, 34, 19),
+        (P26, 35, 19),
+        (P27, 36, 19),
+        (P28, 37, 19),
+    ];
+    pub(super) const R40: &[rt::TemplateBindingRow] = &[
+        (P5, 48, 21),
+        (P6, 49, 21),
+        (P7, 50, 21),
+        (P8, 51, 21),
+    ];
+    pub(super) const R41: &[rt::TemplateBindingRow] = &[
+        (P29, 53, 21),
+        (P30, 54, 21),
+    ];
+    pub(super) const R42: &[rt::TemplateBindingRow] = &[
+        (P1, 88, 33),
+        (P17, 89, 33),
+        (P14, 90, 33),
+        (P3, 91, 33),
+        (P4, 92, 33),
+    ];
+    pub(super) const R43: &[rt::TemplateBindingRow] = &[
+        (P5, 36, 19),
+        (P6, 36, 61),
+        (P7, 36, 105),
+        (P8, 36, 157),
+    ];
+    pub(super) const R44: &[rt::TemplateBindingRow] = &[
+        (P2, 39, 127),
+        (P31, 39, 162),
+        (P32, 39, 257),
+    ];
+    pub(super) const R45: &[rt::TemplateBindingRow] = &[
+        (P7, 60, 17),
+        (P8, 61, 17),
+    ];
+    pub(super) const R46: &[rt::TemplateBindingRow] = &[
+        (P5, 64, 19),
+        (P8, 65, 19),
+    ];
+    pub(super) const R47: &[rt::TemplateBindingRow] = &[
+        (P0, 37, 27),
+        (P11, 38, 27),
+        (P12, 39, 27),
+        (P13, 40, 27),
+        (P1, 41, 27),
+        (P14, 42, 27),
+        (P3, 43, 27),
+        (P4, 44, 27),
+    ];
+    pub(super) const R48: &[rt::TemplateBindingRow] = &[
+        (P0, 51, 27),
+        (P17, 52, 27),
+        (P10, 53, 27),
+        (P11, 54, 27),
+        (P12, 55, 27),
+    ];
+    pub(super) const R49: &[rt::TemplateBindingRow] = &[
+        (P1, 57, 27),
+        (P13, 58, 27),
+        (P14, 59, 27),
+        (P3, 60, 27),
+        (P4, 61, 27),
+    ];
+    pub(super) const R50: &[rt::TemplateBindingRow] = &[
+        (P0, 203, 27),
+        (P10, 204, 27),
+        (P17, 205, 27),
+        (P11, 206, 27),
+        (P12, 207, 27),
+    ];
+    pub(super) const R51: &[rt::TemplateBindingRow] = &[
+        (P1, 209, 27),
+        (P13, 210, 27),
+        (P14, 211, 27),
+        (P3, 212, 27),
+        (P4, 213, 27),
+    ];
+    pub(super) const R52: &[rt::TemplateBindingRow] = &[
+        (P2, 289, 16),
+        (P33, 289, 51),
+    ];
+    pub(super) const R53: &[rt::TemplateBindingRow] = &[
+        (P1, 292, 29),
+        (P18, 293, 29),
+        (P19, 294, 29),
+    ];
+    pub(super) const R54: &[rt::TemplateBindingRow] = &[
+        (P0, 49, 27),
+        (P17, 50, 27),
+        (P10, 51, 27),
+        (P11, 52, 27),
+        (P12, 53, 27),
+    ];
+    pub(super) const R55: &[rt::TemplateBindingRow] = &[
+        (P1, 55, 27),
+        (P13, 56, 27),
+        (P14, 57, 27),
+        (P3, 58, 27),
+        (P4, 59, 27),
+    ];
+    pub(super) const R56: &[rt::TemplateBindingRow] = &[
+        (P0, 51, 27),
+        (P17, 52, 27),
+        (P10, 53, 27),
+        (P11, 54, 27),
+        (P12, 55, 27),
+    ];
+    pub(super) const R57: &[rt::TemplateBindingRow] = &[
+        (P1, 57, 27),
+        (P13, 58, 27),
+        (P14, 59, 27),
+        (P3, 60, 27),
+        (P4, 61, 27),
+    ];
+    pub(super) const R58: &[rt::TemplateBindingRow] = &[
+        (P0, 48, 27),
+        (P10, 49, 27),
+        (P11, 50, 27),
+        (P12, 51, 27),
+    ];
+    pub(super) const R59: &[rt::TemplateBindingRow] = &[
+        (P1, 53, 27),
+        (P14, 54, 27),
+        (P13, 55, 27),
+        (P3, 56, 27),
+        (P4, 57, 27),
+    ];
+    pub(super) const R60: &[rt::TemplateBindingRow] = &[
+        (P5, 48, 17),
+        (P6, 49, 17),
+    ];
+    pub(super) const R61: &[rt::TemplateBindingRow] = &[
+        (P7, 51, 17),
+        (P8, 52, 17),
+    ];
+    pub(super) const R62: &[rt::TemplateBindingRow] = &[
+        (P17, 97, 31),
+        (P2, 98, 31),
+        (P18, 99, 31),
+        (P19, 100, 31),
+    ];
+    pub(super) const R63: &[rt::TemplateBindingRow] = &[
+        (P5, 46, 17),
+        (P6, 47, 17),
+    ];
+    pub(super) const R64: &[rt::TemplateBindingRow] = &[
+        (P7, 49, 17),
+        (P8, 50, 17),
+    ];
+    pub(super) const R65: &[rt::TemplateBindingRow] = &[
+        (P1, 104, 31),
+        (P17, 105, 31),
+        (P2, 106, 31),
+        (P18, 107, 31),
+        (P19, 108, 31),
+    ];
+    pub(super) const R66: &[rt::TemplateBindingRow] = &[
+        (P9, 102, 41),
+        (P34, 102, 77),
+    ];
+    pub(super) const R67: &[rt::TemplateBindingRow] = &[
+        (P9, 119, 41),
+        (P34, 119, 77),
+    ];
+    pub(super) const R68: &[rt::TemplateBindingRow] = &[
+        (P35, 163, 37),
+        (P36, 163, 73),
+    ];
+    pub(super) const R69: &[rt::TemplateBindingRow] = &[
+        (P37, 163, 154),
+        (P38, 163, 229),
+        (P39, 163, 275),
+    ];
+    pub(super) const R70: &[rt::TemplateBindingRow] = &[
+        (P35, 212, 40),
+        (P36, 212, 76),
+    ];
+    pub(super) const R71: &[rt::TemplateBindingRow] = &[
+        (P37, 212, 157),
+        (P38, 212, 232),
+        (P39, 212, 278),
+    ];
+    pub(super) const R72: &[rt::TemplateBindingRow] = &[
+        (P6, 77, 17),
+        (P7, 78, 17),
+        (P8, 79, 17),
+    ];
+    pub(super) const R73: &[rt::TemplateBindingRow] = &[
+        (P1, 87, 37),
+        (P14, 88, 37),
+        (P40, 89, 37),
+        (P41, 90, 37),
+        (P42, 91, 37),
+        (P43, 92, 37),
+        (P44, 93, 37),
+    ];
+    pub(super) const R74: &[rt::TemplateBindingRow] = &[
+        (P1, 167, 31),
+        (P14, 168, 31),
+        (P40, 169, 31),
+        (P41, 170, 31),
+        (P42, 171, 31),
+        (P43, 172, 31),
+        (P44, 173, 31),
+    ];
+    pub(super) const R75: &[rt::TemplateBindingRow] = &[
+        (P16, 31, 17),
+        (P8, 32, 17),
+    ];
+    pub(super) const R76: &[rt::TemplateBindingRow] = &[
+        (P5, 226, 21),
+        (P16, 227, 21),
+        (P6, 228, 21),
+        (P7, 229, 21),
+        (P8, 230, 21),
+        (P29, 231, 21),
+        (P30, 232, 21),
+    ];
+    pub(super) const R77: &[rt::TemplateBindingRow] = &[
+        (P31, 261, 27),
+        (P32, 262, 27),
+        (P45, 263, 27),
+        (P46, 264, 27),
+        (P47, 265, 27),
+        (P48, 266, 27),
+    ];
+    pub(super) const R78: &[rt::TemplateBindingRow] = &[
+        (P49, 270, 30),
+        (P50, 271, 30),
+        (P51, 272, 30),
+        (P52, 273, 30),
+        (P53, 274, 30),
+        (P54, 275, 30),
+        (P55, 276, 30),
+        (P56, 277, 30),
+        (P57, 278, 30),
+        (P58, 279, 30),
+        (P59, 280, 30),
+        (P60, 281, 30),
+        (P61, 282, 30),
+        (P62, 283, 30),
+        (P63, 284, 30),
+    ];
+    pub(super) const R79: &[rt::TemplateBindingRow] = &[
+        (P63, 294, 24),
+        (P64, 295, 24),
+        (P46, 296, 24),
+        (P65, 297, 24),
+        (P66, 298, 24),
+        (P67, 299, 24),
+        (P68, 300, 24),
+    ];
+    pub(super) const R80: &[rt::TemplateBindingRow] = &[
+        (P69, 313, 21),
+        (P70, 314, 21),
+    ];
+    pub(super) const R81: &[rt::TemplateBindingRow] = &[
+        (P69, 327, 27),
+        (P70, 328, 27),
+    ];
+    pub(super) const R82: &[rt::TemplateBindingRow] = &[
+        (P12, 34, 60),
+        (P0, 34, 112),
+        (P10, 34, 154),
+        (P11, 34, 208),
+        (P71, 34, 252),
+    ];
+    pub(super) const R83: &[rt::TemplateBindingRow] = &[
+        (P1, 34, 326),
+        (P14, 34, 378),
+    ];
+    pub(super) const R84: &[rt::TemplateBindingRow] = &[
+        (P6, 37, 44),
+        (P7, 37, 88),
+        (P15, 37, 140),
+        (P8, 37, 176),
+    ];
+    pub(super) const R85: &[rt::TemplateBindingRow] = &[
+        (P72, 41, 49),
+        (P8, 41, 91),
+    ];
+    pub(super) const R86: &[rt::TemplateBindingRow] = &[
+        (P72, 42, 57),
+        (P8, 42, 99),
+    ];
+    pub(super) const R87: &[rt::TemplateBindingRow] = &[
+        (P72, 44, 63),
+        (P8, 44, 105),
+    ];
+    pub(super) const R88: &[rt::TemplateBindingRow] = &[
+        (P73, 39, 13),
+        (P74, 40, 13),
+    ];
+    pub(super) const R89: &[rt::TemplateBindingRow] = &[
+        (P75, 52, 20),
+        (P76, 52, 54),
+    ];
+    pub(super) const R90: &[rt::TemplateBindingRow] = &[
+        (P73, 54, 19),
+        (P74, 55, 19),
+    ];
+    pub(super) const R91: &[rt::TemplateBindingRow] = &[
+        (P14, 38, 29),
+        (P0, 39, 29),
+        (P11, 40, 29),
+    ];
+    pub(super) const R92: &[rt::TemplateBindingRow] = &[
+        (P1, 44, 29),
+        (P13, 45, 29),
+    ];
+    pub(super) const R93: &[rt::TemplateBindingRow] = &[
+        (P14, 75, 29),
+        (P0, 76, 29),
+        (P11, 77, 29),
+    ];
+    pub(super) const R94: &[rt::TemplateBindingRow] = &[
+        (P1, 81, 29),
+        (P13, 82, 29),
+    ];
+    pub(super) const R95: &[rt::TemplateBindingRow] = &[
+        (P0, 47, 29),
+        (P10, 48, 29),
+    ];
+    pub(super) const R96: &[rt::TemplateBindingRow] = &[
+        (P1, 52, 29),
+        (P14, 53, 29),
+        (P3, 54, 29),
+        (P4, 55, 29),
+        (P13, 56, 29),
+    ];
+    pub(super) const R97: &[rt::TemplateBindingRow] = &[
+        (P16, 100, 19),
+        (P15, 101, 19),
+    ];
+    pub(super) const R98: &[rt::TemplateBindingRow] = &[
+        (P1, 105, 31),
+        (P18, 106, 31),
+        (P19, 107, 31),
+    ];
+    pub(super) const R99: &[rt::TemplateBindingRow] = &[
+        (P1, 213, 29),
+        (P14, 214, 29),
+    ];
+    pub(super) const R100: &[rt::TemplateBindingRow] = &[
+        (P3, 216, 29),
+        (P4, 217, 29),
+    ];
+    pub(super) const R101: &[rt::TemplateBindingRow] = &[
+        (P17, 100, 27),
+        (P0, 101, 27),
+        (P10, 102, 27),
+    ];
+    pub(super) const R102: &[rt::TemplateBindingRow] = &[
+        (P1, 106, 27),
+        (P14, 107, 27),
+        (P3, 108, 27),
+        (P4, 109, 27),
+        (P13, 110, 27),
+    ];
+    pub(super) const R103: &[rt::TemplateBindingRow] = &[
+        (P0, 161, 27),
+        (P10, 162, 27),
+    ];
+    pub(super) const R104: &[rt::TemplateBindingRow] = &[
+        (P1, 166, 27),
+        (P14, 167, 27),
+        (P3, 168, 27),
+        (P4, 169, 27),
+        (P13, 170, 27),
+    ];
+    pub(super) const R105: &[rt::TemplateBindingRow] = &[
+        (P5, 213, 17),
+        (P6, 214, 17),
+    ];
+    pub(super) const R106: &[rt::TemplateBindingRow] = &[
+        (P7, 216, 17),
+        (P8, 217, 17),
+    ];
+    pub(super) const R107: &[rt::TemplateBindingRow] = &[
+        (P48, 50, 25),
+        (P25, 51, 25),
+        (P77, 52, 25),
+        (P69, 53, 25),
+        (P70, 54, 25),
+        (P78, 55, 25),
+    ];
+    pub(super) const R108: &[rt::TemplateBindingRow] = &[
+        (P64, 42, 24),
+        (P66, 43, 24),
+    ];
+    pub(super) const R109: &[rt::TemplateBindingRow] = &[
+        (P31, 46, 27),
+        (P32, 47, 27),
+        (P48, 48, 27),
+    ];
+    pub(super) const R110: &[rt::TemplateBindingRow] = &[
+        (P64, 52, 28),
+        (P66, 53, 28),
+        (P67, 54, 28),
+        (P68, 55, 28),
+        (P62, 56, 28),
+        (P63, 57, 28),
+    ];
+    pub(super) const R111: &[rt::TemplateBindingRow] = &[
+        (P49, 68, 32),
+        (P50, 69, 32),
+        (P51, 70, 32),
+        (P52, 71, 32),
+        (P53, 72, 32),
+        (P54, 73, 32),
+        (P55, 74, 32),
+        (P56, 75, 32),
+        (P57, 76, 32),
+        (P58, 77, 32),
+        (P59, 78, 32),
+        (P60, 79, 32),
+        (P61, 80, 32),
+        (P62, 81, 32),
+        (P63, 82, 32),
+    ];
+    pub(super) const R112: &[rt::TemplateBindingRow] = &[
+        (P1, 114, 27),
+        (P3, 115, 27),
+        (P4, 116, 27),
+    ];
+    pub(super) const R113: &[rt::TemplateBindingRow] = &[
+        (P7, 147, 21),
+        (P6, 148, 21),
+    ];
+    pub(super) const R114: &[rt::TemplateBindingRow] = &[
+        (P5, 150, 21),
+        (P8, 151, 21),
+    ];
+    pub(super) const R115: &[rt::TemplateBindingRow] = &[
+        (P48, 167, 22),
+        (P47, 168, 22),
+        (P79, 169, 22),
+        (P80, 170, 22),
+        (P81, 171, 22),
+    ];
+    pub(super) const R116: &[rt::TemplateBindingRow] = &[
+        (P82, 174, 22),
+        (P83, 175, 22),
+    ];
+    pub(super) const R117: &[rt::TemplateBindingRow] = &[
+        (P84, 199, 27),
+        (P85, 200, 27),
+    ];
+    pub(super) const R118: &[rt::TemplateBindingRow] = &[
+        (P86, 202, 27),
+        (P87, 203, 27),
+        (P88, 204, 27),
+        (P89, 205, 27),
+        (P90, 206, 27),
+    ];
+    pub(super) const R119: &[rt::TemplateBindingRow] = &[
+        (P0, 33, 29),
+        (P17, 34, 29),
+        (P11, 35, 29),
+    ];
+    pub(super) const R120: &[rt::TemplateBindingRow] = &[
+        (P25, 98, 21),
+        (P48, 99, 21),
+        (P77, 100, 21),
+        (P69, 101, 21),
+        (P91, 102, 21),
+        (P29, 103, 21),
+        (P30, 104, 21),
+        (P71, 105, 21),
+    ];
+    pub(super) const R121: &[rt::TemplateBindingRow] = &[
+        (P92, 116, 28),
+        (P93, 117, 28),
+        (P94, 118, 28),
+    ];
+    pub(super) const R122: &[rt::TemplateBindingRow] = &[
+        (P92, 124, 28),
+        (P93, 125, 28),
+        (P94, 126, 28),
+    ];
+    pub(super) const R123: &[rt::TemplateBindingRow] = &[
+        (P92, 131, 28),
+        (P93, 132, 28),
+        (P94, 133, 28),
+    ];
+    pub(super) const R124: &[rt::TemplateBindingRow] = &[
+        (P5, 202, 17),
+        (P6, 203, 17),
+        (P7, 204, 17),
+        (P8, 205, 17),
+    ];
+    pub(super) const R125: &[rt::TemplateBindingRow] = &[
+        (P0, 33, 29),
+        (P17, 34, 29),
+        (P11, 35, 29),
+    ];
+    pub(super) const R126: &[rt::TemplateBindingRow] = &[
+        (P25, 95, 21),
+        (P48, 96, 21),
+        (P77, 97, 21),
+        (P69, 98, 21),
+        (P91, 99, 21),
+        (P29, 100, 21),
+        (P30, 101, 21),
+        (P71, 102, 21),
+    ];
+    pub(super) const R127: &[rt::TemplateBindingRow] = &[
+        (P92, 115, 30),
+        (P93, 116, 30),
+        (P94, 117, 30),
+    ];
+    pub(super) const R128: &[rt::TemplateBindingRow] = &[
+        (P92, 129, 30),
+        (P93, 130, 30),
+        (P94, 131, 30),
+    ];
+    pub(super) const R129: &[rt::TemplateBindingRow] = &[
+        (P92, 143, 30),
+        (P93, 144, 30),
+        (P94, 145, 30),
+    ];
+    pub(super) const R130: &[rt::TemplateBindingRow] = &[
+        (P92, 156, 30),
+        (P93, 157, 30),
+        (P94, 158, 30),
+    ];
+    pub(super) const R131: &[rt::TemplateBindingRow] = &[
+        (P5, 218, 17),
+        (P6, 219, 17),
+        (P7, 220, 17),
+        (P8, 221, 17),
+    ];
+    pub(super) const R132: &[rt::TemplateBindingRow] = &[
+        (P5, 29, 37),
+        (P16, 29, 79),
+        (P6, 29, 133),
+        (P7, 29, 177),
+        (P8, 29, 229),
+        (P15, 29, 275),
+    ];
+    pub(super) const R133: &[rt::TemplateBindingRow] = &[
+        (P1, 35, 96),
+        (P17, 35, 148),
+    ];
+    pub(super) const R134: &[rt::TemplateBindingRow] = &[
+        (P5, 66, 35),
+        (P8, 66, 77),
+    ];
+    pub(super) const R135: &[rt::TemplateBindingRow] = &[
+        (P18, 67, 141),
+        (P19, 67, 208),
+    ];
+    pub(super) const R136: &[rt::TemplateBindingRow] = &[
+        (P5, 101, 35),
+        (P8, 101, 77),
+    ];
+    pub(super) const R137: &[rt::TemplateBindingRow] = &[
+        (P18, 102, 141),
+        (P19, 102, 208),
+    ];
+    pub(super) const R138: &[rt::TemplateBindingRow] = &[
+        (P1, 128, 94),
+        (P17, 128, 146),
+    ];
+    pub(super) const R139: &[rt::TemplateBindingRow] = &[
+        (P95, 152, 105),
+        (P96, 152, 147),
+    ];
+    pub(super) const R140: &[rt::TemplateBindingRow] = &[
+        (P7, 112, 17),
+        (P8, 113, 17),
+    ];
+    pub(super) const R141: &[rt::TemplateBindingRow] = &[
+        (P5, 122, 19),
+        (P8, 123, 19),
+    ];
+    pub(super) const R142: &[rt::TemplateBindingRow] = &[
+        (P1, 150, 33),
+        (P3, 151, 33),
+        (P4, 152, 33),
+    ];
+    pub(super) const R143: &[rt::TemplateBindingRow] = &[
+        (P6, 50, 17),
+        (P7, 51, 17),
+        (P8, 52, 17),
+    ];
+    pub(super) const R144: &[rt::TemplateBindingRow] = &[
+        (P1, 69, 37),
+        (P14, 70, 37),
+        (P40, 71, 37),
+        (P41, 72, 37),
+        (P42, 73, 37),
+        (P43, 74, 37),
+        (P44, 75, 37),
+    ];
+    pub(super) const R145: &[rt::TemplateBindingRow] = &[
+        (P97, 149, 17),
+        (P5, 150, 17),
+        (P6, 151, 17),
+    ];
+    pub(super) const R146: &[rt::TemplateBindingRow] = &[
+        (P7, 153, 17),
+        (P8, 154, 17),
+    ];
+    pub(super) const R147: &[rt::TemplateBindingRow] = &[
+        (P98, 157, 25),
+        (P99, 158, 25),
+        (P31, 159, 25),
+        (P32, 160, 25),
+        (P100, 161, 25),
+        (P44, 162, 25),
+        (P45, 163, 25),
+        (P101, 164, 25),
+        (P102, 165, 25),
+    ];
+    pub(super) const R148: &[rt::TemplateBindingRow] = &[
+        (P103, 167, 29),
+        (P2, 168, 29),
+    ];
+    pub(super) const R149: &[rt::TemplateBindingRow] = &[
+        (P0, 89, 29),
+        (P11, 90, 29),
+    ];
+    pub(super) const R150: &[rt::TemplateBindingRow] = &[
+        (P12, 92, 29),
+        (P13, 93, 29),
+    ];
+    pub(super) const R151: &[rt::TemplateBindingRow] = &[
+        (P1, 95, 29),
+        (P14, 96, 29),
+        (P3, 97, 29),
+        (P4, 98, 29),
+    ];
+    pub(super) const R152: &[rt::TemplateBindingRow] = &[
+        (P97, 80, 17),
+        (P5, 81, 17),
+        (P6, 82, 17),
+    ];
+    pub(super) const R153: &[rt::TemplateBindingRow] = &[
+        (P7, 84, 17),
+        (P8, 85, 17),
+    ];
+    pub(super) const R154: &[rt::TemplateBindingRow] = &[
+        (P98, 87, 25),
+        (P99, 88, 25),
+        (P31, 89, 25),
+        (P32, 90, 25),
+        (P100, 91, 25),
+        (P44, 92, 25),
+        (P45, 93, 25),
+        (P101, 94, 25),
+        (P102, 95, 25),
+    ];
+    pub(super) const R155: &[rt::TemplateBindingRow] = &[
+        (P103, 97, 29),
+        (P2, 98, 29),
+    ];
+    pub(super) const R156: &[rt::TemplateBindingRow] = &[
+        (P5, 138, 19),
+        (P6, 139, 19),
+    ];
+    pub(super) const R157: &[rt::TemplateBindingRow] = &[
+        (P7, 141, 19),
+        (P8, 142, 19),
+    ];
+    pub(super) const R158: &[rt::TemplateBindingRow] = &[
+        (P1, 145, 29),
+        (P17, 146, 29),
+        (P14, 147, 29),
+        (P3, 148, 29),
+        (P4, 149, 29),
+    ];
+    pub(super) const R159: &[rt::TemplateBindingRow] = &[
+        (P5, 227, 17),
+        (P6, 228, 17),
+    ];
+    pub(super) const R160: &[rt::TemplateBindingRow] = &[
+        (P7, 230, 17),
+        (P8, 231, 17),
+        (P15, 232, 17),
+    ];
+    pub(super) const R161: &[rt::TemplateBindingRow] = &[
+        (P5, 445, 17),
+        (P7, 446, 17),
+        (P6, 447, 17),
+    ];
+    pub(super) const R162: &[rt::TemplateBindingRow] = &[
+        (P8, 449, 17),
+        (P15, 450, 17),
+    ];
+    pub(super) const R163: &[rt::TemplateBindingRow] = &[
+        (P5, 31, 96),
+        (P8, 31, 138),
+    ];
+    pub(super) const R164: &[rt::TemplateBindingRow] = &[
+        (P103, 32, 54),
+        (P2, 32, 96),
+    ];
+    pub(super) const R165: &[rt::TemplateBindingRow] = &[
+        (P5, 40, 45),
+        (P8, 40, 87),
+        (P6, 40, 133),
+        (P7, 40, 177),
+    ];
+    pub(super) const R166: &[rt::TemplateBindingRow] = &[
+        (P1, 46, 96),
+        (P17, 46, 148),
+        (P104, 46, 190),
+        (P105, 46, 232),
+        (P106, 46, 270),
+        (P14, 46, 312),
+        (P3, 46, 348),
+        (P4, 46, 422),
+    ];
+    pub(super) const R167: &[rt::TemplateBindingRow] = &[
+        (P0, 33, 58),
+        (P11, 33, 100),
+        (P12, 33, 144),
+        (P10, 33, 196),
+        (P17, 33, 250),
+    ];
+    pub(super) const R168: &[rt::TemplateBindingRow] = &[
+        (P1, 33, 328),
+        (P13, 33, 380),
+        (P105, 33, 426),
+        (P104, 33, 464),
+        (P106, 33, 506),
+        (P3, 33, 548),
+        (P4, 33, 622),
+    ];
+    pub(super) const R169: &[rt::TemplateBindingRow] = &[
+        (P0, 76, 58),
+        (P10, 76, 100),
+        (P11, 76, 154),
+        (P12, 76, 198),
+        (P17, 76, 250),
+    ];
+    pub(super) const R170: &[rt::TemplateBindingRow] = &[
+        (P1, 76, 328),
+        (P13, 76, 380),
+        (P105, 76, 426),
+        (P104, 76, 464),
+        (P106, 76, 506),
+        (P3, 76, 548),
+        (P4, 76, 622),
+    ];
+    pub(super) const R171: &[rt::TemplateBindingRow] = &[
+        (P10, 110, 58),
+        (P0, 110, 112),
+        (P11, 110, 154),
+        (P12, 110, 198),
+        (P17, 110, 250),
+        (P1, 110, 292),
+    ];
+    pub(super) const R172: &[rt::TemplateBindingRow] = &[
+        (P13, 110, 380),
+        (P3, 110, 426),
+        (P4, 110, 500),
+    ];
+    pub(super) const R173: &[rt::TemplateBindingRow] = &[
+        (P5, 132, 66),
+        (P6, 132, 108),
+        (P7, 132, 152),
+    ];
+    pub(super) const R174: &[rt::TemplateBindingRow] = &[
+        (P6, 228, 48),
+        (P7, 228, 92),
+        (P8, 228, 144),
+    ];
+    pub(super) const R175: &[rt::TemplateBindingRow] = &[
+        (P107, 230, 66),
+        (P108, 230, 140),
+    ];
+    pub(super) const R176: &[rt::TemplateBindingRow] = &[
+        (P107, 231, 65),
+        (P108, 231, 139),
+    ];
+    pub(super) const R177: &[rt::TemplateBindingRow] = &[
+        (P109, 40, 34),
+        (P6, 40, 80),
+        (P7, 40, 124),
+        (P8, 40, 176),
+    ];
+    pub(super) const R178: &[rt::TemplateBindingRow] = &[
+        (P1, 52, 98),
+        (P3, 52, 150),
+        (P4, 52, 224),
+    ];
+    pub(super) const R179: &[rt::TemplateBindingRow] = &[
+        (P109, 91, 36),
+        (P6, 91, 82),
+        (P7, 91, 126),
+        (P8, 91, 178),
+    ];
+    pub(super) const R180: &[rt::TemplateBindingRow] = &[
+        (P1, 103, 100),
+        (P3, 103, 152),
+        (P4, 103, 226),
+    ];
+    pub(super) const R181: &[rt::TemplateBindingRow] = &[
+        (P109, 141, 36),
+        (P6, 141, 82),
+        (P7, 141, 126),
+        (P8, 141, 178),
+    ];
+    pub(super) const R182: &[rt::TemplateBindingRow] = &[
+        (P1, 153, 100),
+        (P3, 153, 152),
+        (P4, 153, 226),
+    ];
+    pub(super) const R183: &[rt::TemplateBindingRow] = &[
+        (P109, 191, 36),
+        (P6, 191, 82),
+        (P7, 191, 126),
+        (P8, 191, 178),
+    ];
+    pub(super) const R184: &[rt::TemplateBindingRow] = &[
+        (P1, 203, 100),
+        (P3, 203, 152),
+        (P4, 203, 226),
+    ];
+    pub(super) const R185: &[rt::TemplateBindingRow] = &[
+        (P110, 75, 19),
+        (P5, 76, 19),
+    ];
+    pub(super) const R186: &[rt::TemplateBindingRow] = &[
+        (P5, 160, 17),
+        (P8, 161, 17),
+    ];
+    pub(super) const R187: &[rt::TemplateBindingRow] = &[
+        (P20, 173, 37),
+        (P17, 174, 37),
+    ];
+    pub(super) const R188: &[rt::TemplateBindingRow] = &[
+        (P21, 194, 33),
+        (P18, 195, 33),
+    ];
+    pub(super) const R189: &[rt::TemplateBindingRow] = &[
+        (P5, 79, 17),
+        (P8, 80, 17),
+    ];
+    pub(super) const R190: &[rt::TemplateBindingRow] = &[
+        (P18, 88, 19),
+        (P19, 89, 19),
+    ];
+    pub(super) const R191: &[rt::TemplateBindingRow] = &[
+        (P1, 93, 31),
+        (P17, 94, 31),
+        (P3, 95, 31),
+        (P4, 96, 31),
+    ];
+    pub(super) const R192: &[rt::TemplateBindingRow] = &[
+        (P111, 116, 17),
+        (P2, 117, 17),
+        (P5, 118, 17),
+    ];
+    pub(super) const R193: &[rt::TemplateBindingRow] = &[
+        (P1, 136, 31),
+        (P17, 137, 31),
+        (P105, 138, 31),
+    ];
+    pub(super) const R194: &[rt::TemplateBindingRow] = &[
+        (P111, 193, 17),
+        (P2, 194, 17),
+        (P5, 195, 17),
+    ];
+    pub(super) const R195: &[rt::TemplateBindingRow] = &[
+        (P1, 213, 33),
+        (P17, 214, 33),
+    ];
+    pub(super) const R196: &[rt::TemplateBindingRow] = &[
+        (P5, 245, 17),
+        (P8, 246, 17),
+    ];
+    pub(super) const R197: &[rt::TemplateBindingRow] = &[
+        (P1, 267, 33),
+        (P17, 268, 33),
+        (P18, 269, 33),
+        (P19, 270, 33),
+        (P14, 271, 33),
+    ];
+    pub(super) const R198: &[rt::TemplateBindingRow] = &[
+        (P5, 356, 17),
+        (P6, 357, 17),
+    ];
+    pub(super) const R199: &[rt::TemplateBindingRow] = &[
+        (P7, 359, 17),
+        (P8, 360, 17),
+    ];
+    pub(super) const R200: &[rt::TemplateBindingRow] = &[
+        (P47, 363, 25),
+        (P31, 364, 25),
+        (P32, 365, 25),
+    ];
+    pub(super) const R201: &[rt::TemplateBindingRow] = &[
+        (P112, 382, 20),
+        (P113, 383, 20),
+        (P114, 384, 20),
+    ];
+    pub(super) const R202: &[rt::TemplateBindingRow] = &[
+        (P115, 407, 33),
+        (P116, 408, 33),
+    ];
+    pub(super) const R203: &[rt::TemplateBindingRow] = &[
+        (P117, 417, 33),
+        (P118, 418, 33),
+    ];
+    pub(super) const R204: &[rt::TemplateBindingRow] = &[
+        (P119, 489, 35),
+        (P120, 490, 35),
+        (P0, 491, 35),
+        (P11, 492, 35),
+    ];
+    pub(super) const R205: &[rt::TemplateBindingRow] = &[
+        (P5, 63, 17),
+        (P6, 64, 17),
+    ];
+    pub(super) const R206: &[rt::TemplateBindingRow] = &[
+        (P7, 66, 17),
+        (P8, 67, 17),
+    ];
+    pub(super) const R207: &[rt::TemplateBindingRow] = &[
+        (P31, 69, 25),
+        (P32, 70, 25),
+    ];
+    pub(super) const R208: &[rt::TemplateBindingRow] = &[
+        (P103, 74, 29),
+        (P2, 75, 29),
+    ];
+    pub(super) const R209: &[rt::TemplateBindingRow] = &[
+        (P5, 50, 109),
+        (P6, 50, 151),
+        (P7, 50, 195),
+        (P8, 50, 247),
+        (P16, 50, 293),
+    ];
+    pub(super) const R210: &[rt::TemplateBindingRow] = &[
+        (P121, 69, 56),
+        (P122, 69, 87),
+    ];
+    pub(super) const R211: &[rt::TemplateBindingRow] = &[
+        (P121, 70, 51),
+        (P122, 70, 82),
+    ];
+    pub(super) const R212: &[rt::TemplateBindingRow] = &[
+        (P5, 200, 115),
+        (P6, 200, 157),
+        (P7, 200, 201),
+        (P8, 200, 253),
+        (P16, 200, 299),
+    ];
+    pub(super) const R213: &[rt::TemplateBindingRow] = &[
+        (P123, 220, 56),
+        (P122, 220, 87),
+    ];
+    pub(super) const R214: &[rt::TemplateBindingRow] = &[
+        (P123, 221, 51),
+        (P122, 221, 82),
+    ];
+    pub(super) const R215: &[rt::TemplateBindingRow] = &[
+        (P74, 513, 234),
+        (P2, 513, 270),
+    ];
+    pub(super) const R216: &[rt::TemplateBindingRow] = &[
+        (P0, 551, 60),
+        (P11, 551, 102),
+    ];
+    pub(super) const R217: &[rt::TemplateBindingRow] = &[
+        (P12, 551, 181),
+        (P13, 551, 233),
+    ];
+    pub(super) const R218: &[rt::TemplateBindingRow] = &[
+        (P1, 551, 315),
+        (P17, 551, 367),
+    ];
+    pub(super) const R219: &[rt::TemplateBindingRow] = &[
+        (P3, 551, 485),
+        (P4, 551, 559),
+    ];
+    pub(super) const R220: &[rt::TemplateBindingRow] = &[
+        (P15, 591, 114),
+        (P6, 591, 150),
+    ];
+    pub(super) const R221: &[rt::TemplateBindingRow] = &[
+        (P31, 592, 25),
+        (P32, 592, 120),
+    ];
+    pub(super) const R222: &[rt::TemplateBindingRow] = &[
+        (P5, 612, 119),
+        (P8, 612, 161),
+    ];
+    pub(super) const R223: &[rt::TemplateBindingRow] = &[
+        (P5, 49, 17),
+        (P15, 50, 17),
+        (P6, 51, 17),
+        (P7, 52, 17),
+        (P8, 53, 17),
+        (P16, 54, 17),
+    ];
+    pub(super) const R224: &[rt::TemplateBindingRow] = &[
+        (P1, 63, 31),
+        (P17, 64, 31),
+        (P3, 65, 31),
+        (P4, 66, 31),
+    ];
+    pub(super) const R225: &[rt::TemplateBindingRow] = &[
+        (P17, 49, 29),
+        (P11, 50, 29),
+        (P12, 51, 29),
+    ];
+    pub(super) const R226: &[rt::TemplateBindingRow] = &[
+        (P1, 53, 29),
+        (P14, 54, 29),
+        (P3, 55, 29),
+        (P4, 56, 29),
+    ];
+    pub(super) const R227: &[rt::TemplateBindingRow] = &[
+        (P48, 128, 21),
+        (P25, 129, 21),
+    ];
+    pub(super) const R228: &[rt::TemplateBindingRow] = &[
+        (P124, 133, 21),
+        (P125, 134, 21),
+    ];
+    pub(super) const R229: &[rt::TemplateBindingRow] = &[
+        (P126, 136, 21),
+        (P127, 137, 21),
+        (P128, 138, 21),
+    ];
+    pub(super) const R230: &[rt::TemplateBindingRow] = &[
+        (P129, 141, 21),
+        (P130, 142, 21),
+        (P47, 143, 21),
+    ];
+    pub(super) const R231: &[rt::TemplateBindingRow] = &[
+        (P17, 356, 29),
+        (P11, 357, 29),
+        (P12, 358, 29),
+    ];
+    pub(super) const R232: &[rt::TemplateBindingRow] = &[
+        (P1, 360, 29),
+        (P14, 361, 29),
+        (P3, 362, 29),
+        (P4, 363, 29),
+    ];
+    pub(super) const R233: &[rt::TemplateBindingRow] = &[
+        (P6, 427, 21),
+        (P7, 428, 21),
+        (P8, 429, 21),
+    ];
+    pub(super) const R234: &[rt::TemplateBindingRow] = &[
+        (P48, 433, 21),
+        (P25, 434, 21),
+        (P69, 435, 21),
+    ];
+    pub(super) const R235: &[rt::TemplateBindingRow] = &[
+        (P124, 438, 21),
+        (P125, 439, 21),
+    ];
+    pub(super) const R236: &[rt::TemplateBindingRow] = &[
+        (P126, 441, 21),
+        (P127, 442, 21),
+        (P128, 443, 21),
+    ];
+    pub(super) const R237: &[rt::TemplateBindingRow] = &[
+        (P129, 446, 21),
+        (P130, 447, 21),
+        (P47, 448, 21),
+    ];
+    pub(super) const R238: &[rt::TemplateBindingRow] = &[
+        (P25, 455, 21),
+        (P69, 456, 21),
+    ];
+    pub(super) const R239: &[rt::TemplateBindingRow] = &[
+        (P5, 36, 17),
+        (P6, 37, 17),
+        (P7, 38, 17),
+    ];
+    pub(super) const R240: &[rt::TemplateBindingRow] = &[
+        (P1, 82, 33),
+        (P17, 83, 33),
+        (P3, 84, 33),
+        (P4, 85, 33),
+    ];
+    pub(super) const R241: &[rt::TemplateBindingRow] = &[
+        (P131, 89, 33),
+        (P17, 90, 33),
+    ];
+    pub(super) const R242: &[rt::TemplateBindingRow] = &[
+        (P132, 95, 33),
+        (P17, 96, 33),
+    ];
+    pub(super) const R243: &[rt::TemplateBindingRow] = &[
+        (P133, 163, 28),
+        (P134, 164, 28),
+        (P135, 165, 28),
+        (P136, 166, 28),
+        (P137, 167, 28),
+        (P138, 168, 28),
+    ];
+    pub(super) const R244: &[rt::TemplateBindingRow] = &[
+        (P133, 178, 28),
+        (P134, 179, 28),
+        (P135, 180, 28),
+        (P136, 181, 28),
+        (P137, 182, 28),
+        (P138, 183, 28),
+    ];
+    pub(super) const R245: &[rt::TemplateBindingRow] = &[
+        (P35, 188, 26),
+        (P36, 189, 26),
+    ];
+    pub(super) const R246: &[rt::TemplateBindingRow] = &[
+        (P139, 196, 37),
+        (P70, 197, 37),
+    ];
+    pub(super) const R247: &[rt::TemplateBindingRow] = &[
+        (P133, 260, 28),
+        (P134, 261, 28),
+        (P135, 262, 28),
+        (P136, 263, 28),
+        (P137, 264, 28),
+        (P138, 265, 28),
+    ];
+    pub(super) const R248: &[rt::TemplateBindingRow] = &[
+        (P133, 275, 28),
+        (P134, 276, 28),
+        (P135, 277, 28),
+        (P136, 278, 28),
+        (P137, 279, 28),
+        (P138, 280, 28),
+    ];
+    pub(super) const R249: &[rt::TemplateBindingRow] = &[
+        (P35, 285, 26),
+        (P36, 286, 26),
+    ];
+    pub(super) const R250: &[rt::TemplateBindingRow] = &[
+        (P139, 293, 37),
+        (P70, 294, 37),
+    ];
+    pub(super) const R251: &[rt::TemplateBindingRow] = &[
+        (P5, 92, 19),
+        (P6, 93, 19),
+    ];
+    pub(super) const R252: &[rt::TemplateBindingRow] = &[
+        (P7, 95, 19),
+        (P8, 96, 19),
+        (P29, 97, 19),
+        (P30, 98, 19),
+    ];
+    pub(super) const R253: &[rt::TemplateBindingRow] = &[
+        (P46, 118, 29),
+        (P140, 119, 29),
+    ];
+    pub(super) const R254: &[rt::TemplateBindingRow] = &[
+        (P31, 123, 25),
+        (P32, 124, 25),
+        (P45, 125, 25),
+        (P46, 126, 25),
+        (P47, 127, 25),
+        (P48, 128, 25),
+    ];
+    pub(super) const R255: &[rt::TemplateBindingRow] = &[
+        (P49, 132, 28),
+        (P50, 133, 28),
+        (P51, 134, 28),
+        (P52, 135, 28),
+        (P53, 136, 28),
+        (P54, 137, 28),
+        (P55, 138, 28),
+        (P56, 139, 28),
+        (P57, 140, 28),
+        (P58, 141, 28),
+        (P59, 142, 28),
+        (P60, 143, 28),
+        (P61, 144, 28),
+        (P62, 145, 28),
+        (P63, 146, 28),
+    ];
+    pub(super) const R256: &[rt::TemplateBindingRow] = &[
+        (P64, 156, 22),
+        (P46, 157, 22),
+        (P65, 158, 22),
+        (P66, 159, 22),
+        (P67, 160, 22),
+        (P68, 161, 22),
+    ];
+    pub(super) const R257: &[rt::TemplateBindingRow] = &[
+        (P46, 173, 29),
+        (P140, 174, 29),
+    ];
+    pub(super) const R258: &[rt::TemplateBindingRow] = &[
+        (P69, 180, 19),
+        (P70, 181, 19),
+    ];
+    pub(super) const R259: &[rt::TemplateBindingRow] = &[
+        (P1, 236, 29),
+        (P3, 237, 29),
+        (P4, 238, 29),
+    ];
+    pub(super) const R260: &[rt::TemplateBindingRow] = &[
+        (P70, 298, 26),
+        (P141, 299, 26),
+        (P142, 300, 26),
+        (P143, 301, 26),
+    ];
+    pub(super) const R261: &[rt::TemplateBindingRow] = &[
+        (P30, 306, 22),
+        (P127, 307, 22),
+        (P128, 308, 22),
+        (P126, 309, 22),
+        (P25, 310, 22),
+        (P69, 311, 22),
+        (P77, 312, 22),
+        (P47, 313, 22),
+        (P48, 314, 22),
+        (P144, 315, 22),
+        (P70, 316, 22),
+        (P145, 317, 22),
+        (P146, 318, 22),
+        (P147, 319, 22),
+        (P148, 320, 22),
+        (P149, 321, 22),
+        (P150, 322, 22),
+    ];
+    pub(super) const R262: &[rt::TemplateBindingRow] = &[
+        (P8, 53, 17),
+        (P16, 54, 17),
+        (P5, 55, 17),
+        (P30, 56, 17),
+        (P29, 57, 17),
+        (P71, 58, 17),
+        (P151, 59, 17),
+    ];
+    pub(super) const R263: &[rt::TemplateBindingRow] = &[
+        (P7, 61, 17),
+        (P15, 62, 17),
+    ];
+    pub(super) const R264: &[rt::TemplateBindingRow] = &[
+        (P1, 67, 31),
+        (P3, 68, 31),
+        (P4, 69, 31),
+    ];
+    pub(super) const R265: &[rt::TemplateBindingRow] = &[
+        (P8, 175, 17),
+        (P16, 176, 17),
+        (P5, 177, 17),
+        (P30, 178, 17),
+        (P29, 179, 17),
+        (P71, 180, 17),
+        (P151, 181, 17),
+    ];
+    pub(super) const R266: &[rt::TemplateBindingRow] = &[
+        (P7, 183, 17),
+        (P15, 184, 17),
+    ];
+    pub(super) const R267: &[rt::TemplateBindingRow] = &[
+        (P1, 189, 31),
+        (P3, 190, 31),
+        (P4, 191, 31),
+    ];
+    pub(super) const R268: &[rt::TemplateBindingRow] = &[
+        (P29, 278, 20),
+        (P71, 278, 58),
+    ];
+    pub(super) const R269: &[rt::TemplateBindingRow] = &[
+        (P30, 285, 25),
+        (P70, 286, 25),
+        (P91, 287, 25),
+    ];
+    pub(super) const R270: &[rt::TemplateBindingRow] = &[
+        (P152, 299, 21),
+        (P5, 300, 21),
+        (P16, 301, 21),
+    ];
+    pub(super) const R271: &[rt::TemplateBindingRow] = &[
+        (P1, 311, 33),
+        (P3, 312, 33),
+        (P4, 313, 33),
+    ];
+    pub(super) const R272: &[rt::TemplateBindingRow] = &[
+        (P5, 86, 17),
+        (P6, 87, 17),
+    ];
+    pub(super) const R273: &[rt::TemplateBindingRow] = &[
+        (P7, 89, 17),
+        (P8, 90, 17),
+    ];
+    pub(super) const R274: &[rt::TemplateBindingRow] = &[
+        (P153, 96, 19),
+        (P18, 97, 19),
+        (P19, 98, 19),
+    ];
+    pub(super) const R275: &[rt::TemplateBindingRow] = &[
+        (P5, 178, 17),
+        (P6, 179, 17),
+    ];
+    pub(super) const R276: &[rt::TemplateBindingRow] = &[
+        (P153, 190, 17),
+        (P154, 191, 17),
+        (P18, 192, 17),
+        (P19, 193, 17),
+    ];
+    pub(super) const R277: &[rt::TemplateBindingRow] = &[
+        (P5, 281, 17),
+        (P6, 282, 17),
+    ];
+    pub(super) const R278: &[rt::TemplateBindingRow] = &[
+        (P7, 284, 17),
+        (P8, 285, 17),
+    ];
+    pub(super) const R279: &[rt::TemplateBindingRow] = &[
+        (P153, 290, 17),
+        (P154, 291, 17),
+        (P18, 292, 17),
+        (P19, 293, 17),
+    ];
+    pub(super) const R280: &[rt::TemplateBindingRow] = &[
+        (P155, 368, 21),
+        (P33, 369, 21),
+    ];
+    pub(super) const R281: &[rt::TemplateBindingRow] = &[
+        (P156, 371, 19),
+        (P157, 372, 19),
+    ];
+    pub(super) const R282: &[rt::TemplateBindingRow] = &[
+        (P158, 392, 19),
+        (P159, 393, 19),
+    ];
+    pub(super) const R283: &[rt::TemplateBindingRow] = &[
+        (P1, 27, 29),
+        (P14, 28, 29),
+        (P11, 29, 29),
+    ];
+    pub(super) const R284: &[rt::TemplateBindingRow] = &[
+        (P12, 31, 29),
+        (P13, 32, 29),
+        (P3, 33, 29),
+        (P4, 34, 29),
+    ];
+    pub(super) const R285: &[rt::TemplateBindingRow] = &[
+        (P5, 38, 19),
+        (P6, 38, 61),
+        (P7, 38, 105),
+        (P8, 38, 157),
+    ];
+    pub(super) const R286: &[rt::TemplateBindingRow] = &[
+        (P31, 41, 51),
+        (P32, 41, 146),
+    ];
+    pub(super) const R287: &[rt::TemplateBindingRow] = &[
+        (P1, 42, 102),
+        (P2, 42, 154),
+        (P18, 42, 189),
+        (P19, 42, 256),
+    ];
+    pub(super) const R288: &[rt::TemplateBindingRow] = &[
+        (P5, 32, 19),
+        (P6, 32, 61),
+        (P7, 32, 105),
+        (P8, 32, 157),
+    ];
+    pub(super) const R289: &[rt::TemplateBindingRow] = &[
+        (P2, 35, 127),
+        (P31, 35, 162),
+        (P32, 35, 257),
+    ];
+    pub(super) const R290: &[rt::TemplateBindingRow] = &[
+        (P15, 36, 39),
+        (P5, 36, 75),
+        (P6, 36, 117),
+    ];
+    pub(super) const R291: &[rt::TemplateBindingRow] = &[
+        (P160, 49, 114),
+        (P17, 49, 165),
+    ];
+    pub(super) const R292: &[rt::TemplateBindingRow] = &[
+        (P5, 35, 40),
+        (P8, 35, 82),
+    ];
+    pub(super) const R293: &[rt::TemplateBindingRow] = &[
+        (P5, 37, 43),
+        (P8, 37, 85),
+        (P7, 37, 131),
+        (P6, 37, 183),
+    ];
+    pub(super) const R294: &[rt::TemplateBindingRow] = &[
+        (P160, 38, 98),
+        (P17, 38, 149),
+    ];
+    pub(super) const R295: &[rt::TemplateBindingRow] = &[
+        (P5, 88, 37),
+        (P6, 88, 79),
+    ];
+    pub(super) const R296: &[rt::TemplateBindingRow] = &[
+        (P7, 88, 158),
+        (P8, 88, 210),
+        (P15, 88, 256),
+    ];
+    pub(super) const R297: &[rt::TemplateBindingRow] = &[
+        (P5, 33, 37),
+        (P6, 33, 79),
+    ];
+    pub(super) const R298: &[rt::TemplateBindingRow] = &[
+        (P7, 33, 158),
+        (P8, 33, 210),
+    ];
+    pub(super) const R299: &[rt::TemplateBindingRow] = &[
+        (P18, 36, 342),
+        (P19, 36, 409),
+        (P2, 36, 472),
+    ];
+    pub(super) const R300: &[rt::TemplateBindingRow] = &[
+        (P5, 111, 55),
+        (P6, 111, 97),
+    ];
+    pub(super) const R301: &[rt::TemplateBindingRow] = &[
+        (P1, 112, 143),
+        (P17, 112, 195),
+        (P3, 112, 237),
+        (P4, 112, 311),
+    ];
+    pub(super) const R302: &[rt::TemplateBindingRow] = &[
+        (P5, 181, 40),
+        (P6, 181, 82),
+    ];
+    pub(super) const R303: &[rt::TemplateBindingRow] = &[
+        (P7, 181, 161),
+        (P8, 181, 213),
+    ];
+    pub(super) const R304: &[rt::TemplateBindingRow] = &[
+        (P1, 185, 100),
+        (P18, 185, 152),
+        (P19, 185, 219),
+        (P2, 185, 282),
+    ];
+    pub(super) const R305: &[rt::TemplateBindingRow] = &[
+        (P5, 52, 17),
+        (P6, 53, 17),
+    ];
+    pub(super) const R306: &[rt::TemplateBindingRow] = &[
+        (P7, 55, 17),
+        (P8, 56, 17),
+        (P97, 57, 17),
+    ];
+    pub(super) const R307: &[rt::TemplateBindingRow] = &[
+        (P47, 59, 25),
+        (P31, 60, 25),
+        (P32, 61, 25),
+        (P45, 62, 25),
+        (P102, 63, 25),
+        (P100, 64, 25),
+        (P44, 65, 25),
+        (P98, 66, 25),
+        (P99, 67, 25),
+        (P101, 68, 25),
+    ];
+    pub(super) const R308: &[rt::TemplateBindingRow] = &[
+        (P5, 40, 37),
+        (P6, 40, 79),
+    ];
+    pub(super) const R309: &[rt::TemplateBindingRow] = &[
+        (P1, 43, 98),
+        (P17, 43, 150),
+        (P18, 43, 192),
+        (P19, 43, 259),
+        (P2, 43, 322),
+    ];
+    pub(super) const R310: &[rt::TemplateBindingRow] = &[
+        (P5, 35, 19),
+        (P6, 36, 19),
+    ];
+    pub(super) const R311: &[rt::TemplateBindingRow] = &[
+        (P7, 38, 19),
+        (P8, 39, 19),
+    ];
+    pub(super) const R312: &[rt::TemplateBindingRow] = &[
+        (P31, 53, 25),
+        (P32, 54, 25),
+        (P45, 55, 25),
+        (P46, 56, 25),
+        (P47, 57, 25),
+        (P48, 58, 25),
+    ];
+    pub(super) const R313: &[rt::TemplateBindingRow] = &[
+        (P49, 62, 28),
+        (P50, 63, 28),
+        (P51, 64, 28),
+        (P52, 65, 28),
+        (P53, 66, 28),
+        (P54, 67, 28),
+        (P55, 68, 28),
+        (P56, 69, 28),
+        (P57, 70, 28),
+        (P58, 71, 28),
+        (P59, 72, 28),
+        (P60, 73, 28),
+        (P61, 74, 28),
+        (P62, 75, 28),
+        (P63, 76, 28),
+    ];
+    pub(super) const R314: &[rt::TemplateBindingRow] = &[
+        (P122, 84, 22),
+        (P46, 85, 22),
+        (P65, 86, 22),
+        (P66, 87, 22),
+        (P67, 88, 22),
+        (P68, 89, 22),
+    ];
+    pub(super) const R315: &[rt::TemplateBindingRow] = &[
+        (P5, 178, 21),
+        (P6, 179, 21),
+    ];
+    pub(super) const R316: &[rt::TemplateBindingRow] = &[
+        (P7, 181, 21),
+        (P8, 182, 21),
+    ];
+    pub(super) const R317: &[rt::TemplateBindingRow] = &[
+        (P161, 196, 29),
+        (P48, 197, 29),
+        (P2, 198, 29),
+        (P162, 199, 29),
+        (P163, 200, 29),
+    ];
+    pub(super) const R318: &[rt::TemplateBindingRow] = &[
+        (P164, 204, 24),
+        (P122, 205, 24),
+        (P2, 206, 24),
+        (P165, 207, 24),
+        (P166, 208, 24),
+    ];
+    pub(super) const R319: &[rt::TemplateBindingRow] = &[
+        (P165, 222, 22),
+        (P166, 223, 22),
+        (P167, 224, 22),
+        (P48, 225, 22),
+    ];
+    pub(super) const R320: &[rt::TemplateBindingRow] = &[
+        (P70, 227, 22),
+        (P168, 228, 22),
+    ];
+    pub(super) const R321: &[rt::TemplateBindingRow] = &[
+        (P31, 278, 33),
+        (P32, 279, 33),
+        (P45, 280, 33),
+        (P102, 281, 33),
+    ];
+    pub(super) const R322: &[rt::TemplateBindingRow] = &[
+        (P5, 29, 17),
+        (P15, 29, 59),
+    ];
+    pub(super) const R323: &[rt::TemplateBindingRow] = &[
+        (P5, 66, 40),
+        (P6, 66, 82),
+    ];
+    pub(super) const R324: &[rt::TemplateBindingRow] = &[
+        (P8, 66, 283),
+        (P30, 66, 329),
+    ];
+    pub(super) const R325: &[rt::TemplateBindingRow] = &[
+        (P169, 71, 118),
+        (P17, 71, 169),
+    ];
+    pub(super) const R326: &[rt::TemplateBindingRow] = &[
+        (P170, 76, 56),
+        (P103, 76, 97),
+    ];
+    pub(super) const R327: &[rt::TemplateBindingRow] = &[
+        (P5, 48, 17),
+        (P7, 49, 17),
+        (P8, 50, 17),
+    ];
+    pub(super) const R328: &[rt::TemplateBindingRow] = &[
+        (P31, 52, 25),
+        (P32, 53, 25),
+        (P45, 54, 25),
+        (P102, 55, 25),
+        (P100, 56, 25),
+        (P101, 57, 25),
+    ];
+    pub(super) const R329: &[rt::TemplateBindingRow] = &[
+        (P103, 59, 29),
+        (P2, 60, 29),
+    ];
+    pub(super) const R330: &[rt::TemplateBindingRow] = &[
+        (P5, 93, 21),
+        (P6, 94, 21),
+    ];
+    pub(super) const R331: &[rt::TemplateBindingRow] = &[
+        (P7, 96, 21),
+        (P8, 97, 21),
+    ];
+    pub(super) const R332: &[rt::TemplateBindingRow] = &[
+        (P31, 119, 27),
+        (P32, 120, 27),
+        (P45, 121, 27),
+        (P63, 122, 27),
+        (P62, 123, 27),
+        (P46, 124, 27),
+        (P47, 125, 27),
+        (P48, 126, 27),
+    ];
+    pub(super) const R333: &[rt::TemplateBindingRow] = &[
+        (P49, 130, 30),
+        (P50, 131, 30),
+        (P51, 132, 30),
+        (P52, 133, 30),
+        (P53, 134, 30),
+        (P54, 135, 30),
+        (P55, 136, 30),
+        (P56, 137, 30),
+        (P57, 138, 30),
+        (P58, 139, 30),
+        (P59, 140, 30),
+        (P60, 141, 30),
+        (P61, 142, 30),
+    ];
+    pub(super) const R334: &[rt::TemplateBindingRow] = &[
+        (P64, 152, 24),
+        (P46, 153, 24),
+        (P65, 154, 24),
+        (P66, 155, 24),
+        (P63, 156, 24),
+        (P62, 157, 24),
+    ];
+    pub(super) const R335: &[rt::TemplateBindingRow] = &[
+        (P70, 170, 21),
+        (P69, 171, 21),
+    ];
+    pub(super) const R336: &[rt::TemplateBindingRow] = &[
+        (P171, 249, 20),
+        (P172, 250, 20),
+        (P76, 251, 20),
+        (P48, 252, 20),
+        (P25, 253, 20),
+        (P77, 254, 20),
+        (P69, 255, 20),
+        (P127, 256, 20),
+        (P126, 257, 20),
+        (P128, 258, 20),
+        (P173, 259, 20),
+    ];
+    pub(super) const R337: &[rt::TemplateBindingRow] = &[
+        (P70, 264, 20),
+        (P47, 265, 20),
+    ];
+    pub(super) const R338: &[rt::TemplateBindingRow] = &[
+        (P174, 267, 20),
+        (P175, 268, 20),
+        (P176, 269, 20),
+    ];
+    pub(super) const R339: &[rt::TemplateBindingRow] = &[
+        (P105, 119, 29),
+        (P104, 120, 29),
+    ];
+    pub(super) const R340: &[rt::TemplateBindingRow] = &[
+        (P177, 128, 20),
+        (P127, 129, 20),
+        (P128, 130, 20),
+        (P126, 131, 20),
+        (P25, 132, 20),
+        (P69, 133, 20),
+        (P77, 134, 20),
+        (P47, 135, 20),
+        (P48, 136, 20),
+        (P178, 137, 20),
+        (P70, 138, 20),
+    ];
+    pub(super) const R341: &[rt::TemplateBindingRow] = &[
+        (P13, 78, 27),
+        (P1, 79, 27),
+    ];
+    pub(super) const R342: &[rt::TemplateBindingRow] = &[
+        (P14, 83, 27),
+        (P3, 84, 27),
+        (P4, 85, 27),
+    ];
+    pub(super) const R343: &[rt::TemplateBindingRow] = &[
+        (P179, 152, 20),
+        (P76, 153, 20),
+        (P48, 154, 20),
+        (P25, 155, 20),
+        (P77, 156, 20),
+        (P69, 157, 20),
+        (P127, 158, 20),
+        (P126, 159, 20),
+        (P128, 160, 20),
+        (P173, 161, 20),
+    ];
+    pub(super) const R344: &[rt::TemplateBindingRow] = &[
+        (P70, 168, 23),
+        (P69, 169, 23),
+    ];
+    pub(super) const R345: &[rt::TemplateBindingRow] = &[
+        (P5, 85, 19),
+        (P6, 86, 19),
+        (P7, 87, 19),
+        (P8, 88, 19),
+    ];
+    pub(super) const R346: &[rt::TemplateBindingRow] = &[
+        (P46, 93, 25),
+        (P47, 94, 25),
+        (P48, 95, 25),
+        (P31, 96, 25),
+        (P32, 97, 25),
+        (P45, 98, 25),
+        (P100, 99, 25),
+    ];
+    pub(super) const R347: &[rt::TemplateBindingRow] = &[
+        (P46, 110, 22),
+        (P65, 111, 22),
+        (P180, 112, 22),
+        (P181, 113, 22),
+        (P182, 114, 22),
+        (P183, 115, 22),
+    ];
+    pub(super) const R348: &[rt::TemplateBindingRow] = &[
+        (P5, 506, 21),
+        (P8, 507, 21),
+    ];
+    pub(super) const R349: &[rt::TemplateBindingRow] = &[
+        (P17, 551, 39),
+        (P18, 552, 39),
+        (P19, 553, 39),
+        (P14, 554, 39),
+    ];
+}
+
 /// The base URI and the XML namespaces of `Controls/MacOSControls.xaml`.
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: __t::Option::Some("ferres://ferroui.themes.macos/Controls/MacOSControls.xaml"), namespaces: XML_NAMESPACES_1 };
 
@@ -14159,7 +16501,7 @@ fn build_controls_macoscontrols_xaml_deferred_3(
     border_1.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&border_1).upcast::<__t::Control>());
     // Controls/MacOSControls.xaml(24,19) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 24, 19)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 24, 19)?;
     // Controls/MacOSControls.xaml(25,14) Child
     // Controls/MacOSControls.xaml(25,14) VisualLayerManager
     let visual_layer_manager_0 = __t::VisualLayerManager::new();
@@ -14177,7 +16519,7 @@ fn build_controls_macoscontrols_xaml_deferred_3(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 26, 33)?;
     // Controls/MacOSControls.xaml(27,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 27, 33)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 27, 33)?;
     // Controls/MacOSControls.xaml(28,33) Content (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -14189,7 +16531,7 @@ fn build_controls_macoscontrols_xaml_deferred_3(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 28, 33)?, priority_1);
     }
     // Controls/MacOSControls.xaml(29,33) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 29, 33)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 29, 33)?;
     rt::invoked(content_presenter_0.try_end_init(), 26, 16)?;
     rt::invoked(visual_layer_manager_0.try_end_init(), 25, 14)?;
     rt::invoked(border_1.try_end_init(), 24, 12)?;
@@ -14253,7 +16595,7 @@ fn build_controls_macoscontrols_xaml_deferred_5(
     context.set_intermediate_root_object(rt::to_value(layout_transform_control_0.clone()));
     layout_transform_control_0.begin_init();
     // Controls/MacOSControls.xaml(22,33) LayoutTransform
-    rt::bind_template_binding(layout_transform_control_0.upcast_ref::<__t::FerroObject>(), __t::LayoutTransformControl::layout_transform_property(), rt::property(__t::OverlayPopupHost::transform_property()), 22, 33)?;
+    rt::apply_template_binding(layout_transform_control_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::OverlayPopupHost::transform_property()), || rt::property(__t::LayoutTransformControl::layout_transform_property()), 22, 33)?;
     // Controls/MacOSControls.xaml(23,12) Child
     // Controls/MacOSControls.xaml(23,12) VisualLayerManager
     let visual_layer_manager_0 = __t::VisualLayerManager::new();
@@ -14271,9 +16613,7 @@ fn build_controls_macoscontrols_xaml_deferred_5(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 24, 31)?;
     // Controls/MacOSControls.xaml(25,31) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 25, 31)?;
-    // Controls/MacOSControls.xaml(26,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 26, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R0)?;
     // Controls/MacOSControls.xaml(27,31) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -14285,7 +16625,7 @@ fn build_controls_macoscontrols_xaml_deferred_5(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 27, 31)?, priority_0);
     }
     // Controls/MacOSControls.xaml(28,31) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 28, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::ContentPresenter::padding_property()), 28, 31)?;
     rt::invoked(content_presenter_0.try_end_init(), 24, 14)?;
     rt::invoked(visual_layer_manager_0.try_end_init(), 23, 12)?;
     rt::invoked(layout_transform_control_0.try_end_init(), 22, 10)?;
@@ -14355,7 +16695,7 @@ fn build_controls_macoscontrols_xaml_deferred_7(
     context.set_intermediate_root_object(rt::to_value(layout_transform_control_0.clone()));
     layout_transform_control_0.begin_init();
     // Controls/MacOSControls.xaml(26,33) LayoutTransform
-    rt::bind_template_binding(layout_transform_control_0.upcast_ref::<__t::FerroObject>(), __t::LayoutTransformControl::layout_transform_property(), rt::property(__t::PopupRoot::transform_property()), 26, 33)?;
+    rt::apply_template_binding(layout_transform_control_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::PopupRoot::transform_property()), || rt::property(__t::LayoutTransformControl::layout_transform_property()), 26, 33)?;
     // Controls/MacOSControls.xaml(27,12) Child
     // Controls/MacOSControls.xaml(27,12) Panel
     let panel_0 = __t::Panel::new();
@@ -14392,9 +16732,7 @@ fn build_controls_macoscontrols_xaml_deferred_7(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 30, 33)?;
     // Controls/MacOSControls.xaml(31,33) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 31, 33)?;
-    // Controls/MacOSControls.xaml(32,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 32, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R1)?;
     // Controls/MacOSControls.xaml(33,33) Content (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -14406,7 +16744,7 @@ fn build_controls_macoscontrols_xaml_deferred_7(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 33, 33)?, priority_1);
     }
     // Controls/MacOSControls.xaml(34,33) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 34, 33)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::ContentPresenter::padding_property()), 34, 33)?;
     rt::invoked(content_presenter_0.try_end_init(), 30, 16)?;
     rt::invoked(visual_layer_manager_0.try_end_init(), 29, 14)?;
     rt::invoked(panel_0.try_end_init(), 27, 12)?;
@@ -14511,7 +16849,7 @@ fn build_controls_macoscontrols_xaml_deferred_10(
     border_1.begin_init();
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&border_1).upcast::<__t::Control>());
     // Controls/MacOSControls.xaml(21,19) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 21, 19)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 21, 19)?;
     // Controls/MacOSControls.xaml(21,12) IsHitTestVisible
     let priority_1 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_1);
@@ -14526,7 +16864,7 @@ fn build_controls_macoscontrols_xaml_deferred_10(
     let priority_2 = __t::BindingPriority::Template;
     panel_1.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_2);
     // Controls/MacOSControls.xaml(22,43) Margin
-    rt::bind_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(::ferroui_controls::Window::window_decoration_margin_property()), 22, 43)?;
+    rt::apply_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), rt::property(::ferroui_controls::Window::window_decoration_margin_property()), || rt::property(__t::Layoutable::margin_property()), 22, 43)?;
     rt::invoked(panel_1.try_end_init(), 22, 12)?;
     // Controls/MacOSControls.xaml(23,12) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(&panel_0);
@@ -14546,7 +16884,7 @@ fn build_controls_macoscontrols_xaml_deferred_10(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 24, 31)?;
     // Controls/MacOSControls.xaml(24,60) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 24, 60)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 24, 60)?;
     // Controls/MacOSControls.xaml(24,112) Content (setter chosen at run time)
     let priority_3 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -14558,11 +16896,7 @@ fn build_controls_macoscontrols_xaml_deferred_10(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 24, 112)?, priority_3);
     }
     // Controls/MacOSControls.xaml(24,148) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 24, 148)?;
-    // Controls/MacOSControls.xaml(24,183) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 24, 183)?;
-    // Controls/MacOSControls.xaml(24,257) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 24, 257)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R2)?;
     rt::invoked(content_presenter_0.try_end_init(), 24, 14)?;
     rt::invoked(visual_layer_manager_0.try_end_init(), 23, 12)?;
     rt::invoked(panel_0.try_end_init(), 19, 10)?;
@@ -14683,16 +17017,12 @@ fn build_controls_macoscontrols_xaml_deferred_12(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Background")));
     rt::register_name_value(name_scope.as_ref(), "Background", __t::Rc::new(__t::Clone::clone(&border_0)), 23, 19)?;
     // Controls/MacOSControls.xaml(24,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 24, 19)?;
-    // Controls/MacOSControls.xaml(25,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 25, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R3)?;
     // Controls/MacOSControls.xaml(23,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(27,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 27, 19)?;
-    // Controls/MacOSControls.xaml(28,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 28, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R4)?;
     rt::invoked(border_0.try_end_init(), 23, 12)?;
     // Controls/MacOSControls.xaml(29,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -14712,9 +17042,7 @@ fn build_controls_macoscontrols_xaml_deferred_12(
     let priority_1 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/MacOSControls.xaml(33,19) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 33, 19)?;
-    // Controls/MacOSControls.xaml(34,19) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 34, 19)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R5)?;
     // Controls/MacOSControls.xaml(29,12) Opacity
     let priority_2 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Visual::opacity_property(), 0.0_f64, priority_2);
@@ -14738,9 +17066,7 @@ fn build_controls_macoscontrols_xaml_deferred_12(
     let priority_3 = __t::BindingPriority::Template;
     border_2.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_3);
     // Controls/MacOSControls.xaml(40,19) BorderThickness
-    rt::bind_template_binding(border_2.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 40, 19)?;
-    // Controls/MacOSControls.xaml(41,19) CornerRadius
-    rt::bind_template_binding(border_2.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 41, 19)?;
+    rt::bind_template_rows(border_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R6)?;
     // Controls/MacOSControls.xaml(36,12) Opacity
     let priority_4 = __t::BindingPriority::Template;
     border_2.set_value_with_priority(__t::Visual::opacity_property(), 0.0_f64, priority_4);
@@ -14791,9 +17117,7 @@ fn build_controls_macoscontrols_xaml_deferred_14(
     rectangle_0.begin_init();
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(21,20) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 21, 20)?;
-    // Controls/MacOSControls.xaml(21,56) Margin
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 21, 56)?;
+    rt::bind_template_rows(rectangle_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R7)?;
     // Controls/MacOSControls.xaml(21,91) Height (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let provided_2 = rt::provide_static_resource(&context, "MenuFlyoutSeparatorHeight", || rt::property_value(__t::Layoutable::height_property()), 21, 91)?;
@@ -14965,15 +17289,7 @@ fn build_controls_macoscontrols_xaml_deferred_20(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 43, 27)?;
     // Controls/MacOSControls.xaml(44,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 44, 27)?;
-    // Controls/MacOSControls.xaml(45,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 45, 27)?;
-    // Controls/MacOSControls.xaml(46,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 46, 27)?;
-    // Controls/MacOSControls.xaml(47,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 47, 27)?;
-    // Controls/MacOSControls.xaml(48,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 48, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R8)?;
     // Controls/MacOSControls.xaml(49,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -14985,13 +17301,7 @@ fn build_controls_macoscontrols_xaml_deferred_20(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 49, 27)?, priority_0);
     }
     // Controls/MacOSControls.xaml(50,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 50, 27)?;
-    // Controls/MacOSControls.xaml(51,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 51, 27)?;
-    // Controls/MacOSControls.xaml(52,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 52, 27)?;
-    // Controls/MacOSControls.xaml(53,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 53, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R9)?;
     // Controls/MacOSControls.xaml(43,10) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -15030,18 +17340,12 @@ fn build_controls_macoscontrols_xaml_deferred_22(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Controls/MacOSControls.xaml(27,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 27, 17)?;
-    // Controls/MacOSControls.xaml(28,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 28, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R10)?;
     // Controls/MacOSControls.xaml(27,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(30,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 30, 17)?;
-    // Controls/MacOSControls.xaml(31,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 31, 17)?;
-    // Controls/MacOSControls.xaml(32,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 32, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R11)?;
     // Controls/MacOSControls.xaml(33,12) Child
     // Controls/MacOSControls.xaml(33,12) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -15051,7 +17355,7 @@ fn build_controls_macoscontrols_xaml_deferred_22(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 33, 27)?;
     // Controls/MacOSControls.xaml(34,27) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 34, 27)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 34, 27)?;
     rt::invoked(items_presenter_0.try_end_init(), 33, 12)?;
     rt::invoked(border_0.try_end_init(), 27, 10)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
@@ -15106,17 +17410,7 @@ fn build_controls_macoscontrols_xaml_deferred_24(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 35, 17)?;
     // Controls/MacOSControls.xaml(36,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 36, 17)?;
-    // Controls/MacOSControls.xaml(37,17) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 37, 17)?;
-    // Controls/MacOSControls.xaml(38,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 38, 17)?;
-    // Controls/MacOSControls.xaml(39,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 39, 17)?;
-    // Controls/MacOSControls.xaml(40,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 40, 17)?;
-    // Controls/MacOSControls.xaml(41,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 41, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R12)?;
     // Controls/MacOSControls.xaml(42,12) Child
     // Controls/MacOSControls.xaml(42,12) Grid
     let grid_0 = __t::Grid::new();
@@ -15157,7 +17451,7 @@ fn build_controls_macoscontrols_xaml_deferred_24(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 45, 31)?, priority_1);
     }
     // Controls/MacOSControls.xaml(46,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedContentControl::header_template_property()), 46, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::HeaderedContentControl::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 46, 31)?;
     // Controls/MacOSControls.xaml(43,14) FontWeight
     let value_1 = rt::invoked(__t::FontWeight::__markup_parse(__t::String::from("Normal")), 47, 31)?;
     let priority_2 = __t::BindingPriority::Template;
@@ -15173,9 +17467,7 @@ fn build_controls_macoscontrols_xaml_deferred_24(
     let priority_4 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_4);
     // Controls/MacOSControls.xaml(52,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 52, 31)?;
-    // Controls/MacOSControls.xaml(53,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 53, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R13)?;
     // Controls/MacOSControls.xaml(54,31) IsVisible
     let template_binding_10 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedContentControl::header_property()));
     // Controls/MacOSControls.xaml(54,31) Converter
@@ -15211,11 +17503,7 @@ fn build_controls_macoscontrols_xaml_deferred_24(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 58, 31)?, priority_7);
     }
     // Controls/MacOSControls.xaml(59,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 59, 31)?;
-    // Controls/MacOSControls.xaml(60,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 60, 31)?;
-    // Controls/MacOSControls.xaml(61,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 61, 31)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R14)?;
     // Controls/MacOSControls.xaml(56,14) RecognizesAccessKey
     let priority_8 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_8);
@@ -15334,7 +17622,7 @@ fn build_controls_macoscontrols_xaml_deferred_26(
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_1);
     // Controls/MacOSControls.xaml(30,83) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 30, 83)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_sizing_property()), || rt::property(__t::Border::background_sizing_property()), 30, 83)?;
     // Controls/MacOSControls.xaml(30,137) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "ExpanderHeaderBorderBrush", 30, 137)?;
     // Controls/MacOSControls.xaml(30,12) BorderThickness
@@ -15369,7 +17657,7 @@ fn build_controls_macoscontrols_xaml_deferred_26(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 31, 61)?, priority_6);
     }
     // Controls/MacOSControls.xaml(31,96) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedContentControl::header_template_property()), 31, 96)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::HeaderedContentControl::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 31, 96)?;
     // Controls/MacOSControls.xaml(31,147) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "TextFillColorSecondaryBrush", 31, 147)?;
     // Controls/MacOSControls.xaml(31,206) HorizontalContentAlignment (setter chosen at run time)
@@ -15409,20 +17697,12 @@ fn build_controls_macoscontrols_xaml_deferred_26(
     let priority_12 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_12);
     // Controls/MacOSControls.xaml(33,57) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 33, 57)?;
-    // Controls/MacOSControls.xaml(33,99) BackgroundSizing
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 33, 99)?;
-    // Controls/MacOSControls.xaml(33,153) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 33, 153)?;
-    // Controls/MacOSControls.xaml(33,199) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 33, 199)?;
-    // Controls/MacOSControls.xaml(33,243) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 33, 243)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R15)?;
     // Controls/MacOSControls.xaml(33,12) MinHeight
     let priority_13 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Layoutable::min_height_property(), 0.0_f64, priority_13);
     // Controls/MacOSControls.xaml(33,309) Padding
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 33, 309)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Decorator::padding_property()), 33, 309)?;
     // Controls/MacOSControls.xaml(34,14) Child
     // Controls/MacOSControls.xaml(34,14) ContentPresenter
     let content_presenter_1 = __t::ContentPresenter::new();
@@ -15442,11 +17722,7 @@ fn build_controls_macoscontrols_xaml_deferred_26(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_4.clone(), "ContentControl.Content", 1, 34, 62)?, priority_14);
     }
     // Controls/MacOSControls.xaml(34,98) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 34, 98)?;
-    // Controls/MacOSControls.xaml(34,150) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 34, 150)?;
-    // Controls/MacOSControls.xaml(34,224) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 34, 224)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R16)?;
     // Controls/MacOSControls.xaml(34,14) RecognizesAccessKey
     let priority_15 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_15);
@@ -15530,23 +17806,7 @@ fn build_controls_macoscontrols_xaml_deferred_29(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 36, 29)?;
     // Controls/MacOSControls.xaml(37,29) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 37, 29)?;
-    // Controls/MacOSControls.xaml(38,29) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 38, 29)?;
-    // Controls/MacOSControls.xaml(39,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 39, 29)?;
-    // Controls/MacOSControls.xaml(40,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 40, 29)?;
-    // Controls/MacOSControls.xaml(41,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 41, 29)?;
-    // Controls/MacOSControls.xaml(42,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 42, 29)?;
-    // Controls/MacOSControls.xaml(43,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 43, 29)?;
-    // Controls/MacOSControls.xaml(44,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 44, 29)?;
-    // Controls/MacOSControls.xaml(45,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 45, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R17)?;
     rt::invoked(content_presenter_0.try_end_init(), 36, 12)?;
     // Controls/MacOSControls.xaml(46,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
@@ -15558,23 +17818,7 @@ fn build_controls_macoscontrols_xaml_deferred_29(
     content_presenter_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter2")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter2", __t::Rc::new(__t::Clone::clone(&content_presenter_1)), 46, 29)?;
     // Controls/MacOSControls.xaml(47,29) Background
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 47, 29)?;
-    // Controls/MacOSControls.xaml(48,29) BackgroundSizing
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 48, 29)?;
-    // Controls/MacOSControls.xaml(49,29) BorderBrush
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 49, 29)?;
-    // Controls/MacOSControls.xaml(50,29) BorderThickness
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 50, 29)?;
-    // Controls/MacOSControls.xaml(51,29) CornerRadius
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 51, 29)?;
-    // Controls/MacOSControls.xaml(52,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 52, 29)?;
-    // Controls/MacOSControls.xaml(53,29) Padding
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 53, 29)?;
-    // Controls/MacOSControls.xaml(54,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 54, 29)?;
-    // Controls/MacOSControls.xaml(55,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 55, 29)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R18)?;
     rt::invoked(content_presenter_1.try_end_init(), 46, 12)?;
     rt::invoked(panel_0.try_end_init(), 35, 10)?;
     __t::Result::Ok(rt::to_value(panel_0.clone()))
@@ -15798,16 +18042,12 @@ fn build_controls_macoscontrols_xaml_deferred_34(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("SplitterBorder")));
     rt::register_name_value(name_scope.as_ref(), "SplitterBorder", __t::Rc::new(__t::Clone::clone(&border_0)), 36, 17)?;
     // Controls/MacOSControls.xaml(37,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 37, 17)?;
-    // Controls/MacOSControls.xaml(38,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 38, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R19)?;
     // Controls/MacOSControls.xaml(36,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(40,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 40, 17)?;
-    // Controls/MacOSControls.xaml(41,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 41, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R20)?;
     rt::invoked(border_0.try_end_init(), 36, 10)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
 }
@@ -16357,16 +18597,12 @@ fn build_controls_macoscontrols_xaml_deferred_36(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("OuterBorder")));
     rt::register_name_value(name_scope.as_ref(), "OuterBorder", __t::Rc::new(__t::Clone::clone(&border_0)), 74, 19)?;
     // Controls/MacOSControls.xaml(75,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 75, 19)?;
-    // Controls/MacOSControls.xaml(76,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 76, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R21)?;
     // Controls/MacOSControls.xaml(74,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(78,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 78, 19)?;
-    // Controls/MacOSControls.xaml(79,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 79, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R22)?;
     // Controls/MacOSControls.xaml(74,12) IsHitTestVisible
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_1);
@@ -16381,7 +18617,7 @@ fn build_controls_macoscontrols_xaml_deferred_36(
     border_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("InnerBorder")));
     rt::register_name_value(name_scope.as_ref(), "InnerBorder", __t::Rc::new(__t::Clone::clone(&border_1)), 81, 19)?;
     // Controls/MacOSControls.xaml(82,19) Margin
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 82, 19)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 82, 19)?;
     // Controls/MacOSControls.xaml(81,12) BorderThickness
     let priority_2 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64), priority_2);
@@ -16400,7 +18636,7 @@ fn build_controls_macoscontrols_xaml_deferred_36(
     __t::Controls::__markup_Add_0(&children_collection_2, __t::Clone::clone(&panel_1).upcast::<__t::Control>());
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/MacOSControls.xaml(86,18) Margin
-    rt::bind_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 86, 18)?;
+    rt::apply_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 86, 18)?;
     // Controls/MacOSControls.xaml(87,14) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(&panel_1);
     // Controls/MacOSControls.xaml(87,14) ContentPresenter
@@ -16422,17 +18658,11 @@ fn build_controls_macoscontrols_xaml_deferred_36(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 88, 31)?, priority_5);
     }
     // Controls/MacOSControls.xaml(89,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 89, 31)?;
-    // Controls/MacOSControls.xaml(90,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 90, 31)?;
-    // Controls/MacOSControls.xaml(91,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 91, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R23)?;
     // Controls/MacOSControls.xaml(92,31) Padding
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), "CalendarViewDayItemMargin", 92, 31)?;
     // Controls/MacOSControls.xaml(93,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 93, 31)?;
-    // Controls/MacOSControls.xaml(94,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 94, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R24)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 87, 14)?;
     context.pop_parent();
@@ -16839,16 +19069,12 @@ fn build_controls_macoscontrols_xaml_deferred_38(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("OuterBorder")));
     rt::register_name_value(name_scope.as_ref(), "OuterBorder", __t::Rc::new(__t::Clone::clone(&border_0)), 62, 19)?;
     // Controls/MacOSControls.xaml(63,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 63, 19)?;
-    // Controls/MacOSControls.xaml(64,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 64, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R25)?;
     // Controls/MacOSControls.xaml(62,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(66,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 66, 19)?;
-    // Controls/MacOSControls.xaml(67,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 67, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R26)?;
     // Controls/MacOSControls.xaml(62,12) IsHitTestVisible
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_1);
@@ -16861,7 +19087,7 @@ fn build_controls_macoscontrols_xaml_deferred_38(
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&panel_1).upcast::<__t::Control>());
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/MacOSControls.xaml(69,18) Margin
-    rt::bind_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 69, 18)?;
+    rt::apply_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 69, 18)?;
     // Controls/MacOSControls.xaml(70,14) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(&panel_1);
     // Controls/MacOSControls.xaml(70,14) ContentPresenter
@@ -16883,17 +19109,11 @@ fn build_controls_macoscontrols_xaml_deferred_38(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 71, 31)?, priority_2);
     }
     // Controls/MacOSControls.xaml(72,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 72, 31)?;
-    // Controls/MacOSControls.xaml(73,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 73, 31)?;
-    // Controls/MacOSControls.xaml(74,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 74, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R27)?;
     // Controls/MacOSControls.xaml(75,31) Padding
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), "CalendarViewMonthYearItemMargin", 75, 31)?;
     // Controls/MacOSControls.xaml(76,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 76, 31)?;
-    // Controls/MacOSControls.xaml(77,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 77, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R28)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 70, 14)?;
     context.pop_parent();
@@ -17315,16 +19535,12 @@ fn build_controls_macoscontrols_xaml_deferred_44(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("CellWrapper")));
     rt::register_name_value(name_scope.as_ref(), "CellWrapper", __t::Rc::new(__t::Clone::clone(&border_0)), 31, 17)?;
     // Controls/MacOSControls.xaml(32,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 32, 17)?;
-    // Controls/MacOSControls.xaml(33,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 33, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R29)?;
     // Controls/MacOSControls.xaml(31,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(35,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 35, 17)?;
-    // Controls/MacOSControls.xaml(36,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 36, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R30)?;
     // Controls/MacOSControls.xaml(37,12) Child
     // Controls/MacOSControls.xaml(37,12) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -17344,11 +19560,7 @@ fn build_controls_macoscontrols_xaml_deferred_44(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 38, 29)?, priority_1);
     }
     // Controls/MacOSControls.xaml(39,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 39, 29)?;
-    // Controls/MacOSControls.xaml(40,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 40, 29)?;
-    // Controls/MacOSControls.xaml(41,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 41, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R31)?;
     rt::invoked(content_presenter_0.try_end_init(), 37, 12)?;
     rt::invoked(border_0.try_end_init(), 31, 10)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
@@ -17574,17 +19786,7 @@ fn build_controls_macoscontrols_xaml_deferred_46(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_RootBorder")));
     rt::register_name_value(name_scope.as_ref(), "PART_RootBorder", __t::Rc::new(__t::Clone::clone(&border_0)), 43, 19)?;
     // Controls/MacOSControls.xaml(44,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 44, 19)?;
-    // Controls/MacOSControls.xaml(45,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 45, 19)?;
-    // Controls/MacOSControls.xaml(46,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 46, 19)?;
-    // Controls/MacOSControls.xaml(47,19) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 47, 19)?;
-    // Controls/MacOSControls.xaml(48,19) HorizontalAlignment
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 48, 19)?;
-    // Controls/MacOSControls.xaml(49,19) VerticalAlignment
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 49, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R32)?;
     // Controls/MacOSControls.xaml(50,14) Child
     // Controls/MacOSControls.xaml(50,14) Panel
     let panel_1 = __t::Panel::new();
@@ -17685,11 +19887,7 @@ fn build_controls_macoscontrols_xaml_deferred_46(
     border_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_GridLineBorder")));
     rt::register_name_value(name_scope.as_ref(), "PART_GridLineBorder", __t::Rc::new(__t::Clone::clone(&border_1)), 78, 19)?;
     // Controls/MacOSControls.xaml(79,19) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 79, 19)?;
-    // Controls/MacOSControls.xaml(80,19) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 80, 19)?;
-    // Controls/MacOSControls.xaml(81,19) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 81, 19)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R33)?;
     // Controls/MacOSControls.xaml(78,12) IsHitTestVisible
     let priority_11 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_11);
@@ -17847,13 +20045,7 @@ fn build_controls_macoscontrols_xaml_deferred_48(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("TabContainer")));
     rt::register_name_value(name_scope.as_ref(), "TabContainer", __t::Rc::new(__t::Clone::clone(&border_0)), 28, 17)?;
     // Controls/MacOSControls.xaml(28,39) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 28, 39)?;
-    // Controls/MacOSControls.xaml(28,81) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 28, 81)?;
-    // Controls/MacOSControls.xaml(28,125) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 28, 125)?;
-    // Controls/MacOSControls.xaml(28,177) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 28, 177)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R34)?;
     // Controls/MacOSControls.xaml(28,10) Margin
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_0);
@@ -17892,7 +20084,7 @@ fn build_controls_macoscontrols_xaml_deferred_48(
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_0, __t::Clone::clone(&column_definition_1));
     __t::Grid::__markup_set_ColumnDefinitions(&grid_0, __t::Clone::clone(&column_definitions_0));
     // Controls/MacOSControls.xaml(34,44) Margin
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 34, 44)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 34, 44)?;
     // Controls/MacOSControls.xaml(35,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(35,14) ContentPresenter
@@ -17913,9 +20105,7 @@ fn build_controls_macoscontrols_xaml_deferred_48(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 35, 52)?, priority_2);
     }
     // Controls/MacOSControls.xaml(35,85) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::TabItem::icon_template_property()), 35, 85)?;
-    // Controls/MacOSControls.xaml(35,134) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 35, 134)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R35)?;
     // Controls/MacOSControls.xaml(35,14) Width
     let priority_3 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Layoutable::width_property(), 16.0_f64, priority_3);
@@ -17959,13 +20149,7 @@ fn build_controls_macoscontrols_xaml_deferred_48(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 36, 78)?, priority_8);
     }
     // Controls/MacOSControls.xaml(36,113) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedContentControl::header_template_property()), 36, 113)?;
-    // Controls/MacOSControls.xaml(36,164) Foreground
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 36, 164)?;
-    // Controls/MacOSControls.xaml(36,206) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 36, 206)?;
-    // Controls/MacOSControls.xaml(36,280) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 36, 280)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R36)?;
     // Controls/MacOSControls.xaml(36,14) RecognizesAccessKey
     let priority_9 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_9);
@@ -18087,18 +20271,12 @@ fn build_controls_macoscontrols_xaml_deferred_51(
     content_presenter_2.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_2)), 38, 29)?;
     // Controls/MacOSControls.xaml(39,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentPage::horizontal_content_alignment_property()), 39, 29)?;
-    // Controls/MacOSControls.xaml(40,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentPage::vertical_content_alignment_property()), 40, 29)?;
-    // Controls/MacOSControls.xaml(41,29) Background
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 41, 29)?;
-    // Controls/MacOSControls.xaml(42,29) BorderBrush
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 42, 29)?;
+    rt::bind_template_rows(content_presenter_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R37)?;
     // Controls/MacOSControls.xaml(38,12) BackgroundSizing
     let priority_6 = __t::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_6);
     // Controls/MacOSControls.xaml(44,29) BorderThickness
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 44, 29)?;
+    rt::apply_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 44, 29)?;
     // Controls/MacOSControls.xaml(45,29) Content (setter chosen at run time)
     let priority_7 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentPage::content_property()));
@@ -18110,9 +20288,7 @@ fn build_controls_macoscontrols_xaml_deferred_51(
         content_presenter_2.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 45, 29)?, priority_7);
     }
     // Controls/MacOSControls.xaml(46,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentPage::content_template_property()), 46, 29)?;
-    // Controls/MacOSControls.xaml(47,29) CornerRadius
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 47, 29)?;
+    rt::bind_template_rows(content_presenter_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R38)?;
     rt::invoked(content_presenter_2.try_end_init(), 38, 12)?;
     rt::invoked(dock_panel_0.try_end_init(), 27, 10)?;
     __t::Result::Ok(rt::to_value(dock_panel_0.clone()))
@@ -18157,13 +20333,7 @@ fn build_controls_macoscontrols_xaml_deferred_53(
     carousel_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_Carousel")));
     rt::register_name_value(name_scope.as_ref(), "PART_Carousel", __t::Rc::new(__t::Clone::clone(&carousel_0)), 33, 19)?;
     // Controls/MacOSControls.xaml(34,19) Background
-    rt::bind_template_binding(carousel_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 34, 19)?;
-    // Controls/MacOSControls.xaml(35,19) ItemTemplate
-    rt::bind_template_binding(carousel_0.upcast_ref::<__t::FerroObject>(), __t::ItemsControl::item_template_property(), rt::property(::ferroui_controls::MultiPage::page_template_property()), 35, 19)?;
-    // Controls/MacOSControls.xaml(36,19) PageTransition
-    rt::bind_template_binding(carousel_0.upcast_ref::<__t::FerroObject>(), __t::Carousel::page_transition_property(), rt::property(__t::CarouselPage::page_transition_property()), 36, 19)?;
-    // Controls/MacOSControls.xaml(37,19) ItemsPanel
-    rt::bind_template_binding(carousel_0.upcast_ref::<__t::FerroObject>(), __t::ItemsControl::items_panel_property(), rt::property(__t::CarouselPage::items_panel_property()), 37, 19)?;
+    rt::bind_template_rows(carousel_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R39)?;
     // Controls/MacOSControls.xaml(33,10) HorizontalAlignment
     let priority_0 = __t::BindingPriority::Template;
     carousel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
@@ -18380,20 +20550,12 @@ fn build_controls_macoscontrols_xaml_deferred_56(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("BorderElement")));
     rt::register_name_value(name_scope.as_ref(), "BorderElement", __t::Rc::new(__t::Clone::clone(&border_0)), 47, 21)?;
     // Controls/MacOSControls.xaml(48,21) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 48, 21)?;
-    // Controls/MacOSControls.xaml(49,21) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 49, 21)?;
-    // Controls/MacOSControls.xaml(50,21) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 50, 21)?;
-    // Controls/MacOSControls.xaml(51,21) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 51, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R40)?;
     // Controls/MacOSControls.xaml(47,14) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(53,21) MinWidth
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 53, 21)?;
-    // Controls/MacOSControls.xaml(54,21) MinHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 54, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R41)?;
     // Controls/MacOSControls.xaml(47,14) IsTemplateFocusTarget
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_1);
@@ -18406,7 +20568,7 @@ fn build_controls_macoscontrols_xaml_deferred_56(
     __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&dock_panel_0).upcast::<__t::Control>());
     context.push_parent(rt::to_value(dock_panel_0.clone()));
     // Controls/MacOSControls.xaml(56,24) Margin
-    rt::bind_template_binding(dock_panel_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 56, 24)?;
+    rt::apply_template_binding(dock_panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 56, 24)?;
     // Controls/MacOSControls.xaml(57,16) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(57,16) StackPanel
@@ -18430,7 +20592,7 @@ fn build_controls_macoscontrols_xaml_deferred_56(
     let priority_5 = __t::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64), priority_5);
     // Controls/MacOSControls.xaml(62,27) IsVisible
-    rt::bind_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::ButtonSpinner::show_button_spinner_property()), 62, 27)?;
+    rt::apply_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ButtonSpinner::show_button_spinner_property()), || rt::property(__t::Visual::is_visible_property()), 62, 27)?;
     // Controls/MacOSControls.xaml(63,18) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(63,18) RepeatButton
@@ -18557,15 +20719,7 @@ fn build_controls_macoscontrols_xaml_deferred_56(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_4.clone(), "ContentControl.Content", 1, 87, 33)?, priority_22);
     }
     // Controls/MacOSControls.xaml(88,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 88, 33)?;
-    // Controls/MacOSControls.xaml(89,33) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 89, 33)?;
-    // Controls/MacOSControls.xaml(90,33) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 90, 33)?;
-    // Controls/MacOSControls.xaml(91,33) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 91, 33)?;
-    // Controls/MacOSControls.xaml(92,33) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 92, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R42)?;
     rt::invoked(content_presenter_0.try_end_init(), 86, 16)?;
     context.pop_parent();
     rt::invoked(dock_panel_0.try_end_init(), 56, 14)?;
@@ -18691,7 +20845,7 @@ fn build_controls_macoscontrols_xaml_deferred_59(
     let priority_0 = __t::BindingPriority::Template;
     grid_0.set_value_with_priority(__t::Layoutable::min_height_property(), 80.0_f64, priority_0);
     // Controls/MacOSControls.xaml(46,49) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 46, 49)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 46, 49)?;
     rt::invoked(grid_0.try_end_init(), 46, 10)?;
     __t::Result::Ok(rt::to_value(grid_0.clone()))
 }
@@ -18774,19 +20928,6 @@ fn build_controls_macoscontrols_xaml_deferred_61(
 fn build_controls_macoscontrols_xaml_deferred_62(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    __build_controls_macoscontrols_xaml_factory_shape_62(service_provider, 35, 36, 38, 39, 40, 37)
-}
-
-#[inline(never)]
-fn __build_controls_macoscontrols_xaml_factory_shape_62(
-    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
-    arg0: i32,
-    arg1: i32,
-    arg2: i32,
-    arg3: i32,
-    arg4: i32,
-    arg5: i32,
-) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(35,10) Border
@@ -18796,11 +20937,11 @@ fn __build_controls_macoscontrols_xaml_factory_shape_62(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(35,17) Name
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ThemeShadowWrapper")));
-    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", __t::Rc::new(__t::Clone::clone(&border_0)), arg0, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", __t::Rc::new(__t::Clone::clone(&border_0)), 35, 17)?;
     // Controls/MacOSControls.xaml(35,45) BoxShadow
-    rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::box_shadow_property(), "MacOSMenuShadow", arg0, 45)?;
+    rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::box_shadow_property(), "MacOSMenuShadow", 35, 45)?;
     // Controls/MacOSControls.xaml(35,91) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), arg0, 91)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 35, 91)?;
     // Controls/MacOSControls.xaml(36,12) Child
     // Controls/MacOSControls.xaml(36,12) Border
     let border_1 = __t::Border::new();
@@ -18808,13 +20949,7 @@ fn __build_controls_macoscontrols_xaml_factory_shape_62(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&border_1).upcast::<__t::Control>()));
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(36,19) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), arg1, 19)?;
-    // Controls/MacOSControls.xaml(36,61) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), arg1, 61)?;
-    // Controls/MacOSControls.xaml(36,105) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), arg1, 105)?;
-    // Controls/MacOSControls.xaml(36,157) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), arg1, 157)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R43)?;
     // Controls/MacOSControls.xaml(36,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
@@ -18832,14 +20967,14 @@ fn __build_controls_macoscontrols_xaml_factory_shape_62(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&experimental_acrylic_border_0).upcast::<__t::Control>());
     context.push_parent(rt::to_value(experimental_acrylic_border_0.clone()));
     // Controls/MacOSControls.xaml(38,42) Material
-    rt::bind_dynamic_resource(&context, experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), __t::ExperimentalAcrylicBorder::material_property(), "MacOSMenuGlassMaterial", arg2, 42)?;
+    rt::bind_dynamic_resource(&context, experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), __t::ExperimentalAcrylicBorder::material_property(), "MacOSMenuGlassMaterial", 38, 42)?;
     // Controls/MacOSControls.xaml(38,16) IsHitTestVisible
     let priority_1 = __t::BindingPriority::Template;
     experimental_acrylic_border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_1);
     // Controls/MacOSControls.xaml(38,119) CornerRadius
-    rt::bind_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), __t::ExperimentalAcrylicBorder::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), arg2, 119)?;
+    rt::apply_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::ExperimentalAcrylicBorder::corner_radius_property()), 38, 119)?;
     context.pop_parent();
-    rt::invoked(experimental_acrylic_border_0.try_end_init(), arg2, 16)?;
+    rt::invoked(experimental_acrylic_border_0.try_end_init(), 38, 16)?;
     // Controls/MacOSControls.xaml(39,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(39,16) ScrollViewer
@@ -18849,18 +20984,14 @@ fn __build_controls_macoscontrols_xaml_factory_shape_62(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/MacOSControls.xaml(39,29) Name
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("MenuFlyoutPresenterScrollViewer")));
-    rt::register_name_value(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), arg3, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 39, 29)?;
     // Controls/MacOSControls.xaml(39,70) Theme (setter chosen at run time)
     let priority_2 = __t::BindingPriority::Template;
-    let provided_8 = rt::provide_static_resource(&context, "MenuFlyoutPresenterScrollViewer", || rt::property_value(__t::StyledElement::theme_property()), arg3, 70)?;
+    let provided_8 = rt::provide_static_resource(&context, "MenuFlyoutPresenterScrollViewer", || rt::property_value(__t::StyledElement::theme_property()), 39, 70)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_8);
-    rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_2, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", arg3, 70)?;
+    rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_2, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 39, 70)?;
     // Controls/MacOSControls.xaml(39,127) Margin
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), arg3, 127)?;
-    // Controls/MacOSControls.xaml(39,162) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), arg3, 162)?;
-    // Controls/MacOSControls.xaml(39,257) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), arg3, 257)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R44)?;
     // Controls/MacOSControls.xaml(40,18) Content
     // Controls/MacOSControls.xaml(40,18) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -18868,24 +20999,24 @@ fn __build_controls_macoscontrols_xaml_factory_shape_62(
     scroll_viewer_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&items_presenter_0)));
     // Controls/MacOSControls.xaml(40,33) Name
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
-    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), arg4, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 40, 33)?;
     // Controls/MacOSControls.xaml(40,62) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), arg4, 62)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 40, 62)?;
     // Controls/MacOSControls.xaml(40,18) TabNavigation
     let priority_3 = __t::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(__t::KeyboardNavigation::tab_navigation_property(), __t::KeyboardNavigationMode::Continue, priority_3);
     // Controls/MacOSControls.xaml(40,18) IsSharedSizeScope
     let priority_4 = __t::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(__t::Grid::is_shared_size_scope_property(), __t::Clone::clone(&true), priority_4);
-    rt::invoked(items_presenter_0.try_end_init(), arg4, 18)?;
+    rt::invoked(items_presenter_0.try_end_init(), 40, 18)?;
     context.pop_parent();
-    rt::invoked(scroll_viewer_0.try_end_init(), arg3, 16)?;
+    rt::invoked(scroll_viewer_0.try_end_init(), 39, 16)?;
     context.pop_parent();
-    rt::invoked(panel_0.try_end_init(), arg5, 14)?;
+    rt::invoked(panel_0.try_end_init(), 37, 14)?;
     context.pop_parent();
-    rt::invoked(border_1.try_end_init(), arg1, 12)?;
+    rt::invoked(border_1.try_end_init(), 36, 12)?;
     context.pop_parent();
-    rt::invoked(border_0.try_end_init(), arg0, 10)?;
+    rt::invoked(border_0.try_end_init(), 35, 10)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
 }
 
@@ -19149,14 +21280,12 @@ fn build_controls_macoscontrols_xaml_deferred_64(
     // Controls/MacOSControls.xaml(57,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "InfoBarInformationalSeverityBackgroundBrush", 57, 17)?;
     // Controls/MacOSControls.xaml(58,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 58, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 58, 17)?;
     // Controls/MacOSControls.xaml(55,10) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/MacOSControls.xaml(60,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 60, 17)?;
-    // Controls/MacOSControls.xaml(61,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 61, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R45)?;
     // Controls/MacOSControls.xaml(63,12) Child
     // Controls/MacOSControls.xaml(63,12) Border
     let border_1 = __t::Border::new();
@@ -19167,9 +21296,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
     let priority_2 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_2);
     // Controls/MacOSControls.xaml(64,19) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 64, 19)?;
-    // Controls/MacOSControls.xaml(65,19) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 65, 19)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R46)?;
     // Controls/MacOSControls.xaml(66,19) Padding (setter chosen at run time)
     let priority_3 = __t::BindingPriority::Template;
     let provided_6 = rt::provide_static_resource(&context, "InfoBarContentRootPadding", || rt::property_value(__t::Decorator::padding_property()), 66, 19)?;
@@ -19362,7 +21489,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
     text_block_2.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Title")));
     rt::register_name_value(name_scope.as_ref(), "Title", __t::Rc::new(__t::Clone::clone(&text_block_2)), 98, 28)?;
     // Controls/MacOSControls.xaml(99,28) Text
-    rt::bind_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::InfoBar::title_property()), 99, 28)?;
+    rt::apply_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::InfoBar::title_property()), || rt::property(__t::TextBlock::text_property()), 99, 28)?;
     // Controls/MacOSControls.xaml(100,28) Foreground
     rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), "InfoBarTitleForeground", 100, 28)?;
     // Controls/MacOSControls.xaml(101,28) HorizontalOrientationMargin (setter chosen at run time)
@@ -19401,7 +21528,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
     text_block_3.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Message")));
     rt::register_name_value(name_scope.as_ref(), "Message", __t::Rc::new(__t::Clone::clone(&text_block_3)), 106, 28)?;
     // Controls/MacOSControls.xaml(107,28) Text
-    rt::bind_template_binding(text_block_3.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::InfoBar::message_property()), 107, 28)?;
+    rt::apply_template_binding(text_block_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::InfoBar::message_property()), || rt::property(__t::TextBlock::text_property()), 107, 28)?;
     // Controls/MacOSControls.xaml(108,28) Foreground
     rt::bind_dynamic_resource(&context, text_block_3.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), "InfoBarMessageForeground", 108, 28)?;
     // Controls/MacOSControls.xaml(109,28) HorizontalOrientationMargin (setter chosen at run time)
@@ -19507,7 +21634,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_21.clone(), "ContentControl.Content", 1, 129, 33)?, priority_36);
     }
     // Controls/MacOSControls.xaml(130,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 130, 33)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 130, 33)?;
     // Controls/MacOSControls.xaml(126,16) VerticalAlignment
     let priority_37 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_37);
@@ -19526,7 +21653,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
     let priority_38 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_38);
     // Controls/MacOSControls.xaml(134,23) Command
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), rt::property(__t::InfoBar::close_button_command_property()), 134, 23)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::InfoBar::close_button_command_property()), || rt::property(__t::Button::command_property()), 134, 23)?;
     // Controls/MacOSControls.xaml(135,23) CommandParameter (setter chosen at run time)
     let priority_39 = __t::BindingPriority::Template;
     let template_binding_11 = __t::TemplateBinding::__markup_new_1(rt::property(__t::InfoBar::close_button_command_parameter_property()));
@@ -19538,7 +21665,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
         button_0.set_value_with_priority(__t::Button::command_parameter_property(), rt::exact(value_22.clone(), "Button.CommandParameter", 1, 135, 23)?, priority_39);
     }
     // Controls/MacOSControls.xaml(136,23) Theme
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::StyledElement::theme_property(), rt::property(__t::InfoBar::close_button_style_property()), 136, 23)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::InfoBar::close_button_style_property()), || rt::property(__t::StyledElement::theme_property()), 136, 23)?;
     // Controls/MacOSControls.xaml(137,18) Content
     // Controls/MacOSControls.xaml(137,18) Viewbox
     let viewbox_1 = __t::Viewbox::new();
@@ -19703,7 +21830,7 @@ fn build_controls_macoscontrols_xaml_deferred_66(
     let priority_7 = __t::BindingPriority::Template;
     arc_0.set_value_with_priority(__t::Arc::sweep_angle_property(), 360.0_f64, priority_7);
     // Controls/MacOSControls.xaml(65,20) Stroke
-    rt::bind_template_binding(arc_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), rt::property(__t::TemplatedControl::background_property()), 65, 20)?;
+    rt::apply_template_binding(arc_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::stroke_property()), 65, 20)?;
     // Controls/MacOSControls.xaml(60,16) StrokeThickness
     let priority_8 = __t::BindingPriority::Template;
     arc_0.set_value_with_priority(__t::Shape::stroke_thickness_property(), 7.5_f64, priority_8);
@@ -19733,7 +21860,7 @@ fn build_controls_macoscontrols_xaml_deferred_66(
     let priority_13 = __t::BindingPriority::Template;
     arc_1.set_value_with_priority(__t::Arc::sweep_angle_property(), 0.0_f64, priority_13);
     // Controls/MacOSControls.xaml(73,20) Stroke
-    rt::bind_template_binding(arc_1.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), rt::property(__t::TemplatedControl::foreground_property()), 73, 20)?;
+    rt::apply_template_binding(arc_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::stroke_property()), 73, 20)?;
     // Controls/MacOSControls.xaml(68,16) StrokeThickness
     let priority_14 = __t::BindingPriority::Template;
     arc_1.set_value_with_priority(__t::Shape::stroke_thickness_property(), 7.5_f64, priority_14);
@@ -19901,7 +22028,7 @@ fn build_controls_macoscontrols_xaml_deferred_69(
     grid_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&grid_0)), 80, 15)?;
     // Controls/MacOSControls.xaml(80,35) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 80, 35)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 80, 35)?;
     // Controls/MacOSControls.xaml(81,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(81,12) StackPanel
@@ -19976,7 +22103,7 @@ fn build_controls_macoscontrols_xaml_deferred_69(
     let priority_10 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::TextBlock::font_size_property(), 12.0_f64, priority_10);
     // Controls/MacOSControls.xaml(94,24) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 94, 24)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TextBlock::foreground_property()), 94, 24)?;
     // Controls/MacOSControls.xaml(89,14) VerticalAlignment
     let priority_11 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_11);
@@ -19984,7 +22111,7 @@ fn build_controls_macoscontrols_xaml_deferred_69(
     let priority_12 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_12);
     // Controls/MacOSControls.xaml(97,24) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(::ferroui_controls::RatingControl::caption_property()), 97, 24)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(::ferroui_controls::RatingControl::caption_property()), || rt::property(__t::TextBlock::text_property()), 97, 24)?;
     context.pop_parent();
     rt::invoked(text_block_0.try_end_init(), 89, 14)?;
     context.pop_parent();
@@ -20104,21 +22231,7 @@ fn build_controls_macoscontrols_xaml_deferred_71(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 36, 27)?, priority_0);
     }
     // Controls/MacOSControls.xaml(37,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 37, 27)?;
-    // Controls/MacOSControls.xaml(38,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 38, 27)?;
-    // Controls/MacOSControls.xaml(39,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 39, 27)?;
-    // Controls/MacOSControls.xaml(40,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 40, 27)?;
-    // Controls/MacOSControls.xaml(41,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 41, 27)?;
-    // Controls/MacOSControls.xaml(42,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 42, 27)?;
-    // Controls/MacOSControls.xaml(43,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 43, 27)?;
-    // Controls/MacOSControls.xaml(44,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 44, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R47)?;
     rt::invoked(content_presenter_0.try_end_init(), 35, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
 }
@@ -20810,15 +22923,7 @@ fn build_controls_macoscontrols_xaml_deferred_86(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 50, 27)?;
     // Controls/MacOSControls.xaml(51,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 51, 27)?;
-    // Controls/MacOSControls.xaml(52,27) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 52, 27)?;
-    // Controls/MacOSControls.xaml(53,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 53, 27)?;
-    // Controls/MacOSControls.xaml(54,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 54, 27)?;
-    // Controls/MacOSControls.xaml(55,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 55, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R48)?;
     // Controls/MacOSControls.xaml(56,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -20830,15 +22935,7 @@ fn build_controls_macoscontrols_xaml_deferred_86(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 56, 27)?, priority_0);
     }
     // Controls/MacOSControls.xaml(57,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 57, 27)?;
-    // Controls/MacOSControls.xaml(58,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 58, 27)?;
-    // Controls/MacOSControls.xaml(59,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 59, 27)?;
-    // Controls/MacOSControls.xaml(60,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 60, 27)?;
-    // Controls/MacOSControls.xaml(61,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 61, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R49)?;
     // Controls/MacOSControls.xaml(50,10) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -21053,15 +23150,7 @@ fn build_controls_macoscontrols_xaml_deferred_92(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 202, 27)?;
     // Controls/MacOSControls.xaml(203,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 203, 27)?;
-    // Controls/MacOSControls.xaml(204,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 204, 27)?;
-    // Controls/MacOSControls.xaml(205,27) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 205, 27)?;
-    // Controls/MacOSControls.xaml(206,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 206, 27)?;
-    // Controls/MacOSControls.xaml(207,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 207, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R50)?;
     // Controls/MacOSControls.xaml(208,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -21073,15 +23162,7 @@ fn build_controls_macoscontrols_xaml_deferred_92(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 208, 27)?, priority_0);
     }
     // Controls/MacOSControls.xaml(209,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 209, 27)?;
-    // Controls/MacOSControls.xaml(210,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 210, 27)?;
-    // Controls/MacOSControls.xaml(211,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 211, 27)?;
-    // Controls/MacOSControls.xaml(212,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 212, 27)?;
-    // Controls/MacOSControls.xaml(213,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 213, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R51)?;
     // Controls/MacOSControls.xaml(202,10) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -21310,9 +23391,7 @@ fn build_controls_macoscontrols_xaml_deferred_95(
     context.set_intermediate_root_object(rt::to_value(panel_0.clone()));
     panel_0.begin_init();
     // Controls/MacOSControls.xaml(289,16) Margin
-    rt::bind_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 289, 16)?;
-    // Controls/MacOSControls.xaml(289,51) Background
-    rt::bind_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 289, 51)?;
+    rt::bind_template_rows(panel_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R52)?;
     // Controls/MacOSControls.xaml(290,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(290,12) ContentPresenter
@@ -21333,11 +23412,7 @@ fn build_controls_macoscontrols_xaml_deferred_95(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 291, 29)?, priority_0);
     }
     // Controls/MacOSControls.xaml(292,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 292, 29)?;
-    // Controls/MacOSControls.xaml(293,29) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 293, 29)?;
-    // Controls/MacOSControls.xaml(294,29) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 294, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R53)?;
     // Controls/MacOSControls.xaml(290,12) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -21645,15 +23720,7 @@ fn build_controls_macoscontrols_xaml_deferred_101(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 48, 27)?;
     // Controls/MacOSControls.xaml(49,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 49, 27)?;
-    // Controls/MacOSControls.xaml(50,27) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 50, 27)?;
-    // Controls/MacOSControls.xaml(51,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 51, 27)?;
-    // Controls/MacOSControls.xaml(52,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 52, 27)?;
-    // Controls/MacOSControls.xaml(53,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 53, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R54)?;
     // Controls/MacOSControls.xaml(54,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -21665,15 +23732,7 @@ fn build_controls_macoscontrols_xaml_deferred_101(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 54, 27)?, priority_0);
     }
     // Controls/MacOSControls.xaml(55,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 55, 27)?;
-    // Controls/MacOSControls.xaml(56,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 56, 27)?;
-    // Controls/MacOSControls.xaml(57,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 57, 27)?;
-    // Controls/MacOSControls.xaml(58,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 58, 27)?;
-    // Controls/MacOSControls.xaml(59,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 59, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R55)?;
     // Controls/MacOSControls.xaml(48,10) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -22223,15 +24282,7 @@ fn build_controls_macoscontrols_xaml_deferred_109(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 50, 27)?;
     // Controls/MacOSControls.xaml(51,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 51, 27)?;
-    // Controls/MacOSControls.xaml(52,27) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 52, 27)?;
-    // Controls/MacOSControls.xaml(53,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 53, 27)?;
-    // Controls/MacOSControls.xaml(54,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 54, 27)?;
-    // Controls/MacOSControls.xaml(55,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 55, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R56)?;
     // Controls/MacOSControls.xaml(56,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -22243,15 +24294,7 @@ fn build_controls_macoscontrols_xaml_deferred_109(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 56, 27)?, priority_0);
     }
     // Controls/MacOSControls.xaml(57,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 57, 27)?;
-    // Controls/MacOSControls.xaml(58,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 58, 27)?;
-    // Controls/MacOSControls.xaml(59,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 59, 27)?;
-    // Controls/MacOSControls.xaml(60,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 60, 27)?;
-    // Controls/MacOSControls.xaml(61,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 61, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R57)?;
     // Controls/MacOSControls.xaml(50,10) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -22490,13 +24533,7 @@ fn build_controls_macoscontrols_xaml_deferred_117(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 47, 27)?;
     // Controls/MacOSControls.xaml(48,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 48, 27)?;
-    // Controls/MacOSControls.xaml(49,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 49, 27)?;
-    // Controls/MacOSControls.xaml(50,27) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 50, 27)?;
-    // Controls/MacOSControls.xaml(51,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 51, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R58)?;
     // Controls/MacOSControls.xaml(52,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -22508,15 +24545,7 @@ fn build_controls_macoscontrols_xaml_deferred_117(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 52, 27)?, priority_0);
     }
     // Controls/MacOSControls.xaml(53,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 53, 27)?;
-    // Controls/MacOSControls.xaml(54,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 54, 27)?;
-    // Controls/MacOSControls.xaml(55,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 55, 27)?;
-    // Controls/MacOSControls.xaml(56,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 56, 27)?;
-    // Controls/MacOSControls.xaml(57,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 57, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R59)?;
     // Controls/MacOSControls.xaml(47,10) RecognizesAccessKey
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_1);
@@ -23266,16 +25295,12 @@ fn build_controls_macoscontrols_xaml_deferred_121(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 47, 17)?;
     // Controls/MacOSControls.xaml(48,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 48, 17)?;
-    // Controls/MacOSControls.xaml(49,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 49, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R60)?;
     // Controls/MacOSControls.xaml(47,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(51,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 51, 17)?;
-    // Controls/MacOSControls.xaml(52,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 52, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R61)?;
     // Controls/MacOSControls.xaml(53,12) Child
     // Controls/MacOSControls.xaml(53,12) Grid
     let grid_0 = __t::Grid::new();
@@ -23455,7 +25480,7 @@ fn build_controls_macoscontrols_xaml_deferred_121(
     let priority_16 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_16);
     // Controls/MacOSControls.xaml(95,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 95, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 95, 31)?;
     // Controls/MacOSControls.xaml(96,31) Content (setter chosen at run time)
     let priority_17 = __t::BindingPriority::Template;
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -23467,13 +25492,7 @@ fn build_controls_macoscontrols_xaml_deferred_121(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 96, 31)?, priority_17);
     }
     // Controls/MacOSControls.xaml(97,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 97, 31)?;
-    // Controls/MacOSControls.xaml(98,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 98, 31)?;
-    // Controls/MacOSControls.xaml(99,31) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 99, 31)?;
-    // Controls/MacOSControls.xaml(100,31) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 100, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R62)?;
     // Controls/MacOSControls.xaml(93,14) TextWrapping
     let priority_18 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::text_wrapping_property(), __t::TextWrapping::Wrap, priority_18);
@@ -23894,16 +25913,12 @@ fn build_controls_macoscontrols_xaml_deferred_125(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 45, 17)?;
     // Controls/MacOSControls.xaml(46,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 46, 17)?;
-    // Controls/MacOSControls.xaml(47,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 47, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R63)?;
     // Controls/MacOSControls.xaml(45,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(49,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 49, 17)?;
-    // Controls/MacOSControls.xaml(50,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 50, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R64)?;
     // Controls/MacOSControls.xaml(51,12) Child
     // Controls/MacOSControls.xaml(51,12) Grid
     let grid_0 = __t::Grid::new();
@@ -24142,15 +26157,7 @@ fn build_controls_macoscontrols_xaml_deferred_125(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_4.clone(), "ContentControl.Content", 1, 103, 31)?, priority_22);
     }
     // Controls/MacOSControls.xaml(104,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 104, 31)?;
-    // Controls/MacOSControls.xaml(105,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 105, 31)?;
-    // Controls/MacOSControls.xaml(106,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 106, 31)?;
-    // Controls/MacOSControls.xaml(107,31) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 107, 31)?;
-    // Controls/MacOSControls.xaml(108,31) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 108, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R65)?;
     // Controls/MacOSControls.xaml(101,14) TextWrapping
     let priority_23 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::text_wrapping_property(), __t::TextWrapping::Wrap, priority_23);
@@ -24700,15 +26707,6 @@ fn build_controls_macoscontrols_xaml_deferred_138(
 fn build_controls_macoscontrols_xaml_deferred_139(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    __build_controls_macoscontrols_xaml_factory_shape_139(service_provider, 102, 105)
-}
-
-#[inline(never)]
-fn __build_controls_macoscontrols_xaml_factory_shape_139(
-    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
-    arg0: i32,
-    arg1: i32,
-) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(102,10) Rectangle
@@ -24718,13 +26716,11 @@ fn __build_controls_macoscontrols_xaml_factory_shape_139(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(102,20) Name
     rectangle_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ThumbVisual")));
-    rt::register_name_value(name_scope.as_ref(), "ThumbVisual", __t::Rc::new(__t::Clone::clone(&rectangle_0)), arg0, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ThumbVisual", __t::Rc::new(__t::Clone::clone(&rectangle_0)), 102, 20)?;
     // Controls/MacOSControls.xaml(102,41) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), arg0, 41)?;
-    // Controls/MacOSControls.xaml(102,77) Stroke
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_property(), rt::property(__t::TemplatedControl::border_brush_property()), arg0, 77)?;
+    rt::bind_template_rows(rectangle_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R66)?;
     // Controls/MacOSControls.xaml(102,116) StrokeThickness
-    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_thickness_property(), "ScrollBarThumbStrokeThickness", arg0, 116)?;
+    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_thickness_property(), "ScrollBarThumbStrokeThickness", 102, 116)?;
     // Controls/MacOSControls.xaml(102,10) RadiusX
     let priority_0 = __t::BindingPriority::Template;
     rectangle_0.set_value_with_priority(__t::Rectangle::radius_x_property(), 4.0_f64, priority_0);
@@ -24741,14 +26737,14 @@ fn __build_controls_macoscontrols_xaml_factory_shape_139(
     // Controls/MacOSControls.xaml(105,16) Property
     double_transition_0.set_direct_value(__t::TransitionBase::property_property(), __t::Option::Some(rt::property(__t::Visual::opacity_property())));
     // Controls/MacOSControls.xaml(105,52) Duration
-    rt::bind_dynamic_resource(&context, double_transition_0.upcast_ref::<__t::FerroObject>(), __t::TransitionBase::duration_property(), "MacOSMotionFastDuration", arg1, 52)?;
+    rt::bind_dynamic_resource(&context, double_transition_0.upcast_ref::<__t::FerroObject>(), __t::TransitionBase::duration_property(), "MacOSMotionFastDuration", 105, 52)?;
     context.pop_parent();
-    __t::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), arg1, 16)?);
+    __t::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 105, 16)?);
     context.pop_parent();
     let priority_2 = __t::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(__t::Animatable::transitions_property(), rt::cast(__t::Clone::clone(&transitions_0), arg1, 16)?, priority_2);
+    rectangle_0.set_value_with_priority(__t::Animatable::transitions_property(), rt::cast(__t::Clone::clone(&transitions_0), 105, 16)?, priority_2);
     context.pop_parent();
-    rt::invoked(rectangle_0.try_end_init(), arg0, 10)?;
+    rt::invoked(rectangle_0.try_end_init(), 102, 10)?;
     __t::Result::Ok(rt::to_value(rectangle_0.clone()))
 }
 
@@ -24791,19 +26787,45 @@ fn build_controls_macoscontrols_xaml_deferred_140(
 fn build_controls_macoscontrols_xaml_deferred_141(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
+    let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(119,10) Rectangle
+    let rectangle_0 = __t::Rectangle::new();
+    context.set_intermediate_root_object(rt::to_value(rectangle_0.clone()));
+    rectangle_0.begin_init();
+    context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(119,20) Name
+    rectangle_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ThumbVisual")));
+    rt::register_name_value(name_scope.as_ref(), "ThumbVisual", __t::Rc::new(__t::Clone::clone(&rectangle_0)), 119, 20)?;
     // Controls/MacOSControls.xaml(119,41) Fill
-    // Controls/MacOSControls.xaml(119,77) Stroke
+    rt::bind_template_rows(rectangle_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R67)?;
     // Controls/MacOSControls.xaml(119,116) StrokeThickness
+    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::stroke_thickness_property(), "ScrollBarThumbStrokeThickness", 119, 116)?;
     // Controls/MacOSControls.xaml(119,10) RadiusX
+    let priority_0 = __t::BindingPriority::Template;
+    rectangle_0.set_value_with_priority(__t::Rectangle::radius_x_property(), 4.0_f64, priority_0);
     // Controls/MacOSControls.xaml(119,10) RadiusY
+    let priority_1 = __t::BindingPriority::Template;
+    rectangle_0.set_value_with_priority(__t::Rectangle::radius_y_property(), 4.0_f64, priority_1);
     // Controls/MacOSControls.xaml(121,14) Transitions
+    let transitions_0 = __t::Transitions::__markup_new_0();
+    context.push_parent(rt::to_value(transitions_0.clone()));
     // Controls/MacOSControls.xaml(122,16) Content
     // Controls/MacOSControls.xaml(122,16) DoubleTransition
+    let double_transition_0 = __t::DoubleTransition::new();
+    context.push_parent(rt::to_value(double_transition_0.clone()));
     // Controls/MacOSControls.xaml(122,16) Property
+    double_transition_0.set_direct_value(__t::TransitionBase::property_property(), __t::Option::Some(rt::property(__t::Visual::opacity_property())));
     // Controls/MacOSControls.xaml(122,52) Duration
-    __build_controls_macoscontrols_xaml_factory_shape_139(service_provider, 119, 122)
+    rt::bind_dynamic_resource(&context, double_transition_0.upcast_ref::<__t::FerroObject>(), __t::TransitionBase::duration_property(), "MacOSMotionFastDuration", 122, 52)?;
+    context.pop_parent();
+    __t::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 122, 16)?);
+    context.pop_parent();
+    let priority_2 = __t::BindingPriority::Template;
+    rectangle_0.set_value_with_priority(__t::Animatable::transitions_property(), rt::cast(__t::Clone::clone(&transitions_0), 122, 16)?, priority_2);
+    context.pop_parent();
+    rt::invoked(rectangle_0.try_end_init(), 119, 10)?;
+    __t::Result::Ok(rt::to_value(rectangle_0.clone()))
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(133,4)` (a template or a deferred resource).
@@ -25016,7 +27038,7 @@ fn build_controls_macoscontrols_xaml_deferred_143(
     let priority_0 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
     // Controls/MacOSControls.xaml(147,68) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 147, 68)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 147, 68)?;
     // Controls/MacOSControls.xaml(147,14) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
@@ -25170,9 +27192,7 @@ fn build_controls_macoscontrols_xaml_deferred_143(
     let priority_19 = __t::BindingPriority::Template;
     track_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_19);
     // Controls/MacOSControls.xaml(163,37) Minimum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 163, 37)?;
-    // Controls/MacOSControls.xaml(163,73) Maximum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 163, 73)?;
+    rt::bind_template_rows(track_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R68)?;
     // Controls/MacOSControls.xaml(163,109) Value
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::RangeBase::value_property()));
     // Controls/MacOSControls.xaml(163,109) Mode
@@ -25180,11 +27200,7 @@ fn build_controls_macoscontrols_xaml_deferred_143(
     let provided_12 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
     rt::bind(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::value_property(), provided_12, 163, 109)?;
     // Controls/MacOSControls.xaml(163,154) DeferThumbDrag
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::defer_thumb_drag_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 163, 154)?;
-    // Controls/MacOSControls.xaml(163,229) ViewportSize
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::viewport_size_property(), rt::property(__t::ScrollBar::viewport_size_property()), 163, 229)?;
-    // Controls/MacOSControls.xaml(163,275) Orientation
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::orientation_property(), rt::property(__t::ScrollBar::orientation_property()), 163, 275)?;
+    rt::bind_template_rows(track_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R69)?;
     // Controls/MacOSControls.xaml(163,18) IsDirectionReversed
     let priority_20 = __t::BindingPriority::Template;
     track_0.set_value_with_priority(__t::Track::is_direction_reversed_property(), __t::Clone::clone(&true), priority_20);
@@ -25268,7 +27284,7 @@ fn build_controls_macoscontrols_xaml_deferred_143(
     let priority_33 = __t::BindingPriority::Template;
     thumb_0.set_value_with_priority(__t::Visual::render_transform_property(), rt::cast(__t::Clone::clone(&value_5), 170, 330)?, priority_33);
     // Controls/MacOSControls.xaml(170,353) CornerRadius
-    rt::bind_template_binding(thumb_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 170, 353)?;
+    rt::apply_template_binding(thumb_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 170, 353)?;
     // Controls/MacOSControls.xaml(170,20) HorizontalAlignment
     let priority_34 = __t::BindingPriority::Template;
     thumb_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_34);
@@ -25412,12 +27428,12 @@ fn build_controls_macoscontrols_xaml_deferred_144(
     let priority_0 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
     // Controls/MacOSControls.xaml(196,70) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 196, 70)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 196, 70)?;
     // Controls/MacOSControls.xaml(196,14) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/MacOSControls.xaml(196,149) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 196, 149)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 196, 149)?;
     // Controls/MacOSControls.xaml(197,16) Child
     // Controls/MacOSControls.xaml(197,16) Grid
     let grid_0 = __t::Grid::new();
@@ -25568,9 +27584,7 @@ fn build_controls_macoscontrols_xaml_deferred_144(
     let priority_19 = __t::BindingPriority::Template;
     track_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_19);
     // Controls/MacOSControls.xaml(212,40) Minimum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 212, 40)?;
-    // Controls/MacOSControls.xaml(212,76) Maximum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 212, 76)?;
+    rt::bind_template_rows(track_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R70)?;
     // Controls/MacOSControls.xaml(212,112) Value
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::RangeBase::value_property()));
     // Controls/MacOSControls.xaml(212,112) Mode
@@ -25578,11 +27592,7 @@ fn build_controls_macoscontrols_xaml_deferred_144(
     let provided_13 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
     rt::bind(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::value_property(), provided_13, 212, 112)?;
     // Controls/MacOSControls.xaml(212,157) DeferThumbDrag
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::defer_thumb_drag_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 212, 157)?;
-    // Controls/MacOSControls.xaml(212,232) ViewportSize
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::viewport_size_property(), rt::property(__t::ScrollBar::viewport_size_property()), 212, 232)?;
-    // Controls/MacOSControls.xaml(212,278) Orientation
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::orientation_property(), rt::property(__t::ScrollBar::orientation_property()), 212, 278)?;
+    rt::bind_template_rows(track_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R71)?;
     // Controls/MacOSControls.xaml(214,22) DecreaseButton
     // Controls/MacOSControls.xaml(214,22) RepeatButton
     let repeat_button_1 = __t::RepeatButton::new();
@@ -25663,7 +27673,7 @@ fn build_controls_macoscontrols_xaml_deferred_144(
     let priority_32 = __t::BindingPriority::Template;
     thumb_0.set_value_with_priority(__t::Visual::render_transform_property(), rt::cast(__t::Clone::clone(&value_5), 219, 335)?, priority_32);
     // Controls/MacOSControls.xaml(219,358) CornerRadius
-    rt::bind_template_binding(thumb_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 219, 358)?;
+    rt::apply_template_binding(thumb_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 219, 358)?;
     // Controls/MacOSControls.xaml(219,20) VerticalAlignment
     let priority_33 = __t::BindingPriority::Template;
     thumb_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_33);
@@ -25887,11 +27897,7 @@ fn build_controls_macoscontrols_xaml_deferred_147(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Root")));
     rt::register_name_value(name_scope.as_ref(), "Root", __t::Rc::new(__t::Clone::clone(&border_0)), 76, 17)?;
     // Controls/MacOSControls.xaml(77,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 77, 17)?;
-    // Controls/MacOSControls.xaml(78,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 78, 17)?;
-    // Controls/MacOSControls.xaml(79,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 79, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R72)?;
     // Controls/MacOSControls.xaml(80,12) Child
     // Controls/MacOSControls.xaml(80,12) Grid
     let grid_0 = __t::Grid::new();
@@ -25899,7 +27905,7 @@ fn build_controls_macoscontrols_xaml_deferred_147(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&grid_0).upcast::<__t::Control>()));
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(80,17) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 80, 17)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 80, 17)?;
     // Controls/MacOSControls.xaml(80,12) ColumnDefinitions
     let column_definitions_0 = __t::ColumnDefinitions::__markup_new_0();
     rt::invoked(<__t::FerroListOf<__t::Ref<__t::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 81, 17)?;
@@ -25940,19 +27946,7 @@ fn build_controls_macoscontrols_xaml_deferred_147(
     let priority_2 = __t::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_2);
     // Controls/MacOSControls.xaml(87,37) ContentTemplate
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 87, 37)?;
-    // Controls/MacOSControls.xaml(88,37) Padding
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 88, 37)?;
-    // Controls/MacOSControls.xaml(89,37) HorizontalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::horizontal_snap_points_type_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_type_property()), 89, 37)?;
-    // Controls/MacOSControls.xaml(90,37) VerticalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::vertical_snap_points_type_property(), rt::property(__t::ScrollViewer::vertical_snap_points_type_property()), 90, 37)?;
-    // Controls/MacOSControls.xaml(91,37) HorizontalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::horizontal_snap_points_alignment_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_alignment_property()), 91, 37)?;
-    // Controls/MacOSControls.xaml(92,37) VerticalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::vertical_snap_points_alignment_property(), rt::property(__t::ScrollViewer::vertical_snap_points_alignment_property()), 92, 37)?;
-    // Controls/MacOSControls.xaml(93,37) IsScrollInertiaEnabled
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_inertia_enabled_property()), 93, 37)?;
+    rt::bind_template_rows(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R73)?;
     // Controls/MacOSControls.xaml(95,18) GestureRecognizers
     let gesture_recognizers_collection_0 = __t::InputElement::__markup_get_GestureRecognizers(scroll_content_presenter_0.upcast_ref::<__t::InputElement>());
     // Controls/MacOSControls.xaml(95,18) ScrollGestureRecognizer
@@ -26191,7 +28185,7 @@ fn build_controls_macoscontrols_xaml_deferred_150(
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(164,11) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 164, 11)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 164, 11)?;
     // Controls/MacOSControls.xaml(165,8) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(165,8) ScrollContentPresenter
@@ -26206,19 +28200,7 @@ fn build_controls_macoscontrols_xaml_deferred_150(
     let priority_0 = __t::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
     // Controls/MacOSControls.xaml(167,31) ContentTemplate
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 167, 31)?;
-    // Controls/MacOSControls.xaml(168,31) Padding
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 168, 31)?;
-    // Controls/MacOSControls.xaml(169,31) HorizontalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::horizontal_snap_points_type_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_type_property()), 169, 31)?;
-    // Controls/MacOSControls.xaml(170,31) VerticalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::vertical_snap_points_type_property(), rt::property(__t::ScrollViewer::vertical_snap_points_type_property()), 170, 31)?;
-    // Controls/MacOSControls.xaml(171,31) HorizontalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::horizontal_snap_points_alignment_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_alignment_property()), 171, 31)?;
-    // Controls/MacOSControls.xaml(172,31) VerticalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::vertical_snap_points_alignment_property(), rt::property(__t::ScrollViewer::vertical_snap_points_alignment_property()), 172, 31)?;
-    // Controls/MacOSControls.xaml(173,31) IsScrollInertiaEnabled
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_inertia_enabled_property()), 173, 31)?;
+    rt::bind_template_rows(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R74)?;
     // Controls/MacOSControls.xaml(175,12) GestureRecognizers
     let gesture_recognizers_collection_0 = __t::InputElement::__markup_get_GestureRecognizers(scroll_content_presenter_0.upcast_ref::<__t::InputElement>());
     // Controls/MacOSControls.xaml(175,12) ScrollGestureRecognizer
@@ -26381,13 +28363,11 @@ fn build_controls_macoscontrols_xaml_deferred_152(
     // Controls/MacOSControls.xaml(28,17) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "TextControlButtonBorderBrush", 28, 17)?;
     // Controls/MacOSControls.xaml(29,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 29, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 29, 17)?;
     // Controls/MacOSControls.xaml(30,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "TextControlButtonBackground", 30, 17)?;
     // Controls/MacOSControls.xaml(31,17) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 31, 17)?;
-    // Controls/MacOSControls.xaml(32,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 32, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R75)?;
     // Controls/MacOSControls.xaml(34,12) Child
     // Controls/MacOSControls.xaml(34,12) Path
     let path_0 = __t::Path::new();
@@ -26538,11 +28518,11 @@ fn build_controls_macoscontrols_xaml_deferred_154(
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(80,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 80, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 80, 17)?;
     // Controls/MacOSControls.xaml(81,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "TextControlButtonBackground", 81, 17)?;
     // Controls/MacOSControls.xaml(82,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 82, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 82, 17)?;
     // Controls/MacOSControls.xaml(84,12) Child
     // Controls/MacOSControls.xaml(84,12) Path
     let path_0 = __t::Path::new();
@@ -27256,19 +29236,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Grid::column_span_property(), 5_i32, priority_1);
     // Controls/MacOSControls.xaml(226,21) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 226, 21)?;
-    // Controls/MacOSControls.xaml(227,21) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 227, 21)?;
-    // Controls/MacOSControls.xaml(228,21) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 228, 21)?;
-    // Controls/MacOSControls.xaml(229,21) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 229, 21)?;
-    // Controls/MacOSControls.xaml(230,21) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 230, 21)?;
-    // Controls/MacOSControls.xaml(231,21) MinWidth
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 231, 21)?;
-    // Controls/MacOSControls.xaml(232,21) MinHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 232, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R76)?;
     // Controls/MacOSControls.xaml(223,14) IsTemplateFocusTarget
     let priority_2 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_2);
@@ -27325,7 +29293,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     // Controls/MacOSControls.xaml(243,21) BorderBrush
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "MacOSFocusBrush", 243, 21)?;
     // Controls/MacOSControls.xaml(244,21) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 244, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 244, 21)?;
     // Controls/MacOSControls.xaml(241,14) IsHitTestVisible
     let priority_8 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_8);
@@ -27367,7 +29335,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     let priority_10 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_10);
     // Controls/MacOSControls.xaml(256,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 256, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 256, 31)?;
     // Controls/MacOSControls.xaml(257,31) Content (setter chosen at run time)
     let priority_11 = __t::BindingPriority::Template;
     let template_binding_10 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TextBox::inner_left_content_property()));
@@ -27379,7 +29347,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 257, 31)?, priority_11);
     }
     // Controls/MacOSControls.xaml(258,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 258, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TextBox::vertical_content_alignment_property()), || rt::property(__t::ContentPresenter::vertical_content_alignment_property()), 258, 31)?;
     rt::invoked(content_presenter_0.try_end_init(), 253, 14)?;
     // Controls/MacOSControls.xaml(259,14) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -27394,17 +29362,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     let priority_12 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_12);
     // Controls/MacOSControls.xaml(261,27) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 261, 27)?;
-    // Controls/MacOSControls.xaml(262,27) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 262, 27)?;
-    // Controls/MacOSControls.xaml(263,27) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 263, 27)?;
-    // Controls/MacOSControls.xaml(264,27) Margin
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 264, 27)?;
-    // Controls/MacOSControls.xaml(265,27) Padding
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 265, 27)?;
-    // Controls/MacOSControls.xaml(266,27) Foreground
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 266, 27)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R77)?;
     // Controls/MacOSControls.xaml(259,14) Focusable
     let priority_13 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_13);
@@ -27436,35 +29394,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     let provided_22 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_18);
     rt::bind(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_property(), provided_22, 269, 30)?;
     // Controls/MacOSControls.xaml(270,30) CaretBlinkInterval
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_blink_interval_property(), rt::property(__t::TextBox::caret_blink_interval_property()), 270, 30)?;
-    // Controls/MacOSControls.xaml(271,30) CaretIndex
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_index_property(), rt::property(__t::TextBox::caret_index_property()), 271, 30)?;
-    // Controls/MacOSControls.xaml(272,30) SelectionStart
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_start_property(), rt::property(__t::TextBox::selection_start_property()), 272, 30)?;
-    // Controls/MacOSControls.xaml(273,30) SelectionEnd
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_end_property(), rt::property(__t::TextBox::selection_end_property()), 273, 30)?;
-    // Controls/MacOSControls.xaml(274,30) TextAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 274, 30)?;
-    // Controls/MacOSControls.xaml(275,30) TextWrapping
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 275, 30)?;
-    // Controls/MacOSControls.xaml(276,30) LineHeight
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::line_height_property(), rt::property(__t::TextBox::line_height_property()), 276, 30)?;
-    // Controls/MacOSControls.xaml(277,30) LetterSpacing
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::letter_spacing_property(), rt::property(__t::TemplatedControl::letter_spacing_property()), 277, 30)?;
-    // Controls/MacOSControls.xaml(278,30) PasswordChar
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::password_char_property(), rt::property(__t::TextBox::password_char_property()), 278, 30)?;
-    // Controls/MacOSControls.xaml(279,30) RevealPassword
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::reveal_password_property(), rt::property(__t::TextBox::reveal_password_property()), 279, 30)?;
-    // Controls/MacOSControls.xaml(280,30) SelectionBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_brush_property(), rt::property(__t::TextBox::selection_brush_property()), 280, 30)?;
-    // Controls/MacOSControls.xaml(281,30) SelectionForegroundBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_foreground_brush_property(), rt::property(__t::TextBox::selection_foreground_brush_property()), 281, 30)?;
-    // Controls/MacOSControls.xaml(282,30) CaretBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_brush_property(), rt::property(__t::TextBox::caret_brush_property()), 282, 30)?;
-    // Controls/MacOSControls.xaml(283,30) HorizontalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::TextBox::horizontal_content_alignment_property()), 283, 30)?;
-    // Controls/MacOSControls.xaml(284,30) VerticalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 284, 30)?;
+    rt::bind_template_rows(text_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R78)?;
     rt::invoked(text_presenter_0.try_end_init(), 268, 16)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 259, 14)?;
     // Controls/MacOSControls.xaml(291,14) Children
@@ -27484,19 +29414,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     let priority_15 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_15);
     // Controls/MacOSControls.xaml(294,24) VerticalAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 294, 24)?;
-    // Controls/MacOSControls.xaml(295,24) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TextBox::placeholder_foreground_property()), 295, 24)?;
-    // Controls/MacOSControls.xaml(296,24) Margin
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 296, 24)?;
-    // Controls/MacOSControls.xaml(297,24) Padding
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 297, 24)?;
-    // Controls/MacOSControls.xaml(298,24) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TextBox::placeholder_text_property()), 298, 24)?;
-    // Controls/MacOSControls.xaml(299,24) TextAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 299, 24)?;
-    // Controls/MacOSControls.xaml(300,24) TextWrapping
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 300, 24)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R79)?;
     // Controls/MacOSControls.xaml(291,14) IsHitTestVisible
     let priority_16 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_16);
@@ -27561,9 +29479,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     let provided_49 = rt::provide_value(&context, rt::property_value(__t::Button::command_property()), &reflection_binding_extension_2, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(button_0.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), provided_49, 312, 21)?;
     // Controls/MacOSControls.xaml(313,21) BorderThickness
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 313, 21)?;
-    // Controls/MacOSControls.xaml(314,21) CornerRadius
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 314, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R80)?;
     // Controls/MacOSControls.xaml(315,21) Padding
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), "HelperButtonThemePadding", 315, 21)?;
     // Controls/MacOSControls.xaml(309,14) Focusable
@@ -27573,7 +29489,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     let priority_20 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_20);
     // Controls/MacOSControls.xaml(318,21) FontSize
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 318, 21)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_size_property()), || rt::property(__t::TemplatedControl::font_size_property()), 318, 21)?;
     // Controls/MacOSControls.xaml(309,14) Width
     let priority_21 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::width_property(), 24.0_f64, priority_21);
@@ -27607,9 +29523,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     let provided_55 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_44);
     rt::bind(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::ToggleButton::is_checked_property(), provided_55, 326, 27)?;
     // Controls/MacOSControls.xaml(327,27) BorderThickness
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 327, 27)?;
-    // Controls/MacOSControls.xaml(328,27) CornerRadius
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 328, 27)?;
+    rt::bind_template_rows(toggle_button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R81)?;
     // Controls/MacOSControls.xaml(329,27) Padding
     rt::bind_dynamic_resource(&context, toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), "HelperButtonThemePadding", 329, 27)?;
     // Controls/MacOSControls.xaml(323,14) Focusable
@@ -27619,7 +29533,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     let priority_26 = __t::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_26);
     // Controls/MacOSControls.xaml(332,27) FontSize
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 332, 27)?;
+    rt::apply_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_size_property()), || rt::property(__t::TemplatedControl::font_size_property()), 332, 27)?;
     // Controls/MacOSControls.xaml(323,14) Width
     let priority_27 = __t::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(__t::Layoutable::width_property(), 24.0_f64, priority_27);
@@ -27648,7 +29562,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     let priority_29 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::Grid::column_property(), 4_i32, priority_29);
     // Controls/MacOSControls.xaml(339,31) Margin
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 339, 31)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 339, 31)?;
     // Controls/MacOSControls.xaml(340,31) Content (setter chosen at run time)
     let priority_30 = __t::BindingPriority::Template;
     let template_binding_50 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TextBox::inner_right_content_property()));
@@ -27660,7 +29574,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_9.clone(), "ContentControl.Content", 1, 340, 31)?, priority_30);
     }
     // Controls/MacOSControls.xaml(341,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 341, 31)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TextBox::vertical_content_alignment_property()), || rt::property(__t::ContentPresenter::vertical_content_alignment_property()), 341, 31)?;
     rt::invoked(content_presenter_1.try_end_init(), 336, 14)?;
     context.pop_parent();
     rt::invoked(grid_0.try_end_init(), 222, 12)?;
@@ -27828,7 +29742,7 @@ fn build_controls_macoscontrols_xaml_deferred_163(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ThemeShadowWrapper")));
     rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", __t::Rc::new(__t::Clone::clone(&border_0)), 33, 17)?;
     // Controls/MacOSControls.xaml(33,45) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 33, 45)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 33, 45)?;
     // Controls/MacOSControls.xaml(33,91) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::box_shadow_property(), "MacOSToolTipShadow", 33, 91)?;
     // Controls/MacOSControls.xaml(34,12) Child
@@ -27840,15 +29754,7 @@ fn build_controls_macoscontrols_xaml_deferred_163(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 34, 29)?;
     // Controls/MacOSControls.xaml(34,60) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 34, 60)?;
-    // Controls/MacOSControls.xaml(34,112) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 34, 112)?;
-    // Controls/MacOSControls.xaml(34,154) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 34, 154)?;
-    // Controls/MacOSControls.xaml(34,208) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 34, 208)?;
-    // Controls/MacOSControls.xaml(34,252) MaxWidth
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_width_property(), rt::property(__t::Layoutable::max_width_property()), 34, 252)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R82)?;
     // Controls/MacOSControls.xaml(34,290) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -27860,14 +29766,12 @@ fn build_controls_macoscontrols_xaml_deferred_163(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 34, 290)?, priority_0);
     }
     // Controls/MacOSControls.xaml(34,326) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 34, 326)?;
-    // Controls/MacOSControls.xaml(34,378) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 34, 378)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R83)?;
     // Controls/MacOSControls.xaml(34,12) TextWrapping
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::text_wrapping_property(), __t::TextWrapping::Wrap, priority_1);
     // Controls/MacOSControls.xaml(34,434) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 34, 434)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::ContentPresenter::corner_radius_property()), 34, 434)?;
     rt::invoked(content_presenter_0.try_end_init(), 34, 12)?;
     context.pop_parent();
     rt::invoked(border_0.try_end_init(), 33, 10)?;
@@ -28216,13 +30120,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ProgressBarRoot")));
     rt::register_name_value(name_scope.as_ref(), "ProgressBarRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 37, 19)?;
     // Controls/MacOSControls.xaml(37,44) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 37, 44)?;
-    // Controls/MacOSControls.xaml(37,88) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 37, 88)?;
-    // Controls/MacOSControls.xaml(37,140) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 37, 140)?;
-    // Controls/MacOSControls.xaml(37,176) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 37, 176)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R84)?;
     // Controls/MacOSControls.xaml(38,14) Child
     // Controls/MacOSControls.xaml(38,14) Border
     let border_1 = __t::Border::new();
@@ -28236,7 +30134,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     let priority_0 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_0);
     // Controls/MacOSControls.xaml(38,66) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 38, 66)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 38, 66)?;
     // Controls/MacOSControls.xaml(39,16) Child
     // Controls/MacOSControls.xaml(39,16) Grid
     let grid_1 = __t::Grid::new();
@@ -28256,7 +30154,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     border_2.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ProgressBarTrack")));
     rt::register_name_value(name_scope.as_ref(), "ProgressBarTrack", __t::Rc::new(__t::Clone::clone(&border_2)), 40, 25)?;
     // Controls/MacOSControls.xaml(40,51) Background
-    rt::bind_template_binding(border_2.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 40, 51)?;
+    rt::apply_template_binding(border_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 40, 51)?;
     // Controls/MacOSControls.xaml(40,18) CornerRadius
     let priority_1 = __t::BindingPriority::Template;
     border_2.set_value_with_priority(__t::Border::corner_radius_property(), __t::CornerRadius::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_1);
@@ -28271,9 +30169,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     border_3.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_Indicator")));
     rt::register_name_value(name_scope.as_ref(), "PART_Indicator", __t::Rc::new(__t::Clone::clone(&border_3)), 41, 25)?;
     // Controls/MacOSControls.xaml(41,49) Background
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::foreground_property()), 41, 49)?;
-    // Controls/MacOSControls.xaml(41,91) CornerRadius
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 41, 91)?;
+    rt::bind_template_rows(border_3.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R85)?;
     rt::invoked(border_3.try_end_init(), 41, 18)?;
     // Controls/MacOSControls.xaml(42,18) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
@@ -28286,9 +30182,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     border_4.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("MacOSIndeterminateFill")));
     rt::register_name_value(name_scope.as_ref(), "MacOSIndeterminateFill", __t::Rc::new(__t::Clone::clone(&border_4)), 42, 25)?;
     // Controls/MacOSControls.xaml(42,57) Background
-    rt::bind_template_binding(border_4.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::foreground_property()), 42, 57)?;
-    // Controls/MacOSControls.xaml(42,99) CornerRadius
-    rt::bind_template_binding(border_4.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 42, 99)?;
+    rt::bind_template_rows(border_4.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R86)?;
     // Controls/MacOSControls.xaml(42,18) Opacity
     let priority_2 = __t::BindingPriority::Template;
     border_4.set_value_with_priority(__t::Visual::opacity_property(), 0.0_f64, priority_2);
@@ -28310,9 +30204,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     border_5.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("MacOSIndeterminateStaticFill")));
     rt::register_name_value(name_scope.as_ref(), "MacOSIndeterminateStaticFill", __t::Rc::new(__t::Clone::clone(&border_5)), 44, 25)?;
     // Controls/MacOSControls.xaml(44,63) Background
-    rt::bind_template_binding(border_5.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::foreground_property()), 44, 63)?;
-    // Controls/MacOSControls.xaml(44,105) CornerRadius
-    rt::bind_template_binding(border_5.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 44, 105)?;
+    rt::bind_template_rows(border_5.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R87)?;
     // Controls/MacOSControls.xaml(44,18) Opacity
     let priority_4 = __t::BindingPriority::Template;
     border_5.set_value_with_priority(__t::Visual::opacity_property(), 0.0_f64, priority_4);
@@ -28349,7 +30241,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     let priority_8 = __t::BindingPriority::Template;
     layout_transform_control_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_8);
     // Controls/MacOSControls.xaml(49,121) IsVisible
-    rt::bind_template_binding(layout_transform_control_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::ProgressBar::show_progress_text_property()), 49, 121)?;
+    rt::apply_template_binding(layout_transform_control_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ProgressBar::show_progress_text_property()), || rt::property(__t::Visual::is_visible_property()), 49, 121)?;
     // Controls/MacOSControls.xaml(50,14) Child
     // Controls/MacOSControls.xaml(50,14) TextBlock
     let text_block_0 = __t::TextBlock::new();
@@ -28461,7 +30353,7 @@ fn build_controls_macoscontrols_xaml_deferred_170(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Controls/MacOSControls.xaml(37,13) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 37, 13)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 37, 13)?;
     // Controls/MacOSControls.xaml(38,8) Child
     // Controls/MacOSControls.xaml(38,8) Path
     let path_0 = __t::Path::new();
@@ -28471,9 +30363,7 @@ fn build_controls_macoscontrols_xaml_deferred_170(
     path_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Path")));
     rt::register_name_value(name_scope.as_ref(), "Path", __t::Rc::new(__t::Clone::clone(&path_0)), 38, 13)?;
     // Controls/MacOSControls.xaml(39,13) Data
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Path::data_property(), rt::property(__t::PathIcon::data_property()), 39, 13)?;
-    // Controls/MacOSControls.xaml(40,13) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 40, 13)?;
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R88)?;
     rt::invoked(path_0.try_end_init(), 38, 8)?;
     rt::invoked(border_0.try_end_init(), 37, 6)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
@@ -28514,16 +30404,14 @@ fn build_controls_macoscontrols_xaml_deferred_172(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Controls/MacOSControls.xaml(51,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 51, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 51, 17)?;
     // Controls/MacOSControls.xaml(52,12) Child
     // Controls/MacOSControls.xaml(52,12) Viewbox
     let viewbox_0 = __t::Viewbox::new();
     viewbox_0.begin_init();
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&viewbox_0).upcast::<__t::Control>()));
     // Controls/MacOSControls.xaml(52,20) Height
-    rt::bind_template_binding(viewbox_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::Layoutable::height_property()), 52, 20)?;
-    // Controls/MacOSControls.xaml(52,54) Width
-    rt::bind_template_binding(viewbox_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::Layoutable::width_property()), 52, 54)?;
+    rt::bind_template_rows(viewbox_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R89)?;
     // Controls/MacOSControls.xaml(53,14) Child
     // Controls/MacOSControls.xaml(53,14) Path
     let path_0 = __t::Path::new();
@@ -28533,9 +30421,7 @@ fn build_controls_macoscontrols_xaml_deferred_172(
     path_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Path")));
     rt::register_name_value(name_scope.as_ref(), "Path", __t::Rc::new(__t::Clone::clone(&path_0)), 53, 19)?;
     // Controls/MacOSControls.xaml(54,19) Data
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Path::data_property(), rt::property(__t::PathIcon::data_property()), 54, 19)?;
-    // Controls/MacOSControls.xaml(55,19) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 55, 19)?;
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R90)?;
     // Controls/MacOSControls.xaml(53,14) Stretch
     let priority_0 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_0);
@@ -28619,7 +30505,7 @@ fn build_controls_macoscontrols_xaml_deferred_174(
         content_control_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 32, 27)?, priority_2);
     }
     // Controls/MacOSControls.xaml(33,27) ContentTemplate
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::DataValidationErrors::error_template_property()), 33, 27)?;
+    rt::apply_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::DataValidationErrors::error_template_property()), || rt::property(__t::ContentControl::content_template_property()), 33, 27)?;
     // Controls/MacOSControls.xaml(34,27) DataContext (setter chosen at run time)
     let priority_3 = __t::BindingPriority::Template;
     let template_binding_1 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DataValidationErrors::owner_property()));
@@ -28649,16 +30535,12 @@ fn build_controls_macoscontrols_xaml_deferred_174(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 37, 29)?;
     // Controls/MacOSControls.xaml(38,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 38, 29)?;
-    // Controls/MacOSControls.xaml(39,29) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 39, 29)?;
-    // Controls/MacOSControls.xaml(40,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 40, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R91)?;
     // Controls/MacOSControls.xaml(37,12) BackgroundSizing
     let priority_5 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_5);
     // Controls/MacOSControls.xaml(42,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 42, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 42, 29)?;
     // Controls/MacOSControls.xaml(43,29) Content (setter chosen at run time)
     let priority_6 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -28670,9 +30552,7 @@ fn build_controls_macoscontrols_xaml_deferred_174(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 43, 29)?, priority_6);
     }
     // Controls/MacOSControls.xaml(44,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 44, 29)?;
-    // Controls/MacOSControls.xaml(45,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 45, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R92)?;
     rt::invoked(content_presenter_0.try_end_init(), 37, 12)?;
     context.pop_parent();
     rt::invoked(dock_panel_0.try_end_init(), 29, 10)?;
@@ -28781,7 +30661,7 @@ fn build_controls_macoscontrols_xaml_deferred_177(
         content_control_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 69, 27)?, priority_1);
     }
     // Controls/MacOSControls.xaml(70,27) ContentTemplate
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::DataValidationErrors::error_template_property()), 70, 27)?;
+    rt::apply_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::DataValidationErrors::error_template_property()), || rt::property(__t::ContentControl::content_template_property()), 70, 27)?;
     // Controls/MacOSControls.xaml(71,27) DataContext (setter chosen at run time)
     let priority_2 = __t::BindingPriority::Template;
     let template_binding_1 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DataValidationErrors::owner_property()));
@@ -28811,16 +30691,12 @@ fn build_controls_macoscontrols_xaml_deferred_177(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 74, 29)?;
     // Controls/MacOSControls.xaml(75,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 75, 29)?;
-    // Controls/MacOSControls.xaml(76,29) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 76, 29)?;
-    // Controls/MacOSControls.xaml(77,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 77, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R93)?;
     // Controls/MacOSControls.xaml(74,12) BackgroundSizing
     let priority_4 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_4);
     // Controls/MacOSControls.xaml(79,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 79, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 79, 29)?;
     // Controls/MacOSControls.xaml(80,29) Content (setter chosen at run time)
     let priority_5 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -28832,9 +30708,7 @@ fn build_controls_macoscontrols_xaml_deferred_177(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 80, 29)?, priority_5);
     }
     // Controls/MacOSControls.xaml(81,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 81, 29)?;
-    // Controls/MacOSControls.xaml(82,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 82, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R94)?;
     rt::invoked(content_presenter_0.try_end_init(), 74, 12)?;
     context.pop_parent();
     rt::invoked(dock_panel_0.try_end_init(), 67, 10)?;
@@ -29068,7 +30942,7 @@ fn build_controls_macoscontrols_xaml_deferred_181(
     panel_0.begin_init();
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(45,16) Background
-    rt::bind_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 45, 16)?;
+    rt::apply_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 45, 16)?;
     // Controls/MacOSControls.xaml(46,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(46,12) ContentPresenter
@@ -29080,9 +30954,7 @@ fn build_controls_macoscontrols_xaml_deferred_181(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 46, 29)?;
     // Controls/MacOSControls.xaml(47,29) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 47, 29)?;
-    // Controls/MacOSControls.xaml(48,29) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 48, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R95)?;
     // Controls/MacOSControls.xaml(49,29) BorderBrush
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), "DateTimePickerFlyoutButtonBorderBrush", 49, 29)?;
     // Controls/MacOSControls.xaml(50,29) BorderThickness
@@ -29098,15 +30970,7 @@ fn build_controls_macoscontrols_xaml_deferred_181(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 51, 29)?, priority_0);
     }
     // Controls/MacOSControls.xaml(52,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 52, 29)?;
-    // Controls/MacOSControls.xaml(53,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 53, 29)?;
-    // Controls/MacOSControls.xaml(54,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 54, 29)?;
-    // Controls/MacOSControls.xaml(55,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 55, 29)?;
-    // Controls/MacOSControls.xaml(56,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 56, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R96)?;
     // Controls/MacOSControls.xaml(58,16) Transitions
     let transitions_0 = __t::Transitions::__markup_new_0();
     context.push_parent(rt::to_value(transitions_0.clone()));
@@ -29232,7 +31096,7 @@ fn build_controls_macoscontrols_xaml_deferred_183(
     context.set_intermediate_root_object(rt::to_value(panel_0.clone()));
     panel_0.begin_init();
     // Controls/MacOSControls.xaml(98,16) Background
-    rt::bind_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 98, 16)?;
+    rt::apply_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 98, 16)?;
     // Controls/MacOSControls.xaml(99,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(99,12) Border
@@ -29243,9 +31107,7 @@ fn build_controls_macoscontrols_xaml_deferred_183(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootBorder")));
     rt::register_name_value(name_scope.as_ref(), "RootBorder", __t::Rc::new(__t::Clone::clone(&border_0)), 99, 19)?;
     // Controls/MacOSControls.xaml(100,19) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 100, 19)?;
-    // Controls/MacOSControls.xaml(101,19) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 101, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R97)?;
     // Controls/MacOSControls.xaml(102,14) Child
     // Controls/MacOSControls.xaml(102,14) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -29255,7 +31117,7 @@ fn build_controls_macoscontrols_xaml_deferred_183(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 102, 31)?;
     // Controls/MacOSControls.xaml(103,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 103, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 103, 31)?;
     // Controls/MacOSControls.xaml(104,31) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -29267,11 +31129,7 @@ fn build_controls_macoscontrols_xaml_deferred_183(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 104, 31)?, priority_0);
     }
     // Controls/MacOSControls.xaml(105,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 105, 31)?;
-    // Controls/MacOSControls.xaml(106,31) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 106, 31)?;
-    // Controls/MacOSControls.xaml(107,31) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 107, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R98)?;
     // Controls/MacOSControls.xaml(102,14) RenderTransformOrigin
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Visual::render_transform_origin_property(), __t::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, __t::RelativeUnit::Relative), priority_1);
@@ -29665,7 +31523,7 @@ fn build_controls_macoscontrols_xaml_deferred_189(
     let value_0: __t::MarkupValue = rt::to_value(provided_0);
     rt::bind_or_set_priority(border_0.upcast_ref::<__t::FerroObject>(), || __t::Layoutable::margin_property(), value_0, priority_1, || rt::markup_handle(<__t::Thickness as __t::MarkupTyped>::MARKUP), false, "Layoutable.Margin", 208, 17)?;
     // Controls/MacOSControls.xaml(209,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 209, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 209, 17)?;
     // Controls/MacOSControls.xaml(210,12) Child
     // Controls/MacOSControls.xaml(210,12) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -29675,7 +31533,7 @@ fn build_controls_macoscontrols_xaml_deferred_189(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 210, 29)?;
     // Controls/MacOSControls.xaml(211,29) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 211, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 211, 29)?;
     // Controls/MacOSControls.xaml(212,29) Content (setter chosen at run time)
     let priority_2 = __t::BindingPriority::Template;
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -29687,16 +31545,12 @@ fn build_controls_macoscontrols_xaml_deferred_189(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 212, 29)?, priority_2);
     }
     // Controls/MacOSControls.xaml(213,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 213, 29)?;
-    // Controls/MacOSControls.xaml(214,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 214, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R99)?;
     // Controls/MacOSControls.xaml(210,12) Margin
     let priority_3 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(2.0_f64, 0.0_f64, 2.0_f64, 0.0_f64), priority_3);
     // Controls/MacOSControls.xaml(216,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 216, 29)?;
-    // Controls/MacOSControls.xaml(217,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 217, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R100)?;
     rt::invoked(content_presenter_0.try_end_init(), 210, 12)?;
     context.pop_parent();
     rt::invoked(border_0.try_end_init(), 206, 10)?;
@@ -29890,15 +31744,11 @@ fn build_controls_macoscontrols_xaml_deferred_193(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 99, 27)?;
     // Controls/MacOSControls.xaml(100,27) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 100, 27)?;
-    // Controls/MacOSControls.xaml(101,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 101, 27)?;
-    // Controls/MacOSControls.xaml(102,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 102, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R101)?;
     // Controls/MacOSControls.xaml(103,27) BorderBrush
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), "CalendarViewNavigationButtonBorderBrush", 103, 27)?;
     // Controls/MacOSControls.xaml(104,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 104, 27)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 104, 27)?;
     // Controls/MacOSControls.xaml(105,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -29910,15 +31760,7 @@ fn build_controls_macoscontrols_xaml_deferred_193(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 105, 27)?, priority_0);
     }
     // Controls/MacOSControls.xaml(106,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 106, 27)?;
-    // Controls/MacOSControls.xaml(107,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 107, 27)?;
-    // Controls/MacOSControls.xaml(108,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 108, 27)?;
-    // Controls/MacOSControls.xaml(109,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 109, 27)?;
-    // Controls/MacOSControls.xaml(110,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 110, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R102)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 99, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
@@ -30100,13 +31942,11 @@ fn build_controls_macoscontrols_xaml_deferred_196(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 160, 27)?;
     // Controls/MacOSControls.xaml(161,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 161, 27)?;
-    // Controls/MacOSControls.xaml(162,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 162, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R103)?;
     // Controls/MacOSControls.xaml(163,27) BorderBrush
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), "CalendarViewNavigationButtonBorderBrush", 163, 27)?;
     // Controls/MacOSControls.xaml(164,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 164, 27)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 164, 27)?;
     // Controls/MacOSControls.xaml(165,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -30118,15 +31958,7 @@ fn build_controls_macoscontrols_xaml_deferred_196(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 165, 27)?, priority_0);
     }
     // Controls/MacOSControls.xaml(166,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 166, 27)?;
-    // Controls/MacOSControls.xaml(167,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 167, 27)?;
-    // Controls/MacOSControls.xaml(168,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 168, 27)?;
-    // Controls/MacOSControls.xaml(169,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 169, 27)?;
-    // Controls/MacOSControls.xaml(170,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 170, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R104)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 160, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
@@ -30247,16 +32079,12 @@ fn build_controls_macoscontrols_xaml_deferred_199(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootBorder")));
     rt::register_name_value(name_scope.as_ref(), "RootBorder", __t::Rc::new(__t::Clone::clone(&border_0)), 212, 17)?;
     // Controls/MacOSControls.xaml(213,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 213, 17)?;
-    // Controls/MacOSControls.xaml(214,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 214, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R105)?;
     // Controls/MacOSControls.xaml(212,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(216,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 216, 17)?;
-    // Controls/MacOSControls.xaml(217,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 217, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R106)?;
     // Controls/MacOSControls.xaml(218,12) Child
     // Controls/MacOSControls.xaml(218,12) Grid
     let grid_0 = __t::Grid::new();
@@ -30297,7 +32125,7 @@ fn build_controls_macoscontrols_xaml_deferred_199(
     __t::ColumnDefinitions::__markup_Add_0(&column_definitions_0, __t::Clone::clone(&column_definition_2));
     __t::Grid::__markup_set_ColumnDefinitions(&grid_1, __t::Clone::clone(&column_definitions_0));
     // Controls/MacOSControls.xaml(219,51) Background
-    rt::bind_template_binding(grid_1.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::CalendarItem::header_background_property()), 219, 51)?;
+    rt::apply_template_binding(grid_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::CalendarItem::header_background_property()), || rt::property(__t::Panel::background_property()), 219, 51)?;
     // Controls/MacOSControls.xaml(220,16) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_1.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(220,16) Button
@@ -30314,7 +32142,7 @@ fn build_controls_macoscontrols_xaml_deferred_199(
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_1, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 221, 23)?;
     // Controls/MacOSControls.xaml(222,23) Foreground
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 222, 23)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TemplatedControl::foreground_property()), 222, 23)?;
     // Controls/MacOSControls.xaml(220,16) HorizontalContentAlignment
     let priority_2 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Left, priority_2);
@@ -30339,7 +32167,7 @@ fn build_controls_macoscontrols_xaml_deferred_199(
     let value_1: __t::MarkupValue = rt::to_value(provided_7);
     rt::bind_or_set_priority(button_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_4, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 226, 23)?;
     // Controls/MacOSControls.xaml(227,23) Foreground
-    rt::bind_template_binding(button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 227, 23)?;
+    rt::apply_template_binding(button_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TemplatedControl::foreground_property()), 227, 23)?;
     // Controls/MacOSControls.xaml(228,23) Margin
     rt::bind_dynamic_resource(&context, button_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "CalendarViewNavigationPreviousButtonMargin", 228, 23)?;
     // Controls/MacOSControls.xaml(224,16) HorizontalContentAlignment
@@ -30410,7 +32238,7 @@ fn build_controls_macoscontrols_xaml_deferred_199(
     let value_3: __t::MarkupValue = rt::to_value(provided_12);
     rt::bind_or_set_priority(button_2.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_3, priority_14, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 242, 23)?;
     // Controls/MacOSControls.xaml(243,23) Foreground
-    rt::bind_template_binding(button_2.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 243, 23)?;
+    rt::apply_template_binding(button_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TemplatedControl::foreground_property()), 243, 23)?;
     // Controls/MacOSControls.xaml(244,23) Margin
     rt::bind_dynamic_resource(&context, button_2.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "CalendarViewNavigationNextButtonMargin", 244, 23)?;
     // Controls/MacOSControls.xaml(240,16) HorizontalContentAlignment
@@ -30477,7 +32305,7 @@ fn build_controls_macoscontrols_xaml_deferred_199(
     let priority_24 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Layoutable::height_property(), 1.0_f64, priority_24);
     // Controls/MacOSControls.xaml(257,45) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::border_brush_property()), 257, 45)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::background_property()), 257, 45)?;
     rt::invoked(border_1.try_end_init(), 257, 14)?;
     // Controls/MacOSControls.xaml(260,14) Children
     let children_collection_7 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -30917,17 +32745,7 @@ fn build_controls_macoscontrols_xaml_deferred_201(
     calendar_item_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_CalendarItem")));
     rt::register_name_value(name_scope.as_ref(), "PART_CalendarItem", __t::Rc::new(__t::Clone::clone(&calendar_item_0)), 49, 25)?;
     // Controls/MacOSControls.xaml(50,25) Foreground
-    rt::bind_template_binding(calendar_item_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 50, 25)?;
-    // Controls/MacOSControls.xaml(51,25) Background
-    rt::bind_template_binding(calendar_item_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 51, 25)?;
-    // Controls/MacOSControls.xaml(52,25) BorderBrush
-    rt::bind_template_binding(calendar_item_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 52, 25)?;
-    // Controls/MacOSControls.xaml(53,25) BorderThickness
-    rt::bind_template_binding(calendar_item_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 53, 25)?;
-    // Controls/MacOSControls.xaml(54,25) CornerRadius
-    rt::bind_template_binding(calendar_item_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 54, 25)?;
-    // Controls/MacOSControls.xaml(55,25) HeaderBackground
-    rt::bind_template_binding(calendar_item_0.upcast_ref::<__t::FerroObject>(), __t::CalendarItem::header_background_property(), rt::property(__t::Calendar::header_background_property()), 55, 25)?;
+    rt::bind_template_rows(calendar_item_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R107)?;
     rt::invoked(calendar_item_0.try_end_init(), 49, 12)?;
     rt::invoked(panel_0.try_end_init(), 48, 10)?;
     __t::Result::Ok(rt::to_value(panel_0.clone()))
@@ -31025,7 +32843,7 @@ fn build_controls_macoscontrols_xaml_deferred_204(
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(37,15) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 37, 15)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 37, 15)?;
     // Controls/MacOSControls.xaml(38,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(38,12) DockPanel
@@ -31034,7 +32852,7 @@ fn build_controls_macoscontrols_xaml_deferred_204(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&dock_panel_0).upcast::<__t::Control>());
     context.push_parent(rt::to_value(dock_panel_0.clone()));
     // Controls/MacOSControls.xaml(38,22) Margin
-    rt::bind_template_binding(dock_panel_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 38, 22)?;
+    rt::apply_template_binding(dock_panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 38, 22)?;
     // Controls/MacOSControls.xaml(40,14) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(40,14) TextBlock
@@ -31048,9 +32866,7 @@ fn build_controls_macoscontrols_xaml_deferred_204(
     let priority_0 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Top, priority_0);
     // Controls/MacOSControls.xaml(42,24) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TextBox::placeholder_foreground_property()), 42, 24)?;
-    // Controls/MacOSControls.xaml(43,24) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TextBox::placeholder_text_property()), 43, 24)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R108)?;
     // Controls/MacOSControls.xaml(40,14) IsVisible
     let priority_1 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_1);
@@ -31066,11 +32882,7 @@ fn build_controls_macoscontrols_xaml_deferred_204(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 45, 27)?;
     // Controls/MacOSControls.xaml(46,27) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 46, 27)?;
-    // Controls/MacOSControls.xaml(47,27) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 47, 27)?;
-    // Controls/MacOSControls.xaml(48,27) Foreground
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 48, 27)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R109)?;
     // Controls/MacOSControls.xaml(45,14) Focusable
     let priority_2 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_2);
@@ -31104,17 +32916,7 @@ fn build_controls_macoscontrols_xaml_deferred_204(
     text_block_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PlaceholderTextContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PlaceholderTextContentPresenter", __t::Rc::new(__t::Clone::clone(&text_block_1)), 51, 28)?;
     // Controls/MacOSControls.xaml(52,28) Foreground
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TextBox::placeholder_foreground_property()), 52, 28)?;
-    // Controls/MacOSControls.xaml(53,28) Text
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TextBox::placeholder_text_property()), 53, 28)?;
-    // Controls/MacOSControls.xaml(54,28) TextAlignment
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 54, 28)?;
-    // Controls/MacOSControls.xaml(55,28) TextWrapping
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 55, 28)?;
-    // Controls/MacOSControls.xaml(56,28) HorizontalAlignment
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::TextBox::horizontal_content_alignment_property()), 56, 28)?;
-    // Controls/MacOSControls.xaml(57,28) VerticalAlignment
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 57, 28)?;
+    rt::bind_template_rows(text_block_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R110)?;
     // Controls/MacOSControls.xaml(51,18) IsHitTestVisible
     let priority_3 = __t::BindingPriority::Template;
     text_block_1.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_3);
@@ -31172,35 +32974,7 @@ fn build_controls_macoscontrols_xaml_deferred_204(
     let provided_16 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_13);
     rt::bind(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_property(), provided_16, 67, 32)?;
     // Controls/MacOSControls.xaml(68,32) CaretBlinkInterval
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_blink_interval_property(), rt::property(__t::TextBox::caret_blink_interval_property()), 68, 32)?;
-    // Controls/MacOSControls.xaml(69,32) CaretIndex
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_index_property(), rt::property(__t::TextBox::caret_index_property()), 69, 32)?;
-    // Controls/MacOSControls.xaml(70,32) SelectionStart
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_start_property(), rt::property(__t::TextBox::selection_start_property()), 70, 32)?;
-    // Controls/MacOSControls.xaml(71,32) SelectionEnd
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_end_property(), rt::property(__t::TextBox::selection_end_property()), 71, 32)?;
-    // Controls/MacOSControls.xaml(72,32) TextAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 72, 32)?;
-    // Controls/MacOSControls.xaml(73,32) TextWrapping
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 73, 32)?;
-    // Controls/MacOSControls.xaml(74,32) LineHeight
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::line_height_property(), rt::property(__t::TextBox::line_height_property()), 74, 32)?;
-    // Controls/MacOSControls.xaml(75,32) LetterSpacing
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::letter_spacing_property(), rt::property(__t::TemplatedControl::letter_spacing_property()), 75, 32)?;
-    // Controls/MacOSControls.xaml(76,32) PasswordChar
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::password_char_property(), rt::property(__t::TextBox::password_char_property()), 76, 32)?;
-    // Controls/MacOSControls.xaml(77,32) RevealPassword
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::reveal_password_property(), rt::property(__t::TextBox::reveal_password_property()), 77, 32)?;
-    // Controls/MacOSControls.xaml(78,32) SelectionBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_brush_property(), rt::property(__t::TextBox::selection_brush_property()), 78, 32)?;
-    // Controls/MacOSControls.xaml(79,32) SelectionForegroundBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_foreground_brush_property(), rt::property(__t::TextBox::selection_foreground_brush_property()), 79, 32)?;
-    // Controls/MacOSControls.xaml(80,32) CaretBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_brush_property(), rt::property(__t::TextBox::caret_brush_property()), 80, 32)?;
-    // Controls/MacOSControls.xaml(81,32) HorizontalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::TextBox::horizontal_content_alignment_property()), 81, 32)?;
-    // Controls/MacOSControls.xaml(82,32) VerticalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 82, 32)?;
+    rt::bind_template_rows(text_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R111)?;
     rt::invoked(text_presenter_0.try_end_init(), 66, 18)?;
     context.pop_parent();
     rt::invoked(panel_0.try_end_init(), 50, 16)?;
@@ -31261,7 +33035,7 @@ fn build_controls_macoscontrols_xaml_deferred_206(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 111, 27)?;
     // Controls/MacOSControls.xaml(112,27) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 112, 27)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::ContentPresenter::background_property()), 112, 27)?;
     // Controls/MacOSControls.xaml(113,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_1 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -31273,11 +33047,7 @@ fn build_controls_macoscontrols_xaml_deferred_206(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 113, 27)?, priority_0);
     }
     // Controls/MacOSControls.xaml(114,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 114, 27)?;
-    // Controls/MacOSControls.xaml(115,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 115, 27)?;
-    // Controls/MacOSControls.xaml(116,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 116, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R112)?;
     rt::invoked(content_presenter_0.try_end_init(), 111, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
 }
@@ -31534,16 +33304,12 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_0);
     // Controls/MacOSControls.xaml(147,21) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 147, 21)?;
-    // Controls/MacOSControls.xaml(148,21) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 148, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R113)?;
     // Controls/MacOSControls.xaml(145,14) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/MacOSControls.xaml(150,21) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 150, 21)?;
-    // Controls/MacOSControls.xaml(151,21) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 151, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R114)?;
     // Controls/MacOSControls.xaml(145,14) IsTemplateFocusTarget
     let priority_2 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_2);
@@ -31576,7 +33342,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     // Controls/MacOSControls.xaml(156,21) BorderBrush
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "MacOSFocusBrush", 156, 21)?;
     // Controls/MacOSControls.xaml(157,21) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 157, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 157, 21)?;
     // Controls/MacOSControls.xaml(154,14) IsHitTestVisible
     let priority_7 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_7);
@@ -31617,15 +33383,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     let value_0: __t::MarkupValue = rt::to_value(provided_8);
     rt::bind_or_set_priority(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_10, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 166, 22)?;
     // Controls/MacOSControls.xaml(167,22) Foreground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 167, 22)?;
-    // Controls/MacOSControls.xaml(168,22) Padding
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 168, 22)?;
-    // Controls/MacOSControls.xaml(169,22) PlaceholderText
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_text_property(), rt::property(__t::CalendarDatePicker::placeholder_text_property()), 169, 22)?;
-    // Controls/MacOSControls.xaml(170,22) PlaceholderForeground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_foreground_property(), rt::property(__t::CalendarDatePicker::placeholder_foreground_property()), 170, 22)?;
-    // Controls/MacOSControls.xaml(171,22) UseFloatingPlaceholder
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::use_floating_placeholder_property(), rt::property(__t::CalendarDatePicker::use_floating_placeholder_property()), 171, 22)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R115)?;
     // Controls/MacOSControls.xaml(164,14) HorizontalAlignment
     let priority_11 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_11);
@@ -31633,9 +33391,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     let priority_12 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_12);
     // Controls/MacOSControls.xaml(174,22) HorizontalContentAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::horizontal_content_alignment_property(), rt::property(__t::CalendarDatePicker::horizontal_content_alignment_property()), 174, 22)?;
-    // Controls/MacOSControls.xaml(175,22) VerticalContentAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::vertical_content_alignment_property(), rt::property(__t::CalendarDatePicker::vertical_content_alignment_property()), 175, 22)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R116)?;
     context.pop_parent();
     rt::invoked(text_box_0.try_end_init(), 164, 14)?;
     // Controls/MacOSControls.xaml(176,14) Children
@@ -31741,9 +33497,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     // Controls/MacOSControls.xaml(198,27) CornerRadius
     rt::bind_dynamic_resource(&context, calendar_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), "OverlayCornerRadius", 198, 27)?;
     // Controls/MacOSControls.xaml(199,27) FirstDayOfWeek
-    rt::bind_template_binding(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::first_day_of_week_property(), rt::property(__t::CalendarDatePicker::first_day_of_week_property()), 199, 27)?;
-    // Controls/MacOSControls.xaml(200,27) IsTodayHighlighted
-    rt::bind_template_binding(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::is_today_highlighted_property(), rt::property(__t::CalendarDatePicker::is_today_highlighted_property()), 200, 27)?;
+    rt::bind_template_rows(calendar_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R117)?;
     // Controls/MacOSControls.xaml(201,27) SelectedDate
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_0();
     context.push_parent(rt::to_value(reflection_binding_extension_0.clone()));
@@ -31759,15 +33513,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     let provided_27 = rt::provide_value(&context, rt::property_value(__t::Calendar::selected_date_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::selected_date_property(), provided_27, 201, 27)?;
     // Controls/MacOSControls.xaml(202,27) DisplayDate
-    rt::bind_template_binding(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::display_date_property(), rt::property(__t::CalendarDatePicker::display_date_property()), 202, 27)?;
-    // Controls/MacOSControls.xaml(203,27) DisplayDateStart
-    rt::bind_template_binding(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::display_date_start_property(), rt::property(__t::CalendarDatePicker::display_date_start_property()), 203, 27)?;
-    // Controls/MacOSControls.xaml(204,27) DisplayDateEnd
-    rt::bind_template_binding(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::display_date_end_property(), rt::property(__t::CalendarDatePicker::display_date_end_property()), 204, 27)?;
-    // Controls/MacOSControls.xaml(205,27) IsWeekNumberVisible
-    rt::bind_template_binding(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::is_week_number_visible_property(), rt::property(__t::CalendarDatePicker::is_week_number_visible_property()), 205, 27)?;
-    // Controls/MacOSControls.xaml(206,27) WeekNumberRule
-    rt::bind_template_binding(calendar_0.upcast_ref::<__t::FerroObject>(), __t::Calendar::week_number_rule_property(), rt::property(__t::CalendarDatePicker::week_number_rule_property()), 206, 27)?;
+    rt::bind_template_rows(calendar_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R118)?;
     context.pop_parent();
     rt::invoked(calendar_0.try_end_init(), 197, 18)?;
     context.pop_parent();
@@ -31895,13 +33641,6 @@ fn build_controls_macoscontrols_xaml_deferred_211(
 fn build_controls_macoscontrols_xaml_deferred_212(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    __build_controls_macoscontrols_xaml_factory_shape_212(service_provider)
-}
-
-#[inline(never)]
-fn __build_controls_macoscontrols_xaml_factory_shape_212(
-    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
-) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(31,10) Panel
@@ -31918,16 +33657,12 @@ fn __build_controls_macoscontrols_xaml_factory_shape_212(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 32, 29)?;
     // Controls/MacOSControls.xaml(33,29) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 33, 29)?;
-    // Controls/MacOSControls.xaml(34,29) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 34, 29)?;
-    // Controls/MacOSControls.xaml(35,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 35, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R119)?;
     // Controls/MacOSControls.xaml(32,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(37,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 37, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 37, 29)?;
     // Controls/MacOSControls.xaml(38,29) Content (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -31945,7 +33680,7 @@ fn __build_controls_macoscontrols_xaml_factory_shape_212(
     let priority_3 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_3);
     // Controls/MacOSControls.xaml(41,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 41, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::ContentPresenter::corner_radius_property()), 41, 29)?;
     rt::invoked(content_presenter_0.try_end_init(), 32, 12)?;
     rt::invoked(panel_0.try_end_init(), 31, 10)?;
     __t::Result::Ok(rt::to_value(panel_0.clone()))
@@ -32116,7 +33851,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     grid_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&grid_0)), 95, 17)?;
     // Controls/MacOSControls.xaml(95,37) Margin
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 95, 37)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 95, 37)?;
     // Controls/MacOSControls.xaml(96,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(96,14) Button
@@ -32133,21 +33868,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     let value_0: __t::MarkupValue = rt::to_value(provided_1);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_0, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 97, 21)?;
     // Controls/MacOSControls.xaml(98,21) Background
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 98, 21)?;
-    // Controls/MacOSControls.xaml(99,21) Foreground
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 99, 21)?;
-    // Controls/MacOSControls.xaml(100,21) BorderBrush
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 100, 21)?;
-    // Controls/MacOSControls.xaml(101,21) BorderThickness
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 101, 21)?;
-    // Controls/MacOSControls.xaml(102,21) IsEnabled
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::InputElement::is_enabled_property(), rt::property(__t::InputElement::is_enabled_property()), 102, 21)?;
-    // Controls/MacOSControls.xaml(103,21) MinWidth
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 103, 21)?;
-    // Controls/MacOSControls.xaml(104,21) MinHeight
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 104, 21)?;
-    // Controls/MacOSControls.xaml(105,21) MaxWidth
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_width_property(), rt::property(__t::Layoutable::max_width_property()), 105, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R120)?;
     // Controls/MacOSControls.xaml(96,14) HorizontalAlignment
     let priority_1 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_1);
@@ -32158,7 +33879,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     let priority_3 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_3);
     // Controls/MacOSControls.xaml(109,21) CornerRadius
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 109, 21)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 109, 21)?;
     // Controls/MacOSControls.xaml(96,14) IsTemplateFocusTarget
     let priority_4 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_4);
@@ -32209,11 +33930,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     // Controls/MacOSControls.xaml(115,28) Padding
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "DatePickerHostPadding", 115, 28)?;
     // Controls/MacOSControls.xaml(116,28) FontFamily
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 116, 28)?;
-    // Controls/MacOSControls.xaml(117,28) FontWeight
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 117, 28)?;
-    // Controls/MacOSControls.xaml(118,28) FontSize
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 118, 28)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R121)?;
     context.pop_parent();
     rt::invoked(text_block_0.try_end_init(), 112, 18)?;
     // Controls/MacOSControls.xaml(119,18) Children
@@ -32238,11 +33955,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     let priority_9 = __t::BindingPriority::Template;
     text_block_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(1.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_9);
     // Controls/MacOSControls.xaml(124,28) FontFamily
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 124, 28)?;
-    // Controls/MacOSControls.xaml(125,28) FontWeight
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 125, 28)?;
-    // Controls/MacOSControls.xaml(126,28) FontSize
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 126, 28)?;
+    rt::bind_template_rows(text_block_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R122)?;
     context.pop_parent();
     rt::invoked(text_block_1.try_end_init(), 119, 18)?;
     // Controls/MacOSControls.xaml(127,18) Children
@@ -32264,11 +33977,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     // Controls/MacOSControls.xaml(130,28) Padding
     rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "DatePickerHostPadding", 130, 28)?;
     // Controls/MacOSControls.xaml(131,28) FontFamily
-    rt::bind_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 131, 28)?;
-    // Controls/MacOSControls.xaml(132,28) FontWeight
-    rt::bind_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 132, 28)?;
-    // Controls/MacOSControls.xaml(133,28) FontSize
-    rt::bind_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 133, 28)?;
+    rt::bind_template_rows(text_block_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R123)?;
     context.pop_parent();
     rt::invoked(text_block_2.try_end_init(), 127, 18)?;
     // Controls/MacOSControls.xaml(134,18) Children
@@ -32485,13 +34194,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     // Controls/MacOSControls.xaml(201,17) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 201, 17)?;
     // Controls/MacOSControls.xaml(202,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 202, 17)?;
-    // Controls/MacOSControls.xaml(203,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 203, 17)?;
-    // Controls/MacOSControls.xaml(204,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 204, 17)?;
-    // Controls/MacOSControls.xaml(205,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 205, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R124)?;
     // Controls/MacOSControls.xaml(206,17) Padding
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), "DateTimeFlyoutBorderPadding", 206, 17)?;
     // Controls/MacOSControls.xaml(200,10) MaxHeight
@@ -32557,7 +34260,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     // Controls/MacOSControls.xaml(218,23) Background
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "DatePickerFlyoutPresenterHighlightFill", 218, 23)?;
     // Controls/MacOSControls.xaml(219,23) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 219, 23)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 219, 23)?;
     // Controls/MacOSControls.xaml(216,16) Column
     let priority_2 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_2);
@@ -33183,20 +34886,49 @@ fn build_controls_macoscontrols_xaml_deferred_221(
 fn build_controls_macoscontrols_xaml_deferred_222(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(31,10) Panel
+    let panel_0 = __t::Panel::new();
+    context.set_intermediate_root_object(rt::to_value(panel_0.clone()));
+    panel_0.begin_init();
     // Controls/MacOSControls.xaml(32,12) Children
+    let children_collection_0 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(32,12) ContentPresenter
+    let content_presenter_0 = __t::ContentPresenter::new();
+    content_presenter_0.begin_init();
+    __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&content_presenter_0).upcast::<__t::Control>());
     // Controls/MacOSControls.xaml(32,29) Name
+    content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 32, 29)?;
     // Controls/MacOSControls.xaml(33,29) Background
-    // Controls/MacOSControls.xaml(34,29) Foreground
-    // Controls/MacOSControls.xaml(35,29) BorderBrush
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R125)?;
     // Controls/MacOSControls.xaml(32,12) BackgroundSizing
+    let priority_0 = __t::BindingPriority::Template;
+    content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(37,29) BorderThickness
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 37, 29)?;
     // Controls/MacOSControls.xaml(38,29) Content (setter chosen at run time)
+    let priority_1 = __t::BindingPriority::Template;
+    let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
+    let provided_4 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
+    let value_0: __t::MarkupValue = rt::to_value(provided_4);
+    if value_0.is_some() {
+        rt::bind(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_property(), value_0.clone(), 38, 29)?;
+    } else {
+        content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 38, 29)?, priority_1);
+    }
     // Controls/MacOSControls.xaml(32,12) HorizontalContentAlignment
+    let priority_2 = __t::BindingPriority::Template;
+    content_presenter_0.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_2);
     // Controls/MacOSControls.xaml(32,12) VerticalContentAlignment
+    let priority_3 = __t::BindingPriority::Template;
+    content_presenter_0.set_value_with_priority(__t::ContentPresenter::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_3);
     // Controls/MacOSControls.xaml(41,29) CornerRadius
-    __build_controls_macoscontrols_xaml_factory_shape_212(service_provider)
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::ContentPresenter::corner_radius_property()), 41, 29)?;
+    rt::invoked(content_presenter_0.try_end_init(), 32, 12)?;
+    rt::invoked(panel_0.try_end_init(), 31, 10)?;
+    __t::Result::Ok(rt::to_value(panel_0.clone()))
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(66,4)` (a template or a deferred resource).
@@ -33372,7 +35104,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     grid_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&grid_0)), 92, 17)?;
     // Controls/MacOSControls.xaml(92,37) Margin
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 92, 37)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 92, 37)?;
     // Controls/MacOSControls.xaml(93,14) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(93,14) Button
@@ -33389,21 +35121,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     let value_0: __t::MarkupValue = rt::to_value(provided_1);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_0, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 94, 21)?;
     // Controls/MacOSControls.xaml(95,21) Background
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 95, 21)?;
-    // Controls/MacOSControls.xaml(96,21) Foreground
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 96, 21)?;
-    // Controls/MacOSControls.xaml(97,21) BorderBrush
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 97, 21)?;
-    // Controls/MacOSControls.xaml(98,21) BorderThickness
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 98, 21)?;
-    // Controls/MacOSControls.xaml(99,21) IsEnabled
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::InputElement::is_enabled_property(), rt::property(__t::InputElement::is_enabled_property()), 99, 21)?;
-    // Controls/MacOSControls.xaml(100,21) MinWidth
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 100, 21)?;
-    // Controls/MacOSControls.xaml(101,21) MinHeight
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 101, 21)?;
-    // Controls/MacOSControls.xaml(102,21) MaxWidth
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_width_property(), rt::property(__t::Layoutable::max_width_property()), 102, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R126)?;
     // Controls/MacOSControls.xaml(93,14) HorizontalAlignment
     let priority_1 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_1);
@@ -33414,7 +35132,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     let priority_3 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_3);
     // Controls/MacOSControls.xaml(106,21) CornerRadius
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 106, 21)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 106, 21)?;
     // Controls/MacOSControls.xaml(93,14) IsTemplateFocusTarget
     let priority_4 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_4);
@@ -33458,11 +35176,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     // Controls/MacOSControls.xaml(114,30) Padding
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "TimePickerHostPadding", 114, 30)?;
     // Controls/MacOSControls.xaml(115,30) FontFamily
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 115, 30)?;
-    // Controls/MacOSControls.xaml(116,30) FontWeight
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 116, 30)?;
-    // Controls/MacOSControls.xaml(117,30) FontSize
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 117, 30)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R127)?;
     context.pop_parent();
     rt::invoked(text_block_0.try_end_init(), 111, 20)?;
     context.pop_parent();
@@ -33520,11 +35234,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     // Controls/MacOSControls.xaml(128,30) Padding
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "TimePickerHostPadding", 128, 30)?;
     // Controls/MacOSControls.xaml(129,30) FontFamily
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 129, 30)?;
-    // Controls/MacOSControls.xaml(130,30) FontWeight
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 130, 30)?;
-    // Controls/MacOSControls.xaml(131,30) FontSize
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 131, 30)?;
+    rt::bind_template_rows(text_block_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R128)?;
     context.pop_parent();
     rt::invoked(text_block_1.try_end_init(), 125, 20)?;
     context.pop_parent();
@@ -33582,11 +35292,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     // Controls/MacOSControls.xaml(142,30) Padding
     rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "TimePickerHostPadding", 142, 30)?;
     // Controls/MacOSControls.xaml(143,30) FontFamily
-    rt::bind_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 143, 30)?;
-    // Controls/MacOSControls.xaml(144,30) FontWeight
-    rt::bind_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 144, 30)?;
-    // Controls/MacOSControls.xaml(145,30) FontSize
-    rt::bind_template_binding(text_block_2.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 145, 30)?;
+    rt::bind_template_rows(text_block_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R129)?;
     context.pop_parent();
     rt::invoked(text_block_2.try_end_init(), 139, 20)?;
     context.pop_parent();
@@ -33641,11 +35347,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     // Controls/MacOSControls.xaml(155,30) Padding
     rt::bind_dynamic_resource(&context, text_block_3.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), "TimePickerHostPadding", 155, 30)?;
     // Controls/MacOSControls.xaml(156,30) FontFamily
-    rt::bind_template_binding(text_block_3.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 156, 30)?;
-    // Controls/MacOSControls.xaml(157,30) FontWeight
-    rt::bind_template_binding(text_block_3.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 157, 30)?;
-    // Controls/MacOSControls.xaml(158,30) FontSize
-    rt::bind_template_binding(text_block_3.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 158, 30)?;
+    rt::bind_template_rows(text_block_3.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R130)?;
     context.pop_parent();
     rt::invoked(text_block_3.try_end_init(), 153, 20)?;
     context.pop_parent();
@@ -33809,13 +35511,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     // Controls/MacOSControls.xaml(217,17) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 217, 17)?;
     // Controls/MacOSControls.xaml(218,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 218, 17)?;
-    // Controls/MacOSControls.xaml(219,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 219, 17)?;
-    // Controls/MacOSControls.xaml(220,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 220, 17)?;
-    // Controls/MacOSControls.xaml(221,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 221, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R131)?;
     // Controls/MacOSControls.xaml(222,17) Padding
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), "DateTimeFlyoutBorderPadding", 222, 17)?;
     // Controls/MacOSControls.xaml(216,10) MaxHeight
@@ -33881,7 +35577,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     // Controls/MacOSControls.xaml(234,23) Background
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "TimePickerFlyoutPresenterHighlightFill", 234, 23)?;
     // Controls/MacOSControls.xaml(235,23) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 235, 23)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 235, 23)?;
     // Controls/MacOSControls.xaml(232,16) Column
     let priority_2 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_2);
@@ -34647,17 +36343,7 @@ fn build_controls_macoscontrols_xaml_deferred_233(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 29, 17)?;
     // Controls/MacOSControls.xaml(29,37) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 29, 37)?;
-    // Controls/MacOSControls.xaml(29,79) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 29, 79)?;
-    // Controls/MacOSControls.xaml(29,133) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 29, 133)?;
-    // Controls/MacOSControls.xaml(29,177) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 29, 177)?;
-    // Controls/MacOSControls.xaml(29,229) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 29, 229)?;
-    // Controls/MacOSControls.xaml(29,275) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 29, 275)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R132)?;
     // Controls/MacOSControls.xaml(29,10) Width
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::width_property(), 12.0_f64, priority_0);
@@ -34708,9 +36394,7 @@ fn build_controls_macoscontrols_xaml_deferred_233(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 35, 60)?, priority_5);
     }
     // Controls/MacOSControls.xaml(35,96) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 35, 96)?;
-    // Controls/MacOSControls.xaml(35,148) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 35, 148)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R133)?;
     // Controls/MacOSControls.xaml(35,12) HorizontalAlignment
     let priority_6 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_6);
@@ -34894,16 +36578,6 @@ fn build_controls_macoscontrols_xaml_deferred_237(
 fn build_controls_macoscontrols_xaml_deferred_238(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    __build_controls_macoscontrols_xaml_factory_shape_238(service_provider, 66, 67, "GlyphGeometryE72B")
-}
-
-#[inline(never)]
-fn __build_controls_macoscontrols_xaml_factory_shape_238(
-    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
-    arg0: i32,
-    arg1: i32,
-    arg2: &'static str,
-) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(66,10) Border
@@ -34913,11 +36587,9 @@ fn __build_controls_macoscontrols_xaml_factory_shape_238(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(66,17) Name
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
-    rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), arg0, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 66, 17)?;
     // Controls/MacOSControls.xaml(66,35) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), arg0, 35)?;
-    // Controls/MacOSControls.xaml(66,77) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), arg0, 77)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R134)?;
     // Controls/MacOSControls.xaml(67,12) Child
     // Controls/MacOSControls.xaml(67,12) Path
     let path_0 = __t::Path::new();
@@ -34926,14 +36598,14 @@ fn __build_controls_macoscontrols_xaml_factory_shape_238(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(67,17) Name
     path_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Content")));
-    rt::register_name_value(name_scope.as_ref(), "Content", __t::Rc::new(__t::Clone::clone(&path_0)), arg1, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", __t::Rc::new(__t::Clone::clone(&path_0)), 67, 17)?;
     // Controls/MacOSControls.xaml(67,34) Data (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
-    let provided_2 = rt::provide_static_resource(&context, arg2, || rt::property_value(__t::Path::data_property()), arg1, 34)?;
+    let provided_2 = rt::provide_static_resource(&context, "GlyphGeometryE72B", || rt::property_value(__t::Path::data_property()), 67, 34)?;
     let value_0: __t::MarkupValue = rt::to_value(provided_2);
-    rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, priority_0, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", arg1, 34)?;
+    rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, priority_0, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 67, 34)?;
     // Controls/MacOSControls.xaml(67,76) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), arg1, 76)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 67, 76)?;
     // Controls/MacOSControls.xaml(67,12) Stretch
     let priority_1 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_1);
@@ -34941,13 +36613,11 @@ fn __build_controls_macoscontrols_xaml_factory_shape_238(
     let priority_2 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Layoutable::width_property(), 14.0_f64, priority_2);
     // Controls/MacOSControls.xaml(67,141) HorizontalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), arg1, 141)?;
-    // Controls/MacOSControls.xaml(67,208) VerticalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), arg1, 208)?;
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R135)?;
     context.pop_parent();
-    rt::invoked(path_0.try_end_init(), arg1, 12)?;
+    rt::invoked(path_0.try_end_init(), 67, 12)?;
     context.pop_parent();
-    rt::invoked(border_0.try_end_init(), arg0, 10)?;
+    rt::invoked(border_0.try_end_init(), 66, 10)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
 }
 
@@ -35062,20 +36732,47 @@ fn build_controls_macoscontrols_xaml_deferred_239(
 fn build_controls_macoscontrols_xaml_deferred_240(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(101,10) Border
+    let border_0 = __t::Border::new();
+    context.set_intermediate_root_object(rt::to_value(border_0.clone()));
+    border_0.begin_init();
+    context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(101,17) Name
+    border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 101, 17)?;
     // Controls/MacOSControls.xaml(101,35) Background
-    // Controls/MacOSControls.xaml(101,77) CornerRadius
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R136)?;
     // Controls/MacOSControls.xaml(102,12) Child
     // Controls/MacOSControls.xaml(102,12) Path
+    let path_0 = __t::Path::new();
+    path_0.begin_init();
+    border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&path_0).upcast::<__t::Control>()));
+    context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(102,17) Name
+    path_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Content")));
+    rt::register_name_value(name_scope.as_ref(), "Content", __t::Rc::new(__t::Clone::clone(&path_0)), 102, 17)?;
     // Controls/MacOSControls.xaml(102,34) Data (setter chosen at run time)
+    let priority_0 = __t::BindingPriority::Template;
+    let provided_2 = rt::provide_static_resource(&context, "GlyphGeometryE700", || rt::property_value(__t::Path::data_property()), 102, 34)?;
+    let value_0: __t::MarkupValue = rt::to_value(provided_2);
+    rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, priority_0, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 102, 34)?;
     // Controls/MacOSControls.xaml(102,76) Fill
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 102, 76)?;
     // Controls/MacOSControls.xaml(102,12) Stretch
+    let priority_1 = __t::BindingPriority::Template;
+    path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_1);
     // Controls/MacOSControls.xaml(102,12) Width
+    let priority_2 = __t::BindingPriority::Template;
+    path_0.set_value_with_priority(__t::Layoutable::width_property(), 14.0_f64, priority_2);
     // Controls/MacOSControls.xaml(102,141) HorizontalAlignment
-    // Controls/MacOSControls.xaml(102,208) VerticalAlignment
-    __build_controls_macoscontrols_xaml_factory_shape_238(service_provider, 101, 102, "GlyphGeometryE700")
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R137)?;
+    context.pop_parent();
+    rt::invoked(path_0.try_end_init(), 102, 12)?;
+    context.pop_parent();
+    rt::invoked(border_0.try_end_init(), 101, 10)?;
+    __t::Result::Ok(rt::to_value(border_0.clone()))
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(125,4)` (a template or a deferred resource).
@@ -35122,9 +36819,7 @@ fn build_controls_macoscontrols_xaml_deferred_242(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 128, 58)?, priority_0);
     }
     // Controls/MacOSControls.xaml(128,94) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 128, 94)?;
-    // Controls/MacOSControls.xaml(128,146) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 128, 146)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R138)?;
     rt::invoked(content_presenter_0.try_end_init(), 128, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
 }
@@ -35427,7 +37122,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     // Controls/MacOSControls.xaml(141,50) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "SystemControlTransparentBrush", 141, 50)?;
     // Controls/MacOSControls.xaml(141,111) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::WindowDrawnDecorations::frame_thickness_property()), 141, 111)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::frame_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 141, 111)?;
     // Controls/MacOSControls.xaml(141,162) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "SurfaceStrokeColorDefaultBrush", 141, 162)?;
     // Controls/MacOSControls.xaml(141,16) IsHitTestVisible
@@ -35451,12 +37146,12 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     let priority_1 = __t::BindingPriority::Template;
     panel_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_1);
     // Controls/MacOSControls.xaml(142,69) Height
-    rt::bind_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::WindowDrawnDecorations::title_bar_height_property()), 142, 69)?;
+    rt::apply_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::title_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 142, 69)?;
     // Controls/MacOSControls.xaml(142,16) Background
     let priority_2 = __t::BindingPriority::Template;
     panel_1.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_2);
     // Controls/MacOSControls.xaml(142,136) IsVisible
-    rt::bind_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::WindowDrawnDecorations::has_title_bar_property()), 142, 136)?;
+    rt::apply_template_binding(panel_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::has_title_bar_property()), || rt::property(__t::Visual::is_visible_property()), 142, 136)?;
     // Controls/MacOSControls.xaml(142,16) ElementRole
     let priority_3 = __t::BindingPriority::Template;
     panel_1.set_value_with_priority(__t::WindowDecorationProperties::element_role_property(), __t::WindowDecorationsElementRole::TitleBar, priority_3);
@@ -35503,12 +37198,12 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     let priority_5 = __t::BindingPriority::Template;
     panel_3.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_5);
     // Controls/MacOSControls.xaml(149,75) Height
-    rt::bind_template_binding(panel_3.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::WindowDrawnDecorations::title_bar_height_property()), 149, 75)?;
+    rt::apply_template_binding(panel_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::title_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 149, 75)?;
     // Controls/MacOSControls.xaml(149,16) IsHitTestVisible
     let priority_6 = __t::BindingPriority::Template;
     panel_3.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_6);
     // Controls/MacOSControls.xaml(149,142) IsVisible
-    rt::bind_template_binding(panel_3.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::WindowDrawnDecorations::has_title_bar_property()), 149, 142)?;
+    rt::apply_template_binding(panel_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::has_title_bar_property()), || rt::property(__t::Visual::is_visible_property()), 149, 142)?;
     // Controls/MacOSControls.xaml(150,18) Children
     let children_collection_4 = __t::Panel::__markup_get_Children(&panel_3);
     // Controls/MacOSControls.xaml(150,18) TextBlock
@@ -35525,7 +37220,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     let value_0: __t::MarkupValue = rt::to_value(provided_10);
     rt::bind_or_set_priority(text_block_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_7, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 150, 52)?;
     // Controls/MacOSControls.xaml(150,99) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::WindowDrawnDecorations::title_property()), 150, 99)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::title_property()), || rt::property(__t::TextBlock::text_property()), 150, 99)?;
     // Controls/MacOSControls.xaml(150,130) Foreground
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), "TitleBarForegroundBrush", 150, 130)?;
     // Controls/MacOSControls.xaml(150,18) Margin
@@ -35569,9 +37264,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     let priority_14 = __t::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_14);
     // Controls/MacOSControls.xaml(152,105) Height
-    rt::bind_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::WindowDrawnDecorations::title_bar_height_property()), 152, 105)?;
-    // Controls/MacOSControls.xaml(152,147) IsVisible
-    rt::bind_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::WindowDrawnDecorations::has_title_bar_property()), 152, 147)?;
+    rt::bind_template_rows(stack_panel_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R139)?;
     // Controls/MacOSControls.xaml(152,16) Orientation
     let priority_15 = __t::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(__t::StackPanel::orientation_property(), __t::Orientation::Horizontal, priority_15);
@@ -35776,7 +37469,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     __t::WindowDrawnDecorationsContent::__markup_set_FullscreenPopover(&window_drawn_decorations_content_0, __t::Option::Some(__t::Clone::clone(&panel_4).upcast::<__t::Control>()));
     context.push_parent(rt::to_value(panel_4.clone()));
     // Controls/MacOSControls.xaml(169,20) Height
-    rt::bind_template_binding(panel_4.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::WindowDrawnDecorations::default_title_bar_height_property()), 169, 20)?;
+    rt::apply_template_binding(panel_4.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::default_title_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 169, 20)?;
     // Controls/MacOSControls.xaml(169,14) VerticalAlignment
     let priority_41 = __t::BindingPriority::Template;
     panel_4.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_41);
@@ -35801,7 +37494,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     let value_10: __t::MarkupValue = rt::to_value(provided_31);
     rt::bind_or_set_priority(text_block_1.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_10, priority_43, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 170, 57)?;
     // Controls/MacOSControls.xaml(170,104) Text
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::WindowDrawnDecorations::title_property()), 170, 104)?;
+    rt::apply_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::WindowDrawnDecorations::title_property()), || rt::property(__t::TextBlock::text_property()), 170, 104)?;
     // Controls/MacOSControls.xaml(170,135) Foreground
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), "TitleBarForegroundBrush", 170, 135)?;
     // Controls/MacOSControls.xaml(170,16) Margin
@@ -36299,14 +37992,12 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     // Controls/MacOSControls.xaml(109,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "InfoBarInformationalSeverityBackgroundBrush", 109, 17)?;
     // Controls/MacOSControls.xaml(110,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 110, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 110, 17)?;
     // Controls/MacOSControls.xaml(107,10) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/MacOSControls.xaml(112,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 112, 17)?;
-    // Controls/MacOSControls.xaml(113,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 113, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R140)?;
     // Controls/MacOSControls.xaml(115,14) Transitions
     let transitions_0 = __t::Transitions::__markup_new_0();
     context.push_parent(rt::to_value(transitions_0.clone()));
@@ -36335,9 +38026,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     // Controls/MacOSControls.xaml(121,19) MinHeight
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "InfoBarMinHeight", 121, 19)?;
     // Controls/MacOSControls.xaml(122,19) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 122, 19)?;
-    // Controls/MacOSControls.xaml(123,19) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 123, 19)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R141)?;
     // Controls/MacOSControls.xaml(124,19) Padding (setter chosen at run time)
     let priority_4 = __t::BindingPriority::Template;
     let provided_8 = rt::provide_static_resource(&context, "InfoBarContentRootPadding", || rt::property_value(__t::Decorator::padding_property()), 124, 19)?;
@@ -36483,11 +38172,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_7.clone(), "ContentControl.Content", 1, 149, 33)?, priority_21);
     }
     // Controls/MacOSControls.xaml(150,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 150, 33)?;
-    // Controls/MacOSControls.xaml(151,33) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 151, 33)?;
-    // Controls/MacOSControls.xaml(152,33) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 152, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R142)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 146, 16)?;
     // Controls/MacOSControls.xaml(153,16) Children
@@ -36593,11 +38278,7 @@ fn build_controls_macoscontrols_xaml_deferred_250(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Root")));
     rt::register_name_value(name_scope.as_ref(), "Root", __t::Rc::new(__t::Clone::clone(&border_0)), 49, 17)?;
     // Controls/MacOSControls.xaml(50,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 50, 17)?;
-    // Controls/MacOSControls.xaml(51,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 51, 17)?;
-    // Controls/MacOSControls.xaml(52,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 52, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R143)?;
     // Controls/MacOSControls.xaml(53,12) Child
     // Controls/MacOSControls.xaml(53,12) Grid
     let grid_0 = __t::Grid::new();
@@ -36605,7 +38286,7 @@ fn build_controls_macoscontrols_xaml_deferred_250(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&grid_0).upcast::<__t::Control>()));
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(53,17) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 53, 17)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 53, 17)?;
     // Controls/MacOSControls.xaml(53,12) ColumnDefinitions
     let column_definitions_0 = __t::ColumnDefinitions::__markup_new_0();
     rt::invoked(<__t::FerroListOf<__t::Ref<__t::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 54, 17)?;
@@ -36686,19 +38367,7 @@ fn build_controls_macoscontrols_xaml_deferred_250(
     let priority_6 = __t::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_6);
     // Controls/MacOSControls.xaml(69,37) ContentTemplate
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 69, 37)?;
-    // Controls/MacOSControls.xaml(70,37) Padding
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 70, 37)?;
-    // Controls/MacOSControls.xaml(71,37) HorizontalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::horizontal_snap_points_type_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_type_property()), 71, 37)?;
-    // Controls/MacOSControls.xaml(72,37) VerticalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::vertical_snap_points_type_property(), rt::property(__t::ScrollViewer::vertical_snap_points_type_property()), 72, 37)?;
-    // Controls/MacOSControls.xaml(73,37) HorizontalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::horizontal_snap_points_alignment_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_alignment_property()), 73, 37)?;
-    // Controls/MacOSControls.xaml(74,37) VerticalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollContentPresenter::vertical_snap_points_alignment_property(), rt::property(__t::ScrollViewer::vertical_snap_points_alignment_property()), 74, 37)?;
-    // Controls/MacOSControls.xaml(75,37) IsScrollInertiaEnabled
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_inertia_enabled_property()), 75, 37)?;
+    rt::bind_template_rows(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R144)?;
     // Controls/MacOSControls.xaml(77,18) GestureRecognizers
     let gesture_recognizers_collection_0 = __t::InputElement::__markup_get_GestureRecognizers(scroll_content_presenter_0.upcast_ref::<__t::InputElement>());
     // Controls/MacOSControls.xaml(77,18) ScrollGestureRecognizer
@@ -36950,18 +38619,12 @@ fn build_controls_macoscontrols_xaml_deferred_252(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Root")));
     rt::register_name_value(name_scope.as_ref(), "Root", __t::Rc::new(__t::Clone::clone(&border_0)), 148, 17)?;
     // Controls/MacOSControls.xaml(149,17) ClipToBounds
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Visual::clip_to_bounds_property(), rt::property(__t::Visual::clip_to_bounds_property()), 149, 17)?;
-    // Controls/MacOSControls.xaml(150,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 150, 17)?;
-    // Controls/MacOSControls.xaml(151,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 151, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R145)?;
     // Controls/MacOSControls.xaml(148,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(153,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 153, 17)?;
-    // Controls/MacOSControls.xaml(154,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 154, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R146)?;
     // Controls/MacOSControls.xaml(155,12) Child
     // Controls/MacOSControls.xaml(155,12) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -36977,23 +38640,7 @@ fn build_controls_macoscontrols_xaml_deferred_252(
     let value_0: __t::MarkupValue = rt::to_value(provided_5);
     rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_1, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 156, 25)?;
     // Controls/MacOSControls.xaml(157,25) VerticalSnapPointsType
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_snap_points_type_property(), rt::property(__t::ScrollViewer::vertical_snap_points_type_property()), 157, 25)?;
-    // Controls/MacOSControls.xaml(158,25) HorizontalSnapPointsType
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_snap_points_type_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_type_property()), 158, 25)?;
-    // Controls/MacOSControls.xaml(159,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 159, 25)?;
-    // Controls/MacOSControls.xaml(160,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 160, 25)?;
-    // Controls/MacOSControls.xaml(161,25) IsScrollChainingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_chaining_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_chaining_enabled_property()), 161, 25)?;
-    // Controls/MacOSControls.xaml(162,25) IsScrollInertiaEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_inertia_enabled_property()), 162, 25)?;
-    // Controls/MacOSControls.xaml(163,25) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 163, 25)?;
-    // Controls/MacOSControls.xaml(164,25) AllowAutoHide
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::allow_auto_hide_property(), rt::property(__t::ScrollViewer::allow_auto_hide_property()), 164, 25)?;
-    // Controls/MacOSControls.xaml(165,25) BringIntoViewOnFocusChange
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::bring_into_view_on_focus_change_property(), rt::property(__t::ScrollViewer::bring_into_view_on_focus_change_property()), 165, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R147)?;
     // Controls/MacOSControls.xaml(166,14) Content
     // Controls/MacOSControls.xaml(166,14) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -37003,9 +38650,7 @@ fn build_controls_macoscontrols_xaml_deferred_252(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 166, 29)?;
     // Controls/MacOSControls.xaml(167,29) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 167, 29)?;
-    // Controls/MacOSControls.xaml(168,29) Margin
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 168, 29)?;
+    rt::bind_template_rows(items_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R148)?;
     rt::invoked(items_presenter_0.try_end_init(), 166, 14)?;
     context.pop_parent();
     rt::invoked(scroll_viewer_0.try_end_init(), 155, 12)?;
@@ -37076,7 +38721,7 @@ fn build_controls_macoscontrols_xaml_deferred_254(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 46, 17)?;
     // Controls/MacOSControls.xaml(47,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 47, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 47, 17)?;
     // Controls/MacOSControls.xaml(46,10) HorizontalAlignment
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
@@ -37093,7 +38738,7 @@ fn build_controls_macoscontrols_xaml_deferred_254(
     border_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Separator")));
     rt::register_name_value(name_scope.as_ref(), "Separator", __t::Rc::new(__t::Clone::clone(&border_1)), 50, 19)?;
     // Controls/MacOSControls.xaml(51,19) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 51, 19)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 51, 19)?;
     // Controls/MacOSControls.xaml(52,19) BorderThickness
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), "ResizeGripperSeparatorThickness", 52, 19)?;
     // Controls/MacOSControls.xaml(50,12) Opacity
@@ -37195,16 +38840,12 @@ fn build_controls_macoscontrols_xaml_deferred_256(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 88, 29)?;
     // Controls/MacOSControls.xaml(89,29) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 89, 29)?;
-    // Controls/MacOSControls.xaml(90,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 90, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R149)?;
     // Controls/MacOSControls.xaml(88,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(92,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 92, 29)?;
-    // Controls/MacOSControls.xaml(93,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 93, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R150)?;
     // Controls/MacOSControls.xaml(94,29) Content (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -37216,13 +38857,7 @@ fn build_controls_macoscontrols_xaml_deferred_256(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 94, 29)?, priority_1);
     }
     // Controls/MacOSControls.xaml(95,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 95, 29)?;
-    // Controls/MacOSControls.xaml(96,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 96, 29)?;
-    // Controls/MacOSControls.xaml(97,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 97, 29)?;
-    // Controls/MacOSControls.xaml(98,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 98, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R151)?;
     rt::invoked(content_presenter_0.try_end_init(), 88, 12)?;
     // Controls/MacOSControls.xaml(99,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
@@ -37314,18 +38949,12 @@ fn build_controls_macoscontrols_xaml_deferred_258(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("border")));
     rt::register_name_value(name_scope.as_ref(), "border", __t::Rc::new(__t::Clone::clone(&border_0)), 79, 17)?;
     // Controls/MacOSControls.xaml(80,17) ClipToBounds
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Visual::clip_to_bounds_property(), rt::property(__t::Visual::clip_to_bounds_property()), 80, 17)?;
-    // Controls/MacOSControls.xaml(81,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 81, 17)?;
-    // Controls/MacOSControls.xaml(82,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 82, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R152)?;
     // Controls/MacOSControls.xaml(79,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(84,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 84, 17)?;
-    // Controls/MacOSControls.xaml(85,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 85, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R153)?;
     // Controls/MacOSControls.xaml(86,12) Child
     // Controls/MacOSControls.xaml(86,12) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -37335,23 +38964,7 @@ fn build_controls_macoscontrols_xaml_deferred_258(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 86, 25)?;
     // Controls/MacOSControls.xaml(87,25) VerticalSnapPointsType
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_snap_points_type_property(), rt::property(__t::ScrollViewer::vertical_snap_points_type_property()), 87, 25)?;
-    // Controls/MacOSControls.xaml(88,25) HorizontalSnapPointsType
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_snap_points_type_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_type_property()), 88, 25)?;
-    // Controls/MacOSControls.xaml(89,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 89, 25)?;
-    // Controls/MacOSControls.xaml(90,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 90, 25)?;
-    // Controls/MacOSControls.xaml(91,25) IsScrollChainingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_chaining_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_chaining_enabled_property()), 91, 25)?;
-    // Controls/MacOSControls.xaml(92,25) IsScrollInertiaEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_inertia_enabled_property()), 92, 25)?;
-    // Controls/MacOSControls.xaml(93,25) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 93, 25)?;
-    // Controls/MacOSControls.xaml(94,25) AllowAutoHide
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::allow_auto_hide_property(), rt::property(__t::ScrollViewer::allow_auto_hide_property()), 94, 25)?;
-    // Controls/MacOSControls.xaml(95,25) BringIntoViewOnFocusChange
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::bring_into_view_on_focus_change_property(), rt::property(__t::ScrollViewer::bring_into_view_on_focus_change_property()), 95, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R154)?;
     // Controls/MacOSControls.xaml(96,14) Content
     // Controls/MacOSControls.xaml(96,14) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -37361,9 +38974,7 @@ fn build_controls_macoscontrols_xaml_deferred_258(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 96, 29)?;
     // Controls/MacOSControls.xaml(97,29) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 97, 29)?;
-    // Controls/MacOSControls.xaml(98,29) Margin
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 98, 29)?;
+    rt::bind_template_rows(items_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R155)?;
     rt::invoked(items_presenter_0.try_end_init(), 96, 14)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 86, 12)?;
     rt::invoked(border_0.try_end_init(), 79, 10)?;
@@ -37652,16 +39263,12 @@ fn build_controls_macoscontrols_xaml_deferred_261(
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64), priority_0);
     // Controls/MacOSControls.xaml(138,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 138, 19)?;
-    // Controls/MacOSControls.xaml(139,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 139, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R156)?;
     // Controls/MacOSControls.xaml(136,12) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/MacOSControls.xaml(141,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 141, 19)?;
-    // Controls/MacOSControls.xaml(142,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 142, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R157)?;
     rt::invoked(border_0.try_end_init(), 136, 12)?;
     // Controls/MacOSControls.xaml(143,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
@@ -37683,15 +39290,7 @@ fn build_controls_macoscontrols_xaml_deferred_261(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 144, 29)?, priority_2);
     }
     // Controls/MacOSControls.xaml(145,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 145, 29)?;
-    // Controls/MacOSControls.xaml(146,29) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 146, 29)?;
-    // Controls/MacOSControls.xaml(147,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 147, 29)?;
-    // Controls/MacOSControls.xaml(148,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 148, 29)?;
-    // Controls/MacOSControls.xaml(149,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 149, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R158)?;
     rt::invoked(content_presenter_0.try_end_init(), 143, 12)?;
     // Controls/MacOSControls.xaml(150,12) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(&panel_0);
@@ -37774,18 +39373,12 @@ fn build_controls_macoscontrols_xaml_deferred_263(
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(227,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 227, 17)?;
-    // Controls/MacOSControls.xaml(228,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 228, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R159)?;
     // Controls/MacOSControls.xaml(227,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(230,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 230, 17)?;
-    // Controls/MacOSControls.xaml(231,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 231, 17)?;
-    // Controls/MacOSControls.xaml(232,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 232, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R160)?;
     // Controls/MacOSControls.xaml(233,12) Child
     // Controls/MacOSControls.xaml(233,12) DockPanel
     let dock_panel_0 = __t::DockPanel::new();
@@ -38691,7 +40284,7 @@ fn build_controls_macoscontrols_xaml_deferred_265(
     let priority_4 = __t::BindingPriority::Template;
     rectangle_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_4);
     // Controls/MacOSControls.xaml(354,76) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 354, 76)?;
+    rt::apply_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 354, 76)?;
     rt::invoked(rectangle_0.try_end_init(), 354, 28)?;
     rt::invoked(border_0.try_end_init(), 353, 26)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
@@ -39171,18 +40764,12 @@ fn build_controls_macoscontrols_xaml_deferred_268(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("BackgroundElement")));
     rt::register_name_value(name_scope.as_ref(), "BackgroundElement", __t::Rc::new(__t::Clone::clone(&border_0)), 444, 17)?;
     // Controls/MacOSControls.xaml(445,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 445, 17)?;
-    // Controls/MacOSControls.xaml(446,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 446, 17)?;
-    // Controls/MacOSControls.xaml(447,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 447, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R161)?;
     // Controls/MacOSControls.xaml(444,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(449,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 449, 17)?;
-    // Controls/MacOSControls.xaml(450,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 450, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R162)?;
     // Controls/MacOSControls.xaml(451,17) MinWidth
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), "ContentDialogMinWidth", 451, 17)?;
     // Controls/MacOSControls.xaml(452,17) MaxWidth
@@ -39268,7 +40855,7 @@ fn build_controls_macoscontrols_xaml_deferred_268(
     let value_1: __t::MarkupValue = rt::to_value(provided_15);
     rt::bind_or_set_priority(text_block_0.upcast_ref::<__t::FerroObject>(), || __t::TextBlock::font_family_property(), value_1, priority_7, || rt::markup_handle(<__t::FontFamily as __t::MarkupTyped>::MARKUP), true, "TextElement.FontFamily", 469, 28)?;
     // Controls/MacOSControls.xaml(470,28) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 470, 28)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TextBlock::foreground_property()), 470, 28)?;
     // Controls/MacOSControls.xaml(467,18) TextWrapping
     let priority_8 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::TextBlock::text_wrapping_property(), __t::TextWrapping::Wrap, priority_8);
@@ -39326,7 +40913,7 @@ fn build_controls_macoscontrols_xaml_deferred_268(
     // Controls/MacOSControls.xaml(489,23) Padding
     rt::bind_dynamic_resource(&context, border_3.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), "ContentDialogPadding", 489, 23)?;
     // Controls/MacOSControls.xaml(490,23) Background
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 490, 23)?;
+    rt::apply_template_binding(border_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 490, 23)?;
     // Controls/MacOSControls.xaml(491,18) Child
     // Controls/MacOSControls.xaml(491,18) Grid
     let grid_1 = __t::Grid::new();
@@ -39549,14 +41136,12 @@ fn build_controls_macoscontrols_xaml_deferred_272(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Controls/MacOSControls.xaml(31,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 31, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 31, 17)?;
     // Controls/MacOSControls.xaml(31,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(31,96) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 31, 96)?;
-    // Controls/MacOSControls.xaml(31,138) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 31, 138)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R163)?;
     // Controls/MacOSControls.xaml(32,12) Child
     // Controls/MacOSControls.xaml(32,12) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -39566,9 +41151,7 @@ fn build_controls_macoscontrols_xaml_deferred_272(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 32, 27)?;
     // Controls/MacOSControls.xaml(32,54) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 32, 54)?;
-    // Controls/MacOSControls.xaml(32,96) Margin
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 32, 96)?;
+    rt::bind_template_rows(items_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R164)?;
     rt::invoked(items_presenter_0.try_end_init(), 32, 12)?;
     rt::invoked(border_0.try_end_init(), 31, 10)?;
     __t::Result::Ok(rt::to_value(border_0.clone()))
@@ -39764,13 +41347,7 @@ fn build_controls_macoscontrols_xaml_deferred_276(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContainerRoot")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContainerRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 40, 17)?;
     // Controls/MacOSControls.xaml(40,45) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 40, 45)?;
-    // Controls/MacOSControls.xaml(40,87) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 40, 87)?;
-    // Controls/MacOSControls.xaml(40,133) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 40, 133)?;
-    // Controls/MacOSControls.xaml(40,177) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 40, 177)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R165)?;
     // Controls/MacOSControls.xaml(42,14) Transitions
     let transitions_0 = __t::Transitions::__markup_new_0();
     context.push_parent(rt::to_value(transitions_0.clone()));
@@ -39809,21 +41386,7 @@ fn build_controls_macoscontrols_xaml_deferred_276(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 46, 60)?, priority_1);
     }
     // Controls/MacOSControls.xaml(46,96) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 46, 96)?;
-    // Controls/MacOSControls.xaml(46,148) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 46, 148)?;
-    // Controls/MacOSControls.xaml(46,190) FontFamily
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 46, 190)?;
-    // Controls/MacOSControls.xaml(46,232) FontSize
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 46, 232)?;
-    // Controls/MacOSControls.xaml(46,270) FontWeight
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 46, 270)?;
-    // Controls/MacOSControls.xaml(46,312) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 46, 312)?;
-    // Controls/MacOSControls.xaml(46,348) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 46, 348)?;
-    // Controls/MacOSControls.xaml(46,422) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 46, 422)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R166)?;
     // Controls/MacOSControls.xaml(46,12) RecognizesAccessKey
     let priority_2 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_2);
@@ -40000,15 +41563,7 @@ fn build_controls_macoscontrols_xaml_deferred_279(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 33, 27)?;
     // Controls/MacOSControls.xaml(33,58) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 33, 58)?;
-    // Controls/MacOSControls.xaml(33,100) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 33, 100)?;
-    // Controls/MacOSControls.xaml(33,144) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 33, 144)?;
-    // Controls/MacOSControls.xaml(33,196) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 33, 196)?;
-    // Controls/MacOSControls.xaml(33,250) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 33, 250)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R167)?;
     // Controls/MacOSControls.xaml(33,292) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -40020,19 +41575,7 @@ fn build_controls_macoscontrols_xaml_deferred_279(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 33, 292)?, priority_0);
     }
     // Controls/MacOSControls.xaml(33,328) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 33, 328)?;
-    // Controls/MacOSControls.xaml(33,380) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 33, 380)?;
-    // Controls/MacOSControls.xaml(33,426) FontSize
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 33, 426)?;
-    // Controls/MacOSControls.xaml(33,464) FontFamily
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 33, 464)?;
-    // Controls/MacOSControls.xaml(33,506) FontWeight
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 33, 506)?;
-    // Controls/MacOSControls.xaml(33,548) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 33, 548)?;
-    // Controls/MacOSControls.xaml(33,622) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 33, 622)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R168)?;
     rt::invoked(content_presenter_0.try_end_init(), 33, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
 }
@@ -40157,15 +41700,7 @@ fn build_controls_macoscontrols_xaml_deferred_281(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 76, 27)?;
     // Controls/MacOSControls.xaml(76,58) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 76, 58)?;
-    // Controls/MacOSControls.xaml(76,100) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 76, 100)?;
-    // Controls/MacOSControls.xaml(76,154) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 76, 154)?;
-    // Controls/MacOSControls.xaml(76,198) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 76, 198)?;
-    // Controls/MacOSControls.xaml(76,250) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 76, 250)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R169)?;
     // Controls/MacOSControls.xaml(76,292) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -40177,19 +41712,7 @@ fn build_controls_macoscontrols_xaml_deferred_281(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 76, 292)?, priority_0);
     }
     // Controls/MacOSControls.xaml(76,328) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 76, 328)?;
-    // Controls/MacOSControls.xaml(76,380) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 76, 380)?;
-    // Controls/MacOSControls.xaml(76,426) FontSize
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 76, 426)?;
-    // Controls/MacOSControls.xaml(76,464) FontFamily
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 76, 464)?;
-    // Controls/MacOSControls.xaml(76,506) FontWeight
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 76, 506)?;
-    // Controls/MacOSControls.xaml(76,548) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 76, 548)?;
-    // Controls/MacOSControls.xaml(76,622) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 76, 622)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R170)?;
     rt::invoked(content_presenter_0.try_end_init(), 76, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
 }
@@ -40323,17 +41846,7 @@ fn build_controls_macoscontrols_xaml_deferred_283(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 110, 27)?;
     // Controls/MacOSControls.xaml(110,58) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 110, 58)?;
-    // Controls/MacOSControls.xaml(110,112) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 110, 112)?;
-    // Controls/MacOSControls.xaml(110,154) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 110, 154)?;
-    // Controls/MacOSControls.xaml(110,198) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 110, 198)?;
-    // Controls/MacOSControls.xaml(110,250) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 110, 250)?;
-    // Controls/MacOSControls.xaml(110,292) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 110, 292)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R171)?;
     // Controls/MacOSControls.xaml(110,344) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_6 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -40345,11 +41858,7 @@ fn build_controls_macoscontrols_xaml_deferred_283(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 110, 344)?, priority_0);
     }
     // Controls/MacOSControls.xaml(110,380) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 110, 380)?;
-    // Controls/MacOSControls.xaml(110,426) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 110, 426)?;
-    // Controls/MacOSControls.xaml(110,500) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 110, 500)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R172)?;
     rt::invoked(content_presenter_0.try_end_init(), 110, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
 }
@@ -40396,11 +41905,7 @@ fn build_controls_macoscontrols_xaml_deferred_285(
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(132,66) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 132, 66)?;
-    // Controls/MacOSControls.xaml(132,108) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 132, 108)?;
-    // Controls/MacOSControls.xaml(132,152) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 132, 152)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R173)?;
     // Controls/MacOSControls.xaml(133,12) Child
     // Controls/MacOSControls.xaml(133,12) Grid
     let grid_0 = __t::Grid::new();
@@ -40701,7 +42206,7 @@ fn build_controls_macoscontrols_xaml_deferred_285(
     let priority_21 = __t::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(__t::ContentPresenter::padding_property(), __t::Thickness::__markup_new_3(1.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_21);
     // Controls/MacOSControls.xaml(162,102) ContentTemplate
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 162, 102)?;
+    rt::apply_template_binding(scroll_content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 162, 102)?;
     // Controls/MacOSControls.xaml(164,18) GestureRecognizers
     let gesture_recognizers_collection_0 = __t::InputElement::__markup_get_GestureRecognizers(scroll_content_presenter_0.upcast_ref::<__t::InputElement>());
     // Controls/MacOSControls.xaml(164,18) ScrollGestureRecognizer
@@ -41211,7 +42716,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("TabContainerGrid")));
     rt::register_name_value(name_scope.as_ref(), "TabContainerGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 206, 19)?;
     // Controls/MacOSControls.xaml(206,45) Dock
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::DockPanel::dock_property(), rt::property(__t::TabControl::tab_strip_placement_property()), 206, 45)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TabControl::tab_strip_placement_property()), || rt::property(__t::DockPanel::dock_property()), 206, 45)?;
     // Controls/MacOSControls.xaml(206,98) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "MacOSSegmentBackgroundBrush", 206, 98)?;
     // Controls/MacOSControls.xaml(206,12) RenderTransformOrigin
@@ -41326,7 +42831,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     dock_panel_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("TabsItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "TabsItemsPresenter", __t::Rc::new(__t::Clone::clone(&dock_panel_1)), 215, 30)?;
     // Controls/MacOSControls.xaml(215,58) Margin
-    rt::bind_template_binding(dock_panel_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 215, 58)?;
+    rt::apply_template_binding(dock_panel_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 215, 58)?;
     // Controls/MacOSControls.xaml(216,22) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(dock_panel_1.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(216,22) Panel
@@ -41387,7 +42892,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     let priority_24 = __t::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Left, priority_24);
     // Controls/MacOSControls.xaml(219,86) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 219, 86)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 219, 86)?;
     rt::invoked(items_presenter_0.try_end_init(), 219, 22)?;
     // Controls/MacOSControls.xaml(220,22) Children
     let children_collection_6 = __t::Panel::__markup_get_Children(dock_panel_1.upcast_ref::<__t::Panel>());
@@ -41447,11 +42952,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     border_5.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("TabContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "TabContentPresenter", __t::Rc::new(__t::Clone::clone(&border_5)), 228, 19)?;
     // Controls/MacOSControls.xaml(228,48) BorderBrush
-    rt::bind_template_binding(border_5.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 228, 48)?;
-    // Controls/MacOSControls.xaml(228,92) BorderThickness
-    rt::bind_template_binding(border_5.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 228, 92)?;
-    // Controls/MacOSControls.xaml(228,144) CornerRadius
-    rt::bind_template_binding(border_5.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 228, 144)?;
+    rt::bind_template_rows(border_5.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R174)?;
     // Controls/MacOSControls.xaml(229,14) Child
     // Controls/MacOSControls.xaml(229,14) Panel
     let panel_2 = __t::Panel::new();
@@ -41470,9 +42971,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_SelectedContentHost2")));
     rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost2", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 230, 33)?;
     // Controls/MacOSControls.xaml(230,66) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::TabControl::horizontal_content_alignment_property()), 230, 66)?;
-    // Controls/MacOSControls.xaml(230,140) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TabControl::vertical_content_alignment_property()), 230, 140)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R175)?;
     // Controls/MacOSControls.xaml(230,16) IsVisible
     let priority_30 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_30);
@@ -41487,9 +42986,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     content_presenter_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_SelectedContentHost")));
     rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost", __t::Rc::new(__t::Clone::clone(&content_presenter_1)), 231, 33)?;
     // Controls/MacOSControls.xaml(231,65) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::TabControl::horizontal_content_alignment_property()), 231, 65)?;
-    // Controls/MacOSControls.xaml(231,139) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TabControl::vertical_content_alignment_property()), 231, 139)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R176)?;
     rt::invoked(content_presenter_1.try_end_init(), 231, 16)?;
     rt::invoked(panel_2.try_end_init(), 229, 14)?;
     rt::invoked(border_5.try_end_init(), 228, 12)?;
@@ -42135,7 +43632,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(28,15) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 28, 15)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 28, 15)?;
     // Controls/MacOSControls.xaml(30,14) ColumnDefinitions
     let column_definitions_collection_0 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/MacOSControls.xaml(30,14) ColumnDefinition
@@ -42193,7 +43690,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PaneRoot")));
     rt::register_name_value(name_scope.as_ref(), "PaneRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 34, 21)?;
     // Controls/MacOSControls.xaml(34,39) Width
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::SplitView::open_pane_length_property()), 34, 39)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::open_pane_length_property()), || rt::property(__t::Layoutable::width_property()), 34, 39)?;
     // Controls/MacOSControls.xaml(34,14) HorizontalAlignment
     let priority_4 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_4);
@@ -42201,7 +43698,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
     let priority_5 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_5);
     // Controls/MacOSControls.xaml(34,132) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 34, 132)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 34, 132)?;
     // Controls/MacOSControls.xaml(34,14) BackgroundSizing
     let priority_6 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_6);
@@ -42209,7 +43706,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
     let priority_7 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_7);
     // Controls/MacOSControls.xaml(34,231) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 34, 231)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 34, 231)?;
     // Controls/MacOSControls.xaml(36,18) Transitions
     let transitions_0 = __t::Transitions::__markup_new_0();
     context.push_parent(rt::to_value(transitions_0.clone()));
@@ -42236,13 +43733,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
     let priority_9 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(6.0_f64, 6.0_f64, 6.0_f64, 6.0_f64), priority_9);
     // Controls/MacOSControls.xaml(40,34) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::SplitView::pane_background_property()), 40, 34)?;
-    // Controls/MacOSControls.xaml(40,80) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 40, 80)?;
-    // Controls/MacOSControls.xaml(40,124) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 40, 124)?;
-    // Controls/MacOSControls.xaml(40,176) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 40, 176)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R177)?;
     // Controls/MacOSControls.xaml(40,16) BoxShadow
     let value_0 = rt::invoked(__t::BoxShadows::__markup_parse(__t::String::from("0 1 4 0 #14000000")), 40, 222)?;
     let priority_10 = __t::BindingPriority::Template;
@@ -42266,7 +43757,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
     let priority_11 = __t::BindingPriority::Template;
     experimental_acrylic_border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_11);
     // Controls/MacOSControls.xaml(42,126) CornerRadius
-    rt::bind_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), __t::ExperimentalAcrylicBorder::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 42, 126)?;
+    rt::apply_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::ExperimentalAcrylicBorder::corner_radius_property()), 42, 126)?;
     context.pop_parent();
     rt::invoked(experimental_acrylic_border_0.try_end_init(), 42, 20)?;
     // Controls/MacOSControls.xaml(43,20) Children
@@ -42296,7 +43787,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 44, 67)?, priority_12);
     }
     // Controls/MacOSControls.xaml(44,100) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::SplitView::pane_template_property()), 44, 100)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 44, 100)?;
     rt::invoked(content_presenter_0.try_end_init(), 44, 22)?;
     // Controls/MacOSControls.xaml(45,22) Children
     let children_collection_5 = __t::Panel::__markup_get_Children(&panel_2);
@@ -42363,11 +43854,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 52, 62)?, priority_17);
     }
     // Controls/MacOSControls.xaml(52,98) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 52, 98)?;
-    // Controls/MacOSControls.xaml(52,150) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 52, 150)?;
-    // Controls/MacOSControls.xaml(52,224) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 52, 224)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R178)?;
     rt::invoked(content_presenter_1.try_end_init(), 52, 14)?;
     // Controls/MacOSControls.xaml(53,14) Children
     let children_collection_8 = __t::Panel::__markup_get_Children(&panel_3);
@@ -42403,7 +43890,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(79,17) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 79, 17)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 79, 17)?;
     // Controls/MacOSControls.xaml(81,16) ColumnDefinitions
     let column_definitions_collection_0 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/MacOSControls.xaml(81,16) ColumnDefinition
@@ -42464,7 +43951,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PaneRoot")));
     rt::register_name_value(name_scope.as_ref(), "PaneRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 85, 23)?;
     // Controls/MacOSControls.xaml(85,41) Width
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::SplitView::open_pane_length_property()), 85, 41)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::open_pane_length_property()), || rt::property(__t::Layoutable::width_property()), 85, 41)?;
     // Controls/MacOSControls.xaml(85,16) HorizontalAlignment
     let priority_5 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_5);
@@ -42472,7 +43959,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
     let priority_6 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_6);
     // Controls/MacOSControls.xaml(85,135) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 85, 135)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 85, 135)?;
     // Controls/MacOSControls.xaml(85,16) BackgroundSizing
     let priority_7 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_7);
@@ -42480,7 +43967,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
     let priority_8 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_8);
     // Controls/MacOSControls.xaml(85,234) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 85, 234)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 85, 234)?;
     // Controls/MacOSControls.xaml(87,20) Transitions
     let transitions_0 = __t::Transitions::__markup_new_0();
     context.push_parent(rt::to_value(transitions_0.clone()));
@@ -42507,13 +43994,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
     let priority_10 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(6.0_f64, 6.0_f64, 6.0_f64, 6.0_f64), priority_10);
     // Controls/MacOSControls.xaml(91,36) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::SplitView::pane_background_property()), 91, 36)?;
-    // Controls/MacOSControls.xaml(91,82) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 91, 82)?;
-    // Controls/MacOSControls.xaml(91,126) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 91, 126)?;
-    // Controls/MacOSControls.xaml(91,178) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 91, 178)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R179)?;
     // Controls/MacOSControls.xaml(91,18) BoxShadow
     let value_0 = rt::invoked(__t::BoxShadows::__markup_parse(__t::String::from("0 1 4 0 #14000000")), 91, 224)?;
     let priority_11 = __t::BindingPriority::Template;
@@ -42537,7 +44018,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
     let priority_12 = __t::BindingPriority::Template;
     experimental_acrylic_border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_12);
     // Controls/MacOSControls.xaml(93,128) CornerRadius
-    rt::bind_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), __t::ExperimentalAcrylicBorder::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 93, 128)?;
+    rt::apply_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::ExperimentalAcrylicBorder::corner_radius_property()), 93, 128)?;
     context.pop_parent();
     rt::invoked(experimental_acrylic_border_0.try_end_init(), 93, 22)?;
     // Controls/MacOSControls.xaml(94,22) Children
@@ -42567,7 +44048,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 95, 69)?, priority_13);
     }
     // Controls/MacOSControls.xaml(95,102) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::SplitView::pane_template_property()), 95, 102)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 95, 102)?;
     rt::invoked(content_presenter_0.try_end_init(), 95, 24)?;
     // Controls/MacOSControls.xaml(96,24) Children
     let children_collection_5 = __t::Panel::__markup_get_Children(&panel_2);
@@ -42634,11 +44115,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 103, 64)?, priority_18);
     }
     // Controls/MacOSControls.xaml(103,100) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 103, 100)?;
-    // Controls/MacOSControls.xaml(103,152) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 103, 152)?;
-    // Controls/MacOSControls.xaml(103,226) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 103, 226)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R180)?;
     rt::invoked(content_presenter_1.try_end_init(), 103, 16)?;
     // Controls/MacOSControls.xaml(104,16) Children
     let children_collection_8 = __t::Panel::__markup_get_Children(&panel_3);
@@ -42674,7 +44151,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(129,17) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 129, 17)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 129, 17)?;
     // Controls/MacOSControls.xaml(131,16) RowDefinitions
     let row_definitions_collection_0 = __t::Grid::__markup_get_RowDefinitions(&grid_0);
     // Controls/MacOSControls.xaml(131,16) RowDefinition
@@ -42732,7 +44209,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PaneRoot")));
     rt::register_name_value(name_scope.as_ref(), "PaneRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 135, 23)?;
     // Controls/MacOSControls.xaml(135,41) Height
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::SplitView::open_pane_length_property()), 135, 41)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::open_pane_length_property()), || rt::property(__t::Layoutable::height_property()), 135, 41)?;
     // Controls/MacOSControls.xaml(135,16) VerticalAlignment
     let priority_4 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_4);
@@ -42740,7 +44217,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
     let priority_5 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_5);
     // Controls/MacOSControls.xaml(135,132) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 135, 132)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 135, 132)?;
     // Controls/MacOSControls.xaml(135,16) BackgroundSizing
     let priority_6 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_6);
@@ -42748,7 +44225,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
     let priority_7 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_7);
     // Controls/MacOSControls.xaml(135,231) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 135, 231)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 135, 231)?;
     // Controls/MacOSControls.xaml(137,20) Transitions
     let transitions_0 = __t::Transitions::__markup_new_0();
     context.push_parent(rt::to_value(transitions_0.clone()));
@@ -42775,13 +44252,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
     let priority_9 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(6.0_f64, 6.0_f64, 6.0_f64, 6.0_f64), priority_9);
     // Controls/MacOSControls.xaml(141,36) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::SplitView::pane_background_property()), 141, 36)?;
-    // Controls/MacOSControls.xaml(141,82) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 141, 82)?;
-    // Controls/MacOSControls.xaml(141,126) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 141, 126)?;
-    // Controls/MacOSControls.xaml(141,178) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 141, 178)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R181)?;
     // Controls/MacOSControls.xaml(141,18) BoxShadow
     let value_0 = rt::invoked(__t::BoxShadows::__markup_parse(__t::String::from("0 1 4 0 #14000000")), 141, 224)?;
     let priority_10 = __t::BindingPriority::Template;
@@ -42805,7 +44276,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
     let priority_11 = __t::BindingPriority::Template;
     experimental_acrylic_border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_11);
     // Controls/MacOSControls.xaml(143,128) CornerRadius
-    rt::bind_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), __t::ExperimentalAcrylicBorder::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 143, 128)?;
+    rt::apply_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::ExperimentalAcrylicBorder::corner_radius_property()), 143, 128)?;
     context.pop_parent();
     rt::invoked(experimental_acrylic_border_0.try_end_init(), 143, 22)?;
     // Controls/MacOSControls.xaml(144,22) Children
@@ -42835,7 +44306,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 145, 69)?, priority_12);
     }
     // Controls/MacOSControls.xaml(145,102) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::SplitView::pane_template_property()), 145, 102)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 145, 102)?;
     rt::invoked(content_presenter_0.try_end_init(), 145, 24)?;
     // Controls/MacOSControls.xaml(146,24) Children
     let children_collection_5 = __t::Panel::__markup_get_Children(&panel_2);
@@ -42902,11 +44373,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 153, 64)?, priority_17);
     }
     // Controls/MacOSControls.xaml(153,100) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 153, 100)?;
-    // Controls/MacOSControls.xaml(153,152) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 153, 152)?;
-    // Controls/MacOSControls.xaml(153,226) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 153, 226)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R182)?;
     rt::invoked(content_presenter_1.try_end_init(), 153, 16)?;
     // Controls/MacOSControls.xaml(154,16) Children
     let children_collection_8 = __t::Panel::__markup_get_Children(&panel_3);
@@ -42942,7 +44409,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(179,17) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 179, 17)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 179, 17)?;
     // Controls/MacOSControls.xaml(181,16) RowDefinitions
     let row_definitions_collection_0 = __t::Grid::__markup_get_RowDefinitions(&grid_0);
     // Controls/MacOSControls.xaml(181,16) RowDefinition
@@ -43003,7 +44470,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PaneRoot")));
     rt::register_name_value(name_scope.as_ref(), "PaneRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 185, 23)?;
     // Controls/MacOSControls.xaml(185,41) Height
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::SplitView::open_pane_length_property()), 185, 41)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::open_pane_length_property()), || rt::property(__t::Layoutable::height_property()), 185, 41)?;
     // Controls/MacOSControls.xaml(185,16) VerticalAlignment
     let priority_5 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Bottom, priority_5);
@@ -43011,7 +44478,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
     let priority_6 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_6);
     // Controls/MacOSControls.xaml(185,135) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 185, 135)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 185, 135)?;
     // Controls/MacOSControls.xaml(185,16) BackgroundSizing
     let priority_7 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_7);
@@ -43019,7 +44486,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
     let priority_8 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_8);
     // Controls/MacOSControls.xaml(185,234) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 185, 234)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 185, 234)?;
     // Controls/MacOSControls.xaml(187,20) Transitions
     let transitions_0 = __t::Transitions::__markup_new_0();
     context.push_parent(rt::to_value(transitions_0.clone()));
@@ -43046,13 +44513,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
     let priority_10 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(6.0_f64, 6.0_f64, 6.0_f64, 6.0_f64), priority_10);
     // Controls/MacOSControls.xaml(191,36) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::SplitView::pane_background_property()), 191, 36)?;
-    // Controls/MacOSControls.xaml(191,82) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 191, 82)?;
-    // Controls/MacOSControls.xaml(191,126) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 191, 126)?;
-    // Controls/MacOSControls.xaml(191,178) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 191, 178)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R183)?;
     // Controls/MacOSControls.xaml(191,18) BoxShadow
     let value_0 = rt::invoked(__t::BoxShadows::__markup_parse(__t::String::from("0 1 4 0 #14000000")), 191, 224)?;
     let priority_11 = __t::BindingPriority::Template;
@@ -43076,7 +44537,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
     let priority_12 = __t::BindingPriority::Template;
     experimental_acrylic_border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_12);
     // Controls/MacOSControls.xaml(193,128) CornerRadius
-    rt::bind_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), __t::ExperimentalAcrylicBorder::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 193, 128)?;
+    rt::apply_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::ExperimentalAcrylicBorder::corner_radius_property()), 193, 128)?;
     context.pop_parent();
     rt::invoked(experimental_acrylic_border_0.try_end_init(), 193, 22)?;
     // Controls/MacOSControls.xaml(194,22) Children
@@ -43106,7 +44567,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 195, 69)?, priority_13);
     }
     // Controls/MacOSControls.xaml(195,102) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::SplitView::pane_template_property()), 195, 102)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::SplitView::pane_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 195, 102)?;
     rt::invoked(content_presenter_0.try_end_init(), 195, 24)?;
     // Controls/MacOSControls.xaml(196,24) Children
     let children_collection_5 = __t::Panel::__markup_get_Children(&panel_2);
@@ -43173,11 +44634,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 203, 64)?, priority_18);
     }
     // Controls/MacOSControls.xaml(203,100) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 203, 100)?;
-    // Controls/MacOSControls.xaml(203,152) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 203, 152)?;
-    // Controls/MacOSControls.xaml(203,226) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 203, 226)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R184)?;
     rt::invoked(content_presenter_1.try_end_init(), 203, 16)?;
     // Controls/MacOSControls.xaml(204,16) Children
     let children_collection_8 = __t::Panel::__markup_get_Children(&panel_3);
@@ -43378,9 +44835,7 @@ fn build_controls_macoscontrols_xaml_deferred_300(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("TopNavArea")));
     rt::register_name_value(name_scope.as_ref(), "TopNavArea", __t::Rc::new(__t::Clone::clone(&border_0)), 74, 19)?;
     // Controls/MacOSControls.xaml(75,19) Dock
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::DockPanel::dock_property(), rt::property(__t::TabControl::tab_strip_placement_property()), 75, 19)?;
-    // Controls/MacOSControls.xaml(76,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 76, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R185)?;
     // Controls/MacOSControls.xaml(77,14) Child
     // Controls/MacOSControls.xaml(77,14) Border
     let border_1 = __t::Border::new();
@@ -43395,7 +44850,7 @@ fn build_controls_macoscontrols_xaml_deferred_300(
     // Controls/MacOSControls.xaml(79,21) Margin
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "TopNavigationViewTopNavGridMargin", 79, 21)?;
     // Controls/MacOSControls.xaml(80,21) Padding
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 80, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Decorator::padding_property()), 80, 21)?;
     // Controls/MacOSControls.xaml(81,16) Child
     // Controls/MacOSControls.xaml(81,16) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -43405,7 +44860,7 @@ fn build_controls_macoscontrols_xaml_deferred_300(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 81, 31)?;
     // Controls/MacOSControls.xaml(82,31) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 82, 31)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 82, 31)?;
     // Controls/MacOSControls.xaml(81,16) VerticalAlignment
     let priority_0 = __t::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_0);
@@ -43783,9 +45238,7 @@ fn build_controls_macoscontrols_xaml_deferred_303(
     let value_0: __t::MarkupValue = rt::to_value(provided_0);
     rt::bind_or_set_priority(border_0.upcast_ref::<__t::FerroObject>(), || __t::Layoutable::margin_property(), value_0, priority_0, || rt::markup_handle(<__t::Thickness as __t::MarkupTyped>::MARKUP), false, "Layoutable.Margin", 159, 17)?;
     // Controls/MacOSControls.xaml(160,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 160, 17)?;
-    // Controls/MacOSControls.xaml(161,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 161, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R186)?;
     // Controls/MacOSControls.xaml(162,12) Child
     // Controls/MacOSControls.xaml(162,12) Panel
     let panel_0 = __t::Panel::new();
@@ -43874,9 +45327,7 @@ fn build_controls_macoscontrols_xaml_deferred_303(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 172, 37)?, priority_7);
     }
     // Controls/MacOSControls.xaml(173,37) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::TabItem::icon_template_property()), 173, 37)?;
-    // Controls/MacOSControls.xaml(174,37) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 174, 37)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R187)?;
     // Controls/MacOSControls.xaml(177,24) Styles
     let styles_collection_0 = __t::StyledElement::__markup_get_Styles(content_presenter_0.upcast_ref::<__t::StyledElement>());
     // Controls/MacOSControls.xaml(177,24) Style
@@ -43938,7 +45389,7 @@ fn build_controls_macoscontrols_xaml_deferred_303(
     let priority_11 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::ContentPresenter::text_wrapping_property(), __t::TextWrapping::NoWrap, priority_11);
     // Controls/MacOSControls.xaml(192,33) Foreground
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 192, 33)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 192, 33)?;
     // Controls/MacOSControls.xaml(193,33) Content (setter chosen at run time)
     let priority_12 = __t::BindingPriority::Template;
     let template_binding_8 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedContentControl::header_property()));
@@ -43950,9 +45401,7 @@ fn build_controls_macoscontrols_xaml_deferred_303(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_4.clone(), "ContentControl.Content", 1, 193, 33)?, priority_12);
     }
     // Controls/MacOSControls.xaml(194,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedContentControl::header_template_property()), 194, 33)?;
-    // Controls/MacOSControls.xaml(195,33) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 195, 33)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R188)?;
     // Controls/MacOSControls.xaml(188,16) VerticalAlignment
     let priority_13 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_13);
@@ -43994,7 +45443,7 @@ fn build_controls_macoscontrols_xaml_deferred_303(
         content_presenter_2.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_5.clone(), "ContentControl.Content", 1, 204, 31)?, priority_19);
     }
     // Controls/MacOSControls.xaml(205,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::TabItem::indicator_template_property()), 205, 31)?;
+    rt::apply_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TabItem::indicator_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 205, 31)?;
     rt::invoked(content_presenter_2.try_end_init(), 199, 14)?;
     context.pop_parent();
     rt::invoked(panel_0.try_end_init(), 162, 12)?;
@@ -44042,7 +45491,7 @@ fn build_controls_macoscontrols_xaml_deferred_305(
     panel_0.begin_init();
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(275,16) Background
-    rt::bind_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 275, 16)?;
+    rt::apply_template_binding(panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 275, 16)?;
     // Controls/MacOSControls.xaml(276,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(276,12) TabControl
@@ -44322,9 +45771,7 @@ fn build_controls_macoscontrols_xaml_deferred_308(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 78, 17)?;
     // Controls/MacOSControls.xaml(79,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 79, 17)?;
-    // Controls/MacOSControls.xaml(80,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 80, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R189)?;
     // Controls/MacOSControls.xaml(81,12) Child
     // Controls/MacOSControls.xaml(81,12) Panel
     let panel_0 = __t::Panel::new();
@@ -44347,7 +45794,7 @@ fn build_controls_macoscontrols_xaml_deferred_308(
     let value_0: __t::MarkupValue = rt::to_value(provided_2);
     rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, priority_0, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 83, 19)?;
     // Controls/MacOSControls.xaml(84,19) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 84, 19)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 84, 19)?;
     // Controls/MacOSControls.xaml(82,14) Stretch
     let priority_1 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_1);
@@ -44358,9 +45805,7 @@ fn build_controls_macoscontrols_xaml_deferred_308(
     let priority_3 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Layoutable::width_property(), 16.0_f64, priority_3);
     // Controls/MacOSControls.xaml(88,19) HorizontalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 88, 19)?;
-    // Controls/MacOSControls.xaml(89,19) VerticalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 89, 19)?;
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R190)?;
     // Controls/MacOSControls.xaml(90,19) IsVisible
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     // Controls/MacOSControls.xaml(90,19) Converter
@@ -44390,13 +45835,7 @@ fn build_controls_macoscontrols_xaml_deferred_308(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 92, 31)?, priority_4);
     }
     // Controls/MacOSControls.xaml(93,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 93, 31)?;
-    // Controls/MacOSControls.xaml(94,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 94, 31)?;
-    // Controls/MacOSControls.xaml(95,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 95, 31)?;
-    // Controls/MacOSControls.xaml(96,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 96, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R191)?;
     // Controls/MacOSControls.xaml(91,14) RecognizesAccessKey
     let priority_5 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_5);
@@ -44518,7 +45957,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_NavBarSpacer")));
     rt::register_name_value(name_scope.as_ref(), "PART_NavBarSpacer", __t::Rc::new(__t::Clone::clone(&border_0)), 166, 21)?;
     // Controls/MacOSControls.xaml(167,21) Height
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::NavigationPage::effective_bar_height_property()), 167, 21)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationPage::effective_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 167, 21)?;
     // Controls/MacOSControls.xaml(166,14) IsVisible
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_1);
@@ -44543,7 +45982,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     let priority_4 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_4);
     // Controls/MacOSControls.xaml(174,31) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 174, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::ContentPresenter::background_property()), 174, 31)?;
     // Controls/MacOSControls.xaml(175,31) Content (setter chosen at run time)
     let priority_5 = __t::BindingPriority::Template;
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("CurrentPage?.(NavigationPage.BottomCommandBar)"));
@@ -44574,7 +46013,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     grid_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentHost")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentHost", __t::Rc::new(__t::Clone::clone(&grid_0)), 178, 19)?;
     // Controls/MacOSControls.xaml(179,19) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 179, 19)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 179, 19)?;
     // Controls/MacOSControls.xaml(178,14) ClipToBounds
     let priority_6 = __t::BindingPriority::Template;
     grid_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_6);
@@ -44633,7 +46072,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     let priority_13 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_13);
     // Controls/MacOSControls.xaml(195,19) Height
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::NavigationPage::effective_bar_height_property()), 195, 19)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationPage::effective_bar_height_property()), || rt::property(__t::Layoutable::height_property()), 195, 19)?;
     // Controls/MacOSControls.xaml(196,14) Child
     // Controls/MacOSControls.xaml(196,14) Grid
     let grid_1 = __t::Grid::new();
@@ -44672,7 +46111,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     let value_1: __t::MarkupValue = rt::to_value(provided_6);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_15, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 199, 23)?;
     // Controls/MacOSControls.xaml(200,23) IsVisible
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::NavigationPage::is_back_button_effectively_visible_property()), 200, 23)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationPage::is_back_button_effectively_visible_property()), || rt::property(__t::Visual::is_visible_property()), 200, 23)?;
     // Controls/MacOSControls.xaml(197,16) VerticalAlignment
     let priority_16 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_16);
@@ -44911,7 +46350,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     let priority_44 = __t::BindingPriority::Template;
     content_presenter_6.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_44);
     // Controls/MacOSControls.xaml(260,29) Background
-    rt::bind_template_binding(content_presenter_6.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 260, 29)?;
+    rt::apply_template_binding(content_presenter_6.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::ContentPresenter::background_property()), 260, 29)?;
     rt::invoked(content_presenter_6.try_end_init(), 257, 12)?;
     // Controls/MacOSControls.xaml(261,12) Children
     let children_collection_14 = __t::Panel::__markup_get_Children(&panel_0);
@@ -44929,7 +46368,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     let priority_46 = __t::BindingPriority::Template;
     content_presenter_7.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_46);
     // Controls/MacOSControls.xaml(264,29) Background
-    rt::bind_template_binding(content_presenter_7.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 264, 29)?;
+    rt::apply_template_binding(content_presenter_7.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::ContentPresenter::background_property()), 264, 29)?;
     rt::invoked(content_presenter_7.try_end_init(), 261, 12)?;
     context.pop_parent();
     rt::invoked(panel_0.try_end_init(), 163, 10)?;
@@ -45180,16 +46619,12 @@ fn build_controls_macoscontrols_xaml_deferred_315(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 115, 17)?;
     // Controls/MacOSControls.xaml(116,17) Height
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::Layoutable::min_height_property()), 116, 17)?;
-    // Controls/MacOSControls.xaml(117,17) Margin
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 117, 17)?;
-    // Controls/MacOSControls.xaml(118,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 118, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R192)?;
     // Controls/MacOSControls.xaml(115,10) HorizontalAlignment
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
     // Controls/MacOSControls.xaml(120,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 120, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 120, 17)?;
     // Controls/MacOSControls.xaml(121,12) Child
     // Controls/MacOSControls.xaml(121,12) Grid
     let grid_0 = __t::Grid::new();
@@ -45214,7 +46649,7 @@ fn build_controls_macoscontrols_xaml_deferred_315(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&border_1).upcast::<__t::Control>());
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(122,21) Width
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::Layoutable::min_width_property()), 122, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::Layoutable::min_width_property()), || rt::property(__t::Layoutable::width_property()), 122, 21)?;
     // Controls/MacOSControls.xaml(123,16) Child
     // Controls/MacOSControls.xaml(123,16) Path
     let path_0 = __t::Path::new();
@@ -45239,12 +46674,12 @@ fn build_controls_macoscontrols_xaml_deferred_315(
     let priority_4 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_4);
     // Controls/MacOSControls.xaml(128,21) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 128, 21)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 128, 21)?;
     // Controls/MacOSControls.xaml(123,16) HorizontalAlignment
     let priority_5 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_5);
     // Controls/MacOSControls.xaml(130,21) VerticalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 130, 21)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::vertical_content_alignment_property()), || rt::property(__t::Layoutable::vertical_alignment_property()), 130, 21)?;
     context.pop_parent();
     rt::invoked(path_0.try_end_init(), 123, 16)?;
     context.pop_parent();
@@ -45275,11 +46710,7 @@ fn build_controls_macoscontrols_xaml_deferred_315(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 135, 31)?, priority_8);
     }
     // Controls/MacOSControls.xaml(136,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 136, 31)?;
-    // Controls/MacOSControls.xaml(137,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 137, 31)?;
-    // Controls/MacOSControls.xaml(138,31) FontSize
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 138, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R193)?;
     // Controls/MacOSControls.xaml(132,14) Padding
     let priority_9 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::padding_property(), __t::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_9);
@@ -45336,16 +46767,12 @@ fn build_controls_macoscontrols_xaml_deferred_317(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 192, 17)?;
     // Controls/MacOSControls.xaml(193,17) Height
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::Layoutable::min_height_property()), 193, 17)?;
-    // Controls/MacOSControls.xaml(194,17) Margin
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 194, 17)?;
-    // Controls/MacOSControls.xaml(195,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 195, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R194)?;
     // Controls/MacOSControls.xaml(192,10) HorizontalAlignment
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_0);
     // Controls/MacOSControls.xaml(197,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 197, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 197, 17)?;
     // Controls/MacOSControls.xaml(198,12) Child
     // Controls/MacOSControls.xaml(198,12) Border
     let border_1 = __t::Border::new();
@@ -45353,7 +46780,7 @@ fn build_controls_macoscontrols_xaml_deferred_317(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&border_1).upcast::<__t::Control>()));
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(198,19) Width
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::Layoutable::min_width_property()), 198, 19)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::Layoutable::min_width_property()), || rt::property(__t::Layoutable::width_property()), 198, 19)?;
     // Controls/MacOSControls.xaml(199,14) Child
     // Controls/MacOSControls.xaml(199,14) Panel
     let panel_0 = __t::Panel::new();
@@ -45385,12 +46812,12 @@ fn build_controls_macoscontrols_xaml_deferred_317(
     let priority_4 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_4);
     // Controls/MacOSControls.xaml(205,21) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 205, 21)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 205, 21)?;
     // Controls/MacOSControls.xaml(200,16) HorizontalAlignment
     let priority_5 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_5);
     // Controls/MacOSControls.xaml(207,21) VerticalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 207, 21)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::vertical_content_alignment_property()), || rt::property(__t::Layoutable::vertical_alignment_property()), 207, 21)?;
     // Controls/MacOSControls.xaml(208,21) IsVisible
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     // Controls/MacOSControls.xaml(208,21) Converter
@@ -45426,9 +46853,7 @@ fn build_controls_macoscontrols_xaml_deferred_317(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 212, 33)?, priority_8);
     }
     // Controls/MacOSControls.xaml(213,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 213, 33)?;
-    // Controls/MacOSControls.xaml(214,33) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 214, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R195)?;
     // Controls/MacOSControls.xaml(215,33) IsVisible
     let template_binding_11 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     // Controls/MacOSControls.xaml(215,33) Converter
@@ -45670,9 +47095,7 @@ fn build_controls_macoscontrols_xaml_deferred_319(
     // Controls/MacOSControls.xaml(244,17) MinHeight
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 244, 17)?;
     // Controls/MacOSControls.xaml(245,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 245, 17)?;
-    // Controls/MacOSControls.xaml(246,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 246, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R196)?;
     // Controls/MacOSControls.xaml(247,17) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "NavigationViewItemButtonMargin", 247, 17)?;
     // Controls/MacOSControls.xaml(248,12) Child
@@ -45784,15 +47207,7 @@ fn build_controls_macoscontrols_xaml_deferred_319(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 266, 33)?, priority_8);
     }
     // Controls/MacOSControls.xaml(267,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 267, 33)?;
-    // Controls/MacOSControls.xaml(268,33) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 268, 33)?;
-    // Controls/MacOSControls.xaml(269,33) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 269, 33)?;
-    // Controls/MacOSControls.xaml(270,33) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 270, 33)?;
-    // Controls/MacOSControls.xaml(271,33) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 271, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R197)?;
     // Controls/MacOSControls.xaml(263,16) TextWrapping
     let priority_9 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::text_wrapping_property(), __t::TextWrapping::NoWrap, priority_9);
@@ -45887,16 +47302,12 @@ fn build_controls_macoscontrols_xaml_deferred_322(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Controls/MacOSControls.xaml(356,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 356, 17)?;
-    // Controls/MacOSControls.xaml(357,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 357, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R198)?;
     // Controls/MacOSControls.xaml(356,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(359,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 359, 17)?;
-    // Controls/MacOSControls.xaml(360,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 360, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R199)?;
     // Controls/MacOSControls.xaml(362,12) Child
     // Controls/MacOSControls.xaml(362,12) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -45906,11 +47317,7 @@ fn build_controls_macoscontrols_xaml_deferred_322(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 362, 25)?;
     // Controls/MacOSControls.xaml(363,25) Padding
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 363, 25)?;
-    // Controls/MacOSControls.xaml(364,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 364, 25)?;
-    // Controls/MacOSControls.xaml(365,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 365, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R200)?;
     // Controls/MacOSControls.xaml(366,14) Content
     // Controls/MacOSControls.xaml(366,14) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -45920,7 +47327,7 @@ fn build_controls_macoscontrols_xaml_deferred_322(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 366, 29)?;
     // Controls/MacOSControls.xaml(367,29) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 367, 29)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 367, 29)?;
     rt::invoked(items_presenter_0.try_end_init(), 366, 14)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 362, 12)?;
     rt::invoked(border_0.try_end_init(), 356, 10)?;
@@ -46224,7 +47631,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     split_view_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_SplitView")));
     rt::register_name_value(name_scope.as_ref(), "PART_SplitView", __t::Rc::new(__t::Clone::clone(&split_view_0)), 378, 20)?;
     // Controls/MacOSControls.xaml(379,20) Background
-    rt::bind_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 379, 20)?;
+    rt::apply_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::TemplatedControl::background_property()), 379, 20)?;
     // Controls/MacOSControls.xaml(380,20) BorderThickness
     rt::bind_dynamic_resource(&context, split_view_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), "NavigationViewBorderThickness", 380, 20)?;
     // Controls/MacOSControls.xaml(381,20) CornerRadius
@@ -46237,11 +47644,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     let provided_3 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_1);
     rt::bind(split_view_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), provided_3, 381, 20)?;
     // Controls/MacOSControls.xaml(382,20) DisplayMode
-    rt::bind_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), __t::SplitView::display_mode_property(), rt::property(__t::DrawerPage::display_mode_property()), 382, 20)?;
-    // Controls/MacOSControls.xaml(383,20) OpenPaneLength
-    rt::bind_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), __t::SplitView::open_pane_length_property(), rt::property(__t::DrawerPage::drawer_length_property()), 383, 20)?;
-    // Controls/MacOSControls.xaml(384,20) CompactPaneLength
-    rt::bind_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), __t::SplitView::compact_pane_length_property(), rt::property(__t::DrawerPage::compact_drawer_length_property()), 384, 20)?;
+    rt::bind_template_rows(split_view_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R201)?;
     // Controls/MacOSControls.xaml(385,20) IsPaneOpen
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("IsOpen"));
     context.push_parent(rt::to_value(reflection_binding_extension_0.clone()));
@@ -46303,7 +47706,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
         toggle_button_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 395, 29)?, priority_3);
     }
     // Controls/MacOSControls.xaml(396,29) ContentTemplate
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::DrawerPage::drawer_icon_template_property()), 396, 29)?;
+    rt::apply_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::drawer_icon_template_property()), || rt::property(__t::ContentControl::content_template_property()), 396, 29)?;
     // Controls/MacOSControls.xaml(390,16) IsVisible
     let priority_4 = __t::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_4);
@@ -46347,9 +47750,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 406, 33)?, priority_11);
     }
     // Controls/MacOSControls.xaml(407,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::DrawerPage::drawer_header_template_property()), 407, 33)?;
-    // Controls/MacOSControls.xaml(408,33) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::DrawerPage::drawer_header_background_property()), 408, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R202)?;
     // Controls/MacOSControls.xaml(409,33) IsVisible
     let template_binding_10 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DrawerPage::drawer_header_property()));
     // Controls/MacOSControls.xaml(409,33) Converter
@@ -46390,9 +47791,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_4.clone(), "ContentControl.Content", 1, 416, 33)?, priority_16);
     }
     // Controls/MacOSControls.xaml(417,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::DrawerPage::drawer_footer_template_property()), 417, 33)?;
-    // Controls/MacOSControls.xaml(418,33) Background
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::DrawerPage::drawer_footer_background_property()), 418, 33)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R203)?;
     // Controls/MacOSControls.xaml(419,33) IsVisible
     let template_binding_14 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DrawerPage::drawer_footer_property()));
     // Controls/MacOSControls.xaml(419,33) Converter
@@ -46427,7 +47826,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
         content_presenter_2.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_6.clone(), "ContentControl.Content", 1, 424, 33)?, priority_19);
     }
     // Controls/MacOSControls.xaml(425,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::DrawerPage::drawer_template_property()), 425, 33)?;
+    rt::apply_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::drawer_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 425, 33)?;
     rt::invoked(content_presenter_2.try_end_init(), 421, 16)?;
     context.pop_parent();
     rt::invoked(dock_panel_0.try_end_init(), 388, 14)?;
@@ -46534,7 +47933,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
         toggle_button_1.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_8.clone(), "ContentControl.Content", 1, 448, 35)?, priority_27);
     }
     // Controls/MacOSControls.xaml(449,35) ContentTemplate
-    rt::bind_template_binding(toggle_button_1.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::DrawerPage::drawer_icon_template_property()), 449, 35)?;
+    rt::apply_template_binding(toggle_button_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::drawer_icon_template_property()), || rt::property(__t::ContentControl::content_template_property()), 449, 35)?;
     // Controls/MacOSControls.xaml(445,22) Dock
     let priority_28 = __t::BindingPriority::Template;
     toggle_button_1.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Left, priority_28);
@@ -46572,7 +47971,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
         content_control_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_10.clone(), "ContentControl.Content", 1, 455, 37)?, priority_32);
     }
     // Controls/MacOSControls.xaml(456,37) ContentTemplate
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::Page::header_template_property()), 456, 37)?;
+    rt::apply_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::Page::header_template_property()), || rt::property(__t::ContentControl::content_template_property()), 456, 37)?;
     // Controls/MacOSControls.xaml(453,22) VerticalAlignment
     let priority_33 = __t::BindingPriority::Template;
     content_control_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_33);
@@ -46654,7 +48053,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
         toggle_button_2.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_13.clone(), "ContentControl.Content", 1, 472, 35)?, priority_40);
     }
     // Controls/MacOSControls.xaml(473,35) ContentTemplate
-    rt::bind_template_binding(toggle_button_2.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::DrawerPage::drawer_icon_template_property()), 473, 35)?;
+    rt::apply_template_binding(toggle_button_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::drawer_icon_template_property()), || rt::property(__t::ContentControl::content_template_property()), 473, 35)?;
     // Controls/MacOSControls.xaml(469,22) Dock
     let priority_41 = __t::BindingPriority::Template;
     toggle_button_2.set_value_with_priority(__t::DockPanel::dock_property(), __t::Dock::Left, priority_41);
@@ -46692,7 +48091,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
         content_control_1.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_15.clone(), "ContentControl.Content", 1, 479, 37)?, priority_45);
     }
     // Controls/MacOSControls.xaml(480,37) ContentTemplate
-    rt::bind_template_binding(content_control_1.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::Page::header_template_property()), 480, 37)?;
+    rt::apply_template_binding(content_control_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::Page::header_template_property()), || rt::property(__t::ContentControl::content_template_property()), 480, 37)?;
     // Controls/MacOSControls.xaml(477,22) VerticalAlignment
     let priority_46 = __t::BindingPriority::Template;
     content_control_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Center, priority_46);
@@ -46728,18 +48127,12 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     // Controls/MacOSControls.xaml(488,35) Margin
     rt::bind_dynamic_resource(&context, content_presenter_3.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "NavigationViewContentPresenterMargin", 488, 35)?;
     // Controls/MacOSControls.xaml(489,35) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::DrawerPage::horizontal_content_alignment_property()), 489, 35)?;
-    // Controls/MacOSControls.xaml(490,35) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::DrawerPage::vertical_content_alignment_property()), 490, 35)?;
-    // Controls/MacOSControls.xaml(491,35) Background
-    rt::bind_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 491, 35)?;
-    // Controls/MacOSControls.xaml(492,35) BorderBrush
-    rt::bind_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 492, 35)?;
+    rt::bind_template_rows(content_presenter_3.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R204)?;
     // Controls/MacOSControls.xaml(487,18) BackgroundSizing
     let priority_49 = __t::BindingPriority::Template;
     content_presenter_3.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_49);
     // Controls/MacOSControls.xaml(494,35) BorderThickness
-    rt::bind_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 494, 35)?;
+    rt::apply_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 494, 35)?;
     // Controls/MacOSControls.xaml(495,35) Content (setter chosen at run time)
     let priority_50 = __t::BindingPriority::Template;
     let template_binding_32 = __t::TemplateBinding::__markup_new_1(rt::property(__t::DrawerPage::content_property()));
@@ -46751,7 +48144,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
         content_presenter_3.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_17.clone(), "ContentControl.Content", 1, 495, 35)?, priority_50);
     }
     // Controls/MacOSControls.xaml(496,35) ContentTemplate
-    rt::bind_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::DrawerPage::content_template_property()), 496, 35)?;
+    rt::apply_template_binding(content_presenter_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 496, 35)?;
     context.pop_parent();
     rt::invoked(content_presenter_3.try_end_init(), 487, 18)?;
     context.pop_parent();
@@ -46768,7 +48161,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     border_3.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_Backdrop")));
     rt::register_name_value(name_scope.as_ref(), "PART_Backdrop", __t::Rc::new(__t::Clone::clone(&border_3)), 499, 21)?;
     // Controls/MacOSControls.xaml(500,21) Background
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::DrawerPage::backdrop_brush_property()), 500, 21)?;
+    rt::apply_template_binding(border_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::DrawerPage::backdrop_brush_property()), || rt::property(__t::Border::background_property()), 500, 21)?;
     // Controls/MacOSControls.xaml(499,14) IsVisible
     let priority_51 = __t::BindingPriority::Template;
     border_3.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_51);
@@ -46860,16 +48253,12 @@ fn build_controls_macoscontrols_xaml_deferred_327(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Controls/MacOSControls.xaml(63,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 63, 17)?;
-    // Controls/MacOSControls.xaml(64,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 64, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R205)?;
     // Controls/MacOSControls.xaml(63,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(66,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 66, 17)?;
-    // Controls/MacOSControls.xaml(67,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 67, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R206)?;
     // Controls/MacOSControls.xaml(68,12) Child
     // Controls/MacOSControls.xaml(68,12) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -46879,9 +48268,7 @@ fn build_controls_macoscontrols_xaml_deferred_327(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 68, 25)?;
     // Controls/MacOSControls.xaml(69,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 69, 25)?;
-    // Controls/MacOSControls.xaml(70,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 70, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R207)?;
     // Controls/MacOSControls.xaml(68,12) BringIntoViewOnFocusChange
     let priority_1 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::bring_into_view_on_focus_change_property(), __t::Clone::clone(&false), priority_1);
@@ -46897,9 +48284,7 @@ fn build_controls_macoscontrols_xaml_deferred_327(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 73, 29)?;
     // Controls/MacOSControls.xaml(74,29) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 74, 29)?;
-    // Controls/MacOSControls.xaml(75,29) Margin
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 75, 29)?;
+    rt::bind_template_rows(items_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R208)?;
     rt::invoked(items_presenter_0.try_end_init(), 73, 14)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 68, 12)?;
     rt::invoked(border_0.try_end_init(), 63, 10)?;
@@ -47375,15 +48760,7 @@ fn build_controls_macoscontrols_xaml_deferred_331(
     // Controls/MacOSControls.xaml(50,52) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "AppBarButtonInnerBorderMargin", 50, 52)?;
     // Controls/MacOSControls.xaml(50,109) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 50, 109)?;
-    // Controls/MacOSControls.xaml(50,151) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 50, 151)?;
-    // Controls/MacOSControls.xaml(50,195) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 50, 195)?;
-    // Controls/MacOSControls.xaml(50,247) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 50, 247)?;
-    // Controls/MacOSControls.xaml(50,293) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 50, 293)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R209)?;
     // Controls/MacOSControls.xaml(52,16) Transitions
     let transitions_0 = __t::Transitions::__markup_new_0();
     context.push_parent(rt::to_value(transitions_0.clone()));
@@ -47435,7 +48812,7 @@ fn build_controls_macoscontrols_xaml_deferred_331(
     __t::RowDefinitions::__markup_Add_0(&row_definitions_0, __t::Clone::clone(&row_definition_1));
     __t::Grid::__markup_set_RowDefinitions(&grid_0, __t::Clone::clone(&row_definitions_0));
     // Controls/MacOSControls.xaml(57,143) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 57, 143)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 57, 143)?;
     // Controls/MacOSControls.xaml(58,14) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(58,14) Viewbox
@@ -47473,7 +48850,7 @@ fn build_controls_macoscontrols_xaml_deferred_331(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 59, 50)?, priority_3);
     }
     // Controls/MacOSControls.xaml(59,83) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 59, 83)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 59, 83)?;
     // Controls/MacOSControls.xaml(61,20) Styles
     let styles_collection_0 = __t::StyledElement::__markup_get_Styles(content_presenter_0.upcast_ref::<__t::StyledElement>());
     // Controls/MacOSControls.xaml(61,20) Style
@@ -47511,13 +48888,11 @@ fn build_controls_macoscontrols_xaml_deferred_331(
     let priority_4 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_4);
     // Controls/MacOSControls.xaml(69,56) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::CommandBarButton::label_property()), 69, 56)?;
-    // Controls/MacOSControls.xaml(69,87) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 69, 87)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R210)?;
     // Controls/MacOSControls.xaml(69,129) FontSize
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), "AppBarButtonLabelFontSize", 69, 129)?;
     // Controls/MacOSControls.xaml(69,184) FontFamily
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 69, 184)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_family_property()), || rt::property(__t::TextBlock::font_family_property()), 69, 184)?;
     // Controls/MacOSControls.xaml(69,14) TextAlignment
     let priority_5 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::TextBlock::text_alignment_property(), __t::TextAlignment::Center, priority_5);
@@ -47539,13 +48914,11 @@ fn build_controls_macoscontrols_xaml_deferred_331(
     text_block_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("OverflowTextLabel")));
     rt::register_name_value(name_scope.as_ref(), "OverflowTextLabel", __t::Rc::new(__t::Clone::clone(&text_block_1)), 70, 24)?;
     // Controls/MacOSControls.xaml(70,51) Text
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::CommandBarButton::label_property()), 70, 51)?;
-    // Controls/MacOSControls.xaml(70,82) Foreground
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 70, 82)?;
+    rt::bind_template_rows(text_block_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R211)?;
     // Controls/MacOSControls.xaml(70,124) FontSize
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), "ControlContentThemeFontSize", 70, 124)?;
     // Controls/MacOSControls.xaml(70,181) FontFamily
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 70, 181)?;
+    rt::apply_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_family_property()), || rt::property(__t::TextBlock::font_family_property()), 70, 181)?;
     // Controls/MacOSControls.xaml(70,14) TextAlignment
     let priority_7 = __t::BindingPriority::Template;
     text_block_1.set_value_with_priority(__t::TextBlock::text_alignment_property(), __t::TextAlignment::Left, priority_7);
@@ -48651,15 +50024,7 @@ fn build_controls_macoscontrols_xaml_deferred_336(
     // Controls/MacOSControls.xaml(200,58) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "AppBarButtonInnerBorderMargin", 200, 58)?;
     // Controls/MacOSControls.xaml(200,115) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 200, 115)?;
-    // Controls/MacOSControls.xaml(200,157) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 200, 157)?;
-    // Controls/MacOSControls.xaml(200,201) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 200, 201)?;
-    // Controls/MacOSControls.xaml(200,253) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 200, 253)?;
-    // Controls/MacOSControls.xaml(200,299) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 200, 299)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R212)?;
     // Controls/MacOSControls.xaml(202,16) Transitions
     let transitions_0 = __t::Transitions::__markup_new_0();
     context.push_parent(rt::to_value(transitions_0.clone()));
@@ -48711,7 +50076,7 @@ fn build_controls_macoscontrols_xaml_deferred_336(
     __t::RowDefinitions::__markup_Add_0(&row_definitions_0, __t::Clone::clone(&row_definition_1));
     __t::Grid::__markup_set_RowDefinitions(&grid_0, __t::Clone::clone(&row_definitions_0));
     // Controls/MacOSControls.xaml(207,143) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 207, 143)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 207, 143)?;
     // Controls/MacOSControls.xaml(208,14) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(208,14) Path
@@ -48788,7 +50153,7 @@ fn build_controls_macoscontrols_xaml_deferred_336(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 210, 50)?, priority_10);
     }
     // Controls/MacOSControls.xaml(210,83) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 210, 83)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 210, 83)?;
     // Controls/MacOSControls.xaml(212,20) Styles
     let styles_collection_0 = __t::StyledElement::__markup_get_Styles(content_presenter_0.upcast_ref::<__t::StyledElement>());
     // Controls/MacOSControls.xaml(212,20) Style
@@ -48826,14 +50191,12 @@ fn build_controls_macoscontrols_xaml_deferred_336(
     let priority_11 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_11);
     // Controls/MacOSControls.xaml(220,56) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::CommandBarToggleButton::label_property()), 220, 56)?;
-    // Controls/MacOSControls.xaml(220,87) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 220, 87)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R213)?;
     // Controls/MacOSControls.xaml(220,14) FontSize
     let priority_12 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::TextBlock::font_size_property(), 12.0_f64, priority_12);
     // Controls/MacOSControls.xaml(220,143) FontFamily
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 220, 143)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_family_property()), || rt::property(__t::TextBlock::font_family_property()), 220, 143)?;
     // Controls/MacOSControls.xaml(220,14) TextAlignment
     let priority_13 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::TextBlock::text_alignment_property(), __t::TextAlignment::Center, priority_13);
@@ -48855,13 +50218,11 @@ fn build_controls_macoscontrols_xaml_deferred_336(
     text_block_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("OverflowTextLabel")));
     rt::register_name_value(name_scope.as_ref(), "OverflowTextLabel", __t::Rc::new(__t::Clone::clone(&text_block_1)), 221, 24)?;
     // Controls/MacOSControls.xaml(221,51) Text
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::CommandBarToggleButton::label_property()), 221, 51)?;
-    // Controls/MacOSControls.xaml(221,82) Foreground
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 221, 82)?;
+    rt::bind_template_rows(text_block_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R214)?;
     // Controls/MacOSControls.xaml(221,124) FontSize
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_size_property(), "ControlContentThemeFontSize", 221, 124)?;
     // Controls/MacOSControls.xaml(221,181) FontFamily
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 221, 181)?;
+    rt::apply_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_family_property()), || rt::property(__t::TextBlock::font_family_property()), 221, 181)?;
     // Controls/MacOSControls.xaml(221,14) TextAlignment
     let priority_15 = __t::BindingPriority::Template;
     text_block_1.set_value_with_priority(__t::TextBlock::text_alignment_property(), __t::TextAlignment::Left, priority_15);
@@ -49056,9 +50417,7 @@ fn build_controls_macoscontrols_xaml_deferred_340(
     let priority_3 = __t::BindingPriority::Template;
     rectangle_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_3);
     // Controls/MacOSControls.xaml(513,234) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 513, 234)?;
-    // Controls/MacOSControls.xaml(513,270) Margin
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 513, 270)?;
+    rt::bind_template_rows(rectangle_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R215)?;
     context.pop_parent();
     rt::invoked(rectangle_0.try_end_init(), 513, 12)?;
     context.pop_parent();
@@ -49250,16 +50609,12 @@ fn build_controls_macoscontrols_xaml_deferred_343(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 551, 29)?;
     // Controls/MacOSControls.xaml(551,60) Background
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), rt::property(__t::TemplatedControl::background_property()), 551, 60)?;
-    // Controls/MacOSControls.xaml(551,102) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 551, 102)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R216)?;
     // Controls/MacOSControls.xaml(551,12) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/MacOSControls.xaml(551,181) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 551, 181)?;
-    // Controls/MacOSControls.xaml(551,233) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 551, 233)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R217)?;
     // Controls/MacOSControls.xaml(551,279) Content (setter chosen at run time)
     let priority_2 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -49271,9 +50626,7 @@ fn build_controls_macoscontrols_xaml_deferred_343(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 551, 279)?, priority_2);
     }
     // Controls/MacOSControls.xaml(551,315) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 551, 315)?;
-    // Controls/MacOSControls.xaml(551,367) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 551, 367)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R218)?;
     // Controls/MacOSControls.xaml(551,409) Margin (setter chosen at run time)
     let priority_3 = __t::BindingPriority::Template;
     let provided_7 = rt::provide_static_resource(&context, "AppBarEllipsisButtonInnerBorderMargin", || rt::property_value(__t::Layoutable::margin_property()), 551, 409)?;
@@ -49283,9 +50636,7 @@ fn build_controls_macoscontrols_xaml_deferred_343(
     let priority_4 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::padding_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_4);
     // Controls/MacOSControls.xaml(551,485) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 551, 485)?;
-    // Controls/MacOSControls.xaml(551,559) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 551, 559)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R219)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 551, 12)?;
     context.pop_parent();
@@ -49353,18 +50704,16 @@ fn build_controls_macoscontrols_xaml_deferred_345(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 591, 17)?;
     // Controls/MacOSControls.xaml(591,37) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 591, 37)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 591, 37)?;
     // Controls/MacOSControls.xaml(591,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(591,114) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 591, 114)?;
-    // Controls/MacOSControls.xaml(591,150) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 591, 150)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R220)?;
     // Controls/MacOSControls.xaml(591,194) BorderThickness
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), "CommandBarOverflowPresenterBorderThickness", 591, 194)?;
     // Controls/MacOSControls.xaml(591,273) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 591, 273)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 591, 273)?;
     // Controls/MacOSControls.xaml(592,12) Child
     // Controls/MacOSControls.xaml(592,12) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -49372,9 +50721,7 @@ fn build_controls_macoscontrols_xaml_deferred_345(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&scroll_viewer_0).upcast::<__t::Control>()));
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/MacOSControls.xaml(592,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 592, 25)?;
-    // Controls/MacOSControls.xaml(592,120) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 592, 120)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R221)?;
     // Controls/MacOSControls.xaml(593,14) Content
     // Controls/MacOSControls.xaml(593,14) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -49385,7 +50732,7 @@ fn build_controls_macoscontrols_xaml_deferred_345(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 593, 29)?;
     // Controls/MacOSControls.xaml(593,56) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 593, 56)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 593, 56)?;
     // Controls/MacOSControls.xaml(593,98) Margin
     rt::bind_dynamic_resource(&context, items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "CommandBarOverflowPresenterMargin", 593, 98)?;
     context.pop_parent();
@@ -49524,9 +50871,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     // Controls/MacOSControls.xaml(612,64) MinHeight
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "AppBarThemeCompactHeight", 612, 64)?;
     // Controls/MacOSControls.xaml(612,119) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 612, 119)?;
-    // Controls/MacOSControls.xaml(612,161) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 612, 161)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R222)?;
     // Controls/MacOSControls.xaml(612,12) Margin
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(6.0_f64, 6.0_f64, 6.0_f64, 6.0_f64), priority_1);
@@ -49549,7 +50894,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     let priority_2 = __t::BindingPriority::Template;
     experimental_acrylic_border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_2);
     // Controls/MacOSControls.xaml(614,122) CornerRadius
-    rt::bind_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), __t::ExperimentalAcrylicBorder::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 614, 122)?;
+    rt::apply_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::ExperimentalAcrylicBorder::corner_radius_property()), 614, 122)?;
     context.pop_parent();
     rt::invoked(experimental_acrylic_border_0.try_end_init(), 614, 16)?;
     // Controls/MacOSControls.xaml(615,16) Children
@@ -49609,7 +50954,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 621, 37)?;
     // Controls/MacOSControls.xaml(621,68) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 621, 68)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 621, 68)?;
     // Controls/MacOSControls.xaml(621,103) Content (setter chosen at run time)
     let priority_6 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::CommandBar::content_property()));
@@ -49621,7 +50966,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 621, 103)?, priority_6);
     }
     // Controls/MacOSControls.xaml(621,139) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 621, 139)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 621, 139)?;
     // Controls/MacOSControls.xaml(621,20) HorizontalAlignment
     let priority_7 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_7);
@@ -49696,14 +51041,14 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     let value_2: __t::MarkupValue = rt::to_value(provided_12);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_2, priority_16, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 630, 70)?;
     // Controls/MacOSControls.xaml(630,110) Foreground
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 630, 110)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TemplatedControl::foreground_property()), 630, 110)?;
     // Controls/MacOSControls.xaml(630,152) MinHeight
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "AppBarThemeCompactHeight", 630, 152)?;
     // Controls/MacOSControls.xaml(630,18) VerticalAlignment
     let priority_17 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Top, priority_17);
     // Controls/MacOSControls.xaml(630,231) IsVisible
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::CommandBar::is_overflow_button_visible_property()), 630, 231)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::CommandBar::is_overflow_button_visible_property()), || rt::property(__t::Visual::is_visible_property()), 630, 231)?;
     // Controls/MacOSControls.xaml(631,20) Content
     // Controls/MacOSControls.xaml(631,20) Path
     let path_0 = __t::Path::new();
@@ -49787,7 +51132,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     // Controls/MacOSControls.xaml(634,177) BorderBrush
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "CommandBarBorderBrushOpen", 634, 177)?;
     // Controls/MacOSControls.xaml(634,235) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 634, 235)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 634, 235)?;
     context.pop_parent();
     rt::invoked(border_1.try_end_init(), 634, 18)?;
     context.pop_parent();
@@ -50254,17 +51599,7 @@ fn build_controls_macoscontrols_xaml_deferred_353(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 48, 17)?;
     // Controls/MacOSControls.xaml(49,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 49, 17)?;
-    // Controls/MacOSControls.xaml(50,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 50, 17)?;
-    // Controls/MacOSControls.xaml(51,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 51, 17)?;
-    // Controls/MacOSControls.xaml(52,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 52, 17)?;
-    // Controls/MacOSControls.xaml(53,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 53, 17)?;
-    // Controls/MacOSControls.xaml(54,17) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 54, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R223)?;
     // Controls/MacOSControls.xaml(56,14) Transitions
     let transitions_0 = __t::Transitions::__markup_new_0();
     context.push_parent(rt::to_value(transitions_0.clone()));
@@ -50317,13 +51652,7 @@ fn build_controls_macoscontrols_xaml_deferred_353(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 62, 31)?, priority_1);
     }
     // Controls/MacOSControls.xaml(63,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 63, 31)?;
-    // Controls/MacOSControls.xaml(64,31) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 64, 31)?;
-    // Controls/MacOSControls.xaml(65,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 65, 31)?;
-    // Controls/MacOSControls.xaml(66,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 66, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R224)?;
     // Controls/MacOSControls.xaml(61,14) RecognizesAccessKey
     let priority_2 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_2);
@@ -50559,23 +51888,6 @@ fn build_controls_macoscontrols_xaml_deferred_360(
 fn build_controls_macoscontrols_xaml_deferred_361(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    __build_controls_macoscontrols_xaml_factory_shape_361(service_provider, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56)
-}
-
-#[inline(never)]
-fn __build_controls_macoscontrols_xaml_factory_shape_361(
-    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
-    arg0: i32,
-    arg1: i32,
-    arg2: i32,
-    arg3: i32,
-    arg4: i32,
-    arg5: i32,
-    arg6: i32,
-    arg7: i32,
-    arg8: i32,
-    arg9: i32,
-) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(47,10) Grid
@@ -50584,7 +51896,7 @@ fn __build_controls_macoscontrols_xaml_factory_shape_361(
     grid_0.begin_init();
     // Controls/MacOSControls.xaml(47,15) Name
     grid_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
-    rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&grid_0)), arg0, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&grid_0)), 47, 15)?;
     // Controls/MacOSControls.xaml(47,10) Background
     let priority_0 = __t::BindingPriority::Template;
     grid_0.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
@@ -50596,36 +51908,26 @@ fn __build_controls_macoscontrols_xaml_factory_shape_361(
     __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&content_presenter_0).upcast::<__t::Control>());
     // Controls/MacOSControls.xaml(48,29) Name
     content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
-    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), arg1, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 48, 29)?;
     // Controls/MacOSControls.xaml(49,29) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), arg2, 29)?;
-    // Controls/MacOSControls.xaml(50,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), arg3, 29)?;
-    // Controls/MacOSControls.xaml(51,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), arg4, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R225)?;
     // Controls/MacOSControls.xaml(52,29) Content (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
     let provided_3 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_3);
     let value_0: __t::MarkupValue = rt::to_value(provided_3);
     if value_0.is_some() {
-        rt::bind(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_property(), value_0.clone(), arg5, 29)?;
+        rt::bind(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_property(), value_0.clone(), 52, 29)?;
     } else {
-        content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, arg5, 29)?, priority_1);
+        content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 52, 29)?, priority_1);
     }
     // Controls/MacOSControls.xaml(53,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), arg6, 29)?;
-    // Controls/MacOSControls.xaml(54,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), arg7, 29)?;
-    // Controls/MacOSControls.xaml(55,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), arg8, 29)?;
-    // Controls/MacOSControls.xaml(56,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), arg9, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R226)?;
     // Controls/MacOSControls.xaml(48,12) RecognizesAccessKey
     let priority_2 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_2);
-    rt::invoked(content_presenter_0.try_end_init(), arg1, 12)?;
-    rt::invoked(grid_0.try_end_init(), arg0, 10)?;
+    rt::invoked(content_presenter_0.try_end_init(), 48, 12)?;
+    rt::invoked(grid_0.try_end_init(), 47, 10)?;
     __t::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
@@ -51134,7 +52436,7 @@ fn build_controls_macoscontrols_xaml_deferred_364(
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
     // Controls/MacOSControls.xaml(105,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 105, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 105, 17)?;
     // Controls/MacOSControls.xaml(103,10) ClipToBounds
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Visual::clip_to_bounds_property(), __t::Clone::clone(&true), priority_1);
@@ -51248,14 +52550,12 @@ fn build_controls_macoscontrols_xaml_deferred_364(
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_11, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 127, 21)?;
     // Controls/MacOSControls.xaml(128,21) Foreground
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 128, 21)?;
-    // Controls/MacOSControls.xaml(129,21) Background
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 129, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R227)?;
     // Controls/MacOSControls.xaml(125,14) BorderThickness
     let priority_12 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_12);
     // Controls/MacOSControls.xaml(131,21) BorderBrush
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 131, 21)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::TemplatedControl::border_brush_property()), 131, 21)?;
     // Controls/MacOSControls.xaml(132,21) Content (setter chosen at run time)
     let priority_13 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -51267,9 +52567,7 @@ fn build_controls_macoscontrols_xaml_deferred_364(
         button_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 132, 21)?, priority_13);
     }
     // Controls/MacOSControls.xaml(133,21) ContentTemplate
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 133, 21)?;
-    // Controls/MacOSControls.xaml(134,21) Command
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), rt::property(__t::SplitButton::command_property()), 134, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R228)?;
     // Controls/MacOSControls.xaml(135,21) CommandParameter (setter chosen at run time)
     let priority_14 = __t::BindingPriority::Template;
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::SplitButton::command_parameter_property()));
@@ -51281,11 +52579,7 @@ fn build_controls_macoscontrols_xaml_deferred_364(
         button_0.set_value_with_priority(__t::Button::command_parameter_property(), rt::exact(value_2.clone(), "Button.CommandParameter", 1, 135, 21)?, priority_14);
     }
     // Controls/MacOSControls.xaml(136,21) FontFamily
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 136, 21)?;
-    // Controls/MacOSControls.xaml(137,21) FontSize
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 137, 21)?;
-    // Controls/MacOSControls.xaml(138,21) FontWeight
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 138, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R229)?;
     // Controls/MacOSControls.xaml(125,14) HorizontalAlignment
     let priority_15 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_15);
@@ -51293,11 +52587,7 @@ fn build_controls_macoscontrols_xaml_deferred_364(
     let priority_16 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_16);
     // Controls/MacOSControls.xaml(141,21) HorizontalContentAlignment
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 141, 21)?;
-    // Controls/MacOSControls.xaml(142,21) VerticalContentAlignment
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 142, 21)?;
-    // Controls/MacOSControls.xaml(143,21) Padding
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 143, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R230)?;
     // Controls/MacOSControls.xaml(125,14) IsTabStop
     let priority_17 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::InputElement::is_tab_stop_property(), __t::Clone::clone(&false), priority_17);
@@ -51327,12 +52617,12 @@ fn build_controls_macoscontrols_xaml_deferred_364(
     // Controls/MacOSControls.xaml(149,21) Foreground
     rt::bind_dynamic_resource(&context, button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), "SplitButtonForegroundSecondary", 149, 21)?;
     // Controls/MacOSControls.xaml(150,21) Background
-    rt::bind_template_binding(button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 150, 21)?;
+    rt::apply_template_binding(button_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::TemplatedControl::background_property()), 150, 21)?;
     // Controls/MacOSControls.xaml(146,14) BorderThickness
     let priority_21 = __t::BindingPriority::Template;
     button_1.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_21);
     // Controls/MacOSControls.xaml(152,21) BorderBrush
-    rt::bind_template_binding(button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 152, 21)?;
+    rt::apply_template_binding(button_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::TemplatedControl::border_brush_property()), 152, 21)?;
     // Controls/MacOSControls.xaml(146,14) HorizontalContentAlignment
     let priority_22 = __t::BindingPriority::Template;
     button_1.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_22);
@@ -51592,22 +52882,47 @@ fn build_controls_macoscontrols_xaml_deferred_367(
 fn build_controls_macoscontrols_xaml_deferred_368(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(354,10) Grid
+    let grid_0 = __t::Grid::new();
+    context.set_intermediate_root_object(rt::to_value(grid_0.clone()));
+    grid_0.begin_init();
     // Controls/MacOSControls.xaml(354,15) Name
+    grid_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&grid_0)), 354, 15)?;
     // Controls/MacOSControls.xaml(354,10) Background
+    let priority_0 = __t::BindingPriority::Template;
+    grid_0.set_value_with_priority(__t::Panel::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_0);
     // Controls/MacOSControls.xaml(355,12) Children
+    let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(355,12) ContentPresenter
+    let content_presenter_0 = __t::ContentPresenter::new();
+    content_presenter_0.begin_init();
+    __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&content_presenter_0).upcast::<__t::Control>());
     // Controls/MacOSControls.xaml(355,29) Name
+    content_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ContentPresenter")));
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", __t::Rc::new(__t::Clone::clone(&content_presenter_0)), 355, 29)?;
     // Controls/MacOSControls.xaml(356,29) Foreground
-    // Controls/MacOSControls.xaml(357,29) BorderBrush
-    // Controls/MacOSControls.xaml(358,29) BorderThickness
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R231)?;
     // Controls/MacOSControls.xaml(359,29) Content (setter chosen at run time)
+    let priority_1 = __t::BindingPriority::Template;
+    let template_binding_3 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
+    let provided_3 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_3);
+    let value_0: __t::MarkupValue = rt::to_value(provided_3);
+    if value_0.is_some() {
+        rt::bind(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_property(), value_0.clone(), 359, 29)?;
+    } else {
+        content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 359, 29)?, priority_1);
+    }
     // Controls/MacOSControls.xaml(360,29) ContentTemplate
-    // Controls/MacOSControls.xaml(361,29) Padding
-    // Controls/MacOSControls.xaml(362,29) HorizontalContentAlignment
-    // Controls/MacOSControls.xaml(363,29) VerticalContentAlignment
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R232)?;
     // Controls/MacOSControls.xaml(355,12) RecognizesAccessKey
-    __build_controls_macoscontrols_xaml_factory_shape_361(service_provider, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363)
+    let priority_2 = __t::BindingPriority::Template;
+    content_presenter_0.set_value_with_priority(__t::ContentPresenter::recognizes_access_key_property(), __t::Clone::clone(&true), priority_2);
+    rt::invoked(content_presenter_0.try_end_init(), 355, 12)?;
+    rt::invoked(grid_0.try_end_init(), 354, 10)?;
+    __t::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(384,4)` (a template or a deferred resource).
@@ -52193,11 +53508,7 @@ fn build_controls_macoscontrols_xaml_deferred_371(
     let priority_2 = __t::BindingPriority::Template;
     border_3.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_2);
     // Controls/MacOSControls.xaml(427,21) BorderBrush
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 427, 21)?;
-    // Controls/MacOSControls.xaml(428,21) BorderThickness
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 428, 21)?;
-    // Controls/MacOSControls.xaml(429,21) CornerRadius
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 429, 21)?;
+    rt::bind_template_rows(border_3.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R233)?;
     rt::invoked(border_3.try_end_init(), 425, 14)?;
     // Controls/MacOSControls.xaml(430,14) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -52218,11 +53529,7 @@ fn build_controls_macoscontrols_xaml_deferred_371(
     let value_0: __t::MarkupValue = rt::to_value(provided_10);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_4, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 432, 21)?;
     // Controls/MacOSControls.xaml(433,21) Foreground
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 433, 21)?;
-    // Controls/MacOSControls.xaml(434,21) Background
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 434, 21)?;
-    // Controls/MacOSControls.xaml(435,21) BorderThickness
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 435, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R234)?;
     // Controls/MacOSControls.xaml(430,14) BorderBrush
     let priority_5 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::TemplatedControl::border_brush_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_5);
@@ -52237,9 +53544,7 @@ fn build_controls_macoscontrols_xaml_deferred_371(
         button_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 437, 21)?, priority_6);
     }
     // Controls/MacOSControls.xaml(438,21) ContentTemplate
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 438, 21)?;
-    // Controls/MacOSControls.xaml(439,21) Command
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), rt::property(__t::SplitButton::command_property()), 439, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R235)?;
     // Controls/MacOSControls.xaml(440,21) CommandParameter (setter chosen at run time)
     let priority_7 = __t::BindingPriority::Template;
     let template_binding_11 = __t::TemplateBinding::__markup_new_1(rt::property(__t::SplitButton::command_parameter_property()));
@@ -52251,11 +53556,7 @@ fn build_controls_macoscontrols_xaml_deferred_371(
         button_0.set_value_with_priority(__t::Button::command_parameter_property(), rt::exact(value_2.clone(), "Button.CommandParameter", 1, 440, 21)?, priority_7);
     }
     // Controls/MacOSControls.xaml(441,21) FontFamily
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 441, 21)?;
-    // Controls/MacOSControls.xaml(442,21) FontSize
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 442, 21)?;
-    // Controls/MacOSControls.xaml(443,21) FontWeight
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 443, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R236)?;
     // Controls/MacOSControls.xaml(430,14) HorizontalAlignment
     let priority_8 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_8);
@@ -52263,11 +53564,7 @@ fn build_controls_macoscontrols_xaml_deferred_371(
     let priority_9 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_9);
     // Controls/MacOSControls.xaml(446,21) HorizontalContentAlignment
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 446, 21)?;
-    // Controls/MacOSControls.xaml(447,21) VerticalContentAlignment
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 447, 21)?;
-    // Controls/MacOSControls.xaml(448,21) Padding
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 448, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R237)?;
     // Controls/MacOSControls.xaml(430,14) IsTabStop
     let priority_10 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::InputElement::is_tab_stop_property(), __t::Clone::clone(&false), priority_10);
@@ -52297,9 +53594,7 @@ fn build_controls_macoscontrols_xaml_deferred_371(
     // Controls/MacOSControls.xaml(454,21) Foreground
     rt::bind_dynamic_resource(&context, button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), "AppBarButtonForeground", 454, 21)?;
     // Controls/MacOSControls.xaml(455,21) Background
-    rt::bind_template_binding(button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 455, 21)?;
-    // Controls/MacOSControls.xaml(456,21) BorderThickness
-    rt::bind_template_binding(button_1.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 456, 21)?;
+    rt::bind_template_rows(button_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R238)?;
     // Controls/MacOSControls.xaml(451,14) BorderBrush
     let priority_14 = __t::BindingPriority::Template;
     button_1.set_value_with_priority(__t::TemplatedControl::border_brush_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_14);
@@ -52626,11 +53921,7 @@ fn build_controls_macoscontrols_xaml_deferred_374(
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(36,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 36, 17)?;
-    // Controls/MacOSControls.xaml(37,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 37, 17)?;
-    // Controls/MacOSControls.xaml(38,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 38, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R239)?;
     // Controls/MacOSControls.xaml(39,12) Child
     // Controls/MacOSControls.xaml(39,12) Grid
     let grid_0 = __t::Grid::new();
@@ -52914,13 +54205,7 @@ fn build_controls_macoscontrols_xaml_deferred_374(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_5.clone(), "ContentControl.Content", 1, 81, 33)?, priority_25);
     }
     // Controls/MacOSControls.xaml(82,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 82, 33)?;
-    // Controls/MacOSControls.xaml(83,33) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 83, 33)?;
-    // Controls/MacOSControls.xaml(84,33) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 84, 33)?;
-    // Controls/MacOSControls.xaml(85,33) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 85, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R240)?;
     // Controls/MacOSControls.xaml(80,16) IsHitTestVisible
     let priority_26 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_26);
@@ -52948,9 +54233,7 @@ fn build_controls_macoscontrols_xaml_deferred_374(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_6.clone(), "ContentControl.Content", 1, 88, 33)?, priority_28);
     }
     // Controls/MacOSControls.xaml(89,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ToggleSwitch::off_content_template_property()), 89, 33)?;
-    // Controls/MacOSControls.xaml(90,33) Foreground
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 90, 33)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R241)?;
     // Controls/MacOSControls.xaml(87,16) IsVisible
     let priority_29 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_29);
@@ -52981,9 +54264,7 @@ fn build_controls_macoscontrols_xaml_deferred_374(
         content_presenter_2.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_7.clone(), "ContentControl.Content", 1, 94, 33)?, priority_32);
     }
     // Controls/MacOSControls.xaml(95,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ToggleSwitch::on_content_template_property()), 95, 33)?;
-    // Controls/MacOSControls.xaml(96,33) Foreground
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 96, 33)?;
+    rt::bind_template_rows(content_presenter_2.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R242)?;
     // Controls/MacOSControls.xaml(93,16) IsVisible
     let priority_33 = __t::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_33);
@@ -53107,7 +54388,7 @@ fn build_controls_macoscontrols_xaml_deferred_377(
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/MacOSControls.xaml(33,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 33, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 33, 17)?;
     // Controls/MacOSControls.xaml(34,17) CornerRadius
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), "SliderThumbCornerRadius", 34, 17)?;
     // Controls/MacOSControls.xaml(35,12) Child
@@ -53127,7 +54408,7 @@ fn build_controls_macoscontrols_xaml_deferred_377(
     let priority_3 = __t::BindingPriority::Template;
     ellipse_0.set_value_with_priority(__t::Visual::render_transform_property(), rt::cast(__t::Clone::clone(&value_0), 37, 20)?, priority_3);
     // Controls/MacOSControls.xaml(38,20) Fill
-    rt::bind_template_binding(ellipse_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 38, 20)?;
+    rt::apply_template_binding(ellipse_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 38, 20)?;
     // Controls/MacOSControls.xaml(39,20) Width
     rt::bind_dynamic_resource(&context, ellipse_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "SliderInnerThumbWidth", 39, 20)?;
     // Controls/MacOSControls.xaml(40,20) Height
@@ -53207,7 +54488,7 @@ fn build_controls_macoscontrols_xaml_deferred_379(
     rectangle_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("HorizontalDecreaseRect")));
     rt::register_name_value(name_scope.as_ref(), "HorizontalDecreaseRect", __t::Rc::new(__t::Clone::clone(&rectangle_0)), 70, 22)?;
     // Controls/MacOSControls.xaml(71,22) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 71, 22)?;
+    rt::apply_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 71, 22)?;
     // Controls/MacOSControls.xaml(72,22) Height
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "SliderTrackThemeHeight", 72, 22)?;
     // Controls/MacOSControls.xaml(70,12) VerticalAlignment
@@ -53287,7 +54568,7 @@ fn build_controls_macoscontrols_xaml_deferred_381(
     rectangle_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("VerticalDecreaseRect")));
     rt::register_name_value(name_scope.as_ref(), "VerticalDecreaseRect", __t::Rc::new(__t::Clone::clone(&rectangle_0)), 86, 22)?;
     // Controls/MacOSControls.xaml(87,22) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 87, 22)?;
+    rt::apply_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 87, 22)?;
     // Controls/MacOSControls.xaml(88,22) Width
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "SliderTrackThemeHeight", 88, 22)?;
     // Controls/MacOSControls.xaml(86,12) HorizontalAlignment
@@ -53719,7 +55000,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     data_validation_errors_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&grid_0)));
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(129,19) Margin
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 129, 19)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 129, 19)?;
     // Controls/MacOSControls.xaml(130,16) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(130,16) Border
@@ -53825,7 +55106,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     rectangle_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("HorizontalTrackRect")));
     rt::register_name_value(name_scope.as_ref(), "HorizontalTrackRect", __t::Rc::new(__t::Clone::clone(&rectangle_0)), 148, 30)?;
     // Controls/MacOSControls.xaml(149,30) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 149, 30)?;
+    rt::apply_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 149, 30)?;
     // Controls/MacOSControls.xaml(150,30) Height
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "SliderTrackThemeHeight", 150, 30)?;
     // Controls/MacOSControls.xaml(148,20) Row
@@ -53884,17 +55165,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     let priority_10 = __t::BindingPriority::Template;
     tick_bar_0.set_value_with_priority(__t::TickBar::placement_property(), __t::TickBarPlacement::Top, priority_10);
     // Controls/MacOSControls.xaml(163,28) Ticks
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::ticks_property(), rt::property(__t::Slider::ticks_property()), 163, 28)?;
-    // Controls/MacOSControls.xaml(164,28) TickFrequency
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::tick_frequency_property(), rt::property(__t::Slider::tick_frequency_property()), 164, 28)?;
-    // Controls/MacOSControls.xaml(165,28) Orientation
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::orientation_property(), rt::property(__t::Slider::orientation_property()), 165, 28)?;
-    // Controls/MacOSControls.xaml(166,28) Minimum
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 166, 28)?;
-    // Controls/MacOSControls.xaml(167,28) Maximum
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 167, 28)?;
-    // Controls/MacOSControls.xaml(168,28) IsDirectionReversed
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::is_direction_reversed_property(), rt::property(__t::Slider::is_direction_reversed_property()), 168, 28)?;
+    rt::bind_template_rows(tick_bar_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R243)?;
     context.pop_parent();
     rt::invoked(tick_bar_0.try_end_init(), 155, 20)?;
     // Controls/MacOSControls.xaml(169,20) Children
@@ -53930,17 +55201,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     let priority_16 = __t::BindingPriority::Template;
     tick_bar_1.set_value_with_priority(__t::TickBar::placement_property(), __t::TickBarPlacement::Bottom, priority_16);
     // Controls/MacOSControls.xaml(178,28) Ticks
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::ticks_property(), rt::property(__t::Slider::ticks_property()), 178, 28)?;
-    // Controls/MacOSControls.xaml(179,28) TickFrequency
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::tick_frequency_property(), rt::property(__t::Slider::tick_frequency_property()), 179, 28)?;
-    // Controls/MacOSControls.xaml(180,28) Orientation
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::orientation_property(), rt::property(__t::Slider::orientation_property()), 180, 28)?;
-    // Controls/MacOSControls.xaml(181,28) Minimum
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 181, 28)?;
-    // Controls/MacOSControls.xaml(182,28) Maximum
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 182, 28)?;
-    // Controls/MacOSControls.xaml(183,28) IsDirectionReversed
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::is_direction_reversed_property(), rt::property(__t::Slider::is_direction_reversed_property()), 183, 28)?;
+    rt::bind_template_rows(tick_bar_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R244)?;
     context.pop_parent();
     rt::invoked(tick_bar_1.try_end_init(), 169, 20)?;
     // Controls/MacOSControls.xaml(184,20) Children
@@ -53963,9 +55224,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     let priority_19 = __t::BindingPriority::Template;
     track_0.set_value_with_priority(__t::Grid::column_span_property(), 3_i32, priority_19);
     // Controls/MacOSControls.xaml(188,26) Minimum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 188, 26)?;
-    // Controls/MacOSControls.xaml(189,26) Maximum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 189, 26)?;
+    rt::bind_template_rows(track_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R245)?;
     // Controls/MacOSControls.xaml(190,26) Value
     let template_binding_18 = __t::TemplateBinding::__markup_new_1(rt::property(__t::RangeBase::value_property()));
     // Controls/MacOSControls.xaml(190,26) Mode
@@ -53973,7 +55232,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     let provided_29 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_18);
     rt::bind(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::value_property(), provided_29, 190, 26)?;
     // Controls/MacOSControls.xaml(191,26) IsDirectionReversed
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::is_direction_reversed_property(), rt::property(__t::Slider::is_direction_reversed_property()), 191, 26)?;
+    rt::apply_template_binding(track_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::Slider::is_direction_reversed_property()), || rt::property(__t::Track::is_direction_reversed_property()), 191, 26)?;
     // Controls/MacOSControls.xaml(184,20) Orientation
     let priority_20 = __t::BindingPriority::Template;
     track_0.set_value_with_priority(__t::Track::orientation_property(), __t::Orientation::Horizontal, priority_20);
@@ -53993,9 +55252,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     let value_0: __t::MarkupValue = rt::to_value(provided_31);
     rt::bind_or_set_priority(repeat_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_22, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 195, 37)?;
     // Controls/MacOSControls.xaml(196,37) Background
-    rt::bind_template_binding(repeat_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::foreground_property()), 196, 37)?;
-    // Controls/MacOSControls.xaml(197,37) CornerRadius
-    rt::bind_template_binding(repeat_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 197, 37)?;
+    rt::bind_template_rows(repeat_button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R246)?;
     // Controls/MacOSControls.xaml(194,24) Focusable
     let priority_23 = __t::BindingPriority::Template;
     repeat_button_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_23);
@@ -54085,7 +55342,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     data_validation_errors_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&grid_0)));
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(226,19) Margin
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 226, 19)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 226, 19)?;
     // Controls/MacOSControls.xaml(227,16) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(227,16) Border
@@ -54191,7 +55448,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     rectangle_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("VerticalTrackRect")));
     rt::register_name_value(name_scope.as_ref(), "VerticalTrackRect", __t::Rc::new(__t::Clone::clone(&rectangle_0)), 245, 30)?;
     // Controls/MacOSControls.xaml(246,30) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::background_property()), 246, 30)?;
+    rt::apply_template_binding(rectangle_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Shape::fill_property()), 246, 30)?;
     // Controls/MacOSControls.xaml(247,30) Width
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), "SliderTrackThemeHeight", 247, 30)?;
     // Controls/MacOSControls.xaml(245,20) Column
@@ -54250,17 +55507,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     let priority_10 = __t::BindingPriority::Template;
     tick_bar_0.set_value_with_priority(__t::TickBar::placement_property(), __t::TickBarPlacement::Left, priority_10);
     // Controls/MacOSControls.xaml(260,28) Ticks
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::ticks_property(), rt::property(__t::Slider::ticks_property()), 260, 28)?;
-    // Controls/MacOSControls.xaml(261,28) TickFrequency
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::tick_frequency_property(), rt::property(__t::Slider::tick_frequency_property()), 261, 28)?;
-    // Controls/MacOSControls.xaml(262,28) Orientation
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::orientation_property(), rt::property(__t::Slider::orientation_property()), 262, 28)?;
-    // Controls/MacOSControls.xaml(263,28) Minimum
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 263, 28)?;
-    // Controls/MacOSControls.xaml(264,28) Maximum
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 264, 28)?;
-    // Controls/MacOSControls.xaml(265,28) IsDirectionReversed
-    rt::bind_template_binding(tick_bar_0.upcast_ref::<__t::FerroObject>(), __t::TickBar::is_direction_reversed_property(), rt::property(__t::Slider::is_direction_reversed_property()), 265, 28)?;
+    rt::bind_template_rows(tick_bar_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R247)?;
     context.pop_parent();
     rt::invoked(tick_bar_0.try_end_init(), 252, 20)?;
     // Controls/MacOSControls.xaml(266,20) Children
@@ -54296,17 +55543,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     let priority_16 = __t::BindingPriority::Template;
     tick_bar_1.set_value_with_priority(__t::TickBar::placement_property(), __t::TickBarPlacement::Right, priority_16);
     // Controls/MacOSControls.xaml(275,28) Ticks
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::ticks_property(), rt::property(__t::Slider::ticks_property()), 275, 28)?;
-    // Controls/MacOSControls.xaml(276,28) TickFrequency
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::tick_frequency_property(), rt::property(__t::Slider::tick_frequency_property()), 276, 28)?;
-    // Controls/MacOSControls.xaml(277,28) Orientation
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::orientation_property(), rt::property(__t::Slider::orientation_property()), 277, 28)?;
-    // Controls/MacOSControls.xaml(278,28) Minimum
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 278, 28)?;
-    // Controls/MacOSControls.xaml(279,28) Maximum
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 279, 28)?;
-    // Controls/MacOSControls.xaml(280,28) IsDirectionReversed
-    rt::bind_template_binding(tick_bar_1.upcast_ref::<__t::FerroObject>(), __t::TickBar::is_direction_reversed_property(), rt::property(__t::Slider::is_direction_reversed_property()), 280, 28)?;
+    rt::bind_template_rows(tick_bar_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R248)?;
     context.pop_parent();
     rt::invoked(tick_bar_1.try_end_init(), 266, 20)?;
     // Controls/MacOSControls.xaml(281,20) Children
@@ -54329,9 +55566,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     let priority_19 = __t::BindingPriority::Template;
     track_0.set_value_with_priority(__t::Grid::row_span_property(), 3_i32, priority_19);
     // Controls/MacOSControls.xaml(285,26) Minimum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::minimum_property(), rt::property(__t::RangeBase::minimum_property()), 285, 26)?;
-    // Controls/MacOSControls.xaml(286,26) Maximum
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::maximum_property(), rt::property(__t::RangeBase::maximum_property()), 286, 26)?;
+    rt::bind_template_rows(track_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R249)?;
     // Controls/MacOSControls.xaml(287,26) Value
     let template_binding_18 = __t::TemplateBinding::__markup_new_1(rt::property(__t::RangeBase::value_property()));
     // Controls/MacOSControls.xaml(287,26) Mode
@@ -54339,7 +55574,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     let provided_29 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_18);
     rt::bind(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::value_property(), provided_29, 287, 26)?;
     // Controls/MacOSControls.xaml(288,26) IsDirectionReversed
-    rt::bind_template_binding(track_0.upcast_ref::<__t::FerroObject>(), __t::Track::is_direction_reversed_property(), rt::property(__t::Slider::is_direction_reversed_property()), 288, 26)?;
+    rt::apply_template_binding(track_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::Slider::is_direction_reversed_property()), || rt::property(__t::Track::is_direction_reversed_property()), 288, 26)?;
     // Controls/MacOSControls.xaml(281,20) Orientation
     let priority_20 = __t::BindingPriority::Template;
     track_0.set_value_with_priority(__t::Track::orientation_property(), __t::Orientation::Vertical, priority_20);
@@ -54359,9 +55594,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     let value_0: __t::MarkupValue = rt::to_value(provided_31);
     rt::bind_or_set_priority(repeat_button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_22, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 292, 37)?;
     // Controls/MacOSControls.xaml(293,37) Background
-    rt::bind_template_binding(repeat_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::foreground_property()), 293, 37)?;
-    // Controls/MacOSControls.xaml(294,37) CornerRadius
-    rt::bind_template_binding(repeat_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 294, 37)?;
+    rt::bind_template_rows(repeat_button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R250)?;
     // Controls/MacOSControls.xaml(291,24) Focusable
     let priority_23 = __t::BindingPriority::Template;
     repeat_button_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_23);
@@ -54741,20 +55974,12 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Grid::column_span_property(), 6_i32, priority_1);
     // Controls/MacOSControls.xaml(92,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 92, 19)?;
-    // Controls/MacOSControls.xaml(93,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 93, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R251)?;
     // Controls/MacOSControls.xaml(89,12) BackgroundSizing
     let priority_2 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_2);
     // Controls/MacOSControls.xaml(95,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 95, 19)?;
-    // Controls/MacOSControls.xaml(96,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 96, 19)?;
-    // Controls/MacOSControls.xaml(97,19) MinWidth
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 97, 19)?;
-    // Controls/MacOSControls.xaml(98,19) MinHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 98, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R252)?;
     // Controls/MacOSControls.xaml(89,12) IsTemplateFocusTarget
     let priority_3 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_3);
@@ -54784,7 +56009,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     // Controls/MacOSControls.xaml(102,19) BorderBrush
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "MacOSFocusBrush", 102, 19)?;
     // Controls/MacOSControls.xaml(103,19) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 103, 19)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 103, 19)?;
     // Controls/MacOSControls.xaml(100,12) IsHitTestVisible
     let priority_8 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_8);
@@ -54845,9 +56070,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     let priority_13 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_13);
     // Controls/MacOSControls.xaml(118,29) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 118, 29)?;
-    // Controls/MacOSControls.xaml(119,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 119, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R253)?;
     // Controls/MacOSControls.xaml(120,29) Content (setter chosen at run time)
     let priority_14 = __t::BindingPriority::Template;
     let template_binding_10 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TextBox::inner_left_content_property()));
@@ -54872,17 +56095,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     let priority_15 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::Grid::column_property(), 2_i32, priority_15);
     // Controls/MacOSControls.xaml(123,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 123, 25)?;
-    // Controls/MacOSControls.xaml(124,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 124, 25)?;
-    // Controls/MacOSControls.xaml(125,25) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 125, 25)?;
-    // Controls/MacOSControls.xaml(126,25) Margin
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 126, 25)?;
-    // Controls/MacOSControls.xaml(127,25) Padding
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 127, 25)?;
-    // Controls/MacOSControls.xaml(128,25) Foreground
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 128, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R254)?;
     // Controls/MacOSControls.xaml(121,12) Focusable
     let priority_16 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_16);
@@ -54914,35 +56127,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     let provided_19 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_17);
     rt::bind(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_property(), provided_19, 131, 28)?;
     // Controls/MacOSControls.xaml(132,28) CaretBlinkInterval
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_blink_interval_property(), rt::property(__t::TextBox::caret_blink_interval_property()), 132, 28)?;
-    // Controls/MacOSControls.xaml(133,28) CaretIndex
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_index_property(), rt::property(__t::TextBox::caret_index_property()), 133, 28)?;
-    // Controls/MacOSControls.xaml(134,28) SelectionStart
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_start_property(), rt::property(__t::TextBox::selection_start_property()), 134, 28)?;
-    // Controls/MacOSControls.xaml(135,28) SelectionEnd
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_end_property(), rt::property(__t::TextBox::selection_end_property()), 135, 28)?;
-    // Controls/MacOSControls.xaml(136,28) TextAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 136, 28)?;
-    // Controls/MacOSControls.xaml(137,28) TextWrapping
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 137, 28)?;
-    // Controls/MacOSControls.xaml(138,28) LineHeight
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::line_height_property(), rt::property(__t::TextBox::line_height_property()), 138, 28)?;
-    // Controls/MacOSControls.xaml(139,28) LetterSpacing
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::letter_spacing_property(), rt::property(__t::TemplatedControl::letter_spacing_property()), 139, 28)?;
-    // Controls/MacOSControls.xaml(140,28) PasswordChar
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::password_char_property(), rt::property(__t::TextBox::password_char_property()), 140, 28)?;
-    // Controls/MacOSControls.xaml(141,28) RevealPassword
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::reveal_password_property(), rt::property(__t::TextBox::reveal_password_property()), 141, 28)?;
-    // Controls/MacOSControls.xaml(142,28) SelectionBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_brush_property(), rt::property(__t::TextBox::selection_brush_property()), 142, 28)?;
-    // Controls/MacOSControls.xaml(143,28) SelectionForegroundBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_foreground_brush_property(), rt::property(__t::TextBox::selection_foreground_brush_property()), 143, 28)?;
-    // Controls/MacOSControls.xaml(144,28) CaretBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_brush_property(), rt::property(__t::TextBox::caret_brush_property()), 144, 28)?;
-    // Controls/MacOSControls.xaml(145,28) HorizontalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::TextBox::horizontal_content_alignment_property()), 145, 28)?;
-    // Controls/MacOSControls.xaml(146,28) VerticalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 146, 28)?;
+    rt::bind_template_rows(text_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R255)?;
     rt::invoked(text_presenter_0.try_end_init(), 130, 14)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 121, 12)?;
     // Controls/MacOSControls.xaml(153,12) Children
@@ -54962,17 +56147,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     let priority_18 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Grid::column_span_property(), 3_i32, priority_18);
     // Controls/MacOSControls.xaml(156,22) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TextBox::placeholder_foreground_property()), 156, 22)?;
-    // Controls/MacOSControls.xaml(157,22) Margin
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 157, 22)?;
-    // Controls/MacOSControls.xaml(158,22) Padding
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 158, 22)?;
-    // Controls/MacOSControls.xaml(159,22) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TextBox::placeholder_text_property()), 159, 22)?;
-    // Controls/MacOSControls.xaml(160,22) TextAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 160, 22)?;
-    // Controls/MacOSControls.xaml(161,22) TextWrapping
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 161, 22)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R256)?;
     // Controls/MacOSControls.xaml(153,12) IsHitTestVisible
     let priority_19 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_19);
@@ -55034,9 +56209,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     let priority_20 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::Grid::column_property(), 3_i32, priority_20);
     // Controls/MacOSControls.xaml(173,29) Margin
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 173, 29)?;
-    // Controls/MacOSControls.xaml(174,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 174, 29)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R257)?;
     // Controls/MacOSControls.xaml(175,29) Content (setter chosen at run time)
     let priority_21 = __t::BindingPriority::Template;
     let template_binding_42 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TextBox::inner_right_content_property()));
@@ -55071,9 +56244,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     let provided_49 = rt::provide_value(&context, rt::property_value(__t::Button::command_property()), &reflection_binding_extension_2, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(button_0.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), provided_49, 179, 19)?;
     // Controls/MacOSControls.xaml(180,19) BorderThickness
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 180, 19)?;
-    // Controls/MacOSControls.xaml(181,19) CornerRadius
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 181, 19)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R258)?;
     // Controls/MacOSControls.xaml(182,19) Padding
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), "HelperButtonThemePadding", 182, 19)?;
     // Controls/MacOSControls.xaml(176,12) Focusable
@@ -55083,7 +56254,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     let priority_25 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_25);
     // Controls/MacOSControls.xaml(185,19) FontSize
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 185, 19)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_size_property()), || rt::property(__t::TemplatedControl::font_size_property()), 185, 19)?;
     // Controls/MacOSControls.xaml(176,12) HorizontalAlignment
     let priority_26 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_26);
@@ -55229,11 +56400,7 @@ fn build_controls_macoscontrols_xaml_deferred_395(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 235, 29)?, priority_0);
     }
     // Controls/MacOSControls.xaml(236,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 236, 29)?;
-    // Controls/MacOSControls.xaml(237,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 237, 29)?;
-    // Controls/MacOSControls.xaml(238,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 238, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R259)?;
     rt::invoked(content_presenter_0.try_end_init(), 234, 12)?;
     // Controls/MacOSControls.xaml(239,12) Children
     let children_collection_1 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -55258,7 +56425,7 @@ fn build_controls_macoscontrols_xaml_deferred_395(
     let priority_4 = __t::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Right, priority_4);
     // Controls/MacOSControls.xaml(244,23) IsVisible
-    rt::bind_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::ButtonSpinner::show_button_spinner_property()), 244, 23)?;
+    rt::apply_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ButtonSpinner::show_button_spinner_property()), || rt::property(__t::Visual::is_visible_property()), 244, 23)?;
     // Controls/MacOSControls.xaml(245,14) Children
     let children_collection_2 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(245,14) RepeatButton
@@ -55491,13 +56658,7 @@ fn build_controls_macoscontrols_xaml_deferred_397(
     let value_0: __t::MarkupValue = rt::to_value(provided_0);
     rt::bind_or_set_priority(button_spinner_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_0, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 297, 26)?;
     // Controls/MacOSControls.xaml(298,26) CornerRadius
-    rt::bind_template_binding(button_spinner_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 298, 26)?;
-    // Controls/MacOSControls.xaml(299,26) AllowSpin
-    rt::bind_template_binding(button_spinner_0.upcast_ref::<__t::FerroObject>(), __t::ButtonSpinner::allow_spin_property(), rt::property(__t::NumericUpDown::allow_spin_property()), 299, 26)?;
-    // Controls/MacOSControls.xaml(300,26) ShowButtonSpinner
-    rt::bind_template_binding(button_spinner_0.upcast_ref::<__t::FerroObject>(), __t::ButtonSpinner::show_button_spinner_property(), rt::property(__t::NumericUpDown::show_button_spinner_property()), 300, 26)?;
-    // Controls/MacOSControls.xaml(301,26) ButtonSpinnerLocation
-    rt::bind_template_binding(button_spinner_0.upcast_ref::<__t::FerroObject>(), __t::ButtonSpinner::button_spinner_location_property(), rt::property(__t::NumericUpDown::button_spinner_location_property()), 301, 26)?;
+    rt::bind_template_rows(button_spinner_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R260)?;
     // Controls/MacOSControls.xaml(296,12) HorizontalContentAlignment
     let priority_1 = __t::BindingPriority::Template;
     button_spinner_0.set_value_with_priority(__t::ContentControl::horizontal_content_alignment_property(), __t::HorizontalAlignment::Stretch, priority_1);
@@ -55519,39 +56680,7 @@ fn build_controls_macoscontrols_xaml_deferred_397(
     let value_1: __t::MarkupValue = rt::to_value(provided_5);
     rt::bind_or_set_priority(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_1, priority_3, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 305, 22)?;
     // Controls/MacOSControls.xaml(306,22) MinHeight
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 306, 22)?;
-    // Controls/MacOSControls.xaml(307,22) FontSize
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 307, 22)?;
-    // Controls/MacOSControls.xaml(308,22) FontWeight
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 308, 22)?;
-    // Controls/MacOSControls.xaml(309,22) FontFamily
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 309, 22)?;
-    // Controls/MacOSControls.xaml(310,22) Background
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 310, 22)?;
-    // Controls/MacOSControls.xaml(311,22) BorderThickness
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 311, 22)?;
-    // Controls/MacOSControls.xaml(312,22) BorderBrush
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 312, 22)?;
-    // Controls/MacOSControls.xaml(313,22) Padding
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 313, 22)?;
-    // Controls/MacOSControls.xaml(314,22) Foreground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 314, 22)?;
-    // Controls/MacOSControls.xaml(315,22) TextAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::text_alignment_property(), rt::property(__t::NumericUpDown::text_alignment_property()), 315, 22)?;
-    // Controls/MacOSControls.xaml(316,22) CornerRadius
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 316, 22)?;
-    // Controls/MacOSControls.xaml(317,22) PlaceholderText
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_text_property(), rt::property(__t::NumericUpDown::placeholder_text_property()), 317, 22)?;
-    // Controls/MacOSControls.xaml(318,22) PlaceholderForeground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_foreground_property(), rt::property(__t::NumericUpDown::placeholder_foreground_property()), 318, 22)?;
-    // Controls/MacOSControls.xaml(319,22) IsReadOnly
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::is_read_only_property(), rt::property(__t::NumericUpDown::is_read_only_property()), 319, 22)?;
-    // Controls/MacOSControls.xaml(320,22) Text
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::text_property(), rt::property(__t::NumericUpDown::text_property()), 320, 22)?;
-    // Controls/MacOSControls.xaml(321,22) HorizontalContentAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::horizontal_content_alignment_property(), rt::property(__t::NumericUpDown::horizontal_content_alignment_property()), 321, 22)?;
-    // Controls/MacOSControls.xaml(322,22) VerticalContentAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::vertical_content_alignment_property(), rt::property(__t::NumericUpDown::vertical_content_alignment_property()), 322, 22)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R261)?;
     // Controls/MacOSControls.xaml(304,14) AcceptsReturn
     let priority_4 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::TextBox::accepts_return_property(), __t::Clone::clone(&false), priority_4);
@@ -55841,25 +56970,11 @@ fn build_controls_macoscontrols_xaml_deferred_400(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ToggleButtonGrid")));
     rt::register_name_value(name_scope.as_ref(), "ToggleButtonGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 52, 17)?;
     // Controls/MacOSControls.xaml(53,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 53, 17)?;
-    // Controls/MacOSControls.xaml(54,17) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 54, 17)?;
-    // Controls/MacOSControls.xaml(55,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 55, 17)?;
-    // Controls/MacOSControls.xaml(56,17) MinHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 56, 17)?;
-    // Controls/MacOSControls.xaml(57,17) MinWidth
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 57, 17)?;
-    // Controls/MacOSControls.xaml(58,17) MaxWidth
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_width_property(), rt::property(__t::Layoutable::max_width_property()), 58, 17)?;
-    // Controls/MacOSControls.xaml(59,17) HorizontalAlignment
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::Layoutable::horizontal_alignment_property()), 59, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R262)?;
     // Controls/MacOSControls.xaml(60,17) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "ExpanderHeaderBorderBrush", 60, 17)?;
     // Controls/MacOSControls.xaml(61,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 61, 17)?;
-    // Controls/MacOSControls.xaml(62,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 62, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R263)?;
     // Controls/MacOSControls.xaml(63,12) Child
     // Controls/MacOSControls.xaml(63,12) Grid
     let grid_0 = __t::Grid::new();
@@ -55900,11 +57015,7 @@ fn build_controls_macoscontrols_xaml_deferred_400(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 66, 31)?, priority_1);
     }
     // Controls/MacOSControls.xaml(67,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 67, 31)?;
-    // Controls/MacOSControls.xaml(68,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 68, 31)?;
-    // Controls/MacOSControls.xaml(69,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 69, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R264)?;
     // Controls/MacOSControls.xaml(70,31) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "ExpanderHeaderForeground", 70, 31)?;
     // Controls/MacOSControls.xaml(64,14) RecognizesAccessKey
@@ -56095,25 +57206,11 @@ fn build_controls_macoscontrols_xaml_deferred_402(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ToggleButtonGrid")));
     rt::register_name_value(name_scope.as_ref(), "ToggleButtonGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 174, 17)?;
     // Controls/MacOSControls.xaml(175,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 175, 17)?;
-    // Controls/MacOSControls.xaml(176,17) BackgroundSizing
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 176, 17)?;
-    // Controls/MacOSControls.xaml(177,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 177, 17)?;
-    // Controls/MacOSControls.xaml(178,17) MinHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 178, 17)?;
-    // Controls/MacOSControls.xaml(179,17) MinWidth
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 179, 17)?;
-    // Controls/MacOSControls.xaml(180,17) MaxWidth
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_width_property(), rt::property(__t::Layoutable::max_width_property()), 180, 17)?;
-    // Controls/MacOSControls.xaml(181,17) HorizontalAlignment
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::Layoutable::horizontal_alignment_property()), 181, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R265)?;
     // Controls/MacOSControls.xaml(182,17) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "ExpanderHeaderBorderBrush", 182, 17)?;
     // Controls/MacOSControls.xaml(183,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 183, 17)?;
-    // Controls/MacOSControls.xaml(184,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 184, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R266)?;
     // Controls/MacOSControls.xaml(185,12) Child
     // Controls/MacOSControls.xaml(185,12) Grid
     let grid_0 = __t::Grid::new();
@@ -56154,11 +57251,7 @@ fn build_controls_macoscontrols_xaml_deferred_402(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 188, 31)?, priority_1);
     }
     // Controls/MacOSControls.xaml(189,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 189, 31)?;
-    // Controls/MacOSControls.xaml(190,31) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 190, 31)?;
-    // Controls/MacOSControls.xaml(191,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 191, 31)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R267)?;
     // Controls/MacOSControls.xaml(192,31) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "ExpanderHeaderForeground", 192, 31)?;
     // Controls/MacOSControls.xaml(186,14) RecognizesAccessKey
@@ -56621,9 +57714,7 @@ fn build_controls_macoscontrols_xaml_deferred_406(
     dock_panel_0.begin_init();
     context.push_parent(rt::to_value(dock_panel_0.clone()));
     // Controls/MacOSControls.xaml(278,20) MinWidth
-    rt::bind_template_binding(dock_panel_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), rt::property(__t::Layoutable::min_width_property()), 278, 20)?;
-    // Controls/MacOSControls.xaml(278,58) MaxWidth
-    rt::bind_template_binding(dock_panel_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_width_property(), rt::property(__t::Layoutable::max_width_property()), 278, 58)?;
+    rt::bind_template_rows(dock_panel_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R268)?;
     // Controls/MacOSControls.xaml(279,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(279,12) ToggleButton
@@ -56641,18 +57732,14 @@ fn build_controls_macoscontrols_xaml_deferred_406(
     let priority_1 = __t::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(__t::TemplatedControl::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_1);
     // Controls/MacOSControls.xaml(282,25) BackgroundSizing
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 282, 25)?;
+    rt::apply_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_sizing_property()), || rt::property(__t::TemplatedControl::background_sizing_property()), 282, 25)?;
     // Controls/MacOSControls.xaml(283,25) BorderBrush
     rt::bind_dynamic_resource(&context, toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), "ExpanderHeaderBorderBrush", 283, 25)?;
     // Controls/MacOSControls.xaml(279,12) BorderThickness
     let priority_2 = __t::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(__t::TemplatedControl::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_2);
     // Controls/MacOSControls.xaml(285,25) MinHeight
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 285, 25)?;
-    // Controls/MacOSControls.xaml(286,25) CornerRadius
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 286, 25)?;
-    // Controls/MacOSControls.xaml(287,25) IsEnabled
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::InputElement::is_enabled_property(), rt::property(__t::InputElement::is_enabled_property()), 287, 25)?;
+    rt::bind_template_rows(toggle_button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R269)?;
     // Controls/MacOSControls.xaml(279,12) Padding
     let priority_3 = __t::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(__t::TemplatedControl::padding_property(), __t::Thickness::__markup_new_3(2.0_f64, 3.0_f64, 2.0_f64, 3.0_f64), priority_3);
@@ -56685,7 +57772,7 @@ fn build_controls_macoscontrols_xaml_deferred_406(
         toggle_button_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 293, 25)?, priority_8);
     }
     // Controls/MacOSControls.xaml(294,25) ContentTemplate
-    rt::bind_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::HeaderedContentControl::header_template_property()), 294, 25)?;
+    rt::apply_template_binding(toggle_button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::HeaderedContentControl::header_template_property()), || rt::property(__t::ContentControl::content_template_property()), 294, 25)?;
     // Controls/MacOSControls.xaml(295,25) IsChecked
     let template_binding_8 = __t::TemplateBinding::__markup_new_1(rt::property(__t::Expander::is_expanded_property()));
     // Controls/MacOSControls.xaml(295,25) Mode
@@ -56717,11 +57804,7 @@ fn build_controls_macoscontrols_xaml_deferred_406(
     border_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ExpanderContent")));
     rt::register_name_value(name_scope.as_ref(), "ExpanderContent", __t::Rc::new(__t::Clone::clone(&border_1)), 298, 21)?;
     // Controls/MacOSControls.xaml(299,21) IsVisible
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::Expander::is_expanded_property()), 299, 21)?;
-    // Controls/MacOSControls.xaml(300,21) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 300, 21)?;
-    // Controls/MacOSControls.xaml(301,21) BackgroundSizing
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 301, 21)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R270)?;
     // Controls/MacOSControls.xaml(302,21) CornerRadius
     let template_binding_12 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TemplatedControl::corner_radius_property()));
     context.push_parent(rt::to_value(template_binding_12.clone()));
@@ -56732,12 +57815,12 @@ fn build_controls_macoscontrols_xaml_deferred_406(
     let provided_17 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_12);
     rt::bind(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), provided_17, 302, 21)?;
     // Controls/MacOSControls.xaml(303,21) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 303, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 303, 21)?;
     // Controls/MacOSControls.xaml(298,14) BorderThickness
     let priority_10 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::border_thickness_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_10);
     // Controls/MacOSControls.xaml(305,21) MinHeight
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 305, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::Layoutable::min_height_property()), || rt::property(__t::Layoutable::min_height_property()), 305, 21)?;
     // Controls/MacOSControls.xaml(298,14) HorizontalAlignment
     let priority_11 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_11);
@@ -56745,7 +57828,7 @@ fn build_controls_macoscontrols_xaml_deferred_406(
     let priority_12 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_12);
     // Controls/MacOSControls.xaml(308,21) Padding
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 308, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Decorator::padding_property()), 308, 21)?;
     // Controls/MacOSControls.xaml(309,16) Child
     // Controls/MacOSControls.xaml(309,16) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -56765,11 +57848,7 @@ fn build_controls_macoscontrols_xaml_deferred_406(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_4.clone(), "ContentControl.Content", 1, 310, 33)?, priority_13);
     }
     // Controls/MacOSControls.xaml(311,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 311, 33)?;
-    // Controls/MacOSControls.xaml(312,33) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 312, 33)?;
-    // Controls/MacOSControls.xaml(313,33) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 313, 33)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R271)?;
     rt::invoked(content_presenter_0.try_end_init(), 309, 16)?;
     context.pop_parent();
     rt::invoked(border_1.try_end_init(), 298, 14)?;
@@ -57022,16 +58101,12 @@ fn build_controls_macoscontrols_xaml_deferred_410(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 85, 17)?;
     // Controls/MacOSControls.xaml(86,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 86, 17)?;
-    // Controls/MacOSControls.xaml(87,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 87, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R272)?;
     // Controls/MacOSControls.xaml(85,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(89,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 89, 17)?;
-    // Controls/MacOSControls.xaml(90,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 90, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R273)?;
     // Controls/MacOSControls.xaml(91,12) Child
     // Controls/MacOSControls.xaml(91,12) Border
     let border_1 = __t::Border::new();
@@ -57052,16 +58127,12 @@ fn build_controls_macoscontrols_xaml_deferred_410(
     path_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Content")));
     rt::register_name_value(name_scope.as_ref(), "Content", __t::Rc::new(__t::Clone::clone(&path_0)), 93, 19)?;
     // Controls/MacOSControls.xaml(94,19) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 94, 19)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 94, 19)?;
     // Controls/MacOSControls.xaml(93,14) Stretch
     let priority_2 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_2);
     // Controls/MacOSControls.xaml(96,19) Width
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::TemplatedControl::font_size_property()), 96, 19)?;
-    // Controls/MacOSControls.xaml(97,19) HorizontalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 97, 19)?;
-    // Controls/MacOSControls.xaml(98,19) VerticalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 98, 19)?;
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R274)?;
     rt::invoked(path_0.try_end_init(), 93, 14)?;
     rt::invoked(border_1.try_end_init(), 91, 12)?;
     rt::invoked(border_0.try_end_init(), 85, 10)?;
@@ -57331,14 +58402,12 @@ fn build_controls_macoscontrols_xaml_deferred_415(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 177, 17)?;
     // Controls/MacOSControls.xaml(178,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 178, 17)?;
-    // Controls/MacOSControls.xaml(179,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 179, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R275)?;
     // Controls/MacOSControls.xaml(177,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(181,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 181, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 181, 17)?;
     // Controls/MacOSControls.xaml(182,17) Width (setter chosen at run time)
     let priority_1 = __t::BindingPriority::Template;
     let provided_3 = rt::provide_static_resource(&context, "PipsPagerHorizontalOrientationButtonWidth", || rt::property_value(__t::Layoutable::width_property()), 182, 17)?;
@@ -57350,7 +58419,7 @@ fn build_controls_macoscontrols_xaml_deferred_415(
     let value_1: __t::MarkupValue = rt::to_value(provided_4);
     rt::bind_or_set_priority(border_0.upcast_ref::<__t::FerroObject>(), || __t::Layoutable::height_property(), value_1, priority_2, || __t::ValueType::of::<f64>(), false, "Layoutable.Height", 183, 17)?;
     // Controls/MacOSControls.xaml(184,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 184, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 184, 17)?;
     // Controls/MacOSControls.xaml(186,12) Child
     // Controls/MacOSControls.xaml(186,12) Path
     let path_0 = __t::Path::new();
@@ -57366,18 +58435,12 @@ fn build_controls_macoscontrols_xaml_deferred_415(
     let value_2: __t::MarkupValue = rt::to_value(provided_6);
     rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_2, priority_3, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 187, 17)?;
     // Controls/MacOSControls.xaml(188,17) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 188, 17)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 188, 17)?;
     // Controls/MacOSControls.xaml(186,12) Stretch
     let priority_4 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_4);
     // Controls/MacOSControls.xaml(190,17) Width
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::TemplatedControl::font_size_property()), 190, 17)?;
-    // Controls/MacOSControls.xaml(191,17) Height
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::TemplatedControl::font_size_property()), 191, 17)?;
-    // Controls/MacOSControls.xaml(192,17) HorizontalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 192, 17)?;
-    // Controls/MacOSControls.xaml(193,17) VerticalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 193, 17)?;
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R276)?;
     context.pop_parent();
     rt::invoked(path_0.try_end_init(), 186, 12)?;
     context.pop_parent();
@@ -57671,16 +58734,12 @@ fn build_controls_macoscontrols_xaml_deferred_420(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 280, 17)?;
     // Controls/MacOSControls.xaml(281,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 281, 17)?;
-    // Controls/MacOSControls.xaml(282,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 282, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R277)?;
     // Controls/MacOSControls.xaml(280,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(284,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 284, 17)?;
-    // Controls/MacOSControls.xaml(285,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 285, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R278)?;
     // Controls/MacOSControls.xaml(286,12) Child
     // Controls/MacOSControls.xaml(286,12) Path
     let path_0 = __t::Path::new();
@@ -57696,18 +58755,12 @@ fn build_controls_macoscontrols_xaml_deferred_420(
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
     rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, priority_1, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 287, 17)?;
     // Controls/MacOSControls.xaml(288,17) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 288, 17)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 288, 17)?;
     // Controls/MacOSControls.xaml(286,12) Stretch
     let priority_2 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_2);
     // Controls/MacOSControls.xaml(290,17) Width
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::TemplatedControl::font_size_property()), 290, 17)?;
-    // Controls/MacOSControls.xaml(291,17) Height
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::TemplatedControl::font_size_property()), 291, 17)?;
-    // Controls/MacOSControls.xaml(292,17) HorizontalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 292, 17)?;
-    // Controls/MacOSControls.xaml(293,17) VerticalAlignment
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 293, 17)?;
+    rt::bind_template_rows(path_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R279)?;
     context.pop_parent();
     rt::invoked(path_0.try_end_init(), 286, 12)?;
     context.pop_parent();
@@ -57772,7 +58825,7 @@ fn build_controls_macoscontrols_xaml_deferred_422(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 352, 27)?;
     // Controls/MacOSControls.xaml(352,56) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 352, 56)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 352, 56)?;
     rt::invoked(items_presenter_0.try_end_init(), 352, 12)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 348, 10)?;
     __t::Result::Ok(rt::to_value(scroll_viewer_0.clone()))
@@ -57899,9 +58952,7 @@ fn build_controls_macoscontrols_xaml_deferred_424(
     stack_panel_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootPanel")));
     rt::register_name_value(name_scope.as_ref(), "RootPanel", __t::Rc::new(__t::Clone::clone(&stack_panel_0)), 367, 21)?;
     // Controls/MacOSControls.xaml(368,21) Orientation
-    rt::bind_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), __t::StackPanel::orientation_property(), rt::property(__t::PipsPager::orientation_property()), 368, 21)?;
-    // Controls/MacOSControls.xaml(369,21) Background
-    rt::bind_template_binding(stack_panel_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 369, 21)?;
+    rt::bind_template_rows(stack_panel_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R280)?;
     // Controls/MacOSControls.xaml(370,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(370,12) Button
@@ -57912,9 +58963,7 @@ fn build_controls_macoscontrols_xaml_deferred_424(
     button_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_PreviousButton")));
     rt::register_name_value(name_scope.as_ref(), "PART_PreviousButton", __t::Rc::new(__t::Clone::clone(&button_0)), 370, 19)?;
     // Controls/MacOSControls.xaml(371,19) Theme
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::StyledElement::theme_property(), rt::property(__t::PipsPager::previous_button_theme_property()), 371, 19)?;
-    // Controls/MacOSControls.xaml(372,19) IsVisible
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::PipsPager::is_previous_button_visible_property()), 372, 19)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R281)?;
     // Controls/MacOSControls.xaml(370,12) HorizontalAlignment
     let priority_0 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_0);
@@ -57997,9 +59046,7 @@ fn build_controls_macoscontrols_xaml_deferred_424(
     button_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_NextButton")));
     rt::register_name_value(name_scope.as_ref(), "PART_NextButton", __t::Rc::new(__t::Clone::clone(&button_1)), 391, 19)?;
     // Controls/MacOSControls.xaml(392,19) Theme
-    rt::bind_template_binding(button_1.upcast_ref::<__t::FerroObject>(), __t::StyledElement::theme_property(), rt::property(__t::PipsPager::next_button_theme_property()), 392, 19)?;
-    // Controls/MacOSControls.xaml(393,19) IsVisible
-    rt::bind_template_binding(button_1.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::PipsPager::is_next_button_visible_property()), 393, 19)?;
+    rt::bind_template_rows(button_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R282)?;
     // Controls/MacOSControls.xaml(391,12) HorizontalAlignment
     let priority_9 = __t::BindingPriority::Template;
     button_1.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Center, priority_9);
@@ -58088,7 +59135,7 @@ fn build_controls_macoscontrols_xaml_deferred_427(
     grid_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Root")));
     rt::register_name_value(name_scope.as_ref(), "Root", __t::Rc::new(__t::Clone::clone(&grid_0)), 24, 15)?;
     // Controls/MacOSControls.xaml(24,29) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 24, 29)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 24, 29)?;
     // Controls/MacOSControls.xaml(25,12) Children
     let children_collection_0 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
     // Controls/MacOSControls.xaml(25,12) ContentPresenter
@@ -58109,22 +59156,12 @@ fn build_controls_macoscontrols_xaml_deferred_427(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 26, 29)?, priority_0);
     }
     // Controls/MacOSControls.xaml(27,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 27, 29)?;
-    // Controls/MacOSControls.xaml(28,29) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 28, 29)?;
-    // Controls/MacOSControls.xaml(29,29) BorderBrush
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 29, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R283)?;
     // Controls/MacOSControls.xaml(25,12) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/MacOSControls.xaml(31,29) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 31, 29)?;
-    // Controls/MacOSControls.xaml(32,29) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 32, 29)?;
-    // Controls/MacOSControls.xaml(33,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 33, 29)?;
-    // Controls/MacOSControls.xaml(34,29) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 34, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R284)?;
     // Controls/MacOSControls.xaml(25,12) Background
     let priority_2 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_2);
@@ -58239,7 +59276,7 @@ fn build_controls_macoscontrols_xaml_deferred_430(
     // Controls/MacOSControls.xaml(37,45) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::box_shadow_property(), "MacOSMenuShadow", 37, 45)?;
     // Controls/MacOSControls.xaml(37,91) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 37, 91)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 37, 91)?;
     // Controls/MacOSControls.xaml(38,12) Child
     // Controls/MacOSControls.xaml(38,12) Border
     let border_1 = __t::Border::new();
@@ -58247,13 +59284,7 @@ fn build_controls_macoscontrols_xaml_deferred_430(
     border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&border_1).upcast::<__t::Control>()));
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(38,19) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 38, 19)?;
-    // Controls/MacOSControls.xaml(38,61) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 38, 61)?;
-    // Controls/MacOSControls.xaml(38,105) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 38, 105)?;
-    // Controls/MacOSControls.xaml(38,157) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 38, 157)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R285)?;
     // Controls/MacOSControls.xaml(38,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
@@ -58276,7 +59307,7 @@ fn build_controls_macoscontrols_xaml_deferred_430(
     let priority_1 = __t::BindingPriority::Template;
     experimental_acrylic_border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_1);
     // Controls/MacOSControls.xaml(40,122) CornerRadius
-    rt::bind_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), __t::ExperimentalAcrylicBorder::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 40, 122)?;
+    rt::apply_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::ExperimentalAcrylicBorder::corner_radius_property()), 40, 122)?;
     context.pop_parent();
     rt::invoked(experimental_acrylic_border_0.try_end_init(), 40, 16)?;
     // Controls/MacOSControls.xaml(41,16) Children
@@ -58289,9 +59320,7 @@ fn build_controls_macoscontrols_xaml_deferred_430(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 41, 29)?;
     // Controls/MacOSControls.xaml(41,51) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 41, 51)?;
-    // Controls/MacOSControls.xaml(41,146) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 41, 146)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R286)?;
     // Controls/MacOSControls.xaml(42,18) Content
     // Controls/MacOSControls.xaml(42,18) ContentPresenter
     let content_presenter_0 = __t::ContentPresenter::new();
@@ -58311,13 +59340,7 @@ fn build_controls_macoscontrols_xaml_deferred_430(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 42, 66)?, priority_2);
     }
     // Controls/MacOSControls.xaml(42,102) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 42, 102)?;
-    // Controls/MacOSControls.xaml(42,154) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 42, 154)?;
-    // Controls/MacOSControls.xaml(42,189) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 42, 189)?;
-    // Controls/MacOSControls.xaml(42,256) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 42, 256)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R287)?;
     rt::invoked(content_presenter_0.try_end_init(), 42, 18)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 41, 16)?;
     context.pop_parent();
@@ -58399,38 +59422,96 @@ fn build_controls_macoscontrols_xaml_deferred_432(
 fn build_controls_macoscontrols_xaml_deferred_433(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    let name_scope = context.name_scope_field();
     // Controls/MacOSControls.xaml(31,10) Border
+    let border_0 = __t::Border::new();
+    context.set_intermediate_root_object(rt::to_value(border_0.clone()));
+    border_0.begin_init();
+    context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(31,17) Name
+    border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ThemeShadowWrapper")));
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", __t::Rc::new(__t::Clone::clone(&border_0)), 31, 17)?;
     // Controls/MacOSControls.xaml(31,45) BoxShadow
+    rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::box_shadow_property(), "MacOSMenuShadow", 31, 45)?;
     // Controls/MacOSControls.xaml(31,91) CornerRadius
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 31, 91)?;
     // Controls/MacOSControls.xaml(32,12) Child
     // Controls/MacOSControls.xaml(32,12) Border
+    let border_1 = __t::Border::new();
+    border_1.begin_init();
+    border_0.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&border_1).upcast::<__t::Control>()));
+    context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(32,19) Background
-    // Controls/MacOSControls.xaml(32,61) BorderBrush
-    // Controls/MacOSControls.xaml(32,105) BorderThickness
-    // Controls/MacOSControls.xaml(32,157) CornerRadius
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R288)?;
     // Controls/MacOSControls.xaml(32,12) BackgroundSizing
+    let priority_0 = __t::BindingPriority::Template;
+    border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(33,14) Child
     // Controls/MacOSControls.xaml(33,14) Panel
+    let panel_0 = __t::Panel::new();
+    panel_0.begin_init();
+    border_1.set_value(__t::Decorator::child_property(), __t::Option::Some(__t::Clone::clone(&panel_0).upcast::<__t::Control>()));
+    context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(34,16) Children
+    let children_collection_0 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(34,16) ExperimentalAcrylicBorder
+    let experimental_acrylic_border_0 = __t::ExperimentalAcrylicBorder::new();
+    experimental_acrylic_border_0.begin_init();
+    __t::Controls::__markup_Add_0(&children_collection_0, __t::Clone::clone(&experimental_acrylic_border_0).upcast::<__t::Control>());
+    context.push_parent(rt::to_value(experimental_acrylic_border_0.clone()));
     // Controls/MacOSControls.xaml(34,42) Material
+    rt::bind_dynamic_resource(&context, experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), __t::ExperimentalAcrylicBorder::material_property(), "MacOSMenuGlassMaterial", 34, 42)?;
     // Controls/MacOSControls.xaml(34,16) IsHitTestVisible
+    let priority_1 = __t::BindingPriority::Template;
+    experimental_acrylic_border_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_1);
     // Controls/MacOSControls.xaml(34,119) CornerRadius
+    rt::apply_template_binding(experimental_acrylic_border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::ExperimentalAcrylicBorder::corner_radius_property()), 34, 119)?;
+    context.pop_parent();
+    rt::invoked(experimental_acrylic_border_0.try_end_init(), 34, 16)?;
     // Controls/MacOSControls.xaml(35,16) Children
+    let children_collection_1 = __t::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(35,16) ScrollViewer
+    let scroll_viewer_0 = __t::ScrollViewer::new();
+    scroll_viewer_0.begin_init();
+    __t::Controls::__markup_Add_0(&children_collection_1, __t::Clone::clone(&scroll_viewer_0).upcast::<__t::Control>());
+    context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/MacOSControls.xaml(35,29) Name
+    scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("MenuFlyoutPresenterScrollViewer")));
+    rt::register_name_value(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 35, 29)?;
     // Controls/MacOSControls.xaml(35,70) Theme (setter chosen at run time)
+    let priority_2 = __t::BindingPriority::Template;
+    let provided_8 = rt::provide_static_resource(&context, "MenuFlyoutPresenterScrollViewer", || rt::property_value(__t::StyledElement::theme_property()), 35, 70)?;
+    let value_0: __t::MarkupValue = rt::to_value(provided_8);
+    rt::bind_or_set_priority(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_2, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 35, 70)?;
     // Controls/MacOSControls.xaml(35,127) Margin
-    // Controls/MacOSControls.xaml(35,162) HorizontalScrollBarVisibility
-    // Controls/MacOSControls.xaml(35,257) VerticalScrollBarVisibility
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R289)?;
     // Controls/MacOSControls.xaml(36,18) Content
     // Controls/MacOSControls.xaml(36,18) ItemsPresenter
+    let items_presenter_0 = __t::ItemsPresenter::new();
+    items_presenter_0.begin_init();
+    scroll_viewer_0.set_value(__t::ContentControl::content_property(), rt::to_object(__t::Clone::clone(&items_presenter_0)));
     // Controls/MacOSControls.xaml(36,33) Name
+    items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 36, 33)?;
     // Controls/MacOSControls.xaml(36,62) ItemsPanel
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 36, 62)?;
     // Controls/MacOSControls.xaml(36,18) TabNavigation
+    let priority_3 = __t::BindingPriority::Template;
+    items_presenter_0.set_value_with_priority(__t::KeyboardNavigation::tab_navigation_property(), __t::KeyboardNavigationMode::Continue, priority_3);
     // Controls/MacOSControls.xaml(36,18) IsSharedSizeScope
-    __build_controls_macoscontrols_xaml_factory_shape_62(service_provider, 31, 32, 34, 35, 36, 33)
+    let priority_4 = __t::BindingPriority::Template;
+    items_presenter_0.set_value_with_priority(__t::Grid::is_shared_size_scope_property(), __t::Clone::clone(&true), priority_4);
+    rt::invoked(items_presenter_0.try_end_init(), 36, 18)?;
+    context.pop_parent();
+    rt::invoked(scroll_viewer_0.try_end_init(), 35, 16)?;
+    context.pop_parent();
+    rt::invoked(panel_0.try_end_init(), 33, 14)?;
+    context.pop_parent();
+    rt::invoked(border_1.try_end_init(), 32, 12)?;
+    context.pop_parent();
+    rt::invoked(border_0.try_end_init(), 31, 10)?;
+    __t::Result::Ok(rt::to_value(border_0.clone()))
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(44,4)` (a template or a deferred resource).
@@ -59195,21 +60276,17 @@ fn build_controls_macoscontrols_xaml_deferred_437(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 36, 19)?;
     // Controls/MacOSControls.xaml(36,39) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 36, 39)?;
-    // Controls/MacOSControls.xaml(36,75) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 36, 75)?;
-    // Controls/MacOSControls.xaml(36,117) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 36, 117)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R290)?;
     // Controls/MacOSControls.xaml(36,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(36,196) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 36, 196)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 36, 196)?;
     // Controls/MacOSControls.xaml(36,12) Margin
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 1.0_f64, 4.0_f64, 1.0_f64), priority_1);
     // Controls/MacOSControls.xaml(36,261) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 36, 261)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 36, 261)?;
     // Controls/MacOSControls.xaml(37,14) Child
     // Controls/MacOSControls.xaml(37,14) Grid
     let grid_0 = __t::Grid::new();
@@ -59357,7 +60434,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 47, 56)?, priority_26);
     }
     // Controls/MacOSControls.xaml(47,89) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 47, 89)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 47, 89)?;
     rt::invoked(content_presenter_0.try_end_init(), 47, 18)?;
     rt::invoked(viewbox_0.try_end_init(), 46, 16)?;
     // Controls/MacOSControls.xaml(49,16) Children
@@ -59383,9 +60460,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 49, 79)?, priority_28);
     }
     // Controls/MacOSControls.xaml(49,114) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedSelectingItemsControl::header_template_property()), 49, 114)?;
-    // Controls/MacOSControls.xaml(49,165) Foreground
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 49, 165)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R291)?;
     // Controls/MacOSControls.xaml(49,16) TextTrimming
     let value_3 = <dyn __t::TextTrimming>::__markup_static_get_None();
     let priority_29 = __t::BindingPriority::Template;
@@ -59615,7 +60690,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 60, 37)?;
     // Controls/MacOSControls.xaml(60,66) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 60, 66)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 60, 66)?;
     // Controls/MacOSControls.xaml(60,22) TabNavigation
     let priority_57 = __t::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(__t::KeyboardNavigation::tab_navigation_property(), __t::KeyboardNavigationMode::Continue, priority_57);
@@ -60026,9 +61101,7 @@ fn build_controls_macoscontrols_xaml_deferred_446(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ContentRoot")));
     rt::register_name_value(name_scope.as_ref(), "ContentRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 35, 19)?;
     // Controls/MacOSControls.xaml(35,40) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 35, 40)?;
-    // Controls/MacOSControls.xaml(35,82) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 35, 82)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R292)?;
     // Controls/MacOSControls.xaml(36,14) Child
     // Controls/MacOSControls.xaml(36,14) Panel
     let panel_1 = __t::Panel::new();
@@ -60045,13 +61118,7 @@ fn build_controls_macoscontrols_xaml_deferred_446(
     border_1.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("Background")));
     rt::register_name_value(name_scope.as_ref(), "Background", __t::Rc::new(__t::Clone::clone(&border_1)), 37, 23)?;
     // Controls/MacOSControls.xaml(37,43) Background
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 37, 43)?;
-    // Controls/MacOSControls.xaml(37,85) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 37, 85)?;
-    // Controls/MacOSControls.xaml(37,131) BorderThickness
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 37, 131)?;
-    // Controls/MacOSControls.xaml(37,183) BorderBrush
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 37, 183)?;
+    rt::bind_template_rows(border_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R293)?;
     // Controls/MacOSControls.xaml(37,16) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
@@ -60077,9 +61144,7 @@ fn build_controls_macoscontrols_xaml_deferred_446(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 38, 63)?, priority_1);
     }
     // Controls/MacOSControls.xaml(38,98) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedSelectingItemsControl::header_template_property()), 38, 98)?;
-    // Controls/MacOSControls.xaml(38,149) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 38, 149)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R294)?;
     // Controls/MacOSControls.xaml(38,16) Background
     let priority_2 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::background_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_2);
@@ -60237,7 +61302,7 @@ fn build_controls_macoscontrols_xaml_deferred_446(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 47, 37)?;
     // Controls/MacOSControls.xaml(47,66) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 47, 66)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 47, 66)?;
     // Controls/MacOSControls.xaml(47,22) TabNavigation
     let priority_19 = __t::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(__t::KeyboardNavigation::tab_navigation_property(), __t::KeyboardNavigationMode::Continue, priority_19);
@@ -60310,18 +61375,12 @@ fn build_controls_macoscontrols_xaml_deferred_448(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 88, 17)?;
     // Controls/MacOSControls.xaml(88,37) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 88, 37)?;
-    // Controls/MacOSControls.xaml(88,79) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 88, 79)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R295)?;
     // Controls/MacOSControls.xaml(88,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(88,158) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 88, 158)?;
-    // Controls/MacOSControls.xaml(88,210) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 88, 210)?;
-    // Controls/MacOSControls.xaml(88,256) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 88, 256)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R296)?;
     // Controls/MacOSControls.xaml(88,10) HorizontalAlignment
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_1);
@@ -60334,7 +61393,7 @@ fn build_controls_macoscontrols_xaml_deferred_448(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 89, 27)?;
     // Controls/MacOSControls.xaml(89,56) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 89, 56)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 89, 56)?;
     // Controls/MacOSControls.xaml(89,12) VerticalAlignment
     let priority_2 = __t::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(__t::Layoutable::vertical_alignment_property(), __t::VerticalAlignment::Stretch, priority_2);
@@ -60579,16 +61638,12 @@ fn build_controls_macoscontrols_xaml_deferred_451(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 33, 17)?;
     // Controls/MacOSControls.xaml(33,37) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 33, 37)?;
-    // Controls/MacOSControls.xaml(33,79) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 33, 79)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R297)?;
     // Controls/MacOSControls.xaml(33,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(33,158) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 33, 158)?;
-    // Controls/MacOSControls.xaml(33,210) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 33, 210)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R298)?;
     // Controls/MacOSControls.xaml(33,10) Margin
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 1.0_f64, 4.0_f64, 1.0_f64), priority_1);
@@ -60641,7 +61696,7 @@ fn build_controls_macoscontrols_xaml_deferred_451(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 36, 62)?, priority_6);
     }
     // Controls/MacOSControls.xaml(36,98) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 36, 98)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 36, 98)?;
     // Controls/MacOSControls.xaml(36,150) FontFamily
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_family_property(), "ContentControlThemeFontFamily", 36, 150)?;
     // Controls/MacOSControls.xaml(36,14) FontWeight
@@ -60657,11 +61712,7 @@ fn build_controls_macoscontrols_xaml_deferred_451(
     let priority_9 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::TextBlock::text_line_bounds_property(), __t::TextLineBounds::Full, priority_9);
     // Controls/MacOSControls.xaml(36,342) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 36, 342)?;
-    // Controls/MacOSControls.xaml(36,409) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 36, 409)?;
-    // Controls/MacOSControls.xaml(36,472) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 36, 472)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R299)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 36, 14)?;
     context.pop_parent();
@@ -60949,14 +62000,12 @@ fn build_controls_macoscontrols_xaml_deferred_455(
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64), priority_0);
     // Controls/MacOSControls.xaml(111,55) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 111, 55)?;
-    // Controls/MacOSControls.xaml(111,97) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 111, 97)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R300)?;
     // Controls/MacOSControls.xaml(111,12) BackgroundSizing
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_1);
     // Controls/MacOSControls.xaml(111,176) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 111, 176)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 111, 176)?;
     // Controls/MacOSControls.xaml(111,228) CornerRadius
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), "ListViewItemCornerRadius", 111, 228)?;
     // Controls/MacOSControls.xaml(111,12) IsHitTestVisible
@@ -60980,7 +62029,7 @@ fn build_controls_macoscontrols_xaml_deferred_455(
     let priority_4 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_4);
     // Controls/MacOSControls.xaml(112,71) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 112, 71)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::ContentPresenter::padding_property()), 112, 71)?;
     // Controls/MacOSControls.xaml(112,107) Content (setter chosen at run time)
     let priority_5 = __t::BindingPriority::Template;
     let template_binding_4 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -60992,13 +62041,7 @@ fn build_controls_macoscontrols_xaml_deferred_455(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 112, 107)?, priority_5);
     }
     // Controls/MacOSControls.xaml(112,143) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 112, 143)?;
-    // Controls/MacOSControls.xaml(112,195) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 112, 195)?;
-    // Controls/MacOSControls.xaml(112,237) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 112, 237)?;
-    // Controls/MacOSControls.xaml(112,311) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 112, 311)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R301)?;
     rt::invoked(content_presenter_0.try_end_init(), 112, 12)?;
     context.pop_parent();
     rt::invoked(panel_0.try_end_init(), 110, 10)?;
@@ -61226,16 +62269,12 @@ fn build_controls_macoscontrols_xaml_deferred_457(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ContentBorder")));
     rt::register_name_value(name_scope.as_ref(), "ContentBorder", __t::Rc::new(__t::Clone::clone(&border_0)), 181, 17)?;
     // Controls/MacOSControls.xaml(181,40) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 181, 40)?;
-    // Controls/MacOSControls.xaml(181,82) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 181, 82)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R302)?;
     // Controls/MacOSControls.xaml(181,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(181,161) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 181, 161)?;
-    // Controls/MacOSControls.xaml(181,213) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 181, 213)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R303)?;
     // Controls/MacOSControls.xaml(181,10) RenderTransformOrigin
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Visual::render_transform_origin_property(), __t::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, __t::RelativeUnit::Relative), priority_1);
@@ -61306,13 +62345,7 @@ fn build_controls_macoscontrols_xaml_deferred_457(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 185, 64)?, priority_8);
     }
     // Controls/MacOSControls.xaml(185,100) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 185, 100)?;
-    // Controls/MacOSControls.xaml(185,152) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 185, 152)?;
-    // Controls/MacOSControls.xaml(185,219) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 185, 219)?;
-    // Controls/MacOSControls.xaml(185,282) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 185, 282)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R304)?;
     rt::invoked(content_presenter_0.try_end_init(), 185, 16)?;
     rt::invoked(panel_1.try_end_init(), 184, 14)?;
     context.pop_parent();
@@ -61409,18 +62442,12 @@ fn build_controls_macoscontrols_xaml_deferred_460(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 51, 17)?;
     // Controls/MacOSControls.xaml(52,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 52, 17)?;
-    // Controls/MacOSControls.xaml(53,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 53, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R305)?;
     // Controls/MacOSControls.xaml(51,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(55,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 55, 17)?;
-    // Controls/MacOSControls.xaml(56,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 56, 17)?;
-    // Controls/MacOSControls.xaml(57,17) ClipToBounds
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Visual::clip_to_bounds_property(), rt::property(__t::Visual::clip_to_bounds_property()), 57, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R306)?;
     // Controls/MacOSControls.xaml(58,12) Child
     // Controls/MacOSControls.xaml(58,12) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -61430,25 +62457,7 @@ fn build_controls_macoscontrols_xaml_deferred_460(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 58, 25)?;
     // Controls/MacOSControls.xaml(59,25) Padding
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 59, 25)?;
-    // Controls/MacOSControls.xaml(60,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 60, 25)?;
-    // Controls/MacOSControls.xaml(61,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 61, 25)?;
-    // Controls/MacOSControls.xaml(62,25) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 62, 25)?;
-    // Controls/MacOSControls.xaml(63,25) BringIntoViewOnFocusChange
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::bring_into_view_on_focus_change_property(), rt::property(__t::ScrollViewer::bring_into_view_on_focus_change_property()), 63, 25)?;
-    // Controls/MacOSControls.xaml(64,25) IsScrollChainingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_chaining_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_chaining_enabled_property()), 64, 25)?;
-    // Controls/MacOSControls.xaml(65,25) IsScrollInertiaEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_inertia_enabled_property()), 65, 25)?;
-    // Controls/MacOSControls.xaml(66,25) VerticalSnapPointsType
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_snap_points_type_property(), rt::property(__t::ScrollViewer::vertical_snap_points_type_property()), 66, 25)?;
-    // Controls/MacOSControls.xaml(67,25) HorizontalSnapPointsType
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_snap_points_type_property(), rt::property(__t::ScrollViewer::horizontal_snap_points_type_property()), 67, 25)?;
-    // Controls/MacOSControls.xaml(68,25) AllowAutoHide
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::allow_auto_hide_property(), rt::property(__t::ScrollViewer::allow_auto_hide_property()), 68, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R307)?;
     // Controls/MacOSControls.xaml(69,14) Content
     // Controls/MacOSControls.xaml(69,14) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -61458,7 +62467,7 @@ fn build_controls_macoscontrols_xaml_deferred_460(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 69, 29)?;
     // Controls/MacOSControls.xaml(70,29) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 70, 29)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 70, 29)?;
     rt::invoked(items_presenter_0.try_end_init(), 69, 14)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 58, 12)?;
     rt::invoked(border_0.try_end_init(), 51, 10)?;
@@ -61815,19 +62824,17 @@ fn build_controls_macoscontrols_xaml_deferred_465(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("LayoutRoot")));
     rt::register_name_value(name_scope.as_ref(), "LayoutRoot", __t::Rc::new(__t::Clone::clone(&border_0)), 40, 17)?;
     // Controls/MacOSControls.xaml(40,37) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 40, 37)?;
-    // Controls/MacOSControls.xaml(40,79) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 40, 79)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R308)?;
     // Controls/MacOSControls.xaml(40,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(40,158) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 40, 158)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 40, 158)?;
     // Controls/MacOSControls.xaml(40,10) Margin
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 1.0_f64, 4.0_f64, 1.0_f64), priority_1);
     // Controls/MacOSControls.xaml(40,223) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 40, 223)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 40, 223)?;
     // Controls/MacOSControls.xaml(40,10) IsTemplateFocusTarget
     let priority_2 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_2);
@@ -61853,7 +62860,7 @@ fn build_controls_macoscontrols_xaml_deferred_465(
     let value_0: __t::MarkupValue = rt::to_value(provided_4);
     rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, priority_3, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 42, 48)?;
     // Controls/MacOSControls.xaml(42,90) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 42, 90)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 42, 90)?;
     // Controls/MacOSControls.xaml(42,14) Width
     let priority_4 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Layoutable::width_property(), 10.0_f64, priority_4);
@@ -61900,15 +62907,7 @@ fn build_controls_macoscontrols_xaml_deferred_465(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 43, 62)?, priority_12);
     }
     // Controls/MacOSControls.xaml(43,98) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 43, 98)?;
-    // Controls/MacOSControls.xaml(43,150) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 43, 150)?;
-    // Controls/MacOSControls.xaml(43,192) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 43, 192)?;
-    // Controls/MacOSControls.xaml(43,259) VerticalAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 43, 259)?;
-    // Controls/MacOSControls.xaml(43,322) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 43, 322)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R309)?;
     rt::invoked(content_presenter_0.try_end_init(), 43, 14)?;
     context.pop_parent();
     rt::invoked(panel_0.try_end_init(), 41, 12)?;
@@ -62105,16 +63104,12 @@ fn build_controls_macoscontrols_xaml_deferred_468(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("BorderElement")));
     rt::register_name_value(name_scope.as_ref(), "BorderElement", __t::Rc::new(__t::Clone::clone(&border_0)), 34, 19)?;
     // Controls/MacOSControls.xaml(35,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 35, 19)?;
-    // Controls/MacOSControls.xaml(36,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 36, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R310)?;
     // Controls/MacOSControls.xaml(34,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(38,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 38, 19)?;
-    // Controls/MacOSControls.xaml(39,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 39, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R311)?;
     // Controls/MacOSControls.xaml(34,12) IsTemplateFocusTarget
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_1);
@@ -62141,7 +63136,7 @@ fn build_controls_macoscontrols_xaml_deferred_468(
     // Controls/MacOSControls.xaml(43,19) BorderBrush
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "MacOSFocusBrush", 43, 19)?;
     // Controls/MacOSControls.xaml(44,19) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 44, 19)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 44, 19)?;
     // Controls/MacOSControls.xaml(41,12) IsHitTestVisible
     let priority_5 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_5);
@@ -62173,17 +63168,7 @@ fn build_controls_macoscontrols_xaml_deferred_468(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 52, 25)?;
     // Controls/MacOSControls.xaml(53,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 53, 25)?;
-    // Controls/MacOSControls.xaml(54,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 54, 25)?;
-    // Controls/MacOSControls.xaml(55,25) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 55, 25)?;
-    // Controls/MacOSControls.xaml(56,25) Margin
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 56, 25)?;
-    // Controls/MacOSControls.xaml(57,25) Padding
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 57, 25)?;
-    // Controls/MacOSControls.xaml(58,25) Foreground
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 58, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R312)?;
     // Controls/MacOSControls.xaml(52,12) Focusable
     let priority_7 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_7);
@@ -62215,35 +63200,7 @@ fn build_controls_macoscontrols_xaml_deferred_468(
     let provided_13 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_11);
     rt::bind(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_property(), provided_13, 61, 28)?;
     // Controls/MacOSControls.xaml(62,28) CaretBlinkInterval
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_blink_interval_property(), rt::property(__t::TextBox::caret_blink_interval_property()), 62, 28)?;
-    // Controls/MacOSControls.xaml(63,28) CaretIndex
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_index_property(), rt::property(__t::TextBox::caret_index_property()), 63, 28)?;
-    // Controls/MacOSControls.xaml(64,28) SelectionStart
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_start_property(), rt::property(__t::TextBox::selection_start_property()), 64, 28)?;
-    // Controls/MacOSControls.xaml(65,28) SelectionEnd
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_end_property(), rt::property(__t::TextBox::selection_end_property()), 65, 28)?;
-    // Controls/MacOSControls.xaml(66,28) TextAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 66, 28)?;
-    // Controls/MacOSControls.xaml(67,28) TextWrapping
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 67, 28)?;
-    // Controls/MacOSControls.xaml(68,28) LineHeight
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::line_height_property(), rt::property(__t::TextBox::line_height_property()), 68, 28)?;
-    // Controls/MacOSControls.xaml(69,28) LetterSpacing
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::letter_spacing_property(), rt::property(__t::TemplatedControl::letter_spacing_property()), 69, 28)?;
-    // Controls/MacOSControls.xaml(70,28) PasswordChar
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::password_char_property(), rt::property(__t::TextBox::password_char_property()), 70, 28)?;
-    // Controls/MacOSControls.xaml(71,28) RevealPassword
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::reveal_password_property(), rt::property(__t::TextBox::reveal_password_property()), 71, 28)?;
-    // Controls/MacOSControls.xaml(72,28) SelectionBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_brush_property(), rt::property(__t::TextBox::selection_brush_property()), 72, 28)?;
-    // Controls/MacOSControls.xaml(73,28) SelectionForegroundBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_foreground_brush_property(), rt::property(__t::TextBox::selection_foreground_brush_property()), 73, 28)?;
-    // Controls/MacOSControls.xaml(74,28) CaretBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_brush_property(), rt::property(__t::TextBox::caret_brush_property()), 74, 28)?;
-    // Controls/MacOSControls.xaml(75,28) HorizontalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::TextBox::horizontal_content_alignment_property()), 75, 28)?;
-    // Controls/MacOSControls.xaml(76,28) VerticalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 76, 28)?;
+    rt::bind_template_rows(text_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R313)?;
     rt::invoked(text_presenter_0.try_end_init(), 60, 14)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 52, 12)?;
     // Controls/MacOSControls.xaml(83,12) Children
@@ -62257,17 +63214,7 @@ fn build_controls_macoscontrols_xaml_deferred_468(
     text_block_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PlaceholderTextContentPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PlaceholderTextContentPresenter", __t::Rc::new(__t::Clone::clone(&text_block_0)), 83, 22)?;
     // Controls/MacOSControls.xaml(84,22) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 84, 22)?;
-    // Controls/MacOSControls.xaml(85,22) Margin
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 85, 22)?;
-    // Controls/MacOSControls.xaml(86,22) Padding
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 86, 22)?;
-    // Controls/MacOSControls.xaml(87,22) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TextBox::placeholder_text_property()), 87, 22)?;
-    // Controls/MacOSControls.xaml(88,22) TextAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 88, 22)?;
-    // Controls/MacOSControls.xaml(89,22) TextWrapping
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 89, 22)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R314)?;
     // Controls/MacOSControls.xaml(83,12) IsHitTestVisible
     let priority_8 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_8);
@@ -62763,16 +63710,12 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_1);
     // Controls/MacOSControls.xaml(178,21) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 178, 21)?;
-    // Controls/MacOSControls.xaml(179,21) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 179, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R315)?;
     // Controls/MacOSControls.xaml(175,14) BackgroundSizing
     let priority_2 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_2);
     // Controls/MacOSControls.xaml(181,21) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 181, 21)?;
-    // Controls/MacOSControls.xaml(182,21) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 182, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R316)?;
     // Controls/MacOSControls.xaml(183,21) MinWidth
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), "ComboBoxThemeMinWidth", 183, 21)?;
     // Controls/MacOSControls.xaml(184,21) MinHeight
@@ -62831,15 +63774,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
         content_control_0.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 195, 29)?, priority_6);
     }
     // Controls/MacOSControls.xaml(196,29) ContentTemplate
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::ComboBox::selection_box_item_template_property()), 196, 29)?;
-    // Controls/MacOSControls.xaml(197,29) Foreground
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 197, 29)?;
-    // Controls/MacOSControls.xaml(198,29) Margin
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 198, 29)?;
-    // Controls/MacOSControls.xaml(199,29) HorizontalContentAlignment
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::horizontal_content_alignment_property(), rt::property(__t::ComboBox::horizontal_content_alignment_property()), 199, 29)?;
-    // Controls/MacOSControls.xaml(200,29) VerticalContentAlignment
-    rt::bind_template_binding(content_control_0.upcast_ref::<__t::FerroObject>(), __t::ContentControl::vertical_content_alignment_property(), rt::property(__t::ComboBox::vertical_content_alignment_property()), 200, 29)?;
+    rt::bind_template_rows(content_control_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R317)?;
     // Controls/MacOSControls.xaml(201,29) IsVisible
     let template_binding_10 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ComboBox::is_editable_property()));
     // Controls/MacOSControls.xaml(201,29) Converter
@@ -62862,15 +63797,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     let priority_7 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_7);
     // Controls/MacOSControls.xaml(204,24) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::ComboBox::placeholder_text_property()), 204, 24)?;
-    // Controls/MacOSControls.xaml(205,24) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 205, 24)?;
-    // Controls/MacOSControls.xaml(206,24) Margin
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 206, 24)?;
-    // Controls/MacOSControls.xaml(207,24) HorizontalAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ComboBox::horizontal_content_alignment_property()), 207, 24)?;
-    // Controls/MacOSControls.xaml(208,24) VerticalAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ComboBox::vertical_content_alignment_property()), 208, 24)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R318)?;
     // Controls/MacOSControls.xaml(210,18) IsVisible
     let multi_binding_0 = __t::MultiBinding::__markup_new_0();
     context.push_parent(rt::to_value(multi_binding_0.clone()));
@@ -62937,13 +63864,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     let priority_11 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::TemplatedControl::border_brush_property(), __t::Option::Some(__t::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as __t::Rc<dyn __t::IBrush>), priority_11);
     // Controls/MacOSControls.xaml(222,22) HorizontalAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ComboBox::horizontal_content_alignment_property()), 222, 22)?;
-    // Controls/MacOSControls.xaml(223,22) VerticalAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ComboBox::vertical_content_alignment_property()), 223, 22)?;
-    // Controls/MacOSControls.xaml(224,22) PlaceholderText
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_text_property(), rt::property(__t::ComboBox::placeholder_text_property()), 224, 22)?;
-    // Controls/MacOSControls.xaml(225,22) Foreground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 225, 22)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R319)?;
     // Controls/MacOSControls.xaml(226,22) Text
     let template_binding_20 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ComboBox::text_property()));
     // Controls/MacOSControls.xaml(226,22) Mode
@@ -62951,9 +63872,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     let provided_30 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_20);
     rt::bind(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::text_property(), provided_30, 226, 22)?;
     // Controls/MacOSControls.xaml(227,22) CornerRadius
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 227, 22)?;
-    // Controls/MacOSControls.xaml(228,22) IsVisible
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::ComboBox::is_editable_property()), 228, 22)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R320)?;
     context.pop_parent();
     rt::invoked(text_box_0.try_end_init(), 216, 14)?;
     // Controls/MacOSControls.xaml(229,14) Children
@@ -63124,7 +64043,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     let provided_40 = rt::provide_value(&context, rt::property_value(__t::Layoutable::min_width_property()), &reflection_binding_extension_2, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(border_3.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), provided_40, 268, 25)?;
     // Controls/MacOSControls.xaml(269,25) MaxHeight
-    rt::bind_template_binding(border_3.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_height_property(), rt::property(__t::ComboBox::max_drop_down_height_property()), 269, 25)?;
+    rt::apply_template_binding(border_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::ComboBox::max_drop_down_height_property()), || rt::property(__t::Layoutable::max_height_property()), 269, 25)?;
     // Controls/MacOSControls.xaml(270,25) Background
     rt::bind_dynamic_resource(&context, border_3.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "ComboBoxDropDownBackground", 270, 25)?;
     // Controls/MacOSControls.xaml(267,18) BackgroundSizing
@@ -63150,13 +64069,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     // Controls/MacOSControls.xaml(277,33) Foreground
     rt::bind_dynamic_resource(&context, scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), "ComboBoxDropDownForeground", 277, 33)?;
     // Controls/MacOSControls.xaml(278,33) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 278, 33)?;
-    // Controls/MacOSControls.xaml(279,33) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 279, 33)?;
-    // Controls/MacOSControls.xaml(280,33) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 280, 33)?;
-    // Controls/MacOSControls.xaml(281,33) BringIntoViewOnFocusChange
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::bring_into_view_on_focus_change_property(), rt::property(__t::ScrollViewer::bring_into_view_on_focus_change_property()), 281, 33)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R321)?;
     // Controls/MacOSControls.xaml(276,20) IsScrollChainingEnabled
     let priority_39 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::ScrollViewer::is_scroll_chaining_enabled_property(), __t::Clone::clone(&false), priority_39);
@@ -63172,7 +64085,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     // Controls/MacOSControls.xaml(284,37) Margin
     rt::bind_dynamic_resource(&context, items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "ComboBoxDropdownContentMargin", 284, 37)?;
     // Controls/MacOSControls.xaml(285,37) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 285, 37)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 285, 37)?;
     context.pop_parent();
     rt::invoked(items_presenter_0.try_end_init(), 283, 22)?;
     context.pop_parent();
@@ -63294,9 +64207,7 @@ fn build_controls_macoscontrols_xaml_deferred_475(
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(29,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 29, 17)?;
-    // Controls/MacOSControls.xaml(29,59) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 29, 59)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R322)?;
     // Controls/MacOSControls.xaml(30,12) Child
     // Controls/MacOSControls.xaml(30,12) Panel
     let panel_0 = __t::Panel::new();
@@ -63328,7 +64239,7 @@ fn build_controls_macoscontrols_xaml_deferred_475(
     let value_0: __t::MarkupValue = rt::to_value(provided_2);
     rt::bind_or_set_priority(path_0.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_0, priority_3, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 31, 43)?;
     // Controls/MacOSControls.xaml(31,85) Fill
-    rt::bind_template_binding(path_0.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 31, 85)?;
+    rt::apply_template_binding(path_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 31, 85)?;
     // Controls/MacOSControls.xaml(31,14) Stretch
     let priority_4 = __t::BindingPriority::Template;
     path_0.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_4);
@@ -63362,7 +64273,7 @@ fn build_controls_macoscontrols_xaml_deferred_475(
     let value_1: __t::MarkupValue = rt::to_value(provided_4);
     rt::bind_or_set_priority(path_1.upcast_ref::<__t::FerroObject>(), || __t::Path::data_property(), value_1, priority_9, || rt::class_handle(<__t::Geometry as __t::StaticType>::TYPE), true, "Path.Data", 32, 42)?;
     // Controls/MacOSControls.xaml(32,84) Fill
-    rt::bind_template_binding(path_1.upcast_ref::<__t::FerroObject>(), __t::Shape::fill_property(), rt::property(__t::TemplatedControl::foreground_property()), 32, 84)?;
+    rt::apply_template_binding(path_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::Shape::fill_property()), 32, 84)?;
     // Controls/MacOSControls.xaml(32,14) Stretch
     let priority_10 = __t::BindingPriority::Template;
     path_1.set_value_with_priority(__t::Shape::stretch_property(), __t::Stretch::Uniform, priority_10);
@@ -63733,23 +64644,19 @@ fn build_controls_macoscontrols_xaml_deferred_478(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_Header")));
     rt::register_name_value(name_scope.as_ref(), "PART_Header", __t::Rc::new(__t::Clone::clone(&border_0)), 66, 19)?;
     // Controls/MacOSControls.xaml(66,40) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 66, 40)?;
-    // Controls/MacOSControls.xaml(66,82) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 66, 82)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R323)?;
     // Controls/MacOSControls.xaml(66,12) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(66,161) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 66, 161)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 66, 161)?;
     // Controls/MacOSControls.xaml(66,12) Margin
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 1.0_f64, 4.0_f64, 1.0_f64), priority_1);
     // Controls/MacOSControls.xaml(66,226) Padding
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), "TreeViewItemPresenterPadding", 66, 226)?;
     // Controls/MacOSControls.xaml(66,283) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 66, 283)?;
-    // Controls/MacOSControls.xaml(66,329) MinHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), rt::property(__t::Layoutable::min_height_property()), 66, 329)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R324)?;
     // Controls/MacOSControls.xaml(66,12) IsTemplateFocusTarget
     let priority_2 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_2);
@@ -63852,9 +64759,7 @@ fn build_controls_macoscontrols_xaml_deferred_478(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 71, 83)?, priority_7);
     }
     // Controls/MacOSControls.xaml(71,118) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedItemsControl::header_template_property()), 71, 118)?;
-    // Controls/MacOSControls.xaml(71,169) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 71, 169)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R325)?;
     // Controls/MacOSControls.xaml(71,20) HorizontalAlignment
     let priority_8 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Stretch, priority_8);
@@ -63865,7 +64770,7 @@ fn build_controls_macoscontrols_xaml_deferred_478(
     let priority_10 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Layoutable::min_height_property(), 26.0_f64, priority_10);
     // Controls/MacOSControls.xaml(71,283) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 71, 283)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Layoutable::margin_property()), 71, 283)?;
     // Controls/MacOSControls.xaml(71,20) Focusable
     let priority_11 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_11);
@@ -63888,9 +64793,7 @@ fn build_controls_macoscontrols_xaml_deferred_478(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 76, 27)?;
     // Controls/MacOSControls.xaml(76,56) IsVisible
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), rt::property(__t::TreeViewItem::is_expanded_property()), 76, 56)?;
-    // Controls/MacOSControls.xaml(76,97) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 76, 97)?;
+    rt::bind_template_rows(items_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R326)?;
     rt::invoked(items_presenter_0.try_end_init(), 76, 12)?;
     context.pop_parent();
     rt::invoked(stack_panel_0.try_end_init(), 65, 10)?;
@@ -63957,16 +64860,12 @@ fn build_controls_macoscontrols_xaml_deferred_481(
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     // Controls/MacOSControls.xaml(47,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 47, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_brush_property()), || rt::property(__t::Border::border_brush_property()), 47, 17)?;
     // Controls/MacOSControls.xaml(47,10) BackgroundSizing
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(48,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 48, 17)?;
-    // Controls/MacOSControls.xaml(49,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 49, 17)?;
-    // Controls/MacOSControls.xaml(50,17) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 50, 17)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R327)?;
     // Controls/MacOSControls.xaml(51,12) Child
     // Controls/MacOSControls.xaml(51,12) ScrollViewer
     let scroll_viewer_0 = __t::ScrollViewer::new();
@@ -63976,17 +64875,7 @@ fn build_controls_macoscontrols_xaml_deferred_481(
     scroll_viewer_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("ScrollViewer")));
     rt::register_name_value(name_scope.as_ref(), "ScrollViewer", __t::Rc::new(__t::Clone::clone(&scroll_viewer_0)), 51, 25)?;
     // Controls/MacOSControls.xaml(52,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 52, 25)?;
-    // Controls/MacOSControls.xaml(53,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 53, 25)?;
-    // Controls/MacOSControls.xaml(54,25) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 54, 25)?;
-    // Controls/MacOSControls.xaml(55,25) BringIntoViewOnFocusChange
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::bring_into_view_on_focus_change_property(), rt::property(__t::ScrollViewer::bring_into_view_on_focus_change_property()), 55, 25)?;
-    // Controls/MacOSControls.xaml(56,25) IsScrollChainingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_chaining_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_chaining_enabled_property()), 56, 25)?;
-    // Controls/MacOSControls.xaml(57,25) AllowAutoHide
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::allow_auto_hide_property(), rt::property(__t::ScrollViewer::allow_auto_hide_property()), 57, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R328)?;
     // Controls/MacOSControls.xaml(58,14) Content
     // Controls/MacOSControls.xaml(58,14) ItemsPresenter
     let items_presenter_0 = __t::ItemsPresenter::new();
@@ -63996,9 +64885,7 @@ fn build_controls_macoscontrols_xaml_deferred_481(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 58, 29)?;
     // Controls/MacOSControls.xaml(59,29) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 59, 29)?;
-    // Controls/MacOSControls.xaml(60,29) Margin
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::padding_property()), 60, 29)?;
+    rt::bind_template_rows(items_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R329)?;
     rt::invoked(items_presenter_0.try_end_init(), 58, 14)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 51, 12)?;
     rt::invoked(border_0.try_end_init(), 47, 10)?;
@@ -64143,7 +65030,7 @@ fn build_controls_macoscontrols_xaml_deferred_484(
     let priority_0 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_0);
     // Controls/MacOSControls.xaml(27,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 27, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Border::border_thickness_property()), 27, 17)?;
     // Controls/MacOSControls.xaml(28,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), "TextControlButtonBackground", 28, 17)?;
     // Controls/MacOSControls.xaml(29,17) Margin (setter chosen at run time)
@@ -64428,16 +65315,12 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     let priority_1 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Grid::column_span_property(), 5_i32, priority_1);
     // Controls/MacOSControls.xaml(93,21) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 93, 21)?;
-    // Controls/MacOSControls.xaml(94,21) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 94, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R330)?;
     // Controls/MacOSControls.xaml(90,14) BackgroundSizing
     let priority_2 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Border::background_sizing_property(), __t::BackgroundSizing::InnerBorderEdge, priority_2);
     // Controls/MacOSControls.xaml(96,21) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 96, 21)?;
-    // Controls/MacOSControls.xaml(97,21) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 97, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R331)?;
     // Controls/MacOSControls.xaml(90,14) IsTemplateFocusTarget
     let priority_3 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::TemplatedControl::is_template_focus_target_property(), __t::Clone::clone(&true), priority_3);
@@ -64467,7 +65350,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     // Controls/MacOSControls.xaml(101,21) BorderBrush
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), "MacOSFocusBrush", 101, 21)?;
     // Controls/MacOSControls.xaml(102,21) CornerRadius
-    rt::bind_template_binding(border_1.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 102, 21)?;
+    rt::apply_template_binding(border_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::Border::corner_radius_property()), 102, 21)?;
     // Controls/MacOSControls.xaml(99,14) IsHitTestVisible
     let priority_8 = __t::BindingPriority::Template;
     border_1.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_8);
@@ -64509,7 +65392,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     let priority_10 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::Grid::column_property(), 0_i32, priority_10);
     // Controls/MacOSControls.xaml(114,31) Margin
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 114, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 114, 31)?;
     // Controls/MacOSControls.xaml(115,31) Content (setter chosen at run time)
     let priority_11 = __t::BindingPriority::Template;
     let template_binding_7 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TextBox::inner_left_content_property()));
@@ -64521,7 +65404,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 115, 31)?, priority_11);
     }
     // Controls/MacOSControls.xaml(116,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 116, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TextBox::vertical_content_alignment_property()), || rt::property(__t::ContentPresenter::vertical_content_alignment_property()), 116, 31)?;
     rt::invoked(content_presenter_0.try_end_init(), 111, 14)?;
     // Controls/MacOSControls.xaml(117,14) Children
     let children_collection_3 = __t::Panel::__markup_get_Children(grid_0.upcast_ref::<__t::Panel>());
@@ -64536,21 +65419,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     let priority_12 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::Grid::column_property(), 1_i32, priority_12);
     // Controls/MacOSControls.xaml(119,27) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 119, 27)?;
-    // Controls/MacOSControls.xaml(120,27) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 120, 27)?;
-    // Controls/MacOSControls.xaml(121,27) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 121, 27)?;
-    // Controls/MacOSControls.xaml(122,27) VerticalAlignment
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 122, 27)?;
-    // Controls/MacOSControls.xaml(123,27) HorizontalAlignment
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::TextBox::horizontal_content_alignment_property()), 123, 27)?;
-    // Controls/MacOSControls.xaml(124,27) Margin
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 124, 27)?;
-    // Controls/MacOSControls.xaml(125,27) Padding
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 125, 27)?;
-    // Controls/MacOSControls.xaml(126,27) Foreground
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 126, 27)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R332)?;
     // Controls/MacOSControls.xaml(117,14) Focusable
     let priority_13 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_13);
@@ -64582,31 +65451,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     let provided_19 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_17);
     rt::bind(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_property(), provided_19, 129, 30)?;
     // Controls/MacOSControls.xaml(130,30) CaretBlinkInterval
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_blink_interval_property(), rt::property(__t::TextBox::caret_blink_interval_property()), 130, 30)?;
-    // Controls/MacOSControls.xaml(131,30) CaretIndex
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_index_property(), rt::property(__t::TextBox::caret_index_property()), 131, 30)?;
-    // Controls/MacOSControls.xaml(132,30) SelectionStart
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_start_property(), rt::property(__t::TextBox::selection_start_property()), 132, 30)?;
-    // Controls/MacOSControls.xaml(133,30) SelectionEnd
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_end_property(), rt::property(__t::TextBox::selection_end_property()), 133, 30)?;
-    // Controls/MacOSControls.xaml(134,30) TextAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_alignment_property(), rt::property(__t::TextBox::text_alignment_property()), 134, 30)?;
-    // Controls/MacOSControls.xaml(135,30) TextWrapping
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::text_wrapping_property(), rt::property(__t::TextBox::text_wrapping_property()), 135, 30)?;
-    // Controls/MacOSControls.xaml(136,30) LineHeight
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::line_height_property(), rt::property(__t::TextBox::line_height_property()), 136, 30)?;
-    // Controls/MacOSControls.xaml(137,30) LetterSpacing
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::letter_spacing_property(), rt::property(__t::TemplatedControl::letter_spacing_property()), 137, 30)?;
-    // Controls/MacOSControls.xaml(138,30) PasswordChar
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::password_char_property(), rt::property(__t::TextBox::password_char_property()), 138, 30)?;
-    // Controls/MacOSControls.xaml(139,30) RevealPassword
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::reveal_password_property(), rt::property(__t::TextBox::reveal_password_property()), 139, 30)?;
-    // Controls/MacOSControls.xaml(140,30) SelectionBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_brush_property(), rt::property(__t::TextBox::selection_brush_property()), 140, 30)?;
-    // Controls/MacOSControls.xaml(141,30) SelectionForegroundBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::selection_foreground_brush_property(), rt::property(__t::TextBox::selection_foreground_brush_property()), 141, 30)?;
-    // Controls/MacOSControls.xaml(142,30) CaretBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<__t::FerroObject>(), __t::TextPresenter::caret_brush_property(), rt::property(__t::TextBox::caret_brush_property()), 142, 30)?;
+    rt::bind_template_rows(text_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R333)?;
     rt::invoked(text_presenter_0.try_end_init(), 128, 16)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 117, 14)?;
     // Controls/MacOSControls.xaml(149,14) Children
@@ -64626,17 +65471,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     let priority_15 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Grid::column_span_property(), 2_i32, priority_15);
     // Controls/MacOSControls.xaml(152,24) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TextBox::placeholder_foreground_property()), 152, 24)?;
-    // Controls/MacOSControls.xaml(153,24) Margin
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 153, 24)?;
-    // Controls/MacOSControls.xaml(154,24) Padding
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 154, 24)?;
-    // Controls/MacOSControls.xaml(155,24) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TextBox::placeholder_text_property()), 155, 24)?;
-    // Controls/MacOSControls.xaml(156,24) VerticalAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 156, 24)?;
-    // Controls/MacOSControls.xaml(157,24) HorizontalAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::TextBox::horizontal_content_alignment_property()), 157, 24)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R334)?;
     // Controls/MacOSControls.xaml(149,14) IsHitTestVisible
     let priority_16 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_16);
@@ -64701,9 +65536,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     let provided_43 = rt::provide_value(&context, rt::property_value(__t::Button::command_property()), &reflection_binding_extension_2, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(button_0.upcast_ref::<__t::FerroObject>(), __t::Button::command_property(), provided_43, 169, 21)?;
     // Controls/MacOSControls.xaml(170,21) CornerRadius
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 170, 21)?;
-    // Controls/MacOSControls.xaml(171,21) BorderThickness
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 171, 21)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R335)?;
     // Controls/MacOSControls.xaml(172,21) Padding
     rt::bind_dynamic_resource(&context, button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), "HelperButtonThemePadding", 172, 21)?;
     // Controls/MacOSControls.xaml(166,14) Focusable
@@ -64713,7 +65546,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     let priority_20 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_20);
     // Controls/MacOSControls.xaml(175,21) FontSize
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 175, 21)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_size_property()), || rt::property(__t::TemplatedControl::font_size_property()), 175, 21)?;
     // Controls/MacOSControls.xaml(166,14) Width
     let priority_21 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::width_property(), 24.0_f64, priority_21);
@@ -64742,7 +65575,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     let priority_23 = __t::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(__t::Grid::column_property(), 4_i32, priority_23);
     // Controls/MacOSControls.xaml(182,31) Margin
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 182, 31)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::Layoutable::margin_property()), 182, 31)?;
     // Controls/MacOSControls.xaml(183,31) Content (setter chosen at run time)
     let priority_24 = __t::BindingPriority::Template;
     let template_binding_42 = __t::TemplateBinding::__markup_new_1(rt::property(__t::TextBox::inner_right_content_property()));
@@ -64754,7 +65587,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_8.clone(), "ContentControl.Content", 1, 183, 31)?, priority_24);
     }
     // Controls/MacOSControls.xaml(184,31) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::TextBox::vertical_content_alignment_property()), 184, 31)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TextBox::vertical_content_alignment_property()), || rt::property(__t::ContentPresenter::vertical_content_alignment_property()), 184, 31)?;
     rt::invoked(content_presenter_1.try_end_init(), 179, 14)?;
     context.pop_parent();
     rt::invoked(grid_0.try_end_init(), 89, 12)?;
@@ -64853,27 +65686,7 @@ fn build_controls_macoscontrols_xaml_deferred_488(
     let value_0: __t::MarkupValue = rt::to_value(provided_0);
     rt::bind_or_set_priority(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_0, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 248, 20)?;
     // Controls/MacOSControls.xaml(249,20) PlaceholderText
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_text_property(), rt::property(__t::AutoCompleteBox::placeholder_text_property()), 249, 20)?;
-    // Controls/MacOSControls.xaml(250,20) PlaceholderForeground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_foreground_property(), rt::property(__t::AutoCompleteBox::placeholder_foreground_property()), 250, 20)?;
-    // Controls/MacOSControls.xaml(251,20) Width
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::Layoutable::width_property()), 251, 20)?;
-    // Controls/MacOSControls.xaml(252,20) Foreground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 252, 20)?;
-    // Controls/MacOSControls.xaml(253,20) Background
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 253, 20)?;
-    // Controls/MacOSControls.xaml(254,20) BorderBrush
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 254, 20)?;
-    // Controls/MacOSControls.xaml(255,20) BorderThickness
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 255, 20)?;
-    // Controls/MacOSControls.xaml(256,20) FontSize
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 256, 20)?;
-    // Controls/MacOSControls.xaml(257,20) FontFamily
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 257, 20)?;
-    // Controls/MacOSControls.xaml(258,20) FontWeight
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 258, 20)?;
-    // Controls/MacOSControls.xaml(259,20) FontStretch
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_stretch_property(), rt::property(__t::TemplatedControl::font_stretch_property()), 259, 20)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R336)?;
     // Controls/MacOSControls.xaml(247,12) VerticalContentAlignment
     let priority_1 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::TextBox::vertical_content_alignment_property(), __t::VerticalAlignment::Center, priority_1);
@@ -64887,9 +65700,7 @@ fn build_controls_macoscontrols_xaml_deferred_488(
     let priority_4 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_4);
     // Controls/MacOSControls.xaml(264,20) CornerRadius
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 264, 20)?;
-    // Controls/MacOSControls.xaml(265,20) Padding
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 265, 20)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R337)?;
     // Controls/MacOSControls.xaml(266,20) CaretIndex
     let template_binding_13 = __t::TemplateBinding::__markup_new_1(rt::property(__t::AutoCompleteBox::caret_index_property()));
     // Controls/MacOSControls.xaml(266,20) Mode
@@ -64897,11 +65708,7 @@ fn build_controls_macoscontrols_xaml_deferred_488(
     let provided_14 = __t::TemplateBinding::__markup_ProvideValue_0(&template_binding_13);
     rt::bind(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::caret_index_property(), provided_14, 266, 20)?;
     // Controls/MacOSControls.xaml(267,20) ClearSelectionOnLostFocus
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::clear_selection_on_lost_focus_property(), rt::property(__t::AutoCompleteBox::clear_selection_on_lost_focus_property()), 267, 20)?;
-    // Controls/MacOSControls.xaml(268,20) MaxLength
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::max_length_property(), rt::property(__t::AutoCompleteBox::max_length_property()), 268, 20)?;
-    // Controls/MacOSControls.xaml(269,20) Errors
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::DataValidationErrors::errors_property(), rt::property(__t::DataValidationErrors::errors_property()), 269, 20)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R338)?;
     // Controls/MacOSControls.xaml(270,20) InnerLeftContent (setter chosen at run time)
     let priority_5 = __t::BindingPriority::Template;
     let template_binding_17 = __t::TemplateBinding::__markup_new_1(rt::property(__t::AutoCompleteBox::inner_left_content_property()));
@@ -64971,7 +65778,7 @@ fn build_controls_macoscontrols_xaml_deferred_488(
     let provided_24 = rt::provide_value(&context, rt::property_value(__t::Layoutable::min_width_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), provided_24, 279, 21)?;
     // Controls/MacOSControls.xaml(280,21) MaxHeight
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::max_height_property(), rt::property(__t::AutoCompleteBox::max_drop_down_height_property()), 280, 21)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::AutoCompleteBox::max_drop_down_height_property()), || rt::property(__t::Layoutable::max_height_property()), 280, 21)?;
     // Controls/MacOSControls.xaml(281,21) Padding
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), "AutoSuggestListMargin", 281, 21)?;
     // Controls/MacOSControls.xaml(282,21) BorderThickness
@@ -64992,7 +65799,7 @@ fn build_controls_macoscontrols_xaml_deferred_488(
     list_box_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_SelectingItemsControl")));
     rt::register_name_value(name_scope.as_ref(), "PART_SelectingItemsControl", __t::Rc::new(__t::Clone::clone(&list_box_0)), 286, 24)?;
     // Controls/MacOSControls.xaml(287,24) ItemTemplate
-    rt::bind_template_binding(list_box_0.upcast_ref::<__t::FerroObject>(), __t::ItemsControl::item_template_property(), rt::property(__t::AutoCompleteBox::item_template_property()), 287, 24)?;
+    rt::apply_template_binding(list_box_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::AutoCompleteBox::item_template_property()), || rt::property(__t::ItemsControl::item_template_property()), 287, 24)?;
     // Controls/MacOSControls.xaml(288,24) ItemContainerTheme (setter chosen at run time)
     let priority_10 = __t::BindingPriority::Template;
     let provided_32 = rt::provide_static_resource(&context, "DefaultListViewItemStyle", || rt::property_value(__t::ItemsControl::item_container_theme_property()), 288, 24)?;
@@ -65135,7 +65942,7 @@ fn build_controls_macoscontrols_xaml_deferred_491(
     border_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootGrid")));
     rt::register_name_value(name_scope.as_ref(), "RootGrid", __t::Rc::new(__t::Clone::clone(&border_0)), 47, 17)?;
     // Controls/MacOSControls.xaml(48,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 48, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Border::background_property()), 48, 17)?;
     // Controls/MacOSControls.xaml(49,17) CornerRadius
     let reflection_binding_extension_0 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("TemplateSettings.InfoBadgeCornerRadius"));
     context.push_parent(rt::to_value(reflection_binding_extension_0.clone()));
@@ -65147,7 +65954,7 @@ fn build_controls_macoscontrols_xaml_deferred_491(
     let provided_2 = rt::provide_value(&context, rt::property_value(__t::Border::corner_radius_property()), &reflection_binding_extension_0, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), provided_2, 49, 17)?;
     // Controls/MacOSControls.xaml(50,17) Padding
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Decorator::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 50, 17)?;
+    rt::apply_template_binding(border_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::padding_property()), || rt::property(__t::Decorator::padding_property()), 50, 17)?;
     // Controls/MacOSControls.xaml(51,12) Child
     // Controls/MacOSControls.xaml(51,12) Grid
     let grid_0 = __t::Grid::new();
@@ -65834,7 +66641,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(109,15) Height
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), rt::property(__t::Layoutable::height_property()), 109, 15)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::Layoutable::height_property()), || rt::property(__t::Layoutable::height_property()), 109, 15)?;
     // Controls/MacOSControls.xaml(109,10) RowDefinitions
     let row_definitions_0 = __t::RowDefinitions::__markup_new_0();
     rt::invoked(<__t::FerroListOf<__t::Ref<__t::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 3_i32), 110, 15)?;
@@ -65885,7 +66692,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 114, 29)?, priority_1);
     }
     // Controls/MacOSControls.xaml(115,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::NumberBox::header_template_property()), 115, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::NumberBox::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 115, 29)?;
     // Controls/MacOSControls.xaml(112,12) FontWeight
     let value_1 = rt::invoked(__t::FontWeight::__markup_parse(__t::String::from("Normal")), 116, 29)?;
     let priority_2 = __t::BindingPriority::Template;
@@ -65895,9 +66702,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     // Controls/MacOSControls.xaml(118,29) Margin
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "TextBoxTopHeaderMargin", 118, 29)?;
     // Controls/MacOSControls.xaml(119,29) FontSize
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 119, 29)?;
-    // Controls/MacOSControls.xaml(120,29) FontFamily
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 120, 29)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R339)?;
     // Controls/MacOSControls.xaml(112,12) TextWrapping
     let priority_3 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::text_wrapping_property(), __t::TextWrapping::Wrap, priority_3);
@@ -65931,27 +66736,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     let value_2: __t::MarkupValue = rt::to_value(provided_7);
     rt::bind_or_set_priority(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_2, priority_8, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 127, 20)?;
     // Controls/MacOSControls.xaml(128,20) PlaceholderText
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_text_property(), rt::property(__t::NumberBox::placeholder_text_property()), 128, 20)?;
-    // Controls/MacOSControls.xaml(129,20) FontSize
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 129, 20)?;
-    // Controls/MacOSControls.xaml(130,20) FontWeight
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 130, 20)?;
-    // Controls/MacOSControls.xaml(131,20) FontFamily
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 131, 20)?;
-    // Controls/MacOSControls.xaml(132,20) Background
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 132, 20)?;
-    // Controls/MacOSControls.xaml(133,20) BorderThickness
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 133, 20)?;
-    // Controls/MacOSControls.xaml(134,20) BorderBrush
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 134, 20)?;
-    // Controls/MacOSControls.xaml(135,20) Padding
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 135, 20)?;
-    // Controls/MacOSControls.xaml(136,20) Foreground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 136, 20)?;
-    // Controls/MacOSControls.xaml(137,20) TextAlignment
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::text_alignment_property(), rt::property(__t::NumberBox::text_alignment_property()), 137, 20)?;
-    // Controls/MacOSControls.xaml(138,20) CornerRadius
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 138, 20)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R340)?;
     // Controls/MacOSControls.xaml(124,12) AcceptsReturn
     let priority_9 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::TextBox::accepts_return_property(), __t::Clone::clone(&false), priority_9);
@@ -66202,7 +66987,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     let priority_42 = __t::BindingPriority::Template;
     repeat_button_2.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_42);
     // Controls/MacOSControls.xaml(196,25) FontSize
-    rt::bind_template_binding(repeat_button_2.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 196, 25)?;
+    rt::apply_template_binding(repeat_button_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_size_property()), || rt::property(__t::TemplatedControl::font_size_property()), 196, 25)?;
     // Controls/MacOSControls.xaml(197,25) Theme (setter chosen at run time)
     let priority_43 = __t::BindingPriority::Template;
     let provided_35 = rt::provide_static_resource(&context, "NumericUpDownSpinButtonStyle", || rt::property_value(__t::StyledElement::theme_property()), 197, 25)?;
@@ -66212,7 +66997,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     let priority_44 = __t::BindingPriority::Template;
     repeat_button_2.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), priority_44);
     // Controls/MacOSControls.xaml(199,25) CornerRadius
-    rt::bind_template_binding(repeat_button_2.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 199, 25)?;
+    rt::apply_template_binding(repeat_button_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 199, 25)?;
     // Controls/MacOSControls.xaml(200,14) Content
     // Controls/MacOSControls.xaml(200,14) Path
     let path_2 = __t::Path::new();
@@ -66264,7 +67049,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     let priority_52 = __t::BindingPriority::Template;
     repeat_button_3.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_52);
     // Controls/MacOSControls.xaml(211,25) FontSize
-    rt::bind_template_binding(repeat_button_3.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 211, 25)?;
+    rt::apply_template_binding(repeat_button_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_size_property()), || rt::property(__t::TemplatedControl::font_size_property()), 211, 25)?;
     // Controls/MacOSControls.xaml(212,25) Theme (setter chosen at run time)
     let priority_53 = __t::BindingPriority::Template;
     let provided_40 = rt::provide_static_resource(&context, "NumericUpDownSpinButtonStyle", || rt::property_value(__t::StyledElement::theme_property()), 212, 25)?;
@@ -66274,7 +67059,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     let priority_54 = __t::BindingPriority::Template;
     repeat_button_3.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 4.0_f64, 4.0_f64), priority_54);
     // Controls/MacOSControls.xaml(214,25) CornerRadius
-    rt::bind_template_binding(repeat_button_3.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 214, 25)?;
+    rt::apply_template_binding(repeat_button_3.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 214, 25)?;
     // Controls/MacOSControls.xaml(215,14) Content
     // Controls/MacOSControls.xaml(215,14) Path
     let path_3 = __t::Path::new();
@@ -66423,11 +67208,11 @@ fn build_controls_macoscontrols_xaml_deferred_512(
     // Controls/MacOSControls.xaml(73,27) Background
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), "TextControlButtonBackground", 73, 27)?;
     // Controls/MacOSControls.xaml(74,27) BackgroundSizing
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_sizing_property(), rt::property(__t::TemplatedControl::background_sizing_property()), 74, 27)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_sizing_property()), || rt::property(__t::ContentPresenter::background_sizing_property()), 74, 27)?;
     // Controls/MacOSControls.xaml(75,27) BorderBrush
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_brush_property(), "TextControlButtonBorderBrush", 75, 27)?;
     // Controls/MacOSControls.xaml(76,27) BorderThickness
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 76, 27)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::border_thickness_property()), || rt::property(__t::ContentPresenter::border_thickness_property()), 76, 27)?;
     // Controls/MacOSControls.xaml(77,27) Content (setter chosen at run time)
     let priority_0 = __t::BindingPriority::Template;
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -66439,9 +67224,7 @@ fn build_controls_macoscontrols_xaml_deferred_512(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 77, 27)?, priority_0);
     }
     // Controls/MacOSControls.xaml(78,27) CornerRadius
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 78, 27)?;
-    // Controls/MacOSControls.xaml(79,27) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 79, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R341)?;
     // Controls/MacOSControls.xaml(80,27) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "TextControlButtonForeground", 80, 27)?;
     // Controls/MacOSControls.xaml(81,27) FontSize
@@ -66449,11 +67232,7 @@ fn build_controls_macoscontrols_xaml_deferred_512(
     // Controls/MacOSControls.xaml(82,27) Margin
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "AutoSuggestBoxInnerButtonMargin", 82, 27)?;
     // Controls/MacOSControls.xaml(83,27) Padding
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 83, 27)?;
-    // Controls/MacOSControls.xaml(84,27) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::horizontal_content_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 84, 27)?;
-    // Controls/MacOSControls.xaml(85,27) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::vertical_content_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 85, 27)?;
+    rt::bind_template_rows(content_presenter_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R342)?;
     context.pop_parent();
     rt::invoked(content_presenter_0.try_end_init(), 72, 10)?;
     __t::Result::Ok(rt::to_value(content_presenter_0.clone()))
@@ -66630,7 +67409,7 @@ fn build_controls_macoscontrols_xaml_deferred_516(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 142, 29)?, priority_1);
     }
     // Controls/MacOSControls.xaml(143,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedItemsControl::header_template_property()), 143, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::HeaderedItemsControl::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 143, 29)?;
     // Controls/MacOSControls.xaml(144,29) IsVisible
     let template_binding_2 = __t::TemplateBinding::__markup_new_1(rt::property(__t::HeaderedItemsControl::header_property()));
     // Controls/MacOSControls.xaml(144,29) Converter
@@ -66670,25 +67449,7 @@ fn build_controls_macoscontrols_xaml_deferred_516(
     let value_3: __t::MarkupValue = rt::to_value(provided_5);
     rt::bind_or_set_priority(text_box_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_3, priority_5, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 151, 20)?;
     // Controls/MacOSControls.xaml(152,20) PlaceholderText
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TextBox::placeholder_text_property(), rt::property(__t::AutoSuggestBox::placeholder_text_property()), 152, 20)?;
-    // Controls/MacOSControls.xaml(153,20) Width
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::width_property(), rt::property(__t::Layoutable::width_property()), 153, 20)?;
-    // Controls/MacOSControls.xaml(154,20) Foreground
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 154, 20)?;
-    // Controls/MacOSControls.xaml(155,20) Background
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 155, 20)?;
-    // Controls/MacOSControls.xaml(156,20) BorderBrush
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 156, 20)?;
-    // Controls/MacOSControls.xaml(157,20) BorderThickness
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 157, 20)?;
-    // Controls/MacOSControls.xaml(158,20) FontSize
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 158, 20)?;
-    // Controls/MacOSControls.xaml(159,20) FontFamily
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_family_property(), rt::property(__t::TemplatedControl::font_family_property()), 159, 20)?;
-    // Controls/MacOSControls.xaml(160,20) FontWeight
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_weight_property(), rt::property(__t::TemplatedControl::font_weight_property()), 160, 20)?;
-    // Controls/MacOSControls.xaml(161,20) FontStretch
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_stretch_property(), rt::property(__t::TemplatedControl::font_stretch_property()), 161, 20)?;
+    rt::bind_template_rows(text_box_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R343)?;
     // Controls/MacOSControls.xaml(149,12) BringIntoViewOnFocusChange
     let priority_6 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::ScrollViewer::bring_into_view_on_focus_change_property(), __t::Clone::clone(&false), priority_6);
@@ -66696,7 +67457,7 @@ fn build_controls_macoscontrols_xaml_deferred_516(
     let priority_7 = __t::BindingPriority::Template;
     text_box_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_7);
     // Controls/MacOSControls.xaml(164,20) CornerRadius
-    rt::bind_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 164, 20)?;
+    rt::apply_template_binding(text_box_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::corner_radius_property()), || rt::property(__t::TemplatedControl::corner_radius_property()), 164, 20)?;
     // Controls/MacOSControls.xaml(166,16) InnerRightContent
     // Controls/MacOSControls.xaml(166,16) Button
     let button_0 = __t::Button::new();
@@ -66713,9 +67474,7 @@ fn build_controls_macoscontrols_xaml_deferred_516(
     let value_4: __t::MarkupValue = rt::to_value(provided_17);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_4, priority_9, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 167, 23)?;
     // Controls/MacOSControls.xaml(168,23) CornerRadius
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 168, 23)?;
-    // Controls/MacOSControls.xaml(169,23) BorderThickness
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 169, 23)?;
+    rt::bind_template_rows(button_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R344)?;
     // Controls/MacOSControls.xaml(166,16) Margin
     let priority_10 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(-2.0_f64, 0.0_f64, 4.0_f64, 0.0_f64), priority_10);
@@ -66731,7 +67490,7 @@ fn build_controls_macoscontrols_xaml_deferred_516(
     let priority_13 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_13);
     // Controls/MacOSControls.xaml(175,23) FontSize
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::font_size_property(), rt::property(__t::TemplatedControl::font_size_property()), 175, 23)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::font_size_property()), || rt::property(__t::TemplatedControl::font_size_property()), 175, 23)?;
     // Controls/MacOSControls.xaml(166,16) Width
     let priority_14 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::Layoutable::width_property(), 32.0_f64, priority_14);
@@ -66804,7 +67563,7 @@ fn build_controls_macoscontrols_xaml_deferred_516(
     list_box_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("SuggestionsList")));
     rt::register_name_value(name_scope.as_ref(), "SuggestionsList", __t::Rc::new(__t::Clone::clone(&list_box_0)), 194, 24)?;
     // Controls/MacOSControls.xaml(195,24) ItemTemplate
-    rt::bind_template_binding(list_box_0.upcast_ref::<__t::FerroObject>(), __t::ItemsControl::item_template_property(), rt::property(__t::ItemsControl::item_template_property()), 195, 24)?;
+    rt::apply_template_binding(list_box_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::item_template_property()), || rt::property(__t::ItemsControl::item_template_property()), 195, 24)?;
     // Controls/MacOSControls.xaml(196,24) ItemContainerTheme (setter chosen at run time)
     let priority_21 = __t::BindingPriority::Template;
     let provided_31 = rt::provide_static_resource(&context, "DefaultListViewItemStyle", || rt::property_value(__t::ItemsControl::item_container_theme_property()), 196, 24)?;
@@ -66970,7 +67729,7 @@ fn build_controls_macoscontrols_xaml_deferred_519(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 62, 29)?, priority_0);
     }
     // Controls/MacOSControls.xaml(63,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::HeaderedSelectingItemsControl::header_template_property()), 63, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::HeaderedSelectingItemsControl::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 63, 29)?;
     // Controls/MacOSControls.xaml(64,29) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "RadioButtonsHeaderForeground", 64, 29)?;
     // Controls/MacOSControls.xaml(65,29) Margin
@@ -66987,7 +67746,7 @@ fn build_controls_macoscontrols_xaml_deferred_519(
     items_presenter_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("PART_ItemsPresenter")));
     rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", __t::Rc::new(__t::Clone::clone(&items_presenter_0)), 66, 27)?;
     // Controls/MacOSControls.xaml(67,27) ItemsPanel
-    rt::bind_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ItemsPresenter::items_panel_property(), rt::property(__t::ItemsControl::items_panel_property()), 67, 27)?;
+    rt::apply_template_binding(items_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ItemsControl::items_panel_property()), || rt::property(__t::ItemsPresenter::items_panel_property()), 67, 27)?;
     rt::invoked(items_presenter_0.try_end_init(), 66, 12)?;
     context.pop_parent();
     rt::invoked(stack_panel_0.try_end_init(), 60, 10)?;
@@ -67550,7 +68309,7 @@ fn build_controls_macoscontrols_xaml_deferred_523(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 77, 29)?, priority_1);
     }
     // Controls/MacOSControls.xaml(78,29) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::RichEditBox::header_template_property()), 78, 29)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::RichEditBox::header_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 78, 29)?;
     // Controls/MacOSControls.xaml(79,29) Foreground
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), "TextControlHeaderForeground", 79, 29)?;
     // Controls/MacOSControls.xaml(74,12) FontWeight
@@ -67579,13 +68338,7 @@ fn build_controls_macoscontrols_xaml_deferred_523(
     let priority_5 = __t::BindingPriority::Template;
     border_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_5);
     // Controls/MacOSControls.xaml(85,19) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 85, 19)?;
-    // Controls/MacOSControls.xaml(86,19) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_brush_property(), rt::property(__t::TemplatedControl::border_brush_property()), 86, 19)?;
-    // Controls/MacOSControls.xaml(87,19) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::border_thickness_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 87, 19)?;
-    // Controls/MacOSControls.xaml(88,19) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 88, 19)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R345)?;
     // Controls/MacOSControls.xaml(89,19) MinWidth
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_width_property(), "TextControlThemeMinWidth", 89, 19)?;
     // Controls/MacOSControls.xaml(90,19) MinHeight
@@ -67605,19 +68358,7 @@ fn build_controls_macoscontrols_xaml_deferred_523(
     let priority_6 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_6);
     // Controls/MacOSControls.xaml(93,25) Margin
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 93, 25)?;
-    // Controls/MacOSControls.xaml(94,25) Padding
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 94, 25)?;
-    // Controls/MacOSControls.xaml(95,25) Foreground
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 95, 25)?;
-    // Controls/MacOSControls.xaml(96,25) HorizontalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::horizontal_scroll_bar_visibility_property()), 96, 25)?;
-    // Controls/MacOSControls.xaml(97,25) VerticalScrollBarVisibility
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::vertical_scroll_bar_visibility_property(), rt::property(__t::ScrollViewer::vertical_scroll_bar_visibility_property()), 97, 25)?;
-    // Controls/MacOSControls.xaml(98,25) IsDeferredScrollingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_deferred_scrolling_enabled_property(), rt::property(__t::ScrollViewer::is_deferred_scrolling_enabled_property()), 98, 25)?;
-    // Controls/MacOSControls.xaml(99,25) IsScrollChainingEnabled
-    rt::bind_template_binding(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), __t::ScrollViewer::is_scroll_chaining_enabled_property(), rt::property(__t::ScrollViewer::is_scroll_chaining_enabled_property()), 99, 25)?;
+    rt::bind_template_rows(scroll_viewer_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R346)?;
     // Controls/MacOSControls.xaml(91,12) Focusable
     let priority_7 = __t::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(__t::InputElement::focusable_property(), __t::Clone::clone(&false), priority_7);
@@ -67651,17 +68392,7 @@ fn build_controls_macoscontrols_xaml_deferred_523(
     let priority_9 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Grid::row_property(), 1_i32, priority_9);
     // Controls/MacOSControls.xaml(110,22) Margin
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), rt::property(__t::TemplatedControl::border_thickness_property()), 110, 22)?;
-    // Controls/MacOSControls.xaml(111,22) Padding
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 111, 22)?;
-    // Controls/MacOSControls.xaml(112,22) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::RichEditBox::placeholder_foreground_property()), 112, 22)?;
-    // Controls/MacOSControls.xaml(113,22) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::RichEditBox::placeholder_text_property()), 113, 22)?;
-    // Controls/MacOSControls.xaml(114,22) TextAlignment
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_alignment_property(), rt::property(__t::RichEditBox::text_alignment_property()), 114, 22)?;
-    // Controls/MacOSControls.xaml(115,22) TextWrapping
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_wrapping_property(), rt::property(__t::RichEditBox::text_wrapping_property()), 115, 22)?;
+    rt::bind_template_rows(text_block_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R347)?;
     // Controls/MacOSControls.xaml(108,12) IsHitTestVisible
     let priority_10 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::InputElement::is_hit_test_visible_property(), __t::Clone::clone(&false), priority_10);
@@ -68297,7 +69028,7 @@ fn build_controls_macoscontrols_xaml_deferred_528(
     let provided_7 = rt::provide_value(&context, rt::property_value(__t::Visual::is_visible_property()), &reflection_binding_extension_2, __t::ReflectionBindingExtension::__markup_ProvideValue_0);
     rt::bind(button_0.upcast_ref::<__t::FerroObject>(), __t::Visual::is_visible_property(), provided_7, 170, 23)?;
     // Controls/MacOSControls.xaml(171,23) IsEnabled
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::InputElement::is_enabled_property(), rt::property(__t::NavigationView::is_back_enabled_property()), 171, 23)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationView::is_back_enabled_property()), || rt::property(__t::InputElement::is_enabled_property()), 171, 23)?;
     // Controls/MacOSControls.xaml(172,23) Tip
     let priority_6 = __t::BindingPriority::Template;
     button_0.set_value_with_priority(__t::ToolTip::tip_property(), rt::string_object("Back"), priority_6);
@@ -68337,7 +69068,7 @@ fn build_controls_macoscontrols_xaml_deferred_528(
     button_2.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("TogglePaneButton")));
     rt::register_name_value(name_scope.as_ref(), "TogglePaneButton", __t::Rc::new(__t::Clone::clone(&button_2)), 177, 23)?;
     // Controls/MacOSControls.xaml(178,23) Theme
-    rt::bind_template_binding(button_2.upcast_ref::<__t::FerroObject>(), __t::StyledElement::theme_property(), rt::property(__t::NavigationView::pane_toggle_button_style_property()), 178, 23)?;
+    rt::apply_template_binding(button_2.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationView::pane_toggle_button_style_property()), || rt::property(__t::StyledElement::theme_property()), 178, 23)?;
     // Controls/MacOSControls.xaml(179,23) IsVisible
     let reflection_binding_extension_3 = __t::ReflectionBindingExtension::__markup_new_1(__t::String::from("TemplateSettings.PaneToggleButtonVisibility"));
     context.push_parent(rt::to_value(reflection_binding_extension_3.clone()));
@@ -68374,7 +69105,7 @@ fn build_controls_macoscontrols_xaml_deferred_528(
     let priority_11 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Layoutable::margin_property(), __t::Thickness::__markup_new_3(0.0_f64, -2.0_f64, 0.0_f64, 0.0_f64), priority_11);
     // Controls/MacOSControls.xaml(184,28) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::NavigationView::pane_title_property()), 184, 28)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationView::pane_title_property()), || rt::property(__t::TextBlock::text_property()), 184, 28)?;
     // Controls/MacOSControls.xaml(182,18) HorizontalAlignment
     let priority_12 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Layoutable::horizontal_alignment_property(), __t::HorizontalAlignment::Left, priority_12);
@@ -68811,13 +69542,13 @@ fn build_controls_macoscontrols_xaml_deferred_528(
     split_view_0.set_direct_value(__t::StyledElement::name_property(), __t::Option::Some(__t::String::from("RootSplitView")));
     rt::register_name_value(name_scope.as_ref(), "RootSplitView", __t::Rc::new(__t::Clone::clone(&split_view_0)), 259, 24)?;
     // Controls/MacOSControls.xaml(260,24) Background
-    rt::bind_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::background_property(), rt::property(__t::TemplatedControl::background_property()), 260, 24)?;
+    rt::apply_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::TemplatedControl::background_property()), 260, 24)?;
     // Controls/MacOSControls.xaml(261,24) BorderBrush
     rt::bind_dynamic_resource(&context, split_view_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_brush_property(), "NavigationViewItemSeparatorForeground", 261, 24)?;
     // Controls/MacOSControls.xaml(262,24) BorderThickness
     rt::bind_dynamic_resource(&context, split_view_0.upcast_ref::<__t::FerroObject>(), __t::TemplatedControl::border_thickness_property(), "NavigationViewBorderThickness", 262, 24)?;
     // Controls/MacOSControls.xaml(263,24) CompactPaneLength
-    rt::bind_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), __t::SplitView::compact_pane_length_property(), rt::property(__t::NavigationView::compact_pane_length_property()), 263, 24)?;
+    rt::apply_template_binding(split_view_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationView::compact_pane_length_property()), || rt::property(__t::SplitView::compact_pane_length_property()), 263, 24)?;
     // Controls/MacOSControls.xaml(259,14) DisplayMode
     let priority_54 = __t::BindingPriority::Template;
     split_view_0.set_value_with_priority(__t::SplitView::display_mode_property(), __t::SplitViewDisplayMode::Inline, priority_54);
@@ -69334,7 +70065,7 @@ fn build_controls_macoscontrols_xaml_deferred_528(
         content_control_10.set_value_with_priority(__t::ContentControl::content_property(), rt::exact(value_6.clone(), "ContentControl.Content", 1, 355, 35)?, priority_100);
     }
     // Controls/MacOSControls.xaml(356,35) ContentTemplate
-    rt::bind_template_binding(content_control_10.upcast_ref::<__t::FerroObject>(), __t::ContentControl::content_template_property(), rt::property(__t::NavigationView::header_template_property()), 356, 35)?;
+    rt::apply_template_binding(content_control_10.upcast_ref::<__t::FerroObject>(), rt::property(__t::NavigationView::header_template_property()), || rt::property(__t::ContentControl::content_template_property()), 356, 35)?;
     // Controls/MacOSControls.xaml(350,20) VerticalContentAlignment
     let priority_101 = __t::BindingPriority::Template;
     content_control_10.set_value_with_priority(__t::ContentControl::vertical_content_alignment_property(), __t::VerticalAlignment::Stretch, priority_101);
@@ -69375,7 +70106,7 @@ fn build_controls_macoscontrols_xaml_deferred_528(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_8.clone(), "ContentControl.Content", 1, 363, 37)?, priority_106);
     }
     // Controls/MacOSControls.xaml(364,37) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 364, 37)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 364, 37)?;
     // Controls/MacOSControls.xaml(365,37) Margin
     rt::bind_dynamic_resource(&context, content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "NavigationViewContentPresenterMargin", 365, 37)?;
     context.pop_parent();
@@ -70252,9 +70983,7 @@ fn build_controls_macoscontrols_xaml_deferred_530(
     // Controls/MacOSControls.xaml(505,21) MinHeight
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 505, 21)?;
     // Controls/MacOSControls.xaml(506,21) Background
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::background_property(), rt::property(__t::TemplatedControl::background_property()), 506, 21)?;
-    // Controls/MacOSControls.xaml(507,21) CornerRadius
-    rt::bind_template_binding(border_0.upcast_ref::<__t::FerroObject>(), __t::Border::corner_radius_property(), rt::property(__t::TemplatedControl::corner_radius_property()), 507, 21)?;
+    rt::bind_template_rows(border_0.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R348)?;
     // Controls/MacOSControls.xaml(508,21) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "NavigationViewItemButtonMargin", 508, 21)?;
     // Controls/MacOSControls.xaml(509,16) Child
@@ -70408,7 +71137,7 @@ fn build_controls_macoscontrols_xaml_deferred_530(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_2.clone(), "ContentControl.Content", 1, 532, 43)?, priority_8);
     }
     // Controls/MacOSControls.xaml(533,43) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 533, 43)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::ContentPresenter::foreground_property()), 533, 43)?;
     // Controls/MacOSControls.xaml(534,43) Background
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::background_property(), "NavigationViewItemIconBackground", 534, 43)?;
     // Controls/MacOSControls.xaml(537,30) Styles
@@ -70452,7 +71181,7 @@ fn build_controls_macoscontrols_xaml_deferred_530(
     // Controls/MacOSControls.xaml(548,39) Margin
     rt::bind_dynamic_resource(&context, content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "NavigationViewItemContentPresenterMargin", 548, 39)?;
     // Controls/MacOSControls.xaml(549,39) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 549, 39)?;
+    rt::apply_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 549, 39)?;
     // Controls/MacOSControls.xaml(550,39) Content (setter chosen at run time)
     let priority_10 = __t::BindingPriority::Template;
     let template_binding_5 = __t::TemplateBinding::__markup_new_1(rt::property(__t::ContentControl::content_property()));
@@ -70464,13 +71193,7 @@ fn build_controls_macoscontrols_xaml_deferred_530(
         content_presenter_1.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_3.clone(), "ContentControl.Content", 1, 550, 39)?, priority_10);
     }
     // Controls/MacOSControls.xaml(551,39) Foreground
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 551, 39)?;
-    // Controls/MacOSControls.xaml(552,39) HorizontalAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::horizontal_alignment_property(), rt::property(__t::ContentControl::horizontal_content_alignment_property()), 552, 39)?;
-    // Controls/MacOSControls.xaml(553,39) VerticalAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::Layoutable::vertical_alignment_property(), rt::property(__t::ContentControl::vertical_content_alignment_property()), 553, 39)?;
-    // Controls/MacOSControls.xaml(554,39) Padding
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::padding_property(), rt::property(__t::TemplatedControl::padding_property()), 554, 39)?;
+    rt::bind_template_rows(content_presenter_1.upcast_ref::<__t::FerroObject>(), self::__build_controls_macoscontrols_xaml_bindings::R349)?;
     context.pop_parent();
     rt::invoked(content_presenter_1.try_end_init(), 546, 22)?;
     // Controls/MacOSControls.xaml(555,22) Children
@@ -70826,7 +71549,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
         content_presenter_0.set_value_with_priority(__t::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 881, 31)?, priority_4);
     }
     // Controls/MacOSControls.xaml(882,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), __t::ContentPresenter::content_template_property(), rt::property(__t::ContentControl::content_template_property()), 882, 31)?;
+    rt::apply_template_binding(content_presenter_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::ContentControl::content_template_property()), || rt::property(__t::ContentPresenter::content_template_property()), 882, 31)?;
     // Controls/MacOSControls.xaml(878,14) FontFamily
     let priority_5 = __t::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(__t::ContentPresenter::font_family_property(), __t::FontFamily::__markup_new_1(context.base_uri(), __t::String::from("Segoe UI Variable Text, Segoe UI, $Default")), priority_5);
@@ -71199,7 +71922,7 @@ fn build_controls_macoscontrols_xaml_deferred_536(
     // Controls/MacOSControls.xaml(49,40) Height
     rt::bind_dynamic_resource(&context, grid_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::height_property(), "TitleBarCompactHeight", 49, 40)?;
     // Controls/MacOSControls.xaml(49,89) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), __t::Panel::background_property(), rt::property(__t::TemplatedControl::background_property()), 49, 89)?;
+    rt::apply_template_binding(grid_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::background_property()), || rt::property(__t::Panel::background_property()), 49, 89)?;
     // Controls/MacOSControls.xaml(52,14) ColumnDefinitions
     let column_definitions_collection_0 = __t::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/MacOSControls.xaml(52,14) ColumnDefinition
@@ -71370,7 +72093,7 @@ fn build_controls_macoscontrols_xaml_deferred_536(
     let value_0: __t::MarkupValue = rt::to_value(provided_6);
     rt::bind_or_set_priority(button_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_0, priority_16, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 87, 19)?;
     // Controls/MacOSControls.xaml(88,19) IsEnabled
-    rt::bind_template_binding(button_0.upcast_ref::<__t::FerroObject>(), __t::InputElement::is_enabled_property(), rt::property(__t::TitleBar::is_back_button_enabled_property()), 88, 19)?;
+    rt::apply_template_binding(button_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TitleBar::is_back_button_enabled_property()), || rt::property(__t::InputElement::is_enabled_property()), 88, 19)?;
     context.pop_parent();
     rt::invoked(button_0.try_end_init(), 84, 12)?;
     // Controls/MacOSControls.xaml(90,12) Children
@@ -71482,14 +72205,14 @@ fn build_controls_macoscontrols_xaml_deferred_536(
     let priority_27 = __t::BindingPriority::Template;
     text_block_0.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_27);
     // Controls/MacOSControls.xaml(114,22) Text
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TitleBar::title_property()), 114, 22)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TitleBar::title_property()), || rt::property(__t::TextBlock::text_property()), 114, 22)?;
     // Controls/MacOSControls.xaml(115,22) Theme (setter chosen at run time)
     let priority_28 = __t::BindingPriority::Template;
     let provided_18 = rt::provide_static_resource(&context, "CaptionTextBlockStyle", || rt::property_value(__t::StyledElement::theme_property()), 115, 22)?;
     let value_3: __t::MarkupValue = rt::to_value(provided_18);
     rt::bind_or_set_priority(text_block_0.upcast_ref::<__t::FerroObject>(), || __t::StyledElement::theme_property(), value_3, priority_28, || rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), true, "StyledElement.Theme", 115, 22)?;
     // Controls/MacOSControls.xaml(116,22) Foreground
-    rt::bind_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), __t::TextBlock::foreground_property(), rt::property(__t::TemplatedControl::foreground_property()), 116, 22)?;
+    rt::apply_template_binding(text_block_0.upcast_ref::<__t::FerroObject>(), rt::property(__t::TemplatedControl::foreground_property()), || rt::property(__t::TextBlock::foreground_property()), 116, 22)?;
     // Controls/MacOSControls.xaml(117,22) Margin
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<__t::FerroObject>(), __t::Layoutable::margin_property(), "TitleBarTitleMargin", 117, 22)?;
     // Controls/MacOSControls.xaml(111,12) TextTrimming
@@ -71526,7 +72249,7 @@ fn build_controls_macoscontrols_xaml_deferred_536(
     let priority_34 = __t::BindingPriority::Template;
     text_block_1.set_value_with_priority(__t::Visual::is_visible_property(), __t::Clone::clone(&false), priority_34);
     // Controls/MacOSControls.xaml(127,22) Text
-    rt::bind_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), __t::TextBlock::text_property(), rt::property(__t::TitleBar::subtitle_property()), 127, 22)?;
+    rt::apply_template_binding(text_block_1.upcast_ref::<__t::FerroObject>(), rt::property(__t::TitleBar::subtitle_property()), || rt::property(__t::TextBlock::text_property()), 127, 22)?;
     // Controls/MacOSControls.xaml(128,22) Theme (setter chosen at run time)
     let priority_35 = __t::BindingPriority::Template;
     let provided_23 = rt::provide_static_resource(&context, "CaptionTextBlockStyle", || rt::property_value(__t::StyledElement::theme_property()), 128, 22)?;
