@@ -242,6 +242,17 @@ fn independent_dictionary_edit_executes_inside_the_compiled_theme() {
     let edited = FerroRuntimeXamlLoader::try_load_compiled_archive(&linked, &image, &uri, &config, None)
         .unwrap().expect("the entire edit stays behind a single native include boundary");
     let edited = from_markup_value::<Ref<WinUITheme>>(&Some(edited)).unwrap();
+    // A public Build call made by application code during population is not
+    // a linked include edge of this group.
+    let (_, leaf_uri) = linked.dictionaries.iter().find(|(path, _)| *path == "DensityStyles/Compact.xaml").unwrap();
+    let mut includes = ferroui_markup_xaml::archive_includes::Includes::new();
+    includes.insert(leaf_uri, std::rc::Rc::new(|_| panic!("unrelated public builder consumed an edit")));
+    ferroui_markup_xaml::archive_includes::with_revision(WinUITheme::TYPE, includes, || {
+        ferroui_markup_xaml::archive_includes::populate(WinUITheme::TYPE, || {
+            let direct = crate::compiled_xaml::build_densitystyles_compact_xaml(None).unwrap();
+            assert_eq!(from_markup_value::<f64>(&direct.get(&"ControlContentThemeFontSize".into())), Some(14.0));
+        })
+    });
     let after = WinUITheme::new();
     let font = |theme: &Ref<WinUITheme>| {
         theme.set_density_style(crate::DensityStyle::Compact);
