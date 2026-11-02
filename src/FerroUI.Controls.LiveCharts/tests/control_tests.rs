@@ -279,7 +279,7 @@ fn runtime_xaml_loads_native_chart_series_points_and_axes() {
 
 #[test]
 fn polar_chart_takes_the_source_defaults_and_loads_from_markup() {
-    let _app = UnitTestApplication::start(TestServices::new());
+    let _app = UnitTestApplication::start(TestServices::styled_window());
     register_types();
     let polar = PolarChart::new();
     assert_eq!(polar.chart_kind(), ChartKind::Polar);

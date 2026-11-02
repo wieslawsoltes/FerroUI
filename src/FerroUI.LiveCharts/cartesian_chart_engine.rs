@@ -1992,7 +1992,12 @@ mod tests {
             &CartesianOptions::default(),
         )
         .unwrap();
-        assert!(m.y_scales[0].max >= 100.0 && m.y_scales[0].max < 110.0);
+        // Both categories stack to 100. The axis adds one tick of padding above (DataPadding.Y
+        // of a column series, CartesianSeries.GetBounds): with the source's 16 px labels and
+        // the theme's label padding of 12, a 400 px control gives ten separations, so the tick
+        // of the series bounds (0 to 75, 20 to 100) is 10 and the maximum 110. Upstream has no
+        // 100% mode; its stacked columns of the same tops (75/20 under 25/80) pad to 110 too.
+        assert!(m.y_scales[0].max >= 100.0 && m.y_scales[0].max <= 110.0);
     }
     #[test]
     fn nonfinite_points_are_gaps_not_renderer_inputs() {
