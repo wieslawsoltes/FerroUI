@@ -92,6 +92,8 @@ def main():
     parser.add_argument("--use-profile", type=Path, help="apply an existing merged LLVM profile for a fixed-input comparison")
     parser.add_argument("--use-opt-level", choices=("s", "z"), action="append",
                         help="target optimization for the profile-use build (default: s); repeat to compare both")
+    parser.add_argument("--compact-unwind", action="store_true",
+                        help="try smaller x86-64 unwind records at the final profile-use link")
     parser.add_argument("--packer", type=Path, help="reuse a ferroui-fxd built from this source")
     args = parser.parse_args()
     if args.use_profile and not args.use_profile.is_file():
@@ -193,7 +195,10 @@ def main():
     (pkg / "main.rs").write_text(original)
     results = {}
     for level in dict.fromkeys(args.use_opt_level or ["s"]):
-        binary = build(f"-Cprofile-use={profile}", ["-Clto=fat", "-Ccodegen-units=1"], target_opt=level)
+        link = ["-Clto=fat", "-Ccodegen-units=1"]
+        if args.compact_unwind:
+            link.append(f"-Clinker={HERE / 'compact_unwind_link.py'}")
+        binary = build(f"-Cprofile-use={profile}", link, target_opt=level)
         exercise(binary, "shipping")
         exercise(binary, "shipping-edit", scalar, expected=(14, 17))
         exercise(binary, "shipping-structure", structure, expected=(19, 17))
