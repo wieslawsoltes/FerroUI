@@ -25,6 +25,8 @@ These are 81 rotating fresh processes per configuration with 31 additional verif
 
 The separate property fixture passed 299 public API tests. In a 72-block four-way trial, all eleven FatLTO candidate workloads were faster than original shipping ThinLTO. At equal FatLTO, eight improved and the intervals for mixed reads/writes and style-binding emission included parity. Style install/read/dispose took **7.4% longer** (paired 95% interval 6.3–9.2%). The property fixture itself shrank from 11,366,632 to 8,852,056 bytes under equal FatLTO.
 
+A separate headless ThinLTO probe created controls, applied their real styles and templates, traversed the visual tree and released it. Across 61 paired processes, median first activation fell from 663 to 443 µs for Button, 758 to 563 µs for ScrollViewer, 1,690 to 1,480 µs for NavigationView and 680 to 568 µs for a held-out Slider. Visual counts were 2, 8, 26 and 2 on both revisions and on an externally edited FXP. Repeated Button activation's paired interval included equality. [Activation workload and samples](benchmarks/compiled-theme-whole-program-attribution-linux-x86_64.json)
+
 An application can request the same final compiler policy from the repository root. The selected target keeps the distribution linker flags off host-side build tools. The compact configuration uses an ELF loader with RELR support, such as glibc 2.36 or newer.
 
 ```sh

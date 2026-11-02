@@ -2,6 +2,24 @@
 
 The largest identified family in the complete editable WinUI executable is the dependency-property implementation. A property value can use one generic type parameter in the source and still generate multiple functions for each Rust value type in the linked application. The CLR can share generic machine code across reference-type instantiations. Rust ordinarily monomorphizes each reachable concrete instantiation, including distinct handle types such as `Ref<Button>` and `Ref<Border>`. Inlining and linker folding can subsequently share or eliminate some of that output. [CLR generic code sharing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/generics-in-the-run-time) · [rustc monomorphization](https://rustc-dev-guide.rust-lang.org/backend/monomorph.html)
 
+## Physical machine code in the compact whole-program build
+
+The editable FatLTO executable at `ff5ea13a` has 20,307,877 bytes of `.text`. A separate symbolized link reproduced the address, size and SHA-256 of that section. The following counts assign physical ranges once, including when several names resolve to a single address.
+
+| Family | Machine code (bytes) |
+|---|---:|
+| Property registration, stores and observers | 4,857,401 |
+| Callable entries and trait shims | 2,342,641 |
+| Generated native XAML | 2,196,404 |
+| Other XAML runtime and codecs | 1,313,297 |
+| Bindings, reactive operators and events | 1,119,874 |
+
+`StyledProperty::route_bind` accounts for 405,105 bytes across 260 physical bodies. In the largest group, 75 instances each occupy 1,605 bytes. They use the same instruction sequence with different operands for the observer and binding-entry constructors, entry vtable, metadata lookup and local-observer vtable. Those bodies also execute the store lookup and insertion. Factoring out a generic call requires retaining that behavior, especially subscription order and reentrant completion.
+
+Following the actual property descriptor slots found 959 distinct getter/setter functions totaling 327,694 bytes across 241 owners. A shared receiver adapter saved 102,896 bytes in a fixture with many members per owner. With two properties per owner it saved 12,832 bytes but cost 2.4% in getter CPU (paired 95% interval 0.5–5.3%). The median production owner has three accessor references. The measurements favor keeping the existing accessor ABI for the current release.
+
+[Exact symbol and unwind attribution](benchmarks/compiled-theme-whole-program-attribution-linux-x86_64.json)
+
 ## What changed in the linked executable at `71d44ae8`
 
 The same full editable workload was linked with safe ICF, RELR and panic unwinding at both revisions. Each byte of machine code is assigned once. The unwind columns sum frame records and their eight-byte search-index entries. A frame beginning at an aliased address is attributed to a shared category when ownership is ambiguous. The separate landing-pad table can share records across several functions, so the raw report identifies storage spans separately.

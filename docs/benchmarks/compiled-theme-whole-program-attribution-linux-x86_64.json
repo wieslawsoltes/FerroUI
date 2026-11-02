@@ -1,0 +1,3347 @@
+{
+  "revision": "ff5ea13a23e3a659d46a38854ab9909d100976eb",
+  "source_tree": "8261ba72534f6230cdf0ca9e4180bb9aca6aaa06",
+  "symbolized_fat_text_and_unwind": {
+    "text": {
+      "address": 7014064,
+      "bytes": 20307877,
+      "sha256": "93c41bc9d471d55c6ccc8e8d78e93f385032c92ea43bb103afac483e2d4c9b18"
+    },
+    "symbol_records": 80894,
+    "unique_ranges": 74323,
+    "alias_records": 6571,
+    "partial_overlap_bytes": 0,
+    "categories": {
+      "Property registration, stores and observers": 4857401,
+      "Other framework and application code": 4274571,
+      "Callable entries and trait shims": 2342641,
+      "Generated native XAML functions": 2196404,
+      "Other XAML runtime, theme and codecs": 1313297,
+      "Bindings, reactive operators and events": 1119874,
+      "Reflection and value conversion": 982087,
+      "Compiler-generated destruction": 702747,
+      "Other Rust and native code": 686978,
+      "Other closure bodies": 490180,
+      "Class projection, initialization and virtual dispatch": 432253,
+      "Aliases from multiple categories": 298819,
+      "Collection primitives": 259604,
+      "Reference counting and weak handles": 238738,
+      "Thread-local and once initialization": 96363,
+      "Other explicit Drop implementations": 8900,
+      "No sized symbol": 3975,
+      "Other async state machines": 3045
+    },
+    "leading_definitions": {
+      "Other Rust and native code": [
+        {
+          "family": "core::slice::sort::stable::quicksort::quicksort",
+          "bytes": 80657,
+          "distinct_ranges": 39
+        },
+        {
+          "family": "core::slice::sort::stable::drift::sort",
+          "bytes": 61947,
+          "distinct_ranges": 39
+        },
+        {
+          "family": "core::cell::once::OnceCell::try_init",
+          "bytes": 36711,
+          "distinct_ranges": 53
+        },
+        {
+          "family": "std::backtrace_rs::symbolize::gimli::Cache::with_global",
+          "bytes": 18493,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "core::option::Option as core::any::Any::type_id",
+          "bytes": 16226,
+          "distinct_ranges": 1159
+        },
+        {
+          "family": "core::slice::sort::shared::smallsort::sort4_stable",
+          "bytes": 13778,
+          "distinct_ranges": 36
+        },
+        {
+          "family": "miniz_oxide::inflate::core::decompress",
+          "bytes": 13524,
+          "distinct_ranges": 2
+        },
+        {
+          "family": "core::slice::sort::unstable::quicksort::quicksort",
+          "bytes": 13053,
+          "distinct_ranges": 9
+        },
+        {
+          "family": "std::backtrace_rs::symbolize::gimli::Context::new",
+          "bytes": 12453,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "core::slice::sort::shared::pivot::median3_rec",
+          "bytes": 11192,
+          "distinct_ranges": 42
+        },
+        {
+          "family": "roxmltree::parse::Context as roxmltree::tokenizer::XmlEvents::token",
+          "bytes": 10155,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "core::slice::sort::stable::driftsort_main",
+          "bytes": 10028,
+          "distinct_ranges": 39
+        }
+      ],
+      "No sized symbol": [
+        {
+          "family": "Padding or unlabeled text",
+          "bytes": 3975,
+          "distinct_ranges": 0
+        }
+      ],
+      "Compiler-generated destruction": [
+        {
+          "family": "core::ptr::drop_glue",
+          "bytes": 702747,
+          "distinct_ranges": 4682
+        }
+      ],
+      "Aliases from multiple categories": [
+        {
+          "family": "Multiple function definitions",
+          "bytes": 298819,
+          "distinct_ranges": 1979
+        }
+      ],
+      "Reflection and value conversion": [
+        {
+          "family": "ferroui_base::metadata::markup_type::MarkupArguments::next",
+          "bytes": 135404,
+          "distinct_ranges": 306
+        },
+        {
+          "family": "ferroui_base::data::core::value_type::ValueTypes::register_reference",
+          "bytes": 108880,
+          "distinct_ranges": 34
+        },
+        {
+          "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable::unwrap",
+          "bytes": 86389,
+          "distinct_ranges": 961
+        },
+        {
+          "family": "ferroui_base::data::core::value_type::ValueTypes::register_nullable::wrap",
+          "bytes": 81251,
+          "distinct_ranges": 961
+        },
+        {
+          "family": "ferroui_base::data::core::value_type::ValueTypes::register_object",
+          "bytes": 71643,
+          "distinct_ranges": 429
+        },
+        {
+          "family": "ferroui_markup_xaml::register_types::register_value_types",
+          "bytes": 66656,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_base::data::core::value_type::ValueType::of",
+          "bytes": 56529,
+          "distinct_ranges": 1713
+        },
+        {
+          "family": "ferroui_base::data::core::value_type::ValueTypes::register_object::from_object",
+          "bytes": 45887,
+          "distinct_ranges": 429
+        },
+        {
+          "family": "ferroui_base::data::core::value_type::ValueTypes::register_object::from_nullable_object",
+          "bytes": 45887,
+          "distinct_ranges": 429
+        },
+        {
+          "family": "ferroui_base::data::core::value_type::ValueTypes::register_object::as_object",
+          "bytes": 31317,
+          "distinct_ranges": 429
+        },
+        {
+          "family": "ferroui_base::data::core::value_type::register_defaults",
+          "bytes": 20816,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "&&ferroui_base::metadata::typed_path::TypedPathProbe as ferroui_base::metadata::typed_path::TypedPathShared::typed_path_element",
+          "bytes": 19466,
+          "distinct_ranges": 12
+        }
+      ],
+      "Other framework and application code": [
+        {
+          "family": "ferroui_base::animation::animation_instance::AnimationInstance as ferroui_system::i_observable::IObservable::subscribe",
+          "bytes": 71091,
+          "distinct_ranges": 27
+        },
+        {
+          "family": "ferroui_base::animation::animation_instance::StepObserver as ferroui_system::i_observable::IObserver::on_next",
+          "bytes": 64846,
+          "distinct_ranges": 27
+        },
+        {
+          "family": "ferroui_base::animation::dispose_animation_instance_subject::DisposeAnimationInstanceSubject as ferroui_system::i_observable::IObserver::on_next",
+          "bytes": 64294,
+          "distinct_ranges": 27
+        },
+        {
+          "family": "ferroui_base::animation::animation_instance::AnimationInstance::interpolate",
+          "bytes": 64175,
+          "distinct_ranges": 27
+        },
+        {
+          "family": "ferroui_base::ferro_object_extensions::PropertyObservable as ferroui_system::i_observable::IObservable::subscribe",
+          "bytes": 35213,
+          "distinct_ranges": 29
+        },
+        {
+          "family": "ferroui_base::markup_types::register_value_types",
+          "bytes": 30867,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_base::collections::ferro_list::FerroList::add",
+          "bytes": 28092,
+          "distinct_ranges": 24
+        },
+        {
+          "family": "ferroui_base::rendering::composition::expressions::built_in_expression_ffi::BuiltInExpressionFfi::new",
+          "bytes": 27636,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::top_level::TopLevel as ferroui_base::ferro_object::FerroObjectImpl::constructed",
+          "bytes": 23592,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_base::animation::animation_instance::AnimationInstance::do_complete",
+          "bytes": 23374,
+          "distinct_ranges": 27
+        },
+        {
+          "family": "ferroui_base::animation::animation_instance::AnimationInstance::unsubscribed",
+          "bytes": 23288,
+          "distinct_ranges": 23
+        },
+        {
+          "family": "ferroui_base::rendering::composition::server::server_compositor::ServerCompositor::render",
+          "bytes": 22191,
+          "distinct_ranges": 1
+        }
+      ],
+      "Collection primitives": [
+        {
+          "family": "hashbrown::raw::RawTable::reserve_rehash",
+          "bytes": 86558,
+          "distinct_ranges": 64
+        },
+        {
+          "family": "alloc::vec::Vec as alloc::vec::spec_from_iter::SpecFromIter::from_iter",
+          "bytes": 25454,
+          "distinct_ranges": 57
+        },
+        {
+          "family": "alloc::vec::Vec as core::ops::drop::Drop::drop",
+          "bytes": 18147,
+          "distinct_ranges": 167
+        },
+        {
+          "family": "hashbrown::map::HashMap::insert",
+          "bytes": 15912,
+          "distinct_ranges": 35
+        },
+        {
+          "family": "alloc::vec::into_iter::IntoIter as core::ops::drop::Drop::drop",
+          "bytes": 10107,
+          "distinct_ranges": 92
+        },
+        {
+          "family": "hashbrown::raw::RawTable as core::ops::drop::Drop::drop",
+          "bytes": 9782,
+          "distinct_ranges": 59
+        },
+        {
+          "family": "alloc::vec::Vec as core::clone::Clone::clone",
+          "bytes": 7304,
+          "distinct_ranges": 26
+        },
+        {
+          "family": "alloc::collections::btree::map::BTreeMap::insert",
+          "bytes": 6608,
+          "distinct_ranges": 3
+        },
+        {
+          "family": "alloc::vec::into_iter::IntoIter as core::iter::traits::iterator::Iterator::try_fold",
+          "bytes": 4298,
+          "distinct_ranges": 19
+        },
+        {
+          "family": "alloc::vec::drain::Drain as core::ops::drop::Drop::drop",
+          "bytes": 3987,
+          "distinct_ranges": 23
+        },
+        {
+          "family": "alloc::collections::btree::map::IntoIter::dying_next",
+          "bytes": 3449,
+          "distinct_ranges": 8
+        },
+        {
+          "family": "alloc::vec::Vec as alloc::vec::spec_extend::SpecExtend::spec_extend",
+          "bytes": 3416,
+          "distinct_ranges": 19
+        }
+      ],
+      "Reference counting and weak handles": [
+        {
+          "family": "alloc::rc::Rc::drop_slow",
+          "bytes": 108980,
+          "distinct_ranges": 857
+        },
+        {
+          "family": "alloc::rc::Rc::new",
+          "bytes": 54662,
+          "distinct_ranges": 492
+        },
+        {
+          "family": "alloc::rc::Rc as ferroui_base::data::compiled_binding_path::TypedPropertyElement::create_expression",
+          "bytes": 25572,
+          "distinct_ranges": 113
+        },
+        {
+          "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_eq",
+          "bytes": 20578,
+          "distinct_ranges": 196
+        },
+        {
+          "family": "alloc::rc::Rc as xamlx::ast::common::XamlAstNodeExtensions::cast",
+          "bytes": 5225,
+          "distinct_ranges": 45
+        },
+        {
+          "family": "alloc::rc::Rc::new_cyclic",
+          "bytes": 4568,
+          "distinct_ranges": 21
+        },
+        {
+          "family": "alloc::sync::Arc::drop_slow",
+          "bytes": 3975,
+          "distinct_ranges": 35
+        },
+        {
+          "family": "alloc::rc::Rc as core::any::Any::type_id",
+          "bytes": 3094,
+          "distinct_ranges": 221
+        },
+        {
+          "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_type_name",
+          "bytes": 2548,
+          "distinct_ranges": 196
+        },
+        {
+          "family": "alloc::rc::Rc as ferroui_system::events::handler_list::MakeMutOrClone::make_mut_or_clone",
+          "bytes": 2400,
+          "distinct_ranges": 3
+        },
+        {
+          "family": "alloc::rc::Rc as ferroui_base::ferro_property::AnyValue::any_value_as_any",
+          "bytes": 2156,
+          "distinct_ranges": 196
+        },
+        {
+          "family": "alloc::rc::Rc::clone_from_ref_in",
+          "bytes": 1638,
+          "distinct_ranges": 10
+        }
+      ],
+      "Other explicit Drop implementations": [
+        {
+          "family": "::drop::DropGuard as core::ops::drop::Drop::drop",
+          "bytes": 947,
+          "distinct_ranges": 12
+        },
+        {
+          "family": "ferroui_controls::rich_text_block::RichTextBlock as core::ops::drop::Drop::drop",
+          "bytes": 824,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::navigation_view::NavigationView as core::ops::drop::Drop::drop",
+          "bytes": 475,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "::loaded_processing_action::Finally as core::ops::drop::Drop::drop",
+          "bytes": 412,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::rich_edit_box::RichEditBox as core::ops::drop::Drop::drop",
+          "bytes": 399,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::utils::collection_changed_event_manager::EntryGuard as core::ops::drop::Drop::drop",
+          "bytes": 354,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::definition_base::DefinitionBase as core::ops::drop::Drop::drop",
+          "bytes": 334,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_base::input::input_scope::InputScope as core::ops::drop::Drop::drop",
+          "bytes": 333,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "smallvec::SmallVec as core::ops::drop::Drop::drop",
+          "bytes": 303,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::virtualizing_carousel_panel::ClearSourceOnExit as core::ops::drop::Drop::drop",
+          "bytes": 283,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_base::media::text_formatting::text_line_break::TextLineBreak as core::ops::drop::Drop::drop",
+          "bytes": 281,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_base::threading::dispatcher_task::TaskCompletion as core::ops::drop::Drop::drop",
+          "bytes": 266,
+          "distinct_ranges": 1
+        }
+      ],
+      "Callable entries and trait shims": [
+        {
+          "family": "::MARKUP::MARKUP::{closure} as core::ops::function::FnOnce::call_once",
+          "bytes": 661814,
+          "distinct_ranges": 3900
+        },
+        {
+          "family": "::__patch_parent_vtable::{closure} as core::ops::function::FnOnce::call_once",
+          "bytes": 608594,
+          "distinct_ranges": 2680
+        },
+        {
+          "family": "::__MARKUP::MARKUP::{closure} as core::ops::function::FnOnce::call_once",
+          "bytes": 255397,
+          "distinct_ranges": 803
+        },
+        {
+          "family": "ferroui_base::ferro_object::root_vtable::{closure} as core::ops::function::FnOnce::call_once",
+          "bytes": 237456,
+          "distinct_ranges": 480
+        },
+        {
+          "family": "::build_vtable::{closure} as core::ops::function::FnOnce::call_once",
+          "bytes": 208258,
+          "distinct_ranges": 881
+        },
+        {
+          "family": "::__CONSTRUCTOR::{closure} as core::ops::function::FnOnce::call_once",
+          "bytes": 68423,
+          "distinct_ranges": 239
+        },
+        {
+          "family": "ferroui_base::threading::dispatcher_operation::box_local_callback::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+          "bytes": 17497,
+          "distinct_ranges": 36
+        },
+        {
+          "family": "::register_reference::{closure}::{closure} as core::ops::function::FnOnce::call_once",
+          "bytes": 16897,
+          "distinct_ranges": 228
+        },
+        {
+          "family": "::start_core::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+          "bytes": 15317,
+          "distinct_ranges": 116
+        },
+        {
+          "family": "::add_handler_as::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+          "bytes": 12259,
+          "distinct_ranges": 144
+        },
+        {
+          "family": "::register_interface::{closure} as core::ops::function::FnOnce::call_once::{shim:vtable}",
+          "bytes": 11334,
+          "distinct_ranges": 98
+        },
+        {
+          "family": "::TYPE::TYPE::{closure} as core::ops::function::FnOnce::call_once",
+          "bytes": 10700,
+          "distinct_ranges": 428
+        }
+      ],
+      "Other closure bodies": [
+        {
+          "family": "ferroui_base::interactivity::interactive::Interactive::add_handler_as::{closure}",
+          "bytes": 110439,
+          "distinct_ranges": 144
+        },
+        {
+          "family": "ferroui_system::task::executor::handle_future::{closure}",
+          "bytes": 61922,
+          "distinct_ranges": 47
+        },
+        {
+          "family": "ferroui_base::interactivity::routed_event::RoutedEvent::add_class_handler_untyped::{closure}",
+          "bytes": 23659,
+          "distinct_ranges": 45
+        },
+        {
+          "family": "ferroui_base::media::media_collection::MediaCollection::for_each_item::{closure}",
+          "bytes": 9080,
+          "distinct_ranges": 19
+        },
+        {
+          "family": "ferroui_controls::rich_edit_box::RichEditBox::copy_to_clipboard_async::{closure}",
+          "bytes": 7976,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::rich_edit_box::RichEditBox::paste_from_clipboard_async::{closure}",
+          "bytes": 7354,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::page::navigation_page::NavigationPage::pop_modal_async_core::{closure}",
+          "bytes": 6212,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::top_level::TopLevel::create_platform_impl_binding::{closure}",
+          "bytes": 5959,
+          "distinct_ranges": 12
+        },
+        {
+          "family": "ferroui_base::animation::animation_instance::AnimationInstance::subscribed::{closure}",
+          "bytes": 5852,
+          "distinct_ranges": 51
+        },
+        {
+          "family": "ferroui_base::rendering::composition::expressions::delegate_expression_ffi::DelegateExpressionFfi::add3::{closure}",
+          "bytes": 5556,
+          "distinct_ranges": 13
+        },
+        {
+          "family": "ferroui_controls::page::navigation_page::NavigationPage::push_modal_async_private::{closure}",
+          "bytes": 4836,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::primitives::selecting_items_control::SelectingItemsControl::initialize_selection_model::{closure}",
+          "bytes": 4705,
+          "distinct_ranges": 3
+        }
+      ],
+      "Property registration, stores and observers": [
+        {
+          "family": "ferroui_base::styled_property::StyledProperty as ferroui_base::ferro_property::PropertyRoutes::route_bind",
+          "bytes": 405105,
+          "distinct_ranges": 260
+        },
+        {
+          "family": "ferroui_base::property_store::binding_entry::UntypedObserver as ferroui_system::i_observable::IObserver::on_next",
+          "bytes": 271152,
+          "distinct_ranges": 260
+        },
+        {
+          "family": "ferroui_base::property_store::effective_value::EffectiveValue::set_and_raise_core",
+          "bytes": 244092,
+          "distinct_ranges": 260
+        },
+        {
+          "family": "ferroui_base::property_store::local_value_binding_observer::Untyped as ferroui_system::i_observable::IObserver::on_next",
+          "bytes": 171759,
+          "distinct_ranges": 260
+        },
+        {
+          "family": "ferroui_base::property_store::effective_value::EffectiveValue::set_and_raise_core_with_base",
+          "bytes": 169664,
+          "distinct_ranges": 85
+        },
+        {
+          "family": "ferroui_base::property_store::effective_value::EffectiveValue as ferroui_base::property_store::effective_value::EffectiveValueDyn::coerce_value",
+          "bytes": 162485,
+          "distinct_ranges": 260
+        },
+        {
+          "family": "ferroui_base::ferro_property::FerroProperty::register",
+          "bytes": 156864,
+          "distinct_ranges": 481
+        },
+        {
+          "family": "ferroui_base::styled_property::StyledProperty::from_untyped",
+          "bytes": 143459,
+          "distinct_ranges": 260
+        },
+        {
+          "family": "core::option::Option as ferroui_base::ferro_property::AnyValue::any_value_eq",
+          "bytes": 120126,
+          "distinct_ranges": 1016
+        },
+        {
+          "family": "ferroui_base::styled_property::StyledProperty as ferroui_base::ferro_property::PropertyRoutes::route_coerce_default_value",
+          "bytes": 118567,
+          "distinct_ranges": 260
+        },
+        {
+          "family": "ferroui_base::styled_property::StyledProperty as ferroui_base::ferro_property::PropertyRoutes::route_set_value",
+          "bytes": 116864,
+          "distinct_ranges": 260
+        },
+        {
+          "family": "ferroui_base::property_store::effective_value::EffectiveValue::notify_value_changed",
+          "bytes": 102537,
+          "distinct_ranges": 260
+        }
+      ],
+      "Bindings, reactive operators and events": [
+        {
+          "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::update_source",
+          "bytes": 115093,
+          "distinct_ranges": 113
+        },
+        {
+          "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::write_source_value_to_target",
+          "bytes": 95273,
+          "distinct_ranges": 113
+        },
+        {
+          "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::start_core",
+          "bytes": 79221,
+          "distinct_ranges": 113
+        },
+        {
+          "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression as ferroui_system::i_disposable::IDisposable::dispose",
+          "bytes": 63401,
+          "distinct_ranges": 113
+        },
+        {
+          "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression as ferroui_base::data::binding_expression_base::BindingExpressionBase::attach",
+          "bytes": 55000,
+          "distinct_ranges": 62
+        },
+        {
+          "family": "ferroui_base::reactive::disposable::AnonymousDisposable as ferroui_system::i_disposable::IDisposable::dispose",
+          "bytes": 54635,
+          "distinct_ranges": 163
+        },
+        {
+          "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::on_target_property_changed",
+          "bytes": 48818,
+          "distinct_ranges": 113
+        },
+        {
+          "family": "ferroui_base::data::binding_notification::BindingNotification::to_binding_value::{closure}",
+          "bytes": 42640,
+          "distinct_ranges": 307
+        },
+        {
+          "family": "ferroui_base::data::core::typed_binding_expression::TypedBindingExpression::try_get_target_value",
+          "bytes": 36726,
+          "distinct_ranges": 62
+        },
+        {
+          "family": "ferroui_base::data::core::typed_binding_expression::TypedClrPropertyInfo::value_from_untyped",
+          "bytes": 33480,
+          "distinct_ranges": 54
+        },
+        {
+          "family": "ferroui_base::data::core::typed_binding_expression::TypedClrPropertyInfo as ferroui_base::data::core::i_property_info::IPropertyInfo::set_boxed",
+          "bytes": 29522,
+          "distinct_ranges": 113
+        },
+        {
+          "family": "ferroui_base::data::core::typed_binding_expression::TypedClrPropertyInfo as ferroui_base::data::core::i_property_info::IPropertyInfo::set",
+          "bytes": 26798,
+          "distinct_ranges": 113
+        }
+      ],
+      "Class projection, initialization and virtual dispatch": [
+        {
+          "family": "ferroui_base::type_system::Ref as ferroui_base::ferro_property::AnyValue::any_value_eq",
+          "bytes": 48477,
+          "distinct_ranges": 429
+        },
+        {
+          "family": "ferroui_base::type_system::instantiate",
+          "bytes": 48289,
+          "distinct_ranges": 149
+        },
+        {
+          "family": "ferroui_base::input::input_element::InputElement as ferroui_base::type_system::ObjectType::register_class::init",
+          "bytes": 8109,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_base::type_system::Ref as core::any::Any::type_id",
+          "bytes": 6006,
+          "distinct_ranges": 429
+        },
+        {
+          "family": "ferroui_base::type_system::Ref as ferroui_base::ferro_property::AnyValue::any_value_type_name",
+          "bytes": 5577,
+          "distinct_ranges": 429
+        },
+        {
+          "family": "ferroui_controls::auto_complete_box::auto_complete_box::AutoCompleteBox as ferroui_base::type_system::ObjectType::register_class::init",
+          "bytes": 5531,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::text_box::TextBox as ferroui_base::type_system::ObjectType::register_class::init",
+          "bytes": 5294,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::menu_item::MenuItem as ferroui_base::type_system::ObjectType::register_class::init",
+          "bytes": 4762,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_base::type_system::Ref as ferroui_base::ferro_property::AnyValue::any_value_as_any",
+          "bytes": 4719,
+          "distinct_ranges": 429
+        },
+        {
+          "family": "ferroui_controls::navigation_view::NavigationView as ferroui_base::type_system::ObjectType::register_class::init",
+          "bytes": 4635,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::page::navigation_page::NavigationPage as ferroui_base::type_system::ObjectType::register_class::init",
+          "bytes": 4383,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::documents::typography::Typography as ferroui_base::type_system::StaticType::TYPE::class_init",
+          "bytes": 4222,
+          "distinct_ranges": 1
+        }
+      ],
+      "Other async state machines": [
+        {
+          "family": "ferroui_base::rendering::composition::compositor::ServerJobResult as core::future::future::Future::poll",
+          "bytes": 817,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_base::threading::dispatcher_task::DispatcherTask as core::future::future::Future::poll",
+          "bytes": 793,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "core::future::ready::Ready as core::future::future::Future::poll",
+          "bytes": 746,
+          "distinct_ranges": 13
+        },
+        {
+          "family": "ferroui_controls::utils::clipboard_helper::CatchUnwind as core::future::future::Future::poll",
+          "bytes": 339,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_base::animation::animation_task::AnimationTask as core::future::future::Future::poll",
+          "bytes": 291,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_controls::page::navigation_page::TransitionOutcomeFuture as core::future::future::Future::poll",
+          "bytes": 59,
+          "distinct_ranges": 1
+        }
+      ],
+      "Thread-local and once initialization": [
+        {
+          "family": "std::sync::once_lock::OnceLock::initialize",
+          "bytes": 48413,
+          "distinct_ranges": 598
+        },
+        {
+          "family": "std::sys::thread_local::native::lazy::Storage::get_or_init_slow",
+          "bytes": 33059,
+          "distinct_ranges": 91
+        },
+        {
+          "family": "std::thread::local::LocalKey::with",
+          "bytes": 5990,
+          "distinct_ranges": 28
+        },
+        {
+          "family": "std::sys::thread_local::native::eager::destroy",
+          "bytes": 4108,
+          "distinct_ranges": 43
+        },
+        {
+          "family": "std::sys::thread_local::native::lazy::destroy",
+          "bytes": 2255,
+          "distinct_ranges": 50
+        },
+        {
+          "family": "std::sync::once::Once::call_once_force::{closure}",
+          "bytes": 1256,
+          "distinct_ranges": 2
+        },
+        {
+          "family": "std::sys::thread_local::destructors::linux_like::register",
+          "bytes": 369,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "std::sys::thread_local::guard::key::enable::run",
+          "bytes": 261,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "std::thread::local::LocalKey::initialize_with",
+          "bytes": 239,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "std::sys::thread_local::key::racy::LazyKey::lazy_init",
+          "bytes": 189,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "std::sys::thread_local::abort_on_dtor_unwind::DtorUnwindGuard as core::ops::drop::Drop::drop",
+          "bytes": 72,
+          "distinct_ranges": 2
+        },
+        {
+          "family": "std::thread::local::panic_access_error",
+          "bytes": 46,
+          "distinct_ranges": 1
+        }
+      ],
+      "Other XAML runtime, theme and codecs": [
+        {
+          "family": "ferroui_markup_xaml_loader::ferro_xaml_il_runtime_compiler::FerroXamlIlRuntimeCompiler::transform_group",
+          "bytes": 45884,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "xamlx::type_system::xaml_type_well_known_types::XamlTypeWellKnownTypes::new",
+          "bytes": 39604,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_markup_xaml_loader::compiler_extensions::transformers::ferro_xaml_il_well_known_types::FerroXamlIlWellKnownTypes::new",
+          "bytes": 36698,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_markup_xaml_loader::runtime::interpreter::evaluators::StandardNodeEvaluator as ferroui_markup_xaml_loader::runtime::interpreter::interpreter::IXamlNodeEvaluator::evaluate",
+          "bytes": 19534,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_markup_xaml_loader::compiler_extensions::xaml_il_binding_path_helper::XamlIlBindingPathHelper::transform_binding_path",
+          "bytes": 18932,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_markup_xaml_loader::core_table::core_types",
+          "bytes": 14724,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_markup_xaml::xaml_il::runtime::compiled::set_and_register_name",
+          "bytes": 14423,
+          "distinct_ranges": 44
+        },
+        {
+          "family": "ferroui_markup_xaml_loader::compiler_extensions::ferro_xaml_il_language_parse_intrinsics::FerroXamlIlLanguageParseIntrinsics::try_convert",
+          "bytes": 14356,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_markup_xaml_loader::compiler_extensions::transformers::ferro_xaml_il_option_markup_extension_transformer::FerroXamlIlOptionMarkupExtensionTransformer as xamlx::transform::i_xaml_ast_transformer::IXamlAstTransformer::transform",
+          "bytes": 13279,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_markup_xaml_loader::runtime::type_system::runtime_type_system::RuntimeTypeSystem::project_markup",
+          "bytes": 13156,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_markup_xaml_loader::compiler_extensions::group_transformers::xaml_merge_resource_group_transformer::XamlMergeResourceGroupTransformer as ferroui_markup_xaml_loader::compiler_extensions::group_transformers::i_xaml_ast_group_transformer::IXamlAstGroupTransformer::transform",
+          "bytes": 12977,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "xamlx::transform::xaml_transform_helpers::XamlTransformHelpers::find_possible_adders",
+          "bytes": 12728,
+          "distinct_ranges": 1
+        }
+      ],
+      "Generated native XAML functions": [
+        {
+          "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_336",
+          "bytes": 50360,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml",
+          "bytes": 47228,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_293",
+          "bytes": 34456,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_300",
+          "bytes": 33377,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_160",
+          "bytes": 30865,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_271",
+          "bytes": 30340,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_337",
+          "bytes": 29410,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_themes_winui::compiled_xaml::populate_winuitheme_xaml_part_0",
+          "bytes": 26627,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_themes_winui::compiled_xaml::populate_winuitheme_xaml_part_2",
+          "bytes": 26389,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_themes_winui::compiled_xaml::populate_winuitheme_xaml_part_4",
+          "bytes": 26344,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_220",
+          "bytes": 24714,
+          "distinct_ranges": 1
+        },
+        {
+          "family": "ferroui_themes_winui::compiled_xaml::build_controls_winuicontrols_xaml_deferred_193",
+          "bytes": 23775,
+          "distinct_ranges": 1
+        }
+      ]
+    },
+    "unwind": {
+      "frame_count": 74323,
+      "fde_bytes": {
+        "Property registration, stores and observers": 997056,
+        "Callable entries and trait shims": 528420,
+        "Other framework and application code": 498672,
+        "Reflection and value conversion": 278536,
+        "Generated native XAML functions": 252360,
+        "Compiler-generated destruction": 230760,
+        "Bindings, reactive operators and events": 225428,
+        "Other XAML runtime, theme and codecs": 144156,
+        "Reference counting and weak handles": 109028,
+        "Other Rust and native code": 95772,
+        "Class projection, initialization and virtual dispatch": 83344,
+        "Other closure bodies": 70000,
+        "Aliases from multiple categories": 67304,
+        "Collection primitives": 59424,
+        "Thread-local and once initialization": 27888,
+        "Other explicit Drop implementations": 2928,
+        "Other async state machines": 628
+      },
+      "fdes_by_category": {
+        "Property registration, stores and observers": 19854,
+        "Callable entries and trait shims": 12688,
+        "Other framework and application code": 9416,
+        "Reflection and value conversion": 7529,
+        "Compiler-generated destruction": 4682,
+        "Bindings, reactive operators and events": 3989,
+        "Class projection, initialization and virtual dispatch": 2774,
+        "Other Rust and native code": 2590,
+        "Reference counting and weak handles": 2422,
+        "Other XAML runtime, theme and codecs": 2358,
+        "Aliases from multiple categories": 1979,
+        "Generated native XAML functions": 1156,
+        "Other closure bodies": 1024,
+        "Collection primitives": 966,
+        "Thread-local and once initialization": 822,
+        "Other explicit Drop implementations": 56,
+        "Other async state machines": 18
+      },
+      "cie_and_padding_bytes": 60,
+      "index_bytes": {
+        "Other Rust and native code": 20720,
+        "Compiler-generated destruction": 37456,
+        "Aliases from multiple categories": 15832,
+        "Other framework and application code": 75328,
+        "Collection primitives": 7728,
+        "Reference counting and weak handles": 19376,
+        "Other explicit Drop implementations": 448,
+        "Callable entries and trait shims": 101504,
+        "Other closure bodies": 8192,
+        "Property registration, stores and observers": 158832,
+        "Bindings, reactive operators and events": 31912,
+        "Reflection and value conversion": 60232,
+        "Class projection, initialization and virtual dispatch": 22192,
+        "Thread-local and once initialization": 6576,
+        "Other async state machines": 144,
+        "Other XAML runtime, theme and codecs": 18864,
+        "Generated native XAML functions": 9248
+      },
+      "index_header_bytes": 12
+    }
+  },
+  "thin_template_activation": {
+    "method": "61 alternating-order process pairs pinned to Linux x86-64 CPU 8, opt=s, ThinLTO, 16 original consumer codegen units, safe ICF and RELR. CLOCK_THREAD_CPUTIME_ID for creating the control, explicit style, applying the template, walking the visual child tree, and dropping the control. The control theme was already constructed and resolved. One first activation and mean of 12 subsequent activations per control per process. No window, measure/arrange or paint.",
+    "main_revision": "df3e12ad721fb8877699ea1f5ff157e22b45e9a7",
+    "candidate_revision": "ff5ea13a23e3a659d46a38854ab9909d100976eb",
+    "workload_source_sha256": "7757e0e064a170da10e830671ed49e124a133e84acd4b379c973784bd3d7a437",
+    "candidate_release_inputs": {
+      "libferroui_base-628a0579e6170704.rlib": {
+        "bytes": 215460858,
+        "sha256": "790bf808cea5fe48b3db707e95374271a1b80fd40ba4a5b4e922e9c7c0b3692a"
+      },
+      "libferroui_controls-4a93923fefd73189.rlib": {
+        "bytes": 260122420,
+        "sha256": "97cdd9d513ebe385f35e4f96022eaf826fa097caaf0d1fad9ccda7209da408dd"
+      },
+      "libferroui_markup_xaml-a7b3f71b37aff251.rlib": {
+        "bytes": 22130612,
+        "sha256": "f4d98e75335107e02b091559c8616933ec29a7bc8122525c3375e0b6e45f0cc8"
+      },
+      "libferroui_markup_xaml_loader-6f26c9715862f0a1.rlib": {
+        "bytes": 19509800,
+        "sha256": "c631e5ba1e5751788694e504369252591f56d66e3dd3143231ddc9587dd6af1a"
+      },
+      "libferroui_themes_winui-05e9c66bfa8b05fc.rlib": {
+        "bytes": 19342946,
+        "sha256": "07b3ea79d1902403a79089204a7851d57baffde85983ee893efc4e04af88baa3"
+      }
+    },
+    "inputs": {
+      "main": {
+        "path": "/tmp/c496-mainfat/activate-main/probe",
+        "sha256": "8b5b54e31ff4f256cf821feff64921c53ff8b74febbadc48f954ed4c7f5a1c81"
+      },
+      "final": {
+        "path": "/tmp/c496-mainfat/activate-final/probe",
+        "sha256": "a887ccc3648d47c24fc034059ab109c153aca3f04a63e0123373aa5888679462"
+      }
+    },
+    "summary": {
+      "Button": {
+        "visual_nodes_including_control": 2,
+        "first_ns": {
+          "main_median_ns": 663086,
+          "final_median_ns": 442969,
+          "paired_median_ratio": 0.6559881387481988,
+          "bootstrap_ci95": [
+            0.6294122163512882,
+            0.7014055357644938
+          ]
+        },
+        "repeated_ns": {
+          "main_median_ns": 55984,
+          "final_median_ns": 51201,
+          "paired_median_ratio": 0.9099654775604142,
+          "bootstrap_ci95": [
+            0.8521997213022784,
+            1.0045557433884416
+          ]
+        }
+      },
+      "ScrollViewer": {
+        "visual_nodes_including_control": 8,
+        "first_ns": {
+          "main_median_ns": 757857,
+          "final_median_ns": 563357,
+          "paired_median_ratio": 0.7491528210990006,
+          "bootstrap_ci95": [
+            0.7226843842736956,
+            0.7770832255728547
+          ]
+        },
+        "repeated_ns": {
+          "main_median_ns": 214764,
+          "final_median_ns": 207171,
+          "paired_median_ratio": 0.9371636236181762,
+          "bootstrap_ci95": [
+            0.9106913066983423,
+            0.9835845896147404
+          ]
+        }
+      },
+      "NavigationView": {
+        "visual_nodes_including_control": 26,
+        "first_ns": {
+          "main_median_ns": 1689813,
+          "final_median_ns": 1480142,
+          "paired_median_ratio": 0.8959286409912269,
+          "bootstrap_ci95": [
+            0.8372970255386087,
+            0.9248429924525343
+          ]
+        },
+        "repeated_ns": {
+          "main_median_ns": 844809,
+          "final_median_ns": 811205,
+          "paired_median_ratio": 0.9661546102440046,
+          "bootstrap_ci95": [
+            0.9229128099153787,
+            0.9902208723809074
+          ]
+        }
+      },
+      "Slider": {
+        "visual_nodes_including_control": 2,
+        "first_ns": {
+          "main_median_ns": 680052,
+          "final_median_ns": 568055,
+          "paired_median_ratio": 0.8381631249834006,
+          "bootstrap_ci95": [
+            0.80862824601987,
+            0.8815494334451416
+          ]
+        },
+        "repeated_ns": {
+          "main_median_ns": 289246,
+          "final_median_ns": 274791,
+          "paired_median_ratio": 0.9574583263843132,
+          "bootstrap_ci95": [
+            0.9122844355419236,
+            0.9983373001036527
+          ]
+        }
+      }
+    },
+    "raw": {
+      "main": [
+        {
+          "Button": {
+            "first_ns": 529778,
+            "repeated_ns": 51024
+          },
+          "ScrollViewer": {
+            "first_ns": 715254,
+            "repeated_ns": 240902
+          },
+          "NavigationView": {
+            "first_ns": 1763353,
+            "repeated_ns": 840626
+          },
+          "Slider": {
+            "first_ns": 985446,
+            "repeated_ns": 380076
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 573333,
+            "repeated_ns": 38463
+          },
+          "ScrollViewer": {
+            "first_ns": 644589,
+            "repeated_ns": 184635
+          },
+          "NavigationView": {
+            "first_ns": 4984820,
+            "repeated_ns": 1131268
+          },
+          "Slider": {
+            "first_ns": 730877,
+            "repeated_ns": 375909
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 750927,
+            "repeated_ns": 34901
+          },
+          "ScrollViewer": {
+            "first_ns": 638420,
+            "repeated_ns": 160897
+          },
+          "NavigationView": {
+            "first_ns": 1380984,
+            "repeated_ns": 820376
+          },
+          "Slider": {
+            "first_ns": 775393,
+            "repeated_ns": 232772
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 749935,
+            "repeated_ns": 83552
+          },
+          "ScrollViewer": {
+            "first_ns": 1089190,
+            "repeated_ns": 256317
+          },
+          "NavigationView": {
+            "first_ns": 1229349,
+            "repeated_ns": 1015640
+          },
+          "Slider": {
+            "first_ns": 531040,
+            "repeated_ns": 351502
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 716335,
+            "repeated_ns": 92001
+          },
+          "ScrollViewer": {
+            "first_ns": 733030,
+            "repeated_ns": 199510
+          },
+          "NavigationView": {
+            "first_ns": 1688802,
+            "repeated_ns": 909191
+          },
+          "Slider": {
+            "first_ns": 677738,
+            "repeated_ns": 327907
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 644128,
+            "repeated_ns": 49070
+          },
+          "ScrollViewer": {
+            "first_ns": 733641,
+            "repeated_ns": 188713
+          },
+          "NavigationView": {
+            "first_ns": 1492430,
+            "repeated_ns": 773038
+          },
+          "Slider": {
+            "first_ns": 648675,
+            "repeated_ns": 262585
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 619812,
+            "repeated_ns": 54051
+          },
+          "ScrollViewer": {
+            "first_ns": 730086,
+            "repeated_ns": 191499
+          },
+          "NavigationView": {
+            "first_ns": 1484618,
+            "repeated_ns": 757086
+          },
+          "Slider": {
+            "first_ns": 652080,
+            "repeated_ns": 301467
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 692230,
+            "repeated_ns": 62651
+          },
+          "ScrollViewer": {
+            "first_ns": 753411,
+            "repeated_ns": 236500
+          },
+          "NavigationView": {
+            "first_ns": 1728481,
+            "repeated_ns": 889508
+          },
+          "Slider": {
+            "first_ns": 736826,
+            "repeated_ns": 308125
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 751608,
+            "repeated_ns": 55984
+          },
+          "ScrollViewer": {
+            "first_ns": 792248,
+            "repeated_ns": 232830
+          },
+          "NavigationView": {
+            "first_ns": 1689813,
+            "repeated_ns": 908416
+          },
+          "Slider": {
+            "first_ns": 721473,
+            "repeated_ns": 379854
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 589657,
+            "repeated_ns": 46271
+          },
+          "ScrollViewer": {
+            "first_ns": 604990,
+            "repeated_ns": 181721
+          },
+          "NavigationView": {
+            "first_ns": 1218763,
+            "repeated_ns": 627147
+          },
+          "Slider": {
+            "first_ns": 504611,
+            "repeated_ns": 205107
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 732769,
+            "repeated_ns": 45552
+          },
+          "ScrollViewer": {
+            "first_ns": 542717,
+            "repeated_ns": 231549
+          },
+          "NavigationView": {
+            "first_ns": 1305082,
+            "repeated_ns": 812140
+          },
+          "Slider": {
+            "first_ns": 1093066,
+            "repeated_ns": 614169
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 636076,
+            "repeated_ns": 62603
+          },
+          "ScrollViewer": {
+            "first_ns": 760131,
+            "repeated_ns": 194567
+          },
+          "NavigationView": {
+            "first_ns": 1462084,
+            "repeated_ns": 827733
+          },
+          "Slider": {
+            "first_ns": 646392,
+            "repeated_ns": 280593
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 595215,
+            "repeated_ns": 52841
+          },
+          "ScrollViewer": {
+            "first_ns": 800210,
+            "repeated_ns": 199377
+          },
+          "NavigationView": {
+            "first_ns": 1517788,
+            "repeated_ns": 791391
+          },
+          "Slider": {
+            "first_ns": 659891,
+            "repeated_ns": 262719
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 589998,
+            "repeated_ns": 63184
+          },
+          "ScrollViewer": {
+            "first_ns": 893930,
+            "repeated_ns": 247114
+          },
+          "NavigationView": {
+            "first_ns": 1565979,
+            "repeated_ns": 909403
+          },
+          "Slider": {
+            "first_ns": 668905,
+            "repeated_ns": 244207
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 634644,
+            "repeated_ns": 140364
+          },
+          "ScrollViewer": {
+            "first_ns": 747351,
+            "repeated_ns": 231702
+          },
+          "NavigationView": {
+            "first_ns": 1650695,
+            "repeated_ns": 880105
+          },
+          "Slider": {
+            "first_ns": 674603,
+            "repeated_ns": 308309
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 647594,
+            "repeated_ns": 59822
+          },
+          "ScrollViewer": {
+            "first_ns": 814782,
+            "repeated_ns": 221119
+          },
+          "NavigationView": {
+            "first_ns": 1551638,
+            "repeated_ns": 804001
+          },
+          "Slider": {
+            "first_ns": 627804,
+            "repeated_ns": 228344
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 579031,
+            "repeated_ns": 45044
+          },
+          "ScrollViewer": {
+            "first_ns": 793901,
+            "repeated_ns": 262662
+          },
+          "NavigationView": {
+            "first_ns": 1667080,
+            "repeated_ns": 719995
+          },
+          "Slider": {
+            "first_ns": 511741,
+            "repeated_ns": 225043
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 660723,
+            "repeated_ns": 74342
+          },
+          "ScrollViewer": {
+            "first_ns": 660322,
+            "repeated_ns": 214685
+          },
+          "NavigationView": {
+            "first_ns": 1727809,
+            "repeated_ns": 818420
+          },
+          "Slider": {
+            "first_ns": 811127,
+            "repeated_ns": 350549
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 502507,
+            "repeated_ns": 34459
+          },
+          "ScrollViewer": {
+            "first_ns": 601344,
+            "repeated_ns": 194625
+          },
+          "NavigationView": {
+            "first_ns": 1537086,
+            "repeated_ns": 769453
+          },
+          "Slider": {
+            "first_ns": 693622,
+            "repeated_ns": 281867
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 676246,
+            "repeated_ns": 46128
+          },
+          "ScrollViewer": {
+            "first_ns": 598501,
+            "repeated_ns": 181662
+          },
+          "NavigationView": {
+            "first_ns": 1885464,
+            "repeated_ns": 950351
+          },
+          "Slider": {
+            "first_ns": 644769,
+            "repeated_ns": 284169
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 801943,
+            "repeated_ns": 85130
+          },
+          "ScrollViewer": {
+            "first_ns": 1190741,
+            "repeated_ns": 185362
+          },
+          "NavigationView": {
+            "first_ns": 1946305,
+            "repeated_ns": 995004
+          },
+          "Slider": {
+            "first_ns": 550428,
+            "repeated_ns": 304993
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 646172,
+            "repeated_ns": 67479
+          },
+          "ScrollViewer": {
+            "first_ns": 819258,
+            "repeated_ns": 257217
+          },
+          "NavigationView": {
+            "first_ns": 1747209,
+            "repeated_ns": 966254
+          },
+          "Slider": {
+            "first_ns": 684298,
+            "repeated_ns": 328983
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 641674,
+            "repeated_ns": 70544
+          },
+          "ScrollViewer": {
+            "first_ns": 830095,
+            "repeated_ns": 252357
+          },
+          "NavigationView": {
+            "first_ns": 1712958,
+            "repeated_ns": 967960
+          },
+          "Slider": {
+            "first_ns": 807951,
+            "repeated_ns": 326650
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 695244,
+            "repeated_ns": 45426
+          },
+          "ScrollViewer": {
+            "first_ns": 798378,
+            "repeated_ns": 195703
+          },
+          "NavigationView": {
+            "first_ns": 1677345,
+            "repeated_ns": 1102372
+          },
+          "Slider": {
+            "first_ns": 1011404,
+            "repeated_ns": 278435
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 593092,
+            "repeated_ns": 38915
+          },
+          "ScrollViewer": {
+            "first_ns": 610808,
+            "repeated_ns": 150410
+          },
+          "NavigationView": {
+            "first_ns": 2527409,
+            "repeated_ns": 692918
+          },
+          "Slider": {
+            "first_ns": 635485,
+            "repeated_ns": 226016
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 675284,
+            "repeated_ns": 74912
+          },
+          "ScrollViewer": {
+            "first_ns": 834290,
+            "repeated_ns": 259718
+          },
+          "NavigationView": {
+            "first_ns": 1900637,
+            "repeated_ns": 1001613
+          },
+          "Slider": {
+            "first_ns": 849954,
+            "repeated_ns": 310798
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 648164,
+            "repeated_ns": 69368
+          },
+          "ScrollViewer": {
+            "first_ns": 775734,
+            "repeated_ns": 276442
+          },
+          "NavigationView": {
+            "first_ns": 1873647,
+            "repeated_ns": 897068
+          },
+          "Slider": {
+            "first_ns": 758838,
+            "repeated_ns": 309626
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 712049,
+            "repeated_ns": 59582
+          },
+          "ScrollViewer": {
+            "first_ns": 783194,
+            "repeated_ns": 215967
+          },
+          "NavigationView": {
+            "first_ns": 1675452,
+            "repeated_ns": 871840
+          },
+          "Slider": {
+            "first_ns": 684408,
+            "repeated_ns": 299549
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 674363,
+            "repeated_ns": 54873
+          },
+          "ScrollViewer": {
+            "first_ns": 944374,
+            "repeated_ns": 221114
+          },
+          "NavigationView": {
+            "first_ns": 1919074,
+            "repeated_ns": 844809
+          },
+          "Slider": {
+            "first_ns": 680052,
+            "repeated_ns": 278861
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 684028,
+            "repeated_ns": 55257
+          },
+          "ScrollViewer": {
+            "first_ns": 837005,
+            "repeated_ns": 208218
+          },
+          "NavigationView": {
+            "first_ns": 2047775,
+            "repeated_ns": 830766
+          },
+          "Slider": {
+            "first_ns": 784457,
+            "repeated_ns": 307016
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 813309,
+            "repeated_ns": 48854
+          },
+          "ScrollViewer": {
+            "first_ns": 789024,
+            "repeated_ns": 200820
+          },
+          "NavigationView": {
+            "first_ns": 1765436,
+            "repeated_ns": 807461
+          },
+          "Slider": {
+            "first_ns": 859949,
+            "repeated_ns": 271217
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 637468,
+            "repeated_ns": 55689
+          },
+          "ScrollViewer": {
+            "first_ns": 741874,
+            "repeated_ns": 230799
+          },
+          "NavigationView": {
+            "first_ns": 1744605,
+            "repeated_ns": 846190
+          },
+          "Slider": {
+            "first_ns": 640022,
+            "repeated_ns": 269908
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 766300,
+            "repeated_ns": 80296
+          },
+          "ScrollViewer": {
+            "first_ns": 1241096,
+            "repeated_ns": 361260
+          },
+          "NavigationView": {
+            "first_ns": 2309655,
+            "repeated_ns": 851018
+          },
+          "Slider": {
+            "first_ns": 702085,
+            "repeated_ns": 272753
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 646812,
+            "repeated_ns": 65907
+          },
+          "ScrollViewer": {
+            "first_ns": 808893,
+            "repeated_ns": 242431
+          },
+          "NavigationView": {
+            "first_ns": 1670515,
+            "repeated_ns": 965873
+          },
+          "Slider": {
+            "first_ns": 643047,
+            "repeated_ns": 278569
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 689986,
+            "repeated_ns": 81287
+          },
+          "ScrollViewer": {
+            "first_ns": 802864,
+            "repeated_ns": 301688
+          },
+          "NavigationView": {
+            "first_ns": 1904993,
+            "repeated_ns": 1082027
+          },
+          "Slider": {
+            "first_ns": 770736,
+            "repeated_ns": 353304
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 599823,
+            "repeated_ns": 58159
+          },
+          "ScrollViewer": {
+            "first_ns": 738539,
+            "repeated_ns": 199015
+          },
+          "NavigationView": {
+            "first_ns": 1742101,
+            "repeated_ns": 842217
+          },
+          "Slider": {
+            "first_ns": 663226,
+            "repeated_ns": 287781
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 694383,
+            "repeated_ns": 92766
+          },
+          "ScrollViewer": {
+            "first_ns": 878657,
+            "repeated_ns": 290838
+          },
+          "NavigationView": {
+            "first_ns": 1900517,
+            "repeated_ns": 1063069
+          },
+          "Slider": {
+            "first_ns": 839649,
+            "repeated_ns": 383071
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 727602,
+            "repeated_ns": 86643
+          },
+          "ScrollViewer": {
+            "first_ns": 837806,
+            "repeated_ns": 293197
+          },
+          "NavigationView": {
+            "first_ns": 2013275,
+            "repeated_ns": 1048743
+          },
+          "Slider": {
+            "first_ns": 849484,
+            "repeated_ns": 402429
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 703346,
+            "repeated_ns": 88651
+          },
+          "ScrollViewer": {
+            "first_ns": 806990,
+            "repeated_ns": 290891
+          },
+          "NavigationView": {
+            "first_ns": 1958452,
+            "repeated_ns": 1056568
+          },
+          "Slider": {
+            "first_ns": 758268,
+            "repeated_ns": 382423
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 757977,
+            "repeated_ns": 76625
+          },
+          "ScrollViewer": {
+            "first_ns": 825398,
+            "repeated_ns": 286627
+          },
+          "NavigationView": {
+            "first_ns": 1919886,
+            "repeated_ns": 1003829
+          },
+          "Slider": {
+            "first_ns": 1027398,
+            "repeated_ns": 287808
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 982662,
+            "repeated_ns": 44503
+          },
+          "ScrollViewer": {
+            "first_ns": 720031,
+            "repeated_ns": 208617
+          },
+          "NavigationView": {
+            "first_ns": 1731986,
+            "repeated_ns": 820916
+          },
+          "Slider": {
+            "first_ns": 576137,
+            "repeated_ns": 284857
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 1457127,
+            "repeated_ns": 65576
+          },
+          "ScrollViewer": {
+            "first_ns": 888021,
+            "repeated_ns": 179878
+          },
+          "NavigationView": {
+            "first_ns": 1955072,
+            "repeated_ns": 1529039
+          },
+          "Slider": {
+            "first_ns": 725349,
+            "repeated_ns": 531306
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 686521,
+            "repeated_ns": 84530
+          },
+          "ScrollViewer": {
+            "first_ns": 838747,
+            "repeated_ns": 314109
+          },
+          "NavigationView": {
+            "first_ns": 2239290,
+            "repeated_ns": 1029711
+          },
+          "Slider": {
+            "first_ns": 793650,
+            "repeated_ns": 365759
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 640403,
+            "repeated_ns": 71509
+          },
+          "ScrollViewer": {
+            "first_ns": 945006,
+            "repeated_ns": 199951
+          },
+          "NavigationView": {
+            "first_ns": 1342177,
+            "repeated_ns": 682792
+          },
+          "Slider": {
+            "first_ns": 543648,
+            "repeated_ns": 289673
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 831316,
+            "repeated_ns": 45213
+          },
+          "ScrollViewer": {
+            "first_ns": 594594,
+            "repeated_ns": 236690
+          },
+          "NavigationView": {
+            "first_ns": 2655580,
+            "repeated_ns": 1008609
+          },
+          "Slider": {
+            "first_ns": 907890,
+            "repeated_ns": 384965
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 556758,
+            "repeated_ns": 34869
+          },
+          "ScrollViewer": {
+            "first_ns": 743366,
+            "repeated_ns": 197949
+          },
+          "NavigationView": {
+            "first_ns": 1303218,
+            "repeated_ns": 661579
+          },
+          "Slider": {
+            "first_ns": 565881,
+            "repeated_ns": 319510
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 570418,
+            "repeated_ns": 37651
+          },
+          "ScrollViewer": {
+            "first_ns": 722314,
+            "repeated_ns": 214764
+          },
+          "NavigationView": {
+            "first_ns": 1322847,
+            "repeated_ns": 760926
+          },
+          "Slider": {
+            "first_ns": 1142840,
+            "repeated_ns": 298988
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 731618,
+            "repeated_ns": 41520
+          },
+          "ScrollViewer": {
+            "first_ns": 670407,
+            "repeated_ns": 166718
+          },
+          "NavigationView": {
+            "first_ns": 1600320,
+            "repeated_ns": 719410
+          },
+          "Slider": {
+            "first_ns": 668904,
+            "repeated_ns": 244245
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 752088,
+            "repeated_ns": 35038
+          },
+          "ScrollViewer": {
+            "first_ns": 614364,
+            "repeated_ns": 188820
+          },
+          "NavigationView": {
+            "first_ns": 1487282,
+            "repeated_ns": 736870
+          },
+          "Slider": {
+            "first_ns": 600864,
+            "repeated_ns": 241411
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 507936,
+            "repeated_ns": 49121
+          },
+          "ScrollViewer": {
+            "first_ns": 655696,
+            "repeated_ns": 180136
+          },
+          "NavigationView": {
+            "first_ns": 1377860,
+            "repeated_ns": 709186
+          },
+          "Slider": {
+            "first_ns": 630978,
+            "repeated_ns": 266854
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 587603,
+            "repeated_ns": 48041
+          },
+          "ScrollViewer": {
+            "first_ns": 629977,
+            "repeated_ns": 189214
+          },
+          "NavigationView": {
+            "first_ns": 1306613,
+            "repeated_ns": 714574
+          },
+          "Slider": {
+            "first_ns": 566333,
+            "repeated_ns": 219186
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 663086,
+            "repeated_ns": 45118
+          },
+          "ScrollViewer": {
+            "first_ns": 705930,
+            "repeated_ns": 207658
+          },
+          "NavigationView": {
+            "first_ns": 1785496,
+            "repeated_ns": 1027818
+          },
+          "Slider": {
+            "first_ns": 773240,
+            "repeated_ns": 376495
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 534034,
+            "repeated_ns": 35596
+          },
+          "ScrollViewer": {
+            "first_ns": 650508,
+            "repeated_ns": 151320
+          },
+          "NavigationView": {
+            "first_ns": 1194666,
+            "repeated_ns": 633185
+          },
+          "Slider": {
+            "first_ns": 537349,
+            "repeated_ns": 208109
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 682996,
+            "repeated_ns": 39530
+          },
+          "ScrollViewer": {
+            "first_ns": 608015,
+            "repeated_ns": 173538
+          },
+          "NavigationView": {
+            "first_ns": 1269969,
+            "repeated_ns": 795684
+          },
+          "Slider": {
+            "first_ns": 707292,
+            "repeated_ns": 201453
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 514445,
+            "repeated_ns": 41348
+          },
+          "ScrollViewer": {
+            "first_ns": 644188,
+            "repeated_ns": 156554
+          },
+          "NavigationView": {
+            "first_ns": 1195148,
+            "repeated_ns": 675378
+          },
+          "Slider": {
+            "first_ns": 514375,
+            "repeated_ns": 220773
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 560834,
+            "repeated_ns": 60320
+          },
+          "ScrollViewer": {
+            "first_ns": 717528,
+            "repeated_ns": 242057
+          },
+          "NavigationView": {
+            "first_ns": 1554973,
+            "repeated_ns": 805108
+          },
+          "Slider": {
+            "first_ns": 605601,
+            "repeated_ns": 218913
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 779950,
+            "repeated_ns": 63398
+          },
+          "ScrollViewer": {
+            "first_ns": 998425,
+            "repeated_ns": 249547
+          },
+          "NavigationView": {
+            "first_ns": 1732367,
+            "repeated_ns": 1004282
+          },
+          "Slider": {
+            "first_ns": 804707,
+            "repeated_ns": 348731
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 1292392,
+            "repeated_ns": 78667
+          },
+          "ScrollViewer": {
+            "first_ns": 869533,
+            "repeated_ns": 312246
+          },
+          "NavigationView": {
+            "first_ns": 2070960,
+            "repeated_ns": 899298
+          },
+          "Slider": {
+            "first_ns": 647763,
+            "repeated_ns": 289246
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 609296,
+            "repeated_ns": 77004
+          },
+          "ScrollViewer": {
+            "first_ns": 773320,
+            "repeated_ns": 232797
+          },
+          "NavigationView": {
+            "first_ns": 1580781,
+            "repeated_ns": 866995
+          },
+          "Slider": {
+            "first_ns": 705900,
+            "repeated_ns": 297444
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 674303,
+            "repeated_ns": 65175
+          },
+          "ScrollViewer": {
+            "first_ns": 757857,
+            "repeated_ns": 216833
+          },
+          "NavigationView": {
+            "first_ns": 1908438,
+            "repeated_ns": 739363
+          },
+          "Slider": {
+            "first_ns": 562908,
+            "repeated_ns": 241185
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 634584,
+            "repeated_ns": 54270
+          },
+          "ScrollViewer": {
+            "first_ns": 651839,
+            "repeated_ns": 189471
+          },
+          "NavigationView": {
+            "first_ns": 1510367,
+            "repeated_ns": 697607
+          },
+          "Slider": {
+            "first_ns": 636677,
+            "repeated_ns": 204469
+          }
+        }
+      ],
+      "final": [
+        {
+          "Button": {
+            "first_ns": 423750,
+            "repeated_ns": 76985
+          },
+          "ScrollViewer": {
+            "first_ns": 465162,
+            "repeated_ns": 192102
+          },
+          "NavigationView": {
+            "first_ns": 1119575,
+            "repeated_ns": 736979
+          },
+          "Slider": {
+            "first_ns": 468147,
+            "repeated_ns": 249787
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 369490,
+            "repeated_ns": 47712
+          },
+          "ScrollViewer": {
+            "first_ns": 475267,
+            "repeated_ns": 167106
+          },
+          "NavigationView": {
+            "first_ns": 2251458,
+            "repeated_ns": 645364
+          },
+          "Slider": {
+            "first_ns": 433345,
+            "repeated_ns": 225572
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 451431,
+            "repeated_ns": 35060
+          },
+          "ScrollViewer": {
+            "first_ns": 476949,
+            "repeated_ns": 184181
+          },
+          "NavigationView": {
+            "first_ns": 1297220,
+            "repeated_ns": 762554
+          },
+          "Slider": {
+            "first_ns": 435458,
+            "repeated_ns": 240848
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 399774,
+            "repeated_ns": 46183
+          },
+          "ScrollViewer": {
+            "first_ns": 482868,
+            "repeated_ns": 192116
+          },
+          "NavigationView": {
+            "first_ns": 1534893,
+            "repeated_ns": 742251
+          },
+          "Slider": {
+            "first_ns": 532793,
+            "repeated_ns": 217279
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 450870,
+            "repeated_ns": 43839
+          },
+          "ScrollViewer": {
+            "first_ns": 602847,
+            "repeated_ns": 177649
+          },
+          "NavigationView": {
+            "first_ns": 1683354,
+            "repeated_ns": 809178
+          },
+          "Slider": {
+            "first_ns": 568055,
+            "repeated_ns": 256074
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 523689,
+            "repeated_ns": 50602
+          },
+          "ScrollViewer": {
+            "first_ns": 778457,
+            "repeated_ns": 584657
+          },
+          "NavigationView": {
+            "first_ns": 2059874,
+            "repeated_ns": 1224214
+          },
+          "Slider": {
+            "first_ns": 982592,
+            "repeated_ns": 314778
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 413244,
+            "repeated_ns": 34614
+          },
+          "ScrollViewer": {
+            "first_ns": 498612,
+            "repeated_ns": 165436
+          },
+          "NavigationView": {
+            "first_ns": 1131603,
+            "repeated_ns": 666088
+          },
+          "Slider": {
+            "first_ns": 535287,
+            "repeated_ns": 217432
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 447466,
+            "repeated_ns": 53073
+          },
+          "ScrollViewer": {
+            "first_ns": 599502,
+            "repeated_ns": 195859
+          },
+          "NavigationView": {
+            "first_ns": 1447252,
+            "repeated_ns": 819333
+          },
+          "Slider": {
+            "first_ns": 531340,
+            "repeated_ns": 274848
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 473133,
+            "repeated_ns": 68665
+          },
+          "ScrollViewer": {
+            "first_ns": 635766,
+            "repeated_ns": 229008
+          },
+          "NavigationView": {
+            "first_ns": 1567311,
+            "repeated_ns": 861606
+          },
+          "Slider": {
+            "first_ns": 573353,
+            "repeated_ns": 312377
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 476869,
+            "repeated_ns": 56931
+          },
+          "ScrollViewer": {
+            "first_ns": 605731,
+            "repeated_ns": 166906
+          },
+          "NavigationView": {
+            "first_ns": 1099395,
+            "repeated_ns": 578802
+          },
+          "Slider": {
+            "first_ns": 418282,
+            "repeated_ns": 212377
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 342560,
+            "repeated_ns": 37558
+          },
+          "ScrollViewer": {
+            "first_ns": 448186,
+            "repeated_ns": 184114
+          },
+          "NavigationView": {
+            "first_ns": 1855270,
+            "repeated_ns": 705401
+          },
+          "Slider": {
+            "first_ns": 529848,
+            "repeated_ns": 370479
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 423019,
+            "repeated_ns": 50253
+          },
+          "ScrollViewer": {
+            "first_ns": 579853,
+            "repeated_ns": 210182
+          },
+          "NavigationView": {
+            "first_ns": 1460542,
+            "repeated_ns": 862230
+          },
+          "Slider": {
+            "first_ns": 544229,
+            "repeated_ns": 269209
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 459563,
+            "repeated_ns": 93960
+          },
+          "ScrollViewer": {
+            "first_ns": 781012,
+            "repeated_ns": 249966
+          },
+          "NavigationView": {
+            "first_ns": 1897793,
+            "repeated_ns": 1049368
+          },
+          "Slider": {
+            "first_ns": 540725,
+            "repeated_ns": 344583
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 373235,
+            "repeated_ns": 46955
+          },
+          "ScrollViewer": {
+            "first_ns": 637078,
+            "repeated_ns": 227823
+          },
+          "NavigationView": {
+            "first_ns": 1547292,
+            "repeated_ns": 950862
+          },
+          "Slider": {
+            "first_ns": 906718,
+            "repeated_ns": 299674
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 459353,
+            "repeated_ns": 51005
+          },
+          "ScrollViewer": {
+            "first_ns": 563357,
+            "repeated_ns": 217564
+          },
+          "NavigationView": {
+            "first_ns": 1499980,
+            "repeated_ns": 797567
+          },
+          "Slider": {
+            "first_ns": 516238,
+            "repeated_ns": 257639
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 443871,
+            "repeated_ns": 46993
+          },
+          "ScrollViewer": {
+            "first_ns": 592251,
+            "repeated_ns": 190808
+          },
+          "NavigationView": {
+            "first_ns": 1363588,
+            "repeated_ns": 815284
+          },
+          "Slider": {
+            "first_ns": 625450,
+            "repeated_ns": 284635
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 377251,
+            "repeated_ns": 65947
+          },
+          "ScrollViewer": {
+            "first_ns": 665400,
+            "repeated_ns": 239204
+          },
+          "NavigationView": {
+            "first_ns": 1403938,
+            "repeated_ns": 781567
+          },
+          "Slider": {
+            "first_ns": 432103,
+            "repeated_ns": 254526
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 330492,
+            "repeated_ns": 43809
+          },
+          "ScrollViewer": {
+            "first_ns": 430139,
+            "repeated_ns": 200708
+          },
+          "NavigationView": {
+            "first_ns": 1278943,
+            "repeated_ns": 676398
+          },
+          "Slider": {
+            "first_ns": 529077,
+            "repeated_ns": 230572
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 386845,
+            "repeated_ns": 68309
+          },
+          "ScrollViewer": {
+            "first_ns": 729635,
+            "repeated_ns": 244507
+          },
+          "NavigationView": {
+            "first_ns": 1602393,
+            "repeated_ns": 836354
+          },
+          "Slider": {
+            "first_ns": 630238,
+            "repeated_ns": 296955
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 433424,
+            "repeated_ns": 77324
+          },
+          "ScrollViewer": {
+            "first_ns": 640042,
+            "repeated_ns": 242681
+          },
+          "NavigationView": {
+            "first_ns": 1624637,
+            "repeated_ns": 918186
+          },
+          "Slider": {
+            "first_ns": 638009,
+            "repeated_ns": 326917
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 369129,
+            "repeated_ns": 48290
+          },
+          "ScrollViewer": {
+            "first_ns": 536528,
+            "repeated_ns": 211027
+          },
+          "NavigationView": {
+            "first_ns": 1093216,
+            "repeated_ns": 730109
+          },
+          "Slider": {
+            "first_ns": 781643,
+            "repeated_ns": 257779
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 358193,
+            "repeated_ns": 59434
+          },
+          "ScrollViewer": {
+            "first_ns": 483058,
+            "repeated_ns": 301441
+          },
+          "NavigationView": {
+            "first_ns": 1615894,
+            "repeated_ns": 997002
+          },
+          "Slider": {
+            "first_ns": 601845,
+            "repeated_ns": 328436
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 430351,
+            "repeated_ns": 72490
+          },
+          "ScrollViewer": {
+            "first_ns": 631179,
+            "repeated_ns": 274154
+          },
+          "NavigationView": {
+            "first_ns": 1795861,
+            "repeated_ns": 889660
+          },
+          "Slider": {
+            "first_ns": 653332,
+            "repeated_ns": 326296
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 297603,
+            "repeated_ns": 42124
+          },
+          "ScrollViewer": {
+            "first_ns": 447034,
+            "repeated_ns": 185636
+          },
+          "NavigationView": {
+            "first_ns": 1295928,
+            "repeated_ns": 689082
+          },
+          "Slider": {
+            "first_ns": 450330,
+            "repeated_ns": 255837
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 493574,
+            "repeated_ns": 81914
+          },
+          "ScrollViewer": {
+            "first_ns": 725719,
+            "repeated_ns": 269448
+          },
+          "NavigationView": {
+            "first_ns": 1739337,
+            "repeated_ns": 1027392
+          },
+          "Slider": {
+            "first_ns": 619211,
+            "repeated_ns": 342913
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 460726,
+            "repeated_ns": 66320
+          },
+          "ScrollViewer": {
+            "first_ns": 713552,
+            "repeated_ns": 284753
+          },
+          "NavigationView": {
+            "first_ns": 1830613,
+            "repeated_ns": 1007680
+          },
+          "Slider": {
+            "first_ns": 687573,
+            "repeated_ns": 352940
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 539933,
+            "repeated_ns": 58612
+          },
+          "ScrollViewer": {
+            "first_ns": 741352,
+            "repeated_ns": 226541
+          },
+          "NavigationView": {
+            "first_ns": 1824684,
+            "repeated_ns": 904421
+          },
+          "Slider": {
+            "first_ns": 700061,
+            "repeated_ns": 294362
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 487414,
+            "repeated_ns": 59045
+          },
+          "ScrollViewer": {
+            "first_ns": 900730,
+            "repeated_ns": 220659
+          },
+          "NavigationView": {
+            "first_ns": 1656023,
+            "repeated_ns": 835185
+          },
+          "Slider": {
+            "first_ns": 559171,
+            "repeated_ns": 284837
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 445994,
+            "repeated_ns": 54105
+          },
+          "ScrollViewer": {
+            "first_ns": 551060,
+            "repeated_ns": 207171
+          },
+          "NavigationView": {
+            "first_ns": 1586660,
+            "repeated_ns": 819225
+          },
+          "Slider": {
+            "first_ns": 913208,
+            "repeated_ns": 274060
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 421077,
+            "repeated_ns": 47090
+          },
+          "ScrollViewer": {
+            "first_ns": 552242,
+            "repeated_ns": 213989
+          },
+          "NavigationView": {
+            "first_ns": 1446742,
+            "repeated_ns": 811549
+          },
+          "Slider": {
+            "first_ns": 539392,
+            "repeated_ns": 280728
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 478031,
+            "repeated_ns": 47402
+          },
+          "ScrollViewer": {
+            "first_ns": 477080,
+            "repeated_ns": 247729
+          },
+          "NavigationView": {
+            "first_ns": 1901418,
+            "repeated_ns": 793352
+          },
+          "Slider": {
+            "first_ns": 540834,
+            "repeated_ns": 274791
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 824266,
+            "repeated_ns": 55161
+          },
+          "ScrollViewer": {
+            "first_ns": 555777,
+            "repeated_ns": 212967
+          },
+          "NavigationView": {
+            "first_ns": 1437598,
+            "repeated_ns": 837915
+          },
+          "Slider": {
+            "first_ns": 556517,
+            "repeated_ns": 283939
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 433214,
+            "repeated_ns": 43826
+          },
+          "ScrollViewer": {
+            "first_ns": 611630,
+            "repeated_ns": 186768
+          },
+          "NavigationView": {
+            "first_ns": 1507492,
+            "repeated_ns": 741392
+          },
+          "Slider": {
+            "first_ns": 544930,
+            "repeated_ns": 265873
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 424301,
+            "repeated_ns": 51201
+          },
+          "ScrollViewer": {
+            "first_ns": 597920,
+            "repeated_ns": 175443
+          },
+          "NavigationView": {
+            "first_ns": 1358421,
+            "repeated_ns": 743461
+          },
+          "Slider": {
+            "first_ns": 560423,
+            "repeated_ns": 253826
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 483960,
+            "repeated_ns": 72908
+          },
+          "ScrollViewer": {
+            "first_ns": 671148,
+            "repeated_ns": 244592
+          },
+          "NavigationView": {
+            "first_ns": 1676293,
+            "repeated_ns": 939738
+          },
+          "Slider": {
+            "first_ns": 602866,
+            "repeated_ns": 352563
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 465763,
+            "repeated_ns": 70998
+          },
+          "ScrollViewer": {
+            "first_ns": 712440,
+            "repeated_ns": 254118
+          },
+          "NavigationView": {
+            "first_ns": 1638717,
+            "repeated_ns": 857542
+          },
+          "Slider": {
+            "first_ns": 589386,
+            "repeated_ns": 317514
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 511711,
+            "repeated_ns": 43897
+          },
+          "ScrollViewer": {
+            "first_ns": 444552,
+            "repeated_ns": 277115
+          },
+          "NavigationView": {
+            "first_ns": 1407062,
+            "repeated_ns": 972377
+          },
+          "Slider": {
+            "first_ns": 627263,
+            "repeated_ns": 208697
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 544139,
+            "repeated_ns": 56308
+          },
+          "ScrollViewer": {
+            "first_ns": 643848,
+            "repeated_ns": 283126
+          },
+          "NavigationView": {
+            "first_ns": 1311951,
+            "repeated_ns": 1081764
+          },
+          "Slider": {
+            "first_ns": 850986,
+            "repeated_ns": 366253
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 371032,
+            "repeated_ns": 67429
+          },
+          "ScrollViewer": {
+            "first_ns": 542006,
+            "repeated_ns": 202505
+          },
+          "NavigationView": {
+            "first_ns": 1468443,
+            "repeated_ns": 1036156
+          },
+          "Slider": {
+            "first_ns": 643287,
+            "repeated_ns": 341468
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 541465,
+            "repeated_ns": 77706
+          },
+          "ScrollViewer": {
+            "first_ns": 589026,
+            "repeated_ns": 275219
+          },
+          "NavigationView": {
+            "first_ns": 1662453,
+            "repeated_ns": 1003847
+          },
+          "Slider": {
+            "first_ns": 685540,
+            "repeated_ns": 376654
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 487274,
+            "repeated_ns": 83584
+          },
+          "ScrollViewer": {
+            "first_ns": 765108,
+            "repeated_ns": 334845
+          },
+          "NavigationView": {
+            "first_ns": 1983460,
+            "repeated_ns": 1110184
+          },
+          "Slider": {
+            "first_ns": 611510,
+            "repeated_ns": 383286
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 468506,
+            "repeated_ns": 84069
+          },
+          "ScrollViewer": {
+            "first_ns": 677457,
+            "repeated_ns": 279386
+          },
+          "NavigationView": {
+            "first_ns": 1751605,
+            "repeated_ns": 1027821
+          },
+          "Slider": {
+            "first_ns": 639431,
+            "repeated_ns": 353162
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 489097,
+            "repeated_ns": 81385
+          },
+          "ScrollViewer": {
+            "first_ns": 712931,
+            "repeated_ns": 262635
+          },
+          "NavigationView": {
+            "first_ns": 1763453,
+            "repeated_ns": 1000729
+          },
+          "Slider": {
+            "first_ns": 632751,
+            "repeated_ns": 350199
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 493715,
+            "repeated_ns": 84306
+          },
+          "ScrollViewer": {
+            "first_ns": 705600,
+            "repeated_ns": 261658
+          },
+          "NavigationView": {
+            "first_ns": 1587091,
+            "repeated_ns": 998513
+          },
+          "Slider": {
+            "first_ns": 539282,
+            "repeated_ns": 237469
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 328318,
+            "repeated_ns": 39106
+          },
+          "ScrollViewer": {
+            "first_ns": 407836,
+            "repeated_ns": 205421
+          },
+          "NavigationView": {
+            "first_ns": 1312192,
+            "repeated_ns": 755897
+          },
+          "Slider": {
+            "first_ns": 642506,
+            "repeated_ns": 313620
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 323411,
+            "repeated_ns": 39608
+          },
+          "ScrollViewer": {
+            "first_ns": 537219,
+            "repeated_ns": 144680
+          },
+          "NavigationView": {
+            "first_ns": 1064773,
+            "repeated_ns": 676354
+          },
+          "Slider": {
+            "first_ns": 625320,
+            "repeated_ns": 291484
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 557039,
+            "repeated_ns": 45359
+          },
+          "ScrollViewer": {
+            "first_ns": 485763,
+            "repeated_ns": 176828
+          },
+          "NavigationView": {
+            "first_ns": 1312011,
+            "repeated_ns": 690374
+          },
+          "Slider": {
+            "first_ns": 554274,
+            "repeated_ns": 252126
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 315429,
+            "repeated_ns": 34473
+          },
+          "ScrollViewer": {
+            "first_ns": 463400,
+            "repeated_ns": 194902
+          },
+          "NavigationView": {
+            "first_ns": 1409376,
+            "repeated_ns": 815277
+          },
+          "Slider": {
+            "first_ns": 557880,
+            "repeated_ns": 232220
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 325194,
+            "repeated_ns": 49255
+          },
+          "ScrollViewer": {
+            "first_ns": 480184,
+            "repeated_ns": 198010
+          },
+          "NavigationView": {
+            "first_ns": 1480142,
+            "repeated_ns": 768619
+          },
+          "Slider": {
+            "first_ns": 627574,
+            "repeated_ns": 225364
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 386415,
+            "repeated_ns": 52039
+          },
+          "ScrollViewer": {
+            "first_ns": 575165,
+            "repeated_ns": 158807
+          },
+          "NavigationView": {
+            "first_ns": 1316108,
+            "repeated_ns": 713915
+          },
+          "Slider": {
+            "first_ns": 414777,
+            "repeated_ns": 256404
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 510319,
+            "repeated_ns": 50713
+          },
+          "ScrollViewer": {
+            "first_ns": 458001,
+            "repeated_ns": 203210
+          },
+          "NavigationView": {
+            "first_ns": 1673289,
+            "repeated_ns": 695344
+          },
+          "Slider": {
+            "first_ns": 525792,
+            "repeated_ns": 214948
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 490119,
+            "repeated_ns": 38826
+          },
+          "ScrollViewer": {
+            "first_ns": 550509,
+            "repeated_ns": 164270
+          },
+          "NavigationView": {
+            "first_ns": 1082911,
+            "repeated_ns": 718794
+          },
+          "Slider": {
+            "first_ns": 442488,
+            "repeated_ns": 317274
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 330341,
+            "repeated_ns": 34480
+          },
+          "ScrollViewer": {
+            "first_ns": 453625,
+            "repeated_ns": 152143
+          },
+          "NavigationView": {
+            "first_ns": 1071994,
+            "repeated_ns": 643526
+          },
+          "Slider": {
+            "first_ns": 461867,
+            "repeated_ns": 209393
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 361788,
+            "repeated_ns": 54498
+          },
+          "ScrollViewer": {
+            "first_ns": 429499,
+            "repeated_ns": 179607
+          },
+          "NavigationView": {
+            "first_ns": 1153045,
+            "repeated_ns": 667583
+          },
+          "Slider": {
+            "first_ns": 414396,
+            "repeated_ns": 252407
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 442969,
+            "repeated_ns": 37009
+          },
+          "ScrollViewer": {
+            "first_ns": 545351,
+            "repeated_ns": 138130
+          },
+          "NavigationView": {
+            "first_ns": 1082200,
+            "repeated_ns": 713003
+          },
+          "Slider": {
+            "first_ns": 774522,
+            "repeated_ns": 249254
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 546913,
+            "repeated_ns": 34304
+          },
+          "ScrollViewer": {
+            "first_ns": 561405,
+            "repeated_ns": 173997
+          },
+          "NavigationView": {
+            "first_ns": 1197271,
+            "repeated_ns": 763989
+          },
+          "Slider": {
+            "first_ns": 603437,
+            "repeated_ns": 307447
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 459954,
+            "repeated_ns": 55844
+          },
+          "ScrollViewer": {
+            "first_ns": 765719,
+            "repeated_ns": 242529
+          },
+          "NavigationView": {
+            "first_ns": 1657836,
+            "repeated_ns": 739077
+          },
+          "Slider": {
+            "first_ns": 523268,
+            "repeated_ns": 192235
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 409780,
+            "repeated_ns": 34164
+          },
+          "ScrollViewer": {
+            "first_ns": 445242,
+            "repeated_ns": 290932
+          },
+          "NavigationView": {
+            "first_ns": 1254226,
+            "repeated_ns": 748450
+          },
+          "Slider": {
+            "first_ns": 574274,
+            "repeated_ns": 253845
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 432934,
+            "repeated_ns": 60702
+          },
+          "ScrollViewer": {
+            "first_ns": 600934,
+            "repeated_ns": 194183
+          },
+          "NavigationView": {
+            "first_ns": 1454002,
+            "repeated_ns": 811205
+          },
+          "Slider": {
+            "first_ns": 735153,
+            "repeated_ns": 273510
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 417140,
+            "repeated_ns": 59307
+          },
+          "ScrollViewer": {
+            "first_ns": 549757,
+            "repeated_ns": 203208
+          },
+          "NavigationView": {
+            "first_ns": 1490938,
+            "repeated_ns": 816600
+          },
+          "Slider": {
+            "first_ns": 598280,
+            "repeated_ns": 278048
+          }
+        },
+        {
+          "Button": {
+            "first_ns": 312565,
+            "repeated_ns": 34167
+          },
+          "ScrollViewer": {
+            "first_ns": 438232,
+            "repeated_ns": 144382
+          },
+          "NavigationView": {
+            "first_ns": 1106186,
+            "repeated_ns": 646585
+          },
+          "Slider": {
+            "first_ns": 504381,
+            "repeated_ns": 199378
+          }
+        }
+      ]
+    },
+    "workload_source": "use ferroui_base::{controls::ResourceKey, metadata::from_markup_value, styling::ControlTheme, Ref, TypeInfo, Visual};\nuse ferroui_controls::{Application, Button, NavigationView, ScrollViewer, Slider};\nuse ferroui_controls::primitives::TemplatedControl;\nuse ferroui_themes_winui::WinUITheme;\n#[repr(C)]\nstruct Timespec { seconds: i64, nanoseconds: i64 }\nunsafe extern \"C\" { fn clock_gettime(clock: i32, value: *mut Timespec) -> i32; }\n\nfn thread_cpu_ns() -> i64 {\n    let mut value = Timespec { seconds: 0, nanoseconds: 0 };\n    assert_eq!(unsafe { clock_gettime(3, &mut value) }, 0);\n    value.seconds * 1_000_000_000 + value.nanoseconds\n}\n\n#[cfg(feature = \"retain-archive\")]\nfn load_archive(path: std::ffi::OsString) -> ferroui_base::Ref<WinUITheme> {\n    use ferroui_base::{metadata::from_markup_value, utilities::Uri};\n    use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;\n    use ferroui_markup_xaml_loader::{\n        binary_document::pack::{expand_solid, is_solid, ThemePack},\n        FerroRuntimeXamlLoader,\n    };\n\n    let image = std::fs::read(path).expect(\"read replacement archive\");\n    #[cfg(feature = \"operand-updates\")]\n    if image.starts_with(b\"FXU\\x01\") {\n        return ferroui_themes_winui::load_theme_update(&image).expect(\"load compiled operands\");\n    }\n    ferroui_themes_winui::register_types();\n    let mut config = RuntimeXamlLoaderConfiguration::new();\n    config.local_assembly = Some(&ferroui_themes_winui::ASSEMBLY);\n    let uri = Uri::absolute(WinUITheme::DOCUMENT_URI).unwrap();\n    let root = ferroui_themes_winui::compiled_archive_root();\n    #[cfg(feature = \"legacy-archive\")]\n    let native = root.try_load(&image, &uri, &config, None);\n    #[cfg(not(feature = \"legacy-archive\"))]\n    let native = FerroRuntimeXamlLoader::try_load_compiled_archive(&root, &image, &uri, &config, None);\n    if let Some(value) = native.expect(\"load compiled archive\") {\n        return from_markup_value(&Some(value)).expect(\"compiled WinUI theme class\");\n    }\n    let indexed = if is_solid(&image) {\n        expand_solid(&image).unwrap()\n    } else {\n        image\n    };\n    let archive = ThemePack::open(&indexed).unwrap();\n    let value =\n        FerroRuntimeXamlLoader::load_packed_document(&archive, uri, None, None, config).unwrap();\n    from_markup_value(&Some(value)).expect(\"WinUI theme class\")\n}\n\n\nfn count_visuals(visual: &Visual) -> usize {\n    1 + visual.visual_children_snapshot().map_or(0, |children|\n        children.iter().map(|child| count_visuals(child)).sum())\n}\n\nfn activate(theme: &Ref<ControlTheme>, new_control: fn() -> Ref<TemplatedControl>) -> usize {\n    let control = new_control();\n    control.set_theme(theme);\n    control.apply_styling();\n    control.apply_template();\n    assert_eq!(control.visual_children_count(), 1, \"the template must produce one visual root\");\n    count_visuals(&control)\n}\n\nfn main() {\n    let app = Application::new();\n    Application::bind_current(app.clone());\n    #[cfg(feature = \"retain-archive\")]\n    let theme = std::env::args_os().nth(1).map_or_else(WinUITheme::new, load_archive);\n    #[cfg(not(feature = \"retain-archive\"))]\n    let theme = WinUITheme::new();\n    app.styles().add(theme.as_style());\n    let factories: [(&TypeInfo, fn() -> Ref<TemplatedControl>); 4] = [\n        (Button::TYPE, || Button::new().upcast()),\n        (ScrollViewer::TYPE, || ScrollViewer::new().upcast()),\n        (NavigationView::TYPE, || NavigationView::new().upcast()),\n        (Slider::TYPE, || Slider::new().upcast()),\n    ];\n    for (ty, create) in factories {\n        let value = theme.try_get_resource(&ResourceKey::Type(ty), None).flatten();\n        let style = from_markup_value::<Ref<ControlTheme>>(&value).expect(\"typed theme\");\n        assert!(style.target_type().is_some_and(|t| std::ptr::eq(ty,t)));\n        let start = thread_cpu_ns();\n        let count = activate(&style,create);\n        let first = thread_cpu_ns() - start;\n        let start = thread_cpu_ns();\n        for _ in 0..12 {assert_eq!(activate(&style,create),count);}\n        println!(\"{} {count} {first} {}\",ty.name(),(thread_cpu_ns() - start)/12);\n    }\n}\n"
+  }
+}
