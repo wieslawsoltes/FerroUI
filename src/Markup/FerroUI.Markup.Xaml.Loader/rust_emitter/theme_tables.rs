@@ -143,30 +143,15 @@ impl Factory {
     }
     /// Match the complete setter plan for a static resource. An extension may provide an
     /// unset sentinel, a binding or a Color. All fallible steps must use one location.
-    fn static_brush<'a>(create: &str, mut steps: impl Iterator<Item = &'a str>) -> Option<Self> {
-        const EXT: &str = "::ferroui_markup_xaml::markup_extensions::StaticResourceExtension";
+    fn static_brush<'a>(create: &str, steps: impl Iterator<Item = &'a str>) -> Option<Self> {
         const PROP: &str = "::ferroui_base::media::SolidColorBrush::color_property()";
         const OBJ: &str = "solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>()";
-        let key = create
-            .strip_prefix(&format!(
-                "let static_resource_extension_0 = {EXT}::__markup_new_1(rt::string_object("
-            ))?
-            .strip_suffix("));")?;
-        let location = steps.next()?.strip_prefix(&format!(
-            "let provided_0 = rt::provide_value_invoked(&context, rt::property_value({PROP}), &static_resource_extension_0, {EXT}::__markup_ProvideValue_0, "
-        ))?.strip_suffix(")?;")?;
+        let arguments = create.strip_prefix("let provided_0 = rt::provide_static_resource(&context, ")?.strip_suffix(")?;")?;
+        let (key, location) = arguments.rsplit_once(&format!(", || rt::property_value({PROP}), "))?;
         let (line, column) = location.split_once(", ")?;
         let expected = [
             "let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);".to_owned(),
-            "if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {".to_owned(),
-            format!("rt::unset_value({OBJ}, {PROP});"),
-            "} else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {".to_owned(),
-            format!("rt::bind({OBJ}, {PROP}, value_0.clone(), {location})?;"),
-            "} else if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {".to_owned(),
-            format!("solid_color_brush_0.set_value({PROP}, rt::exact(value_0.clone(), \"FerroUI.Media.SolidColorBrush.set_Color\", 0, {location})?);"),
-            "} else {".to_owned(),
-            format!("return ::core::result::Result::Err(rt::no_setter(\"Color\", &value_0, {location}));"),
-            "}".to_owned(),
+            format!("rt::set_local_value({OBJ}, || {PROP}, value_0, || rt::markup_handle(<::ferroui_base::media::Color as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false, \"FerroUI.Media.SolidColorBrush.set_Color\", \"Color\", {location})?;"),
             "context.pop_parent();".to_owned(),
         ];
         if !steps.eq(expected.iter().map(String::as_str)) {

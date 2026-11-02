@@ -248,3 +248,29 @@ fn compact_template_setter_preserves_priority_null_and_error_location() {
         true, "TextBlock.Text", 8, 13).unwrap();
     assert_eq!(text.get_value(TextBlock::text_property()), None);
 }
+
+#[test]
+fn local_setter_checks_the_overloads_before_registering_the_property() {
+    use super::compiled::{no_setter, set_local_value};
+    use ferroui_base::{data::core::ValueType, FerroObject, FerroProperty, Visual};
+    use ferroui_controls::TextBlock;
+
+    crate::register_types();
+    let text = TextBlock::new();
+    let object = text.upcast_ref::<FerroObject>();
+    let member = "FerroUI.Visual.set_Opacity";
+    set_local_value(object, Visual::opacity_property, to_value(0.25_f64), ValueType::of::<f64>,
+        false, member, "Opacity", 7, 19).unwrap();
+    assert_eq!(text.get_value(Visual::opacity_property()), 0.25);
+    set_local_value(object, Visual::opacity_property, Some(FerroProperty::unset_value()),
+        || panic!("unset must bypass the expected value type"), false, member, "Opacity", 7, 19).unwrap();
+    assert_eq!(text.get_value(Visual::opacity_property()), 1.0);
+    let wrong = to_value("x".to_owned());
+    let expected = no_setter("Opacity", &wrong, 7, 19);
+    let actual = set_local_value::<f64>(object, || panic!("an invalid value must not read the accessor"),
+        wrong, ValueType::of::<f64>, false, member, "Opacity", 7, 19).unwrap_err();
+    assert_eq!(actual.message(), expected.message());
+    set_local_value(object, TextBlock::text_property, None, ValueType::of::<String>,
+        true, "FerroUI.Controls.TextBlock.set_Text", "Text", 7, 19).unwrap();
+    assert_eq!(text.get_value(TextBlock::text_property()), None);
+}

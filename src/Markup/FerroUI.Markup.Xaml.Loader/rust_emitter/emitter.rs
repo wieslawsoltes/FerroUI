@@ -498,7 +498,7 @@ fn is_string_literal(text: &str) -> bool {
 fn dynamic_resource_setter_value<'s>(types: &dyn EmitTypes, statements: &[&'s str], value: &str) -> Option<&'s str> {
     let extension = types.framework_path(FrameworkType::DynamicResourceExtension)?;
     let [create, provide] = statements else { return None };
-    let (local, key) = dynamic_resource_extension(&extension, *create)?;
+    let (local, key) = resource_extension_ctor(&extension, *create)?;
     let (provided, target) = provided_value(&extension, local, *provide)?;
     (target == "rt::setter_value_property()" && value == format!("rt::to_object(::core::clone::Clone::clone(&{provided}))"))
         .then_some(key)
@@ -506,7 +506,7 @@ fn dynamic_resource_setter_value<'s>(types: &dyn EmitTypes, statements: &[&'s st
 
 /// `let <local> = DynamicResourceExtension::__markup_new_1(rt::string_object(<key>));`: the
 /// local and the key.
-fn dynamic_resource_extension<'s>(extension: &str, statement: &'s str) -> Option<(&'s str, &'s str)> {
+fn resource_extension_ctor<'s>(extension: &str, statement: &'s str) -> Option<(&'s str, &'s str)> {
     let (local, created) = statement.strip_prefix("let ")?.split_once(" = ")?;
     let key = created.strip_prefix(&format!("{extension}::__markup_new_1(rt::string_object("))?.strip_suffix("));")?;
     (is_identifier(local) && is_string_literal(key)).then_some((local, key))
@@ -531,7 +531,7 @@ fn provided_value<'s>(extension: &str, local: &str, statement: &'s str) -> Optio
 fn fused_dynamic_resource_bind(types: &dyn EmitTypes, lines: &[String], statement: &str) -> Option<String> {
     let extension = types.framework_path(FrameworkType::DynamicResourceExtension)?;
     let [.., create, provide] = lines else { return None };
-    let (local, key) = dynamic_resource_extension(&extension, create.strip_prefix("    ")?)?;
+    let (local, key) = resource_extension_ctor(&extension, create.strip_prefix("    ")?)?;
     let (provided, target) = provided_value(&extension, local, provide.strip_prefix("    ")?)?;
     let property = target.strip_prefix("rt::property_value(")?.strip_suffix(')')?;
     let (object, rest) = statement.strip_prefix("rt::bind(")?.split_once(".upcast_ref::<::ferroui_base::FerroObject>(), ")?;
@@ -2408,6 +2408,12 @@ impl<'a> Emitter<'a> {
             self.line(call);
             return Ok(());
         }
+        if priority.is_none() {
+            if let Some(call) = self.compact_local_setter(node, &value_node, assignment, &branches, target, &local) {
+                self.line(call);
+                return Ok(());
+            }
+        }
         let mut lines: Vec<String> = Vec::new();
         let mut closed = false;
         for (index, (test, setter)) in branches.iter().enumerate() {
@@ -2444,6 +2450,45 @@ impl<'a> Emitter<'a> {
             self.line(line);
         }
         Ok(())
+    }
+
+    /// The standard unset/binding/registered-accessor plan. A direct property,
+    /// custom overload, different null handler or distinct diagnostic site stays expanded.
+    fn compact_local_setter(
+        &self,
+        node: &Rc<dyn IXamlAstNode>,
+        value_node: &Rc<dyn IXamlAstNode>,
+        assignment: &XamlPropertyAssignmentNode,
+        branches: &[(SetterTest, Rc<dyn IXamlPropertySetter>)],
+        target: &Typed<'a>,
+        value: &str,
+    ) -> Option<String> {
+        let [(SetterTest::Instance(_), unset), (SetterTest::Instance(_), bind), (SetterTest::Instance(expected), set)] = branches else {
+            return None;
+        };
+        if unset.binder_parameters().allow_runtime_null.get() || bind.binder_parameters().allow_runtime_null.get()
+            || (node.line(), node.position()) != (value_node.line(), value_node.position())
+        {
+            return None;
+        }
+        let unset = unset.as_any().downcast_ref::<UnsetValueSetter>()?;
+        let bind = bind.as_any().downcast_ref::<BindingSetter>()?;
+        let field = XamlIlFerroPropertyHelper::try_get_ferro_property_field(&assignment.property)?;
+        if !unset.ferro_property().equals(&*field) || !bind.ferro_property().equals(&*field) {
+            return None;
+        }
+        let accessor = self.direct_setter(set)?;
+        let (property, definition) = self.registered_accessor(node, assignment, &accessor).ok()?;
+        if accessor.declared().is_some() || property.is_direct() {
+            return None;
+        }
+        let member = rust_string_literal(&self.member_name(&accessor));
+        let name = rust_string_literal(&assignment.property.name());
+        let nullable = set.binder_parameters().allow_runtime_null.get();
+        Some(format!(
+            "rt::set_local_value({}.upcast_ref::<::ferroui_base::FerroObject>(), || {definition}, {value}, || {expected}, {nullable}, {member}, {name}, {}, {})?;",
+            target.expr, node.line(), node.position()
+        ))
     }
 
     /// Share the exact binding-then-value plan for a registered template property.
@@ -3275,6 +3320,7 @@ impl<'a> Emitter<'a> {
         let provide_value_target = needs_context && FRAMEWORK_CONTEXT.provide_value_target && property.is_some();
 
         let value_node = extension.value().as_node();
+        let first_statement = self.lines.len();
         let value = self.value(&value_node)?;
         // The extension is held in a local: the context is set between creating and calling it.
         let value = match value.kind {
@@ -3317,6 +3363,17 @@ impl<'a> Emitter<'a> {
             {
                 self.uses_context = true;
                 let extension = &texts[0];
+                let static_key = self.types.framework_path(FrameworkType::StaticResourceExtension).and_then(|path| {
+                    let [create] = &self.lines[first_statement..] else { return None };
+                    let (created, key) = resource_extension_ctor(&path, create.trim_start())?;
+                    (fallible && extension.strip_prefix('&') == Some(created) && function == format!("{path}::__markup_ProvideValue_0"))
+                        .then(|| key.to_owned())
+                });
+                if let Some(key) = static_key {
+                    self.lines.truncate(first_statement);
+                    self.line(format!("let {local} = rt::provide_static_resource(&context, {key}, || {descriptor}, {}, {})?;", node.line(), node.position()));
+                    return Ok(Typed { expr: local, kind: self.kind_of(returned) });
+                }
                 self.line(match fallible {
                     true => format!(
                         "let {local} = rt::provide_value_invoked(&context, {descriptor}, {extension}, {function}, {}, {})?;",

@@ -130,40 +130,15 @@ pub fn static_brush(
     value_line: i32,
     value_column: i32,
 ) -> Result<(), XamlLoadError> {
-    use crate::markup_extensions::StaticResourceExtension;
-    use ferroui_base::{data::BindingBase, metadata::MarkupTyped, UnsetValueType};
+    use ferroui_base::metadata::MarkupTyped;
     register(dictionary, context, key, line, column, move |provider| {
         let context = deferred_context(provider, document);
         let brush = SolidColorBrush::new();
         context.push_parent(to_value(brush.clone()));
-        let property = SolidColorBrush::color_property();
-        let extension = StaticResourceExtension::__markup_new_1(string_object(target.as_ref()));
-        let provided = super::provide_value_invoked(
-            &context,
-            super::property_value(property),
-            &extension,
-            StaticResourceExtension::__markup_ProvideValue_0,
-            value_line,
-            value_column,
-        )?;
-        let value = to_value(provided);
-        let object = brush.upcast_ref::<FerroObject>();
-        if super::is_instance(&value, super::markup_handle(UnsetValueType::MARKUP)) {
-            super::unset_value(object, property);
-        } else if super::is_instance(&value, super::markup_handle(<dyn BindingBase>::MARKUP)) {
-            super::bind(object, property, value, value_line, value_column)?;
-        } else if super::is_instance(&value, super::markup_handle(Color::MARKUP)) {
-            let color: Color = super::exact(
-                value,
-                "FerroUI.Media.SolidColorBrush.set_Color",
-                0,
-                value_line,
-                value_column,
-            )?;
-            brush.set_value(property, color);
-        } else {
-            return Err(super::no_setter("Color", &value, value_line, value_column));
-        }
+        let provided = super::provide_static_resource(&context, target.as_ref(),
+            || super::property_value(SolidColorBrush::color_property()), value_line, value_column)?;
+        super::set_local_value(brush.upcast_ref::<FerroObject>(), SolidColorBrush::color_property, to_value(provided),
+            || super::markup_handle(Color::MARKUP), false, "FerroUI.Media.SolidColorBrush.set_Color", "Color", value_line, value_column)?;
         context.pop_parent();
         Ok(to_value(brush))
     })

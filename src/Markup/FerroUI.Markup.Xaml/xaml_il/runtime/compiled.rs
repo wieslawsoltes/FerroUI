@@ -422,6 +422,21 @@ pub fn bind_template_binding(
     bind(target, property, provided, line, position)
 }
 
+/// A literal-key StaticResource assignment. Evaluate the target descriptor after
+/// constructing the extension, including any first-use property registration.
+#[inline(never)]
+pub fn provide_static_resource(
+    context: &Rc<XamlIlContext>,
+    key: &str,
+    target: fn() -> MarkupValue,
+    line: i32,
+    position: i32,
+) -> Result<MarkupValue, XamlLoadError> {
+    use crate::markup_extensions::StaticResourceExtension;
+    let extension = StaticResourceExtension::__markup_new_1(string_object(key));
+    provide_value_invoked(context, target(), &extension, StaticResourceExtension::__markup_ProvideValue_0, line, position)
+}
+
 /// The build of deferred content that is `{StaticResource key}` alone (a resource of a
 /// dictionary that names another resource): the context of the build ([`deferred_context`]
 /// of `document`), the extension created (`StaticResourceExtension::__markup_new_0`) with its
@@ -535,6 +550,35 @@ pub fn bind_or_set_priority<T: ferroui_base::PropertyValue>(
     }
     let name = member.rsplit('.').next().unwrap_or(member);
     Err(no_setter(name, &value, line, position))
+}
+
+/// XamlX's local-value overload sequence for a writable styled property. The
+/// getter runs only in the branch that takes the value. An invalid value never
+/// registers the property and the binding branch never registers the value type.
+#[inline(never)]
+#[allow(clippy::too_many_arguments)]
+pub fn set_local_value<T: ferroui_base::PropertyValue>(
+    target: &Ref<FerroObject>,
+    property: fn() -> &'static ferroui_base::StyledProperty<T>,
+    value: MarkupValue,
+    expected: fn() -> ValueType,
+    nullable: bool,
+    member: &str,
+    name: &str,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    use ferroui_base::metadata::MarkupTyped;
+    if is_instance(&value, markup_handle(UnsetValueType::MARKUP)) {
+        unset_value(target, property());
+    } else if is_instance(&value, markup_handle(<dyn BindingBase>::MARKUP)) {
+        return bind(target, property(), value, line, position);
+    } else if is_instance(&value, expected()) || (nullable && value.is_none()) {
+        target.set_value(property(), exact(value, member, 0, line, position)?);
+    } else {
+        return Err(no_setter(name, &value, line, position));
+    }
+    Ok(())
 }
 
 /// The error of a property assignment whose setter is chosen at run time
