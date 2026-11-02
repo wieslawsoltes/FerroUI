@@ -18,7 +18,7 @@ struct Reader<'a> {
     expansion: Expansion,
 }
 
-fn read_uint(input: &mut &[u8]) -> XamlResult<u32> {
+pub(super) fn read_uint(input: &mut &[u8]) -> XamlResult<u32> {
     let mut v = 0;
     for shift in (0..32).step_by(7) {
         let (&b, rest) = input

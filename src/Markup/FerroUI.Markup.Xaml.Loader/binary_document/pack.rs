@@ -6,6 +6,10 @@ use crate::compiler_extensions::FerroXamlIlCompiler;
 use std::{fs, path::Path};
 use xamlx::exceptions::{XamlError, XamlResult};
 
+#[path = "solid.rs"]
+mod solid;
+pub use solid::{compile_solid_documents, expand_solid, is_solid};
+
 const MAGIC: &[u8; 4] = b"FXP\0";
 const PACK_VERSION: u8 = 1;
 const MAX_DOCUMENTS: usize = 16_384;
@@ -163,6 +167,14 @@ pub fn compile_documents(documents: &[(&str, &str)]) -> XamlResult<Vec<u8>> {
 
 /// Package all .xaml files under a directory, ignoring filesystem symlinks.
 pub fn compile_directory(root: &Path) -> XamlResult<Vec<u8>> {
+    compile_directory_with(root, compile_documents)
+}
+/// Package a directory with cross-document compression for distribution.
+pub fn compile_solid_directory(root: &Path) -> XamlResult<Vec<u8>> {
+    compile_directory_with(root, compile_solid_documents)
+}
+
+fn compile_directory_with(root: &Path, encode: fn(&[(&str, &str)]) -> XamlResult<Vec<u8>>) -> XamlResult<Vec<u8>> {
     fn gather(dir: &Path, prefix: &str, docs: &mut Vec<(String, String)>) -> XamlResult<()> {
         let fs_error = |e: std::io::Error| invalid(&format!("{}: {e}", dir.display()));
         for entry in fs::read_dir(dir).map_err(fs_error)? {
@@ -200,7 +212,7 @@ pub fn compile_directory(root: &Path) -> XamlResult<Vec<u8>> {
     }
     let mut docs = Vec::new();
     gather(root, "", &mut docs)?;
-    compile_documents(
+    encode(
         &docs
             .iter()
             .map(|(p, s)| (p.as_str(), s.as_str()))

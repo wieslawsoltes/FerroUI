@@ -24,7 +24,7 @@ fn count(n: usize) -> XamlResult<u32> {
     u32::try_from(n).map_err(|_| invalid("count exceeds the wire range"))
 }
 
-fn put(out: &mut Vec<u8>, mut n: u32) {
+pub(super) fn put(out: &mut Vec<u8>, mut n: u32) {
     while n >= 128 {
         out.push(n as u8 | 128);
         n >>= 7;
@@ -50,11 +50,11 @@ struct Encoder {
 // different intervals. Keep each independently compressible without dropping
 // diagnostics or changing the ordering or identity of nodes.
 #[derive(Default)]
-struct Columns {
-    tags: Vec<u8>,
-    lines: Vec<u8>,
-    positions: Vec<u8>,
-    scopes: Vec<u8>,
+pub(super) struct Columns {
+    pub(super) tags: Vec<u8>,
+    pub(super) lines: Vec<u8>,
+    pub(super) positions: Vec<u8>,
+    pub(super) scopes: Vec<u8>,
     last_line: i32,
 }
 
@@ -314,7 +314,15 @@ pub fn encode_stored(document: &XamlDocument) -> XamlResult<Vec<u8>> {
     write_syntax(document, false)
 }
 
-fn write_syntax(document: &XamlDocument, columnar: bool) -> XamlResult<Vec<u8>> {
+pub(super) struct EncodedGraph {
+    pub(super) string_count: u32,
+    pub(super) strings: Vec<u8>,
+    pub(super) metadata: Vec<u8>,
+    pub(super) columns: Option<Columns>,
+    pub(super) records: Vec<u8>,
+}
+
+pub(super) fn encode_graph(document: &XamlDocument, columnar: bool) -> XamlResult<EncodedGraph> {
     let root = document.root()?;
     if !root.is::<XamlAstObjectNode>() {
         return Err(invalid("root is not an object"));
@@ -326,41 +334,46 @@ fn write_syntax(document: &XamlDocument, columnar: bool) -> XamlResult<Vec<u8>> 
     let name = enc.optional(document.document.as_deref())?;
     let aliases = enc.aliases(&document.namespace_aliases)?;
     enc.graph(root)?;
-    let mut header = MAGIC.to_vec();
-    header.extend([VERSION, if columnar { 2 } else { 0 }]);
-    put(&mut header, count(enc.strings.len())?);
     let mut meta = Vec::new();
     put(&mut meta, name);
     meta.extend(aliases);
     put(&mut meta, count(enc.scopes.len())?);
     put(&mut enc.scope_pool, count(enc.ids.len())?);
-    let mut sections = vec![header, enc.string_pool, meta, enc.scope_pool];
-    if let Some(columns) = enc.columns {
-        // One tag per node. Only the three varint lanes need explicit lengths.
-        let mut lengths = Vec::new();
+    meta.extend(enc.scope_pool);
+    if let Some(columns) = &enc.columns {
         for n in [
             columns.lines.len(),
             columns.positions.len(),
             columns.scopes.len(),
         ] {
-            put(&mut lengths, count(n)?);
+            put(&mut meta, count(n)?);
         }
-        sections.extend([
-            lengths,
-            columns.tags,
-            columns.lines,
-            columns.positions,
-            columns.scopes,
-        ]);
     }
-    sections.push(enc.records);
-    let size: usize = sections.iter().map(Vec::len).sum();
-    if size > MAX_DOCUMENT_BYTES {
+    Ok(EncodedGraph {
+        string_count: count(enc.strings.len())?,
+        strings: enc.string_pool,
+        metadata: meta,
+        columns: enc.columns,
+        records: enc.records,
+    })
+}
+
+fn write_syntax(document: &XamlDocument, columnar: bool) -> XamlResult<Vec<u8>> {
+    let graph = encode_graph(document, columnar)?;
+    let mut out = MAGIC.to_vec();
+    out.extend([VERSION, if columnar { 2 } else { 0 }]);
+    put(&mut out, graph.string_count);
+    out.extend(graph.strings);
+    out.extend(graph.metadata);
+    if let Some(columns) = graph.columns {
+        out.extend(columns.tags);
+        out.extend(columns.lines);
+        out.extend(columns.positions);
+        out.extend(columns.scopes);
+    }
+    out.extend(graph.records);
+    if out.len() > MAX_DOCUMENT_BYTES {
         return Err(invalid("image too large"));
-    }
-    let mut out = Vec::with_capacity(size);
-    for section in sections {
-        out.extend(section);
     }
     Ok(out)
 }
