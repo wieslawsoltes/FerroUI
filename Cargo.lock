@@ -1473,6 +1473,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-opengl",
  "ferroui-skia",
+ "ferroui-system",
  "ferroui-vulkan",
  "jni-sys 0.4.1",
  "libc",
