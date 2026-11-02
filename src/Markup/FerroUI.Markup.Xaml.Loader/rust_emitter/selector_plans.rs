@@ -1,7 +1,7 @@
 //! Typed structural interning of linear selector builders. The shape names only the
 //! operations the compiler resolved. Strings, types and nth-child operands belong to
 //! the use site. Each call builds a fresh chain (selector nodes may be mutable).
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
@@ -60,10 +60,77 @@ impl Op {
 pub(super) struct SelectorPlans {
     /// A seed is the result of a non-linear or property-value selector.
     shapes: HashMap<(bool, Vec<Op>), String>,
+    style_builders: HashSet<String>,
     pub(super) helpers: String,
 }
 
 impl SelectorPlans {
+    /// Fold the setup of a child Style into its already-interned selector shape.
+    /// Only rootless linear plans qualify: all their operands are literals or
+    /// static type references, so no user execution moves across Style creation.
+    pub(super) fn start_style(&mut self, call: &str, parent: Option<&str>) -> Option<String> {
+        let (name, operands) = call.strip_suffix(')')?.split_once('(')?;
+        let ((_, shape), _) = self
+            .shapes
+            .iter()
+            .find(|((seed, _), candidate)| !seed && candidate.as_str() == name)?;
+        let complete = parent.is_some();
+        let helper = format!(
+            "{name}_{}",
+            if complete { "add_style" } else { "begin_style" }
+        );
+        if self.style_builders.insert(helper.clone()) {
+            let mut params = vec![
+                "context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>"
+                    .to_owned(),
+            ];
+            if complete {
+                params.push(
+                    "parent: &::ferroui_base::Ref<::ferroui_base::styling::StyleBase>".into(),
+                );
+            }
+            let mut args = Vec::new();
+            for ty in shape.iter().flat_map(|op| op.parameters()) {
+                let arg = format!("arg{}", args.len());
+                params.push(format!("{arg}: {ty}"));
+                args.push(arg);
+            }
+            let (result, tail) = if complete {
+                params.extend(
+                    [
+                        "setters: &[rt::style_program::DynamicSetter]",
+                        "line: i32",
+                        "column: i32",
+                    ]
+                    .map(str::to_owned),
+                );
+                ("::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError>",
+                 "rt::style_program::finish_dynamic(context, parent, &style, setters, line, column)")
+            } else {
+                (
+                    "::ferroui_base::Ref<::ferroui_base::styling::Style>",
+                    "style",
+                )
+            };
+            writeln!(
+                self.helpers,
+                "#[inline(never)]\nfn {helper}({}) -> {result} {{",
+                params.join(", ")
+            )
+            .unwrap();
+            writeln!(
+                self.helpers,
+                "    let style = rt::style_program::begin(context);"
+            )
+            .unwrap();
+            writeln!(self.helpers, "    ::ferroui_base::styling::Style::__markup_set_Selector(&style, ::core::option::Option::Some({name}({})));", args.join(", ")).unwrap();
+            writeln!(self.helpers, "    {tail}\n}}\n").unwrap();
+        }
+        let parent = parent.map_or_else(String::new, |parent| format!(", {parent}"));
+        let separator = if operands.is_empty() { "" } else { ", " };
+        Some(format!("{helper}(&context{parent}{separator}{operands}"))
+    }
+
     pub(super) fn call(
         &mut self,
         document: &str,
@@ -143,6 +210,33 @@ mod tests {
             "__build_selector_shape_0(Grid::TYPE, \"other\")"
         );
         assert_eq!(plans.helpers.matches("fn ").count(), 1);
+        let style = plans
+            .start_style(
+                "__build_selector_shape_0(Border::TYPE, \"part\")",
+                Some("parent"),
+            )
+            .unwrap();
+        assert_eq!(
+            style,
+            "__build_selector_shape_0_add_style(&context, parent, Border::TYPE, \"part\""
+        );
+        plans
+            .start_style(
+                "__build_selector_shape_0(Grid::TYPE, \"next\")",
+                Some("parent"),
+            )
+            .unwrap();
+        assert_eq!(plans.helpers.matches("_add_style(").count(), 1);
+        let helper = plans
+            .helpers
+            .split("fn __build_selector_shape_0_add_style")
+            .nth(1)
+            .unwrap();
+        assert!(helper.find("style_program::begin(") < helper.find("__markup_set_Selector"));
+        assert!(
+            helper.find("__markup_set_Selector") < helper.find("style_program::finish_dynamic")
+        );
+
         assert!(!plans.helpers.contains("Border") && !plans.helpers.contains("Grid"));
         assert_eq!(
             plans.call("build", Some("prefix"), &steps("T", "s")),

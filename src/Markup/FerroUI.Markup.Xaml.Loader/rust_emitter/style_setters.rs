@@ -5,6 +5,8 @@ use std::fmt::Write;
 
 use super::emitter::{is_identifier, is_plain_borrow};
 
+use super::selector_plans::SelectorPlans;
+
 const STYLE: &str = "::ferroui_base::styling::Style";
 const BASE: &str = "::ferroui_base::styling::StyleBase";
 
@@ -49,6 +51,8 @@ impl StyleSetters {
     pub(super) fn attach(
         &mut self,
         document: &str,
+        selectors: &mut SelectorPlans,
+        retain_child: bool,
         lines: &mut Vec<String>,
         start: usize,
         child: &str,
@@ -136,6 +140,50 @@ impl StyleSetters {
             lines.truncate(boundary);
             lines.extend(result);
         }
+        // Fuse a freshly created child's constant-operand selector. A prefix
+        // selector, a custom statement or any other order is a hard boundary.
+        if let Some(index) = first {
+            Self::selected_child(selectors, lines, index, child, parent, retain_child);
+        }
+        Some(())
+    }
+
+    fn selected_child(
+        selectors: &mut SelectorPlans,
+        lines: &mut Vec<String>,
+        index: usize,
+        child: &str,
+        parent: &str,
+        retain_child: bool,
+    ) -> Option<()> {
+        let [begin, marker, build, assign] = lines.get(index..index + 4)? else {
+            return None;
+        };
+        if begin != &format!("    let {child} = rt::style_program::begin(&context);")
+            || !marker.trim_start().starts_with("// ")
+        {
+            return None;
+        }
+        let (selector, call) = build
+            .strip_prefix("    let ")?
+            .strip_suffix(';')?
+            .split_once(" = ")?;
+        if !is_identifier(selector) || assign != &format!("    {STYLE}::__markup_set_Selector(&{child}, ::core::option::Option::Some({selector}.clone()));") {
+            return None;
+        }
+        let complete = !retain_child
+            && lines.get(index + 4).is_some_and(|line| {
+                line == &format!(
+                    "    rt::style_program::finish_dynamic(&context, {parent}, &{child}, {{"
+                )
+            });
+        let call = selectors.start_style(call, complete.then_some(parent))?;
+        let (end, replacement) = if complete {
+            (index + 5, format!("    {call}, {{"))
+        } else {
+            (index + 4, format!("    let {child} = {call});"))
+        };
+        lines.splice(index..end, [marker.clone(), replacement]);
         Some(())
     }
 }
@@ -162,7 +210,17 @@ mod tests {
             "    context.pop_parent();".into(),
         ];
         setters
-            .attach("doc", &mut lines, 0, "style_2", &call, 3, 7)
+            .attach(
+                "doc",
+                &mut SelectorPlans::default(),
+                false,
+                &mut lines,
+                0,
+                "style_2",
+                &call,
+                3,
+                7,
+            )
             .unwrap();
         assert!(lines[0].contains("add_dynamic_resource_setter_with_parent"));
         let generated = lines[2..].join("\n");

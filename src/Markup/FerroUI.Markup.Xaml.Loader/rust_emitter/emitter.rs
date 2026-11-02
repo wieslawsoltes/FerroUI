@@ -3676,7 +3676,11 @@ impl<'a> Emitter<'a> {
             }
             if let [_, child] = arguments.as_slice() {
                 if matches!(child.kind, Kind::Class(class) if class.rust_path().is_some_and(|p| absolute(p) == "::ferroui_base::styling::Style"))
-                    && self.styles.attach(self.function_name, &mut self.lines, start, &child.expr, &call, node.line(), node.position()).is_some()
+                    && self.styles.attach(
+                        self.function_name, &mut self.selectors,
+                        self.compiler_locals.values().any(|(name, _)| name == &child.expr),
+                        &mut self.lines, start, &child.expr, &call, node.line(), node.position(),
+                    ).is_some()
                 {
                     return Ok(());
                 }
