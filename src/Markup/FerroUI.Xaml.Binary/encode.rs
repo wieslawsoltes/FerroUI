@@ -39,6 +39,31 @@ fn location_flags(rows: &[Resource<'_>]) -> u8 {
     if (rows.len() - 1) * (same & REPEAT).count_ones() as usize > 1 { same } else { 0 }
 }
 
+// Encode both edges of adjacent sorted identifiers. Numeric thresholds use the
+// actual wire lengths so even tiny standalone dictionaries never grow.
+fn uint_len(value: usize) -> usize {
+    (usize::BITS - (value | 1).leading_zeros()).div_ceil(7) as usize
+}
+
+#[derive(Clone, Copy)]
+struct StringEdges {
+    prefix: usize,
+    suffix: usize,
+}
+
+fn shared_edges(previous: &str, text: &str) -> StringEdges {
+    let mut prefix = text.bytes().zip(previous.bytes()).take_while(|(a, b)| a == b).count();
+    while !text.is_char_boundary(prefix) {
+        prefix -= 1;
+    }
+    let mut suffix = text[prefix..].bytes().rev().zip(previous[prefix..].bytes().rev())
+        .take_while(|(a, b)| a == b).count();
+    while !text.is_char_boundary(text.len() - suffix) {
+        suffix -= 1;
+    }
+    StringEdges { prefix, suffix: if suffix > 1 { suffix } else { 0 } }
+}
+
 /// Encode a homogeneous run without changing insertion or error order.
 pub fn encode(kind: Kind, rows: &[Resource<'_>]) -> Result<Vec<u8>, Error> {
     if rows.len() > MAX_ITEMS {
@@ -75,28 +100,38 @@ pub fn encode(kind: Kind, rows: &[Resource<'_>]) -> Result<Vec<u8>, Error> {
         return Err(Error("FXB string table too large"));
     }
     let repeat = location_flags(rows);
+    let mut previous = "";
+    let mut prefix_bytes = 0;
+    let mut edge_bytes = usize::from(repeat == 0); // v3 always has a location flag byte
+    let edges: Vec<_> = strings.iter().map(|&text| {
+        let edges = shared_edges(previous, text);
+        previous = text;
+        let tail = text.len() - edges.prefix;
+        let literal = tail - edges.suffix;
+        // The prefix uses the same LEB128 in either table.
+        prefix_bytes += uint_len(tail) + tail;
+        edge_bytes += uint_len((literal << 1) | usize::from(edges.suffix != 0)) + literal;
+        if edges.suffix != 0 { edge_bytes += uint_len(edges.suffix); }
+        edges
+    }).collect();
+    let back_copy = edge_bytes < prefix_bytes;
     let mut out = MAGIC.to_vec();
-    out.push(if repeat == 0 { 1 } else { 2 });
+    out.push(if back_copy { 3 } else if repeat != 0 { 2 } else { 1 });
     out.push(kind as u8);
-    if repeat != 0 {
-        out.push(repeat);
-    }
+    if back_copy || repeat != 0 { out.push(repeat); }
     uint(&mut out, strings.len() as u32);
     uint(&mut out, rows.len() as u32);
-    let mut previous = "";
-    for &s in &strings {
-        let mut prefix = s
-            .bytes()
-            .zip(previous.bytes())
-            .take_while(|(a, b)| a == b)
-            .count();
-        while !s.is_char_boundary(prefix) {
-            prefix -= 1;
+    for (&text, edge) in strings.iter().zip(edges) {
+        uint(&mut out, edge.prefix as u32);
+        let suffix = if back_copy { edge.suffix } else { 0 };
+        let literal = &text.as_bytes()[edge.prefix..text.len() - suffix];
+        if back_copy {
+            uint(&mut out, ((literal.len() as u32) << 1) | u32::from(suffix != 0));
+            if suffix != 0 { uint(&mut out, suffix as u32); }
+        } else {
+            uint(&mut out, literal.len() as u32);
         }
-        uint(&mut out, prefix as u32);
-        uint(&mut out, (s.len() - prefix) as u32);
-        out.extend_from_slice(&s.as_bytes()[prefix..]);
-        previous = s;
+        out.extend_from_slice(literal);
     }
     let index = |s: &str| strings.binary_search(&s).expect("interned resource string") as u32;
     for (i, row) in rows.iter().enumerate() {

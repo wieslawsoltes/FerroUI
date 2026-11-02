@@ -181,3 +181,53 @@ fn predictable_positions_roundtrip_with_explicit_v1_and_overflow_checks() {
     let overflow = b"FXB\0\x02\x05\x1f\x01\x02\x00\x01A\x00\x00\xff\xff\xff\xff\x07\x00\x00\x00\x00\x00";
     assert!(Batch::decode(overflow).is_err());
 }
+
+#[test]
+fn front_coded_suffixes_preserve_scalar_boundaries_and_reload_handles() {
+    let rows = [
+        row("ZäCommonSuffix", Value::Text("ZÜCommonSuffix")),
+        row("ZäCommonSuffix", Value::Text("ZàCommonSuffix")),
+        row("ä", Value::Text("÷")),
+    ];
+    let image = encode(Kind::Alias, &rows).unwrap();
+    assert_eq!(image[4], 3);
+    let batch = Batch::decode(&image).unwrap();
+    let records: Vec<_> = batch.records().map(|record| {
+        let Payload::Text(text) = record.payload else { panic!() };
+        (record.key.to_owned(), text)
+    }).collect();
+    drop(batch);
+    for ((key, text), expected) in records.into_iter().zip(rows) {
+        assert_eq!(key, expected.key);
+        assert_eq!(Value::Text(text.as_ref()), expected.value);
+    }
+    for n in 0..image.len() {
+        assert!(Batch::decode(&image[..n]).is_err());
+    }
+}
+
+#[test]
+fn back_copy_rejects_overlaps_and_invalid_utf8_boundaries() {
+    // Previous string starts at UTF-8 "äX". A one-byte insertion after
+    // copying one scalar, followed by a previously stored suffix.
+    let mut image = b"FXB\0\x03\x05\x00\x02\x01\x00\x06\xc3\xa4X\x02\x03\x01Y\x01\x00\x00\x00\x00\x00".to_vec();
+    assert_eq!(Batch::decode(&image).unwrap().records().next().unwrap().key, "äYX");
+    image[16] = 2;
+    assert!(Batch::decode(&image).is_err());
+    image[14] = 0;
+    assert!(Batch::decode(&image).is_err());
+    image[16] = 4;
+    assert!(Batch::decode(&image).is_err());
+}
+
+
+#[test]
+fn joined_pool_cannot_split_a_scalar_between_strings() {
+    for image in [
+        &b"FXB\0\x01\x05\x02\x00\x00\x01\xc3\x00\x01\xa4"[..],
+        &b"FXB\0\x03\x05\x00\x02\x00\x00\x02\xc3\x00\x02\xa4"[..],
+        &b"FXB\0\x03\x05\x00\x01\x00\x00\x01\x00"[..],
+    ] {
+        assert!(Batch::decode(image).is_err());
+    }
+}

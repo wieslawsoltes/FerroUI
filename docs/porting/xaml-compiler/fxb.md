@@ -12,17 +12,19 @@ Portable whole-document FXD images preserve the parsed XamlX syntax graph for ru
 
 | Field in order | Representation |
 | --- | --- |
-| Signature and version | Four octets `46 58 42 00`, then version `01` or `02` |
+| Signature and version | Four octets `46 58 42 00`, then version `01`, `02`, or `03` |
 | Factory kind | One octet. Values 1–4 identify aliases, literal brushes, dynamic brushes and static-resource brushes. 5 imports a deferred builder. 6–9 insert a color, double, thickness or corner radius respectively |
-| Location flags (v2 only) | One byte declaring which source fields can be reconstructed after the first row |
+| Location flags (v2 and v3) | One byte declaring which source fields can be reconstructed after the first row |
 | String count, record count | Two unsigned 32-bit canonical LEB128 integers |
-| Strings, sorted by UTF-8 bytes | For each string, previous-string common-prefix length in bytes, suffix length in bytes, and suffix bytes. Prefixes end at UTF-8 scalar boundaries |
+| Strings, sorted by UTF-8 bytes | In v1 and v2 each string gives the length of a prefix copied from its predecessor, followed by the literal length and bytes. V3 may also copy a suffix from that predecessor. All lengths count bytes |
 | Dictionary key | Index into the string table, zero-based |
 | Value operand | Text operands use a string index. Colors and literal brushes use a little-endian ARGB word. Builder imports use an unsigned LEB128 slot. A double uses one numeric component, thickness and corner radius use four components in constructor order |
 | Source location | Declaration line and column, then ZigZag-encoded deltas for the value line and column relative to the declaration |
 | Remaining records | Repeat key, operand and location in XAML insertion order |
 
 The first row always stores four source fields. In v2, bits 0 through 3 omit, respectively, the declaration line, declaration column, ZigZag value-line delta and ZigZag value-column delta on subsequent rows. Each omitted field repeats its prior encoded value. Bit 4 changes the omitted declaration line to the preceding line plus one and requires bit 0. At least one of bits 0–3 must be set and bits 5–7 must be zero. Readers check the reconstructed absolute coordinates on every row. The encoder chooses v2 only when every prediction holds and removing fields saves more than the flag byte. Irregular blocks and singleton runs can still use v1.
+
+V3 uses the v2 location flags and also accepts zero for an irregular block. Each string starts with a prefix length and a tagged literal length, both unsigned LEB128. The literal length is the tagged value shifted right by one. If the low bit is set, a positive trailing-copy length follows. The literal bytes come last. The reader concatenates the predecessor's prefix, the literal, and the predecessor's suffix. The copies end and start on scalar boundaries and cannot overlap in the predecessor. The first entry has an empty predecessor. The encoder compares the complete string-table sizes including the header difference and uses v3 only when the whole block becomes smaller.
 
 A numeric component from −32 through 222 uses a single byte containing the integer plus 32. Every other value uses byte 255 followed by the eight little-endian IEEE-754 bits. This preserves negative zero, subnormals, infinities and NaN payloads. Counts, indices and source locations use canonical unsigned LEB128. Absolute and reconstructed source positions fit a nonnegative `i32`. Blocks and expanded string pools are limited to 16 MiB each, with at most 1,048,576 records and 1,048,576 strings. Unknown versions and kinds, noncanonical or overflowing integers, invalid references, invalid UTF-8, invalid lengths and trailing bytes fail validation before registration begins.
 

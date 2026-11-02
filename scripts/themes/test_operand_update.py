@@ -8,12 +8,14 @@ import unittest
 from operand_update import fingerprint, publish
 
 
-def generation(dir_, *, source=b"native caller", value=1, options=b"(false, true)\n"):
+def generation(dir_, *, source=b"native caller", value=1, wire_version=1, options=b"(false, true)\n"):
     dir_.mkdir()
     module, prefix = b"theme::xaml", b"xaml"
     name = "xaml-000000000000000a.fxb"
     # One color row keyed A, with the same declaration/value position.
-    leaf = b"FXB\0\1\6\1\1\0\1A\0" + struct.pack("<I", value) + b"\1\1\0\0"
+    header = b"FXB\0" + bytes((wire_version, 6))
+    pool = b"\0\1\1\0\2A" if wire_version == 3 else b"\1\1\0\1A"
+    leaf = header + pool + b"\0" + struct.pack("<I", value) + b"\1\1\0\0"
     meta = {"module": module.decode(), "version": 1, "caller": fingerprint(source),
             "blocks": {name: [6, fingerprint(leaf)]}}
     manifest = dir_ / "xaml.fxb.json"
@@ -41,7 +43,7 @@ class OperandUpdateTests(unittest.TestCase):
 
     def test_empty_and_changed_updates_bind_to_baseline(self):
         self.assertEqual(publish(self.old, self.old, self.output), (0, 72))
-        new = generation(self.dir / "new", value=5)
+        new = generation(self.dir / "new", value=5, wire_version=3)
         count, size = publish(self.old, new, self.output)
         data = self.output.read_bytes()
         self.assertEqual((count, size), (1, len(data)))

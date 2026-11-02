@@ -85,7 +85,7 @@ def load(manifest):
             raise ValueError(f"FXB slot out of range for {name}")
         data = read(name)
         if (not 6 <= len(data) <= MAX_BLOCK or data[:4] != b"FXB\0"
-                or data[4] not in (1, 2) or data[5] != kind or fingerprint(data) != layout[1]):
+                or data[4] not in (1, 2, 3) or data[5] != kind or fingerprint(data) != layout[1]):
             raise ValueError(f"{name} differs from its published FXB generation")
         slot = SLOT.pack(int(match[1], 16), collision, kind, imports)
         digest.update(slot)

@@ -1,6 +1,6 @@
 //! FXB compiled theme resource blocks. A block belongs to one dictionary run and
 //! contains exactly one factory kind. There are no type names, constructors or pointers.
-//! Strings are interned in lexical order, UTF-8 prefix-compressed, and expanded once
+//! Strings are interned in lexical order, UTF-8 front-coded, and expanded once
 //! into a shared buffer. Every integer except ARGB is canonical unsigned LEB128.
 //! The decoder validates all references before the caller can observe a record.
 
@@ -171,9 +171,9 @@ impl Batch {
             Kind::from_wire(take(&mut bytes, 1)?[0]).ok_or(Error("unsupported FXB record kind"))?;
         let repeat = match version {
             1 => 0,
-            2 => {
+            2 | 3 => {
                 let flags = take(&mut bytes, 1)?[0];
-                if flags & REPEAT == 0 || flags > (STEP_LINE | REPEAT)
+                if (version == 2 && flags & REPEAT == 0) || flags > (STEP_LINE | REPEAT)
                     || flags & STEP_LINE != 0 && flags & 1 == 0 {
                     return Err(Error("invalid FXB location flags"));
                 }
@@ -204,28 +204,52 @@ impl Batch {
         }
         // A resource name is often longer than its compressed spelling. Seed the
         // pool without trusting a count alone or reserving space used by records.
-        let estimated_text = strings.saturating_mul(32).min(bytes.len() - minimum_rows);
-        let mut text = String::with_capacity(estimated_text);
+        let estimated_text = strings.saturating_mul(32)
+            .min((bytes.len() - minimum_rows).saturating_mul(2))
+            .min(MAX_BLOCK_BYTES);
+        let mut text: Vec<u8> = Vec::with_capacity(estimated_text);
         let mut ends = Vec::with_capacity(strings + 1);
         ends.push(0);
         let mut previous_start = 0;
         for _ in 0..strings {
             let prefix = uint(&mut bytes)? as usize;
-            let suffix = uint(&mut bytes)? as usize;
-            let previous = &text[previous_start..];
-            if !previous.is_char_boundary(prefix)
-                || prefix > MAX_BLOCK_BYTES - text.len()
-                || suffix > MAX_BLOCK_BYTES - text.len() - prefix
-            {
-                return Err(Error("invalid FXB string prefix or expanded length"));
-            }
-            let tail = std::str::from_utf8(take(&mut bytes, suffix)?)
-                .map_err(|_| Error("invalid FXB UTF-8"))?;
+            let length = uint(&mut bytes)? as usize;
+            let (literal, suffix) = if version == 3 {
+                let suffix = if length & 1 != 0 {
+                    let suffix = uint(&mut bytes)? as usize;
+                    if suffix == 0 { return Err(Error("empty FXB suffix reference")); }
+                    suffix
+                } else {
+                    0
+                };
+                (length >> 1, suffix)
+            } else {
+                (length, 0)
+            };
             let start = text.len();
+            let previous = &text[previous_start..];
+            if prefix > previous.len() || !scalar_boundary(previous, prefix)
+                || suffix > previous.len() - prefix
+                || !scalar_boundary(previous, previous.len() - suffix)
+                || prefix > MAX_BLOCK_BYTES - start
+                || suffix > MAX_BLOCK_BYTES - start - prefix
+                || literal > MAX_BLOCK_BYTES - start - prefix - suffix
+            {
+                return Err(Error("invalid FXB string reference or expanded length"));
+            }
+            let middle = take(&mut bytes, literal)?;
             text.extend_from_within(previous_start..previous_start + prefix);
-            text.push_str(tail);
+            text.extend_from_slice(middle);
+            if suffix != 0 { text.extend_from_within(start - suffix..start); }
             ends.push(text.len() as u32);
             previous_start = start;
+        }
+
+        // Validate the expanded pool in one pass. Reject a scalar split between
+        // consecutive entries even if their concatenation is well-formed UTF-8.
+        let text = String::from_utf8(text).map_err(|_| Error("invalid FXB UTF-8"))?;
+        if ends.iter().any(|&end| !text.is_char_boundary(end as usize)) {
+            return Err(Error("invalid FXB string boundary"));
         }
 
         if minimum_rows > bytes.len() {
@@ -337,6 +361,11 @@ impl Batch {
                 }
             })
     }
+}
+
+// Callers check the index is in bounds. The full buffer is validated after expansion.
+fn scalar_boundary(bytes: &[u8], index: usize) -> bool {
+    bytes.get(index).is_none_or(|b| b & 0xc0 != 0x80)
 }
 
 fn take<'a>(bytes: &mut &'a [u8], count: usize) -> Result<&'a [u8], Error> {
