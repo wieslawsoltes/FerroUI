@@ -1,11 +1,14 @@
-use super::{ISkiaGpu, ISkiaGpuRenderTarget};
+use super::{ISkiaGpu, ISkiaGpuRenderTarget, ISkiaGrContext};
 use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
+use crate::skia_options::SkiaOptions;
 use crate::skia_platform::SkiaPlatform;
 use crate::text_rendering_settings::{TextRenderingSettings, TextRenderingSource};
 use ferroui_base::platform::{
     IDrawingContextImpl, IRenderTarget, PlatformRenderTargetState, RenderTargetDrawingContextProperties,
     RenderTargetError, RenderTargetProperties, RenderTargetSceneInfo,
 };
+use ferroui_base::{FerroLocator, LocatorExtensions};
+use skia_safe::{AlphaType, ImageInfo};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -21,6 +24,59 @@ pub struct SkiaGpuRenderTarget {
 }
 
 impl SkiaGpuRenderTarget {
+    /// Draws `paint` onto an offscreen surface of `gr_context` (the context
+    /// of the frames), or of the recorder of a prewarm of its own when the
+    /// context has one (Graphite), and compiles what was drawn: on a thread
+    /// of its own for a prewarm recorder, by the flush of the context
+    /// otherwise.
+    fn prewarm_with(
+        &self,
+        gr_context: &Rc<dyn ISkiaGrContext>,
+        scene_info: &RenderTargetSceneInfo,
+        paint: &mut dyn FnMut(&mut dyn IDrawingContextImpl),
+    ) -> bool {
+        let (prewarm_context, finish): (Rc<dyn ISkiaGrContext>, Box<dyn FnOnce()>) = match gr_context.begin_prewarm() {
+            Some(prewarm) => (prewarm.gr_context, prewarm.finish),
+            None => {
+                let flushed = gr_context.clone();
+                let finish: Box<dyn FnOnce()> = Box::new(move || flushed.flush());
+                (gr_context.clone(), finish)
+            }
+        };
+        // The surfaces the scene of a frame is drawn on: the layers of the
+        // composition target (`SurfaceRenderTarget`), of the native colour
+        // type, premultiplied, without a colour space. The pipelines depend
+        // on the format of what they draw onto.
+        let text_rendering = self.frame_text_rendering.get();
+        let info = ImageInfo::new(
+            (scene_info.size.width.max(1), scene_info.size.height.max(1)),
+            crate::helpers::pixel_format_helper::resolve_color_type(None),
+            AlphaType::Premul,
+            None,
+        );
+        let Some(surface) = prewarm_context.create_surface(&info, &text_rendering.surface_props()) else {
+            return false;
+        };
+        {
+            let nfo = CreateInfo {
+                gr_context: Some(prewarm_context.clone()),
+                surface: Some(surface),
+                dpi: SkiaPlatform::default_dpi() * scene_info.scaling,
+                scale_drawing_to_dpi: false,
+                gpu: Some(self.skia_gpu.clone()),
+                text_rendering,
+                ..CreateInfo::default()
+            };
+            let mut context = DrawingContextImpl::new(nfo, Vec::new());
+            paint(&mut context);
+            context.dispose();
+            // The context and its surface are released here: the surface
+            // hands its draws to the recorder.
+        }
+        finish();
+        true
+    }
+
     /// Creates a render target that renders with `skia_gpu` to
     /// `render_target`, with the default text rendering of the backend.
     pub fn new(skia_gpu: Rc<dyn ISkiaGpu>, render_target: Rc<dyn ISkiaGpuRenderTarget>) -> Self {
@@ -90,9 +146,42 @@ impl IRenderTarget for SkiaGpuRenderTarget {
         self.render_target.state()
     }
 
+    /// Draws `paint` offscreen with the drawing context of the frames, so
+    /// that the GPU makes its pipelines before a frame needs them (#437):
+    /// on Graphite onto a recorder of its own, whose pipelines compile on a
+    /// thread of its own; on Ganesh with the context of the frames, whose
+    /// flush compiles the programs on this thread. Not when
+    /// [`SkiaOptions::prewarm_effect_pipelines`] is off or the context is
+    /// lost.
+    fn prewarm(&self, scene_info: &RenderTargetSceneInfo, paint: &mut dyn FnMut(&mut dyn IDrawingContextImpl)) -> bool {
+        // The Metal compiler of the iOS simulator rejects the destination
+        // reads of the blend modes the effects use (gpu-rendering.md, "The
+        // iOS simulator: no destination reads in shaders").
+        if cfg!(all(target_os = "ios", target_abi = "sim")) || !prewarm_effect_pipelines() {
+            return false;
+        }
+        let Some(scoped) = self.skia_gpu.try_get_gr_context() else { return false };
+        let gr_context = scoped.value().clone();
+        let prewarmed = !gr_context.is_lost() && self.prewarm_with(&gr_context, scene_info, paint);
+        scoped.dispose();
+        prewarmed
+    }
+
     fn dispose(&self) {
         self.render_target.dispose();
     }
+}
+
+/// [`SkiaOptions::prewarm_effect_pipelines`] of the options registered on
+/// this thread, else of the ones the backend was initialized with (the
+/// render thread has no services); on by default.
+fn prewarm_effect_pipelines() -> bool {
+    FerroLocator::current()
+        .get_service::<SkiaOptions>()
+        .map(|options| *options)
+        .or_else(SkiaPlatform::options)
+        .unwrap_or_default()
+        .prewarm_effect_pipelines
 }
 
 ferroui_base::ferro_thread_local! {

@@ -6,7 +6,7 @@ use super::{paint_composition_brush, ServerCompositionSurfaceBrush};
 use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::imaging::BitmapBlendingMode;
 use crate::media::{BoxShadows, Color, ColorMatrix, ColorMatrixAlphaMode, EffectExtensions, IEffect, ImmutableBlurEffect};
-use crate::platform::{AlphaFormat, IDrawingContextImpl, PixelFormat, PixelFormats, PixelOperation};
+use crate::platform::{AlphaFormat, IDrawingContextImpl, PixelFormat, PixelFormats, PixelOperation, SharedBitmapImpl};
 use crate::rendering::composition::effects::{
     blur_amount_to_radius, BlendEffectMode, EffectColor, EffectGraph, EffectMatrix, EffectNode, EffectNodeKind,
     EffectScalar, PixelOp,
@@ -65,6 +65,10 @@ pub struct ServerCompositionEffectBrush {
     /// Set while the brush paints: a source that contains the brush is not
     /// painted inside itself.
     painting: Cell<bool>,
+    /// The image an unbound source parameter is drawn as, in the prewarm
+    /// of the GPU programs ([`paint_effect_graph_for_prewarm`]); `None` for
+    /// a brush of a visual, whose unbound sources draw nothing.
+    stand_in: RefCell<Option<Arc<SharedBitmapImpl>>>,
 }
 
 impl ServerCompositionEffectBrush {
@@ -83,6 +87,7 @@ impl ServerCompositionEffectBrush {
             properties: RefCell::new(None),
             sources: RefCell::new(Vec::new()),
             painting: Cell::new(false),
+            stand_in: RefCell::new(None),
         });
         brush.base.object().activate();
         brush
@@ -354,6 +359,18 @@ impl ServerCompositionEffectBrush {
             EffectNodeKind::Parameter(name) => {
                 if let Some(source) = self.source(name).filter(|source| !self.is_self(source)) {
                     paint_composition_brush(canvas, &source, rect);
+                } else if let Some(bitmap) = self.stand_in.borrow().clone() {
+                    // The prewarm: the image at its size from the top left of
+                    // the area, as a surface brush draws a tile of it.
+                    let size = bitmap.pixel_size().to_size_with_dpi_vector(bitmap.dpi());
+                    canvas.push_clip(rect);
+                    canvas.draw_bitmap(
+                        &*bitmap,
+                        1.0,
+                        Rect::from_size(bitmap.pixel_size().to_size(1.0)),
+                        Rect::new(rect.x, rect.y, size.width, size.height),
+                    );
+                    canvas.pop_clip();
                 }
             }
             EffectNodeKind::GaussianBlur { amount, hard, source } => {
@@ -1127,6 +1144,30 @@ impl IServerObject for ServerCompositionHostBackdropBrush {
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
         self
     }
+}
+
+/// Paints `graph` over `rect` of `canvas` once, for the prewarm of the GPU
+/// programs (`effects::register_effect_prewarm`, #437): with the values of
+/// its description, its source parameters drawn as `stand_in` (nothing
+/// without one), through the painting of the effect brushes, so that the
+/// drawing context makes the draws, layers and filters a brush of the graph
+/// makes. The brush made for it lives for the call only.
+pub(crate) fn paint_effect_graph_for_prewarm(
+    compositor: &Rc<ServerCompositor>,
+    graph: Arc<EffectGraph>,
+    stand_in: Option<Arc<SharedBitmapImpl>>,
+    canvas: &mut dyn IDrawingContextImpl,
+    rect: Rect,
+) {
+    if is_empty(&rect) {
+        return;
+    }
+    let brush = ServerCompositionEffectBrush::new(compositor, graph);
+    *brush.stand_in.borrow_mut() = stand_in;
+    if let Some(root) = brush.graph.root.as_ref() {
+        brush.paint_node(root, canvas, rect);
+    }
+    IServerObject::dispose(&*brush);
 }
 
 /// The colour matrix of a shadow (on un-premultiplied colours): the colour of the
