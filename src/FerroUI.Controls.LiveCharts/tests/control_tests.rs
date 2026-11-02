@@ -57,6 +57,7 @@ fn default_collections_are_per_instance_and_derived_series_keep_their_kind() {
         StackedStepAreaSeries::new().kind(),
         SeriesKind::StackedStepArea
     );
+    assert_eq!(PolarLineSeries::new().kind(), SeriesKind::PolarLine);
     let c = LineSeries::new();
     let d = LineSeries::new();
     c.values().add(ChartPoint::with_xy(0.0, 1.0));
@@ -276,3 +277,42 @@ fn runtime_xaml_loads_native_chart_series_points_and_axes() {
     assert!(chart.revision() > revision);
 }
 
+#[test]
+fn polar_chart_takes_the_source_defaults_and_loads_from_markup() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    let polar = PolarChart::new();
+    assert_eq!(polar.chart_kind(), ChartKind::Polar);
+    // LiveChartsSettings.PolarInitialRotation: zero points up. The pie chart keeps 0.
+    assert_eq!(polar.initial_rotation(), -90.0);
+    assert_eq!(PieChart::new().initial_rotation(), 0.0);
+    assert_eq!(
+        PolarLineSeries::new().data_padding(),
+        ferroui_base::Point::new(1.0, 1.5)
+    );
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:PolarChart xmlns:lc="https://ferroui.dev/livecharts" InnerRadius="50">
+          <lc:PolarChart.YAxes>
+            <lc:Axis MaxLimit="20" LabelsAngle="-60" />
+          </lc:PolarChart.YAxes>
+          <lc:PolarLineSeries Name="Signal" IsClosed="False">
+            <lc:ChartPoint X="0" Y="10" />
+            <lc:ChartPoint X="1" Y="8" />
+            <lc:ChartPoint X="2" Y="12" />
+          </lc:PolarLineSeries>
+        </lc:PolarChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<PolarChart>>(&Some(loaded)).unwrap();
+    assert_eq!(chart.inner_radius(), 50.0);
+    assert_eq!(chart.y_axes().get(0).labels_angle(), -60.0);
+    let series = chart.series().get(0);
+    assert_eq!(series.kind(), SeriesKind::PolarLine);
+    assert!(!series.polar_closed());
+    chart.set_animations_speed(0.0);
+    let scene = chart.scene(Size::new(600.0, 600.0)).unwrap();
+    assert_eq!(scene.hits.len(), 3);
+    let scale = chart.polar_scale(0, 0).unwrap().unwrap();
+    assert!((scale.radius.max - 20.0).abs() < 1e-9);
+}

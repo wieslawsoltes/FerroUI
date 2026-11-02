@@ -13,6 +13,7 @@ mod bitmap_cache_page;
 mod border_page;
 mod cartesian_chart_page;
 mod pie_chart_page;
+mod polar_chart_page;
 mod button_spinner_page;
 mod buttons_page;
 mod calendar_date_picker_page;
@@ -144,6 +145,7 @@ pub use bitmap_cache_page::BitmapCachePage;
 pub use border_page::BorderPage;
 pub use cartesian_chart_page::CartesianChartPage;
 pub use pie_chart_page::PieChartPage;
+pub use polar_chart_page::PolarChartPage;
 pub use button_spinner_page::ButtonSpinnerPage;
 pub use buttons_page::{ButtonsPage, RelayCommand};
 pub use calendar_date_picker_page::CalendarDatePickerPage;
@@ -342,6 +344,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     BorderPage::TYPE,
     CartesianChartPage::TYPE,
     PieChartPage::TYPE,
+    PolarChartPage::TYPE,
     ButtonSpinnerPage::TYPE,
     ButtonsPage::TYPE,
     CanvasPage::TYPE,
@@ -444,6 +447,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &BorderPage::XAML_CLASS,
     &CartesianChartPage::XAML_CLASS,
     &PieChartPage::XAML_CLASS,
+    &PolarChartPage::XAML_CLASS,
     &ButtonSpinnerPage::XAML_CLASS,
     &ButtonsPage::XAML_CLASS,
     &CanvasPage::XAML_CLASS,

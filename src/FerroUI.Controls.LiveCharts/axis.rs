@@ -83,7 +83,7 @@ ferro_properties! { impl Axis {
         FerroProperty::register::<Axis, _>("Position", AxisPosition::Start)
     }
     pub fn text_size_property() -> StyledProperty<f64> {
-        FerroProperty::register::<Axis, _>("TextSize", 12.0)
+        FerroProperty::register::<Axis, _>("TextSize", 16.0)
     }
     pub fn labels_rotation_property() -> StyledProperty<f64> {
         FerroProperty::register::<Axis, _>("LabelsRotation", 0.0)
@@ -109,8 +109,8 @@ ferro_properties! { impl Axis {
     pub fn custom_separators_property() -> StyledProperty<Vec<f64>> {
         FerroProperty::register::<Axis, _>("CustomSeparators", Vec::new())
     }
-    pub fn labels_padding_property() -> StyledProperty<f64> {
-        FerroProperty::register::<Axis, _>("LabelsPadding", 3.0)
+    pub fn labels_padding_property() -> StyledProperty<Option<f64>> {
+        FerroProperty::register::<Axis, _>("LabelsPadding", None)
     }
     pub fn labels_density_property() -> StyledProperty<f64> {
         FerroProperty::register::<Axis, _>("LabelsDensity", 0.85)
@@ -237,10 +237,10 @@ impl Axis {
     pub fn set_custom_separators(&self, value: Vec<f64>) {
         self.set_value(Self::custom_separators_property(), value);
     }
-    pub fn labels_padding(&self) -> f64 {
+    pub fn labels_padding(&self) -> Option<f64> {
         self.get_value(Self::labels_padding_property())
     }
-    pub fn set_labels_padding(&self, value: f64) {
+    pub fn set_labels_padding(&self, value: Option<f64>) {
         self.set_value(Self::labels_padding_property(), value);
     }
     pub fn labels_density(&self) -> f64 {

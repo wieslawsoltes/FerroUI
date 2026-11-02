@@ -23,7 +23,7 @@ use ferroui_base::{
 use ferroui_controls::{Control, ControlImpl};
 use ferroui_livecharts::{
     AxisScale, CartesianChartEngine, CartesianOptions, ChartError, HitRegion, PieChartEngine,
-    PieOptions, Scene,
+    PieOptions, PolarChartEngine, PolarOptions, PolarScale, Scene,
 };
 use std::{
     cell::{Cell, OnceCell, RefCell},
@@ -43,6 +43,8 @@ struct Measurement {
     scene: Rc<Scene>,
     x_scales: Vec<AxisScale>,
     y_scales: Vec<AxisScale>,
+    /// The centre and initial rotation of a polar chart, in control coordinates.
+    polar_origin: Option<(Point, f64)>,
 }
 
 /// Shared host for all chart families. All application state stays on the UI thread.
@@ -505,6 +507,7 @@ impl Chart {
                 "drawing margin must be a finite nonnegative rectangle".into(),
             ));
         }
+        let mut polar_origin = None;
         let (mut scene, x_scales, y_scales) = match self.chart_kind() {
             ChartKind::Cartesian => {
                 let measured = CartesianChartEngine::measure_with_axes_and_labels(
@@ -537,6 +540,39 @@ impl Chart {
                 Vec::new(),
                 Vec::new(),
             ),
+            ChartKind::Polar => {
+                // The angle axes are the X axes and the radius axes the Y axes. Automatic
+                // title and legend space is outside the polar label negotiation, so the
+                // engine measures the viewport and the scene moves into it; an explicit
+                // drawing margin keeps control coordinates.
+                let local = self.draw_margin().is_none();
+                let mut measured = PolarChartEngine::measure_with_axes_and_labels(
+                    if local { viewport.size() } else { size },
+                    &series,
+                    &xs,
+                    &ys,
+                    &PolarOptions {
+                        draw_margin: if local { None } else { margin },
+                        inner_radius: self.inner_radius(),
+                        initial_rotation: self.initial_rotation(),
+                        total_angle: self.max_angle(),
+                        fit_to_bounds: self.fit_to_bounds(),
+                    },
+                    crate::decorations::text_size,
+                )?;
+                if local {
+                    let offset = Point::new(viewport.x, viewport.y);
+                    measured.scene.translate(offset, size)?;
+                    measured.center.x += offset.x;
+                    measured.center.y += offset.y;
+                }
+                polar_origin = Some((measured.center, measured.initial_rotation));
+                (
+                    measured.scene,
+                    measured.angle_scales,
+                    measured.radius_scales,
+                )
+            }
         };
         crate::decorations::decorate(
             &mut scene,
@@ -578,6 +614,7 @@ impl Chart {
             scene: scene.clone(),
             x_scales,
             y_scales,
+            polar_origin,
         });
         self.last_error.borrow_mut().take();
         self.native_scene.borrow_mut().take();
@@ -794,7 +831,37 @@ impl Chart {
             .unwrap_or_default()
     }
 
-    /// Converts chart values (X/Y) into control-local pixels.
+    /// A resolved polar axis pair (`PolarScaler`): the angle scale maps to degrees, the radius
+    /// scale to logical pixels from the centre, which includes the title and legend layout.
+    /// `None` for another chart family or a missing axis.
+    pub fn polar_scale(
+        &self,
+        angle_axis: usize,
+        radius_axis: usize,
+    ) -> Result<Option<PolarScale>, ChartError> {
+        self.ensure_measurement()?;
+        let measured = self.measurement.borrow();
+        let Some(measured) = measured.as_ref() else {
+            return Ok(None);
+        };
+        let Some((center, initial_rotation)) = measured.polar_origin else {
+            return Ok(None);
+        };
+        let (Some(angle), Some(radius)) = (
+            measured.x_scales.get(angle_axis),
+            measured.y_scales.get(radius_axis),
+        ) else {
+            return Ok(None);
+        };
+        Ok(Some(PolarScale {
+            center,
+            angle: *angle,
+            radius: *radius,
+            initial_rotation,
+        }))
+    }
+
+    /// Converts chart values (X/Y, or angle/radius of a polar chart) into control-local pixels.
     /// A missing axis or a chart family without axes returns `None`.
     pub fn scale_data_to_pixels(
         &self,
@@ -804,6 +871,12 @@ impl Chart {
     ) -> Result<Option<Point>, ChartError> {
         if !data.x.is_finite() || !data.y.is_finite() {
             return Ok(None);
+        }
+        if self.chart_kind() == ChartKind::Polar {
+            return Ok(self
+                .polar_scale(x_axis, y_axis)?
+                .map(|scale| scale.to_pixels(data.x, data.y))
+                .filter(|point| point.x.is_finite() && point.y.is_finite()));
         }
         self.ensure_measurement()?;
         let measured = self.measurement.borrow();
@@ -827,6 +900,12 @@ impl Chart {
     ) -> Result<Option<Point>, ChartError> {
         if !point.x.is_finite() || !point.y.is_finite() {
             return Ok(None);
+        }
+        if self.chart_kind() == ChartKind::Polar {
+            return Ok(self
+                .polar_scale(x_axis, y_axis)?
+                .map(|scale| scale.to_chart_values(point))
+                .filter(|data| data.x.is_finite() && data.y.is_finite()));
         }
         self.ensure_measurement()?;
         let measured = self.measurement.borrow();
