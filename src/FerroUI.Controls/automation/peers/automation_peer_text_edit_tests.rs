@@ -6,6 +6,7 @@ use crate::automation::peers::ControlAutomationPeer;
 use crate::automation::provider::{ITextEditProvider, ITextProvider};
 use crate::test_support::test_scope;
 use crate::Control;
+use ferroui_base::reactive::IDisposable;
 use std::cell::Cell;
 
 #[derive(Default)]

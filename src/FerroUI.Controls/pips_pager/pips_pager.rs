@@ -15,7 +15,6 @@ use ferroui_base::{
     Ref, StyledElementImpl, StyledProperty, StyledPropertyOptions, Vector, VisualImpl,
 };
 use std::cell::{Cell, RefCell};
-use std::rc::Rc;
 use std::time::Duration;
 
 const PART_PREVIOUS_BUTTON: &str = "PART_PreviousButton";
