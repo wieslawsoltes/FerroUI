@@ -461,7 +461,7 @@ impl Chart {
     }
 
     fn clear_source_subscriptions(&self) {
-        drop(std::mem::take(&mut *self.source_subscriptions.borrow_mut()));
+        drop(self.source_subscriptions.take());
     }
 
     /// Measures once per data revision and size. The returned scene is an immutable snapshot.

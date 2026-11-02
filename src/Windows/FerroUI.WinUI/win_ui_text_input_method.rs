@@ -576,7 +576,7 @@ mod imp {
                     return;
                 }
             }
-            drop(std::mem::take(&mut *self.client_events.borrow_mut()));
+            drop(self.client_events.take());
             if generation != self.client_generation.get() {
                 return;
             }

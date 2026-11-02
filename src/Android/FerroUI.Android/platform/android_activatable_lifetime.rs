@@ -16,7 +16,7 @@ pub struct AndroidActivatableLifetime {
 }
 
 fn dispose_all(subscriptions: &RefCell<Vec<Subscription>>) {
-    drop(std::mem::take(&mut *subscriptions.borrow_mut()));
+    drop(subscriptions.take());
 }
 
 fn is_intend_activation(kind: ActivationKind) -> bool {

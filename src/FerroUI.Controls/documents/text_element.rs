@@ -293,7 +293,7 @@ impl TextElement {
     }
 
     fn refresh_media_subscriptions(&self) {
-        drop(std::mem::take(&mut *self.media_subscriptions.borrow_mut()));
+        drop(self.media_subscriptions.take());
         let mut subscriptions = Vec::new();
         if let Some(features) = self.font_features() {
             let weak = self.to_ref().downgrade();

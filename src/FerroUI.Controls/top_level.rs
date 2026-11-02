@@ -203,7 +203,7 @@ impl TopLevelImpl for TopLevel {
         }
         this.scaling.set(1.0);
 
-        drop(std::mem::take(&mut *this.global_styles_subscriptions.borrow_mut()));
+        drop(this.global_styles_subscriptions.take());
         if let Some(subscription) = this.application_theme_subscription.borrow_mut().take() {
             subscription.dispose();
         }

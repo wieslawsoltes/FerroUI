@@ -99,7 +99,7 @@ impl LightweightObservable<Option<Ref<StyledElement>>> for ControlTracker {
     }
 
     fn deinitialize(&self) {
-        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
+        drop(self.subscriptions.take());
         *self.value.borrow_mut() = None;
     }
 

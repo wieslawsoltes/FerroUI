@@ -497,7 +497,7 @@ impl ScrollBar {
     }
 
     fn dispose_owner_subscriptions(&self) {
-        drop(self.owner_subscriptions.borrow_mut().take());
+        drop(self.owner_subscriptions.take());
     }
 
     /// Tries to attach to the templated parent if it is a [`ScrollViewer`]

@@ -158,7 +158,7 @@ impl InputScope {
         Rc::new(InputScopeAddChild(this))
     }
     fn refresh_item_subscriptions(&self) {
-        drop(std::mem::take(&mut *self.item_subscriptions.borrow_mut()));
+        drop(self.item_subscriptions.take());
         let mut subscriptions = Vec::new();
         let mut seen = HashSet::new();
         for name in self.names.snapshot().iter() {

@@ -408,7 +408,7 @@ impl DBusTextInputMethodBase {
     }
 
     fn dispose_disposables(&self) {
-        drop(std::mem::take(&mut *self.disposables.borrow_mut()));
+        drop(self.disposables.take());
     }
 
     /// `Reset` of the reference: the part of the input method, then the

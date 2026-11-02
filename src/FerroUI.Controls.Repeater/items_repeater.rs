@@ -753,7 +753,7 @@ impl ItemsRepeater {
         if let Some(old) = old {
             self.stack_measure_count.set(0);
             old.uninitialize_for_context(&context);
-            drop(std::mem::take(&mut *self.layout_subscriptions.borrow_mut()));
+            drop(self.layout_subscriptions.take());
             for element in self.realized_elements() {
                 self.clear_element_impl(&element);
             }

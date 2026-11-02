@@ -136,7 +136,7 @@ impl IDisposable for AutoSuspendHelper {
     /// Releases the helper (`Dispose`): it stops following the exit of the lifetime and completes
     /// nothing more.
     fn dispose(&self) {
-        drop(self.controlled_lifetime_exit.borrow_mut().take());
+        drop(self.controlled_lifetime_exit.take());
 
         self.should_persist_state.dispose();
         self.is_launching_new.dispose();

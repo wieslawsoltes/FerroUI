@@ -143,7 +143,7 @@ impl LayoutPanel {
             // the context; a replacement must initialize with its own state.
             self.set_layout_state(None);
         }
-        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
+        drop(self.subscriptions.take());
         let layout = self.layout();
         *self.effective_layout.borrow_mut() = layout.clone();
         if let Some(layout) = layout {

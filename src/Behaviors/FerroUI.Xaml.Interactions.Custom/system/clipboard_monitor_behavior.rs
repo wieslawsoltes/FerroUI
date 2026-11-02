@@ -85,7 +85,7 @@ ferroui_base::ferro_overrides! {
         }
 
         fn on_detaching(this: &Self) {
-            drop(std::mem::take(&mut *this.tree_subscriptions.borrow_mut()));
+            drop(this.tree_subscriptions.take());
             this.stop_monitoring();
             Self::parent_on_detaching(this);
         }

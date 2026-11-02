@@ -616,11 +616,11 @@ impl MainViewModel {
         if let Some(subscription) = self.keyboard_property_changed_subscription.borrow_mut().take() {
             subscription.dispose();
         }
-        drop(self.pointer_over_subscription.borrow_mut().take());
+        drop(self.pointer_over_subscription.take());
         self.combined_tree().dispose();
         self.logical_tree().dispose();
         self.visual_tree().dispose();
-        drop(self.current_focus_highlight_adorner.borrow_mut().take());
+        drop(self.current_focus_highlight_adorner.take());
         if let Some(renderer) = self.try_get_renderer() {
             renderer.diagnostics().set_debug_overlays(RendererDebugOverlays::NONE);
         }

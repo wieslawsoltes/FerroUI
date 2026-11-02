@@ -631,7 +631,7 @@ impl AutomationPeerWrapper {
     /// Removes the handlers of the wrapper and of its children from
     /// their peers.
     pub(crate) fn dispose(&self) {
-        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
+        drop(self.subscriptions.take());
 
         let children: Vec<Rc<AutomationPeerWrapper>> =
             self.children_map.borrow_mut().drain().map(|(_, (_, wrapper))| wrapper).collect();

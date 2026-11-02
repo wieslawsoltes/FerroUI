@@ -411,8 +411,8 @@ impl BrowserAccessibility {
             self.focus_dirty.set(true);
             self.request();
         } else {
-            drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
-            drop(std::mem::take(&mut *self.nodes.borrow_mut()));
+            drop(self.subscriptions.take());
+            drop(self.nodes.take());
             self.ids.borrow_mut().clear();
             self.structure_dirty.borrow_mut().clear();
             self.attributes_dirty.borrow_mut().clear();

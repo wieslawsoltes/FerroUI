@@ -235,6 +235,6 @@ impl EventsPageView {
 
     /// Removes the highlight.
     pub fn list_box_item_pointer_exited(&self, _sender: &Option<BoxedValue>, _e: &PointerEventArgs) {
-        drop(self.adorner.borrow_mut().take());
+        drop(self.adorner.take());
     }
 }

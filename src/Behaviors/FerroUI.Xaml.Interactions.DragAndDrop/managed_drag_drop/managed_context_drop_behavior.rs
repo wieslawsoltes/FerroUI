@@ -500,6 +500,6 @@ impl DragDropServiceSubscription {
     }
 
     fn dispose(&self) {
-        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
+        drop(self.subscriptions.take());
     }
 }

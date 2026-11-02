@@ -1156,7 +1156,7 @@ impl RichTextBlock {
     }
 
     fn refresh_default_highlight_brush_subscriptions(&self) {
-        drop(std::mem::take(&mut *self.default_highlight_brush_subscriptions.borrow_mut()));
+        drop(self.default_highlight_brush_subscriptions.take());
         let mut subscriptions = Vec::new();
         for foreground in [true, false] {
             let brush = self.default_highlight_brush(foreground);

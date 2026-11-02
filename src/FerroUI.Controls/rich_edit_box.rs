@@ -1288,7 +1288,7 @@ impl RichEditBox {
         })
     }
     fn refresh_selection_brush_subscriptions(&self) {
-        drop(std::mem::take(&mut *self.selection_brush_subscriptions.borrow_mut()));
+        drop(self.selection_brush_subscriptions.take());
         let mut subscriptions = Vec::new();
         for brush in [
             self.selection_highlight_color(),

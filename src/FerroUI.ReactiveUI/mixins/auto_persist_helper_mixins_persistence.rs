@@ -468,9 +468,9 @@ impl<T> IDisposable for AutoPersistDriver<T> {
         if self.disposed.replace(true) {
             return;
         }
-        drop(self.change_subscription.borrow_mut().take());
-        drop(self.manual_subscription.borrow_mut().take());
+        drop(self.change_subscription.take());
+        drop(self.manual_subscription.take());
         self.debounce.dispose();
-        drop(self.persist_subscription.borrow_mut().take());
+        drop(self.persist_subscription.take());
     }
 }

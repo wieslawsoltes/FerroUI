@@ -97,7 +97,7 @@ impl TransformTrackingHelper {
         }
 
         self.unsubscribe_from_parents();
-        drop(std::mem::take(&mut *self.attachment_subscriptions.borrow_mut()));
+        drop(self.attachment_subscriptions.take());
         *self.visual.borrow_mut() = None;
     }
 
@@ -113,7 +113,7 @@ impl TransformTrackingHelper {
     }
 
     fn unsubscribe_from_parents(&self) {
-        drop(std::mem::take(&mut *self.property_changed_subscriptions.borrow_mut()));
+        drop(self.property_changed_subscriptions.take());
     }
 
     fn update_matrix(&self) {

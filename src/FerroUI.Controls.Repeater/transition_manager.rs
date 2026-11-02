@@ -49,7 +49,7 @@ impl TransitionManager {
         if !self.clear_previous_provider_transitions(change) {
             return;
         }
-        drop(self.subscription.borrow_mut().take());
+        drop(self.subscription.take());
         *self.provider.borrow_mut() = provider.clone();
         if let Some(provider) = provider {
             let weak = Rc::downgrade(self);

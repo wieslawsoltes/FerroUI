@@ -136,7 +136,7 @@ impl AncestorPropertyChangesSubscription {
     }
 
     fn unsubscribe_from_ancestors(&self) {
-        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
+        drop(self.subscriptions.take());
     }
 
     fn on_property_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {
@@ -181,6 +181,6 @@ impl IDisposable for AncestorPropertyChangesSubscription {
         }
 
         self.unsubscribe_from_ancestors();
-        drop(std::mem::take(&mut *self.attachment_subscriptions.borrow_mut()));
+        drop(self.attachment_subscriptions.take());
     }
 }

@@ -192,7 +192,7 @@ impl ChartSeries {
     fn clear_values_listener(&self) {
         let old=self.values_listener.borrow_mut().take();
         if let Some((values,token))=old { values.remove_collection_changed(token); }
-        drop(std::mem::take(&mut *self.point_listeners.borrow_mut()));
+        drop(self.point_listeners.take());
     }
     fn rebind_values(&self) {
         self.clear_values_listener();

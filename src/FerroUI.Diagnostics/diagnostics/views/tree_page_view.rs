@@ -203,7 +203,7 @@ impl TreePageView {
             return;
         }
 
-        drop(self.adorner.borrow_mut().take());
+        drop(self.adorner.take());
 
         let Some(node) = node else {
             *self.hovered.borrow_mut() = None;

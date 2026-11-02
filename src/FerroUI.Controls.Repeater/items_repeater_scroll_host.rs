@@ -539,7 +539,7 @@ impl ItemsRepeaterScrollHost {
             None
         };
         self.cancel_scroll_animation();
-        drop(self.viewer_subscription.borrow_mut().take());
+        drop(self.viewer_subscription.take());
         self.pending_bring.borrow_mut().take();
         self.candidates.borrow_mut().clear();
         *self.anchor.borrow_mut() = None;

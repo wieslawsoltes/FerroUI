@@ -531,7 +531,7 @@ impl AtSpiNode {
         self.children_dirty.set(true);
         self.attached_children.borrow_mut().clear();
         *self.parent.borrow_mut() = None;
-        drop(std::mem::take(&mut *self.peer_subscriptions.borrow_mut()));
+        drop(self.peer_subscriptions.take());
         self.dispose_path_registration();
     }
 

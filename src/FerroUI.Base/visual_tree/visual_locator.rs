@@ -86,7 +86,7 @@ impl LightweightObservable<Option<Ref<Visual>>> for VisualTracker {
     }
 
     fn deinitialize(&self) {
-        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
+        drop(self.subscriptions.take());
     }
 
     fn subscribed(&self, observer: &Rc<dyn IObserver<Option<Ref<Visual>>>>, _first: bool) {

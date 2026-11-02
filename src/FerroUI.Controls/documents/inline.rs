@@ -119,7 +119,7 @@ impl Inline {
     }
 
     fn refresh_decoration_subscriptions(&self) {
-        drop(std::mem::take(&mut *self.decoration_subscriptions.borrow_mut()));
+        drop(self.decoration_subscriptions.take());
         let Some(decorations) = self.text_decorations() else {
             return;
         };

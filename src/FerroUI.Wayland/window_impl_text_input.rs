@@ -149,7 +149,7 @@ impl WaylandTextInputMethod {
     }
 
     fn unsubscribe_client(&self) {
-        drop(std::mem::take(&mut *self.client_subscriptions.borrow_mut()));
+        drop(self.client_subscriptions.take());
     }
 }
 

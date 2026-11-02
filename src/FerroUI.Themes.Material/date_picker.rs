@@ -297,7 +297,7 @@ impl VisualImpl for MaterialDatePicker {
 impl TemplatedControlImpl for MaterialDatePicker {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
-        drop(std::mem::take(&mut *this.subscriptions.borrow_mut()));
+        drop(this.subscriptions.take());
         this.parts.borrow_mut().take();
         macro_rules! part {
             ($ty:ty,$name:literal) => {

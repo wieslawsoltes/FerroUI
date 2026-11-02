@@ -296,7 +296,7 @@ impl RunningTransition {
             return;
         }
         self.cancellation.cancel();
-        drop(std::mem::take(&mut *self.values.borrow_mut()));
+        drop(self.values.take());
         self.progress.complete();
     }
 }

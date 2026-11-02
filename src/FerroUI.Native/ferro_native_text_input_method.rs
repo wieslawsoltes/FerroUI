@@ -59,7 +59,7 @@ impl FerroNativeTextInputMethod {
         // A hint a connection client left on the view is cleared; nothing is sent otherwise.
         self.content_hint.set_active(false);
         self.send_content_hint();
-        drop(self.native_options.borrow_mut().take());
+        drop(self.native_options.take());
         let input_method = self.input_method.borrow_mut().take();
         drop(input_method);
         let native_client = self.native_client.borrow_mut().take();
@@ -67,7 +67,7 @@ impl FerroNativeTextInputMethod {
     }
 
     fn unsubscribe(&self) {
-        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
+        drop(self.subscriptions.take());
     }
 
     fn on_cursor_rectangle_changed(&self) {

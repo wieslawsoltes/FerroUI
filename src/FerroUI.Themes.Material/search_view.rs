@@ -185,7 +185,7 @@ impl LayoutableImpl for MaterialSearchView {
 impl TemplatedControlImpl for MaterialSearchView {
     fn on_apply_template(this: &Self, event: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, event);
-        drop(std::mem::take(&mut *this.subscriptions.borrow_mut()));
+        drop(this.subscriptions.take());
         let editor = event.name_scope().find_as::<TextBox>("PART_QueryBox");
         *this.editor.borrow_mut() = editor.clone();
         *this.results.borrow_mut() = event.name_scope().find_as::<ScrollViewer>("PART_Results");

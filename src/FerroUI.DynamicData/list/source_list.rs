@@ -309,7 +309,7 @@ impl<T: Clone + PartialEq + 'static> IDisposable for SourceList<T> {
         if self.inner.disposed.replace(true) {
             return;
         }
-        drop(self.inner.loader.borrow_mut().take());
+        drop(self.inner.loader.take());
         self.inner.on_completed();
         let count = self.inner.count_changed.borrow().clone();
         if let Some(subject) = count {

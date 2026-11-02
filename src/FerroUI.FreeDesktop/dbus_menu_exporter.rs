@@ -304,7 +304,7 @@ impl DBusMenuExporterImpl {
      */
     fn do_layout_reset(&self) {
         self.reset_queued.set(false);
-        drop(std::mem::take(&mut *self.item_subscriptions.borrow_mut()));
+        drop(self.item_subscriptions.take());
         let menus = std::mem::take(&mut *self.menus.borrow_mut());
         for (menu, token) in menus {
             menu.items().remove_collection_changed(token);

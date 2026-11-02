@@ -53,7 +53,7 @@ impl ContainerQueryActivatorBase {
     fn de_initialize_screen_size_provider(&self) {
         let has_provider = self.current_container().is_some_and(|c| Container::get_query_provider(&c).is_some());
         if has_provider {
-            drop(std::mem::take(&mut *self.provider_subscriptions.borrow_mut()));
+            drop(self.provider_subscriptions.take());
             *self.current_screen_size_provider.borrow_mut() = None;
         }
     }
@@ -116,7 +116,7 @@ pub(crate) trait ContainerQueryActivator: StyleActivator + Sized {
 
         this.de_initialize_screen_size_provider();
 
-        drop(std::mem::take(&mut *this.visual_subscriptions.borrow_mut()));
+        drop(this.visual_subscriptions.take());
 
         *this.visual.borrow_mut() = visual.as_ref().map(Ref::downgrade);
 
@@ -168,7 +168,7 @@ pub(crate) trait ContainerQueryActivator: StyleActivator + Sized {
 
     fn deinitialize_container_query(&self) {
         let this = self.container_base();
-        drop(std::mem::take(&mut *this.target_subscriptions.borrow_mut()));
+        drop(this.target_subscriptions.take());
 
         self.set_visual(None);
     }

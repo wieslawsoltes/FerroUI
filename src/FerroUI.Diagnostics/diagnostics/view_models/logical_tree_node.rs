@@ -61,7 +61,7 @@ impl LogicalTreeNodeCollection {
 impl TreeNodeCollectionImpl for LogicalTreeNodeCollection {
     fn dispose(&self, this: &TreeNodeCollection) {
         this.base_dispose();
-        drop(self.subscription.borrow_mut().take());
+        drop(self.subscription.take());
     }
 
     fn initialize(&self, this: &TreeNodeCollection, nodes: &FerroList<Rc<TreeNode>>) {

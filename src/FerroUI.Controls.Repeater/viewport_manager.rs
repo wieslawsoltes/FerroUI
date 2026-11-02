@@ -209,7 +209,7 @@ impl ViewportManager {
             });
             *self.viewport_subscription.borrow_mut() = Some(subscription);
         } else if !virtualizing {
-            drop(self.viewport_subscription.borrow_mut().take());
+            drop(self.viewport_subscription.take());
             self.viewport_received.set(false);
             self.visible.set(Rect::default());
             self.native_viewport.set(Rect::default());
@@ -469,7 +469,7 @@ impl ViewportManager {
     }
 
     pub fn on_render_transform_changed(&self, owner: &ItemsRepeater) {
-        drop(self.transform_subscription.borrow_mut().take());
+        drop(self.transform_subscription.take());
         if let Some(transform) = owner.render_transform() {
             if let Some(mutable) = transform.as_mutable_transform() {
                 let weak = owner.to_ref().downgrade();

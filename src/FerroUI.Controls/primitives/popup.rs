@@ -1236,7 +1236,7 @@ impl Popup {
     }
 
     fn unsubscribe_placement_target_transforms(&self) {
-        drop(std::mem::take(&mut *self.placement_target_transform_subscriptions.borrow_mut()));
+        drop(self.placement_target_transform_subscriptions.take());
     }
 
     fn placement_target_ancestor_property_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {

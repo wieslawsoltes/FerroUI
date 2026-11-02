@@ -195,7 +195,7 @@ impl TextInputMethodManager {
         if current.is_some() {
             self.retire_connection();
 
-            drop(std::mem::take(&mut *self.client_subscriptions.borrow_mut()));
+            drop(self.client_subscriptions.take());
 
             drop(self.client.replace(None));
             drop(self.owner.replace(None));
@@ -558,8 +558,8 @@ impl TextInputMethodManager {
         }
 
         self.retire_connection();
-        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
-        drop(std::mem::take(&mut *self.client_subscriptions.borrow_mut()));
+        drop(self.subscriptions.take());
+        drop(self.client_subscriptions.take());
         self.transform_tracker.dispose();
     }
 }

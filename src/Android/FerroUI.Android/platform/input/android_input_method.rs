@@ -503,9 +503,9 @@ impl ITextInputMethodImpl for AndroidInputMethod {
 
     fn set_client(&self, client: Option<Rc<dyn TextInputMethodClient>>) {
         self.client_generation.set(self.client_generation.get().wrapping_add(1));
-        drop(self.options_restart_connection.borrow_mut().take());
-        drop(self.delivered_editor_info.borrow_mut().take());
-        drop(std::mem::take(&mut *self.client_events.borrow_mut()));
+        drop(self.options_restart_connection.take());
+        drop(self.delivered_editor_info.take());
+        drop(self.client_events.take());
 
         *self.client.borrow_mut() = client;
 

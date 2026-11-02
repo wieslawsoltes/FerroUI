@@ -158,7 +158,7 @@ impl TextHighlighter {
     }
 
     fn refresh_brush_subscriptions(&self) {
-        drop(std::mem::take(&mut *self.brush_subscriptions.borrow_mut()));
+        drop(self.brush_subscriptions.take());
         let mut subscriptions = Vec::new();
         let mut seen = HashSet::new();
         for brush in [self.foreground(), self.background()] {

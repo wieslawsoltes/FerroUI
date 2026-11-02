@@ -245,7 +245,7 @@ impl RoutedEventCommandBinding {
 
 impl IDisposable for RoutedEventCommandBinding {
     fn dispose(&self) {
-        drop(self.parameter_subscription.borrow_mut().take());
+        drop(self.parameter_subscription.take());
         if let Some(token) = self.handler.take() {
             let interactive: &Interactive = &self.element;
             interactive.remove_handler(&self.routed_event, token);
@@ -310,8 +310,8 @@ impl HandlerCommandBinding {
 
 impl IDisposable for HandlerCommandBinding {
     fn dispose(&self) {
-        drop(self.parameter_subscription.borrow_mut().take());
-        drop(self.handler.borrow_mut().take());
+        drop(self.parameter_subscription.take());
+        drop(self.handler.take());
     }
 }
 

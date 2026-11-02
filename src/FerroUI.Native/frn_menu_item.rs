@@ -204,7 +204,7 @@ impl FrnMenuItem {
             sub_menu.deinitialise();
         }
 
-        drop(std::mem::take(&mut *self.property_disposables.borrow_mut()));
+        drop(self.property_disposables.take());
         let current_action = self.current_action.borrow_mut().take();
         drop(current_action);
     }

@@ -82,7 +82,7 @@ impl VisualImpl for NativeControlHost {
     // As upstream, the base implementation is not called.
     fn on_detached_from_visual_tree(this: &Self, _e: &VisualTreeAttachmentEventArgs) {
         *this.current_root.borrow_mut() = None;
-        drop(std::mem::take(&mut *this.property_changed_subscriptions.borrow_mut()));
+        drop(this.property_changed_subscriptions.take());
         this.unsubscribe_render_transforms();
         this.update_host();
     }
@@ -247,7 +247,7 @@ impl NativeControlHost {
     }
 
     fn unsubscribe_render_transforms(&self) {
-        drop(std::mem::take(&mut *self.render_transform_subscriptions.borrow_mut()));
+        drop(self.render_transform_subscriptions.take());
     }
 
     fn update_host(&self) {

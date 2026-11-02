@@ -194,7 +194,7 @@ impl ResourceObservable {
     }
 
     fn unsubscribe_host(&self) {
-        drop(std::mem::take(&mut *self.host_subscriptions.borrow_mut()));
+        drop(self.host_subscriptions.take());
     }
 
     fn publish_next(&self) {

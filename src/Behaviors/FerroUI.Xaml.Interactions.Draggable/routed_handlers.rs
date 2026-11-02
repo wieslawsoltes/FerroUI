@@ -40,6 +40,6 @@ impl RoutedHandlers {
 
     /// `element.RemoveHandler(..)` of every handler added.
     pub(crate) fn clear(&self) {
-        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
+        drop(self.subscriptions.take());
     }
 }

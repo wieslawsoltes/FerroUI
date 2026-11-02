@@ -513,7 +513,7 @@ impl MaterialTimePicker {
         self.raise_event(&e);
     }
     fn release_parts(&self) {
-        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
+        drop(self.subscriptions.take());
         let old = self.parts.replace(Parts::default());
         if let Some(layout) = old.layout {
             layout.owner.borrow_mut().take();

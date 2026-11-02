@@ -304,7 +304,7 @@ impl<S: IDockSerializer> DockWorkspaceManager<S> {
         if self.tracking_factory.borrow().is_none() {
             return;
         }
-        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
+        drop(self.subscriptions.take());
         self.tracking_factory.replace(None);
         self.tracked_root.replace(None);
         self.tracking_options

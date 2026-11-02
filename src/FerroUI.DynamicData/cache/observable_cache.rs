@@ -621,7 +621,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> IDisposable for Observa
         if self.inner.disposed.replace(true) {
             return;
         }
-        drop(self.inner.loader.borrow_mut().take());
+        drop(self.inner.loader.take());
         self.inner.notify_completed();
     }
 }

@@ -214,7 +214,7 @@ impl TreeNode {
     /// `Dispose()`: ends the subscription to the classes and disposes the
     /// children.
     pub fn dispose(&self) {
-        drop(self.classes_subscription.borrow_mut().take());
+        drop(self.classes_subscription.take());
         self.children.dispose();
     }
 }

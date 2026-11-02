@@ -558,7 +558,7 @@ impl TitleBar {
     }
 
     fn detach_from_window(&self) {
-        drop(std::mem::take(&mut *self.window_subscriptions.borrow_mut()));
+        drop(self.window_subscriptions.take());
         if self.window().is_some() {
             self.reset_window_title(&self.title());
         }

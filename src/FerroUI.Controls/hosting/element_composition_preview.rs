@@ -207,7 +207,7 @@ impl PointerTracker {
             return false;
         }
         self.unhook();
-        drop(std::mem::take(&mut *self.subscriptions.borrow_mut()));
+        drop(self.subscriptions.take());
         true
     }
 

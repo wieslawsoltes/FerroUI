@@ -83,7 +83,7 @@ impl StyledElementImpl for MainWindow {
 impl TopLevelImpl for MainWindow {
     fn on_closed(this: &Self) {
         Self::parent_on_closed(this);
-        drop(this.input_subscription.borrow_mut().take());
+        drop(this.input_subscription.take());
 
         let frozen_popup_states: Vec<_> = this.frozen_popup_states.borrow_mut().drain(..).collect();
         for (_, closing_subscription) in frozen_popup_states {
