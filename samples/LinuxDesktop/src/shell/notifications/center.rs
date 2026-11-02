@@ -1,5 +1,5 @@
 use super::*;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 #[derive(Clone, PartialEq)]
 struct Group {
@@ -9,7 +9,7 @@ struct Group {
 
 // Retain the order of each source's newest item. Android automatically groups
 // only sources with at least four messages; other items stay in time order.
-fn groups(items: Vec<Notice>, layout: Layout) -> Vec<Group> {
+fn groups(items: Vec<Notice>, layout: Layout) -> Vec<Rc<Group>> {
     let mut counts = HashMap::new();
     if layout == Layout::BottomNavigation {
         for item in &items {
@@ -39,78 +39,98 @@ fn groups(items: Vec<Notice>, layout: Layout) -> Vec<Group> {
         });
         groups[index].items.push(item);
     }
-    groups
+    groups.into_iter().map(Rc::new).collect()
 }
 
-fn group_view(shell: &Rc<Shell>, group: Group, expanded: Signal<HashSet<String>>) -> Element {
-    let latest = &group.items[0];
-    if group.items.len() == 1 {
-        return cards::card(shell, latest, false);
-    }
-    let layout = look().layout();
-    let key = group.key.clone();
-    let query_key = key.clone();
-    let opened = memo(move |_| expanded.with(|keys| keys.contains(&query_key)));
-    let app = cards::sender_name(shell, &latest.sender).to_owned();
-    let count = group.items.len();
-    let visible = if layout == Layout::Taskbar {
-        count.min(3)
-    } else {
-        1
-    };
-    let header = if visible < count {
-        let name = app.to_owned();
-        action(
-            &format!("Expand or collapse {count} notifications from {app}"),
-            move || {
-                expanded.update(|keys| {
-                    if !keys.remove(&key) {
-                        keys.insert(key.clone());
-                    }
-                });
-            },
-        )
-        .automation_properties_item_status(move || {
-            if opened.get() {
-                "Expanded"
-            } else {
-                "Collapsed"
-            }
-            .to_owned()
+fn group_view(shell: &Rc<Shell>, groups: Memo<Vec<Rc<Group>>>, key: String) -> Element {
+    // The source owns its controls. A new delivery or replacement can update
+    // its cards without remounting the focused disclosure or losing expansion.
+    let group =
+        memo(move |_| groups.with(|all| all.iter().find(|group| group.key == key).cloned()));
+    let count = memo(move |_| group.with(|g| g.as_ref().map_or(0, |g| g.items.len())));
+    let state = shell.clone();
+    let app = memo(move |_| {
+        group.with(|g| {
+            g.as_ref().map_or_else(String::new, |g| {
+                cards::sender_name(&state, &g.items[0].sender).to_owned()
+            })
         })
-        .horizontal_alignment(H::Stretch)
-        .horizontal_content_alignment(H::Left)
-        .background("Transparent")
-        .border_thickness(0)
-        .padding((4., 2.))
+    });
+    let layout = look().layout();
+    let limit = if layout == Layout::Taskbar { 3 } else { 1 };
+    let opened = signal(false);
+    let service = shell.notifications.service.clone();
+    let header = grid()
+        .column_definitions("*,Auto")
+        .is_visible(move || count.get() > 1)
         .child(
             shell_text("", 13., Ink::Primary)
                 .font_weight(FontWeight::SemiBold)
-                .text(move || {
-                    if opened.get() {
-                        format!("{name}  ·  Show fewer")
-                    } else {
-                        format!("{name}  ·  {count} notifications")
-                    }
-                }),
+                .text(move || app.get())
+                .is_visible(move || count.get() <= limit),
         )
-        .into_element()
-    } else {
-        shell_text(&app, 13., Ink::Primary)
-            .font_weight(FontWeight::SemiBold)
-            .into_element()
-    };
-    let service = shell.notifications.service.clone();
-    let sender = latest.sender.clone();
+        .child(
+            action("Show or hide older notifications", move || {
+                opened.update(|v| *v = !*v)
+            })
+            .automation_properties_name(move || {
+                format!(
+                    "Expand or collapse {} notifications from {}",
+                    count.get(),
+                    app.get()
+                )
+            })
+            .automation_properties_item_status(move || {
+                if opened.get() {
+                    "Expanded"
+                } else {
+                    "Collapsed"
+                }
+                .to_owned()
+            })
+            .is_visible(move || count.get() > limit)
+            .horizontal_alignment(H::Stretch)
+            .horizontal_content_alignment(H::Left)
+            .background("Transparent")
+            .border_thickness(0)
+            .padding((4., 2.))
+            .child(
+                shell_text("", 13., Ink::Primary)
+                    .font_weight(FontWeight::SemiBold)
+                    .text(move || {
+                        let app = app.get();
+                        if opened.get() {
+                            format!("{app}  ·  Show fewer")
+                        } else {
+                            format!("{app}  ·  {} notifications", count.get())
+                        }
+                    }),
+            ),
+        )
+        .child(
+            icon_action("Clear sender's notifications", Icon::Close, move || {
+                if let Some(g) = group.get_untracked() {
+                    service.clear(Some(&g.items[0].sender));
+                }
+            })
+            .automation_properties_name(move || format!("Clear all from {}", app.get()))
+            .grid_column(1)
+            .width(26)
+            .height(26)
+            .padding(6)
+            .background("Transparent")
+            .border_thickness(0),
+        );
     let state = shell.clone();
     let rows = for_each(
         move || {
-            group
-                .items
-                .iter()
-                .take(if opened.get() { count } else { visible })
-                .cloned()
-                .collect::<Vec<_>>()
+            group.with(|g| {
+                let limit = if opened.get() { usize::MAX } else { limit };
+                g.iter()
+                    .flat_map(|g| g.items.iter().take(limit))
+                    .cloned()
+                    .collect::<Vec<_>>()
+            })
         },
         |n| n.id,
         move |item| cards::card(&state, &item, false),
@@ -121,26 +141,13 @@ fn group_view(shell: &Rc<Shell>, group: Group, expanded: Signal<HashSet<String>>
         } else {
             4.
         })
-        .child(
-            grid().column_definitions("*,Auto").child(header).child(
-                icon_action(&format!("Clear all from {app}"), Icon::Close, move || {
-                    service.clear(Some(&sender))
-                })
-                .grid_column(1)
-                .width(26)
-                .height(26)
-                .padding(6)
-                .background("Transparent")
-                .border_thickness(0),
-            ),
-        )
+        .child(header)
         .child(rows);
     if layout == Layout::MenuBarDock {
-        // The two exposed card edges distinguish a collapsed macOS stack from
-        // an individual alert before the user reaches its disclosure control.
+        // The revealed edges distinguish a collapsed stack from one alert.
         stack
             .child(show(
-                move || !opened.get(),
+                move || count.get() > 1 && !opened.get(),
                 || {
                     stack_panel()
                         .child(
@@ -169,7 +176,6 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     const PAGE: usize = 8;
     let layout = look().layout();
     let page = signal(0usize);
-    let expanded = signal(HashSet::<String>::new());
     let notifications = shell.notifications.service.clone();
     let revision = shell.notifications.revision;
     let grouped = memo(move |_| {
@@ -293,11 +299,15 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
             move || {
                 grouped.with(|g| {
                     let first = page.get().min(g.len().saturating_sub(1) / PAGE) * PAGE;
-                    g.iter().skip(first).take(PAGE).cloned().collect::<Vec<_>>()
+                    g.iter()
+                        .skip(first)
+                        .take(PAGE)
+                        .map(|g| g.key.clone())
+                        .collect::<Vec<_>>()
                 })
             },
-            |g| g.key.clone(),
-            move |g| group_view(&state, g, expanded),
+            |key| key.clone(),
+            move |key| group_view(&state, grouped, key),
         ));
     let pager = dynamic(move || -> Element {
         let total = grouped.with(|v| v.len().div_ceil(PAGE));
