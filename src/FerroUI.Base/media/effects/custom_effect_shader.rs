@@ -1,51 +1,8 @@
 //! The runtime shaders of custom effects (#455, E4; not from upstream): the
 //! description of [`CustomEffect::shader`], loaded once per type, and the
 //! uniform convention the backends hand the parameters of a snapshot to the
-//! program with (docs/porting/custom-effects.md, section 3.4).
-//!
-//! # The uniform convention
-//!
-//! The uniform block of a shader effect is, in this order:
-//!
-//! 1. `layer_size` ([`SHADER_LAYER_SIZE`]), a `float2` (`vec2<f32>`): the
-//!    width and the height of the area of the effect in device pixels (the
-//!    content and the padding of the effect, rounded out to whole pixels);
-//! 2. `layer_scale` ([`SHADER_LAYER_SCALE`]), a `float` (`f32`): the device
-//!    pixels per device independent pixel of the layer;
-//! 3. the parameters of the effect, in the order of
-//!    [`CustomEffect::for_each_parameter`], each named as the parameter with
-//!    every `-` written `_` (`cell-size` is `cell_size`): a `Float` is a
-//!    `float`, a `Point`, `Vector` or `Size` a `float2`, a `Color` a
-//!    premultiplied `float4` (red, green and blue times the alpha, 0 to 1), a
-//!    `Rect` a `float4` (x, y, width, height), a `Bool` (0 or 1) or an `Int` an
-//!    `int`. A `Text` parameter has no uniform.
-//!
-//! The values of the parameters are passed as they are: a length in device
-//! independent pixels is turned into device pixels by the program, with
-//! `layer_scale`. The program is given the coordinates of the pixel it
-//! colours in device pixels of the layer: `(0, 0)` is the top left corner of
-//! the area of the effect, the centre of the first pixel `(0.5, 0.5)`.
-//!
-//! # The programs
-//!
-//! The SkSL program of Skia declares the uniforms above, in that order and
-//! with those types, and, when it samples the content
-//! ([`ShaderEffectMode::ContentSampling`]), the child `uniform shader content;`
-//! ([`CUSTOM_EFFECT_CONTENT`](super::CUSTOM_EFFECT_CONTENT)), which it samples with `content.eval(coord)`
-//! (premultiplied, transparent beyond the area); its entry point is
-//! `half4 main(float2 coord)`, which returns a premultiplied colour.
-//!
-//! The WGSL program of Vello (drawn from step E5 on) declares the uniforms as
-//! the members of `struct Uniforms`, in the same order, and the function
-//! `fn effect(coord: vec2<f32>) -> vec4<f32>`. The pass of the backend adds
-//! the bindings: `uniforms`, the block, and `fn sample_content(coord:
-//! vec2<f32>) -> vec4<f32>`, the content at `coord` (content-sampling
-//! programs only), and calls `effect` at the centre of each pixel.
-//!
-//! Each backend checks its program against the parameters when it compiles
-//! it (decision 1 of the plan): a program whose uniforms are not those of the
-//! convention is reported once and the effect is drawn as an effect without
-//! a factory (its content unchanged), as is a program that does not compile.
+//! program with (docs/porting/custom-effects.md, section 3.4). The convention
+//! is documented on [`ShaderEffectDescription`].
 
 use super::{CustomEffect, EffectParameterValue, ImmutableCustomEffect};
 use crate::media::imaging::BitmapBlendingMode;
@@ -95,11 +52,55 @@ pub enum ShaderEffectPadding {
 /// The description of a runtime shader effect (#455, E4): what
 /// [`CustomEffect::shader`] returns, read once per type.
 ///
-/// It carries two programs with one convention (the
-/// [module documentation](self)): SkSL for Skia, drawn on every surface of
-/// the backend, and WGSL for Vello, drawn from step E5 on (until then Vello
-/// draws a shader effect as an effect without a factory: its content
-/// unchanged, reported once).
+/// It carries two programs with one convention: SkSL for Skia, drawn on
+/// every surface of the backend, and WGSL for Vello, drawn from step E5 on
+/// (until then Vello draws a shader effect as an effect without a factory:
+/// its content unchanged, reported once).
+///
+/// # The uniform convention
+///
+/// The uniform block of a shader effect is, in this order:
+///
+/// 1. `layer_size` ([`SHADER_LAYER_SIZE`]), a `float2` (`vec2<f32>`): the
+///    width and the height of the area of the effect in device pixels (the
+///    content and the padding of the effect, rounded out to whole pixels);
+/// 2. `layer_scale` ([`SHADER_LAYER_SCALE`]), a `float` (`f32`): the device
+///    pixels per device independent pixel of the layer;
+/// 3. the parameters of the effect, in the order of
+///    [`CustomEffect::for_each_parameter`], each named as the parameter with
+///    every `-` written `_` (`cell-size` is `cell_size`): a `Float` is a
+///    `float`, a `Point`, `Vector` or `Size` a `float2`, a `Color` a
+///    premultiplied `float4` (red, green and blue times the alpha, 0 to 1), a
+///    `Rect` a `float4` (x, y, width, height), a `Bool` (0 or 1) or an `Int` an
+///    `int`. A `Text` parameter has no uniform.
+///
+/// The values of the parameters are passed as they are: a length in device
+/// independent pixels is turned into device pixels by the program, with
+/// `layer_scale`. The program is given the coordinates of the pixel it
+/// colours in device pixels of the layer: `(0, 0)` is the top left corner of
+/// the area of the effect, the centre of the first pixel `(0.5, 0.5)`.
+///
+/// # The programs
+///
+/// The SkSL program of Skia declares the uniforms above, in that order and
+/// with those types, and, when it samples the content
+/// ([`ShaderEffectMode::ContentSampling`]), the child `uniform shader content;`
+/// ([`CUSTOM_EFFECT_CONTENT`](super::CUSTOM_EFFECT_CONTENT)), which it
+/// samples with `content.eval(coord)` (premultiplied, transparent beyond the
+/// area); its entry point is `half4 main(float2 coord)`, which returns a
+/// premultiplied colour.
+///
+/// The WGSL program of Vello (drawn from step E5 on) declares the uniforms as
+/// the members of `struct Uniforms`, in the same order, and the function
+/// `fn effect(coord: vec2<f32>) -> vec4<f32>`. The pass of the backend adds
+/// the bindings: `uniforms`, the block, and `fn sample_content(coord:
+/// vec2<f32>) -> vec4<f32>`, the content at `coord` (content-sampling
+/// programs only), and calls `effect` at the centre of each pixel.
+///
+/// Each backend checks its program against the parameters when it compiles
+/// it (decision 1 of the plan): a program whose uniforms are not those of the
+/// convention is reported once and the effect is drawn as an effect without
+/// a factory (its content unchanged), as is a program that does not compile.
 ///
 /// ```ignore
 /// fn shader() -> Option<ShaderEffectDescription> {
