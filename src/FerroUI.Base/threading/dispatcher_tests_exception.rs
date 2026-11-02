@@ -397,6 +397,7 @@ fn nested_frame_does_not_filter_the_same_exception_twice() {
 }
 
 #[test]
+#[allow(deprecated)]
 fn sync_context_exception_can_be_handled_with_post() {
     let t = DispatcherTests::new();
     let sync_context = t.ui_thread.get_context_with_priority(DispatcherPriority::BACKGROUND);

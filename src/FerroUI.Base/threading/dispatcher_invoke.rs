@@ -9,7 +9,7 @@ use super::dispatcher_operation::{box_local_callback, OperationCore, SendCallbac
 use super::dispatcher_task::{new_local_task, new_send_task};
 use super::{
     CancellationToken, Dispatcher, DispatcherOperation, DispatcherOperationStatus, DispatcherPriority,
-    DispatcherPriorityAwaitable, DispatcherPriorityTaskAwaitable, DispatcherTask, FerroSynchronizationContext,
+    DispatcherPriorityAwaitable, DispatcherPriorityTaskAwaitable, DispatcherTask,
 };
 use ferroui_system::task::Canceled;
 
@@ -82,7 +82,7 @@ impl Dispatcher {
         // call the callback directly.
         if !cancellation_token.is_cancelled() && priority == DispatcherPriority::SEND && self.check_access()
         {
-            let _restore = FerroSynchronizationContext::ensure_with_dispatcher(self, priority);
+            let _restore = self.enter_job(priority);
             return Ok(callback());
         }
 
@@ -114,7 +114,7 @@ impl Dispatcher {
         // Fast-Path, see invoke_with_cancellation.
         if !cancellation_token.is_cancelled() && priority == DispatcherPriority::SEND && self.check_access()
         {
-            let _restore = FerroSynchronizationContext::ensure_with_dispatcher(self, priority);
+            let _restore = self.enter_job(priority);
             return Ok(callback());
         }
 
@@ -160,7 +160,7 @@ impl Dispatcher {
 
         // Fast-Path, see invoke_with_cancellation.
         if !cancellation_token.is_cancelled() && priority == DispatcherPriority::SEND {
-            let _restore = FerroSynchronizationContext::ensure_with_dispatcher(self, priority);
+            let _restore = self.enter_job(priority);
             return Ok(callback());
         }
 
@@ -186,7 +186,7 @@ impl Dispatcher {
 
         // Fast-Path, see invoke_with_cancellation.
         if !cancellation_token.is_cancelled() && priority == DispatcherPriority::SEND {
-            let _restore = FerroSynchronizationContext::ensure_with_dispatcher(self, priority);
+            let _restore = self.enter_job(priority);
             return Ok(callback());
         }
 
@@ -271,7 +271,7 @@ impl Dispatcher {
 
     fn send_inline(&self, action: impl FnOnce(), priority: DispatcherPriority) {
         let result = catch_unwind(AssertUnwindSafe(|| {
-            let _restore = FerroSynchronizationContext::ensure_with_dispatcher(self, priority);
+            let _restore = self.enter_job(priority);
             action();
         }));
         if let Err(payload) = result {

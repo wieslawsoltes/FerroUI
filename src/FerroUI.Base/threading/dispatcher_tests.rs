@@ -10,6 +10,8 @@ use std::thread::{self, ThreadId};
 use std::time::{Duration, Instant};
 
 use super::dispatcher_tests_exception::{message_of, DispatcherTests};
+// `FerroSynchronizationContext` is deprecated since 0.5.0: the tests that use it are its tests.
+#[allow(deprecated)]
 use super::{
     CancellationToken, Canceled, Dispatcher, DispatcherFrame, DispatcherImplEvent, DispatcherOperation,
     DispatcherInvokeError, DispatcherOperationStatus, DispatcherPriority, DispatcherTask, DispatcherTaskScheduler,
@@ -1430,6 +1432,7 @@ fn push_frame_requires_a_controlled_implementation() {
 }
 
 #[test]
+#[allow(deprecated)]
 fn handles_are_thread_safe() {
     fn assert_send_sync<T: Send + Sync>() {}
     assert_send_sync::<Dispatcher>();
@@ -1531,14 +1534,14 @@ fn workload_on_another_thread() -> Oneshot<ThreadId> {
 }
 
 fn current_priority() -> DispatcherPriority {
-    FerroSynchronizationContext::current().expect("a current context").priority()
+    Dispatcher::current_priority().expect("a current job priority")
 }
 
 #[test]
 fn dispatcher_operations_have_context_with_proper_priority() {
     let _t = DispatcherTests::new();
     let _services = DispatcherServices::new(SimpleDispatcherImpl::new(SimpleKind::Controlled));
-    FerroSynchronizationContext::set_current(None);
+    Dispatcher::set_current_priority(None);
     let disp = Dispatcher::ui_thread();
     let priorities = Rc::new(RefCell::new(Vec::new()));
 
@@ -1589,8 +1592,8 @@ fn dispatcher_operations_have_context_with_proper_priority() {
             DispatcherPriority::SEND,
         ]
     );
-    // The context is restored after each of them.
-    assert!(FerroSynchronizationContext::current().is_none());
+    // The priority is restored after each of them.
+    assert!(Dispatcher::current_priority().is_none());
 }
 
 #[test]
@@ -1811,6 +1814,7 @@ fn task_scheduler_takes_the_priority_of_the_current_context() {
 }
 
 #[test]
+#[allow(deprecated)]
 fn synchronization_context_ensure_and_install() {
     let t = DispatcherTests::new();
     assert!(FerroSynchronizationContext::current().is_none());
@@ -1851,6 +1855,7 @@ fn synchronization_context_ensure_and_install() {
 }
 
 #[test]
+#[allow(deprecated)]
 fn synchronization_context_post_and_send() {
     let t = DispatcherTests::new();
     let context = t.ui_thread.get_context_with_priority(DispatcherPriority::BACKGROUND);
@@ -1899,6 +1904,7 @@ fn synchronization_context_post_and_send() {
 }
 
 #[test]
+#[allow(deprecated)]
 fn send_reports_panics_to_the_unhandled_exception_handlers() {
     let t = DispatcherTests::new();
     let handled = Rc::new(Cell::new(0));
@@ -1915,6 +1921,7 @@ fn send_reports_panics_to_the_unhandled_exception_handlers() {
 }
 
 #[test]
+#[allow(deprecated)]
 fn disable_processing_keeps_the_current_context() {
     // The context half of the reference test: there the helper that replaces
     // the pumping wait of the runtime is swapped in unless a dispatcher
@@ -2591,3 +2598,8 @@ fn legacy_platform_threading_interface_is_adapted() {
 // module, so that it uses the simulated implementation and the helpers above.
 #[path = "dispatcher_ordering_tests.rs"]
 mod ordering;
+
+// The dispatcher as the schedule of its thread and the rule of the continuations of the tasks of
+// `ferroui-system` on a dispatcher thread (step A5 of C4, finding F3); a child module, as above.
+#[path = "dispatcher_schedule_tests.rs"]
+mod schedule;
