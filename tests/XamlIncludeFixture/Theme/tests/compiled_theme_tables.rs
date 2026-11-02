@@ -15,6 +15,13 @@ fn materialize(dictionary: Ref<ResourceDictionary>) -> Vec<(Color, f64)> {
     for key in keys {
         assert!(dictionary.contains_deferred_key(&key.into()), "{key} must be lazy");
     }
+    assert!(dictionary.contains_deferred_key(&"ImportedTemplate".into()));
+    let template = dictionary.get(&"ImportedTemplate".into()).expect("imported template");
+    let template = template.downcast_ref::<std::rc::Rc<ferroui_markup_xaml::templates::ControlTemplate>>().unwrap();
+    let owner = ferroui_controls::ContentControl::new().upcast();
+    let built = template.build(&owner).unwrap();
+    assert_eq!(built.result().name().as_deref(), Some("ImportedChild"));
+    assert!(!built.result().ptr_eq(template.build(&owner).unwrap().result()));
     let brush = |key: &str| -> Ref<SolidColorBrush> {
         let value = dictionary.get(&key.into()).expect(key);
         ValueTypes::as_object(&*value)
@@ -53,7 +60,7 @@ fn compiled_theme_tables_match_the_interpreter() {
     }
     let rust = include_str!(concat!(env!("OUT_DIR"), "/xaml/compact_rust.rs"));
     let binary = include_str!(concat!(env!("OUT_DIR"), "/xaml/compact_binary.rs"));
-    for helper in ["aliases", "literal_brushes", "static_brushes", "dynamic_brushes"] {
+    for helper in ["aliases", "literal_brushes", "static_brushes", "dynamic_brushes", "deferred_factories"] {
         assert!(
             rust.contains(&format!("rt::theme_resources::{helper}(")),
             "{helper} was not lowered"
@@ -174,4 +181,20 @@ fn generated_manifest_reloads_a_live_resource_through_its_alias() {
     assert_eq!(color(), Color::from_uint32(0xffabcdef));
     drop(watcher);
     fs::remove_dir_all(folder).unwrap();
+}
+
+#[test]
+fn unknown_factory_slot_is_rejected_before_registering_any_key() {
+    use ferroui_markup_xaml::xaml_il::runtime::compiled as rt;
+    static DOC: rt::DocumentInfo = rt::DocumentInfo { base_uri: None, namespaces: &[] };
+    // Two valid FXB records. Only the second import index is absent from the caller.
+    let block = rt::binary_resources::Block::new("fixture/imports",
+        b"FXB\0\x01\x05\x02\x02\x00\x01A\x00\x01B\x00\x00\x01\x00\x00\x00\x01\x01\x01\x00\x00\x00");
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    crate::register_types();
+    let dictionary = ResourceDictionary::new();
+    let context = rt::populate_context(None, &DOC, rt::to_value(dictionary.clone()));
+    let error = rt::binary_resources::deferred_factories(&dictionary, &context, &[|_| Ok(None)], block).unwrap_err();
+    assert!(error.message().contains("invalid FXB deferred factory import"));
+    assert!(!dictionary.contains_key(&"A".into()));
 }

@@ -183,30 +183,38 @@ struct Body {
     slot: usize,
 }
 
+enum SiteBody {
+    Intrinsic(Body),
+    Import(String),
+}
+
 struct Site {
     direct: String,
     dictionary: String,
     key: String,
     line: u32,
     column: u32,
-    body: Body,
+    body: SiteBody,
 }
 
 impl Site {
     fn same_run(&self, other: &Self) -> bool {
-        self.dictionary == other.dictionary
-            && self.body.document == other.body.document
-            && self.body.factory.operand.kind() == other.body.factory.operand.kind()
-    }
-    fn row(&self) -> Resource<'_> {
-        Resource {
-            key: &self.key,
-            value: self.body.factory.operand.value(),
-            line: self.line,
-            column: self.column,
-            value_line: self.body.factory.value_line,
-            value_column: self.body.factory.value_column,
+        self.dictionary == other.dictionary && match (&self.body, &other.body) {
+            (SiteBody::Intrinsic(a), SiteBody::Intrinsic(b)) => {
+                a.document == b.document && a.factory.operand.kind() == b.factory.operand.kind()
+            }
+            // Imported builders carry their own document and lexical namespace tables.
+            (SiteBody::Import(_), SiteBody::Import(_)) => true,
+            _ => false,
         }
+    }
+
+    fn row(&self, slot: usize) -> Resource<'_> {
+        let (value, value_line, value_column) = match &self.body {
+            SiteBody::Intrinsic(b) => (b.factory.operand.value(), b.factory.value_line, b.factory.value_column),
+            SiteBody::Import(_) => (Value::Import(slot as u32), self.line, self.column),
+        };
+        Resource { key: &self.key, value, line: self.line, column: self.column, value_line, value_column }
     }
 }
 
@@ -252,7 +260,10 @@ impl ThemeTables {
         let key = text_literal(key)?;
         let (line, column) = position.split_once(", ")?;
         let (line, column) = (line.parse().ok()?, column.parse().ok()?);
-        let body = self.factories.remove(build)?;
+        let body = match self.factories.remove(build) {
+            Some(body) => SiteBody::Intrinsic(body),
+            None => SiteBody::Import(build.to_owned()),
+        };
         let index = self.sites.len();
         self.sites.push(Site {
             direct: direct.to_owned(),
@@ -278,7 +289,7 @@ impl ThemeTables {
         }
         let count = lines.iter().filter_map(|line| site(line)).take(8).count();
         if count == 0 { return; }
-        if count < 8 {
+        if count < 8 && documents.binary.is_none() {
             for line in lines {
                 if let Some(index) = site(line) {
                     line.truncate(line.len() - line.trim_start().len());
@@ -313,14 +324,44 @@ impl ThemeTables {
                 at = next + 1;
             }
             let first = &self.sites[first];
-            let kind = first.body.factory.operand.kind();
+            let rows: Vec<_> = run.iter().enumerate().map(|(slot, &index)| self.sites[index].row(slot)).collect();
+            let SiteBody::Intrinsic(body) = &first.body else {
+                // A singleton stays a direct call; importing one function would only add indirection.
+                if run.len() == 1 {
+                    lines.push(format!("{indent}{}", first.direct));
+                    continue;
+                }
+                let data = format!("{}_THEME_FACTORIES_{}", function.to_uppercase(), self.tables);
+                self.tables += 1;
+                let binary = documents.binary_resource_batch(function, Kind::DeferredFactory, &rows);
+                let ty = if binary.is_some() { "rt::DeferredBuild" } else { "rt::theme_resources::FactoryRow" };
+                writeln!(self.constants, "static {data}: &[{ty}] = &[").unwrap();
+                for &index in &run {
+                    let site = &self.sites[index];
+                    let SiteBody::Import(build) = &site.body else { unreachable!("homogeneous run") };
+                    if binary.is_some() {
+                        writeln!(self.constants, "    {build},").unwrap();
+                    } else {
+                        writeln!(self.constants, "    ({}, {build}, {}, {}),", rust_string_literal(&site.key), site.line, site.column).unwrap();
+                    }
+                }
+                self.constants.push_str("];\n");
+                let (module, args) = match binary {
+                    Some(block) => ("binary_resources", format!("{data}, {block}")),
+                    None => ("theme_resources", data),
+                };
+                lines.push(format!("{indent}rt::{module}::deferred_factories({}, &context, {args})?;", first.dictionary));
+                continue;
+            };
+            let kind = body.factory.operand.kind();
             let helper = match kind {
                 Kind::Alias => "aliases",
                 Kind::LiteralBrush => "literal_brushes",
                 Kind::DynamicBrush => "dynamic_brushes",
                 Kind::StaticBrush => "static_brushes",
+                Kind::DeferredFactory => unreachable!("import run handled separately"),
             };
-            let document = &first.body.document;
+            let document = &body.document;
             let document = if document.starts_with("rt::DocumentInfo {") {
                 let next = self.documents.len();
                 self.documents
@@ -334,7 +375,6 @@ impl ThemeTables {
             } else {
                 document.as_str()
             };
-            let rows: Vec<_> = run.iter().map(|&index| self.sites[index].row()).collect();
             let (module, data) = if let Some(bytes) = documents.binary_resource_batch(function, kind, &rows) {
                 ("binary_resources", bytes)
             } else {
@@ -350,6 +390,7 @@ impl ThemeTables {
                     let value = match row.value {
                         Value::Text(text) => rust_string_literal(text),
                         Value::Argb(argb) => format!("0x{argb:08x}"),
+                        Value::Import(_) => unreachable!("import run handled separately"),
                     };
                     writeln!(
                         self.constants,
@@ -370,7 +411,7 @@ impl ThemeTables {
                 first.dictionary
             ));
             for index in run {
-                functions[self.sites[index].body.slot].clear();
+                if let SiteBody::Intrinsic(body) = &self.sites[index].body { functions[body.slot].clear(); }
             }
         }
     }

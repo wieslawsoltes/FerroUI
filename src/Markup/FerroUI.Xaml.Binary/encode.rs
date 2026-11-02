@@ -22,7 +22,7 @@ pub fn encode(kind: Kind, rows: &[Resource<'_>]) -> Result<Vec<u8>, Error> {
     for row in rows {
         strings.push(row.key);
         match (kind, row.value) {
-            (Kind::LiteralBrush, Value::Argb(_)) => {}
+            (Kind::LiteralBrush, Value::Argb(_)) | (Kind::DeferredFactory, Value::Import(_)) => {}
             (Kind::Alias | Kind::DynamicBrush | Kind::StaticBrush, Value::Text(value)) => {
                 strings.push(value)
             }
@@ -70,6 +70,7 @@ pub fn encode(kind: Kind, rows: &[Resource<'_>]) -> Result<Vec<u8>, Error> {
         match row.value {
             Value::Argb(value) => out.extend_from_slice(&value.to_le_bytes()),
             Value::Text(s) => uint(&mut out, index(s)),
+            Value::Import(slot) => uint(&mut out, slot),
         }
         uint(&mut out, row.line);
         uint(&mut out, row.column);

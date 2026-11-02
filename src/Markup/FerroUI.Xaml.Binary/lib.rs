@@ -27,6 +27,8 @@ pub enum Kind {
     LiteralBrush = 2,
     DynamicBrush = 3,
     StaticBrush = 4,
+    /// Invoke a typed deferred builder from the caller's local import table.
+    DeferredFactory = 5,
 }
 
 impl Kind {
@@ -36,6 +38,7 @@ impl Kind {
             2 => Some(Self::LiteralBrush),
             3 => Some(Self::DynamicBrush),
             4 => Some(Self::StaticBrush),
+            5 => Some(Self::DeferredFactory),
             _ => None,
         }
     }
@@ -45,6 +48,7 @@ impl Kind {
 pub enum Value<'a> {
     Text(&'a str),
     Argb(u32),
+    Import(u32),
 }
 
 /// Source positions of both the dictionary insertion and evaluation of the deferred value.
@@ -87,6 +91,7 @@ impl AsRef<str> for SharedText {
 pub enum Payload {
     Text(SharedText),
     Argb(u32),
+    Import(u32),
 }
 
 pub struct Record<'a> {
@@ -156,7 +161,10 @@ impl Batch {
                 Kind::LiteralBrush => u32::from_le_bytes(take(&mut bytes, 4)?.try_into().unwrap()),
                 _ => uint(&mut bytes)?,
             };
-            if key as usize >= strings || kind != Kind::LiteralBrush && value as usize >= strings {
+            if key as usize >= strings
+                || matches!(kind, Kind::Alias | Kind::DynamicBrush | Kind::StaticBrush)
+                    && value as usize >= strings
+            {
                 return Err(Error("invalid FXB string index"));
             }
             let line = uint(&mut bytes)?;
@@ -179,6 +187,17 @@ impl Batch {
         })
     }
 
+    /// Check every host-relative factory reference before the first dictionary write.
+    /// A block may reuse or reorder imports, including across a hot reload.
+    pub fn validate_imports(&self, available: usize) -> Result<(), Error> {
+        if self.kind != Kind::DeferredFactory
+            || self.rows.iter().any(|row| row[1] as usize >= available)
+        {
+            return Err(Error("invalid FXB deferred factory import"));
+        }
+        Ok(())
+    }
+
     pub fn records(&self) -> impl ExactSizeIterator<Item = Record<'_>> {
         self.rows
             .iter()
@@ -187,6 +206,8 @@ impl Batch {
                 let (a, b) = range(key);
                 let payload = if self.kind == Kind::LiteralBrush {
                     Payload::Argb(value)
+                } else if self.kind == Kind::DeferredFactory {
+                    Payload::Import(value)
                 } else {
                     let (start, end) = range(value);
                     Payload::Text(SharedText {

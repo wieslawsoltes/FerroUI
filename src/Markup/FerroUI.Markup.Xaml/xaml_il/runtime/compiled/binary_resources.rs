@@ -87,6 +87,27 @@ load!(static_brushes, StaticBrush, Text, static_brush);
 load!(literal_brushes, LiteralBrush, Argb, literal_brush);
 load!(dynamic_brushes, DynamicBrush, Text, dynamic_brush);
 
+/// Register arbitrary compiled deferred XAML bodies. The caller supplies only the typed
+/// builders reachable from this dictionary run. Wire data cannot select any other code.
+#[inline(never)]
+pub fn deferred_factories(
+    dictionary: &Ref<ResourceDictionary>,
+    context: &Rc<XamlIlContext>,
+    imports: &[super::DeferredBuild],
+    block: Block,
+) -> Result<(), XamlLoadError> {
+    let batch = block.decode(Kind::DeferredFactory)?;
+    batch.validate_imports(imports.len()).map_err(|e| error(block.id, e))?;
+    for row in batch.records() {
+        let Payload::Import(slot) = row.payload else { unreachable!("validated factory block") };
+        super::add_deferred_resource(
+            dictionary, row.key, ferroui_base::data::core::ValueType::object(),
+            context, imports[slot as usize], row.line, row.column,
+        )?;
+    }
+    Ok(())
+}
+
 /// UI-thread candidate image for repopulating a theme. Validate edits before activation.
 /// Deferred values created by an older population retain that generation's string pool.
 /// A host may retry construction under the previous snapshot if the new theme fails.

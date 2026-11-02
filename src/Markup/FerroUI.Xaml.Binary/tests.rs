@@ -113,3 +113,26 @@ fn text_factories_share_a_wire_layout_and_large_indices_round_trip() {
         }
     }
 }
+
+#[test]
+fn deferred_factory_imports_are_local_to_a_compiled_call_site() {
+    let rows = [
+        row("First", Value::Import(1)),
+        row("Second", Value::Import(0)),
+        row("Reuse", Value::Import(1)),
+    ];
+    let bytes = encode(Kind::DeferredFactory, &rows).unwrap();
+    let batch = Batch::decode(&bytes).unwrap();
+    assert_eq!(batch.kind(), Kind::DeferredFactory);
+    assert!(batch.validate_imports(2).is_ok());
+    assert!(batch.validate_imports(1).is_err());
+    for (record, expected) in batch.records().zip([1, 0, 1]) {
+        assert!(matches!(record.payload, Payload::Import(slot) if slot == expected));
+    }
+    assert!(encode(Kind::Alias, &rows).is_err());
+    let oversized = encode(Kind::DeferredFactory, &[row("x", Value::Import(u32::MAX))]).unwrap();
+    assert!(Batch::decode(&oversized)
+        .unwrap()
+        .validate_imports(3)
+        .is_err());
+}

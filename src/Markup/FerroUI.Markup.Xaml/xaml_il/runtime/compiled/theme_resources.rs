@@ -204,3 +204,19 @@ table!(aliases, alias, &'static str);
 table!(literal_brushes, literal_brush, u32);
 table!(dynamic_brushes, dynamic_brush, &'static str);
 table!(static_brushes, static_brush, &'static str);
+
+/// A local typed builder may construct a template, custom control or any other deferred
+/// XAML body. Its own generated function owns the declaration's namespace scope.
+pub type FactoryRow = (&'static str, super::DeferredBuild, i32, i32);
+
+#[inline(never)]
+pub fn deferred_factories(
+    dictionary: &Ref<ResourceDictionary>,
+    context: &Rc<XamlIlContext>,
+    rows: &[FactoryRow],
+) -> Result<(), XamlLoadError> {
+    for &(key, build, line, column) in rows {
+        super::add_deferred_resource(dictionary, key, ValueType::object(), context, build, line, column)?;
+    }
+    Ok(())
+}

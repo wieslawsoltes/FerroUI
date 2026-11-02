@@ -352,7 +352,7 @@ pub const STYLE_WITH_SERVICE_PROVIDER: (&str, &str) = (
 );
 
 /// One dictionary containing each compact factory plus a brush whose extra property requires
-/// the ordinary typed factory. Kept private to the integration fixture's two backend groups.
+/// a typed factory import beside a nested ControlTemplate. Kept private to the integration fixture's two backend groups.
 pub const TABLE_TEST: &[(&str, &str)] = &[("Compact.xaml", r##"
 <ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Color x:Key="Accent">#ff102030</Color>
@@ -365,4 +365,7 @@ pub const TABLE_TEST: &[(&str, &str)] = &[("Compact.xaml", r##"
     <StaticResource x:Key="Aliás1" ResourceKey="Literal1"/>
     <StaticResource x:Key="Alias2" ResourceKey="Aliás1"/>
     <SolidColorBrush x:Key="Fallback" Color="#ff112233" Opacity="0.5"/>
+    <ControlTemplate x:Key="ImportedTemplate" TargetType="ContentControl">
+        <ContentControl Name="ImportedChild"/>
+    </ControlTemplate>
 </ResourceDictionary>"##)];
