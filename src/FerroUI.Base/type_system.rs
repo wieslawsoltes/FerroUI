@@ -631,6 +631,17 @@ pub unsafe trait ObjectType: StaticType + Upcast<FerroObject> + Sized {
 /// Implemented by a class `C` for every class `T` that can derive from it:
 /// builds `C`'s part of the virtual table with `T`'s overrides.
 pub trait Subclassable<T>: ObjectType {
+    /// True when the entire table prefix can reuse the direct parent's implementations.
+    /// Handwritten implementations that do not supply this fact keep the ordinary builder.
+    #[doc(hidden)]
+    const __INHERITS_VTABLE: bool = false;
+
+    /// Copy this prefix for the most-derived class, including its dynamic type at the root.
+    #[doc(hidden)]
+    fn __inherit_vtable(_parent: &Self::VTable) -> Self::VTable {
+        Self::build_vtable()
+    }
+
     #[doc(hidden)]
     fn build_vtable() -> Self::VTable;
 }
@@ -1166,6 +1177,13 @@ macro_rules! ferro_class {
         where
             $base: $crate::Subclassable<T>,
         {
+            const __INHERITS_VTABLE: bool = <$base as $crate::Subclassable<T>>::__INHERITS_VTABLE;
+
+            #[inline]
+            fn __inherit_vtable(parent: &Self::VTable) -> Self::VTable {
+                <$base as $crate::Subclassable<T>>::__inherit_vtable(parent)
+            }
+
             #[inline]
             fn build_vtable() -> Self::VTable {
                 <$base as $crate::Subclassable<T>>::build_vtable()
@@ -1244,7 +1262,24 @@ macro_rules! ferro_class {
             where
                 $base: $crate::Subclassable<T>,
             {
+                const __INHERITS_VTABLE: bool = <$base as $crate::Subclassable<T>>::__INHERITS_VTABLE
+                    && matches!(<T as $impl_trait>::__OVERRIDES, Some([]))
+                    && ::std::mem::size_of::<<T::Parent as $crate::ObjectType>::VTable>()
+                        >= ::std::mem::size_of::<[<$name VTable>]>();
+
+                #[inline]
+                fn __inherit_vtable(parent: &[<$name VTable>]) -> [<$name VTable>] {
+                    [<$name VTable>] {
+                        base: <$base as $crate::Subclassable<T>>::__inherit_vtable(&parent.base),
+                        ..*parent
+                    }
+                }
+
                 fn build_vtable() -> [<$name VTable>] {
+                    if <$name as $crate::Subclassable<T>>::__INHERITS_VTABLE {
+                        let parent = $crate::parent_vtable::<T, [<$name VTable>]>();
+                        return <$name as $crate::Subclassable<T>>::__inherit_vtable(parent);
+                    }
                     let base = <$base as $crate::Subclassable<T>>::build_vtable();
                     // Looking up the parent can initialize its OnceLock. Resolve it
                     // once for all inherited slots and only if a slot needs it.

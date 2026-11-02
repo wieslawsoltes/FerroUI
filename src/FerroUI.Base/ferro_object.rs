@@ -160,7 +160,17 @@ pub trait FerroObjectImplExt: FerroObjectImpl {
 impl<T: FerroObjectImpl> FerroObjectImplExt for T {}
 
 impl<T: FerroObjectImpl> Subclassable<T> for FerroObject {
+    const __INHERITS_VTABLE: bool = matches!(<T as FerroObjectImpl>::__OVERRIDES, Some([]));
+
+    #[inline]
+    fn __inherit_vtable(parent: &FerroObjectVTable) -> FerroObjectVTable {
+        FerroObjectVTable { type_info: T::TYPE, ..*parent }
+    }
+
     fn build_vtable() -> FerroObjectVTable {
+        if <Self as Subclassable<T>>::__INHERITS_VTABLE {
+            return <Self as Subclassable<T>>::__inherit_vtable(parent_vtable::<T, FerroObjectVTable>());
+        }
         // SAFETY (all casts): the table is only attached to objects whose
         // most-derived class is `T`.
         let mut table = FerroObjectVTable {
@@ -191,17 +201,20 @@ impl<T: FerroObjectImpl> Subclassable<T> for FerroObject {
                 __forwards_to_parent::<T, FerroObjectVTable>(overrides, "update_data_validation"),
             ]
         };
-        if forwards[0] {
-            table.constructed = parent_vtable::<T, FerroObjectVTable>().constructed;
-        }
-        if forwards[1] {
-            table.on_property_changed_core = parent_vtable::<T, FerroObjectVTable>().on_property_changed_core;
-        }
-        if forwards[2] {
-            table.on_property_changed = parent_vtable::<T, FerroObjectVTable>().on_property_changed;
-        }
-        if forwards[3] {
-            table.update_data_validation = parent_vtable::<T, FerroObjectVTable>().update_data_validation;
+        if forwards[0] || forwards[1] || forwards[2] || forwards[3] {
+            let parent = parent_vtable::<T, FerroObjectVTable>();
+            if forwards[0] {
+                table.constructed = parent.constructed;
+            }
+            if forwards[1] {
+                table.on_property_changed_core = parent.on_property_changed_core;
+            }
+            if forwards[2] {
+                table.on_property_changed = parent.on_property_changed;
+            }
+            if forwards[3] {
+                table.update_data_validation = parent.update_data_validation;
+            }
         }
         table
     }
