@@ -56,4 +56,12 @@ cargo run --release -p ferroui-markup-xaml-loader --no-default-features \
   src/FerroUI.Themes.WinUI/WinUITheme.xaml
 ```
 
-The example measures 51 in-memory parse-and-drop or decode-and-drop iterations per path. Its median measures syntax reconstruction. Application type resolution, transforms, object construction, asset I/O and process startup are separate costs.
+The example measures 51 interleaved in-memory parse-and-drop or decode-and-drop iterations per path, rotating the order on every pass. Its median measures syntax reconstruction. Application type resolution, transforms, object construction, asset I/O and process startup are separate costs.
+
+On Linux x86-64 with Rust 1.99.1 in release mode, the 690 XAML files across the five built-in themes occupied 6,986,943 bytes. Their independently encoded FXD images occupied 3,317,018 bytes, a 52.5% reduction. Every file decoded and re-encoded to the same bytes. The following warm-memory measurements use one pinned CPU and the rotating sample order above.
+
+| WinUI document | XML bytes | Stored FXD bytes | Compressed FXD bytes | Parse XML p50 | Decode stored p50 | Decode compressed p50 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Controls/Button.xaml | 16,102 | 18,937 | 7,990 | 747 µs | 454 µs | 587 µs |
+| Resources/Button_themeresources.xaml | 15,733 | 16,570 | 6,368 | 356 µs | 276 µs | 346 µs |
+| WinUITheme.xaml | 7,672 | 8,480 | 3,040 | 135 µs | 103 µs | 127 µs |
