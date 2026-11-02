@@ -114,7 +114,7 @@ fn cyclic_merge_only_dictionaries_report_the_offending_uri() {
         merge_only("ferres://Tests/B.xaml", "A.xaml"),
     ];
     let error = try_load_group(docs, None).err().expect("a merge cycle must fail the group");
-    assert!(describe(&error).contains("Cyclic MergeResourceInclude of 'ferres://Tests/A.xaml'"));
+    assert!(describe(&error).contains("Cyclic MergeResourceInclude of 'ferres://tests/A.xaml'"));
 }
 
 #[test]
