@@ -47,7 +47,7 @@ pub mod primitives;
 // is the reference `tests/compiled_xaml_tests.rs` compares the output of the build with, byte
 // for byte; it is not a module of the crate. (`compiled_markup`, which the same file declares,
 // is not used: the theme registers its assets and its loader table itself.)
-#[cfg(feature = "packed-theme")]
+#[cfg(all(feature = "packed-theme", not(feature = "precompiled-theme")))]
 #[doc(hidden)]
 #[path = "packed_xaml.rs"]
 pub mod compiled_xaml;
@@ -55,6 +55,13 @@ ferroui_markup_xaml::include_compiled_xaml!();
 mod register_types;
 mod rust_paths;
 mod winui_theme;
+
+/// The original compiled FXP revision for a designer or hot-reload host. In a
+/// precompiled build, startup executes the linked group without opening this archive.
+#[cfg(any(feature = "packed-theme", feature = "precompiled-theme"))]
+pub fn theme_archive() -> &'static [u8] {
+    include_bytes!(concat!(env!("OUT_DIR"), "/winui.fxp"))
+}
 
 pub use assets::{excluded_documents, ExcludedDocument};
 #[cfg(feature = "designer-sources")]

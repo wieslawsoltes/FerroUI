@@ -26,10 +26,13 @@ path = "lib.rs"
 
 [features]
 # Embed the complete FXP archive and resolve its FXD documents through XamlX on first load.
-packed-theme = ["dep:ferroui-markup-xaml-loader"]
+packed-theme = ["dep:ferroui-markup-xaml-loader", "ferroui-build/portable-xaml"]
 # Group similar FXD columns across the complete archive and expand the index once.
 solid-theme = ["packed-theme"]
 binary-resources = ["ferroui-markup-xaml/binary-resources"]
+# Resolve all semantics during the build. Run typed FXB/native code on startup and
+# expose the matching solid FXP revision to reload and designer consumers on demand.
+precompiled-theme = ["binary-resources", "ferroui-build/portable-xaml"]
 # Original control-theme documents for opt-in designer definition libraries.
 # Normal applications continue to ship only compiled markup.
 designer-sources = []
@@ -49,7 +52,6 @@ ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["r
 # compiler, which reads the types from the scan of the sources of this crate and from the models the
 # crates it is built on export.
 ferroui-build = { workspace = true }
-ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["portable-xaml"] }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
@@ -57,7 +59,7 @@ ferroui-controls = { workspace = true, features = ["testing"] }
 # The theme is loaded from its compiled markup (`compiled_xaml.rs`); the run-time XAML loader and
 # its emitter generate that file and check it (`tests/compiled_xaml_tests.rs`), and the tests load
 # documents at run time.
-ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter", "portable-xaml"] }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

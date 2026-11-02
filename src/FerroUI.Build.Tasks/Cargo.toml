@@ -18,6 +18,8 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
+# Package the source graphs alongside an AOT group for inspection and replacement.
+portable-xaml = ["ferroui-markup-xaml-loader/portable-xaml"]
 # The run-time host of `Build` (`TypeSystem::Runtime`, with `Build::assembly`): the documents are compiled
 # against the types the build script registered in its process. It links the XAML runtime library and,
 # through it, the controls, which a build script then builds for the host. No crate of the repository

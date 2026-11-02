@@ -148,39 +148,41 @@ fn main() {
     }
 }
 
-#[cfg(not(feature = "packed-theme"))]
-fn compile_theme(documents: Vec<(String, String)>, roots: Option<Vec<String>>) {
-    let documents: Vec<_> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
-    let mut group = ferroui_build::XamlGroup::new("compiled_xaml")
-        .documents(&documents)
-        .binary_resources(cfg!(feature = "binary-resources"))
-        .class_document("WinUITheme.xaml")
-        .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_service_provider"));
-    if let Some(roots) = roots {
-        group = group.resource_roots(&roots.iter().map(String::as_str).collect::<Vec<_>>());
-    }
-    ferroui_build::Build::from_env().type_system(ferroui_build::TypeSystem::Model).compile_group(group).run();
-}
-
-#[cfg(feature = "packed-theme")]
 fn compile_theme(mut documents: Vec<(String, String)>, roots: Option<Vec<String>>) {
     if let Some(roots) = roots {
         ferroui_build::trim_resource_documents(&mut documents, &roots).expect("trim WinUI theme");
     }
     let documents: Vec<_> = documents.iter().map(|(name, text)| (name.as_str(), text.as_str())).collect();
-    #[cfg(feature = "solid-theme")]
-    use ferroui_markup_xaml_loader::binary_document::pack::compile_solid_documents as encode;
-    #[cfg(not(feature = "solid-theme"))]
-    use ferroui_markup_xaml_loader::binary_document::pack::compile_documents as encode;
-    let pack = encode(&documents)
+    #[cfg(any(feature = "precompiled-theme", feature = "packed-theme"))]
+    write_archive(&documents);
+
+    let build = ferroui_build::Build::from_env();
+    #[cfg(any(feature = "precompiled-theme", not(feature = "packed-theme")))]
+    let build = {
+        let group = ferroui_build::XamlGroup::new("compiled_xaml")
+            .documents(&documents)
+            .binary_resources(cfg!(feature = "binary-resources"))
+            .class_document("WinUITheme.xaml")
+            .constructor(ferroui_build::ClassConstructor::ServiceProvider("with_service_provider"));
+        build.type_system(ferroui_build::TypeSystem::Model).compile_group(group)
+    };
+    #[cfg(all(feature = "packed-theme", not(feature = "precompiled-theme")))]
+    let build = build.export_metadata()
+        .checked_in_metadata("compiled_xaml.xamlmeta")
+        .loader("crate::compiled_xaml::try_load");
+    build.run();
+}
+
+#[cfg(any(feature = "precompiled-theme", feature = "packed-theme"))]
+fn write_archive(documents: &[(&str, &str)]) {
+    #[cfg(any(feature = "solid-theme", feature = "precompiled-theme"))]
+    use ferroui_build::compile_solid_archive as encode;
+    #[cfg(not(any(feature = "solid-theme", feature = "precompiled-theme")))]
+    use ferroui_build::compile_archive as encode;
+    let pack = encode(documents)
         .unwrap_or_else(|error| panic!("cannot compile WinUI theme pack: {error}"));
     let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR")).join("winui.fxp");
     if fs::read(&out).ok().as_deref() != Some(&pack) {
         fs::write(out, pack).expect("write WinUI theme pack");
     }
-    ferroui_build::Build::from_env()
-        .export_metadata()
-        .checked_in_metadata("compiled_xaml.xamlmeta")
-        .loader("crate::compiled_xaml::try_load")
-        .run();
 }

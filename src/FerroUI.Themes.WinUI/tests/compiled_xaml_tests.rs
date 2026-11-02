@@ -72,7 +72,7 @@ fn compiled_xaml_is_up_to_date() {
 /// refused document fails the build of the crate).
 #[test]
 fn build_script_output_is_the_checked_in_reference() {
-    #[cfg(not(feature = "packed-theme"))]
+    #[cfg(any(feature = "precompiled-theme", not(feature = "packed-theme")))]
     {
         let built = include_str!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml.rs"));
         let checked_in = std::fs::read_to_string(PATH).expect("compiled_xaml.rs can be read");
@@ -98,15 +98,15 @@ fn build_script_output_is_the_checked_in_reference() {
 
 /// The shipping budget covers the entire indexed archive. Cross-check the source
 /// inventory so dropping dictionaries cannot make the budget pass.
-#[cfg(feature = "packed-theme")]
+#[cfg(any(feature = "packed-theme", feature = "precompiled-theme"))]
 #[test]
 fn packed_theme_contains_every_compiled_document_within_budget() {
     use ferroui_markup_xaml_loader::binary_document::pack::ThemePack;
-    let bytes = include_bytes!(concat!(env!("OUT_DIR"), "/winui.fxp"));
+    let bytes = crate::theme_archive();
     assert!(bytes.len() < 600_000, "WinUI archive is {} bytes", bytes.len());
-    #[cfg(feature = "solid-theme")]
+    #[cfg(any(feature = "solid-theme", feature = "precompiled-theme"))]
     let indexed = ferroui_markup_xaml_loader::binary_document::pack::expand_solid(bytes).unwrap();
-    #[cfg(feature = "solid-theme")]
+    #[cfg(any(feature = "solid-theme", feature = "precompiled-theme"))]
     let bytes = &indexed;
     let archive = ThemePack::open(bytes).unwrap();
     let expected: Vec<_> = crate::assets::documents().iter()
@@ -119,7 +119,7 @@ fn packed_theme_contains_every_compiled_document_within_budget() {
 
 /// Model and runtime hosts must choose the same rows, factory order, source locations,
 /// reload identifiers and payload bytes even with different host-side type tables.
-#[cfg(all(feature = "binary-resources", not(feature = "packed-theme")))]
+#[cfg(all(feature = "binary-resources", any(feature = "precompiled-theme", not(feature = "packed-theme"))))]
 #[test]
 fn binary_build_matches_runtime_host() {
     let binary = BinaryResourceFiles::new("compiled_xaml");

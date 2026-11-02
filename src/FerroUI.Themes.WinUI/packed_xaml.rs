@@ -20,7 +20,7 @@ type Parent = Option<Rc<dyn IServiceProvider>>;
 fn load(path: &str, root: Option<BoxedValue>, parent: Parent) -> Result<BoxedValue, XamlLoadError> {
     static ARCHIVE: OnceLock<Result<ThemePack<'static>, String>> = OnceLock::new();
     let archive = ARCHIVE.get_or_init(|| {
-        let bytes = include_bytes!(concat!(env!("OUT_DIR"), "/winui.fxp")).as_slice();
+        let bytes = crate::theme_archive();
         #[cfg(feature = "solid-theme")]
         let bytes = {
             use ferroui_markup_xaml_loader::binary_document::pack::expand_solid;

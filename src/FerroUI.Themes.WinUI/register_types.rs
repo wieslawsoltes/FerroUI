@@ -57,8 +57,8 @@ pub fn register_types() {
         crate::assets::register();
         // When a replacement archive names the class, let its constructor initialize the
         // compact dictionary against that revision through the scoped populate override.
-        #[cfg(feature = "packed-theme")]
-        ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register_class_document(WinUITheme::TYPE, WinUITheme::DOCUMENT_URI);
+        #[cfg(any(feature = "packed-theme", feature = "precompiled-theme"))]
+        FerroXamlLoader::register_class_document(WinUITheme::TYPE, WinUITheme::DOCUMENT_URI);
         FerroXamlLoader::register_compiled_xaml(ASSEMBLY.name, crate::compiled_xaml::try_load);
     });
 }
