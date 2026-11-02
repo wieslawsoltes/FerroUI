@@ -143,7 +143,7 @@ ferro_properties! {
 
 impl ContentPage {
     fn static_constructor() {
-        Self::content_property().changed().add_class_handler::<ContentPage>(|x, e| x.content_changed(e));
+        Self::content_property().changed().add_class_handler::<ContentPage>(|x, e| x.content_changed(e)).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

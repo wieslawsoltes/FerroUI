@@ -105,7 +105,8 @@ impl MaterialTextField {
         ] {
             property
                 .changed()
-                .add_class_handler::<TextBox>(Self::on_decoration_changed);
+                .add_class_handler::<TextBox>(Self::on_decoration_changed)
+                .detach();
         }
         // Class handlers retain no text boxes. Only fields with a counter/limit
         // do count work, and no per-control timers or subscriptions are created.
@@ -115,14 +116,16 @@ impl MaterialTextField {
                 if Self::get_show_character_count(field) || Self::get_character_limit(field) > 0 {
                     Self::refresh(field);
                 }
-            });
+            })
+            .detach();
         TextBox::max_length_property()
             .changed()
             .add_class_handler::<TextBox>(|field, _| {
                 if Self::get_show_character_count(field) {
                     Self::refresh(field);
                 }
-            });
+            })
+            .detach();
         DataValidationErrors::has_errors_property()
             .changed()
             .add_class_handler::<TextBox>(|field, _| {
@@ -133,7 +136,8 @@ impl MaterialTextField {
                 {
                     Self::refresh(field);
                 }
-            });
+            })
+            .detach();
         DataValidationErrors::errors_property()
             .changed()
             .add_class_handler::<TextBox>(|field, _| {
@@ -144,7 +148,8 @@ impl MaterialTextField {
                 {
                     Self::refresh(field);
                 }
-            });
+            })
+            .detach();
     }
 
     fn on_decoration_changed(field: &TextBox, _change: &FerroPropertyChangedEventArgs<'_>) {

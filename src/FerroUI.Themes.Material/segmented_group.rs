@@ -233,7 +233,8 @@ impl MaterialSegmentedGroup {
                 {
                     owner.refresh(Some(child));
                 }
-            });
+            })
+            .detach();
         for property in [
             Visual::is_visible_property().as_property(),
             InputElement::is_effectively_enabled_property().as_property(),
@@ -249,7 +250,7 @@ impl MaterialSegmentedGroup {
                     owner.refresh(None);
                     owner.invalidate_measure();
                 }
-            });
+            }).detach();
         }
     }
     pub fn construct() -> Self {

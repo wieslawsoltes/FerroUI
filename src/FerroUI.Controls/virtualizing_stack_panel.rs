@@ -702,7 +702,8 @@ impl VirtualizingStackPanel {
         register_scroll_snap_points_info::<VirtualizingStackPanel>();
         Self::cache_length_property()
             .changed()
-            .add_class_handler::<VirtualizingStackPanel>(|x, e| x.on_cache_length_changed(e));
+            .add_class_handler::<VirtualizingStackPanel>(|x, e| x.on_cache_length_changed(e))
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

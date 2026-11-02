@@ -575,9 +575,10 @@ impl Window {
     fn static_constructor() {
         let white: Rc<dyn IBrush> = Brushes::white();
         TemplatedControl::background_property().override_default_value::<Window>(Some(white));
-        let _ = Self::extend_client_area_title_bar_height_hint_property()
+        Self::extend_client_area_title_bar_height_hint_property()
             .changed()
-            .add_class_handler::<Window>(|w, _| w.on_title_bar_height_hint_changed());
+            .add_class_handler::<Window>(|w, _| w.on_title_bar_height_hint_changed())
+            .detach();
     }
 
     /// Field initialisation of a window over the window implementation

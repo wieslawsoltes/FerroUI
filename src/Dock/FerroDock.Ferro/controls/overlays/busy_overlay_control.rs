@@ -80,7 +80,8 @@ impl BusyOverlayControl {
                         .flatten(),
                 );
                 c.sync_from_services();
-            });
+            })
+            .detach();
         Self::global_busy_service_property()
             .changed()
             .add_class_handler::<Self>(|c, e| {
@@ -91,13 +92,16 @@ impl BusyOverlayControl {
                         .flatten(),
                 );
                 c.sync_from_services();
-            });
+            })
+            .detach();
         Self::blocks_input_property()
             .changed()
-            .add_class_handler::<Self>(|c, _| c.sync_from_services());
+            .add_class_handler::<Self>(|c, _| c.sync_from_services())
+            .detach();
         Self::show_reload_button_property()
             .changed()
-            .add_class_handler::<Self>(|c, _| c.sync_from_services());
+            .add_class_handler::<Self>(|c, _| c.sync_from_services())
+            .detach();
     }
     /// Constructs the original field defaults without subscribing to services.
     pub fn construct() -> Self {

@@ -62,7 +62,7 @@ crate::ferro_properties! { impl Geometry {
 
 impl Geometry {
     fn static_constructor() {
-        Self::transform_property().changed().add_class_handler::<Geometry>(|x, e| x.transform_property_changed(e));
+        Self::transform_property().changed().add_class_handler::<Geometry>(|x, e| x.transform_property_changed(e)).detach();
     }
 
     /// Creates the class data of a geometry whose platform implementation is
@@ -202,7 +202,7 @@ impl Geometry {
     /// recreated and the changed notification is raised.
     pub fn affects_geometry(properties: &[&'static FerroProperty]) {
         for property in properties {
-            property.changed().subscribe(Self::affects_geometry_invalidate);
+            property.changed().subscribe(Self::affects_geometry_invalidate).detach();
         }
     }
 

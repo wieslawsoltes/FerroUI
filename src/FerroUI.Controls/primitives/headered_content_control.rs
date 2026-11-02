@@ -74,7 +74,7 @@ ferroui_base::ferro_properties! { impl HeaderedContentControl {
 
 impl HeaderedContentControl {
     fn static_constructor() {
-        Self::header_property().changed().add_class_handler::<HeaderedContentControl>(|x, e| x.header_changed(e));
+        Self::header_property().changed().add_class_handler::<HeaderedContentControl>(|x, e| x.header_changed(e)).detach();
         crate::i_headered::register_headered::<HeaderedContentControl>();
     }
 

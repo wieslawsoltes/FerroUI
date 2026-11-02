@@ -231,7 +231,7 @@ impl HotKeyManager {
             };
 
             Manager::new(&control.to_ref()).init();
-        });
+        }).detach();
     }
 
     /// Sets the value of the `HotKey` attached property on an object.
