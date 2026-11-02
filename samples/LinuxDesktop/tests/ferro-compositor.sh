@@ -131,6 +131,7 @@ wait "$modifier"; modifier=
 wait_for has_color 397abb
 wait_for has_color d76a3d
 shot clients
+gtk_swatch_pixels=$(pixels d76a3d count)
 scene_is() { [[ $("$binary" --platform=wayland --current-scene 2>/dev/null) == "$1" ]]; }
 "$binary" --platform=wayland --show=workspaces
 wait_for scene_is workspaces
@@ -157,10 +158,11 @@ wtype -k l
 wait_for grep -sqx 'light normal' "$XDG_CONFIG_HOME/ferro-desktop/windows-style"
 wtype -s 60 -k Escape -s 60
 wait_for scene_is desktop
-# Verify the new wallpaper and both live client swatches in the same frame.
+# Wait for the chooser to uncover the updated GTK swatch to its original size.
 # The existing Qt process receives the keyboard and repaints below.
 profile_clients_visible() {
-    capture && pixels wallpaper "$1" && pixels 9354ba present && pixels 397abb present
+    capture && pixels wallpaper "$1" && pixels 397abb present &&
+        (( $(pixels 9354ba count) >= gtk_swatch_pixels * 95 / 100 ))
 }
 for entry in '2 macos' '3 material'; do
     read -r key profile <<<"$entry"

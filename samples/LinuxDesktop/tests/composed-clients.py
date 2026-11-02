@@ -148,6 +148,9 @@ def probe(path, color, test):
              for band, c in zip(im.split(), rgb)]
     mask = ImageChops.multiply(ImageChops.multiply(*masks[:2]), masks[2])
     count = mask.histogram()[255]
+    if test == "count":
+        print(count)
+        return True
     if test == "absent":
         return count < 80
     if count < 500:
