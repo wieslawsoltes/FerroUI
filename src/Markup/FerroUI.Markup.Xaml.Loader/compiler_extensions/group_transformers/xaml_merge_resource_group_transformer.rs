@@ -1,11 +1,11 @@
 //! Port of `CompilerExtensions/GroupTransformers/XamlMergeResourceGroupTransformer.cs`.
 
-use std::{cell::RefCell, collections::HashSet, rc::Rc};
+use std::{cell::RefCell, collections::{HashSet, VecDeque}, rc::Rc};
 
 use xamlx::ast::{
     IXamlAstManipulationNode, IXamlAstNode, IXamlAstValueNode, XamlAstExtensions,
     XamlAstNewClrObjectNode, XamlAstNodeExtensions, XamlConstantNode, XamlManipulationGroupNode,
-    XamlObjectInitializationNode, XamlPropertyAssignmentNode, XamlStaticExtensionNode,
+    XamlObjectInitializationNode, XamlPropertyAssignmentNode, XamlStaticExtensionNode, XamlValueWithManipulationNode,
 };
 use xamlx::exceptions::{XamlError, XamlResult};
 
@@ -53,6 +53,41 @@ fn theme_dictionary_value_group(
     let group = XamlManipulationGroupNode::new(&*initialization, Some(vec![operation]));
     *initialization.manipulation.borrow_mut() = group.clone();
     Some(group)
+}
+
+/// One variant contribution in include order. Keep the source operations immutable:
+/// a dictionary may be merged by two roots and may also be loaded independently.
+struct VariantContribution {
+    index: usize,
+    assignment: Rc<XamlPropertyAssignmentNode>,
+    key: Rc<dyn IXamlAstValueNode>,
+    value: Rc<XamlValueWithManipulationNode>,
+    initialization: Rc<XamlObjectInitializationNode>,
+    group: Rc<XamlManipulationGroupNode>,
+}
+
+impl VariantContribution {
+    fn read(index: usize, child: &Rc<dyn IXamlAstManipulationNode>, dictionary: &dyn xamlx::type_system::IXamlType) -> Option<Self> {
+        let assignment = child.cast::<XamlPropertyAssignmentNode>()?;
+        if assignment.property.name() != "ThemeDictionaries" { return None; }
+        let (key, value) = {
+            let values = assignment.values.borrow();
+            let [key, value] = values.as_slice() else { return None };
+            (key.clone(), value.clone())
+        };
+        let group = theme_dictionary_value_group(&value, dictionary)?;
+        let value = value.cast::<XamlValueWithManipulationNode>()?;
+        let initialization = value.manipulation()?.cast::<XamlObjectInitializationNode>()?;
+        Some(Self { index, assignment, key, value, initialization, group })
+    }
+
+    fn with_group(&self, group: Rc<XamlManipulationGroupNode>) -> Rc<dyn IXamlAstManipulationNode> {
+        let init = XamlObjectInitializationNode::new(&*self.initialization, group, self.initialization.type_.borrow().clone());
+        init.skip_begin_init.set(self.initialization.skip_begin_init.get());
+        let value = XamlValueWithManipulationNode::new(&*self.value, self.value.value(), Some(init));
+        XamlPropertyAssignmentNode::new(&*self.assignment, self.assignment.property.clone(),
+            self.assignment.possible_setters.borrow().clone(), vec![self.key.clone(), value])
+    }
 }
 
 /// A `MergeResourceInclude` taken out of the merged dictionaries of a dictionary.
@@ -413,65 +448,52 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
         let mut children = resource_dictionary_manipulation.children.borrow().clone();
         children.splice(0..0, manipulation_group);
 
-        // Flatten resource assignments.
-        let mut i = 0;
-        while i < children.len() {
-            if let Some(group) = children[i].cast::<XamlManipulationGroupNode>() {
-                children.remove(i);
-                children.extend(group.children.borrow().iter().cloned());
-                // step back, so new items can be reiterated.
-                continue;
+        // Expanded groups follow pending siblings, as in the original append-and-remove
+        // loop. A queue preserves that precedence without shifting the remaining entries.
+        let mut pending = VecDeque::from(children);
+        let mut children = Vec::with_capacity(pending.len());
+        while let Some(child) = pending.pop_front() {
+            if let Some(group) = child.cast::<XamlManipulationGroupNode>() {
+                pending.extend(group.children.borrow().iter().cloned());
+            } else {
+                children.push(child);
             }
-            i += 1;
         }
 
-        // Merge "ThemeDictionaries" as well.
-        let mut i = children.len();
-        while i > 0 {
-            i -= 1;
-            let Some(assignment_node) = children[i].cast::<XamlPropertyAssignmentNode>() else {
-                continue;
-            };
-            if assignment_node.property.name() != "ThemeDictionaries" {
-                continue;
-            }
-            let values = assignment_node.values.borrow().clone();
-            if values.len() != 2 {
-                continue;
-            }
-            let key = values[0].clone();
-            let Some(value_group) = theme_dictionary_value_group(&values[1], &*resource_dictionary_type) else {
-                continue;
-            };
-
-            let mut j = i;
-            while j > 0 {
-                j -= 1;
-                let Some(same_key_prev_assignment_node) =
-                    children[j].cast::<XamlPropertyAssignmentNode>()
-                else {
-                    continue;
-                };
-                if same_key_prev_assignment_node.property.name() != "ThemeDictionaries" {
-                    continue;
-                }
-                let prev_values = same_key_prev_assignment_node.values.borrow().clone();
-                if prev_values.len() != 2 {
-                    continue;
-                }
-                let Some(same_key_prev_value_group) = theme_dictionary_value_group(&prev_values[1], &*resource_dictionary_type)
-                else {
-                    continue;
-                };
-                if Self::theme_variant_node_equals(context, &key, &prev_values[0])? {
-                    let added = value_group.children.borrow().clone();
-                    same_key_prev_value_group.children.borrow_mut().extend(added);
-                    Self::fix_ensure_capacity_nodes(context, &same_key_prev_value_group)?;
-                    children.remove(i);
+        // Resolve the same nearest-preceding matches as the upstream reverse scan.
+        // Materialize each merged variant once; extending the preceding source
+        // group at every match both leaked entries to its other consumers and
+        // copied and revisited a quadratic number of shared subtrees.
+        let variants: Vec<_> = children.iter().enumerate()
+            .filter_map(|(i, child)| VariantContribution::read(i, child, &*resource_dictionary_type))
+            .collect();
+        let mut targets = (0..variants.len()).collect::<Vec<_>>();
+        for (i, variant) in variants.iter().enumerate().rev() {
+            for j in (0..i).rev() {
+                if Self::theme_variant_node_equals(context, &variant.key, &variants[j].key)? {
+                    targets[i] = j;
                     break;
                 }
             }
         }
+        let mut operations = vec![None::<Vec<Rc<dyn IXamlAstManipulationNode>>>; variants.len()];
+        let mut removed = vec![false; children.len()];
+        for (i, variant) in variants.iter().enumerate() {
+            if targets[i] == i { continue; }
+            let first = targets[targets[i]];
+            targets[i] = first;
+            let merged = operations[first].get_or_insert_with(|| variants[first].group.children.borrow().clone());
+            merged.extend(variant.group.children.borrow().iter().cloned());
+            removed[variant.index] = true;
+        }
+        for (variant, operations) in variants.iter().zip(operations) {
+            if let Some(operations) = operations {
+                let group = XamlManipulationGroupNode::new(&*variant.group, Some(operations));
+                Self::fix_ensure_capacity_nodes(context, &group)?;
+                children[variant.index] = variant.with_group(group);
+            }
+        }
+        children = children.into_iter().zip(removed).filter_map(|(op, removed)| (!removed).then_some(op)).collect();
 
         // The run-time includes go back to the merged dictionaries, in their order.
         children.extend(runtime_includes);

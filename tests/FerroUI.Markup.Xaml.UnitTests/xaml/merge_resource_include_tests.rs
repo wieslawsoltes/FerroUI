@@ -325,6 +325,12 @@ fn merge_resource_include_works_with_theme_dictionaries() {
     ];
 
     let objects = load_group(documents, None);
+    let first = assert_value_is_type::<ResourceDictionary>(&objects[0]);
+    let second = assert_value_is_type::<ResourceDictionary>(&objects[1]);
+    for theme in [ThemeVariant::light(), ThemeVariant::dark()] {
+        assert!(first.try_get_resource(&"brush3".into(), Some(&theme)).is_none());
+        assert!(second.try_get_resource(&"brush1".into(), Some(&theme)).is_none());
+    }
     let resources = assert_value_is_type::<ResourceDictionary>(&objects[2]);
     assert!(resources.merged_dictionaries().is_empty());
 
