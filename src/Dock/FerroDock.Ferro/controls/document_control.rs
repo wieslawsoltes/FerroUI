@@ -27,8 +27,8 @@ use ferroui_controls::{
 };
 use std::cell::Cell;
 use std::{cell::RefCell, rc::Rc};
-struct Subscription(Box<dyn Fn()>);
-impl Subscription {
+struct ClosureSubscription(Box<dyn Fn()>);
+impl ClosureSubscription {
     fn dispose(self) {
         (self.0)()
     }
@@ -38,8 +38,8 @@ impl Subscription {
 pub struct DocumentControl {
     base: TemplatedControl,
     pressed: RefCell<Option<Subscription>>,
-    dock_subscription: RefCell<Option<Subscription>>,
-    dockables_subscription: RefCell<Option<Subscription>>,
+    dock_subscription: RefCell<Option<ClosureSubscription>>,
+    dockables_subscription: RefCell<Option<ClosureSubscription>>,
     current_dock: RefCell<Option<Rc<dyn IDock>>>,
     data_context_subscription: RefCell<Option<Subscription>>,
     has_visible_dockables: Cell<bool>,
@@ -244,7 +244,7 @@ impl DocumentControl {
                 .add(Rc::new(move |name| owner.dock_property_changed(name)));
             let original = dock.clone();
             self.dock_subscription
-                .replace(Some(Subscription(Box::new(move || {
+                .replace(Some(ClosureSubscription(Box::new(move || {
                     if let Some(notifier) = original.as_notify_property_changed() {
                         notifier.property_changed().remove(token);
                     }
@@ -287,7 +287,7 @@ impl DocumentControl {
             .collection_changed()
             .add(Rc::new(move |_| owner.update_has_visible_dockables()));
         self.dockables_subscription
-            .replace(Some(Subscription(Box::new(move || {
+            .replace(Some(ClosureSubscription(Box::new(move || {
                 if let Some(notifier) = list.as_notify_collection_changed() {
                     notifier.collection_changed().remove(token);
                 }

@@ -30,7 +30,6 @@ use ferroui_controls::{
     Button, ContentControl, ContentControlImpl, ControlImpl, ScrollViewer, TextBox, TopLevel,
 };
 use std::cell::{Cell, RefCell};
-use std::rc::Rc;
 
 /// A 56dp search field with an animated docked results surface.
 /// `Content` supplies the application's results; `Query` is two-way bindable.

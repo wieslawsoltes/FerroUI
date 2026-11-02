@@ -25,7 +25,6 @@ use ferroui_base::{
 use ferroui_controls::presenters::ScrollContentPresenter;
 use ferroui_controls::{Control, ControlImpl, Grid, ItemsControl, Panel, PanelImpl};
 use std::cell::{Cell, RefCell};
-use std::rc::Rc;
 
 /// The minimum width of a tab when the theme sets none (`c_tabMinimumWidth` of TabView, the
 /// default of `TabViewItemMinWidth`).

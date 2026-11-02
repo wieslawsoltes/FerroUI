@@ -32,8 +32,8 @@ use std::{
     rc::Rc,
 };
 type NativeDockableSubscription = (Ref<FerroObject>, Rc<dyn IDisposable>);
-struct Subscription(Box<dyn Fn()>);
-impl Subscription {
+struct ClosureSubscription(Box<dyn Fn()>);
+impl ClosureSubscription {
     fn dispose(self) {
         (self.0)()
     }
@@ -56,7 +56,7 @@ pub struct PinnedDockControl {
     last_effective_display_mode: Cell<PinnedDockDisplayMode>,
     tracked_dockable: RefCell<Option<Rc<dyn IDockable>>>,
     tracked_native_dockable: RefCell<Option<NativeDockableSubscription>>,
-    tracked_notify_dockable: RefCell<Option<Subscription>>,
+    tracked_notify_dockable: RefCell<Option<ClosureSubscription>>,
     is_pinned_dock_empty: Cell<bool>,
     skip_pinned_bounds_update: Cell<bool>,
     layout_events: RefCell<Vec<Subscription>>,
@@ -429,7 +429,7 @@ impl PinnedDockControl {
                 owner.on_dockable_property_changed(name)
             }));
             self.tracked_notify_dockable
-                .replace(Some(Subscription(Box::new(move || {
+                .replace(Some(ClosureSubscription(Box::new(move || {
                     if let Some(notifier) = dockable.as_notify_property_changed() {
                         notifier.property_changed().remove(token);
                     }

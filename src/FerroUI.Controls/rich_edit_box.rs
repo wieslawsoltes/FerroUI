@@ -44,7 +44,7 @@ use ferroui_base::media::{
     subscribe_invalidated, Brushes, FontStyle, FontWeight, IBrush, TextAlignment,
     TextDecorationCollection, TextDecorationLocation, TextDecorations, TextWrapping,
 };
-use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, Subscription};
+use ferroui_base::reactive::{CompositeDisposable, Disposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{

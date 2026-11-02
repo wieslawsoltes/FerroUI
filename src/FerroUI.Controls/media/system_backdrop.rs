@@ -265,7 +265,8 @@ impl ElementSystemBackdrop {
 struct PerTargetConfiguration {
     target: Rc<dyn ICompositionSupportsSystemBackdrop>,
     configuration: Rc<SystemBackdropConfiguration>,
-    subscriptions: Vec<Subscription>,
+    /// Held for their drop: removing the entry removes its handlers.
+    _subscriptions: Vec<Subscription>,
 }
 
 /// The base of the system backdrops of the object model (WinUI
@@ -387,7 +388,7 @@ impl SystemBackdropImpl for SystemBackdrop {
         this.configurations.borrow_mut().push(PerTargetConfiguration {
             target: connected_target.clone(),
             configuration,
-            subscriptions,
+            _subscriptions: subscriptions,
         });
     }
 
