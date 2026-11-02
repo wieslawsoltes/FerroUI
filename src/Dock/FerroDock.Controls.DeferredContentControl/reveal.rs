@@ -7,6 +7,7 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, FerroObjectImpl, Ref, Visual,
 };
 use ferroui_controls::Control;
+use std::time::Duration;
 #[repr(C)]
 struct DeferredRevealTransition {
     base: DoubleTransition,
@@ -14,17 +15,17 @@ struct DeferredRevealTransition {
 ferro_class!(DeferredRevealTransition:DoubleTransition);
 ferro_class_info!(DeferredRevealTransition {});
 ferro_impl_classes!(DeferredRevealTransition:FerroObjectImpl,TransitionBaseImpl);
-fn create(duration: SignedDuration) -> Ref<DeferredRevealTransition> {
+fn create(duration: Duration) -> Ref<DeferredRevealTransition> {
     let transition = ferroui_base::instantiate(DeferredRevealTransition {
         base: DoubleTransition::construct(),
     });
     transition.set_property(Some(Visual::opacity_property().as_property()));
-    transition.set_duration(duration);
+    transition.set_duration(SignedDuration::from(duration));
     transition.set_easing(Easing::from(CubicEaseOut::new()));
     transition
 }
-pub(crate) fn apply(control: &Control, duration: SignedDuration, should_reveal: bool) {
-    if !should_reveal || duration <= SignedDuration::ZERO {
+pub(crate) fn apply(control: &Control, duration: Duration, should_reveal: bool) {
+    if !should_reveal || duration.is_zero() {
         control.set_opacity(1.0);
         return;
     }
@@ -36,13 +37,13 @@ pub(crate) fn apply(control: &Control, duration: SignedDuration, should_reveal: 
         DispatcherPriority::BACKGROUND,
     );
 }
-fn ensure(control: &Control, duration: SignedDuration) {
+fn ensure(control: &Control, duration: Duration) {
     if let Some(transitions) = control.transitions() {
         for index in 0..transitions.count() {
             let transition = transitions.get(index);
             if let Some(object) = transition.as_object() {
                 if let Some(reveal) = object.cast::<DeferredRevealTransition>() {
-                    reveal.set_duration(duration);
+                    reveal.set_duration(SignedDuration::from(duration));
                     reveal.set_easing(Easing::from(CubicEaseOut::new()));
                     return;
                 }
