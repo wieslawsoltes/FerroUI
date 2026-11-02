@@ -7,7 +7,7 @@
 //! Apache-2.0. This implementation uses FerroUI drawing and its UI clock.
 
 use crate::motion::animations_enabled;
-use ferroui_base::animation::{IGlobalClock, TimeSpan};
+use ferroui_base::animation::{IGlobalClock, SignedDuration};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutableImpl, Orientation};
@@ -354,7 +354,7 @@ impl MaterialProgressIndicator {
         self.epoch.set(None);
         let weak = self.to_ref().downgrade();
         let subscription =
-            clock.subscribe(Rc::new(AnonymousObserver::new(move |time: TimeSpan| {
+            clock.subscribe(Rc::new(AnonymousObserver::new(move |time: SignedDuration| {
                 if let Some(this) = weak.upgrade() {
                     this.tick(time.total_seconds());
                 }

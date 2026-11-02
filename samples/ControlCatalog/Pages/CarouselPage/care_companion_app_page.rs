@@ -3,7 +3,7 @@
 
 use crate::markup::xaml_class;
 use crate::pages::navigation_demo_helper::{boxed_text, parse_color, parse_geometry};
-use ferroui_base::animation::{CrossFade, TimeSpan};
+use ferroui_base::animation::{CrossFade, SignedDuration};
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::{BindingMode, CompiledBinding, CompiledBindingPathBuilder};
 use ferroui_base::input::{Cursor, InputElement, InputElementImpl, StandardCursorType};
@@ -425,7 +425,7 @@ impl CareCompanionAppPage {
     fn build_onboarding_carousel(&self) -> Ref<CarouselPage> {
         let carousel = CarouselPage::new();
         carousel.set_background(solid(bg_light()));
-        carousel.set_page_transition(Some(Rc::new(CrossFade::with_duration(TimeSpan::from_milliseconds(300.0)))));
+        carousel.set_page_transition(Some(Rc::new(CrossFade::with_duration(SignedDuration::from_milliseconds(300.0)))));
         NavigationPage::set_has_navigation_bar(&carousel, false);
 
         let pips1 = Self::make_pips_pager(3, &carousel);

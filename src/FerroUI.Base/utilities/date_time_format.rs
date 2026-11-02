@@ -9,7 +9,7 @@
 //! rejects exotic inputs that one accepts.
 
 use super::{DateTime, DateTimeFormatInfo, DateTimeKind, DateTimeStyles, DayOfWeek, FormatError, TimeZoneInfo};
-use crate::animation::TimeSpan;
+use crate::animation::SignedDuration;
 use std::borrow::Cow;
 
 const ROUND_TRIP_PATTERN: &str = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.fffffffK";
@@ -23,7 +23,7 @@ pub(crate) struct Parsed {
     /// The date and time as written, of unspecified kind.
     pub date_time: DateTime,
     /// The offset stated by the text (`Z` is zero).
-    pub offset: Option<TimeSpan>,
+    pub offset: Option<SignedDuration>,
     /// Whether the offset was stated with the UTC designator `Z`.
     pub utc_designator: bool,
 }
@@ -44,7 +44,7 @@ fn not_recognized(text: &str) -> FormatError {
 /// `DateTimeOffset`; `None` formats a plain `DateTime`.
 pub(crate) fn format(
     value: DateTime,
-    offset: Option<TimeSpan>,
+    offset: Option<SignedDuration>,
     format: &str,
     info: &DateTimeFormatInfo,
 ) -> Result<String, FormatError> {
@@ -66,10 +66,10 @@ pub(crate) fn format(
 
     let invariant = DateTimeFormatInfo::invariant_info();
     // The formats that state UTC print the UTC time of a value with an offset.
-    fn to_utc(value: &mut DateTime, offset: &mut Option<TimeSpan>) {
+    fn to_utc(value: &mut DateTime, offset: &mut Option<SignedDuration>) {
         if let Some(current) = *offset {
             *value = DateTime::from_ticks(value.ticks() - current.ticks());
-            *offset = Some(TimeSpan::ZERO);
+            *offset = Some(SignedDuration::ZERO);
         }
     }
 
@@ -111,8 +111,8 @@ fn push_number(out: &mut String, value: i64, min_digits: usize) {
     let _ = write!(out, "{value:0min_digits$}");
 }
 
-fn push_offset(out: &mut String, offset: TimeSpan, count: usize) {
-    let minutes = offset.ticks() / TimeSpan::TICKS_PER_MINUTE;
+fn push_offset(out: &mut String, offset: SignedDuration, count: usize) {
+    let minutes = offset.ticks() / SignedDuration::TICKS_PER_MINUTE;
     out.push(if minutes < 0 { '-' } else { '+' });
     let minutes = minutes.abs();
     match count {
@@ -128,7 +128,7 @@ fn push_offset(out: &mut String, offset: TimeSpan, count: usize) {
 
 struct FormatContext<'a> {
     value: DateTime,
-    offset: Option<TimeSpan>,
+    offset: Option<SignedDuration>,
     info: &'a DateTimeFormatInfo,
     year: i32,
     month: i32,
@@ -137,10 +137,10 @@ struct FormatContext<'a> {
 
 impl FormatContext<'_> {
     /// The offset the `z` specifiers print.
-    fn zone_offset(&self) -> TimeSpan {
+    fn zone_offset(&self) -> SignedDuration {
         match self.offset {
             Some(offset) => offset,
-            None if self.value.kind() == DateTimeKind::Utc => TimeSpan::ZERO,
+            None if self.value.kind() == DateTimeKind::Utc => SignedDuration::ZERO,
             None => TimeZoneInfo::get_utc_offset_of_local_time(self.value),
         }
     }
@@ -178,7 +178,7 @@ impl FormatContext<'_> {
                 if count > 7 {
                     return Err(bad_format());
                 }
-                let mut fraction = value.ticks() % TimeSpan::TICKS_PER_SECOND / 10_i64.pow((7 - count) as u32);
+                let mut fraction = value.ticks() % SignedDuration::TICKS_PER_SECOND / 10_i64.pow((7 - count) as u32);
                 if specifier == b'f' {
                     push_number(out, fraction, count);
                 } else {
@@ -230,7 +230,7 @@ fn is_repeatable(byte: u8) -> bool {
 
 fn format_custom(
     value: DateTime,
-    offset: Option<TimeSpan>,
+    offset: Option<SignedDuration>,
     pattern: &str,
     info: &DateTimeFormatInfo,
 ) -> Result<String, FormatError> {
@@ -330,7 +330,7 @@ struct Fields {
     fraction_ticks: Option<i32>,
     pm: Option<bool>,
     day_of_week: Option<DayOfWeek>,
-    offset: Option<TimeSpan>,
+    offset: Option<SignedDuration>,
     utc_designator: bool,
 }
 
@@ -483,7 +483,7 @@ impl<'a> Cursor<'a> {
     }
 
     /// Reads an offset `+h`, `+hh`, `+hhmm` or `+hh:mm` (either sign).
-    fn offset(&mut self) -> Option<TimeSpan> {
+    fn offset(&mut self) -> Option<SignedDuration> {
         let start = self.position;
         let negative = match self.peek() {
             Some('+') => false,
@@ -503,8 +503,8 @@ impl<'a> Cursor<'a> {
             if hours > 14 || minutes > 59 || (hours == 14 && minutes != 0) {
                 return None;
             }
-            let ticks = (hours as i64 * 60 + minutes as i64) * TimeSpan::TICKS_PER_MINUTE;
-            Some(TimeSpan::from_ticks(if negative { -ticks } else { ticks }))
+            let ticks = (hours as i64 * 60 + minutes as i64) * SignedDuration::TICKS_PER_MINUTE;
+            Some(SignedDuration::from_ticks(if negative { -ticks } else { ticks }))
         })();
         if result.is_none() {
             self.position = start;
@@ -729,7 +729,7 @@ fn parse_specifier(
         b'z' => set(&mut fields.offset, cursor.offset()?).ok()?,
         b'K' => {
             if cursor.eat('Z') {
-                set(&mut fields.offset, TimeSpan::ZERO).ok()?;
+                set(&mut fields.offset, SignedDuration::ZERO).ok()?;
                 fields.utc_designator = true;
             } else if let Some(offset) = cursor.offset() {
                 set(&mut fields.offset, offset).ok()?;
@@ -866,7 +866,7 @@ pub(crate) fn parse(text: &str, info: &DateTimeFormatInfo, styles: DateTimeStyle
 
         if fields.offset.is_none() {
             if (c == 'Z' || c == 'z') && !next_char.is_some_and(char::is_alphabetic) {
-                fields.offset = Some(TimeSpan::ZERO);
+                fields.offset = Some(SignedDuration::ZERO);
                 fields.utc_designator = true;
                 cursor.position += 1;
                 continue;
@@ -904,7 +904,7 @@ pub(crate) fn parse(text: &str, info: &DateTimeFormatInfo, styles: DateTimeStyle
             if fields.offset.is_none() && !previous_is_digit && !iso_separator {
                 if let Some(length) = match_ignore_case(rest, "GMT") {
                     if !rest[length..].starts_with(char::is_alphabetic) {
-                        fields.offset = Some(TimeSpan::ZERO);
+                        fields.offset = Some(SignedDuration::ZERO);
                         cursor.position += length;
                         continue;
                     }

@@ -5,7 +5,7 @@
 
 use crate::motion::animations_enabled;
 use crate::{MaterialMotionRole, MaterialMotionScheme, MaterialSpringState};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::BindingMode;
 use ferroui_base::input::{
     FocusChangedEventArgs, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs,
@@ -51,7 +51,7 @@ pub struct MaterialSearchView {
     suppress_expand: Cell<bool>,
     frame_pending: Cell<bool>,
     frame_generation: Cell<u64>,
-    last_frame: Cell<Option<TimeSpan>>,
+    last_frame: Cell<Option<SignedDuration>>,
 }
 
 ferro_class!(MaterialSearchView: ContentControl);

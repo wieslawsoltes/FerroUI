@@ -8,7 +8,7 @@ use ferroui_base::reactive::{IObservable, IObserver, LightweightSubject};
 use ferroui_base::threading::Dispatcher;
 
 struct ManualClock {
-    ticks: LightweightSubject<TimeSpan>,
+    ticks: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
 
@@ -21,12 +21,12 @@ impl ManualClock {
     }
     fn pulse(&self, milliseconds: f64) {
         self.ticks
-            .on_next(TimeSpan::from_milliseconds(milliseconds));
+            .on_next(SignedDuration::from_milliseconds(milliseconds));
     }
 }
 
-impl IObservable<TimeSpan> for ManualClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for ManualClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.ticks.subscribe(observer)
     }
 }

@@ -1818,7 +1818,7 @@ fn register_defaults() {
     }
     orderings!(
         i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, bool, char, String,
-        crate::utilities::Decimal, crate::utilities::DateTime, crate::utilities::DateTimeOffset, crate::animation::TimeSpan
+        crate::utilities::Decimal, crate::utilities::DateTime, crate::utilities::DateTimeOffset, crate::animation::SignedDuration
     );
     ValueTypes::register_ordering_by::<f64>(|a, b| Some(float_order(*a, *b)));
     ValueTypes::register_ordering_by::<f32>(|a, b| Some(float_order(f64::from(*a), f64::from(*b))));

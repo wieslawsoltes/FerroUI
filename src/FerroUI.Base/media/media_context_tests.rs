@@ -1,4 +1,4 @@
-use crate::animation::{Clock, IClock, IGlobalClock, PlayState, TimeSpan};
+use crate::animation::{Clock, IClock, IGlobalClock, PlayState, SignedDuration};
 use crate::media::MediaContext;
 use crate::reactive::{IObservable, IObserver};
 use crate::threading::Dispatcher;
@@ -23,10 +23,10 @@ impl Drop for Scope {
     }
 }
 
-struct Recorder(RefCell<Vec<TimeSpan>>);
+struct Recorder(RefCell<Vec<SignedDuration>>);
 
-impl IObserver<TimeSpan> for Recorder {
-    fn on_next(&self, value: TimeSpan) {
+impl IObserver<SignedDuration> for Recorder {
+    fn on_next(&self, value: SignedDuration) {
         self.0.borrow_mut().push(value);
     }
 }
@@ -144,7 +144,7 @@ fn registered_as_the_global_clock_the_context_pulses_animation_clocks() {
 
     Dispatcher::ui_thread().run_jobs(None);
     assert_eq!(direct.0.borrow().len(), 1);
-    assert_eq!(*ticks.0.borrow(), [TimeSpan::ZERO]);
+    assert_eq!(*ticks.0.borrow(), [SignedDuration::ZERO]);
 
     context.render();
     assert_eq!(direct.0.borrow().len(), 2);

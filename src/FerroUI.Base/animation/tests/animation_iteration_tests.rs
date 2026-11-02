@@ -38,7 +38,7 @@ fn check_key_time_correctly_converted_to_cue() {
     let clock = TestClock::new();
     run(&animation, &border, &clock);
 
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     assert_eq!(border.width(), 0.0);
 
     clock.step(seconds(1.0));
@@ -59,7 +59,7 @@ fn check_initial_inter_and_trailing_delay_values() {
     let clock = TestClock::new();
     let animation_run = run(&animation, &border, &clock);
 
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
 
     // Initial Delay.
     clock.step(seconds(0.0));
@@ -95,7 +95,7 @@ fn only_if_visible_pauses_animation_when_is_effectively_visible_is_false() {
     let clock = TestClock::new();
     let animation_run = run(&animation, &border, &clock);
 
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     clock.step(seconds(0.0));
     assert_eq!(border.width(), 100.0);
 
@@ -131,7 +131,7 @@ fn stop_and_dispose_animation_when_detached_from_visual_tree() {
     let clock = TestClock::new();
     let animation_run = run(&animation, &border, &clock);
 
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     clock.step(seconds(0.0));
     assert!(!animation_run.is_completed());
 
@@ -191,7 +191,7 @@ fn check_fill_mode_start_value() {
     ] {
         let animation = Animation::new();
         animation.set_duration(seconds(10.0));
-        animation.set_delay(if delay { seconds(5.0) } else { TimeSpan::ZERO });
+        animation.set_delay(if delay { seconds(5.0) } else { SignedDuration::ZERO });
         animation.set_fill_mode(fill_mode);
         animation.children().add(width_key_frame(50.0, start_cue));
         animation.children().add(width_key_frame(300.0, end_cue));
@@ -200,7 +200,7 @@ fn check_fill_mode_start_value() {
         let clock = TestClock::new();
         run(&animation, &border, &clock);
 
-        clock.step(TimeSpan::ZERO);
+        clock.step(SignedDuration::ZERO);
 
         assert_eq!(border.width(), target, "{fill_mode:?} {start_cue} {end_cue} {delay}");
     }
@@ -224,7 +224,7 @@ fn check_fill_mode_end_value() {
     ] {
         let animation = Animation::new();
         animation.set_duration(seconds(10.0));
-        animation.set_delay(if delay { seconds(5.0) } else { TimeSpan::ZERO });
+        animation.set_delay(if delay { seconds(5.0) } else { SignedDuration::ZERO });
         animation.set_fill_mode(fill_mode);
         animation.children().add(width_key_frame(0.0, start_cue));
         animation.children().add(width_key_frame(300.0, end_cue));
@@ -440,7 +440,7 @@ fn key_frames_order_does_not_matter() {
         let clock = TestClock::new();
         run(&animation, &border, &clock);
 
-        clock.step(TimeSpan::ZERO);
+        clock.step(SignedDuration::ZERO);
         assert_eq!(border.width(), 100.0);
 
         clock.step(seconds(0.5));
@@ -465,7 +465,7 @@ fn single_key_frame_works() {
         let clock = TestClock::new();
         run(&animation, &border, &clock);
 
-        clock.step(TimeSpan::ZERO);
+        clock.step(SignedDuration::ZERO);
         clock.step(seconds(cue));
 
         assert_eq!(border.width(), 100.0);
@@ -580,7 +580,7 @@ fn only_if_visible_pauses_animation_when_is_effectively_visible_is_false_nested(
     let clock = TestClock::new();
     let animation_run = run(&animation, &border, &clock);
 
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     clock.step(seconds(0.0));
     assert_eq!(border.width(), 100.0);
 
@@ -618,7 +618,7 @@ fn only_if_visible_pauses_animation_when_control_starts_invisible() {
     let animation_run = run(&animation, &border, &clock);
 
     // Clock ticks while invisible should not advance the animation.
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     clock.step(seconds(1.0));
     clock.step(seconds(2.0));
     assert_eq!(border.width(), 100.0);
@@ -648,7 +648,7 @@ fn animation_plays_correctly_after_reattach() {
     let clock = TestClock::new();
     let animation_run = run(&animation, &border, &clock);
 
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     assert!(!animation_run.is_completed());
 
     // Detach — animation completes.
@@ -660,7 +660,7 @@ fn animation_plays_correctly_after_reattach() {
     let clock2 = TestClock::new();
     let animation_run2 = run(&animation, &border, &clock2);
 
-    clock2.step(TimeSpan::ZERO);
+    clock2.step(SignedDuration::ZERO);
     assert!(!animation_run2.is_completed());
 
     clock2.step(seconds(5.0));
@@ -690,7 +690,7 @@ fn interpolator_is_not_called_after_last_iteration() {
     let clock = TestClock::new();
     let animation_run = run(&animation, &border, &clock);
 
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     assert_eq!(FAKE_CALL_COUNT.get(), 1);
     assert_eq!(FAKE_LAST_PROGRESS.get(), 0.0);
 
@@ -733,7 +733,7 @@ fn animation_completes_gracefully_when_first_key_frame_value_is_null() {
 
     // Pulse the clock - this should not panic even though the first
     // keyframe's value is null (falls back to neutral value).
-    clock.pulse(TimeSpan::ZERO);
+    clock.pulse(SignedDuration::ZERO);
 
     // The animation should continue running (using neutral value as fallback)
     clock.pulse(seconds(0.5));
@@ -764,7 +764,7 @@ fn animation_with_unresolved_binding_does_not_throw_null_reference_exception() {
     let task = animation.run_async_with_clock(&control, Some(clock.as_clock()), CancellationToken::none());
 
     // Animation falls back to neutral value and continues
-    clock.pulse(TimeSpan::ZERO);
+    clock.pulse(SignedDuration::ZERO);
     clock.pulse(seconds(0.1));
 
     // Animation should still be running (uses neutral value as fallback)
@@ -796,7 +796,7 @@ fn animation_can_set_is_visible_true_on_invisible_control() {
     let animation_run = run(&animation, &border, &clock);
 
     // Kick off the animation.
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
 
     // The Cue 0.0 keyframe should have set IsVisible = true,
     // even though the control started invisible.
@@ -826,7 +826,7 @@ fn width_animation_resumes_after_is_visible_set_true_on_invisible_control() {
     let animation_run = run(&animation, &border, &clock);
 
     // Animation is paused because control is invisible.
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     assert_eq!(border.width(), 0.0);
     assert!(!animation_run.is_completed());
 
@@ -850,7 +850,7 @@ fn animation_can_set_is_visible_false_at_end_without_pausing_itself() {
     let clock = TestClock::new();
     let animation_run = run(&animation, &border, &clock);
 
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     assert!(border.is_visible());
 
     // Step to the end: animation sets IsVisible=false.
@@ -874,7 +874,7 @@ fn cancelling_expand_animation_mid_flight_then_collapsing_works() {
     let clock1 = TestClock::new();
     let expand_run = expand_animation.run_async_with_clock(&border, Some(clock1.as_clock()), cts1.token());
 
-    clock1.step(TimeSpan::ZERO);
+    clock1.step(SignedDuration::ZERO);
     assert!(border.is_visible());
 
     // Partially through expand, cancel and start collapse.
@@ -886,7 +886,7 @@ fn cancelling_expand_animation_mid_flight_then_collapsing_works() {
     let clock2 = TestClock::new();
     let collapse_run = collapse_animation.run_async_with_clock(&border, Some(clock2.as_clock()), cts2.token());
 
-    clock2.step(TimeSpan::ZERO);
+    clock2.step(SignedDuration::ZERO);
     clock2.step(seconds(0.3));
 
     assert!(collapse_run.is_completed());
@@ -920,7 +920,7 @@ fn auto_pauses_on_invisible_when_started_from_style() {
         false,
     );
 
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     assert_eq!(border.width(), 100.0);
 
     // Hide the control, animation should pause under Auto.
@@ -949,7 +949,7 @@ fn auto_does_not_pause_on_invisible_when_started_manually() {
     let clock = TestClock::new();
     let animation_run = run(&animation, &border, &clock);
 
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     assert_eq!(border.width(), 100.0);
 
     // Hide the control, animation should keep running under Auto + manual.
@@ -979,7 +979,7 @@ fn fill_mode_applies_final_value_when_visual_detached_during_animation() {
     let clock = TestClock::new();
     let animation_run = run(&animation, &border, &clock);
 
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     assert_eq!(border.width(), 100.0);
 
     // Detach from visual tree immediately

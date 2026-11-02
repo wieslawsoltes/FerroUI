@@ -3,7 +3,7 @@
 
 use crate::markup::{user_control_class, xaml_class};
 use crate::pages::navigation_demo_helper::{boxed_text, parse_color, parse_geometry};
-use ferroui_base::animation::{CrossFade, IPageTransition, TimeSpan};
+use ferroui_base::animation::{CrossFade, IPageTransition, SignedDuration};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::interactivity::{IRoutedEventArgs, RoutedEventArgs};
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
@@ -62,7 +62,7 @@ fn column_definitions(text: &str) -> ColumnDefinitions {
 
 /// `new CrossFade(TimeSpan.FromMilliseconds(180))`.
 fn cross_fade() -> Option<Rc<dyn IPageTransition>> {
-    Some(Rc::new(CrossFade::with_duration(TimeSpan::from_milliseconds(180.0))))
+    Some(Rc::new(CrossFade::with_duration(SignedDuration::from_milliseconds(180.0))))
 }
 
 /// The controls of the gallery by category.

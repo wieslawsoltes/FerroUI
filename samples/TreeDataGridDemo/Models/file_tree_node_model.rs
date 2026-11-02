@@ -12,7 +12,7 @@
 //! removed, and (on Unix, where an entry keeps its file identity when it is renamed) a renamed
 //! entry gets its new path and name in place.
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::model::{Event, INotifyPropertyChanged, ModelTypes};
 use ferroui_base::ferro_markup_type;
@@ -496,7 +496,7 @@ fn to_date_time_offset(time: SystemTime) -> DateTimeOffset {
         Ok(after) => (after.as_nanos() / NANOSECONDS_PER_TICK) as i64,
         Err(before) => -((before.duration().as_nanos() / NANOSECONDS_PER_TICK) as i64),
     };
-    DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(ticks))
+    DateTimeOffset::UNIX_EPOCH.add(SignedDuration::from_ticks(ticks))
 }
 
 ferro_markup_type!(class FileTreeNodeModel {

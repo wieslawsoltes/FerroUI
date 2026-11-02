@@ -1,6 +1,6 @@
 //! Port of `Layout/FluidMoveBehavior.cs`.
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::layout::Layoutable;
 use ferroui_base::reactive::Subscription;
 use ferroui_base::{
@@ -57,8 +57,8 @@ ferro_properties! {
         }
 
         /// Identifies the `Duration` property.
-        pub fn duration_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<FluidMoveBehavior, _>("Duration", TimeSpan::from_milliseconds(300.0))
+        pub fn duration_property() -> StyledProperty<SignedDuration> {
+            FerroProperty::register::<FluidMoveBehavior, _>("Duration", SignedDuration::from_milliseconds(300.0))
         }
     }
 }
@@ -113,11 +113,11 @@ impl FluidMoveBehavior {
     }
 
     /// Gets or sets animation duration.
-    pub fn duration(&self) -> TimeSpan {
+    pub fn duration(&self) -> SignedDuration {
         self.get_value(Self::duration_property())
     }
 
-    pub fn set_duration(&self, value: TimeSpan) {
+    pub fn set_duration(&self, value: SignedDuration) {
         self.set_value(Self::duration_property(), value)
     }
 

@@ -8,7 +8,7 @@ use crate::templates::ControlTemplate;
 use crate::test_support::{boxed, TestAssetLoader, TestServiceProvider};
 use crate::xaml_il::runtime::IFerroXamlIlParentStackProvider;
 use crate::{register_types, IXamlTypeResolver, XamlLoadError};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::expression_nodes::CastTarget;
 use ferroui_base::data::core::ValueType;
@@ -99,11 +99,11 @@ fn points_list_type_converter_rejects_malformed_lists() {
 #[test]
 fn time_span_type_converter_accepts_seconds_and_time_spans() {
     let conv = TimeSpanTypeConverter::new();
-    let value = |text: &str| *convert(&*conv, text).unwrap().unwrap().downcast_ref::<TimeSpan>().unwrap();
-    assert_eq!(value("0.25"), TimeSpan::from_seconds(0.25));
-    assert_eq!(value("2"), TimeSpan::from_seconds(2.0));
-    assert_eq!(value("0:0:1.5"), TimeSpan::from_seconds(1.5));
-    assert_eq!(value("00:01:00"), TimeSpan::from_seconds(60.0));
+    let value = |text: &str| *convert(&*conv, text).unwrap().unwrap().downcast_ref::<SignedDuration>().unwrap();
+    assert_eq!(value("0.25"), SignedDuration::from_seconds(0.25));
+    assert_eq!(value("2"), SignedDuration::from_seconds(2.0));
+    assert_eq!(value("0:0:1.5"), SignedDuration::from_seconds(1.5));
+    assert_eq!(value("00:01:00"), SignedDuration::from_seconds(60.0));
     assert!(convert(&*conv, "abc").is_err());
     assert!(convert(&*conv, "1:xx").is_err());
 }

@@ -9,7 +9,7 @@
 //! Project, Apache-2.0). Drawing, input subscription and lifecycle management use FerroUI.
 
 use crate::motion::animations_enabled;
-use ferroui_base::animation::{KeySplineSolver, TimeSpan};
+use ferroui_base::animation::{KeySplineSolver, SignedDuration};
 use ferroui_base::input::{
     FocusChangedEventArgs, InputElement, InputElementImpl, Key, KeyEventArgs,
     PointerCaptureLostEventArgs, PointerEventArgs, PointerPressedEventArgs,
@@ -58,7 +58,7 @@ pub struct MaterialRipple {
     waves: RefCell<Vec<RippleWave>>,
     frame_pending: Cell<bool>,
     frame_generation: Cell<u64>,
-    last_frame: Cell<Option<TimeSpan>>,
+    last_frame: Cell<Option<SignedDuration>>,
 }
 
 ferro_class!(MaterialRipple: Control);

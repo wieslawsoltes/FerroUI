@@ -3,7 +3,7 @@ use crate::primitives::TemplatedControlImpl;
 use crate::{
     ContentControl, ContentControlImpl, ContentControlImplExt, ControlImpl, TransitionCompletedEventArgs,
 };
-use ferroui_base::animation::{CrossFade, IPageTransition, TimeSpan};
+use ferroui_base::animation::{CrossFade, IPageTransition, SignedDuration};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{
     Interactive, InteractiveImpl, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies,
@@ -189,7 +189,7 @@ struct ImmutableCrossFade {
 }
 
 impl ImmutableCrossFade {
-    fn new(duration: TimeSpan) -> Self {
+    fn new(duration: SignedDuration) -> Self {
         Self { inner: CrossFade::with_duration(duration) }
     }
 }
@@ -210,7 +210,7 @@ ferro_properties! {
     impl TransitioningContentControl {
         /// Defines the `PageTransition` property.
         pub fn page_transition_property() -> StyledProperty<Option<Rc<dyn IPageTransition>>> {
-            let default: Rc<dyn IPageTransition> = Rc::new(ImmutableCrossFade::new(TimeSpan::from_milliseconds(125.0)));
+            let default: Rc<dyn IPageTransition> = Rc::new(ImmutableCrossFade::new(SignedDuration::from_milliseconds(125.0)));
             FerroProperty::register::<TransitioningContentControl, _>("PageTransition", Some(default))
         }
 

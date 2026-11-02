@@ -268,7 +268,7 @@ fn native_template_and_data_template_scopes_render_actual_parts_without_changing
 #[cfg(feature = "render-smoke")]
 #[test]
 fn standalone_template_sample_keeps_content_and_light_theme_brushes_in_a_dark_workspace() {
-    use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+    use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
     use ferroui_base::data::core::ValueTypes;
     use ferroui_base::media::Color;
     use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
@@ -280,11 +280,11 @@ fn standalone_template_sample_keeps_content_and_light_theme_brushes_in_a_dark_wo
     use std::rc::Rc;
 
     struct PreviewClock {
-        subject: LightweightSubject<TimeSpan>,
+        subject: LightweightSubject<SignedDuration>,
         state: Cell<PlayState>,
     }
-    impl IObservable<TimeSpan> for PreviewClock {
-        fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+    impl IObservable<SignedDuration> for PreviewClock {
+        fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
             self.subject.subscribe(observer)
         }
     }
@@ -350,7 +350,7 @@ fn standalone_template_sample_keeps_content_and_light_theme_brushes_in_a_dark_wo
         ferroui_base::threading::Dispatcher::ui_thread().run_jobs(None);
         clock
             .subject
-            .on_next(TimeSpan::from_seconds(f64::from(tick)));
+            .on_next(SignedDuration::from_seconds(f64::from(tick)));
         window.update_layout();
     }
     {

@@ -5,12 +5,12 @@
 //! installs; without one, local time is UTC.
 
 use super::DateTime;
-use crate::animation::TimeSpan;
+use crate::animation::SignedDuration;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Gives the offset of local time from UTC at a UTC instant.
-pub type LocalUtcOffsetProvider = Rc<dyn Fn(DateTime) -> TimeSpan>;
+pub type LocalUtcOffsetProvider = Rc<dyn Fn(DateTime) -> SignedDuration>;
 
 crate::ferro_thread_local! {
     // TIMEZONE-SEAM: platform crates install the offset of the system time zone here
@@ -23,7 +23,7 @@ pub struct TimeZoneInfo;
 
 impl TimeZoneInfo {
     /// The largest offset from UTC, 14 hours (in either direction).
-    pub const MAX_OFFSET: TimeSpan = TimeSpan::from_ticks(14 * TimeSpan::TICKS_PER_HOUR);
+    pub const MAX_OFFSET: SignedDuration = SignedDuration::from_ticks(14 * SignedDuration::TICKS_PER_HOUR);
 
     /// Installs (or with `None` removes) the provider of the local UTC offset
     /// of the current thread and returns the previous one.
@@ -34,15 +34,15 @@ impl TimeZoneInfo {
     /// The offset of local time from UTC at the UTC instant `utc_time`
     /// (zero when no provider is installed). The offset is truncated to whole
     /// minutes and limited to 14 hours in either direction.
-    pub fn get_local_utc_offset(utc_time: DateTime) -> TimeSpan {
+    pub fn get_local_utc_offset(utc_time: DateTime) -> SignedDuration {
         let provider = LOCAL_UTC_OFFSET_PROVIDER.with(|current| current.borrow().clone());
         match provider {
             Some(provider) => {
                 let ticks = provider(utc_time).ticks();
-                let ticks = ticks - ticks % TimeSpan::TICKS_PER_MINUTE;
-                TimeSpan::from_ticks(ticks.clamp(-Self::MAX_OFFSET.ticks(), Self::MAX_OFFSET.ticks()))
+                let ticks = ticks - ticks % SignedDuration::TICKS_PER_MINUTE;
+                SignedDuration::from_ticks(ticks.clamp(-Self::MAX_OFFSET.ticks(), Self::MAX_OFFSET.ticks()))
             }
-            None => TimeSpan::ZERO,
+            None => SignedDuration::ZERO,
         }
     }
 
@@ -50,9 +50,9 @@ impl TimeZoneInfo {
     /// `local_time`. Around a transition of the offset the clock time can be
     /// ambiguous or invalid; the offset in effect after the transition is
     /// preferred.
-    pub fn get_utc_offset_of_local_time(local_time: DateTime) -> TimeSpan {
+    pub fn get_utc_offset_of_local_time(local_time: DateTime) -> SignedDuration {
         let first = Self::get_local_utc_offset(local_time);
-        if first == TimeSpan::ZERO && LOCAL_UTC_OFFSET_PROVIDER.with(|current| current.borrow().is_none()) {
+        if first == SignedDuration::ZERO && LOCAL_UTC_OFFSET_PROVIDER.with(|current| current.borrow().is_none()) {
             return first;
         }
         let ticks = (local_time.ticks() - first.ticks()).clamp(DateTime::MIN_VALUE.ticks(), DateTime::MAX_VALUE.ticks());

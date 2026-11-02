@@ -5,7 +5,7 @@ use crate::{
     MaterialAppBarSize as Variant, MaterialAppBarState, MaterialMotionRole, MaterialMotionScheme,
     MaterialTheme, register_types,
 };
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::input::{
     IPointer, InputElement, KeyModifiers, KeyboardDevice, MouseButton, NavigationMethod, Pointer,
     PointerEventArgs, PointerPointProperties, PointerPressedEventArgs, PointerReleasedEventArgs,
@@ -24,11 +24,11 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 struct Clock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
-impl IObservable<TimeSpan> for Clock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for Clock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }
@@ -422,8 +422,8 @@ fn snap_uses_default_effects_spring_and_reduced_motion_removes_live_clock_work()
     bar.set_height_offset(-60.0);
     bar.settle(0.0);
     assert!(clock.subject.has_observers());
-    clock.subject.on_next(TimeSpan::from_seconds(0.0));
-    clock.subject.on_next(TimeSpan::from_seconds(0.05));
+    clock.subject.on_next(SignedDuration::from_seconds(0.0));
+    clock.subject.on_next(SignedDuration::from_seconds(0.05));
     let expected = MaterialMotionScheme::Expressive
         .spring(MaterialMotionRole::DefaultEffects)
         .sample(0.05, -60.0, -88.0, 0.0)
@@ -443,8 +443,8 @@ fn single_row_overlap_color_uses_default_effects_and_two_row_color_uses_oklab() 
     let bar = app_bar(Variant::Small, false);
     let _window = window(&bar);
     bar.post_scroll(-20.0, 0.0);
-    clock.subject.on_next(TimeSpan::from_seconds(0.0));
-    clock.subject.on_next(TimeSpan::from_seconds(0.05));
+    clock.subject.on_next(SignedDuration::from_seconds(0.0));
+    clock.subject.on_next(SignedDuration::from_seconds(0.05));
     let a = bar
         .background()
         .unwrap()

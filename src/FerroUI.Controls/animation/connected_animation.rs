@@ -8,7 +8,7 @@ use crate::presenters::ContentPresenter;
 use crate::primitives::{OverlayLayer, TemplatedControl};
 use crate::{Border, Canvas, ControlImpl, Panel, TopLevel};
 use ferroui_base::animation::easings::{Easing, LinearEasing, SplineEasing};
-use ferroui_base::animation::{Animation, Cue, FillMode, KeyFrame, TimeSpan};
+use ferroui_base::animation::{Animation, Cue, FillMode, KeyFrame, SignedDuration};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{Layoutable, LayoutableImpl};
@@ -70,7 +70,7 @@ ferroui_base::ferro_thread_local! {
 /// ([`ConnectedAnimation::resolve_timing_and_easing`]).
 #[derive(Clone)]
 pub(crate) struct ResolvedTiming {
-    pub(crate) duration: TimeSpan,
+    pub(crate) duration: SignedDuration,
     pub(crate) easing: Easing,
     pub(crate) use_gravity_dip: bool,
     pub(crate) use_shadow: bool,
@@ -782,7 +782,7 @@ impl ConnectedAnimation {
         destination: &Ref<Visual>,
         coordinated_elements: &[Ref<Visual>],
         top_level: &TopLevel,
-        duration: TimeSpan,
+        duration: SignedDuration,
         easing: Easing,
         use_gravity_dip: bool,
         use_shadow: bool,

@@ -479,7 +479,7 @@ on purpose with a DEVIATIONS row.
 Order: T1 first (one rename, no behaviour), then T2 before T3 (markup before any property moves),
 U1 before U2 to U4, L1 before L2 (and O3 before L2), D1, G1 and X1 at any time.
 
-Status: S0 (this page) is open.
+Status: S0 (this page) is merged (#506). T1 is done: the port type is `SignedDuration` and its error `NegativeDurationError`, every use in the workspace renamed (code only; the markup name `System.TimeSpan`, the .NET messages and the comments that name the .NET type stay), `TimeSpan` and `NegativeTimeSpanError` deprecated aliases, both Rust paths in the core table of the markup compiler, the time editor of the designer found by either name. The enum variants named `TimeSpan` (`FormatArg`, `KeyFrameTimingMode`, the editor kinds of the designer) keep their names. The .NET-named methods (`from_seconds`, `total_seconds`, ...) and the `Duration`-shaped ones are not part of T1: they move with T2, where the markup and the bindings learn `Duration`.
 
 ## 5. Not in scope
 

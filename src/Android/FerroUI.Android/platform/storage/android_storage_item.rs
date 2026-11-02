@@ -13,7 +13,7 @@
 //! (`std::io::Result`), and otherwise writes it to the log (error level)
 //! and answers as if nothing was found.
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::utilities::DateTimeOffset;
 use std::io::{self, Read, Seek, SeekFrom, Write};
 
@@ -85,7 +85,7 @@ pub(crate) fn date_from_unix_time_milliseconds(long_value: i64) -> Option<DateTi
     if long_value <= 0 || long_value > MAX_UNIX_TIME_MILLISECONDS {
         return None;
     }
-    Some(DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(long_value * 10_000)))
+    Some(DateTimeOffset::UNIX_EPOCH.add(SignedDuration::from_ticks(long_value * 10_000)))
 }
 
 /// A column `StorageHelper.queryLongs` read from a row.
@@ -1553,11 +1553,11 @@ mod tests {
         assert_eq!(None, date_from_unix_time_milliseconds(0));
         assert_eq!(None, date_from_unix_time_milliseconds(-1));
         assert_eq!(
-            Some(DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(10_000))),
+            Some(DateTimeOffset::UNIX_EPOCH.add(SignedDuration::from_ticks(10_000))),
             date_from_unix_time_milliseconds(1)
         );
         assert_eq!(
-            Some(DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(864_000_000_000))),
+            Some(DateTimeOffset::UNIX_EPOCH.add(SignedDuration::from_ticks(864_000_000_000))),
             date_from_unix_time_milliseconds(86_400_000)
         );
         assert!(date_from_unix_time_milliseconds(MAX_UNIX_TIME_MILLISECONDS).is_some());

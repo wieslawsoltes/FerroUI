@@ -1,7 +1,7 @@
 //! Ported from `Composition/ScaleAnimation.cs`.
 
 use super::composition_animation_helpers::{CompositionAnimationHelpers, Vector3KeyFrame};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::numerics::Vector3;
 use ferroui_base::rendering::composition::ElementComposition;
 use ferroui_base::Visual;
@@ -16,7 +16,7 @@ impl ScaleAnimation {
     pub fn set_scale_in(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply(element, Vector3::new(0.0, 0.0, 0.0), Vector3::ONE, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, Vector3::new(0.0, 0.0, 0.0), Vector3::ONE, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -26,7 +26,7 @@ impl ScaleAnimation {
     pub fn set_scale_out(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply(element, Vector3::ONE, Vector3::new(0.0, 0.0, 0.0), TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, Vector3::ONE, Vector3::new(0.0, 0.0, 0.0), SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -36,7 +36,7 @@ impl ScaleAnimation {
     pub fn set_zoom_in(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply(element, Vector3::new(1.5, 1.5, 1.0), Vector3::ONE, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, Vector3::new(1.5, 1.5, 1.0), Vector3::ONE, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -46,7 +46,7 @@ impl ScaleAnimation {
     pub fn set_zoom_out(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply(element, Vector3::ONE, Vector3::new(1.5, 1.5, 1.0), TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, Vector3::ONE, Vector3::new(1.5, 1.5, 1.0), SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -55,7 +55,7 @@ impl ScaleAnimation {
     pub fn set_bounce(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply_bounce(element, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply_bounce(element, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -76,14 +76,14 @@ impl ScaleAnimation {
                     element,
                     Vector3::new(from_scale_x as f32, from_scale_y as f32, 1.0),
                     Vector3::new(to_scale_x as f32, to_scale_y as f32, 1.0),
-                    TimeSpan::from_milliseconds(milliseconds),
+                    SignedDuration::from_milliseconds(milliseconds),
                 );
             }
         });
     }
 
     /// Applies a scale animation to the visual.
-    fn apply(visual: &Visual, from_scale: Vector3, to_scale: Vector3, duration: TimeSpan) {
+    fn apply(visual: &Visual, from_scale: Vector3, to_scale: Vector3, duration: SignedDuration) {
         let Some(composition_visual) = ElementComposition::get_element_visual(visual) else {
             return;
         };
@@ -97,7 +97,7 @@ impl ScaleAnimation {
     }
 
     /// Applies a bounce animation to the visual.
-    fn apply_bounce(visual: &Visual, duration: TimeSpan) {
+    fn apply_bounce(visual: &Visual, duration: SignedDuration) {
         let Some(composition_visual) = ElementComposition::get_element_visual(visual) else {
             return;
         };

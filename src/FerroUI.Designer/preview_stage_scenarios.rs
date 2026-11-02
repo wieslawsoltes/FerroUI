@@ -2,7 +2,7 @@
 //! The authored document is read-only here. Classes, native state animations and
 //! disposable preview values belong exclusively to the candidate RuntimePreview.
 use crate::runtime::{PreviewStatus, RuntimePreview};
-use ferroui_base::animation::{IClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, PlayState, SignedDuration};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::{Ref, StyledElement, WeakRef};
 use ferroui_controls::ContentControl;
@@ -39,7 +39,7 @@ impl Drop for StageScenarioGuard {
             return;
         };
         clock.set_play_state(PlayState::Stop);
-        clock.subject.on_next(TimeSpan::from_seconds(self.endpoint));
+        clock.subject.on_next(SignedDuration::from_seconds(self.endpoint));
         let installed: Rc<dyn IClock> = clock;
         if let Some(host) = self.host.take().and_then(|host| host.upgrade()) {
             if host
@@ -222,8 +222,8 @@ pub(crate) fn apply_stage_states(
         collection.add(&change.selected);
     }
     preview.host.update_layout();
-    clock.subject.on_next(TimeSpan::ZERO);
-    clock.subject.on_next(TimeSpan::from_seconds(endpoint));
+    clock.subject.on_next(SignedDuration::ZERO);
+    clock.subject.on_next(SignedDuration::from_seconds(endpoint));
     // Literal endpoints retain the same deterministic overlay as preview_state_at.
     // Expressions are never evaluated or replaced here: native animations own them.
     preview.preview_samples(&samples)?;
@@ -232,7 +232,7 @@ pub(crate) fn apply_stage_states(
 }
 
 struct StageStateClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
 
@@ -245,8 +245,8 @@ impl Default for StageStateClock {
     }
 }
 
-impl IObservable<TimeSpan> for StageStateClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for StageStateClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }

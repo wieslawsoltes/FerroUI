@@ -4,7 +4,7 @@
 use super::transitions::{CardStackPageTransition, WaveRevealPageTransition};
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::animation::{
-    CompositePageTransition, CrossFade, IPageTransition, PageSlide, Rotate3DTransition, SlideAxis, TimeSpan,
+    CompositePageTransition, CrossFade, IPageTransition, PageSlide, Rotate3DTransition, SlideAxis, SignedDuration,
 };
 use ferroui_base::interactivity::Interactive;
 use ferroui_base::media::RotateTransform;
@@ -185,15 +185,15 @@ impl CarouselPage {
 
         let transition: Option<Option<Rc<dyn IPageTransition>>> = match self.transition().selected_index() {
             0 => Some(None),
-            1 => Some(Some(Rc::new(PageSlide::with_duration(TimeSpan::from_seconds(0.25), axis)))),
-            2 => Some(Some(Rc::new(CrossFade::with_duration(TimeSpan::from_seconds(0.25))))),
-            3 => Some(Some(Rc::new(Rotate3DTransition::with_duration(TimeSpan::from_seconds(0.5), axis, None)))),
-            4 => Some(Some(Rc::new(CardStackPageTransition::with_duration(TimeSpan::from_seconds(0.5), axis)))),
-            5 => Some(Some(Rc::new(WaveRevealPageTransition::with_duration(TimeSpan::from_seconds(0.8), axis)))),
+            1 => Some(Some(Rc::new(PageSlide::with_duration(SignedDuration::from_seconds(0.25), axis)))),
+            2 => Some(Some(Rc::new(CrossFade::with_duration(SignedDuration::from_seconds(0.25))))),
+            3 => Some(Some(Rc::new(Rotate3DTransition::with_duration(SignedDuration::from_seconds(0.5), axis, None)))),
+            4 => Some(Some(Rc::new(CardStackPageTransition::with_duration(SignedDuration::from_seconds(0.5), axis)))),
+            5 => Some(Some(Rc::new(WaveRevealPageTransition::with_duration(SignedDuration::from_seconds(0.8), axis)))),
             6 => {
                 let composite = CompositePageTransition::new();
-                composite.add(Rc::new(PageSlide::with_duration(TimeSpan::from_seconds(0.25), axis)));
-                composite.add(Rc::new(CrossFade::with_duration(TimeSpan::from_seconds(0.25))));
+                composite.add(Rc::new(PageSlide::with_duration(SignedDuration::from_seconds(0.25), axis)));
+                composite.add(Rc::new(CrossFade::with_duration(SignedDuration::from_seconds(0.25))));
                 Some(Some(Rc::new(composite)))
             }
             _ => None,

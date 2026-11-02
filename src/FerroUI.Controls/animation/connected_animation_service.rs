@@ -3,7 +3,7 @@ use super::ConnectedAnimation;
 use ferroui_base::rendering::composition::Compositor;
 use crate::TopLevel;
 use ferroui_base::animation::easings::Easing;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::{ferro_class, ferro_class_info, instantiate, FerroObject, FerroObjectImpl, Ref, Visual, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -35,7 +35,7 @@ ferroui_base::ferro_thread_local! {
 pub struct ConnectedAnimationService {
     base: FerroObject,
     animations: RefCell<HashMap<String, Rc<ConnectedAnimation>>>,
-    default_duration: Cell<TimeSpan>,
+    default_duration: Cell<SignedDuration>,
     default_easing_function: RefCell<Option<Easing>>,
     /// The flights of the composition engine that have not ended (`m_animations` of
     /// `CConnectedAnimationService`), coordinated ones included.
@@ -55,7 +55,7 @@ impl ConnectedAnimationService {
         Self {
             base: FerroObject::construct(),
             animations: RefCell::new(HashMap::new()),
-            default_duration: Cell::new(TimeSpan::from_milliseconds(300.0)),
+            default_duration: Cell::new(SignedDuration::from_milliseconds(300.0)),
             default_easing_function: RefCell::new(None),
             flights: RefCell::new(Vec::new()),
             tick_requested: Cell::new(false),
@@ -129,13 +129,13 @@ impl ConnectedAnimationService {
 
     /// Gets the default duration applied to all animations whose
     /// configuration does not specify one. Defaults to 300 ms.
-    pub fn default_duration(&self) -> TimeSpan {
+    pub fn default_duration(&self) -> SignedDuration {
         self.default_duration.get()
     }
 
     /// Sets the default duration applied to all animations whose
     /// configuration does not specify one.
-    pub fn set_default_duration(&self, value: TimeSpan) {
+    pub fn set_default_duration(&self, value: SignedDuration) {
         self.default_duration.set(value);
     }
 

@@ -2,7 +2,7 @@
 
 use ferroui_base::animation::{
     Animation, AnimationTask, CompositePageTransition, CrossFade, Cue, IPageTransition, KeyFrame, PageSlide, SlideAxis,
-    TimeSpan,
+    SignedDuration,
 };
 use ferroui_base::data::model::{BindableList, Event, INotifyPropertyChanged};
 use ferroui_base::ferro_markup_type;
@@ -158,7 +158,7 @@ impl TransitioningContentControlPageViewModel {
             ]);
         }
 
-        let duration = TimeSpan::from_milliseconds(f64::from(duration));
+        let duration = SignedDuration::from_milliseconds(f64::from(duration));
         let cross_fade: Rc<dyn IPageTransition> = Rc::new(CrossFade::with_duration(duration));
         let slide_horizontally: Rc<dyn IPageTransition> =
             Rc::new(PageSlide::with_duration(duration, SlideAxis::Horizontal));
@@ -316,7 +316,7 @@ ferro_markup_type!(class PageTransition {
 /// the new one from nothing.
 #[derive(Default)]
 pub struct CustomTransition {
-    duration: Cell<TimeSpan>,
+    duration: Cell<SignedDuration>,
 }
 
 impl PartialEq for CustomTransition {
@@ -332,16 +332,16 @@ impl CustomTransition {
     }
 
     /// Initializes a new instance with the duration of the animation.
-    pub fn with_duration(duration: TimeSpan) -> Self {
+    pub fn with_duration(duration: SignedDuration) -> Self {
         Self { duration: Cell::new(duration) }
     }
 
     /// The duration of the animation.
-    pub fn duration(&self) -> TimeSpan {
+    pub fn duration(&self) -> SignedDuration {
         self.duration.get()
     }
 
-    pub fn set_duration(&self, value: TimeSpan) {
+    pub fn set_duration(&self, value: SignedDuration) {
         self.duration.set(value);
     }
 
@@ -427,12 +427,12 @@ ferro_markup_type!(class CustomTransition {
     interfaces: [Rc<dyn IPageTransition>],
     constructors: [
         () => || Rc::new(CustomTransition::new()),
-        (TimeSpan) => |duration: TimeSpan| Rc::new(CustomTransition::with_duration(duration)),
+        (SignedDuration) => |duration: SignedDuration| Rc::new(CustomTransition::with_duration(duration)),
     ],
     properties: [
-        Duration: TimeSpan {
+        Duration: SignedDuration {
             get: |this: &Rc<CustomTransition>| this.duration(),
-            set: |this: &Rc<CustomTransition>, value: TimeSpan| this.set_duration(value)
+            set: |this: &Rc<CustomTransition>, value: SignedDuration| this.set_duration(value)
         },
     ],
 });
@@ -453,7 +453,7 @@ mod tests {
         );
         assert!(page_transitions.items().get(0).transition().is_none());
         let slide = page_transitions.items().get(2).transition().expect("a transition");
-        assert_eq!(TimeSpan::from_milliseconds(500.0), slide.as_page_slide().expect("a slide").duration());
+        assert_eq!(SignedDuration::from_milliseconds(500.0), slide.as_page_slide().expect("a slide").duration());
         assert_eq!(SlideAxis::Horizontal, slide.as_page_slide().expect("a slide").orientation());
         let composite = page_transitions.items().get(4).transition().expect("a transition");
         assert_eq!(3, composite.as_composite_page_transition().expect("a composite").page_transitions().len());
@@ -466,14 +466,14 @@ mod tests {
         assert_eq!(6, page_transitions.items().count());
         assert_eq!(1, changed.get());
         let slide = page_transitions.items().get(3).transition().expect("a transition");
-        assert_eq!(TimeSpan::from_milliseconds(750.0), slide.as_page_slide().expect("a slide").duration());
+        assert_eq!(SignedDuration::from_milliseconds(750.0), slide.as_page_slide().expect("a slide").duration());
     }
 
     #[test]
     fn a_custom_transition_has_no_duration_until_it_is_given_one() {
         let transition = CustomTransition::new();
-        assert_eq!(TimeSpan::ZERO, transition.duration());
-        transition.set_duration(TimeSpan::from_milliseconds(250.0));
-        assert_eq!(TimeSpan::from_milliseconds(250.0), transition.duration());
+        assert_eq!(SignedDuration::ZERO, transition.duration());
+        transition.set_duration(SignedDuration::from_milliseconds(250.0));
+        assert_eq!(SignedDuration::from_milliseconds(250.0), transition.duration());
     }
 }

@@ -6,7 +6,7 @@
 use crate::motion::{
     MaterialMotionRole, MaterialMotionScheme, MaterialSpringState, animations_enabled,
 };
-use ferroui_base::animation::{IGlobalClock, TimeSpan};
+use ferroui_base::animation::{IGlobalClock, SignedDuration};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
@@ -250,7 +250,7 @@ impl MaterialSegmentedContent {
         self.last_frame.set(None);
         let weak = self.to_ref().downgrade();
         let subscription =
-            clock.subscribe(Rc::new(AnonymousObserver::new(move |time: TimeSpan| {
+            clock.subscribe(Rc::new(AnonymousObserver::new(move |time: SignedDuration| {
                 let Some(this) = weak.upgrade() else {
                     return;
                 };

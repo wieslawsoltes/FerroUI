@@ -12,7 +12,7 @@
 use crate::motion::{MaterialSpringEasing, MaterialSpringSample};
 use ferroui_base::animation::animators::{CornerRadiusAnimator, DoubleAnimator, ThicknessAnimator};
 use ferroui_base::animation::{
-    Animatable, AnimatorDrivenTransition, IClock, TimeSpan, Transition, TransitionBase,
+    Animatable, AnimatorDrivenTransition, IClock, SignedDuration, Transition, TransitionBase,
     TransitionBaseImpl,
 };
 use ferroui_base::data::BindingPriority;
@@ -98,7 +98,7 @@ macro_rules! implement_transition {
             }
             pub fn with_property(
                 property: &'static FerroProperty,
-                duration: TimeSpan,
+                duration: SignedDuration,
             ) -> Ref<Self> {
                 let result = Self::new();
                 result.set_property(Some(property));
@@ -203,7 +203,7 @@ impl SpringValue for Thickness {
 /// Kept by the target's transition state, never by a shared resource or the target's observer.
 struct SpringFrame {
     current: [MaterialSpringSample; 4],
-    last_tick: Option<TimeSpan>,
+    last_tick: Option<SignedDuration>,
     clock_id: *const (),
     completed: bool,
 }
@@ -244,7 +244,7 @@ fn apply_spring<C: Transition<T>, T: SpringValue>(
     let property = property
         .as_styled::<T>()
         .expect("Material transitions require a styled property");
-    if spring.motion_disabled() || base.duration() <= TimeSpan::ZERO {
+    if spring.motion_disabled() || base.duration() <= SignedDuration::ZERO {
         return control.bind(
             property,
             Observable::return_(new_value),
@@ -313,7 +313,7 @@ struct SpringObservable<T: SpringValue> {
     frame: Rc<RefCell<SpringFrame>>,
     origin: [MaterialSpringSample; 4],
     target: [f64; 4],
-    start_at: Cell<Option<TimeSpan>>,
+    start_at: Cell<Option<SignedDuration>>,
     duration: f64,
     delay: f64,
     spring: MaterialSpringEasing,
@@ -368,8 +368,8 @@ impl<T: SpringValue> IObservable<T> for SpringObservable<T> {
     }
 }
 
-impl<T: SpringValue> IObserver<TimeSpan> for SpringObservable<T> {
-    fn on_next(&self, tick: TimeSpan) {
+impl<T: SpringValue> IObserver<SignedDuration> for SpringObservable<T> {
+    fn on_next(&self, tick: SignedDuration) {
         if !self.core.has_observer() {
             return;
         }
@@ -432,7 +432,7 @@ mod tests {
     use ferroui_controls::{Border, Button, Control, Window};
 
     struct TestClock {
-        ticks: LightweightSubject<TimeSpan>,
+        ticks: LightweightSubject<SignedDuration>,
     }
     impl TestClock {
         fn new() -> Rc<Self> {
@@ -441,11 +441,11 @@ mod tests {
             })
         }
         fn tick(&self, seconds: f64) {
-            self.ticks.on_next(TimeSpan::from_seconds(seconds));
+            self.ticks.on_next(SignedDuration::from_seconds(seconds));
         }
     }
-    impl IObservable<TimeSpan> for TestClock {
-        fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+    impl IObservable<SignedDuration> for TestClock {
+        fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
             self.ticks.subscribe(observer)
         }
     }
@@ -666,7 +666,7 @@ mod tests {
         let _app = crate::tests::support::start_themed_application();
         let clock = TestClock::new();
         let transition = width_transition(MaterialMotionRole::FastSpatial);
-        transition.set_duration(TimeSpan::ZERO);
+        transition.set_duration(SignedDuration::ZERO);
         let target = border(&clock, transition.into(), 20.0);
         target.set_width(120.0);
         assert_eq!(120.0, target.width());
@@ -694,7 +694,7 @@ mod tests {
         let _app = crate::tests::support::start_themed_application();
         let clock = TestClock::new();
         let transition = width_transition(MaterialMotionRole::FastSpatial);
-        transition.set_duration(TimeSpan::from_seconds(1.0));
+        transition.set_duration(SignedDuration::from_seconds(1.0));
         transition.set_easing(ferroui_base::animation::easings::LinearEasing::new());
         let target = border(&clock, transition.into(), 20.0);
         target.set_width(120.0);

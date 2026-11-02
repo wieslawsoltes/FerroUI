@@ -3,7 +3,7 @@
 
 use super::support::*;
 use crate::{ControlSize, MacOSTheme};
-use ferroui_base::animation::{IterationCount, PageSlide, SlideAxis, TimeSpan, TransitionBase};
+use ferroui_base::animation::{IterationCount, PageSlide, SlideAxis, SignedDuration, TransitionBase};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::input::{platform::PlatformHotkeyConfiguration, PointerType};
 use ferroui_base::media::{AcrylicBackgroundSource, Color, ExperimentalAcrylicMaterial};
@@ -97,12 +97,12 @@ fn reduce_motion_updates_existing_transition_durations_and_can_be_restored() {
     let transition = border.transitions().expect("the transition collection").get(0)
         .as_object().and_then(|object| object.cast::<TransitionBase>()).expect("the transition object");
     let original = transition.duration();
-    assert!(original > TimeSpan::ZERO);
+    assert!(original > SignedDuration::ZERO);
     assert!(resource::<IterationCount>(&theme, "MacOSProgressPulseIterations", &ThemeVariant::light()).is_infinite());
     theme.set_reduce_motion(true);
-    assert_eq!(TimeSpan::ZERO, transition.duration(), "the already-attached transition is updated");
+    assert_eq!(SignedDuration::ZERO, transition.duration(), "the already-attached transition is updated");
     for key in ["MacOSMotionFastDuration", "MacOSMotionStandardDuration", "MacOSMotionSlowDuration"] {
-        assert_eq!(TimeSpan::ZERO, resource::<TimeSpan>(&theme, key, &ThemeVariant::light()));
+        assert_eq!(SignedDuration::ZERO, resource::<SignedDuration>(&theme, key, &ThemeVariant::light()));
     }
     assert_eq!(IterationCount::new(0), resource::<IterationCount>(&theme, "MacOSProgressPulseIterations", &ThemeVariant::light()),
         "indeterminate progress must stop repeating under reduced motion");
@@ -121,11 +121,11 @@ fn reduce_motion_replaces_navigation_transitions_on_an_existing_page() {
     window.show();
     let original = navigation.page_transition().expect("the themed navigation transition");
     let normal_duration = original.as_page_slide().expect("a page slide").duration();
-    assert!(normal_duration > TimeSpan::ZERO);
+    assert!(normal_duration > SignedDuration::ZERO);
 
     for reduced in [true, false] {
         theme.set_reduce_motion(reduced);
-        let expected_duration = if reduced { TimeSpan::ZERO } else { normal_duration };
+        let expected_duration = if reduced { SignedDuration::ZERO } else { normal_duration };
         for (key, transition, axis) in [
             ("MacOSNavigationTransition", navigation.page_transition(), SlideAxis::Horizontal),
             ("MacOSModalTransition", navigation.modal_transition(), SlideAxis::Vertical),
@@ -360,7 +360,7 @@ fn platform_accessibility_events_update_existing_resources_and_unsubscribe_with_
     settings.base.on_accessibility_settings_changed();
     assert!(theme.effective_reduce_motion() && theme.effective_reduce_transparency());
     assert!(!theme.reduce_motion() && !theme.reduce_transparency(), "system policy does not overwrite app preferences");
-    assert_eq!(TimeSpan::ZERO, resource::<TimeSpan>(&theme, "MacOSMotionStandardDuration", &ThemeVariant::light()));
+    assert_eq!(SignedDuration::ZERO, resource::<SignedDuration>(&theme, "MacOSMotionStandardDuration", &ThemeVariant::light()));
     assert_eq!(AcrylicBackgroundSource::None, glass.material().unwrap().background_source());
 
     settings.colors.set(settings.colors.get().with_contrast_preference(ColorContrastPreference::High));
@@ -404,7 +404,7 @@ fn platform_accessibility_preferences_apply_when_the_theme_is_first_attached() {
     assert!(theme.effective_reduce_transparency());
     assert!(theme.effective_increase_contrast());
     for variant in [ThemeVariant::light(), ThemeVariant::dark()] {
-        assert_eq!(TimeSpan::ZERO, resource::<TimeSpan>(&theme, "MacOSMotionFastDuration", &variant));
+        assert_eq!(SignedDuration::ZERO, resource::<SignedDuration>(&theme, "MacOSMotionFastDuration", &variant));
         let material = resource::<Ref<ExperimentalAcrylicMaterial>>(&theme, "MacOSRegularGlassMaterial", &variant);
         assert_eq!(AcrylicBackgroundSource::None, material.background_source());
         assert_eq!(255, resource::<Color>(&theme, "ControlStrokeColorDefault", &variant).a);

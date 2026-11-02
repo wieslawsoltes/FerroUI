@@ -494,7 +494,7 @@ fn type_properties_are_converted() {
 
 #[test]
 fn primitive_types_are_properly_parsed() {
-    use ferroui_base::animation::TimeSpan;
+    use ferroui_base::animation::SignedDuration;
     let host = TestHost::new();
     let parsed = |type_: &str, value: &str| -> Object {
         let res = host.run::<Rc<ConvertersTestClass>>(&format!(
@@ -514,7 +514,7 @@ fn primitive_types_are_properly_parsed() {
         assert_eq!(get::<f64>(&parsed(&format!("{prefix}:Double"), "1.5")), 1.5);
         assert_eq!(get::<f32>(&parsed(&format!("{prefix}:Single"), "2.5")), 2.5);
         assert_eq!(text(&parsed(&format!("{prefix}:String"), "Some string")), "Some string");
-        assert_eq!(get::<TimeSpan>(&parsed(&format!("{prefix}:TimeSpan"), "01:10:00")).to_string(), "01:10:00");
+        assert_eq!(get::<SignedDuration>(&parsed(&format!("{prefix}:TimeSpan"), "01:10:00")).to_string(), "01:10:00");
         assert_eq!(get::<char>(&parsed(&format!("{prefix}:Char"), "x")), 'x');
     }
 }

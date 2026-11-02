@@ -12,7 +12,7 @@ use crate::time_picker::MaterialTimePicker;
 use crate::time_picker_state::{
     DialGeometry, MaterialTimeDisplayMode, MaterialTimeSelection, angle_for, shortest_target,
 };
-use ferroui_base::animation::{IGlobalClock, TimeSpan};
+use ferroui_base::animation::{IGlobalClock, SignedDuration};
 use ferroui_base::input::{
     IPointer, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers,
     KeyboardDevice, KeyboardNavigation, NavigationMethod, PointerCaptureLostEventArgs,
@@ -617,7 +617,7 @@ impl MaterialTimePickerDial {
         self.last_frame.set(None);
         let weak = self.to_ref().downgrade();
         let subscription =
-            clock.subscribe(Rc::new(AnonymousObserver::new(move |time: TimeSpan| {
+            clock.subscribe(Rc::new(AnonymousObserver::new(move |time: SignedDuration| {
                 if let Some(this) = weak.upgrade() {
                     if !this.is_attached_to_visual_tree() || !this.is_effectively_visible() {
                         this.cancel_interaction();

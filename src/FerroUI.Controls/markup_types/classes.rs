@@ -25,7 +25,7 @@ use crate::templates::{DataTemplates, IDataTemplate, ITemplateOf};
 use crate::primitives::*;
 use crate::*;
 use ferroui_base::animation::easings::Easing;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::collections::FerroList;
 use ferroui_base::controls::{Classes, IResourceDictionary, ResourceDictionary, ResourcesChangedEventArgs};
 use ferroui_base::data::core::ValueTypes;
@@ -88,7 +88,7 @@ ferro_class_info!(ConnectedAnimationService {
     markup: {
         namespace: "FerroUI.Animation",
         properties: [
-            DefaultDuration: TimeSpan { get: ConnectedAnimationService::default_duration, set: ConnectedAnimationService::set_default_duration },
+            DefaultDuration: SignedDuration { get: ConnectedAnimationService::default_duration, set: ConnectedAnimationService::set_default_duration },
             DefaultEasingFunction: Option<Easing> { get: ConnectedAnimationService::default_easing_function, set: ConnectedAnimationService::set_default_easing_function },
         ],
     },

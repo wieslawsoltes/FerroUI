@@ -4,7 +4,7 @@ use crate::animation::i_page_transition::continuation_context;
 use crate::animation::key_frame::KeyFrameTimingMode;
 use crate::animation::{
     Animatable, AnimationError, AnimationTask, AnimatorFactory, AnimatorKeyFrame, Cue, FillMode,
-    IAnimator, IClock, IterationCount, KeyFrames, PlaybackBehavior, PlaybackDirection, TimeSpan,
+    IAnimator, IClock, IterationCount, KeyFrames, PlaybackBehavior, PlaybackDirection, SignedDuration,
 };
 use crate::data::{BindingMode, BindingPriority};
 use crate::reactive::{
@@ -39,14 +39,14 @@ crate::ferro_thread_local! {
 #[repr(C)]
 pub struct Animation {
     base: FerroObject,
-    duration: Cell<TimeSpan>,
+    duration: Cell<SignedDuration>,
     iteration_count: Cell<IterationCount>,
     playback_direction: Cell<PlaybackDirection>,
     playback_behavior: Cell<PlaybackBehavior>,
     fill_mode: Cell<FillMode>,
     easing: RefCell<Easing>,
-    delay: Cell<TimeSpan>,
-    delay_between_iterations: Cell<TimeSpan>,
+    delay: Cell<SignedDuration>,
+    delay_between_iterations: Cell<SignedDuration>,
     speed_ratio: Cell<f64>,
     children: KeyFrames,
     preview_values: RefCell<Option<Rc<CompositeDisposable>>>,
@@ -92,7 +92,7 @@ crate::ferro_properties! {
 impl Animation {
     direct_cell_property!(
         /// Defines the `Duration` property: the active time of one iteration.
-        duration_property, "Duration", TimeSpan, duration, set_duration, duration, TimeSpan::ZERO
+        duration_property, "Duration", SignedDuration, duration, set_duration, duration, SignedDuration::ZERO
     );
 
     direct_cell_property!(
@@ -121,13 +121,13 @@ impl Animation {
 
     direct_cell_property!(
         /// Defines the `Delay` property: the initial delay time.
-        delay_property, "Delay", TimeSpan, delay, set_delay, delay, TimeSpan::ZERO
+        delay_property, "Delay", SignedDuration, delay, set_delay, delay, SignedDuration::ZERO
     );
 
     direct_cell_property!(
         /// Defines the `DelayBetweenIterations` property.
-        delay_between_iterations_property, "DelayBetweenIterations", TimeSpan, delay_between_iterations,
-        set_delay_between_iterations, delay_between_iterations, TimeSpan::ZERO
+        delay_between_iterations_property, "DelayBetweenIterations", SignedDuration, delay_between_iterations,
+        set_delay_between_iterations, delay_between_iterations, SignedDuration::ZERO
     );
 
     ferro_property!(for Animation;
@@ -158,14 +158,14 @@ impl Animation {
     pub fn construct() -> Self {
         Self {
             base: FerroObject::construct(),
-            duration: Cell::new(TimeSpan::ZERO),
+            duration: Cell::new(SignedDuration::ZERO),
             iteration_count: Cell::new(IterationCount::new(1)),
             playback_direction: Cell::new(PlaybackDirection::Normal),
             playback_behavior: Cell::new(PlaybackBehavior::Auto),
             fill_mode: Cell::new(FillMode::None),
             easing: RefCell::new(Easing::default()),
-            delay: Cell::new(TimeSpan::ZERO),
-            delay_between_iterations: Cell::new(TimeSpan::ZERO),
+            delay: Cell::new(SignedDuration::ZERO),
+            delay_between_iterations: Cell::new(SignedDuration::ZERO),
             speed_ratio: Cell::new(1.0),
             children: KeyFrames::new(),
             preview_values: RefCell::new(None),

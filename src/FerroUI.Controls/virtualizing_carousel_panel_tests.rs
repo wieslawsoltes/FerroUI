@@ -17,7 +17,7 @@ use crate::{
 };
 use ferroui_base::animation::{
     CrossFade, IClock, IGlobalClock, IPageTransition, IProgressPageTransition, PageSlide, PageTransitionItem,
-    PlayState, SlideAxis, TimeSpan,
+    PlayState, SlideAxis, SignedDuration,
 };
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::TemplateBinding;
@@ -40,18 +40,18 @@ fn start() -> TestScope {
 
 /// The global clock of a test: pulses every subscriber.
 struct MockGlobalClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     play_state: Cell<PlayState>,
 }
 
 impl MockGlobalClock {
-    fn pulse(&self, time: TimeSpan) {
+    fn pulse(&self, time: SignedDuration) {
         self.subject.on_next(time);
     }
 }
 
-impl IObservable<TimeSpan> for MockGlobalClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for MockGlobalClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }
@@ -352,7 +352,7 @@ fn refreshing_swipe_wiring_reuses_a_single_recognizer() {
     let t = create_target(strs(&["foo", "bar"]));
     let (target, carousel) = (&t.panel, &t.carousel);
     let page_slide = || -> Option<Rc<dyn IPageTransition>> {
-        Some(Rc::new(PageSlide::with_duration(TimeSpan::from_milliseconds(1.0), SlideAxis::Horizontal)))
+        Some(Rc::new(PageSlide::with_duration(SignedDuration::from_milliseconds(1.0), SlideAxis::Horizontal)))
     };
 
     carousel.set_is_swipe_enabled(true);
@@ -942,8 +942,8 @@ mod gestures {
 
         panel.raise_event(&SwipeGestureEndedEventArgs::new(1, Vector::default()));
 
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_seconds(1.0));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_seconds(1.0));
         run_jobs();
 
         assert_eq!(2, carousel.selected_index());
@@ -980,7 +980,7 @@ mod gestures {
         let _app = start();
         let t = create_target_with_transition(
             strs(&["foo", "bar"]),
-            Rc::new(CrossFade::with_duration(TimeSpan::from_seconds(1.0))),
+            Rc::new(CrossFade::with_duration(SignedDuration::from_seconds(1.0))),
         );
         let (panel, carousel) = (&t.panel, &t.carousel);
         carousel.set_is_swipe_enabled(true);
@@ -1003,8 +1003,8 @@ mod gestures {
         panel.raise_event(&swipe(1, 1000.0, 0.0));
         panel.raise_event(&SwipeGestureEndedEventArgs::new(1, Vector::new(1000.0, 0.0)));
 
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_seconds(1.0));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_seconds(1.0));
         run_jobs();
 
         assert!(transition.update_call_count.get() > 0);
@@ -1025,8 +1025,8 @@ mod gestures {
         panel.raise_event(&swipe(1, 1000.0, 0.0));
         panel.raise_event(&SwipeGestureEndedEventArgs::new(1, Vector::new(1000.0, 0.0)));
 
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_seconds(1.0));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_seconds(1.0));
         run_jobs();
 
         assert_eq!(1, carousel.selected_index());
@@ -1071,8 +1071,8 @@ mod gestures {
         panel.raise_event(&swipe(1, 1000.0, 0.0));
         panel.raise_event(&SwipeGestureEndedEventArgs::new(1, Vector::new(1000.0, 0.0)));
 
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_seconds(1.0));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_seconds(1.0));
         run_jobs();
 
         assert_eq!(Some(true), hidden_when_reset.get());
@@ -1095,8 +1095,8 @@ mod gestures {
 
         panel.raise_event(&SwipeGestureEndedEventArgs::new(1, Vector::default()));
 
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_seconds(0.1));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_seconds(0.1));
         run_jobs();
 
         let post_release_progresses: Vec<f64> =
@@ -1104,7 +1104,7 @@ mod gestures {
 
         assert!(post_release_progresses.iter().any(|&p| p > 0.0 && p < release_start_progress));
 
-        clock.pulse(TimeSpan::from_seconds(1.0));
+        clock.pulse(SignedDuration::from_seconds(1.0));
         run_jobs();
 
         assert_eq!(0.0, *transition.progresses.borrow().last().unwrap());
@@ -1124,9 +1124,9 @@ mod gestures {
 
         carousel.set_selected_index(1);
 
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_seconds(0.1));
-        clock.pulse(TimeSpan::from_seconds(1.0));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_seconds(0.1));
+        clock.pulse(SignedDuration::from_seconds(1.0));
         run_jobs();
 
         let progresses = transition.progresses.borrow();
@@ -1330,7 +1330,7 @@ mod gestures {
     #[test]
     fn vertical_swipe_forward_realizes_next_item() {
         let _app = start();
-        let transition = Rc::new(PageSlide::with_duration(TimeSpan::from_seconds(1.0), SlideAxis::Vertical));
+        let transition = Rc::new(PageSlide::with_duration(SignedDuration::from_seconds(1.0), SlideAxis::Vertical));
         let t = create_target_with_transition(strs(&["foo", "bar"]), transition);
         let (panel, carousel) = (&t.panel, &t.carousel);
         carousel.set_is_swipe_enabled(true);
@@ -1357,8 +1357,8 @@ mod gestures {
         panel.raise_event(&swipe(1, 1000.0, 0.0));
         panel.raise_event(&SwipeGestureEndedEventArgs::new(1, Vector::new(1000.0, 0.0)));
 
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_milliseconds(50.0));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_milliseconds(50.0));
         run_jobs();
 
         assert_eq!(0, carousel.selected_index());

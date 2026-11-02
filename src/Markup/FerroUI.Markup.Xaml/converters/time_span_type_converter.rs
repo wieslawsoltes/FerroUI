@@ -3,7 +3,7 @@
 use super::type_converter::{text_of, type_converter_markup};
 use super::{ITypeDescriptorContext, TypeConverter};
 use crate::XamlLoadError;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::BoxedValue;
@@ -30,10 +30,10 @@ impl TypeConverter for TimeSpanTypeConverter {
             let secs: f64 = value_str.trim().parse().map_err(|_| {
                 XamlLoadError::with_message(format!("The input string '{value_str}' was not in a correct format."))
             })?;
-            return Ok(Some(Rc::new(TimeSpan::from_seconds(secs))));
+            return Ok(Some(Rc::new(SignedDuration::from_seconds(secs))));
         }
 
-        let time_span = TimeSpan::parse(value_str).map_err(|e| XamlLoadError::with_message(e.to_string()))?;
+        let time_span = SignedDuration::parse(value_str).map_err(|e| XamlLoadError::with_message(e.to_string()))?;
         Ok(Some(Rc::new(time_span)))
     }
 }

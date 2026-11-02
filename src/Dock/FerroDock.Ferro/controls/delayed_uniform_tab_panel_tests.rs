@@ -111,8 +111,8 @@ fn original_maximum_immediate_shrink_and_viewport_only_expansion() {
         let p = panel(3);
         assert_eq!(p.max_tab_width(), 220.0);
         assert_eq!(p.min_tab_width(), 80.0);
-        assert_eq!(p.expansion_delay(), TimeSpan::from_seconds(1.0));
-        assert_eq!(p.resize_animation_duration(), TimeSpan::ZERO);
+        assert_eq!(p.expansion_delay(), SignedDuration::from_seconds(1.0));
+        assert_eq!(p.resize_animation_duration(), SignedDuration::ZERO);
         assert!(p
             .get_value(DelayedUniformTabPanel::animated_tab_width_property())
             .is_nan());
@@ -120,7 +120,7 @@ fn original_maximum_immediate_shrink_and_viewport_only_expansion() {
         widths(&p, 220.0);
         layout(&p, 500.0);
         widths(&p, 164.0);
-        p.set_expansion_delay(TimeSpan::from_seconds(10.0));
+        p.set_expansion_delay(SignedDuration::from_seconds(10.0));
         layout(&p, 1000.0);
         widths(&p, 220.0);
     });
@@ -129,7 +129,7 @@ fn original_maximum_immediate_shrink_and_viewport_only_expansion() {
 fn original_close_expands_only_after_the_configured_dispatcher_delay() {
     run_task(|| async {
         let p = panel(4);
-        p.set_expansion_delay(TimeSpan::from_milliseconds(40.0));
+        p.set_expansion_delay(SignedDuration::from_milliseconds(40.0));
         layout(&p, 500.0);
         widths(&p, 122.0);
         p.children().remove_at(3);
@@ -143,7 +143,7 @@ fn original_close_expands_only_after_the_configured_dispatcher_delay() {
 fn original_repeated_closes_restart_the_delay_and_defer_viewport_expansion() {
     run_task(|| async {
         let p = panel(6);
-        p.set_expansion_delay(TimeSpan::from_milliseconds(80.0));
+        p.set_expansion_delay(SignedDuration::from_milliseconds(80.0));
         layout(&p, 1000.0);
         let compact = p.children().get(0).bounds().width;
         p.children().remove_at(5);
@@ -155,7 +155,7 @@ fn original_repeated_closes_restart_the_delay_and_defer_viewport_expansion() {
         widths(&p, compact);
         assert!(wait(&p, 220.0, 1000.0).await >= Duration::from_millis(60));
         let p = panel(4);
-        p.set_expansion_delay(TimeSpan::from_milliseconds(50.0));
+        p.set_expansion_delay(SignedDuration::from_milliseconds(50.0));
         layout(&p, 500.0);
         p.children().remove_at(3);
         layout(&p, 500.0);
@@ -168,14 +168,14 @@ fn original_repeated_closes_restart_the_delay_and_defer_viewport_expansion() {
 fn source_delay_change_restarts_pending_timer_and_signed_nonpositive_delay_is_immediate() {
     run_task(|| async {
         let p = panel(4);
-        p.set_expansion_delay(TimeSpan::from_milliseconds(100.0));
+        p.set_expansion_delay(SignedDuration::from_milliseconds(100.0));
         layout(&p, 500.0);
         p.children().remove_at(3);
         layout(&p, 500.0);
-        p.set_expansion_delay(TimeSpan::from_milliseconds(40.0));
+        p.set_expansion_delay(SignedDuration::from_milliseconds(40.0));
         widths(&p, 122.0);
         assert!(wait(&p, 164.0, 500.0).await >= Duration::from_millis(20));
-        for delay in [TimeSpan::ZERO, TimeSpan::from_ticks(-1)] {
+        for delay in [SignedDuration::ZERO, SignedDuration::from_ticks(-1)] {
             let p = panel(4);
             p.set_expansion_delay(delay);
             layout(&p, 500.0);
@@ -190,7 +190,7 @@ fn source_delay_change_restarts_pending_timer_and_signed_nonpositive_delay_is_im
 fn source_hidden_children_minimum_width_negative_spacing_and_empty_reset() {
     run(|| {
         let p = panel(3);
-        p.set_expansion_delay(TimeSpan::ZERO);
+        p.set_expansion_delay(SignedDuration::ZERO);
         p.set_item_spacing(-6.0);
         p.children().get(1).set_is_visible(false);
         layout(&p, 300.0);
@@ -252,7 +252,7 @@ fn source_duration_installs_actual_cubic_double_transition_and_clears_it() {
     run(|| {
         let p = panel(1);
         assert!(p.transitions().is_none());
-        p.set_resize_animation_duration(TimeSpan::from_milliseconds(180.0));
+        p.set_resize_animation_duration(SignedDuration::from_milliseconds(180.0));
         let transitions = p.transitions().unwrap();
         assert_eq!(transitions.count(), 1);
         let transition = transitions.get(0);
@@ -265,9 +265,9 @@ fn source_duration_installs_actual_cubic_double_transition_and_clears_it() {
             .unwrap()
             .cast::<DoubleTransition>()
             .unwrap();
-        assert_eq!(object.duration(), TimeSpan::from_milliseconds(180.0));
+        assert_eq!(object.duration(), SignedDuration::from_milliseconds(180.0));
         assert_eq!(object.easing().ease(0.5), 0.875);
-        p.set_resize_animation_duration(TimeSpan::from_ticks(-1));
+        p.set_resize_animation_duration(SignedDuration::from_ticks(-1));
         assert!(p.transitions().is_none());
     });
 }
@@ -300,7 +300,7 @@ fn actual_original_dotnet_layout_corpus_matches_native_desired_extent_and_every_
             let fields: Vec<_> = line.split('\t').collect();
             let number = |index: usize| fields[index].parse::<f64>().unwrap();
             let p = panel(fields[0].parse().unwrap());
-            p.set_expansion_delay(TimeSpan::ZERO);
+            p.set_expansion_delay(SignedDuration::ZERO);
             p.set_max_tab_width(number(2));
             p.set_min_tab_width(number(3));
             p.set_item_spacing(number(4));
@@ -401,7 +401,7 @@ fn source_constructor_timer_subscription_is_inherited_by_native_derived_panels()
             base: DelayedUniformTabPanel::construct(),
         });
         p.set_item_spacing(4.0);
-        p.set_expansion_delay(TimeSpan::from_milliseconds(30.0));
+        p.set_expansion_delay(SignedDuration::from_milliseconds(30.0));
         for _ in 0..4 {
             p.children().add(Border::new());
         }

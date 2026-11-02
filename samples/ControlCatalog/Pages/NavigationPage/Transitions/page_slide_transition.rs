@@ -1,7 +1,7 @@
 //! Port of `Pages/NavigationPage/Transitions/PageSlideTransition.cs`.
 
 use ferroui_base::animation::easings::{Easing, LinearEasing};
-use ferroui_base::animation::{Animation, AnimationTask, Cue, FillMode, IPageTransition, KeyFrame, TimeSpan};
+use ferroui_base::animation::{Animation, AnimationTask, Cue, FillMode, IPageTransition, KeyFrame, SignedDuration};
 use ferroui_base::media::TranslateTransform;
 use ferroui_base::styling::Setter;
 use ferroui_base::threading::{CancellationToken, DispatcherTask};
@@ -20,7 +20,7 @@ pub enum PageSlideTransitionAxis {
 
 /// Transitions between two pages by sliding them horizontally or vertically.
 pub struct PageSlideTransition {
-    duration: Cell<TimeSpan>,
+    duration: Cell<SignedDuration>,
     axis: Cell<PageSlideTransitionAxis>,
     slide_easing: RefCell<Easing>,
 }
@@ -35,14 +35,14 @@ impl PageSlideTransition {
     /// `new PageSlideTransition()`.
     pub fn new() -> Self {
         Self {
-            duration: Cell::new(TimeSpan::from_milliseconds(300.0)),
+            duration: Cell::new(SignedDuration::from_milliseconds(300.0)),
             axis: Cell::new(PageSlideTransitionAxis::Horizontal),
             slide_easing: RefCell::new(LinearEasing.into()),
         }
     }
 
     /// `new PageSlideTransition(duration, axis)`.
-    pub fn with_duration(duration: TimeSpan, axis: PageSlideTransitionAxis) -> Self {
+    pub fn with_duration(duration: SignedDuration, axis: PageSlideTransitionAxis) -> Self {
         let result = Self::new();
         result.set_duration(duration);
         result.set_axis(axis);
@@ -59,11 +59,11 @@ impl PageSlideTransition {
     }
 
     /// The duration of the transition.
-    pub fn duration(&self) -> TimeSpan {
+    pub fn duration(&self) -> SignedDuration {
         self.duration.get()
     }
 
-    pub fn set_duration(&self, value: TimeSpan) {
+    pub fn set_duration(&self, value: SignedDuration) {
         self.duration.set(value)
     }
 
@@ -183,12 +183,12 @@ mod tests {
     #[test]
     fn defaults_and_the_constructor_with_a_duration_and_an_axis() {
         let transition = PageSlideTransition::new();
-        assert_eq!(TimeSpan::from_milliseconds(300.0), transition.duration());
+        assert_eq!(SignedDuration::from_milliseconds(300.0), transition.duration());
         assert_eq!(PageSlideTransitionAxis::Horizontal, transition.axis());
 
         let transition =
-            PageSlideTransition::with_duration(TimeSpan::from_milliseconds(40.0), PageSlideTransitionAxis::Vertical);
-        assert_eq!(TimeSpan::from_milliseconds(40.0), transition.duration());
+            PageSlideTransition::with_duration(SignedDuration::from_milliseconds(40.0), PageSlideTransitionAxis::Vertical);
+        assert_eq!(SignedDuration::from_milliseconds(40.0), transition.duration());
         assert_eq!(PageSlideTransitionAxis::Vertical, transition.axis());
     }
 }

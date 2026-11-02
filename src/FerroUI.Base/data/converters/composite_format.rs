@@ -65,7 +65,7 @@ use crate::utilities::number_format::{
     pattern, NEGATIVE_CURRENCY_FORMATS, NEGATIVE_NUMBER_FORMATS, NEGATIVE_PERCENT_FORMATS, POSITIVE_CURRENCY_FORMATS,
     POSITIVE_PERCENT_FORMATS,
 };
-use crate::animation::TimeSpan;
+use crate::animation::SignedDuration;
 use crate::utilities::{CultureInfo, DateTime, DateTimeOffset, Decimal, NumberFormatInfo};
 use crate::{BoxedValue, DoNothingType, UnsetValueType};
 use std::fmt;
@@ -102,7 +102,7 @@ pub enum FormatArg<'a> {
     /// A date and time with an offset from UTC.
     DateTimeOffset(DateTimeOffset),
     /// A time interval: formatted with time span format strings.
-    TimeSpan(TimeSpan),
+    TimeSpan(SignedDuration),
 }
 
 /// The error of a composite format operation: the equivalent of the format
@@ -331,7 +331,7 @@ pub fn format_values_with(
             Decimal => |v| FormatArg::Decimal(*v),
             DateTime => |v| FormatArg::DateTime(*v),
             DateTimeOffset => |v| FormatArg::DateTimeOffset(*v),
-            TimeSpan => |v| FormatArg::TimeSpan(*v),
+            SignedDuration => |v| FormatArg::TimeSpan(*v),
             &'static str => |v| FormatArg::Str(v),
         );
         if let Some(s) = value.downcast_ref::<String>() {

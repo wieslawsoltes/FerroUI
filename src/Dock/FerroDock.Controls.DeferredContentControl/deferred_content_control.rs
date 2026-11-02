@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
 use crate::{presentation, reveal, scheduling, target::TargetState};
 use crate::{DeferredContentPresenter, DeferredContentScheduling};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::TemplateBinding;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
@@ -153,7 +153,7 @@ impl DeferredContentControl {
         self.remove_queued_presentation();
         let presenter = self.presenter.borrow().clone();
         if let Some(presenter) = presenter {
-            apply_state(&presenter, None, None, TimeSpan::ZERO);
+            apply_state(&presenter, None, None, SignedDuration::ZERO);
         }
         self.applied_content.replace(None);
         self.applied_template.replace(None);
@@ -184,7 +184,7 @@ impl DeferredContentControl {
                 .unwrap_or_else(|| scheduling::resolve_timeline(self))
                 .reveal_duration()
         } else {
-            TimeSpan::ZERO
+            SignedDuration::ZERO
         };
         let presenter = self.presenter.borrow().clone().expect("ready presenter");
         apply_state(&presenter, content.clone(), template.clone(), duration);
@@ -247,7 +247,7 @@ fn apply_state(
     presenter: &ContentPresenter,
     content: Option<BoxedValue>,
     template: Option<Rc<dyn IDataTemplate>>,
-    duration: TimeSpan,
+    duration: SignedDuration,
 ) {
     if let Some(deferred) = presenter.to_ref().cast::<DeferredContentPresenter>() {
         deferred.apply_deferred_state(content, template, duration);

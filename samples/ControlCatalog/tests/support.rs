@@ -287,14 +287,14 @@ pub fn class_constructs(path: &str, application: TestApplication) {
 /// most tests never do.
 #[derive(Default)]
 pub struct TestGlobalClock {
-    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::TimeSpan>,
+    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::SignedDuration>,
     play_state: std::cell::Cell<Option<ferroui_base::animation::PlayState>>,
 }
 
-impl ferroui_base::reactive::IObservable<ferroui_base::animation::TimeSpan> for TestGlobalClock {
+impl ferroui_base::reactive::IObservable<ferroui_base::animation::SignedDuration> for TestGlobalClock {
     fn subscribe(
         &self,
-        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::TimeSpan>>,
+        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::SignedDuration>>,
     ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
         self.subject.subscribe(observer)
     }
@@ -302,7 +302,7 @@ impl ferroui_base::reactive::IObservable<ferroui_base::animation::TimeSpan> for 
 
 impl TestGlobalClock {
     /// Ticks the clock: its subscribers are told that the time is `time`.
-    pub fn pulse(&self, time: ferroui_base::animation::TimeSpan) {
+    pub fn pulse(&self, time: ferroui_base::animation::SignedDuration) {
         use ferroui_base::reactive::IObserver;
         self.subject.on_next(time);
     }

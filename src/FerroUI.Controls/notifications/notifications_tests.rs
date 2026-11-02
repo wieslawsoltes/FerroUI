@@ -6,7 +6,7 @@ use crate::primitives::{AdornerLayer, VisualLayerManager};
 use crate::test_support::{boxed_str, test_scope};
 use crate::testing::{TestServices, UnitTestApplication};
 use crate::{Button, Control, Window};
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::data::model::INotifyPropertyChanged;
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::layout::ILayoutManager;
@@ -390,18 +390,18 @@ mod additional_tests {
 
     /// The global clock of a test: pulses every subscriber.
     struct MockGlobalClock {
-        subject: LightweightSubject<TimeSpan>,
+        subject: LightweightSubject<SignedDuration>,
         play_state: Cell<PlayState>,
     }
 
     impl MockGlobalClock {
-        fn pulse(&self, time: TimeSpan) {
+        fn pulse(&self, time: SignedDuration) {
             self.subject.on_next(time);
         }
     }
 
-    impl IObservable<TimeSpan> for MockGlobalClock {
-        fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+    impl IObservable<SignedDuration> for MockGlobalClock {
+        fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
             self.subject.subscribe(observer)
         }
     }
@@ -459,11 +459,11 @@ mod additional_tests {
         // card leaves the panel.
         let card = manager.notifications()[0].clone();
         card.close();
-        clock.pulse(TimeSpan::ZERO);
-        clock.pulse(TimeSpan::from_seconds(1.0));
+        clock.pulse(SignedDuration::ZERO);
+        clock.pulse(SignedDuration::from_seconds(1.0));
         assert!(!card.is_closed());
         assert_eq!(items.children().count(), 2);
-        clock.pulse(TimeSpan::from_seconds(1.25));
+        clock.pulse(SignedDuration::from_seconds(1.25));
         assert!(card.is_closed());
         assert_eq!(items.children().count(), 1);
 
