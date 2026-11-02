@@ -2579,3 +2579,99 @@ mod bitmaps {
         assert!(decoded_files >= 10, "{decoded_files}");
     }
 }
+
+/// The custom effects FerroUI ships drawn as their graphs (#455, E2) in the
+/// CPU mode: `push_custom_effect_graph` around a scene of opaque and
+/// translucent colours, compared with the CPU reference of each effect
+/// applied to the same scene drawn plain (the same scene and tolerances as
+/// the tests of `ferroui-skia`).
+mod custom_effect_graphs {
+    use super::*;
+    use ferroui_base::media::effects::library::{
+        BrightnessContrastEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect, SepiaEffect, TintEffect,
+    };
+    use ferroui_base::media::effects::ImmutableCustomEffect;
+    use ferroui_base::platform::AlphaFormat;
+    use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
+
+    const SIZE: i32 = 100;
+
+    /// Opaque red and steel blue squares and a translucent orange band, with
+    /// aliased edges.
+    fn scene(context: &mut dyn IDrawingContextImpl) {
+        let steel_blue = Color::from_rgb(48, 128, 192);
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.push_render_options(aliased());
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(30.0, 30.0, 20.0, 20.0), &no_shadows());
+        context.draw_rectangle(Some(&solid(steel_blue)), None, rect(52.0, 30.0, 20.0, 20.0), &no_shadows());
+        context.draw_rectangle(Some(&solid(orange)), None, rect(30.0, 52.0, 42.0, 18.0), &no_shadows());
+        context.pop_render_options();
+    }
+
+    /// The premultiplied RGBA pixels of the target.
+    fn pixels(target: &Target) -> Vec<u8> {
+        let framebuffer = target.bitmap.lock();
+        let premultiplied = framebuffer.alpha_format() != AlphaFormat::Unpremul;
+        let mut rgba = Vec::with_capacity((SIZE * SIZE * 4) as usize);
+        for y in 0..SIZE {
+            for x in 0..SIZE {
+                let (r, g, b, a) = read_framebuffer_pixel(&*framebuffer, x, y);
+                let scale = |c: u8| if premultiplied { c } else { ((u32::from(c) * u32::from(a) + 127) / 255) as u8 };
+                rgba.extend_from_slice(&[scale(r), scale(g), scale(b), a]);
+            }
+        }
+        framebuffer.dispose();
+        rgba
+    }
+
+    /// The largest difference of a channel, and the mean difference.
+    fn difference(a: &[u8], b: &[u8]) -> (u8, f64) {
+        assert_eq!(a.len(), b.len());
+        let largest = a.iter().zip(b).map(|(a, b)| a.abs_diff(*b)).max().unwrap_or(0);
+        let total: u64 = a.iter().zip(b).map(|(a, b)| u64::from(a.abs_diff(*b))).sum();
+        (largest, total as f64 / a.len() as f64)
+    }
+
+    /// Draws `effect` around the scene and compares it with the CPU
+    /// reference: within `largest` levels per channel, and within a mean of
+    /// half a level.
+    fn assert_matches_reference(effect: ImmutableCustomEffect, largest: u8) {
+        assert!(effect.has_graph(), "{effect}");
+        let plain = Target::new();
+        plain.draw(scene);
+        let mut expected = pixels(&plain);
+        assert!(effect.cpu_reference(&mut expected, SIZE as usize, SIZE as usize, 1.0), "{effect}");
+
+        let target = Target::new();
+        target.draw(|context| {
+            let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
+            assert!(push_custom_effect_graph(context, &effect, bounds));
+            scene(context);
+            assert!(pop_custom_effect_graph(context, &effect, bounds));
+        });
+        let actual = pixels(&target);
+        let (most, mean) = difference(&expected, &actual);
+        assert!(most <= largest && mean <= 0.5, "{effect}: largest difference {most}, mean {mean}");
+        let (changed, _) = difference(&pixels(&plain), &actual);
+        assert!(changed > 0, "{effect}: the content is changed");
+    }
+
+    #[test]
+    fn the_colour_effects_match_their_cpu_references() {
+        assert_matches_reference(ImmutableCustomEffect::new(TintEffect { color: Colors::TEAL, strength: 0.6 }), 2);
+        assert_matches_reference(ImmutableCustomEffect::new(GrayscaleEffect { amount: 0.8 }), 2);
+        assert_matches_reference(ImmutableCustomEffect::new(SepiaEffect { amount: 0.9 }), 2);
+        assert_matches_reference(ImmutableCustomEffect::new(SaturationEffect { saturation: 1.7 }), 2);
+        assert_matches_reference(
+            ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.1, contrast: 1.4 }),
+            2,
+        );
+        assert_matches_reference(ImmutableCustomEffect::new(InvertEffect { amount: 1.0 }), 2);
+    }
+
+    #[test]
+    fn the_glow_matches_its_cpu_reference() {
+        let glow = GlowEffect { color: Colors::BLUE, blur_radius: 4.0, intensity: 0.8 };
+        assert_matches_reference(ImmutableCustomEffect::new(glow), 12);
+    }
+}
