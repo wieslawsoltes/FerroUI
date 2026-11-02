@@ -96,6 +96,23 @@ fn build_script_output_is_the_checked_in_reference() {
     assert!(built.documents == checked_in.documents, "the documents of the .xamlmeta of the build script differ from the checked-in reference");
 }
 
+/// The shipping budget covers the entire indexed archive. Cross-check the source
+/// inventory so dropping dictionaries cannot make the budget pass.
+#[cfg(feature = "packed-theme")]
+#[test]
+fn packed_theme_contains_every_compiled_document_within_budget() {
+    use ferroui_markup_xaml_loader::binary_document::pack::ThemePack;
+    let bytes = include_bytes!(concat!(env!("OUT_DIR"), "/winui.fxp"));
+    assert!(bytes.len() < 600_000, "WinUI archive is {} bytes", bytes.len());
+    let archive = ThemePack::open(bytes).unwrap();
+    let expected: Vec<_> = crate::assets::documents().iter()
+        .filter(|(name, _)| !crate::assets::is_excluded(name))
+        .map(|(name, _)| name.trim_start_matches('/'))
+        .collect();
+    assert_eq!(archive.paths().collect::<Vec<_>>(), expected);
+    archive.validate().unwrap();
+}
+
 /// Model and runtime hosts must choose the same rows, factory order, source locations,
 /// reload identifiers and payload bytes even with different host-side type tables.
 #[cfg(all(feature = "binary-resources", not(feature = "packed-theme")))]
