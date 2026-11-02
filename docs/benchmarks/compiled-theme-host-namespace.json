@@ -1,0 +1,52 @@
+{
+  "workload": "Unpruned WinUI model-host build.rs in new output directories with identical sources and four dependency models, without downstream rustc or linking. Order ABBA. Other builds ran on the host.",
+  "platform": "Linux x86_64",
+  "toolchain": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "build_dependencies": "opt-level=0, debuginfo=0, debug assertions on, incremental off",
+  "optimization_commit": "b3b1eaefb30564730d01a4d875e6fc2442708599",
+  "models": {
+    "ferroui-base": "5e1a35b64725f9cdf5933bf5d2161406c0e93d59638315cd0d60a96f39435b14",
+    "ferroui-controls": "1fd8616b75697f8adcf4b4d28901f330bbb96ff85e52ed89e31acaf4d5ce2ae9",
+    "ferroui-markup-xaml": "5b1f43e1e6b037ac428f1734580e88349301554e6ca67bd2788fa7f7c475adeb",
+    "ferroui-dialogs": "cf3383c300e9d3f129edff28a49109b02f5e0c0ed0ff271cf31a0d0bc002e1c2"
+  },
+  "mean_wall_s": {
+    "before": 30.908437628000684,
+    "after": 18.35344975049975
+  },
+  "wall_reduction_percent": 40.61993695251381,
+  "runs": [
+    {
+      "which": "before",
+      "wall_s": 30.735197358000732,
+      "cpu_s": 30.711545,
+      "rust_bytes": 7903409,
+      "rust_sha256": "84f0be9ec2d2585d2953fa3728a58dffe317a5b23c9e2f5d1a3b951b28ed3c78",
+      "metadata_sha256": "ff340e30302515555af8a31b09e174ccae28ab9e47e16533a1de64ca0954fa47"
+    },
+    {
+      "which": "after",
+      "wall_s": 17.96581161099857,
+      "cpu_s": 17.946109,
+      "rust_bytes": 7903409,
+      "rust_sha256": "84f0be9ec2d2585d2953fa3728a58dffe317a5b23c9e2f5d1a3b951b28ed3c78",
+      "metadata_sha256": "ff340e30302515555af8a31b09e174ccae28ab9e47e16533a1de64ca0954fa47"
+    },
+    {
+      "which": "after",
+      "wall_s": 18.741087890000927,
+      "cpu_s": 18.718247999999996,
+      "rust_bytes": 7903409,
+      "rust_sha256": "84f0be9ec2d2585d2953fa3728a58dffe317a5b23c9e2f5d1a3b951b28ed3c78",
+      "metadata_sha256": "ff340e30302515555af8a31b09e174ccae28ab9e47e16533a1de64ca0954fa47"
+    },
+    {
+      "which": "before",
+      "wall_s": 31.081677898000635,
+      "cpu_s": 31.066107000000002,
+      "rust_bytes": 7903409,
+      "rust_sha256": "84f0be9ec2d2585d2953fa3728a58dffe317a5b23c9e2f5d1a3b951b28ed3c78",
+      "metadata_sha256": "ff340e30302515555af8a31b09e174ccae28ab9e47e16533a1de64ca0954fa47"
+    }
+  ]
+}
