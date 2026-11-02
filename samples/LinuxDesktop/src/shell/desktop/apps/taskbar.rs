@@ -307,11 +307,7 @@ fn window_card(
                 f.set_is_open(false);
             }
             if let Some(session) = &activate {
-                if session.activate(id) {
-                    if let Some(host) = session.compositor() {
-                        host.focus_client();
-                    }
-                }
+                activate_window(session, id);
             }
         })
         .on_key_down(move |e| {

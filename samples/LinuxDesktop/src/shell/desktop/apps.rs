@@ -45,8 +45,16 @@ impl Entry {
             if layout == Layout::Taskbar && target.active && target.can_minimize {
                 session.minimize(target.id);
             } else {
-                session.activate(target.id);
+                activate_window(session, target.id);
             }
+        }
+    }
+}
+
+fn activate_window(session: &crate::session::Session, id: u32) {
+    if session.activate(id) {
+        if let Some(host) = session.compositor() {
+            host.focus_client();
         }
     }
 }
@@ -280,7 +288,7 @@ fn dock_menu(shell: &Rc<Shell>, entry: &Entry) -> ferroui_base::Ref<ferroui_cont
             };
             let action = item(title, move || {
                 if let Some(s) = &session {
-                    s.activate(id);
+                    activate_window(s, id);
                 }
             });
             action.set_toggle_type(MenuItemToggleType::Radio);
