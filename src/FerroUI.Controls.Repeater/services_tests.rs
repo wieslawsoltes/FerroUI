@@ -31,7 +31,7 @@ use super::virtualization_info::{ElementOwner, VirtualizationInfo};
 use ferroui_controls::templates::{FuncDataTemplate, IDataTemplate};
 use crate::test_support::{test_scope, TestRoot};
 use ferroui_controls::{Border, Button, Control, Panel, ScrollViewer, StackPanel, TextBlock};
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::collections::NotifyCollectionChangedAction;
 use ferroui_base::data::BindingPriority;
 use ferroui_base::media::{ITransform, MatrixTransform};
@@ -45,7 +45,7 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 pub(super) struct TestClock {
-    time: LightweightSubject<TimeSpan>,
+    time: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
 impl TestClock {
@@ -60,12 +60,12 @@ impl TestClock {
         clock
     }
     pub(super) fn pulse(&self, milliseconds: f64) {
-        self.time.on_next(TimeSpan::from_milliseconds(milliseconds));
+        self.time.on_next(SignedDuration::from_milliseconds(milliseconds));
         Dispatcher::ui_thread().run_jobs(None);
     }
 }
-impl IObservable<TimeSpan> for TestClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for TestClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.time.subscribe(observer)
     }
 }

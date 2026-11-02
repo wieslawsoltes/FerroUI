@@ -38,7 +38,7 @@ fn animation_preview_final_fill_preserves_live_binding_until_disposal() {
     source.on_next(0.8);
     let clock = TestClock::new();
     let applied = animation.apply_for_preview(&target, Some(clock.as_clock()), None);
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     clock.step(seconds(1.0));
     assert_eq!(target.opacity(), 0.0);
     assert!(target.has_local_value_binding(Visual::opacity_property().as_property()));
@@ -67,7 +67,7 @@ fn animation_preview_midway_stop_restores_local_and_regular_apply_still_commits(
     target.set_opacity(0.7);
     let clock = TestClock::new();
     let preview = animation.apply_for_preview(&target, Some(clock.as_clock()), None);
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     clock.step(seconds(0.5));
     assert_eq!(target.opacity(), 0.5);
     preview.dispose();
@@ -80,7 +80,7 @@ fn animation_preview_midway_stop_restores_local_and_regular_apply_still_commits(
         None,
         true,
     );
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     clock.step(seconds(1.0));
     ordinary.dispose();
     assert_eq!(
@@ -107,7 +107,7 @@ fn animation_preview_generated_transform_is_removed_after_completion() {
     assert!(target.render_transform().is_none());
     let clock = TestClock::new();
     let preview = animation.apply_for_preview(&target, Some(clock.as_clock()), None);
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     clock.step(seconds(1.0));
     let group = target
         .render_transform()
@@ -169,8 +169,8 @@ fn animation_preview_completed_fill_keeps_original_program_precedence() {
     let later_clock = TestClock::new();
     let first_run = first.apply_for_preview(&target, Some(first_clock.as_clock()), None);
     let later_run = later.apply_for_preview(&target, Some(later_clock.as_clock()), None);
-    first_clock.step(TimeSpan::ZERO);
-    later_clock.step(TimeSpan::ZERO);
+    first_clock.step(SignedDuration::ZERO);
+    later_clock.step(SignedDuration::ZERO);
     later_clock.step(seconds(1.0));
     assert_eq!(target.opacity(), 0.75);
     first_clock.step(seconds(1.0));
@@ -220,8 +220,8 @@ fn animation_preview_shared_generated_transform_outlives_its_creator_run() {
     let scale_clock = TestClock::new();
     let rotate_run = rotate.apply_for_preview(&target, Some(rotate_clock.as_clock()), None);
     let scale_run = scale.apply_for_preview(&target, Some(scale_clock.as_clock()), None);
-    rotate_clock.step(TimeSpan::ZERO);
-    scale_clock.step(TimeSpan::ZERO);
+    rotate_clock.step(SignedDuration::ZERO);
+    scale_clock.step(SignedDuration::ZERO);
     rotate_clock.step(seconds(1.0));
     scale_clock.step(seconds(1.0));
     rotate_run.dispose();
@@ -283,7 +283,7 @@ fn animation_preview_reentrant_transform_user_retains_published_lease() {
         target.render_transform().is_some(),
         "The callback's preview retains the generated transform"
     );
-    scale_clock.step(TimeSpan::ZERO);
+    scale_clock.step(SignedDuration::ZERO);
     scale_clock.step(seconds(1.0));
     let group = target
         .render_transform()
@@ -340,7 +340,7 @@ fn control_theme_applies_animation() {
     );
     let (_root, target) = create_themed_root(&animation);
 
-    clock.pulse(TimeSpan::ZERO);
+    clock.pulse(SignedDuration::ZERO);
     assert_eq!(target.opacity(), 1.0);
 
     clock.pulse(seconds(0.5));
@@ -380,7 +380,7 @@ fn control_theme_applies_animation_with_bound_key_frame_values() {
     target.set_data_context(Some(values));
     root.set_child(&target);
 
-    clock.pulse(TimeSpan::ZERO);
+    clock.pulse(SignedDuration::ZERO);
     assert_eq!(target.opacity(), 1.0);
 
     clock.pulse(seconds(0.5));
@@ -400,7 +400,7 @@ fn style_applies_animation_with_observable_key_frame_values() {
     let animation = create_opacity_animation(SetterValue::Binding(from), SetterValue::Binding(to));
     let (_root, target) = create_root(&animation, Selectors::of_type::<Border>());
 
-    clock.pulse(TimeSpan::ZERO);
+    clock.pulse(SignedDuration::ZERO);
     assert_eq!(target.opacity(), 1.0);
 
     clock.pulse(seconds(0.5));
@@ -419,7 +419,7 @@ fn style_applies_animation() {
     );
     let (_root, target) = create_root(&animation, Selectors::of_type::<Border>());
 
-    clock.pulse(TimeSpan::ZERO);
+    clock.pulse(SignedDuration::ZERO);
     assert_eq!(target.opacity(), 1.0);
 
     clock.pulse(seconds(0.5));
@@ -442,7 +442,7 @@ fn bound_key_frame_value_follows_its_source() {
 
     use crate::reactive::IObserver;
     to.on_next(Rc::new(0.5_f64));
-    clock.pulse(TimeSpan::ZERO);
+    clock.pulse(SignedDuration::ZERO);
     clock.pulse(seconds(0.5));
     assert_eq!(target.opacity(), 0.75);
 
@@ -461,7 +461,7 @@ fn animation_of_style_with_activator_runs_while_the_style_is_active() {
     animation.set_fill_mode(FillMode::None);
     let (_root, target) = create_root(&animation, Selectors::of_type::<Border>().class("foo"));
 
-    clock.pulse(TimeSpan::ZERO);
+    clock.pulse(SignedDuration::ZERO);
     clock.pulse(seconds(0.5));
     assert_eq!(target.opacity(), 1.0);
     assert!(!target.is_animating(Visual::opacity_property()));
@@ -490,7 +490,7 @@ fn animations_are_disposed_when_the_style_is_detached() {
     animation.set_fill_mode(FillMode::None);
     let (root, target) = create_root(&animation, Selectors::of_type::<Border>());
 
-    clock.pulse(TimeSpan::ZERO);
+    clock.pulse(SignedDuration::ZERO);
     clock.pulse(seconds(0.5));
     assert_eq!(target.opacity(), 0.5);
 
@@ -552,7 +552,7 @@ fn animations_should_be_activated() {
 
     assert_eq!(0.0, target.double());
 
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     assert_eq!(5.0, target.double());
 
     clock.step(seconds(0.5));
@@ -573,7 +573,7 @@ fn animations_with_trigger_should_be_activated_and_deactivated() {
     assert_eq!(0.0, target.double());
 
     target.classes().add("foo");
-    clock.step(TimeSpan::ZERO);
+    clock.step(SignedDuration::ZERO);
     assert_eq!(5.0, target.double());
 
     clock.step(seconds(0.5));

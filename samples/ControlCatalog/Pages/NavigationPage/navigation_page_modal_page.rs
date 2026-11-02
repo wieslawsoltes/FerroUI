@@ -3,7 +3,7 @@
 
 use crate::markup::{user_control_class, xaml_class};
 use crate::pages::navigation_demo_helper::NavigationDemoHelper;
-use ferroui_base::animation::{CrossFade, IPageTransition, PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{CrossFade, IPageTransition, PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEventArgs};
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref};
 use ferroui_controls::{ComboBox, NavigationPage, SelectionChangedEventArgs, TextBlock, UserControl};
@@ -150,9 +150,9 @@ impl NavigationPageModalPage {
         };
 
         let transition: Option<Rc<dyn IPageTransition>> = match self.transition_combo().selected_index() {
-            1 => Some(Rc::new(CrossFade::with_duration(TimeSpan::from_milliseconds(250.0)))),
+            1 => Some(Rc::new(CrossFade::with_duration(SignedDuration::from_milliseconds(250.0)))),
             2 => None,
-            _ => Some(Rc::new(PageSlide::with_duration(TimeSpan::from_milliseconds(300.0), SlideAxis::Vertical))),
+            _ => Some(Rc::new(PageSlide::with_duration(SignedDuration::from_milliseconds(300.0), SlideAxis::Vertical))),
         };
         demo_nav.set_modal_transition(transition);
     }

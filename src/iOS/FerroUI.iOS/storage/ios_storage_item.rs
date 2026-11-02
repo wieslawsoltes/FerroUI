@@ -3,7 +3,7 @@
 //! ancestor of it, with.
 
 use ferroui_base::utilities::DateTimeOffset;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 
 /// The path of an item of a folder (`Path.Combine`): the name alone when
 /// it is rooted, else the folder, a separator if it lacks one, and the
@@ -24,7 +24,7 @@ pub fn combine(folder_path: &str, name: &str) -> String {
 
 /// The date of a number of seconds since 1970 (`NSDate`).
 pub fn date_from_time_interval_since_1970(seconds: f64) -> DateTimeOffset {
-    DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks((seconds * 10_000_000.0) as i64))
+    DateTimeOffset::UNIX_EPOCH.add(SignedDuration::from_ticks((seconds * 10_000_000.0) as i64))
 }
 
 #[cfg(target_os = "ios")]
@@ -625,6 +625,6 @@ mod tests {
     fn a_date_of_foundation_is_a_date_of_the_framework() {
         assert_eq!(DateTimeOffset::UNIX_EPOCH, date_from_time_interval_since_1970(0.0));
         let date = date_from_time_interval_since_1970(86_400.5);
-        assert_eq!(DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(864_005_000_000)), date);
+        assert_eq!(DateTimeOffset::UNIX_EPOCH.add(SignedDuration::from_ticks(864_005_000_000)), date);
     }
 }

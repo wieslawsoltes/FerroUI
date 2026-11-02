@@ -33,7 +33,7 @@ fn check_transitions_interpolation_positive_bounds_clamp() {
     border.set_opacity(0.0);
 
     clock.pulse(seconds(0.0));
-    clock.pulse(TimeSpan::from_milliseconds(1001.0));
+    clock.pulse(SignedDuration::from_milliseconds(1001.0));
 
     assert_eq!(border.opacity(), 0.0);
 }
@@ -53,9 +53,9 @@ fn record(
 #[test]
 fn transition_instance_with_zero_duration_is_completed_on_first_tick() {
     let clock = TestClock::new();
-    let (values, completed) = record(&TransitionInstance::new(clock.as_clock(), TimeSpan::ZERO, TimeSpan::ZERO));
+    let (values, completed) = record(&TransitionInstance::new(clock.as_clock(), SignedDuration::ZERO, SignedDuration::ZERO));
 
-    clock.pulse(TimeSpan::from_milliseconds(10.0));
+    clock.pulse(SignedDuration::from_milliseconds(10.0));
 
     assert_eq!(*values.borrow(), vec![0.0, 1.0]);
     assert!(completed.get());
@@ -66,12 +66,12 @@ fn transition_instance_properly_calculates_delay_and_duration_values() {
     let clock = TestClock::new();
     let (values, completed) = record(&TransitionInstance::new(
         clock.as_clock(),
-        TimeSpan::from_milliseconds(30.0),
-        TimeSpan::from_milliseconds(70.0),
+        SignedDuration::from_milliseconds(30.0),
+        SignedDuration::from_milliseconds(70.0),
     ));
 
     for _ in 0..=10 {
-        clock.pulse(TimeSpan::from_milliseconds(10.0));
+        clock.pulse(SignedDuration::from_milliseconds(10.0));
     }
 
     let round = |v: f64| (v * 10_000.0).round() / 10_000.0;
@@ -89,10 +89,10 @@ fn transition_instance_properly_calculates_delay_and_duration_values() {
 fn transition_instance_with_delay_but_zero_duration_is_completed_after_delay() {
     let clock = TestClock::new();
     let (values, completed) =
-        record(&TransitionInstance::new(clock.as_clock(), TimeSpan::from_milliseconds(30.0), TimeSpan::ZERO));
+        record(&TransitionInstance::new(clock.as_clock(), SignedDuration::from_milliseconds(30.0), SignedDuration::ZERO));
 
     for _ in 0..=4 {
-        clock.pulse(TimeSpan::from_milliseconds(10.0));
+        clock.pulse(SignedDuration::from_milliseconds(10.0));
     }
 
     // One iteration sooner than the test above, because the start of the

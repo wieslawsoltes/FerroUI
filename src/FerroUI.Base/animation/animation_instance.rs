@@ -2,7 +2,7 @@ use crate::animation::animators::{interpolation_handler, Animator};
 use crate::animation::easings::Easing;
 use crate::animation::{
     Animatable, Animation, Clock, FillMode, IClock, IterationType, PlayState, PlaybackDirection,
-    TimeSpan,
+    SignedDuration,
 };
 use crate::data::BindingPriority;
 use crate::reactive::{
@@ -56,17 +56,17 @@ pub(crate) struct AnimationInstance<A: Animator> {
     last_interp_value: RefCell<A::Value>,
     initial_kf_value: RefCell<A::Value>,
     iteration_count: Cell<Option<i64>>,
-    initial_delay: Cell<TimeSpan>,
-    iteration_delay: Cell<TimeSpan>,
-    duration: Cell<TimeSpan>,
-    time_prev: Cell<TimeSpan>,
+    initial_delay: Cell<SignedDuration>,
+    iteration_delay: Cell<SignedDuration>,
+    duration: Cell<SignedDuration>,
+    time_prev: Cell<SignedDuration>,
     anim_time_prev: Cell<f64>,
     playback_direction: Cell<PlaybackDirection>,
     playback_direction_prev: Cell<PlaybackDirection>,
     speed_ratio: Cell<f64>,
     speed_ratio_prev: Cell<f64>,
     time_moves_backwards: Cell<bool>,
-    time_of_last_change: Cell<TimeSpan>,
+    time_of_last_change: Cell<SignedDuration>,
     anim_time_of_last_change: Cell<f64>,
     should_pause_on_invisible: bool,
 }
@@ -75,8 +75,8 @@ pub(crate) struct AnimationInstance<A: Animator> {
 /// completes or is disposed, whether or not its subscription is kept.
 struct StepObserver<A: Animator>(Rc<AnimationInstance<A>>);
 
-impl<A: Animator> IObserver<TimeSpan> for StepObserver<A> {
-    fn on_next(&self, value: TimeSpan) {
+impl<A: Animator> IObserver<SignedDuration> for StepObserver<A> {
+    fn on_next(&self, value: SignedDuration) {
         self.0.step(value);
     }
 }
@@ -117,17 +117,17 @@ impl<A: Animator> AnimationInstance<A> {
             last_interp_value: RefCell::new(A::Value::default()),
             initial_kf_value: RefCell::new(A::Value::default()),
             iteration_count: Cell::new(None),
-            initial_delay: Cell::new(TimeSpan::ZERO),
-            iteration_delay: Cell::new(TimeSpan::ZERO),
-            duration: Cell::new(TimeSpan::ZERO),
-            time_prev: Cell::new(TimeSpan::ZERO),
+            initial_delay: Cell::new(SignedDuration::ZERO),
+            iteration_delay: Cell::new(SignedDuration::ZERO),
+            duration: Cell::new(SignedDuration::ZERO),
+            time_prev: Cell::new(SignedDuration::ZERO),
             anim_time_prev: Cell::new(0.0),
             playback_direction: Cell::new(PlaybackDirection::Normal),
             playback_direction_prev: Cell::new(PlaybackDirection::Normal),
             speed_ratio: Cell::new(1.0),
             speed_ratio_prev: Cell::new(1.0),
             time_moves_backwards: Cell::new(false),
-            time_of_last_change: Cell::new(TimeSpan::ZERO),
+            time_of_last_change: Cell::new(SignedDuration::ZERO),
             anim_time_of_last_change: Cell::new(0.0),
             should_pause_on_invisible,
         });
@@ -152,7 +152,7 @@ impl<A: Animator> AnimationInstance<A> {
 
         self.initial_delay.set(animation.delay());
 
-        if self.initial_delay.get() < TimeSpan::ZERO {
+        if self.initial_delay.get() < SignedDuration::ZERO {
             return Err(AnimationError(
                 "Delay value cannot be negative.".to_string(),
             ));
@@ -160,7 +160,7 @@ impl<A: Animator> AnimationInstance<A> {
 
         self.duration.set(animation.duration());
 
-        if self.duration.get() < TimeSpan::ZERO {
+        if self.duration.get() < SignedDuration::ZERO {
             return Err(AnimationError(
                 "Duration value cannot be negative.".to_string(),
             ));
@@ -169,7 +169,7 @@ impl<A: Animator> AnimationInstance<A> {
         self.iteration_delay
             .set(animation.delay_between_iterations());
 
-        if self.iteration_delay.get() < TimeSpan::ZERO {
+        if self.iteration_delay.get() < SignedDuration::ZERO {
             return Err(AnimationError(
                 "DelayBetweenIterations value cannot be negative.".to_string(),
             ));
@@ -291,7 +291,7 @@ impl<A: Animator> AnimationInstance<A> {
         self.update_neutral_value();
     }
 
-    pub(crate) fn step(&self, frame_tick: TimeSpan) {
+    pub(crate) fn step(&self, frame_tick: SignedDuration) {
         let paused = self
             .clock
             .borrow()
@@ -508,7 +508,7 @@ impl<A: Animator> AnimationInstance<A> {
         }
     }
 
-    fn internal_step(&self, time: TimeSpan) -> Result<(), AnimationError> {
+    fn internal_step(&self, time: SignedDuration) -> Result<(), AnimationError> {
         self.do_play_states();
         if self.preview_complete.get() {
             return Ok(());
@@ -560,7 +560,7 @@ impl<A: Animator> AnimationInstance<A> {
             anim_time
         };
 
-        if self.initial_delay.get() > TimeSpan::ZERO {
+        if self.initial_delay.get() > SignedDuration::ZERO {
             let is_currently_inside_delay = self.apply_initial_delay(&mut anim_time_positive);
             if is_currently_inside_delay {
                 self.do_initial_delay();

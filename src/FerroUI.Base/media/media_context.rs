@@ -1,5 +1,5 @@
 use super::media_context_clock::MediaContextClock;
-use crate::animation::{IGlobalClock, TimeSpan};
+use crate::animation::{IGlobalClock, SignedDuration};
 use crate::platform::IPlatformRenderInterface;
 use crate::rendering::composition::server::ServerObjectId;
 use crate::rendering::composition::transport::CompositionBatch;
@@ -188,7 +188,7 @@ impl MediaContext {
     fn render_core(&self) {
         let now = self.elapsed();
         if !self.animations_are_waiting_for_composition.get() {
-            self.clock.pulse(TimeSpan::from(now));
+            self.clock.pulse(SignedDuration::from(now));
         }
 
         // Since new animations could be started during the layout and can
@@ -301,7 +301,7 @@ impl MediaContext {
 
     /// Runs `action` with the frame time on the next pulse of the animation
     /// clock.
-    pub fn request_animation_frame(&self, action: impl FnOnce(TimeSpan) + 'static) {
+    pub fn request_animation_frame(&self, action: impl FnOnce(SignedDuration) + 'static) {
         self.clock.request_animation_frame(action);
     }
 

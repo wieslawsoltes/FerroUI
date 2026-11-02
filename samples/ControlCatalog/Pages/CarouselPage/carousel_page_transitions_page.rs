@@ -3,7 +3,7 @@
 
 use crate::markup::{user_control_class, xaml_class};
 use crate::pages::transitions::{CardStackPageTransition, WaveRevealPageTransition};
-use ferroui_base::animation::{CrossFade, IPageTransition, PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{CrossFade, IPageTransition, PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::interactivity::{IRoutedEventArgs, RoutedEventArgs};
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref};
 use ferroui_controls::{
@@ -84,7 +84,7 @@ impl CarouselPageTransitionsPage {
             return;
         }
 
-        let duration = TimeSpan::from_milliseconds(300.0);
+        let duration = SignedDuration::from_milliseconds(300.0);
         let (transition, mode_name): (Option<Rc<dyn IPageTransition>>, &'static str) =
             match self.get_control::<ComboBox>("TransitionCombo").selected_index() {
                 0 => (None, "None"),
@@ -93,14 +93,14 @@ impl CarouselPageTransitionsPage {
                 3 => (Some(Rc::new(PageSlide::with_duration(duration, SlideAxis::Vertical))), "PageSlide"),
                 4 => (
                     Some(Rc::new(CardStackPageTransition::with_duration(
-                        TimeSpan::from_milliseconds(400.0),
+                        SignedDuration::from_milliseconds(400.0),
                         SlideAxis::Horizontal,
                     ))),
                     "Card Stack",
                 ),
                 5 => (
                     Some(Rc::new(WaveRevealPageTransition::with_duration(
-                        TimeSpan::from_milliseconds(600.0),
+                        SignedDuration::from_milliseconds(600.0),
                         SlideAxis::Horizontal,
                     ))),
                     "Wave Reveal",

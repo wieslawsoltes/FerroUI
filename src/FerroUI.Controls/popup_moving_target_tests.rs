@@ -24,7 +24,7 @@ use crate::primitives::popup_positioning::{IPopupPositioner, PopupPositionerPara
 use crate::primitives::Popup;
 use crate::testing::{MockWindowImpl, MockWindowingPlatform, TestServices, UnitTestApplication};
 use crate::{Border, Control, PlacementMode, Window};
-use ferroui_base::animation::{IGlobalClock, IPageTransition, PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{IGlobalClock, IPageTransition, PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::{Brushes, MediaContext};
 use ferroui_base::threading::DispatcherTask;
@@ -89,7 +89,7 @@ fn shell(transition_milliseconds: f64) -> Shell {
 
     let nav = NavigationPage::new();
     let transition: Rc<dyn IPageTransition> = Rc::new(PageSlide::with_duration(
-        TimeSpan::from_milliseconds(transition_milliseconds),
+        SignedDuration::from_milliseconds(transition_milliseconds),
         SlideAxis::Horizontal,
     ));
     nav.set_page_transition(Some(transition));

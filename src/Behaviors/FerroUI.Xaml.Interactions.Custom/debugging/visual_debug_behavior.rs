@@ -1,7 +1,7 @@
 //! Port of `Debugging/VisualDebugBehavior.cs`.
 
 use super::visual_debug_adorner::VisualDebugAdorner;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::media::{Color, Colors, SolidColorBrush};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::{
@@ -38,8 +38,8 @@ ferro_properties! {
         }
 
         /// Identifies the `Duration` property.
-        pub fn duration_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<VisualDebugBehavior, _>("Duration", TimeSpan::from_seconds(0.5))
+        pub fn duration_property() -> StyledProperty<SignedDuration> {
+            FerroProperty::register::<VisualDebugBehavior, _>("Duration", SignedDuration::from_seconds(0.5))
         }
     }
 }
@@ -78,11 +78,11 @@ impl VisualDebugBehavior {
     }
 
     /// Gets or sets the duration of the highlight.
-    pub fn duration(&self) -> TimeSpan {
+    pub fn duration(&self) -> SignedDuration {
         self.get_value(Self::duration_property())
     }
 
-    pub fn set_duration(&self, value: TimeSpan) {
+    pub fn set_duration(&self, value: SignedDuration) {
         self.set_value(Self::duration_property(), value)
     }
 

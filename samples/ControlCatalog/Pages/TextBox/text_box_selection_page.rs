@@ -2,7 +2,7 @@
 //! document `Pages/TextBox/TextBoxSelectionPage.xaml`.
 
 use crate::markup::{user_control_class, xaml_class};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEventArgs};
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, FerroPropertyChangedEventArgs, Ref};
 use ferroui_controls::{ComboBox, SelectionChangedEventArgs, TextBlock, TextBox, UserControl};
@@ -126,10 +126,10 @@ impl TextBoxSelectionPage {
 
     fn on_caret_blink_changed(&self, _sender: &Interactive, _e: &SelectionChangedEventArgs) {
         self.caret_box().set_caret_blink_interval(match self.caret_blink_combo().selected_index() {
-            1 => TimeSpan::from_milliseconds(150.0),
-            2 => TimeSpan::from_seconds(1.0),
-            3 => TimeSpan::ZERO,
-            _ => TimeSpan::from_milliseconds(500.0),
+            1 => SignedDuration::from_milliseconds(150.0),
+            2 => SignedDuration::from_seconds(1.0),
+            3 => SignedDuration::ZERO,
+            _ => SignedDuration::from_milliseconds(500.0),
         });
     }
 

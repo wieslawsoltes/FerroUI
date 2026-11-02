@@ -4,7 +4,7 @@ use crate::{
     MaterialSnackbarHost, MaterialSnackbarMessage, MaterialSnackbarResult,
     MaterialSnackbarTimeoutPolicy, MaterialTheme,
 };
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::threading::{Dispatcher, DispatcherTimer};
@@ -21,11 +21,11 @@ use std::task::{Context, Poll, Waker};
 use std::time::Duration;
 
 struct TestClock {
-    subject: LightweightSubject<TimeSpan>,
+    subject: LightweightSubject<SignedDuration>,
     state: Cell<PlayState>,
 }
-impl IObservable<TimeSpan> for TestClock {
-    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+impl IObservable<SignedDuration> for TestClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
         self.subject.subscribe(observer)
     }
 }
@@ -350,8 +350,8 @@ fn entry_motion_samples_fast_effects_opacity_and_fast_spatial_scale() {
     let visual = target.current_snackbar().unwrap();
     assert_eq!(0.0, visual.opacity());
     assert!(clock.subject.has_observers());
-    clock.subject.on_next(TimeSpan::from_seconds(0.0));
-    clock.subject.on_next(TimeSpan::from_seconds(0.05));
+    clock.subject.on_next(SignedDuration::from_seconds(0.0));
+    clock.subject.on_next(SignedDuration::from_seconds(0.05));
     let scheme = MaterialMotionScheme::Expressive;
     let opacity = scheme
         .spring(MaterialMotionRole::FastEffects)
@@ -363,7 +363,7 @@ fn entry_motion_samples_fast_effects_opacity_and_fast_spatial_scale() {
         .value;
     assert!((visual.opacity() - opacity).abs() < 1e-10);
     assert!((visual.render_transform().unwrap().value().m11 - scale).abs() < 1e-10);
-    clock.subject.on_next(TimeSpan::from_seconds(2.0));
+    clock.subject.on_next(SignedDuration::from_seconds(2.0));
     assert_eq!(1.0, visual.opacity());
     assert!(
         !clock.subject.has_observers(),
@@ -378,8 +378,8 @@ fn outgoing_visual_survives_exit_fade_without_announcing_or_accepting_actions() 
     let _window = host(&target);
     let first = target.show(MaterialSnackbarMessage::new("First").with_action("Undo"));
     let outgoing = target.current_snackbar().unwrap();
-    clock.subject.on_next(TimeSpan::from_seconds(0.0));
-    clock.subject.on_next(TimeSpan::from_seconds(1.0));
+    clock.subject.on_next(SignedDuration::from_seconds(0.0));
+    clock.subject.on_next(SignedDuration::from_seconds(1.0));
     let second = target.show("Second");
     first.dismiss();
     assert_eq!(Some(second.id()), target.current_id());
@@ -390,8 +390,8 @@ fn outgoing_visual_survives_exit_fade_without_announcing_or_accepting_actions() 
     );
     assert!(!outgoing.is_hit_test_visible());
     assert!(!first.perform_action());
-    clock.subject.on_next(TimeSpan::from_seconds(1.0));
-    clock.subject.on_next(TimeSpan::from_seconds(2.0));
+    clock.subject.on_next(SignedDuration::from_seconds(1.0));
+    clock.subject.on_next(SignedDuration::from_seconds(2.0));
     assert!(!outgoing.is_attached_to_visual_tree());
     assert!(!clock.subject.has_observers());
 }

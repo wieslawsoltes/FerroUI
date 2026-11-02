@@ -1,6 +1,6 @@
 use crate::{MaterialColorRole, MaterialColorScheme, MaterialMotionRole, MaterialMotionScheme, MaterialStatusColor, MaterialTheme};
 use ferroui_base::animation::easings::Easing;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::metadata::from_markup_value;
@@ -91,7 +91,7 @@ fn reduced_motion_replaces_the_resources_consumed_by_transitions() {
     theme.set_reduced_motion(true);
     for role in MaterialMotionRole::ALL {
         let duration = theme.try_get_resource(&ResourceKey::from(format!("MaterialMotion{}Duration", role.resource_name())), None).flatten();
-        assert_eq!(from_markup_value::<TimeSpan>(&duration), Some(TimeSpan::ZERO));
+        assert_eq!(from_markup_value::<SignedDuration>(&duration), Some(SignedDuration::ZERO));
         let easing = theme.try_get_resource(&ResourceKey::from(format!("MaterialMotion{}Easing", role.resource_name())), None).flatten();
         let easing = from_markup_value::<Easing>(&easing).expect("actual transition easing");
         assert_eq!(easing.ease(0.25), 1.0);
@@ -99,7 +99,7 @@ fn reduced_motion_replaces_the_resources_consumed_by_transitions() {
     theme.set_reduced_motion(false);
     theme.set_motion_scheme(MaterialMotionScheme::Standard);
     let duration = theme.try_get_resource(&ResourceKey::from("MaterialMotionFastSpatialDuration"), None).flatten();
-    assert_eq!(from_markup_value::<TimeSpan>(&duration), Some(MaterialMotionScheme::Standard.duration(MaterialMotionRole::FastSpatial, false)));
+    assert_eq!(from_markup_value::<SignedDuration>(&duration), Some(MaterialMotionScheme::Standard.duration(MaterialMotionRole::FastSpatial, false)));
 }
 
 #[test]

@@ -1,7 +1,7 @@
 //! Ported from `Composition/RotateAnimation.cs`.
 
 use super::composition_animation_helpers::{CompositionAnimationHelpers, ScalarKeyFrame};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::rendering::composition::ElementComposition;
 use ferroui_base::Visual;
 use ferroui_controls::Control;
@@ -15,7 +15,7 @@ impl RotateAnimation {
     pub fn set_rotate_clockwise(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply(element, 0.0, 360.0, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, 0.0, 360.0, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -25,7 +25,7 @@ impl RotateAnimation {
     pub fn set_rotate_counter_clockwise(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply(element, 0.0, -360.0, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, 0.0, -360.0, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -35,7 +35,7 @@ impl RotateAnimation {
     pub fn set_rotate_in(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply(element, -180.0, 0.0, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, -180.0, 0.0, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -45,7 +45,7 @@ impl RotateAnimation {
     pub fn set_rotate_out(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply(element, 0.0, 180.0, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, 0.0, 180.0, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -55,7 +55,7 @@ impl RotateAnimation {
     pub fn set_flip(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply(element, 0.0, 180.0, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, 0.0, 180.0, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -65,7 +65,7 @@ impl RotateAnimation {
     pub fn set_swing(element: &Control, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply_swing(element, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply_swing(element, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
@@ -75,13 +75,13 @@ impl RotateAnimation {
     pub fn set_custom_rotate(element: &Control, from_angle: f64, to_angle: f64, milliseconds: f64) {
         element.loaded(move |sender, _| {
             if let Some(element) = sender.downcast_ref::<Visual>() {
-                Self::apply(element, from_angle as f32, to_angle as f32, TimeSpan::from_milliseconds(milliseconds));
+                Self::apply(element, from_angle as f32, to_angle as f32, SignedDuration::from_milliseconds(milliseconds));
             }
         });
     }
 
     /// Applies a rotation animation to the visual, from `from_angle` to `to_angle` degrees.
-    fn apply(visual: &Visual, from_angle: f32, to_angle: f32, duration: TimeSpan) {
+    fn apply(visual: &Visual, from_angle: f32, to_angle: f32, duration: SignedDuration) {
         let Some(composition_visual) = ElementComposition::get_element_visual(visual) else {
             return;
         };
@@ -97,7 +97,7 @@ impl RotateAnimation {
     }
 
     /// Applies a swing animation to the visual.
-    fn apply_swing(visual: &Visual, duration: TimeSpan) {
+    fn apply_swing(visual: &Visual, duration: SignedDuration) {
         let Some(composition_visual) = ElementComposition::get_element_visual(visual) else {
             return;
         };

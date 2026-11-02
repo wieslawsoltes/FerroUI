@@ -1,6 +1,6 @@
 use crate::animation::easings::Easing;
 use crate::animation::{
-    Animation, Cue, FillMode, IPageTransition, IProgressPageTransition, KeyFrame, PageTransitionItem, TimeSpan,
+    Animation, Cue, FillMode, IPageTransition, IProgressPageTransition, KeyFrame, PageTransitionItem, SignedDuration,
 };
 use crate::animation::i_page_transition::{start_async, when_all};
 use crate::styling::Setter;
@@ -28,11 +28,11 @@ impl Default for CrossFade {
 impl CrossFade {
     /// Creates a cross-fade with a zero duration.
     pub fn new() -> Self {
-        Self::with_duration(TimeSpan::ZERO)
+        Self::with_duration(SignedDuration::ZERO)
     }
 
     /// Creates a cross-fade with the given duration.
-    pub fn with_duration(duration: TimeSpan) -> Self {
+    pub fn with_duration(duration: SignedDuration) -> Self {
         let opacity_animation = |from: f64, to: f64| {
             let animation = Animation::new();
             animation.set_fill_mode(FillMode::Forward);
@@ -50,11 +50,11 @@ impl CrossFade {
     }
 
     /// The duration of the animation.
-    pub fn duration(&self) -> TimeSpan {
+    pub fn duration(&self) -> SignedDuration {
         self.fade_out_animation.duration()
     }
 
-    pub fn set_duration(&self, value: TimeSpan) {
+    pub fn set_duration(&self, value: SignedDuration) {
         self.fade_out_animation.set_duration(value);
         self.fade_in_animation.set_duration(value);
     }

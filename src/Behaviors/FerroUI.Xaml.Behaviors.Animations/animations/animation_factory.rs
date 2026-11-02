@@ -1,7 +1,7 @@
 //! Ported from `Animations/AnimationFactory.cs`.
 
 use crate::argument_out_of_range::{throw_if_greater_than, throw_if_less_than};
-use ferroui_base::animation::{Animation, IAnimationSetter, KeyFrame, TimeSpan};
+use ferroui_base::animation::{Animation, IAnimationSetter, KeyFrame, SignedDuration};
 use ferroui_base::styling::Setter;
 use ferroui_base::{Ref, Visual};
 use std::rc::Rc;
@@ -20,9 +20,9 @@ impl AnimationFactory {
     /// When `initial_delay` or `duration` is negative (the `ArgumentOutOfRangeException` of the
     /// reference).
     #[track_caller]
-    pub fn create_fade_in(initial_delay: TimeSpan, duration: TimeSpan) -> Ref<Animation> {
-        throw_if_less_than(initial_delay, TimeSpan::ZERO, "initialDelay");
-        throw_if_less_than(duration, TimeSpan::ZERO, "duration");
+    pub fn create_fade_in(initial_delay: SignedDuration, duration: SignedDuration) -> Ref<Animation> {
+        throw_if_less_than(initial_delay, SignedDuration::ZERO, "initialDelay");
+        throw_if_less_than(duration, SignedDuration::ZERO, "duration");
 
         let total_duration = initial_delay + duration;
         Self::create_fade_in_timeline(initial_delay, total_duration, total_duration)
@@ -40,20 +40,20 @@ impl AnimationFactory {
     /// `ArgumentOutOfRangeException` of the reference).
     #[track_caller]
     pub fn create_fade_in_timeline(
-        initial_delay: TimeSpan,
-        fade_completion_time: TimeSpan,
-        total_duration: TimeSpan,
+        initial_delay: SignedDuration,
+        fade_completion_time: SignedDuration,
+        total_duration: SignedDuration,
     ) -> Ref<Animation> {
-        throw_if_less_than(initial_delay, TimeSpan::ZERO, "initialDelay");
-        throw_if_less_than(fade_completion_time, TimeSpan::ZERO, "fadeCompletionTime");
-        throw_if_less_than(total_duration, TimeSpan::ZERO, "totalDuration");
+        throw_if_less_than(initial_delay, SignedDuration::ZERO, "initialDelay");
+        throw_if_less_than(fade_completion_time, SignedDuration::ZERO, "fadeCompletionTime");
+        throw_if_less_than(total_duration, SignedDuration::ZERO, "totalDuration");
         throw_if_greater_than(initial_delay, fade_completion_time, "initialDelay");
         throw_if_greater_than(fade_completion_time, total_duration, "fadeCompletionTime");
 
         let animation = Animation::new();
         animation.set_duration(total_duration);
         let children = animation.children();
-        children.add(KeyFrame::with_key_time(TimeSpan::ZERO, [opacity_setter(0.0)]));
+        children.add(KeyFrame::with_key_time(SignedDuration::ZERO, [opacity_setter(0.0)]));
         children.add(KeyFrame::with_key_time(initial_delay, [opacity_setter(0.0)]));
         children.add(KeyFrame::with_key_time(fade_completion_time, [opacity_setter(1.0)]));
         animation

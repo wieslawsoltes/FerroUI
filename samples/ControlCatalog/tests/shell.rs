@@ -19,7 +19,7 @@ use crate::models::{CatalogTheme, HomeSection, PageItem};
 use crate::pages::{HomePage, SectionPage, SettingsPage};
 use crate::view_models::MainWindowViewModel;
 use crate::{register_types, App, MainView};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::input::raw::{RawPointerEventArgs, RawPointerEventType};
 use ferroui_base::input::{
     IInputDevice, IInputRoot, IKeyboardDevice, IKeyboardNavigationHandler, InputElement, KeyboardDevice,
@@ -168,7 +168,7 @@ impl Shell {
         Dispatcher::ui_thread().run_jobs(None);
         let time = self.time.get() + FRAME_TIME_MS;
         self.time.set(time);
-        self.clock.pulse(TimeSpan::from_milliseconds(time));
+        self.clock.pulse(SignedDuration::from_milliseconds(time));
         Dispatcher::ui_thread().run_jobs(None);
         self.render_loop.tick();
         Dispatcher::ui_thread().run_jobs(None);

@@ -243,7 +243,7 @@ fn feedback_pages_and_callbacks_release_their_native_controls() {
 
 #[test]
 fn compact_sizing_copies_every_field_across_distinct_page_types() {
-    use ferroui_base::animation::TimeSpan;
+    use ferroui_base::animation::SignedDuration;
     use ferroui_base::utilities::DateTimeOffset;
     use ferroui_controls::{Frame, RadioButtons};
     use ferroui_controls::{DatePicker, TextBox};
@@ -261,7 +261,7 @@ fn compact_sizing_copies_every_field_across_distinct_page_types() {
     ] {
         initial.get_control::<TextBox>(name).set_text(Some(value));
     }
-    let selected = DateTimeOffset::new(2026, 10, 22, 0, 0, 0, TimeSpan::ZERO);
+    let selected = DateTimeOffset::new(2026, 10, 22, 0, 0, 0, SignedDuration::ZERO);
     initial
         .get_control::<DatePicker>("ChosenDate")
         .set_selected_date(Some(selected));

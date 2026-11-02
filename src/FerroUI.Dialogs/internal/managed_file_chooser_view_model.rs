@@ -3,7 +3,7 @@ use super::{
     ManagedFileChooserItemType, ManagedFileChooserItemViewModel, ManagedFileChooserSources,
 };
 use crate::ManagedFileDialogOptions;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::model::{Event, INotifyPropertyChanged};
 use ferroui_base::metadata::from_markup_value;
@@ -113,7 +113,7 @@ fn last_write_time(metadata: &std::fs::Metadata) -> DateTime {
         Ok(after) => (after.as_nanos() / NANOSECONDS_PER_TICK) as i64,
         Err(before) => -((before.duration().as_nanos() / NANOSECONDS_PER_TICK) as i64),
     };
-    DateTimeOffset::UNIX_EPOCH.add(TimeSpan::from_ticks(ticks)).local_date_time()
+    DateTimeOffset::UNIX_EPOCH.add(SignedDuration::from_ticks(ticks)).local_date_time()
 }
 
 /// Whether an entry is hidden from the listing when hidden files are not

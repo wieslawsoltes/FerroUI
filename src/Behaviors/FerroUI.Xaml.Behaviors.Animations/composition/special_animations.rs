@@ -1,7 +1,7 @@
 //! Ported from `Composition/SpecialAnimations.cs`.
 
 use super::composition_animation_helpers::{CompositionAnimationHelpers, ScalarKeyFrame, Vector3KeyFrame};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::numerics::{Vector2, Vector3};
 use ferroui_base::rendering::composition::{CompositionVisual, ElementComposition};
 use ferroui_controls::Control;
@@ -19,7 +19,7 @@ impl SpecialAnimations {
     fn run(
         element: &Control,
         milliseconds: f64,
-        animation: fn(&Control, &CompositionVisual, TimeSpan),
+        animation: fn(&Control, &CompositionVisual, SignedDuration),
         ensure_center_point: bool,
         anchor: Option<Vector2>,
     ) {
@@ -37,11 +37,11 @@ impl SpecialAnimations {
                 CompositionAnimationHelpers::ensure_center_point(element, &visual);
             }
 
-            animation(element, &visual, TimeSpan::from_milliseconds(milliseconds));
+            animation(element, &visual, SignedDuration::from_milliseconds(milliseconds));
         });
     }
 
-    fn apply_flip(_element: &Control, visual: &CompositionVisual, duration: TimeSpan) {
+    fn apply_flip(_element: &Control, visual: &CompositionVisual, duration: SignedDuration) {
         let rotation_frames = [
             ScalarKeyFrame::new(0.0, CompositionAnimationHelpers::degrees_to_radians(-360.0)),
             ScalarKeyFrame::new(0.4, CompositionAnimationHelpers::degrees_to_radians(-190.0)),

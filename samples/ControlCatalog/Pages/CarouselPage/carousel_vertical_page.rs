@@ -2,7 +2,7 @@
 //! `Pages/CarouselPage/CarouselVerticalPage.xaml`.
 
 use crate::markup::{user_control_class, xaml_class};
-use ferroui_base::animation::{CrossFade, IPageTransition, PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{CrossFade, IPageTransition, PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEventArgs};
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref};
 use ferroui_controls::{Button, Carousel, CheckBox, ComboBox, SelectionChangedEventArgs, TextBlock, UserControl};
@@ -91,9 +91,9 @@ impl CarouselVerticalPage {
 
     fn on_transition_changed(&self, _sender: &Interactive, _e: &SelectionChangedEventArgs) {
         let transition: Option<Rc<dyn IPageTransition>> = match self.transition_combo().selected_index() {
-            1 => Some(Rc::new(CrossFade::with_duration(TimeSpan::from_seconds(0.3)))),
+            1 => Some(Rc::new(CrossFade::with_duration(SignedDuration::from_seconds(0.3)))),
             2 => None,
-            _ => Some(Rc::new(PageSlide::with_duration(TimeSpan::from_seconds(0.3), SlideAxis::Vertical))),
+            _ => Some(Rc::new(PageSlide::with_duration(SignedDuration::from_seconds(0.3), SlideAxis::Vertical))),
         };
         self.demo_carousel().set_page_transition(transition);
     }

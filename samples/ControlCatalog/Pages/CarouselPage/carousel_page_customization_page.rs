@@ -2,7 +2,7 @@
 //! `Pages/CarouselPage/CarouselPageCustomizationPage.xaml`.
 
 use crate::markup::{user_control_class, xaml_class};
-use ferroui_base::animation::{PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEventArgs, RoutedEventHandlerToken};
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref};
 use ferroui_controls::{
@@ -92,7 +92,7 @@ impl CarouselPageCustomizationPage {
     fn on_loaded(&self, _sender: &Interactive, _e: &RoutedEventArgs) {
         let demo_carousel = self.carousel();
         demo_carousel.set_page_transition(Some(Rc::new(PageSlide::with_duration(
-            TimeSpan::from_milliseconds(300.0),
+            SignedDuration::from_milliseconds(300.0),
             SlideAxis::Horizontal,
         ))));
         // The handler belongs to a child of the page: it holds the page weakly.
@@ -126,7 +126,7 @@ impl CarouselPageCustomizationPage {
 
         let axis = if self.orientation_combo().selected_index() == 1 { SlideAxis::Vertical } else { SlideAxis::Horizontal };
         self.carousel()
-            .set_page_transition(Some(Rc::new(PageSlide::with_duration(TimeSpan::from_milliseconds(300.0), axis))));
+            .set_page_transition(Some(Rc::new(PageSlide::with_duration(SignedDuration::from_milliseconds(300.0), axis))));
         self.update_status();
     }
 

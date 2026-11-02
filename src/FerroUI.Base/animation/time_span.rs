@@ -5,7 +5,9 @@
 //! a negative `Delay` or `Duration` has to be representable so that it can be
 //! rejected when an animation runs rather than when it is declared. A
 //! [`std::time::Duration`] cannot hold any of that, so the animation API uses
-//! [`TimeSpan`] and converts from and to `Duration` at its edges.
+//! [`SignedDuration`] and converts from and to `Duration` at its edges. It is
+//! the markup type `System.TimeSpan`; the Rust name `TimeSpan` remains for one
+//! release as a deprecated alias (C5 of #423, docs/idiomatic-rust-signatures.md).
 
 use crate::utilities::FormatError;
 use std::fmt;
@@ -15,11 +17,19 @@ use std::time::Duration;
 
 /// A signed time interval with a resolution of 100 nanoseconds.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct TimeSpan {
+pub struct SignedDuration {
     ticks: i64,
 }
 
-impl TimeSpan {
+/// The former name of [`SignedDuration`].
+#[deprecated(since = "0.5.0", note = "use `SignedDuration`")]
+pub type TimeSpan = SignedDuration;
+
+/// The former name of [`NegativeDurationError`].
+#[deprecated(since = "0.5.0", note = "use `NegativeDurationError`")]
+pub type NegativeTimeSpanError = NegativeDurationError;
+
+impl SignedDuration {
     /// The number of ticks in one millisecond.
     pub const TICKS_PER_MILLISECOND: i64 = 10_000;
     /// The number of ticks in one second.
@@ -32,11 +42,11 @@ impl TimeSpan {
     pub const TICKS_PER_DAY: i64 = 864_000_000_000;
 
     /// The zero interval.
-    pub const ZERO: TimeSpan = TimeSpan { ticks: 0 };
+    pub const ZERO: SignedDuration = SignedDuration { ticks: 0 };
     /// The largest interval.
-    pub const MAX_VALUE: TimeSpan = TimeSpan { ticks: i64::MAX };
+    pub const MAX_VALUE: SignedDuration = SignedDuration { ticks: i64::MAX };
     /// The smallest (most negative) interval.
-    pub const MIN_VALUE: TimeSpan = TimeSpan { ticks: i64::MIN };
+    pub const MIN_VALUE: SignedDuration = SignedDuration { ticks: i64::MIN };
 
     /// Creates an interval from a number of 100-nanosecond ticks.
     #[inline]
@@ -100,7 +110,7 @@ impl TimeSpan {
 
     /// Parses an interval in the invariant format
     /// `[-]{ d | [d.]hh:mm[:ss[.fffffff]] | d:hh:mm:ss[.fffffff] }`.
-    pub fn parse(s: &str) -> Result<TimeSpan, FormatError> {
+    pub fn parse(s: &str) -> Result<SignedDuration, FormatError> {
         let invalid = || FormatError::from_string(format!("Invalid TimeSpan string: \"{s}\"."));
         let text = s.trim();
         let (negative, body) = match text.strip_prefix('-') {
@@ -167,7 +177,7 @@ impl TimeSpan {
                     "The TimeSpan string \"{s}\" could not be parsed because at least one of the numeric components is out of range."
                 ))
             })?;
-        Ok(TimeSpan { ticks: if negative { -ticks } else { ticks } })
+        Ok(SignedDuration { ticks: if negative { -ticks } else { ticks } })
     }
 
     fn split_days(part: &str, number: &dyn Fn(&str) -> Result<i64, FormatError>) -> Result<(i64, i64), FormatError> {
@@ -179,7 +189,7 @@ impl TimeSpan {
 }
 
 /// Members used by the date and time types and the pickers.
-impl TimeSpan {
+impl SignedDuration {
     /// The interval of the given hours, minutes and seconds (the C#
     /// constructor `TimeSpan(int, int, int)`). Panics on overflow.
     pub fn from_hms(hours: i32, minutes: i32, seconds: i32) -> Self {
@@ -263,8 +273,8 @@ impl TimeSpan {
     }
 
     /// The absolute value of the interval. Panics for [`TimeSpan::MIN_VALUE`].
-    pub fn duration(self) -> TimeSpan {
-        TimeSpan { ticks: self.ticks.checked_abs().expect("TimeSpan overflowed because the duration is too long.") }
+    pub fn duration(self) -> SignedDuration {
+        SignedDuration { ticks: self.ticks.checked_abs().expect("TimeSpan overflowed because the duration is too long.") }
     }
 
     /// Formats with a standard (`c`, `t`, `T`, `g`, `G`) or custom .NET
@@ -401,7 +411,7 @@ impl TimeSpan {
     }
 }
 
-impl From<Duration> for TimeSpan {
+impl From<Duration> for SignedDuration {
     /// Converts a duration, truncating to whole ticks and saturating at
     /// [`TimeSpan::MAX_VALUE`].
     ///
@@ -411,53 +421,53 @@ impl From<Duration> for TimeSpan {
     /// gives [`TimeSpan::MAX_VALUE`].
     fn from(value: Duration) -> Self {
         let ticks = value.as_nanos() / 100;
-        TimeSpan { ticks: i64::try_from(ticks).unwrap_or(i64::MAX) }
+        SignedDuration { ticks: i64::try_from(ticks).unwrap_or(i64::MAX) }
     }
 }
 
-impl TryFrom<TimeSpan> for Duration {
-    type Error = NegativeTimeSpanError;
+impl TryFrom<SignedDuration> for Duration {
+    type Error = NegativeDurationError;
 
     /// Converts a non-negative interval exactly: each tick is 100
     /// nanoseconds, and every non-negative [`TimeSpan`] up to
     /// [`TimeSpan::MAX_VALUE`] fits in a [`Duration`]. A negative interval is
     /// an error ([`TimeSpan::to_duration`] gives `None` for it).
-    fn try_from(value: TimeSpan) -> Result<Self, Self::Error> {
-        value.to_duration().ok_or(NegativeTimeSpanError { value })
+    fn try_from(value: SignedDuration) -> Result<Self, Self::Error> {
+        value.to_duration().ok_or(NegativeDurationError { value })
     }
 }
 
-/// The error of the conversion of a negative [`TimeSpan`] to a
+/// The error of the conversion of a negative [`SignedDuration`] to a
 /// [`Duration`], which cannot be negative.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct NegativeTimeSpanError {
-    value: TimeSpan,
+pub struct NegativeDurationError {
+    value: SignedDuration,
 }
 
-impl NegativeTimeSpanError {
+impl NegativeDurationError {
     /// The interval that was not converted.
     #[inline]
-    pub fn time_span(&self) -> TimeSpan {
+    pub fn time_span(&self) -> SignedDuration {
         self.value
     }
 }
 
-impl fmt::Display for NegativeTimeSpanError {
+impl fmt::Display for NegativeDurationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "The TimeSpan {} is negative and cannot be converted to a Duration.", self.value)
     }
 }
 
-impl std::error::Error for NegativeTimeSpanError {}
+impl std::error::Error for NegativeDurationError {}
 
-impl FromStr for TimeSpan {
+impl FromStr for SignedDuration {
     type Err = FormatError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        TimeSpan::parse(s)
+        SignedDuration::parse(s)
     }
 }
 
-impl fmt::Display for TimeSpan {
+impl fmt::Display for SignedDuration {
     /// Formats as `[-][d.]hh:mm:ss[.fffffff]`.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let negative = self.ticks < 0;
@@ -481,49 +491,49 @@ impl fmt::Display for TimeSpan {
     }
 }
 
-impl Add for TimeSpan {
-    type Output = TimeSpan;
+impl Add for SignedDuration {
+    type Output = SignedDuration;
     #[inline]
-    fn add(self, rhs: TimeSpan) -> TimeSpan {
-        TimeSpan { ticks: self.ticks.checked_add(rhs.ticks).expect("TimeSpan overflowed because the duration is too long.") }
+    fn add(self, rhs: SignedDuration) -> SignedDuration {
+        SignedDuration { ticks: self.ticks.checked_add(rhs.ticks).expect("TimeSpan overflowed because the duration is too long.") }
     }
 }
 
-impl Sub for TimeSpan {
-    type Output = TimeSpan;
+impl Sub for SignedDuration {
+    type Output = SignedDuration;
     #[inline]
-    fn sub(self, rhs: TimeSpan) -> TimeSpan {
-        TimeSpan { ticks: self.ticks.checked_sub(rhs.ticks).expect("TimeSpan overflowed because the duration is too long.") }
+    fn sub(self, rhs: SignedDuration) -> SignedDuration {
+        SignedDuration { ticks: self.ticks.checked_sub(rhs.ticks).expect("TimeSpan overflowed because the duration is too long.") }
     }
 }
 
-impl AddAssign for TimeSpan {
+impl AddAssign for SignedDuration {
     #[inline]
-    fn add_assign(&mut self, rhs: TimeSpan) {
+    fn add_assign(&mut self, rhs: SignedDuration) {
         *self = *self + rhs;
     }
 }
 
-impl SubAssign for TimeSpan {
+impl SubAssign for SignedDuration {
     #[inline]
-    fn sub_assign(&mut self, rhs: TimeSpan) {
+    fn sub_assign(&mut self, rhs: SignedDuration) {
         *self = *self - rhs;
     }
 }
 
-impl Neg for TimeSpan {
-    type Output = TimeSpan;
+impl Neg for SignedDuration {
+    type Output = SignedDuration;
     #[inline]
-    fn neg(self) -> TimeSpan {
-        TimeSpan { ticks: self.ticks.checked_neg().expect("TimeSpan overflowed because the duration is too long.") }
+    fn neg(self) -> SignedDuration {
+        SignedDuration { ticks: self.ticks.checked_neg().expect("TimeSpan overflowed because the duration is too long.") }
     }
 }
 
-impl Mul<f64> for TimeSpan {
-    type Output = TimeSpan;
+impl Mul<f64> for SignedDuration {
+    type Output = SignedDuration;
     /// Scales the interval, rounding to the nearest tick.
-    fn mul(self, rhs: f64) -> TimeSpan {
-        TimeSpan::interval(self.ticks as f64, rhs)
+    fn mul(self, rhs: f64) -> SignedDuration {
+        SignedDuration::interval(self.ticks as f64, rhs)
     }
 }
 
@@ -533,36 +543,36 @@ mod tests {
 
     #[test]
     fn from_seconds_rounds_to_ticks() {
-        assert_eq!(TimeSpan::from_seconds(1.0).ticks(), 10_000_000);
-        assert_eq!(TimeSpan::from_seconds(-0.5).ticks(), -5_000_000);
-        assert_eq!(TimeSpan::from_milliseconds(10.0).ticks(), 100_000);
-        assert_eq!(TimeSpan::from_seconds(0.5).total_seconds(), 0.5);
+        assert_eq!(SignedDuration::from_seconds(1.0).ticks(), 10_000_000);
+        assert_eq!(SignedDuration::from_seconds(-0.5).ticks(), -5_000_000);
+        assert_eq!(SignedDuration::from_milliseconds(10.0).ticks(), 100_000);
+        assert_eq!(SignedDuration::from_seconds(0.5).total_seconds(), 0.5);
     }
 
     #[test]
     fn parse_accepts_the_invariant_formats() {
-        assert_eq!(TimeSpan::parse("0:0:1").unwrap(), TimeSpan::from_seconds(1.0));
-        assert_eq!(TimeSpan::parse("00:00:00.3").unwrap(), TimeSpan::from_milliseconds(300.0));
-        assert_eq!(TimeSpan::parse("00:00:10.0153932").unwrap().ticks(), 100_153_932);
-        assert_eq!(TimeSpan::parse("1").unwrap().ticks(), TimeSpan::TICKS_PER_DAY);
-        assert_eq!(TimeSpan::parse("1:30").unwrap().ticks(), TimeSpan::TICKS_PER_HOUR + 30 * TimeSpan::TICKS_PER_MINUTE);
-        assert_eq!(TimeSpan::parse("1.02:03:04").unwrap().ticks(), TimeSpan::parse("1:2:3:4").unwrap().ticks());
-        assert_eq!(TimeSpan::parse(" -0:0:2 ").unwrap(), TimeSpan::from_seconds(-2.0));
+        assert_eq!(SignedDuration::parse("0:0:1").unwrap(), SignedDuration::from_seconds(1.0));
+        assert_eq!(SignedDuration::parse("00:00:00.3").unwrap(), SignedDuration::from_milliseconds(300.0));
+        assert_eq!(SignedDuration::parse("00:00:10.0153932").unwrap().ticks(), 100_153_932);
+        assert_eq!(SignedDuration::parse("1").unwrap().ticks(), SignedDuration::TICKS_PER_DAY);
+        assert_eq!(SignedDuration::parse("1:30").unwrap().ticks(), SignedDuration::TICKS_PER_HOUR + 30 * SignedDuration::TICKS_PER_MINUTE);
+        assert_eq!(SignedDuration::parse("1.02:03:04").unwrap().ticks(), SignedDuration::parse("1:2:3:4").unwrap().ticks());
+        assert_eq!(SignedDuration::parse(" -0:0:2 ").unwrap(), SignedDuration::from_seconds(-2.0));
         // The seconds may be left out before their fraction.
-        assert_eq!(TimeSpan::parse("0:0:.075").unwrap().ticks(), 750_000);
+        assert_eq!(SignedDuration::parse("0:0:.075").unwrap().ticks(), 750_000);
     }
 
     #[test]
     fn parse_rejects_malformed_input() {
         for input in ["", "abc", "1:2:3:4:5", "0:60:0", "24:00", "0:0:1.", "0:0:1.12345678", "1,5"] {
-            assert!(TimeSpan::parse(input).is_err(), "{input}");
+            assert!(SignedDuration::parse(input).is_err(), "{input}");
         }
     }
 
     #[test]
     fn display_round_trips() {
         for input in ["00:00:01", "1.02:03:04", "-00:00:02.5000000", "00:00:10.0153932"] {
-            assert_eq!(TimeSpan::parse(input).unwrap().to_string(), input);
+            assert_eq!(SignedDuration::parse(input).unwrap().to_string(), input);
         }
     }
 
@@ -571,12 +581,12 @@ mod tests {
     #[test]
     fn custom_formats_match_net() {
         let spans = [
-            TimeSpan::from_hms(0, 0, 0),
-            TimeSpan::from_hms(9, 4, 5),
-            TimeSpan::from_hms(15, 4, 5),
-            TimeSpan::from_dhms(1, 2, 3, 4),
-            -TimeSpan::from_hms(3, 4, 5),
-            TimeSpan::from_dhms_milliseconds(0, 23, 59, 59, 999),
+            SignedDuration::from_hms(0, 0, 0),
+            SignedDuration::from_hms(9, 4, 5),
+            SignedDuration::from_hms(15, 4, 5),
+            SignedDuration::from_dhms(1, 2, 3, 4),
+            -SignedDuration::from_hms(3, 4, 5),
+            SignedDuration::from_dhms_milliseconds(0, 23, 59, 59, 999),
         ];
         let rows: [(&str, Option<[&str; 6]>); 20] = [
             ("%h", Some(["0", "9", "15", "2", "3", "23"])),
@@ -608,50 +618,50 @@ mod tests {
         }
 
         // A backslash escapes inside a quoted literal too.
-        assert_eq!("h'm 09", TimeSpan::from_hms(9, 4, 5).to_string_format("'h\\'m 'hh"));
-        assert!(TimeSpan::from_hms(9, 4, 5).try_to_string_format("'h\\'").is_err());
+        assert_eq!("h'm 09", SignedDuration::from_hms(9, 4, 5).to_string_format("'h\\'m 'hh"));
+        assert!(SignedDuration::from_hms(9, 4, 5).try_to_string_format("'h\\'").is_err());
     }
 
     #[test]
     fn converts_from_and_to_duration() {
-        assert_eq!(TimeSpan::from(Duration::from_millis(1500)), TimeSpan::from_seconds(1.5));
-        assert_eq!(TimeSpan::from_seconds(1.5).to_duration(), Some(Duration::from_millis(1500)));
-        assert_eq!(TimeSpan::from_seconds(-1.0).to_duration(), None);
+        assert_eq!(SignedDuration::from(Duration::from_millis(1500)), SignedDuration::from_seconds(1.5));
+        assert_eq!(SignedDuration::from_seconds(1.5).to_duration(), Some(Duration::from_millis(1500)));
+        assert_eq!(SignedDuration::from_seconds(-1.0).to_duration(), None);
     }
 
     #[test]
     fn duration_conversions_round_trip_whole_ticks() {
         // Whole ticks convert exactly, both ways.
         for ticks in [0, 1, 9_999_999, 10_000_000, 123_456_789_012, i64::MAX] {
-            let span = TimeSpan::from_ticks(ticks);
+            let span = SignedDuration::from_ticks(ticks);
             let duration = Duration::try_from(span).unwrap();
             assert_eq!(duration.as_nanos(), ticks as u128 * 100, "{ticks}");
-            assert_eq!(TimeSpan::from(duration), span, "{ticks}");
+            assert_eq!(SignedDuration::from(duration), span, "{ticks}");
         }
-        assert_eq!(Duration::try_from(TimeSpan::MAX_VALUE).unwrap(), Duration::new(922_337_203_685, 477_580_700));
-        assert_eq!(Duration::try_from(TimeSpan::ZERO), Ok(Duration::ZERO));
-        assert_eq!(Duration::try_from(TimeSpan::from_seconds(1.5)), Ok(Duration::from_millis(1500)));
+        assert_eq!(Duration::try_from(SignedDuration::MAX_VALUE).unwrap(), Duration::new(922_337_203_685, 477_580_700));
+        assert_eq!(Duration::try_from(SignedDuration::ZERO), Ok(Duration::ZERO));
+        assert_eq!(Duration::try_from(SignedDuration::from_seconds(1.5)), Ok(Duration::from_millis(1500)));
     }
 
     #[test]
     fn duration_conversions_truncate_and_saturate() {
         // Below a whole tick, the nanoseconds of a duration are dropped.
-        assert_eq!(TimeSpan::from(Duration::from_nanos(99)).ticks(), 0);
-        assert_eq!(TimeSpan::from(Duration::from_nanos(149)).ticks(), 1);
-        assert_eq!(TimeSpan::from(Duration::from_nanos(1_999)).ticks(), 19);
+        assert_eq!(SignedDuration::from(Duration::from_nanos(99)).ticks(), 0);
+        assert_eq!(SignedDuration::from(Duration::from_nanos(149)).ticks(), 1);
+        assert_eq!(SignedDuration::from(Duration::from_nanos(1_999)).ticks(), 19);
         // A duration longer than the largest interval saturates.
-        assert_eq!(TimeSpan::from(Duration::MAX), TimeSpan::MAX_VALUE);
-        assert_eq!(TimeSpan::from(Duration::new(922_337_203_685, 477_580_800)), TimeSpan::MAX_VALUE);
+        assert_eq!(SignedDuration::from(Duration::MAX), SignedDuration::MAX_VALUE);
+        assert_eq!(SignedDuration::from(Duration::new(922_337_203_685, 477_580_800)), SignedDuration::MAX_VALUE);
     }
 
     #[test]
     fn negative_intervals_are_not_durations() {
-        for span in [TimeSpan::from_ticks(-1), TimeSpan::from_seconds(-2.0), TimeSpan::MIN_VALUE] {
+        for span in [SignedDuration::from_ticks(-1), SignedDuration::from_seconds(-2.0), SignedDuration::MIN_VALUE] {
             let error = Duration::try_from(span).unwrap_err();
             assert_eq!(error.time_span(), span);
         }
         assert_eq!(
-            Duration::try_from(TimeSpan::from_seconds(-2.0)).unwrap_err().to_string(),
+            Duration::try_from(SignedDuration::from_seconds(-2.0)).unwrap_err().to_string(),
             "The TimeSpan -00:00:02 is negative and cannot be converted to a Duration."
         );
     }

@@ -149,7 +149,7 @@ pub fn start_themed_application_with_clock(clock: Rc<MockGlobalClock>) -> UnitTe
 /// The global clock of the themed application: the transitions of the control themes need one.
 /// It pulses when a test tells it to ([`pulse`](Self::pulse)), which most tests never do.
 pub struct MockGlobalClock {
-    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::TimeSpan>,
+    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::SignedDuration>,
     play_state: std::cell::Cell<ferroui_base::animation::PlayState>,
 }
 
@@ -162,16 +162,16 @@ impl MockGlobalClock {
     }
 
     /// Ticks the clock: its subscribers are told that the time is `time`.
-    pub fn pulse(&self, time: ferroui_base::animation::TimeSpan) {
+    pub fn pulse(&self, time: ferroui_base::animation::SignedDuration) {
         use ferroui_base::reactive::IObserver;
         self.subject.on_next(time);
     }
 }
 
-impl ferroui_base::reactive::IObservable<ferroui_base::animation::TimeSpan> for MockGlobalClock {
+impl ferroui_base::reactive::IObservable<ferroui_base::animation::SignedDuration> for MockGlobalClock {
     fn subscribe(
         &self,
-        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::TimeSpan>>,
+        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::SignedDuration>>,
     ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
         self.subject.subscribe(observer)
     }

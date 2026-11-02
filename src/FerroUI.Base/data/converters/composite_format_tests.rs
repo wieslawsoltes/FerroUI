@@ -4334,7 +4334,7 @@ mod cultures {
     use super::super::composite_format::{
         format, format_arg, format_arg_with, format_values, format_values_with, format_with, FormatArg, FormatError,
     };
-    use crate::animation::TimeSpan;
+    use crate::animation::SignedDuration;
     use crate::utilities::{CultureInfo, DateTime, DateTimeOffset, Decimal, NumberFormatInfo};
     use crate::BoxedValue;
     use std::rc::Rc;
@@ -4505,10 +4505,10 @@ mod cultures {
             (FormatArg::DateTime(date), "HH:mm", "14:07"),
             (FormatArg::DateTime(date), "s", "2024-03-05T14:07:09"),
             (FormatArg::DateTime(date), "MMMM d, yyyy", "March 5, 2024"),
-            (FormatArg::DateTimeOffset(DateTimeOffset::new(2024, 3, 5, 14, 7, 9, TimeSpan::from_hms(2, 0, 0))), "yyyy-MM-dd HH:mm zzz", "2024-03-05 14:07 +02:00"),
-            (FormatArg::TimeSpan(TimeSpan::from_dhms(1, 2, 3, 4)), "", "1.02:03:04"),
-            (FormatArg::TimeSpan(TimeSpan::from_hms(2, 3, 4)), "c", "02:03:04"),
-            (FormatArg::TimeSpan(TimeSpan::from_hms(2, 3, 4)), "hh\\:mm", "02:03"),
+            (FormatArg::DateTimeOffset(DateTimeOffset::new(2024, 3, 5, 14, 7, 9, SignedDuration::from_hms(2, 0, 0))), "yyyy-MM-dd HH:mm zzz", "2024-03-05 14:07 +02:00"),
+            (FormatArg::TimeSpan(SignedDuration::from_dhms(1, 2, 3, 4)), "", "1.02:03:04"),
+            (FormatArg::TimeSpan(SignedDuration::from_hms(2, 3, 4)), "c", "02:03:04"),
+            (FormatArg::TimeSpan(SignedDuration::from_hms(2, 3, 4)), "hh\\:mm", "02:03"),
         ];
         check(&invariant, cases);
 
@@ -4517,7 +4517,7 @@ mod cultures {
             format_values_with("on {0:yyyy-MM-dd} at {0:HH:mm}", &[boxed], &invariant).as_deref(),
             Ok("on 2024-03-05 at 14:07")
         );
-        let span: Option<BoxedValue> = Some(Rc::new(TimeSpan::from_hms(2, 3, 4)));
+        let span: Option<BoxedValue> = Some(Rc::new(SignedDuration::from_hms(2, 3, 4)));
         assert_eq!(format_values_with("{0:hh\\:mm}", &[span], &invariant).as_deref(), Ok("02:03"));
         // An invalid date and time format string is the format exception.
         assert_eq!(format_arg(&FormatArg::DateTime(date), "%"), Err(FormatError::InvalidFormat));

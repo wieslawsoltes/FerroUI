@@ -4,7 +4,7 @@
 use crate::markup::{user_control_class, xaml_class};
 use crate::pages::transitions::{CardStackPageTransition, WaveRevealPageTransition};
 use ferroui_base::animation::{
-    CompositePageTransition, CrossFade, IPageTransition, PageSlide, Rotate3DTransition, SlideAxis, TimeSpan,
+    CompositePageTransition, CrossFade, IPageTransition, PageSlide, Rotate3DTransition, SlideAxis, SignedDuration,
 };
 use ferroui_base::{ferro_class_info, instantiate, Ref};
 use ferroui_controls::{Button, Carousel, ComboBox, TextBlock, UserControl};
@@ -68,29 +68,29 @@ impl CarouselTransitionsPage {
             match self.get_control::<ComboBox>("TransitionCombo").selected_index() {
                 0 => (None, String::from("Transition: None")),
                 1 => (
-                    Some(Rc::new(PageSlide::with_duration(TimeSpan::from_seconds(0.25), axis))),
+                    Some(Rc::new(PageSlide::with_duration(SignedDuration::from_seconds(0.25), axis))),
                     format!("Transition: Page Slide ({label})"),
                 ),
                 2 => (
-                    Some(Rc::new(CrossFade::with_duration(TimeSpan::from_seconds(0.25)))),
+                    Some(Rc::new(CrossFade::with_duration(SignedDuration::from_seconds(0.25)))),
                     String::from("Transition: Cross Fade"),
                 ),
                 3 => (
-                    Some(Rc::new(Rotate3DTransition::with_duration(TimeSpan::from_seconds(0.5), axis, None))),
+                    Some(Rc::new(Rotate3DTransition::with_duration(SignedDuration::from_seconds(0.5), axis, None))),
                     format!("Transition: Rotate 3D ({label})"),
                 ),
                 4 => (
-                    Some(Rc::new(CardStackPageTransition::with_duration(TimeSpan::from_seconds(0.5), axis))),
+                    Some(Rc::new(CardStackPageTransition::with_duration(SignedDuration::from_seconds(0.5), axis))),
                     format!("Transition: Card Stack ({label})"),
                 ),
                 5 => (
-                    Some(Rc::new(WaveRevealPageTransition::with_duration(TimeSpan::from_seconds(0.8), axis))),
+                    Some(Rc::new(WaveRevealPageTransition::with_duration(SignedDuration::from_seconds(0.8), axis))),
                     format!("Transition: Wave Reveal ({label})"),
                 ),
                 6 => {
                     let composite = CompositePageTransition::new();
-                    composite.add(Rc::new(PageSlide::with_duration(TimeSpan::from_seconds(0.25), axis)));
-                    composite.add(Rc::new(CrossFade::with_duration(TimeSpan::from_seconds(0.25))));
+                    composite.add(Rc::new(PageSlide::with_duration(SignedDuration::from_seconds(0.25), axis)));
+                    composite.add(Rc::new(CrossFade::with_duration(SignedDuration::from_seconds(0.25))));
                     (Some(Rc::new(composite)), String::from("Transition: Composite (Slide + Fade)"))
                 }
                 _ => return,

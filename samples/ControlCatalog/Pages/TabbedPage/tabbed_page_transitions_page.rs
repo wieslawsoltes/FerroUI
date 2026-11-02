@@ -2,7 +2,7 @@
 //! `Pages/TabbedPage/TabbedPageTransitionsPage.xaml`.
 
 use crate::markup::{user_control_class, xaml_class};
-use ferroui_base::animation::{CompositePageTransition, CrossFade, IPageTransition, PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{CompositePageTransition, CrossFade, IPageTransition, PageSlide, SlideAxis, SignedDuration};
 use ferroui_base::interactivity::{IRoutedEventArgs, RoutedEventArgs};
 use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref};
 use ferroui_controls::{ComboBox, TabPlacement, TabbedPage, UserControl};
@@ -63,14 +63,14 @@ impl TabbedPageTransitionsPage {
         };
 
         let transition: Option<Rc<dyn IPageTransition>> = match self.selected_index("TransitionCombo") {
-            1 => Some(Rc::new(CrossFade::with_duration(TimeSpan::from_milliseconds(250.0)))),
-            2 => Some(Rc::new(PageSlide::with_duration(TimeSpan::from_milliseconds(300.0), SlideAxis::Horizontal))),
-            3 => Some(Rc::new(PageSlide::with_duration(TimeSpan::from_milliseconds(300.0), SlideAxis::Vertical))),
+            1 => Some(Rc::new(CrossFade::with_duration(SignedDuration::from_milliseconds(250.0)))),
+            2 => Some(Rc::new(PageSlide::with_duration(SignedDuration::from_milliseconds(300.0), SlideAxis::Horizontal))),
+            3 => Some(Rc::new(PageSlide::with_duration(SignedDuration::from_milliseconds(300.0), SlideAxis::Vertical))),
             4 => {
                 let composite = CompositePageTransition::new();
-                composite.add(Rc::new(CrossFade::with_duration(TimeSpan::from_milliseconds(250.0))));
+                composite.add(Rc::new(CrossFade::with_duration(SignedDuration::from_milliseconds(250.0))));
                 composite.add(Rc::new(PageSlide::with_duration(
-                    TimeSpan::from_milliseconds(300.0),
+                    SignedDuration::from_milliseconds(300.0),
                     SlideAxis::Horizontal,
                 )));
                 Some(Rc::new(composite))

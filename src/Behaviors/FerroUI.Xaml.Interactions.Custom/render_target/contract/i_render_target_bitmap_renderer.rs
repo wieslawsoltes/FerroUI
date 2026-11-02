@@ -1,6 +1,6 @@
 //! Port of `RenderTarget/Contract/IRenderTargetBitmapRenderer.cs`.
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::media::DrawingContext;
 use std::rc::Rc;
 
@@ -9,7 +9,7 @@ use std::rc::Rc;
 pub trait IRenderTargetBitmapRenderer {
     /// Draws into the provided [`DrawingContext`]: `context` is the drawing context to use,
     /// `elapsed` the elapsed time since the behavior was attached.
-    fn render(&self, context: &mut DrawingContext<'_>, elapsed: TimeSpan);
+    fn render(&self, context: &mut DrawingContext<'_>, elapsed: SignedDuration);
 }
 
 /// Renderers compare by identity (reference equality), so that they can be held in property and

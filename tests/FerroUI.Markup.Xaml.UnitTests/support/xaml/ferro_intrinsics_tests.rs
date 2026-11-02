@@ -4,7 +4,7 @@
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
@@ -24,7 +24,7 @@ use crate::support::TypeModule;
 #[repr(C)]
 pub struct TestIntrinsicsControl {
     base: Control,
-    time_span_property: Cell<TimeSpan>,
+    time_span_property: Cell<SignedDuration>,
     thickness_property: Cell<Thickness>,
     point_property: Cell<Point>,
     vector_property: Cell<Vector>,
@@ -58,9 +58,9 @@ ferro_class_info!(TestIntrinsicsControl {
     markup: {
         namespace: "FerroUI.Markup.Xaml.UnitTests.Xaml",
         properties: [
-            TimeSpanProperty: TimeSpan {
+            TimeSpanProperty: SignedDuration {
                 get: |this: &Ref<TestIntrinsicsControl>| this.time_span_property(),
-                set: |this: &Ref<TestIntrinsicsControl>, value: TimeSpan| this.set_time_span_property(value)
+                set: |this: &Ref<TestIntrinsicsControl>, value: SignedDuration| this.set_time_span_property(value)
             },
             ThicknessProperty: Thickness {
                 get: |this: &Ref<TestIntrinsicsControl>| this.thickness_property(),
@@ -142,7 +142,7 @@ impl TestIntrinsicsControl {
     pub fn construct() -> Self {
         Self {
             base: Control::construct(),
-            time_span_property: Cell::new(TimeSpan::default()),
+            time_span_property: Cell::new(SignedDuration::default()),
             thickness_property: Cell::new(Thickness::default()),
             point_property: Cell::new(Point::default()),
             vector_property: Cell::new(Vector::default()),
@@ -166,11 +166,11 @@ impl TestIntrinsicsControl {
         instantiate(Self::construct())
     }
 
-    pub fn time_span_property(&self) -> TimeSpan {
+    pub fn time_span_property(&self) -> SignedDuration {
         self.time_span_property.get()
     }
 
-    pub fn set_time_span_property(&self, value: TimeSpan) {
+    pub fn set_time_span_property(&self, value: SignedDuration) {
         self.time_span_property.set(value);
     }
 

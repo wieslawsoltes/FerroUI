@@ -24,7 +24,7 @@ impl Transition<f64> for DoubleTransition {
         // Deviation (DEVIATIONS.md, Animation): upstream interpolates NaN, which is NaN for the
         // whole duration; the value that is not a number is taken at once.
         if old_value.is_nan() || new_value.is_nan() {
-            let immediate = this.delay() == crate::animation::TimeSpan::ZERO;
+            let immediate = this.delay() == crate::animation::SignedDuration::ZERO;
             return TransitionObservableBase::new(progress, Easing::new(LinearEasing::new()), move |progress| {
                 if immediate || progress > 0.0 {
                     new_value

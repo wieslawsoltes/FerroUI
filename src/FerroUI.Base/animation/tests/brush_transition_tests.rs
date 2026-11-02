@@ -26,7 +26,7 @@ fn test(progress: f64, old_brush: Rc<dyn IBrush>, new_brush: Rc<dyn IBrush>) {
     let old_value: BoxedValue = Rc::new(Some(old_brush.clone()));
     let new_value: BoxedValue = Rc::new(Some(new_brush.clone()));
     <BrushTransition as TransitionBaseImpl>::apply(&sut, &border, clock.as_clock(), &old_value, &new_value);
-    clock.pulse(TimeSpan::ZERO);
+    clock.pulse(SignedDuration::ZERO);
     clock.pulse(sut.duration() * progress);
 
     let background = border.background().expect("a background");
@@ -64,7 +64,7 @@ use crate::media::Color;
 fn apply_solid(
     old_brush: Option<Rc<dyn IBrush>>,
     new_brush: Option<Rc<dyn IBrush>>,
-    delay: TimeSpan,
+    delay: SignedDuration,
 ) -> (Ref<Border>, Rc<TestClock>) {
     let clock = TestClock::new();
     let border = Border::new();
@@ -76,7 +76,7 @@ fn apply_solid(
     let old_value: BoxedValue = Rc::new(old_brush);
     let new_value: BoxedValue = Rc::new(new_brush);
     <SolidColorBrushTransition as TransitionBaseImpl>::apply(&sut, &border, clock.as_clock(), &old_value, &new_value);
-    clock.pulse(TimeSpan::ZERO);
+    clock.pulse(SignedDuration::ZERO);
     (border, clock)
 }
 
@@ -86,7 +86,7 @@ fn same(a: &Option<Rc<dyn IBrush>>, b: &Rc<dyn IBrush>) -> bool {
 
 #[test]
 fn solid_color_brush_transition_interpolates_solid_color_brushes() {
-    let (border, clock) = apply_solid(Some(solid(0.0)), Some(solid(1.0)), TimeSpan::ZERO);
+    let (border, clock) = apply_solid(Some(solid(0.0)), Some(solid(1.0)), SignedDuration::ZERO);
     clock.pulse(seconds(0.5));
     assert_eq!(0.5, border.background().expect("a background").opacity());
 }
@@ -95,7 +95,7 @@ fn solid_color_brush_transition_interpolates_solid_color_brushes() {
 fn solid_color_brush_transition_fades_in_from_no_brush() {
     let brush = SolidColorBrush::new();
     brush.set_color(Color::from_argb(255, 10, 20, 30));
-    let (border, clock) = apply_solid(None, Some(brush.into()), TimeSpan::ZERO);
+    let (border, clock) = apply_solid(None, Some(brush.into()), SignedDuration::ZERO);
     clock.pulse(seconds(0.5));
     let background = border.background().expect("a background");
     let color = background.as_solid_color_brush().expect("a solid colour brush").color();
@@ -107,16 +107,16 @@ fn solid_color_brush_transition_fades_in_from_no_brush() {
 fn solid_color_brush_transition_changes_other_brushes_at_once() {
     // To a brush that is not a solid colour brush (an acrylic or gradient background): at once.
     let gradient = linear(1.0);
-    let (border, _clock) = apply_solid(Some(solid(0.0)), Some(gradient.clone()), TimeSpan::ZERO);
+    let (border, _clock) = apply_solid(Some(solid(0.0)), Some(gradient.clone()), SignedDuration::ZERO);
     assert!(same(&border.background(), &gradient), "the new brush on the first frame");
 
     // From one: at once as well.
     let target = solid(1.0);
-    let (border, _clock) = apply_solid(Some(linear(1.0)), Some(target.clone()), TimeSpan::ZERO);
+    let (border, _clock) = apply_solid(Some(linear(1.0)), Some(target.clone()), SignedDuration::ZERO);
     assert!(same(&border.background(), &target));
 
     // To no brush: at once.
-    let (border, _clock) = apply_solid(Some(solid(1.0)), None, TimeSpan::ZERO);
+    let (border, _clock) = apply_solid(Some(solid(1.0)), None, SignedDuration::ZERO);
     assert!(border.background().is_none());
 }
 
@@ -143,7 +143,7 @@ fn brush_transition_switches_incompatible_brushes_half_way() {
     let old_value: BoxedValue = Rc::new(None::<Rc<dyn IBrush>>);
     let new_value: BoxedValue = Rc::new(Some(new.clone()));
     <BrushTransition as TransitionBaseImpl>::apply(&sut, &border, clock.as_clock(), &old_value, &new_value);
-    clock.pulse(TimeSpan::ZERO);
+    clock.pulse(SignedDuration::ZERO);
     clock.pulse(seconds(0.4));
     assert!(border.background().is_none());
     clock.pulse(seconds(0.2));
@@ -162,7 +162,7 @@ fn double_transition_does_not_interpolate_not_a_number() {
         let old_value: BoxedValue = Rc::new(old);
         let new_value: BoxedValue = Rc::new(new);
         <DoubleTransition as TransitionBaseImpl>::apply(&sut, &border, clock.as_clock(), &old_value, &new_value);
-        clock.pulse(TimeSpan::ZERO);
+        clock.pulse(SignedDuration::ZERO);
         clock.pulse(seconds(0.5));
         let value = border.width();
         assert!(value == new || (value.is_nan() && new.is_nan()), "{old} -> {new} gave {value}");

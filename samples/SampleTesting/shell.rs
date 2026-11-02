@@ -2,7 +2,7 @@
 //! the test into memory, and take the input of a mouse.
 
 use crate::{services, Frame, FrameSurface, Report, TestGlobalClock};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::input::raw::{RawPointerEventArgs, RawPointerEventType};
 use ferroui_base::input::{
     IInputDevice, IKeyboardDevice, IKeyboardNavigationHandler, KeyboardDevice, KeyboardNavigationHandler, MouseDevice, Pointer,
@@ -167,7 +167,7 @@ impl Shell {
         Dispatcher::ui_thread().run_jobs(None);
         let time = self.time.get() + self.frame_time.get();
         self.time.set(time);
-        self.clock.pulse(TimeSpan::from_milliseconds(time));
+        self.clock.pulse(SignedDuration::from_milliseconds(time));
         Dispatcher::ui_thread().run_jobs(None);
         self.render_loop.tick();
         Dispatcher::ui_thread().run_jobs(None);

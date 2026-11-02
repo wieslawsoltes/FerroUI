@@ -12,7 +12,7 @@
 //! that file has a view model with such methods.
 
 use super::*;
-use crate::animation::TimeSpan;
+use crate::animation::SignedDuration;
 use crate::data::converters::DefaultValueConverter;
 use crate::data::core::{ValueType, ValueTypes};
 use crate::data::BindingNotification;
@@ -68,7 +68,7 @@ fn register_conversions() {
     ValueTypes::register_conversion::<ExplicitDouble, f64>(|v| Some(v.value));
     ValueTypes::register_conversion::<CustomType, i32>(|v| Some(v.value));
     ValueTypes::register_conversion::<i32, CustomType>(|v| Some(CustomType { value: *v }));
-    ValueTypes::register_parse::<TimeSpan>(|s| s.parse().ok());
+    ValueTypes::register_parse::<SignedDuration>(|s| s.parse().ok());
 }
 
 fn convert<T: PartialEq + 'static, TTo: 'static>(value: T) -> Option<BoxedValue> {
@@ -155,9 +155,9 @@ fn can_convert_string_to_enum() {
 
 #[test]
 fn can_convert_string_to_time_span() {
-    let result = convert::<_, TimeSpan>(s("00:00:10"));
+    let result = convert::<_, SignedDuration>(s("00:00:10"));
 
-    assert_value(result, TimeSpan::from_seconds(10.0));
+    assert_value(result, SignedDuration::from_seconds(10.0));
 }
 
 #[test]

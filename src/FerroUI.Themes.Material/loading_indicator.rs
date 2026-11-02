@@ -8,7 +8,7 @@ use crate::motion::{animations_enabled, MaterialSpringSpec};
 use crate::progress_indicator::rounded_geometry::{
     loading_polygons, path_bounds, Morph, Polygon, V,
 };
-use ferroui_base::animation::{IGlobalClock, TimeSpan};
+use ferroui_base::animation::{IGlobalClock, SignedDuration};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
@@ -257,7 +257,7 @@ impl MaterialLoadingIndicator {
         let weak = self.to_ref().downgrade();
         self.epoch.set(None);
         *self.clock_subscription.borrow_mut() = Some(Subscription::new(clock.subscribe(Rc::new(
-            AnonymousObserver::new(move |time: TimeSpan| {
+            AnonymousObserver::new(move |time: SignedDuration| {
                 if let Some(this) = weak.upgrade() {
                     if !animations_enabled(this.reduced_motion()) {
                         this.stop_clock();

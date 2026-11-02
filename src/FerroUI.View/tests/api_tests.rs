@@ -127,7 +127,7 @@ fn transitions_and_animations_are_built_for_the_animation_system() {
         .key_frame(1.0, |frame| frame.set(Visual::opacity_property(), 1.0))
         .build();
     assert_eq!(built.children().count(), 2);
-    assert_eq!(built.duration(), ferroui_base::animation::TimeSpan::from(ms(600)));
+    assert_eq!(built.duration(), ferroui_base::animation::SignedDuration::from(ms(600)));
     owner.dispose();
 }
 

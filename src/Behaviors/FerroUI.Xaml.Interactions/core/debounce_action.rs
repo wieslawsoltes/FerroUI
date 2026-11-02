@@ -1,7 +1,7 @@
 //! Port of `Core/DebounceAction.cs`.
 
 use super::{attach_actions_to_logical_tree, detach_actions_from_logical_tree};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::logical_tree::LogicalTreeAttachmentEventArgs;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::DispatcherTimer;
@@ -36,8 +36,8 @@ ferro_class_info!(DebounceAction {
 ferro_properties! {
     impl DebounceAction {
         /// Identifies the `Delay` property.
-        pub fn delay_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<DebounceAction, _>("Delay", TimeSpan::ZERO)
+        pub fn delay_property() -> StyledProperty<SignedDuration> {
+            FerroProperty::register::<DebounceAction, _>("Delay", SignedDuration::ZERO)
         }
 
         /// Identifies the `Actions` property.
@@ -146,11 +146,11 @@ impl DebounceAction {
 
     /// Gets or sets the delay to wait before executing the actions. This is a property of the
     /// object model.
-    pub fn delay(&self) -> TimeSpan {
+    pub fn delay(&self) -> SignedDuration {
         self.get_value(Self::delay_property())
     }
 
-    pub fn set_delay(&self, value: TimeSpan) {
+    pub fn set_delay(&self, value: SignedDuration) {
         self.set_value(Self::delay_property(), value)
     }
 

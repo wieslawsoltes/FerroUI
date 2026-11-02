@@ -36,7 +36,7 @@ fn main() {
 
 #[cfg(target_os = "linux")]
 mod checks {
-    use ferroui_base::animation::TimeSpan;
+    use ferroui_base::animation::SignedDuration;
     use ferroui_base::threading::{CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTimer};
     use ferroui_controls::AppBuilder;
     use platform_sanity_checks::App;
@@ -164,7 +164,7 @@ mod checks {
                 DispatcherTimer::run(
                     move || {
                         ticks.set(ticks.get() + 1);
-                        println!("Tick {} at {}", ticks.get(), TimeSpan::from(st.elapsed()));
+                        println!("Tick {} at {}", ticks.get(), SignedDuration::from(st.elapsed()));
                         if ticks.get() == 5 {
                             let elapsed = st.elapsed().as_secs_f64();
                             if elapsed < 4.5 {

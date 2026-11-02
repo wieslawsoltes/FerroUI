@@ -12,7 +12,7 @@ use crate::{
 use ferroui_base::input::platform::{ClipboardError, ClipboardExtensions, ClipboardType, IClipboard};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use std::any::Any;
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::{BindingMode, BindingPriority};
 use ferroui_base::input::{
     ContextRequestedEventArgs, FocusChangedEventArgs, HoldingRoutedEventArgs, HoldingState, InputElement,
@@ -1280,8 +1280,8 @@ ferroui_base::ferro_properties! { impl TextBox, also [
 
     ferro_property!(
         /// Defines the `CaretBlinkInterval` property.
-        pub fn caret_blink_interval_property() -> StyledProperty<TimeSpan> {
-            FerroProperty::register::<TextBox, _>("CaretBlinkInterval", TimeSpan::from_milliseconds(500.0))
+        pub fn caret_blink_interval_property() -> StyledProperty<SignedDuration> {
+            FerroProperty::register::<TextBox, _>("CaretBlinkInterval", SignedDuration::from_milliseconds(500.0))
         }
     );
 
@@ -1734,11 +1734,11 @@ impl TextBox {
     }
 
     /// The caret blink rate.
-    pub fn caret_blink_interval(&self) -> TimeSpan {
+    pub fn caret_blink_interval(&self) -> SignedDuration {
         self.get_value(Self::caret_blink_interval_property())
     }
 
-    pub fn set_caret_blink_interval(&self, value: TimeSpan) {
+    pub fn set_caret_blink_interval(&self, value: SignedDuration) {
         self.set_value(Self::caret_blink_interval_property(), value)
     }
 

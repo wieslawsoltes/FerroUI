@@ -7,7 +7,7 @@
 
 use super::support::{content_control_template, control, panics, start_app, CompositionApp};
 use crate::{SelectingItemsControlBehavior, SelectionIndicatorAnimation};
-use ferroui_base::animation::TimeSpan;
+use ferroui_base::animation::SignedDuration;
 use ferroui_base::rendering::composition::ElementComposition;
 use ferroui_base::{Ref, Visual};
 use ferroui_controls::primitives::{SelectingItemsControl, TemplatedControl};
@@ -81,14 +81,14 @@ fn selection_indicator_animation_installs_implicit_animation_for_templated_conta
 #[test]
 fn selection_indicator_animation_rejects_negative_duration_and_missing_visuals() {
     let _app = start_app();
-    assert_eq!(SelectionIndicatorAnimation::default_duration(), TimeSpan::from_milliseconds(250.0));
+    assert_eq!(SelectionIndicatorAnimation::default_duration(), SignedDuration::from_milliseconds(250.0));
     let first = ContentControl::new();
     let second = ContentControl::new();
     let first: &TemplatedControl = &first;
     let second: &TemplatedControl = &second;
-    assert!(!SelectionIndicatorAnimation::try_start(Some(first), Some(second), TimeSpan::ZERO));
+    assert!(!SelectionIndicatorAnimation::try_start(Some(first), Some(second), SignedDuration::ZERO));
     assert!(panics(|| {
-        SelectionIndicatorAnimation::try_start(Some(first), Some(second), TimeSpan::from_milliseconds(-1.0));
+        SelectionIndicatorAnimation::try_start(Some(first), Some(second), SignedDuration::from_milliseconds(-1.0));
     }));
 }
 
@@ -111,7 +111,7 @@ fn selection_indicator_animation_returns_false_for_zero_duration_with_available_
         visual(control(&old_indicator)),
         visual(control(&new_selection)),
         visual(control(&old_selection)),
-        TimeSpan::ZERO,
+        SignedDuration::ZERO,
     ));
     window.close();
 }
