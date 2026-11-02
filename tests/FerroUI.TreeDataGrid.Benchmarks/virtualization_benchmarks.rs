@@ -702,7 +702,7 @@ impl AlwaysMeasureRowsPresenter {
                 }
             }
         });
-        *this.viewport_tracker.subscription.borrow_mut() = Some(subscription);
+        *this.viewport_tracker.subscription.borrow_mut() = Some(subscription.detach());
         this
     }
 }
@@ -739,7 +739,7 @@ impl AlwaysMeasureCellsPresenter {
                 }
             }
         });
-        *this.viewport_tracker.subscription.borrow_mut() = Some(subscription);
+        *this.viewport_tracker.subscription.borrow_mut() = Some(subscription.detach());
         this
     }
 }

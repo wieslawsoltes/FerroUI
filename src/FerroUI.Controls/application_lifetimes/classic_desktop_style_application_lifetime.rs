@@ -209,7 +209,7 @@ impl ClassicDesktopStyleApplicationLifetime {
         };
 
         *self.global_events_subscriptions.borrow_mut() =
-            Some(Rc::new(CompositeDisposable::from_disposables([opened, closed])));
+            Some(Rc::new(CompositeDisposable::from_disposables([opened.detach(), closed.detach()])));
     }
 
     fn before_init(&self) {

@@ -103,7 +103,7 @@ pub(crate) fn install(element: &Control, groups: Option<&VisualStateGroupCollect
             list.remove_collection_changed(token);
         })
     };
-    host.element_subscriptions.borrow_mut().extend([attached, detached, collection]);
+    host.element_subscriptions.borrow_mut().extend([attached.detach(), detached.detach(), collection]);
     element.set_value(StateTriggerHosts::host_property(), Some(TriggerHostRef(host.clone())));
     if element.is_attached_to_visual_tree() {
         host.attach();

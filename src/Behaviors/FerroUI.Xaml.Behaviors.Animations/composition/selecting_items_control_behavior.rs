@@ -45,9 +45,10 @@ impl SelectingItemsControlBehavior {
     fn static_constructor() {
         // The handler stays registered for the life of the thread, as the class handler of the
         // static constructor of the reference does for the life of the process.
-        let _ = Self::enable_selection_animation_property()
+        Self::enable_selection_animation_property()
             .changed()
-            .add_class_handler::<Control>(Self::on_enable_selection_animation);
+            .add_class_handler::<Control>(Self::on_enable_selection_animation)
+            .detach();
     }
 
     fn on_enable_selection_animation(control: &Control, args: &FerroPropertyChangedEventArgs<'_>) {

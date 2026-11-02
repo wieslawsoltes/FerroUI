@@ -6,6 +6,7 @@ use crate::markup::xaml_class;
 use crate::models::CatalogTheme;
 use crate::view_models::{ApplicationViewModel, MainWindowViewModel};
 use ferroui_base::controls::ResourceKey;
+use ferroui_base::media::{FontFallback, FontFamily, UnicodeRange, UnicodeRangeSegment};
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::styling::{IStyle, Style, Styles, ThemeVariant};
 use ferroui_base::utilities::EventArgs;
@@ -382,6 +383,38 @@ impl App {
             builder.with_material_fonts()
         };
         builder
+    }
+
+    /// Not in the original: the font fallbacks of a host without system fonts (the browser), for
+    /// the characters of the catalog's pages that its default family, Inter, lacks. Each font is a
+    /// small subset (`Assets/FallbackFonts`, written by `scripts/fonts/catalog_fallback_fonts.py`)
+    /// that covers the emoji, Arabic, CJK and symbols the pages show; a host with system fonts
+    /// leaves the fallbacks empty and draws these characters with the fonts of the system.
+    pub fn font_fallbacks() -> Vec<FontFallback> {
+        let fallback = |family: &str, ranges: &[(i32, i32)]| FontFallback {
+            font_family: FontFamily::new(family),
+            unicode_range: UnicodeRange::from_segments(
+                ranges.iter().map(|&(start, end)| UnicodeRangeSegment::new(start, end)).collect(),
+            ),
+        };
+        vec![
+            fallback(
+                "ferres://ControlCatalog/Assets/FallbackFonts/NotoColorEmoji-Catalog.ttf#Noto Color Emoji",
+                &[(0x200D, 0x200D), (0x2600, 0x27BF), (0x2B00, 0x2BFF), (0xFE0F, 0xFE0F), (0x1F000, 0x1FAFF)],
+            ),
+            fallback(
+                "ferres://ControlCatalog/Assets/FallbackFonts/NotoSansArabic-Catalog.ttf#Noto Sans Arabic",
+                &[(0x0600, 0x06FF), (0x0750, 0x077F), (0xFB50, 0xFDFF), (0xFE70, 0xFEFF)],
+            ),
+            fallback(
+                "ferres://ControlCatalog/Assets/FallbackFonts/WenQuanYiMicroHei-Catalog.ttf#WenQuanYi Micro Hei",
+                &[(0x2E80, 0x9FFF), (0xF900, 0xFAFF), (0xFF00, 0xFFEF)],
+            ),
+            fallback(
+                "ferres://ControlCatalog/Assets/FallbackFonts/FerroUICatalogSymbolsFallback.ttf#FerroUI Catalog Symbols Fallback",
+                &[(0x2000, 0x2BFF)],
+            ),
+        ]
     }
 
     /// The retained Material theme instance.

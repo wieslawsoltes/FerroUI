@@ -73,6 +73,7 @@ export class WebGlRenderTarget extends WebRenderTarget {
     // is closed. Whatever drew with it (Skia's context) has been released before, with this
     // context current.
     public release(): void {
+        super.release();
         const handle = this.contextHandle;
         this.contextHandle = undefined;
         if (handle != null) { WebGlRenderTarget._gl?.deleteContext?.(handle); }

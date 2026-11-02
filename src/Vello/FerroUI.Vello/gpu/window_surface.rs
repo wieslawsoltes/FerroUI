@@ -32,9 +32,9 @@ use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{
     IDrawingContextImpl, IPlatformGraphicsContext, IRenderTarget, PlatformRenderTargetState,
-    RenderTargetDrawingContextProperties, RenderTargetProperties, RenderTargetSceneInfo,
+    RenderTargetDrawingContextProperties, RenderTargetError, RenderTargetProperties, RenderTargetSceneInfo,
 };
-use ferroui_base::PixelSize;
+use ferroui_base::{PixelSize, RenderTargetNotReadyError};
 use ferroui_controls::platform::INativePlatformHandleSurface;
 use std::any::TypeId;
 use std::cell::{Cell, RefCell};
@@ -423,6 +423,13 @@ impl VelloSurfaceRenderTarget {
     }
 }
 
+/// Whether a scene of `scene` pixels is the one for a window of `window` pixels: the same size, or
+/// one pixel off in either direction, the rounding between the logical size of the scene and the
+/// pixels of the window.
+fn scene_fits_window(scene: PixelSize, window: PixelSize) -> bool {
+    (scene.width - window.width).abs() <= 1 && (scene.height - window.height).abs() <= 1
+}
+
 fn log_window_failure(error: &str) {
     if let Some(logger) = Logger::try_get(LogEventLevel::Error, LogArea::VISUAL) {
         logger.log_with_values(None, "The Vello backend could not present a frame of a window: {Error}", &[&error]);
@@ -435,6 +442,26 @@ impl IRenderTarget for VelloSurfaceRenderTarget {
         // the swap chain holds nothing of the frame before), and the
         // compositor draws into it directly.
         RenderTargetProperties { retains_previous_frame_contents: true, is_suitable_for_direct_rendering: true }
+    }
+
+    /// Not ready while the window has a size other than the one the scene was laid out for
+    /// (beyond a pixel of rounding): a frame of the window's size would show the scene of the
+    /// other size with a strip of the frame before it, and a frame of the scene's size would be
+    /// stretched to the window by the swap chain (`DXGI_SCALING_STRETCH` of `wgpu` on DX12). The
+    /// compositor skips the frame and asks again with the next tick; the platform renders the
+    /// scene of the new size itself when it resizes (issue 476, cooperative resize).
+    fn try_create_drawing_context(
+        &self,
+        scene_info: &RenderTargetSceneInfo,
+    ) -> Result<(Box<dyn IDrawingContextImpl>, RenderTargetDrawingContextProperties), RenderTargetError> {
+        if !self.disposed.get() {
+            if let Some(handle) = native_handle(&*self.platform_surface) {
+                if !scene_fits_window(scene_info.size, handle.size()) {
+                    return Err(RenderTargetNotReadyError::new().into());
+                }
+            }
+        }
+        Ok(self.create_drawing_context(scene_info))
     }
 
     fn create_drawing_context(
@@ -492,5 +519,22 @@ impl IRenderTarget for VelloSurfaceRenderTarget {
         if let Some(swap_chain) = self.swap_chain.borrow_mut().take() {
             self.gpu.retired.borrow_mut().push(swap_chain);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::scene_fits_window;
+    use ferroui_base::PixelSize;
+
+    #[test]
+    fn a_scene_fits_a_window_of_its_size_up_to_a_pixel_of_rounding() {
+        let window = PixelSize::new(1400, 1000);
+        assert!(scene_fits_window(PixelSize::new(1400, 1000), window));
+        assert!(scene_fits_window(PixelSize::new(1399, 1001), window));
+        // A scene laid out before the window grew or shrank is not drawn into it.
+        assert!(!scene_fits_window(PixelSize::new(1026, 671), window));
+        assert!(!scene_fits_window(PixelSize::new(1400, 1002), window));
+        assert!(!scene_fits_window(PixelSize::new(1600, 1000), window));
     }
 }

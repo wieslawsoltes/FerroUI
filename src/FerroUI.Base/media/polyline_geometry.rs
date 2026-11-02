@@ -72,7 +72,7 @@ impl PolylineGeometry {
         Geometry::affects_geometry(&[Self::is_filled_property().as_property()]);
         Self::points_property().changed().add_class_handler::<PolylineGeometry>(|s, e| {
             s.on_points_changed(e.get_new_value::<Option<Points>>())
-        });
+        }).detach();
     }
 
     /// Creates the class data.

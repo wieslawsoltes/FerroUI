@@ -217,7 +217,7 @@ impl FerroObjectImpl for ItemsRepeaterScrollHost {
                 this.on_layout_updated();
             }
         });
-        *this.layout_subscription.borrow_mut() = Some(subscription);
+        *this.layout_subscription.borrow_mut() = Some(subscription.detach());
     }
 
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {

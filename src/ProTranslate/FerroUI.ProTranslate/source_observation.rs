@@ -1,5 +1,5 @@
 use crate::{Translation, TranslationBindingSource};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::{FerroObject, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -10,9 +10,9 @@ pub(crate) struct SourceObservation {
     target: WeakRef<FerroObject>,
     explicit_source: Option<TranslationBindingSource>,
     update: Rc<dyn Fn()>,
-    source_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    target_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    default_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    source_subscription: RefCell<Option<Subscription>>,
+    target_subscription: RefCell<Option<Subscription>>,
+    default_subscription: RefCell<Option<Subscription>>,
     disposed: Cell<bool>,
     updating: Cell<bool>,
     pending: Cell<bool>,
@@ -47,21 +47,22 @@ impl SourceObservation {
                         }
                     }
                 });
-                this.target_subscription.replace(Some(subscription));
+                this.target_subscription
+                    .replace(Some(Subscription::new(subscription)));
             }
             let weak = Rc::downgrade(&this);
-            this.default_subscription.replace(Some(
-                TranslationBindingSource::subscribe_default_changed(move || {
-                    if let Some(this) = weak.upgrade() {
-                        if this.target.upgrade().is_some_and(|target| {
-                            target.get_value(Translation::source_property()).is_none()
-                        }) {
-                            this.reconnect();
-                            this.refresh();
-                        }
+            let subscription = TranslationBindingSource::subscribe_default_changed(move || {
+                if let Some(this) = weak.upgrade() {
+                    if this.target.upgrade().is_some_and(|target| {
+                        target.get_value(Translation::source_property()).is_none()
+                    }) {
+                        this.reconnect();
+                        this.refresh();
                     }
-                }),
-            ));
+                }
+            });
+            this.default_subscription
+                .replace(Some(Subscription::new(subscription)));
         }
         this
     }
@@ -91,7 +92,8 @@ impl SourceObservation {
                 this.refresh();
             }
         });
-        self.source_subscription.replace(Some(subscription));
+        self.source_subscription
+            .replace(Some(Subscription::new(subscription)));
     }
 
     pub(crate) fn refresh(&self) {

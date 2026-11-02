@@ -2,7 +2,7 @@
 
 use ferroui_base::data::BindingPriority;
 use ferroui_base::input::InputElement;
-use ferroui_base::reactive::{IDisposable, IObservable, ObservableExt};
+use ferroui_base::reactive::{IDisposable, IObservable, ObservableExt, Subscription};
 use ferroui_base::{ferro_properties, ferro_static_type, AttachedProperty, FerroProperty, Ref, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -18,7 +18,7 @@ pub struct CommandCanExecuteIsEnabledBinder {
 #[derive(Default)]
 struct BinderState {
     target: RefCell<Option<WeakRef<InputElement>>>,
-    can_execute_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    can_execute_subscription: RefCell<Option<Subscription>>,
     is_blocking: Cell<bool>,
 }
 
@@ -68,7 +68,7 @@ impl CommandCanExecuteIsEnabledBinder {
                 state.update_can_execute(can_execute);
             }
         });
-        *self.state.can_execute_subscription.borrow_mut() = Some(subscription);
+        *self.state.can_execute_subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 
     /// Stops following the command and removes the overlay this binder added.

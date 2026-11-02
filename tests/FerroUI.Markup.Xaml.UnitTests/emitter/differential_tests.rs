@@ -1115,6 +1115,7 @@ fn compiled_documents_are_registered_by_uri() {
     FerroLocator::current_mutable()
         .bind::<dyn IAssetLoader>()
         .to_constant(Rc::new(StandardAssetLoader::new(Some(&AssetAssembly::new(generated::ASSEMBLY_NAME)))));
+    let _registry = compiled_xaml_registry();
     generated::register_compiled_xaml();
     let parsed = Uri::new(&uri, UriKind::Absolute).expect("an absolute URI");
     let loaded = FerroXamlLoader::try_load_with_service_provider(None, &parsed, None);
@@ -1151,6 +1152,7 @@ fn a_compiled_document_that_fails_to_build_fails_the_load() {
     FerroLocator::current_mutable()
         .bind::<dyn IAssetLoader>()
         .to_constant(Rc::new(StandardAssetLoader::new(Some(&AssetAssembly::new(generated::ASSEMBLY_NAME)))));
+    let _registry = compiled_xaml_registry();
     generated::register_compiled_xaml();
     let parsed = Uri::new(&uri, UriKind::Absolute).expect("an absolute URI");
     let loaded = FerroXamlLoader::try_load_with_service_provider(None, &parsed, None);
@@ -1223,4 +1225,12 @@ fn the_position_map_leads_back_to_the_document() {
         })
         .expect("the line is in a range of the map");
     assert!(entry.contains("\"line\": 5,"), "{entry}");
+}
+
+/// Serializes the tests that register the compiled documents of the test assembly: the registry of
+/// `FerroXamlLoader` is shared by the process, and a test that unregisters the assembly while
+/// another loads through it made the load fail with "could not be found".
+fn compiled_xaml_registry() -> std::sync::MutexGuard<'static, ()> {
+    static REGISTRY: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    REGISTRY.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
 }

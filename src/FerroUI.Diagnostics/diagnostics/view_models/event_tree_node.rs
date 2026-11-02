@@ -79,7 +79,7 @@ impl EventTreeNode {
             // (As upstream, the handlers are never removed; they reach the node through a weak
             // reference, so they do not keep it alive.)
             let weak = Rc::downgrade(&this.to_rc());
-            let _ = node.event.add_class_handler_untyped(
+            node.event.add_class_handler_untyped(
                 FerroObject::TYPE,
                 move |sender, e| {
                     if let Some(this) = weak.upgrade() {
@@ -88,13 +88,13 @@ impl EventTreeNode {
                 },
                 all_routes,
                 true,
-            );
+            ).detach();
             let weak = Rc::downgrade(&this.to_rc());
-            let _ = node.event.route_finished().subscribe(move |e| {
+            node.event.route_finished().subscribe(move |e| {
                 if let Some(this) = weak.upgrade() {
                     Self::handle_route_finished(&this, e);
                 }
-            });
+            }).detach();
 
             node.is_registered.set(true);
         }

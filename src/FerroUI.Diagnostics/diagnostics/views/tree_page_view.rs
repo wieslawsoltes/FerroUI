@@ -14,7 +14,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::metadata::from_markup_value;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt,
@@ -38,7 +38,7 @@ pub struct TreePageView {
     hovered: RefCell<Option<Rc<TreeNode>>>,
     tree: RefCell<Option<Ref<TreeDataGrid>>>,
     adorner: RefCell<Option<Rc<dyn IDisposable>>>,
-    clipboard_copy_requested: RefCell<Option<Rc<dyn IDisposable>>>,
+    clipboard_copy_requested: RefCell<Option<Subscription>>,
     selected_node_changed: RefCell<Option<(Rc<TreePageViewModel>, u64)>>,
 }
 
@@ -112,7 +112,7 @@ impl FerroObjectImpl for TreePageView {
                         this.on_clipboard_copy_requested(selector);
                     }
                 });
-                *this.clipboard_copy_requested.borrow_mut() = Some(subscription);
+                *this.clipboard_copy_requested.borrow_mut() = Some(Subscription::new(subscription));
 
                 // Deviation (DEVIATIONS.md, Developer tools): the row of a node the view model
                 // selects is brought into view (the source has selected it and expanded the rows

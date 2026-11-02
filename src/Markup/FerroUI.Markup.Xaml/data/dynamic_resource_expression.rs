@@ -6,7 +6,7 @@ use ferroui_base::data::core::{Publish, UntypedBindingExpression, UntypedBinding
 use ferroui_base::data::BindingPriority;
 use ferroui_base::logging::LogEventLevel;
 use ferroui_base::media::IBrush;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{BoxedValue, DoNothingType, FerroProperty, Ref, StyledElement, UnsetValueType, WeakRef};
 use ferroui_controls::Application;
@@ -65,7 +65,7 @@ pub(crate) struct DynamicResourceExpression {
     override_theme_variant: Cell<bool>,
     target_type_is_brush: Cell<bool>,
     theme_variant: RefCell<Option<ThemeVariant>>,
-    owner_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    owner_changed_subscription: RefCell<Option<Subscription>>,
     host_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
 }
 
@@ -155,7 +155,7 @@ impl DynamicResourceExpression {
                     this.on_resource_provider_owner_changed();
                 }
             }));
-            *self.owner_changed_subscription.borrow_mut() = Some(subscription);
+            *self.owner_changed_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
         let host = self.host();
         self.subscribe(host.as_ref());

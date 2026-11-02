@@ -355,10 +355,10 @@ ferroui_base::ferro_properties! { impl Popup {
 
 impl Popup {
     fn static_constructor() {
-        Self::child_property().changed().add_class_handler::<Popup>(|x, e| x.child_changed(e));
-        Self::is_open_property().changed().add_class_handler::<Popup>(|x, e| x.is_open_changed(e));
+        Self::child_property().changed().add_class_handler::<Popup>(|x, e| x.child_changed(e)).detach();
+        Self::is_open_property().changed().add_class_handler::<Popup>(|x, e| x.is_open_changed(e)).detach();
         // WinUI: the `Shadow` of a popup is cast by its child (`NeedsDropShadowVisual`).
-        Visual::shadow_property().changed().add_class_handler::<Popup>(|x, _| x.update_child_theme_shadow());
+        Visual::shadow_property().changed().add_class_handler::<Popup>(|x, _| x.update_child_theme_shadow()).detach();
     }
 
     /// Hands the `Shadow` of the popup to its child, which casts it (with the elevation of the
@@ -772,11 +772,14 @@ impl Popup {
 
         if self.inherits_transform() {
             let weak = weak.clone();
-            handler_cleanup.add(TransformTrackingHelper::track(&placement_target.clone().upcast(), true, move |v, m| {
-                if let Some(this) = weak.upgrade() {
-                    this.placement_target_transform_changed(v, m);
-                }
-            }));
+            handler_cleanup.add(
+                TransformTrackingHelper::track(&placement_target.clone().upcast(), true, move |v, m| {
+                    if let Some(this) = weak.upgrade() {
+                        this.placement_target_transform_changed(v, m);
+                    }
+                })
+                .detach(),
+            );
         } else {
             popup_host.set_transform(None);
         }
@@ -820,7 +823,7 @@ impl Popup {
                     this.target_detached(e);
                 }
             }
-        }));
+        }).detach());
 
         self.subscribe_to_top_level(&top_level, &placement_target, &handler_cleanup);
         if !self.is_current_lifecycle_request(generation) {
@@ -1000,7 +1003,7 @@ impl Popup {
                                 this.placement_target_layout_updated();
                             }
                         }
-                    }));
+                    }).detach());
                 }
 
                 return;

@@ -3,7 +3,7 @@
 use crate::SplitViewStateSetter;
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::reactive::{IDisposable, ObservableExt};
+use ferroui_base::reactive::{IDisposable, ObservableExt, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, DirectProperty, ElementRef, FerroObject,
     FerroObjectExtensions, FerroObjectImpl, FerroProperty, Nullable, Rect, Ref, StaticType, StyledElementImpl,
@@ -76,7 +76,7 @@ ferroui_base::ferro_markup_type!(class SplitViewStateSetters {
 #[repr(C)]
 pub struct SplitViewStateBehavior {
     base: StyledElementBehaviorOfT,
-    disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    disposable: RefCell<Option<Subscription>>,
     setters: OnceCell<SplitViewStateSetters>,
 }
 
@@ -172,7 +172,7 @@ impl SplitViewStateBehavior {
 
         if let Some(source) = source {
             let disposable = self.observe_bounds(&source);
-            *self.disposable.borrow_mut() = Some(disposable);
+            *self.disposable.borrow_mut() = Some(Subscription::new(disposable));
         }
     }
 

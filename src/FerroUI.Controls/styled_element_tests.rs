@@ -321,7 +321,7 @@ fn record_data_context_events(c: &Ref<StyledElement>, called: &Rc<RefCell<Vec<St
     c.data_context_changed(move || {
         let s = sender.upgrade().unwrap();
         changed.borrow_mut().push(format!("changed {}", name(&s)));
-    });
+    }).detach();
 }
 
 fn red() -> Option<Rc<dyn IBrush>> {
@@ -405,11 +405,11 @@ fn attached_to_logical_tree_should_be_called_when_added_to_tree() {
     let grandchild_raised = Rc::new(Cell::new(false));
 
     let r = parent_raised.clone();
-    parent.attached_to_logical_tree(move |_| r.set(true));
+    parent.attached_to_logical_tree(move |_| r.set(true)).detach();
     let r = child_raised.clone();
-    child.attached_to_logical_tree(move |_| r.set(true));
+    child.attached_to_logical_tree(move |_| r.set(true)).detach();
     let r = grandchild_raised.clone();
-    grandchild.attached_to_logical_tree(move |_| r.set(true));
+    grandchild.attached_to_logical_tree(move |_| r.set(true)).detach();
 
     parent.set_child(child.clone());
     child.set_child(grandchild.clone());
@@ -439,7 +439,7 @@ fn attached_to_logical_tree_should_be_called_before_parent_change_signalled() {
             Some(expected_parent.upgrade().unwrap().upcast::<StyledElement>())
         );
         r.borrow_mut().push("attached".to_string());
-    });
+    }).detach();
 
     let r = raised.clone();
     let skipped = Cell::new(false);
@@ -471,7 +471,7 @@ fn attached_to_logical_tree_should_not_be_called_with_global_styles_as_root() {
     child.attached_to_logical_tree(move |e| {
         assert_eq!(*e.root(), expected_root.upgrade().unwrap().upcast::<StyledElement>());
         r.set(true);
-    });
+    }).detach();
 
     root.set_child(child.clone());
 
@@ -495,8 +495,8 @@ fn attached_to_logical_tree_should_have_source_set() {
         }
     };
 
-    border.attached_to_logical_tree(attached.clone());
-    canvas.attached_to_logical_tree(attached);
+    border.attached_to_logical_tree(attached.clone()).detach();
+    canvas.attached_to_logical_tree(attached).detach();
 
     root.set_child(border.clone());
 
@@ -520,8 +520,8 @@ fn attached_to_logical_tree_should_have_parent_set() {
         }
     };
 
-    border.attached_to_logical_tree(attached.clone());
-    canvas.attached_to_logical_tree(attached);
+    border.attached_to_logical_tree(attached.clone()).detach();
+    canvas.attached_to_logical_tree(attached).detach();
 
     root.set_child(border.clone());
 
@@ -544,11 +544,11 @@ fn detached_from_logical_tree_should_be_called_when_removed_from_tree() {
     root.set_child(parent.clone());
 
     let r = parent_raised.clone();
-    parent.detached_from_logical_tree(move |_| r.set(true));
+    parent.detached_from_logical_tree(move |_| r.set(true)).detach();
     let r = child_raised.clone();
-    child.detached_from_logical_tree(move |_| r.set(true));
+    child.detached_from_logical_tree(move |_| r.set(true)).detach();
     let r = grandchild_raised.clone();
-    grandchild.detached_from_logical_tree(move |_| r.set(true));
+    grandchild.detached_from_logical_tree(move |_| r.set(true)).detach();
 
     root.set_child(None);
 
@@ -572,7 +572,7 @@ fn detached_from_logical_tree_should_not_be_called_with_global_styles_as_root() 
     child.detached_from_logical_tree(move |e| {
         assert_eq!(*e.root(), expected_root.upgrade().unwrap().upcast::<StyledElement>());
         r.set(true);
-    });
+    }).detach();
 
     root.set_child(child.clone());
     root.set_child(None);
@@ -591,7 +591,7 @@ fn logical_children_can_be_added_during_attached_to_logical_tree() {
     parent.logical_children().add(child1.clone());
 
     let (p, c2) = (parent.downgrade(), child2.clone());
-    child1.attached_to_logical_tree(move |_| p.upgrade().unwrap().logical_children().add(c2.clone()));
+    child1.attached_to_logical_tree(move |_| p.upgrade().unwrap().logical_children().add(c2.clone())).detach();
 
     root.logical_children().add(parent.clone());
 
@@ -613,7 +613,7 @@ fn logical_children_can_be_removed_during_attached_to_logical_tree() {
     let (p, c2) = (parent.downgrade(), child2.clone());
     child1.attached_to_logical_tree(move |_| {
         p.upgrade().unwrap().logical_children().remove(&c2);
-    });
+    }).detach();
 
     root.logical_children().add(parent.clone());
 
@@ -634,7 +634,7 @@ fn logical_children_can_be_added_during_detached_from_logical_tree() {
     root.logical_children().add(parent.clone());
 
     let (p, c2) = (parent.downgrade(), child2.clone());
-    child1.detached_from_logical_tree(move |_| p.upgrade().unwrap().logical_children().add(c2.clone()));
+    child1.detached_from_logical_tree(move |_| p.upgrade().unwrap().logical_children().add(c2.clone())).detach();
 
     root.logical_children().remove(&parent.clone());
 
@@ -658,9 +658,9 @@ fn logical_children_can_be_removed_during_detached_from_logical_tree() {
     let (p, c2) = (parent.downgrade(), child2.clone());
     child1.detached_from_logical_tree(move |_| {
         p.upgrade().unwrap().logical_children().remove(&c2);
-    });
+    }).detach();
     let d = child2_detached.clone();
-    child2.detached_from_logical_tree(move |_| d.set(d.get() + 1));
+    child2.detached_from_logical_tree(move |_| d.set(d.get() + 1)).detach();
 
     root.logical_children().remove(&parent.clone());
 
@@ -683,7 +683,7 @@ fn parent_should_be_null_when_detached_from_logical_tree_called() {
         assert!(target.parent().is_none());
         assert!(target.inheritance_parent().is_none());
         c.set(c.get() + 1);
-    });
+    }).detach();
 
     root.set_child(None);
 
@@ -780,7 +780,7 @@ fn end_init_should_raise_initialized() {
     let called = Rc::new(Cell::new(false));
 
     let c = called.clone();
-    target.initialized(move || c.set(true));
+    target.initialized(move || c.set(true)).detach();
     target.begin_init();
     root.set_child(target.clone());
     target.end_init();
@@ -797,7 +797,7 @@ fn attaching_to_visual_tree_should_raise_initialized() {
     let called = Rc::new(Cell::new(false));
 
     let c = called.clone();
-    target.initialized(move || c.set(true));
+    target.initialized(move || c.set(true)).detach();
     root.set_child(target.clone());
 
     assert!(called.get());
@@ -831,11 +831,11 @@ fn data_context_changed_should_be_called() {
     };
 
     let root_element: Ref<StyledElement> = root.clone().upcast();
-    root.data_context_changed(record(&root_element));
+    root.data_context_changed(record(&root_element)).detach();
 
     for c in root.get_logical_descendants() {
         assert!(c.is::<TestControl>());
-        c.data_context_changed(record(&c));
+        c.data_context_changed(record(&c)).detach();
     }
 
     root.set_data_context(boxed_str("foo"));
@@ -934,7 +934,7 @@ fn assigning_resources_raises_resources_changed() {
     let raised = Rc::new(Cell::new(0));
 
     let r = raised.clone();
-    target.resources_changed(move |_| r.set(r.get() + 1));
+    target.resources_changed(move |_| r.set(r.get() + 1)).detach();
     target.set_resources(resources);
 
     assert_eq!(1, raised.get());
@@ -958,7 +958,7 @@ fn adding_to_logical_tree_raises_resources_changed() {
     let raised = Rc::new(Cell::new(0));
 
     let r = raised.clone();
-    target.resources_changed(move |_| r.set(r.get() + 1));
+    target.resources_changed(move |_| r.set(r.get() + 1)).detach();
 
     parent.set_child(target.clone());
 

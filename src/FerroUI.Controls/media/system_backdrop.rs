@@ -362,7 +362,7 @@ impl SystemBackdropImpl for SystemBackdrop {
                     configuration.set_theme(theme_of(&root));
                     notify();
                 }
-            }));
+            }).detach());
         }
         if let Some(settings) = FerroLocator::current().get_service::<dyn IPlatformSettings>() {
             let configuration = configuration.clone();

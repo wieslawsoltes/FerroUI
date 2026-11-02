@@ -149,7 +149,8 @@ mod application {
             },
             Duration::from_millis(ms),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 
     /// The children of the Java view of the main activity, in the order they
@@ -279,6 +280,7 @@ mod application {
             },
             Duration::from_millis(250),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 }

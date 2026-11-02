@@ -207,7 +207,7 @@ impl ViewportManager {
                         .on_effective_viewport_changed(&owner, args.effective_viewport());
                 }
             });
-            *self.viewport_subscription.borrow_mut() = Some(subscription);
+            *self.viewport_subscription.borrow_mut() = Some(subscription.detach());
         } else if !virtualizing {
             let subscription = self.viewport_subscription.borrow_mut().take();
             if let Some(subscription) = subscription {

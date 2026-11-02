@@ -1,6 +1,6 @@
 //! Port of `ItemsControl/ItemsControlPreparingContainerTrigger.cs`.
 
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     ferro_class, ferro_class_info, instantiate, BoxedValue, FerroObjectImpl, Ref, StaticType, StyledElementImpl,
 };
@@ -17,7 +17,7 @@ use std::rc::Rc;
 pub struct ItemsControlPreparingContainerTrigger {
     base: StyledElementTriggerOfT,
     // The subscription to the event of the associated object (the reference removes its delegate).
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(ItemsControlPreparingContainerTrigger: StyledElementTriggerOfT);
@@ -34,7 +34,7 @@ ferroui_base::ferro_overrides! {
                         trigger.items_control_on_preparing_container(e);
                     }
                 });
-                let previous = this.subscription.borrow_mut().replace(subscription);
+                let previous = this.subscription.borrow_mut().replace(Subscription::new(subscription));
                 if let Some(previous) = previous {
                     previous.dispose();
                 }

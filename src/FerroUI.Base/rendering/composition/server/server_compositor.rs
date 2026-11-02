@@ -756,9 +756,10 @@ impl ServerCompositor {
         let dispatcher = Dispatcher::ui_thread();
         let processing_disabled = dispatcher.check_access().then(|| dispatcher.disable_processing());
         let _notify = NotifyRendered(self);
-        // Declared after `_notify`, so processing is enabled again before
-        // the rendered notification runs.
-        let _enable = EnableProcessing(processing_disabled);
+        // Bound after `_notify`, so processing is enabled again (when the
+        // value drops, also when the frame unwinds) before the rendered
+        // notification runs.
+        let _enable = processing_disabled;
         self.render_core()
     }
 
@@ -848,17 +849,5 @@ struct NotifyRendered<'a>(&'a ServerCompositor);
 impl Drop for NotifyRendered<'_> {
     fn drop(&mut self) {
         self.0.notify_batches_rendered();
-    }
-}
-
-/// Re-enables dispatcher processing when the frame ends, also when it
-/// unwinds: the handle only re-enables on `dispose`.
-struct EnableProcessing(Option<crate::threading::DispatcherProcessingDisabled>);
-
-impl Drop for EnableProcessing {
-    fn drop(&mut self) {
-        if let Some(disabled) = &self.0 {
-            crate::reactive::IDisposable::dispose(disabled);
-        }
     }
 }

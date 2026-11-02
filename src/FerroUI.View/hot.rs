@@ -228,7 +228,8 @@ mod reload {
             },
             std::time::Duration::from_millis(300),
             ferroui_base::threading::DispatcherPriority::BACKGROUND,
-        );
+        )
+        .detach();
     }
 
     pub(super) fn poll() {

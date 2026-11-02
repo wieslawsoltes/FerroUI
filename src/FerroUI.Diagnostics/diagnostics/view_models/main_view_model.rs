@@ -12,7 +12,7 @@ use ferroui_base::input::raw::RawPointerEventArgs;
 use ferroui_base::input::{IInputRoot, InputElement, InputManager, KeyboardDevice};
 use ferroui_base::media::IBrush;
 use ferroui_base::metadata::{from_markup_value, into_markup_value};
-use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::rendering::{IRenderer, RendererDebugOverlays};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::{ferro_markup_type, BoxedValue, FerroObject, Ref};
@@ -141,7 +141,7 @@ pub struct MainViewModel {
     events: Rc<EventsPageViewModel>,
     hot_keys: Rc<HotKeyPageViewModel>,
     pointer_over_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    keyboard_property_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    keyboard_property_changed_subscription: RefCell<Option<Subscription>>,
     content: RefCell<Option<MainContent>>,
     selected_tab: Cell<i32>,
     focused_control: RefCell<Option<String>>,
@@ -503,13 +503,14 @@ impl MainViewModel {
                 // expand the parent nodes. Because at this point the TreeView isn't visible,
                 // this will fail unless we schedule the selection to run after layout.
                 let new_tree = new_tree.clone();
-                let _ = DispatcherTimer::run_once(
+                DispatcherTimer::run_once(
                     move || {
                         new_tree.select_control(&control);
                     },
                     Duration::ZERO,
                     DispatcherPriority::default(),
-                );
+                )
+                .detach();
             }
         }
 

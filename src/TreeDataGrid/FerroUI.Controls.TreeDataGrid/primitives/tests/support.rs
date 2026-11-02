@@ -665,13 +665,13 @@ impl TreeAttachmentCounter {
     pub fn watch(&self, control: &Control) {
         let mut subscriptions = self.subscriptions.borrow_mut();
         let counter = self.logical_attaches.clone();
-        subscriptions.push(control.attached_to_logical_tree(move |_| counter.set(counter.get() + 1)));
+        subscriptions.push(control.attached_to_logical_tree(move |_| counter.set(counter.get() + 1)).detach());
         let counter = self.logical_detaches.clone();
-        subscriptions.push(control.detached_from_logical_tree(move |_| counter.set(counter.get() + 1)));
+        subscriptions.push(control.detached_from_logical_tree(move |_| counter.set(counter.get() + 1)).detach());
         let counter = self.visual_attaches.clone();
-        subscriptions.push(control.attached_to_visual_tree(move |_| counter.set(counter.get() + 1)));
+        subscriptions.push(control.attached_to_visual_tree(move |_| counter.set(counter.get() + 1)).detach());
         let counter = self.visual_detaches.clone();
-        subscriptions.push(control.detached_from_visual_tree(move |_| counter.set(counter.get() + 1)));
+        subscriptions.push(control.detached_from_visual_tree(move |_| counter.set(counter.get() + 1)).detach());
     }
 
     /// Asserts that no control was attached or detached.

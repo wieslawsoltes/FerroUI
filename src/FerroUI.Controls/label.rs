@@ -68,7 +68,7 @@ ferroui_base::ferro_properties! { impl Label {
 
 impl Label {
     fn static_constructor() {
-        AccessKeyHandler::access_key_pressed_event().add_class_handler::<Label>(Self::on_access_key_pressed);
+        AccessKeyHandler::access_key_pressed_event().add_class_handler::<Label>(Self::on_access_key_pressed).detach();
         // The tab stop property defaults to false for labels.
         InputElement::is_tab_stop_property().override_default_value::<Label>(false);
     }

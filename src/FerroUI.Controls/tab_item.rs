@@ -134,12 +134,12 @@ impl TabItem {
         SelectableMixin::attach::<TabItem>(Self::is_selected_property());
         PressedMixin::attach::<TabItem>();
         InputElement::focusable_property().override_default_value::<TabItem>(true);
-        StyledElement::data_context_property().changed().add_class_handler::<TabItem>(|x, e| x.update_header(e));
+        StyledElement::data_context_property().changed().add_class_handler::<TabItem>(|x, e| x.update_header(e)).detach();
         crate::automation::AutomationProperties::control_type_override_property()
             .override_default_value::<TabItem>(Some(crate::automation::peers::AutomationControlType::TabItem));
         crate::automation::AutomationProperties::is_offscreen_behavior_property()
             .override_default_value::<TabItem>(crate::automation::IsOffscreenBehavior::FromClip);
-        AccessKeyHandler::access_key_pressed_event().add_class_handler::<TabItem>(Self::on_access_key_pressed);
+        AccessKeyHandler::access_key_pressed_event().add_class_handler::<TabItem>(Self::on_access_key_pressed).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

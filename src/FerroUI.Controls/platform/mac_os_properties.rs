@@ -20,7 +20,8 @@ impl MacOSProperties {
     fn static_constructor() {
         Self::is_template_icon_property()
             .changed()
-            .add_class_handler::<TrayIcon>(Self::tray_icon_is_template_icon_changed);
+            .add_class_handler::<TrayIcon>(Self::tray_icon_is_template_icon_changed)
+            .detach();
     }
 
     /// A Boolean value that determines whether the TrayIcon image

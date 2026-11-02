@@ -445,26 +445,33 @@ pub struct ObjectPropertyChangedObservable {
 }
 
 impl ObjectPropertyChangedObservable {
-    /// Subscribes to changes of the property on the object. Disposing the
-    /// returned handle unsubscribes.
-    pub fn subscribe(&self, handler: impl Fn(&FerroPropertyChangedEventArgs<'_>) + 'static) -> Rc<dyn IDisposable> {
+    /// Subscribes to changes of the property on the object.
+    ///
+    /// Dropping the returned guard removes the handler; call
+    /// [`detach`](Subscription::detach) to keep it for the life of the
+    /// object.
+    pub fn subscribe(&self, handler: impl Fn(&FerroPropertyChangedEventArgs<'_>) + 'static) -> Subscription {
         let property = self.property;
-        match self.target.upgrade() {
+        Subscription::new(match self.target.upgrade() {
             Some(target) => target.property_changed(move |e| {
                 if e.property() == property {
                     handler(e);
                 }
             }),
             None => Disposable::empty(),
-        }
+        })
     }
 
     /// Subscribes a handler that is only invoked when the object is of class
     /// `TTarget` (or a class derived from it).
+    ///
+    /// Dropping the returned guard removes the handler; call
+    /// [`detach`](Subscription::detach) to keep it for the life of the
+    /// object.
     pub fn add_class_handler<TTarget: ObjectType>(
         &self,
         handler: impl Fn(&TTarget, &FerroPropertyChangedEventArgs<'_>) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         self.subscribe(move |e| {
             if let Some(target) = e.sender().downcast_ref::<TTarget>() {
                 handler(target, e);

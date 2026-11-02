@@ -145,6 +145,19 @@
                   ToolTip.Tip="Window State"/>
       </Grid>
     </Border>
+
+    <!-- Not in the original: turns the frame rate counter of the renderer
+         (RendererDiagnostics.DebugOverlays) on and off for this window. -->
+    <Border Classes="card">
+      <Grid ColumnSpacing="10" ColumnDefinitions="*,Auto">
+        <Label>Frame Rate Counter</Label>
+        <CheckBox x:Name="ShowFrameRate"
+                  Grid.Column="1"
+                  Content="Show FPS"
+                  IsCheckedChanged="ShowFrameRate_IsCheckedChanged"
+                  ToolTip.Tip="Show the frame rate counter of the renderer" />
+      </Grid>
+    </Border>
     <Border Classes="card" IsVisible="{Binding MacOSThemeSettingsVisible}">
       <StackPanel Spacing="10">
         <TextBlock Text="macOS 26 Appearance" FontWeight="SemiBold" />

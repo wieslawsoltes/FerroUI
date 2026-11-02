@@ -154,7 +154,7 @@ impl Win32Properties {
                     top_level_impl.set_window_corner_preference(e.get_new_value::<WindowCornerPreference>());
                 }
             },
-        );
+        ).detach();
     }
 
     /// Runs `f` with the Win32 options of the platform implementation of `top_level`, if it

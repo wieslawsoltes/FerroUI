@@ -312,7 +312,7 @@ impl CarouselPage {
                     event_args.set_handled(true);
                 }
             },
-        );
+        ).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

@@ -192,7 +192,8 @@ pub fn smoke_run() {
             },
             Duration::from_millis(ms),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
     if let Some(ms) = std::env::var("FERROUI_SMOKE_EXIT_MS").ok().and_then(|value| value.parse::<u64>().ok()) {
         println!("Will close the main window after {ms} ms");
@@ -245,5 +246,6 @@ pub fn close_main_window_after(interval: Duration) {
         },
         interval,
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
 }

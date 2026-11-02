@@ -796,7 +796,8 @@ mod app {
             },
             Duration::from_millis(50),
             DispatcherPriority::BACKGROUND,
-        );
+        )
+        .detach();
         TIMER.with(|slot| *slot.borrow_mut() = Some(timer));
     }
 

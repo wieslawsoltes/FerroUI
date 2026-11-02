@@ -117,14 +117,14 @@ impl FerroLocator {
     }
 
     /// Makes a new locator, whose parent is the current resolver, the
-    /// current one. Disposing the returned value restores the previous
-    /// resolver and locator.
+    /// current one. Disposing the returned value, or dropping its last
+    /// handle, restores the previous resolver and locator (once).
     pub fn enter_scope() -> Rc<dyn IDisposable> {
         let (resolver, mutable) = with_current(|current| current.clone());
         let scope = Rc::new(FerroLocator::with_parent_scope(resolver.clone()));
         Self::set_current(scope.clone());
         Self::set_current_mutable(scope);
-        Rc::new(ResolverDisposable { resolver, mutable })
+        Rc::new(ResolverDisposable { previous: Cell::new(Some((resolver, mutable))) })
     }
 }
 
@@ -209,15 +209,34 @@ impl<'a, T: ?Sized + 'static> RegistrationHelper<'a, T> {
     }
 }
 
+/// The scope of [`FerroLocator::enter_scope`]: restores the previous
+/// resolver and locator when it is disposed or dropped, whichever comes
+/// first.
 struct ResolverDisposable {
-    resolver: Rc<dyn IFerroDependencyResolver>,
-    mutable: Rc<FerroLocator>,
+    /// `Some` while the previous resolver and locator still have to be
+    /// restored.
+    previous: Cell<Option<(Rc<dyn IFerroDependencyResolver>, Rc<FerroLocator>)>>,
 }
 
 impl IDisposable for ResolverDisposable {
     fn dispose(&self) {
-        FerroLocator::set_current(self.resolver.clone());
-        FerroLocator::set_current_mutable(self.mutable.clone());
+        if let Some((resolver, mutable)) = self.previous.take() {
+            FerroLocator::set_current(resolver);
+            FerroLocator::set_current_mutable(mutable);
+        }
+    }
+}
+
+impl Drop for ResolverDisposable {
+    fn drop(&mut self) {
+        let Some(previous) = self.previous.get_mut().take() else { return };
+        // A scope can be dropped while its thread ends, after the current
+        // locator of the thread is gone: then there is nothing to restore.
+        // The replaced pair is dropped after the borrow ends, as in
+        // `set_current`.
+        let replaced =
+            CURRENT.try_with(|current| current.try_borrow_mut().ok().map(|mut current| current.replace(previous)));
+        drop(replaced);
     }
 }
 
@@ -387,6 +406,28 @@ mod tests {
         assert!(Rc::ptr_eq(&outer, &FerroLocator::current_mutable()));
         assert_eq!(FerroLocator::current().get_required_service::<dyn IGreeter>().greet(), "outer");
         assert!(FerroLocator::current().get_service::<Counter>().is_none());
+    }
+
+    #[test]
+    fn a_scope_is_left_when_dropped_and_restored_once() {
+        let outer = FerroLocator::current_mutable();
+
+        let scope = FerroLocator::enter_scope();
+        assert!(!Rc::ptr_eq(&outer, &FerroLocator::current_mutable()));
+        drop(scope);
+        assert!(Rc::ptr_eq(&outer, &FerroLocator::current_mutable()));
+
+        // Disposed, then dropped after another scope was entered: the drop
+        // leaves the newer scope alone.
+        let first = FerroLocator::enter_scope();
+        first.dispose();
+        let second = FerroLocator::enter_scope();
+        let inner = FerroLocator::current_mutable();
+        first.dispose();
+        drop(first);
+        assert!(Rc::ptr_eq(&inner, &FerroLocator::current_mutable()));
+        drop(second);
+        assert!(Rc::ptr_eq(&outer, &FerroLocator::current_mutable()));
     }
 
     #[test]

@@ -51,13 +51,13 @@ impl FocusManager {
             Self::on_preview_pointer_event_handler,
             RoutingStrategies::TUNNEL,
             false,
-        );
+        ).detach();
         InputElement::pointer_released_event().add_class_handler_untyped(
             InputElement::TYPE,
             Self::on_preview_pointer_event_handler,
             RoutingStrategies::TUNNEL,
             false,
-        );
+        ).detach();
     }
 
     /// Creates a focus manager.

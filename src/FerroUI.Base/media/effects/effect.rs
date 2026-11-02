@@ -33,7 +33,7 @@ impl Effect {
                     let effect: &Effect = sender.upcast();
                     effect.raise_invalidated();
                 }
-            });
+            }).detach();
         }
     }
 

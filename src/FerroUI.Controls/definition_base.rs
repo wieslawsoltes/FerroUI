@@ -126,10 +126,12 @@ impl DefinitionBase {
     fn static_constructor() {
         Self::shared_size_group_property()
             .changed()
-            .add_class_handler::<DefinitionBase>(Self::on_shared_size_group_property_changed);
+            .add_class_handler::<DefinitionBase>(Self::on_shared_size_group_property_changed)
+            .detach();
         Self::private_shared_size_scope_property()
             .changed()
-            .add_class_handler::<DefinitionBase>(Self::on_private_shared_size_scope_property_changed);
+            .add_class_handler::<DefinitionBase>(Self::on_private_shared_size_scope_property_changed)
+            .detach();
     }
 
     /// Creates the class data; see [`FerroObject::construct`].
@@ -523,7 +525,7 @@ impl DefinitionBase {
                 {
                     parent.invalidate_measure();
                 }
-            });
+            }).detach();
         }
     }
 }
@@ -681,7 +683,7 @@ impl SharedSizeState {
                     this.on_layout_updated();
                 }
             });
-            *self.layout_updated_host.borrow_mut() = Some((layout_updated_host.to_ref().downgrade(), subscription));
+            *self.layout_updated_host.borrow_mut() = Some((layout_updated_host.to_ref().downgrade(), subscription.detach()));
         }
     }
 

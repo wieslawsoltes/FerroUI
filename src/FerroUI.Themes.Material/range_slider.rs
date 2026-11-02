@@ -18,7 +18,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::{LayoutableImpl, Orientation};
 use ferroui_base::media::{BoxShadows, DrawingContext, FlowDirection, IBrush};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs,
     Point, Rect, Ref, RoundedRect, Size, StyledElementImpl, StyledProperty, StyledPropertyOptions,
@@ -67,7 +67,7 @@ pub struct MaterialRangeSlider {
     layout: RefCell<Option<Ref<MaterialRangeSliderLayout>>>,
     start_thumb: RefCell<Option<Ref<MaterialRangeSliderThumb>>>,
     end_thumb: RefCell<Option<Ref<MaterialRangeSliderThumb>>>,
-    subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    subscriptions: RefCell<Vec<Subscription>>,
     synchronizing: Cell<bool>,
     drag: RefCell<Option<Drag>>,
     edited: Cell<bool>,

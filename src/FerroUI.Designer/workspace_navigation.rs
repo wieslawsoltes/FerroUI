@@ -421,7 +421,7 @@ impl DesignerWorkspace {
             if let Some(this) = weak.upgrade() {
                 this.refresh_canvas_layout();
             }
-        }));
+        }).detach());
         let weak = Rc::downgrade(self);
         canvas.add_handler_with(
             InputElement::pointer_wheel_changed_event(),

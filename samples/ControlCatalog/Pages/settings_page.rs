@@ -12,6 +12,7 @@ use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Colors, FlowDirection, IBrush};
 use ferroui_base::metadata::from_markup_value;
+use ferroui_base::rendering::RendererDebugOverlays;
 use ferroui_base::styling::{styles_as_style, Styles, ThemeVariant};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref, StyledElementImpl,
@@ -19,7 +20,7 @@ use ferroui_base::{
 };
 use ferroui_controls::primitives::TemplatedControlImpl;
 use ferroui_controls::{
-    Application, ContentPage, ControlImpl, PageImpl, SelectionChangedEventArgs, TopLevel, Window, WindowDecorations,
+    Application, CheckBox, ContentPage, ControlImpl, PageImpl, SelectionChangedEventArgs, TopLevel, Window, WindowDecorations,
     WindowTransparencyLevel, WindowTransparencyLevelCollection,
 };
 use std::cell::OnceCell;
@@ -75,6 +76,10 @@ ferro_class_info!(SettingsPage {
                 |this: &Ref<SettingsPage>, _sender: Option<BoxedValue>, e: Rc<dyn IRoutedEventArgs>| {
                     this.transparency_levels_selection_changed(first_added::<WindowTransparencyLevel>(&e))
                 },
+            fn ShowFrameRate_IsCheckedChanged(Option<BoxedValue>, Rc<dyn IRoutedEventArgs>) =>
+                |this: &Ref<SettingsPage>, _sender: Option<BoxedValue>, _e: Rc<dyn IRoutedEventArgs>| {
+                    this.show_frame_rate_changed()
+                },
         ],
     },
 });
@@ -89,6 +94,13 @@ impl VisualImpl for SettingsPage {
             if let Some(window) = top_level.cast::<Window>() {
                 view_model.set_selected_decoration_index(window.window_decorations() as i32);
             }
+        }
+
+        if let (Some(top_level), Some(check_box)) =
+            (TopLevel::get_top_level(Some(this)), this.find_control::<CheckBox>("ShowFrameRate"))
+        {
+            let shown = top_level.renderer_diagnostics().debug_overlays().contains(RendererDebugOverlays::FPS);
+            check_box.set_is_checked(Some(shown));
         }
     }
 }
@@ -127,6 +139,17 @@ impl SettingsPage {
         if let (Some(window), Some(system_decorations)) = (self.top_level().and_then(|t| t.cast::<Window>()), added) {
             window.set_window_decorations(system_decorations);
         }
+    }
+
+    /// Not in the original: shows or hides the frame rate counter of the
+    /// renderer of the top level.
+    fn show_frame_rate_changed(&self) {
+        let Some(top_level) = self.top_level() else { return };
+        let shown = self.find_control::<CheckBox>("ShowFrameRate").is_some_and(|c| c.is_checked() == Some(true));
+        let diagnostics = top_level.renderer_diagnostics();
+        let mut overlays = diagnostics.debug_overlays();
+        overlays.set(RendererDebugOverlays::FPS, shown);
+        diagnostics.set_debug_overlays(overlays);
     }
 
     fn themes_selection_changed(&self, added: Option<CatalogTheme>) {

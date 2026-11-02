@@ -306,7 +306,7 @@ fn impl_close_should_raise_detached_from_logical_tree_event() {
             assert!(e.parent().is_none());
             raised.set(raised.get() + 1);
         }
-    });
+    }).detach();
 
     closed(&platform_impl);
 
@@ -390,7 +390,7 @@ fn adding_resource_to_application_should_raise_resources_changed() {
     let _ = target.resources_changed({
         let raised = raised.clone();
         move |_| raised.set(true)
-    });
+    }).detach();
     Application::current().unwrap().resources().add_value("foo", "bar".to_string());
 
     assert!(raised.get());

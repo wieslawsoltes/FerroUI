@@ -901,12 +901,12 @@ impl RichTextBlock {
             Self::on_context_requested,
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
         InputElement::context_canceled_event().add_class_handler_with::<RichTextBlock>(
             Self::on_context_canceled,
             RoutingStrategies::BUBBLE,
             false,
-        );
+        ).detach();
         // Trimmed line boxes deliberately exclude some glyph ink, just as the
         // shared TextBlock formatter does. Overflow uses the document owner's
         // bounds policy even when it is not in the owner's logical tree.
@@ -1125,7 +1125,7 @@ impl RichTextBlock {
                 this.invalidate_document_layout();
             }
         });
-        *self.view_subscriptions.borrow_mut() = vec![highlighters, resources, theme];
+        *self.view_subscriptions.borrow_mut() = vec![highlighters, resources.detach(), theme.detach()];
         self.refresh_default_highlight_brush_subscriptions();
     }
 

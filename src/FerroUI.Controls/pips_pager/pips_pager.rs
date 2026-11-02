@@ -270,18 +270,22 @@ impl PipsPager {
 
         Self::selected_page_index_property()
             .changed()
-            .add_class_handler::<PipsPager>(|x, e| x.on_selected_page_index_changed(e));
-        Self::number_of_pages_property().changed().add_class_handler::<PipsPager>(|x, e| x.on_number_of_pages_changed(e));
+            .add_class_handler::<PipsPager>(|x, e| x.on_selected_page_index_changed(e))
+            .detach();
+        Self::number_of_pages_property().changed().add_class_handler::<PipsPager>(|x, e| x.on_number_of_pages_changed(e)).detach();
         Self::is_previous_button_visible_property()
             .changed()
-            .add_class_handler::<PipsPager>(|x, _| x.on_is_previous_button_visible_changed());
+            .add_class_handler::<PipsPager>(|x, _| x.on_is_previous_button_visible_changed())
+            .detach();
         Self::is_next_button_visible_property()
             .changed()
-            .add_class_handler::<PipsPager>(|x, _| x.on_is_next_button_visible_changed());
-        Self::orientation_property().changed().add_class_handler::<PipsPager>(|x, _| x.on_orientation_changed());
+            .add_class_handler::<PipsPager>(|x, _| x.on_is_next_button_visible_changed())
+            .detach();
+        Self::orientation_property().changed().add_class_handler::<PipsPager>(|x, _| x.on_orientation_changed()).detach();
         Self::max_visible_pips_property()
             .changed()
-            .add_class_handler::<PipsPager>(|x, e| x.on_max_visible_pips_changed(e));
+            .add_class_handler::<PipsPager>(|x, e| x.on_max_visible_pips_changed(e))
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -643,7 +647,8 @@ impl PipsPager {
             },
             Duration::from_millis(FRAME_MS),
             DispatcherPriority::RENDER,
-        );
+        )
+        .detach();
     }
 
     fn animate_step(
@@ -683,7 +688,8 @@ impl PipsPager {
                 },
                 Duration::from_millis(16),
                 DispatcherPriority::RENDER,
-            );
+            )
+            .detach();
         }
     }
 

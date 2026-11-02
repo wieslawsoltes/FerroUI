@@ -984,44 +984,48 @@ impl NavigationPage {
                     drop(sender.pop_async());
                 }
             },
-        );
+        ).detach();
 
         Self::modal_content_property().changed().add_class_handler::<NavigationPage>(|x, e| {
             let modal_presenter = x.modal_presenter.borrow().clone();
             if let Some(modal_presenter) = modal_presenter {
                 modal_presenter.set_content(e.get_new_value::<Option<BoxedValue>>());
             }
-        });
+        }).detach();
 
         Self::is_modal_visible_property().changed().add_class_handler::<NavigationPage>(|x, e| {
             let modal_presenter = x.modal_presenter.borrow().clone();
             if let Some(modal_presenter) = modal_presenter {
                 modal_presenter.set_is_visible(e.get_new_value::<bool>());
             }
-        });
+        }).detach();
 
         Self::is_back_button_visible_property()
             .changed()
-            .add_class_handler::<NavigationPage>(|x, _| x.update_is_back_button_effectively_visible());
+            .add_class_handler::<NavigationPage>(|x, _| x.update_is_back_button_effectively_visible())
+            .detach();
 
         Self::bar_height_property()
             .changed()
-            .add_class_handler::<NavigationPage>(|x, _| x.update_effective_bar_height());
+            .add_class_handler::<NavigationPage>(|x, _| x.update_effective_bar_height())
+            .detach();
 
-        Self::has_shadow_property().changed().add_class_handler::<NavigationPage>(|x, _| x.apply_has_shadow());
+        Self::has_shadow_property().changed().add_class_handler::<NavigationPage>(|x, _| x.apply_has_shadow()).detach();
 
         Self::effective_bar_height_property()
             .changed()
-            .add_class_handler::<NavigationPage>(|x, _| x.apply_has_shadow());
+            .add_class_handler::<NavigationPage>(|x, _| x.apply_has_shadow())
+            .detach();
 
         Self::is_nav_bar_effectively_visible_property().changed().add_class_handler::<NavigationPage>(|x, _| {
             x.apply_nav_bar_visibility();
             x.apply_has_shadow();
-        });
+        }).detach();
 
         Self::is_back_button_effectively_enabled_property()
             .changed()
-            .add_class_handler::<NavigationPage>(|x, e| x.apply_back_button_enabled(e.get_new_value::<bool>()));
+            .add_class_handler::<NavigationPage>(|x, e| x.apply_back_button_enabled(e.get_new_value::<bool>()))
+            .detach();
 
         Self::content_property().changed().add_class_handler::<NavigationPage>(|x, e| {
             let page = e
@@ -1037,7 +1041,7 @@ impl NavigationPage {
             }
             // A property-changed handler cannot be asynchronous; fire-and-forget is intentional.
             drop(x.push_async(page));
-        });
+        }).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

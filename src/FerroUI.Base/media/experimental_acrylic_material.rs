@@ -86,7 +86,7 @@ impl ExperimentalAcrylicMaterial {
             property.changed().add_class_handler::<ExperimentalAcrylicMaterial>(|b, _| {
                 b.effective_tint_color.set(Self::get_effective_tint_color(b.tint_color(), b.tint_opacity()));
                 b.effective_luminosity_color.set(b.get_effective_luminosity_color());
-            });
+            }).detach();
         }
     }
 
@@ -334,7 +334,7 @@ impl ExperimentalAcrylicMaterial {
                     let material: &ExperimentalAcrylicMaterial = sender.upcast();
                     material.raise_invalidated();
                 }
-            });
+            }).detach();
         }
     }
 

@@ -51,7 +51,7 @@ impl VisualImpl for ToolControl {
             move |_, _| owner.pressed_handler(),
             RoutingStrategies::TUNNEL,
             false,
-        );
+        ).detach();
         this.pressed.replace(Some(pressed));
     }
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {

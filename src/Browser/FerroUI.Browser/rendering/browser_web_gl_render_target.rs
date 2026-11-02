@@ -1,4 +1,4 @@
-use super::web_render_target::update_size;
+use super::web_render_target::{present, update_size};
 use super::{BrowserSurfaceShared, RenderStatistics};
 use crate::interop::canvas_helper::{GlInfo, RENDER_TARGET_KIND_WEB_GL};
 use crate::interop::{thread_proxy, JsObject};
@@ -125,6 +125,8 @@ impl BrowserWebGlRenderTarget {
 }
 
 struct GlSession {
+    /// The render target of the script side, which hands the frame on when the session ends.
+    js: JsObject,
     restore_context: Cell<Option<Rc<dyn IDisposable>>>,
     context: Rc<dyn IGlContext>,
     size: PixelSize,
@@ -163,6 +165,8 @@ impl IGlPlatformSurfaceRenderingSession for GlSession {
                 self.size.width,
                 self.size.height,
             );
+            // The canvas of a render worker hands the frame to the page here.
+            present(&self.js, self.size, self.scaling);
             restore_context.dispose();
             // Whoever waits for the first frame of this canvas is told.
             self.shared.frame_presented();
@@ -190,6 +194,7 @@ impl IGlPlatformSurfaceRenderTarget for GlSurface {
             .gl_interface()
             .bind_framebuffer(gl_consts::GL_FRAMEBUFFER, self.target.gl_info.fbo_id as i32);
         Rc::new(GlSession {
+            js: self.target.js.clone(),
             restore_context: Cell::new(Some(restore_context)),
             context: self.target.gl_context.clone(),
             size,

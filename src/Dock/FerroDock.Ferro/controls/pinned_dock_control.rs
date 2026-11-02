@@ -102,7 +102,7 @@ impl TemplatedControlImpl for PinnedDockControl {
         let attached = this.attached_to_visual_tree(move |_| owner.on_attached());
         let owner = this.to_ref();
         let detached = this.detached_from_visual_tree(move |_| owner.on_detached());
-        this.layout_events.replace(vec![layout, attached, detached]);
+        this.layout_events.replace(vec![layout.detach(), attached.detach(), detached.detach()]);
     }
 }
 ferro_properties! {impl PinnedDockControl {
@@ -120,16 +120,20 @@ impl PinnedDockControl {
     fn static_constructor() {
         Self::pinned_dock_alignment_property()
             .changed()
-            .add_class_handler::<Self>(|this, _| this.update_grid());
+            .add_class_handler::<Self>(|this, _| this.update_grid())
+            .detach();
         Self::pinned_dock_display_mode_property()
             .changed()
-            .add_class_handler::<Self>(|this, _| this.on_display_mode_changed());
+            .add_class_handler::<Self>(|this, _| this.on_display_mode_changed())
+            .detach();
         Self::minimum_pinned_width_property()
             .changed()
-            .add_class_handler::<Self>(|this, _| this.update_grid());
+            .add_class_handler::<Self>(|this, _| this.update_grid())
+            .detach();
         Self::minimum_pinned_height_property()
             .changed()
-            .add_class_handler::<Self>(|this, _| this.update_grid());
+            .add_class_handler::<Self>(|this, _| this.update_grid())
+            .detach();
     }
     /// Constructs all original fields for native inheritance.
     pub fn construct() -> Self {
@@ -509,7 +513,7 @@ impl PinnedDockControl {
                         move |_, e| this.owner_window_pointer_pressed(e),
                         RoutingStrategies::TUNNEL,
                         false,
-                    );
+                    ).detach();
                     let this = self.to_ref();
                     let deactivated = self
                         .owner_window()
@@ -869,7 +873,7 @@ impl PinnedDockControl {
                 move |_, _| this.on_pinned_dock_splitter_drag_started(),
                 RoutingStrategies::BUBBLE,
                 false,
-            );
+            ).detach();
         let this = self.to_ref();
         let delta = self
             .splitter()
@@ -879,7 +883,7 @@ impl PinnedDockControl {
                 move |_, e| this.on_pinned_dock_splitter_drag_delta(e.vector),
                 RoutingStrategies::BUBBLE,
                 false,
-            );
+            ).detach();
         let this = self.to_ref();
         let completed = self
             .splitter()
@@ -889,7 +893,7 @@ impl PinnedDockControl {
                 move |_, _| this.on_pinned_dock_splitter_drag_completed(),
                 RoutingStrategies::BUBBLE,
                 false,
-            );
+            ).detach();
         self.splitter_events
             .replace(vec![started, delta, completed]);
     }

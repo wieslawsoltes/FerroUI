@@ -393,7 +393,7 @@ impl BrowserAccessibility {
                     this.layout_dirty.set(true);
                     this.request();
                 }
-            })];
+            }).detach()];
             if let Some(provider) = root.get_provider::<dyn IEmbeddedRootProvider>() {
                 let weak = self.this.clone();
                 subscriptions.push(provider.focus_changed(Rc::new(move || {

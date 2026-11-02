@@ -228,7 +228,7 @@ impl ConnectedAnimationFlight {
             PREPARED_TIMEOUT,
             DispatcherPriority::BACKGROUND,
         );
-        *flight.timeout.borrow_mut() = Some(Subscription::new(timeout));
+        *flight.timeout.borrow_mut() = Some(timeout);
         Some(flight)
     }
 

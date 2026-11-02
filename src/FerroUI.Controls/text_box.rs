@@ -1542,7 +1542,7 @@ impl TextBox {
             if !tb.is_read_only() {
                 e.set_client(Some(tb.im_client.clone()));
             }
-        });
+        }).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

@@ -146,7 +146,7 @@ impl ItemsRepeaterPage {
             if let Some(owner) = owner.upgrade() {
                 owner.refresh_status();
             }
-        });
+        }).detach();
         this.refresh_status();
         this
     }

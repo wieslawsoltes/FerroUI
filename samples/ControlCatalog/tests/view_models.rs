@@ -80,11 +80,15 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
     let _app = start_catalog_application();
     let view_model = MainWindowViewModel::new();
 
-    assert_eq!(11, view_model.home_sections().len());
+    assert_eq!(12, view_model.home_sections().len());
     let available: usize = view_model.home_sections().iter().map(|s| s.items().map_or(0, |items| items.len())).sum();
     // The upstream list has 74 entries. The native catalog also offers these
     // pages, each exactly once and available through its page factory.
-    let additional_pages = ["TreeDataGrid", "Composition (WinUI)", "InkCanvas", "InkToolbar", "IconElement", "InfoBadge", "InfoBar", "ProgressRing", "NumberBox", "RadioButtons", "RatingControl", "AutoSuggestBox", "NavigationView", "ItemsRepeater", "Visual States", "Materials (WinUI)", "RichTextBlock", "RichEditBox", "CartesianChart", "PieChart"];
+    let additional_pages = ["TreeDataGrid", "InkCanvas", "InkToolbar", "IconElement", "InfoBadge", "InfoBar", "ProgressRing", "NumberBox", "RadioButtons", "RatingControl", "AutoSuggestBox", "NavigationView", "ItemsRepeater", "Visual States", "RichTextBlock", "RichEditBox", "CartesianChart", "PieChart"]
+        .into_iter()
+        // The first page of the section "Composition" is the upstream page "Composition".
+        .chain(COMPOSITION_PAGES.into_iter().skip(1))
+        .collect::<Vec<_>>();
     assert_eq!(74 + additional_pages.len(), available + view_model.unavailable_pages().len());
     for header in additional_pages {
         let matches: usize = view_model.home_sections().iter().map(|section| {
@@ -94,6 +98,60 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
     }
     for page in view_model.unavailable_pages() {
         assert!(!page.reason.is_empty(), "{} has no reason", page.document);
+    }
+}
+
+/// The pages of the section "Composition" (not from upstream): the composition page of the
+/// original, then one per feature of the WinUI composition API and of the WinUI materials, in the
+/// order of the page list.
+const COMPOSITION_PAGES: [&str; 20] = [
+    "Composition overview",
+    "Connected animations",
+    "Implicit animations",
+    "Pointer position",
+    "Parallax",
+    "Visuals",
+    "Composition brushes",
+    "Spring and key frame animations",
+    "Shadows and lights",
+    "InteractionTracker",
+    "Effect brushes",
+    "Alpha mask shadows",
+    "ThemeShadow",
+    "Zoom and manipulation",
+    "Acrylic brush",
+    "Blend and colour effects",
+    "Lighting",
+    "Reveal",
+    "System backdrops",
+    "Acrylic menus",
+];
+
+/// The section "Composition" follows "Media & Graphics" and has a page per feature; the pages of
+/// the smoke run of the desktop entry point are among them, and the single pages they replace are
+/// gone.
+#[test]
+fn the_composition_section_has_a_page_per_feature() {
+    let _app = start_catalog_application();
+    let view_model = MainWindowViewModel::new();
+    let sections = view_model.home_sections();
+    let titles: Vec<String> = sections.iter().map(|section| section.title()).collect();
+    let media = titles.iter().position(|title| title == "Media & Graphics").expect("the section Media & Graphics");
+    assert_eq!(Some("Composition"), titles.get(media + 1).map(String::as_str), "{titles:?}");
+    let headers: Vec<String> =
+        sections[media + 1].items().map(|items| items.iter().map(|page| page.header()).collect()).unwrap_or_default();
+    assert_eq!(COMPOSITION_PAGES.to_vec(), headers);
+    for header in ["Acrylic", "BitmapCache"] {
+        let media_pages = sections[media].items().unwrap();
+        assert!(media_pages.iter().any(|page| page.header() == header), "{header} stays in Media & Graphics");
+    }
+    for index in 0..crate::pages::smoke_section_count() {
+        let header = crate::pages::smoke_section_header(index).expect("the header of a section of the smoke run");
+        assert!(COMPOSITION_PAGES.contains(&header), "section {index} of the smoke run: {header}");
+    }
+    let all: Vec<String> = sections.iter().flat_map(|section| section.items().unwrap().to_vec()).map(|page| page.header()).collect();
+    for header in ["Composition (WinUI)", "Materials (WinUI)"] {
+        assert!(!all.iter().any(|page| page == header), "{header} is no longer a page");
     }
 }
 

@@ -68,7 +68,7 @@ macro_rules! located_view {
                     if let Some(this) = weak.upgrade() {
                         this.show_view_model();
                     }
-                });
+                }).detach();
                 this
             }
 

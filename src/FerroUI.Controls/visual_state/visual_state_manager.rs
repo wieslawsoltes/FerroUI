@@ -122,7 +122,8 @@ impl VisualStateManager {
     fn static_constructor() {
         Self::visual_state_groups_property()
             .changed()
-            .add_class_handler::<Control>(Self::on_visual_state_groups_changed);
+            .add_class_handler::<Control>(Self::on_visual_state_groups_changed)
+            .detach();
     }
 
     pub fn construct() -> Self {

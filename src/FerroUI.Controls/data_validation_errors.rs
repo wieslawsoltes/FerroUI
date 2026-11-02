@@ -151,12 +151,13 @@ ferroui_base::ferro_properties! { impl DataValidationErrors {
 impl DataValidationErrors {
     /// Initializes the static members of the `DataValidationErrors` class.
     fn static_constructor() {
-        Self::errors_property().changed().subscribe(Self::errors_changed);
-        Self::has_errors_property().changed().subscribe(Self::has_errors_changed);
+        Self::errors_property().changed().subscribe(Self::errors_changed).detach();
+        Self::has_errors_property().changed().subscribe(Self::has_errors_changed).detach();
         StyledElement::templated_parent_property()
             .changed()
-            .add_class_handler::<DataValidationErrors>(|x, e| x.on_templated_parent_change(e));
-        Self::error_converter_property().changed().subscribe(Self::on_error_converter_changed);
+            .add_class_handler::<DataValidationErrors>(|x, e| x.on_templated_parent_change(e))
+            .detach();
+        Self::error_converter_property().changed().subscribe(Self::on_error_converter_changed).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

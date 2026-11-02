@@ -515,7 +515,7 @@ fn selection_box_item_rectangle_is_removed_from_logical_tree() {
     assert!(target.is_attached_to_logical_tree());
     assert!(rectangle.is_attached_to_logical_tree());
 
-    rectangle.detached_from_logical_tree(|_| {});
+    rectangle.detached_from_logical_tree(|_| {}).detach();
 
     root.set_child(None);
 

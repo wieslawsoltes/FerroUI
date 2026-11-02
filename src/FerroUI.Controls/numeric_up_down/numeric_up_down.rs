@@ -144,7 +144,7 @@ impl FerroObjectImpl for NumericUpDown {
 
                 this.set_valid_spin_direction();
             }
-        });
+        }).detach();
     }
 }
 
@@ -539,39 +539,39 @@ impl NumericUpDown {
         Self::number_format_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<Option<Rc<NumberFormatInfo>>>();
             up_down.on_number_format_changed(old_value, new_value);
-        });
+        }).detach();
         Self::format_string_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<String>();
             up_down.on_format_string_changed(&old_value, &new_value);
-        });
+        }).detach();
         Self::increment_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<Decimal>();
             up_down.on_increment_changed(old_value, new_value);
-        });
+        }).detach();
         Self::is_read_only_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<bool>();
             up_down.on_is_read_only_changed(old_value, new_value);
-        });
+        }).detach();
         Self::maximum_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<Decimal>();
             up_down.on_maximum_changed(old_value, new_value);
-        });
+        }).detach();
         Self::minimum_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<Decimal>();
             up_down.on_minimum_changed(old_value, new_value);
-        });
+        }).detach();
         Self::text_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<Option<String>>();
             up_down.on_text_changed(old_value.as_deref(), new_value.as_deref());
-        });
+        }).detach();
         Self::text_converter_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<Option<Rc<dyn IValueConverter>>>();
             up_down.on_text_converter_changed(old_value, new_value);
-        });
+        }).detach();
         Self::value_property().changed().add_class_handler::<NumericUpDown>(|up_down, e| {
             let (old_value, new_value) = e.get_old_and_new_value::<Option<Decimal>>();
             up_down.on_value_changed(old_value, new_value);
-        });
+        }).detach();
 
         InputElement::focusable_property().override_default_value::<NumericUpDown>(true);
         InputElement::is_tab_stop_property().override_default_value::<NumericUpDown>(false);

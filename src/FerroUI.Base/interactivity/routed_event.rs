@@ -1,5 +1,5 @@
 use super::{IRoutedEventArgs, Interactive, RoutedEventRegistry};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::utilities::HandlerList;
 use crate::{ObjectType, StaticType, TypeInfo};
 use bitflags::bitflags;
@@ -34,16 +34,17 @@ pub struct RoutedEventObservable {
 }
 
 impl RoutedEventObservable {
-    /// Subscribes to the notifications. Disposing the returned handle
-    /// unsubscribes.
+    /// Subscribes to the notifications. Dropping the returned guard
+    /// unsubscribes; [`Subscription::detach`] keeps the subscription for the
+    /// life of the event.
     pub fn subscribe(
         &'static self,
         handler: impl Fn(&Interactive, &dyn IRoutedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.handlers.add(Rc::new(handler));
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             self.handlers.remove(token);
-        })
+        }))
     }
 
     /// Whether there is any subscriber.
@@ -70,13 +71,14 @@ pub struct RouteFinishedObservable {
 }
 
 impl RouteFinishedObservable {
-    /// Subscribes to the notifications. Disposing the returned handle
-    /// unsubscribes.
-    pub fn subscribe(&'static self, handler: impl Fn(&dyn IRoutedEventArgs) + 'static) -> Rc<dyn IDisposable> {
+    /// Subscribes to the notifications. Dropping the returned guard
+    /// unsubscribes; [`Subscription::detach`] keeps the subscription for the
+    /// life of the event.
+    pub fn subscribe(&'static self, handler: impl Fn(&dyn IRoutedEventArgs) + 'static) -> Subscription {
         let token = self.handlers.add(Rc::new(handler));
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             self.handlers.remove(token);
-        })
+        }))
     }
 
     #[inline]
@@ -274,13 +276,17 @@ impl<TEventArgs: ?Sized> RoutedEvent<TEventArgs> {
     /// The handler is invoked on the direct route, and on the tunnel or
     /// bubble routes selected by `routes`; for events that are already
     /// handled only if `handled_events_too` is set.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the event (what a
+    /// class handler registered once for a class does).
     pub fn add_class_handler_untyped(
         &self,
         target_type: &'static TypeInfo,
         handler: impl Fn(&Interactive, &dyn IRoutedEventArgs) + 'static,
         routes: RoutingStrategies,
         handled_events_too: bool,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         self.inner.raised.subscribe(move |sender, e| {
             if target_type.is_assignable_from(sender.get_type())
                 && (e.route() == RoutingStrategies::DIRECT || e.route().intersects(routes))
@@ -310,22 +316,27 @@ impl<TEventArgs: IRoutedEventArgs> RoutedEvent<TEventArgs> {
 
     /// Adds a class handler for elements of class `TTarget`, listening to
     /// the direct and bubble routes of unhandled events.
+    ///
+    /// Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the event.
     pub fn add_class_handler<TTarget: ObjectType>(
         &self,
         handler: impl Fn(&TTarget, &TEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         self.add_class_handler_with(handler, RoutingStrategies::DIRECT | RoutingStrategies::BUBBLE, false)
     }
 
     /// Adds a class handler for elements of class `TTarget`.
     ///
-    /// See [`add_class_handler_untyped`](Self::add_class_handler_untyped).
+    /// See [`add_class_handler_untyped`](Self::add_class_handler_untyped):
+    /// dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the event.
     pub fn add_class_handler_with<TTarget: ObjectType>(
         &self,
         handler: impl Fn(&TTarget, &TEventArgs) + 'static,
         routes: RoutingStrategies,
         handled_events_too: bool,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         self.add_class_handler_untyped(
             TTarget::TYPE,
             move |sender, e| {

@@ -223,7 +223,7 @@ impl Dispatcher {
     /// This is an advanced method intended to eliminate the chance of
     /// unrelated reentrancy. While processing is disabled no one is allowed
     /// to push a frame and no job processing is permitted. Processing is
-    /// enabled again by disposing the returned value.
+    /// enabled again when the returned value is disposed or dropped.
     pub fn disable_processing(&self) -> DispatcherProcessingDisabled {
         self.verify_access();
 
@@ -233,8 +233,9 @@ impl Dispatcher {
     }
 }
 
-/// Re-enables dispatcher processing when disposed; see
-/// [`Dispatcher::disable_processing`].
+/// Re-enables dispatcher processing when disposed or dropped, whichever
+/// comes first; see [`Dispatcher::disable_processing`].
+#[must_use = "dropping the value enables dispatcher processing again at once"]
 pub struct DispatcherProcessingDisabled {
     dispatcher: Cell<Option<Arc<Dispatcher>>>,
 }
@@ -245,5 +246,11 @@ impl IDisposable for DispatcherProcessingDisabled {
             return;
         };
         dispatcher.lock().disabled_processing_count -= 1;
+    }
+}
+
+impl Drop for DispatcherProcessingDisabled {
+    fn drop(&mut self) {
+        self.dispose();
     }
 }

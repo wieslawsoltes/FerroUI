@@ -3,7 +3,7 @@
 
 use crate::native_methods;
 use ferroui_base::collections::FerroList;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_controls::platform::MountedVolumeInfo;
 use std::cell::{Cell, RefCell};
@@ -16,7 +16,7 @@ const PROC_PARTITIONS_DIR: &str = "/proc/partitions";
 const PROC_MOUNTS_DIR: &str = "/proc/mounts";
 
 pub struct LinuxMountedVolumeInfoListener {
-    disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    disposable: RefCell<Option<Subscription>>,
     target_obs: FerroList<MountedVolumeInfo>,
     been_disposed: Cell<bool>,
 }

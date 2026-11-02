@@ -167,13 +167,13 @@ impl FerroObjectImpl for InkToolbarPenButton {
             if let Some(pen) = weak.upgrade() {
                 pen.refresh_palette();
             }
-        });
+        }).detach();
         let weak = this.to_ref().downgrade();
         this.actual_theme_variant_changed(move || {
             if let Some(pen) = weak.upgrade() {
                 pen.refresh_palette();
             }
-        });
+        }).detach();
     }
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);

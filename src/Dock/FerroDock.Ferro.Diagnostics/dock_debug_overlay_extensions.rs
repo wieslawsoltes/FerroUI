@@ -46,7 +46,7 @@ impl DockDebugOverlayExtensions {
             },
             RoutingStrategies::TUNNEL,
             false,
-        );
+        ).detach();
         Rc::new(ActionDisposable(Box::new(move || {
             subscription.dispose();
             let current = manager.borrow().clone();

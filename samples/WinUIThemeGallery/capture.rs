@@ -595,7 +595,7 @@ pub fn start(directory: PathBuf) {
         Err(error) => {
             println!("capture: FAILED: {error}");
             FAILED.store(true, Ordering::SeqCst);
-            let _timer = DispatcherTimer::run_once(|| end(2), Duration::ZERO, DispatcherPriority::NORMAL);
+            let _timer = DispatcherTimer::run_once(|| end(2), Duration::ZERO, DispatcherPriority::NORMAL).detach();
             return;
         }
     };
@@ -633,5 +633,6 @@ pub fn start(directory: PathBuf) {
         written: Cell::new(0),
         failures: RefCell::new(Vec::new()),
     });
-    let _timer = DispatcherTimer::run(move || run.tick(), Duration::from_millis(50), DispatcherPriority::NORMAL);
+    let _timer =
+        DispatcherTimer::run(move || run.tick(), Duration::from_millis(50), DispatcherPriority::NORMAL).detach();
 }

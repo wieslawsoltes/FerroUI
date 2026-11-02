@@ -113,6 +113,14 @@ textures of Vello (`scene/image_textures.rs`): the same passes make no upload, a
 stay at the display's interval (99th percentile 10.3 ms at 120 Hz). An application that has to
 hold less sets the option lower. Skia's own default (`None`) is 256 MiB.
 
+## The iOS simulator: no destination reads in shaders
+
+Skia turns framebuffer fetch on for the Metal devices of the Apple GPU family (`MtlCaps`: `fFBFetchSupport` when the family is Apple, in Graphite and in Ganesh), and the simulator's Metal device reports that family: it is the GPU of the Mac. The simulator's Metal compiler rejects framebuffer fetch ("reading from a rendertarget is not supported"), so a draw whose shader reads its destination gets no pipeline, and Graphite then fails on it (a null pipeline in `QueueManager::addRecording`, a crash of the application). The runtime blenders of the multiply layer of the lights and of the pixel operations read their destination, and since the GPU route of those effects (#456) the prewarm of a context's second frame draws each of them: every application crashed in the simulator after a few frames.
+
+On a GPU surface of the iOS simulator (`target_os = "ios"` with `target_abi = "sim"`) `push_lighting_multiply_layer` and `push_pixel_operation` report that they did not draw, so the compositor draws these effects with its CPU path, and the prewarm skips them. Devices are not affected: their GPUs have framebuffer fetch. Measured on the iOS 26.4 simulator (iPhone 17 Pro, `ios_view`): before, the application crashed with the pipeline errors on its third frame; after, a tap and two rotations, no pipeline error and no crash.
+
+What remains for the simulator: a blend layer with a blend mode that reads its destination (`push_blend_layer` with multiply, screen and the other non-coefficient modes) has the same failure there; no application of the repository uses one in the simulator.
+
 ## Vello: what is missing and the GPU route
 
 vello's renderers cannot express the lighting, the colour matrix, the multiply layer or the pixel

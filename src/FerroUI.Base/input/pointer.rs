@@ -231,7 +231,7 @@ impl Pointer {
                     pointer.on_capture_detached(e);
                 }
             });
-            let old = self.capture_detached.replace(Some(Subscription::new(subscription)));
+            let old = self.capture_detached.replace(Some(subscription));
             if let Some(old) = old {
                 old.dispose();
             }

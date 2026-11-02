@@ -23,7 +23,7 @@ use ferroui_base::{
     instantiate,
     interactivity::{InteractiveImpl, RoutedEventArgs, RoutedEventHandlerToken, RoutingStrategies},
     layout::LayoutableImpl,
-    reactive::{AnonymousObserver, IDisposable},
+    reactive::{AnonymousObserver, Subscription},
     styling::ControlTheme,
     BoxedValue, FerroObject, FerroObjectExtensions, FerroObjectImpl, FerroObjectImplExt,
     FerroProperty, FerroPropertyChangedEventArgs, Point, Rect, Ref, Size, StyledElement,
@@ -57,7 +57,7 @@ struct PointerSubscriptions {
 #[repr(C)]
 pub struct MdiDocumentWindow {
     base: TemplatedControl,
-    data_context_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    data_context_subscription: RefCell<Option<Subscription>>,
     dock_subscription: RefCell<Option<ModelSubscription>>,
     document_subscription: RefCell<Option<ModelSubscription>>,
     current_document: RefCell<Option<Rc<dyn IMdiDocument>>>,
@@ -115,7 +115,7 @@ impl VisualImpl for MdiDocumentWindow {
             .subscribe(Rc::new(AnonymousObserver::new(move |v| {
                 owner.on_data_context_changed(v)
             })));
-        this.data_context_subscription.replace(Some(sub));
+        this.data_context_subscription.replace(Some(Subscription::new(sub)));
         let owner = this.to_ref();
         let moved = this.add_handler_with(
             InputElement::pointer_moved_event(),

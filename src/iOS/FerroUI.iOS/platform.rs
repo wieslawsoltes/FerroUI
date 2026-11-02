@@ -313,7 +313,10 @@ mod uikit {
                 locator.bind::<dyn IActivatableLifetime>().to_constant(lifetime);
             }
 
-            let compositor = Compositor::new(Some(graphics), false);
+            // The synchronous commits (`paint`, after a layout of the view) render on this thread,
+            // the main thread, so that the frame of a new size is presented with the transaction that
+            // gives the layer that size (`MetalRenderTarget::begin_rendering`), as on macOS.
+            let compositor = Compositor::new(Some(graphics), true);
             STATE.with(|state| state.borrow_mut().compositor = Some(compositor.clone()));
             locator.bind_to_self(compositor);
         }

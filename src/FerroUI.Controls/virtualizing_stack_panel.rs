@@ -102,7 +102,7 @@ impl FerroObjectImpl for VirtualizingStackPanel {
             if let Some(this) = weak.upgrade() {
                 this.on_effective_viewport_changed(e);
             }
-        });
+        }).detach();
     }
 }
 
@@ -702,7 +702,8 @@ impl VirtualizingStackPanel {
         register_scroll_snap_points_info::<VirtualizingStackPanel>();
         Self::cache_length_property()
             .changed()
-            .add_class_handler::<VirtualizingStackPanel>(|x, e| x.on_cache_length_changed(e));
+            .add_class_handler::<VirtualizingStackPanel>(|x, e| x.on_cache_length_changed(e))
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -1791,10 +1792,10 @@ impl IScrollSnapPointsInfo for VirtualizingStackPanel {
     }
 
     fn horizontal_snap_points_changed(&self, handler: SnapPointsChangedHandler) -> Rc<dyn IDisposable> {
-        self.add_disposable_handler(Self::horizontal_snap_points_changed_event(), move |sender, e| handler(sender, e))
+        self.add_disposable_handler(Self::horizontal_snap_points_changed_event(), move |sender, e| handler(sender, e)).detach()
     }
 
     fn vertical_snap_points_changed(&self, handler: SnapPointsChangedHandler) -> Rc<dyn IDisposable> {
-        self.add_disposable_handler(Self::vertical_snap_points_changed_event(), move |sender, e| handler(sender, e))
+        self.add_disposable_handler(Self::vertical_snap_points_changed_event(), move |sender, e| handler(sender, e)).detach()
     }
 }

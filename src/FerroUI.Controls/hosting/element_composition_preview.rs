@@ -197,7 +197,7 @@ impl PointerTracker {
             let tracker = tracker.clone();
             element.detached_from_visual_tree(move |_| tracker.unhook())
         };
-        tracker.subscriptions.borrow_mut().extend([attached, detached]);
+        tracker.subscriptions.borrow_mut().extend([attached.detach(), detached.detach()]);
         tracker.hook();
     }
 

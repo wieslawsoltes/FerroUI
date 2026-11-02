@@ -1792,7 +1792,7 @@ impl NavigationView {
                 }
                 // An ancestor item gets the bubbling event too: only the focused item is invoked.
                 owner.item_invoked_core(&item);
-            });
+            }).detach();
             let weak = self.to_ref().downgrade();
             let weak_item = item.downgrade();
             let keyboard = item.add_disposable_handler(InputElement::key_down_event(), move |_, args| {
@@ -1802,7 +1802,7 @@ impl NavigationView {
                 if args.source().is_some_and(|source| source.ptr_eq(&item.to_ref())) {
                     owner.item_key_down(&item, args);
                 }
-            });
+            }).detach();
             let weak = self.to_ref().downgrade();
             let weak_item = item.downgrade();
             let invoked = item.invoked(move || {

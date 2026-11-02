@@ -2,7 +2,7 @@
 
 use super::collection_changed;
 use ferroui_base::data::model::CollectionChange;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt,
     FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledElementImpl, StyledProperty,
@@ -21,7 +21,7 @@ use std::rc::Rc;
 pub struct CollectionChangedTrigger {
     base: StyledElementTrigger,
     // The subscription to the changes of the collection.
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(CollectionChangedTrigger: StyledElementTrigger);
@@ -118,7 +118,7 @@ impl CollectionChangedTrigger {
                 trigger.on_collection_changed(e);
             }
         });
-        *self.subscription.borrow_mut() = subscription;
+        *self.subscription.borrow_mut() = subscription.map(Subscription::new);
     }
 
     fn on_collection_changed(&self, e: CollectionChange) {

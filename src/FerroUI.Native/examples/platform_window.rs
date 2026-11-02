@@ -443,6 +443,7 @@ mod macos {
                 Duration::from_millis(ms),
                 DispatcherPriority::NORMAL,
             )
+            .detach()
         });
 
         let _input_timer = std::env::var_os("FERROUI_SMOKE_INPUT").map(|_| {
@@ -455,6 +456,7 @@ mod macos {
                 Duration::from_millis(700),
                 DispatcherPriority::NORMAL,
             )
+            .detach()
         });
 
         // --- main loop ------------------------------------------------------

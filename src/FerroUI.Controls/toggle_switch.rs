@@ -155,22 +155,22 @@ ferro_properties! {
 
 impl ToggleSwitch {
     fn static_constructor() {
-        Self::off_content_property().changed().add_class_handler::<ToggleSwitch>(|x, e| x.off_content_changed(e));
-        Self::on_content_property().changed().add_class_handler::<ToggleSwitch>(|x, e| x.on_content_changed(e));
+        Self::off_content_property().changed().add_class_handler::<ToggleSwitch>(|x, e| x.off_content_changed(e)).detach();
+        Self::on_content_property().changed().add_class_handler::<ToggleSwitch>(|x, e| x.on_content_changed(e)).detach();
         ToggleButton::is_checked_property().changed().add_class_handler::<ToggleSwitch>(|x, e| {
             if let Some(value) = e.get_new_value::<Option<bool>>() {
                 x.update_knob_pos(value);
             }
-        });
+        }).detach();
 
         Visual::bounds_property().changed().add_class_handler::<ToggleSwitch>(|x, _| {
             if let Some(is_checked) = x.is_checked() {
                 x.update_knob_pos(is_checked);
             }
-        });
+        }).detach();
         Self::knob_transitions_property().changed().add_class_handler::<ToggleSwitch>(|x, _| {
             x.update_knob_transitions();
-        });
+        }).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

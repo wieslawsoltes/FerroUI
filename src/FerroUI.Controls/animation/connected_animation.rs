@@ -201,7 +201,7 @@ impl ConnectedAnimation {
             Duration::from_secs(3),
             DispatcherPriority::BACKGROUND,
         );
-        *animation.timeout_timer_disposable.borrow_mut() = Some(Subscription::new(timeout_timer_disposable));
+        *animation.timeout_timer_disposable.borrow_mut() = Some(timeout_timer_disposable);
 
         animation
     }
@@ -512,7 +512,7 @@ impl ConnectedAnimation {
                         }
                     }
                 });
-                *handler.borrow_mut() = Some(subscription);
+                *handler.borrow_mut() = Some(subscription.detach());
 
                 // The 500 ms timeout of the reference.
                 let timeout = DispatcherTimer::run_once(
