@@ -1,4 +1,4 @@
-//! The page "Custom effects" of the section "Composition" of the catalog (#455, E2; not from
+//! The page "Custom effects" of the section "Composition" of the catalog (#455, E2 and E3; not from
 //! upstream; `docs/porting/custom-effects.md`): the custom effects FerroUI ships
 //! (`ferroui_base::media::effects::library`), each set as `Visual.Effect` on the same sample
 //! content, with a slider for each of its numbers and the effect string markup writes for it.
@@ -8,7 +8,8 @@
 use super::winui_composition_page::{brush, section, text};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
 use ferroui_base::media::effects::library::{
-    BrightnessContrastEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect, SepiaEffect, TintEffect,
+    BrightnessContrastEffect, EdgeDetectEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect,
+    SepiaEffect, SharpenEffect, TintEffect,
 };
 use ferroui_base::media::effects::{CustomEffect, EffectParameterValue, ImmutableCustomEffect};
 use ferroui_base::media::{Color, FontWeight};
@@ -139,9 +140,11 @@ pub(super) fn custom_effects_section() -> Ref<StackPanel> {
     ));
     tiles.children().add(effect_tile(InvertEffect::default(), &[("amount", 0.0, 1.0)]));
     tiles.children().add(effect_tile(GlowEffect::default(), &[("blur-radius", 0.0, 24.0), ("intensity", 0.0, 1.0)]));
+    tiles.children().add(effect_tile(SharpenEffect::default(), &[("strength", 0.0, 2.0)]));
+    tiles.children().add(effect_tile(EdgeDetectEffect::default(), &[("strength", 0.0, 2.0)]));
     section(
         "Custom effects",
-        "Effects defined outside the framework as values of CustomEffect, set as Visual.Effect from code or markup (Effect=\"tint(color=#0F9D8E, strength=0.55)\"). The effects of the library describe themselves as effect graphs: colour matrices and a drop shadow drawn by the backend on the GPU, the graph compiled once, a slider changing only the values of its members.",
+        "Effects defined outside the framework as values of CustomEffect, set as Visual.Effect from code or markup (Effect=\"tint(color=#0F9D8E, strength=0.55)\"). The effects of the library describe themselves as effect graphs: colour matrices, convolutions and a drop shadow drawn by the backend on the GPU, the graph compiled once, a slider changing only the values of its members.",
         &tiles.upcast(),
     )
 }

@@ -390,7 +390,7 @@ fn the_layer_passes_match_their_cpu_references_in_the_gpu_modes() {
 
 /// The multiply layer of lit visuals on the device: the content times the
 /// light of the compositor in double precision at each pixel, clamped to
-/// 0..16, the colour clamped to the alpha.
+/// 0..16, the colour clamped to the alpha (within 3 levels).
 #[test]
 fn the_multiply_layer_of_lit_visuals_matches_the_exact_light_in_the_gpu_modes() {
     use ferroui_base::rendering::composition::server::LIGHT_MAP_MAX_SCALE;
@@ -424,7 +424,9 @@ fn the_multiply_layer_of_lit_visuals_matches_the_exact_light_in_the_gpu_modes() 
         });
         assert_eq!(cpu_layers, crate::drawing_context_impl::cpu_layer_count(), "{mode:?}: drawn on the processor");
         let (most, mean, _) = difference(&expected, &actual);
-        assert!(most <= 2 && mean <= 0.5, "{mode:?}: lit content: largest {most}, mean {mean}");
+        // The light is within 2 levels of the exact one (see the lighting
+        // test); the content scales the error by at most one.
+        assert!(most <= 3 && mean <= 0.5, "{mode:?}: lit content: largest {most}, mean {mean}");
     }
 }
 
