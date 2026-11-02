@@ -1368,8 +1368,10 @@ pub(crate) fn to_exact(value: &MarkupValue, target: ValueType, index: usize) -> 
     };
     // A value of a type that is assignable to the target which its cast refuses (a negative
     // time span for a `Duration`): the error of the cast.
-    if let (None, Some(error)) = (&converted, value.as_ref().and_then(|boxed| ValueTypes::cast_error(boxed, target))) {
-        return Err(MarkupInvokeError::Failed(error));
+    if converted.is_none() {
+        if let Some(error) = value.as_ref().and_then(|boxed| ValueTypes::cast_error(boxed, target)) {
+            return Err(MarkupInvokeError::Failed(error));
+        }
     }
     converted.ok_or_else(|| MarkupInvokeError::Argument {
         index,
