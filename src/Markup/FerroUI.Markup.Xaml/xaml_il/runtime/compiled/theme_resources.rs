@@ -3,7 +3,7 @@
 
 use std::rc::Rc;
 
-use ferroui_base::controls::{IDeferredContent, ResourceDictionary};
+use ferroui_base::controls::{IDeferredContent, ResourceDictionary, ResourceKey};
 use ferroui_base::data::core::ValueType;
 use ferroui_base::media::{Color, SolidColorBrush};
 use ferroui_base::metadata::{IServiceProvider, MarkupValue};
@@ -29,6 +29,14 @@ fn register(
         line,
         column,
     )?;
+    let resource_key = ResourceKey::from(key);
+    if !dictionary.contains_key(&resource_key) {
+        // The compiler proved this operand is a string. Insert its final key directly,
+        // bypassing the intermediate String, BoxedValue and dynamic key conversion.
+        dictionary.add_deferred(resource_key, deferred);
+        return Ok(());
+    }
+    // Preserve the markup member's exact duplicate-key failure and source position.
     invoked(
         ResourceDictionary::__markup_AddDeferred_1(
             dictionary,

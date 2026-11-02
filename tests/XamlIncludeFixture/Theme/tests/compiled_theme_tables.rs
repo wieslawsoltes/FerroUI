@@ -64,3 +64,41 @@ fn compiled_theme_tables_match_the_interpreter() {
         );
     }
 }
+
+#[test]
+fn duplicate_table_key_matches_the_typed_call_and_stops_the_run() {
+    use ferroui_base::data::core::ValueType;
+    use ferroui_markup_xaml::xaml_il::runtime::compiled as rt;
+
+    static DOC: rt::DocumentInfo = rt::DocumentInfo {
+        base_uri: None,
+        namespaces: &[],
+    };
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    crate::register_types();
+    let dictionary = ResourceDictionary::new();
+    dictionary.add_value("taken", 41_i32);
+    let context = rt::populate_context(None, &DOC, rt::to_value(dictionary.clone()));
+    context.push_parent(rt::to_value(dictionary.clone()));
+    let original = rt::add_deferred_resource(&dictionary, "taken", ValueType::object(), &context, |_| Ok(None), 17, 9)
+        .unwrap_err();
+    let compact = rt::theme_resources::aliases(
+        &dictionary,
+        &context,
+        &DOC,
+        &[
+            ("before", "taken", 16, 9, 16, 9),
+            ("taken", "before", 17, 9, 17, 9),
+            ("after", "before", 18, 9, 18, 9),
+        ],
+    )
+    .unwrap_err();
+    assert_eq!(compact.message(), original.message());
+    assert!(compact.message().contains("same key"));
+    assert!(dictionary.contains_deferred_key(&"before".into()));
+    assert!(!dictionary.contains_key(&"after".into()));
+    assert_eq!(
+        dictionary.get(&"taken".into()).unwrap().downcast_ref::<i32>(),
+        Some(&41)
+    );
+}
