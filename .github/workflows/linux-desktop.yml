@@ -70,6 +70,7 @@ jobs:
         run: |
           samples/LinuxDesktop/tests/shortcuts.sh target/debug/ferro-desktop desktop-captures/shortcuts
           samples/LinuxDesktop/tests/macos-menus.sh target/debug/ferro-desktop desktop-captures/macos-menus
+          samples/LinuxDesktop/tests/material-home.sh target/debug/ferro-desktop desktop-captures/material-home
           samples/LinuxDesktop/tests/session.sh test
           samples/LinuxDesktop/tests/session.sh capture target/debug/ferro-desktop desktop-captures/session
       - name: Test native Wayland login, live appearances and Xwayland interoperability

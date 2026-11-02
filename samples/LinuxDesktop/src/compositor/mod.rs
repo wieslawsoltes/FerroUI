@@ -102,6 +102,24 @@ impl Desktop {
         self.scene.window_visual(window)
     }
 
+    /// Normalized client frames in stacking order for the workspace strip.
+    /// Read geometry on overview navigation, independently of client pixel commits.
+    pub fn workspace_outlines(&self) -> Vec<Vec<ferroui_base::Rect>> {
+        let scene = self.server.snapshot();
+        let (w, h) = self.extent.get();
+        let (w, h) = (f64::from(w.max(1)), f64::from(h.max(1)));
+        let mut spaces = vec![Vec::new(); scene.workspace_count];
+        for win in &scene.windows {
+            if !win.minimized && let Some(space) = spaces.get_mut(win.workspace) {
+                space.push(ferroui_base::Rect::new(
+                    f64::from(win.x) / w, f64::from(win.y) / h,
+                    f64::from(win.width) / w, f64::from(win.height) / h,
+                ));
+            }
+        }
+        spaces
+    }
+
     pub fn client_has_focus(&self) -> bool {
         self.scene.has_keyboard_focus()
     }

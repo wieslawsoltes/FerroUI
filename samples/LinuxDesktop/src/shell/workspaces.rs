@@ -1,5 +1,7 @@
 //! Workspace navigation and client actions are requests to the window manager.
 //! Property notifications drive the authoritative workspace and client list.
+mod overview;
+
 use super::appearance::Layout;
 use super::chrome::*;
 use super::{feedback, popup_header, Shell};
@@ -15,6 +17,9 @@ use std::rc::Rc;
 
 pub(super) fn view(shell: &Rc<Shell>) -> Element {
     let snapshot = shell.snapshot;
+    let compositor = shell.session.as_ref().and_then(|s| s.compositor()).cloned();
+    let composed = compositor.is_some();
+    let layout = look().layout();
     let picker_shell = shell.clone();
     let window_shell = shell.clone();
     // Keep keyboard focus on workspace buttons when an unrelated client changes its title.
@@ -28,11 +33,14 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                 model.workspace_names.clone(),
                 model.current_workspace,
                 removable,
+                compositor.as_ref()
+                    .filter(|_| layout != Layout::BottomNavigation)
+                    .map(|host| host.workspace_outlines()),
             )
         })
     });
     let tabs = dynamic(move || {
-        tab_state.with(|(names, current, removable)| {
+        tab_state.with(|(names, current, removable, maps)| {
             let mut choices = wrap_panel();
             for (index, name) in names.iter().enumerate() {
                 let selected = index == *current;
@@ -57,15 +65,19 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     })
                     .margin((0.0, 0.0, 5.0, 5.0))
                     .max_width(154.0)
-                    .child(shell_text(
-                        &title,
-                        12.0,
-                        if selected {
+                    .child({
+                        let label = shell_text(&title, 12.0, if selected {
                             colors().on_selected
                         } else {
                             colors().text
-                        },
-                    )),
+                        });
+                        match maps.as_ref().and_then(|m| m.get(index)) {
+                            Some(rects) => stack_panel().spacing(3.0)
+                                .child(overview::map(rects))
+                                .child(label.horizontal_alignment(H::Center)).into_element(),
+                            None => label.into_element(),
+                        }
+                    }),
                 );
             }
             let state = picker_shell.clone();
@@ -97,12 +109,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     });
     let expanded = signal(None::<u32>);
     let empty_shell = shell.clone();
-    let composed = shell
-        .session
-        .as_ref()
-        .is_some_and(|s| s.compositor().is_some());
-    let layout = look().layout();
-    let width = shell.metrics().width;
+
     let empty = show(
         move || {
             snapshot.with(|model| {
@@ -153,74 +160,31 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
         |w| w.id as usize,
         move |client| client_row(&window_shell, client, expanded, composed),
     );
-    let cards: Element = if composed {
-        uniform_grid()
-            .columns(move || {
-                let columns = if width.get() >= 720.0 { 2 } else { 1 };
-                snapshot.with(|model| {
-                    let count = model
-                        .windows
-                        .iter()
-                        .filter(|w| w.workspace.is_none_or(|ws| ws == model.current_workspace))
-                        .count();
-                    columns.min(count.max(1)) as i32
-                })
-            })
-            .child(windows)
-            .into()
-    } else {
-        stack_panel().spacing(5.0).child(windows).into()
-    };
-    let clients = stack_panel().child(empty).child(cards);
-    let (title, subtitle) = match look().layout() {
+    let (title, subtitle) = match layout {
         Layout::Taskbar => ("Task View", "VIRTUAL DESKTOPS"),
         Layout::MenuBarDock => ("Mission Control", "SPACES"),
         Layout::BottomNavigation => ("Recents", "WORKSPACES"),
     };
-    let desktops_below = composed && layout == Layout::Taskbar;
-    let frame = super::desktop::popup_frame();
-    let frame = if composed {
-        frame.vertical_alignment(V::Center)
-    } else {
-        frame
-    };
-    frame
-        .max_width(if composed { 900.0 } else { 600.0 })
+    if composed {
+        return overview::stage(shell, layout, title, tabs, empty, windows);
+    }
+    super::desktop::popup_frame()
+        .max_width(600.0)
         .max_height(690.0)
         .padding(22)
         .child(
             grid()
-                .row_definitions(if desktops_below {
-                    "Auto,Auto,*,Auto,Auto"
-                } else {
-                    "Auto,Auto,Auto,*,Auto"
-                })
+                .row_definitions("Auto,Auto,Auto,*,Auto")
                 .child(popup_header(title, subtitle, shell))
-                .child(
-                    border()
-                        .grid_row(if desktops_below { 3 } else { 1 })
-                        .margin((0.0, 12.0, 0.0, 6.0))
-                        .max_height(100.0)
-                        .child(
-                            scroll_viewer()
-                                .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
-                                .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
-                                .child(tabs),
-                        ),
-                )
-                .child(
-                    eyebrow("WINDOWS")
-                        .grid_row(if desktops_below { 1 } else { 2 })
-                        .margin((0.0, 8.0, 0.0, 6.0)),
-                )
-                .child(
-                    scroll_viewer()
-                        .grid_row(if desktops_below { 2 } else { 3 })
-                        .max_height(if composed { 455.0 } else { 350.0 })
+                .child(border().grid_row(1).margin((0.0, 12.0, 0.0, 6.0))
+                    .max_height(100.0).child(scroll_viewer()
                         .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
-                        .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
-                        .child(clients),
-                )
+                        .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto).child(tabs)))
+                .child(eyebrow("WINDOWS").grid_row(2).margin((0.0, 8.0, 0.0, 6.0)))
+                .child(scroll_viewer().grid_row(3).max_height(350.0)
+                    .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
+                    .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
+                    .child(stack_panel().spacing(5.0).child(empty).child(windows)))
                 .child(feedback(shell.status).grid_row(4)),
         )
         .into()
@@ -298,9 +262,14 @@ fn client_row(
             Ink::Secondary,
         ));
     let content: Element = if composed {
-        let artwork = source.map(|visual| preview(visual, 152.0)).unwrap_or_else(|| {
+        let height = match look().layout() {
+            Layout::Taskbar => 168.0,
+            Layout::MenuBarDock => 204.0,
+            Layout::BottomNavigation => 224.0,
+        };
+        let artwork = source.map(|visual| preview(visual, height)).unwrap_or_else(|| {
             grid()
-                .height(152.0)
+                .height(height)
                 .child(glyph(Icon::Window, 32.0, colors().accent))
                 .into()
         });
@@ -394,9 +363,14 @@ fn client_row(
             .child(row_actions.grid_column(1))
             .into()
     };
-    border()
-        .background(colors().tile)
-        .corner_radius(9)
+    let card = border();
+    let card = if composed && look().layout() == Layout::BottomNavigation {
+        let width = shell.metrics().width;
+        card.width(move || (width.get() * 0.76).clamp(156.0, 380.0)).corner_radius(20)
+    } else {
+        card.corner_radius(9)
+    };
+    card.background(colors().tile)
         .margin(if composed { 4 } else { 0 })
         .padding(4)
         .child(stack_panel().child(commands).child(show(
