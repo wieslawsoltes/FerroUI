@@ -72,12 +72,12 @@ axis_props = [
  ('min_step','MinStep','f64','0.0'),('force_step','ForceStep','bool','false'),
  ('unit_width','UnitWidth','f64','1.0'),('inverted','IsInverted','bool','false'),
  ('visible','IsVisible','bool','true'),('show_separator_lines','ShowSeparatorLines','bool','true'),
- ('position','Position','AxisPosition','AxisPosition::Start'),('text_size','TextSize','f64','12.0'),
+ ('position','Position','AxisPosition','AxisPosition::Start'),('text_size','TextSize','f64','16.0'),
  ('labels_rotation','LabelsRotation','f64','0.0'),('labels_color','LabelsColor','Color','Color::from_rgb(75,85,99)'),
  ('separators_color','SeparatorsColor','Color','Color::from_argb(50,107,114,128)'),
  ('logarithmic_base','LogarithmicBase','Option<f64>','None'),('padding','Padding','f64','0.0'),
  ('min_separators','MinSeparators','u32','3'),('labels_angle','LabelsAngle','f64','0.0'),
- ('custom_separators','CustomSeparators','Vec<f64>','Vec::new()'),('labels_padding','LabelsPadding','f64','3.0'),
+ ('custom_separators','CustomSeparators','Vec<f64>','Vec::new()'),('labels_padding','LabelsPadding','Option<f64>','None'),
  ('labels_density','LabelsDensity','f64','0.85')]
 axis = HEADER + IMPORTS + '''use ferroui_base::media::Color;
 use ferroui_livecharts::{Axis as AxisSnapshot, AxisPosition};
@@ -241,8 +241,13 @@ impl FerroObjectImpl for {name} {{
 }}
 impl {name} {{
     fn static_constructor() {{
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults=ferroui_livecharts::Series::new(SeriesKind::{kind});
         ChartSeries::kind_property().override_default_value::<{name}>(SeriesKind::{kind});
-        ChartSeries::data_padding_property().override_default_value::<{name}>(ferroui_livecharts::Series::default_data_padding(SeriesKind::{kind}));
+        ChartSeries::data_padding_property().override_default_value::<{name}>(defaults.data_padding);
+        ChartSeries::geometry_size_property().override_default_value::<{name}>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<{name}>(defaults.padding);
+        ChartSeries::max_bar_width_property().override_default_value::<{name}>(defaults.max_bar_width);
     }}
     pub fn construct()->Self {{Self{{base:ChartSeries::construct()}}}}
     pub fn new()->Ref<Self> {{instantiate(Self::construct())}}

@@ -250,8 +250,9 @@ fn source_stacked_row_should_scale_properly() {
     assert_stacked_bars(&result.scene, true);
 }
 
-/// The high-to-low line and the body of every point of a financial or box series, in point
-/// order: (top, bottom, body, body style).
+/// The extent of the vertical lines (the wick of a candle, both whiskers of a box) and the body
+/// of every point of a financial or box series, in point order: (top, bottom, body, body
+/// style).
 fn candles(scene: &Scene, series: usize) -> Vec<(f64, f64, Rect, PaintStyle)> {
     let mut lines = std::collections::BTreeMap::new();
     let mut bodies = std::collections::BTreeMap::new();
@@ -261,9 +262,11 @@ fn candles(scene: &Scene, series: usize) -> Vec<(f64, f64, Rect, PaintStyle)> {
         };
         match &p.geometry {
             Geometry::Line { start, end } if start.x == end.x => {
-                lines
+                let (top, bottom) = lines
                     .entry(id.point)
-                    .or_insert((start.y.min(end.y), start.y.max(end.y)));
+                    .or_insert((f64::INFINITY, f64::NEG_INFINITY));
+                *top = top.min(start.y).min(end.y);
+                *bottom = bottom.max(start.y).max(end.y);
             }
             Geometry::Rectangle { rect, .. } => {
                 bodies.entry(id.point).or_insert((*rect, p.style.clone()));

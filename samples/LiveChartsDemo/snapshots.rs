@@ -328,13 +328,10 @@ fn line_curved() -> Ref<Chart> {
     line_smoothness(1.)
 }
 
-/// The source's `Fill = null`: no area under the line. A native series takes its stroke colour
-/// from its fill when it has no stroke, so the stroke is the palette colour of the series.
+/// The source's `Fill = null`: no area under the line. A transparent fill removes the area of the
+/// theme; the stroke keeps the palette colour of the series.
 fn no_fill(series: Ref<ChartSeries>) -> Ref<ChartSeries> {
     series.set_fill(Some(Color::from_argb(0, 0, 0, 0)));
-    if series.stroke().is_none() {
-        series.set_stroke(Some(ferroui_livecharts::scene::palette_color(0)));
-    }
     series
 }
 

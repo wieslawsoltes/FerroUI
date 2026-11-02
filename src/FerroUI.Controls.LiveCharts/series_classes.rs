@@ -21,10 +21,16 @@ impl FerroObjectImpl for LineSeries {
 }
 impl LineSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::Line);
         ChartSeries::kind_property().override_default_value::<LineSeries>(SeriesKind::Line);
-        ChartSeries::data_padding_property().override_default_value::<LineSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::Line),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<LineSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<LineSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<LineSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<LineSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -52,10 +58,16 @@ impl FerroObjectImpl for StepLineSeries {
 }
 impl StepLineSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::StepLine);
         ChartSeries::kind_property().override_default_value::<StepLineSeries>(SeriesKind::StepLine);
-        ChartSeries::data_padding_property().override_default_value::<StepLineSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::StepLine),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<StepLineSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<StepLineSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<StepLineSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<StepLineSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -83,10 +95,16 @@ impl FerroObjectImpl for AreaSeries {
 }
 impl AreaSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::Area);
         ChartSeries::kind_property().override_default_value::<AreaSeries>(SeriesKind::Area);
-        ChartSeries::data_padding_property().override_default_value::<AreaSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::Area),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<AreaSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<AreaSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<AreaSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<AreaSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -114,11 +132,18 @@ impl FerroObjectImpl for StackedAreaSeries {
 }
 impl StackedAreaSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::StackedArea);
         ChartSeries::kind_property()
             .override_default_value::<StackedAreaSeries>(SeriesKind::StackedArea);
-        ChartSeries::data_padding_property().override_default_value::<StackedAreaSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::StackedArea),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<StackedAreaSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<StackedAreaSeries>(defaults.geometry_size);
+        ChartSeries::padding_property()
+            .override_default_value::<StackedAreaSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<StackedAreaSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -146,11 +171,18 @@ impl FerroObjectImpl for StackedStepAreaSeries {
 }
 impl StackedStepAreaSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::StackedStepArea);
         ChartSeries::kind_property()
             .override_default_value::<StackedStepAreaSeries>(SeriesKind::StackedStepArea);
-        ChartSeries::data_padding_property().override_default_value::<StackedStepAreaSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::StackedStepArea),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<StackedStepAreaSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<StackedStepAreaSeries>(defaults.geometry_size);
+        ChartSeries::padding_property()
+            .override_default_value::<StackedStepAreaSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<StackedStepAreaSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -178,10 +210,16 @@ impl FerroObjectImpl for ColumnSeries {
 }
 impl ColumnSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::Column);
         ChartSeries::kind_property().override_default_value::<ColumnSeries>(SeriesKind::Column);
-        ChartSeries::data_padding_property().override_default_value::<ColumnSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::Column),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<ColumnSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<ColumnSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<ColumnSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<ColumnSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -209,10 +247,16 @@ impl FerroObjectImpl for RowSeries {
 }
 impl RowSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::Row);
         ChartSeries::kind_property().override_default_value::<RowSeries>(SeriesKind::Row);
-        ChartSeries::data_padding_property().override_default_value::<RowSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::Row),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<RowSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<RowSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<RowSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<RowSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -240,11 +284,18 @@ impl FerroObjectImpl for StackedColumnSeries {
 }
 impl StackedColumnSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::StackedColumn);
         ChartSeries::kind_property()
             .override_default_value::<StackedColumnSeries>(SeriesKind::StackedColumn);
-        ChartSeries::data_padding_property().override_default_value::<StackedColumnSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::StackedColumn),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<StackedColumnSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<StackedColumnSeries>(defaults.geometry_size);
+        ChartSeries::padding_property()
+            .override_default_value::<StackedColumnSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<StackedColumnSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -272,11 +323,18 @@ impl FerroObjectImpl for StackedRowSeries {
 }
 impl StackedRowSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::StackedRow);
         ChartSeries::kind_property()
             .override_default_value::<StackedRowSeries>(SeriesKind::StackedRow);
-        ChartSeries::data_padding_property().override_default_value::<StackedRowSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::StackedRow),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<StackedRowSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<StackedRowSeries>(defaults.geometry_size);
+        ChartSeries::padding_property()
+            .override_default_value::<StackedRowSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<StackedRowSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -304,10 +362,16 @@ impl FerroObjectImpl for ScatterSeries {
 }
 impl ScatterSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::Scatter);
         ChartSeries::kind_property().override_default_value::<ScatterSeries>(SeriesKind::Scatter);
-        ChartSeries::data_padding_property().override_default_value::<ScatterSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::Scatter),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<ScatterSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<ScatterSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<ScatterSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<ScatterSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -335,10 +399,16 @@ impl FerroObjectImpl for HeatSeries {
 }
 impl HeatSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::Heat);
         ChartSeries::kind_property().override_default_value::<HeatSeries>(SeriesKind::Heat);
-        ChartSeries::data_padding_property().override_default_value::<HeatSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::Heat),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<HeatSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<HeatSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<HeatSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<HeatSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -366,11 +436,18 @@ impl FerroObjectImpl for RangeColumnSeries {
 }
 impl RangeColumnSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::RangeColumn);
         ChartSeries::kind_property()
             .override_default_value::<RangeColumnSeries>(SeriesKind::RangeColumn);
-        ChartSeries::data_padding_property().override_default_value::<RangeColumnSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::RangeColumn),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<RangeColumnSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<RangeColumnSeries>(defaults.geometry_size);
+        ChartSeries::padding_property()
+            .override_default_value::<RangeColumnSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<RangeColumnSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -398,10 +475,16 @@ impl FerroObjectImpl for RangeRowSeries {
 }
 impl RangeRowSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::RangeRow);
         ChartSeries::kind_property().override_default_value::<RangeRowSeries>(SeriesKind::RangeRow);
-        ChartSeries::data_padding_property().override_default_value::<RangeRowSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::RangeRow),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<RangeRowSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<RangeRowSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<RangeRowSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<RangeRowSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -429,11 +512,17 @@ impl FerroObjectImpl for RangeLineSeries {
 }
 impl RangeLineSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::RangeLine);
         ChartSeries::kind_property()
             .override_default_value::<RangeLineSeries>(SeriesKind::RangeLine);
-        ChartSeries::data_padding_property().override_default_value::<RangeLineSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::RangeLine),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<RangeLineSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<RangeLineSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<RangeLineSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<RangeLineSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -461,11 +550,18 @@ impl FerroObjectImpl for CandlesticksSeries {
 }
 impl CandlesticksSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::Financial);
         ChartSeries::kind_property()
             .override_default_value::<CandlesticksSeries>(SeriesKind::Financial);
-        ChartSeries::data_padding_property().override_default_value::<CandlesticksSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::Financial),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<CandlesticksSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<CandlesticksSeries>(defaults.geometry_size);
+        ChartSeries::padding_property()
+            .override_default_value::<CandlesticksSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<CandlesticksSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -493,10 +589,16 @@ impl FerroObjectImpl for BoxSeries {
 }
 impl BoxSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::Box);
         ChartSeries::kind_property().override_default_value::<BoxSeries>(SeriesKind::Box);
-        ChartSeries::data_padding_property().override_default_value::<BoxSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::Box),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<BoxSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<BoxSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<BoxSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<BoxSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -524,10 +626,16 @@ impl FerroObjectImpl for PieSeries {
 }
 impl PieSeries {
     fn static_constructor() {
+        // The family defaults of the source series and its theme live in the core snapshot.
+        let defaults = ferroui_livecharts::Series::new(SeriesKind::Pie);
         ChartSeries::kind_property().override_default_value::<PieSeries>(SeriesKind::Pie);
-        ChartSeries::data_padding_property().override_default_value::<PieSeries>(
-            ferroui_livecharts::Series::default_data_padding(SeriesKind::Pie),
-        );
+        ChartSeries::data_padding_property()
+            .override_default_value::<PieSeries>(defaults.data_padding);
+        ChartSeries::geometry_size_property()
+            .override_default_value::<PieSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<PieSeries>(defaults.padding);
+        ChartSeries::max_bar_width_property()
+            .override_default_value::<PieSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {

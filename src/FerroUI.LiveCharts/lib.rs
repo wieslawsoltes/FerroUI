@@ -17,7 +17,7 @@ mod scene_transform;
 pub mod series;
 pub mod visual_states;
 
-pub use axis::{Axis, AxisPosition, AxisScale};
+pub use axis::{Axis, AxisPosition, AxisScale, CARTESIAN_LABELS_PADDING, POLAR_LABELS_PADDING};
 pub use cartesian_chart_engine::{
     CartesianChartEngine, CartesianMeasurement, CartesianOptions, CartesianSeriesBounds, Section,
 };
