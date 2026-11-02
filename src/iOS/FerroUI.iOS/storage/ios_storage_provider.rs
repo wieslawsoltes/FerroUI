@@ -62,7 +62,6 @@ pub(crate) use uikit::{is_text_uniform_type, IosStorageProvider};
 #[cfg(target_os = "ios")]
 mod uikit {
     use super::{file_types_to_uniform_type_sources, search_path_directory, UniformTypeSource, PLATFORM_KEY};
-    use crate::completion::{Completion, CompletionFuture};
     use crate::ferro_view::FerroView;
     use crate::storage::ios_storage_item::{url_of, IosStorageFile, IosStorageFolder};
     use ferroui_base::input::LocalBoxFuture;
@@ -87,6 +86,8 @@ mod uikit {
         UIImagePickerControllerInfoKey, UIImagePickerControllerSourceType, UINavigationControllerDelegate,
         UIPresentationController, UIViewController,
     };
+    use ferroui_system::task::oneshot;
+    use std::cell::RefCell;
     use std::io;
     use std::rc::Rc;
 
@@ -147,6 +148,27 @@ mod uikit {
 
     type Urls = Vec<Retained<NSURL>>;
 
+    /// The sender of the choice of a picker, which its delegates share: the
+    /// first of them that answers sets it (the task completion source of the
+    /// reference).
+    type UrlsSender = Rc<RefCell<Option<oneshot::Sender<Urls>>>>;
+
+    /// A one-shot channel of the choice of a picker.
+    fn urls_channel() -> (UrlsSender, oneshot::Receiver<Urls>) {
+        let (sender, receiver) = oneshot::channel();
+        (Rc::new(RefCell::new(Some(sender))), receiver)
+    }
+
+    /// Sets the choice, unless a delegate set it already.
+    fn complete(sender: &UrlsSender, urls: Urls) {
+        // Taken before it sends: sending may poll the task that waits right away.
+        let sender = sender.borrow_mut().take();
+        if let Some(sender) = sender {
+            // A picker whose wait was dropped does not want the choice.
+            let _ = sender.send(urls);
+        }
+    }
+
     define_class!(
         // SAFETY: `NSObject` may be subclassed; the class does not
         // implement `Drop`. The methods have the signatures the protocol
@@ -154,7 +176,7 @@ mod uikit {
         #[unsafe(super(NSObject))]
         #[thread_kind = MainThreadOnly]
         #[name = "FerroPickerDelegate"]
-        #[ivars = Completion<Urls>]
+        #[ivars = UrlsSender]
         struct PickerDelegate;
 
         unsafe impl NSObjectProtocol for PickerDelegate {}
@@ -162,17 +184,17 @@ mod uikit {
         unsafe impl UIDocumentPickerDelegate for PickerDelegate {
             #[unsafe(method(documentPickerWasCancelled:))]
             fn was_cancelled(&self, _controller: &UIDocumentPickerViewController) {
-                self.ivars().try_set_result(Vec::new());
+                complete(self.ivars(), Vec::new());
             }
 
             #[unsafe(method(documentPicker:didPickDocumentsAtURLs:))]
             fn did_pick_documents(&self, _controller: &UIDocumentPickerViewController, urls: &NSArray<NSURL>) {
-                self.ivars().try_set_result(urls.iter().collect());
+                complete(self.ivars(), urls.iter().collect());
             }
 
             #[unsafe(method(documentPicker:didPickDocumentAtURL:))]
             fn did_pick_document(&self, _controller: &UIDocumentPickerViewController, url: &NSURL) {
-                self.ivars().try_set_result(vec![url.retain()]);
+                complete(self.ivars(), vec![url.retain()]);
             }
         }
     );
@@ -182,7 +204,7 @@ mod uikit {
         #[unsafe(super(NSObject))]
         #[thread_kind = MainThreadOnly]
         #[name = "FerroImageOpenPickerDelegate"]
-        #[ivars = Completion<Urls>]
+        #[ivars = UrlsSender]
         struct ImageOpenPickerDelegate;
 
         unsafe impl NSObjectProtocol for ImageOpenPickerDelegate {}
@@ -192,7 +214,7 @@ mod uikit {
         unsafe impl UIImagePickerControllerDelegate for ImageOpenPickerDelegate {
             #[unsafe(method(imagePickerControllerDidCancel:))]
             fn canceled(&self, _picker: &UIImagePickerController) {
-                self.ivars().try_set_result(Vec::new());
+                complete(self.ivars(), Vec::new());
             }
 
             #[unsafe(method(imagePickerController:didFinishPickingMediaWithInfo:))]
@@ -204,9 +226,9 @@ mod uikit {
                 // SAFETY: the key is a constant of UIKit.
                 let url = info.objectForKey(unsafe { UIImagePickerControllerImageURL });
                 match url.and_then(|url| url.downcast::<NSURL>().ok()) {
-                    Some(ns_url) => self.ivars().try_set_result(vec![ns_url]),
-                    None => self.ivars().try_set_result(Vec::new()),
-                };
+                    Some(ns_url) => complete(self.ivars(), vec![ns_url]),
+                    None => complete(self.ivars(), Vec::new()),
+                }
             }
         }
     );
@@ -216,7 +238,7 @@ mod uikit {
         #[unsafe(super(NSObject))]
         #[thread_kind = MainThreadOnly]
         #[name = "FerroPresentationControllerDelegate"]
-        #[ivars = Completion<Urls>]
+        #[ivars = UrlsSender]
         struct UIPresentationControllerDelegate;
 
         unsafe impl NSObjectProtocol for UIPresentationControllerDelegate {}
@@ -226,7 +248,7 @@ mod uikit {
             fn did_dismiss(&self, _presentation_controller: &UIPresentationController) {
                 // The picker was dismissed without a choice. A choice
                 // that was made stays: the result is set once.
-                self.ivars().try_set_result(Vec::new());
+                complete(self.ivars(), Vec::new());
             }
         }
     );
@@ -234,7 +256,7 @@ mod uikit {
     macro_rules! delegate_new {
         ($type:ident) => {
             impl $type {
-                fn new(mtm: MainThreadMarker, completion: Completion<Urls>) -> Retained<Self> {
+                fn new(mtm: MainThreadMarker, completion: UrlsSender) -> Retained<Self> {
                     let this = mtm.alloc::<Self>().set_ivars(completion);
                     // SAFETY: `init` of the superclass, on the object
                     // that was just allocated and whose instance
@@ -251,9 +273,9 @@ mod uikit {
 
     /// The delegates of a picker that is shown. UIKit refers to its
     /// delegates weakly, so they live with the future that waits for the
-    /// choice.
+    /// choice; they hold its senders, so that future is never canceled.
     struct ShownPicker {
-        urls: CompletionFuture<Urls>,
+        urls: oneshot::Receiver<Urls>,
         _picker: Retained<UIViewController>,
         _delegates: Vec<Retained<AnyObject>>,
     }
@@ -311,7 +333,7 @@ mod uikit {
 
         fn show_document_picker(&self, document_picker: &UIDocumentPickerViewController) -> io::Result<ShownPicker> {
             let mtm = Self::mtm()?;
-            let (tcs, urls) = Completion::new();
+            let (tcs, urls) = urls_channel();
             let delegate = PickerDelegate::new(mtm, tcs.clone());
             document_picker.setDelegate(Some(ProtocolObject::from_ref(&*delegate)));
             let mut shown = self.show_picker(document_picker, tcs, urls)?;
@@ -322,8 +344,8 @@ mod uikit {
         fn show_picker(
             &self,
             picker: &UIViewController,
-            tcs: Completion<Urls>,
-            urls: CompletionFuture<Urls>,
+            tcs: UrlsSender,
+            urls: oneshot::Receiver<Urls>,
         ) -> io::Result<ShownPicker> {
             let mtm = Self::mtm()?;
             let mut delegates: Vec<Retained<AnyObject>> = Vec::new();
@@ -356,7 +378,7 @@ mod uikit {
             image_picker.setAllowsEditing(false);
             image_picker.setTitle(options.title().map(NSString::from_str).as_deref());
 
-            let (tcs, urls) = Completion::new();
+            let (tcs, urls) = urls_channel();
             let delegate = ImageOpenPickerDelegate::new(mtm, tcs.clone());
             let delegate_object: &AnyObject = &delegate;
             // SAFETY: the delegate implements the two protocols the
@@ -467,7 +489,7 @@ mod uikit {
 
             Box::pin(async move {
                 let shown = shown?;
-                let urls = shown.urls.await;
+                let urls = shown.urls.await.unwrap_or_default();
                 drop((shown._picker, shown._delegates));
                 Ok(urls.into_iter().map(|u| IosStorageFile::new(u, None) as Rc<dyn IStorageFile>).collect())
             })
@@ -593,7 +615,7 @@ mod uikit {
 
             Box::pin(async move {
                 let shown = shown?;
-                let urls = shown.urls.await;
+                let urls = shown.urls.await.unwrap_or_default();
                 drop((shown._picker, shown._delegates));
 
                 // Clean up the temporary directory
@@ -627,7 +649,7 @@ mod uikit {
             let shown = self.show_document_picker(&document_picker);
             Box::pin(async move {
                 let shown = shown?;
-                let urls = shown.urls.await;
+                let urls = shown.urls.await.unwrap_or_default();
                 drop((shown._picker, shown._delegates));
                 Ok(urls.into_iter().map(|u| IosStorageFolder::new(u, None) as Rc<dyn IStorageFolder>).collect())
             })

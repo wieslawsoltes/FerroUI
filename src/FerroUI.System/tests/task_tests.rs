@@ -253,3 +253,48 @@ fn register_local_runs_on_the_thread_that_registered() {
     assert!(run_pending_wakes());
     assert_eq!(ran.get(), 12);
 }
+
+#[test]
+fn a_panic_in_a_spawned_future_faults_its_task_and_the_other_awaiters_still_resume() {
+    // F2 of docs/idiomatic-rust-async.md: the panic used to leave through `set_result`, with the
+    // task left running and the awaiters that were not woken yet never woken.
+    let source = TaskCompletionSource::<i32>::new();
+    let awaited = source.task();
+    let panicking = Task::spawn_local(async move {
+        let value = awaited.await?;
+        if value > 0 {
+            panic!("boom");
+        }
+        Ok(value)
+    });
+    let awaited = source.task();
+    let resumed = Rc::new(Cell::new(0));
+    let r = resumed.clone();
+    let after = Task::spawn_local(async move {
+        let value = awaited.await?;
+        r.set(value);
+        Ok(value)
+    });
+
+    // The panic does not leave through the call that woke the future.
+    source.set_result(5);
+    assert!(panicking.is_faulted());
+    let error = panicking.exception().unwrap();
+    assert!(error.downcast_ref::<crate::threading::tasks::TaskWorkError>().is_some());
+    assert_eq!(error.to_string(), "boom");
+    assert_eq!(resumed.get(), 5);
+    assert_eq!(after.result().unwrap(), 5);
+}
+
+#[test]
+fn a_panic_after_the_task_has_ended_goes_on_from_the_call_that_polled_it() {
+    // A continuation that the end of the task runs, inside the poll of its future, panics: the
+    // task has its outcome already, so the panic leaves through the call that woke the future.
+    let source = TaskCompletionSource::<i32>::new();
+    let awaited = source.task();
+    let task = Task::spawn_local(async move { awaited.await });
+    let _ = task.continue_with(|_| panic!("in a continuation"));
+    let woke = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| source.set_result(1)));
+    assert!(woke.is_err());
+    assert_eq!(task.result().unwrap(), 1);
+}

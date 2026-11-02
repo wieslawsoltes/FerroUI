@@ -18,6 +18,8 @@ path = "lib.rs"
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
 ferroui-opengl.workspace = true
+# The one-shot channel the requests to an activity wait on.
+ferroui-system.workspace = true
 # The Vulkan rendering mode (`platform/vulkan`): the contracts and the platform graphics of Vulkan.
 # Nothing is linked: the loader of the system is opened at run time.
 ferroui-vulkan.workspace = true

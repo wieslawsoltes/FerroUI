@@ -11,6 +11,7 @@
 //! only these methods make. That is what lets them be safe functions.
 
 use crate::interop::glib::{GSList, Glib};
+use ferroui_system::task::oneshot;
 use ferroui_base::native_functions;
 use ferroui_base::platform::native_library::{NativeLibrary, NativeLibraryError};
 use crate::x11_platform::X11PlatformOptions;
@@ -20,8 +21,8 @@ use std::future::Future;
 use std::marker::PhantomData;
 use std::pin::Pin;
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex, OnceLock, PoisonError};
-use std::task::{Context, Poll, Waker};
+use std::sync::{Mutex, OnceLock, PoisonError};
+use std::task::{Context, Poll};
 use std::thread::{self, ThreadId};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -341,57 +342,37 @@ impl Gtk {
 }
 
 /// Whether GTK could be started: a result several tasks, on any thread,
-/// wait for (the `Task<bool>` of `StartGtk`).
+/// wait for (the `Task<bool>` of `StartGtk`). It is the shared receiver of a
+/// one-shot channel ([`oneshot`]); a start that ends without a result (its
+/// thread could not be started, or panicked) is GTK that cannot be started.
 #[derive(Clone)]
-pub struct StartGtkTask(Arc<Mutex<StartState>>);
-
-#[derive(Default)]
-struct StartState {
-    result: Option<bool>,
-    wakers: Vec<Waker>,
-}
+pub struct StartGtkTask(oneshot::SharedReceiver<bool>);
 
 impl StartGtkTask {
     fn completed(result: bool) -> Self {
-        Self(Arc::new(Mutex::new(StartState { result: Some(result), wakers: Vec::new() })))
+        let (tcs, task) = Self::pending();
+        // The task keeps a receiver: the result cannot come back.
+        let _ = tcs.send(result);
+        task
     }
 
-    fn pending() -> Self {
-        Self(Arc::new(Mutex::new(StartState::default())))
-    }
-
-    fn try_set_result(&self, result: bool) {
-        let wakers = {
-            let mut state = self.0.lock().unwrap_or_else(PoisonError::into_inner);
-            if state.result.is_some() {
-                return;
-            }
-            state.result = Some(result);
-            std::mem::take(&mut state.wakers)
-        };
-        for waker in wakers {
-            waker.wake();
-        }
+    /// A task and the sender of its result.
+    fn pending() -> (oneshot::Sender<bool>, Self) {
+        let (tcs, receiver) = oneshot::channel();
+        (tcs, Self(receiver.shared()))
     }
 
     /// The result, when it is there.
     pub fn result(&self) -> Option<bool> {
-        self.0.lock().unwrap_or_else(PoisonError::into_inner).result
+        self.0.try_recv().unwrap_or(Some(false))
     }
 }
 
 impl Future for StartGtkTask {
     type Output = bool;
 
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<bool> {
-        let mut state = self.0.lock().unwrap_or_else(PoisonError::into_inner);
-        match state.result {
-            Some(result) => Poll::Ready(result),
-            None => {
-                state.wakers.push(cx.waker().clone());
-                Poll::Pending
-            }
-        }
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<bool> {
+        Pin::new(&mut self.0).poll(cx).map(|result| result.unwrap_or(false))
     }
 }
 
@@ -463,17 +444,19 @@ fn initialize_gtk() -> bool {
 }
 
 /// `GtkThread`: initializes GTK and then runs its main loop for ever.
-fn gtk_thread(tcs: StartGtkTask) {
+fn gtk_thread(tcs: oneshot::Sender<bool>) {
+    // Each send gives the result to a task that keeps a receiver (the static of `start_gtk`):
+    // it cannot come back.
     if !initialize_gtk() {
-        tcs.try_set_result(false);
+        let _ = tcs.send(false);
         return;
     }
     let Ok(api) = api() else {
-        tcs.try_set_result(false);
+        let _ = tcs.send(false);
         return;
     };
 
-    tcs.try_set_result(true);
+    let _ = tcs.send(true);
     loop {
         // SAFETY: GTK was initialized on this thread, which is its thread from now on.
         unsafe { (api.gtk_main_iteration)() };
@@ -487,13 +470,11 @@ fn start_gtk_core() -> StartGtkTask {
     if use_g_lib_main_loop {
         StartGtkTask::completed(initialize_gtk())
     } else {
-        let tcs = StartGtkTask::pending();
-        let thread_tcs = tcs.clone();
-        // A thread that cannot be started is GTK that cannot be started.
-        if thread::Builder::new().name("GTK3THREAD".to_string()).spawn(move || gtk_thread(thread_tcs)).is_err() {
-            tcs.try_set_result(false);
-        }
-        tcs
+        let (tcs, task) = StartGtkTask::pending();
+        // A thread that cannot be started is GTK that cannot be started: the sender is dropped
+        // with the closure, which ends the task with `false`.
+        let _ = thread::Builder::new().name("GTK3THREAD".to_string()).spawn(move || gtk_thread(tcs));
+        task
     }
 }
 
@@ -525,13 +506,23 @@ mod tests {
 
     #[test]
     fn a_start_result_is_seen_by_every_waiter() {
-        let task = StartGtkTask::pending();
+        let (tcs, task) = StartGtkTask::pending();
         assert_eq!(task.result(), None);
         let other = task.clone();
-        task.try_set_result(false);
-        task.try_set_result(true);
+        tcs.send(false).unwrap();
         assert_eq!(other.result(), Some(false));
+        assert_eq!(task.result(), Some(false));
         assert_eq!(StartGtkTask::completed(true).result(), Some(true));
+    }
+
+    #[test]
+    fn a_start_that_ends_without_a_result_is_gtk_that_cannot_be_started() {
+        let (tcs, task) = StartGtkTask::pending();
+        let mut task = std::pin::pin!(task);
+        assert_eq!(task.as_mut().poll(&mut Context::from_waker(std::task::Waker::noop())), Poll::Pending);
+        drop(tcs);
+        assert_eq!(task.result(), Some(false));
+        assert_eq!(task.as_mut().poll(&mut Context::from_waker(std::task::Waker::noop())), Poll::Ready(false));
     }
 
     #[test]

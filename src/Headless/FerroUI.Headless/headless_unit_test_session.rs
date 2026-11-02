@@ -43,6 +43,7 @@ use ferroui_base::threading::{
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::{AppBuilder, Application, Control, IToolTipService};
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
+use ferroui_system::task::oneshot;
 use std::any::Any;
 use std::cell::RefCell;
 use std::collections::{HashMap, VecDeque};
@@ -74,73 +75,42 @@ pub struct FerroTestAssembly {
 
 // --- the task of a dispatch ----------------------------------------------------------------------
 
-enum TaskState<T> {
-    Running,
-    RanToCompletion(Option<T>),
-    Faulted(Option<Exception>),
-    Canceled,
-}
-
-struct TaskShared<T> {
-    state: Mutex<TaskState<T>>,
-    finished: Condvar,
-}
-
-impl<T> TaskShared<T> {
-    fn lock(&self) -> MutexGuard<'_, TaskState<T>> {
-        self.state.lock().unwrap_or_else(PoisonError::into_inner)
-    }
-
-    fn try_set(&self, state: TaskState<T>) -> bool {
-        let mut current = self.lock();
-        if !matches!(*current, TaskState::Running) {
-            return false;
-        }
-        *current = state;
-        self.finished.notify_all();
-        true
-    }
-}
-
-/// The completion source of a [`HeadlessUnitTestTask`]. A source that is
-/// dropped without having completed its task cancels it.
-struct TaskCompletionSource<T>(Arc<TaskShared<T>>);
+/// The completion source of a [`HeadlessUnitTestTask`]: the sender of a one-shot channel
+/// ([`oneshot`]) of the outcome, a result or the panic that stands for an exception. A source
+/// that is dropped without having completed its task cancels it.
+struct TaskCompletionSource<T>(oneshot::Sender<Result<T, Exception>>);
 
 impl<T> TaskCompletionSource<T> {
     fn new() -> (Self, HeadlessUnitTestTask<T>) {
-        let shared = Arc::new(TaskShared { state: Mutex::new(TaskState::Running), finished: Condvar::new() });
-        (Self(shared.clone()), HeadlessUnitTestTask { shared })
+        let (sender, receiver) = oneshot::channel();
+        (Self(sender), HeadlessUnitTestTask { receiver })
     }
 
-    fn try_set_result(&self, result: T) -> bool {
-        self.0.try_set(TaskState::RanToCompletion(Some(result)))
+    // A task that was dropped does not want its outcome: what a send gives back is dropped.
+
+    fn set_result(self, result: T) {
+        let _ = self.0.send(Ok(result));
     }
 
-    fn try_set_exception(&self, exception: Exception) -> bool {
-        self.0.try_set(TaskState::Faulted(Some(exception)))
+    fn set_exception(self, exception: Exception) {
+        let _ = self.0.send(Err(exception));
     }
 
-    fn try_set_canceled(&self) -> bool {
-        self.0.try_set(TaskState::Canceled)
-    }
-}
-
-impl<T> Drop for TaskCompletionSource<T> {
-    fn drop(&mut self) {
-        self.try_set_canceled();
+    fn set_canceled(self) {
+        drop(self);
     }
 }
 
 /// The outcome of an action dispatched to a [`HeadlessUnitTestSession`];
 /// what the original returns as a task object.
 pub struct HeadlessUnitTestTask<T> {
-    shared: Arc<TaskShared<T>>,
+    receiver: oneshot::Receiver<Result<T, Exception>>,
 }
 
 impl<T> HeadlessUnitTestTask<T> {
     /// Whether the task has finished: completed, failed or cancelled.
     pub fn is_completed(&self) -> bool {
-        !matches!(*self.shared.lock(), TaskState::Running)
+        self.receiver.is_finished()
     }
 
     /// Blocks until the task has finished and takes its result
@@ -149,13 +119,9 @@ impl<T> HeadlessUnitTestTask<T> {
     ///
     /// # Panics
     /// Raises the panic of the dispatched action, or of the cleanup after
-    /// it, again. Panics when the outcome has already been taken.
+    /// it, again.
     pub fn wait(self) -> Result<T, OperationCanceledError> {
-        let mut state = self.shared.lock();
-        while matches!(*state, TaskState::Running) {
-            state = self.shared.finished.wait(state).unwrap_or_else(PoisonError::into_inner);
-        }
-        Self::take(&mut state)
+        Self::take(self.receiver.blocking_recv())
     }
 
     /// Blocks until the task has finished or `timeout` has passed
@@ -165,31 +131,19 @@ impl<T> HeadlessUnitTestTask<T> {
     /// Panics when the task has not finished in time (`TimeoutException`);
     /// otherwise as [`wait`](Self::wait).
     pub fn wait_timeout(self, timeout: Duration) -> Result<T, OperationCanceledError> {
-        let state = self.shared.lock();
-        let (mut state, _) = self
-            .shared
-            .finished
-            .wait_timeout_while(state, timeout, |state| matches!(*state, TaskState::Running))
-            .unwrap_or_else(PoisonError::into_inner);
-        if matches!(*state, TaskState::Running) {
-            drop(state);
-            panic!("The operation has timed out.");
+        let mut receiver = self.receiver;
+        match receiver.recv_timeout(timeout) {
+            Ok(None) => panic!("The operation has timed out."),
+            Ok(Some(outcome)) => Self::take(Ok(outcome)),
+            Err(canceled) => Self::take(Err(canceled)),
         }
-        Self::take(&mut state)
     }
 
-    fn take(state: &mut TaskState<T>) -> Result<T, OperationCanceledError> {
-        match state {
-            TaskState::RanToCompletion(result) => match result.take() {
-                Some(result) => Ok(result),
-                None => panic!("The result of the task has already been taken."),
-            },
-            TaskState::Faulted(exception) => match exception.take() {
-                Some(exception) => resume_unwind(exception),
-                None => panic!("The failure of the task has already been observed."),
-            },
-            TaskState::Canceled => Err(OperationCanceledError),
-            TaskState::Running => unreachable!("the task has finished"),
+    fn take(outcome: Result<Result<T, Exception>, oneshot::Canceled>) -> Result<T, OperationCanceledError> {
+        match outcome {
+            Ok(Ok(result)) => Ok(result),
+            Ok(Err(exception)) => resume_unwind(exception),
+            Err(oneshot::Canceled) => Err(OperationCanceledError),
         }
     }
 }
@@ -391,7 +345,7 @@ impl HeadlessUnitTestSession {
             })) {
                 Ok(application) => application,
                 Err(ex) => {
-                    tcs.try_set_exception(ex);
+                    tcs.set_exception(ex);
                     local_cts.dispose();
                     global_cts.dispose();
                     return; // Exit the dispatcher action if application initialization fails
@@ -450,11 +404,11 @@ impl HeadlessUnitTestSession {
             global_cts.dispose();
 
             if let Some(caught) = caught {
-                tcs.try_set_exception(caught);
+                tcs.set_exception(caught);
             } else if should_cancel {
-                tcs.try_set_canceled();
+                tcs.set_canceled();
             } else if let Some(result) = result {
-                tcs.try_set_result(result);
+                tcs.set_result(result);
             }
         }));
         task

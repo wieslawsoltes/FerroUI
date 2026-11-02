@@ -1473,6 +1473,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-opengl",
  "ferroui-skia",
+ "ferroui-system",
  "ferroui-vulkan",
  "jni-sys 0.4.1",
  "libc",
@@ -1847,6 +1848,7 @@ dependencies = [
  "ferroui-build",
  "ferroui-controls",
  "ferroui-markup-xaml",
+ "ferroui-system",
  "sysinfo",
 ]
 
@@ -1885,6 +1887,7 @@ dependencies = [
  "bitflags",
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-system",
  "futures-util",
  "uuid",
  "zbus",
@@ -1907,6 +1910,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-harfbuzz",
  "ferroui-skia",
+ "ferroui-system",
  "ferroui-themes-simple",
 ]
 
@@ -2000,6 +2004,7 @@ dependencies = [
  "ferroui-metal",
  "ferroui-opengl",
  "ferroui-skia",
+ "ferroui-system",
  "ferroui-themes-simple",
  "libc",
  "objc2",
@@ -2331,6 +2336,7 @@ dependencies = [
 name = "ferroui-remote-protocol"
 version = "0.5.0-preview.1"
 dependencies = [
+ "ferroui-system",
  "uuid",
 ]
 
@@ -2661,6 +2667,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-controls",
  "ferroui-microcom",
+ "ferroui-system",
  "ferroui-win32",
  "microcom-codegen",
  "windows-sys 0.61.2",
@@ -2678,6 +2685,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-opengl",
  "ferroui-skia",
+ "ferroui-system",
  "ferroui-themes-simple",
  "ferroui-vulkan",
  "libc",
