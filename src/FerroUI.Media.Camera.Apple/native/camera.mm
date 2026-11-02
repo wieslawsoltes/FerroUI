@@ -6,12 +6,41 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
+#include <initializer_list>
 
 // One native photo request across generations. A canceled request keeps this
 // slot until AVFoundation's final callback, including when its Rust future dies.
 static std::atomic<bool> FerroPortablePhotoBusy{false};
+// AVFoundation compares rational durations, not rounded decimal frame rates.
+// 1/30 rounded to nanoseconds is shorter than the device's exact minimum,
+// which requests 30.0000003 fps and throws even though 30 fps was negotiated.
+static CMTime FerroCameraFrameDuration(double fps,double minFPS,double maxFPS,CMTime minimum,CMTime maximum) {
+    if (!std::isfinite(fps) || fps<=0 || !CMTIME_IS_NUMERIC(minimum) || !CMTIME_IS_NUMERIC(maximum)
+        || CMTimeCompare(minimum,kCMTimeZero)<=0 || CMTimeCompare(minimum,maximum)>0) return kCMTimeInvalid;
+    if (fps>=maxFPS) return minimum;
+    if (fps<=minFPS) return maximum;
+    CMTime result=CMTimeMakeWithSeconds(1./fps,1000000000);
+    if (CMTimeCompare(result,minimum)<0) return minimum;
+    if (CMTimeCompare(result,maximum)>0) return maximum;
+    return result;
+}
 #ifdef FERROUI_CAMERA_LIFETIME_TESTS
 static std::atomic<int> FerroCameraTestDrops{0}, FerroCameraTestStops{0};
+extern "C" int ferroui_camera_frame_duration_contract() {
+    const CMTime minimum=CMTimeMake(100000,3000000),maximum=CMTimeMake(100000,100000);
+    // The negative control must reproduce the user's original boundary error.
+    if (CMTimeCompare(CMTimeMakeWithSeconds(1./30.,1000000000),minimum)>=0) return 0;
+    if (CMTimeCompare(FerroCameraFrameDuration(30.,1.,30.,minimum,maximum),minimum)!=0) return 0;
+    if (CMTimeCompare(FerroCameraFrameDuration(1.,1.,30.,minimum,maximum),maximum)!=0) return 0;
+    const CMTime fractional=CMTimeMake(1001,30000);
+    if (CMTimeCompare(FerroCameraFrameDuration(30000./1001.,1.,30000./1001.,fractional,maximum),fractional)!=0) return 0;
+    for (double fps : {1.1,24.,25.,29.9}) {
+        CMTime value=FerroCameraFrameDuration(fps,1.,30.,minimum,maximum);
+        if (!CMTIME_IS_NUMERIC(value) || CMTimeCompare(value,minimum)<0 || CMTimeCompare(value,maximum)>0) return 0;
+    }
+    return !CMTIME_IS_VALID(FerroCameraFrameDuration(NAN,1.,30.,minimum,maximum))
+        && !CMTIME_IS_VALID(FerroCameraFrameDuration(30.,1.,30.,kCMTimeInvalid,maximum));
+}
 #endif
 @class FerroPortableCamera;
 @interface FerroPortablePhoto : NSObject<AVCapturePhotoCaptureDelegate>
@@ -198,7 +227,7 @@ static void FerroCameraConfigure(FerroPortableCamera *owner,NSString *deviceID,i
             [session beginConfiguration];[session addInput:input];
             AVCaptureDeviceFormat *chosen=nil;
             double best=INFINITY;
-            double selectedFPS=0;
+            CMTime selectedDuration=kCMTimeInvalid;
             double requestedFPS=fps>0?fps:30.;
             for (AVCaptureDeviceFormat *format in selected.formats) {
                 CMVideoDimensions d=CMVideoFormatDescriptionGetDimensions(format.formatDescription);
@@ -208,7 +237,9 @@ static void FerroCameraConfigure(FerroPortableCamera *owner,NSString *deviceID,i
                     if (!rate) continue;
                     if (exact && width && (d.width!=(int32_t)width || d.height!=(int32_t)height || std::abs(rate-fps)>1e-6)) continue;
                     double score=std::abs((double)d.width-(width?:1280))+std::abs((double)d.height-(height?:720))+100.*std::abs((double)rate-requestedFPS);
-                    if (score<best) {best=score;chosen=format;selectedFPS=rate;}
+                    CMTime duration=FerroCameraFrameDuration(rate,range.minFrameRate,range.maxFrameRate,range.minFrameDuration,range.maxFrameDuration);
+                    if (!CMTIME_IS_VALID(duration)) continue;
+                    if (score<best) {best=score;chosen=format;selectedDuration=duration;}
                 }
             }
             if (!chosen || ![selected lockForConfiguration:&error]) {
@@ -216,8 +247,8 @@ static void FerroCameraConfigure(FerroPortableCamera *owner,NSString *deviceID,i
             }
             @try {
                 selected.activeFormat=chosen;
-                selected.activeVideoMinFrameDuration=CMTimeMakeWithSeconds(1./selectedFPS,1000000000);
-                selected.activeVideoMaxFrameDuration=CMTimeMakeWithSeconds(1./selectedFPS,1000000000);
+                selected.activeVideoMinFrameDuration=selectedDuration;
+                selected.activeVideoMaxFrameDuration=selectedDuration;
             } @finally {[selected unlockForConfiguration];}
             AVCaptureVideoDataOutput *video=[AVCaptureVideoDataOutput new];
             video.alwaysDiscardsLateVideoFrames=YES;

@@ -174,3 +174,22 @@ the input harness. `metal-focus-final` in the CGL evidence directory records a
 fresh 37-stage Metal replay with 300 cycles / 600 resets passing; see
 [MACOS-CGL-VERIFICATION.md](MACOS-CGL-VERIFICATION.md#default-metal-regression).
 CGL's separate failing reset-memory gate does not change that Metal evidence.
+
+## Catalog camera frame-rate boundary regression
+
+A physical-camera attempt in ControlCatalog exposed AVFoundation rejecting
+`30.0000002` fps for a device whose supported maximum was 30 fps. The previous
+native setup converted `1/30` to nanoseconds (`33333333/1000000000`), making
+the requested interval slightly shorter than the supported exact minimum.
+
+Format selection now retains the selected range's exact rational duration at
+either boundary. Intermediate requested durations are clamped to that range's
+native minimum/maximum. Both active duration setters receive this valid value;
+negotiated settings continue reporting what the device actually accepts.
+
+The native contract test reproduces the old invalid rounding as a negative
+control, verifies exact 30 fps and 30000/1001 boundaries, the minimum rate,
+intermediate rates and invalid inputs. Together with the existing delegate
+lifetime test, both tests pass with `native-lifetime-tests`; neither test acquires
+a camera. A successful physical preview/photo replay after this fix remains
+separate evidence.

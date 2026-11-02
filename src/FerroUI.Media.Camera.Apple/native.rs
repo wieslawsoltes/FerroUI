@@ -2,7 +2,7 @@
 use ferroui_media_apple::PixelBuffer;
 use ferroui_media_camera::{CameraError, CameraErrorKind, CameraPermission, CameraSelection};
 use std::{
-    ffi::{c_char, c_void, CStr, CString},
+    ffi::{CStr, CString, c_char, c_void},
     marker::PhantomData,
     ptr::NonNull,
     rc::Rc,
@@ -218,6 +218,11 @@ mod tests {
     extern "C" {
         fn ferroui_camera_lifetime_fixture() -> *mut c_void;
         fn ferroui_camera_lifetime_result() -> i32;
+        fn ferroui_camera_frame_duration_contract() -> i32;
+    }
+    #[test]
+    fn native_frame_duration_keeps_exact_supported_boundaries() {
+        assert_eq!(unsafe { ferroui_camera_frame_duration_contract() }, 1);
     }
     #[test]
     fn native_stop_releases_the_retaining_delegate_and_session_off_ui() {
