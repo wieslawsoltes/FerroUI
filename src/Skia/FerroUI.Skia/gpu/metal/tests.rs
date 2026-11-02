@@ -1400,3 +1400,112 @@ fn graphite_prewarms_the_runtime_effects_without_drawing_anything() {
     layer.dispose();
     context.dispose();
 }
+
+// ---------------------------------------------------------------------------
+// The prewarm of the GPU pipelines (#437)
+// ---------------------------------------------------------------------------
+
+/// A Graphite prewarm draws onto a recorder of its own, whose recording (where
+/// the pipelines compile) a thread of its own makes; the prewarm records
+/// nothing afterwards, and the context of the frames is untouched.
+#[test]
+fn graphite_prewarms_pipelines_on_a_recorder_and_a_thread_of_their_own() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let gpu = super::SkiaMetalGpu::new(device.clone(), None, None);
+    let gr_context = gpu.gr_context();
+    let prewarm = gr_context.begin_prewarm().expect("Graphite prewarms on a recorder of its own");
+    let prewarm_context = prewarm
+        .gr_context
+        .as_any()
+        .downcast_ref::<crate::gpu::graphite::GraphitePrewarmContext>()
+        .expect("the context of a Graphite prewarm");
+    let info = skia_safe::ImageInfo::new((64, 64), ColorType::N32, skia_safe::AlphaType::Premul, None);
+    let props = skia_safe::SurfaceProps::default();
+    {
+        let mut surface = prewarm.gr_context.create_surface(&info, &props).expect("a surface of the prewarm");
+        // A blur and an advanced blend layer, as the acrylic draws them.
+        let mut paint = skia_safe::Paint::default();
+        paint.set_image_filter(skia_safe::image_filters::blur((8.0, 8.0), None, None, None));
+        surface.canvas().draw_rect(skia_safe::Rect::from_wh(32.0, 32.0), &paint);
+        let mut layer = skia_safe::Paint::default();
+        layer.set_blend_mode(skia_safe::BlendMode::Luminosity);
+        surface.canvas().save_layer(&skia_safe::canvas::SaveLayerRec::default().paint(&layer));
+        surface.canvas().draw_color(skia_safe::Color::RED, None);
+        surface.canvas().restore();
+    }
+    let thread = prewarm_context.finish().expect("a thread compiles the pipelines");
+    assert!(thread.join().expect("the thread ends"), "the recording is made");
+
+    assert!(prewarm_context.is_finished());
+    assert!(prewarm.gr_context.create_surface(&info, &props).is_none(), "a finished prewarm records nothing");
+    assert!(prewarm_context.finish().is_none(), "a prewarm is finished once");
+    assert!(gr_context.create_surface(&info, &props).is_some());
+}
+
+/// The render target of a window prewarms with the drawing context of its
+/// frames, offscreen: nothing is presented. With the option off it does not.
+#[test]
+fn a_graphite_render_target_prewarms_off_its_frames() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+
+    let size = PixelSize::new(32, 32);
+    // SAFETY: the device handle is valid for the lifetime of `device`.
+    let texture = unsafe { create_texture(device.device, 32, 32) };
+    assert!(!texture.is_null());
+    let presented = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+    let surface: std::sync::Arc<dyn IPlatformRenderSurface> =
+        std::sync::Arc::new(TextureSurface { texture: texture as usize, size, presented: presented.clone() });
+    let context = crate::SkiaContext::new(Some(super::SkiaMetalGpu::new(device.clone(), None, None)));
+    let render_target = context.create_render_target(std::slice::from_ref(&surface));
+
+    let scene_info = RenderTargetSceneInfo::new(size, 2.0, CompositionTransparencyLevel::None);
+    let (mut drawing_context, _) = render_target.create_drawing_context(&scene_info);
+    drawing_context.clear(Colors::BLUE);
+    drawing_context.dispose();
+    assert_eq!(1, presented.load(std::sync::atomic::Ordering::SeqCst));
+
+    let prewarm_scene = RenderTargetSceneInfo::new(PixelSize::new(256, 256), 2.0, CompositionTransparencyLevel::None);
+    let mut painted = 0;
+    let prewarmed = render_target.prewarm(&prewarm_scene, &mut |context: &mut dyn IDrawingContextImpl| {
+        painted += 1;
+        let blur = ferroui_base::media::ImmutableBlurEffect::new(30.0);
+        if let Some(effects) = context.as_drawing_context_impl_with_effects() {
+            effects.push_effect(Some(Rect::new(0.0, 0.0, 64.0, 64.0)), &blur);
+        }
+        context.draw_rectangle(
+            Some(&red()),
+            None,
+            RoundedRect::from_rect(Rect::new(0.0, 0.0, 32.0, 32.0)),
+            &BoxShadows::default(),
+        );
+        if let Some(effects) = context.as_drawing_context_impl_with_effects() {
+            effects.pop_effect();
+        }
+    });
+    assert!(prewarmed);
+    assert_eq!(1, painted);
+    assert_eq!(1, presented.load(std::sync::atomic::Ordering::SeqCst), "a prewarm presents nothing");
+
+    let scope = ferroui_base::FerroLocator::enter_scope();
+    ferroui_base::FerroLocator::current_mutable().bind_to_self(Rc::new(crate::SkiaOptions {
+        prewarm_effect_pipelines: false,
+        ..crate::SkiaOptions::default()
+    }));
+    let mut called = false;
+    assert!(!render_target.prewarm(&prewarm_scene, &mut |_: &mut dyn IDrawingContextImpl| called = true));
+    assert!(!called, "the option turns the prewarm off");
+    scope.dispose();
+
+    render_target.dispose();
+    context.dispose();
+
+    // SAFETY: balances the +1 of `newTextureWithDescriptor:`; Skia no longer
+    // references the texture.
+    unsafe { send(texture, sel(b"release\0")) };
+}

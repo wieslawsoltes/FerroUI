@@ -1,4 +1,5 @@
-use crate::gpu::{ISkiaGrContext, SkiaGpuBackend};
+use super::GraphitePrewarmContext;
+use crate::gpu::{ISkiaGrContext, SkiaGpuBackend, SkiaPrewarm};
 use skia_safe::gpu::graphite::{self, InsertRecordingInfo};
 use skia_safe::gpu::Mipmapped;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
@@ -9,6 +10,7 @@ use skia_safe::{
 use std::any::Any;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 /// An image that was uploaded for drawing: the image it was made from and
 /// its textures on the recorder.
@@ -228,6 +230,28 @@ impl ISkiaGrContext for GraphiteGrContext {
 
     fn is_lost(&self) -> bool {
         self.state.borrow().as_ref().is_some_and(|state| state.context.is_device_lost())
+    }
+
+    /// A recorder of its own, made by the context, whose pipelines compile
+    /// on a thread of its own (`graphite_prewarm.rs`).
+    fn begin_prewarm(&self) -> Option<SkiaPrewarm> {
+        let recorder = {
+            let mut state = self.state.borrow_mut();
+            let state = state.as_mut()?;
+            if state.context.is_device_lost() {
+                return None;
+            }
+            state.context.make_recorder(None)?
+        };
+        let prewarm = Rc::new(GraphitePrewarmContext::new(recorder));
+        let finishing = prewarm.clone();
+        Some(SkiaPrewarm {
+            gr_context: prewarm,
+            finish: Box::new(move || {
+                // The thread runs on by itself.
+                let _ = finishing.finish();
+            }),
+        })
     }
 
     fn as_any(&self) -> &dyn Any {
