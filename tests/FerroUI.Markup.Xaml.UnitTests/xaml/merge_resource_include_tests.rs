@@ -107,6 +107,31 @@ fn dictionaries_with_only_a_merge_include_inline_transitive_resources() {
 }
 
 #[test]
+fn nested_dictionary_in_an_included_document_uses_its_declaring_uri() {
+    let _base = xaml_test_base();
+    let root = merge_only("ferres://Tests/Root.xaml", "Sub/Holder.xaml");
+    let holder = document(
+        "ferres://Tests/Sub/Holder.xaml",
+        "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+           <ResourceDictionary x:Key='Inner'>
+             <ResourceDictionary.MergedDictionaries><MergeResourceInclude Source='Leaf.xaml'/></ResourceDictionary.MergedDictionaries>
+           </ResourceDictionary>
+         </ResourceDictionary>",
+    );
+    let leaf = document(
+        "ferres://Tests/Sub/Leaf.xaml",
+        "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+           <SolidColorBrush x:Key='Brush'>Blue</SolidColorBrush>
+         </ResourceDictionary>",
+    );
+    let docs = load_group(vec![root, holder, leaf], None);
+    let root = assert_value_is_type::<ResourceDictionary>(&docs[0]);
+    let inner = assert_value_is_type::<ResourceDictionary>(&root.get(&"Inner".into()));
+    assert!(inner.merged_dictionaries().is_empty());
+    assert_eq!(Colors::BLUE, solid_color(&inner.get(&"Brush".into())));
+}
+
+#[test]
 fn cyclic_merge_only_dictionaries_report_the_offending_uri() {
     let _base = xaml_test_base();
     let docs = vec![

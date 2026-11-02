@@ -1,6 +1,6 @@
 //! Port of `CompilerExtensions/GroupTransformers/XamlMergeResourceGroupTransformer.cs`.
 
-use std::rc::Rc;
+use std::{cell::RefCell, collections::HashSet, rc::Rc};
 
 use xamlx::ast::{
     IXamlAstManipulationNode, IXamlAstNode, IXamlAstValueNode, XamlAstExtensions,
@@ -22,6 +22,13 @@ use crate::compiler_extensions::XamlDocumentUsage;
 /// compile time: the resources of the included dictionary (another document of the same
 /// compilation) are added directly to the including dictionary.
 pub struct XamlMergeResourceGroupTransformer;
+
+/// The same included document may be referenced by many other dictionaries.
+#[derive(Default)]
+struct MergeTraversal {
+    active: RefCell<HashSet<usize>>,
+    prepared: RefCell<HashSet<usize>>,
+}
 
 /// `string.Equals(a, b, StringComparison.InvariantCultureIgnoreCase)`.
 pub(super) fn invariant_ignore_case_equals(a: Option<&str>, b: &str) -> bool {
@@ -189,21 +196,11 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
         context: &AstGroupTransformationContext,
         node: Rc<dyn IXamlAstNode>,
     ) -> XamlResult<Rc<dyn IXamlAstNode>> {
-        Self::merge(context, node, &mut Vec::new())
-    }
-}
-
-impl XamlMergeResourceGroupTransformer {
-    fn merge(
-        context: &AstGroupTransformationContext,
-        node: Rc<dyn IXamlAstNode>,
-        ancestors: &mut Vec<*const XamlObjectInitializationNode>,
-    ) -> XamlResult<Rc<dyn IXamlAstNode>> {
-        let ferro_types = context.try_get_ferro_types()?;
-        let resource_dictionary_type = ferro_types.resource_dictionary.clone();
         let Some(resource_dictionary_node) = node.cast::<XamlObjectInitializationNode>() else {
             return Ok(node);
         };
+        let ferro_types = context.try_get_ferro_types()?;
+        let resource_dictionary_type = ferro_types.resource_dictionary.clone();
         if !resource_dictionary_node
             .type_
             .borrow()
@@ -373,23 +370,32 @@ impl XamlMergeResourceGroupTransformer {
                 );
             }
 
-            // The input group can list consumers before their dependencies. Resolve
-            // each included root in its own URI scope before copying its operations.
-            let target = Rc::as_ptr(&single_root_object);
-            if target == Rc::as_ptr(&resource_dictionary_node) || ancestors.contains(&target) {
-                return context.report_transform_error(
-                    &format!("Cyclic MergeResourceInclude of '{original_asset_path}'."),
-                    Some(&**source_node),
-                    node,
-                );
+            // Visit the complete dependency while its own URI is current, before
+            // copying its operations. A nested dictionary can have relative includes too.
+            let traversal = context.get_or_create_item::<MergeTraversal>();
+            let target = Rc::as_ptr(&target_document) as *const () as usize;
+            if !traversal.prepared.borrow().contains(&target) {
+                let previous = context.current_document();
+                let owner = previous.as_ref().map(|doc| Rc::as_ptr(doc) as *const () as usize);
+                if owner == Some(target) || traversal.active.borrow().contains(&target) {
+                    return context.report_transform_error(
+                        &format!("Cyclic MergeResourceInclude of '{original_asset_path}'."),
+                        Some(&**source_node),
+                        node,
+                    );
+                }
+                if let Some(owner) = owner {
+                    traversal.active.borrow_mut().insert(owner);
+                }
+                context.set_current_document(Some(target_document.clone()));
+                let result = context.visit_group(&single_root_object.as_node(), self);
+                context.set_current_document(previous);
+                if let Some(owner) = owner {
+                    traversal.active.borrow_mut().remove(&owner);
+                }
+                result?;
+                traversal.prepared.borrow_mut().insert(target);
             }
-            let previous = context.current_document();
-            context.set_current_document(Some(target_document.clone()));
-            ancestors.push(Rc::as_ptr(&resource_dictionary_node));
-            let result = Self::merge(context, single_root_object.as_node(), ancestors);
-            ancestors.pop();
-            context.set_current_document(previous);
-            result?;
             manipulation_group.push(single_root_object.manipulation());
             if target_document.usage() == XamlDocumentUsage::Unknown {
                 target_document.set_usage(XamlDocumentUsage::Merged);
