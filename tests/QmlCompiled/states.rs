@@ -149,10 +149,12 @@ fn property_tracks_match_qt_with_v8_endpoints() {
         .load("states/PropertyTracks.qml")
         .unwrap()
         .document;
+    let compiled = guest::compiled_qml();
+    // Guest-backed expressions stay in the linked IR. Compare all authored
+    // values, source spans and import metadata before checking execution.
+    assert_eq!(ferroui_qml::ComponentSource::document(&compiled), &doc);
     check_tracks(Instance::with_engine(&doc, &registry, Default::default(), vm.clone()).unwrap());
-    check_tracks(
-        Instance::with_engine(&guest::compiled_qml(), &registry, Default::default(), vm).unwrap(),
-    );
+    check_tracks(Instance::with_engine(&compiled, &registry, Default::default(), vm).unwrap());
 }
 
 #[test]

@@ -6,6 +6,9 @@ use crate::{deferred, MethodRef};
 use crate::{Document, Error, Locals, ObjectId, SlotId, Value};
 use std::collections::BTreeSet;
 
+#[doc(hidden)]
+pub mod layout;
+
 pub use crate::evaluation::{binary, unary, Flow};
 
 /// An expression emitted as a native Rust function. The frame borrows the

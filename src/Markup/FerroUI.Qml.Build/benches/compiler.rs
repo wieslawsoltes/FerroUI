@@ -61,8 +61,9 @@ fn main() {
         "compile to Rust: {} us",
         median_us(|| compiler.compile(&path).unwrap())
     );
-    println!(
-        "generated Rust: {} bytes",
-        compiler.compile(&path).unwrap().rust.len()
-    );
+    let generated = compiler.compile(&path).unwrap().rust;
+    println!("generated Rust: {} bytes", generated.len());
+    if let Some(output) = std::env::var_os("FERROUI_QML_BENCH_OUTPUT") {
+        fs::write(output, generated).unwrap();
+    }
 }
