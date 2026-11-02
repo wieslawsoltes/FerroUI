@@ -448,9 +448,47 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     } else {
         Element::Empty
     };
+    // Keep the search editor and paging controls available on short outputs.
+    // Pins, recent apps, category navigation and results share one scroll owner.
+    let sections = stack_panel()
+        .child(pinned_preview(
+            shell,
+            layout,
+            searching,
+            pinned_only,
+            active_page,
+        ))
+        .child(browse::recent(shell, layout, show_recent))
+        .child(
+            grid()
+                .column_definitions("*,Auto")
+                .margin((6.0, 9.0, 4.0, 5.0))
+                .child(
+                    row(5.0).child(back).child(
+                        shell_text("", if spotlight { 12.0 } else { 16.0 }, Ink::Primary)
+                            .text(section)
+                            .font_weight(FontWeight::SemiBold),
+                    ),
+                )
+                .child(
+                    row(5.0).grid_column(1).child(picker).child(
+                        action("Change application scope", toggle_scope)
+                            .automation_properties_name(scope_name)
+                            .height(30.0)
+                            .min_height(0.0)
+                            .padding((10.0, 2.0))
+                            .child(
+                                row(6.0)
+                                    .child(shell_text("", 12.0, Ink::Primary).text(scope_name))
+                                    .child(glyph(Icon::Forward, 9.0, p.muted)),
+                            ),
+                    ),
+                ),
+        )
+        .child(results);
     let content =
         grid()
-            .row_definitions("Auto,Auto,Auto,Auto,*,Auto,Auto")
+            .row_definitions("Auto,Auto,*,Auto,Auto")
             .child(handle)
             .child(
                 border()
@@ -487,56 +525,17 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     ),
             )
             .child(
-                stack_panel()
+                scroll_viewer()
                     .grid_row(2)
-                    .child(pinned_preview(
-                        shell,
-                        layout,
-                        searching,
-                        pinned_only,
-                        active_page,
-                    ))
-                    .child(browse::recent(shell, layout, show_recent)),
+                    .max_height(500.0)
+                    .is_enabled(move || !launching.get())
+                    .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
+                    .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
+                    .child(sections),
             )
             .child(
                 grid()
                     .grid_row(3)
-                    .column_definitions("*,Auto")
-                    .margin((6.0, 9.0, 4.0, 5.0))
-                    .child(
-                        row(5.0).child(back).child(
-                            shell_text("", if spotlight { 12.0 } else { 16.0 }, Ink::Primary)
-                                .text(section)
-                                .font_weight(FontWeight::SemiBold),
-                        ),
-                    )
-                    .child(
-                        row(5.0).grid_column(1).child(picker).child(
-                            action("Change application scope", toggle_scope)
-                                .automation_properties_name(scope_name)
-                                .height(30.0)
-                                .min_height(0.0)
-                                .padding((10.0, 2.0))
-                                .child(
-                                    row(6.0)
-                                        .child(shell_text("", 12.0, Ink::Primary).text(scope_name))
-                                        .child(glyph(Icon::Forward, 9.0, p.muted)),
-                                ),
-                        ),
-                    ),
-            )
-            .child(
-                scroll_viewer()
-                    .grid_row(4)
-                    .max_height(345.0)
-                    .is_enabled(move || !launching.get())
-                    .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
-                    .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
-                    .child(results),
-            )
-            .child(
-                grid()
-                    .grid_row(5)
                     .column_definitions("*,Auto")
                     .margin((6.0, 7.0, 4.0, 0.0))
                     .child(shell_text("", 12.0, Ink::Secondary).text(move || {
@@ -560,7 +559,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                             .child(next),
                     ),
             )
-            .child(feedback(shell.status).grid_row(6));
+            .child(feedback(shell.status).grid_row(4));
     super::desktop::popup_frame()
         .automation_properties_name(match layout {
             Layout::Taskbar => "Start",
@@ -588,7 +587,7 @@ fn pinned_preview(
     pinned_only: Signal<bool>,
     page: Memo<usize>,
 ) -> El<ferroui_controls::Border> {
-    let frame = border().grid_row(2);
+    let frame = border();
     if layout != Layout::Taskbar {
         return frame;
     }
