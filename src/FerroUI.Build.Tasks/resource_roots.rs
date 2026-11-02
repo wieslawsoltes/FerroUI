@@ -121,10 +121,18 @@ impl Graph<'_> {
 
 /// Blanks unreachable elements in place, preserving the original positions for diagnostics.
 pub(super) fn trim(documents: &mut [(String, String)], roots: &[String]) -> Result<(), String> {
-    let parsed: Vec<_> = documents
-        .iter()
-        .map(|(name, xaml)| Document::parse(xaml).map_err(|e| format!("{name}: {e}")))
-        .collect::<Result<_, _>>()?;
+    let mut parsed = Vec::with_capacity(documents.len());
+    for (name, source) in documents.iter() {
+        match Document::parse(source) {
+            Ok(xml) => parsed.push(xml),
+            // XamlX ignores DTDs in its private lexical prescan. Its normal compiler
+            // still validates these inputs. Without the exact XML tree for one source
+            // we cannot prove any dependency in this group dead, including across includes.
+            Err(roxmltree::Error::DtdDetected) => return Ok(()),
+            Err(error) => return Err(format!("{name}: {error}")),
+        }
+    }
+    let mut retained_literals = HashSet::new();
     let mut graph = Graph::default();
     // Only the outermost keyed entry is removable. Each document is traversed in source order.
     let mut per_document = Vec::with_capacity(parsed.len());
@@ -155,6 +163,22 @@ pub(super) fn trim(documents: &mut [(String, String)], roots: &[String]) -> Resu
                     dependencies: HashSet::new(),
                 });
                 entries.push((node.id(), index));
+            } else if node
+                .parent_element()
+                .is_some_and(|p| p.has_tag_name((FERRO_XML_NAMESPACE, "ResourceDictionary")))
+                && !node.tag_name().name().contains('.')
+            {
+                // Opaque and implicit entries are always live. Their nested dictionaries
+                // belong to the retained value. Scan their dependencies as ambient in pass
+                // two, without making their local keys independently removable in pass one.
+                end = node.range().end;
+                if let Some(literal) = node.attribute((XamlNamespaces::XAML2006, "Key")) {
+                    if let Some(text) = literal.strip_prefix("{}") {
+                        retained_literals.insert(text);
+                    } else if !literal.starts_with('{') {
+                        retained_literals.insert(literal);
+                    }
+                }
             }
         }
         per_document.push(entries);
@@ -197,10 +221,13 @@ pub(super) fn trim(documents: &mut [(String, String)], roots: &[String]) -> Resu
     }
     let mut pending: Vec<_> = ambient.into_iter().collect();
     for root in roots {
-        let id = graph.names.get(root.as_str()).ok_or_else(|| {
-            format!("unknown XAML resource root '{root}' (expected an explicit string key or local x:Type key in this group)")
-        })?;
-        pending.push(*id);
+        // A punctuation or Unicode key cannot be tracked by the identifier graph, but
+        // its declaration and its outgoing dependencies have already been retained.
+        if let Some(&id) = graph.names.get(root.as_str()) {
+            pending.push(id);
+        } else if !retained_literals.contains(root.as_str()) {
+            return Err(format!("unknown XAML resource root '{root}' (expected an explicit string key or local x:Type key in this group)"));
+        }
     }
     let mut live = vec![false; graph.definitions.len()];
     while let Some(id) = pending.pop() {
@@ -261,8 +288,12 @@ mod tests {
     #[test]
     fn follows_cycles_types_overrides_and_variant_keys_across_documents() {
         let mut docs = vec![
-            dictionary(r#"<ControlTheme x:Key="{x:Type Button}" BasedOn="{StaticResource Default}"/><Style x:Key="Dead"><Other/></Style>"#),
-            dictionary(r#"<Style x:Key="Default"><TextBlock Text="{DynamicResource Accent}"/></Style><Style x:Key="{x:Type TextBlock}"/><Color x:Key="Accent">Default</Color>"#),
+            dictionary(
+                r#"<ControlTheme x:Key="{x:Type Button}" BasedOn="{StaticResource Default}"/><Style x:Key="Dead"><Other/></Style>"#,
+            ),
+            dictionary(
+                r#"<Style x:Key="Default"><TextBlock Text="{DynamicResource Accent}"/></Style><Style x:Key="{x:Type TextBlock}"/><Color x:Key="Accent">Default</Color>"#,
+            ),
             dictionary("<Color x:Key=\"Accent\"/>\n<Color x:Key=\"Other\"/>\n<Color x:Key=\"special.key\"/>"),
         ];
         trim(&mut docs, &["Button".into()]).unwrap();
@@ -285,6 +316,38 @@ mod tests {
         trim(&mut docs, &[]).unwrap();
         assert!(docs[0].1.contains("Visible"));
         assert!(!docs[0].1.contains("PART_Content"));
+    }
+
+    #[test]
+    fn opaque_entries_keep_local_dictionaries_and_their_external_dependencies() {
+        let mut docs = vec![
+            dictionary(
+                r#"<ResourceDictionary x:Key="a.b"><ResourceDictionary x:Key="Nested"><StaticResource x:Key="Inner" ResourceKey="Accent"/></ResourceDictionary></ResourceDictionary>
+                <ResourceDictionary x:Key="{CustomKey}"><Color x:Key="OpaqueLocal"/></ResourceDictionary>
+                <ResourceDictionary x:Key="{}{literal}"><Color x:Key="EscapedLocal"/></ResourceDictionary>
+                <ControlTheme TargetType="Button"><ControlTheme.Resources><ResourceDictionary><Color x:Key="ImplicitLocal"/></ResourceDictionary></ControlTheme.Resources></ControlTheme>"#,
+            ),
+            dictionary(r#"<Color x:Key="Accent"/><Color x:Key="Unused"/>"#),
+        ];
+        let original_entries = docs[0].1.clone();
+        trim(&mut docs, &["a.b".into(), "{literal}".into()]).unwrap();
+        assert_eq!(docs[0].1, original_entries);
+        assert!(docs[1].1.contains("Accent"));
+        assert!(!docs[1].1.contains("Unused"));
+    }
+
+    #[test]
+    fn dtd_input_conservatively_keeps_dependencies_in_the_whole_group() {
+        let mut docs = vec![
+            dictionary("<Color x:Key=\"Accent\"/>"),
+            dictionary("<StaticResource x:Key=\"Alias\" ResourceKey=\"Accent\"/>"),
+        ];
+        docs[1]
+            .1
+            .insert_str(0, "<!DOCTYPE ResourceDictionary [<!-- <ignored> -->]>");
+        let original = docs.clone();
+        trim(&mut docs, &["Alias".into()]).unwrap();
+        assert_eq!(docs, original);
     }
 
     #[test]

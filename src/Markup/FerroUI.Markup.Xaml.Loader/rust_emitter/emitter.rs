@@ -3962,11 +3962,6 @@ impl<'a> DocumentFunctions<'a> {
     pub(super) fn take_called(&self) -> Vec<String> {
         self.called.take()
     }
-
-    /// The functions the documents emitted so far call.
-    pub fn called(&self) -> Vec<String> {
-        self.called.borrow().clone()
-    }
 }
 
 /// [`emit_document`] for a document of a group: calls of the build methods
