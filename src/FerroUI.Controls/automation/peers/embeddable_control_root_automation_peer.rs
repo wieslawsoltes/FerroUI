@@ -165,7 +165,7 @@ impl EmbeddableControlRootAutomationPeer {
                     this.keyboard_device_property_changed(property_name);
                 }
             });
-            *self.keyboard_device_subscription.borrow_mut() = Some(Subscription::new(subscription));
+            *self.keyboard_device_subscription.borrow_mut() = Some(subscription);
             self.on_focus_changed(keyboard_device.focused_element());
         }
     }

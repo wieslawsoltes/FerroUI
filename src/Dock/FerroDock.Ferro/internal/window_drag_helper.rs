@@ -80,7 +80,7 @@ impl WindowDragHelper {
             move |_, e| this.on_pointer_pressed(e),
             RoutingStrategies::TUNNEL,
             false,
-        );
+        ).detach();
         let pressed = RetainedSubscription::retain(self.owner.clone().upcast(), pressed);
         let this = self.this();
         let moved = self.owner.add_disposable_handler_with(
@@ -88,7 +88,7 @@ impl WindowDragHelper {
             move |_, e| this.on_pointer_moved(e),
             RoutingStrategies::TUNNEL,
             false,
-        );
+        ).detach();
         let moved = RetainedSubscription::retain(self.owner.clone().upcast(), moved);
         self.disposables.replace(Some(vec![pressed, moved]));
     }
@@ -277,7 +277,7 @@ impl WindowDragHelper {
             move |_, e| this.on_pointer_released(e),
             RoutingStrategies::TUNNEL,
             true,
-        );
+        ).detach();
         RetainedSubscription::retain(window.to_ref().upcast(), subscription)
     }
 }

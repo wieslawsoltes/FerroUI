@@ -669,11 +669,11 @@ impl MenuItem {
         PressedMixin::attach::<MenuItem>();
         InputElement::focusable_property().override_default_value::<MenuItem>(true);
         ItemsControl::items_panel_property().override_default_value::<MenuItem>(default_panel);
-        Self::click_event().add_class_handler::<MenuItem>(|x, e| x.on_click(e));
-        Self::submenu_opened_event().add_class_handler::<MenuItem>(|x, e| x.on_submenu_opened(e));
+        Self::click_event().add_class_handler::<MenuItem>(|x, e| x.on_click(e)).detach();
+        Self::submenu_opened_event().add_class_handler::<MenuItem>(|x, e| x.on_submenu_opened(e)).detach();
         crate::automation::AutomationProperties::is_offscreen_behavior_property()
             .override_default_value::<MenuItem>(crate::automation::IsOffscreenBehavior::FromClip);
-        AccessKeyHandler::access_key_pressed_event().add_class_handler::<MenuItem>(Self::on_access_key_pressed);
+        AccessKeyHandler::access_key_pressed_event().add_class_handler::<MenuItem>(Self::on_access_key_pressed).detach();
         PlatformFeedback::feedback_type_property().override_default_value::<MenuItem>(FeedbackType::Auto);
     }
 

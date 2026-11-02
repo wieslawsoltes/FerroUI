@@ -69,9 +69,9 @@ crate::ferro_static_type!(Gestures);
 impl Gestures {
     /// Subscribes the gesture recognition to the pointer events.
     fn static_constructor() {
-        InputElement::pointer_pressed_event().route_finished().subscribe(Self::pointer_pressed);
-        InputElement::pointer_released_event().route_finished().subscribe(Self::pointer_released);
-        InputElement::pointer_moved_event().route_finished().subscribe(Self::pointer_moved);
+        InputElement::pointer_pressed_event().route_finished().subscribe(Self::pointer_pressed).detach();
+        InputElement::pointer_released_event().route_finished().subscribe(Self::pointer_released).detach();
+        InputElement::pointer_moved_event().route_finished().subscribe(Self::pointer_moved).detach();
     }
 
     pub(crate) fn add_holding(handler: impl Fn(&Interactive, &HoldingRoutedEventArgs) + 'static) {

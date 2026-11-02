@@ -292,9 +292,9 @@ impl TreeDataGrid {
     ];
 
     fn static_constructor() {
-        let _ = DragDrop::drag_over_event().add_class_handler::<TreeDataGrid>(|x, e| x.on_drag_over(e));
-        let _ = DragDrop::drag_leave_event().add_class_handler::<TreeDataGrid>(|x, e| x.on_drag_leave(e));
-        let _ = DragDrop::drop_event().add_class_handler::<TreeDataGrid>(|x, e| x.on_drop(e));
+        DragDrop::drag_over_event().add_class_handler::<TreeDataGrid>(|x, e| x.on_drag_over(e)).detach();
+        DragDrop::drag_leave_event().add_class_handler::<TreeDataGrid>(|x, e| x.on_drag_leave(e)).detach();
+        DragDrop::drop_event().add_class_handler::<TreeDataGrid>(|x, e| x.on_drop(e)).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

@@ -688,7 +688,7 @@ fn control_focus_should_be_set_before_focused_element_raises_property_changed() 
             assert_eq!(got_focus.get(), 1);
             counter.set(counter.get() + 1);
         }
-    });
+    }).detach();
 
     target.set_focused_element(Some(&focused.clone().upcast()), NavigationMethod::Unspecified, KeyModifiers::NONE);
 
@@ -3762,7 +3762,7 @@ fn access_key_targets() {
         }
         e.set_target(Some(sender.to_ref().upcast()));
         e.set_handled(true);
-    });
+    }).detach();
 }
 
 fn raise_key(target: &Ref<TestControl>, down: bool, key: Key, key_symbol: Option<&str>, modifiers: KeyModifiers) {

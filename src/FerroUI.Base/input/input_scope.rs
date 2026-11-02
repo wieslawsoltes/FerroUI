@@ -4,7 +4,7 @@
 use super::{text_input::TextInputContentType, InputScopeNameValue};
 use crate::collections::FerroList;
 use crate::metadata::IAddChild;
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::utilities::{FormatError, HandlerList};
 use crate::{
     ferro_class, instantiate, FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, Ref,
@@ -142,14 +142,17 @@ impl InputScope {
             .map(|name| name.name_value())
             .collect()
     }
-    pub fn changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when the names of the scope, or the value of one of them,
+    /// change. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the scope.
+    pub fn changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.changed.add(Rc::new(handler));
         let weak = Rc::downgrade(&self.changed);
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(handlers) = weak.upgrade() {
                 handlers.remove(token);
             }
-        })
+        }))
     }
     pub fn as_add_child(this: Ref<Self>) -> Rc<dyn IAddChild<Ref<InputScopeName>>> {
         Rc::new(InputScopeAddChild(this))

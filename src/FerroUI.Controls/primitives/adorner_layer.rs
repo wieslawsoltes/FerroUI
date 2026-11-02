@@ -45,11 +45,13 @@ impl FerroObjectImpl for AdornerLayer {
 
         this.tracking_helper.set_visual(Some(&this.to_ref().upcast()));
         let weak = this.to_ref().downgrade();
-        this.tracking_helper.matrix_changed(move || {
-            if let Some(this) = weak.upgrade() {
-                this.invalidate_measure();
-            }
-        });
+        this.tracking_helper
+            .matrix_changed(move || {
+                if let Some(this) = weak.upgrade() {
+                    this.invalidate_measure();
+                }
+            })
+            .detach();
     }
 }
 

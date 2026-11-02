@@ -62,7 +62,7 @@ ferroui_base::ferro_overrides! {
                 },
                 this.event_routing_strategy(),
                 false,
-            )
+            ).detach()
         }
     }
 }

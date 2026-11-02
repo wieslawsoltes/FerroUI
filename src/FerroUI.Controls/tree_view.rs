@@ -288,7 +288,7 @@ impl TreeView {
     /// Initializes static members of the [`TreeView`] class.
     fn static_constructor() {
         SelectingItemsControl::is_selected_changed_event()
-            .add_class_handler::<TreeView>(|x, e| x.container_selection_changed(e));
+            .add_class_handler::<TreeView>(|x, e| x.container_selection_changed(e)).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

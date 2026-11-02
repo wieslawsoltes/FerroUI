@@ -480,12 +480,12 @@ impl IScrollSnapPointsInfo for StackPanel {
     fn horizontal_snap_points_changed(&self, handler: SnapPointsChangedHandler) -> Rc<dyn IDisposable> {
         self.add_disposable_handler(StackPanel::horizontal_snap_points_changed_event(), move |sender, e| {
             handler(sender, e)
-        })
+        }).detach()
     }
 
     fn vertical_snap_points_changed(&self, handler: SnapPointsChangedHandler) -> Rc<dyn IDisposable> {
         self.add_disposable_handler(StackPanel::vertical_snap_points_changed_event(), move |sender, e| {
             handler(sender, e)
-        })
+        }).detach()
     }
 }
