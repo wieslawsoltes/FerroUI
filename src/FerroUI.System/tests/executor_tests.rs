@@ -599,7 +599,7 @@ fn a_schedule_is_told_of_its_tasks_and_can_abort_them() {
     tasks[0].abort();
     assert!(dropped.get());
     assert!(tasks[0].is_finished());
-    assert_eq!(describe(&now_or_never(handle).unwrap()), "canceled");
+    assert!(matches!(now_or_never(handle).unwrap(), Err(ref error) if error.is_canceled()));
 
     // Aborted when the schedule is told of it: the future is never polled.
     let refused = spawn_local_on(async { explode() }, Arc::new(Refusing), FirstPoll::Now);
