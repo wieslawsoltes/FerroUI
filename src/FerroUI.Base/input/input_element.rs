@@ -342,6 +342,14 @@ crate::ferro_properties! { impl InputElement, also [InputElement::register_gestu
     );
 
     ferro_property!(
+        /// Whether pointer-origin focus changes may focus this element. Inherited; programmatic,
+        /// tab and directional focus remain controlled by Focusable/IsTabStop as before.
+        pub fn allow_focus_on_interaction_property() -> StyledProperty<bool> {
+            FerroProperty::register_with::<InputElement, _>("AllowFocusOnInteraction", StyledPropertyOptions::new(true).inherits(true))
+        }
+    );
+
+    ferro_property!(
         /// Defines the `IsEnabled` property.
         pub fn is_enabled_property() -> StyledProperty<bool> {
             FerroProperty::register::<InputElement, _>("IsEnabled", true)
@@ -780,6 +788,13 @@ impl InputElement {
 
     pub fn set_focusable(&self, value: bool) {
         self.set_value(Self::focusable_property(), value)
+    }
+
+    pub fn allow_focus_on_interaction(&self) -> bool {
+        self.get_value(Self::allow_focus_on_interaction_property())
+    }
+    pub fn set_allow_focus_on_interaction(&self, value: bool) {
+        self.set_value(Self::allow_focus_on_interaction_property(), value)
     }
 
     /// Whether the control is enabled for user interaction.
