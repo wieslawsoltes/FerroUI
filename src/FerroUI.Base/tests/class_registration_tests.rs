@@ -604,7 +604,12 @@ fn register_types_lists_every_type_declared_in_the_sources() {
                 }
                 continue;
             }
-            if !name.ends_with(".rs") || name.ends_with("_tests.rs") || name.contains("test_support") {
+            // Split upstream test suites also use <suite>_tests_<part>.rs.
+            if !name.ends_with(".rs")
+                || name.ends_with("_tests.rs")
+                || name.contains("_tests_")
+                || name.contains("test_support")
+            {
                 continue;
             }
             if matches!(name.as_str(), "type_system.rs" | "ferro_property.rs") {
