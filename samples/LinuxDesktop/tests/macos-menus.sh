@@ -36,12 +36,30 @@ wait_for wm_ready
 python3 "$(dirname "$0")/julia.py" >"$fixture/terrain.ppm"
 convert "$fixture/terrain.ppm" -resize 350x230 "$fixture/terrain.png"
 convert "$fixture/terrain.png" -flop -modulate 100,75,130 "$fixture/coast.png"
-client() {
-    display -immutable -title "$1" -geometry "$2" "$3" >>"$out/menu-client.log" 2>&1 & pids+=("$!")
-    client_id=$(xdotool search --sync --onlyvisible --name "^$1$" | head -1)
-}
-client 'Terrain study' '+435+120' "$fixture/terrain.png"; terrain=$client_id
-client 'Coastal study' '+825+375' "$fixture/coast.png"; coast=$client_id
+# Independent, resizable GTK top levels exercise the X11 window manager
+# and real WM_CLASS grouping. Keep the image windows on the same workspace.
+GDK_BACKEND=x11 /usr/bin/python3 - "$fixture" >"$out/menu-client.log" 2>&1 <<'PYGTK' &
+from pathlib import Path
+import sys
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import GLib, Gtk
+
+GLib.set_prgname("ferro-menu-proof")
+windows = []
+for title, image, x, y in (("Terrain study", "terrain", 435, 120), ("Coastal study", "coast", 825, 375)):
+    window = Gtk.Window(title=title)
+    window.set_default_size(350, 240)
+    window.move(x, y)
+    window.add(Gtk.Image.new_from_file(str(Path(sys.argv[1]) / (image + ".png"))))
+    window.connect("destroy", Gtk.main_quit)
+    window.show_all()
+    windows.append(window)
+Gtk.main()
+PYGTK
+pids+=("$!")
+terrain=$(xdotool search --sync --onlyvisible --name '^Terrain study$' | head -1)
+coast=$(xdotool search --sync --onlyvisible --name '^Coastal study$' | head -1)
 wmclass=$(xprop -id "$terrain" WM_CLASS | sed -n 's/.*", "\([^"]*\)"/\1/p')
 [[ $wmclass =~ ^[[:alnum:]_.-]+$ ]]
 cat >"$XDG_DATA_HOME/applications/$wmclass.desktop" <<ENTRY
@@ -94,6 +112,20 @@ xdotool mousemove 78 16
 capture_menu menu-application "$region" "$fixture/last-menu.png"
 xdotool mousemove 142 16
 capture_menu menu-window "$region" "$fixture/last-menu.png"
+# The host desktop sits *under* external clients. A maximized GTK window
+# must not cover the next pull-down's Restore Size command.
+maximized() { xprop -id "$terrain" _NET_WM_STATE | grep -q _NET_WM_STATE_MAXIMIZED_VERT; }
+normal_size() { ! maximized; }
+xdotool mousemove 197 71 click 1
+wait_for maximized
+import -window root "$fixture/first-zoom.png"
+convert "$fixture/first-zoom.png" -crop "$region" +repage "$fixture/zoom-base.png"
+xdotool mousemove 142 16 click 1
+capture_menu menu-over-maximized "$region" "$fixture/zoom-base.png"
+xdotool mousemove 197 71 click 1
+wait_for normal_size
+xdotool mousemove 142 16 click 1
+capture_menu menu-window "$region" "$fixture/base.png"
 xdotool mousemove 197 45 click 1
 hidden() { xprop -id "$terrain" _NET_WM_STATE | grep -q '_NET_WM_STATE_HIDDEN'; }
 wait_for hidden
