@@ -134,6 +134,8 @@ pub enum GraphicsEffect {
     Border(BorderEffect),
     SceneLighting(SceneLightingEffect),
     Shadow(ShadowEffect),
+    Sepia(SepiaEffect),
+    LinearTransfer(LinearTransferEffect),
 }
 
 impl GraphicsEffect {
@@ -158,6 +160,8 @@ impl GraphicsEffect {
             GraphicsEffect::Border(effect) => &effect.name,
             GraphicsEffect::SceneLighting(effect) => &effect.name,
             GraphicsEffect::Shadow(effect) => &effect.name,
+            GraphicsEffect::Sepia(effect) => &effect.name,
+            GraphicsEffect::LinearTransfer(effect) => &effect.name,
         }
     }
 
@@ -181,6 +185,8 @@ impl GraphicsEffect {
             GraphicsEffect::Border(_) => "BorderEffect",
             GraphicsEffect::SceneLighting(_) => "SceneLightingEffect",
             GraphicsEffect::Shadow(_) => "ShadowEffect",
+            GraphicsEffect::Sepia(_) => "SepiaEffect",
+            GraphicsEffect::LinearTransfer(_) => "LinearTransferEffect",
         }
     }
 }
@@ -219,6 +225,8 @@ graphics_effect_conversions! {
     BorderEffect => Border,
     ShadowEffect => Shadow,
     SceneLightingEffect => SceneLighting,
+    SepiaEffect => Sepia,
+    LinearTransferEffect => LinearTransfer,
 }
 
 /// Blurs its source (Win2D `GaussianBlurEffect`). Animatable:
@@ -623,6 +631,93 @@ impl Default for ShadowEffect {
             blur_amount: 1.0,
             shadow_color: Color::from_argb(255, 0, 0, 0),
             optimization: EffectOptimization::Balanced,
+            source: None,
+        }
+    }
+}
+
+/// Tones its source in sepia (Win2D `SepiaEffect`): a colour matrix
+/// (`ColorMatrix::sepia`) between the identity at intensity 0 and the
+/// sepia matrix at 1. Animatable: `Intensity`.
+#[derive(Clone, Debug, PartialEq)]
+pub struct SepiaEffect {
+    /// The name of the effect.
+    pub name: String,
+    /// The intensity, 0 to 1 (default 0.5).
+    pub intensity: f32,
+    /// Whether the matrix applies to premultiplied or straight colours
+    /// (default premultiplied: the colour is un-premultiplied first).
+    pub alpha_mode: ColorMatrixAlphaMode,
+    /// The input.
+    pub source: Option<GraphicsEffectSource>,
+}
+
+impl Default for SepiaEffect {
+    fn default() -> Self {
+        Self { name: String::new(), intensity: 0.5, alpha_mode: ColorMatrixAlphaMode::Premultiplied, source: None }
+    }
+}
+
+/// Maps each channel of its source through a line, `slope * c + offset`
+/// (Win2D `LinearTransferEffect`): a colour matrix that scales each channel
+/// and adds an offset. A disabled channel is kept as it is. Animatable:
+/// `RedSlope`, `RedOffset`, `GreenSlope`, `GreenOffset`, `BlueSlope`,
+/// `BlueOffset`, `AlphaSlope`, `AlphaOffset`.
+#[derive(Clone, Debug, PartialEq)]
+pub struct LinearTransferEffect {
+    /// The name of the effect.
+    pub name: String,
+    /// The offset of red (default 0).
+    pub red_offset: f32,
+    /// The slope of red (default 1).
+    pub red_slope: f32,
+    /// Whether red is kept as it is (default `false`).
+    pub red_disable: bool,
+    /// The offset of green (default 0).
+    pub green_offset: f32,
+    /// The slope of green (default 1).
+    pub green_slope: f32,
+    /// Whether green is kept as it is (default `false`).
+    pub green_disable: bool,
+    /// The offset of blue (default 0).
+    pub blue_offset: f32,
+    /// The slope of blue (default 1).
+    pub blue_slope: f32,
+    /// Whether blue is kept as it is (default `false`).
+    pub blue_disable: bool,
+    /// The offset of alpha (default 0).
+    pub alpha_offset: f32,
+    /// The slope of alpha (default 1).
+    pub alpha_slope: f32,
+    /// Whether alpha is kept as it is (default `false`).
+    pub alpha_disable: bool,
+    /// Whether the lines apply to premultiplied or straight colours
+    /// (default premultiplied: the colour is un-premultiplied first).
+    pub alpha_mode: ColorMatrixAlphaMode,
+    /// Whether the output is clamped (stored; the drawing contexts clamp).
+    pub clamp_output: bool,
+    /// The input.
+    pub source: Option<GraphicsEffectSource>,
+}
+
+impl Default for LinearTransferEffect {
+    fn default() -> Self {
+        Self {
+            name: String::new(),
+            red_offset: 0.0,
+            red_slope: 1.0,
+            red_disable: false,
+            green_offset: 0.0,
+            green_slope: 1.0,
+            green_disable: false,
+            blue_offset: 0.0,
+            blue_slope: 1.0,
+            blue_disable: false,
+            alpha_offset: 0.0,
+            alpha_slope: 1.0,
+            alpha_disable: false,
+            alpha_mode: ColorMatrixAlphaMode::Premultiplied,
+            clamp_output: false,
             source: None,
         }
     }

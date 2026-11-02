@@ -54,14 +54,20 @@ impl EffectPrewarmList {
         animatable_properties: &[&str],
     ) -> Result<(), CompositionEffectFactoryError> {
         let graph = EffectGraph::load(effect, animatable_properties).map_err(|(_, error)| error)?;
+        self.register_graph(name, Arc::new(graph));
+        Ok(())
+    }
+
+    /// Adds a graph loaded already under `name`. A name that is registered
+    /// already keeps its graph.
+    pub(crate) fn register_graph(&self, name: &str, graph: Arc<EffectGraph>) {
         let mut entries = self.entries();
         if entries.iter().any(|entry| entry.name == name) {
-            return Ok(());
+            return;
         }
         let generation = self.generation.load(Ordering::Acquire) + 1;
-        entries.push(PrewarmEntry { name: name.to_owned(), graph: Arc::new(graph), generation });
+        entries.push(PrewarmEntry { name: name.to_owned(), graph, generation });
         self.generation.store(generation, Ordering::Release);
-        Ok(())
     }
 
     /// The generation of the latest registration; 0 while nothing is
@@ -105,6 +111,14 @@ pub fn register_effect_prewarm(
     animatable_properties: &[&str],
 ) -> Result<(), CompositionEffectFactoryError> {
     EFFECT_PREWARM.register(name, &effect.into(), animatable_properties)
+}
+
+/// Registers a loaded graph under `name` for the prewarm: the graphs of the
+/// custom effects (#455), loaded once per type, which the prewarm draws
+/// around an image as the render walk draws them around the content of a
+/// visual. A name that is registered already keeps its graph.
+pub(crate) fn register_effect_graph_prewarm(name: &str, graph: Arc<EffectGraph>) {
+    EFFECT_PREWARM.register_graph(name, graph);
 }
 
 /// The names of the effects registered with [`register_effect_prewarm`], in

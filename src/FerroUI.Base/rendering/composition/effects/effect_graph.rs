@@ -65,6 +65,39 @@ pub(crate) enum EffectMatrix {
     Saturation(EffectScalar),
     /// `ColorMatrix::tint` of the member.
     Tint(EffectColor),
+    /// `ColorMatrix::sepia` of the member (the intensity).
+    Sepia(EffectScalar),
+    /// `ColorMatrix::scale_and_offset` of the members: the slope and the
+    /// offset of red, green, blue and alpha; a disabled channel is kept.
+    LinearTransfer { slopes: [EffectScalar; 4], offsets: [EffectScalar; 4], disabled: [bool; 4] },
+}
+
+/// The names of the members of a linear transfer, by channel: the slope and
+/// the offset.
+const TRANSFER_MEMBERS: [(&str, &str); 4] =
+    [("RedSlope", "RedOffset"), ("GreenSlope", "GreenOffset"), ("BlueSlope", "BlueOffset"), ("AlphaSlope", "AlphaOffset")];
+
+/// The member of a linear transfer named `property` (ignoring case): whether
+/// it is a slope, and its channel.
+fn transfer_member(property: &str) -> Option<(bool, usize)> {
+    TRANSFER_MEMBERS.iter().enumerate().find_map(|(channel, (slope, offset))| {
+        if property.eq_ignore_ascii_case(slope) {
+            Some((true, channel))
+        } else if property.eq_ignore_ascii_case(offset) {
+            Some((false, channel))
+        } else {
+            None
+        }
+    })
+}
+
+/// The kind of value an animatable member takes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum EffectMemberKind {
+    /// A number.
+    Scalar,
+    /// A colour.
+    Color,
 }
 
 /// What a node of a loaded graph does.
@@ -203,6 +236,16 @@ impl EffectNode {
                 EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Tint(color), .. } if is("Color") => {
                     color.key = key
                 }
+                EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Sepia(intensity), .. } if is("Intensity") => {
+                    intensity.key = key
+                }
+                EffectNodeKind::ColorMatrix { matrix: EffectMatrix::LinearTransfer { slopes, offsets, .. }, .. } => {
+                    match transfer_member(property) {
+                        Some((true, channel)) => slopes[channel].key = key,
+                        Some((false, channel)) => offsets[channel].key = key,
+                        None => return Err(()),
+                    }
+                }
                 EffectNodeKind::ArithmeticWithColor { multiply, .. } if is("MultiplyAmount") => multiply.key = key,
                 EffectNodeKind::ArithmeticWithColor { source1, .. } if is("Source1Amount") => source1.key = key,
                 EffectNodeKind::ArithmeticWithColor { source2, .. } if is("Source2Amount") => source2.key = key,
@@ -249,6 +292,10 @@ impl EffectNode {
             EffectNodeKind::ColorSource(value) => color(value),
             EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Saturation(value), .. } => scalar(value),
             EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Tint(value), .. } => color(value),
+            EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Sepia(value), .. } => scalar(value),
+            EffectNodeKind::ColorMatrix { matrix: EffectMatrix::LinearTransfer { slopes, offsets, .. }, .. } => {
+                slopes.iter().chain(offsets.iter()).find_map(|value| scalar(value))
+            }
             EffectNodeKind::ArithmeticWithColor { multiply, source1, source2, offset, .. } => {
                 scalar(multiply).or_else(|| scalar(source1)).or_else(|| scalar(source2)).or_else(|| scalar(offset))
             }
@@ -268,6 +315,66 @@ impl EffectNode {
             | EffectNodeKind::Border { .. } => None,
         };
         own.or_else(|| self.sources().into_iter().find_map(|source| source.animatable_value(key)))
+    }
+
+    /// The animatable members of the node: their names and kinds, as
+    /// [`bind_animatable`](Self::bind_animatable) knows them.
+    fn animatable_members(&self) -> &'static [(&'static str, EffectMemberKind)] {
+        use EffectMemberKind::{Color, Scalar};
+        match &self.kind {
+            EffectNodeKind::GaussianBlur { .. } => &[("BlurAmount", Scalar)],
+            EffectNodeKind::Opacity { .. } => &[("Opacity", Scalar)],
+            EffectNodeKind::CrossFade { .. } => &[("Weight", Scalar)],
+            EffectNodeKind::ColorSource(_) => &[("Color", Color)],
+            EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Saturation(_), .. } => &[("Saturation", Scalar)],
+            EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Tint(_), .. } => &[("Color", Color)],
+            EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Sepia(_), .. } => &[("Intensity", Scalar)],
+            EffectNodeKind::ColorMatrix { matrix: EffectMatrix::LinearTransfer { .. }, .. } => &[
+                ("RedSlope", Scalar),
+                ("RedOffset", Scalar),
+                ("GreenSlope", Scalar),
+                ("GreenOffset", Scalar),
+                ("BlueSlope", Scalar),
+                ("BlueOffset", Scalar),
+                ("AlphaSlope", Scalar),
+                ("AlphaOffset", Scalar),
+            ],
+            EffectNodeKind::ArithmeticWithColor { .. } | EffectNodeKind::Pixels { op: PixelOp::Arithmetic { .. }, .. } => &[
+                ("MultiplyAmount", Scalar),
+                ("Source1Amount", Scalar),
+                ("Source2Amount", Scalar),
+                ("Offset", Scalar),
+            ],
+            EffectNodeKind::SceneLighting { .. } => &[
+                ("AmbientAmount", Scalar),
+                ("DiffuseAmount", Scalar),
+                ("SpecularAmount", Scalar),
+                ("SpecularShine", Scalar),
+            ],
+            EffectNodeKind::Shadow { .. } => &[("BlurAmount", Scalar), ("ShadowColor", Color)],
+            EffectNodeKind::Parameter(_)
+            | EffectNodeKind::Composite { .. }
+            | EffectNodeKind::Blend { .. }
+            | EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Fixed(_), .. }
+            | EffectNodeKind::AlphaMask { .. }
+            | EffectNodeKind::Border { .. }
+            | EffectNodeKind::Pixels { .. } => &[],
+        }
+    }
+
+    /// The names of the animatable members of `kind` of the effects named
+    /// `effect` in the graph below this node, once each.
+    fn members_of(&self, effect: &str, kind: EffectMemberKind, found: &mut Vec<&'static str>) {
+        if !self.name.is_empty() && self.name == effect {
+            for &(member, member_kind) in self.animatable_members() {
+                if member_kind == kind && !found.contains(&member) {
+                    found.push(member);
+                }
+            }
+        }
+        for source in self.sources() {
+            source.members_of(effect, kind, found);
+        }
     }
 
     fn collect_parameters(&self, parameters: &mut Vec<String>) {
@@ -321,6 +428,11 @@ pub(crate) struct EffectGraph {
     /// The path to the first source parameter in graph order: where the
     /// composed layer goes when the brush is the effect of a layer visual.
     pub(crate) layer_path: Option<Vec<usize>>,
+    /// Whether the graph is drawn around content (the graph of a custom
+    /// effect, #455): the prewarm draws it around an image as the render
+    /// walk draws it around the content of a visual, rather than as a
+    /// brush.
+    pub(crate) around_content: bool,
 }
 
 impl EffectGraph {
@@ -337,7 +449,63 @@ impl EffectGraph {
         animatable: &[&str],
     ) -> Result<EffectGraph, (CompositionEffectFactoryLoadStatus, CompositionEffectFactoryError)> {
         let mut count = 0;
-        let mut root = build_node(effect, 1, &mut count)?;
+        let root = build_node(effect, 1, &mut count)?;
+        Self::with_root(root, animatable)
+    }
+
+    /// Loads `effect` as the graph of a custom effect (#455): each member is
+    /// the name of an animatable property, `EffectName.PropertyName` as for
+    /// [`load`](Self::load), or the name of an effect of the graph alone,
+    /// which names the one animatable property of that effect of the given
+    /// kind (`Saturation` for the saturation effect named `amount`). Returns
+    /// the graph and the full name (`EffectName.PropertyName`) of each
+    /// member, in order. A member whose kind is not the kind of the property
+    /// it names is an invalid animatable property.
+    pub(crate) fn load_with_members(
+        effect: &GraphicsEffect,
+        members: &[(&str, EffectMemberKind)],
+    ) -> Result<(EffectGraph, Vec<String>), (CompositionEffectFactoryLoadStatus, CompositionEffectFactoryError)> {
+        let invalid = |key: &str| {
+            (CompositionEffectFactoryLoadStatus::Other, CompositionEffectFactoryError::InvalidAnimatableProperty(key.to_owned()))
+        };
+        let mut count = 0;
+        let root = build_node(effect, 1, &mut count)?;
+        let mut keys = Vec::with_capacity(members.len());
+        for &(member, kind) in members {
+            if member.contains('.') {
+                keys.push(member.to_owned());
+                continue;
+            }
+            let mut found = Vec::new();
+            root.members_of(member, kind, &mut found);
+            match found.as_slice() {
+                [property] => keys.push(format!("{member}.{property}")),
+                _ => return Err(invalid(member)),
+            }
+        }
+        let names: Vec<&str> = keys.iter().map(String::as_str).collect();
+        let graph = Self::with_root(root, &names)?;
+        for (key, &(member, kind)) in keys.iter().zip(members) {
+            let matches = graph.animatable.iter().any(|(existing, value)| {
+                existing == key
+                    && matches!(
+                        (value, kind),
+                        (EffectPropertyValue::Scalar(_), EffectMemberKind::Scalar)
+                            | (EffectPropertyValue::Color(_), EffectMemberKind::Color)
+                    )
+            });
+            if !matches {
+                return Err(invalid(member));
+            }
+        }
+        Ok((graph, keys))
+    }
+
+    /// The graph of `root` with the animatable properties `animatable`.
+    fn with_root(
+        mut root: EffectNode,
+        animatable: &[&str],
+    ) -> Result<EffectGraph, (CompositionEffectFactoryLoadStatus, CompositionEffectFactoryError)> {
         let mut properties: Vec<(String, EffectPropertyValue)> = Vec::with_capacity(animatable.len());
         for &key in animatable {
             let invalid = || {
@@ -356,7 +524,7 @@ impl EffectGraph {
         root.collect_parameters(&mut parameters);
         let mut path = Vec::new();
         let layer_path = root.first_parameter_path(&mut path).then_some(path);
-        Ok(EffectGraph { root: Some(root), parameters, animatable: properties, layer_path })
+        Ok(EffectGraph { root: Some(root), parameters, animatable: properties, layer_path, around_content: false })
     }
 
     /// Whether the graph was loaded.
@@ -588,6 +756,21 @@ fn build_node(effect: &GraphicsEffect, depth: usize, count: &mut usize) -> Resul
             color: EffectColor::new(shadow.shadow_color),
             source: boxed(&shadow.source, count)?,
         },
+        GraphicsEffect::Sepia(sepia) => {
+            matrix_of(EffectMatrix::Sepia(EffectScalar::new(sepia.intensity)), sepia.alpha_mode, &sepia.source, count)?
+        }
+        GraphicsEffect::LinearTransfer(transfer) => matrix_of(
+            EffectMatrix::LinearTransfer {
+                slopes: [transfer.red_slope, transfer.green_slope, transfer.blue_slope, transfer.alpha_slope]
+                    .map(EffectScalar::new),
+                offsets: [transfer.red_offset, transfer.green_offset, transfer.blue_offset, transfer.alpha_offset]
+                    .map(EffectScalar::new),
+                disabled: [transfer.red_disable, transfer.green_disable, transfer.blue_disable, transfer.alpha_disable],
+            },
+            transfer.alpha_mode,
+            &transfer.source,
+            count,
+        )?,
         GraphicsEffect::SceneLighting(lighting) => EffectNodeKind::SceneLighting {
             ambient: EffectScalar::new(lighting.ambient_amount),
             diffuse: EffectScalar::new(lighting.diffuse_amount),
