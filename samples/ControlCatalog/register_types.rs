@@ -88,6 +88,9 @@ pub fn register_types() {
         ferroui_controls_livecharts::register_types();
         treedatagrid_demo::register_types();
         ferroui_opengl::register_types();
+        ferroui_media_video_controls::register_types();
+        ferroui_media_camera_controls::register_types();
+        crate::media_samples::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         for type_ in types() {
             TypeInfo::register(type_);

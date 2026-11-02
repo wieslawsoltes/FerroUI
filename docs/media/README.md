@@ -4,6 +4,8 @@ The normative behavior is in [the specification](PORTABLE-MEDIA-FRAMEWORK-SPECIF
 This is an initial implementation, not a declaration of six-platform support.
 The [platform-agent handover](PLATFORM-HANDOVER.md) records the receiving branches,
 integration boundaries, reproducible checks and outstanding native work.
+The main [ControlCatalog media pages](CONTROL-CATALOG.md) demonstrate video,
+camera and QR behavior, with desktop provider bindings and explicit host limits.
 
 ## Available code
 

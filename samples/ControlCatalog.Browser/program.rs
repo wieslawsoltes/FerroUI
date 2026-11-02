@@ -49,6 +49,7 @@
 #![cfg_attr(target_os = "emscripten", no_main)]
 
 mod embed_sample_browser;
+mod media_samples;
 mod page_assets_browser;
 
 use control_catalog::pages::EmbedSample;
@@ -87,6 +88,7 @@ pub fn run_main(href: &str) {
     build_ferro_app()
         .log_to_text_writer(std::io::stdout(), LogEventLevel::Warning, &[])
         .after_setup(move |_| {
+            media_samples::install();
             EmbedSample::set_implementation(Some(Rc::new(EmbedSampleWeb)));
             PageAssets::set_implementation(Some(Rc::new(BrowserPageAssets)));
             if let Some(theme) = initial_theme {
@@ -205,6 +207,22 @@ pub fn catalog_state() -> String {
         view.map_or("null".to_string(), |view| view.navigation_view().is_pane_open().to_string()),
         page.map_or("null".to_string(), |page| json_string(&page)),
         elements.join(","),
+    )
+}
+
+/// Read-only media diagnostics for the native browser catalog smoke.
+#[wasm_bindgen(js_name = catalogMediaState)]
+pub fn catalog_media_state() -> String {
+    let Some(s) = control_catalog::media_samples::smoke_snapshot() else {
+        return "null".into();
+    };
+    let counters = s.budget.counters().snapshot();
+    format!(
+        "{{\"title\":{},\"status\":{},\"attached\":{},\"playing\":{},\"paused\":{},\"frame\":{},\"cameraActive\":{},\"frames\":{},\"imports\":{},\"reads\":{},\"quarantine\":{},\"previewAttempts\":{},\"previewBytes\":{}}}",
+        json_string(s.title), json_string(&s.status), s.attached, s.playing, s.paused,
+        s.frame, s.camera_active, s.budget.usage().frames, counters.gpu_imports,
+        s.budget.gpu_reads(), s.budget.quarantined_reads(),
+        counters.preview.attempts, counters.preview.bytes
     )
 }
 

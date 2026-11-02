@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleIdentifier</key><string>org.ferroui.ControlCatalog</string>
+<key>CFBundleName</key><string>FerroUI ControlCatalog</string>
+<key>NSCameraUsageDescription</key><string>Preview your camera and scan QR codes when you start a camera sample.</string>
+</dict></plist>

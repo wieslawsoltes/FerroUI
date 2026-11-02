@@ -1,0 +1,113 @@
+// Real catalog UI, native HTML media and page-owned Skia/WebGL on a GPU.
+// Build: scripts/build-browser.sh control-catalog-browser --debug
+// Run: FERROUI_BROWSER_ANGLE=metal node scripts/browser/tests/catalog_media.test.mjs <site>
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { open, sleep } from "../harness.mjs";
+import { drive, waitUntilReady, visit, inContent } from "../catalog-pages.mjs";
+
+const site = path.resolve(process.argv[2] ?? path.join(process.env.CARGO_TARGET_DIR ?? "target", "browser/control-catalog-browser"));
+const source = fs.readFileSync("samples/ControlCatalog/Media/sintel-sample.mp4");
+assert.deepEqual(fs.readFileSync(path.join(site, "media/sintel-sample.mp4")), source);
+const manifest = fs.readFileSync(path.join(site, "assets/ControlCatalog.json"), "utf8");
+assert.ok(!manifest.includes(".mp4"), "video must stay out of startup and idle-prefetch manifests");
+assert.ok(!fs.readFileSync(path.join(site, "control_catalog_browser.wasm")).includes(source), "video must stay out of WebAssembly");
+const initScript = `(() => {
+    globalThis.__catalogVideos = [];
+    globalThis.__catalogCameraRequests = 0;
+    const create = document.createElement;
+    document.createElement = function(name, ...args) {
+        const result = create.call(this, name, ...args);
+        if (name.toLowerCase() === "video") __catalogVideos.push(result);
+        return result;
+    };
+    const acquire = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+    navigator.mediaDevices.getUserMedia = options => {
+        __catalogCameraRequests++;
+        if (options.audio !== false) throw new Error("Preview requested microphone access");
+        return acquire(options);
+    };
+})();`;
+const page = drive(await open(site, {
+    query: "?RenderingMode=WebGL2&Threads=false&RenderThread=false",
+    width: 1100, height: 1000, network: true,
+    angle: process.env.FERROUI_BROWSER_ANGLE ?? "metal", initScript,
+    chromeArgs: ["--use-fake-device-for-media-stream"],
+}));
+const state = () => page.evaluate("JSON.parse(controlCatalog.catalogMediaState())");
+async function until(predicate, description) {
+    let current;
+    for (const deadline = Date.now() + 30000; Date.now() < deadline; await sleep(50)) {
+        current = await state();
+        if (predicate(current)) return current;
+        if (page.errors.length) throw new Error(page.errors.join("\n"));
+    }
+    throw new Error(`${description}: ${JSON.stringify(current)}\n${page.log.slice(-8).join("\n")}`);
+}
+const click = async text => page.clickElement(await page.find(text, inContent));
+const videoRequests = () => page.requests.filter(url => /\/media\/sintel-sample\.mp4(?:\?|$)/.test(url));
+try {
+    await waitUntilReady(page, 60000);
+    // Leave ordinary idle asset prefetch enabled: it must still exclude video.
+    await sleep(1800);
+    assert.equal(videoRequests().length, 0, "startup/idle prefetch downloaded video");
+    await visit(page, { section: "Media & Graphics", name: "Video" }, 1000);
+    await sleep(350);
+    assert.equal(videoRequests().length, 0, "opening Video downloaded the clip");
+    assert.equal(await page.evaluate("__catalogVideos.length"), 0);
+    assert.equal(await page.evaluate("__catalogCameraRequests"), 0);
+    console.log("CATALOG_VIDEO_LAZY_ASSET_PASS startup_requests=0 navigation_requests=0");
+
+    await click("Load bundled video");
+    await until(s => s?.paused && s.frame && s.imports > 0, "sample first frame");
+    assert.ok(videoRequests().length > 0);
+    const native = await page.evaluate(`(() => {
+        const v = __catalogVideos[0];
+        return { count: __catalogVideos.length, src: v.src, paused: v.paused, duration: v.duration, width: v.videoWidth };
+    })()`);
+    assert.equal(native.count, 1);
+    assert.equal(native.paused, true, "autoplay is off");
+    assert.ok(native.width > 0);
+    assert.ok(Math.abs(native.duration - 12) < 0.1);
+    assert.equal(new URL(native.src).origin, new URL(page.url).origin);
+    assert.ok(native.src.endsWith("/media/sintel-sample.mp4"), "use native URL loading, not a fetched byte/blob copy");
+    await click("Play");
+    const playing = await until(s => s?.playing && s.imports > 1, "native playback and GPU presentation");
+    assert.equal(playing.previewAttempts, 0);
+    assert.equal(playing.previewBytes, 0);
+    console.log("CATALOG_BROWSER_VIDEO_PASS", JSON.stringify(playing));
+    if (process.env.FERROUI_CATALOG_MEDIA_SCREENSHOT) {
+        const picture = await page.send("Page.captureScreenshot", { format: "png" });
+        fs.writeFileSync(process.env.FERROUI_CATALOG_MEDIA_SCREENSHOT, Buffer.from(picture.data, "base64"));
+    }
+    await click("Unload video");
+    await until(s => s?.frames === 0 && s.reads === 0 && s.quarantine === 0, "unload completion");
+    assert.equal(await page.evaluate("__catalogVideos[0].getAttribute('src')"), null);
+
+    await visit(page, { section: "Media & Graphics", name: "Camera" }, 1000);
+    await click("Discover cameras");
+    await until(s => s?.status.includes("camera(s); permission"), "camera discovery");
+    assert.equal(await page.evaluate("__catalogCameraRequests"), 0);
+    await page.setPermission("camera", "granted");
+    await click("Start camera");
+    const camera = await until(s => s?.cameraActive && s.imports > 0, "synthetic browser camera preview");
+    assert.equal(await page.evaluate("__catalogCameraRequests"), 1);
+    assert.equal(camera.previewAttempts, 0);
+    await click("Capture photo");
+    await until(s => s?.status.startsWith("Photo "), "independently decoded photo");
+    await click("Stop camera");
+    await until(s => !s?.cameraActive && s.frames === 0 && s.reads === 0, "camera retirement");
+    console.log("CATALOG_BROWSER_CAMERA_PASS fake_device=true explicit_start=true photo=true");
+
+    await visit(page, { section: "Media & Graphics", name: "QR codes" }, 1000);
+    await click("Decode bundled QR image");
+    const qr = await until(s => s?.status.startsWith("Decoded 2 QR code(s):"), "offline QR image");
+    assert.ok(qr.status.includes("ferroui-native-qr-left") && qr.status.includes("ferroui-native-qr-right"));
+    assert.equal(await page.evaluate("__catalogCameraRequests"), 1);
+    console.log("CATALOG_BROWSER_QR_PASS", qr.status);
+    assert.deepEqual(page.errors, []);
+    console.log("CATALOG_BROWSER_MEDIA_PASS");
+} finally {
+    await page.close();
+}

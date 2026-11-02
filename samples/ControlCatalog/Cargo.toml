@@ -61,6 +61,14 @@ runtime-markup = [
 ]
 
 [dependencies]
+ferroui-media.workspace = true
+ferroui-media-video.workspace = true
+ferroui-media-camera.workspace = true
+ferroui-media-controls.workspace = true
+ferroui-media-video-controls.workspace = true
+ferroui-media-camera-controls.workspace = true
+ferroui-media-qr = { workspace = true, features = ["rust-decoder"] }
+image = { version = "0.25", default-features = false, features = ["png"] }
 ferroui-hot-reload = { workspace = true, optional = true }
 # The compiled markup of the crate calls the typed functions of the declared members.
 ferroui-base = { workspace = true, features = ["markup-functions"] }
