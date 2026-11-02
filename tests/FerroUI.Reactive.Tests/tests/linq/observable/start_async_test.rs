@@ -6,14 +6,15 @@
 //! error of work on another thread comes back as a `TaskWorkError` with its message, so the tests
 //! of such errors check the message, where upstream checks the identity of the exception; the
 //! `OperationCanceledException` the worker of the `_Cancel` tests throws is such an error with the
-//! message of a `TaskCanceledError`. The `ManualResetEvent`s that the worker signals are channels,
+//! message of a cancellation (`Canceled`). The `ManualResetEvent`s that the worker signals are channels,
 //! and the spin on `t.IsCompleted` is `block_on(t)`. The `DESKTOPCLR` tests are ported; their wait
 //! for the event is not needed, since the continuation runs when the source is completed.
 
 use ferroui_reactive::concurrency::Scheduler;
 use ferroui_reactive::{Observable, ObservableError, ObservableExt};
 use ferroui_reactive_testing::new_error;
-use ferroui_system::threading::tasks::{block_on, run, Task, TaskCanceledError, TaskCompletionSource, TaskWorkError};
+use ferroui_system::task::Canceled;
+use ferroui_system::threading::tasks::{block_on, run, Task, TaskCompletionSource, TaskWorkError};
 use ferroui_system::threading::CancellationToken;
 use std::cell::{Cell, RefCell};
 use std::error::Error;
@@ -37,11 +38,11 @@ fn work_error(error: &ObservableError) -> Option<String> {
 /// (`finally { f.Set(); }`).
 fn spin_until_canceled<T>(token: CancellationToken, started: Sender<()>, finished: Sender<()>) -> Result<T, Box<dyn Error + Send + Sync>> {
     let _ = started.send(());
-    while !token.is_cancellation_requested() {
+    while !token.is_cancelled() {
         std::hint::spin_loop();
     }
     let _ = finished.send(());
-    Err(Box::new(TaskCanceledError::default()))
+    Err(Box::new(Canceled))
 }
 
 #[test]
@@ -146,7 +147,7 @@ fn start_async_func_with_cancel_cancel() {
         assert!(t.is_completed());
 
         let result = block_on(xs.single_async().to_task());
-        assert_eq!(Some(TaskCanceledError::default().to_string()), work_error(&result.unwrap_err()));
+        assert_eq!(Some(Canceled.to_string()), work_error(&result.unwrap_err()));
     }
 }
 
@@ -297,7 +298,7 @@ fn start_async_action_with_cancel_cancel() {
         assert!(t.is_completed());
 
         let result = block_on(xs.single_async().to_task());
-        assert_eq!(Some(TaskCanceledError::default().to_string()), work_error(&result.unwrap_err()));
+        assert_eq!(Some(Canceled.to_string()), work_error(&result.unwrap_err()));
     }
 }
 

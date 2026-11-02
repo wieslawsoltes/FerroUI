@@ -5,7 +5,7 @@
 
 use ferroui_reactive::{Observable, ObservableExt};
 use ferroui_reactive_testing::{assert_messages, assert_subscriptions, new_error, ticks_to_time, ReactiveTest as RT, TestScheduler};
-use ferroui_system::threading::CancellationTokenSource;
+use ferroui_system::threading::CancellationToken;
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -819,7 +819,7 @@ fn take_until_predicate_crash() {
 #[test]
 fn take_until_cancellation_token_basic_cancelation() {
     let scheduler = TestScheduler::new();
-    let token_source = CancellationTokenSource::new();
+    let token_source = CancellationToken::new();
 
     let source = scheduler.create_cold_observable(vec![
         RT::on_next(10, 1),
@@ -837,7 +837,7 @@ fn take_until_cancellation_token_basic_cancelation() {
 
     let result = {
         let source = source.clone();
-        let token = token_source.token();
+        let token = token_source.clone();
         scheduler.start(move || source.as_observable().take_until_cancellation(token))
     };
 
@@ -856,7 +856,7 @@ fn take_until_cancellation_token_basic_cancelation() {
 #[test]
 fn take_until_cancellation_token_already_canceled() {
     let scheduler = TestScheduler::new();
-    let token_source = CancellationTokenSource::new();
+    let token_source = CancellationToken::new();
     token_source.cancel();
 
     let source = scheduler.create_cold_observable(vec![
@@ -870,7 +870,7 @@ fn take_until_cancellation_token_already_canceled() {
 
     let result = {
         let source = source.clone();
-        let token = token_source.token();
+        let token = token_source.clone();
         scheduler.start(move || source.as_observable().take_until_cancellation(token))
     };
 

@@ -13,7 +13,7 @@ use ferroui_reactive::linq::SequenceError;
 use ferroui_reactive::{IDisposable, Observable, ObservableError, ObservableExt, TaskObservableExt};
 use ferroui_reactive_testing::{assert_messages, assert_subscriptions, new_error, MockObserver, ReactiveTest as RT, TestScheduler};
 use ferroui_system::threading::tasks::{TaskCanceledError, TaskCompletionSource};
-use ferroui_system::threading::CancellationTokenSource;
+use ferroui_system::threading::CancellationToken;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 use std::thread::{self, ThreadId};
@@ -348,9 +348,9 @@ fn observable_to_task_cancelled() {
         RT::on_completed(200),
     ]);
 
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
-    let continuation = xs.as_observable().to_task_with_token(cts.token());
+    let continuation = xs.as_observable().to_task_with_token(cts.clone());
     {
         let cts = cts.clone();
         scheduler.schedule_absolute_action(125, move || cts.cancel());
@@ -434,9 +434,9 @@ fn to_task_scheduler_resumed_on_thread_failure_with_cancellation() {
 fn to_task_scheduler_resumed_on_thread_cancel_with_cancellation() {
     let scheduler = OneshotScheduler::new();
 
-    let cts = CancellationTokenSource::new();
+    let cts = CancellationToken::new();
 
-    let task = Observable::never::<i32>().to_task_with_token_on(cts.token(), scheduler.clone());
+    let task = Observable::never::<i32>().to_task_with_token_on(cts.clone(), scheduler.clone());
 
     assert!(!scheduler.has_task());
 

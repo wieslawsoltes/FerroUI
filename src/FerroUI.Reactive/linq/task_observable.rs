@@ -14,7 +14,7 @@ use crate::disposables::{CancellationDisposable, SingleAssignmentDisposableValue
 use crate::linq::{Observable, SequenceError};
 use crate::ObservableBase;
 use ferroui_system::threading::tasks::{Task, TaskCompletionSource};
-use ferroui_system::threading::{CancellationToken, LocalCancellationTokenRegistration};
+use ferroui_system::threading::{CancellationGuard, CancellationToken};
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::{Cell, RefCell};
 use std::future::Future;
@@ -107,7 +107,7 @@ impl<T: Clone + 'static> TaskObservableExt<T> for Task<T> {
 /// sequence ends, an error faults it, the cancellation of the token cancels it.
 struct ToTaskObserver<T> {
     source: TaskCompletionSource<T>,
-    registration: RefCell<Option<LocalCancellationTokenRegistration>>,
+    registration: RefCell<Option<CancellationGuard>>,
     last_value: RefCell<Option<T>>,
     resource: SingleAssignmentDisposableValue,
     is_stopped: Cell<bool>,
@@ -173,7 +173,7 @@ pub(crate) fn to_task<T: 'static>(source: Rc<dyn IObservable<T>>, token: Cancell
         resource: SingleAssignmentDisposableValue::new(),
         is_stopped: Cell::new(false),
     });
-    if token.can_be_canceled() {
+    if token.can_be_cancelled() {
         // The registration holds the observer, as upstream's does: a source that keeps no
         // reference to its observer (`Never`) still ends the task when the token is canceled. The
         // end of the sequence disposes the registration.

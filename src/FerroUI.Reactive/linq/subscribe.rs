@@ -11,8 +11,8 @@ use std::rc::Rc;
 /// cancellation of the token disposes the subscription. A terminal notification removes the
 /// registration (the resource of the safe observer), not the subscription.
 pub(crate) fn subscribe_with_token<T: 'static>(source: Rc<dyn IObservable<T>>, observer: Rc<dyn IObserver<T>>, token: CancellationToken) {
-    if token.can_be_canceled() {
-        if !token.is_cancellation_requested() {
+    if token.can_be_cancelled() {
+        if !token.is_cancelled() {
             let consumer = SafeObserver::wrap(observer);
             let subscription = source.subscribe(consumer.clone());
             consumer.set_resource(TokenRegistration::register(&token, move || subscription.dispose()));
