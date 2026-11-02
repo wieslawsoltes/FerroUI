@@ -49,6 +49,10 @@ Open the window overview with **Super+Tab** in the composed session. Task View, 
 
 Each overview thumbnail binds a FerroUI `CompositionVisualSurface` to the client container. A uniformly scaled surface brush shows the window in its natural proportions, including portions obscured by other windows. The overview creates these brushes only while mounted. A client buffer update feeds both views through the existing drawing surface. The shell uses an icon for minimized clients and for clients owned by a separate compositor.
 
+The capture below shows the Qt color inspector and GTK notes window. The GTK test client updated the purple swatch while the overview held keyboard focus. The compositor fixture checks both preview colors on the presented output.
+
+![Live Qt and GTK previews in Task View](screenshots/compositor-live-overview.webp)
+
 ## Scope
 
 The child compositor exposes one logical output, native xdg-shell clients and shared-memory buffer import. Direct DMA-BUF import, DRM/KMS scanout, Xwayland, touch/tablet seats and a child screen-capture portal remain outside this mode. The Sway-managed login remains available for native multi-output management, Xwayland and portal integration. See [Wayland sessions](WAYLAND.md).
