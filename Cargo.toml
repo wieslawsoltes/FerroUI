@@ -486,6 +486,15 @@ lto = "thin"
 inherits = "release"
 lto = false
 
+# A compact native application with open-ended XAML lookup and ordinary unwinding.
+# See docs/compiled-theme-performance.md for the complete WinUI startup comparison.
+[profile.compact-release]
+inherits = "release"
+opt-level = "s"
+lto = "thin"
+codegen-units = 16
+strip = "symbols"
+
 # The build that is shipped and measured (`cargo build --profile dist`, `scripts/perf-report.py
 # --profile dist`): whole-program optimisation in one code generation unit. The executables are
 # 10 to 14 % smaller than with thin LTO over four units and start no slower

@@ -21,6 +21,8 @@ The editable precompiled executable retains 10,118,051 bytes attributed to WinUI
 
 Full WinUI generates 5,939,605 bytes of native Rust or 5,325,703 bytes with FXB, against 14,421,918 bytes on the original main baseline. The compiler shares 186 property getter pairs across 1,272 template-binding assignments. A Button-rooted build references 37 pairs and 137 FXB blocks. Its realized Button template responded to live padding changes and the DatePicker style was absent. The shipping comparison uses the full dictionary. [Generated outputs, trim checks and template verification](benchmarks/compiled-theme-binding-rows-linux-x86_64.json)
 
+Workspace applications can select this profile with `cargo build --profile compact-release`. Cargo reads profiles from the application workspace. Downstream consumers can copy the `[profile.compact-release]` section of FerroUI's root manifest and enable `solid-theme` on the WinUI dependency.
+
 To check startup on another machine, build both checkouts with the same optimization settings. The comparison exits with a failure if the candidate's median time through the verified Button lookup exceeds the reference median. `--compact-app` applies size optimization and ThinLTO to the whole downstream executable. Both programs use normal panic unwinding.
 
 ```sh
@@ -168,6 +170,8 @@ The baseline was `df8b92d9`, the measured full representations were `9e4065b9`, 
 
 | Consumer | Configuration | Representation |
 | --- | --- | --- |
+| Installed full WinUI with an editable archive | Enable `solid-theme` | Typed execution with FXB and a matching solid FXP |
+| Portable solid WinUI image | Enable `portable-solid-theme` | Complete syntax archive resolved at first use |
 | Open-ended resource dictionary | Default | Typed Rust calls with static operand tables for repeated factories |
 | Open-ended dictionary with binary resources | Enable `binary-resources` on the theme crate | Typed Rust calls with independently embedded FXB blocks for eligible runs |
 | Application with known WinUI keys and controls | Set `FERROUI_WINUI_THEME_ROOTS` at build time | Compile the selected keys and their transitive XAML dependencies, using either backend |
