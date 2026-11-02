@@ -146,8 +146,14 @@ pub fn bind<V: PartialEq + 'static>(
     line: i32,
     position: i32,
 ) -> Result<(), XamlLoadError> {
-    let value = to_value(value);
-    let binding = from_markup_value::<Rc<dyn BindingBase>>(&value).ok_or_else(|| match &value {
+    bind_value(target, property, &to_value(value), line, position)
+}
+
+#[inline(never)]
+fn bind_value(
+    target: &Ref<FerroObject>, property: &'static FerroProperty, value: &MarkupValue, line: i32, position: i32,
+) -> Result<(), XamlLoadError> {
+    let binding = from_markup_value::<Rc<dyn BindingBase>>(value).ok_or_else(|| match value {
         None => at("NullReferenceException", "The binding is null", line, position),
         Some(value) => at(
             "InvalidCastException",
@@ -233,25 +239,28 @@ pub fn exact<T: Clone + 'static>(
         (Some(boxed), true) => untyped_object_form(boxed).map(Some).unwrap_or(value),
         _ => value,
     };
-    let converted = match &value {
-        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed.clone()),
+    cast_value(&value, target)
+        .as_ref().and_then(|value| value.downcast_ref::<T>()).cloned()
+        .ok_or_else(|| argument_error(member, index, target, &value, line, position))
+}
+
+// The registry already handles an exact TypeId before consulting any conversions.
+#[inline(never)]
+fn cast_value(value: &MarkupValue, target: ValueType) -> MarkupValue {
+    match value {
         Some(boxed) => ValueTypes::try_cast(boxed, target),
         None => ValueTypes::try_convert(None, target).flatten(),
-    };
-    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
-        Some(converted) => Ok(converted.clone()),
-        None => {
-            let error = MarkupInvokeError::Argument {
-                index,
-                expected: target.name(),
-                actual: match &value {
-                    Some(value) => value.type_name().to_string(),
-                    None => "null".to_string(),
-                },
-            };
-            Err(at("InvalidCastException", format!("{member}: {error}"), line, position))
-        }
     }
+}
+
+#[cold]
+#[inline(never)]
+fn argument_error(
+    member: &str, index: usize, target: ValueType, value: &MarkupValue, line: i32, position: i32,
+) -> XamlLoadError {
+    let actual = value.as_ref().map_or("null", |value| value.type_name());
+    let error = MarkupInvokeError::Argument { index, expected: target.name(), actual: actual.to_owned() };
+    at("InvalidCastException", format!("{member}: {error}"), line, position)
 }
 
 /// The type name of the exception a member call of generated code that
@@ -1306,7 +1315,11 @@ pub fn object_assignment_value(value: MarkupValue) -> MarkupValue {
 /// ([`untyped_object_form`]), then cast to the untyped value, which is what
 /// a member typed `object` receives from the run-time loader.
 pub fn to_object<T: PartialEq + 'static>(value: T) -> MarkupValue {
-    let boxed: BoxedValue = Rc::new(value);
+    boxed_to_object(Rc::new(value))
+}
+
+#[inline(never)]
+fn boxed_to_object(boxed: BoxedValue) -> MarkupValue {
     let boxed = untyped_object_form(&boxed).unwrap_or(boxed);
     if let Some(untyped) = boxed.downcast_ref::<Option<BoxedValue>>() {
         return untyped.clone();
@@ -1401,17 +1414,8 @@ pub fn argument<T: Clone + 'static, V: PartialEq + 'static>(
     position: i32,
 ) -> Result<T, XamlLoadError> {
     let value = to_untyped(Rc::new(value));
-    from_markup_value::<T>(&value).ok_or_else(|| {
-        let error = MarkupInvokeError::Argument {
-            index,
-            expected: std::any::type_name::<T>(),
-            actual: match &value {
-                Some(value) => value.type_name().to_string(),
-                None => "null".to_string(),
-            },
-        };
-        at("InvalidCastException", format!("{member}: {error}"), line, position)
-    })
+    from_markup_value::<T>(&value)
+        .ok_or_else(|| argument_error(member, index, ValueType::of::<T>(), &value, line, position))
 }
 
 /// A nullable form (`Option<T>`, `Option<Rc<T>>`) the instance `T` of a member is borrowed
@@ -1443,10 +1447,7 @@ pub fn instance<'a, T: 'static>(
     line: i32,
     position: i32,
 ) -> Result<&'a T, XamlLoadError> {
-    value.instance().ok_or_else(|| {
-        let error = MarkupInvokeError::Argument { index: 0, expected: std::any::type_name::<T>(), actual: "null".to_string() };
-        at("InvalidCastException", format!("{member}: {error}"), line, position)
-    })
+    value.instance().ok_or_else(|| argument_error(member, 0, ValueType::of::<T>(), &None, line, position))
 }
 
 /// `value` as the value of a member that declares the Rust type `T`, through
@@ -1459,15 +1460,15 @@ pub fn instance<'a, T: 'static>(
 /// the `InvalidCastException` of the loader at `line`, `position`.
 pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, position: i32) -> Result<T, XamlLoadError> {
     let target = ValueType::of::<T>();
-    let converted = match into_markup_value(value) {
-        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
-        Some(boxed) => ValueTypes::try_cast(&boxed, target),
-        None => ValueTypes::try_convert(None, target).flatten(),
-    };
-    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
-        Some(value) => Ok(value.clone()),
-        None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
-    }
+    cast_value(&into_markup_value(value), target)
+        .as_ref().and_then(|converted| converted.downcast_ref::<T>()).cloned()
+        .ok_or_else(|| cast_error(target, line, position))
+}
+
+#[cold]
+#[inline(never)]
+fn cast_error(target: ValueType, line: i32, position: i32) -> XamlLoadError {
+    at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)
 }
 
 /// `value` cast to the type with the handle `target`, then held untyped as the run-time
@@ -1481,15 +1482,9 @@ pub fn cast_untyped<V: PartialEq + 'static>(
     line: i32,
     position: i32,
 ) -> Result<MarkupValue, XamlLoadError> {
-    let converted = match into_markup_value(value) {
-        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
-        Some(boxed) => ValueTypes::try_cast(&boxed, target),
-        None => ValueTypes::try_convert(None, target).flatten(),
-    };
-    match converted {
-        Some(converted) => Ok(to_untyped(converted)),
-        None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
-    }
+    cast_value(&into_markup_value(value), target)
+        .map(to_untyped)
+        .ok_or_else(|| cast_error(target, line, position))
 }
 
 /// The list of the runtime library markup creates (`new List<T>()`, `new ArrayList()`), as
