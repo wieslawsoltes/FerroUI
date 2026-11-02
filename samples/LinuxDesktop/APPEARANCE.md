@@ -22,6 +22,12 @@ Pinned and running windows share an app button when the client identifies its in
 
 The Android profile reserves 48 logical pixels for the status strip and 72 for its tablet taskbar. The time opens the calendar, the bell opens notifications and the controls button opens Quick Settings. Swipe up on empty home wallpaper to open all apps, or swipe down to open notifications. Swipe up from the bottom handle and release to show Home, or pause before releasing to open recent windows. Mouse drags work as well as touch and pen. The app grid and recents buttons provide keyboard-accessible alternatives.
 
+The Material Home row shows up to five installed apps, with fewer slots on narrow outputs. Saved favorites appear first. Empty slots can show recent launches, each marked by a ring in the wallpaper’s accent color. Hold or right-click an app to pin or remove it, or to invoke a shortcut declared by its desktop entry. The Menu key opens the same actions on a focused shortcut. Holding empty wallpaper opens **Wallpaper & style** and **Suggest apps on Home**. That preference persists across restarts. The taskbar takes over when a client is visible on the current workspace.
+
+| Home with a suggested OpenSCAD launch | Inkscape’s installed desktop action |
+| --- | --- |
+| [![Three saved favorites and OpenSCAD above Material Home search](screenshots/material-home-favorites.webp)](screenshots/material-home-favorites.webp) | [![Open a New Window action anchored above Inkscape](screenshots/material-app-shortcuts.webp)](screenshots/material-app-shortcuts.webp) |
+
 On macOS, the **Window** menu lists the session’s windows and offers commands for the focused client. Right-click a Dock app to select one of its windows or change whether the app stays in the Dock. [Window menu with two native clients](screenshots/macos-window-menu.webp) · [Dock menu for a running app](screenshots/macos-dock-menu.webp)
 
 ## Spotlight
