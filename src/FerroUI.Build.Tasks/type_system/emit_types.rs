@@ -333,6 +333,7 @@ const KNOWN: &[(Known, &str)] = &[
     (Known::StyleQuery, "::ferroui_base::styling::StyleQuery"),
     (Known::RuntimeList, "::ferroui_markup_xaml::xaml_il::runtime::RuntimeList"),
     (Known::ListItems, "::std::rc::Rc<::ferroui_base::collections::FerroList<Option<::ferroui_base::BoxedValue>>>"),
+    (Known::Duration, "::std::time::Duration"),
 ];
 
 /// The primitive types generated code names by their name, and `String` by its path.

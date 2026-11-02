@@ -366,19 +366,40 @@ fn assemblies_expose_their_xml_namespace_definitions() {
 #[test]
 fn rust_types_without_metadata_are_opaque() {
     let ts = system();
-    let opaque = ts.resolve(ValueType::of::<std::time::Duration>());
-    assert_eq!(opaque.name(), "core::time::Duration");
-    assert!(opaque.equals(&*ts.resolve(ValueType::of::<std::time::Duration>())));
+    // `Instant`: a type of std nothing declares markup metadata for (`Duration`, the example
+    // before C5 of #423, is a time span now).
+    let opaque = ts.resolve(ValueType::of::<std::time::Instant>());
+    assert_eq!(opaque.name(), "std::time::Instant");
+    assert!(opaque.equals(&*ts.resolve(ValueType::of::<std::time::Instant>())));
     assert!(opaque.is_assignable_from(&*opaque));
     assert!(ts.well_known_types().object.is_assignable_from(&*opaque));
     assert!(!opaque.is_assignable_from(&*ts.well_known_types().object));
     assert!(!opaque.is_assignable_from(&*ts.well_known_types().string));
     assert!(opaque.methods().is_empty() && opaque.constructors().is_empty());
     // A value of the type is an instance of it.
-    let value = boxed(std::time::Duration::from_secs(1));
+    let value = boxed(std::time::Instant::now());
     assert!(ts.is_instance(&value, &*opaque));
     assert!(!ts.is_instance(&value, &*ts.well_known_types().string));
     let _ = ValueTypes::accepts_null(ValueType::of::<String>());
+}
+
+/// Not from upstream (C5 of #423): `Duration` is the other Rust form of a time span, its
+/// nullable form the other form of the nullable time span, and a duration is a value of
+/// the time span.
+#[test]
+fn a_duration_is_a_system_time_span() {
+    let ts = system();
+    let time_span = ts.get("System.TimeSpan");
+    let duration = ts.resolve(ValueType::of::<std::time::Duration>());
+    assert!(duration.equals(&*time_span));
+    assert!(ts.resolve(ValueType::of::<ferroui_base::animation::SignedDuration>()).equals(&*time_span));
+    assert_eq!(ts.resolve(ValueType::of::<Option<std::time::Duration>>()).full_name(), "System.Nullable`1[System.TimeSpan]");
+    assert!(ts
+        .resolve(ValueType::of::<Option<std::time::Duration>>())
+        .equals(&*ts.resolve(ValueType::of::<Option<ferroui_base::animation::SignedDuration>>())));
+    assert!(ts.is_instance(&boxed(std::time::Duration::from_secs(1)), &*time_span));
+    // The signed form stays the canonical handle: what markup makes of a time span.
+    assert_eq!(runtime(&time_span).handle(), Some(ValueType::of::<ferroui_base::animation::SignedDuration>()));
 }
 
 #[test]

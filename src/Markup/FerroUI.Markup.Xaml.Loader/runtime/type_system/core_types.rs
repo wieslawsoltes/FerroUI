@@ -211,7 +211,11 @@ fn handles_of(full_name: &str) -> Vec<ValueType> {
         "System.UInt64" => handles![u64],
         "System.Single" => handles![f32],
         "System.Double" => handles![f64],
-        "System.TimeSpan" => handles![SignedDuration],
+        // A time span has two Rust forms (C5 of #423): the signed one, and the
+        // `Duration` a value that cannot be negative is held in. The casts between the two
+        // are the ones of the untyped value conversions (a negative time span is not a
+        // duration).
+        "System.TimeSpan" => handles![SignedDuration, std::time::Duration],
         "System.String" => handles![String, Option<String>],
         "System.Type" => handles![
             RuntimeTypeValue,
@@ -315,6 +319,7 @@ pub(crate) fn define_core_types(system: &Rc<RuntimeTypeSystem>) {
     map_nullable("System.Single", ValueType::of::<Option<f32>>());
     map_nullable("System.Double", ValueType::of::<Option<f64>>());
     map_nullable("System.TimeSpan", ValueType::of::<Option<SignedDuration>>());
+    map_nullable("System.TimeSpan", ValueType::of::<Option<std::time::Duration>>());
 
     // Arrays of the element types the compiler produces constants of: a member
     // that declares `Vec<T>` takes an array of `T` (see `values`).

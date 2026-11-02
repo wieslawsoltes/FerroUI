@@ -503,3 +503,349 @@ fn breaks_and_merges_of_a_paragraph_keep_its_inlines_and_inheritance_children_bo
         assert!(paragraph.inheritance_child_entries() <= 8);
     }
 }
+
+// S8 (#439): undo units are deltas of the blocks an edit replaced. Each edit of the editor, its
+// undo and its redo give what the reference gives, whose units hold the whole document (the
+// path before S8 and F1c: a document with `set_full_rebuild` records snapshots of the document).
+
+/// An editor of the incremental document and one of the reference.
+fn editors(build: impl Fn() -> RichTextDocument) -> [(Probe, RichTextEditor); 2] {
+    let (incremental, reference) = probes(build);
+    [incremental, reference].map(|probe| {
+        let editor = RichTextEditor::new(probe.document.clone());
+        (probe, editor)
+    })
+}
+
+/// Runs `step` through the editors of both documents, then its undo, its redo and its undo
+/// again, and compares the documents (snapshot, text, change events, pointers) and the editors
+/// (selection, history) after each.
+fn check_editor(
+    context: &str,
+    step: impl Fn(&RichTextEditor) -> Result<bool, crate::rich_text::EditError>,
+) {
+    let editors = editors(rich_document);
+    let original = editors[0].0.document.snapshot();
+    editor_step(context, &editors, &step);
+    let edited = editors[0].0.document.snapshot();
+    editor_step(&format!("{context}: undo"), &editors, |editor| editor.undo());
+    assert_eq!(editors[0].0.document.snapshot(), original, "{context}: undo");
+    editor_step(&format!("{context}: redo"), &editors, |editor| editor.redo());
+    assert_eq!(editors[0].0.document.snapshot(), edited, "{context}: redo");
+    editor_step(&format!("{context}: undo again"), &editors, |editor| editor.undo());
+    assert_eq!(editors[0].0.document.snapshot(), original, "{context}: undo again");
+}
+
+#[test]
+fn editor_breaks_and_typing_at_every_offset_undo_and_redo_like_the_snapshot_path() {
+    let _scope = test_scope();
+    let length = rich_document().text_length();
+    for offset in 0..=length {
+        check_editor(&format!("typed break at {offset}"), |editor| {
+            editor.set_selection(EditorSelection::caret(offset))?;
+            editor.insert_text("\n", EditKind::Typing)
+        });
+        check_editor(&format!("pasted breaks at {offset}"), |editor| {
+            editor.set_selection(EditorSelection::caret(offset))?;
+            editor.insert_text("x\n\ny", EditKind::Paste)
+        });
+        check_editor(&format!("typed character at {offset}"), |editor| {
+            editor.set_selection(EditorSelection::caret(offset))?;
+            editor.insert_text("z", EditKind::Typing)
+        });
+    }
+}
+
+#[test]
+fn editor_merges_of_paragraphs_undo_and_redo_like_the_snapshot_path() {
+    let _scope = test_scope();
+    for mark in paragraph_marks(&rich_document()) {
+        check_editor(&format!("backspace over {mark}"), |editor| {
+            editor.set_selection(EditorSelection::caret(mark + 1))?;
+            editor.delete_backward(false)
+        });
+        check_editor(&format!("delete of {mark}"), |editor| {
+            editor.set_selection(EditorSelection::caret(mark))?;
+            editor.delete_forward(false)
+        });
+        check_editor(&format!("typed over {mark}"), |editor| {
+            editor.set_selection(EditorSelection::new(mark.saturating_sub(2), mark + 2))?;
+            editor.insert_text("joined", EditKind::Typing)
+        });
+    }
+}
+
+#[test]
+fn editor_replacements_across_paragraphs_undo_and_redo_like_the_snapshot_path() {
+    let _scope = test_scope();
+    let length = rich_document().text_length();
+    for (start, end) in [
+        (0, length),
+        (2, length - 2),
+        (5, 20),
+        (11, 23),
+        (22, 24),
+        (3, 12),
+    ] {
+        check_editor(&format!("typed text over {start}..{end}"), |editor| {
+            editor.set_selection(EditorSelection::new(start, end))?;
+            editor.insert_text("z", EditKind::Typing)
+        });
+        check_editor(&format!("text over {start}..{end}"), |editor| {
+            editor.set_selection(EditorSelection::new(start, end))?;
+            editor.insert_text("x\ny", EditKind::Programmatic)
+        });
+        check_editor(&format!("deletion of {start}..{end}"), |editor| {
+            editor.set_selection(EditorSelection::new(start, end))?;
+            editor.delete_selection()
+        });
+        check_editor(&format!("fragment over {start}..{end}"), |editor| {
+            editor.set_selection(EditorSelection::new(start, end))?;
+            editor.insert_fragment(&DocumentSnapshot::from_text("p\nq\nr"), EditKind::Paste)
+        });
+        check_editor(&format!("rich fragment over {start}..{end}"), |editor| {
+            let fragment = editor.document().slice(0..14)?;
+            editor.set_selection(EditorSelection::new(start, end))?;
+            editor.insert_fragment(&fragment, EditKind::Paste)
+        });
+    }
+}
+
+#[test]
+fn editor_format_changes_undo_and_redo_like_the_snapshot_path() {
+    let _scope = test_scope();
+    let length = rich_document().text_length();
+    let bold = CharacterFormat {
+        font_weight: Some(FontWeight::Bold),
+        ..Default::default()
+    };
+    let right = ParagraphFormat {
+        text_alignment: Some(TextAlignment::Right),
+        ..Default::default()
+    };
+    for (start, end) in [
+        (0, length),
+        (3, 15),
+        (10, 11),
+        (11, 25),
+        (24, 25),
+        (15, 18),
+        (6, 6),
+    ] {
+        check_editor(&format!("character format of {start}..{end}"), |editor| {
+            editor.set_selection(EditorSelection::new(start, end))?;
+            editor.apply_format(&bold).map(|()| true)
+        });
+        check_editor(&format!("paragraph format of {start}..{end}"), |editor| {
+            editor.set_selection(EditorSelection::new(start, end))?;
+            editor.apply_paragraph_format(&right).map(|()| true)
+        });
+    }
+}
+
+#[test]
+fn editor_typing_groups_and_groups_undo_and_redo_like_the_snapshot_path() {
+    let _scope = test_scope();
+    let editors = editors(rich_document);
+    let original = editors[0].0.document.snapshot();
+    // A typing group: a character, a break, characters after it and Backspaces over the break
+    // and into the paragraph before.
+    editor_step("caret", &editors, |editor| {
+        editor.set_selection(EditorSelection::caret(18))?;
+        Ok(true)
+    });
+    for (index, character) in ["a", "\n", "b", "c"].into_iter().enumerate() {
+        editor_step(&format!("typing {index}"), &editors, |editor| {
+            editor.insert_text(character, EditKind::Typing)
+        });
+    }
+    for index in 0..5 {
+        editor_step(&format!("backspace {index}"), &editors, |editor| {
+            editor.delete_backward(false)
+        });
+    }
+    // An edit group over several paragraphs.
+    editor_step("group", &editors, |editor| {
+        editor.edit_group(|editor| {
+            editor.set_selection(EditorSelection::caret(3))?;
+            editor.insert_text("\n", EditKind::Typing)?;
+            editor.set_selection(EditorSelection::new(30, 35))?;
+            editor.apply_format(&CharacterFormat {
+                font_weight: Some(FontWeight::Bold),
+                ..Default::default()
+            })?;
+            Ok(true)
+        })
+    });
+    let edited = editors[0].0.document.snapshot();
+    for index in 0..8 {
+        editor_step(&format!("undo {index}"), &editors, |editor| editor.undo());
+    }
+    assert_eq!(editors[0].0.document.snapshot(), original);
+    for index in 0..8 {
+        editor_step(&format!("redo {index}"), &editors, |editor| editor.redo());
+    }
+    assert_eq!(editors[0].0.document.snapshot(), edited);
+}
+
+/// A document of `paragraphs` paragraphs "paragraph 0", "paragraph 1" and so on.
+fn long_document(paragraphs: usize) -> RichTextDocument {
+    let text: Vec<String> = (0..paragraphs)
+        .map(|index| format!("paragraph {index}"))
+        .collect();
+    RichTextDocument::from_text(&text.join("\n"))
+}
+
+/// The UTF-16 offset of the start of a paragraph of `long_document` (its text is ASCII).
+fn paragraph_start(document: &RichTextDocument, index: usize) -> usize {
+    document
+        .text()
+        .split('\n')
+        .take(index)
+        .map(|paragraph| paragraph.len() + 1)
+        .sum()
+}
+
+#[test]
+fn an_undo_unit_of_typing_in_a_long_document_holds_the_edited_paragraph() {
+    let _scope = test_scope();
+    let document = long_document(1000);
+    let editor = RichTextEditor::new(document.clone());
+    let before = document.snapshot();
+    let blocks = document.blocks().snapshot().to_vec();
+    // The end of "paragraph 500".
+    let caret = paragraph_start(&document, 501) - 1;
+    editor.set_selection(EditorSelection::caret(caret)).unwrap();
+    for character in ["a", "b", "c"] {
+        assert!(editor.insert_text(character, EditKind::Typing).unwrap());
+    }
+    assert_eq!(
+        editor.undo_unit_blocks(),
+        vec![(500, 1, 1, false)],
+        "one typing unit of the edited paragraph"
+    );
+    let edited = document.snapshot();
+    assert!(editor.undo().unwrap());
+    assert_eq!(document.snapshot(), before);
+    assert_eq!(editor.selection(), EditorSelection::caret(caret));
+    let undone = document.blocks().snapshot().to_vec();
+    assert_eq!(undone[..500], blocks[..500], "the paragraphs before keep their elements");
+    assert_eq!(undone[501..], blocks[501..], "the paragraphs after keep their elements");
+    assert!(editor.redo().unwrap());
+    assert_eq!(document.snapshot(), edited);
+    assert_eq!(editor.selection(), EditorSelection::caret(caret + 3));
+    // A paragraph break in the middle of the paragraph, and its undo.
+    editor.set_selection(EditorSelection::caret(caret - 2)).unwrap();
+    assert!(editor.insert_text("\n", EditKind::Typing).unwrap());
+    let units = editor.undo_unit_blocks();
+    assert_eq!(units.len(), 2);
+    assert!(units[1].1 <= 1 && units[1].2 <= 2 && !units[1].3, "{units:?}");
+    assert!(editor.undo().unwrap());
+    assert_eq!(document.snapshot(), edited);
+    let undone = document.blocks().snapshot().to_vec();
+    assert_eq!(undone[..500], blocks[..500]);
+    assert_eq!(undone[501..], blocks[501..]);
+}
+
+#[test]
+fn a_typing_group_across_a_paragraph_break_holds_the_union_of_its_paragraphs() {
+    let _scope = test_scope();
+    let document = long_document(1000);
+    let editor = RichTextEditor::new(document.clone());
+    let before = document.snapshot();
+    // A character typed at the start of "paragraph 500" and two Backspaces, the second over
+    // the mark of "paragraph 499": one typing unit (#243 review S1).
+    let start = paragraph_start(&document, 500);
+    editor.set_selection(EditorSelection::caret(start)).unwrap();
+    assert!(editor.insert_text("x", EditKind::Typing).unwrap());
+    assert!(editor.delete_backward(false).unwrap());
+    assert!(editor.delete_backward(false).unwrap());
+    assert_eq!(document.paragraphs().len(), 999);
+    assert_eq!(
+        editor.undo_unit_blocks(),
+        vec![(499, 2, 1, false)],
+        "the unit holds the two paragraphs before and the merged one after"
+    );
+    let merged = document.snapshot();
+    assert!(editor.undo().unwrap());
+    assert_eq!(document.snapshot(), before);
+    assert_eq!(editor.selection(), EditorSelection::caret(start));
+    assert!(!editor.can_undo());
+    assert!(editor.redo().unwrap());
+    assert_eq!(document.snapshot(), merged);
+    assert_eq!(editor.selection(), EditorSelection::caret(start - 1));
+    // A break typed after it starts a unit of its own, which typing after the break joins.
+    assert!(editor.insert_text("\n", EditKind::Typing).unwrap());
+    assert!(editor.insert_text("y", EditKind::Typing).unwrap());
+    let units = editor.undo_unit_blocks();
+    assert_eq!(units.len(), 2, "{units:?}");
+    assert!(units[1].0 >= 499, "{units:?}");
+    assert!(units[1].1 <= 1 && units[1].2 <= 2 && !units[1].3, "{units:?}");
+    assert!(editor.undo().unwrap());
+    assert_eq!(document.snapshot(), merged);
+    assert!(editor.undo().unwrap());
+    assert_eq!(document.snapshot(), before);
+}
+
+#[test]
+fn an_external_change_still_clears_the_history_of_delta_units() {
+    let _scope = test_scope();
+    let document = long_document(10);
+    let editor = RichTextEditor::new(document.clone());
+    editor.set_selection(EditorSelection::caret(3)).unwrap();
+    assert!(editor.insert_text("x", EditKind::Typing).unwrap());
+    assert!(editor.can_undo());
+    // An edit of the document outside the editor invalidates the history: an undo cannot put
+    // back blocks over the application's change.
+    document.replace_text(0..0, "app ").unwrap();
+    assert!(!editor.can_undo());
+    assert!(!editor.undo().unwrap());
+    assert!(document.text().starts_with("app parxagraph 0\n"));
+    // So does a write to an element of the tree.
+    editor.set_selection(EditorSelection::caret(0)).unwrap();
+    assert!(editor.insert_text("y", EditKind::Typing).unwrap());
+    assert!(editor.can_undo());
+    let run = document.paragraphs()[5].inlines().snapshot()[0]
+        .cast::<Run>()
+        .unwrap();
+    run.set_text(Some("changed"));
+    assert!(!editor.can_undo());
+    assert!(!editor.undo().unwrap());
+    assert!(document.text().starts_with("yapp parxagraph 0\n"));
+    // A later edit records a unit again, which undoes only that edit.
+    let changed = document.snapshot();
+    editor.set_selection(EditorSelection::caret(1)).unwrap();
+    assert!(editor.insert_text("z", EditKind::Typing).unwrap());
+    assert_eq!(editor.undo_unit_blocks(), vec![(0, 1, 1, false)]);
+    assert!(editor.undo().unwrap());
+    assert_eq!(document.snapshot(), changed);
+    assert!(!editor.can_undo());
+}
+
+#[test]
+fn a_write_around_the_document_during_an_edit_keeps_the_edit_and_clears_the_history() {
+    // A change of an element of the tree that is not an edit of the document (here from a
+    // handler of its changes, while an edit is recorded) is one the journal of the edit cannot
+    // follow: the edit and the change stay, and the history is cleared, as for a change outside
+    // the editor (S8).
+    let _scope = test_scope();
+    let document = long_document(3);
+    let editor = RichTextEditor::new(document.clone());
+    editor.set_selection(EditorSelection::caret(0)).unwrap();
+    assert!(editor.insert_text("a", EditKind::Typing).unwrap());
+    editor.checkpoint();
+    let run = document.paragraphs()[2].inlines().snapshot()[0]
+        .cast::<Run>()
+        .unwrap();
+    let armed = Rc::new(Cell::new(true));
+    let trigger = armed.clone();
+    let _subscription = document.changed(move |_| {
+        if trigger.replace(false) {
+            run.set_text(Some("changed"));
+        }
+    });
+    assert!(editor.insert_text("b", EditKind::Typing).unwrap());
+    assert!(!armed.get());
+    assert_eq!(document.text(), "abparagraph 0\nparagraph 1\nchanged");
+    assert!(!editor.can_undo());
+}

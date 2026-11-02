@@ -102,19 +102,26 @@ pub trait TypeConverter {
         value: Option<&BoxedValue>,
         destination_type: ValueType,
     ) -> Result<Option<BoxedValue>, XamlLoadError> {
-        if destination_type.is_string() {
-            let text = match value {
-                Some(value) => ValueTypes::try_to_string(&**value).unwrap_or_else(|| (**value).type_name().to_string()),
-                None => String::new(),
-            };
-            return Ok(Some(Rc::new(text)));
-        }
-        Err(XamlLoadError::with_message(format!(
-            "'TypeConverter' is unable to convert '{}' to '{}'.",
-            value.map_or("(null)", |v| (**v).type_name()),
-            destination_type
-        )))
+        convert_to_text(value, destination_type)
     }
+}
+
+/// The conversion of the base converter ([`TypeConverter::convert_to`]): `value` as text,
+/// and no conversion to any other type. What a converter that converts to more types does
+/// for the others.
+pub(crate) fn convert_to_text(value: Option<&BoxedValue>, destination_type: ValueType) -> Result<Option<BoxedValue>, XamlLoadError> {
+    if destination_type.is_string() {
+        let text = match value {
+            Some(value) => ValueTypes::try_to_string(&**value).unwrap_or_else(|| (**value).type_name().to_string()),
+            None => String::new(),
+        };
+        return Ok(Some(Rc::new(text)));
+    }
+    Err(XamlLoadError::with_message(format!(
+        "'TypeConverter' is unable to convert '{}' to '{}'.",
+        value.map_or("(null)", |v| (**v).type_name()),
+        destination_type
+    )))
 }
 
 /// Converter handles compare by identity, so that they can be held in
