@@ -643,18 +643,35 @@ fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
                             e.set_handled(true);
                         }),
                 )
-                .child(
-                    border()
-                        .background("#65081420")
-                        .is_hit_test_visible(false)
-                        .is_visible(move || match current.get() {
-                            Scene::Desktop => false,
-                            Scene::Applications => {
-                                appearance.get().layout() == appearance::Layout::BottomNavigation
-                            }
-                            _ => true,
-                        }),
-                )
+                .child(dynamic(move || {
+                    let profile = appearance.get();
+                    let scrim = if profile == Appearance::Material {
+                        border()
+                            .background(resource("MaterialScrimBrush"))
+                            .opacity(0.32)
+                            .is_visible(move || current.get() != Scene::Desktop)
+                    } else if profile.winui().is_some() || profile == Appearance::MacOS {
+                        // Start, Control Center, calendar and notification flyouts float
+                        // directly above the scene. Only the task overview dims it.
+                        let contrast = profile
+                            .winui()
+                            .is_some_and(|s| s.mode == ColorMode::HighContrast);
+                        border()
+                            .background("#52000000")
+                            .is_visible(move || !contrast && current.get() == Scene::Workspaces)
+                    } else {
+                        border()
+                            .background("#65081420")
+                            .is_visible(move || match current.get() {
+                                Scene::Desktop => false,
+                                Scene::Applications => {
+                                    profile.layout() == appearance::Layout::BottomNavigation
+                                }
+                                _ => true,
+                            })
+                    };
+                    scrim.is_hit_test_visible(false)
+                }))
                 .child(dynamic(move || {
                     match launcher_state.cached_launcher.get() {
                         Some(_) => launcher::view(&launcher_state),
