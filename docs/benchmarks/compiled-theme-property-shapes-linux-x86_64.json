@@ -6283,5 +6283,22 @@
    "main.rs": "15ea52f4b0136147bf5c9f5f62cadeaadad63b70d290d6d0d894883f6a8020e0",
    "enums.rs": "090df0fc1dbcc1d46207b0a643ad0588c456f92fc5a1d62f855585b00b063e53"
   }
+ },
+ "runtime_type_names": {
+  "scope": "Dedicated x86-64 AnyValue::any_value_type_name leaves. For each matched, decode its RIP-relative pointer and literal slice length, verify the UTF-8 bytes are in .rodata, integrate the union of string ranges and match each FDE to the leaf start and length. Count one eight-byte search index entry per FDE. String literals may have other inbound references. These are attribution bytes, not a recoverable saving.",
+  "measurements": {
+   "distinct_leaf_addresses": 2161,
+   "text_bytes": 24291,
+   "distinct_utf8_names": 2161,
+   "union_rodata_bytes": 197756,
+   "fde_count": 2161,
+   "fde_bytes": 50824,
+   "index_bytes": 17288
+  },
+  "replay_script_arguments": [
+   "stripped ELF",
+   "gzip of nm -S -C --defined-only symbolized image"
+  ],
+  "replay_python": "import gzip,json,re,struct,subprocess,sys\nfrom pathlib import Path\nelf=Path(sys.argv[1]);symbols=Path(sys.argv[2]);sections={}\nfor line in subprocess.check_output(['readelf','-SW',elf],text=True).splitlines():\n m=re.match(r'^\\s*\\[\\s*\\d+\\]\\s+(\\S+)\\s+\\S+\\s+([\\da-f]+)\\s+([\\da-f]+)\\s+([\\da-f]+)',line)\n if m:sections[m[1]]=tuple(int(x,16) for x in m.groups()[1:])\nraw=elf.read_bytes();va,off,_=sections['.text'];rv,ro,rs=sections['.rodata']\nleaves={};names={}\nwith gzip.open(symbols,'rt') as nm:\n for line in nm:\n  row=line.strip().split(' ',3)\n  if len(row)!=4 or row[2] not in ['t','T'] or not row[3].endswith('>::any_value_type_name'):continue\n  pc,n=int(row[0],16),int(row[1],16);code=raw[off+pc-va:off+pc-va+n]\n  assert code[:3]==b'\\x48\\x8d\\x05' and code[-1]==0xc3\n  addr=pc+7+struct.unpack_from('<i',code,3)[0]\n  if n==11 and code[7]==0x6a and code[8]<128 and code[9]==0x5a:\n   length=code[8]\n  else:\n   assert n==13 and code[7]==0xba\n   length=struct.unpack_from('<I',code,8)[0]\n  assert rv<=addr<addr+length<=rv+rs\n  names[addr,addr+length]=raw[ro+addr-rv:ro+addr-rv+length].decode()\n  leaves[pc]=n\ncovered=0;high=0\nfor start,end in sorted(names):\n covered+=max(0,end-max(start,high));high=max(high,end)\nfde=0;count=0;proc=subprocess.Popen(['readelf','-wf',elf],stdout=subprocess.PIPE,text=True)\nfor line in proc.stdout:\n m=re.match(r'^\\s*[0-9a-fA-F]+\\s+([0-9a-fA-F]+)\\s+\\S+\\s+FDE cie=\\S+ pc=([0-9a-fA-F]+)\\.\\.([0-9a-fA-F]+)',line)\n if m:\n  pc=int(m[2],16)\n  if pc in leaves:\n   assert int(m[3],16)-pc==leaves[pc];fde+=4+int(m[1],16);count+=1\nassert proc.wait()==0\nprint(json.dumps({'distinct_leaf_addresses':len(leaves),'text_bytes':sum(leaves.values()),'distinct_utf8_names':len(set(names.values())),'union_rodata_bytes':covered,'fde_count':count,'fde_bytes':fde,'index_bytes':8*count}))\n"
  }
 }
