@@ -171,12 +171,7 @@ fn classify(slot: usize, function: &str) -> Option<(String, Vec<Kind>, Factory)>
             writeln!(markers, "{line}").unwrap();
             continue;
         }
-        if line.contains(['!', '\'', '[', '|'])
-            && (line.contains('!')
-                || line.contains('\'')
-                || line.contains('[')
-                || line.replace("||", "").contains('|'))
-        {
+        if line.contains(['!', '\'', '[']) || line.replace("||", "").contains('|') {
             return None;
         }
         // The emitter only produces local item declarations outside deferred bodies.
@@ -246,22 +241,42 @@ impl Group {
                         parameters.push(format!("arg{index}: {}", self.kinds[slot].rust()));
                         index
                     });
+                // Bound both the calling convention and the cost of comparing columns.
+                if fields.len() > 12 {
+                    return;
+                }
                 write!(body, "arg{index}").unwrap();
             }
             slot += 1;
         }
-        // Small ABI for the thunks. Large, individually shaped templates keep their native code.
-        if fields.len() > 12 {
-            return;
+        // Retain the representative XAML markers on the actual typed operations for
+        // rustc's position map. Every other thunk keeps its own declaration markers.
+        let original = functions[first.slot][first.header_end..]
+            .strip_suffix("}\n")
+            .unwrap();
+        let mut instructions = body.lines();
+        let mut mapped_body = String::new();
+        for line in original.lines() {
+            let mapped = if line.trim_start().starts_with("//") {
+                line
+            } else {
+                instructions.next().unwrap()
+            };
+            writeln!(mapped_body, "{mapped}").unwrap();
         }
+        debug_assert!(instructions.next().is_none());
         let mut shared = format!("#[inline(never)]\nfn {name}(\n    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,\n");
         for p in parameters {
             writeln!(shared, "    {p},").unwrap();
         }
-        writeln!(shared, ") -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {{\n{body}}}").unwrap();
+        writeln!(shared, ") -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {{\n{mapped_body}}}").unwrap();
         let mut wrappers = Vec::new();
         for f in &self.factories {
-            let mut tail = f.markers.clone();
+            let mut tail = if f.slot == first.slot {
+                String::new()
+            } else {
+                f.markers.clone()
+            };
             write!(tail, "    {name}(service_provider").unwrap();
             for &i in &fields {
                 write!(tail, ", {}", f.values[i]).unwrap();
@@ -306,5 +321,63 @@ pub(super) fn share(document: &str, functions: &mut [String]) {
             let name = format!("__{document}_factory_shape_{}", group.factories[0].slot);
             group.emit(&name, &shape, functions);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn locations_belong_to_the_matching_call_and_getter_closures_keep_their_literals() {
+        let line = r#"rt::invoked(target(rt::cast(x, 10, 4)?, || fixed("frozen"), "a,\"b", -1.5_f64), 20, 3)?;"#;
+        let mut found = Vec::new();
+        operands(line, 0, &mut found);
+        let found: Vec<_> = found
+            .iter()
+            .map(|op| (&line[op.span.clone()], op.kind.rust()))
+            .collect();
+        assert_eq!(
+            found,
+            [
+                ("10", "i32"),
+                ("4", "i32"),
+                (r#""a,\"b""#, "&'static str"),
+                ("-1.5_f64", "f64"),
+                ("20", "i32"),
+                ("3", "i32")
+            ]
+        );
+    }
+
+    #[test]
+    fn distinct_imports_cannot_share_a_factory_and_unused_slots_stay_empty() {
+        fn factory(n: usize, constructor: &str, key: &str) -> String {
+            let mut body = format!("fn doc_deferred_{n}(service_provider: &Provider) -> Result<Value, XamlLoadError> {{\n");
+            writeln!(body, "    // doc.xaml({n},4) Brush").unwrap();
+            // Enough repeated work to justify an out-of-line typed implementation.
+            for _ in 0..8 {
+                writeln!(
+                    body,
+                    "    rt::invoked({constructor}(rt::string_object({key:?})), {n}, 4)?;"
+                )
+                .unwrap();
+            }
+            body.push_str("    Ok(value)\n}\n");
+            body
+        }
+        let third = factory(2, "different_constructor", "c");
+        let mut functions = vec![
+            factory(0, "new_brush", "a"),
+            factory(1, "new_brush", "b"),
+            third.clone(),
+            String::new(),
+        ];
+        share("doc", &mut functions);
+        assert!(functions[0].contains("fn __doc_factory_shape_0("));
+        assert!(functions[0].contains("// doc.xaml(0,4) Brush\n    rt::invoked("));
+        assert!(functions[1].contains("__doc_factory_shape_0(service_provider, \"b\", 1)"));
+        assert_eq!(functions[2], third);
+        assert!(functions[3].is_empty());
     }
 }

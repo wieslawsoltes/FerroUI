@@ -495,6 +495,7 @@ pub fn position_map(source: &str, functions: &[(String, String)]) -> String {
             let (family, index) = name.rsplit_once('_')?;
             if !index.bytes().all(|b| b.is_ascii_digit()) { return None; }
             family.strip_suffix("_deferred").or_else(|| family.strip_suffix("_part"))
+                .or_else(|| family.strip_prefix("__")?.strip_suffix("_factory_shape"))
         };
         if let Some(info) = build.or_else(helper).and_then(|name| documents.get(name)) {
             document = Some(info);
