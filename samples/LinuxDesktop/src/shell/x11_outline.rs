@@ -11,10 +11,10 @@ pub(super) fn track_popup(popup: &Popup, radius: f64) {
     // The popup owns this handler. Releasing its host drops all corresponding
     // root/scale/manager subscriptions, even if the menu is opened repeatedly.
     let current = RefCell::new(None);
-    let _ = popup.popup_host_changed(move |host| {
+    popup.popup_host_changed(move |host| {
         let root = host.and_then(|h| h.as_popup_root());
         current.replace(root.and_then(|w| track(&w.upcast::<TopLevel>(), radius)));
-    });
+    }).detach();
 }
 
 pub(super) fn track(window: &Ref<TopLevel>, radius: f64) -> Option<Subscription> {
