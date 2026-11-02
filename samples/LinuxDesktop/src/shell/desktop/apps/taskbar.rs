@@ -14,18 +14,23 @@ use std::{cell::RefCell, time::Duration};
 
 pub(super) fn buttons(shell: &Rc<Shell>, items: Memo<Vec<Entry>>) -> Element {
     let shell = shell.clone();
+    let open_group = Rc::new(RefCell::new(None));
     for_each(
         move || items.with(|all| all.iter().map(Entry::key).collect::<Vec<_>>()),
         |id| id.clone(),
         move |id| {
             let entry =
                 memo(move |_| items.with(|all| all.iter().find(|e| e.key() == id).cloned()));
-            group_button(&shell, entry)
+            group_button(&shell, entry, open_group.clone())
         },
     )
 }
 
-fn group_button(shell: &Rc<Shell>, entry: Memo<Option<Entry>>) -> Element {
+fn group_button(
+    shell: &Rc<Shell>,
+    entry: Memo<Option<Entry>>,
+    open_group: Rc<RefCell<Option<ferroui_base::WeakRef<Flyout>>>>,
+) -> Element {
     let Some(initial) = entry.get_untracked() else {
         return Element::Empty;
     };
@@ -57,6 +62,12 @@ fn group_button(shell: &Rc<Shell>, entry: Memo<Option<Entry>>) -> Element {
     let weak = flyout.downgrade();
     let surface = colors().surface;
     let opening = flyout.opening(move |_| {
+        // Adjacent task buttons lie inside a transient flyout's dismissal
+        // margin. Opening another group retires the old preview immediately.
+        let old = open_group.replace(Some(weak.clone()));
+        if let Some(old) = old.and_then(|f| f.upgrade()).filter(|f| f.is_open()) {
+            old.set_is_open(false);
+        }
         if let Some(presenter) = weak
             .upgrade()
             .and_then(|f| f.popup().child()?.downcast::<FlyoutPresenter>().ok())

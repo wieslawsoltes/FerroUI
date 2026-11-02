@@ -200,6 +200,33 @@ wait_for restored
 # Use the bar via keyboard and verify actual scene dispatch from its first item.
 xdotool mousemove 29 16 click 1 key Down Return
 wait_for scene appearance
+echo "Verified menu tracking, rounded native popups over maximized windows, minimize/restore, Dock pinning and keyboard activation."
+
+# Reuse both real clients on the Windows taskbar. The dedicated popup extends
+# above the desktop under Openbox, including when a client has keyboard focus.
+xdotool key 1
+wait_for grep -sqx windows "$XDG_CONFIG_HOME/ferro-desktop/appearance"
 xdotool key Escape
 wait_for scene desktop
-echo "Verified menu tracking, rounded native popups over maximized windows, minimize/restore, Dock pinning and keyboard activation."
+task_anchor() {
+    import -window root "$fixture/taskbar-base.png"
+    /usr/bin/python3 "$(dirname "$0")/composed-clients.py" "$fixture/taskbar-base.png" active-task point >"$fixture/task-anchor"
+}
+choose_window() {
+    local expected=$terrain previous=$coast
+    if [[ $1 == next ]]; then expected=$coast; previous=$terrain; fi
+    xdotool windowactivate --sync "$previous"
+    wait_for task_anchor
+    read -r bx by < "$fixture/task-anchor"
+    local region="330x210+$((bx-165))+545"
+    convert "$fixture/taskbar-base.png" -crop "$region" +repage "$fixture/group-base.png"
+    xdotool mousemove "$bx" "$by" click 1
+    capture_menu taskbar-windows "$region" "$fixture/group-base.png"
+    if [[ $1 == next ]]; then xdotool key Down; fi
+    xdotool key Return
+    wait_for client_activated "$expected"
+}
+client_activated() { [[ $(xdotool getactivewindow) == "$1" ]]; }
+choose_window first
+choose_window next
+echo "Verified Windows grouped taskbar selection and activation of both GTK clients with the keyboard."
