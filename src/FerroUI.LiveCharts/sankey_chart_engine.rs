@@ -1536,10 +1536,10 @@ mod tests {
         let scene = measure(Size::new(700.0, 600.0), s);
         // Yttrium is the widest label: 7 characters at the estimated metrics, with the padding.
         let margin = 7.0 * 14.0 * 0.6 + 12.0 + 4.0;
-        let HitShape::AnnularSector { outer_radius, .. } = scene.hits[0].shape else {
+        let HitShape::AnnularSector { outer_radius, .. } = &scene.hits[0].shape else {
             panic!("an arc node hovers its sector");
         };
-        assert!((outer_radius - (300.0 - margin)).abs() < 1e-9);
+        assert!((*outer_radius - (300.0 - margin)).abs() < 1e-9);
         let alpha = scene
             .primitives
             .iter()

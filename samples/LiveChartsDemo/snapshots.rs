@@ -1,7 +1,6 @@
 //! The Cartesian, pie, polar, Sankey and treemap scenarios of LiveCharts2's `tests/SnapshotTests`
-//! at the pin,
-//! restated with the native controls. Each scenario keeps the source's chart, series, values, axes and
-//! size; `livecharts-snapshots` renders them through Vello CPU, and the render job of
+//! at the pin, restated with the native controls. Each scenario keeps the source's chart, series,
+//! values, axes and size; `livecharts-snapshots` renders them through Vello CPU, and the render job of
 //! `livecharts.yml` keeps the images beside the upstream reference images. The upstream suite
 //! compares SkiaSharp images pixel by pixel, which a native renderer cannot reproduce, so the
 //! images are a visual reference and the tests check that every scenario measures its data.

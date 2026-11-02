@@ -101,7 +101,11 @@ impl SankeyLink {
         instantiate(Self::construct())
     }
     /// A link of the given weight from `source` to `target` (`SankeyLink(source, target, weight)`).
-    pub fn with_nodes(source: &Ref<SankeyNode>, target: &Ref<SankeyNode>, weight: f64) -> Ref<Self> {
+    pub fn with_nodes(
+        source: &Ref<SankeyNode>,
+        target: &Ref<SankeyNode>,
+        weight: f64,
+    ) -> Ref<Self> {
         let link = Self::new();
         link.set_source(Some(source.clone()));
         link.set_target(Some(target.clone()));
