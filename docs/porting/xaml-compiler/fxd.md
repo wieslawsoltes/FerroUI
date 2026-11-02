@@ -117,3 +117,20 @@ The unfiltered WinUI source tree contains 169 documents totaling 2,092,775 bytes
 | Decode and drop all 169 graphs | 55.074 / 66.955 ms | 52.147 / 65.618 ms |
 
 A pinned CPU ran 51 iterations in rotating order using release-optimized Rust 1.99.1. Archive compilation, including source reads from a warm filesystem cache, took a median 214.322 ms over nine builds with identical output. These timings end at syntax reconstruction. Type resolution, framework construction, process startup and first usable UI are separate measurements. The archive contains portable XAML data. An executable also links the decoder, runtime and its selected framework types.
+
+### Solid FXP distribution
+
+The version 2 envelope stores the complete document group in one zlib stream. The WinUI crate selects it with the `solid-theme` feature. The CLI writes the same format with `ferroui-fxd --pack-solid <source-directory> <output.fxp>`. Use `--pack` or the `packed-theme` feature for independent per-document compression. Both encodings retain the original document paths, ordered child lists, generic arguments, markup extension flags, lexical scopes and line information.
+
+| Field | Representation |
+| --- | --- |
+| Envelope | `FXP\0`, version byte 2, little-endian u32 inflated length, zlib stream |
+| Global UTF-8 string pool | Lexical byte order, encoded as shared prefix length and length-prefixed suffix |
+| Sorted directory | Path, reconstructed FXD byte size, local string count and lengths of the five per-document columns |
+| Local string tables | ZigZag deltas between global string IDs, reset at each document |
+| Graph columns | Per-document metadata, node tags, source line deltas, source columns and namespace scopes |
+| Operands | Six streams, one per FXD opcode. The tag sequence restores the original instruction order |
+
+Counts and section lengths inside the stream use unsigned LEB128. The decoder bounds the declared, inflated and reconstructed sizes, validates references and consumes the entire compressed stream. Expansion produces an indexed version 1 archive containing stored columnar FXD documents. The WinUI adapter retains this expanded image once per process. Reloading a mounted contribution validates every candidate document and resolves its relative includes against the candidate before publication.
+
+On the complete 169-document WinUI input, `--pack-solid` produces 245,385 bytes and `--pack` produces 432,438 bytes. Both outputs preserve the same canonical XamlX graphs. These are serialized theme sizes. The application benchmark in [compiled-theme-performance.md](../../compiled-theme-performance.md) accounts separately for native code, metadata, unwind tables and the runtime loader.

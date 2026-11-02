@@ -132,11 +132,15 @@ def main():
                         help="compile just the WinUI crate with opt-level=z and one codegen unit")
     parser.add_argument("--lld-link-map", action="store_true",
                         help="measure allocated WinUI input sections with the ELF LLD linker")
+    parser.add_argument("--max-theme-bytes", type=positive_int,
+                        help="fail after writing the report if allocated WinUI sections exceed this limit")
     parser.add_argument("--rebuilds", type=int, default=1, help="number of dependency-warm theme rebuilds, zero to measure the initial build only")
     parser.add_argument("--launches", type=positive_int, default=15, help="number of measured, fresh-process launches")
     parser.add_argument("--compare-with", type=Path, action="append", default=[],
                         help="also time a previous work directory's stripped-probe, interleaved with the new one")
     args = parser.parse_args()
+    if args.max_theme_bytes and not args.lld_link_map:
+        parser.error("--max-theme-bytes requires --lld-link-map")
     if args.rebuilds < 0:
         parser.error("--rebuilds must be zero or positive")
     source = args.source.resolve()
@@ -232,6 +236,8 @@ def main():
     report = json.dumps(result, indent=2) + "\n"
     (work / "report.json").write_text(report)
     print(report, end="")
+    if args.max_theme_bytes and result["theme_allocated_bytes"] > args.max_theme_bytes:
+        raise SystemExit(f"WinUI contributed {result['theme_allocated_bytes']} bytes; limit {args.max_theme_bytes}")
 
 
 if __name__ == "__main__":

@@ -206,6 +206,10 @@ jobs:
           -p ferroui-build-scan -p ferroui-build -p xamlx
           -p ferroui-base -p ferroui-controls -p ferroui-markup-xaml-loader
           -p ferroui-themes-winui
+      - name: Check portable XAML codecs and complete WinUI archive inventory
+        run: |
+          cargo test --locked --lib -p ferroui-markup-xaml-loader --features portable-xaml binary_document::
+          cargo test --locked --lib -p ferroui-themes-winui --features solid-theme packed_theme_contains_every_compiled_document_within_budget
       - name: Publish correctness build timings
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
