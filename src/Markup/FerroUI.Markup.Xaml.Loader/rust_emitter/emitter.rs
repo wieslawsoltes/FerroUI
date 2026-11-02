@@ -4088,6 +4088,7 @@ pub(crate) fn root_value_handle_of<'a>(types: &'a dyn EmitTypes, root: &Rc<dyn I
 #[derive(Default)]
 pub struct DocumentFunctions<'a> {
     pub(super) binary: Option<super::BinaryResourceFiles>,
+    pub(super) editable_dictionaries: std::collections::BTreeMap<String, (String, String)>,
     builds: HashMap<usize, (String, Option<TypeKey<'a>>)>,
     /// The functions the emitted documents call, in the order of the calls.
     called: std::cell::RefCell<Vec<String>>,
@@ -4258,6 +4259,9 @@ pub fn emit_function<'a>(
         None => source.push_str(&format!(
             ") -> ::core::result::Result<{root_type}, ::ferroui_markup_xaml::XamlLoadError> {{\n"
         )),
+    }
+    if let Some((_, uri)) = documents.editable_dictionaries.get(function_name) {
+        source.push_str(&format!("    if let ::core::option::Option::Some(value) = ::ferroui_markup_xaml::archive_includes::dictionary({}, service_provider.as_ref()) {{ return value; }}\n", rust_string_literal(uri)));
     }
     let mut local_types = std::mem::take(&mut emitter.local_types);
     local_types.insert("context".to_string(), "::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>".to_string());

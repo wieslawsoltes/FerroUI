@@ -23,6 +23,11 @@ use crate::compiler_extensions::XamlDocumentUsage;
 /// compilation) are added directly to the including dictionary.
 pub struct XamlMergeResourceGroupTransformer;
 
+/// The AOT emitter requests this set when it needs to certify independently
+/// replaceable build methods. A document may be both inlined and called.
+#[derive(Default)]
+pub(crate) struct InlinedDocuments(pub std::cell::RefCell<std::collections::HashSet<String>>);
+
 /// The same included document may be referenced by many other dictionaries.
 #[derive(Default)]
 struct MergeTraversal {
@@ -430,6 +435,9 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
                 }
                 result?;
                 traversal.prepared.borrow_mut().insert(target);
+            }
+            if let Ok(inlined) = context.configuration().get_extra::<InlinedDocuments>() {
+                if let Some(uri) = target_document.uri() { inlined.0.borrow_mut().insert(uri); }
             }
             manipulation_group.push(single_root_object.manipulation());
             if target_document.usage() == XamlDocumentUsage::Unknown {

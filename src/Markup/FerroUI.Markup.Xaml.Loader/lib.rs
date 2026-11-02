@@ -40,6 +40,8 @@ pub mod rust_emitter;
 
 #[cfg(feature = "runtime")]
 mod runtime_document_input;
+#[cfg(all(feature = "runtime", feature = "portable-xaml"))]
+mod compiled_archive;
 #[cfg(feature = "runtime")]
 mod ferro_runtime_xaml_loader;
 #[cfg(feature = "runtime")]

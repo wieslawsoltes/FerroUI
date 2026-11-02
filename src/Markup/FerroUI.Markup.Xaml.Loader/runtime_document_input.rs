@@ -36,6 +36,11 @@ impl DocumentInput {
         Self { content: DocumentContent::Portable(bytes.to_vec()), syntax: None }
     }
 
+    #[cfg(feature = "portable-xaml")]
+    pub(crate) fn from_decoded(bytes: Vec<u8>, syntax: XamlDocument) -> Self {
+        Self { content: DocumentContent::Portable(bytes), syntax: Some(syntax) }
+    }
+
     pub(crate) fn read(stream: &mut dyn Read) -> io::Result<Self> {
         #[cfg(feature = "portable-xaml")]
         {

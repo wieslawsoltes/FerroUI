@@ -241,6 +241,7 @@ pub(super) fn transform_group_with_parsed(
         providers.push(provider);
     }
 
+    transformer_configuration.get_or_create_extra::<crate::compiler_extensions::group_transformers::InlinedDocuments>();
     compiler.transform_group(&parsed_documents)?;
     throw_exception_if_any_error(&diagnostics.borrow())?;
 

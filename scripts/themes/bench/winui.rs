@@ -20,8 +20,8 @@ fn load_archive(path: std::ffi::OsString) -> ferroui_base::Ref<WinUITheme> {
     let mut config = RuntimeXamlLoaderConfiguration::new();
     config.local_assembly = Some(&ferroui_themes_winui::ASSEMBLY);
     let uri = Uri::absolute(WinUITheme::DOCUMENT_URI).unwrap();
-    if let Some(value) = ferroui_themes_winui::compiled_archive_root()
-        .try_load(&image, &uri, &config, None)
+    if let Some(value) = FerroRuntimeXamlLoader::try_load_compiled_archive(
+        &ferroui_themes_winui::compiled_archive_root(), &image, &uri, &config, None)
         .expect("load matching installed archive")
     {
         return from_markup_value(&Some(value)).expect("compiled WinUI theme class");

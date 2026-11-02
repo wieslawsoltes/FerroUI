@@ -114,6 +114,8 @@ pub struct DeferredContent {
     root_object: Option<WeakValue>,
     parent_resource_nodes: Rc<CapturedResourceNodes>,
     builder: DeferredContentBuilder,
+    #[cfg(all(feature = "binary-resources", feature = "runtime-populate"))]
+    archive_includes: Option<Rc<crate::archive_includes::Includes>>,
     result_type: ValueType,
     #[cfg(all(feature = "binary-resources", feature = "hot-reload", debug_assertions))]
     binary_snapshot: Option<Rc<super::compiled::binary_resources::reload::Snapshot>>,
@@ -164,6 +166,8 @@ impl DeferredContent {
             root_object: root_object.as_ref().map(WeakValue::new),
             parent_resource_nodes,
             builder,
+            #[cfg(all(feature = "binary-resources", feature = "runtime-populate"))]
+            archive_includes: crate::archive_includes::capture(),
             result_type,
             #[cfg(all(feature = "binary-resources", feature = "hot-reload", debug_assertions))]
             binary_snapshot: super::compiled::binary_resources::reload::capture(),
@@ -238,6 +242,8 @@ impl DeferredContent {
             self.event_context.clone(),
         );
         let invoke = || self.builder.invoke(&provider);
+        #[cfg(all(feature = "binary-resources", feature = "runtime-populate"))]
+        let invoke = || crate::archive_includes::activate(self.archive_includes.clone(), invoke);
         #[cfg(all(feature = "binary-resources", feature = "hot-reload", debug_assertions))]
         let invoke = || super::compiled::binary_resources::reload::with_snapshot(self.binary_snapshot.clone(), invoke);
         #[cfg(feature = "source-overlays")]

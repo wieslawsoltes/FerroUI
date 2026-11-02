@@ -894,6 +894,16 @@ pub fn generate_class_file_with_binary_resources(
             }
         };
         let populate = (index == 0).then_some(class);
+        if index != 0 && binary.is_some() && !crate::back_end::may_include(&document.1)
+            && root_type_name(&transformed.root).as_deref() == Some("FerroUI.Controls.ResourceDictionary")
+        {
+            if let Some(uri) = &transformed.base_uri {
+                let inlined = transformed.configuration.get_extra::<crate::compiler_extensions::group_transformers::InlinedDocuments>();
+                if inlined.is_ok_and(|set| !set.0.borrow().contains(uri)) {
+                    functions.editable_dictionaries.insert(function_name.clone(), (document.0.clone(), uri.clone()));
+                }
+            }
+        }
         let _ = types.take_unanswered();
         match emit_function(
             types,
@@ -962,7 +972,11 @@ pub fn generate_class_file_with_binary_resources(
     source.push_str("        return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));\n    }\n");
     source.push_str("    let service_provider =\n");
     source.push_str("        ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider);\n");
-    source.push_str(&format!("    {}(::core::option::Option::Some(service_provider), root)\n", names[0]));
+    if binary.is_some() {
+        source.push_str(&format!("    ::ferroui_markup_xaml::archive_includes::populate(<::{} as ::ferroui_base::StaticType>::TYPE, || {}(::core::option::Option::Some(service_provider), root))\n", class_path.trim_start_matches("::"), names[0]));
+    } else {
+        source.push_str(&format!("    {}(::core::option::Option::Some(service_provider), root)\n", names[0]));
+    }
     source.push_str("}\n");
     for function in &sources {
         source.push('\n');
@@ -972,7 +986,14 @@ pub fn generate_class_file_with_binary_resources(
     source.push_str(&loader_table(documents, &names, &loadable, class_path, constructor.as_ref()));
     // The file is a module of the crate of the class: that crate is `crate` in it.
     let own_crate = class_path.trim_start_matches("::").split("::").next().unwrap_or_default();
-    if let Some(binary) = binary { binary.declare_manifest(&mut source); }
+    if let Some(binary) = binary {
+        binary.declare_manifest(&mut source);
+        source.push_str("\n/// Complete native call boundaries for isolated resource dictionaries.\npub const ARCHIVE_DICTIONARIES: &[(&str, &str)] = &[\n");
+        for (path, uri) in functions.editable_dictionaries.values() {
+            source.push_str(&format!("    ({}, {}),\n", super::rust_string_literal(path), super::rust_string_literal(uri)));
+        }
+        source.push_str("];\n");
+    }
     let source = super::imports::finish(source, Some(own_crate));
 
     // The emitted documents, as other crates see them: the class, and every other

@@ -41,6 +41,8 @@ mod xaml_types;
 pub use eager_parent_stack_enumerator::EagerParentStackEnumerator;
 pub use extensions::ServiceProviderExtensions;
 pub use populate_overrides::{PopulateOverride, PopulateOverrideGuard};
+#[doc(hidden)]
+pub mod archive_includes;
 pub use ferro_xaml_loader::{CompiledArchiveRoot, CompiledXamlLoader, FerroXamlLoader, IRuntimeXamlLoader};
 pub use markup_extension::MarkupExtension;
 pub use object_casts::{FromXamlObject, XamlResourceNode};

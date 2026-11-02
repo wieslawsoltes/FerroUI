@@ -126,7 +126,8 @@ impl StyleReloadTarget {
             if let Some(root) = self.compiled_archive {
                 let uri = ferroui_base::utilities::Uri::absolute(&self.uri)
                     .map_err(|error| ReloadError::Failed(error.to_string()))?;
-                if let Some(value) = root.try_load(bytes, &uri, &self.configuration, None)
+                if let Some(value) = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::try_load_compiled_archive(
+                    &root, bytes, &uri, &self.configuration, None)
                     .map_err(|error| ReloadError::Failed(error.to_string()))? {
                     return Rc::<dyn IStyle>::from_xaml_object(&value)
                         .ok_or_else(|| ReloadError::Failed("Expected style".into()));
@@ -403,7 +404,7 @@ mod portable_tests {
         let descriptor = CompiledArchiveRoot {
             bytes: original, uri: URI, assembly: &ferroui_markup_xaml::ASSEMBLY,
             class: Styles::TYPE, use_compiled_bindings_by_default: false,
-            create_source_info: configuration.create_source_info(),
+            create_source_info: configuration.create_source_info(), dictionaries: &[],
             load: |_, _| {
                 BUILDS.with(|count| count.set(count.get() + 1));
                 Ok(Some(Rc::new(Styles::new())))

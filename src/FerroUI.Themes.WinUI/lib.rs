@@ -72,7 +72,7 @@ pub fn compiled_archive_root() -> ferroui_markup_xaml::CompiledArchiveRoot {
     ferroui_markup_xaml::CompiledArchiveRoot {
         bytes: theme_archive(), uri: WinUITheme::DOCUMENT_URI, class: WinUITheme::TYPE,
         assembly: &ASSEMBLY, create_source_info, use_compiled_bindings_by_default,
-        load: compiled_xaml::try_load,
+        load: compiled_xaml::try_load, dictionaries: compiled_xaml::ARCHIVE_DICTIONARIES,
     }
 }
 

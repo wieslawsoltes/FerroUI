@@ -59,6 +59,8 @@ pub struct CompiledArchiveRoot {
     pub create_source_info: bool,
     pub use_compiled_bindings_by_default: bool,
     pub load: CompiledXamlLoader,
+    /// Paths and normalized build URIs certified by the compiler as never inlined.
+    pub dictionaries: &'static [(&'static str, &'static str)],
 }
 
 impl CompiledArchiveRoot {
@@ -68,23 +70,28 @@ impl CompiledArchiveRoot {
         &self, bytes: &[u8], uri: &Uri, configuration: &RuntimeXamlLoaderConfiguration,
         parent: Option<&Rc<dyn IServiceProvider>>,
     ) -> Result<Option<BoxedValue>, XamlLoadError> {
+        if bytes != self.bytes || !self.accepts(uri, configuration) { return Ok(None); }
+        (self.load)(parent, self.uri)
+    }
+
+    /// Shared by exact and independently replaceable dictionary execution.
+    pub fn accepts(&self, uri: &Uri, configuration: &RuntimeXamlLoaderConfiguration) -> bool {
         if configuration.design_mode || configuration.diagnostic_handler.is_some()
             || configuration.create_source_info() != self.create_source_info
             || configuration.use_compiled_bindings_by_default != self.use_compiled_bindings_by_default
             || !configuration.local_assembly.is_some_and(|assembly| std::ptr::eq(assembly, self.assembly))
             || !uri.is_absolute_uri()
             || !Uri::absolute(self.uri).is_ok_and(|expected| expected.absolute_uri() == uri.absolute_uri())
-            || bytes != self.bytes
             || FerroXamlLoader::populate_override(self.class).is_some()
         {
-            return Ok(None);
+            return false;
         }
         #[cfg(all(feature = "binary-resources", feature = "hot-reload", debug_assertions))]
         if crate::xaml_il::runtime::compiled::binary_resources::reload::capture().is_some() {
             // The active FXB snapshot can supersede the linked revision.
-            return Ok(None);
+            return false;
         }
-        (self.load)(parent, self.uri)
+        true
     }
 }
 

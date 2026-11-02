@@ -28,7 +28,9 @@ pub(crate) use assignment::{assignment_plan, last_parameter};
 pub use context::{context_definition, ContextDefinition, FRAMEWORK_CONTEXT};
 pub use includes::include_sources;
 #[cfg(feature = "runtime")]
-pub(crate) use includes::{may_include, syntax_includes};
+pub(crate) use includes::syntax_includes;
+#[cfg(any(feature = "runtime", feature = "compiler"))]
+pub(crate) use includes::may_include;
 #[cfg(feature = "runtime")]
 pub(crate) use methods::{document_method, DocumentMethodSignature};
 pub use methods::{
