@@ -4,6 +4,20 @@ use super::*;
 use crate::session::{ClientWindow, Session, SnapSide};
 use ferroui_controls::{MenuItem, MenuItemToggleType};
 
+fn submenu() -> El<MenuItem> {
+    let shared = use_context::<DesktopBackdrop>().is_some();
+    menu_item().on_template_applied(move |event| {
+        if shared {
+            if let Some(popup) = event
+                .name_scope()
+                .find_as::<ferroui_controls::primitives::Popup>("PART_Popup")
+            {
+                popup.set_should_use_overlay_layer(true);
+            }
+        }
+    })
+}
+
 fn scene_item(shell: &Rc<Shell>, label: &str, scene: Scene) -> El<MenuItem> {
     let shell = shell.clone();
     menu_item()
@@ -70,7 +84,7 @@ pub(super) fn bar(shell: &Rc<Shell>) -> Element {
                 .to_owned()
         })
     });
-    let system = menu_item()
+    let system = submenu()
         .header(glyph(Icon::Mark, 16.0, colors().bar_ink))
         .automation_properties_name("Ferro Desktop menu")
         .child(scene_item(shell, "System Settings…", Scene::Appearance))
@@ -79,7 +93,7 @@ pub(super) fn bar(shell: &Rc<Shell>) -> Element {
         .child(scene_item(shell, "Spotlight…", Scene::Applications))
         .child(scene_item(shell, "Mission Control", Scene::Workspaces));
     let hide_session = shell.session.clone();
-    let app = menu_item()
+    let app = submenu()
         .header(
             shell_text("", 13.0, colors().bar_ink)
                 .font_weight(FontWeight::Bold)
@@ -120,7 +134,7 @@ pub(super) fn bar(shell: &Rc<Shell>) -> Element {
                     }
                 }),
         );
-    let tile = menu_item()
+    let tile = submenu()
         .header("Move & Resize")
         .is_enabled(move || front.with(|w| w.as_ref().is_some_and(|w| w.can_snap && !w.fullscreen)))
         .child(window_command(
@@ -138,7 +152,7 @@ pub(super) fn bar(shell: &Rc<Shell>) -> Element {
             |s, id| s.snap(id, SnapSide::Right),
         ));
     let session = shell.session.clone();
-    let windows = menu_item()
+    let windows = submenu()
         .header("Window")
         .is_visible(move || width.get() >= 470.0)
         .child(window_command(

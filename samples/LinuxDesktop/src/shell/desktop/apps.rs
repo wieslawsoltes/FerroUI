@@ -209,7 +209,7 @@ pub(super) fn strip(shell: &Rc<Shell>, layout: Layout) -> Element {
             if let Some(menu) = dock_menu {
                 let button = button
                     .tool_tip_placement(ferroui_controls::PlacementMode::Top)
-                    .with(move |b| b.set_context_menu(Some(menu.clone())));
+                    .with(move |b| b.set_context_flyout(&menu));
                 if separator {
                     row(7.0)
                         .child(border().width(1).height(31).background(colors().bar_edge))
@@ -226,9 +226,9 @@ pub(super) fn strip(shell: &Rc<Shell>, layout: Layout) -> Element {
     buttons
 }
 
-fn dock_menu(shell: &Rc<Shell>, entry: &Entry) -> ferroui_base::Ref<ferroui_controls::ContextMenu> {
+fn dock_menu(shell: &Rc<Shell>, entry: &Entry) -> ferroui_base::Ref<ferroui_controls::MenuFlyout> {
     use ferroui_controls::{
-        ContextMenu, Control, MenuItem, MenuItemToggleType, PlacementMode, Separator,
+        Control, MenuFlyout, MenuItem, MenuItemToggleType, PlacementMode, Separator,
     };
 
     fn item(label: &str, invoke: impl Fn() + 'static) -> ferroui_base::Ref<MenuItem> {
@@ -238,7 +238,9 @@ fn dock_menu(shell: &Rc<Shell>, entry: &Entry) -> ferroui_base::Ref<ferroui_cont
         item
     }
 
-    let menu = ContextMenu::new();
+    let menu = MenuFlyout::new();
+    menu.popup()
+        .set_should_use_overlay_layer(use_context::<DesktopBackdrop>().is_some());
     menu.set_placement(PlacementMode::Top);
     let app = entry.app;
     let native_id = entry.native_id.clone();
