@@ -72,7 +72,7 @@
 use crate::interop::glib::{panic_message, GMainLoop, Glib, G_PRIORITY_DEFAULT};
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::threading::{
-    CancellationToken, CancellationTokenSource, DispatcherImplEvent, IControlledDispatcherImpl, IDispatcherImpl,
+    CancellationToken, DispatcherImplEvent, IControlledDispatcherImpl, IDispatcherImpl,
     IDispatcherImplWithExplicitBackgroundProcessing, IDispatcherImplWithPendingInput, IDispatcherSignal,
 };
 use ferroui_base::utilities::ThreadBound;
@@ -152,7 +152,7 @@ impl IDispatcherSignal for GlibSignal {
 /// One run of the main loop the framework started (`ManagedLoopFrame`).
 struct ManagedLoopFrame {
     external_token: CancellationToken,
-    internal_token_source: RefCell<Option<CancellationTokenSource>>,
+    internal_token: RefCell<Option<CancellationToken>>,
     cancelled: RefCell<CancellationToken>,
     // Shared with the callback of the cancellation, which may come from another thread:
     // the loop lives as long as either holds it, where the reference guards a disposed
@@ -165,7 +165,7 @@ impl ManagedLoopFrame {
     fn new(glib: Glib, token: CancellationToken) -> Self {
         Self {
             external_token: token,
-            internal_token_source: RefCell::new(None),
+            internal_token: RefCell::new(None),
             cancelled: RefCell::new(CancellationToken::none()),
             main_loop: Arc::new(glib.g_main_loop_new(true)),
             exceptions: RefCell::new(Vec::new()),
@@ -173,31 +173,28 @@ impl ManagedLoopFrame {
     }
 
     fn stop(&self) {
-        let source = self.internal_token_source.borrow().clone();
-        if let Some(source) = source {
-            source.cancel();
+        let token = self.internal_token.borrow().clone();
+        if let Some(token) = token {
+            token.cancel();
         }
     }
 
     fn run(&self) {
-        if self.external_token.is_cancellation_requested() {
+        if self.external_token.is_cancelled() {
             return;
         }
-        // The token of the frame is canceled by the token of the caller and by `stop` (the
-        // linked token source of the reference).
-        let internal = CancellationTokenSource::new();
-        *self.internal_token_source.borrow_mut() = Some(internal.clone());
-        let link = internal.clone();
-        let external_registration = self.external_token.register(move || link.cancel());
-        *self.cancelled.borrow_mut() = internal.token();
+        // The token of the frame is a child of the token of the caller, which `stop` also
+        // cancels (the linked token source of the reference).
+        let internal = self.external_token.child_token();
+        *self.internal_token.borrow_mut() = Some(internal.clone());
+        *self.cancelled.borrow_mut() = internal.clone();
         let main_loop = self.main_loop.clone();
-        let registration = internal.token().register(move || main_loop.g_main_loop_quit());
+        let registration = internal.register(move || main_loop.g_main_loop_quit());
 
         self.main_loop.g_main_loop_run();
 
         registration.dispose();
-        external_registration.dispose();
-        *self.internal_token_source.borrow_mut() = None;
+        *self.internal_token.borrow_mut() = None;
     }
 }
 
@@ -408,7 +405,7 @@ impl IDispatcherImplWithPendingInput for GlibDispatcherImplBase {
 
 impl IControlledDispatcherImpl for GlibDispatcherImplBase {
     fn run_loop(&self, token: CancellationToken) {
-        if token.is_cancellation_requested() {
+        if token.is_cancelled() {
             return;
         }
 
@@ -463,7 +460,7 @@ mod tests {
         assert!(dispatcher.current_thread_is_loop_thread());
         assert!(!dispatcher.can_query_pending_input() && !dispatcher.has_pending_input());
 
-        let source = CancellationTokenSource::new();
+        let source = CancellationToken::new();
         let (l, s) = (log.clone(), source.clone());
         dispatcher.timer().add(Rc::new(move |()| {
             // The timer is the last of the three: it ends the loop.
@@ -479,12 +476,12 @@ mod tests {
         dispatcher.update_timer(Some(dispatcher.now() + 30));
         assert!(log.borrow().is_empty());
 
-        dispatcher.run_loop(source.token());
+        dispatcher.run_loop(source.clone());
         assert_eq!(*log.borrow(), ["signaled", "background", "timer", "stop"]);
 
         // A loop with a canceled token does not run at all.
         dispatcher.signal();
-        dispatcher.run_loop(source.token());
+        dispatcher.run_loop(source.clone());
         assert_eq!(log.borrow().len(), 4);
     }
 
@@ -495,7 +492,7 @@ mod tests {
         };
         let _lock = main_context_lock();
         let dispatcher = GlibDispatcherImplBase::new(glib, None);
-        let source = CancellationTokenSource::new();
+        let source = CancellationToken::new();
         let s = source.clone();
         let ui_thread = thread::current().id();
         dispatcher.signaled().add(Rc::new(move |()| {
@@ -507,9 +504,9 @@ mod tests {
             thread::sleep(std::time::Duration::from_millis(20));
             handle.signal();
         });
-        dispatcher.run_loop(source.token());
+        dispatcher.run_loop(source.clone());
         other.join().unwrap();
-        assert!(source.is_cancellation_requested());
+        assert!(source.is_cancelled());
     }
 
     #[test]
@@ -520,7 +517,7 @@ mod tests {
         let _lock = main_context_lock();
         let dispatcher = GlibDispatcherImplBase::new(glib, None);
         let log = events(&dispatcher);
-        let source = CancellationTokenSource::new();
+        let source = CancellationToken::new();
 
         dispatcher.update_timer(Some(dispatcher.now() + 5));
         dispatcher.update_timer(None);
@@ -529,7 +526,7 @@ mod tests {
         let started = dispatcher.now();
         let s = source.clone();
         dispatcher.timer().add(Rc::new(move |()| s.cancel()));
-        dispatcher.run_loop(source.token());
+        dispatcher.run_loop(source.clone());
         assert_eq!(*log.borrow(), ["timer"]);
         assert!(dispatcher.now() - started >= 35, "the timer fired early");
     }
