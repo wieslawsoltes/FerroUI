@@ -220,3 +220,51 @@ pub fn deferred_factories(
     }
     Ok(())
 }
+
+/// Immediate dictionary values retain their XAML evaluation and duplicate-key ordering.
+pub type ConstantRow<T> = (&'static str, T, i32, i32);
+
+pub(super) fn add_constant(
+    dictionary: &Ref<ResourceDictionary>, key: &str,
+    value: MarkupValue, line: i32, column: i32,
+) -> Result<(), XamlLoadError> {
+    use ferroui_base::controls::IResourceDictionary;
+    invoked(<dyn IResourceDictionary>::__markup_Add_0(
+        &super::cast(dictionary.clone(), line, column)?, string_object(key), value,
+    ), line, column)
+}
+
+pub(super) fn color_value(argb: u32) -> MarkupValue {
+    super::to_object(Color::from_uint32(argb))
+}
+
+pub(super) fn double_value(bits: u64) -> MarkupValue {
+    super::to_object(f64::from_bits(bits))
+}
+
+pub(super) fn thickness_value(bits: [u64; 4]) -> MarkupValue {
+    let [left, top, right, bottom] = bits.map(f64::from_bits);
+    super::to_object(ferroui_base::Thickness::new(left, top, right, bottom))
+}
+
+pub(super) fn corner_radius_value(bits: [u64; 4]) -> MarkupValue {
+    let [tl, tr, br, bl] = bits.map(f64::from_bits);
+    super::to_object(ferroui_base::CornerRadius::new(tl, tr, br, bl))
+}
+
+macro_rules! constants {
+    ($name:ident, $operand:ty, $make:ident) => {
+        #[inline(never)]
+        pub fn $name(dictionary: &Ref<ResourceDictionary>, rows: &[ConstantRow<$operand>]) -> Result<(), XamlLoadError> {
+            for &(key, value, line, column) in rows {
+                add_constant(dictionary, key, $make(value), line, column)?;
+            }
+            Ok(())
+        }
+    };
+}
+
+constants!(colors, u32, color_value);
+constants!(doubles, u64, double_value);
+constants!(thicknesses, [u64; 4], thickness_value);
+constants!(corner_radii, [u64; 4], corner_radius_value);

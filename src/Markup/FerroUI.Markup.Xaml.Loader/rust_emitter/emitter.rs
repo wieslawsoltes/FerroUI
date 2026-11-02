@@ -2556,10 +2556,22 @@ impl<'a> Emitter<'a> {
             None => Typed { expr: target.expr.clone(), kind: target.kind },
         };
         let key = self.value(&key_node.as_node())?;
+        let value_start = self.lines.len();
         let value = self.value(&value_node.as_node())?;
         if !setter.emit_source_info {
             let local = value.expr.clone();
+            let literal_dictionary = match dictionary.kind {
+                Kind::Class(class) if class.rust_path().is_some_and(|p| p.trim_start_matches("::") == "ferroui_base::controls::ResourceDictionary") => Some(dictionary.expr.clone()),
+                _ => None,
+            };
             let call = self.declared_call(node, &adder, &[dictionary, key, value])?;
+            if let Some(site) = literal_dictionary.as_deref().and_then(|dict| self.theme_tables.constant(
+                dict, &self.lines[value_start..], &call, node.line(), node.position(),
+            )) {
+                self.lines.truncate(value_start);
+                self.line(site);
+                return Ok(());
+            }
             if let Some(fused) = self.lines.last().and_then(|last| fused_deferred_resource_add(self.types, &mut self.theme_tables, last, &local, &call)) {
                 self.lines.pop();
                 self.line(fused);

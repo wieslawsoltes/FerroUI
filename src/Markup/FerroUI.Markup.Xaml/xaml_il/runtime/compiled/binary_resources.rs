@@ -108,6 +108,25 @@ pub fn deferred_factories(
     Ok(())
 }
 
+macro_rules! constants {
+    ($name:ident, $kind:ident, $operand:ident, $make:ident) => {
+        #[inline(never)]
+        pub fn $name(dictionary: &Ref<ResourceDictionary>, block: Block) -> Result<(), XamlLoadError> {
+            let batch = block.decode(Kind::$kind)?;
+            for row in batch.records() {
+                let Payload::$operand(value) = row.payload else { unreachable!("validated constant block") };
+                theme_resources::add_constant(dictionary, row.key, theme_resources::$make(value), row.line, row.column)?;
+            }
+            Ok(())
+        }
+    };
+}
+
+constants!(colors, Color, Argb, color_value);
+constants!(doubles, Double, Double, double_value);
+constants!(thicknesses, Thickness, Quad, thickness_value);
+constants!(corner_radii, CornerRadius, Quad, corner_radius_value);
+
 /// UI-thread candidate image for repopulating a theme. Validate edits before activation.
 /// Deferred values created by an older population retain that generation's string pool.
 /// A host may retry construction under the previous snapshot if the new theme fails.

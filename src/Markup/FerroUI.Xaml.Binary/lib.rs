@@ -29,6 +29,10 @@ pub enum Kind {
     StaticBrush = 4,
     /// Invoke a typed deferred builder from the caller's local import table.
     DeferredFactory = 5,
+    Color = 6,
+    Double = 7,
+    Thickness = 8,
+    CornerRadius = 9,
 }
 
 impl Kind {
@@ -39,6 +43,10 @@ impl Kind {
             3 => Some(Self::DynamicBrush),
             4 => Some(Self::StaticBrush),
             5 => Some(Self::DeferredFactory),
+            6 => Some(Self::Color),
+            7 => Some(Self::Double),
+            8 => Some(Self::Thickness),
+            9 => Some(Self::CornerRadius),
             _ => None,
         }
     }
@@ -49,6 +57,8 @@ pub enum Value<'a> {
     Text(&'a str),
     Argb(u32),
     Import(u32),
+    Double(u64),
+    Quad([u64; 4]),
 }
 
 /// Source positions of both the dictionary insertion and evaluation of the deferred value.
@@ -92,6 +102,8 @@ pub enum Payload {
     Text(SharedText),
     Argb(u32),
     Import(u32),
+    Double(u64),
+    Quad([u64; 4]),
 }
 
 pub struct Record<'a> {
@@ -109,6 +121,7 @@ pub struct Batch {
     text: Arc<str>,
     ends: Vec<u32>,
     rows: Vec<[u32; 6]>,
+    numbers: Vec<u64>,
 }
 
 impl Batch {
@@ -158,10 +171,25 @@ impl Batch {
         }
 
         let mut rows = Vec::with_capacity(count);
+        let mut numbers = Vec::new();
         for _ in 0..count {
             let key = uint(&mut bytes)?;
             let value = match kind {
-                Kind::LiteralBrush => u32::from_le_bytes(take(&mut bytes, 4)?.try_into().unwrap()),
+                Kind::Double | Kind::Thickness | Kind::CornerRadius => {
+                    let start = numbers.len() as u32;
+                    let components = if kind == Kind::Double { 1 } else { 4 };
+                    for _ in 0..components {
+                        let tag = take(&mut bytes, 1)?[0];
+                        let bits = if tag == 255 {
+                            u64::from_le_bytes(take(&mut bytes, 8)?.try_into().unwrap())
+                        } else {
+                            (f64::from(tag) - 32.0).to_bits()
+                        };
+                        numbers.push(bits);
+                    }
+                    start
+                }
+                Kind::Color | Kind::LiteralBrush => u32::from_le_bytes(take(&mut bytes, 4)?.try_into().unwrap()),
                 _ => uint(&mut bytes)?,
             };
             if key as usize >= strings
@@ -187,6 +215,7 @@ impl Batch {
             text: Arc::from(text),
             ends,
             rows,
+            numbers,
         })
     }
 
@@ -207,7 +236,11 @@ impl Batch {
             .map(|&[key, value, line, column, value_line, value_column]| {
                 let range = |id: u32| (self.ends[id as usize], self.ends[id as usize + 1]);
                 let (a, b) = range(key);
-                let payload = if self.kind == Kind::LiteralBrush {
+                let payload = if self.kind == Kind::Double {
+                    Payload::Double(self.numbers[value as usize])
+                } else if matches!(self.kind, Kind::Thickness | Kind::CornerRadius) {
+                    Payload::Quad(self.numbers[value as usize..value as usize + 4].try_into().unwrap())
+                } else if matches!(self.kind, Kind::LiteralBrush | Kind::Color) {
                     Payload::Argb(value)
                 } else if self.kind == Kind::DeferredFactory {
                     Payload::Import(value)

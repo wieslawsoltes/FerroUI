@@ -6,6 +6,9 @@ use ferroui_xaml_binary::{Kind, Resource, Value};
 use std::collections::HashMap;
 use std::fmt::Write as _;
 
+mod constants;
+use constants::Constant;
+
 use super::emitter::DocumentFunctions;
 use super::source::rust_string_literal;
 
@@ -186,6 +189,7 @@ struct Body {
 enum SiteBody {
     Intrinsic(Body),
     Import(String),
+    Constant(Constant),
 }
 
 struct Site {
@@ -205,6 +209,7 @@ impl Site {
             }
             // Imported builders carry their own document and lexical namespace tables.
             (SiteBody::Import(_), SiteBody::Import(_)) => true,
+            (SiteBody::Constant(a), SiteBody::Constant(b)) => a.layout().0 == b.layout().0,
             _ => false,
         }
     }
@@ -213,6 +218,7 @@ impl Site {
         let (value, value_line, value_column) = match &self.body {
             SiteBody::Intrinsic(b) => (b.factory.operand.value(), b.factory.value_line, b.factory.value_column),
             SiteBody::Import(_) => (Value::Import(slot as u32), self.line, self.column),
+            SiteBody::Constant(c) => (c.value(), self.line, self.column),
         };
         Resource { key: &self.key, value, line: self.line, column: self.column, value_line, value_column }
     }
@@ -290,10 +296,12 @@ impl ThemeTables {
         let count = lines.iter().filter_map(|line| site(line)).take(8).count();
         if count == 0 { return; }
         if count < 8 && documents.binary.is_none() {
-            for line in lines {
-                if let Some(index) = site(line) {
-                    line.truncate(line.len() - line.trim_start().len());
-                    line.push_str(&self.sites[index].direct);
+            for line in std::mem::take(lines) {
+                if let Some(index) = site(&line) {
+                    let indent = &line[..line.len() - line.trim_start().len()];
+                    lines.extend(self.sites[index].direct.lines().map(|s| format!("{indent}{s}")));
+                } else {
+                    lines.push(line);
                 }
             }
             return;
@@ -325,6 +333,29 @@ impl ThemeTables {
             }
             let first = &self.sites[first];
             let rows: Vec<_> = run.iter().enumerate().map(|(slot, &index)| self.sites[index].row(slot)).collect();
+            if let SiteBody::Constant(value) = &first.body {
+                let (kind, helper, ty) = value.layout();
+                let (module, data) = if let Some(block) = documents.binary_resource_batch(function, kind, &rows) {
+                    ("binary_resources", block)
+                } else {
+                    let data = format!("{}_THEME_CONSTANTS_{}", function.to_uppercase(), self.tables);
+                    self.tables += 1;
+                    writeln!(self.constants, "static {data}: &[rt::theme_resources::ConstantRow<{ty}>] = &[").unwrap();
+                    for row in rows {
+                        let operand = match row.value {
+                            Value::Argb(x) => format!("0x{x:08x}"),
+                            Value::Double(x) => format!("{x:#x}"),
+                            Value::Quad(xs) => format!("[{:#x}, {:#x}, {:#x}, {:#x}]", xs[0], xs[1], xs[2], xs[3]),
+                            _ => unreachable!("constant operand"),
+                        };
+                        writeln!(self.constants, "    ({}, {operand}, {}, {}),", rust_string_literal(row.key), row.line, row.column).unwrap();
+                    }
+                    self.constants.push_str("];\n");
+                    ("theme_resources", data)
+                };
+                lines.push(format!("{indent}rt::{module}::{helper}({}, {data})?;", first.dictionary));
+                continue;
+            }
             let SiteBody::Intrinsic(body) = &first.body else {
                 // A singleton stays a direct call; importing one function would only add indirection.
                 if run.len() == 1 {
@@ -359,7 +390,7 @@ impl ThemeTables {
                 Kind::LiteralBrush => "literal_brushes",
                 Kind::DynamicBrush => "dynamic_brushes",
                 Kind::StaticBrush => "static_brushes",
-                Kind::DeferredFactory => unreachable!("import run handled separately"),
+                _ => unreachable!("non-intrinsic run handled separately"),
             };
             let document = &body.document;
             let document = if document.starts_with("rt::DocumentInfo {") {
@@ -390,7 +421,7 @@ impl ThemeTables {
                     let value = match row.value {
                         Value::Text(text) => rust_string_literal(text),
                         Value::Argb(argb) => format!("0x{argb:08x}"),
-                        Value::Import(_) => unreachable!("import run handled separately"),
+                        _ => unreachable!("non-intrinsic run handled separately"),
                     };
                     writeln!(
                         self.constants,

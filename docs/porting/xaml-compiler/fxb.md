@@ -1,27 +1,31 @@
 # FXB v1 compiled resource blocks
 
-The XAML compiler emits a typed Rust factory for each operation a theme needs. Four repeated deferred dictionary operations can use compact binary operands. They construct a static resource alias, a literal ARGB brush, a brush whose color comes from a static resource, or a brush bound to a dynamic resource. Templates, bindings, user types, ordinary property assignments and other operations continue through the typed Rust emitter. The binary path preserves deferred instantiation, source positions, insertion order and the XML namespace scope at the declaration site.
+The XAML compiler groups dictionary operations into contiguous typed runs. FXB carries deferred aliases and brushes, immediate colors, doubles, thicknesses and corner radii, and calls to typed deferred builders. A builder import can construct a template with its own name scope, a custom object, or a subtree containing arbitrary supported markup extensions. The builder body remains compiled Rust. Other operations follow the ordinary emitter. A dictionary observes the original evaluation order, lazy construction and declaration namespace scope.
 
 Enable the `binary-resources` feature of a built-in theme, for example `ferroui-themes-winui/binary-resources`. A custom crate enables `ferroui-markup-xaml/binary-resources` and calls `.binary_resources(true)` on its build script's `ferroui_build::XamlGroup`. Both model and runtime compiler hosts support this option.
 
-Each contiguous run of eligible operations within one dictionary, lexical scope and factory becomes a separate `.fxb` file alongside its generated Rust module in `OUT_DIR/xaml`. Each compiled call includes only its own block and names its typed factory directly. A decoder in a client process needs no reflection, file I/O or second XML parse. The host-side encoder is feature-gated in the dependency-free `ferroui-xaml-binary` crate. Generated Rust keeps operations that cannot fit in a bounded block.
+Each lowered run within one dictionary becomes a separate `.fxb` file alongside its generated Rust module in `OUT_DIR/xaml`. Each compiled call includes only its own block and names its typed factory directly. A decoder in a client process needs no reflection, file I/O or second XML parse. The host-side encoder is feature-gated in the dependency-free `ferroui-xaml-binary` crate. Generated Rust keeps operations that cannot fit in a bounded block.
 
 ## Wire format
 
 | Field in order | Representation |
 | --- | --- |
 | Signature and version | Four octets `46 58 42 00`, then major version `01` |
-| Factory kind | One octet. Values 1, 2, 3 and 4 identify aliases, literal brushes, dynamic brushes and static resource brushes respectively |
+| Factory kind | One octet. Values 1–4 identify aliases, literal brushes, dynamic brushes and static-resource brushes. 5 imports a deferred builder. 6–9 insert a color, double, thickness or corner radius respectively |
 | String count, record count | Two unsigned 32-bit canonical LEB128 integers |
 | Strings, sorted by UTF-8 bytes | For each string, previous-string common-prefix length in bytes, suffix length in bytes, and suffix bytes. Prefixes end at UTF-8 scalar boundaries |
 | Dictionary key | Index into the string table, zero-based |
-| Value operand | Alias, static brush and dynamic brush use a string index. Literal brush uses a little-endian `u32` containing `0xAARRGGBB` |
+| Value operand | Text operands use a string index. Colors and literal brushes use a little-endian ARGB word. Builder imports use an unsigned LEB128 slot. A double uses one numeric component, thickness and corner radius use four components in constructor order |
 | Source location | Declaration line and column, then ZigZag-encoded deltas for the value line and column relative to the declaration |
 | Remaining records | Repeat key, operand and location in XAML insertion order |
 
-All numeric fields other than the signature, version, kind and ARGB word use canonical unsigned LEB128. Absolute and reconstructed source positions fit a nonnegative `i32`. Blocks and expanded string pools are limited to 16 MiB each, with at most 1,048,576 records and 1,048,576 strings. Unknown versions and kinds, noncanonical or overflowing integers, invalid references, invalid UTF-8, invalid lengths and trailing bytes fail validation before registration begins.
+A numeric component from −32 through 222 uses a single byte containing the integer plus 32. Every other value uses byte 255 followed by the eight little-endian IEEE-754 bits. This preserves negative zero, subnormals, infinities and NaN payloads. Counts, indices and source locations use canonical unsigned LEB128. Absolute and reconstructed source positions fit a nonnegative `i32`. Blocks and expanded string pools are limited to 16 MiB each, with at most 1,048,576 records and 1,048,576 strings. Unknown versions and kinds, noncanonical or overflowing integers, invalid references, invalid UTF-8, invalid lengths and trailing bytes fail validation before registration begins.
 
 `Batch::decode` expands the string pool in one pass, indexes records, and validates input before yielding any row. A deferred text operand holds a reference-counted slice of the pool, allowing the decoder and input bytes to be dropped immediately. The decoder expands shared prefixes, interned strings, compact indices and source-position deltas without an external compression library.
+
+For a deferred builder import, the generated call supplies a slice of `rt::DeferredBuild` function pointers local to the run. A slot selects only a builder linked at that call site. The runtime validates every slot against the table before inserting any entry. It captures the same service provider, root object and name scope as the direct Rust call. Multiple rows may refer to the same slot. Changing the builder code or introducing a new imported builder requires a native rebuild. A singleton builder stays a direct call.
+
+The original four FXB v1 kinds retain their encoding. Readers that predate the additional kinds report an unsupported factory kind on a new block.
 
 ## Hot reload
 

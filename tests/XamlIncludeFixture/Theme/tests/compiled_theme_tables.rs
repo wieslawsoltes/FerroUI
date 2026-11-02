@@ -9,6 +9,13 @@ use ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 
 fn materialize(dictionary: Ref<ResourceDictionary>) -> Vec<(Color, f64)> {
+    for key in ["Scale", "Margin", "Radii", "Accent"] {
+        assert!(dictionary.contains_key(&key.into()));
+        assert!(!dictionary.contains_deferred_key(&key.into()));
+    }
+    assert_eq!(dictionary.get(&"Scale".into()).unwrap().downcast_ref::<f64>(), Some(&0.8125));
+    assert_eq!(dictionary.get(&"Margin".into()).unwrap().downcast_ref::<ferroui_base::Thickness>(), Some(&ferroui_base::Thickness::new(1.,2.,3.,4.)));
+    assert_eq!(dictionary.get(&"Radii".into()).unwrap().downcast_ref::<ferroui_base::CornerRadius>(), Some(&ferroui_base::CornerRadius::new(4.,3.,2.,1.)));
     let keys = [
         "Alias2", "Aliás1", "Literal1", "Literal2", "Static1", "Static2", "Dynamic1", "Dynamic2", "Fallback",
     ];
@@ -60,7 +67,7 @@ fn compiled_theme_tables_match_the_interpreter() {
     }
     let rust = include_str!(concat!(env!("OUT_DIR"), "/xaml/compact_rust.rs"));
     let binary = include_str!(concat!(env!("OUT_DIR"), "/xaml/compact_binary.rs"));
-    for helper in ["aliases", "literal_brushes", "static_brushes", "dynamic_brushes", "deferred_factories"] {
+    for helper in ["aliases", "literal_brushes", "static_brushes", "dynamic_brushes", "deferred_factories", "colors", "doubles", "thicknesses", "corner_radii"] {
         assert!(
             rust.contains(&format!("rt::theme_resources::{helper}(")),
             "{helper} was not lowered"

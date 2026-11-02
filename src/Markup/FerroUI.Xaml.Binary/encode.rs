@@ -22,7 +22,10 @@ pub fn encode(kind: Kind, rows: &[Resource<'_>]) -> Result<Vec<u8>, Error> {
     for row in rows {
         strings.push(row.key);
         match (kind, row.value) {
-            (Kind::LiteralBrush, Value::Argb(_)) | (Kind::DeferredFactory, Value::Import(_)) => {}
+            (Kind::LiteralBrush | Kind::Color, Value::Argb(_))
+            | (Kind::Double, Value::Double(_))
+            | (Kind::Thickness | Kind::CornerRadius, Value::Quad(_))
+            | (Kind::DeferredFactory, Value::Import(_)) => {}
             (Kind::Alias | Kind::DynamicBrush | Kind::StaticBrush, Value::Text(value)) => {
                 strings.push(value)
             }
@@ -71,6 +74,12 @@ pub fn encode(kind: Kind, rows: &[Resource<'_>]) -> Result<Vec<u8>, Error> {
             Value::Argb(value) => out.extend_from_slice(&value.to_le_bytes()),
             Value::Text(s) => uint(&mut out, index(s)),
             Value::Import(slot) => uint(&mut out, slot),
+            Value::Double(bits) => number(&mut out, bits),
+            Value::Quad(components) => {
+                for bits in components {
+                    number(&mut out, bits);
+                }
+            }
         }
         uint(&mut out, row.line);
         uint(&mut out, row.column);
@@ -81,4 +90,16 @@ pub fn encode(kind: Kind, rows: &[Resource<'_>]) -> Result<Vec<u8>, Error> {
         return Err(Error("FXB block too large"));
     }
     Ok(out)
+}
+
+/// Integers -32..=222 occupy one byte. The escape preserves all IEEE-754 bits,
+/// including negative zero, fractional values, infinities and arbitrary NaN payloads.
+fn number(out: &mut Vec<u8>, bits: u64) {
+    let tag = (f64::from_bits(bits) + 32.0) as u8;
+    if tag != 255 && (f64::from(tag) - 32.0).to_bits() == bits {
+        out.push(tag);
+    } else {
+        out.push(255);
+        out.extend_from_slice(&bits.to_le_bytes());
+    }
 }

@@ -136,3 +136,21 @@ fn deferred_factory_imports_are_local_to_a_compiled_call_site() {
         .validate_imports(3)
         .is_err());
 }
+
+#[test]
+fn numeric_operands_preserve_every_ieee_bit_and_reject_partial_wide_values() {
+    let cases = [(-32.0_f64).to_bits(), 222.0_f64.to_bits(), (-0.0_f64).to_bits(), 0.8125_f64.to_bits(),
+        f64::INFINITY.to_bits(), f64::NEG_INFINITY.to_bits(), 0x7ff8_1234_5678_9876, 1_u64];
+    for bits in cases {
+        let data = encode(Kind::Double, &[row("v", Value::Double(bits))]).unwrap();
+        assert!(matches!(Batch::decode(&data).unwrap().records().next().unwrap().payload, Payload::Double(v) if v == bits));
+    }
+    for kind in [Kind::Thickness, Kind::CornerRadius] {
+        let quad = [cases[0], cases[7], cases[4], cases[2]];
+        let data = encode(kind, &[row("v", Value::Quad(quad))]).unwrap();
+        assert!(matches!(Batch::decode(&data).unwrap().records().next().unwrap().payload, Payload::Quad(v) if v == quad));
+        for end in 0..data.len() {
+            assert!(Batch::decode(&data[..end]).is_err());
+        }
+    }
+}
