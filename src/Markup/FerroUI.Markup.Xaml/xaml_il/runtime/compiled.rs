@@ -9,6 +9,8 @@
 //! document built by generated code fails exactly where and as the run-time
 //! loader fails.
 
+#[cfg(feature = "binary-resources")]
+pub mod binary_resources;
 pub mod theme_resources;
 
 use std::any::{Any, TypeId};

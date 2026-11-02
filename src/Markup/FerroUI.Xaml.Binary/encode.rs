@@ -23,7 +23,9 @@ pub fn encode(kind: Kind, rows: &[Resource<'_>]) -> Result<Vec<u8>, Error> {
         strings.push(row.key);
         match (kind, row.value) {
             (Kind::LiteralBrush, Value::Argb(_)) => {}
-            (Kind::Alias | Kind::DynamicBrush, Value::Text(value)) => strings.push(value),
+            (Kind::Alias | Kind::DynamicBrush | Kind::StaticBrush, Value::Text(value)) => {
+                strings.push(value)
+            }
             _ => return Err(Error("FXB value does not match the factory kind")),
         }
         if [row.line, row.column, row.value_line, row.value_column]

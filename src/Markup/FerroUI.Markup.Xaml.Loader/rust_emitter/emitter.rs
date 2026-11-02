@@ -51,6 +51,7 @@ use super::emit_types::{
     DeclaredKind, EmitClass, EmitMarkup, EmitProperty, EmitTypes, FieldValue, FrameworkType, Handle, Known, MethodInfo, TypeKey,
 };
 use super::source::rust_string_literal;
+use super::theme_tables::{Factory, ThemeTables};
 
 /// Why a document is not eligible for emission: the first node (or member)
 /// the emitter has no exact Rust for.
@@ -422,7 +423,7 @@ fn fused_setter_add(types: &dyn EmitTypes, lines: &[String], call: &str) -> Opti
 ///
 /// `None` (the statements are kept as they are) for any other shape: the constructor with the
 /// key, other members, another service provider.
-fn fused_static_resource_content(types: &dyn EmitTypes, lines: &[String], returned: &str, document: &str) -> Option<Vec<String>> {
+fn fused_static_resource_content(types: &dyn EmitTypes, lines: &[String], returned: &str, document: &str) -> Option<(Vec<String>, Option<Factory>)> {
     let extension = types.framework_path(FrameworkType::StaticResourceExtension)?;
     let statements: Vec<&str> = lines.iter().map(|line| line.strip_prefix("    ").unwrap_or(line)).collect();
     let [create, marker, set_key, provide] = statements.as_slice() else { return None };
@@ -441,10 +442,10 @@ fn fused_static_resource_content(types: &dyn EmitTypes, lines: &[String], return
     if !is_string_literal(key) || line.parse::<i32>().is_err() || column.parse::<i32>().is_err() || returned != "rt::to_value(provided_0)" {
         return None;
     }
-    Some(vec![
+    Some((vec![
         format!("    {marker}"),
         format!("    rt::static_resource_content(service_provider, &{document}, {key}, {line}, {column})"),
-    ])
+    ], Factory::alias(key, line, column)))
 }
 
 /// The literal of `::std::string::String::from("..")`, the form in which the emitter writes text
@@ -559,7 +560,7 @@ fn fused_template_binding_bind(types: &dyn EmitTypes, lines: &[String], statemen
 /// (`rt::defer`) and `call` the call of `ResourceDictionary.AddDeferred` with it, both at one
 /// position. `rt::add_deferred_resource(dictionary, key, type, &context, build, line, position)`
 /// makes the same calls in the same order. `None` (the statements are kept) for any other shape.
-fn fused_deferred_resource_add(types: &dyn EmitTypes, last: &str, local: &str, call: &str) -> Option<String> {
+fn fused_deferred_resource_add(types: &dyn EmitTypes, tables: &mut ThemeTables, last: &str, local: &str, call: &str) -> Option<String> {
     let dictionary_type = types.framework_path(FrameworkType::ResourceDictionary)?;
     let deferred_content = types.framework_path(FrameworkType::DeferredContent)?;
     let deferred = last.strip_prefix(&format!("    let {local} = rt::defer("))?.strip_suffix(")?;")?;
@@ -572,7 +573,11 @@ fn fused_deferred_resource_add(types: &dyn EmitTypes, last: &str, local: &str, c
     if !is_identifier(local) || !is_identifier(build) || !is_plain_borrow(dictionary) || !is_string_literal(key) {
         return None;
     }
-    Some(format!("rt::add_deferred_resource({dictionary}, {key}, {result_type}, &context, {build}, {position})?;"))
+    let direct = format!("rt::add_deferred_resource({dictionary}, {key}, {result_type}, &context, {build}, {position})?;");
+    if result_type == "::ferroui_base::data::core::ValueType::object()" {
+        if let Some(site) = tables.insertion(build, dictionary, key, position, &direct) { return Some(site); }
+    }
+    Some(direct)
 }
 
 /// The arguments of `rt::clr_property_info` for `Setter.Value`, which
@@ -649,6 +654,7 @@ struct Emitter<'a> {
     /// order their content appears in the document (a slot is reserved when
     /// the content starts, so nested content follows the content around it).
     deferred_functions: Vec<String>,
+    theme_tables: ThemeTables,
     /// The Rust types of the locals whose type the emitter states (`let` of
     /// an object created with its default constructor): what a part of a
     /// split function can be passed ([`split_into_parts`]).
@@ -2494,7 +2500,7 @@ impl<'a> Emitter<'a> {
         if !setter.emit_source_info {
             let local = value.expr.clone();
             let call = self.declared_call(node, &adder, &[dictionary, key, value])?;
-            if let Some(fused) = self.lines.last().and_then(|last| fused_deferred_resource_add(self.types, last, &local, &call)) {
+            if let Some(fused) = self.lines.last().and_then(|last| fused_deferred_resource_add(self.types, &mut self.theme_tables, last, &local, &call)) {
                 self.lines.pop();
                 self.line(fused);
                 return Ok(());
@@ -2559,7 +2565,8 @@ impl<'a> Emitter<'a> {
         let outer_aliases = std::mem::replace(&mut self.namespace_aliases, declaration_aliases.clone());
         let body = self.deferred_body(deferred);
         self.namespace_aliases = outer_aliases;
-        let body_lines = std::mem::replace(&mut self.lines, outer_lines);
+        let mut body_lines = std::mem::replace(&mut self.lines, outer_lines);
+        self.theme_tables.lower(&mut body_lines, &mut self.deferred_functions, self.function_name, self.documents);
         self.assignments = outer_assignments;
         self.local_names = outer_names;
         let (uses_context, uses_name_scope) = (self.uses_context || self.uses_name_scope, self.uses_name_scope);
@@ -2589,13 +2596,21 @@ impl<'a> Emitter<'a> {
         // Retain the fused resource fast path when a dictionary imports another lexical scope.
         let fused = fused_static_resource_content(self.types, &body_lines, &returned, &document_info);
         match fused {
-            Some(fused) if !uses_name_scope => {
+            Some((fused, factory)) if !uses_name_scope => {
+                if let Some(factory) = factory {
+                    self.theme_tables.factory(&function, slot, &document_info, factory);
+                }
                 for line in fused {
                     text.push_str(&line);
                     text.push('\n');
                 }
             }
             _ => {
+                if !uses_name_scope {
+                    if let Some(factory) = Factory::brush(&body_lines, &returned) {
+                        self.theme_tables.factory(&function, slot, &document_info, factory);
+                    }
+                }
                 text.push_str(&format!("    let {context_name} = rt::deferred_context(service_provider, &{document_info});\n"));
                 if uses_name_scope {
                     text.push_str("    let name_scope = context.name_scope_field();\n");
@@ -3917,12 +3932,18 @@ pub(crate) fn root_value_handle_of<'a>(types: &'a dyn EmitTypes, root: &Rc<dyn I
 /// resource include the group transformers linked) calls.
 #[derive(Default)]
 pub struct DocumentFunctions<'a> {
+    pub(super) binary: Option<super::BinaryResourceFiles>,
     builds: HashMap<usize, (String, Option<TypeKey<'a>>)>,
     /// The functions the emitted documents call, in the order of the calls.
     called: std::cell::RefCell<Vec<String>>,
 }
 
 impl<'a> DocumentFunctions<'a> {
+    pub(super) fn binary_resource_batch(&self, function: &str, kind: ferroui_xaml_binary::Kind,
+        rows: &[ferroui_xaml_binary::Resource<'_>]) -> Option<String> {
+        self.binary.as_ref()?.add(function, kind, rows)
+    }
+
     /// Records the actual constructed value of another document's Build method.
     pub(crate) fn insert_value(&mut self, build: &Rc<dyn IXamlMethod>, function_name: &str, handle: TypeKey<'a>) {
         self.builds.insert(node_address(build), (function_name.to_string(), Some(handle)));
@@ -4008,6 +4029,7 @@ pub fn emit_function<'a>(
         documents,
         function_name,
         deferred_functions: Vec::new(),
+        theme_tables: ThemeTables::default(),
         local_types: HashMap::new(),
         namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
         root_namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
@@ -4050,12 +4072,14 @@ pub fn emit_function<'a>(
         None => emitter.line(format!("::core::result::Result::Ok({})", created.expr)),
     }
 
+    emitter.theme_tables.lower(&mut emitter.lines, &mut emitter.deferred_functions, function_name, documents);
     let mut source = String::new();
     let document_text = document_name.replace('`', "'").replace(['\r', '\n'], " ");
     for table in &emitter.namespace_tables {
         source.push_str(&format!("/// A lexical XML namespace scope used by `{document_text}`.\n"));
         source.push_str(&format!("const {}: rt::XmlNamespaceTable = {};\n\n", table.name, table.source));
     }
+    source.push_str(&emitter.theme_tables.constants);
     source.push_str(&format!("/// The base URI and the XML namespaces of `{document_text}`.\n"));
     source.push_str(&format!(
         "static {document_constant}: rt::DocumentInfo = rt::DocumentInfo {{ base_uri: {base_uri}, namespaces: {namespaces} }};\n"
@@ -4091,7 +4115,7 @@ pub fn emit_function<'a>(
         source.push('\n');
         source.push_str(part);
     }
-    for function in &emitter.deferred_functions {
+    for function in emitter.deferred_functions.iter().filter(|function| !function.is_empty()) {
         source.push('\n');
         source.push_str(function);
     }

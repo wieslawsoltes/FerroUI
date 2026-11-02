@@ -14,7 +14,7 @@ use xamlx::type_system::IXamlTypeSystem;
 use crate::FerroXamlIlRuntimeCompiler;
 
 use super::compiled::{CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED};
-use super::compiled::{compile_documents_with, file_of, generate_class_file_with, ClassConstructor, ClassFile, ClassGroup, CompiledDocument, EmitterHost, GeneratedFile};
+use super::compiled::{ file_of, ClassConstructor, ClassFile, ClassGroup, CompiledDocument, EmitterHost, GeneratedFile};
 use super::compiled_resources::CompiledMarkupTypeSystem;
 use super::runtime_types::RuntimeEmitTypes;
 use super::source::function_name_of;
@@ -61,7 +61,7 @@ fn transform_with_runtime_types(
 
 /// Parses, transforms and emits the documents (`(name, xaml)`) of an assembly
 /// with the configuration of the run-time loader, against the run-time type system
-/// ([`compile_documents_with`] and [`EmitterHost::runtime`]). The documents are
+/// ([`super::compile_documents_with`] and [`EmitterHost::runtime`]). The documents are
 /// transformed as ONE group, as upstream's build transforms the documents of
 /// an assembly and the run-time loader a group of documents: the group
 /// transformers see every document, so includes between them are resolved.
@@ -90,8 +90,18 @@ pub fn compile_documents(
     configuration: &RuntimeXamlLoaderConfiguration,
     dependencies: &[XamlMetadata],
 ) -> Vec<CompiledDocument> {
+    compile_with_binary(documents, root_uri, configuration, dependencies, None)
+}
+
+fn compile_with_binary(
+    documents: &[(&str, &str)],
+    root_uri: Option<&str>,
+    configuration: &RuntimeXamlLoaderConfiguration,
+    dependencies: &[XamlMetadata],
+    binary: Option<&super::BinaryResourceFiles>,
+) -> Vec<CompiledDocument> {
     match EmitterHost::runtime(dependencies) {
-        Ok(host) => compile_documents_with(&host, documents, root_uri, &TransformOptions::of(configuration)),
+        Ok(host) => super::compiled::compile_documents_with_binary(&host, documents, root_uri, &TransformOptions::of(configuration), binary),
         Err(error) => documents
             .iter()
             .map(|(name, _)| CompiledDocument {
@@ -128,6 +138,15 @@ pub fn generate_file(
     dependencies: &[XamlMetadata],
 ) -> GeneratedFile {
     file_of(assembly_name, root_uri, compile_documents(documents, Some(root_uri), configuration, dependencies))
+}
+
+/// Generate compiled Rust against registered types and collect its binary leaves.
+pub fn generate_file_binary(
+    assembly_name: &str, root_uri: &str, documents: &[(&str, &str)],
+    configuration: &RuntimeXamlLoaderConfiguration, dependencies: &[XamlMetadata],
+    binary: Option<&super::BinaryResourceFiles>,
+) -> GeneratedFile {
+    file_of(assembly_name, root_uri, compile_with_binary(documents, Some(root_uri), configuration, dependencies, binary))
 }
 
 /// A group of documents with owned texts as the borrowed form
@@ -209,6 +228,17 @@ pub fn generate_class_file(
     module_path: &str,
     dependencies: &[XamlMetadata],
 ) -> Result<ClassFile, String> {
+    generate_class_file_binary(class, constructor, module_path, dependencies, None)
+}
+
+/// The class emitter against registered types, collecting FXB leaves when requested.
+pub fn generate_class_file_binary(
+    class: &'static ferroui_base::TypeInfo,
+    constructor: Option<ClassConstructor>,
+    module_path: &str,
+    dependencies: &[XamlMetadata],
+    binary: Option<&super::BinaryResourceFiles>,
+) -> Result<ClassFile, String> {
     let uri = crate::FerroRuntimeXamlLoader::class_document(class)
         .ok_or_else(|| format!("no document is registered for {}", class.full_name()))?;
     // A document of a crate with compiled markup is that crate's: the include calls it there.
@@ -232,7 +262,7 @@ pub fn generate_class_file(
         constructor,
         module_path,
     };
-    generate_class_file_with(&host, &class, &TransformOptions::of(&configuration))
+    super::generate_class_file_with_binary_resources(&host, &class, &TransformOptions::of(&configuration), binary)
 }
 
 #[cfg(test)]

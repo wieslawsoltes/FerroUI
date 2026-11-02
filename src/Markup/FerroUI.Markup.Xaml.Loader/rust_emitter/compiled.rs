@@ -134,6 +134,16 @@ pub fn compile_documents_with(
     root_uri: Option<&str>,
     options: &TransformOptions,
 ) -> Vec<CompiledDocument> {
+    compile_documents_with_binary(host, documents, root_uri, options, None)
+}
+
+pub(super) fn compile_documents_with_binary(
+    host: &EmitterHost<'_>,
+    documents: &[(&str, &str)],
+    root_uri: Option<&str>,
+    options: &TransformOptions,
+    binary: Option<&super::BinaryResourceFiles>,
+) -> Vec<CompiledDocument> {
     let mut compiled: Vec<CompiledDocument> = Vec::with_capacity(documents.len());
     // The items of the file each document defines, with the document that defines them.
     let mut items: Vec<(String, &str)> = Vec::with_capacity(documents.len() * 2);
@@ -194,6 +204,7 @@ pub fn compile_documents_with(
             let names: Vec<String> = group.iter().map(|(index, _, _, _)| compiled[*index].function_name.clone()).collect();
             let functions_of_group = || {
                 let mut functions = DocumentFunctions::default();
+                functions.binary = binary.cloned();
                 for (name, transformed) in names.iter().zip(&transformed) {
                     if let (Some(build), Some(root_class)) = (&transformed.build, root_value_handle_of(types, &transformed.root)) {
                         functions.insert_value(build, name, root_class);
@@ -283,6 +294,14 @@ pub fn generate_file_with(
     options: &TransformOptions,
 ) -> GeneratedFile {
     file_of(assembly_name, root_uri, compile_documents_with(host, documents, Some(root_uri), options))
+}
+
+/// Compiles against the same type model, emitting eligible resource runs into `binary`.
+pub fn generate_file_with_binary_resources(
+    host: &EmitterHost<'_>, assembly_name: &str, root_uri: &str, documents: &[(&str, &str)],
+    options: &TransformOptions, binary: Option<&super::BinaryResourceFiles>,
+) -> GeneratedFile {
+    file_of(assembly_name, root_uri, compile_documents_with_binary(host, documents, Some(root_uri), options, binary))
 }
 
 /// The generated file of the compiled documents of an assembly.
@@ -710,6 +729,14 @@ pub struct ClassGroup<'a> {
 /// ones the type system of the host states for that type. A question the type system
 /// cannot answer for a document makes the class not eligible, with the question.
 pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, options: &TransformOptions) -> Result<ClassFile, String> {
+    generate_class_file_with_binary_resources(host, group, options, None)
+}
+
+/// The class emitter with separately addressable binary resource runs.
+pub fn generate_class_file_with_binary_resources(
+    host: &EmitterHost<'_>, group: &ClassGroup<'_>, options: &TransformOptions,
+    binary: Option<&super::BinaryResourceFiles>,
+) -> Result<ClassFile, String> {
     let types = host.types;
     let (documents, module_path) = (group.documents, group.module_path);
     if documents.is_empty() {
@@ -755,6 +782,7 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
 
     // The functions of the documents, by their build methods.
     let mut functions = DocumentFunctions::default();
+    functions.binary = binary.cloned();
     let mut names = Vec::with_capacity(documents.len());
     let mut has_build = vec![false; documents.len()];
     for (index, (document, transformed)) in documents.iter().zip(&transformed).enumerate() {

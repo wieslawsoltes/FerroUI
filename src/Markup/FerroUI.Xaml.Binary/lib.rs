@@ -18,6 +18,7 @@ pub enum Kind {
     Alias = 1,
     LiteralBrush = 2,
     DynamicBrush = 3,
+    StaticBrush = 4,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -101,6 +102,7 @@ impl Batch {
             1 => Kind::Alias,
             2 => Kind::LiteralBrush,
             3 => Kind::DynamicBrush,
+            4 => Kind::StaticBrush,
             _ => return Err(Error("unsupported FXB record kind")),
         };
         let strings = uint(&mut bytes)? as usize;
