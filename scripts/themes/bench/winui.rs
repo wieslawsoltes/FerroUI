@@ -16,27 +16,28 @@ fn load_archive(path: std::ffi::OsString) -> ferroui_base::Ref<WinUITheme> {
     };
 
     let image = std::fs::read(path).expect("read replacement archive");
+    ferroui_themes_winui::register_types();
+    let mut config = RuntimeXamlLoaderConfiguration::new();
+    config.local_assembly = Some(&ferroui_themes_winui::ASSEMBLY);
+    let uri = Uri::absolute(WinUITheme::DOCUMENT_URI).unwrap();
+    if let Some(value) = ferroui_themes_winui::compiled_archive_root()
+        .try_load(&image, &uri, &config, None)
+        .expect("load matching installed archive")
+    {
+        return from_markup_value(&Some(value)).expect("compiled WinUI theme class");
+    }
     let indexed = if is_solid(&image) {
         expand_solid(&image).unwrap()
     } else {
         image
     };
     let archive = ThemePack::open(&indexed).unwrap();
-    ferroui_themes_winui::register_types();
-    let mut config = RuntimeXamlLoaderConfiguration::new();
-    config.local_assembly = Some(&ferroui_themes_winui::ASSEMBLY);
-    let uri = Uri::absolute(WinUITheme::DOCUMENT_URI).unwrap();
     let value =
         FerroRuntimeXamlLoader::load_packed_document(&archive, uri, None, None, config).unwrap();
     from_markup_value(&Some(value)).expect("WinUI theme class")
 }
 
 fn main() {
-    // An editor can fetch the archive later. Keep the exact shipping bytes in this
-    // executable without charging an archive decode to the typed startup path.
-    #[cfg(feature = "retain-archive")]
-    assert!(!std::hint::black_box(ferroui_themes_winui::theme_archive()).is_empty());
-
     let start = Instant::now();
     #[cfg(feature = "retain-archive")]
     let theme = std::env::args_os()
