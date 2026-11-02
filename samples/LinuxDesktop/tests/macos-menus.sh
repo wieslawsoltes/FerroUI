@@ -118,10 +118,45 @@ maximized() { xprop -id "$terrain" _NET_WM_STATE | grep -q _NET_WM_STATE_MAXIMIZ
 normal_size() { ! maximized; }
 xdotool mousemove 197 71 click 1
 wait_for maximized
-import -window root "$fixture/first-zoom.png"
+# The WM publishes MAXIMIZED before its newly resized client has repainted
+# and the previous menu has unmapped. Sample the blank GTK space on both
+# sides of that menu as well as underneath it before taking the reference.
+zoom_presented() {
+    import -window root "$fixture/first-zoom.png"
+    local colors
+    colors=$(convert "$fixture/first-zoom.png" -format '%[hex:p{90,120}] %[hex:p{197,120}] %[hex:p{355,120}]' info:)
+    read -r left center right <<<"$colors"
+    [[ $left == "$center" && $center == "$right" ]]
+}
+wait_for zoom_presented
 convert "$fixture/first-zoom.png" -crop "$region" +repage "$fixture/zoom-base.png"
 xdotool mousemove 142 16 click 1
 capture_menu menu-over-maximized "$region" "$fixture/zoom-base.png"
+# Read the actual bounding region of the override-redirect popup above the
+# GTK window. Its top and bottom edges must be inset from the middle.
+python3 - >"$out/menu-x11-shape.txt" <<'PYSHAPE'
+import ctypes as c
+
+class Rect(c.Structure):
+    _fields_ = [("x", c.c_short), ("y", c.c_short), ("w", c.c_ushort), ("h", c.c_ushort)]
+
+x11 = c.CDLL("libX11.so.6")
+ext = c.CDLL("libXext.so.6")
+x11.XOpenDisplay.restype = c.c_void_p
+display = c.c_void_p(x11.XOpenDisplay(None))
+x11.XDefaultRootWindow.restype = c.c_ulong
+root = c.c_ulong(x11.XDefaultRootWindow(display))
+child, tmp_x, tmp_y = c.c_ulong(), c.c_int(), c.c_int()
+assert x11.XTranslateCoordinates(display, root, root, 197, 45,
+                                 c.byref(tmp_x), c.byref(tmp_y), c.byref(child)) and child.value
+ext.XShapeGetRectangles.restype = c.POINTER(Rect)
+count, order = c.c_int(), c.c_int()
+region = ext.XShapeGetRectangles(display, child, 0, c.byref(count), c.byref(order))
+assert count.value > 2, f"popup 0x{child.value:x} has {count.value} bounding rectangles"
+rows = sorted((r.y, r.x, r.w) for r in region[:count.value])
+assert rows[0][1] > 0 and rows[-1][1] == rows[0][1] and min(row[1] for row in rows) == 0
+print(f"X11 popup 0x{child.value:x}, {count.value} bounding rectangles, corner inset {rows[0][1]}px")
+PYSHAPE
 xdotool mousemove 197 71 click 1
 wait_for normal_size
 xdotool mousemove 142 16 click 1
@@ -167,4 +202,4 @@ xdotool mousemove 29 16 click 1 key Down Return
 wait_for scene appearance
 xdotool key Escape
 wait_for scene desktop
-echo "Verified menu tracking, native minimize/restore, Dock pinning and keyboard activation."
+echo "Verified menu tracking, rounded native popups over maximized windows, minimize/restore, Dock pinning and keyboard activation."
