@@ -138,6 +138,12 @@ fn compiled_archive_dispatch_requires_the_exact_revision_and_load_configuration(
     assert!(linked.try_load(&changed, &uri, &configuration, None).unwrap().is_none());
     let fragment = Uri::absolute(&format!("{}#designer", WinUITheme::DOCUMENT_URI)).unwrap();
     assert!(linked.try_load(&bytes, &fragment, &configuration, None).unwrap().is_none());
+    configuration.set_create_source_info(!linked.create_source_info);
+    assert!(linked.try_load(&bytes, &uri, &configuration, None).unwrap().is_none());
+    configuration.set_create_source_info(linked.create_source_info);
+    configuration.use_compiled_bindings_by_default = !linked.use_compiled_bindings_by_default;
+    assert!(linked.try_load(&bytes, &uri, &configuration, None).unwrap().is_none());
+    configuration.use_compiled_bindings_by_default = linked.use_compiled_bindings_by_default;
     configuration.diagnostic_handler = Some(std::rc::Rc::new(|_| RuntimeXamlDiagnosticSeverity::Warning));
     assert!(linked.try_load(&bytes, &uri, &configuration, None).unwrap().is_none());
 }

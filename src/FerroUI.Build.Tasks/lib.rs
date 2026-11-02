@@ -750,6 +750,13 @@ impl Build {
                         for warning in &file.warnings {
                             diagnostics.warning(FerroXamlDiagnosticCodes::XAML_LOADER_UNREACHABLE, class_document, warning, &mut lines, &mut errors);
                         }
+                        #[cfg(feature = "portable-xaml")]
+                        if binary.is_some() {
+                            // The archive dispatcher must compare against the options of
+                            // this exact class compilation, including group overrides.
+                            let flags = format!("({}, {})\n", options.create_source_info, options.use_compiled_bindings_by_default);
+                            write_if_changed(&path.with_extension("fxp-options.rs"), &flags, &mut errors);
+                        }
                         write_binary_files(&path, &module_path, &file.source, binary.as_ref(), &mut errors);
                         write_if_changed(&path, &file.source, &mut errors);
                         let class_metadata = file.metadata(&[]);
