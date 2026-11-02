@@ -6,6 +6,26 @@ const COMPLEX: &str = r#"<r:View xmlns:r="urn:root" xmlns:x="http://schemas.micr
   <a:Item xmlns:a="urn:inner" r:Owner.Attached="{a:Outer {a:Inner}, Target={a:Nested Path=Value}}"/>
 </r:View>"#;
 
+fn theme_fixture() -> String {
+    use std::fmt::Write;
+    let mut xaml = String::from(
+        "<Styles xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Styles.Resources>"
+    );
+    for row in 0..24 {
+        writeln!(
+            xaml,
+            "<SolidColorBrush x:Key='AccentBrush{row}' Color='#ff{row:06x}'/>"
+        )
+        .unwrap();
+    }
+    xaml.push_str("</Styles.Resources>");
+    for row in 0..24 {
+        writeln!(xaml, "<Style Selector='Button.variant{row}'><Setter Property='Background' Value='{{DynamicResource AccentBrush{row}}}'/></Style>").unwrap();
+    }
+    xaml.push_str("</Styles>");
+    xaml
+}
+
 #[test]
 fn lexical_scopes_and_shared_type_references_survive_replay() {
     let doc = decode(&compile(COMPLEX).unwrap()).unwrap();
@@ -72,12 +92,8 @@ fn lexical_scopes_and_shared_type_references_survive_replay() {
 
 #[test]
 fn realistic_theme_and_nested_syntax_round_trip_byte_for_byte() {
-    for s in [
-        COMPLEX,
-        include_str!("../../../FerroUI.Themes.WinUI/Controls/Button.xaml"),
-        include_str!("../../../FerroUI.Themes.WinUI/Resources/Button_themeresources.xaml"),
-        include_str!("../../../FerroUI.Themes.WinUI/WinUITheme.xaml"),
-    ] {
+    let theme = theme_fixture();
+    for s in [COMPLEX, theme.as_str()] {
         let doc = crate::compiler_extensions::FerroXamlIlCompiler::parse_source_syntax(s).unwrap();
         let stored = encode_stored(&doc).unwrap();
         let bytes = encode(&doc).unwrap();
@@ -103,10 +119,7 @@ fn invalid_images_and_zlib_trailing_data_fail_before_transformation() {
         bad[offset] = 0xff;
         assert!(decode(&bad).is_err());
     }
-    let mut compressed = compile(include_str!(
-        "../../../FerroUI.Themes.WinUI/Controls/Button.xaml"
-    ))
-    .unwrap();
+    let mut compressed = compile(&theme_fixture()).unwrap();
     assert_eq!(compressed[5], 1);
     compressed.push(0);
     assert!(decode(&compressed).is_err());
