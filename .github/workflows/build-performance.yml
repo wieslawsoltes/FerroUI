@@ -209,10 +209,13 @@ jobs:
       - name: Check portable XAML codecs, complete WinUI inventory and compiled entry points
         run: |
           cargo test --locked --lib -p ferroui-markup-xaml-loader --features portable-xaml binary_document::
-          cargo test --locked --lib -p ferroui-themes-winui --features solid-theme -- \
-            tests::compiled_xaml_tests::packed_theme_contains_every_compiled_document_within_budget \
-            tests::winui_theme_tests::exported_dictionary_builders_load_their_own_resources \
-            tests::control_templates::button --exact --test-threads=1
+          for mode in solid-theme precompiled-theme; do
+            cargo test --locked --lib -p ferroui-themes-winui --features "$mode" -- \
+              tests::compiled_xaml_tests::packed_theme_contains_every_compiled_document_within_budget \
+              tests::compiled_xaml_tests::replacement_archive_initializes_compact_density_from_its_own_revision \
+              tests::winui_theme_tests::exported_dictionary_builders_load_their_own_resources \
+              tests::control_templates::button --exact --test-threads=1
+          done
       - name: Publish correctness build timings
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
