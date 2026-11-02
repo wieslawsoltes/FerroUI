@@ -17,6 +17,9 @@ integration boundaries, reproducible checks and outstanding native work.
   imported frame without taking a snapshot. Unsupported backends return an error.
   Metal/Skia Graphite wraps the existing texture and retains native storage until
   an asynchronous completion on the actual Skia command queue.
+  The experimental opt-in macOS CGL/Ganesh profile borrows IOSurface rectangle textures and
+  retires each consumer through owning-context GL fences; see
+  [CGL verification](MACOS-CGL-VERIFICATION.md).
   Page-owned Skia WebGL2 borrows textures in the active context and retires reads
   through native fences polled with zero timeout. Reservations bound allocation
   before GPU storage creation; retirement tokens cover queued native cleanup.

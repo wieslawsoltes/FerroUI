@@ -91,6 +91,7 @@ impl GlSkiaGpu {
             gr_context.set_resource_cache_limit(max_resource_bytes);
         }
         let gr_context = Rc::new(gr_context);
+        context.begin_shared_frame_generation();
         if context.shared_frame_context_id().is_some() {
             let frame_context = context.clone();
             gr_context.set_frame_completion_handler(Rc::new(move |completion| {
@@ -325,6 +326,7 @@ impl IPlatformGraphicsContext for GlSkiaGpu {
         // Ganesh flush/release must use its actual owning GL context.
         let _current = (!lost).then(|| RestoreGlCurrent(self.gl_context.ensure_current()));
         self.gr_context.dispose(!lost);
+        self.gl_context.retire_shared_frame_generation();
 
         let callbacks = std::mem::take(&mut *self.post_dispose_callbacks.borrow_mut());
         for cb in callbacks {

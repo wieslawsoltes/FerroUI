@@ -1,4 +1,5 @@
 fn main() {
+    println!("cargo:rustc-check-cfg=cfg(ferro_skia_apple_ganesh)");
     println!("cargo:rerun-if-changed=Info.plist");
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("macos") {
         println!("cargo:rerun-if-changed=macos_diagnostics.m");

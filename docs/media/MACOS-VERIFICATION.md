@@ -1,7 +1,7 @@
 # macOS Metal media verification
 
-The selected macOS media profile is **Metal/Skia Graphite only**. Native
-OpenGL/CGL media presentation is outside this profile, as requested. This note
+This note covers the default **Metal/Skia Graphite** media profile. The later
+opt-in CGL/Ganesh addition has separate [verification](MACOS-CGL-VERIFICATION.md). This note
 records implementation fixes and measured acceptance on the Apple M4 development
 Mac, macOS 27.0.1 (26A434), ARM64, with the macOS 27 SDK. It does not declare all
 portable-media release gates complete.
@@ -165,3 +165,12 @@ signing/notarization, clean-machine installation and full-resolution performance
 thresholds/workloads remain release gates. Independently published FerroUI crates
 must also carry an upstream/published corrected Skia dependency: a workspace
 Cargo patch is not inherited by downstream crate consumers.
+
+## Subsequent shared-code regression
+
+The optional CGL work added per-consumer native-view retention, a lexical Apple
+render-frame autorelease scope and explicit native-window activation/waiting in
+the input harness. `metal-focus-final` in the CGL evidence directory records a
+fresh 37-stage Metal replay with 300 cycles / 600 resets passing; see
+[MACOS-CGL-VERIFICATION.md](MACOS-CGL-VERIFICATION.md#default-metal-regression).
+CGL's separate failing reset-memory gate does not change that Metal evidence.

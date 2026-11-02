@@ -28,6 +28,14 @@ pub trait IGlContext: IPlatformGraphicsContext {
     fn shared_frame_context_generation(&self) -> u64 {
         1
     }
+    /// Starts a new compositor binding on a platform-owned shared context.
+    /// Existing submitted work still retires on that native context, while
+    /// queued imports from its previous binding become stale.
+    fn begin_shared_frame_generation(&self) {}
+    /// Retires a compositor binding on a platform-owned shared context. The
+    /// platform may replace it on the next acquisition; existing native work
+    /// must remain pollable until its consumers and resource owners retire.
+    fn retire_shared_frame_generation(&self) {}
     fn schedule_frame_completion(
         &self,
         completion: ferroui_base::rendering::composition::frames::GpuCompletion,

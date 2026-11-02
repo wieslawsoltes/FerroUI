@@ -2,8 +2,8 @@ use super::{FrameError, FrameMetadata};
 use std::{
     any::Any,
     sync::{
-        atomic::{AtomicBool, AtomicU64, Ordering},
         Arc, Mutex, Weak,
+        atomic::{AtomicBool, AtomicU64, Ordering},
     },
 };
 
@@ -122,6 +122,7 @@ impl FrameReservation {
                 retirement: self.retirement,
             }),
             None,
+            None,
         )
     }
 }
@@ -166,7 +167,11 @@ impl Drop for FrameInner {
 /// Clones share native storage. A UI view, camera session and each submitted
 /// GPU read hold independent leases; no clone duplicates pixel storage.
 #[derive(Clone)]
-pub struct FrameLease(Arc<FrameInner>, Option<PublicationValidity>);
+pub struct FrameLease(
+    Arc<FrameInner>,
+    Option<PublicationValidity>,
+    Option<Arc<dyn Any + Send + Sync>>,
+);
 #[derive(Clone)]
 struct PublicationValidity {
     epoch: Arc<AtomicU64>,
@@ -196,6 +201,14 @@ impl FrameLease {
     }
     pub fn same_storage(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.0, &other.0)
+    }
+    /// Adds a native sampling view to this consumer's lease without reserving
+    /// or acquiring the source storage again. Clones and GPU completion retain
+    /// the view too; metadata, publication validity and accounting stay shared.
+    pub fn with_keep_alive<T: Any + Send + Sync>(&self, owner: T) -> Self {
+        let mut lease = self.clone();
+        lease.2 = Some(Arc::new((self.2.clone(), owner)));
+        lease
     }
 }
 
@@ -248,7 +261,19 @@ impl GpuCompletion {
             GpuCompletionStatus::Indeterminate => {}
         }
         // Deduplicate one allocation used repeatedly in the same submission.
-        if !state.frames.iter().any(|f| f.same_storage(&frame)) {
+        if let Some(retained) = state.frames.iter_mut().find(|f| f.same_storage(&frame)) {
+            // Different API aliases of one allocation need independent view
+            // lifetime, even though their GPU-read budget is deduplicated.
+            if let Some(owner) = frame.2 {
+                if !retained
+                    .2
+                    .as_ref()
+                    .is_some_and(|previous| Arc::ptr_eq(previous, &owner))
+                {
+                    retained.2 = Some(Arc::new((retained.2.take(), owner)));
+                }
+            }
+        } else {
             let budget = &frame.0.budget().0;
             budget
                 .gpu_reads

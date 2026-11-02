@@ -1,14 +1,14 @@
 //! Explicit counted GPU/composition/window diagnostics, excluded from default builds.
 use ferroui_base::{
-    media::imaging::{BitmapEncoderOptions, PngBitmapEncoderOptions},
-    rendering::composition::{frames::*, ElementComposition},
     Ref,
+    media::imaging::{BitmapEncoderOptions, PngBitmapEncoderOptions},
+    rendering::composition::{ElementComposition, frames::*},
 };
 use ferroui_controls::Window;
 use ferroui_media::{MediaError, MediaErrorKind};
-#[cfg(windows)]
+#[cfg(any(windows, target_os = "macos"))]
 use ferroui_media_opengl::NativeGlFrameProducer;
-#[cfg(windows)]
+#[cfg(any(windows, target_os = "macos"))]
 use ferroui_opengl::SharedFrameTexture;
 use image::RgbaImage;
 use std::{
@@ -19,7 +19,7 @@ use std::{
 #[cfg(windows)]
 mod os;
 #[cfg(target_os = "macos")]
-pub use super::macos_diagnostics::{presented, read_texture};
+pub use super::macos_diagnostics::presented;
 #[cfg(target_os = "macos")]
 use ferroui_media_apple::poll_native;
 #[cfg(windows)]
@@ -45,8 +45,8 @@ pub async fn settle() -> Result<(), String> {
     let start = Instant::now();
     wait(move || Ok((start.elapsed() > Duration::from_millis(100)).then_some(()))).await
 }
-#[cfg(windows)]
-pub async fn read_texture(
+#[cfg(any(windows, target_os = "macos"))]
+pub async fn read_gl_texture(
     producer: &NativeGlFrameProducer,
     frame: FrameLease,
 ) -> Result<RgbaImage, String> {
@@ -129,6 +129,36 @@ pub async fn read_texture(
         .map_err(|e| e.to_string())?;
     let image = RgbaImage::from_raw(width, height, pixels).ok_or("Invalid diagnostic pixels")?;
     Ok(image)
+}
+#[cfg(windows)]
+pub use read_gl_texture as read_texture;
+#[cfg(target_os = "macos")]
+pub enum MacFrameReader {
+    Metal(super::macos_diagnostics::MetalFrameReader),
+    Gl(NativeGlFrameProducer),
+}
+#[cfg(target_os = "macos")]
+impl MacFrameReader {
+    pub fn from_interop(
+        interop: &dyn ferroui_base::rendering::composition::ICompositionGpuInterop,
+        budget: FrameBudget,
+    ) -> Result<Self, MediaError> {
+        if interop.shared_context_id().is_some() {
+            NativeGlFrameProducer::from_interop(interop, budget).map(Self::Gl)
+        } else {
+            super::macos_diagnostics::MetalFrameReader::from_interop(interop, budget)
+                .map(Self::Metal)
+        }
+    }
+}
+#[cfg(target_os = "macos")]
+pub async fn read_texture(reader: &MacFrameReader, frame: FrameLease) -> Result<RgbaImage, String> {
+    match reader {
+        MacFrameReader::Gl(producer) => read_gl_texture(producer, frame).await,
+        MacFrameReader::Metal(reader) => {
+            super::macos_diagnostics::read_texture(reader, frame).await
+        }
+    }
 }
 pub async fn composition(
     window: &Ref<Window>,

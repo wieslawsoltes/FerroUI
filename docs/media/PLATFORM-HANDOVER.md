@@ -2,9 +2,11 @@
 
 Current integration branch: `codex/portable-media-desktop`.
 The original coordinator branch/worktree below describe the historical handoff.
-[MACOS-VERIFICATION.md](MACOS-VERIFICATION.md) records the Metal-only Mac profile,
+[MACOS-VERIFICATION.md](MACOS-VERIFICATION.md) records the default Metal Mac profile,
 native presentation/input/packaging checks, measured lifecycle work, dependency
 ownership fix and remaining physical/release gates.
+[MACOS-CGL-VERIFICATION.md](MACOS-CGL-VERIFICATION.md) records the additional
+opt-in CGL/Ganesh media route and its independent evidence.
 
 This handover is explicitly requested for agents working on the native Windows
 and Linux machines. It records the current code, evidence and integration work.

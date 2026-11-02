@@ -149,11 +149,16 @@ impl ISkiaGrContext for GaneshGrContext {
     }
 
     fn snapshot_to_raster(&self, surface: &mut Surface) -> Option<Image> {
-        self.with_context(|context| {
+        let image = self.with_context(|context| {
             surface
                 .image_snapshot()
                 .make_raster_image(context, CachingHint::Disallow)
-        })
+        });
+        // Native readback can submit internally without an on-screen session.
+        // Close our tracked submission too, so its leased inputs retire even
+        // when the window becomes idle immediately after the snapshot.
+        self.flush();
+        image
     }
 
     fn is_lost(&self) -> bool {

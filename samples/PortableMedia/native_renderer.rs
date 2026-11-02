@@ -15,8 +15,8 @@ thread_local! {
 pub fn retained() -> bool {
     BUDGETS.with(|budgets| {
         let mut budgets = budgets.borrow_mut();
-        budgets.retain(|(host, budget)| host.upgrade().is_some() || budget.usage().frames != 0);
-        budgets.iter().any(|(_, budget)| budget.usage().frames != 0)
+        budgets.retain(|(host, budget)| host.upgrade().is_some() || budget.usage().frames != 0 || budget.gpu_reads() != 0 || budget.quarantined_reads() != 0);
+        budgets.iter().any(|(_, budget)| budget.usage().frames != 0 || budget.gpu_reads() != 0 || budget.quarantined_reads() != 0)
     })
 }
 pub fn install(
@@ -41,7 +41,7 @@ pub fn install(
             Ok(v) => v,
             Err(e) => {
                 eprintln!("RENDERER_SETUP_FAILED {e}");
-                super::FAILED.store(true, super::Ordering::Relaxed);
+                crate::desktop::FAILED.store(true, crate::desktop::Ordering::Relaxed);
                 return None;
             }
         };
@@ -61,7 +61,7 @@ pub fn install(
     host.set_renderer(
         Some(std::rc::Rc::new(renderer)),
         id,
-        Some(super::providers::importer()),
+        Some(crate::desktop::providers::importer()),
     );
     let recovery_budget = budget.clone();
     host.set_renderer_factory(Some(std::rc::Rc::new(move |interop, id| {
@@ -75,14 +75,14 @@ pub fn install(
                 id,
                 Arc::new(scene::Scene::default()),
             )),
-            super::providers::importer(),
+            crate::desktop::providers::importer(),
         ))
     })));
     host.set_inputs(vec![source.clone()]);
     root.children().add(&host);
     let errors = host.errors().subscribe(|e| {
         eprintln!("RENDERER_ERROR {e}");
-        super::FAILED.store(true, super::Ordering::Relaxed);
+        crate::desktop::FAILED.store(true, crate::desktop::Ordering::Relaxed);
     });
     let weak = host.downgrade();
     DispatcherTimer::run(
@@ -92,12 +92,14 @@ pub fn install(
                 return false;
             };
             println!(
-                "RENDERER_SHARED_INPUT {:?} output={:?} budget={:?} counters={:?}",
+                "RENDERER_SHARED_INPUT {:?} output={:?} budget={:?} reads={} quarantine={} counters={:?}",
                 source.latest().map(|v| v.metadata().identity),
                 host.output()
                     .and_then(|s| s.latest())
                     .map(|v| v.metadata().identity),
                 budget.usage(),
+                budget.gpu_reads(),
+                budget.quarantined_reads(),
                 budget.counters().snapshot()
             );
             true

@@ -22,7 +22,8 @@ GPU-only both reject a missing admitted GPU route in these profiles.
 
 | Profile | Implemented source route | Still open |
 | --- | --- | --- |
-| macOS Metal/Skia Graphite | AVFoundation retained CoreVideo/IOSurface storage → compatible same-device Metal views → leased direct sampling | Native Metal/presentation/recovery/input and development packaging pass; physical camera and remaining release gates are in MACOS-VERIFICATION.md. Native OpenGL/CGL media is outside this profile. |
+| macOS Metal/Skia Graphite | AVFoundation retained CoreVideo/IOSurface storage → compatible same-device Metal views → leased direct sampling | Native Metal/presentation/recovery/input and development packaging pass; physical camera and remaining release gates are in MACOS-VERIFICATION.md. The optional CGL profile is tracked independently below. |
+| macOS CGL/Skia Ganesh (experimental opt-in) | Same AVFoundation/CoreVideo storage → CGL IOSurface rectangle view → lease-backed direct sampling; renderer output uses leased GL textures | Repeated-reset native memory gate fails on the M4/macOS 27 host; [CGL evidence](MACOS-CGL-VERIFICATION.md). Intel, physical camera and remaining hardware/release profiles require separate evidence |
 | Windows ANGLE/EGL + GLES3 | Active D3D11 device → MF DXGI manager/Source Reader → retained ARGB32/BGRA DXGI sample → EGL texture alias → leased direct sampling | Physical camera, wider codec/driver profiles and remaining acceptance in WINDOWS-VERIFICATION.md |
 | Linux EGL + GLES3 | Exact DMA_DRM caps from the active display → retained GStreamer DMA-BUF → direct XRGB/XBGR alias, or counted NV12 GPU conversion → leased sampling | Native build passed; WSL lacks DMA-BUF import; positive GPU/runtime gates remain open |
 | Linux EGL + desktop GL | Explicitly negotiated XRGB/XBGR direct aliases | NV12 conversion shader profile and native verification |
@@ -35,7 +36,8 @@ from this task.
 
 The macOS Graphite profile uses the pinned Skia source ownership hotfix described
 in [MACOS-VERIFICATION.md](MACOS-VERIFICATION.md). Its native pixel/memory runner is
-`tests/media/verify-macos.py`. It requires native Metal and window access.
+`tests/media/verify-macos.py`. It requires native Metal and window access. `--backend cgl` selects a separate
+Ganesh build and native CGL run; see [MACOS-CGL-VERIFICATION.md](MACOS-CGL-VERIFICATION.md).
 
 `NativeGlFrameProducer::import_native` reserves storage credits before creating
 an alias. Final lease/GPU completion queues alias/backing destruction on the

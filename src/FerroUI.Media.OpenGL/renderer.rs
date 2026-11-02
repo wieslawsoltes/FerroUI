@@ -1,11 +1,12 @@
-use crate::{unsupported, NativeGlFrameProducer};
-use ferroui_media::{frames::*, MediaError, MediaFuture, RendererViewport, TextureRenderer};
+use crate::{NativeGlFrameProducer, unsupported};
+use ferroui_base::platform::IOptionalFeatureProvider;
+use ferroui_media::{MediaError, MediaFuture, RendererViewport, TextureRenderer, frames::*};
 use ferroui_opengl::IGlContext;
 use std::{
     rc::Rc,
     sync::{
-        atomic::{AtomicU64, Ordering},
         Arc,
+        atomic::{AtomicU64, Ordering},
     },
     time::Duration,
 };
@@ -126,10 +127,26 @@ impl TextureRenderer for GlTextureRenderer {
                 return Err(MediaError::cancelled());
             }
             if draw_inputs.iter().any(|v| {
-                v.metadata().device
+                let different_context = v.metadata().device
                     != context
                         .shared_frame_context_id()
-                        .map(DeviceIdentity::Context)
+                        .map(DeviceIdentity::Context);
+                let native_iosurface = {
+                    let features: &dyn IOptionalFeatureProvider = &**context;
+                    features
+                        .try_get::<dyn ferroui_opengl::IGlContextExternalObjectsFeature>()
+                        .is_some_and(|feature| {
+                            v.metadata().format == FrameFormat::Bgra8
+                                && v.metadata().device.is_some()
+                                && v.metadata().device
+                                    == feature.device_luid().map(DeviceIdentity::Luid)
+                                && feature
+                                    .supported_importable_external_image_types()
+                                    .iter()
+                                    .any(|t| t == "IOSurfaceRef")
+                        })
+                };
+                (different_context && !native_iosurface)
                     || v.metadata().device_generation != context.shared_frame_context_generation()
             }) {
                 return Err(unsupported(

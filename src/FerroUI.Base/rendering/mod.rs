@@ -15,6 +15,7 @@ mod immediate_renderer;
 mod scene_invalidated_event_args;
 mod z_index_comparer;
 mod managed_hit_tester;
+mod native_render_scope;
 
 pub use i_hit_tester::IHitTester;
 pub use i_presentation_source::IPresentationSource;

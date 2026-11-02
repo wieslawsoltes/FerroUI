@@ -15,13 +15,17 @@ use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
 use ferroui_base::platform::{
     IExternalObjectsHandleWrapRenderInterfaceContextFeature, IOptionalFeatureProvider, IPlatformGraphics,
-    IPlatformGraphicsContext, IPlatformHandle, KnownPlatformGraphicsExternalImageHandleTypes,
+    IPlatformGraphicsContext, IPlatformHandle, LeasedPlatformHandle, KnownPlatformGraphicsExternalImageHandleTypes,
     KnownPlatformGraphicsExternalSemaphoreHandleTypes, PlatformGraphicsContextLostError,
     PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties, PlatformRenderTargetState,
     RenderTargetSceneInfo,
 };
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::rendering::composition::CompositionGpuImportedImageSynchronizationCapabilities;
+use ferroui_base::rendering::composition::{CompositionGpuImportedImageSynchronizationCapabilities, frames::{FrameLease, FrameError, GpuCompletion}};
+use ferroui_opengl::SharedGlTextureRetirementQueue;
+use std::sync::atomic::{AtomicU64, Ordering};
+static NEXT_FRAME_CONTEXT: AtomicU64 = AtomicU64::new(1 << 40);
+static NEXT_FRAME_GENERATION: AtomicU64 = AtomicU64::new(1);
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{PixelSize, RenderTargetNotReadyError};
 use ferroui_microcom::{ComPtr, HResult, IUnknown};
@@ -44,7 +48,7 @@ pub struct FerroNativeGlPlatformGraphics {
     display: ComPtr<IFrnGlDisplay>,
     gl_display: Rc<GlDisplay>,
     version: GlVersion,
-    shared_context: Rc<GlContext>,
+    shared_context: RefCell<Rc<GlContext>>,
 }
 
 // SAFETY: the platform graphics are shared by the UI thread and the thread
@@ -125,7 +129,7 @@ impl FerroNativeGlPlatformGraphics {
             version,
         );
 
-        Ok(FerroNativeGlPlatformGraphics { display, gl_display, version, shared_context })
+        Ok(FerroNativeGlPlatformGraphics { display, gl_display, version, shared_context: RefCell::new(shared_context) })
     }
 
     /// Whether contexts may share their objects: always.
@@ -144,8 +148,14 @@ impl FerroNativeGlPlatformGraphics {
     }
 
     /// The context every top-level renders with.
-    pub fn shared_context(&self) -> &Rc<GlContext> {
-        &self.shared_context
+    pub fn shared_context(&self) -> Rc<GlContext> {
+        if self.shared_context.borrow().retired.get() || self.shared_context.borrow().is_lost() {
+            // Reset must retire native driver caches too. Keep the old context
+            // alive through the manager's retirement list and its actual owners.
+            let native = self.display.create_context(None).check().expect("CreateContext returned no context");
+            self.shared_context.replace(GlContext::new(&self.gl_display, None, native, self.version));
+        }
+        self.shared_context.borrow().clone()
     }
 }
 
@@ -168,7 +178,7 @@ impl IPlatformGraphics for FerroNativeGlPlatformGraphics {
     }
 
     fn get_shared_context(&self) -> Rc<dyn IPlatformGraphicsContext> {
-        self.shared_context.clone()
+        self.shared_context()
     }
 }
 
@@ -275,6 +285,11 @@ pub struct GlContext {
     external_objects: Rc<GlExternalObjectsFeature>,
     context: RefCell<Option<ComPtr<IFrnGlContext>>>,
     version: GlVersion,
+    frame_id: u64,
+    frame_generation: Cell<u64>,
+    retired: Cell<bool>,
+    frame_fences: RefCell<Vec<(isize, GpuCompletion)>>,
+    frame_retirement: SharedGlTextureRetirementQueue,
 }
 
 impl GlContext {
@@ -292,6 +307,11 @@ impl GlContext {
             external_objects: Rc::new(GlExternalObjectsFeature::new(this.clone(), &context, display.clone())),
             context: RefCell::new(Some(context)),
             version,
+            frame_id: NEXT_FRAME_CONTEXT.fetch_add(1, Ordering::Relaxed),
+            frame_generation: Cell::new(0),
+            retired: Cell::new(false),
+            frame_fences: RefCell::new(Vec::new()),
+            frame_retirement: SharedGlTextureRetirementQueue::default(),
         })
     }
 
@@ -372,7 +392,40 @@ impl IOptionalFeatureProvider for GlContext {
     }
 }
 
+impl Drop for GlContext { fn drop(&mut self) { self.dispose(); } }
+
 impl IPlatformGraphicsContext for GlContext {
+    fn has_pending_resource_retirement(&self) -> bool {
+        !self.frame_fences.borrow().is_empty() || self.frame_retirement.has_live_resources()
+    }
+    fn poll_pending_gpu_work(&self) -> bool {
+        let fences = std::mem::take(&mut *self.frame_fences.borrow_mut());
+        if fences.is_empty() && !self.frame_retirement.has_pending() { return false; }
+        let current = match self.try_make_current() {
+            Ok(current) => current,
+            Err(_) => {
+                for (_, completion) in fences { completion.mark_indeterminate(); }
+                self.frame_retirement.close();
+                return false;
+            }
+        };
+        let gl = self.gl_interface();
+        for (fence, completion) in fences {
+            match gl.client_wait_sync(fence, 0x0001, 0) {
+                0x911A | 0x911C => { gl.delete_sync(fence); completion.complete(); }
+                0x911B => self.frame_fences.borrow_mut().push((fence, completion)),
+                _ => { gl.delete_sync(fence); completion.mark_indeterminate(); }
+            }
+        }
+        for (texture, retirement) in self.frame_retirement.take() {
+            gl.delete_texture(texture as i32);
+            drop(retirement);
+        }
+        let native_pending = self.frame_retirement.poll_native(&gl);
+        current.dispose();
+        native_pending || !self.frame_fences.borrow().is_empty()
+    }
+
     fn is_lost(&self) -> bool {
         self.context.borrow().is_none()
     }
@@ -382,6 +435,11 @@ impl IPlatformGraphicsContext for GlContext {
     }
 
     fn dispose(&self) {
+        self.poll_pending_gpu_work();
+        for (_, completion) in self.frame_fences.borrow_mut().drain(..) {
+            completion.mark_indeterminate();
+        }
+        self.frame_retirement.close();
         let context = self.context.borrow_mut().take();
         drop(context);
     }
@@ -392,6 +450,39 @@ impl IPlatformGraphicsContext for GlContext {
 }
 
 impl IGlContext for GlContext {
+    fn shared_frame_context_id(&self) -> Option<u64> {
+        let gl = self.gl_interface();
+        let renderer = gl.renderer().unwrap_or("").to_ascii_lowercase();
+        (!self.is_lost() && gl.is_fence_sync_available()
+            && gl.is_client_wait_sync_available() && gl.is_delete_sync_available()
+            && !renderer.is_empty() && !renderer.contains("software")
+            && !renderer.contains("swiftshader") && !renderer.contains("llvmpipe"))
+            .then_some(self.frame_id)
+    }
+    fn shared_frame_context_generation(&self) -> u64 { self.frame_generation.get() }
+    fn begin_shared_frame_generation(&self) {
+        self.frame_generation.set(NEXT_FRAME_GENERATION.fetch_add(1, Ordering::Relaxed));
+    }
+    fn retire_shared_frame_generation(&self) {
+        self.retired.set(true);
+        self.frame_generation.set(NEXT_FRAME_GENERATION.fetch_add(1, Ordering::Relaxed));
+    }
+    fn shared_frame_retirement_queue(&self) -> Option<SharedGlTextureRetirementQueue> {
+        self.shared_frame_context_id().map(|_| self.frame_retirement.clone())
+    }
+    fn schedule_frame_completion(&self, completion: GpuCompletion) {
+        if self.shared_frame_context_id().is_none() { completion.mark_indeterminate(); return; }
+        let current = match self.try_make_current() {
+            Ok(current) => current,
+            Err(_) => { completion.mark_indeterminate(); return; }
+        };
+        let gl = self.gl_interface();
+        let fence = gl.fence_sync(0x9117, 0);
+        if fence == 0 { completion.mark_indeterminate(); }
+        else { gl.flush(); self.frame_fences.borrow_mut().push((fence, completion)); }
+        current.dispose();
+    }
+
     fn version(&self) -> GlVersion {
         self.version
     }
@@ -732,6 +823,10 @@ impl IGlContextExternalObjectsFeature for GlExternalObjectsFeature {
             let old_texture = gl.get_integerv(GL_TEXTURE_BINDING_RECTANGLE);
             let texture_id = gl.gen_texture();
             gl.bind_texture(GL_TEXTURE_RECTANGLE, texture_id);
+            gl.tex_parameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            gl.tex_parameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            gl.tex_parameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            gl.tex_parameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             // SAFETY: by its descriptor the handle is an `IOSurfaceRef`,
             // which the caller keeps alive for the call (the compositor
             // hands over the handle the wrapping feature of the context
@@ -762,6 +857,7 @@ impl IGlContextExternalObjectsFeature for GlExternalObjectsFeature {
                 texture_id,
                 GL_RGBA8,
                 properties,
+                handle.as_any().downcast_ref::<LeasedPlatformHandle>().map(|h| h.frame().clone()),
             )));
         }
         Err(OpenGlError::new("This handle type is not supported"))
@@ -855,6 +951,24 @@ pub(crate) struct ImportedTexture {
     internal_format: i32,
     properties: PlatformGraphicsExternalImageProperties,
     disposed: Cell<bool>,
+    frame_owner: RefCell<Option<Arc<CglFrameOwner>>>,
+}
+
+struct CglFrameOwner {
+    queue: SharedGlTextureRetirementQueue,
+    texture: i32,
+    frame: Option<FrameLease>,
+}
+impl Drop for CglFrameOwner {
+    fn drop(&mut self) {
+        let frame = self.frame.take().unwrap();
+        let texture = self.texture;
+        self.queue.retire_native(move |gl| {
+            if let Some(gl) = gl { gl.delete_texture(texture); }
+            // Source accounting remains charged until native alias cleanup.
+            drop(frame);
+        });
+    }
 }
 
 impl ImportedTexture {
@@ -864,12 +978,29 @@ impl ImportedTexture {
         id: i32,
         internal_format: i32,
         properties: PlatformGraphicsExternalImageProperties,
+        frame: Option<FrameLease>,
     ) -> ImportedTexture {
-        ImportedTexture { context, type_, id, internal_format, properties, disposed: Cell::new(false) }
+        let frame_owner = frame.map(|frame| Arc::new(CglFrameOwner {
+            queue: context.frame_retirement.clone(), texture: id, frame: Some(frame),
+        }));
+        ImportedTexture { context, type_, id, internal_format, properties, disposed: Cell::new(false), frame_owner: RefCell::new(frame_owner) }
     }
 }
 
+impl Drop for ImportedTexture { fn drop(&mut self) { self.dispose(); } }
+
 impl IGlExternalImageTexture for ImportedTexture {
+    fn acquire_frame_lease(&self, frame: FrameLease) -> Result<FrameLease, FrameError> {
+        let owner = self.frame_owner.borrow().clone().ok_or(FrameError::MissingImporter)?;
+        if !owner.frame.as_ref().is_some_and(|source| source.same_storage(&frame)) {
+            return Err(FrameError::DeviceMismatch);
+        }
+        if frame.metadata().device_generation != self.context.shared_frame_context_generation() || !frame.is_current() {
+            return Err(FrameError::StaleGeneration);
+        }
+        Ok(frame.with_keep_alive(owner))
+    }
+
     /// # Panics
     /// Always: an IOSurface has no keyed mutex.
     fn acquire_keyed_mutex(&self, _key: u32) {
@@ -900,6 +1031,10 @@ impl IGlExternalImageTexture for ImportedTexture {
 
     fn dispose(&self) {
         if self.disposed.replace(true) {
+            return;
+        }
+        if let Some(owner) = self.frame_owner.borrow_mut().take() {
+            drop(owner); // Submitted views retain the alias until their fences.
             return;
         }
         // A context that is lost or cannot be made current is likely
@@ -1068,6 +1203,8 @@ mod tests {
         static kIOSurfaceBytesPerElement: CFTypeRef;
         static kIOSurfacePixelFormat: CFTypeRef;
         fn IOSurfaceCreate(properties: CFTypeRef) -> CFTypeRef;
+        fn IOSurfaceGetAllocSize(surface: CFTypeRef) -> usize;
+        fn IOSurfaceGetBytesPerRow(surface: CFTypeRef) -> usize;
     }
     #[link(name = "CoreFoundation", kind = "framework")]
     extern "C" {
@@ -1152,6 +1289,73 @@ mod tests {
         unsafe { CFRelease(surface) };
     }
 
+    #[test]
+    fn leased_cgl_aliases_retire_after_each_real_gpu_fence_and_reject_stale_bindings() {
+        use ferroui_base::rendering::composition::frames::*;
+        use std::time::{Duration, Instant};
+        let graphics = graphics().expect("native CGL verification requires CGL");
+        let context = gl_context(graphics.get_shared_context());
+        context.begin_shared_frame_generation();
+        let feature = external_objects(&context);
+        let surface = io_surface();
+        struct Surface(usize);
+        impl Drop for Surface { fn drop(&mut self) { unsafe { CFRelease(self.0 as CFTypeRef) } } }
+        let budget = FrameBudget::new(FrameBudgetLimits { frames: 1, ..Default::default() });
+        assert!(!surface.is_null());
+        let bytes = unsafe { IOSurfaceGetAllocSize(surface) } as u64;
+        let stride = unsafe { IOSurfaceGetBytesPerRow(surface) } as u64;
+        let metadata = FrameMetadata {
+            identity: FrameIdentity { source: 1, generation: 1, sequence: 1 },
+            width: 16, height: 8, visible: FrameRegion { x: 0, y: 0, width: 16, height: 8 },
+            format: FrameFormat::Bgra8, color: FrameColor::Srgb, alpha: FrameAlpha::Opaque,
+            rotation: FrameRotation::None, mirrored: false, top_left_origin: true,
+            timestamp: Duration::ZERO, device: feature.device_luid().map(DeviceIdentity::Luid),
+            device_generation: context.shared_frame_context_generation(),
+            planes: vec![FramePlane { offset: 0, stride, length: stride * 8 }], retained_bytes: bytes,
+        };
+        assert!(!surface.is_null());
+        let frame = budget.lease(metadata.clone(), Surface(surface as usize)).unwrap();
+        let props = properties(PlatformGraphicsExternalImageFormat::B8G8R8A8UNorm);
+        let import = || feature.import_image(Rc::new(LeasedPlatformHandle::new(surface as isize, Some("IOSurfaceRef"), frame.clone())), props.clone()).unwrap();
+        let a = import(); let b = import();
+        let first = GpuCompletion::new(); let second = GpuCompletion::new();
+        first.retain(a.acquire_frame_lease(frame.clone()).unwrap()).unwrap();
+        second.retain(b.acquire_frame_lease(frame.clone()).unwrap()).unwrap();
+        let other = FrameBudget::new(Default::default()).lease(metadata, ()).unwrap();
+        assert!(matches!(a.acquire_frame_lease(other), Err(FrameError::DeviceMismatch)));
+        let stale = frame.clone();
+        context.retire_shared_frame_generation();
+        let replacement = gl_context(graphics.get_shared_context());
+        replacement.begin_shared_frame_generation();
+        assert_ne!(context.shared_frame_context_id(), replacement.shared_frame_context_id());
+        assert_ne!(context.shared_frame_context_generation(), replacement.shared_frame_context_generation());
+        assert!(!context.is_lost(), "retiring readers still have their native context");
+        assert!(matches!(a.acquire_frame_lease(stale), Err(FrameError::StaleGeneration)));
+        a.dispose(); b.dispose(); drop((a, b, frame));
+        assert_eq!(budget.usage().frames, 1);
+        assert_eq!(budget.gpu_reads(), 2);
+        context.schedule_frame_completion(first.clone());
+        let started = Instant::now();
+        while first.status() == GpuCompletionStatus::Pending {
+            context.poll_pending_gpu_work();
+            assert!(started.elapsed() < Duration::from_secs(5));
+            std::thread::yield_now();
+        }
+        assert_eq!(first.status(), GpuCompletionStatus::Complete);
+        assert_eq!(second.status(), GpuCompletionStatus::Pending);
+        assert_eq!(budget.usage().frames, 1);
+        assert_eq!(budget.gpu_reads(), 1);
+        context.schedule_frame_completion(second.clone());
+        while budget.usage().frames != 0 {
+            context.poll_pending_gpu_work();
+            assert!(started.elapsed() < Duration::from_secs(5));
+            std::thread::yield_now();
+        }
+        assert_eq!(second.status(), GpuCompletionStatus::Complete);
+        assert_eq!(budget.gpu_reads(), 0);
+        assert_eq!(budget.quarantined_reads(), 0);
+    }
+
     // Metal and the Objective-C runtime, for a shared event to import.
     #[link(name = "Metal", kind = "framework")]
     extern "C" {
@@ -1161,6 +1365,7 @@ mod tests {
     extern "C" {
         fn sel_registerName(name: *const c_char) -> *mut c_void;
         fn objc_msgSend();
+
         fn objc_release(object: *mut c_void);
     }
 

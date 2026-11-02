@@ -29,8 +29,11 @@ ferroui-themes-fluent.workspace = true
 [target.'cfg(target_os = "macos")'.dependencies]
 ferroui-skia = {workspace=true,optional=true}
 skia-safe = {workspace=true,optional=true}
+ferroui-native.workspace = true
+ferroui-opengl.workspace = true
+ferroui-media-opengl.workspace = true
 ferroui-media-metal.workspace = true
-ferroui-media-apple.workspace = true
+ferroui-media-apple = {workspace=true,features=["opengl"]}
 ferroui-media-video-apple = {workspace=true,features=["controls"]}
 ferroui-media-camera-apple = {workspace=true,features=["controls"]}
 

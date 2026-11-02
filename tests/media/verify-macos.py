@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Replay native Metal media acceptance; retain every failure outside Git."""
+"""Replay native Metal or CGL media acceptance; retain every failure outside Git."""
 import argparse
 import hashlib
 import json
@@ -31,6 +31,8 @@ def main():
     parser.add_argument("--target-dir", type=Path, default=Path(os.environ.get("CARGO_TARGET_DIR", REPO / "target")))
     parser.add_argument("--cycles", type=int, default=100)
     parser.add_argument("--skip-contracts", action="store_true")
+    parser.add_argument("--skip-memory", action="store_true", help="Run a diagnostic subset; explicitly omit the positive memory gate")
+    parser.add_argument("--backend", choices=["metal", "cgl"], default="metal")
     args = parser.parse_args()
     if sys.platform != "darwin" or not 12 <= args.cycles <= 1000:
         parser.error("Requires macOS; cycles must be 12..1000")
@@ -41,15 +43,25 @@ def main():
         out.mkdir(parents=True, exist_ok=False)
     target = args.target_dir.resolve()
     env = dict(os.environ, CARGO_TARGET_DIR=str(target), CARGO_PROFILE_DEV_DEBUG="0", CARGO_PROFILE_TEST_DEBUG="0", CARGO_INCREMENTAL="0")
+    if args.backend == "cgl":
+        env["RUSTFLAGS"] = (env.get("RUSTFLAGS", "") + " --cfg ferro_skia_apple_ganesh").strip()
+    elif "ferro_skia_apple_ganesh" in env.get("RUSTFLAGS", ""):
+        parser.error("Metal/Graphite acceptance requires the default Skia configuration")
     if env.get("SKIA_LIBRARY_SEARCH_PATH"):
         parser.error("Native acceptance must build the patched source, not import a caller-managed Skia archive")
     report = {"revision": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip(),
               "os": platform.platform(), "architecture": platform.machine(),
               "hardware": subprocess.check_output(["sysctl", "-n", "machdep.cpu.brand_string"], text=True).strip(),
-              "scope": "Metal/Graphite SDR; synthetic AVC/AAC 160x90; 220x220 projection; own-window captures; 10 warmup cycles; two resets/cycle",
+              "scope": ("CGL/Ganesh SDR;" if args.backend == "cgl" else "Metal/Graphite SDR;") + " synthetic AVC/AAC 160x90; 220x220 projection; own-window captures; 10 warmup cycles; two resets/cycle",
               "limits": {"footprint_growth_bytes": 64 * 1024**2, "metal_growth_bytes": 32 * 1024**2, "port_growth": 64},
               "not_accepted": ["physical camera/privacy/hotplug/photo", "physical audio and AV sync", "VoiceOver end-to-end", "older OS runtime", "Intel runtime", "Developer ID/notarization", "full performance workload"],
               "steps": []}
+    report["full_run"] = not (args.skip_memory or args.skip_contracts)
+    report["omitted_stages"] = (["native-memory-soak"] if args.skip_memory else []) + (["contract/native-unit stages"] if args.skip_contracts else [])
+    if args.skip_memory:
+        report["not_accepted"].append("positive native-memory gate omitted; subset cannot establish profile acceptance")
+    report["backend"] = args.backend
+    report["rustflags"] = env.get("RUSTFLAGS", "")
     report["skia"] = {"bindings": "workspace-patched 0.153.3", "source_override": env.get("SKIA_SOURCE_DIR"), "ninja_override": env.get("SKIA_NINJA_COMMAND")}
     if env.get("SKIA_SOURCE_DIR"):
         source = Path(env["SKIA_SOURCE_DIR"]) / "src/gpu/graphite/mtl/MtlGraphicsPipeline.mm"
@@ -60,12 +72,15 @@ def main():
 
     def save():
         (out / "report.json").write_text(json.dumps(report, indent=2) + "\n")
-        rows = ["# macOS media verification", "", f"Revision: `{report['revision']}`", "", "| Stage | Outcome | Seconds |", "| --- | --- | --- |"]
+        rows = ["# macOS media verification", "", f"Revision: `{report['revision']}`", "", f"Omitted stages: {', '.join(report['omitted_stages']) or 'none'}", "", "| Stage | Outcome | Seconds |", "| --- | --- | --- |"]
         rows += [f"| {s['name']} | {'PASS' if s['passed'] else 'FAIL'}{' (expected negative)' if s['negative'] else ''} | {s['seconds']} |" for s in report["steps"]]
         rows += ["", "Open acceptance: " + ", ".join(report["not_accepted"]), ""]
         (out / "report.md").write_text("\n".join(rows))
 
     def run(name, command, required=(), negative=False, timeout=240, extra_env=None):
+        command = list(command)
+        if args.backend == "cgl" and Path(command[0]).name in ["portable-media-audit", "portable-media", "PortableMedia"]:
+            command.append("--opengl")
         log = out / f"{name}.log"
         print(f"START {name}", flush=True)
         start = time.monotonic()
@@ -109,19 +124,22 @@ def main():
         run("wrong-orientation-negative", [binary, fixtures / "orientation-1.mp4", "--resource", "--renderer", "--video-pixel-smoke", "--orientation=0"], ["VIDEO_PIXEL_FAILED"], negative=True)
         source = REPO / "tests/media/fixtures/avc-aac.mp4"
         run("transport", [binary, source, "--resource", "--macos-transport-smoke"], ["MACOS_TRANSPORT_AX_PASS", "MACOS_TRANSPORT_KEYBOARD_PASS"])
-        run("native-memory-soak", [binary, source, "--resource", "--renderer", f"--macos-lifecycle-cycles={args.cycles}", "--quiet-diagnostics"], [f"MACOS_LIFECYCLE_PASS cycles={args.cycles}", "native_owners=0"], timeout=max(240, args.cycles * 5))
+        if not args.skip_memory:
+            run("native-memory-soak", [binary, source, "--resource", "--renderer", f"--macos-lifecycle-cycles={args.cycles}", "--quiet-diagnostics"], [f"MACOS_LIFECYCLE_PASS cycles={args.cycles}", "native_owners=0"], timeout=max(240, args.cycles * 5))
         run("retained-memory-negative", [binary, source, "--resource", "--renderer", "--macos-lifecycle-cycles=20", "--macos-leak-control", "--quiet-diagnostics"], ["Native memory growth exceeds frozen limit"], negative=True)
         if not args.skip_contracts:
-            run("media-contracts", cargo + ["test", "--locked", "-j", "2", "--lib", "-p", "ferroui-media", "-p", "ferroui-media-video", "-p", "ferroui-media-camera", "-p", "ferroui-media-qr", "-p", "ferroui-media-controls", "-p", "ferroui-media-video-controls", "-p", "ferroui-media-camera-controls"], ["test result: ok."], timeout=900)
+            run("native-render-scope", cargo + ["test", "--locked", "-j", "2", "--lib", "-p", "ferroui-base", "native_render_scope::tests"], ["test result: ok. 1 passed"], timeout=900)
+            run("media-contracts", cargo + ["test", "--locked", "-j", "2", "--lib", "-p", "ferroui-opengl", "-p", "ferroui-media-opengl", "-p", "ferroui-media", "-p", "ferroui-media-video", "-p", "ferroui-media-camera", "-p", "ferroui-media-qr", "-p", "ferroui-media-controls", "-p", "ferroui-media-video-controls", "-p", "ferroui-media-camera-controls"], ["test result: ok."], timeout=900)
             for name, command in [
-                ("native-metal", ["-p", "ferroui-skia", "--features", "native-frame-tests", "native_shared_metal_frame"]),
+                (("native-cgl", ["-p", "ferroui-native", "ferro_native_gl_platform_graphics", "--", "--test-threads=1"]) if args.backend == "cgl" else
+                 ("native-metal", ["-p", "ferroui-skia", "--features", "native-frame-tests", "native_shared_metal_frame"])) ,
                 ("camera-lifetime", ["-p", "ferroui-media-camera-apple", "--features", "native-lifetime-tests"]),
                 ("native-vision", ["-p", "ferroui-media-qr-apple", "--features", "test-fixtures"]),
             ]:
-                run(name, cargo + ["test", "--locked", "-j", "2", "--lib", *command], ["test result: ok. 1 passed"], timeout=900)
+                run(name, cargo + ["test", "--locked", "-j", "2", "--lib", *command], ["test result: ok. 7 passed" if name == "native-cgl" else "test result: ok. 1 passed"], timeout=900)
         run("default-build", cargo + ["build", "--locked", "-j", "2", "-p", "portable-media"], timeout=900)
         default = target / "debug/portable-media"
-        run("default-recovery", [default, source, "--resource", "--smoke", "--renderer", "--device-recovery-smoke"], ["DEVICE_RECOVERY_PASS", "RENDERER_PIXELS_PASS", "NATIVE_MEDIA_SMOKE_PASS"])
+        run("default-recovery", [default, source, "--resource", "--smoke", "--renderer", "--device-recovery-smoke"], ["DEVICE_RECOVERY_PASS", "RENDERER_SHARED_INPUT" if args.backend == "cgl" else "RENDERER_PIXELS_PASS", "NATIVE_MEDIA_SMOKE_PASS"])
         run("default-ended-restart", [default, source, "--resource", "--smoke", "--renderer", "--ended-restart-smoke"], ["ENDED_RESTART_COMPLETED", "NATIVE_MEDIA_SMOKE_PASS"])
         bundle = out / "FerroUI Portable Media.app"
         macos = bundle / "Contents/MacOS"
@@ -139,12 +157,13 @@ def main():
         run("bundle-sign", ["codesign", "--force", "--sign", "-", "--timestamp=none", "--options", "runtime", "--entitlements", entitlements, bundle])
         run("bundle-verify", ["codesign", "--verify", "--strict", "--verbose=2", bundle])
         run("bundle-entitlements", ["codesign", "--display", "--entitlements", ":-", bundle], ["com.apple.security.device.camera"])
-        run("bundle-playback", [executable, source, "--resource", "--smoke", "--renderer"], ["RENDERER_PIXELS_PASS", "NATIVE_MEDIA_SMOKE_PASS"])
+        run("bundle-playback", [executable, source, "--resource", "--smoke", "--renderer"], ["RENDERER_SHARED_INPUT" if args.backend == "cgl" else "RENDERER_PIXELS_PASS", "NATIVE_MEDIA_SMOKE_PASS"])
         run("bundle-camera-discovery", [executable, "--camera-discovery"], ["CAMERA_DISCOVERY_PASS", "acquired=false"])
         run("deployment-metadata", ["vtool", "-show-build", executable], ["minos"])
         report["passed"] = True
         save()
-        print(f"MACOS_VERIFICATION_PASS stages={len(report['steps'])} evidence={out}", flush=True)
+        status = "MACOS_VERIFICATION_PASS" if report["full_run"] else "MACOS_VERIFICATION_PARTIAL_PASS"
+        print(f"{status} stages={len(report['steps'])} omitted={report['omitted_stages']} evidence={out}", flush=True)
     except (RuntimeError, OSError) as error:
         report["passed"] = False
         report["error"] = str(error)

@@ -1,8 +1,8 @@
 use super::*;
 use std::{
     sync::{
-        atomic::{AtomicUsize, Ordering},
         Arc,
+        atomic::{AtomicUsize, Ordering},
     },
     time::Duration,
 };
@@ -43,6 +43,32 @@ impl Drop for Resource {
     fn drop(&mut self) {
         self.0.fetch_add(1, Ordering::SeqCst);
     }
+}
+#[test]
+fn native_views_share_budget_but_all_survive_deduplicated_gpu_reads() {
+    let budget = FrameBudget::new(Default::default());
+    let frame = budget.lease(metadata(1), ()).unwrap();
+    let mailbox = FrameMailbox::new(1, 1);
+    mailbox.publish(frame.clone()).unwrap();
+    let published = mailbox.latest().unwrap();
+    let drops = Arc::new(AtomicUsize::new(0));
+    let a = published.with_keep_alive(Resource(drops.clone()));
+    let b = published.with_keep_alive(Resource(drops.clone()));
+    assert!(a.same_storage(&b));
+    assert_eq!(a.metadata(), published.metadata());
+    let completion = GpuCompletion::new();
+    completion.retain(published.clone()).unwrap();
+    completion.retain(a.clone()).unwrap();
+    completion.retain(b.clone()).unwrap();
+    assert_eq!(budget.gpu_reads(), 1);
+    assert_eq!(budget.usage().frames, 1);
+    mailbox.clear();
+    assert!(!a.is_current());
+    drop((frame, published, a, b));
+    assert_eq!(drops.load(Ordering::SeqCst), 0);
+    completion.complete();
+    assert_eq!(drops.load(Ordering::SeqCst), 2);
+    assert_eq!(budget.usage().frames, 0);
 }
 #[test]
 fn reservations_bound_allocation_before_creation_and_queued_native_retirement() {
@@ -270,9 +296,10 @@ fn replacing_source_does_not_change_the_graphics_generation() {
         gpu_conversion: false,
         synchronized: true,
     };
-    assert!(caps
-        .select(&frame, PresentationPolicy::GpuOnly, false)
-        .is_ok());
+    assert!(
+        caps.select(&frame, PresentationPolicy::GpuOnly, false)
+            .is_ok()
+    );
     frame.device_generation = 2;
     assert_eq!(
         caps.select(&frame, PresentationPolicy::GpuOnly, false),

@@ -13,6 +13,7 @@ struct Pipeline {
     context: u64,
     generation: u64,
     queue: SharedGlTextureRetirementQueue,
+    target: i32,
 }
 impl Drop for Pipeline {
     fn drop(&mut self) {
@@ -29,13 +30,17 @@ impl Drop for Pipeline {
 pub struct Scene(Mutex<Option<Pipeline>>);
 const VERTEX:&str="#version 300 es\nprecision highp float;uniform mat4 uvMap;out vec2 uv;void main(){vec2 q[6]=vec2[6](vec2(0,0),vec2(1,0),vec2(1,1),vec2(0,0),vec2(1,1),vec2(0,1));vec2 p=q[gl_VertexID];mat4 m=mat4(1.4,0.,0.,.35,-.25,-1.35,0.,.15,0.,0.,1.,0.,-.55,.7,0.,1.);gl_Position=m*vec4(p,0,1);uv=(uvMap*vec4(p,0,1)).xy;}";
 const FRAGMENT:&str="#version 300 es\nprecision highp float;uniform sampler2D source;uniform int rec709;in vec2 uv;out vec4 color;void main(){vec3 c=texture(source,uv).rgb;if(rec709!=0){c=pow(max(c,vec3(0)),vec3(2.4));c=mix(12.92*c,1.055*pow(c,vec3(1./2.4))-.055,step(vec3(.0031308),c));}color=vec4(c*.85,.85);}";
-fn pipeline(context: &Rc<dyn IGlContext>) -> Result<Pipeline, MediaError> {
+fn pipeline(context: &Rc<dyn IGlContext>, target: i32) -> Result<Pipeline, MediaError> {
     let gl = context.gl_interface();
     let v = gl.create_shader(0x8b31);
     let f = gl.create_shader(0x8b30);
+    let desktop = context.version().type_() == ferroui_opengl::GlProfileType::OpenGL;
+    let vertex = if desktop { VERTEX.replace("#version 300 es\nprecision highp float;", "#version 150\n") } else { VERTEX.to_owned() };
+    let mut fragment = if desktop { FRAGMENT.replace("#version 300 es\nprecision highp float;", "#version 150\n") } else { FRAGMENT.to_owned() };
+    if target == 0x84F5 { fragment = fragment.replace("sampler2D source", "sampler2DRect source"); }
     if let Some(e) = gl
-        .compile_shader_and_get_error(v, VERTEX)
-        .or_else(|| gl.compile_shader_and_get_error(f, FRAGMENT))
+        .compile_shader_and_get_error(v, &vertex)
+        .or_else(|| gl.compile_shader_and_get_error(f, &fragment))
     {
         gl.delete_shader(v);
         gl.delete_shader(f);
@@ -53,6 +58,7 @@ fn pipeline(context: &Rc<dyn IGlContext>) -> Result<Pipeline, MediaError> {
     let mut vao = 0;
     unsafe { gl.gen_vertex_arrays(1, &mut vao) };
     Ok(Pipeline {
+        target,
         program,
         vao,
         generation: context.shared_frame_context_generation(),
@@ -73,6 +79,7 @@ struct State<'a> {
     read: i32,
     active: i32,
     texture: i32,
+    rectangle: Option<i32>,
     viewport: [i32; 4],
     mask: [i32; 4],
     clear: [f32; 4],
@@ -80,7 +87,7 @@ struct State<'a> {
     color_mask: unsafe extern "system" fn(u8, u8, u8, u8),
 }
 impl<'a> State<'a> {
-    fn capture(gl: &'a GlInterface) -> Result<Self, MediaError> {
+    fn capture(gl: &'a GlInterface, desktop: bool) -> Result<Self, MediaError> {
         let p = gl.get_proc_address("glColorMask");
         if p.is_null() {
             return Err(error("Missing glColorMask"));
@@ -91,6 +98,7 @@ impl<'a> State<'a> {
         let active = gl.get_integerv(0x84e0);
         gl.active_texture(0x84c0);
         let texture = gl.get_integerv(0x8069);
+        let rectangle = (desktop).then(|| gl.get_integerv(0x84F6));
         let (mut viewport, mut mask, mut clear) = ([0; 4], [0; 4], [0.; 4]);
         unsafe {
             gl.get_integerv_native(0x0ba2, viewport.as_mut_ptr());
@@ -111,6 +119,7 @@ impl<'a> State<'a> {
             read: gl.get_integerv(0x8caa),
             active,
             texture,
+            rectangle,
             viewport,
             mask,
             clear,
@@ -149,6 +158,7 @@ impl Drop for State<'_> {
             }
         }
         gl.bind_texture(0x0de1, self.texture);
+        if let Some(texture) = self.rectangle { gl.bind_texture(0x84F5, texture); }
         gl.active_texture(self.active);
     }
 }
@@ -169,9 +179,17 @@ impl GlTextureRender for Scene {
         {
             return Err(error("This scene admits opaque SDR inputs"));
         }
-        let input = frame
-            .resource::<SharedFrameTexture>()
-            .ok_or_else(|| error("Input is not an admitted GL texture"))?;
+        #[cfg(target_os = "macos")]
+        let native = if frame.resource::<SharedFrameTexture>().is_none() {
+            Some(ferroui_media_apple::CglFrameView::import(context, frame)?)
+        } else { None };
+        let (target, texture) = match frame.resource::<SharedFrameTexture>() {
+            Some(input) => (0x0de1, input.texture()),
+            #[cfg(target_os = "macos")]
+            None => { let view = native.as_ref().ok_or_else(|| error("Missing native view"))?; (view.target() as i32, view.texture()) },
+            #[cfg(not(target_os = "macos"))]
+            None => return Err(error("Input is not an admitted GL texture")),
+        };
         let layout = ferroui_media_controls::frame_layout(m, Size::new(1., 1.), Stretch::Fill)
             .ok_or_else(|| error("No frame layout"))?;
         let inverse = layout.transform.invert();
@@ -179,7 +197,9 @@ impl GlTextureRender for Scene {
             let p = inverse.transform(Point::new(x, y));
             let u = p.x / m.width as f64;
             let v = p.y / m.height as f64;
-            (u as f32, if m.top_left_origin { v } else { 1. - v } as f32)
+            let v = if m.top_left_origin { v } else { 1. - v };
+            if target == 0x84F5 { ((u * m.width as f64) as f32, (v * m.height as f64) as f32) }
+            else { (u as f32, v as f32) }
         };
         let (a, b, c) = (map(0., 0.), map(1., 0.), map(0., 1.));
         let uv = [
@@ -202,14 +222,14 @@ impl GlTextureRender for Scene {
         ];
         let mut cached = self.0.lock().unwrap();
         if cached.as_ref().is_none_or(|p| {
-            Some(p.context) != context.shared_frame_context_id()
+            p.target != target || Some(p.context) != context.shared_frame_context_id()
                 || p.generation != context.shared_frame_context_generation()
         }) {
-            *cached = Some(pipeline(context)?);
+            *cached = Some(pipeline(context, target)?);
         }
         let pipeline = cached.as_ref().unwrap();
         let gl = context.gl_interface();
-        let state = State::capture(&gl)?;
+        let state = State::capture(&gl, context.version().type_() == ferroui_opengl::GlProfileType::OpenGL)?;
         for &(e, _) in &state.enables {
             gl.disable(e)
         }
@@ -226,7 +246,7 @@ impl GlTextureRender for Scene {
             gl.clear(0x4000);
             gl.use_program(pipeline.program);
             gl.bind_vertex_array(pipeline.vao);
-            gl.bind_texture(0x0de1, input.texture() as i32);
+            gl.bind_texture(target, texture as i32);
             unsafe {
                 let name = |s: &[u8]| gl.get_uniform_location(pipeline.program, s.as_ptr().cast());
                 gl.uniform1i(name(b"source\0"), 0);

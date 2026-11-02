@@ -141,17 +141,21 @@ int ferro_media_transport_action(void *pointer,const char *label,const char *rol
             return [node accessibilityPerformPress]?1:0;
         }
         if(action==2){
+            [NSApp activateIgnoringOtherApps:YES];
             [window makeKeyAndOrderFront:nil];
             if(![node respondsToSelector:@selector(setAccessibilityFocused:)])return 0;
             [node setAccessibilityFocused:YES];return 1;
         }
+        if(action==3)return window.isKeyWindow?1:0;
         return 0;
     }
 }
 int ferro_media_transport_key(void *pointer,unsigned short key,const char *text) {
     @autoreleasepool {
         NSWindow *window=(__bridge NSWindow *)pointer;
-        if(![NSThread isMainThread] || ![[NSApp windows] containsObject:window] || !window.isKeyWindow)return 0;
+        if(![NSThread isMainThread])return -1;
+        if(![[NSApp windows] containsObject:window])return -2;
+        if(!window.isKeyWindow)return -3;
         NSString *characters=[NSString stringWithUTF8String:text];
         for(NSNumber *kind in @[@(NSEventTypeKeyDown),@(NSEventTypeKeyUp)]){
             NSEvent *event=[NSEvent keyEventWithType:kind.unsignedIntegerValue location:NSZeroPoint modifierFlags:0 timestamp:NSProcessInfo.processInfo.systemUptime windowNumber:window.windowNumber context:nil characters:characters charactersIgnoringModifiers:characters isARepeat:NO keyCode:key];

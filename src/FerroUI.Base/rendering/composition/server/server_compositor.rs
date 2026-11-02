@@ -758,6 +758,10 @@ impl ServerCompositor {
     ///
     /// Panics on reentrancy.
     pub fn render(&self) -> bool {
+        crate::rendering::native_render_scope::run(|| self.render_in_native_scope())
+    }
+
+    fn render_in_native_scope(&self) -> bool {
         if self.ui_thread_is_inside_render.replace(true) {
             panic!("Reentrancy is not supported");
         }

@@ -3,6 +3,10 @@
 #![deny(unsafe_code)]
 #[allow(unsafe_code)]
 mod native;
+#[cfg(all(target_os = "macos", feature = "opengl"))]
+mod cgl;
+#[cfg(all(target_os = "macos", feature = "opengl"))]
+pub use cgl::CglFrameView;
 use ferroui_base::{
     platform::{
         IPlatformHandle, KnownPlatformGraphicsExternalImageHandleTypes, LeasedPlatformHandle,
@@ -62,6 +66,14 @@ impl ferroui_media_controls::TextureFrameImporter for AppleTextureImporter {
             PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties,
         };
         let m = frame.metadata();
+        #[cfg(all(target_os = "macos", feature = "opengl"))]
+        if frame.resource::<ferroui_opengl::SharedFrameTexture>().is_some() {
+            return ferroui_media_controls::TextureFrameImporter::import(
+                &ferroui_media_opengl::NativeGlTextureImporter, interop, frame);
+        }
+        if !interop.supported_image_handle_types().iter().any(|t| t == KnownPlatformGraphicsExternalImageHandleTypes::IO_SURFACE_REF) {
+            return Err(MediaError::new(MediaErrorKind::Unsupported, "Renderer cannot directly import CoreVideo IOSurfaces"));
+        }
         if m.device_generation != interop.shared_context_generation() {
             return Err(MediaError::new(
                 MediaErrorKind::Unsupported,

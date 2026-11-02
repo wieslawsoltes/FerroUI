@@ -1,4 +1,4 @@
-//! Same-process AVFoundation/Metal lifetime and native-memory acceptance probe.
+//! Same-process AVFoundation/GPU lifetime and native-memory acceptance probe.
 //! Fixed limits are emitted before warm-up; never inferred from a passing run.
 use super::{
     macos_diagnostics::memory,
@@ -55,6 +55,7 @@ async fn exercise(
         return Err("Mac lifecycle cycles must be 12..1000 (10 warm-up cycles)".into());
     }
     let negative = std::env::args().any(|a| a == "--macos-leak-control");
+    let backend = if std::env::args().any(|a| a == "--opengl") { "cgl" } else { "metal" };
     let workload = std::env::args()
         .find_map(|a| {
             a.strip_prefix("--macos-memory-workload=")
@@ -69,7 +70,7 @@ async fn exercise(
     } else {
         0
     };
-    std::println!("MACOS_LIFECYCLE_PROFILE cycles={cycles} warmup=10 workload={workload} footprint_growth_max={FOOTPRINT_GROWTH} metal_growth_max={METAL_GROWTH} port_growth_max={PORT_GROWTH} source=avc-aac.mp4 source_size=160x90 renderer=220x220 resets_per_cycle={resets} leak_control={negative}");
+    std::println!("MACOS_LIFECYCLE_PROFILE backend={backend} metal_counter_scope=metal_allocations_only cycles={cycles} warmup=10 workload={workload} footprint_growth_max={FOOTPRINT_GROWTH} metal_growth_max={METAL_GROWTH} port_growth_max={PORT_GROWTH} source=avc-aac.mp4 source_size=160x90 renderer=220x220 resets_per_cycle={resets} leak_control={negative}");
     let compositor = ElementComposition::get_element_visual(&window)
         .ok_or("No compositor")?
         .compositor()
@@ -84,7 +85,7 @@ async fn exercise(
         let interop = compositor
             .try_get_composition_gpu_interop()
             .await
-            .ok_or("No Metal interop")?;
+            .ok_or("No Apple GPU interop")?;
         // Poll real native preparation before clearing, retaining the future to
         // verify cancellation instead of silently dropping unstarted work.
         let provider = providers::video(&*interop, budget.clone()).map_err(|e| e.to_string())?;

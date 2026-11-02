@@ -56,7 +56,7 @@ pub fn install(
         Ok(v) => v,
         Err(e) => {
             eprintln!("RENDERER_SETUP_FAILED {e}");
-            super::FAILED.store(true, super::Ordering::Relaxed);
+            crate::desktop::FAILED.store(true, crate::desktop::Ordering::Relaxed);
             return None;
         }
     };
@@ -94,7 +94,7 @@ pub fn install(
     root.children().add(&host);
     let errors = host.errors().subscribe(|e| {
         eprintln!("RENDERER_ERROR {e}");
-        super::FAILED.store(true, super::Ordering::Relaxed);
+        crate::desktop::FAILED.store(true, crate::desktop::Ordering::Relaxed);
     });
     let weak = host.downgrade();
     let probed = std::cell::Cell::new(None::<u64>);
@@ -118,7 +118,7 @@ pub fn install(
                         }
                         Err(e) => {
                             eprintln!("RENDERER_PIXELS_FAILED {e}");
-                            super::FAILED.store(true, super::Ordering::Relaxed);
+                            crate::desktop::FAILED.store(true, crate::desktop::Ordering::Relaxed);
                         }
                     }
                 }

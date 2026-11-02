@@ -1,12 +1,12 @@
 //! Independent MP4 fixture orientation, crop and presented-pixel acceptance.
 #[cfg(target_os = "macos")]
-use super::macos_diagnostics::MetalFrameReader as NativeFrameReader;
+use super::native_pixels::MacFrameReader as NativeFrameReader;
 use super::native_pixels::{composition, presented, read_texture, settle, wait};
 use super::*;
 use ferroui_base::{
+    Point, Visual,
     layout::{HorizontalAlignment, VerticalAlignment},
     media::{Color, SolidColorBrush},
-    Point, Visual,
 };
 use ferroui_media_controls::{RendererHost, TexturePresenter};
 #[cfg(windows)]
@@ -78,7 +78,13 @@ fn check(
             }
         });
         if (0..3).any(|c| actual[c].abs_diff(expected[c]) > 30) {
-            return Err(format!("Video pixels ({u},{v}) {actual:?}, expected {expected:?} orientation={orientation} crop={crop} projection={projection} bounds={:?} point={p:?} image={}x{} scale={}",control.bounds(),image.width(),image.height(),window.render_scaling()));
+            return Err(format!(
+                "Video pixels ({u},{v}) {actual:?}, expected {expected:?} orientation={orientation} crop={crop} projection={projection} bounds={:?} point={p:?} image={}x{} scale={}",
+                control.bounds(),
+                image.width(),
+                image.height(),
+                window.render_scaling()
+            ));
         }
     }
     Ok(())
@@ -143,23 +149,19 @@ fn check_edges(
         }
         let actual = crossing.ok_or("No quadrant boundary in native crop")?;
         let source_length = if horizontal == (orientation % 2 == 0) {
-            if crop {
-                144.
-            } else {
-                160.
-            }
+            if crop { 144. } else { 160. }
         } else {
-            if crop {
-                80.
-            } else {
-                90.
-            }
+            if crop { 80. } else { 90. }
         };
         // Allow one decoded source pixel plus window-capture rounding.
         let tolerance = 1.0 / source_length + 1.0 / length;
-        println!("VIDEO_EDGE_PROBE horizontal={horizontal} actual={actual} expected={expected_at} tolerance={tolerance}");
+        println!(
+            "VIDEO_EDGE_PROBE horizontal={horizontal} actual={actual} expected={expected_at} tolerance={tolerance}"
+        );
         if (actual - expected_at).abs() > tolerance {
-            return Err(format!("Video crop boundary horizontal={horizontal} actual={actual} expected={expected_at} tolerance={tolerance}"));
+            return Err(format!(
+                "Video crop boundary horizontal={horizontal} actual={actual} expected={expected_at} tolerance={tolerance}"
+            ));
         }
     }
     Ok(())
@@ -251,6 +253,7 @@ async fn exercise(
         .ok_or("No diagnostic interop")?;
     let producer =
         NativeFrameReader::from_interop(&*interop, budget.clone()).map_err(|e| e.to_string())?;
+    let raw_top_left = output.metadata().top_left_origin;
     let raw = read_texture(&producer, output).await?;
     for (u, v) in [(0.2, 0.2), (0.8, 0.2), (0.2, 0.8), (0.8, 0.8)] {
         let w = 1. + 0.35 * u + 0.15 * v;
@@ -258,8 +261,7 @@ async fn exercise(
             (1. + (1.4 * u - 0.25 * v - 0.55) / w) / 2.,
             (1. + (-1.35 * v + 0.7) / w) / 2.,
         );
-        #[cfg(target_os = "macos")]
-        let y = 1. - y;
+        let y = if raw_top_left { 1. - y } else { y };
         let actual = raw.get_pixel(
             (x * raw.width() as f64) as u32,
             (y * raw.height() as f64) as u32,
@@ -512,13 +514,24 @@ async fn exercise(
             {
                 return Err("Geometry recovery lost paused intent/position".into());
             }
-            let device = source_frame.metadata().device.clone();
+            let active = compositor
+                .try_get_composition_gpu_interop()
+                .await
+                .ok_or("No recovered GPU interop")?;
+            let device = active
+                .shared_context_id()
+                .map(DeviceIdentity::Context)
+                .or_else(|| active.device_luid().map(DeviceIdentity::Luid));
+            let generation = active.shared_context_generation();
             let observed = host.clone();
             wait(move || {
                 Ok(observed
                     .output()
                     .and_then(|m| m.latest())
-                    .filter(|f| f.metadata().device == device)
+                    .filter(|f| {
+                        f.metadata().device == device
+                            && f.metadata().device_generation == generation
+                    })
                     .map(|_| ()))
             })
             .await?;
@@ -589,7 +602,9 @@ async fn exercise(
                 crop,
                 true,
             )?;
-            println!("VIDEO_LIFECYCLE_PIXELS_PASS phase={phase} orientation={orientation} crop={crop} paused=true position_ms=500");
+            println!(
+                "VIDEO_LIFECYCLE_PIXELS_PASS phase={phase} orientation={orientation} crop={crop} paused=true position_ms=500"
+            );
         }
     }
     drop(frame);

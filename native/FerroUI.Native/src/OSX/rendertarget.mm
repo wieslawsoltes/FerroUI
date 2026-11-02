@@ -36,6 +36,15 @@
                               };
     
     surface = IOSurfaceCreate((CFDictionaryRef)options);
+    // Composition writes SDR sRGB values. Tag the presented IOSurface so Core
+    // Animation does not interpret them in the display's device color space.
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+    CFPropertyListRef colorProperties = CGColorSpaceCopyPropertyList(colorSpace);
+    if (colorProperties) {
+        IOSurfaceSetValue(surface, kIOSurfaceColorSpace, colorProperties);
+        CFRelease(colorProperties);
+    }
+    CGColorSpaceRelease(colorSpace);
     self->scale = scale;
     self->size = size;
     self->_context = context;

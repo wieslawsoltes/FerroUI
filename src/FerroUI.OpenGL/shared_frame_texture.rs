@@ -76,7 +76,7 @@ impl SharedGlTextureRetirementQueue {
     pub(crate) fn take_native(&self) -> Vec<NativeRetirement> {
         std::mem::take(&mut self.0.lock().unwrap().native)
     }
-    pub(crate) fn poll_native(&self, gl: &crate::GlInterface) -> bool {
+    pub fn poll_native(&self, gl: &crate::GlInterface) -> bool {
         let mut pending = Vec::new();
         for mut release in self.take_native() {
             if !release(Some(gl)) {
@@ -112,19 +112,19 @@ impl SharedGlTextureRetirementQueue {
             wake();
         }
     }
-    pub(crate) fn take(&self) -> Vec<(u32, FrameRetirement)> {
+    pub fn take(&self) -> Vec<(u32, FrameRetirement)> {
         std::mem::take(&mut self.0.lock().unwrap().textures)
     }
     /// Includes live native/texture owners that have not queued destruction
     /// yet. Used only when retiring a healthy context, not as an idle frame clock.
-    pub(crate) fn has_live_resources(&self) -> bool {
+    pub fn has_live_resources(&self) -> bool {
         Arc::strong_count(&self.0) > 1 || self.has_pending()
     }
-    pub(crate) fn has_pending(&self) -> bool {
+    pub fn has_pending(&self) -> bool {
         let state = self.0.lock().unwrap();
         !state.textures.is_empty() || !state.native.is_empty()
     }
-    pub(crate) fn close(&self) {
+    pub fn close(&self) {
         let pending = {
             let mut state = self.0.lock().unwrap();
             state.closed = true;

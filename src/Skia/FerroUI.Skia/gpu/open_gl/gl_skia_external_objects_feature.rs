@@ -3,7 +3,7 @@ use crate::gpu::ganesh::GaneshGrContext;
 use crate::gpu::ISkiaGrContext;
 use crate::immutable_bitmap::ImmutableBitmap;
 use ferroui_base::platform::{
-    IExternalObjectsRenderInterfaceContextFeature, IPlatformHandle,
+    IExternalObjectsRenderInterfaceContextFeature, IPlatformHandle, LeasedPlatformHandle,
     IPlatformRenderInterfaceImportedImage, IPlatformRenderInterfaceImportedObject,
     IPlatformRenderInterfaceImportedSemaphore, PlatformGraphicsDrmFormat,
     PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties, SharedBitmapImpl,
@@ -128,6 +128,7 @@ impl IExternalObjectsRenderInterfaceContextFeature for GlSkiaExternalObjectsFeat
             panic!("Importing this platform handle is not supported");
         };
         let current = self.gl_context.ensure_current();
+        let frame = handle.as_any().downcast_ref::<LeasedPlatformHandle>().map(|h| h.frame().clone());
         let image = feature.import_image(handle, properties);
         current.dispose();
         let image = image.unwrap_or_else(|error| panic!("{}", error.message()));
@@ -135,7 +136,7 @@ impl IExternalObjectsRenderInterfaceContextFeature for GlSkiaExternalObjectsFeat
             self.gr_context.clone(),
             self.gl_context.clone(),
             self.fbo_provider(),
-            ImportedImageSource::External(image),
+            match frame { Some(frame) => ImportedImageSource::ExternalFrame(image, frame), None => ImportedImageSource::External(image) },
         ))
     }
 
@@ -296,6 +297,7 @@ enum ImportedImageSource {
     },
     /// The texture of an image of another graphics API.
     External(Rc<dyn IGlExternalImageTexture>),
+    ExternalFrame(Rc<dyn IGlExternalImageTexture>, ferroui_base::rendering::composition::frames::FrameLease),
     /// A texture of a context of the share group; a
     /// [`GlSkiaSharedTextureForComposition`].
     Shared(Arc<dyn ICompositionImportableSharedGpuContextImage>),
@@ -333,7 +335,7 @@ impl GlSkiaImportedImage {
         match &self.source {
             ImportedImageSource::External(image) => image,
             ImportedImageSource::Shared(_) => panic!("Only supported with an external image"),
-            ImportedImageSource::Frame { .. } => {
+            ImportedImageSource::Frame { .. } | ImportedImageSource::ExternalFrame(..) => {
                 panic!("An immutable frame requires lease-backed presentation")
             }
         }
@@ -441,7 +443,7 @@ impl GlSkiaImportedImage {
                         GL_TEXTURE_2D,
                     )
                 }
-                ImportedImageSource::Frame { .. } => {
+                ImportedImageSource::Frame { .. } | ImportedImageSource::ExternalFrame(..) => {
                     panic!("An immutable frame cannot use a snapshot importer")
                 }
             };
@@ -560,11 +562,11 @@ impl GlSkiaImportedImage {
 impl IPlatformRenderInterfaceImportedObject for GlSkiaImportedImage {
     fn dispose(&self) {
         match &self.source {
-            ImportedImageSource::External(image) => image.dispose(),
+            ImportedImageSource::External(image) | ImportedImageSource::ExternalFrame(image, _) => image.dispose(),
             ImportedImageSource::Shared(image) => {
                 shared_texture(image).dispose_with(&*self.gl_context)
             }
-            ImportedImageSource::Frame { .. } => {} // The frame lease owns storage.
+            ImportedImageSource::Frame { .. } | ImportedImageSource::ExternalFrame(..) => {} // The frame lease owns storage.
         }
     }
 }
@@ -578,6 +580,48 @@ impl IPlatformRenderInterfaceImportedImage for GlSkiaImportedImage {
         use ferroui_base::rendering::composition::frames::{
             DeviceIdentity, FrameAlpha, FrameColor, FrameError, FrameFormat,
         };
+        if let ImportedImageSource::ExternalFrame(image, source) = &self.source {
+            if self.fbo_provider.frame_context_id.is_none() { return Err(FrameError::MissingSynchronization); }
+            let m = frame.metadata();
+            m.validate(8192)?;
+            if !frame.is_current() || m.device_generation != self.fbo_provider.frame_generation
+                || self.gl_context.shared_frame_context_generation() != self.fbo_provider.frame_generation {
+                return Err(FrameError::StaleGeneration);
+            }
+            if !source.same_storage(&frame) || m.device.is_none()
+                || m.device != self.fbo_provider.device_luid().map(DeviceIdentity::Luid) {
+                return Err(FrameError::DeviceMismatch);
+            }
+            let properties = image.properties();
+            if m.width as i32 != properties.width || m.height as i32 != properties.height
+                || m.top_left_origin != properties.top_left_origin { return Err(FrameError::InvalidDimensions); }
+            if m.format != FrameFormat::Bgra8 || properties.format != PlatformGraphicsExternalImageFormat::B8G8R8A8UNorm {
+                return Err(FrameError::UnsupportedFormat);
+            }
+            crate::leased_gpu_bitmap::frame_color_filter(m.color)?;
+            if m.color == FrameColor::Rec709Full && m.alpha != FrameAlpha::Opaque { return Err(FrameError::UnsupportedColor); }
+            let alpha = match m.alpha {
+                FrameAlpha::Opaque => AlphaType::Opaque,
+                FrameAlpha::Premultiplied => AlphaType::Premul,
+                _ => return Err(FrameError::UnsupportedFormat),
+            };
+            let frame = image.acquire_frame_lease(frame)?;
+            let current = self.gl_context.ensure_current();
+            self.gr_context.reset_context();
+            // CGL's IOSurface rectangle is borrowed directly. The native alias
+            // travels with the frame retained by each actual Ganesh submission.
+            let backend = unsafe { backend_textures::make_gl(
+                (properties.width, properties.height), Mipmapped::No,
+                TextureInfo { target: image.texture_type() as u32, id: image.texture_id() as u32,
+                    format: image.internal_format() as u32, ..Default::default() }, "") };
+            let origin = if properties.top_left_origin { SurfaceOrigin::TopLeft } else { SurfaceOrigin::BottomLeft };
+            let image = self.gr_context.with_context(|gr| images::borrow_texture_from(gr, &backend, origin, ColorType::RGBA8888, alpha, None));
+            current.dispose();
+            let image = image.ok_or(FrameError::MissingImporter)?;
+            let context = self.gr_context.frame_context_id().ok_or(FrameError::MissingSynchronization)?;
+            frame.counters().gpu_import();
+            return Ok(Arc::new(crate::leased_gpu_bitmap::LeasedGpuBitmap::new(image, frame, context)));
+        }
         let ImportedImageSource::Frame {
             texture_id,
             properties,

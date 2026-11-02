@@ -26,7 +26,7 @@ pub fn video(
     {
         Ok(Rc::new(ferroui_media_video_apple::AppleVideoProvider {
             device: DeviceIdentity::Luid(interop.device_luid().ok_or_else(|| {
-                MediaError::new(MediaErrorKind::Unsupported, "No admitted Metal device")
+                MediaError::new(MediaErrorKind::Unsupported, "No admitted Apple GPU device")
             })?),
             device_generation: interop.shared_context_generation(),
             budget,
@@ -53,7 +53,7 @@ pub fn camera(
     {
         Ok(Rc::new(ferroui_media_camera_apple::AppleCameraProvider {
             device: DeviceIdentity::Luid(interop.device_luid().ok_or_else(|| {
-                MediaError::new(MediaErrorKind::Unsupported, "No admitted Metal device")
+                MediaError::new(MediaErrorKind::Unsupported, "No admitted Apple GPU device")
             })?),
             device_generation: interop.shared_context_generation(),
         }))

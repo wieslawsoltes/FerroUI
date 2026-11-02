@@ -63,9 +63,9 @@ pub fn transport_key(window: &Window, key: u16, text: &str) -> Result<(), String
         .try_get_platform_handle()
         .ok_or("No keyboard NSWindow")?;
     let text = CString::new(text).map_err(|e| e.to_string())?;
-    if unsafe { ferro_media_transport_key(handle.handle() as *mut c_void, key, text.as_ptr()) } == 0
-    {
-        return Err("Native transport keyboard dispatch failed".into());
+    let status = unsafe { ferro_media_transport_key(handle.handle() as *mut c_void, key, text.as_ptr()) };
+    if status != 1 {
+        return Err(format!("Native transport keyboard dispatch failed (status {status}: -1 thread, -2 owner, -3 key window)"));
     }
     Ok(())
 }

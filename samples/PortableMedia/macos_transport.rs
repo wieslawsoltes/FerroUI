@@ -4,6 +4,13 @@ use super::{
     native_pixels::{settle, wait},
     *,
 };
+async fn focus(window: &Ref<Window>, label: &'static str, role: &'static str) -> Result<(), String> {
+    transport_action(window, label, role, 2)?;
+    let window = window.clone();
+    // App activation and native key-window changes can complete on a later
+    // AppKit event. Never bypass the native key-window dispatch precondition.
+    wait(move || Ok(transport_action(&window, label, role, 3).is_ok().then_some(()))).await
+}
 async fn exercise(window: Ref<Window>, view: Ref<MediaPlayerElement>) -> Result<(), String> {
     let player = view.media_player().ok_or("No player")?;
     let observed = player.clone();
@@ -29,7 +36,7 @@ async fn exercise(window: Ref<Window>, view: Ref<MediaPlayerElement>) -> Result<
         return Err("AX mute action did not reach the player".into());
     }
     transport_action(&window, "Unmute", "AXButton", 1)?;
-    transport_action(&window, "Pause", "AXButton", 2)?;
+    focus(&window, "Pause", "AXButton").await?;
     transport_key(&window, 49, " ")?;
     let observed = player.clone();
     wait(move || {
@@ -38,7 +45,7 @@ async fn exercise(window: Ref<Window>, view: Ref<MediaPlayerElement>) -> Result<
     })
     .await?;
     let before_seek = player.playback_session().position;
-    transport_action(&window, "Playback position", "AXSlider", 2)?;
+    focus(&window, "Playback position", "AXSlider").await?;
     transport_key(&window, 124, "\u{f703}")?;
     let observed = player.clone();
     wait(move || {
@@ -49,7 +56,7 @@ async fn exercise(window: Ref<Window>, view: Ref<MediaPlayerElement>) -> Result<
         )
     })
     .await?;
-    transport_action(&window, "Play", "AXButton", 2)?;
+    focus(&window, "Play", "AXButton").await?;
     transport_key(&window, 49, " ")?;
     let observed = player.clone();
     wait(move || {
@@ -60,12 +67,12 @@ async fn exercise(window: Ref<Window>, view: Ref<MediaPlayerElement>) -> Result<
     let mut options = player.options();
     options.volume = 0.4;
     player.set_options(options).map_err(|e| e.to_string())?;
-    transport_action(&window, "Volume", "AXSlider", 2)?;
+    focus(&window, "Volume", "AXSlider").await?;
     transport_key(&window, 124, "\u{f703}")?;
     if player.options().volume <= 0.4 {
         return Err("Native slider Right key did not change volume".into());
     }
-    transport_action(&window, "Stop", "AXButton", 2)?;
+    focus(&window, "Stop", "AXButton").await?;
     transport_key(&window, 49, " ")?;
     let observed = player.clone();
     wait(move || {

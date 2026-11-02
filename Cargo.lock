@@ -2194,6 +2194,8 @@ dependencies = [
  "ferroui-base",
  "ferroui-media",
  "ferroui-media-controls",
+ "ferroui-media-opengl",
+ "ferroui-opengl",
 ]
 
 [[package]]
@@ -4982,6 +4984,7 @@ dependencies = [
  "ferroui-media-video-linux",
  "ferroui-media-video-windows",
  "ferroui-media-windows",
+ "ferroui-native",
  "ferroui-opengl",
  "ferroui-skia",
  "ferroui-themes-fluent",

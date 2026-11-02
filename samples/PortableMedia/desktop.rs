@@ -40,7 +40,7 @@ mod native_pixels;
 #[path = "providers.rs"]
 mod providers;
 #[cfg(target_os = "macos")]
-#[path = "renderer.rs"]
+#[path = "macos_renderer.rs"]
 mod renderer;
 #[cfg(not(target_os = "macos"))]
 #[path = "native_renderer.rs"]
@@ -551,6 +551,11 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
     ).detach();
 }
 pub fn run() -> std::process::ExitCode {
+    #[cfg(all(target_os = "macos", not(ferro_skia_apple_ganesh)))]
+    if std::env::args().any(|a| a == "--opengl") {
+        eprintln!("CGL media requires RUSTFLAGS='--cfg ferro_skia_apple_ganesh'");
+        return std::process::ExitCode::FAILURE;
+    }
     #[cfg(not(all(target_os = "macos", feature = "native-pixel-tests")))]
     if std::env::args().any(|a| a == "--macos-transport-smoke") {
         eprintln!("Mac transport verification requires macOS and --features macos-verification");
@@ -656,6 +661,13 @@ pub fn run() -> std::process::ExitCode {
         )],
         ..Default::default()
     }));
+    #[cfg(target_os = "macos")]
+    let builder = if args.iter().any(|a| a == "--opengl") {
+        builder.with(Rc::new(ferroui_native::FerroNativePlatformOptions {
+            rendering_mode: vec![ferroui_native::FerroNativeRenderingMode::OpenGl],
+            ..Default::default()
+        }))
+    } else { builder };
     let result = builder.start_with_classic_desktop_lifetime(&args);
     if FAILED.load(Ordering::Relaxed) {
         std::process::ExitCode::FAILURE
