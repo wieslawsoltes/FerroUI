@@ -1,4 +1,5 @@
 use super::{Error, QmlView};
+use ferroui_base::reactive::Disposable;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use std::{cell::Cell, rc::Rc, time::Duration};
 
@@ -118,7 +119,8 @@ impl QmlView {
                         ),
                         DispatcherPriority::BACKGROUND,
                     );
-                    view.0.deferred_resume.replace(Some(timer));
+                    let cancellation = Disposable::create(move || timer.dispose());
+                    view.0.deferred_resume.replace(Some(cancellation));
                 }
                 if let Err(error) = view.flush().and(result) {
                     (view.0.on_error)(error);
