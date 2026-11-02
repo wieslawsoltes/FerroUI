@@ -23,9 +23,14 @@ struct Entry {
 }
 
 impl Entry {
-    fn key(&self) -> i64 {
-        self.app
-            .map_or_else(|| -1 - i64::from(self.windows[0].id), |index| index as i64)
+    fn key(&self) -> ferroui_view::Key {
+        if let Some(app) = self.app {
+            app.into()
+        } else if !self.native_id.is_empty() {
+            self.native_id.as_str().into()
+        } else {
+            (-1 - i64::from(self.windows[0].id)).into()
+        }
     }
 
     fn invoke(&self, shell: &Rc<Shell>, layout: Layout) {

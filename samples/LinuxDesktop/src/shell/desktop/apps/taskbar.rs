@@ -2,7 +2,7 @@
 //! Preview brushes live only for the open flyout and sample the original
 //! client surfaces in the same compositor.
 use super::*;
-use crate::shell::desktop::popup_host::{PopupHost, opaque_background};
+use crate::shell::desktop::popup_host::{opaque_background, PopupHost};
 use crate::shell::workspaces::preview;
 use ferroui_base::input::{
     Key, KeyModifiers, KeyboardNavigationHandler, KeyboardNavigationMode, NavigationDirection,
@@ -16,7 +16,7 @@ pub(super) fn buttons(shell: &Rc<Shell>, items: Memo<Vec<Entry>>) -> Element {
     let shell = shell.clone();
     for_each(
         move || items.with(|all| all.iter().map(Entry::key).collect::<Vec<_>>()),
-        |id| *id,
+        |id| id.clone(),
         move |id| {
             let entry =
                 memo(move |_| items.with(|all| all.iter().find(|e| e.key() == id).cloned()));
@@ -261,8 +261,12 @@ fn window_card(
             if let Some(f) = flyout.upgrade() {
                 f.set_is_open(false);
             }
-            if let Some(s) = &activate {
-                s.activate(id);
+            if let Some(session) = &activate {
+                if session.activate(id) {
+                    if let Some(host) = session.compositor() {
+                        host.focus_client();
+                    }
+                }
             }
         })
         .on_key_down(move |e| {
