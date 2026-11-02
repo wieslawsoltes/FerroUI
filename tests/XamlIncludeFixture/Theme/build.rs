@@ -25,6 +25,7 @@ fn main() {
         .input("documents.rs")
         .compile_group(XamlGroup::new("compiled_xaml").documents(documents::DOCUMENTS))
         .compile_group(XamlGroup::new("compact_rust").documents(documents::TABLE_TEST).create_source_info(false).internal())
+        .compile_group(XamlGroup::new("compact_slice").documents(documents::TABLE_TEST).resource_roots(&["Alias2"]).internal())
         .compile_group(XamlGroup::new("compact_binary").documents(documents::TABLE_TEST).create_source_info(false).binary_resources(true).internal())
         .compile_group(
             XamlGroup::new("compiled_xaml_source_info")

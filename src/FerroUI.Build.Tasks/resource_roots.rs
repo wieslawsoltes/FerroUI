@@ -38,6 +38,37 @@ fn key<'a>(node: Node<'a, '_>) -> Option<&'a str> {
     identifier(local).then_some(local)
 }
 
+// A dictionary entry that registers a name in the outer document can be observed without
+// looking up its key. Known framework templates create a new namescope for their contents.
+fn registers_outer_name(entry: Node<'_, '_>) -> bool {
+    let mut template_end = 0;
+    for node in entry.descendants().filter(|n| n.is_element()) {
+        if node.range().start < template_end {
+            continue;
+        }
+        let tag = node.tag_name();
+        if node.attribute((XamlNamespaces::XAML2006, "Name")).is_some()
+            || node.attribute("Name").is_some()
+            || tag.name().ends_with(".Name")
+        {
+            return true;
+        }
+        if tag.namespace() == Some(FERRO_XML_NAMESPACE)
+            && matches!(
+                tag.name(),
+                "ControlTemplate"
+                    | "DataTemplate"
+                    | "TreeDataTemplate"
+                    | "ItemsPanelTemplate"
+                    | "FocusAdornerTemplate"
+            )
+        {
+            template_end = node.range().end;
+        }
+    }
+    false
+}
+
 struct Entry {
     document: usize,
     range: Range<usize>,
@@ -97,6 +128,7 @@ pub(super) fn trim(documents: &mut [(String, String)], roots: &[String]) -> Resu
     let mut graph = Graph::default();
     // Only the outermost keyed entry is removable. Each document is traversed in source order.
     let mut per_document = Vec::with_capacity(parsed.len());
+    let mut ambient = HashSet::new();
     for (document, xml) in parsed.iter().enumerate() {
         let mut entries = Vec::new();
         let mut end = 0;
@@ -109,6 +141,9 @@ pub(super) fn trim(documents: &mut [(String, String)], roots: &[String]) -> Resu
                 let id = *graph.names.entry(name).or_insert(count);
                 if id == count {
                     graph.definitions.push(Vec::new());
+                }
+                if registers_outer_name(node) {
+                    ambient.insert(id);
                 }
                 let index = graph.entries.len();
                 graph.definitions[id].push(index);
@@ -125,7 +160,6 @@ pub(super) fn trim(documents: &mut [(String, String)], roots: &[String]) -> Resu
         per_document.push(entries);
     }
 
-    let mut ambient = HashSet::new();
     for (xml, entries) in parsed.iter().zip(&per_document) {
         let mut entry_iter = entries.iter().peekable();
         let mut current: Option<(usize, usize)> = None;
@@ -243,8 +277,21 @@ mod tests {
     }
 
     #[test]
+    fn outer_names_are_roots_but_names_in_deferred_templates_are_local() {
+        let mut docs = vec![dictionary(
+            r#"<Panel x:Key="Named"><Button x:Name="Visible"/></Panel>
+            <ControlTheme x:Key="Unused"><ControlTemplate><Button x:Name="PART_Content"/></ControlTemplate></ControlTheme>"#,
+        )];
+        trim(&mut docs, &[]).unwrap();
+        assert!(docs[0].1.contains("Visible"));
+        assert!(!docs[0].1.contains("PART_Content"));
+    }
+
+    #[test]
     fn pruning_preserves_utf16_positions_of_surviving_resources() {
-        let mut docs = vec![dictionary("<Color x:Key=\"Gone\">😀</Color><Color x:Key=\"Keep\"/>")];
+        let mut docs = vec![dictionary(
+            "<Color x:Key=\"Gone\">😀</Color><Color x:Key=\"Keep\"/>",
+        )];
         let position = |s: &str| s[..s.find("Keep").unwrap()].encode_utf16().count();
         let before = position(&docs[0].1);
         trim(&mut docs, &["Keep".into()]).unwrap();

@@ -102,3 +102,18 @@ fn duplicate_table_key_matches_the_typed_call_and_stops_the_run() {
         Some(&41)
     );
 }
+
+#[test]
+fn explicit_root_keeps_alias_chain_and_omits_unreferenced_factories() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    crate::register_types();
+    let dictionary = crate::compact_slice::build_compact_xaml(Some(
+        XamlIlRuntimeHelpers::create_root_service_provider_v3(None),
+    )).unwrap();
+    assert!(dictionary.get(&"Alias2".into()).is_some());
+    assert!(dictionary.contains_key(&"Literal1".into()));
+    assert!(!dictionary.contains_key(&"Literal2".into()));
+    let generated = include_str!(concat!(env!("OUT_DIR"), "/xaml/compact_slice.rs"));
+    assert!(!generated.contains("Dynamic1"));
+    assert!(!generated.contains("bind_dynamic_resource"));
+}
