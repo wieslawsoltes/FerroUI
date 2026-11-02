@@ -1,4 +1,5 @@
-//! The Cartesian, pie and polar scenarios of LiveCharts2's `tests/SnapshotTests` at the pin,
+//! The Cartesian, pie, polar, Sankey and treemap scenarios of LiveCharts2's `tests/SnapshotTests`
+//! at the pin,
 //! restated with the native controls. Each scenario keeps the source's chart, series, values, axes and
 //! size; `livecharts-snapshots` renders them through Vello CPU, and the render job of
 //! `livecharts.yml` keeps the images beside the upstream reference images. The upstream suite
@@ -6,16 +7,21 @@
 //! images are a visual reference and the tests check that every scenario measures its data.
 //!
 //! Source settings without a native counterpart are left out and named in a comment: tooltip
-//! label formatters, `TicksAtCenter`, `IsHoverable`, paints of geometries and separators.
+//! label formatters, `TicksAtCenter`, `IsHoverable`, paints of geometries and separators. The
+//! node and link colours of a Sankey series stand for its `NodeColorMapper`, and the labels a
+//! `LabelMapper` builds are the names of the nodes. The hover scenarios move the pointer after the
+//! first measure, so their renders show the native tooltip.
 
 use ferroui_base::media::Color;
-use ferroui_base::{Ref, Size};
+use ferroui_base::{Point, Ref, Size};
 use ferroui_controls_livecharts::{
     Axis, BoxSeries, CandlesticksSeries, CartesianChart, Chart, ChartPoint, ChartSeries,
-    ColumnSeries, LineSeries, PieChart, PieSeries, PolarChart, PolarLabelsPosition,
-    PolarLineSeries, RangeColumnSeries, RangeLineSeries, RangeRowSeries, RowSeries, ScatterSeries,
-    StackedAreaSeries, StackedColumnSeries, StackedRowSeries, StackedStepAreaSeries,
-    StepLineSeries,
+    ColumnSeries, LegendPosition, LineSeries, PieChart, PieSeries, PolarChart,
+    PolarLabelsPosition, PolarLineSeries, RangeColumnSeries, RangeLineSeries, RangeRowSeries,
+    RowSeries, SankeyChart, SankeyLayoutKind, SankeyLink, SankeyLinks, SankeyNode, SankeyNodes,
+    SankeySeries, ScatterSeries, StackedAreaSeries, StackedColumnSeries, StackedRowSeries,
+    StackedStepAreaSeries, StepLineSeries, TreemapChart, TreemapNode, TreemapNodes,
+    TreemapSeries,
 };
 use ferroui_livecharts::kernel::Coordinate;
 use ferroui_livecharts::{COTANGENT_ANGLE, TANGENT_ANGLE};
@@ -47,6 +53,15 @@ fn changed(name: &'static str, build: fn() -> Ref<Chart>, then: fn(&Chart)) -> S
         size: SQUARE,
         build,
         then: Some(then),
+    }
+}
+
+fn sized(name: &'static str, width: f64, height: f64, build: fn() -> Ref<Chart>) -> Scenario {
+    Scenario {
+        name,
+        size: Size::new(width, height),
+        build,
+        then: None,
     }
 }
 
@@ -146,6 +161,41 @@ pub fn scenarios() -> Vec<Scenario> {
         scenario("PolarChartTests_FilledArea", polar_filled),
         scenario("PolarChartTests_WithInnerRadius", polar_inner_radius),
         scenario("PolarChartTests_OpenLine", polar_open_line),
+        sized("SankeySeriesTests_TwoLevelFlow", 600., 400., sankey_two_level),
+        sized("SankeySeriesTests_WithLabels", 700., 400., sankey_with_labels),
+        sized("SankeySeriesTests_JobApplicationFunnel", 900., 600., sankey_funnel),
+        sized("SankeySeriesTests_BipartiteArc", 700., 600., sankey_bipartite_arc),
+        sized(
+            "SankeySeriesTests_BipartiteArcWithLabels",
+            700.,
+            600.,
+            sankey_bipartite_arc_labels,
+        ),
+        Scenario {
+            name: "SankeySeriesTests_HoverTooltip_Vertical",
+            size: Size::new(600., 400.),
+            build: sankey_hover_vertical,
+            then: Some(|c| c.move_pointer(Point::new(8., 80.))),
+        },
+        changed(
+            "SankeySeriesTests_HoverTooltip_BipartiteArc",
+            sankey_hover_arc,
+            |c| c.move_pointer(Point::new(590., 300.)),
+        ),
+        sized("SankeySeriesTests_DefaultTheme_AppliesPaletteColor", 600., 400., sankey_theme),
+        sized("SankeySeriesTests_ThreeColumnsWithBranching", 700., 400., sankey_three_columns),
+        scenario("TreemapSeriesTests_FlatBasic", treemap_flat),
+        scenario("TreemapSeriesTests_WithDataLabels", treemap_labels),
+        changed("TreemapSeriesTests_HoverTooltip", treemap_population, |c| {
+            c.move_pointer(Point::new(150., 150.))
+        }),
+        sized(
+            "TreemapSeriesTests_TwoSeriesWithTitleAndLegend",
+            900.,
+            600.,
+            treemap_two_series,
+        ),
+        scenario("TreemapSeriesTests_HierarchicalTwoLevel", treemap_hierarchical),
     ]
 }
 
@@ -973,6 +1023,367 @@ fn polar_open_line() -> Ref<Chart> {
     s.set_polar_closed(false);
     s.set_geometry_size(12.);
     radius_to_20(polar_chart(vec![s]))
+}
+
+// SankeySeriesTests.
+
+const SANKEY_BLUE: Color = Color::from_rgb(96, 138, 218);
+const SANKEY_LINK: Color = Color::from_argb(90, 96, 138, 218);
+const BLACK: Color = Color::from_rgb(0, 0, 0);
+const WHITE: Color = Color::from_rgb(255, 255, 255);
+
+fn sankey_chart(series: Ref<SankeySeries>) -> Ref<Chart> {
+    let chart = SankeyChart::new().upcast::<Chart>();
+    chart.series().add(series.upcast());
+    chart.set_animations_speed(0.0);
+    chart
+}
+
+/// A Sankey series of the named nodes, linked by their indexes, with the source's fill and link
+/// fill (`None` leaves them to the theme).
+fn sankey(
+    names: &[&str],
+    links: &[(usize, usize, f64)],
+    fill: Option<Color>,
+    link_fill: Option<Color>,
+) -> Ref<SankeySeries> {
+    let nodes: Vec<_> = names.iter().map(|name| SankeyNode::with_name(*name)).collect();
+    let series = SankeySeries::new();
+    series.set_links(SankeyLinks::from_items(links.iter().map(
+        |&(source, target, weight)| SankeyLink::with_nodes(&nodes[source], &nodes[target], weight),
+    )));
+    series.set_nodes(SankeyNodes::from_items(nodes));
+    series.set_fill(fill);
+    series.set_link_fill(link_fill);
+    series
+}
+
+/// The node colours of a series, in place of the source's `NodeColorMapper`.
+fn colour_nodes(series: &SankeySeries, colours: &[Color]) {
+    for (node, colour) in series.nodes().to_vec().iter().zip(colours) {
+        node.set_color(Some(*colour));
+    }
+}
+
+fn labels(series: &SankeySeries, colour: Color, size: f64) {
+    series.set_data_labels(true);
+    series.set_data_labels_color(Some(colour));
+    series.set_data_labels_size(size);
+}
+
+const TWO_LEVEL: [(usize, usize, f64); 5] =
+    [(0, 3, 8.), (0, 4, 4.), (1, 3, 6.), (1, 4, 2.), (2, 4, 10.)];
+
+fn sankey_two_level() -> Ref<Chart> {
+    let s = sankey(
+        &["A", "B", "C", "X", "Y"],
+        &TWO_LEVEL,
+        Some(SANKEY_BLUE),
+        Some(SANKEY_LINK),
+    );
+    s.set_node_width(16.);
+    sankey_chart(s)
+}
+
+fn sankey_with_labels() -> Ref<Chart> {
+    let s = sankey(
+        &["Alice", "Bob", "Carol", "Trips", "Other"],
+        &TWO_LEVEL,
+        Some(SANKEY_BLUE),
+        Some(SANKEY_LINK),
+    );
+    s.set_node_width(16.);
+    labels(&s, BLACK, 16.);
+    sankey_chart(s)
+}
+
+fn sankey_funnel() -> Ref<Chart> {
+    // The source's LabelMapper writes the node value before the name; the names say it here.
+    let s = sankey(
+        &[
+            "9 Applications",
+            "4 1st Interviews",
+            "3 Rejected",
+            "2 No Reply",
+            "2 2nd Interviews",
+            "1 Dropped by Myself",
+            "1 No Offer Received",
+            "2 Offers",
+            "1 Accepted",
+            "1 Declined",
+        ],
+        &[
+            (0, 1, 4.),
+            (0, 2, 3.),
+            (0, 3, 2.),
+            (1, 4, 2.),
+            (1, 5, 1.),
+            (1, 6, 1.),
+            (4, 7, 2.),
+            (7, 8, 1.),
+            (7, 9, 1.),
+        ],
+        Some(SANKEY_BLUE),
+        Some(WHITE),
+    );
+    let orange = Color::from_rgb(220, 130, 50);
+    colour_nodes(
+        &s,
+        &[
+            SANKEY_BLUE,
+            SANKEY_BLUE,
+            Color::from_rgb(210, 80, 80),
+            Color::from_rgb(180, 180, 180),
+            SANKEY_BLUE,
+            orange,
+            orange,
+            SANKEY_BLUE,
+            Color::from_rgb(64, 175, 110),
+            orange,
+        ],
+    );
+    s.set_node_width(18.);
+    s.set_node_padding(14.);
+    s.set_node_corner_radius(3.);
+    labels(&s, BLACK, 13.);
+    sankey_chart(s)
+}
+
+fn sankey_bipartite_arc() -> Ref<Chart> {
+    let s = sankey(
+        &[
+            "Furniture",
+            "Technology",
+            "Office Supplies",
+            "Chairs",
+            "Phones",
+            "Storage",
+            "Tables",
+            "Paper",
+        ],
+        &[
+            (0, 3, 12.),
+            (0, 6, 6.),
+            (1, 4, 14.),
+            (1, 5, 8.),
+            (2, 5, 4.),
+            (2, 7, 9.),
+            (2, 3, 2.),
+        ],
+        Some(SANKEY_BLUE),
+        Some(SANKEY_LINK),
+    );
+    colour_nodes(
+        &s,
+        &[
+            SANKEY_BLUE,
+            Color::from_rgb(52, 78, 144),
+            Color::from_rgb(150, 188, 232),
+            SANKEY_BLUE,
+            Color::from_rgb(52, 78, 144),
+            Color::from_rgb(120, 158, 220),
+            Color::from_rgb(170, 60, 80),
+            Color::from_rgb(232, 168, 130),
+        ],
+    );
+    s.set_layout(SankeyLayoutKind::BipartiteArc);
+    s.set_arc_span_degrees(150.);
+    s.set_node_width(20.);
+    s.set_node_padding(8.);
+    sankey_chart(s)
+}
+
+fn sankey_bipartite_arc_labels() -> Ref<Chart> {
+    let s = sankey(
+        &["Alpha", "Beta", "Gamma", "Xenon", "Yttrium", "Zinc"],
+        &[(0, 3, 8.), (0, 4, 4.), (1, 3, 6.), (1, 5, 5.), (2, 4, 10.), (2, 5, 3.)],
+        Some(SANKEY_BLUE),
+        Some(SANKEY_LINK),
+    );
+    s.set_layout(SankeyLayoutKind::BipartiteArc);
+    s.set_node_width(14.);
+    labels(&s, BLACK, 14.);
+    sankey_chart(s)
+}
+
+fn sankey_hover_vertical() -> Ref<Chart> {
+    let s = sankey(
+        &["A", "B", "C", "X", "Y"],
+        &[(0, 3, 8.), (0, 4, 4.), (1, 3, 6.), (2, 4, 10.)],
+        Some(SANKEY_BLUE),
+        Some(SANKEY_LINK),
+    );
+    s.set_node_width(16.);
+    sankey_chart(s)
+}
+
+fn sankey_hover_arc() -> Ref<Chart> {
+    let s = sankey(
+        &["Furniture", "Technology", "Chairs", "Phones", "Storage"],
+        &[(0, 2, 12.), (1, 3, 14.), (1, 4, 8.)],
+        Some(SANKEY_BLUE),
+        Some(SANKEY_LINK),
+    );
+    s.set_layout(SankeyLayoutKind::BipartiteArc);
+    s.set_node_width(20.);
+    sankey_chart(s)
+}
+
+fn sankey_theme() -> Ref<Chart> {
+    // No fill and no link fill: the theme's palette colour and its LinkFill at alpha 90.
+    let s = sankey(
+        &["A", "B", "X", "Y"],
+        &[(0, 2, 5.), (0, 3, 3.), (1, 3, 7.)],
+        None,
+        None,
+    );
+    s.set_node_width(16.);
+    sankey_chart(s)
+}
+
+fn sankey_three_columns() -> Ref<Chart> {
+    let s = sankey(
+        &["A", "B", "C", "M", "N", "P", "Q"],
+        &[
+            (0, 3, 10.),
+            (1, 3, 5.),
+            (1, 4, 3.),
+            (2, 4, 12.),
+            (3, 5, 8.),
+            (3, 6, 7.),
+            (4, 5, 5.),
+            (4, 6, 10.),
+        ],
+        Some(Color::from_rgb(232, 105, 105)),
+        Some(Color::from_argb(80, 232, 105, 105)),
+    );
+    s.set_node_width(14.);
+    s.set_node_padding(12.);
+    sankey_chart(s)
+}
+
+// TreemapSeriesTests.
+
+fn treemap_chart(series: Vec<Ref<TreemapSeries>>) -> Ref<Chart> {
+    let chart = TreemapChart::new().upcast::<Chart>();
+    for s in series {
+        chart.series().add(s.upcast());
+    }
+    chart.set_animations_speed(0.0);
+    chart
+}
+
+/// A treemap series with the source's fill and white stroke of 2.
+fn treemap(nodes: Vec<Ref<TreemapNode>>, padding: f64, fill: Color) -> Ref<TreemapSeries> {
+    let series = TreemapSeries::new();
+    series.set_nodes(TreemapNodes::from_items(nodes));
+    series.set_padding(padding);
+    series.set_fill(Some(fill));
+    series.set_stroke(Some(WHITE));
+    series.set_stroke_width(2.);
+    series
+}
+
+fn leaves(values: &[(f64, &str)]) -> Vec<Ref<TreemapNode>> {
+    values
+        .iter()
+        .map(|&(value, name)| TreemapNode::with_value(value, name))
+        .collect()
+}
+
+fn branch(name: &str, values: &[(f64, &str)]) -> Ref<TreemapNode> {
+    TreemapNode::with_children(name, TreemapNodes::from_items(leaves(values)))
+}
+
+fn treemap_flat() -> Ref<Chart> {
+    // The default padding of 2.
+    treemap_chart(vec![treemap(
+        leaves(&[(40., "A"), (25., "B"), (15., "C"), (10., "D"), (7., "E"), (3., "F")]),
+        2.,
+        SANKEY_BLUE,
+    )])
+}
+
+fn treemap_labels() -> Ref<Chart> {
+    let s = treemap(
+        leaves(&[
+            (40., "Asia"),
+            (25., "Europe"),
+            (15., "Americas"),
+            (10., "Africa"),
+            (7., "Oceania"),
+            (3., "Antarctica"),
+        ]),
+        4.,
+        SANKEY_BLUE,
+    );
+    s.set_data_labels(true);
+    s.set_data_labels_color(Some(WHITE));
+    s.set_data_labels_size(18.);
+    treemap_chart(vec![s])
+}
+
+const ASIA: [(f64, &str); 4] = [
+    (1400., "China"),
+    (1300., "India"),
+    (125., "Japan"),
+    (270., "Indonesia"),
+];
+const EUROPE: [(f64, &str); 4] = [
+    (83., "Germany"),
+    (67., "France"),
+    (60., "Italy"),
+    (46., "Spain"),
+];
+
+fn treemap_population() -> Ref<Chart> {
+    treemap_chart(vec![treemap(
+        vec![branch("Asia", &ASIA), branch("Europe", &EUROPE)],
+        4.,
+        SANKEY_BLUE,
+    )])
+}
+
+fn treemap_two_series() -> Ref<Chart> {
+    let year = |name: &str, values: &[(f64, &str)], fill: Color| {
+        let s = treemap(leaves(values), 4., fill);
+        s.set_name(name.into());
+        s.set_data_labels(true);
+        s.set_data_labels_color(Some(WHITE));
+        s.set_data_labels_size(16.);
+        s
+    };
+    let chart = treemap_chart(vec![
+        year(
+            "2023",
+            &[(60., "Americas"), (50., "EMEA"), (28., "APAC"), (15., "Other")],
+            SANKEY_BLUE,
+        ),
+        year(
+            "2024",
+            &[(40., "Americas"), (28., "EMEA"), (16., "APAC"), (8., "Other")],
+            Color::from_rgb(232, 105, 105),
+        ),
+    ]);
+    // The source title is a 22 px label with a padding of 12 in black.
+    chart.set_title("Sales by Region".into());
+    chart.set_title_size(22.);
+    chart.set_legend_position(LegendPosition::Right);
+    chart
+}
+
+fn treemap_hierarchical() -> Ref<Chart> {
+    let s = treemap(
+        vec![
+            branch("Asia", &ASIA),
+            branch("Europe", &EUROPE),
+            branch("Americas", &[(330., "USA"), (220., "Brazil"), (130., "Mexico")]),
+        ],
+        4.,
+        Color::from_argb(160, 96, 138, 218),
+    );
+    s.set_corner_radius(4.);
+    treemap_chart(vec![s])
 }
 
 /// Builds a scenario and measures it at its size, applying its change after a first measure.

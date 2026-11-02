@@ -4,9 +4,10 @@ This Rust sample loads one compiled XAML view with six native FerroUI LiveCharts
 Cartesian or pie charts: columns with a line, a doughnut, stacked areas, scatter, candlesticks
 and a gauge. The chart engines, drawing, layout, text measurement, brushes, property system and
 data observation run in Rust. The build uses `ferroui-build` with `TypeSystem::Model`, following
-the framework's sample build pipeline. The polar chart (L4) is shown by the ControlCatalog page
-PolarChart and by the polar scenarios of the snapshot suite below; the Sankey, treemap and
-geographic charts join with their engines (docs/porting/livecharts2.md).
+the framework's sample build pipeline. The polar (L4), Sankey and treemap (L4b) charts are shown
+by the ControlCatalog pages PolarChart, SankeyChart and TreemapChart and by their scenarios of the
+snapshot suite below; the geographic charts join with their engine
+(docs/porting/livecharts2.md).
 
 ## Run
 
@@ -54,7 +55,7 @@ stop.
 
 The sample tests verify compiled and runtime construction equivalence, one-click invalidation and
 changed geometry in every chart, and native gradient mutation. The CPU images exercise native
-layout, text shaping and the controls' rendering path. The snapshot renders are the 60 ported
-Cartesian, pie and polar scenarios of the upstream snapshot suite; they are visual references, not a pixel comparison with
+layout, text shaping and the controls' rendering path. The snapshot renders are the 74 ported
+Cartesian, pie, polar, Sankey and treemap scenarios of the upstream snapshot suite; they are visual references, not a pixel comparison with
 the upstream images (which SkiaSharp draws). The pinned upstream inventory and the remaining work
 are tracked in [`docs/porting/livecharts2.md`](../../docs/porting/livecharts2.md).
