@@ -92,7 +92,7 @@ mod tests {
 
         let raised = Rc::new(Cell::new(false));
         let r = raised.clone();
-        target.invalidated(move || r.set(true));
+        target.invalidated(move || r.set(true)).detach();
         target.set_source(Some(bitmap2));
         assert!(raised.get());
     }
@@ -105,7 +105,7 @@ mod tests {
         let target = ImageBrush::with_source(Some(bitmap.clone()));
         let raised = Rc::new(Cell::new(false));
         let r = raised.clone();
-        target.invalidated(move || r.set(true));
+        target.invalidated(move || r.set(true)).detach();
         target.set_source(Some(bitmap));
         assert!(!raised.get());
     }

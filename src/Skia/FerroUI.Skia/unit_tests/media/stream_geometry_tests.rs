@@ -28,7 +28,7 @@ fn open_should_raise_changed() {
     add_line(&geometry, Point::new(0.0, 0.0), Point::new(10.0, 10.0));
     let raised = Rc::new(Cell::new(false));
     let r = raised.clone();
-    geometry.changed(move || r.set(true));
+    geometry.changed(move || r.set(true)).detach();
 
     add_line(&geometry, Point::new(20.0, 20.0), Point::new(30.0, 30.0));
 

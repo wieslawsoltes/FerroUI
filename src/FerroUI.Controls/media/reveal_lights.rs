@@ -9,7 +9,7 @@ use ferroui_base::input::{InputElement, PointerEventArgs, PointerPressedEventArg
 use ferroui_base::interactivity::{Interactive, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::media::{Color, Colors, IBrush, MaterialPolicy, XamlLight, XamlLightImpl};
 use ferroui_base::numerics::Vector2;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::rendering::composition::{
     AmbientLight, CompositionBatchTypes, CompositionPropertySet, CompositionScopedBatch, Compositor,
     ICompositionObjectAnimations, SpotLight,
@@ -252,7 +252,7 @@ struct HoverState {
     center_light: bool,
     is_hover_animation_active: bool,
     is_disabled_by_policy: bool,
-    policy_subscription: Option<Rc<dyn IDisposable>>,
+    policy_subscription: Option<Subscription>,
     /// The batch of the state animation that is running, and the
     /// subscription that continues the state machine when it completes.
     continuation: Option<(Rc<CompositionScopedBatch>, Rc<dyn IDisposable>)>,
@@ -522,7 +522,8 @@ impl RevealHoverLight {
                 this.state.borrow_mut().continuation = None;
                 this.goto_light_state(LightEvent::AnimationComplete);
             }
-        });
+        })
+        .detach();
         self.state.borrow_mut().continuation = Some((batch, subscription));
     }
 
@@ -789,8 +790,8 @@ struct BorderState {
     is_disabled_by_policy: bool,
     set_disabled_after_turn_off: Rc<Cell<bool>>,
     got_capture_lost_from_touch: bool,
-    policy_subscription: Option<Rc<dyn IDisposable>>,
-    turn_off: Option<(Rc<CompositionScopedBatch>, Rc<dyn IDisposable>)>,
+    policy_subscription: Option<Subscription>,
+    turn_off: Option<(Rc<CompositionScopedBatch>, Subscription)>,
 }
 
 /// A border light of Reveal (WinUI's internal `RevealBorderLight`): a spot
@@ -1131,7 +1132,7 @@ impl RevealBorderLight {
 pub struct XamlAmbientLight {
     base: XamlLight,
     light: RefCell<Option<AmbientLight>>,
-    policy_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    policy_subscription: RefCell<Option<Subscription>>,
     target: RefCell<Option<WeakRef<Visual>>>,
 }
 

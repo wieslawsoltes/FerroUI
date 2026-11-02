@@ -1,7 +1,7 @@
 use crate::animation::Animatable;
 use crate::media::effects::{IEffect, ImmutableBlurEffect, ImmutableDropShadowEffect};
 use crate::media::{Color, Colors};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::utilities::{FormatError, HandlerList};
 use crate::{ferro_class, ferro_impl_classes, FerroObject, FerroObjectImpl, FerroProperty, ObjectType, Upcast};
 use std::rc::Rc;
@@ -48,19 +48,20 @@ impl Effect {
     }
 
     /// Subscribes to invalidation of the effect: raised when a change
-    /// requires the affected content to be redrawn. Disposing the returned
-    /// handle unsubscribes.
-    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// requires the affected content to be redrawn. Dropping the returned
+    /// guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the effect.
+    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.invalidated.add(Rc::new(handler));
         let object: &FerroObject = self.upcast();
         let weak = object.to_weak();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 if let Some(this) = this.downcast_ref::<Effect>() {
                     this.invalidated.remove(token);
                 }
             }
-        })
+        }))
     }
 
     fn parse_error(s: &str) -> FormatError {

@@ -162,7 +162,7 @@ mod tests {
     fn count_changed(target: &StreamGeometry) -> Rc<Cell<i32>> {
         let changed = Rc::new(Cell::new(0));
         let c = changed.clone();
-        target.changed(move || c.set(c.get() + 1));
+        target.changed(move || c.set(c.get() + 1)).detach();
         changed
     }
 

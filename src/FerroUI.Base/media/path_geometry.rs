@@ -156,7 +156,7 @@ impl PathGeometry {
         let observer = figures.for_each_item(
             move |_, s: &Ref<PathFigure>| {
                 let from_segments = invalidate_added.clone();
-                let subscription = s.segments_invalidated(from_segments);
+                let subscription = s.segments_invalidated(from_segments).detach();
                 subscriptions_added.borrow_mut().push((s.clone(), subscription));
                 invalidate_added();
             },
@@ -170,10 +170,10 @@ impl PathGeometry {
             },
             invalidate_reset,
         );
-        *self.figures_observer.borrow_mut() = Some(Subscription::new(observer));
+        *self.figures_observer.borrow_mut() = Some(observer);
 
         let observer = track_item_property_changed(&figures, invalidate);
-        *self.figures_properties_observer.borrow_mut() = Some(Subscription::new(observer));
+        *self.figures_properties_observer.borrow_mut() = Some(observer);
     }
 }
 
@@ -207,7 +207,7 @@ mod tests {
         let target = PathGeometry::new();
         let changed = Rc::new(Cell::new(false));
         let c = changed.clone();
-        target.changed(move || c.set(true));
+        target.changed(move || c.set(true)).detach();
 
         target.figures().unwrap().add(figure);
         assert!(changed.get());
@@ -261,7 +261,7 @@ mod tests {
 
         let changed = Rc::new(Cell::new(false));
         let c = changed.clone();
-        target.changed(move || c.set(true));
+        target.changed(move || c.set(true)).detach();
 
         target_segment.set_size(Size::new(20.0, 20.0));
 
@@ -273,7 +273,7 @@ mod tests {
         let target = PathGeometry::parse("M 0,0 L 10,10").unwrap();
         let count = Rc::new(Cell::new(0));
         let c = count.clone();
-        target.changed(move || c.set(c.get() + 1));
+        target.changed(move || c.set(c.get() + 1)).detach();
 
         let figure = target.figures().unwrap().get(0);
         figure.segments().unwrap().add(crate::media::LineSegment::new().upcast());

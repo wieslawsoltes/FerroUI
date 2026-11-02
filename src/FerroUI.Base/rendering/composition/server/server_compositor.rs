@@ -204,7 +204,7 @@ impl ServerCompositor {
                 compositor.rt_on_context_created(&**context);
             }
         });
-        *compositor._context_subscriptions.borrow_mut() = vec![disposed, created];
+        *compositor._context_subscriptions.borrow_mut() = vec![disposed.detach(), created.detach()];
         compositor
     }
 

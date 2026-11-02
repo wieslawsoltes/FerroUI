@@ -70,10 +70,10 @@ impl GeometryCollection {
         let subscriptions_added = subscriptions.clone();
         let (invalidate_added, invalidate_removed) = (invalidate_parent.clone(), invalidate_parent);
         // The subscription lives as long as the list.
-        let _ = list.for_each_item(
+        list.for_each_item(
             move |_, x: &Ref<Geometry>| {
                 let child_changed = invalidate_added.clone();
-                let subscription = x.changed(child_changed);
+                let subscription = x.changed(child_changed).detach();
                 subscriptions_added.borrow_mut().push((x.clone(), subscription));
                 invalidate_added();
             },
@@ -86,7 +86,8 @@ impl GeometryCollection {
                 invalidate_removed();
             },
             || panic!("Collection reset is not supported."),
-        );
+        )
+        .detach();
 
         Self { list, parent }
     }

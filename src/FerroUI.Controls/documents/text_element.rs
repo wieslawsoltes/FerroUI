@@ -320,7 +320,7 @@ impl TextElement {
                         }
                     }
                 }
-            }));
+            }).detach());
         }
         for brush in [self.foreground(), self.background()] {
             if brush.as_ref().and_then(|brush| brush.as_object()).is_none() {

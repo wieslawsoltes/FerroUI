@@ -531,7 +531,7 @@ impl Shape {
             }
         });
 
-        let previous = self.geometry_changed_subscription.replace(Some(Subscription::new(subscription)));
+        let previous = self.geometry_changed_subscription.replace(Some(subscription));
         if let Some(previous) = previous {
             previous.dispose();
         }

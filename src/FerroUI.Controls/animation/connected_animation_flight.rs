@@ -537,7 +537,7 @@ impl ConnectedAnimationFlight {
             }
         });
         *self.batch.borrow_mut() = Some(batch);
-        *self.batch_subscription.borrow_mut() = Some(Subscription::new(subscription));
+        *self.batch_subscription.borrow_mut() = Some(subscription);
         self.state.set(FlightState::Running);
         false
     }

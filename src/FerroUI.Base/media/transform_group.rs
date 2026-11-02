@@ -75,7 +75,8 @@ impl FerroObjectImpl for TransformGroup {
                             if let Some(this) = weak_child.upgrade() {
                                 this.on_transform_invalidated();
                             }
-                        });
+                        })
+                        .detach();
                         subscriptions_added.borrow_mut().push((tr.clone(), handle));
                         if let Some(this) = weak_added.upgrade() {
                             this.on_transform_invalidated();
@@ -93,7 +94,7 @@ impl FerroObjectImpl for TransformGroup {
                     },
                     || {},
                 );
-                *this.children_notification_subscription.borrow_mut() = Some(Subscription::new(subscription));
+                *this.children_notification_subscription.borrow_mut() = Some(subscription);
             }
 
             this.on_transform_invalidated();

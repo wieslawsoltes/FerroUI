@@ -1,6 +1,6 @@
 use crate::media::ref_adapter::RefAdapter;
 use crate::media::{AcrylicBackgroundSource, Color, IExperimentalAcrylicMaterial, ImmutableExperimentalAcrylicMaterial};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, Subscription};
 use crate::utilities::HandlerList;
 use crate::{
     ferro_class, ferro_property, instantiate, FerroObject, FerroObjectImpl, FerroProperty,
@@ -104,15 +104,17 @@ impl ExperimentalAcrylicMaterial {
         instantiate(Self::construct())
     }
 
-    /// Raised when the material changes.
-    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when the material changes. Dropping the returned guard removes
+    /// the handler; [`Subscription::detach`] keeps it for the life of the
+    /// material.
+    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.invalidated.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.invalidated.remove(token);
             }
-        })
+        }))
     }
 
     /// The background source mode.
@@ -365,7 +367,7 @@ mod tests {
         let target = ExperimentalAcrylicMaterial::new();
         let count = Rc::new(Cell::new(0));
         let c = count.clone();
-        target.invalidated(move || c.set(c.get() + 1));
+        target.invalidated(move || c.set(c.get() + 1)).detach();
 
         target.set_tint_color(Colors::WHITE);
         assert_eq!(1, count.get());

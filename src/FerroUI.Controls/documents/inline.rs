@@ -140,7 +140,7 @@ impl Inline {
                 inline.refresh_decoration_subscriptions();
                 inline.invalidate_decoration_change();
             }
-        }));
+        }).detach());
         for decoration in decorations.iter() {
             let weak = self.to_ref().downgrade();
             subscriptions.push(decoration.property_changed(move |_| {
@@ -155,7 +155,7 @@ impl Inline {
                     if let Some(inline) = weak.upgrade() {
                         inline.invalidate_decoration_change();
                     }
-                }));
+                }).detach());
             }
             if decoration
                 .stroke()

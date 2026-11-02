@@ -69,7 +69,7 @@ impl FerroObjectImpl for CombinedGeometry {
                     this.invalidate_geometry();
                 }
             });
-            *slot.borrow_mut() = Some(Subscription::new(subscription));
+            *slot.borrow_mut() = Some(subscription);
         }
     }
 }
@@ -219,7 +219,7 @@ mod tests {
         let target = CombinedGeometry::with_mode(GeometryCombineMode::Xor, Some(child.clone().upcast()), None);
         let count = Rc::new(Cell::new(0));
         let c = count.clone();
-        target.changed(move || c.set(c.get() + 1));
+        target.changed(move || c.set(c.get() + 1)).detach();
 
         child.set_fill_rule(crate::media::FillRule::NonZero);
         // PathGeometry.FillRule is not registered with affects_geometry, so

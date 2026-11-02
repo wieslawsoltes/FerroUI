@@ -213,7 +213,7 @@ mod tests {
         let target = VisualBrush::new();
         let raised = Rc::new(Cell::new(0));
         let r = raised.clone();
-        target.invalidated(move || r.set(r.get() + 1));
+        target.invalidated(move || r.set(r.get() + 1)).detach();
         let visual = Visual::new();
         target.set_visual(&visual);
         assert_eq!(1, raised.get());
