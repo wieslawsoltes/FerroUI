@@ -345,21 +345,6 @@ impl<'a> MarkupArguments<'a> {
         Ok(Self { arguments, next: 0 })
     }
 
-    /// Invokes a generated infallible instance getter. Accessors of one receiver
-    /// type share argument conversion, diagnostics, and dropping the cloned
-    /// receiver. The member-specific leaf returns the untyped value directly.
-    #[doc(hidden)]
-    #[inline(never)]
-    pub fn get<T: Clone + 'static>(
-        receiver: &MarkupValue,
-        get: fn(&T) -> MarkupValue,
-    ) -> Result<MarkupValue, MarkupInvokeError> {
-        let Some(this) = from_markup_value::<T>(receiver) else {
-            return Err(Self::argument_error(0, std::any::type_name::<T>(), receiver));
-        };
-        Ok(get(&this))
-    }
-
     /// The next argument, as a `T`.
     pub fn next<T: Clone + 'static>(&mut self) -> Result<T, MarkupInvokeError> {
         let index = self.next;

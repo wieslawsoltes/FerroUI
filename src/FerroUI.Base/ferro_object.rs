@@ -863,36 +863,12 @@ impl FerroObject {
         value: &dyn Any,
         priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
-        if self.handle_untyped_set_marker(property, value, priority) {
-            return None;
-        }
         property.routes().route_set_value(self, value, priority)
     }
 
     /// [`set_current_value`](Self::set_current_value) with an untyped value.
     pub fn set_current_value_untyped(&self, property: &'static FerroProperty, value: &dyn Any) {
-        if !self.handle_untyped_set_marker(property, value, BindingPriority::LocalValue) {
-            property.routes().route_set_current_value(self, value);
-        }
-    }
-
-    // Both boxed setters interpret markers before attempting to convert a
-    // value to T. Keep that decision independent of T and read its TypeId once.
-    #[inline(never)]
-    fn handle_untyped_set_marker(
-        &self,
-        property: &'static FerroProperty,
-        value: &dyn Any,
-        priority: BindingPriority,
-    ) -> bool {
-        let kind = value.type_id();
-        if kind == std::any::TypeId::of::<crate::UnsetValueType>() {
-            if priority == BindingPriority::LocalValue || property.is_direct() {
-                self.clear_value_untyped(property);
-            }
-            return true;
-        }
-        kind == std::any::TypeId::of::<crate::DoNothingType>()
+        property.routes().route_set_current_value(self, value)
     }
 
     /// Clears a property's local value.

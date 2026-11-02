@@ -4,7 +4,7 @@ use crate::ferro_property_metadata::MetadataTable;
 use crate::property_store::{EffectiveValueDyn, IValueEntry};
 use crate::reactive::{IDisposable, IObservable};
 use crate::{
-    BoxedValue, ObjectType, DirectPropertyMetadata, FerroObject, FerroProperty,
+    BoxedValue, ObjectType, DirectPropertyMetadata, DoNothingType, FerroObject, FerroProperty,
     FerroPropertyMetadata, FerroPropertyRegistry, PropertyValue, TypeInfo, UnsetValueType,
 };
 use std::any::Any;
@@ -24,6 +24,7 @@ pub(crate) trait DirectPropertyAccessor<T> {
 /// of its owner.
 pub struct DirectPropertyBase<T: PropertyValue> {
     base: FerroProperty,
+    owner: &'static TypeInfo,
     metadata: MetadataTable<DirectPropertyMetadata<T>>,
     accessor: OnceCell<&'static dyn DirectPropertyAccessor<T>>,
 }
@@ -56,7 +57,7 @@ impl<T: PropertyValue> DirectPropertyBase<T> {
     /// The class that registered this instance of the property.
     #[inline]
     pub fn owner(&self) -> &'static TypeInfo {
-        self.base.owner_type()
+        self.owner
     }
 
     #[inline]
@@ -149,7 +150,10 @@ impl<T: PropertyValue> PropertyRoutes for DirectPropertyBase<T> {
         _priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
         let this = self;
-        if let Some(v) = value.downcast_ref::<T>() {
+        if value.is::<UnsetValueType>() {
+            o.clear_direct_value(this);
+        } else if value.is::<DoNothingType>() {
+        } else if let Some(v) = value.downcast_ref::<T>() {
             o.set_direct_value(this, v.clone());
         } else if let Some(v) = Self::convert_untyped(value) {
             o.set_direct_value(this, v);
@@ -264,6 +268,7 @@ impl<TOwner: ObjectType, T: PropertyValue> DirectProperty<TOwner, T> {
         Self::leak(Self {
             base: DirectPropertyBase {
                 base,
+                owner: TOwner::TYPE,
                 metadata: MetadataTable::new(TOwner::TYPE, metadata),
                 accessor: OnceCell::new(),
             },
@@ -308,6 +313,7 @@ impl<TOwner: ObjectType, T: PropertyValue> DirectProperty<TOwner, T> {
         let result = DirectProperty::<TNewOwner, T>::leak(DirectProperty {
             base: DirectPropertyBase {
                 base: FerroProperty::for_added_owner(&self.base.base, TNewOwner::TYPE, setter.is_none()),
+                owner: TNewOwner::TYPE,
                 metadata: MetadataTable::for_added_owner(&self.base.metadata, TNewOwner::TYPE, metadata),
                 accessor: OnceCell::new(),
             },
