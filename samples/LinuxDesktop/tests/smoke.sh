@@ -90,16 +90,38 @@ shell_window=$(await_window '^Ferro Desktop$')
 xdotool windowsize --sync "$shell_window" 1280 800 windowactivate --sync "$shell_window"
 xdotool mousemove 1420 940
 
+# Inspect both the upper-right wallpaper and a patch inside the chooser's
+# footprint. The first identifies the native profile even while a sheet is
+# visible. The second checks that Escape has uncovered the desktop. The
+# Material scrim also darkens the upper-right patch. Sample normalized
+# coordinates so the probes average a small area rather than an edge pixel.
+desktop_pixels() {
+    convert "$1" -resize '100x100!' -format \
+        '%[fx:p{93,10}.r] %[fx:p{93,10}.g] %[fx:p{93,10}.b] %[fx:p{59,66}.r] %[fx:p{59,66}.g] %[fx:p{59,66}.b]' info:
+}
+
+desktop_presented() {
+    awk -v theme="$1" '
+        theme == "windows"  { ok = $3 > $1+.08 && $3 > $2+.03 && $6 > $4+.23 && $6 > $5+.14 }
+        theme == "macos"    { ok = $1 > $3+.08 && $1 > $2+.07 && $4 > $6+.12 && $4 > $5+.10 }
+        theme == "material" { ok = $2 > $1+.06 && $2 > $3+.03 && $2 > .28 && $5 > $4+.10 }
+        END {exit !ok}' <<< "$2"
+}
+
 # Wait for both first paint and large view transitions. This excludes a
 # blank mapped window and stale or duplicate frames from the screenshots.
 capture() {
-    local name=$1 previous=${2:-} pixels colors
+    local name=$1 previous=${2:-} profile=${3:-} sample= pixels colors
     rm -f -- "$fixture/prior.png"
     for ((i=0; i<60; i++)); do
         import -window "$shell_window" "$fixture/frame.png"
         colors=$(identify -format '%k' "$fixture/frame.png")
         if (( colors > 60 )) && [[ -f "$fixture/prior.png" ]]; then
             local changed=true
+            if [[ -n $profile ]]; then
+                sample=$(desktop_pixels "$fixture/frame.png")
+                desktop_presented "$profile" "$sample" || changed=false
+            fi
             if [[ -n "$previous" ]]; then
                 pixels=$(compare -metric AE "$output/$previous.png" "$fixture/frame.png" null: 2>&1 || true)
                 awk -v pixels="$pixels" 'BEGIN {exit !(pixels + 0 > 12000)}' || changed=false
@@ -115,7 +137,10 @@ capture() {
         sleep .1
     done
     cp "$fixture/prior.png" "$output/failed-$name.png"
-    echo "The $name view did not render" >&2
+    echo "The $name view did not render; saved $output/failed-$name.png" >&2
+    if [[ -n $profile ]]; then
+        echo "Expected uncovered $profile desktop; sampled wallpaper RGB and chooser-area RGB: $sample" >&2
+    fi
     return 1
 }
 
@@ -141,7 +166,7 @@ dismiss_launcher() {
     return 1
 }
 
-capture desktop
+capture desktop "" windows
 xdotool key --clearmodifiers ctrl+k
 capture applications desktop
 dismiss_launcher desktop applications windows
@@ -191,7 +216,7 @@ for choice in '2 macos' '3 material' '1 windows'; do
     done
     [[ "$(cat "$XDG_CONFIG_HOME/ferro-desktop/appearance")" == "$theme" ]]
     xdotool key --clearmodifiers Escape
-    capture "$theme" appearance
+    capture "$theme" "" "$theme"
     if [[ "$theme" != windows ]]; then
         xdotool key --clearmodifiers ctrl+k
         # Opening an appearance can restore a previous search. Show the full
@@ -202,7 +227,7 @@ for choice in '2 macos' '3 material' '1 windows'; do
         xdotool key --clearmodifiers ctrl+comma
         set_color_mode "$theme" l light
         xdotool key --clearmodifiers Escape
-        capture "$theme-light" "$theme"
+        capture "$theme-light" "$theme" "$theme"
         dark=$(panel_luma "$theme")
         light=$(panel_luma "$theme-light")
         awk -v dark="$dark" -v light="$light" 'BEGIN {exit !(light > dark + 0.12)}' || {
@@ -241,7 +266,7 @@ unset shell_pid
 shell_pid=$!
 shell_window=$(await_window '^Ferro Desktop$')
 xdotool windowsize --sync "$shell_window" 1280 800 windowactivate --sync "$shell_window"
-capture macos-restored windows
+capture macos-restored windows macos
 awk -v actual="$(panel_luma macos-restored)" -v light="$(panel_luma macos-light)" \
     'BEGIN {exit !((actual-light)^2 < 0.01)}'
 xdotool key --clearmodifiers ctrl+comma
@@ -254,7 +279,7 @@ done
 [[ "$(cat "$XDG_CONFIG_HOME/ferro-desktop/appearance")" == material ]]
 capture material-restored-picker macos-restored-picker
 xdotool key --clearmodifiers Escape
-capture material-restored material-restored-picker
+capture material-restored material-restored-picker material
 awk -v actual="$(panel_luma material-restored)" -v dark="$(panel_luma material)" \
     'BEGIN {exit !((actual-dark)^2 < 0.01)}'
 xdotool key --clearmodifiers alt+F4
