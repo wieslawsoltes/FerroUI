@@ -894,14 +894,18 @@ impl FerroObject {
         priority: BindingPriority,
         is_effective_value: bool,
     ) {
-        let e = FerroPropertyChangedEventArgs::new(
-            self,
-            property,
-            old_value.map(|v| v as &dyn Any),
-            new_value,
-            priority,
-            is_effective_value,
-        );
+        self.raise_property_changed_values(property, old_value.map(|v| v as &dyn Any), new_value, priority, is_effective_value);
+    }
+
+    pub(crate) fn raise_property_changed_values(
+        &self,
+        property: &'static FerroProperty,
+        old_value: Option<&dyn Any>,
+        new_value: &dyn Any,
+        priority: BindingPriority,
+        is_effective_value: bool,
+    ) {
+        let e = FerroPropertyChangedEventArgs::new(self, property, old_value, new_value, priority, is_effective_value);
         self.notify_property_changed(&e);
     }
 
