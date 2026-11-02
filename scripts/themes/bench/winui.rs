@@ -5,6 +5,11 @@ use ferroui_themes_winui::WinUITheme;
 use std::{io::Write, time::Instant};
 
 fn main() {
+    // An editor can fetch the archive later. Keep the exact shipping bytes in this
+    // executable without charging an archive decode to the typed startup path.
+    #[cfg(feature = "retain-archive")]
+    assert!(!std::hint::black_box(ferroui_themes_winui::theme_archive()).is_empty());
+
     let start = Instant::now();
     let theme = WinUITheme::new();
     let created = start.elapsed();

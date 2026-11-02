@@ -130,6 +130,10 @@ def main():
     backend = parser.add_mutually_exclusive_group()
     backend.add_argument("--packed", action="store_true", help="embed the complete FXP theme archive")
     backend.add_argument("--solid", action="store_true", help="embed the solid-compressed complete FXP archive")
+    backend.add_argument("--precompiled", action="store_true",
+                         help="execute typed FXB and retain its editable solid FXP archive")
+    parser.add_argument("--compact-app", action="store_true",
+                        help="build the entire application with opt-level=s, ThinLTO and 16 CGUs")
     backend.add_argument("--binary", action="store_true", help="enable the theme's binary-resources feature")
     parser.add_argument("--size-optimize-theme", action="store_true",
                         help="compile just the WinUI crate with opt-level=z and one codegen unit")
@@ -144,6 +148,8 @@ def main():
     args = parser.parse_args()
     if args.max_theme_bytes and not args.lld_link_map:
         parser.error("--max-theme-bytes requires --lld-link-map")
+    if args.compact_app and args.lld_link_map:
+        parser.error("cross-crate LTO cannot attribute all optimized code to its input archives")
     if args.rebuilds < 0:
         parser.error("--rebuilds must be zero or positive")
     source = args.source.resolve()
@@ -165,18 +171,28 @@ def main():
     )
     for name, path in deps.items():
         manifest += f'{name} = {{ path = {json.dumps(str(path))} }}\n'
+    # Forward only features used by this consumer. Older source revisions may have
+    # no archive API, and Cargo validates forwarded dependency features eagerly.
+    manifest += '\n[features]\nretain-archive = []\n'
+    if args.compact_app:
+        manifest += '\n[profile.release]\nopt-level = "s"\ncodegen-units = 16\n'
     if args.size_optimize_theme:
         manifest += f'\n[profile.release.package."{THEME}"]\nopt-level = "z"\ncodegen-units = 1\n'
     (package / "Cargo.toml").write_text(manifest)
     shutil.copyfile(HERE / "winui.rs", package / "main.rs")
     # Cargo restricts this lock to the consumer's dependency graph on the first build.
     shutil.copyfile(source / "Cargo.lock", package / "Cargo.lock")
-    # The standalone shipping-dependency consumer uses Cargo's release profile at
-    # opt-level 3, without cross-crate LTO. Stripping is a separate measured copy.
-    env = {**os.environ, "CARGO_TARGET_DIR": str(target), "CARGO_INCREMENTAL": "0", "CARGO_PROFILE_RELEASE_LTO": "false"}
+    # Stripping is a separate measured copy for both release profiles.
+    env = {**os.environ, "CARGO_TARGET_DIR": str(target), "CARGO_INCREMENTAL": "0", "CARGO_PROFILE_RELEASE_LTO": "thin" if args.compact_app else "false"}
     packed = args.packed or args.solid
-    feature = "solid-theme" if args.solid else "packed-theme" if args.packed else "binary-resources" if args.binary else None
-    cargo_args = ["--features", f"{THEME}/{feature}"] if feature else []
+    features = []
+    if args.precompiled:
+        features = [f"{THEME}/precompiled-theme", "retain-archive"]
+    elif packed:
+        features = [f"{THEME}/solid-theme" if args.solid else f"{THEME}/packed-theme"]
+    elif args.binary:
+        features = [f"{THEME}/binary-resources"]
+    cargo_args = ["--features", ",".join(features)] if features else []
     first_build, messages = build(cargo_args, package, env)
     initial_units = cargo_timings(target)
     rebuilds = []
@@ -224,12 +240,14 @@ def main():
         "rustc": command_output(["rustc", "-vV"]), "cargo": command_output(["cargo", "-V"]),
         "platform": platform.platform(), "jobs": env.get("CARGO_BUILD_JOBS", "cargo default"),
         "packed_theme": packed, "solid_theme": args.solid, "size_optimized_theme": args.size_optimize_theme,
+        "precompiled_theme": args.precompiled, "compact_app": args.compact_app,
         "linked_allocations": allocations,
         "theme_allocated_sections": sections, "theme_allocated_bytes": sum(sections.values()) if sections else None,
-        "fxp_bytes": (out / "winui.fxp").stat().st_size if packed else 0,
+        "fxp_bytes": (out / "winui.fxp").stat().st_size if packed or args.precompiled else 0,
         "generated_registration_rust_bytes": (generated / "mod.rs").stat().st_size,
-        "binary_resources": args.binary, "resource_roots": env.get("FERROUI_WINUI_THEME_ROOTS"),
-        "profile": "release, LTO off, incremental off", "initial_target_empty": target_was_empty,
+        "binary_resources": args.binary or args.precompiled, "resource_roots": env.get("FERROUI_WINUI_THEME_ROOTS"),
+        "profile": "release, opt-level=s, ThinLTO, 16 CGUs, incremental off" if args.compact_app else "release, LTO off, incremental off",
+        "initial_target_empty": target_was_empty,
         "initial_build_seconds": first_build, "theme_rebuild_seconds": rebuilds,
         "initial_cargo_units": initial_units, "last_cargo_units": last_units,
         "generated_rust_bytes": len(source_bytes), "generated_rust_sha256": hashlib.sha256(source_bytes).hexdigest(),
