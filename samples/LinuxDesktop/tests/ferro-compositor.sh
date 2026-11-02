@@ -159,9 +159,10 @@ echo "Verified grouped taskbar previews, live client repaint and selection of a 
 scene_is() { [[ $("$binary" --platform=wayland --current-scene 2>/dev/null) == "$1" ]]; }
 "$binary" --platform=wayland --show=workspaces
 wait_for scene_is workspaces
-wait_for has_color preview
+previews_visible() { capture && pixels preview "$1" "$output/$2.png"; }
+wait_for previews_visible original clients
 kill -USR1 "$gtk"
-wait_for has_color preview updated
+wait_for previews_visible updated clients
 shot live-overview
 wtype -k Escape
 wait_for scene_is desktop
@@ -200,6 +201,13 @@ for entry in '2 macos' '3 material'; do
     wait_for profile_clients_visible "$profile"
     kill -0 "$gtk" "$qt" && only_host || fail "Lost an independent client on $profile"
     shot "$profile-clients"
+    "$binary" --platform=wayland --show=workspaces
+    wait_for scene_is workspaces
+    wait_for previews_visible updated "$profile-clients"
+    if [[ $profile == macos ]]; then shot macos-overview; else shot material-recents; fi
+    wtype -k Escape
+    wait_for scene_is desktop
+    wait_for profile_clients_visible "$profile"
 done
 # Weston ships a real synchronized wl_subsurface client. Omit its optional
 # EGL triangle so the test works on wl_shm-only displays.

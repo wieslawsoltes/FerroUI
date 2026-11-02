@@ -114,7 +114,7 @@ def qt_client():
     app.exec_()
 
 
-def probe(path, color, test):
+def probe(path, color, test, reference=None):
     from PIL import Image, ImageChops
     im = Image.open(path).convert("RGB")
     # The opaque, unfiltered widget interiors survive both the client and
@@ -139,17 +139,20 @@ def probe(path, color, test):
         offset = im.height - 230
         im = im.crop((0, offset, im.width, im.height - 52))
     if color == "preview":
-        # The independent clients have large flat-color swatches. Their scaled
-        # colors must survive in the bright previews inside the centered Task
-        # View. The scrim darkens the corresponding background windows.
-        width, height = im.size
-        area = im.crop((width // 2 - 420, height // 2 - 125,
-                        width // 2 + 420, height // 2 + 100))
-        colors = area.getcolors(area.width * area.height)
+        # Each profile lays out its live cards differently. Require both swatches
+        # in new positions relative to the same full-size client windows. This
+        # rejects frames where the command arrived before the overview painted.
+        before = Image.open(reference).convert("RGB")
+        def swatch_mask(frame, rgb):
+            bands = [band.point([255 * (abs(i - c) <= 4) for i in range(256)])
+                     for band, c in zip(frame.split(), rgb)]
+            return ImageChops.multiply(ImageChops.multiply(*bands[:2]), bands[2])
         gtk = (0x93, 0x54, 0xba) if test == "updated" else (0xd7, 0x6a, 0x3d)
-        return all(sum(n for n, rgb in colors
-                       if all(abs(a - b) <= 4 for a, b in zip(rgb, target))) >= 450
-                   for target in [gtk, (0x39, 0x7a, 0xbb)])
+        for target in (gtk, (0x39, 0x7a, 0xbb)):
+            relocated = ImageChops.subtract(swatch_mask(im, target), swatch_mask(before, target))
+            if relocated.histogram()[255] < 450:
+                return False
+        return True
     if color == "picker":
         # The middle of the Appearance panel contains rows with opaque
         # themed surfaces. Wait for the new theme to paint before capturing.
