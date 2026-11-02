@@ -14,10 +14,16 @@ mod scoped {
     use std::{cell::RefCell, thread::LocalKey};
 
     type Slot<T> = LocalKey<RefCell<Option<T>>>;
-    type Pending = (&'static ferroui_base::TypeInfo, Rc<Includes>);
+    #[derive(Default)]
+    pub(crate) struct Revision {
+        dictionaries: Includes,
+        #[cfg(feature = "compiled-updates")]
+        blocks: super::updates::Blocks,
+    }
+    type Pending = (&'static ferroui_base::TypeInfo, Rc<Revision>);
     thread_local! {
         static NEXT: RefCell<Option<Pending>> = const { RefCell::new(None) };
-        static ACTIVE: RefCell<Option<Rc<Includes>>> = const { RefCell::new(None) };
+        static ACTIVE: RefCell<Option<Rc<Revision>>> = const { RefCell::new(None) };
     }
     fn scoped<T: 'static, R>(
         slot: &'static Slot<T>,
@@ -40,7 +46,43 @@ mod scoped {
         plan: Includes,
         run: impl FnOnce() -> R,
     ) -> R {
-        scoped(&NEXT, Some((root, Rc::new(plan))), run)
+        scoped(
+            &NEXT,
+            Some((
+                root,
+                Rc::new(Revision {
+                    dictionaries: plan,
+                    ..Revision::default()
+                }),
+            )),
+            run,
+        )
+    }
+
+    #[cfg(feature = "compiled-updates")]
+    pub(super) fn with_blocks<R>(
+        root: &'static ferroui_base::TypeInfo,
+        blocks: super::updates::Blocks,
+        run: impl FnOnce() -> R,
+    ) -> R {
+        scoped(
+            &NEXT,
+            Some((
+                root,
+                Rc::new(Revision {
+                    blocks,
+                    ..Revision::default()
+                }),
+            )),
+            run,
+        )
+    }
+
+    #[cfg(feature = "compiled-updates")]
+    pub(crate) fn block(
+        id: &str,
+    ) -> Option<crate::xaml_il::runtime::compiled::binary_resources::SharedBatch> {
+        ACTIVE.with(|slot| slot.borrow().as_ref()?.blocks.get(id).cloned())
     }
 
     pub fn populate<R>(root: &ferroui_base::TypeInfo, run: impl FnOnce() -> R) -> R {
@@ -58,11 +100,11 @@ mod scoped {
         activate(plan, run)
     }
 
-    pub(crate) fn capture() -> Option<Rc<Includes>> {
+    pub(crate) fn capture() -> Option<Rc<Revision>> {
         ACTIVE.with(|slot| slot.borrow().clone())
     }
 
-    pub(crate) fn activate<R>(plan: Option<Rc<Includes>>, run: impl FnOnce() -> R) -> R {
+    pub(crate) fn activate<R>(plan: Option<Rc<Revision>>, run: impl FnOnce() -> R) -> R {
         if plan.is_none() && ACTIVE.with(|slot| slot.borrow().is_none()) {
             return run();
         }
@@ -73,7 +115,7 @@ mod scoped {
         uri: &str,
         provider: Option<&Provider>,
     ) -> Option<Result<Ref<ResourceDictionary>, XamlLoadError>> {
-        let build = ACTIVE.with(|slot| slot.borrow().as_ref()?.get(uri).cloned())?;
+        let build = ACTIVE.with(|slot| slot.borrow().as_ref()?.dictionaries.get(uri).cloned())?;
         Some(
             provider
                 .cloned()
@@ -88,10 +130,17 @@ mod scoped {
         )
     }
 }
+#[cfg(feature = "compiled-updates")]
+pub(crate) use scoped::block;
 #[cfg(all(feature = "binary-resources", feature = "runtime-populate"))]
-pub(crate) use scoped::{activate, capture};
+pub(crate) use scoped::{activate, capture, Revision};
+#[cfg(feature = "compiled-updates")]
+#[path = "operand_update.rs"]
+mod updates;
 #[cfg(all(feature = "binary-resources", feature = "runtime-populate"))]
 pub use scoped::{dictionary, populate, with_revision};
+#[cfg(feature = "compiled-updates")]
+pub use updates::load_operand_update;
 
 pub const ENABLED: bool = cfg!(all(
     feature = "binary-resources",
@@ -117,7 +166,6 @@ pub fn with_revision<R>(
 ) -> R {
     run()
 }
-
 
 /// Only compiler-linked calls within the group consult the active revision.
 /// Direct calls to a public document builder retain their ordinary semantics.

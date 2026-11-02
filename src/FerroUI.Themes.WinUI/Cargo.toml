@@ -25,6 +25,8 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
+# Run editor-produced FXU operand revisions against the installed typed program.
+compiled-updates = ["precompiled-theme", "ferroui-build/compiled-updates", "ferroui-markup-xaml/compiled-updates"]
 # Embed the complete FXP archive and resolve its FXD documents through XamlX on first load.
 packed-theme = ["dep:ferroui-markup-xaml-loader", "ferroui-build/portable-xaml"]
 # Ship the full solid revision with prelinked typed execution on the startup path.

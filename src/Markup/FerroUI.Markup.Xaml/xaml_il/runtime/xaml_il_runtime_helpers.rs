@@ -115,7 +115,7 @@ pub struct DeferredContent {
     parent_resource_nodes: Rc<CapturedResourceNodes>,
     builder: DeferredContentBuilder,
     #[cfg(all(feature = "binary-resources", feature = "runtime-populate"))]
-    archive_includes: Option<Rc<crate::archive_includes::Includes>>,
+    archive_includes: Option<Rc<crate::archive_includes::Revision>>,
     result_type: ValueType,
     #[cfg(all(feature = "binary-resources", feature = "hot-reload", debug_assertions))]
     binary_snapshot: Option<Rc<super::compiled::binary_resources::reload::Snapshot>>,

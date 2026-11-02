@@ -11,6 +11,9 @@ use std::rc::Rc as BatchOwner;
 #[cfg(all(feature = "hot-reload", debug_assertions))]
 use std::sync::Arc as BatchOwner;
 
+#[cfg(feature = "compiled-updates")]
+pub(crate) type SharedBatch = BatchOwner<Batch>;
+
 /// An individually linkable compiled block. The stable identifier is used by reload
 /// clients; the module-qualified name disambiguates identical class names across crates.
 pub struct Block {
@@ -28,6 +31,8 @@ impl Block {
         if let Some(batch) = reload::get(self.id) {
             return checked(self.id, expected, batch);
         }
+        #[cfg(feature = "compiled-updates")]
+        if let Some(batch) = crate::archive_includes::block(self.id) { return checked(self.id, expected, batch); }
         let batch = Batch::decode(self.bytes).map_err(|e| error(self.id, e))?;
         checked(self.id, expected, BatchOwner::new(batch))
     }

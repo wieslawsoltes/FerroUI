@@ -1537,6 +1537,7 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "roxmltree 0.20.0",
  "serde_json",
+ "sha2",
  "xamlx",
 ]
 
@@ -2060,6 +2061,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-markup",
  "ferroui-xaml-binary",
+ "sha2",
 ]
 
 [[package]]

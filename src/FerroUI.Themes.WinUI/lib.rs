@@ -76,6 +76,25 @@ pub fn compiled_archive_root() -> ferroui_markup_xaml::CompiledArchiveRoot {
     }
 }
 
+/// Construct the theme from an editor-compiled FXU operand revision. Structural
+/// edits that change the native program are distributed as full FXP archives.
+#[cfg(feature = "compiled-updates")]
+pub fn load_theme_update(bytes: &[u8]) -> Result<ferroui_base::Ref<WinUITheme>, ferroui_markup_xaml::XamlLoadError> {
+    use ferroui_base::{metadata::from_markup_value, utilities::Uri};
+    use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, XamlLoadError};
+    register_types();
+    let root = compiled_archive_root();
+    let uri = Uri::absolute(root.uri).map_err(|e| XamlLoadError::with_message(e.to_string()))?;
+    let mut configuration = RuntimeXamlLoaderConfiguration::new();
+    configuration.local_assembly = Some(root.assembly);
+    configuration.set_create_source_info(root.create_source_info);
+    configuration.use_compiled_bindings_by_default = root.use_compiled_bindings_by_default;
+    let result = ferroui_markup_xaml::archive_includes::load_operand_update(
+        &root, include_bytes!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml.fxs")), bytes, &uri, &configuration, None,
+    )?;
+    from_markup_value(&result).ok_or_else(|| XamlLoadError::with_message("The installed WinUI class cannot execute this update in the active loader scope"))
+}
+
 pub use assets::{excluded_documents, ExcludedDocument};
 #[cfg(feature = "designer-sources")]
 pub use designer_sources::designer_documents;

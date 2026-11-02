@@ -147,6 +147,18 @@ impl Batch {
         self.kind
     }
 
+    /// Heap buffer capacity retained by a decoded block, used by multi-block
+    /// readers to enforce an aggregate decompression budget.
+    pub fn allocated_bytes(&self) -> usize {
+        let text = match &self.text {
+            TextPool::Keys(s) => s.capacity(),
+            TextPool::Values(s) => s.capacity(),
+        };
+        text + self.ends.capacity() * std::mem::size_of::<u32>()
+            + self.rows.capacity() * std::mem::size_of::<[u32; 6]>()
+            + self.numbers.capacity() * std::mem::size_of::<u64>()
+    }
+
     /// Decode one whole immutable block. Truncation, trailing data, unbounded counts,
     /// dangling references and out-of-range source locations are errors.
     pub fn decode(bytes: &[u8]) -> Result<Self, Error> {

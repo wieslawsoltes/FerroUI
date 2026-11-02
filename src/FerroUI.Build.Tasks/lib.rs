@@ -157,6 +157,8 @@
 
 pub mod deterministic_id_generator;
 mod diagnostics;
+#[cfg(feature = "compiled-updates")]
+mod operand_schema;
 mod resource_roots;
 pub use resource_roots::trim as trim_resource_documents;
 /// Build-time FXP packaging. Both encoders consume the same document inventory as an AOT group.
@@ -757,7 +759,7 @@ impl Build {
                             let flags = format!("({}, {})\n", options.create_source_info, options.use_compiled_bindings_by_default);
                             write_if_changed(&path.with_extension("fxp-options.rs"), &flags, &mut errors);
                         }
-                        write_binary_files(&path, &module_path, &file.source, binary.as_ref(), &mut errors);
+                        write_binary_files(&path, &module_path, &file.source, binary.as_ref(), Some([options.create_source_info, options.use_compiled_bindings_by_default]), &mut errors);
                         write_if_changed(&path, &file.source, &mut errors);
                         let class_metadata = file.metadata(&[]);
                         if group.exported {
@@ -825,7 +827,7 @@ impl Build {
                     false => errors.push(diagnostics::error(FerroXamlDiagnosticCodes::EMIT_ERROR, name, &reason)),
                 }
             }
-            write_binary_files(&path, &module_path, &file.source, binary.as_ref(), &mut errors);
+            write_binary_files(&path, &module_path, &file.source, binary.as_ref(), None, &mut errors);
             write_if_changed(&path, &file.source, &mut errors);
             write_if_changed(&xaml_directory.join(format!("{}.map.json", group.module)), &file.position_map, &mut errors);
             if group.exported {
@@ -1053,7 +1055,7 @@ fn collect(root: &Path, directory: &Path, found: &mut Vec<(String, PathBuf)>) ->
 }
 
 /// Materialize only the binary leaves referenced by this compilation.
-fn write_binary_files(module_file: &Path, module: &str, source: &str, files: Option<&BinaryResourceFiles>, errors: &mut Vec<String>) {
+fn write_binary_files(module_file: &Path, module: &str, source: &str, files: Option<&BinaryResourceFiles>, _class_options: Option<[bool; 2]>, errors: &mut Vec<String>) {
     let Some(files) = files else { return };
     let directory = module_file.parent().expect("generated module directory");
     if let Err(error) = fs::create_dir_all(directory) {
@@ -1062,7 +1064,19 @@ fn write_binary_files(module_file: &Path, module: &str, source: &str, files: Opt
     }
     use ferroui_markup_xaml_loader::rust_emitter::binary_fingerprint;
     let mut blocks = std::collections::BTreeMap::new();
-    for (name, leaf) in files.take_leaves() {
+    let leaves = files.take_leaves();
+    #[cfg(feature = "compiled-updates")]
+    if let Some(options) = _class_options {
+        let path = module_file.with_extension("fxs");
+        match operand_schema::encode(module_file, module, source, options, &leaves) {
+            Ok(image) if fs::read(&path).ok().as_deref() != Some(&image) => {
+                if let Err(error) = fs::write(&path, image) { errors.push(format!("{}: {error}", path.display())); return; }
+            }
+            Ok(_) => {}
+            Err(error) => { errors.push(error); return; }
+        }
+    }
+    for (name, leaf) in leaves {
         let bytes = leaf.bytes;
         let path = directory.join(&name);
         let hash = format!("{:016x}", binary_fingerprint(&bytes));
