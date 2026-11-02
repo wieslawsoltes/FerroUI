@@ -141,3 +141,39 @@ fn regenerate_compiled_xaml() {
     std::fs::write(PATH, &file.source).expect("compiled_xaml.rs can be written");
     std::fs::write(METADATA_PATH, file.metadata(&[]).to_json()).expect("compiled_xaml.xamlmeta can be written");
 }
+
+/// A replacement revision must initialize the class's private compact dictionary
+/// in its real constructor, including when the embedded revision uses AOT entry points.
+#[cfg(any(feature = "precompiled-theme", feature = "packed-theme"))]
+#[test]
+fn replacement_archive_initializes_compact_density_from_its_own_revision() {
+    use ferroui_base::{metadata::from_markup_value, utilities::Uri, Ref};
+    use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
+    use ferroui_markup_xaml_loader::binary_document::pack::{compile_documents, ThemePack};
+
+    let _app = start_application();
+    crate::register_types();
+    let xml = r#"<Styles xmlns="https://github.com/ferroui"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         x:Class="FerroUI.Themes.WinUI.WinUITheme">
+        <Styles.Resources><ResourceDictionary>
+            <ResourceDictionary x:Key="CompactStyles">
+                <x:String x:Key="Revision">compact</x:String>
+            </ResourceDictionary>
+            <x:String x:Key="Revision">normal</x:String>
+        </ResourceDictionary></Styles.Resources>
+    </Styles>"#;
+    let bytes = compile_documents(&[("WinUITheme.xaml", xml)]).unwrap();
+    let pack = ThemePack::open(&bytes).unwrap();
+    let mut configuration = RuntimeXamlLoaderConfiguration::new();
+    configuration.local_assembly = Some(&crate::ASSEMBLY);
+    let value = FerroRuntimeXamlLoader::load_packed_document(
+        &pack, Uri::absolute(WinUITheme::DOCUMENT_URI).unwrap(), None, None, configuration,
+    ).unwrap();
+    let theme = from_markup_value::<Ref<WinUITheme>>(&Some(value)).unwrap();
+    let read = || from_markup_value::<String>(&theme.try_get_resource(&"Revision".into(), None).unwrap()).unwrap();
+    assert!(!theme.resources().contains_key(&"CompactStyles".into()));
+    assert_eq!(read(), "normal");
+    theme.set_density_style(crate::DensityStyle::Compact);
+    assert_eq!(read(), "compact");
+}

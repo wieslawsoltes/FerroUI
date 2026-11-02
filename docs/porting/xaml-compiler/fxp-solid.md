@@ -55,3 +55,11 @@ The reconstructed size must match the directory entry. All twelve streams and th
 | Local strings and nodes per document, each | 524,288 |
 
 Reject additions, offsets and signed-ID conversions that exceed their bounds. The reconstruction limit includes the complete 13-byte v1 header, directory and all FXD members. The reference reader inflates in fixed 16 KiB steps. It checks the output limit before appending each step.
+
+## Ahead-of-time execution of an embedded revision
+
+Enable `precompiled-theme` on `ferroui-themes-winui` to build a solid FXP revision and execute its XAML through typed Rust and FXB resource blocks. The build script gives the two compilers the same ordered source inventory after applying any explicit resource roots. A clean build pays for both the XamlX semantic pass and the archive encoder. Construction, compiled URI loading and exported dictionary builders execute the prelinked group. They do not inflate the solid archive, resolve type names or run XamlX transforms at startup.
+
+An editor can obtain the complete embedded revision through `ferroui_themes_winui::theme_archive()`. That accessor is the only target-side reference to the archive in precompiled mode. A consumer retaining it ships both representations. A runtime-only consumer can let the linker discard the unused FXP. Supplying a changed archive to the normal style reload target validates and interprets that revision and runs the class constructor with its scoped populate override. Compiled resource and template identity is retained within the installed revision.
+
+With Cargo feature unification, `precompiled-theme` selects this execution path even when another dependency enables `packed-theme` or `solid-theme`. Selecting only a portable mode retains its syntax interpreter. Applications can select `binary-resources` alone when they need only the prelinked representation.
