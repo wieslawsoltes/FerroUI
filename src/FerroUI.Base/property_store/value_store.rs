@@ -331,14 +331,7 @@ impl ValueStore {
         } else if has_value_changed {
             let priority = instance.priority();
             if priority == BindingPriority::LocalValue {
-                let effective = match self.get_effective_value(property) {
-                    Some(existing) => existing,
-                    None => {
-                        let created = property.routes().create_effective_value(owner);
-                        self.add_effective_value(owner, property, created.clone());
-                        created
-                    }
-                };
+                let effective = self.get_or_add_effective_value(owner, property);
                 effective.set_local_value_and_raise_entry(owner, &*entry);
             } else {
                 match self.get_effective_value(property) {
@@ -406,14 +399,7 @@ impl ValueStore {
             let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
             let result = frame.add_value(property, value);
             let entry: Rc<dyn IValueEntry> = result.clone();
-            let effective = match self.get_effective_value(property) {
-                Some(existing) => existing,
-                None => {
-                    let created: EffectiveValueRef = self.create_effective_value(owner, property);
-                    self.add_effective_value(owner, property, created.clone());
-                    created
-                }
-            };
+            let effective = self.get_or_add_effective_value(owner, property);
             effective.set_and_raise(owner, &entry, priority);
             Some(result)
         } else {
@@ -848,19 +834,19 @@ impl ValueStore {
         result
     }
 
-    fn get_or_add_effective_value<T: PropertyValue>(
-        &self,
-        owner: &FerroObject,
-        property: &'static StyledProperty<T>,
-    ) -> EffectiveValueRef {
+    fn get_or_add_effective_value(&self, owner: &FerroObject, property: &'static FerroProperty) -> EffectiveValueRef {
         match self.get_effective_value(property) {
             Some(existing) => existing,
-            None => {
-                let created: EffectiveValueRef = self.create_effective_value(owner, property);
-                self.add_effective_value(owner, property, created.clone());
-                created
-            }
+            None => self.create_and_add_effective_value(owner, property),
         }
+    }
+
+    // The construction route preserves the property's Rust type. Only a miss
+    // needs this dispatch; lookup and insertion are the same for every type.
+    fn create_and_add_effective_value(&self, owner: &FerroObject, property: &'static FerroProperty) -> EffectiveValueRef {
+        let value = property.routes().create_effective_value(owner);
+        self.add_effective_value(owner, property, value.clone());
+        value
     }
 
     fn add_effective_value(&self, owner: &FerroObject, property: &FerroProperty, value: EffectiveValueRef) {
@@ -892,8 +878,7 @@ impl ValueStore {
         priority: BindingPriority,
     ) {
         debug_assert!(priority < BindingPriority::Inherited);
-        let effective = property.routes().create_effective_value(owner);
-        self.add_effective_value(owner, property, effective.clone());
+        let effective = self.create_and_add_effective_value(owner, property);
         effective.set_and_raise(owner, entry, priority);
     }
 
@@ -1017,8 +1002,7 @@ impl ValueStore {
                         match &current {
                             Some(current) => current.set_and_raise(owner, &entry, priority),
                             None => {
-                                let created = property.routes().create_effective_value(owner);
-                                self.add_effective_value(owner, property, created.clone());
+                                let created = self.create_and_add_effective_value(owner, property);
                                 created.set_and_raise(owner, &entry, priority);
                                 current = Some(created);
                             }
@@ -1101,9 +1085,7 @@ impl ValueStore {
                     match effective {
                         Some(effective) => effective.set_and_raise(owner, &entry, priority),
                         None => {
-                            let created = property.routes().create_effective_value(owner);
-                            self.add_effective_value(owner, property, created.clone());
-                            created.set_and_raise(owner, &entry, priority);
+                            self.add_effective_value_and_raise(owner, property, &entry, priority);
                         }
                     }
 
