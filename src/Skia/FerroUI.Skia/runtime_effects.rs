@@ -3,8 +3,8 @@
 //!
 //! This is the layer the GPU forms of WinUI's composition effects are built
 //! on (the lights and the pixel operations, docs/porting/winui-composition.md,
-//! "How the effects are drawn"), and the one user-defined effects are to be
-//! built on:
+//! "How the effects are drawn"), and the one the runtime shader effects of
+//! custom effects are built on (#455, E4, `custom_shader_effects.rs`):
 //!
 //! - [`compile`] compiles an SkSL program as a shader, a blender or a colour
 //!   filter ([`ProgramKind`]) once per thread: the compiled effects are kept
@@ -113,7 +113,11 @@ pub(crate) fn compile(kind: ProgramKind, source: &str) -> Option<sk::RuntimeEffe
     compile_named(kind, source, "runtime effect")
 }
 
-fn compile_named(kind: ProgramKind, source: &str, name: &str) -> Option<sk::RuntimeEffect> {
+/// Compiles `source` as `kind`, once per thread, naming the program `name` in
+/// the log; `None` when it does not compile (logged once) or runtime effects
+/// are off. The programs of custom shader effects (#455, E4) are compiled
+/// here, named after their effect.
+pub(crate) fn compile_named(kind: ProgramKind, source: &str, name: &str) -> Option<sk::RuntimeEffect> {
     if !is_enabled() {
         return None;
     }
