@@ -24,6 +24,12 @@ The Android profile reserves 48 logical pixels for the status strip and 72 for i
 
 On macOS, the **Window** menu lists the session’s windows and offers commands for the focused client. Right-click a Dock app to select one of its windows or change whether the app stays in the Dock. [Window menu with two native clients](screenshots/macos-window-menu.webp) · [Dock menu for a running app](screenshots/macos-dock-menu.webp)
 
+## Spotlight
+
+Spotlight opens as a single search field. Typing unfolds the results beneath it. The top hit favors an exact application name, then a name prefix, then a name substring. Desktop IDs and descriptions also participate in the search. On a narrow output, the selected application’s details move below the list.
+
+Use **↓** or the Applications button to browse the catalog from an empty field. **⌘1** and **Ctrl+1** select Applications. The arrow and page keys navigate results while the field retains text input. Click a result to inspect its description, desktop ID, category, available actions and matching windows. **Return** or a double-click activates its most recently focused window, or launches it through GIO if it has no windows. Choose a window by title to switch directly to it. If the desktop entry provides Quick Actions, **Tab** from the search field focuses its first action and **Return** runs it.
+
 ## Materials in the desktop scene
 
 | Appearance | Panel and flyout materials in a shared render target |
