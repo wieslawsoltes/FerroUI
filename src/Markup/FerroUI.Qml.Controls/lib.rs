@@ -266,8 +266,8 @@ impl QmlView {
             .get(&instance.root())
             .ok_or_else(|| Error::new("component root has no native visual factory"))?
             .control();
-        let graph =
-            composition::apply(composition::plan(&instance, &nodes)?).expect("full visual plan");
+        let mut graph = composition::Graph::default();
+        composition::apply(composition::plan(&instance, &nodes)?).commit(&mut graph);
         instance.drain_changes();
         instance.drain_created();
         let view = Self(Rc::new(Inner {
@@ -450,14 +450,11 @@ impl QmlView {
         if layout_changed && self.0.revision.get() == self.0.instance.borrow().structure_revision()
         {
             let plan = match self.0.validated_layout.take() {
-                Some(plan) if plan.graph.is_some() || self.0.visual_graph.borrow().is_current() => {
-                    plan
-                }
+                Some(plan) if plan.full() || self.0.visual_graph.borrow().is_current() => plan,
                 _ => composition::plan(&self.0.instance.borrow(), &self.0.nodes.borrow())?,
             };
-            if let Some(graph) = composition::apply(plan) {
-                self.0.visual_graph.replace(graph);
-            }
+            let update = composition::apply(plan);
+            update.commit(&mut self.0.visual_graph.borrow_mut());
         }
         Ok(())
     }

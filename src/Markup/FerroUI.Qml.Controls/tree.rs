@@ -77,6 +77,7 @@ impl Inner {
         // previous plan. In that case validate against the complete model.
         let mut full =
             topology_changed || self.flushing.get() || self.validated_layout.borrow().is_some();
+        let mut lists = std::collections::BTreeSet::new();
         let mut local = std::collections::BTreeSet::new();
         let mut layout_changed = topology_changed;
         for change in changes {
@@ -84,12 +85,12 @@ impl Inner {
                 peer.validate(&change.property, &change.value)?;
                 if affects_layout(&**peer, &change.property) {
                     layout_changed = true;
-                    if peer.children_property() == Some(&change.property)
-                        || matches!(
-                            change.property.as_str(),
-                            "baselineOffset" | "anchors.alignWhenCentered"
-                        )
-                    {
+                    if peer.children_property() == Some(&change.property) {
+                        lists.insert(change.object);
+                    } else if matches!(
+                        change.property.as_str(),
+                        "baselineOffset" | "anchors.alignWhenCentered"
+                    ) {
                         full = true;
                     } else {
                         local.insert(change.object);
@@ -101,11 +102,11 @@ impl Inner {
             let plan = if full || !graph.is_current() {
                 composition::plan(model, peers)?
             } else {
-                composition::anchor_changes(model, peers, &graph, local)?
+                composition::changes(model, peers, &graph, lists, local)?
             };
             // Custom peers may replace their native hosts during apply. They
             // still re-plan after applying the property notifications.
-            let stable = plan.graph.as_ref().unwrap_or(&graph).stable_hosts;
+            let stable = plan.reusable();
             self.validated_layout.replace(stable.then_some(plan));
         }
         if let Some(peers) = next {

@@ -4,85 +4,162 @@
 use super::*;
 use std::collections::{BTreeSet, HashSet};
 
+/// A QML child list and its last committed native collection. Retain IDs in
+/// visual order so a transaction can remove previous edges without scanning
+/// the model or treating an ownership parent as a visual parent.
+pub(super) struct Host {
+    children: Vec<ObjectId>,
+    collection: Controls,
+    snapshot: std::rc::Weak<Vec<Ref<Control>>>,
+}
+
+#[derive(Default)]
 pub(super) struct Graph {
     parents: BTreeMap<ObjectId, ObjectId>,
-    pub stable_hosts: bool,
-    collections: Vec<(Controls, std::rc::Weak<Vec<Ref<Control>>>)>,
+    stable_hosts: bool,
+    hosts: BTreeMap<ObjectId, Host>,
 }
 
 impl Graph {
-    // Native callers can also modify the exposed child collections. FerroList
-    // snapshots are copy-on-write: a weak snapshot detects changes without
-    // retaining a removed control or copying the list when it is edited.
     pub fn is_current(&self) -> bool {
         self.stable_hosts
             && self
-                .collections
-                .iter()
-                .all(|(children, previous)| previous.as_ptr() == Rc::as_ptr(&children.snapshot()))
+                .hosts
+                .values()
+                .all(|h| h.snapshot.as_ptr() == Rc::as_ptr(&h.collection.snapshot()))
+    }
+}
+
+pub(super) enum Update {
+    Replace(Graph),
+    Patch {
+        parents: BTreeMap<ObjectId, Option<ObjectId>>,
+        hosts: BTreeMap<ObjectId, Host>,
+    },
+}
+impl Update {
+    pub fn commit(self, graph: &mut Graph) {
+        match self {
+            Self::Replace(all) => *graph = all,
+            Self::Patch { parents, hosts } => {
+                for (child, parent) in parents {
+                    if let Some(parent) = parent {
+                        graph.parents.insert(child, parent);
+                    } else {
+                        graph.parents.remove(&child);
+                    }
+                }
+                graph.hosts.extend(hosts);
+            }
+        }
     }
 }
 
 pub(super) struct Plan {
-    pub graph: Option<Graph>,
+    update: Update,
     children: Vec<(Controls, Vec<Ref<Control>>)>,
     anchors: Vec<(Ref<super::anchors::AnchorCanvas>, super::anchors::Rules)>,
 }
 
-pub(super) fn plan(instance: &Instance, nodes: &tree::Peers) -> Result<Plan, Error> {
-    let mut parents = BTreeMap::new();
-    let mut plan = Vec::new();
-    for (&parent, node) in nodes {
-        let Some(name) = node.children_property() else {
-            continue;
-        };
-        let Value::List(entries) = instance.get(parent, name)? else {
-            return Err(Error::new(format!("{name} must be an object list")));
-        };
-        let mut children = Vec::new();
-        for entry in entries {
-            let Value::Object(id) = entry else {
-                return Err(Error::new(format!("{name} expects an object")));
-            };
-            if instance.type_name(id).is_none() {
-                return Err(Error::new("foreign child in visual list"));
-            }
-            let Some(child) = nodes.get(&id) else {
-                continue;
-            };
-            if id == instance.root() || parents.insert(id, parent).is_some() {
-                return Err(Error::new("root or multiply parented child in visual list"));
-            }
-            children.push(child.control());
-        }
-        match node.content() {
-            Some((_, collection)) => plan.push((collection, children)),
-            None if !children.is_empty() => {
-                return Err(Error::new(format!(
-                    "{} has no native visual child host",
-                    instance.type_name(parent).unwrap_or("object")
-                )))
-            }
-            None => {}
+impl Plan {
+    pub fn reusable(&self) -> bool {
+        match &self.update {
+            Update::Replace(graph) => graph.stable_hosts,
+            Update::Patch { .. } => true,
         }
     }
+    pub fn full(&self) -> bool {
+        matches!(self.update, Update::Replace(_))
+    }
+}
 
-    // Detect cycles before changing the retained tree. Finished paths are memoized.
+fn child_list(
+    instance: &Instance,
+    nodes: &tree::Peers,
+    parent: ObjectId,
+) -> Result<Option<Host>, Error> {
+    let node = &nodes[&parent];
+    let Some(name) = node.children_property() else {
+        return Ok(None);
+    };
+    let Value::List(entries) = instance.get(parent, name)? else {
+        return Err(Error::new(format!("{name} must be an object list")));
+    };
+    let mut children = Vec::new();
+    for entry in entries {
+        let Value::Object(id) = entry else {
+            return Err(Error::new(format!("{name} expects an object")));
+        };
+        if instance.type_name(id).is_none() {
+            return Err(Error::new("foreign child in visual list"));
+        }
+        if nodes.contains_key(&id) {
+            children.push(id);
+        }
+    }
+    match node.content() {
+        Some((_, collection)) => Ok(Some(Host {
+            children,
+            collection,
+            snapshot: Default::default(),
+        })),
+        None if children.is_empty() => Ok(None),
+        None => Err(Error::new(format!(
+            "{} has no native visual child host",
+            instance.type_name(parent).unwrap_or("object")
+        ))),
+    }
+}
+
+fn check_cycles(
+    starts: impl Iterator<Item = ObjectId>,
+    parent_of: impl Fn(ObjectId) -> Option<ObjectId>,
+) -> Result<(), Error> {
     let mut finished = BTreeSet::new();
-    for &start in parents.keys() {
+    for start in starts {
         let mut path = BTreeSet::new();
         let mut next = start;
         while !finished.contains(&next) {
-            let Some(parent) = parents.get(&next) else {
-                break;
-            };
+            let Some(parent) = parent_of(next) else { break };
             if !path.insert(next) {
                 return Err(Error::new("cycle in visual children"));
             }
-            next = *parent;
+            next = parent;
         }
         finished.extend(path);
     }
+    Ok(())
+}
+
+fn controls(host: &Host, nodes: &tree::Peers) -> (Controls, Vec<Ref<Control>>) {
+    (
+        host.collection.clone(),
+        host.children.iter().map(|id| nodes[id].control()).collect(),
+    )
+}
+
+pub(super) fn plan(instance: &Instance, nodes: &tree::Peers) -> Result<Plan, Error> {
+    let stable_hosts = nodes.values().all(|node| node.has_stable_visual_host());
+    let mut graph = Graph {
+        stable_hosts,
+        ..Default::default()
+    };
+    let mut children = Vec::new();
+    for &parent in nodes.keys() {
+        if let Some(host) = child_list(instance, nodes, parent)? {
+            for &id in &host.children {
+                if id == instance.root() || graph.parents.insert(id, parent).is_some() {
+                    return Err(Error::new("root or multiply parented child in visual list"));
+                }
+            }
+            children.push(controls(&host, nodes));
+            if stable_hosts {
+                graph.hosts.insert(parent, host);
+            }
+        }
+    }
+    let parent_of = |child| graph.parents.get(&child).copied();
+    check_cycles(graph.parents.keys().copied(), parent_of)?;
     let mut hosts = BTreeMap::new();
     for (&id, node) in nodes {
         if let Some(canvas) = node
@@ -96,40 +173,27 @@ pub(super) fn plan(instance: &Instance, nodes: &tree::Peers) -> Result<Plan, Err
         if !node.uses_item_anchors() {
             continue;
         }
-        let Some(rule) = super::anchors::read(instance, id, &parents, nodes)? else {
+        let Some(rule) = super::anchors::read(instance, id, parent_of, nodes)? else {
             continue;
         };
-        let parent = parents
-            .get(&id)
-            .ok_or_else(|| Error::new("anchored Item has no visual parent"))?;
+        let parent =
+            parent_of(id).ok_or_else(|| Error::new("anchored Item has no visual parent"))?;
         let (_, rules) = hosts
-            .get_mut(parent)
+            .get_mut(&parent)
             .ok_or_else(|| Error::new("anchors require an Item or Rectangle layout host"))?;
         rules.insert(node.control(), rule);
     }
     for (_, rules) in hosts.values_mut() {
         rules.validate()?;
     }
-    let stable_hosts = nodes.values().all(|node| node.has_stable_visual_host());
-    let collections = if stable_hosts {
-        plan.iter()
-            .map(|(children, _)| (children.clone(), std::rc::Weak::new()))
-            .collect()
-    } else {
-        Vec::new()
-    };
     Ok(Plan {
-        graph: Some(Graph {
-            parents,
-            stable_hosts,
-            collections,
-        }),
-        children: plan,
+        update: Update::Replace(graph),
+        children,
         anchors: hosts.into_values().collect(),
     })
 }
 
-pub(super) fn apply(mut plan: Plan) -> Option<Graph> {
+pub(super) fn apply(mut plan: Plan) -> Update {
     // A structural change in one delegate need not edit every sibling collection.
     plan.children.retain(|(collection, children)| {
         collection.count() != children.len()
@@ -168,51 +232,120 @@ pub(super) fn apply(mut plan: Plan) -> Option<Graph> {
     for (host, rules) in plan.anchors {
         host.update(rules);
     }
-    if let Some(graph) = &mut plan.graph {
-        for (collection, snapshot) in &mut graph.collections {
-            *snapshot = Rc::downgrade(&collection.snapshot());
-        }
+    let changed = match &mut plan.update {
+        Update::Replace(graph) => &mut graph.hosts,
+        Update::Patch { hosts, .. } => hosts,
+    };
+    for host in changed.values_mut() {
+        host.snapshot = Rc::downgrade(&host.collection.snapshot());
     }
-    plan.graph
+    plan.update
 }
 
-/// Patch only the owners of changed anchor lines. Properties also read by
-/// siblings (baselineOffset and alignWhenCentered) use the full planner.
-pub(super) fn anchor_changes(
+type AnchorHosts = BTreeMap<ObjectId, (Ref<super::anchors::AnchorCanvas>, super::anchors::Rules)>;
+
+fn host_rules<'a>(
+    parent: Option<ObjectId>,
+    nodes: &tree::Peers,
+    hosts: &'a mut AnchorHosts,
+) -> Option<&'a mut super::anchors::Rules> {
+    let parent = parent?;
+    if let std::collections::btree_map::Entry::Vacant(entry) = hosts.entry(parent) {
+        let canvas = nodes[&parent]
+            .anchor_host()?
+            .cast::<super::anchors::AnchorCanvas>()?;
+        let rules = canvas.snapshot_rules();
+        entry.insert((canvas, rules));
+    }
+    Some(&mut hosts.get_mut(&parent).expect("registered anchor host").1)
+}
+
+/// Validate the final relation for all edited lists together. A transfer may
+/// update its destination before its source. Pure reorders preserve the parent
+/// graph and all previously checked anchor relationships.
+pub(super) fn changes(
     instance: &Instance,
     nodes: &tree::Peers,
     graph: &Graph,
-    changed: BTreeSet<ObjectId>,
+    lists: BTreeSet<ObjectId>,
+    mut anchors: BTreeSet<ObjectId>,
 ) -> Result<Plan, Error> {
+    let mut parents = BTreeMap::new();
     let mut hosts = BTreeMap::new();
-    for child in changed {
-        let rule = super::anchors::read(instance, child, &graph.parents, nodes)?;
-        let host = graph.parents.get(&child).and_then(|parent| {
-            nodes[parent]
-                .anchor_host()?
-                .cast::<super::anchors::AnchorCanvas>()
-        });
-        let Some(canvas) = host else {
-            if rule.is_some() {
-                return Err(Error::new(if graph.parents.contains_key(&child) {
-                    "anchors require an Item or Rectangle layout host"
-                } else {
-                    "anchored Item has no visual parent"
-                }));
-            }
-            continue;
-        };
-        let (_, rules) = hosts
-            .entry(graph.parents[&child])
-            .or_insert_with(|| (canvas.clone(), canvas.snapshot_rules()));
-        rules.replace(nodes[&child].control(), rule);
+    let mut children = Vec::new();
+    for parent in &lists {
+        if let Some(old) = graph.hosts.get(parent) {
+            parents.extend(old.children.iter().map(|&child| (child, None)));
+        }
     }
-    for (_, rules) in hosts.values_mut() {
+    for parent in lists {
+        if let Some(host) = child_list(instance, nodes, parent)? {
+            for &child in &host.children {
+                let previous = parents
+                    .get(&child)
+                    .copied()
+                    .unwrap_or_else(|| graph.parents.get(&child).copied());
+                if child == instance.root() || previous.is_some() {
+                    return Err(Error::new("root or multiply parented child in visual list"));
+                }
+                parents.insert(child, Some(parent));
+            }
+            children.push(controls(&host, nodes));
+            hosts.insert(parent, host);
+        }
+    }
+    parents.retain(|child, new| graph.parents.get(child) != new.as_ref());
+    let parent_of = |child| {
+        parents
+            .get(&child)
+            .copied()
+            .unwrap_or_else(|| graph.parents.get(&child).copied())
+    };
+    check_cycles(parents.keys().copied(), parent_of)?;
+
+    // Anchors can refer only to parents and siblings. Recheck old and new
+    // sibling groups for changed edges, including a child's own detached rule.
+    let mut families = BTreeSet::new();
+    for (&child, &next) in &parents {
+        families.extend(graph.parents.get(&child).copied());
+        families.extend(next);
+        anchors.insert(child);
+    }
+    for parent in families {
+        if let Some(host) = hosts.get(&parent) {
+            anchors.extend(host.children.iter().copied());
+        }
+    }
+    let mut rules = AnchorHosts::new();
+    for child in anchors {
+        let node = &nodes[&child];
+        if !node.uses_item_anchors() {
+            continue;
+        }
+        let parent = parent_of(child);
+        let old = graph.parents.get(&child).copied();
+        if old != parent {
+            if let Some(rules) = host_rules(old, nodes, &mut rules) {
+                rules.replace(node.control(), None);
+            }
+        }
+        let rule = super::anchors::read(instance, child, parent_of, nodes)?;
+        if let Some(rules) = host_rules(parent, nodes, &mut rules) {
+            rules.replace(node.control(), rule);
+        } else if rule.is_some() {
+            return Err(Error::new(if parent.is_none() {
+                "anchored Item has no visual parent"
+            } else {
+                "anchors require an Item or Rectangle layout host"
+            }));
+        }
+    }
+    for (_, rules) in rules.values_mut() {
         rules.validate()?;
     }
     Ok(Plan {
-        graph: None,
-        children: Vec::new(),
-        anchors: hosts.into_values().collect(),
+        update: Update::Patch { parents, hosts },
+        children,
+        anchors: rules.into_values().collect(),
     })
 }

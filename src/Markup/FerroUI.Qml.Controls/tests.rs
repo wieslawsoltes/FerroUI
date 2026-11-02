@@ -948,3 +948,84 @@ fn local_anchor_change_repairs_external_edits_to_the_native_child_list() {
     assert_eq!(children.count(), 1);
     assert_eq!(children.get(0), view.control(marker).unwrap());
 }
+
+#[test]
+fn projected_transfers_validate_final_sibling_anchors_and_parent_cycles() {
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let view = mount(
+        r#"import QtQuick
+        Item { id:root
+            Item { id:left; Item { id:a; anchors.left: b.right }; Item { id:b } }
+            Item { id:right; Item { id:c } }
+            function split() { right.data = [a,c]; left.data = [b] }
+            function both() { right.data = [a,b,c]; left.data = [] }
+            function cycle() { root.data = [left]; right.data = [b,c]; b.data = [right] }
+            function duplicate() { left.data = [a] }
+            function undoBoth() { left.data = [a,b]; right.data = [c] }
+        }"#,
+    );
+    let root = view.root_id();
+    let children = |id| {
+        view.control(view.id(id).unwrap())
+            .unwrap()
+            .cast::<Canvas>()
+            .unwrap()
+            .children()
+    };
+    let left = children("left");
+    let right = children("right");
+    assert!(view
+        .call(root, "split", vec![])
+        .unwrap_err()
+        .message
+        .contains("sibling"));
+    assert_eq!((left.count(), right.count()), (2, 1));
+    view.call(root, "both", vec![]).unwrap();
+    assert_eq!((left.count(), right.count()), (0, 3));
+    assert!(view
+        .call(root, "cycle", vec![])
+        .unwrap_err()
+        .message
+        .contains("cycle"));
+    assert!(view
+        .call(root, "duplicate", vec![])
+        .unwrap_err()
+        .message
+        .contains("multiply parented"));
+    assert_eq!((left.count(), right.count()), (0, 3));
+    view.call(root, "undoBoth", vec![]).unwrap();
+    assert_eq!((left.count(), right.count()), (2, 1));
+}
+
+#[test]
+fn native_collection_reentry_applies_the_latest_validated_projection() {
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let view = mount(
+        r#"import QtQuick
+        Item { Item { id: panel; Item { id: first }; Item { id: second } }
+            function reverse() {panel.data = [second,first]}
+            function restore() {panel.data = [first,second]}
+        }"#,
+    );
+    let panel = view
+        .control(view.id("panel").unwrap())
+        .unwrap()
+        .cast::<Canvas>()
+        .unwrap();
+    let children = panel.children();
+    let first = children.get(0);
+    let nested = view.clone();
+    let done = Rc::new(Cell::new(false));
+    let once = done.clone();
+    let token = children.add_collection_changed(Rc::new(move |_| {
+        if !once.replace(true) {
+            nested.call(nested.root_id(), "restore", vec![]).unwrap();
+        }
+    }));
+    view.call(view.root_id(), "reverse", vec![]).unwrap();
+    children.remove_collection_changed(token);
+    assert!(done.get());
+    assert_eq!(children.get(0), first);
+    view.call(view.root_id(), "reverse", vec![]).unwrap();
+    assert_eq!(children.get(1), first);
+}

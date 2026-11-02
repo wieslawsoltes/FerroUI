@@ -359,7 +359,7 @@ impl AnchorCanvas {
 pub(super) fn read(
     instance: &Instance,
     child: ObjectId,
-    parents: &BTreeMap<ObjectId, ObjectId>,
+    parent_of: impl Fn(ObjectId) -> Option<ObjectId>,
     nodes: &tree::Peers,
 ) -> Result<Option<Anchor>, Error> {
     let field = |name: &str| instance.get(child, &format!("anchors.{name}"));
@@ -380,7 +380,7 @@ pub(super) fn read(
             "anchors.fill and anchors.centerIn cannot both be active",
         ));
     }
-    let parent = parents.get(&child).copied();
+    let parent = parent_of(child);
     let align = |id| instance.get(id, "anchors.alignWhenCentered").ok() != Some(Value::Bool(false));
     let margin = scalar("margins", 0.)?;
     let mirrored = instance.get(child, "LayoutMirroring.enabled")? == Value::Bool(true);
@@ -419,7 +419,7 @@ pub(super) fn read(
         }
         let target = if Some(id) == parent {
             None
-        } else if parent.is_some() && child != id && parents.get(&id) == parent.as_ref() {
+        } else if parent.is_some() && child != id && parent_of(id) == parent {
             Some(
                 nodes
                     .get(&id)

@@ -208,10 +208,59 @@ fn mounted_layout() {
     });
 }
 
+fn mounted_structure() {
+    let _services = UnitTestApplication::start(TestServices::new());
+    let mut source = String::from("import QtQuick\nItem { id: root; Item { id:left; Item {id:a} Item {id:b} } Item {id:right; Item {id:c} }\n");
+    source.push_str("ListView { id: list; width:100; height:200; cacheBuffer:0; reuseItems:true; currentIndex:-1; model:10000; delegate: Item { required property int index; height:10; width:10 } }\n");
+    for _ in 0..320 {
+        source.push_str("Item { width:2; height:2 }\n");
+    }
+    source.push_str("function reverse(){left.data = [b,a]} function restore(){left.data = [a,b]} function transfer(){left.data=[b];right.data=[a,c]} function back(){right.data=[c];left.data=[a,b]} }");
+    let doc = parse(&source).unwrap();
+    let view = QmlView::new(
+        &doc,
+        &ControlRegistry::standard().unwrap(),
+        Default::default(),
+    )
+    .unwrap();
+    let root = view.root_id();
+    measure(
+        "reorder native siblings with 320 unrelated peers",
+        50,
+        |i| {
+            view.call(root, if i % 2 == 0 { "reverse" } else { "restore" }, vec![])
+                .unwrap();
+        },
+    );
+    measure("transfer a native child between two panels", 50, |i| {
+        view.call(root, if i % 2 == 0 { "transfer" } else { "back" }, vec![])
+            .unwrap();
+    });
+    let list = view.id("list").unwrap();
+    assert!(
+        view.call(list, "itemAtIndex", vec![Value::Number(0.)])
+            .unwrap()
+            != Value::Null
+    );
+    measure(
+        "page a mounted pooled ListView with 320 unrelated peers",
+        40,
+        |i| {
+            view.set(
+                list,
+                "contentY",
+                Value::Number((1000 + (i % 2) * 30000) as f64),
+            )
+            .unwrap();
+        },
+    );
+}
+
 fn main() {
     collections();
     eager_repeater();
     animations();
     timer_dispatch();
     mounted_layout();
+    mounted_structure();
 }
