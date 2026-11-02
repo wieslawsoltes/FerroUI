@@ -2,6 +2,7 @@
 //! remain in place while the render thread plays these finite key frames.
 use super::{look, shell_panel, Appearance, ColorMode, Layout};
 use ferroui_base::controls::ResourceKey;
+use ferroui_base::layout::VerticalAlignment;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::numerics::Vector2;
 use ferroui_base::platform::IPlatformSettings;
@@ -48,7 +49,14 @@ fn animate(host: &Border, profile: Appearance) {
     let (offset, initial_opacity, ms, preference) = match profile.layout() {
         Layout::Taskbar => (14., 0.75, 155, None),
         Layout::MenuBarDock => (0., 0.72, 105, Some("MacOSReduceMotion")),
-        Layout::BottomNavigation => (28., 0.86, 200, Some("MaterialReducedMotion")),
+        Layout::BottomNavigation => {
+            let offset = if host.vertical_alignment() == VerticalAlignment::Top {
+                -28.
+            } else {
+                28.
+            };
+            (offset, 0.86, 200, Some("MaterialReducedMotion"))
+        }
     };
     if let Some(key) = preference {
         let value = host

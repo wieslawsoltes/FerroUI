@@ -41,7 +41,7 @@ The dark WinUI personalization flyout below samples the actual GTK and Qt surfac
 
 ## Shell motion
 
-Start and Windows system flyouts rise 14 DIPs over 155 ms. Spotlight and macOS system panels fade in over 105 ms. Material sheets rise 28 DIPs over 200 ms. These are finite compositor key frames. Animating `Translation.Y` preserves the elevation in `Translation.Z`. The input target becomes available as soon as the sheet opens, and closing it immediately restores the underlying target. The shell skips entry motion in Windows High Contrast and when the active theme or platform disables animations.
+Start and Windows system flyouts rise 14 DIPs over 155 ms. Spotlight and macOS system panels fade in over 105 ms. Material sheets enter from their anchored edge over 200 ms. Top shades descend 28 DIPs, and bottom sheets rise by the same distance. These are finite compositor key frames. Animating `Translation.Y` preserves the elevation in `Translation.Z`. The input target becomes available as soon as the sheet opens, and closing it immediately restores the underlying target. The shell skips entry motion in Windows High Contrast and when the active theme or platform disables animations.
 
 ### Wallpaper reuse on the composed output
 
