@@ -2996,20 +2996,9 @@ pub fn build_static_resource_local_xaml(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>()));
     context.push_parent(rt::to_value(border_1.clone()));
     // static_resource_local.xaml(1,315) Background (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScopedAccent"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Border::background_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 1, 315)?;
+    let provided_0 = rt::provide_static_resource(&context, "ScopedAccent", || rt::property_value(::ferroui_controls::Border::background_property()), 1, 315)?;
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), value_0.clone(), 1, 315)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::media::IBrush as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        border_1.set_value(::ferroui_controls::Border::background_property(), rt::exact(value_0.clone(), "FerroUI.Controls.Border.set_Background", 0, 1, 315)?);
-    } else if value_0.is_none() {
-        border_1.set_value(::ferroui_controls::Border::background_property(), rt::exact(value_0.clone(), "FerroUI.Controls.Border.set_Background", 0, 1, 315)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Background", &value_0, 1, 315));
-    }
+    rt::set_local_value(border_1.upcast_ref::<::ferroui_base::FerroObject>(), || ::ferroui_controls::Border::background_property(), value_0, || rt::markup_handle(<dyn ::ferroui_base::media::IBrush as ::ferroui_base::metadata::MarkupTyped>::MARKUP), true, "FerroUI.Controls.Border.set_Background", "Background", 1, 315)?;
     context.pop_parent();
     rt::invoked(border_1.try_end_init(), 1, 308)?;
     context.pop_parent();
@@ -3113,20 +3102,9 @@ pub fn build_static_resource_missing_xaml(
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
     // static_resource_missing.xaml(1,99) Background (setter chosen at run time)
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("Missing"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Border::background_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 1, 99)?;
+    let provided_0 = rt::provide_static_resource(&context, "Missing", || rt::property_value(::ferroui_controls::Border::background_property()), 1, 99)?;
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
-    if rt::is_instance(&value_0, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property());
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), value_0.clone(), 1, 99)?;
-    } else if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::media::IBrush as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        border_0.set_value(::ferroui_controls::Border::background_property(), rt::exact(value_0.clone(), "FerroUI.Controls.Border.set_Background", 0, 1, 99)?);
-    } else if value_0.is_none() {
-        border_0.set_value(::ferroui_controls::Border::background_property(), rt::exact(value_0.clone(), "FerroUI.Controls.Border.set_Background", 0, 1, 99)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Background", &value_0, 1, 99));
-    }
+    rt::set_local_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), || ::ferroui_controls::Border::background_property(), value_0, || rt::markup_handle(<dyn ::ferroui_base::media::IBrush as ::ferroui_base::metadata::MarkupTyped>::MARKUP), true, "FerroUI.Controls.Border.set_Background", "Background", 1, 99)?;
     context.pop_parent();
     rt::invoked(border_0.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
@@ -3402,14 +3380,12 @@ fn build_control_theme_resources_xaml_deferred_2(
     // control_theme_resources.xaml(1,265) TargetType
     ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
     // control_theme_resources.xaml(1,314) BasedOn
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("Base"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 1, 314)?;
+    let provided_0 = rt::provide_static_resource(&context, "Base", || rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), 1, 314)?;
     ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 1, 314)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 1, 314)?);
     // control_theme_resources.xaml(1,347) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
     // control_theme_resources.xaml(1,376) Value
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("Accent"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 1, 376)?;
+    let provided_1 = rt::provide_static_resource(&context, "Accent", || rt::setter_value_property(), 1, 376)?;
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, ::core::clone::Clone::clone(&provided_1));
     // control_theme_resources.xaml(1,410) Content
     // control_theme_resources.xaml(1,439) Value
@@ -4369,8 +4345,7 @@ pub fn build_style_resources_xaml(
     // style_resources.xaml(1,230) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Border::background_property()));
     // style_resources.xaml(1,259) Value
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("Accent"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 1, 259)?;
+    let provided_0 = rt::provide_static_resource(&context, "Accent", || rt::setter_value_property(), 1, 259)?;
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, ::core::clone::Clone::clone(&provided_0));
     // style_resources.xaml(1,293) Content
     // style_resources.xaml(1,323) Value
@@ -5586,17 +5561,7 @@ pub fn build_static_resource_element_xaml(
     ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_set_ResourceKey(&static_resource_extension_1, rt::string_object("Accent"));
     let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::Border::background_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 15, 8)?;
     let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
-    if rt::is_instance(&value_1, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::unset_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property());
-    } else if rt::is_instance(&value_1, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), value_1.clone(), 15, 8)?;
-    } else if rt::is_instance(&value_1, rt::markup_handle(<dyn ::ferroui_base::media::IBrush as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        border_0.set_value(::ferroui_controls::Border::background_property(), rt::exact(value_1.clone(), "FerroUI.Controls.Border.set_Background", 0, 15, 8)?);
-    } else if value_1.is_none() {
-        border_0.set_value(::ferroui_controls::Border::background_property(), rt::exact(value_1.clone(), "FerroUI.Controls.Border.set_Background", 0, 15, 8)?);
-    } else {
-        return ::core::result::Result::Err(rt::no_setter("Background", &value_1, 15, 8));
-    }
+    rt::set_local_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), || ::ferroui_controls::Border::background_property(), value_1, || rt::markup_handle(<dyn ::ferroui_base::media::IBrush as ::ferroui_base::metadata::MarkupTyped>::MARKUP), true, "FerroUI.Controls.Border.set_Background", "Background", 15, 8)?;
     context.pop_parent();
     rt::invoked(border_0.try_end_init(), 13, 4)?;
     context.pop_parent();
