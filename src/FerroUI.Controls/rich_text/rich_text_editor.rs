@@ -1,7 +1,7 @@
 use super::{RangeGravity, SelectionOptions, SelectionType};
 use crate::documents::{
-    CharacterFormat, DocumentError, DocumentSnapshot, ParagraphFormat, RichTextDocument,
-    TextGravity,
+    BlockJournal, CharacterFormat, DocumentDelta, DocumentError, DocumentSnapshot,
+    ParagraphFormat, RichTextDocument, TextGravity,
 };
 use ferroui_base::media::TextDecorations;
 use ferroui_base::reactive::{Disposable, Subscription};
@@ -106,15 +106,63 @@ struct EditorSnapshot {
     default_paragraph_format: ParagraphFormat,
 }
 
+impl EditorSnapshot {
+    fn state(&self) -> EditorState {
+        EditorState {
+            selection: self.selection,
+            typing_format: self.typing_format.clone(),
+            default_character_format: self.default_character_format.clone(),
+            default_paragraph_format: self.default_paragraph_format.clone(),
+        }
+    }
+}
+
+/// The state of the editor an undo unit restores with the document.
+#[derive(Clone, PartialEq)]
+struct EditorState {
+    selection: EditorSelection,
+    typing_format: CharacterFormat,
+    default_character_format: CharacterFormat,
+    default_paragraph_format: ParagraphFormat,
+}
+
 #[derive(Clone)]
-/// One undo unit. The snapshots are shared: a unit's `before` is the `after` of the
-/// unit before it whenever nothing changed in between, so neighbouring units hold one
-/// copy of the document, not two (#243 review, S8; delta units follow in F1).
+/// One undo unit: a delta of the document, the blocks the edit replaced and the blocks that
+/// took their place (decision D9, #243 review S8), and the state of the editor before and
+/// after the edit.
 struct UndoUnit {
-    before: Rc<EditorSnapshot>,
-    after: Rc<EditorSnapshot>,
+    document: DocumentDelta,
+    before: EditorState,
+    after: EditorState,
     kind: EditKind,
     merge_generation: u64,
+}
+
+/// What an edit captured before it changed anything, to record its undo unit or to roll it
+/// back (S8).
+enum RecordStart {
+    /// A snapshot of the whole document: an edit group (which rolls back to it), a
+    /// composition, or a document whose edits are not recorded as deltas of paragraphs (with
+    /// link fields or blocks that are not paragraphs). `by_paragraph`: every block of the
+    /// document is a paragraph and it has no link fields.
+    Snapshot {
+        snapshot: EditorSnapshot,
+        by_paragraph: bool,
+    },
+    /// The state of the editor and the journal of the blocks the edit changes.
+    Journal {
+        state: EditorState,
+        journal: BlockJournal,
+    },
+}
+
+impl RecordStart {
+    fn selection(&self) -> EditorSelection {
+        match self {
+            Self::Snapshot { snapshot, .. } => snapshot.selection,
+            Self::Journal { state, .. } => state.selection,
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -373,6 +421,18 @@ impl RichTextEditor {
         let history = self.history.borrow();
         self.history_is_current(&history) && !history.redo.is_empty()
     }
+    /// Test only: the blocks of the undo units, from the oldest (S8): for each, the index of
+    /// the first block of its delta, the number of blocks it holds before the edit and after it,
+    /// and whether it holds the whole document.
+    #[cfg(test)]
+    pub(crate) fn undo_unit_blocks(&self) -> Vec<(usize, usize, usize, bool)> {
+        let history = self.history.borrow();
+        history
+            .undo
+            .iter()
+            .map(|unit| unit.document.blocks())
+            .collect()
+    }
     pub fn is_composing(&self) -> bool {
         self.history.borrow().composition.is_some()
     }
@@ -462,7 +522,7 @@ impl RichTextEditor {
         self.prepare_edit()?;
         let _operation = self.enter(true)?;
         self.synchronize();
-        let before = self.capture();
+        let before = self.begin_record((self.document.text_length() == 0).then_some(0..0));
         let merged = self.default_character_format().overlay(format).clone();
         let previous = self.default_character_format.replace(Rc::new(merged));
         if self.document.text_length() == 0 {
@@ -486,7 +546,7 @@ impl RichTextEditor {
         self.prepare_edit()?;
         let _operation = self.enter(true)?;
         self.synchronize();
-        let before = self.capture();
+        let before = self.begin_record((self.document.text_length() == 0).then_some(0..0));
         let merged = self.default_paragraph_format().overlay(format).clone();
         let previous = self.default_paragraph_format.replace(Rc::new(merged));
         if self.document.text_length() == 0 {
@@ -810,10 +870,45 @@ impl RichTextEditor {
         }
     }
 
+    fn capture_state(&self) -> EditorState {
+        EditorState {
+            selection: self.selection(),
+            typing_format: self.typing_format(),
+            default_character_format: self.default_character_format(),
+            default_paragraph_format: self.default_paragraph_format(),
+        }
+    }
+
+    /// Captures what recording an edit of the text `range` needs (S8): in a document whose
+    /// edits are recorded as deltas of paragraphs, the state of the editor and a journal of the
+    /// blocks the edit changes, which holds the snapshots of the blocks `range` spans from now
+    /// on; in any other document, a snapshot of the whole document.
+    fn begin_record(&self, range: Option<Range<usize>>) -> RecordStart {
+        if self.document.edits_by_paragraph() {
+            let journal = self.document.begin_journal(range);
+            RecordStart::Journal {
+                state: self.capture_state(),
+                journal,
+            }
+        } else {
+            RecordStart::Snapshot {
+                snapshot: self.capture(),
+                by_paragraph: false,
+            }
+        }
+    }
+
     fn restore_document_snapshot(&self, snapshot: &DocumentSnapshot) -> Result<(), EditError> {
+        self.restore_document_with(|document| document.restore(snapshot))
+    }
+
+    fn restore_document_with(
+        &self,
+        install: impl FnOnce(&RichTextDocument) -> Result<(), DocumentError>,
+    ) -> Result<(), EditError> {
         let version = self.document.mutation_version();
         let history_generation = self.history_clear_generation.get();
-        let result = self.document.restore(snapshot);
+        let result = install(&self.document);
         if result.is_err() && self.document.mutation_version() != version {
             // The model rejected a stale preflight after an application write.
             // Its new story owns the failure; callers must not roll it back.
@@ -831,11 +926,33 @@ impl RichTextEditor {
     }
 
     fn restore(&self, snapshot: &EditorSnapshot) -> Result<(), EditError> {
+        self.restore_with(snapshot.state(), |document| document.restore(&snapshot.document))
+    }
+
+    /// Installs one side of an undo unit: the document and the state of the editor before the
+    /// edit for an undo, after it for a redo (S8: the blocks of one side of the delta take the
+    /// place of the blocks of the other).
+    fn restore_unit(&self, unit: &UndoUnit, undo: bool) -> Result<(), EditError> {
+        let state = if undo { &unit.before } else { &unit.after };
+        self.restore_with(state.clone(), |document| document.apply_delta(&unit.document, undo))
+    }
+
+    fn restore_with(
+        &self,
+        state: EditorState,
+        install: impl FnOnce(&RichTextDocument) -> Result<(), DocumentError>,
+    ) -> Result<(), EditError> {
         let version = self.document.mutation_version();
         let history_generation = self.history_clear_generation.get();
-        let typing = Rc::new(snapshot.typing_format.clone());
-        let character = Rc::new(snapshot.default_character_format.clone());
-        let paragraph = Rc::new(snapshot.default_paragraph_format.clone());
+        let EditorState {
+            selection,
+            typing_format,
+            default_character_format,
+            default_paragraph_format,
+        } = state;
+        let typing = Rc::new(typing_format);
+        let character = Rc::new(default_character_format);
+        let paragraph = Rc::new(default_paragraph_format);
         if self.document.mutation_version() != version {
             self.observe_external_document_change();
             return Err(EditError::ReentrantEdit);
@@ -845,8 +962,8 @@ impl RichTextEditor {
         }
         // These are explicit historical formats, not a new affinity query.
         // A newer Gravity value survives restoration, including group rollback.
-        self.restore_document_snapshot(&snapshot.document)?;
-        self.selection.set(snapshot.selection);
+        self.restore_document_with(install)?;
+        self.selection.set(selection);
         let old_typing = self.typing_format.replace(typing);
         let old_character = self.default_character_format.replace(character);
         let old_paragraph = self.default_paragraph_format.replace(paragraph);
@@ -855,7 +972,23 @@ impl RichTextEditor {
         Ok(())
     }
 
-    fn record(&self, before: EditorSnapshot, kind: EditKind) {
+    /// Puts back the document and the state of the editor an edit began with: the rollback of
+    /// a failed edit. `Ok(false)` when the journal of the edit could not follow it: nothing is
+    /// restored then.
+    fn revert_record(&self, start: RecordStart) -> Result<bool, EditError> {
+        match start {
+            RecordStart::Snapshot { snapshot, .. } => self.restore(&snapshot).map(|()| true),
+            RecordStart::Journal { state, journal } => {
+                let Some(delta) = self.document.finish_journal(journal, None) else {
+                    return Ok(false);
+                };
+                self.restore_with(state, |document| document.apply_delta(&delta, true))
+                    .map(|()| true)
+            }
+        }
+    }
+
+    fn record(&self, before: RecordStart, kind: EditKind) {
         self.known_revision.set(self.document.revision());
         if self.group_depth.get() > 0 {
             return;
@@ -880,11 +1013,70 @@ impl RichTextEditor {
             .composition
             .as_ref()
             .map(|composition| composition.before.clone());
-        let after = committed.map_or_else(|| self.capture(), |snapshot| (*snapshot).clone());
-        let unchanged = before.document == after.document
+        // The reads of the document (the blocks the edit changed, or the whole document of a
+        // snapshot) and the comparisons below can call application code: they run between the
+        // checks of the mutation version.
+        let (before, document) = match before {
+            RecordStart::Snapshot {
+                snapshot,
+                by_paragraph,
+            } => {
+                let state = snapshot.state();
+                let after = committed
+                    .as_ref()
+                    .map_or_else(|| self.document.snapshot(), |after| after.document.clone());
+                let by_paragraph = by_paragraph && self.document.edits_by_paragraph();
+                let delta = DocumentDelta::between(snapshot.document, after, by_paragraph);
+                (state, Some(delta))
+            }
+            RecordStart::Journal { state, journal } => {
+                let committed = committed.as_ref().map(|committed| &committed.document);
+                (state, self.document.finish_journal(journal, committed))
+            }
+        };
+        let after = committed
+            .as_ref()
+            .map_or_else(|| self.capture_state(), |after| after.state());
+        let unchanged = document.as_ref().is_some_and(DocumentDelta::is_unchanged)
             && before.typing_format == after.typing_format
             && before.default_character_format == after.default_character_format
             && before.default_paragraph_format == after.default_paragraph_format;
+        // RichEdit groups typing "including characters deleted by using the
+        // BackSpace key": a Backspace at a collapsed caret is recorded as typing.
+        let kind = if kind == EditKind::Delete && self.recording_backspace.get() && before.selection.is_empty() {
+            EditKind::Typing
+        } else {
+            kind
+        };
+        // The unit before, which a typing edit joins (#243 review M6, S1) and whose document
+        // after a whole delta shares, and the delta of both edits.
+        let previous = match &document {
+            Some(_) if !unchanged => {
+                let history = self.history.borrow();
+                history
+                    .undo
+                    .last()
+                    .map(|unit| (unit.document.clone(), unit.after.clone(), unit.kind))
+            }
+            _ => None,
+        };
+        let mut document = document;
+        let mut merged = None;
+        if let (Some(document), Some((previous, previous_after, previous_kind))) =
+            (&mut document, &previous)
+        {
+            if kind == EditKind::Typing
+                && before.selection.is_empty()
+                && *previous_kind == kind
+                && previous_after.selection == before.selection
+                && previous_after.typing_format == before.typing_format
+            {
+                merged = previous.then(document, &self.document);
+            }
+            if merged.is_none() {
+                document.share_with(previous);
+            }
+        }
         if self.document.mutation_version() != mutation_version {
             self.observe_external_document_change();
             self.publish_changed();
@@ -893,52 +1085,52 @@ impl RichTextEditor {
         if self.history_clear_generation.get() != history_generation {
             return;
         }
+        let Some(document) = document else {
+            // A write to the tree that went around the document's edits: the journal could not
+            // follow the edit, and without what the blocks were its unit cannot be made. The
+            // history is cleared, as for a change of the document outside the editor.
+            self.clear_history();
+            self.publish_changed();
+            return;
+        };
         if unchanged {
             self.publish_changed();
             return;
         }
         let mut history = self.history.borrow_mut();
-        history.redo.clear();
+        let cleared = std::mem::take(&mut history.redo);
         if self.undo_limit.get() == 0 {
             drop(history);
+            drop(cleared);
             self.publish_changed();
             return;
         }
         let generation = self.merge_generation.get();
-        // RichEdit groups typing "including characters deleted by using the
-        // BackSpace key": a Backspace at a collapsed caret is recorded as typing.
-        let kind = if kind == EditKind::Delete && self.recording_backspace.get() && before.selection.is_empty() {
-            EditKind::Typing
-        } else {
-            kind
-        };
-        if kind == EditKind::Typing && before.selection.is_empty() {
+        if let (Some(merged), Some((previous, ..))) = (merged, &previous) {
             if let Some(last) = history.undo.last_mut().filter(|unit| {
                 unit.kind == kind
                     && unit.merge_generation == generation
-                    && unit.after.selection == before.selection
-                    && unit.after.typing_format == before.typing_format
+                    && unit.document.is(previous)
             }) {
-                last.after = Rc::new(after);
+                let replaced = std::mem::replace(&mut last.document, merged);
+                let replaced_after = std::mem::replace(&mut last.after, after);
                 drop(history);
+                drop((cleared, replaced, replaced_after));
                 self.publish_changed();
                 return;
             }
         }
-        // Share the snapshot with the unit before when it is the same state.
-        let before = match history.undo.last() {
-            Some(last) if *last.after == before => last.after.clone(),
-            _ => Rc::new(before),
-        };
         history.undo.push(UndoUnit {
+            document,
             before,
-            after: Rc::new(after),
+            after,
             kind,
             merge_generation: generation,
         });
         let remove = history.undo.len().saturating_sub(self.undo_limit.get());
-        history.undo.drain(..remove);
+        let removed: Vec<UndoUnit> = history.undo.drain(..remove).collect();
         drop(history);
+        drop((cleared, removed));
         self.publish_changed();
     }
 
@@ -1033,7 +1225,7 @@ impl RichTextEditor {
         kind: EditKind,
         range: Range<usize>,
         paired_tracking: bool,
-    ) -> Result<Option<(EditorSnapshot, String)>, EditError> {
+    ) -> Result<Option<(RecordStart, String)>, EditError> {
         let checkpoint = self.selection_format_checkpoint();
         let limit = self.max_length();
         let text = self.permitted_text(text, range.clone());
@@ -1041,7 +1233,8 @@ impl RichTextEditor {
         if text.is_empty() && (!text_is_deletion(kind) || range.is_empty()) {
             return Ok(None);
         }
-        let before = self.capture();
+        let before = self.begin_record(Some(range.clone()));
+        let before_length = self.document.text_length();
         self.ensure_selection_format(checkpoint)?;
         let length = text.encode_utf16().count();
         let format = if length > 0 {
@@ -1075,7 +1268,7 @@ impl RichTextEditor {
             } else {
                 self.document.replace_text(range.clone(), &text)?;
             }
-            if before.document.text_length() == 0 || self.document.text_length() == 0 {
+            if before_length == 0 || self.document.text_length() == 0 {
                 self.document.apply_paragraph_format(
                     0..self.document.text_length(),
                     &self.insertion_defaults(),
@@ -1162,7 +1355,7 @@ impl RichTextEditor {
         if fragment.text_length() == 0 {
             return Ok(false);
         }
-        let before = self.capture();
+        let before = self.begin_record(Some(range.clone()));
         {
             let _batch = self.document.begin_edit();
             if preserve_fields {
@@ -1232,7 +1425,7 @@ impl RichTextEditor {
         self.prepare_edit()?;
         let _operation = self.enter(true)?;
         self.synchronize();
-        let before = self.capture();
+        let before = self.begin_record(Some(self.selection().range()));
         if self.selection().is_empty() {
             // Validate the format through the same model path as a nonempty selection.
             self.document
@@ -1278,7 +1471,7 @@ impl RichTextEditor {
         self.prepare_edit()?;
         let _operation = self.enter(true)?;
         self.synchronize();
-        let before = self.capture();
+        let before = self.begin_record(Some(self.selection().range()));
         self.document
             .apply_paragraph_format(self.selection().range(), format)?;
         self.checkpoint();
@@ -1301,6 +1494,9 @@ impl RichTextEditor {
             return Err(EditError::ReentrantEdit);
         }
         self.synchronize();
+        // A group takes a snapshot of the whole document, which a failure rolls back to and its
+        // undo unit is made from (S8: the code of the group can change the tree in any way).
+        let by_paragraph = self.document.edits_by_paragraph();
         let before = self.capture();
         let range_tracking = self.document.capture_range_tracking();
         let before_limit = self.max_length();
@@ -1356,7 +1552,13 @@ impl RichTextEditor {
         let notification_version = self.document.mutation_version();
         if result.is_ok() {
             self.checkpoint();
-            self.record(before, EditKind::Group);
+            self.record(
+                RecordStart::Snapshot {
+                    snapshot: before,
+                    by_paragraph,
+                },
+                EditKind::Group,
+            );
         } else {
             self.publish_changed();
         }
@@ -1376,7 +1578,7 @@ impl RichTextEditor {
             return Ok(false);
         };
         let history_generation = self.history_clear_generation.get();
-        if let Err(error) = self.restore(&unit.before) {
+        if let Err(error) = self.restore_unit(&unit, true) {
             if self.history_clear_generation.get() == history_generation {
                 self.history.borrow_mut().undo.push(unit);
             }
@@ -1397,7 +1599,7 @@ impl RichTextEditor {
             return Ok(false);
         };
         let history_generation = self.history_clear_generation.get();
-        if let Err(error) = self.restore(&unit.after) {
+        if let Err(error) = self.restore_unit(&unit, false) {
             if self.history_clear_generation.get() == history_generation {
                 self.history.borrow_mut().redo.push(unit);
             }
