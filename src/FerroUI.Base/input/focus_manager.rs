@@ -164,7 +164,7 @@ impl FocusManager {
         method: NavigationMethod,
         key_modifiers: KeyModifiers,
     ) -> bool {
-        if !Self::can_focus(element) {
+        if !Self::can_focus(element) || (method == NavigationMethod::Pointer && !element.allow_focus_on_interaction()) {
             return false;
         }
 
