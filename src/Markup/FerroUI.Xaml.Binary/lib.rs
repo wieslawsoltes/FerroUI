@@ -204,9 +204,7 @@ impl Batch {
         }
         // A resource name is often longer than its compressed spelling. Seed the
         // pool without trusting a count alone or reserving space used by records.
-        let estimated_text = strings.saturating_mul(32)
-            .min((bytes.len() - minimum_rows).saturating_mul(2))
-            .min(MAX_BLOCK_BYTES);
+        let estimated_text = strings.saturating_mul(32).min(bytes.len() - minimum_rows);
         let mut text: Vec<u8> = Vec::with_capacity(estimated_text);
         let mut ends = Vec::with_capacity(strings + 1);
         ends.push(0);
