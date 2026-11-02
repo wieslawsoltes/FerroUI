@@ -81,6 +81,12 @@ impl DrawingContextImpl {
             });
         }
 
+        // A custom effect (#455) has no factory in this backend yet: its
+        // content is drawn unchanged, in a layer without a filter.
+        if let Some(custom) = effect.as_custom_effect() {
+            custom.report_unhandled("Vello");
+        }
+
         None
     }
 

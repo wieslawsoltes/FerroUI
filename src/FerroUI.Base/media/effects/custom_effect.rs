@@ -1,0 +1,644 @@
+//! Custom effects (#455, not from upstream): effects defined outside the
+//! framework, set on `Visual.Effect` like the built-in blur and drop shadow
+//! (docs/porting/custom-effects.md).
+//!
+//! A custom effect is a value type that implements [`CustomEffect`]: its
+//! parameters, the padding it needs and how two of its values interpolate.
+//! [`ImmutableCustomEffect`] is the immutable, shared snapshot of such a
+//! value. It is an [`IEffect`] and an [`IImmutableEffect`], so it is what the
+//! compositor sends to the render thread: an `Arc` of plain values, never a
+//! live object. A mutable effect class (a class deriving from
+//! [`Effect`](super::Effect) with properties) freezes into one through
+//! [`CustomEffectClass`].
+//!
+//! What a backend draws for a custom effect is the business of that
+//! backend's factory for the effect (steps E2 and later of the plan). A
+//! backend without one draws the content unchanged and reports it once
+//! ([`ImmutableCustomEffect::report_unhandled`]).
+
+use super::{IEffect, IImmutableEffect};
+use crate::animation::animators::{ColorAnimator, DoubleAnimator};
+use crate::logging::{LogEventLevel, Logger};
+use crate::media::Color;
+use crate::{ObjectType, Point, Rect, Size, Thickness, Vector};
+use std::any::{Any, TypeId};
+use std::fmt;
+use std::rc::Rc;
+use std::sync::{Arc, Mutex};
+
+/// The value of a parameter of a custom effect.
+///
+/// The parameters are what parsing reads and writes (`tint(color=#0F9D8E,
+/// strength=0.55)`), what the default interpolation interpolates, and what a
+/// backend factory hands to its GPU program as uniforms.
+#[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
+pub enum EffectParameterValue {
+    /// `true` or `false`. Steps when interpolated.
+    Bool(bool),
+    /// An integer, also the value of an enumeration. Interpolated and
+    /// rounded.
+    Int(i32),
+    /// A number.
+    Float(f64),
+    /// A colour: `#AARRGGBB`, `#RRGGBB` or a colour name.
+    Color(Color),
+    /// A point: `x,y`.
+    Point(Point),
+    /// A vector: `x,y`.
+    Vector(Vector),
+    /// A size: `width,height`.
+    Size(Size),
+    /// A rectangle: `x,y,width,height`.
+    Rect(Rect),
+    /// A name or other text. Steps when interpolated.
+    Text(Arc<str>),
+}
+
+impl EffectParameterValue {
+    /// The value as a boolean.
+    pub fn as_bool(&self) -> Option<bool> {
+        match *self {
+            Self::Bool(value) => Some(value),
+            _ => None,
+        }
+    }
+
+    /// The value as an integer.
+    pub fn as_int(&self) -> Option<i32> {
+        match *self {
+            Self::Int(value) => Some(value),
+            _ => None,
+        }
+    }
+
+    /// The value as a number; an integer converts.
+    pub fn as_float(&self) -> Option<f64> {
+        match *self {
+            Self::Float(value) => Some(value),
+            Self::Int(value) => Some(f64::from(value)),
+            _ => None,
+        }
+    }
+
+    /// The value as a colour.
+    pub fn as_color(&self) -> Option<Color> {
+        match *self {
+            Self::Color(value) => Some(value),
+            _ => None,
+        }
+    }
+
+    /// The value as a point; a vector converts.
+    pub fn as_point(&self) -> Option<Point> {
+        match *self {
+            Self::Point(value) => Some(value),
+            Self::Vector(value) => Some(Point::new(value.x, value.y)),
+            _ => None,
+        }
+    }
+
+    /// The value as a vector; a point converts.
+    pub fn as_vector(&self) -> Option<Vector> {
+        match *self {
+            Self::Vector(value) => Some(value),
+            Self::Point(value) => Some(Vector::new(value.x, value.y)),
+            _ => None,
+        }
+    }
+
+    /// The value as a size.
+    pub fn as_size(&self) -> Option<Size> {
+        match *self {
+            Self::Size(value) => Some(value),
+            _ => None,
+        }
+    }
+
+    /// The value as a rectangle.
+    pub fn as_rect(&self) -> Option<Rect> {
+        match *self {
+            Self::Rect(value) => Some(value),
+            _ => None,
+        }
+    }
+
+    /// The value as text.
+    pub fn as_text(&self) -> Option<&str> {
+        match self {
+            Self::Text(value) => Some(&**value),
+            _ => None,
+        }
+    }
+
+    /// The value at `progress` (0 to 1) of the way from `self` to `to`, or
+    /// `None` when the two are of different kinds or the kind does not
+    /// interpolate (booleans and text step).
+    pub fn interpolate(&self, to: &Self, progress: f64) -> Option<Self> {
+        let lerp = |from: f64, to: f64| DoubleAnimator::interpolate_core(progress, &from, &to);
+        Some(match (self, to) {
+            (Self::Int(from), Self::Int(to)) => {
+                let value = lerp(f64::from(*from), f64::from(*to)).round();
+                Self::Int(value.clamp(f64::from(i32::MIN), f64::from(i32::MAX)) as i32)
+            }
+            (Self::Float(from), Self::Float(to)) => Self::Float(lerp(*from, *to)),
+            (Self::Color(from), Self::Color(to)) => Self::Color(ColorAnimator::interpolate_core(progress, from, to)),
+            (Self::Point(from), Self::Point(to)) => Self::Point(Point::new(lerp(from.x, to.x), lerp(from.y, to.y))),
+            (Self::Vector(from), Self::Vector(to)) => Self::Vector(Vector::new(lerp(from.x, to.x), lerp(from.y, to.y))),
+            (Self::Size(from), Self::Size(to)) => {
+                Self::Size(Size::new(lerp(from.width, to.width), lerp(from.height, to.height)))
+            }
+            (Self::Rect(from), Self::Rect(to)) => Self::Rect(Rect::new(
+                lerp(from.x, to.x),
+                lerp(from.y, to.y),
+                lerp(from.width, to.width),
+                lerp(from.height, to.height),
+            )),
+            _ => return None,
+        })
+    }
+
+    /// Parses `text` as a value of the same kind as `self` (the kind of a
+    /// parameter is that of its current value), in the invariant format
+    /// [`Display`](fmt::Display) writes. Composite values may be wrapped in
+    /// parentheses and separate their numbers with commas or spaces.
+    pub fn parse_like(&self, text: &str) -> Option<Self> {
+        let text = text.trim();
+        if text.is_empty() {
+            return None;
+        }
+        Some(match self {
+            Self::Bool(_) => {
+                if text.eq_ignore_ascii_case("true") {
+                    Self::Bool(true)
+                } else if text.eq_ignore_ascii_case("false") {
+                    Self::Bool(false)
+                } else {
+                    return None;
+                }
+            }
+            Self::Int(_) => Self::Int(text.parse().ok()?),
+            Self::Float(_) => Self::Float(text.parse().ok()?),
+            Self::Color(_) => Self::Color(Color::try_parse(text)?),
+            Self::Point(_) => {
+                let [x, y] = numbers::<2>(text)?;
+                Self::Point(Point::new(x, y))
+            }
+            Self::Vector(_) => {
+                let [x, y] = numbers::<2>(text)?;
+                Self::Vector(Vector::new(x, y))
+            }
+            Self::Size(_) => {
+                let [width, height] = numbers::<2>(text)?;
+                Self::Size(Size::new(width, height))
+            }
+            Self::Rect(_) => {
+                let [x, y, width, height] = numbers::<4>(text)?;
+                Self::Rect(Rect::new(x, y, width, height))
+            }
+            Self::Text(_) => Self::Text(unquote(text).into()),
+        })
+    }
+}
+
+/// Exactly `N` numbers separated by commas or white space, optionally
+/// inside one pair of parentheses.
+fn numbers<const N: usize>(text: &str) -> Option<[f64; N]> {
+    let text = text.trim();
+    let text = match text.strip_prefix('(').and_then(|inner| inner.strip_suffix(')')) {
+        Some(inner) => inner.trim(),
+        None => text,
+    };
+    let mut result = [0.0; N];
+    let mut count = 0;
+    for part in text.split(|c: char| c == ',' || c.is_whitespace()).filter(|part| !part.is_empty()) {
+        if count == N {
+            return None;
+        }
+        result[count] = part.parse().ok()?;
+        count += 1;
+    }
+    (count == N).then_some(result)
+}
+
+/// The text without one pair of matching outer quotes.
+fn unquote(text: &str) -> &str {
+    for quote in ['"', '\''] {
+        if let Some(inner) = text.strip_prefix(quote).and_then(|inner| inner.strip_suffix(quote)) {
+            return inner;
+        }
+    }
+    text
+}
+
+/// Whether text is written without quotes in an effect string.
+fn is_bare_text(text: &str) -> bool {
+    !text.is_empty() && text.chars().all(|c| c.is_alphanumeric() || c == '-' || c == '_' || c == '.')
+}
+
+/// The invariant format of effect strings, which
+/// [`parse_like`](EffectParameterValue::parse_like) reads back.
+impl fmt::Display for EffectParameterValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Bool(value) => write!(f, "{value}"),
+            Self::Int(value) => write!(f, "{value}"),
+            Self::Float(value) => write!(f, "{value}"),
+            Self::Color(value) => write!(f, "{value}"),
+            Self::Point(value) => write!(f, "{},{}", value.x, value.y),
+            Self::Vector(value) => write!(f, "{},{}", value.x, value.y),
+            Self::Size(value) => write!(f, "{},{}", value.width, value.height),
+            Self::Rect(value) => write!(f, "{},{},{},{}", value.x, value.y, value.width, value.height),
+            Self::Text(value) if is_bare_text(value) => f.write_str(value),
+            Self::Text(value) => write!(f, "\"{value}\""),
+        }
+    }
+}
+
+impl From<bool> for EffectParameterValue {
+    fn from(value: bool) -> Self {
+        Self::Bool(value)
+    }
+}
+
+impl From<i32> for EffectParameterValue {
+    fn from(value: i32) -> Self {
+        Self::Int(value)
+    }
+}
+
+impl From<f64> for EffectParameterValue {
+    fn from(value: f64) -> Self {
+        Self::Float(value)
+    }
+}
+
+impl From<Color> for EffectParameterValue {
+    fn from(value: Color) -> Self {
+        Self::Color(value)
+    }
+}
+
+impl From<Point> for EffectParameterValue {
+    fn from(value: Point) -> Self {
+        Self::Point(value)
+    }
+}
+
+impl From<Vector> for EffectParameterValue {
+    fn from(value: Vector) -> Self {
+        Self::Vector(value)
+    }
+}
+
+impl From<Size> for EffectParameterValue {
+    fn from(value: Size) -> Self {
+        Self::Size(value)
+    }
+}
+
+impl From<Rect> for EffectParameterValue {
+    fn from(value: Rect) -> Self {
+        Self::Rect(value)
+    }
+}
+
+impl From<&str> for EffectParameterValue {
+    fn from(value: &str) -> Self {
+        Self::Text(value.into())
+    }
+}
+
+impl From<String> for EffectParameterValue {
+    fn from(value: String) -> Self {
+        Self::Text(value.into())
+    }
+}
+
+impl From<Arc<str>> for EffectParameterValue {
+    fn from(value: Arc<str>) -> Self {
+        Self::Text(value)
+    }
+}
+
+/// An effect defined outside the framework: an immutable value of plain
+/// data (numbers, colours, points; never a live object), shared with the
+/// render thread as an [`ImmutableCustomEffect`].
+///
+/// ```ignore
+/// #[derive(Clone, Debug, Default, PartialEq)]
+/// struct Tint { color: Color, strength: f64 }
+///
+/// impl CustomEffect for Tint {
+///     const NAME: &'static str = "tint";
+///
+///     fn for_each_parameter(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+///         f("color", self.color.into());
+///         f("strength", self.strength.into());
+///     }
+///
+///     fn set_parameter(&mut self, name: &str, value: EffectParameterValue) -> bool {
+///         match name {
+///             "color" => value.as_color().map(|v| self.color = v).is_some(),
+///             "strength" => value.as_float().map(|v| self.strength = v).is_some(),
+///             _ => false,
+///         }
+///     }
+/// }
+///
+/// CustomEffectRegistry::register::<Tint>()?;
+/// border.set_effect(Some(ImmutableCustomEffect::new(Tint { color: Colors::TEAL, strength: 0.5 }).into()));
+/// let parsed = Effect::parse("tint(color=#0F9D8E, strength=0.55)")?;
+/// ```
+pub trait CustomEffect: Clone + PartialEq + Default + fmt::Debug + Send + Sync + 'static {
+    /// The name of the effect in effect strings: `tint` in
+    /// `tint(color=#0F9D8E, strength=0.55)`. Letters, digits, `-` and `_`;
+    /// matched ignoring case, `-` and `_`.
+    const NAME: &'static str;
+
+    /// Calls `f` with the name and the current value of each parameter, in
+    /// a fixed order. Parsing finds a parameter here by name (ignoring case,
+    /// `-` and `_`) and reads the text as a value of the kind of the current
+    /// one.
+    fn for_each_parameter(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue));
+
+    /// Sets the parameter `name` (as [`for_each_parameter`](Self::for_each_parameter)
+    /// spells it) to `value`. Returns `false` when there is no such parameter
+    /// or the value is of the wrong kind.
+    fn set_parameter(&mut self, name: &str, value: EffectParameterValue) -> bool;
+
+    /// How far the output of the effect extends beyond the bounds of its
+    /// content. None by default.
+    fn padding(&self) -> Thickness {
+        Thickness::default()
+    }
+
+    /// The value of this effect that leaves its content unchanged, if there
+    /// is one. A transition from no effect to this effect (or back)
+    /// interpolates from (or to) it; without one the effect switches at
+    /// half of the transition.
+    fn neutral() -> Option<Self> {
+        None
+    }
+
+    /// The value at `progress` (0 to 1, possibly beyond with an easing that
+    /// overshoots) of the way from `self` to `to`. By default each parameter
+    /// interpolates by its kind ([`EffectParameterValue::interpolate`]) and
+    /// the others switch at half.
+    fn interpolate(&self, to: &Self, progress: f64) -> Self {
+        let mut result = if progress >= 0.5 { to.clone() } else { self.clone() };
+        let mut targets = Vec::new();
+        CustomEffect::for_each_parameter(to, &mut |name, value| targets.push((name, value)));
+        let mut index = 0;
+        CustomEffect::for_each_parameter(self, &mut |name, from| {
+            if let Some((target_name, target)) = targets.get(index) {
+                if *target_name == name {
+                    if let Some(value) = from.interpolate(target, progress) {
+                        result.set_parameter(name, value);
+                    }
+                }
+            }
+            index += 1;
+        });
+        result
+    }
+}
+
+/// The type-erased form of a [`CustomEffect`], what an
+/// [`ImmutableCustomEffect`] holds.
+///
+/// Its members have names of their own, so that they never compete with
+/// those of [`CustomEffect`] in a method call.
+pub(crate) trait AnyCustomEffect: fmt::Debug + Send + Sync + 'static {
+    fn effect_name(&self) -> &'static str;
+    fn value_as_any(&self) -> &dyn Any;
+    fn value_equals(&self, other: &dyn AnyCustomEffect) -> bool;
+    fn value_padding(&self) -> Thickness;
+    fn visit_parameters(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue));
+    fn interpolate_value(&self, to: &dyn AnyCustomEffect, progress: f64) -> Option<Arc<dyn AnyCustomEffect>>;
+    fn neutral_value(&self) -> Option<Arc<dyn AnyCustomEffect>>;
+}
+
+impl<T: CustomEffect> AnyCustomEffect for T {
+    fn effect_name(&self) -> &'static str {
+        T::NAME
+    }
+
+    fn value_as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn value_equals(&self, other: &dyn AnyCustomEffect) -> bool {
+        other.value_as_any().downcast_ref::<T>().is_some_and(|other| self == other)
+    }
+
+    fn value_padding(&self) -> Thickness {
+        CustomEffect::padding(self)
+    }
+
+    fn visit_parameters(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+        CustomEffect::for_each_parameter(self, f)
+    }
+
+    fn interpolate_value(&self, to: &dyn AnyCustomEffect, progress: f64) -> Option<Arc<dyn AnyCustomEffect>> {
+        let to = to.value_as_any().downcast_ref::<T>()?;
+        Some(Arc::new(CustomEffect::interpolate(self, to, progress)))
+    }
+
+    fn neutral_value(&self) -> Option<Arc<dyn AnyCustomEffect>> {
+        T::neutral().map(|neutral| Arc::new(neutral) as Arc<dyn AnyCustomEffect>)
+    }
+}
+
+/// The immutable snapshot of a custom effect: what `Visual.Effect` holds
+/// for a custom effect value and what crosses to the render thread.
+///
+/// It is `Send + Sync` and compares by value. Cloning shares the value.
+#[derive(Clone, Debug)]
+pub struct ImmutableCustomEffect {
+    value: Arc<dyn AnyCustomEffect>,
+}
+
+const _: () = {
+    fn assert_send_sync<T: Send + Sync>() {}
+    let _ = assert_send_sync::<ImmutableCustomEffect>;
+};
+
+impl ImmutableCustomEffect {
+    /// The snapshot of `value`.
+    pub fn new<T: CustomEffect>(value: T) -> Self {
+        Self { value: Arc::new(value) }
+    }
+
+    /// The name of the effect ([`CustomEffect::NAME`]).
+    pub fn name(&self) -> &'static str {
+        self.value.effect_name()
+    }
+
+    /// The type of the value, by which a backend finds its factory for the
+    /// effect.
+    pub fn value_type_id(&self) -> TypeId {
+        self.value.value_as_any().type_id()
+    }
+
+    /// Whether the value is a `T`.
+    pub fn is<T: CustomEffect>(&self) -> bool {
+        self.value.value_as_any().is::<T>()
+    }
+
+    /// The value, when it is a `T`.
+    pub fn downcast_ref<T: CustomEffect>(&self) -> Option<&T> {
+        self.value.value_as_any().downcast_ref::<T>()
+    }
+
+    /// How far the output of the effect extends beyond the bounds of its
+    /// content ([`CustomEffect::padding`]): each side at least zero, a value
+    /// that is not finite read as zero.
+    pub fn padding(&self) -> Thickness {
+        let side = |value: f64| if value.is_finite() { value.max(0.0) } else { 0.0 };
+        let padding = self.value.value_padding();
+        Thickness::new(side(padding.left), side(padding.top), side(padding.right), side(padding.bottom))
+    }
+
+    /// Calls `f` with the name and value of each parameter
+    /// ([`CustomEffect::for_each_parameter`]), without allocating.
+    pub fn for_each_parameter(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+        self.value.visit_parameters(f)
+    }
+
+    /// The parameters with their values.
+    pub fn parameters(&self) -> Vec<(&'static str, EffectParameterValue)> {
+        let mut parameters = Vec::new();
+        self.for_each_parameter(&mut |name, value| parameters.push((name, value)));
+        parameters
+    }
+
+    /// The value of the parameter `name` (ignoring case, `-` and `_`).
+    pub fn parameter(&self, name: &str) -> Option<EffectParameterValue> {
+        let key = normalize_identifier(name);
+        let mut found = None;
+        self.for_each_parameter(&mut |candidate, value| {
+            if found.is_none() && normalize_identifier(candidate) == key {
+                found = Some(value);
+            }
+        });
+        found
+    }
+
+    /// The effect at `progress` of the way from `self` to `to`
+    /// ([`CustomEffect::interpolate`]); `None` when the two are effects of
+    /// different types.
+    pub fn interpolate(&self, to: &ImmutableCustomEffect, progress: f64) -> Option<ImmutableCustomEffect> {
+        self.value.interpolate_value(&*to.value, progress).map(|value| Self { value })
+    }
+
+    /// The value of this effect's type that leaves its content unchanged
+    /// ([`CustomEffect::neutral`]).
+    pub fn neutral(&self) -> Option<ImmutableCustomEffect> {
+        self.value.neutral_value().map(|value| Self { value })
+    }
+
+    /// Reports that `backend` has no factory for this effect, so that it
+    /// draws the content of the effect unchanged. The first report of each
+    /// backend and effect name is logged (a warning in the log area named
+    /// by `backend`) and returns `true`; later ones return `false`. Called by
+    /// the drawing contexts of the backends on the render thread.
+    pub fn report_unhandled(&self, backend: &'static str) -> bool {
+        static REPORTED: Mutex<Vec<(&'static str, &'static str)>> = Mutex::new(Vec::new());
+
+        let name = self.name();
+        {
+            let mut reported = REPORTED.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+            if reported.contains(&(backend, name)) {
+                return false;
+            }
+            reported.push((backend, name));
+        }
+        if let Some(logger) = Logger::try_get(LogEventLevel::Warning, backend) {
+            logger.log(
+                None,
+                &format!("The custom effect {name} has no factory in this backend; its content is drawn unchanged."),
+            );
+        }
+        true
+    }
+}
+
+impl PartialEq for ImmutableCustomEffect {
+    fn eq(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.value, &other.value) || self.value.value_equals(&*other.value)
+    }
+}
+
+impl From<ImmutableCustomEffect> for Rc<dyn IEffect> {
+    fn from(value: ImmutableCustomEffect) -> Self {
+        Rc::new(value)
+    }
+}
+
+/// The effect string: `name(parameter=value, ...)`, which
+/// [`Effect::parse`](super::Effect::parse) reads back when the effect is
+/// registered ([`CustomEffectRegistry`](super::CustomEffectRegistry)).
+impl fmt::Display for ImmutableCustomEffect {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}(", self.name())?;
+        let mut result = Ok(());
+        let mut first = true;
+        self.for_each_parameter(&mut |name, value| {
+            if result.is_ok() {
+                let separator = if first { "" } else { ", " };
+                first = false;
+                result = write!(f, "{separator}{name}={value}");
+            }
+        });
+        result?;
+        f.write_str(")")
+    }
+}
+
+impl IEffect for ImmutableCustomEffect {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_custom_effect(&self) -> Option<&ImmutableCustomEffect> {
+        Some(self)
+    }
+
+    fn as_immutable_effect(&self) -> Option<&dyn IImmutableEffect> {
+        Some(self)
+    }
+
+    fn into_immutable_effect(self: Rc<Self>) -> Option<Arc<dyn IImmutableEffect>> {
+        Some(Arc::new(ImmutableCustomEffect::clone(&self)))
+    }
+}
+
+impl IImmutableEffect for ImmutableCustomEffect {
+    /// Whether `other` is a custom effect of the same type with the same
+    /// values; a mutable effect class is compared by its snapshot.
+    fn equals(&self, other: Option<&dyn IEffect>) -> bool {
+        let Some(other) = other else { return false };
+        match other.as_custom_effect() {
+            Some(other) => self == other,
+            None => super::EffectExtensions::to_custom_effect(other).is_some_and(|other| *self == other),
+        }
+    }
+}
+
+/// A mutable effect class whose values freeze into a custom effect: a class
+/// deriving from [`Effect`](super::Effect) that constructs its base with
+/// [`Effect::construct_custom`](super::Effect::construct_custom). Its handle
+/// converts to `Rc<dyn IEffect>` as the built-in effect classes do; the
+/// compositor sends its snapshot to the render thread and takes a new one
+/// when the effect raises `invalidated`.
+pub trait CustomEffectClass: ObjectType {
+    /// The snapshot of the current values.
+    fn to_custom_effect(&self) -> ImmutableCustomEffect;
+}
+
+/// The identifier `name` reduced to lowercase letters and digits, as
+/// effect and parameter names are matched.
+pub(crate) fn normalize_identifier(name: &str) -> String {
+    name.chars().filter(|c| c.is_alphanumeric()).flat_map(char::to_lowercase).collect()
+}

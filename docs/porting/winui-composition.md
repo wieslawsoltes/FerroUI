@@ -485,7 +485,8 @@ material as uniforms. Two steps of WinUI's design are not taken yet: the nodes o
 not fused into one program per factory (a colour matrix followed by a blend is two layers, where
 Direct2D would make one pass), and the walk of the graph runs per paint on the CPU (it makes
 drawing commands, no pixels). Both are planned with the custom effects of `Visual.Effect` (the
-Effector architecture), which builds on the same runtime-effect layer.
+Effector architecture, [custom-effects.md](custom-effects.md), #455), which builds on the same
+runtime-effect layer.
 
 The lights reach the drawing context as plain data (`LightingParameters`: the ambient and
 distant lights summed into one constant light in double precision, the point and spot lights
