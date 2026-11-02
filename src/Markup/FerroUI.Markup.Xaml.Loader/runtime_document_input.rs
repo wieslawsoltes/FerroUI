@@ -10,14 +10,14 @@ use crate::{
     compiler_extensions::FerroXamlIlCompiler,
 };
 
-enum Encoding {
+enum DocumentContent {
     Xml(String),
     #[cfg(feature = "portable-xaml")]
     Portable(Vec<u8>),
 }
 
 pub(crate) struct DocumentInput {
-    encoding: Encoding,
+    content: DocumentContent,
     // Discovery may already have parsed this exact source. Consume that tree once
     // when resolving the root, which mutates type references for this load.
     syntax: Option<XamlDocument>,
@@ -26,7 +26,7 @@ pub(crate) struct DocumentInput {
 impl DocumentInput {
     pub(crate) fn xml(text: String) -> Self {
         Self {
-            encoding: Encoding::Xml(text),
+            content: DocumentContent::Xml(text),
             syntax: None,
         }
     }
@@ -48,7 +48,7 @@ impl DocumentInput {
                     ));
                 }
                 return Ok(Self {
-                    encoding: Encoding::Portable(prefix),
+                    content: DocumentContent::Portable(prefix),
                     syntax: None,
                 });
             }
@@ -66,10 +66,10 @@ impl DocumentInput {
     }
 
     pub(crate) fn bytes(&self) -> &[u8] {
-        match &self.encoding {
-            Encoding::Xml(text) => text.as_bytes(),
+        match &self.content {
+            DocumentContent::Xml(text) => text.as_bytes(),
             #[cfg(feature = "portable-xaml")]
-            Encoding::Portable(bytes) => bytes,
+            DocumentContent::Portable(bytes) => bytes,
         }
     }
 
@@ -77,7 +77,7 @@ impl DocumentInput {
     /// permit a large syntax image to bypass the group's bounded edit history.
     pub(crate) fn cache_weight(&self) -> usize {
         #[cfg(feature = "portable-xaml")]
-        if let Encoding::Portable(bytes) = &self.encoding {
+        if let DocumentContent::Portable(bytes) = &self.content {
             if bytes.get(5) == Some(&1) {
                 // Compression mode 1 starts with the validated expanded payload size.
                 return bytes
@@ -93,18 +93,18 @@ impl DocumentInput {
 
     #[cfg(all(feature = "hot-reload", debug_assertions))]
     pub(crate) fn source_text(&self) -> Option<&str> {
-        match &self.encoding {
-            Encoding::Xml(text) => Some(text),
+        match &self.content {
+            DocumentContent::Xml(text) => Some(text),
             #[cfg(feature = "portable-xaml")]
-            Encoding::Portable(_) => None,
+            DocumentContent::Portable(_) => None,
         }
     }
 
     pub(crate) fn into_text(self) -> io::Result<String> {
-        match self.encoding {
-            Encoding::Xml(text) => Ok(text),
+        match self.content {
+            DocumentContent::Xml(text) => Ok(text),
             #[cfg(feature = "portable-xaml")]
-            Encoding::Portable(_) => Err(io::Error::new(
+            DocumentContent::Portable(_) => Err(io::Error::new(
                 io::ErrorKind::InvalidData,
                 "this asset contains binary FXD syntax",
             )),
@@ -112,16 +112,16 @@ impl DocumentInput {
     }
 
     fn syntax(&self) -> XamlResult<XamlDocument> {
-        match &self.encoding {
-            Encoding::Xml(text) => FerroXamlIlCompiler::parse_source_syntax(text),
+        match &self.content {
+            DocumentContent::Xml(text) => FerroXamlIlCompiler::parse_source_syntax(text),
             #[cfg(feature = "portable-xaml")]
-            Encoding::Portable(bytes) => crate::binary_document::decode(bytes),
+            DocumentContent::Portable(bytes) => crate::binary_document::decode(bytes),
         }
     }
 
     pub(crate) fn include_sources(&mut self) -> XamlResult<Vec<String>> {
-        match &self.encoding {
-            Encoding::Xml(text) if !may_include(text) => return Ok(Vec::new()),
+        match &self.content {
+            DocumentContent::Xml(text) if !may_include(text) => return Ok(Vec::new()),
             _ => {}
         }
         let syntax = self.syntax()?;
