@@ -9,6 +9,8 @@
 //! document built by generated code fails exactly where and as the run-time
 //! loader fails.
 
+pub mod theme_resources;
+
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
 use std::collections::HashMap;
