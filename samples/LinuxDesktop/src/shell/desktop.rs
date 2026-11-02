@@ -2,6 +2,7 @@
 mod apps;
 mod gestures;
 mod mac_menus;
+mod material_home;
 mod motion;
 pub(super) use gestures::drawer_handle;
 
@@ -25,13 +26,15 @@ pub(super) fn background(
         return Element::Empty;
     }
     let composed = state.session.as_ref().is_some_and(|s| s.compositor().is_some());
+    let scene = state.scene;
+    let shortcuts = match appearance.layout() {
+        Layout::Taskbar => windows_icons(state),
+        Layout::MenuBarDock => Element::Empty,
+        Layout::BottomNavigation => material_home(state, clock),
+    };
     grid()
         .child(wallpaper::wallpaper(appearance, composed))
-        .child(match appearance.layout() {
-            Layout::Taskbar => windows_icons(state),
-            Layout::MenuBarDock => Element::Empty,
-            Layout::BottomNavigation => material_home(state, clock),
-        })
+        .child(grid().is_visible(move || !composed || scene.get() != Scene::Workspaces).child(shortcuts))
         .into()
 }
 
@@ -68,7 +71,8 @@ pub(super) fn surface(
         .is_some();
     let snapshot = state.snapshot;
     let panels_visible = memo(move |_| {
-        !hosted || !snapshot.with(|s| s.windows.iter().any(|w| w.active && w.fullscreen))
+        !hosted || (scene.get() != Scene::Workspaces
+            && !snapshot.with(|s| s.windows.iter().any(|w| w.active && w.fullscreen)))
     });
 
     let edge = |top: bool| {
@@ -83,7 +87,16 @@ pub(super) fn surface(
                 .child(panel(&state, clock, appearance, top))
         })
     };
-    // Keep the native client visual tree alive across appearance changes.
+    // Hide the presentation of the client plane in the overview. Its retained
+    // child visuals still receive buffers and supply live CompositionVisualSurfaces.
+    let clients = if hosted {
+        border()
+            .opacity(move || if scene.get() == Scene::Workspaces { 0.0 } else { 1.0 })
+            .child(clients)
+            .into()
+    } else {
+        clients
+    };
     grid()
         .is_hit_test_visible(move || scene.get() == Scene::Desktop)
         .child(dynamic(move || background(&bg, clock, bg.appearance.get())))
@@ -446,6 +459,7 @@ fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                         .text(move || time_text(clock.get())),
                 ),
         )
+        .child(material_home::hotseat(state))
         .child(
             command(state, Scene::Applications, "Search installed applications")
                 .horizontal_alignment(H::Stretch)
@@ -537,7 +551,12 @@ fn navigation(state: &Rc<Shell>) -> Element {
                                 .node_ref(state.desktop_focus)
                                 .on_loaded(focus_home(state)),
                         )
-                        .child(apps::strip(state, Layout::BottomNavigation))
+                        .child(row(4.0)
+                            .is_visible({
+                                let snapshot = state.snapshot;
+                                move || snapshot.with(material_home::has_visible_client)
+                            })
+                            .child(apps::strip(state, Layout::BottomNavigation)))
                         .child(button(
                             Scene::Workspaces,
                             "Recent windows",

@@ -23,7 +23,7 @@ impl DesktopApplication {
     /// selection, the working directory and field codes. No shell is involved.
     pub fn launch(&self) -> io::Result<()> {
         #[cfg(target_os = "linux")]
-        return gio::launch(&self.id, None);
+        return gio::launch(&self.id, None, None);
         #[cfg(not(target_os = "linux"))]
         Err(io::Error::new(
             io::ErrorKind::Unsupported,
@@ -31,8 +31,12 @@ impl DesktopApplication {
         ))
     }
     #[cfg(target_os = "linux")]
+    pub fn launch_action(&self, action: &str, display: Option<&std::ffi::OsStr>) -> io::Result<()> {
+        gio::launch(&self.id, display, Some(action))
+    }
+    #[cfg(target_os = "linux")]
     pub fn launch_on_display(&self, display: &std::ffi::OsStr) -> io::Result<()> {
-        gio::launch(&self.id, Some(display))
+        gio::launch(&self.id, Some(display), None)
     }
 }
 

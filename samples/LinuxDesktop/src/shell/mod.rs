@@ -181,12 +181,21 @@ impl Shell {
     }
 
     fn launch(self: &Rc<Self>, application: &DesktopApplication) {
+        self.launch_entry(application, None);
+    }
+
+    fn launch_entry(self: &Rc<Self>, application: &DesktopApplication, action: Option<String>) {
         if self.launching.get_untracked() {
             return;
         }
         self.launching.set(true);
         self.status.set(format!("Opening {}…", application.name));
-        let index = self.catalog.index_of(&application.id);
+        // Desktop actions are fire-and-forget. Only regular successful launches enter Recent.
+        let index = if action.is_none() {
+            self.catalog.index_of(&application.id)
+        } else {
+            None
+        };
         let application = application.clone();
         let display = self
             .session
@@ -196,9 +205,12 @@ impl Shell {
         let weak = Rc::downgrade(self);
         let _task = tasks::spawn_local(async move {
             let result = tasks::run(move || {
-                Ok(match display {
-                    Some(name) => application.launch_on_display(&name)?,
-                    None => application.launch()?,
+                Ok(match (action, display) {
+                    (Some(action), display) => {
+                        application.launch_action(&action, display.as_deref())?
+                    }
+                    (None, Some(name)) => application.launch_on_display(&name)?,
+                    (None, None) => application.launch()?,
                 })
             })
             .await;

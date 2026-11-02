@@ -70,9 +70,26 @@ fn xdg_precedence_visibility_and_launch() {
         assert!(app.icon.contains("utilities-terminal"));
         assert_eq!(app.category, "Productivity");
         assert_eq!(catalog.groups()["Productivity"], [0]);
+        let shortcuts: Vec<_> = app
+            .actions
+            .iter()
+            .map(|a| (a.id.as_str(), a.label.as_str()))
+            .collect();
+        assert_eq!(shortcuts, [("Compose", "New note")]);
+        assert_eq!(
+            app.launch_action("Removed", None).unwrap_err().kind(),
+            std::io::ErrorKind::NotFound
+        );
+        app.launch_action("Compose", Some(std::ffi::OsStr::new("ferro-shortcut-test")))
+            .unwrap();
         app.launch().unwrap();
         for _ in 0..200 {
-            if dir.join("launch marker").is_file() {
+            if dir.join("launch marker").is_file()
+                && fs::read_to_string(dir.join("shortcut marker"))
+                    .as_deref()
+                    .ok()
+                    == Some("ferro-shortcut-test\nwayland\n\n")
+            {
                 return;
             }
             std::thread::sleep(Duration::from_millis(10));
@@ -88,9 +105,16 @@ fn xdg_precedence_visibility_and_launch() {
     fs::create_dir_all(&system).unwrap();
     let generic = "[Desktop Entry]\nType=Application\nName=System Utility\nExec=/bin/true\n";
     fs::write(system.join("ferroutil.desktop"), generic).unwrap();
+    use std::os::unix::fs::PermissionsExt;
+    let recorder = dir.join("record-action");
+    fs::write(&recorder, r#"#!/bin/sh
+printf '%s\n' "$WAYLAND_DISPLAY" "$XDG_SESSION_TYPE" "$DISPLAY" > "$FERRO_DESKTOP_TEST_CATALOG/shortcut marker"
+"#).unwrap();
+    fs::set_permissions(&recorder, fs::Permissions::from_mode(0o755)).unwrap();
     let user_app = format!(
-        "[Desktop Entry]\nType=Application\nName=User Utility\nCategories=WordProcessor;Office;Utility;\nComment=Catalog fixture\nIcon=utilities-terminal\nExec=/usr/bin/touch \"{}\" %U\nOnlyShowIn=FerroUI;\n",
+        "[Desktop Entry]\nType=Application\nName=User Utility\nCategories=WordProcessor;Office;Utility;\nComment=Catalog fixture\nIcon=utilities-terminal\nExec=/usr/bin/touch \"{}\" %U\nOnlyShowIn=FerroUI;\nActions=Compose;\n\n[Desktop Action Compose]\nName=New note\nExec=\"{}\"\n",
         dir.join("launch marker").display(),
+        recorder.display(),
     );
     fs::write(user.join("ferroutil.desktop"), user_app).unwrap();
     fs::write(system.join("masked.desktop"), generic).unwrap();
@@ -120,6 +144,7 @@ fn xdg_precedence_visibility_and_launch() {
         .env("XDG_DATA_HOME", dir.join("user"))
         .env("XDG_DATA_DIRS", dir.join("system"))
         .env("XDG_CURRENT_DESKTOP", "FerroUI")
+        .env("DISPLAY", ":999")
         .status();
     fs::remove_dir_all(dir).unwrap();
     assert!(status.unwrap().success());

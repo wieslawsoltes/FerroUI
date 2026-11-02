@@ -2,9 +2,9 @@
 //! entries. Load the system ABI with the same loader as FerroUI's X11 and
 //! Wayland backends, keeping GTK development packages optional.
 
-use super::DesktopApplication;
+use super::catalog::{DesktopAction, DesktopApplication};
 use ferroui_base::platform::native_library::{NativeLibrary, NativeLibraryError};
-use std::ffi::{c_char, c_int, c_void, CStr, CString};
+use std::ffi::{CStr, CString, c_char, c_int, c_void};
 use std::{io, ptr, sync::OnceLock};
 
 #[repr(C)]
@@ -36,6 +36,10 @@ ferroui_base::native_functions! {
         gio::g_desktop_app_info_get_categories: unsafe extern "C" fn(*mut c_void) -> *const c_char;
         object::g_type_check_instance_is_a: unsafe extern "C" fn(*mut c_void, usize) -> c_int;
         gio::g_desktop_app_info_new: unsafe extern "C" fn(*const c_char) -> *mut c_void;
+        gio::g_desktop_app_info_list_actions: unsafe extern "C" fn(*mut c_void) -> *const *const c_char;
+        gio::g_desktop_app_info_get_action_name: unsafe extern "C" fn(*mut c_void, *const c_char) -> *mut c_char;
+        gio::g_desktop_app_info_launch_action: unsafe extern "C" fn(*mut c_void, *const c_char, *mut c_void);
+        glib::g_strv_contains: unsafe extern "C" fn(*const *const c_char, *const c_char) -> c_int;
         gio::g_app_launch_context_new: unsafe extern "C" fn() -> *mut c_void;
         gio::g_app_launch_context_setenv: unsafe extern "C" fn(*mut c_void, *const c_char, *const c_char);
         gio::g_app_launch_context_unsetenv: unsafe extern "C" fn(*mut c_void, *const c_char);
@@ -105,6 +109,17 @@ pub(super) fn applications() -> io::Result<Vec<DesktopApplication>> {
             if (api.g_type_check_instance_is_a)(info, (api.g_desktop_app_info_get_type)()) != 0 {
                 let categories = text((api.g_desktop_app_info_get_categories)(info));
                 app.category = super::catalog::main_category(&categories);
+                // GIO lends a null-terminated action vector and transfers each localized label.
+                let mut actions = (api.g_desktop_app_info_list_actions)(info);
+                while !(*actions).is_null() {
+                    let label = (api.g_desktop_app_info_get_action_name)(info, *actions);
+                    app.actions.push(DesktopAction {
+                        id: text(*actions),
+                        label: text(label),
+                    });
+                    (api.g_free)(label.cast());
+                    actions = actions.add(1);
+                }
             }
             result.push(app);
         }
@@ -113,11 +128,16 @@ pub(super) fn applications() -> io::Result<Vec<DesktopApplication>> {
     Ok(result)
 }
 
-pub(super) fn launch(id: &str, display: Option<&std::ffi::OsStr>) -> io::Result<()> {
+pub(super) fn launch(
+    id: &str,
+    display: Option<&std::ffi::OsStr>,
+    action: Option<&str>,
+) -> io::Result<()> {
     use std::os::unix::ffi::OsStrExt;
     let display = display.map(|d| CString::new(d.as_bytes())).transpose()?;
     let api = gio()?;
     let id = CString::new(id)?;
+    let action = action.map(CString::new).transpose()?;
     // SAFETY: the ID is a terminated string. new returns a reference or
     // NULL. Empty file list and default launch context are allowed. A
     // failure transfers a GError to the caller.
@@ -135,6 +155,19 @@ pub(super) fn launch(id: &str, display: Option<&std::ffi::OsStr>) -> io::Result<
                 io::ErrorKind::NotFound,
                 "Application is no longer available in this session",
             ));
+        }
+        // Desktop files can be replaced while the shell is running. GIO only
+        // accepts action IDs advertised by this exact GDesktopAppInfo.
+        if let Some(action) = &action {
+            if (api.g_strv_contains)((api.g_desktop_app_info_list_actions)(info), action.as_ptr())
+                == 0
+            {
+                (api.g_object_unref)(info);
+                return Err(io::Error::new(
+                    io::ErrorKind::NotFound,
+                    "Application shortcut is no longer available",
+                ));
+            }
         }
         let mut error = ptr::null_mut();
         let context = if let Some(display) = display {
@@ -164,12 +197,18 @@ pub(super) fn launch(id: &str, display: Option<&std::ffi::OsStr>) -> io::Result<
         } else {
             ptr::null_mut()
         };
-        let launched = (api.g_app_info_launch)(info, ptr::null_mut(), context, &mut error);
+        let launched = if let Some(action) = action {
+            (api.g_desktop_app_info_launch_action)(info, action.as_ptr(), context);
+            // launch_action accepts the request without returning a process or status.
+            true
+        } else {
+            (api.g_app_info_launch)(info, ptr::null_mut(), context, &mut error) != 0
+        };
         if !context.is_null() {
             (api.g_object_unref)(context);
         }
         (api.g_object_unref)(info);
-        if launched != 0 {
+        if launched {
             return Ok(());
         }
         let message = if error.is_null() {

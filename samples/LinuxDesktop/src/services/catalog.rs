@@ -3,6 +3,12 @@
 use std::collections::{BTreeMap, HashMap};
 
 #[derive(Clone, Debug)]
+pub struct DesktopAction {
+    pub id: String,
+    pub label: String,
+}
+
+#[derive(Clone, Debug)]
 pub struct DesktopApplication {
     /// The XDG desktop file ID, including its `.desktop` suffix.
     pub id: String,
@@ -10,6 +16,7 @@ pub struct DesktopApplication {
     pub description: String,
     /// Serialized GIcon, usually a single theme icon name.
     pub icon: String,
+    pub actions: Vec<DesktopAction>,
     pub(super) category: &'static str,
     search_text: String,
 }
@@ -23,6 +30,7 @@ impl DesktopApplication {
             description,
             icon,
             category: "Other",
+            actions: Vec::new(),
             search_text,
         }
     }
