@@ -388,6 +388,48 @@ mod portable_tests {
     }
 
     #[test]
+    fn exact_archive_restore_uses_the_compiled_class_only_outside_override_scopes() {
+        use ferroui_markup_xaml::{CompiledArchiveRoot, FerroXamlLoader};
+        use std::{cell::Cell, sync::OnceLock};
+        thread_local! { static BUILDS: Cell<u32> = const { Cell::new(0) }; }
+        let _scope = Dispatcher::unit_test_scope();
+        ferroui_markup_xaml::register_types();
+        const URI: &str = "ferres://archive-dispatch/Root.xaml";
+        let docs = [("Root.xaml", r#"<Styles xmlns="https://github.com/ferroui"/>"#)];
+        static ORIGINAL: OnceLock<Vec<u8>> = OnceLock::new();
+        let original = ORIGINAL.get_or_init(|| binary_document::pack::compile_documents(&docs).unwrap());
+        let mut configuration = RuntimeXamlLoaderConfiguration::new();
+        configuration.local_assembly = Some(&ferroui_markup_xaml::ASSEMBLY);
+        let descriptor = CompiledArchiveRoot {
+            bytes: original, uri: URI, assembly: &ferroui_markup_xaml::ASSEMBLY,
+            class: Styles::TYPE, use_compiled_bindings_by_default: false,
+            create_source_info: configuration.create_source_info(),
+            load: |_, _| {
+                BUILDS.with(|count| count.set(count.get() + 1));
+                Ok(Some(Rc::new(Styles::new())))
+            },
+        };
+        let container = Styles::new();
+        container.add(Rc::<dyn IStyle>::from(Styles::new()));
+        let target = StyleReloadTarget::contribution(&container, 0, URI.into(), configuration)
+            .unwrap().with_compiled_archive(descriptor);
+        BUILDS.with(|count| count.set(0));
+        target.replace_packed(&original.clone()).unwrap();
+        BUILDS.with(|count| assert_eq!(count.get(), 1));
+        let guard = FerroXamlLoader::scoped_populate_override(Styles::TYPE, Rc::new(|_, _| Ok(())));
+        target.replace_packed(original).unwrap();
+        drop(guard);
+        #[cfg(all(feature = "binary-resources", debug_assertions))]
+        Rc::new(ferroui_markup_xaml::xaml_il::runtime::compiled::binary_resources::reload::Snapshot::default())
+            .run(|| target.replace_packed(original).unwrap());
+        let reencoded = binary_document::pack::compile_solid_documents(&docs).unwrap();
+        target.replace_packed(&reencoded).unwrap();
+        BUILDS.with(|count| assert_eq!(count.get(), 1));
+        target.replace_packed(original).unwrap();
+        BUILDS.with(|count| assert_eq!(count.get(), 2));
+    }
+
+    #[test]
     fn packed_style_reloads_transitive_includes_and_rejects_an_invalid_unrelated_member() {
         let _scope = Dispatcher::unit_test_scope();
         ferroui_markup_xaml::register_types();

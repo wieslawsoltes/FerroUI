@@ -64,3 +64,8 @@ ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
 group = "controls"
+
+[[example]]
+name = "packed_activation"
+path = "examples/packed_activation.rs"
+required-features = ["packed-theme"]
