@@ -2,6 +2,35 @@
 
 The native Rust backend uses XamlX to resolve types, overloads, namespaces and includes at build time. The Rust backend used to emit a separate function for each deferred alias or brush, even when only its key, color and source position differed. The WinUI baseline at `df8b92d9` contains 14,421,918 bytes of generated Rust.
 
+## Shipping WinUI with startup parity
+
+Use `ferroui-themes-winui/solid-theme` for an installed full theme with a reloadable FXP revision. The build resolves XAML types, overloads, includes, property getters and deferred builders. The constructor executes that typed program with FXB resource operands. The application can also install independently supplied FXP files. An exact revision can dispatch to the installed program after checking the bytes, URI, assembly, compiler settings and active overrides. A changed revision is resolved through XamlX. The `portable-solid-theme` feature offers a separate, interpreter-only configuration with a smaller WinUI contribution.
+
+The original no-LTO consumer comparison used all 169 WinUI documents, open-ended resource lookup, Linux x86-64, and a warm filesystem cache. Fast lanes rotated in 31 fresh processes each. The two slow lanes used seven launches each. The source-only framework comparison below is a different experiment.
+
+| No-LTO consumer and startup path | Stripped executable | Median spawn to Button |
+| --- | ---: | ---: |
+| Native AOT on the original main baseline `df8b92d9` | 71,124,168 B | 19.83 ms |
+| Prior PR native AOT | 67,059,216 B | 19.68 ms |
+| Prior PR solid FXP interpreted at startup | 59,498,592 B | 2,086.97 ms |
+| Precompiled solid theme with external FXP loading linked | 65,720,728 B | 13.94 ms |
+| Same executable, matching FXP read from disk | 65,720,728 B | 13.76 ms |
+| Same executable, edited full FXP read from disk | 65,720,728 B | 2,019.82 ms |
+
+The editable precompiled executable retains 10,118,051 bytes attributed to WinUI, including its typed code, FXB blocks and canonical FXP. The isolated release theme rustc invocation took 70.07 s and the probe compilation and link took 2.17 s. The comparison reused the original release dependency graph with updated framework and compiler components. The independently edited file changed compact font size from 14 to 17, and the runtime returned the edited value. [All launches, linked sections, build inputs and hashes](benchmarks/precompiled-theme-full-release-linux-x86_64.json)
+
+Full WinUI generates 5,939,605 bytes of native Rust or 5,325,703 bytes with FXB, against 14,421,918 bytes on the original main baseline. The compiler shares 186 property getter pairs across 1,272 template-binding assignments. A Button-rooted build references 37 pairs and 137 FXB blocks. Its realized Button template responded to live padding changes and the DatePicker style was absent. The shipping comparison uses the full dictionary. [Generated outputs, trim checks and template verification](benchmarks/compiled-theme-binding-rows-linux-x86_64.json)
+
+To check startup on another machine, build both checkouts with the same optimization settings. The comparison exits with a failure if the candidate's median time through the verified Button lookup exceeds the reference median. `--compact-app` applies size optimization and ThinLTO to the whole downstream executable. Both programs use normal panic unwinding.
+
+```sh
+python3 scripts/themes/bench/measure.py --source ../FerroUI-main \
+    --compact-app --work-dir /tmp/main-winui --rebuilds 0
+python3 scripts/themes/bench/measure.py --solid --compact-app \
+    --work-dir /tmp/solid-winui --rebuilds 0 --launches 31 \
+    --startup-baseline /tmp/main-winui/stripped-probe
+```
+
 ## What the 59.50 MB WinUI executable contains
 
 The stripped Linux x86-64 consumer at `9c484e44` embeds a 245,385-byte FXP containing the complete WinUI theme. Its LLD map accounts for the following allocated input sections. Code instantiated in another crate is charged to the crate that supplied the object file.
