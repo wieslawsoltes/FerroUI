@@ -1,81 +1,83 @@
-//! A value that arrives later, on the main thread: what stands for the
+//! A value that arrives later, on the main thread: what stood for the
 //! task completion sources of the reference, whose tasks the callers
-//! await. The completion blocks of UIKit set the value; the future that
-//! waits for it is polled on the dispatcher of the main thread.
+//! await. Deprecated: the platform uses the one-shot channel of
+//! `ferroui_system::task::oneshot`, which these types wrap with the
+//! behaviour they had (a value that never comes leaves the future pending).
 
+use ferroui_system::task::oneshot;
 use std::cell::RefCell;
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
-use std::task::{Context, Poll, Waker};
-
-struct State<T> {
-    result: Option<T>,
-    waker: Option<Waker>,
-}
+use std::task::{Context, Poll};
 
 /// The side that sets the value.
+#[deprecated(
+    since = "0.5.0",
+    note = "use `ferroui_system::task::oneshot::channel`; a dropped sender cancels its receiver"
+)]
 pub struct Completion<T> {
-    state: Rc<RefCell<State<T>>>,
+    sender: Rc<RefCell<Option<oneshot::Sender<T>>>>,
 }
 
 /// The side that waits for the value.
+#[deprecated(since = "0.5.0", note = "use `ferroui_system::task::oneshot::Receiver`")]
 pub struct CompletionFuture<T> {
-    state: Rc<RefCell<State<T>>>,
+    receiver: oneshot::Receiver<T>,
 }
 
+#[allow(deprecated)]
 impl<T> Clone for Completion<T> {
     fn clone(&self) -> Self {
-        Self { state: self.state.clone() }
+        Self { sender: self.sender.clone() }
     }
 }
 
+#[allow(deprecated)]
 impl<T> Completion<T> {
     /// Creates a completion and the future of its value.
     pub fn new() -> (Completion<T>, CompletionFuture<T>) {
-        let state = Rc::new(RefCell::new(State { result: None, waker: None }));
-        (Completion { state: state.clone() }, CompletionFuture { state })
+        let (sender, receiver) = oneshot::channel();
+        (Completion { sender: Rc::new(RefCell::new(Some(sender))) }, CompletionFuture { receiver })
     }
 
     /// Sets the value, unless one was set; tells whether it was set now.
     pub fn try_set_result(&self, result: T) -> bool {
-        let waker = {
-            let mut state = self.state.borrow_mut();
-            if state.result.is_some() {
-                return false;
+        // Taken before it sends: sending may poll the task that waits right away.
+        let sender = self.sender.borrow_mut().take();
+        match sender {
+            Some(sender) => {
+                // A future that is gone does not want the value.
+                let _ = sender.send(result);
+                true
             }
-            state.result = Some(result);
-            state.waker.take()
-        };
-        if let Some(waker) = waker {
-            waker.wake();
+            None => false,
         }
-        true
     }
 }
 
+#[allow(deprecated)]
 impl<T> Future for CompletionFuture<T> {
     type Output = T;
 
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<T> {
-        let mut state = self.state.borrow_mut();
-        match state.result.take() {
-            Some(result) => Poll::Ready(result),
-            None => {
-                state.waker = Some(cx.waker().clone());
-                Poll::Pending
-            }
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<T> {
+        match Pin::new(&mut self.receiver).poll(cx) {
+            Poll::Ready(Ok(result)) => Poll::Ready(result),
+            // Every completion was dropped without a value, or the value was taken: the future
+            // stays pending, as the completion it wraps did.
+            Poll::Ready(Err(_)) | Poll::Pending => Poll::Pending,
         }
     }
 }
 
 #[cfg(test)]
+#[allow(deprecated)]
 mod tests {
     // Not from the reference.
     use super::*;
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::Arc;
-    use std::task::Wake;
+    use std::task::{Wake, Waker};
 
     struct CountingWaker(AtomicUsize);
 

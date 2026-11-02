@@ -71,7 +71,7 @@ impl ManagedStorageProvider {
     }
 
     async fn show_as_window(&self, window: Ref<Window>, model: Rc<ManagedFileChooserViewModel>) -> Vec<String> {
-        let tcs = TaskCompletionSource::<bool>::new();
+        let (tcs, closed) = TaskCompletionSource::<bool>::new();
         window.set_title(model.title());
         {
             let model = model.clone();
@@ -131,7 +131,8 @@ impl ManagedStorageProvider {
             None => WindowBase::show(&window),
         }
 
-        tcs.task().await;
+        // `tcs` keeps the channel open while it waits: the receiver is never canceled.
+        let _ = closed.await;
 
         let result = result.borrow().clone();
         result
@@ -143,7 +144,7 @@ impl ManagedStorageProvider {
         root: Ref<ContentControl>,
         model: Rc<ManagedFileChooserViewModel>,
     ) -> io::Result<Vec<String>> {
-        let tcs = TaskCompletionSource::<bool>::new();
+        let (tcs, closed) = TaskCompletionSource::<bool>::new();
         let root_panel = parent
             .find_descendant_of_type::<Panel>(false)
             .ok_or_else(|| io::Error::other("The top level has no panel to host the managed file chooser."))?;
@@ -230,7 +231,8 @@ impl ManagedStorageProvider {
         }
 
         popup.open();
-        tcs.task().await;
+        // `tcs` keeps the channel open while it waits: the receiver is never canceled.
+        let _ = closed.await;
 
         root_panel.children().remove(popup.clone());
         if let Some(token) = token.take() {
@@ -242,7 +244,7 @@ impl ManagedStorageProvider {
     }
 
     async fn show_overwrite_prompt(filename: &str, root: &Ref<ContentControl>) -> bool {
-        let tcs = TaskCompletionSource::<bool>::new();
+        let (tcs, answered) = TaskCompletionSource::<bool>::new();
         let prompt = ManagedFileChooserOverwritePrompt::new();
         prompt.set_file_name(path::get_file_name(filename).to_string());
         {
@@ -263,7 +265,8 @@ impl ManagedStorageProvider {
         flyout.set_placement(PlacementMode::Center);
         FlyoutBase::show_at(&flyout, root);
 
-        let prompt_result = tcs.task().await;
+        // `tcs` keeps the channel open while it waits: the receiver is never canceled.
+        let prompt_result = answered.await.unwrap_or(false);
         FlyoutBase::hide(&flyout);
 
         prompt_result
