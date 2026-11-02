@@ -8,7 +8,7 @@ use crate::RichTextBlock;
 use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::media::{
     BoxShadows, Brushes, Color, Colors, DrawingContext, FlowDirection, Geometry, GlyphRun, IBrush,
-    IDrawingContextCore, IEffect, IPen, RenderOptions, TextDecorations, TextOptions,
+    IDrawingContextCore, IEffect, IPen, RenderOptions, TextOptions,
 };
 use ferroui_base::platform::IGeometryImpl;
 use ferroui_base::rendering::scene_graph::ICustomDrawOperation;
@@ -255,7 +255,12 @@ fn decorated(text: &str) -> Ref<RichTextBlock> {
     let run = Run::with_text(Some(text));
     run.set_foreground(Some(Brushes::green()));
     run.set_background(Some(Brushes::aqua()));
-    run.set_text_decorations(Some(TextDecorations::underline()));
+    // The test font reports no underline thickness, so the underline states its own.
+    let underline = ferroui_base::media::TextDecoration::new();
+    underline.set_location(ferroui_base::media::TextDecorationLocation::Underline);
+    underline.set_stroke_thickness(1.0);
+    underline.set_stroke_thickness_unit(ferroui_base::media::TextDecorationUnit::Pixel);
+    run.set_text_decorations(Some(ferroui_base::media::TextDecorationCollection::from_items([underline])));
     paragraph.add_child(run);
     view.blocks().add(paragraph);
     view.set_selection_highlight_color(Some(Brushes::red()));
@@ -428,13 +433,31 @@ fn a_selection_across_paragraphs_highlights_the_paragraph_marks_and_the_empty_pa
     assert_eq!(marks(last.as_slice()), 0, "the selection ends inside the last paragraph");
 
     // The selected glyphs: those of the text rectangles; the marks have no glyphs.
-    let spans: Vec<(f64, f64)> = highlight
-        .iter()
-        .filter(|rect| !close(rect.width, 4.0))
-        .map(|rect| (rect.x, rect.right()))
-        .collect();
-    assert_eq!(spans.len(), 2);
-    assert_selected_text(&drawn, &spans, Colors::GREEN);
+    // Each line is checked against its own selected span.
+    let text_spans = |rects: &[Rect]| -> Vec<(f64, f64)> {
+        rects
+            .iter()
+            .filter(|rect| !close(rect.width, 4.0))
+            .map(|rect| (rect.x, rect.right()))
+            .collect()
+    };
+    for index in [0, 2] {
+        let bounds = metrics[index].bounds;
+        let spans = text_spans(&on_line(index));
+        assert_eq!(spans.len(), 1, "one selected span on line {index}");
+        let on_this_line: Vec<Drawn> = drawn
+            .iter()
+            .filter(|drawn| match drawn {
+                Drawn::Glyphs(painted) | Drawn::Line(painted) => {
+                    let middle = painted.extent.y + painted.extent.height / 2.0;
+                    middle >= bounds.y - EPSILON && middle <= bounds.bottom() + EPSILON
+                }
+                _ => false,
+            })
+            .cloned()
+            .collect();
+        assert_selected_text(&on_this_line, &spans, Colors::GREEN);
+    }
 }
 
 #[test]
