@@ -43,6 +43,21 @@ The dark WinUI personalization flyout below samples the actual GTK and Qt surfac
 
 Start and Windows system flyouts rise 14 DIPs over 155 ms. Spotlight and macOS system panels fade in over 105 ms. Material sheets rise 28 DIPs over 200 ms. These are finite compositor key frames. Animating `Translation.Y` preserves the elevation in `Translation.Z`. The input target becomes available as soon as the sheet opens, and closing it immediately restores the underlying target. The shell skips entry motion in Windows High Contrast and when the active theme or platform disables animations.
 
+### Wallpaper reuse on the composed output
+
+The private compositor caches the static wallpaper in an output-scale FerroUI bitmap layer. Client damage and acrylic sampling can reuse that layer. The cache follows the output scale and extent. Delegated Wayland sessions already put the wallpaper on a separate surface.
+
+Two alternating pairs of local Graphite development builds ran `tests/wayland-session.sh --ferro` with `FERRO_TEST_BENCHMARK=1` on the same 1280 × 800 headless Mesa software Vulkan output. Each run opened and closed Start ten times after two warm-up cycles, with independent GTK and Qt clients visible.
+
+| Median command-to-captured-frame latency | Direct vector drawing | Cached wallpaper |
+| --- | ---: | ---: |
+| Open, first run | 329.1 ms | 231.0 ms |
+| Open, second run | 348.4 ms | 235.5 ms |
+| Close, first run | 164.6 ms | 163.5 ms |
+| Close, second run | 168.8 ms | 134.2 ms |
+
+Across 20 opens per configuration, the median fell from 339.7 ms to 234.5 ms. The measurement includes process startup, D-Bus, shell motion, composition and the screenshot observer. All four runs recorded zero shell CPU ticks during the five-second idle sample. The same 1,050 × 500 wallpaper crop matched pixel-for-pixel in both pairs.
+
 ## Live window previews
 
 Open the window overview with **Super+Tab** in the composed session. Task View, Mission Control and Recents show each visible client from the same retained visual tree that presents it on the desktop. A toplevel has a container positioned at its xdg window geometry. Its surface, synchronized children and popups retain their local positions and stacking order. Popups can extend beyond that geometry on the desktop.

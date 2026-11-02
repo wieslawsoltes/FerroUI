@@ -20,8 +20,9 @@ pub(super) fn background(
     clock: Signal<OffsetDateTime>,
     appearance: Appearance,
 ) -> Element {
+    let composed = state.session.as_ref().is_some_and(|s| s.compositor().is_some());
     grid()
-        .child(wallpaper::wallpaper(appearance))
+        .child(wallpaper::wallpaper(appearance, composed))
         .child(match appearance.layout() {
             Layout::Taskbar => windows_icons(state),
             Layout::MenuBarDock => Element::Empty,

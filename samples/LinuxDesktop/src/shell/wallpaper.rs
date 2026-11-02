@@ -168,7 +168,7 @@ fn garden(look: Appearance) -> El<Canvas> {
         ))
 }
 
-pub(super) fn wallpaper(look: Appearance) -> Element {
+pub(super) fn wallpaper(look: Appearance, composed: bool) -> Element {
     if look
         .winui()
         .is_some_and(|s| s.mode == ColorMode::HighContrast)
@@ -186,6 +186,15 @@ pub(super) fn wallpaper(look: Appearance) -> Element {
         Wallpaper::Garden => garden(look).into_element(),
     };
     viewbox()
+        .with(move |host| {
+            // The private compositor repaints clients and live backdrops over
+            // this visual. Reuse one raster layer at the current output scale.
+            // Delegated Wayland wallpapers already live on a separate surface.
+            if composed {
+                use ferroui_base::media::{BitmapCache, CacheMode};
+                host.set_cache_mode(BitmapCache::new().upcast::<CacheMode>());
+            }
+        })
         .stretch(Stretch::UniformToFill)
         .clip_to_bounds(true)
         .is_hit_test_visible(false)
