@@ -455,7 +455,8 @@ impl ParentStackBuffer {
                         if is_resource_node(value) {
                             // The object in a concrete Ref<T> is fixed. An interface adapter
                             // or weak element handle in the same box can change its target.
-                            stable &= ValueTypes::class_of(ValueType::of_value(&**value)).is_some();
+                            let handle = ValueType::of_value(&**value);
+                            stable &= ValueTypes::class_of(handle).and_then(TypeInfo::handle) == Some(handle.id());
                             self.nodes.push(value.clone());
                         } else {
                             stable = false;
