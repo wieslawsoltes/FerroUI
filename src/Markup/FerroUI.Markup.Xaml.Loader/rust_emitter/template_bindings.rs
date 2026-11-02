@@ -1,5 +1,5 @@
 //! Consecutive TemplateBinding assignments on one receiver use a slice of property pairs.
-//! Every pair is a separate constant so an unused template cannot retain another pair.
+//! Every pair is a separate static so an unused template cannot retain another pair.
 use std::collections::HashMap;
 use std::fmt::Write;
 
@@ -127,7 +127,7 @@ impl TemplateBindings {
         for (id, (src, dst)) in self.pairs.iter().enumerate() {
             writeln!(
                 source,
-                "    const P{id}: rt::TemplateBindingProperties = (g{src}, g{dst});"
+                "    static P{id}: rt::TemplateBindingProperties = (g{src}, g{dst});"
             )
             .unwrap();
         }
@@ -138,7 +138,7 @@ impl TemplateBindings {
             )
             .unwrap();
             for (pair, line, column) in rows {
-                writeln!(source, "        (P{pair}, {line}, {column}),").unwrap();
+                writeln!(source, "        (&P{pair}, {line}, {column}),").unwrap();
             }
             source.push_str("    ];\n");
         }
@@ -184,7 +184,7 @@ mod tests {
         for line in [2, 3] {
             let row = source
                 .lines()
-                .position(|s| s.contains(&format!("(P0, {line}, 5),")))
+                .position(|s| s.contains(&format!("(&P0, {line}, 5),")))
                 .unwrap()
                 + 1;
             assert!(map.contains(&format!(r#""file_lines": [{row}, {row}], "document": "foo.xaml", "line": {line}, "position": 5"#)));

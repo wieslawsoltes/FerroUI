@@ -1410,1165 +1410,1165 @@ mod __build_controls_simplecontrols_xaml_bindings {
     fn g193() -> &'static __t::FerroProperty { rt::property(__t::TabControl::tab_strip_placement_property()) }
     fn g194() -> &'static __t::FerroProperty { rt::property(__t::DockPanel::dock_property()) }
     fn g195() -> &'static __t::FerroProperty { rt::property(__t::Visual::clip_to_bounds_property()) }
-    const P0: rt::TemplateBindingProperties = (g0, g1);
-    const P1: rt::TemplateBindingProperties = (g2, g3);
-    const P2: rt::TemplateBindingProperties = (g4, g5);
-    const P3: rt::TemplateBindingProperties = (g6, g7);
-    const P4: rt::TemplateBindingProperties = (g8, g9);
-    const P5: rt::TemplateBindingProperties = (g10, g11);
-    const P6: rt::TemplateBindingProperties = (g12, g13);
-    const P7: rt::TemplateBindingProperties = (g14, g15);
-    const P8: rt::TemplateBindingProperties = (g16, g17);
-    const P9: rt::TemplateBindingProperties = (g6, g18);
-    const P10: rt::TemplateBindingProperties = (g8, g19);
-    const P11: rt::TemplateBindingProperties = (g10, g20);
-    const P12: rt::TemplateBindingProperties = (g21, g21);
-    const P13: rt::TemplateBindingProperties = (g22, g22);
-    const P14: rt::TemplateBindingProperties = (g23, g24);
-    const P15: rt::TemplateBindingProperties = (g16, g25);
-    const P16: rt::TemplateBindingProperties = (g14, g26);
-    const P17: rt::TemplateBindingProperties = (g0, g27);
-    const P18: rt::TemplateBindingProperties = (g2, g28);
-    const P19: rt::TemplateBindingProperties = (g4, g29);
-    const P20: rt::TemplateBindingProperties = (g30, g28);
-    const P21: rt::TemplateBindingProperties = (g31, g29);
-    const P22: rt::TemplateBindingProperties = (g32, g33);
-    const P23: rt::TemplateBindingProperties = (g30, g2);
-    const P24: rt::TemplateBindingProperties = (g31, g4);
-    const P25: rt::TemplateBindingProperties = (g0, g0);
-    const P26: rt::TemplateBindingProperties = (g16, g16);
-    const P27: rt::TemplateBindingProperties = (g34, g34);
-    const P28: rt::TemplateBindingProperties = (g35, g35);
-    const P29: rt::TemplateBindingProperties = (g36, g36);
-    const P30: rt::TemplateBindingProperties = (g6, g6);
-    const P31: rt::TemplateBindingProperties = (g8, g8);
-    const P32: rt::TemplateBindingProperties = (g10, g10);
-    const P33: rt::TemplateBindingProperties = (g37, g38);
-    const P34: rt::TemplateBindingProperties = (g14, g14);
-    const P35: rt::TemplateBindingProperties = (g39, g40);
-    const P36: rt::TemplateBindingProperties = (g41, g41);
-    const P37: rt::TemplateBindingProperties = (g42, g43);
-    const P38: rt::TemplateBindingProperties = (g44, g45);
-    const P39: rt::TemplateBindingProperties = (g46, g47);
-    const P40: rt::TemplateBindingProperties = (g48, g49);
-    const P41: rt::TemplateBindingProperties = (g50, g51);
-    const P42: rt::TemplateBindingProperties = (g0, g52);
-    const P43: rt::TemplateBindingProperties = (g53, g53);
-    const P44: rt::TemplateBindingProperties = (g54, g54);
-    const P45: rt::TemplateBindingProperties = (g55, g55);
-    const P46: rt::TemplateBindingProperties = (g56, g56);
-    const P47: rt::TemplateBindingProperties = (g57, g57);
-    const P48: rt::TemplateBindingProperties = (g28, g28);
-    const P49: rt::TemplateBindingProperties = (g29, g29);
-    const P50: rt::TemplateBindingProperties = (g58, g3);
-    const P51: rt::TemplateBindingProperties = (g59, g5);
-    const P52: rt::TemplateBindingProperties = (g60, g13);
-    const P53: rt::TemplateBindingProperties = (g61, g62);
-    const P54: rt::TemplateBindingProperties = (g16, g63);
-    const P55: rt::TemplateBindingProperties = (g64, g65);
-    const P56: rt::TemplateBindingProperties = (g66, g67);
-    const P57: rt::TemplateBindingProperties = (g68, g69);
-    const P58: rt::TemplateBindingProperties = (g70, g71);
-    const P59: rt::TemplateBindingProperties = (g72, g43);
-    const P60: rt::TemplateBindingProperties = (g73, g45);
-    const P61: rt::TemplateBindingProperties = (g74, g75);
-    const P62: rt::TemplateBindingProperties = (g76, g77);
-    const P63: rt::TemplateBindingProperties = (g78, g79);
-    const P64: rt::TemplateBindingProperties = (g80, g81);
-    const P65: rt::TemplateBindingProperties = (g82, g83);
-    const P66: rt::TemplateBindingProperties = (g84, g85);
-    const P67: rt::TemplateBindingProperties = (g86, g87);
-    const P68: rt::TemplateBindingProperties = (g88, g89);
-    const P69: rt::TemplateBindingProperties = (g90, g91);
-    const P70: rt::TemplateBindingProperties = (g92, g93);
-    const P71: rt::TemplateBindingProperties = (g94, g67);
-    const P72: rt::TemplateBindingProperties = (g95, g69);
-    const P73: rt::TemplateBindingProperties = (g96, g97);
-    const P74: rt::TemplateBindingProperties = (g98, g99);
-    const P75: rt::TemplateBindingProperties = (g100, g101);
-    const P76: rt::TemplateBindingProperties = (g102, g43);
-    const P77: rt::TemplateBindingProperties = (g103, g45);
-    const P78: rt::TemplateBindingProperties = (g104, g105);
-    const P79: rt::TemplateBindingProperties = (g106, g107);
-    const P80: rt::TemplateBindingProperties = (g108, g109);
-    const P81: rt::TemplateBindingProperties = (g110, g3);
-    const P82: rt::TemplateBindingProperties = (g111, g5);
-    const P83: rt::TemplateBindingProperties = (g112, g13);
-    const P84: rt::TemplateBindingProperties = (g113, g49);
-    const P85: rt::TemplateBindingProperties = (g114, g115);
-    const P86: rt::TemplateBindingProperties = (g116, g37);
-    const P87: rt::TemplateBindingProperties = (g117, g118);
-    const P88: rt::TemplateBindingProperties = (g119, g13);
-    const P89: rt::TemplateBindingProperties = (g120, g13);
-    const P90: rt::TemplateBindingProperties = (g67, g28);
-    const P91: rt::TemplateBindingProperties = (g69, g29);
-    const P92: rt::TemplateBindingProperties = (g45, g33);
-    const P93: rt::TemplateBindingProperties = (g43, g121);
-    const P94: rt::TemplateBindingProperties = (g101, g122);
-    const P95: rt::TemplateBindingProperties = (g123, g124);
-    const P96: rt::TemplateBindingProperties = (g125, g126);
-    const P97: rt::TemplateBindingProperties = (g127, g128);
-    const P98: rt::TemplateBindingProperties = (g129, g130);
-    const P99: rt::TemplateBindingProperties = (g131, g132);
-    const P100: rt::TemplateBindingProperties = (g133, g134);
-    const P101: rt::TemplateBindingProperties = (g135, g136);
-    const P102: rt::TemplateBindingProperties = (g137, g138);
-    const P103: rt::TemplateBindingProperties = (g139, g140);
-    const P104: rt::TemplateBindingProperties = (g141, g142);
-    const P105: rt::TemplateBindingProperties = (g143, g144);
-    const P106: rt::TemplateBindingProperties = (g145, g146);
-    const P107: rt::TemplateBindingProperties = (g147, g148);
-    const P108: rt::TemplateBindingProperties = (g149, g150);
-    const P109: rt::TemplateBindingProperties = (g101, g151);
-    const P110: rt::TemplateBindingProperties = (g123, g152);
-    const P111: rt::TemplateBindingProperties = (g153, g153);
-    const P112: rt::TemplateBindingProperties = (g154, g155);
-    const P113: rt::TemplateBindingProperties = (g156, g157);
-    const P114: rt::TemplateBindingProperties = (g158, g159);
-    const P115: rt::TemplateBindingProperties = (g160, g161);
-    const P116: rt::TemplateBindingProperties = (g36, g162);
-    const P117: rt::TemplateBindingProperties = (g57, g163);
-    const P118: rt::TemplateBindingProperties = (g56, g164);
-    const P119: rt::TemplateBindingProperties = (g165, g166);
-    const P120: rt::TemplateBindingProperties = (g167, g168);
-    const P121: rt::TemplateBindingProperties = (g169, g169);
-    const P122: rt::TemplateBindingProperties = (g28, g3);
-    const P123: rt::TemplateBindingProperties = (g170, g118);
-    const P124: rt::TemplateBindingProperties = (g171, g171);
-    const P125: rt::TemplateBindingProperties = (g106, g172);
-    const P126: rt::TemplateBindingProperties = (g61, g173);
-    const P127: rt::TemplateBindingProperties = (g104, g174);
-    const P128: rt::TemplateBindingProperties = (g12, g12);
-    const P129: rt::TemplateBindingProperties = (g175, g176);
-    const P130: rt::TemplateBindingProperties = (g106, g106);
-    const P131: rt::TemplateBindingProperties = (g61, g61);
-    const P132: rt::TemplateBindingProperties = (g104, g104);
-    const P133: rt::TemplateBindingProperties = (g2, g2);
-    const P134: rt::TemplateBindingProperties = (g4, g4);
-    const P135: rt::TemplateBindingProperties = (g177, g121);
-    const P136: rt::TemplateBindingProperties = (g16, g33);
-    const P137: rt::TemplateBindingProperties = (g178, g121);
-    const P138: rt::TemplateBindingProperties = (g179, g179);
-    const P139: rt::TemplateBindingProperties = (g180, g181);
-    const P140: rt::TemplateBindingProperties = (g182, g183);
-    const P141: rt::TemplateBindingProperties = (g184, g185);
-    const P142: rt::TemplateBindingProperties = (g184, g21);
-    const P143: rt::TemplateBindingProperties = (g184, g22);
-    const P144: rt::TemplateBindingProperties = (g186, g13);
-    const P145: rt::TemplateBindingProperties = (g187, g7);
-    const P146: rt::TemplateBindingProperties = (g188, g13);
-    const P147: rt::TemplateBindingProperties = (g189, g7);
-    const P148: rt::TemplateBindingProperties = (g190, g3);
-    const P149: rt::TemplateBindingProperties = (g191, g5);
-    const P150: rt::TemplateBindingProperties = (g192, g13);
-    const P151: rt::TemplateBindingProperties = (g193, g194);
-    const P152: rt::TemplateBindingProperties = (g195, g195);
+    static P0: rt::TemplateBindingProperties = (g0, g1);
+    static P1: rt::TemplateBindingProperties = (g2, g3);
+    static P2: rt::TemplateBindingProperties = (g4, g5);
+    static P3: rt::TemplateBindingProperties = (g6, g7);
+    static P4: rt::TemplateBindingProperties = (g8, g9);
+    static P5: rt::TemplateBindingProperties = (g10, g11);
+    static P6: rt::TemplateBindingProperties = (g12, g13);
+    static P7: rt::TemplateBindingProperties = (g14, g15);
+    static P8: rt::TemplateBindingProperties = (g16, g17);
+    static P9: rt::TemplateBindingProperties = (g6, g18);
+    static P10: rt::TemplateBindingProperties = (g8, g19);
+    static P11: rt::TemplateBindingProperties = (g10, g20);
+    static P12: rt::TemplateBindingProperties = (g21, g21);
+    static P13: rt::TemplateBindingProperties = (g22, g22);
+    static P14: rt::TemplateBindingProperties = (g23, g24);
+    static P15: rt::TemplateBindingProperties = (g16, g25);
+    static P16: rt::TemplateBindingProperties = (g14, g26);
+    static P17: rt::TemplateBindingProperties = (g0, g27);
+    static P18: rt::TemplateBindingProperties = (g2, g28);
+    static P19: rt::TemplateBindingProperties = (g4, g29);
+    static P20: rt::TemplateBindingProperties = (g30, g28);
+    static P21: rt::TemplateBindingProperties = (g31, g29);
+    static P22: rt::TemplateBindingProperties = (g32, g33);
+    static P23: rt::TemplateBindingProperties = (g30, g2);
+    static P24: rt::TemplateBindingProperties = (g31, g4);
+    static P25: rt::TemplateBindingProperties = (g0, g0);
+    static P26: rt::TemplateBindingProperties = (g16, g16);
+    static P27: rt::TemplateBindingProperties = (g34, g34);
+    static P28: rt::TemplateBindingProperties = (g35, g35);
+    static P29: rt::TemplateBindingProperties = (g36, g36);
+    static P30: rt::TemplateBindingProperties = (g6, g6);
+    static P31: rt::TemplateBindingProperties = (g8, g8);
+    static P32: rt::TemplateBindingProperties = (g10, g10);
+    static P33: rt::TemplateBindingProperties = (g37, g38);
+    static P34: rt::TemplateBindingProperties = (g14, g14);
+    static P35: rt::TemplateBindingProperties = (g39, g40);
+    static P36: rt::TemplateBindingProperties = (g41, g41);
+    static P37: rt::TemplateBindingProperties = (g42, g43);
+    static P38: rt::TemplateBindingProperties = (g44, g45);
+    static P39: rt::TemplateBindingProperties = (g46, g47);
+    static P40: rt::TemplateBindingProperties = (g48, g49);
+    static P41: rt::TemplateBindingProperties = (g50, g51);
+    static P42: rt::TemplateBindingProperties = (g0, g52);
+    static P43: rt::TemplateBindingProperties = (g53, g53);
+    static P44: rt::TemplateBindingProperties = (g54, g54);
+    static P45: rt::TemplateBindingProperties = (g55, g55);
+    static P46: rt::TemplateBindingProperties = (g56, g56);
+    static P47: rt::TemplateBindingProperties = (g57, g57);
+    static P48: rt::TemplateBindingProperties = (g28, g28);
+    static P49: rt::TemplateBindingProperties = (g29, g29);
+    static P50: rt::TemplateBindingProperties = (g58, g3);
+    static P51: rt::TemplateBindingProperties = (g59, g5);
+    static P52: rt::TemplateBindingProperties = (g60, g13);
+    static P53: rt::TemplateBindingProperties = (g61, g62);
+    static P54: rt::TemplateBindingProperties = (g16, g63);
+    static P55: rt::TemplateBindingProperties = (g64, g65);
+    static P56: rt::TemplateBindingProperties = (g66, g67);
+    static P57: rt::TemplateBindingProperties = (g68, g69);
+    static P58: rt::TemplateBindingProperties = (g70, g71);
+    static P59: rt::TemplateBindingProperties = (g72, g43);
+    static P60: rt::TemplateBindingProperties = (g73, g45);
+    static P61: rt::TemplateBindingProperties = (g74, g75);
+    static P62: rt::TemplateBindingProperties = (g76, g77);
+    static P63: rt::TemplateBindingProperties = (g78, g79);
+    static P64: rt::TemplateBindingProperties = (g80, g81);
+    static P65: rt::TemplateBindingProperties = (g82, g83);
+    static P66: rt::TemplateBindingProperties = (g84, g85);
+    static P67: rt::TemplateBindingProperties = (g86, g87);
+    static P68: rt::TemplateBindingProperties = (g88, g89);
+    static P69: rt::TemplateBindingProperties = (g90, g91);
+    static P70: rt::TemplateBindingProperties = (g92, g93);
+    static P71: rt::TemplateBindingProperties = (g94, g67);
+    static P72: rt::TemplateBindingProperties = (g95, g69);
+    static P73: rt::TemplateBindingProperties = (g96, g97);
+    static P74: rt::TemplateBindingProperties = (g98, g99);
+    static P75: rt::TemplateBindingProperties = (g100, g101);
+    static P76: rt::TemplateBindingProperties = (g102, g43);
+    static P77: rt::TemplateBindingProperties = (g103, g45);
+    static P78: rt::TemplateBindingProperties = (g104, g105);
+    static P79: rt::TemplateBindingProperties = (g106, g107);
+    static P80: rt::TemplateBindingProperties = (g108, g109);
+    static P81: rt::TemplateBindingProperties = (g110, g3);
+    static P82: rt::TemplateBindingProperties = (g111, g5);
+    static P83: rt::TemplateBindingProperties = (g112, g13);
+    static P84: rt::TemplateBindingProperties = (g113, g49);
+    static P85: rt::TemplateBindingProperties = (g114, g115);
+    static P86: rt::TemplateBindingProperties = (g116, g37);
+    static P87: rt::TemplateBindingProperties = (g117, g118);
+    static P88: rt::TemplateBindingProperties = (g119, g13);
+    static P89: rt::TemplateBindingProperties = (g120, g13);
+    static P90: rt::TemplateBindingProperties = (g67, g28);
+    static P91: rt::TemplateBindingProperties = (g69, g29);
+    static P92: rt::TemplateBindingProperties = (g45, g33);
+    static P93: rt::TemplateBindingProperties = (g43, g121);
+    static P94: rt::TemplateBindingProperties = (g101, g122);
+    static P95: rt::TemplateBindingProperties = (g123, g124);
+    static P96: rt::TemplateBindingProperties = (g125, g126);
+    static P97: rt::TemplateBindingProperties = (g127, g128);
+    static P98: rt::TemplateBindingProperties = (g129, g130);
+    static P99: rt::TemplateBindingProperties = (g131, g132);
+    static P100: rt::TemplateBindingProperties = (g133, g134);
+    static P101: rt::TemplateBindingProperties = (g135, g136);
+    static P102: rt::TemplateBindingProperties = (g137, g138);
+    static P103: rt::TemplateBindingProperties = (g139, g140);
+    static P104: rt::TemplateBindingProperties = (g141, g142);
+    static P105: rt::TemplateBindingProperties = (g143, g144);
+    static P106: rt::TemplateBindingProperties = (g145, g146);
+    static P107: rt::TemplateBindingProperties = (g147, g148);
+    static P108: rt::TemplateBindingProperties = (g149, g150);
+    static P109: rt::TemplateBindingProperties = (g101, g151);
+    static P110: rt::TemplateBindingProperties = (g123, g152);
+    static P111: rt::TemplateBindingProperties = (g153, g153);
+    static P112: rt::TemplateBindingProperties = (g154, g155);
+    static P113: rt::TemplateBindingProperties = (g156, g157);
+    static P114: rt::TemplateBindingProperties = (g158, g159);
+    static P115: rt::TemplateBindingProperties = (g160, g161);
+    static P116: rt::TemplateBindingProperties = (g36, g162);
+    static P117: rt::TemplateBindingProperties = (g57, g163);
+    static P118: rt::TemplateBindingProperties = (g56, g164);
+    static P119: rt::TemplateBindingProperties = (g165, g166);
+    static P120: rt::TemplateBindingProperties = (g167, g168);
+    static P121: rt::TemplateBindingProperties = (g169, g169);
+    static P122: rt::TemplateBindingProperties = (g28, g3);
+    static P123: rt::TemplateBindingProperties = (g170, g118);
+    static P124: rt::TemplateBindingProperties = (g171, g171);
+    static P125: rt::TemplateBindingProperties = (g106, g172);
+    static P126: rt::TemplateBindingProperties = (g61, g173);
+    static P127: rt::TemplateBindingProperties = (g104, g174);
+    static P128: rt::TemplateBindingProperties = (g12, g12);
+    static P129: rt::TemplateBindingProperties = (g175, g176);
+    static P130: rt::TemplateBindingProperties = (g106, g106);
+    static P131: rt::TemplateBindingProperties = (g61, g61);
+    static P132: rt::TemplateBindingProperties = (g104, g104);
+    static P133: rt::TemplateBindingProperties = (g2, g2);
+    static P134: rt::TemplateBindingProperties = (g4, g4);
+    static P135: rt::TemplateBindingProperties = (g177, g121);
+    static P136: rt::TemplateBindingProperties = (g16, g33);
+    static P137: rt::TemplateBindingProperties = (g178, g121);
+    static P138: rt::TemplateBindingProperties = (g179, g179);
+    static P139: rt::TemplateBindingProperties = (g180, g181);
+    static P140: rt::TemplateBindingProperties = (g182, g183);
+    static P141: rt::TemplateBindingProperties = (g184, g185);
+    static P142: rt::TemplateBindingProperties = (g184, g21);
+    static P143: rt::TemplateBindingProperties = (g184, g22);
+    static P144: rt::TemplateBindingProperties = (g186, g13);
+    static P145: rt::TemplateBindingProperties = (g187, g7);
+    static P146: rt::TemplateBindingProperties = (g188, g13);
+    static P147: rt::TemplateBindingProperties = (g189, g7);
+    static P148: rt::TemplateBindingProperties = (g190, g3);
+    static P149: rt::TemplateBindingProperties = (g191, g5);
+    static P150: rt::TemplateBindingProperties = (g192, g13);
+    static P151: rt::TemplateBindingProperties = (g193, g194);
+    static P152: rt::TemplateBindingProperties = (g195, g195);
     pub(super) const R0: &[rt::TemplateBindingRow] = &[
-        (P0, 16, 27),
-        (P1, 17, 27),
-        (P2, 18, 27),
-        (P3, 19, 27),
-        (P4, 20, 27),
-        (P5, 21, 27),
+        (&P0, 16, 27),
+        (&P1, 17, 27),
+        (&P2, 18, 27),
+        (&P3, 19, 27),
+        (&P4, 20, 27),
+        (&P5, 21, 27),
     ];
     pub(super) const R1: &[rt::TemplateBindingRow] = &[
-        (P6, 23, 27),
-        (P7, 24, 27),
-        (P8, 25, 27),
+        (&P6, 23, 27),
+        (&P7, 24, 27),
+        (&P8, 25, 27),
     ];
     pub(super) const R2: &[rt::TemplateBindingRow] = &[
-        (P0, 16, 27),
-        (P1, 17, 27),
-        (P2, 18, 27),
-        (P3, 19, 27),
-        (P4, 20, 27),
-        (P5, 21, 27),
+        (&P0, 16, 27),
+        (&P1, 17, 27),
+        (&P2, 18, 27),
+        (&P3, 19, 27),
+        (&P4, 20, 27),
+        (&P5, 21, 27),
     ];
     pub(super) const R3: &[rt::TemplateBindingRow] = &[
-        (P6, 23, 27),
-        (P7, 24, 27),
-        (P8, 25, 27),
+        (&P6, 23, 27),
+        (&P7, 24, 27),
+        (&P8, 25, 27),
     ];
     pub(super) const R4: &[rt::TemplateBindingRow] = &[
-        (P0, 16, 27),
-        (P1, 17, 27),
-        (P2, 18, 27),
-        (P3, 19, 27),
-        (P4, 20, 27),
-        (P5, 21, 27),
+        (&P0, 16, 27),
+        (&P1, 17, 27),
+        (&P2, 18, 27),
+        (&P3, 19, 27),
+        (&P4, 20, 27),
+        (&P5, 21, 27),
     ];
     pub(super) const R5: &[rt::TemplateBindingRow] = &[
-        (P6, 23, 27),
-        (P7, 24, 27),
-        (P8, 25, 27),
+        (&P6, 23, 27),
+        (&P7, 24, 27),
+        (&P8, 25, 27),
     ];
     pub(super) const R6: &[rt::TemplateBindingRow] = &[
-        (P9, 17, 19),
-        (P10, 18, 19),
-        (P11, 19, 19),
+        (&P9, 17, 19),
+        (&P10, 18, 19),
+        (&P11, 19, 19),
     ];
     pub(super) const R7: &[rt::TemplateBindingRow] = &[
-        (P0, 30, 33),
-        (P1, 31, 33),
-        (P2, 32, 33),
+        (&P0, 30, 33),
+        (&P1, 31, 33),
+        (&P2, 32, 33),
     ];
     pub(super) const R8: &[rt::TemplateBindingRow] = &[
-        (P12, 12, 20),
-        (P13, 13, 20),
+        (&P12, 12, 20),
+        (&P13, 13, 20),
     ];
     pub(super) const R9: &[rt::TemplateBindingRow] = &[
-        (P14, 14, 19),
-        (P15, 15, 19),
+        (&P14, 14, 19),
+        (&P15, 15, 19),
     ];
     pub(super) const R10: &[rt::TemplateBindingRow] = &[
-        (P9, 20, 19),
-        (P10, 21, 19),
-        (P11, 22, 19),
-        (P16, 23, 19),
+        (&P9, 20, 19),
+        (&P10, 21, 19),
+        (&P11, 22, 19),
+        (&P16, 23, 19),
     ];
     pub(super) const R11: &[rt::TemplateBindingRow] = &[
-        (P17, 45, 29),
-        (P18, 46, 29),
-        (P19, 47, 29),
+        (&P17, 45, 29),
+        (&P18, 46, 29),
+        (&P19, 47, 29),
     ];
     pub(super) const R12: &[rt::TemplateBindingRow] = &[
-        (P0, 13, 27),
-        (P3, 14, 27),
-        (P4, 15, 27),
-        (P5, 16, 27),
+        (&P0, 13, 27),
+        (&P3, 14, 27),
+        (&P4, 15, 27),
+        (&P5, 16, 27),
     ];
     pub(super) const R13: &[rt::TemplateBindingRow] = &[
-        (P6, 18, 27),
-        (P7, 19, 27),
+        (&P6, 18, 27),
+        (&P7, 19, 27),
     ];
     pub(super) const R14: &[rt::TemplateBindingRow] = &[
-        (P0, 10, 27),
-        (P1, 11, 27),
-        (P2, 12, 27),
-        (P3, 13, 27),
-        (P4, 14, 27),
-        (P5, 15, 27),
+        (&P0, 10, 27),
+        (&P1, 11, 27),
+        (&P2, 12, 27),
+        (&P3, 13, 27),
+        (&P4, 14, 27),
+        (&P5, 15, 27),
     ];
     pub(super) const R15: &[rt::TemplateBindingRow] = &[
-        (P6, 17, 27),
-        (P7, 18, 27),
+        (&P6, 17, 27),
+        (&P7, 18, 27),
     ];
     pub(super) const R16: &[rt::TemplateBindingRow] = &[
-        (P0, 13, 27),
-        (P1, 14, 27),
-        (P2, 15, 27),
-        (P3, 16, 27),
-        (P4, 17, 27),
-        (P5, 18, 27),
+        (&P0, 13, 27),
+        (&P1, 14, 27),
+        (&P2, 15, 27),
+        (&P3, 16, 27),
+        (&P4, 17, 27),
+        (&P5, 18, 27),
     ];
     pub(super) const R17: &[rt::TemplateBindingRow] = &[
-        (P6, 20, 27),
-        (P7, 21, 27),
+        (&P6, 20, 27),
+        (&P7, 21, 27),
     ];
     pub(super) const R18: &[rt::TemplateBindingRow] = &[
-        (P9, 19, 17),
-        (P10, 20, 17),
-        (P11, 21, 17),
-        (P16, 22, 17),
+        (&P9, 19, 17),
+        (&P10, 20, 17),
+        (&P11, 21, 17),
+        (&P16, 22, 17),
     ];
     pub(super) const R19: &[rt::TemplateBindingRow] = &[
-        (P17, 26, 24),
-        (P20, 27, 24),
-        (P21, 28, 24),
-        (P22, 29, 24),
+        (&P17, 26, 24),
+        (&P20, 27, 24),
+        (&P21, 28, 24),
+        (&P22, 29, 24),
     ];
     pub(super) const R20: &[rt::TemplateBindingRow] = &[
-        (P17, 39, 29),
-        (P23, 40, 29),
-        (P24, 41, 29),
+        (&P17, 39, 29),
+        (&P23, 40, 29),
+        (&P24, 41, 29),
     ];
     pub(super) const R21: &[rt::TemplateBindingRow] = &[
-        (P25, 48, 22),
-        (P20, 49, 22),
-        (P21, 50, 22),
-        (P26, 51, 22),
+        (&P25, 48, 22),
+        (&P20, 49, 22),
+        (&P21, 50, 22),
+        (&P26, 51, 22),
     ];
     pub(super) const R22: &[rt::TemplateBindingRow] = &[
-        (P27, 90, 31),
-        (P28, 91, 31),
-        (P29, 92, 31),
+        (&P27, 90, 31),
+        (&P28, 91, 31),
+        (&P29, 92, 31),
     ];
     pub(super) const R23: &[rt::TemplateBindingRow] = &[
-        (P17, 22, 31),
-        (P1, 23, 31),
-        (P2, 24, 31),
+        (&P17, 22, 31),
+        (&P1, 23, 31),
+        (&P2, 24, 31),
     ];
     pub(super) const R24: &[rt::TemplateBindingRow] = &[
-        (P30, 8, 23),
-        (P31, 9, 23),
-        (P32, 10, 23),
+        (&P30, 8, 23),
+        (&P31, 9, 23),
+        (&P32, 10, 23),
     ];
     pub(super) const R25: &[rt::TemplateBindingRow] = &[
-        (P33, 15, 27),
-        (P17, 16, 27),
+        (&P33, 15, 27),
+        (&P17, 16, 27),
     ];
     pub(super) const R26: &[rt::TemplateBindingRow] = &[
-        (P25, 15, 20),
-        (P30, 16, 20),
-        (P31, 17, 20),
-        (P32, 18, 20),
-        (P34, 19, 20),
+        (&P25, 15, 20),
+        (&P30, 16, 20),
+        (&P31, 17, 20),
+        (&P32, 18, 20),
+        (&P34, 19, 20),
     ];
     pub(super) const R27: &[rt::TemplateBindingRow] = &[
-        (P35, 21, 20),
-        (P36, 22, 20),
-        (P37, 23, 20),
-        (P38, 24, 20),
-        (P39, 25, 20),
+        (&P35, 21, 20),
+        (&P36, 22, 20),
+        (&P37, 23, 20),
+        (&P38, 24, 20),
+        (&P39, 25, 20),
     ];
     pub(super) const R28: &[rt::TemplateBindingRow] = &[
-        (P26, 41, 24),
-        (P40, 42, 24),
+        (&P26, 41, 24),
+        (&P40, 42, 24),
     ];
     pub(super) const R29: &[rt::TemplateBindingRow] = &[
-        (P0, 16, 29),
-        (P3, 17, 29),
-        (P4, 18, 29),
-        (P5, 19, 29),
+        (&P0, 16, 29),
+        (&P3, 17, 29),
+        (&P4, 18, 29),
+        (&P5, 19, 29),
     ];
     pub(super) const R30: &[rt::TemplateBindingRow] = &[
-        (P6, 21, 29),
-        (P7, 22, 29),
+        (&P6, 21, 29),
+        (&P7, 22, 29),
     ];
     pub(super) const R31: &[rt::TemplateBindingRow] = &[
-        (P9, 17, 17),
-        (P10, 18, 17),
-        (P11, 19, 17),
-        (P16, 20, 17),
+        (&P9, 17, 17),
+        (&P10, 18, 17),
+        (&P11, 19, 17),
+        (&P16, 20, 17),
     ];
     pub(super) const R32: &[rt::TemplateBindingRow] = &[
-        (P27, 21, 25),
-        (P28, 22, 25),
+        (&P27, 21, 25),
+        (&P28, 22, 25),
     ];
     pub(super) const R33: &[rt::TemplateBindingRow] = &[
-        (P17, 24, 31),
-        (P18, 25, 31),
-        (P19, 26, 31),
+        (&P17, 24, 31),
+        (&P18, 25, 31),
+        (&P19, 26, 31),
     ];
     pub(super) const R34: &[rt::TemplateBindingRow] = &[
-        (P9, 14, 17),
-        (P10, 15, 17),
-        (P11, 16, 17),
-        (P16, 17, 17),
+        (&P9, 14, 17),
+        (&P10, 15, 17),
+        (&P11, 16, 17),
+        (&P16, 17, 17),
     ];
     pub(super) const R35: &[rt::TemplateBindingRow] = &[
-        (P9, 17, 17),
-        (P10, 18, 17),
-        (P11, 19, 17),
-        (P16, 20, 17),
+        (&P9, 17, 17),
+        (&P10, 18, 17),
+        (&P11, 19, 17),
+        (&P16, 20, 17),
     ];
     pub(super) const R36: &[rt::TemplateBindingRow] = &[
-        (P3, 28, 27),
-        (P41, 29, 27),
-        (P4, 30, 27),
-        (P5, 31, 27),
-        (P7, 32, 27),
+        (&P3, 28, 27),
+        (&P41, 29, 27),
+        (&P4, 30, 27),
+        (&P5, 31, 27),
+        (&P7, 32, 27),
     ];
     pub(super) const R37: &[rt::TemplateBindingRow] = &[
-        (P6, 34, 27),
-        (P0, 35, 27),
-        (P1, 36, 27),
-        (P2, 37, 27),
+        (&P6, 34, 27),
+        (&P0, 35, 27),
+        (&P1, 36, 27),
+        (&P2, 37, 27),
     ];
     pub(super) const R38: &[rt::TemplateBindingRow] = &[
-        (P42, 8, 17),
-        (P9, 9, 17),
-        (P10, 10, 17),
-        (P11, 11, 17),
-        (P16, 12, 17),
+        (&P42, 8, 17),
+        (&P9, 9, 17),
+        (&P10, 10, 17),
+        (&P11, 11, 17),
+        (&P16, 12, 17),
     ];
     pub(super) const R39: &[rt::TemplateBindingRow] = &[
-        (P0, 13, 27),
-        (P1, 14, 27),
-        (P2, 15, 27),
-        (P3, 16, 27),
-        (P4, 17, 27),
-        (P5, 18, 27),
+        (&P0, 13, 27),
+        (&P1, 14, 27),
+        (&P2, 15, 27),
+        (&P3, 16, 27),
+        (&P4, 17, 27),
+        (&P5, 18, 27),
     ];
     pub(super) const R40: &[rt::TemplateBindingRow] = &[
-        (P6, 20, 27),
-        (P7, 21, 27),
+        (&P6, 20, 27),
+        (&P7, 21, 27),
     ];
     pub(super) const R41: &[rt::TemplateBindingRow] = &[
-        (P10, 16, 17),
-        (P11, 17, 17),
-        (P16, 18, 17),
+        (&P10, 16, 17),
+        (&P11, 17, 17),
+        (&P16, 18, 17),
     ];
     pub(super) const R42: &[rt::TemplateBindingRow] = &[
-        (P43, 20, 25),
-        (P44, 21, 25),
-        (P30, 22, 25),
-        (P27, 23, 25),
-        (P45, 24, 25),
-        (P29, 25, 25),
-        (P28, 26, 25),
-        (P46, 27, 25),
-        (P47, 28, 25),
+        (&P43, 20, 25),
+        (&P44, 21, 25),
+        (&P30, 22, 25),
+        (&P27, 23, 25),
+        (&P45, 24, 25),
+        (&P29, 25, 25),
+        (&P28, 26, 25),
+        (&P46, 27, 25),
+        (&P47, 28, 25),
     ];
     pub(super) const R43: &[rt::TemplateBindingRow] = &[
-        (P17, 30, 29),
-        (P33, 31, 29),
+        (&P17, 30, 29),
+        (&P33, 31, 29),
     ];
     pub(super) const R44: &[rt::TemplateBindingRow] = &[
-        (P0, 13, 27),
-        (P1, 14, 27),
-        (P2, 15, 27),
-        (P3, 16, 27),
-        (P4, 17, 27),
-        (P5, 18, 27),
+        (&P0, 13, 27),
+        (&P1, 14, 27),
+        (&P2, 15, 27),
+        (&P3, 16, 27),
+        (&P4, 17, 27),
+        (&P5, 18, 27),
     ];
     pub(super) const R45: &[rt::TemplateBindingRow] = &[
-        (P6, 20, 27),
-        (P7, 21, 27),
+        (&P6, 20, 27),
+        (&P7, 21, 27),
     ];
     pub(super) const R46: &[rt::TemplateBindingRow] = &[
-        (P42, 9, 17),
-        (P48, 10, 17),
-        (P49, 11, 17),
-        (P9, 12, 17),
-        (P10, 13, 17),
-        (P11, 14, 17),
-        (P16, 15, 17),
+        (&P42, 9, 17),
+        (&P48, 10, 17),
+        (&P49, 11, 17),
+        (&P9, 12, 17),
+        (&P10, 13, 17),
+        (&P11, 14, 17),
+        (&P16, 15, 17),
     ];
     pub(super) const R47: &[rt::TemplateBindingRow] = &[
-        (P17, 21, 33),
-        (P50, 22, 33),
-        (P51, 23, 33),
+        (&P17, 21, 33),
+        (&P50, 22, 33),
+        (&P51, 23, 33),
     ];
     pub(super) const R48: &[rt::TemplateBindingRow] = &[
-        (P17, 26, 33),
-        (P50, 27, 33),
-        (P51, 28, 33),
+        (&P17, 26, 33),
+        (&P50, 27, 33),
+        (&P51, 28, 33),
     ];
     pub(super) const R49: &[rt::TemplateBindingRow] = &[
-        (P0, 14, 27),
-        (P1, 15, 27),
-        (P2, 16, 27),
-        (P3, 17, 27),
-        (P4, 18, 27),
-        (P5, 19, 27),
+        (&P0, 14, 27),
+        (&P1, 15, 27),
+        (&P2, 16, 27),
+        (&P3, 17, 27),
+        (&P4, 18, 27),
+        (&P5, 19, 27),
     ];
     pub(super) const R50: &[rt::TemplateBindingRow] = &[
-        (P52, 21, 27),
-        (P7, 22, 27),
+        (&P52, 21, 27),
+        (&P7, 22, 27),
     ];
     pub(super) const R51: &[rt::TemplateBindingRow] = &[
-        (P0, 22, 33),
-        (P3, 23, 33),
+        (&P0, 22, 33),
+        (&P3, 23, 33),
     ];
     pub(super) const R52: &[rt::TemplateBindingRow] = &[
-        (P0, 18, 31),
-        (P3, 19, 31),
+        (&P0, 18, 31),
+        (&P3, 19, 31),
     ];
     pub(super) const R53: &[rt::TemplateBindingRow] = &[
-        (P3, 11, 29),
-        (P4, 12, 29),
-        (P5, 13, 29),
-        (P7, 14, 29),
-        (P6, 15, 29),
-        (P0, 16, 29),
-        (P2, 17, 29),
-        (P1, 18, 29),
+        (&P3, 11, 29),
+        (&P4, 12, 29),
+        (&P5, 13, 29),
+        (&P7, 14, 29),
+        (&P6, 15, 29),
+        (&P0, 16, 29),
+        (&P2, 17, 29),
+        (&P1, 18, 29),
     ];
     pub(super) const R54: &[rt::TemplateBindingRow] = &[
-        (P3, 20, 29),
-        (P4, 21, 29),
-        (P5, 22, 29),
-        (P7, 23, 29),
-        (P6, 24, 29),
-        (P0, 25, 29),
-        (P2, 26, 29),
-        (P1, 27, 29),
+        (&P3, 20, 29),
+        (&P4, 21, 29),
+        (&P5, 22, 29),
+        (&P7, 23, 29),
+        (&P6, 24, 29),
+        (&P0, 25, 29),
+        (&P2, 26, 29),
+        (&P1, 27, 29),
     ];
     pub(super) const R55: &[rt::TemplateBindingRow] = &[
-        (P10, 15, 17),
-        (P11, 16, 17),
-        (P16, 17, 17),
+        (&P10, 15, 17),
+        (&P11, 16, 17),
+        (&P16, 17, 17),
     ];
     pub(super) const R56: &[rt::TemplateBindingRow] = &[
-        (P43, 18, 25),
-        (P44, 19, 25),
-        (P30, 20, 25),
-        (P27, 21, 25),
-        (P45, 22, 25),
-        (P29, 23, 25),
-        (P28, 24, 25),
+        (&P43, 18, 25),
+        (&P44, 19, 25),
+        (&P30, 20, 25),
+        (&P27, 21, 25),
+        (&P45, 22, 25),
+        (&P29, 23, 25),
+        (&P28, 24, 25),
     ];
     pub(super) const R57: &[rt::TemplateBindingRow] = &[
-        (P17, 26, 29),
-        (P33, 27, 29),
+        (&P17, 26, 29),
+        (&P33, 27, 29),
     ];
     pub(super) const R58: &[rt::TemplateBindingRow] = &[
-        (P9, 12, 17),
-        (P10, 13, 17),
-        (P11, 14, 17),
-        (P16, 15, 17),
+        (&P9, 12, 17),
+        (&P10, 13, 17),
+        (&P11, 14, 17),
+        (&P16, 15, 17),
     ];
     pub(super) const R59: &[rt::TemplateBindingRow] = &[
-        (P42, 15, 17),
-        (P9, 16, 17),
-        (P10, 17, 17),
-        (P11, 18, 17),
-        (P16, 19, 17),
+        (&P42, 15, 17),
+        (&P9, 16, 17),
+        (&P10, 17, 17),
+        (&P11, 18, 17),
+        (&P16, 19, 17),
     ];
     pub(super) const R60: &[rt::TemplateBindingRow] = &[
-        (P18, 38, 29),
-        (P19, 39, 29),
+        (&P18, 38, 29),
+        (&P19, 39, 29),
     ];
     pub(super) const R61: &[rt::TemplateBindingRow] = &[
-        (P6, 41, 29),
-        (P53, 42, 29),
-        (P54, 43, 29),
+        (&P6, 41, 29),
+        (&P53, 42, 29),
+        (&P54, 43, 29),
     ];
     pub(super) const R62: &[rt::TemplateBindingRow] = &[
-        (P18, 41, 29),
-        (P19, 42, 29),
+        (&P18, 41, 29),
+        (&P19, 42, 29),
     ];
     pub(super) const R63: &[rt::TemplateBindingRow] = &[
-        (P6, 44, 29),
-        (P53, 45, 29),
-        (P54, 46, 29),
+        (&P6, 44, 29),
+        (&P53, 45, 29),
+        (&P54, 46, 29),
     ];
     pub(super) const R64: &[rt::TemplateBindingRow] = &[
-        (P9, 21, 19),
-        (P10, 22, 19),
-        (P11, 23, 19),
-        (P16, 24, 19),
+        (&P9, 21, 19),
+        (&P10, 22, 19),
+        (&P11, 23, 19),
+        (&P16, 24, 19),
     ];
     pub(super) const R65: &[rt::TemplateBindingRow] = &[
-        (P30, 24, 25),
-        (P31, 25, 25),
-        (P32, 26, 25),
-        (P34, 27, 25),
-        (P55, 28, 25),
+        (&P30, 24, 25),
+        (&P31, 25, 25),
+        (&P32, 26, 25),
+        (&P34, 27, 25),
+        (&P55, 28, 25),
     ];
     pub(super) const R66: &[rt::TemplateBindingRow] = &[
-        (P25, 97, 20),
-        (P56, 98, 20),
-        (P57, 99, 20),
-        (P30, 100, 20),
-        (P31, 101, 20),
-        (P32, 102, 20),
-        (P34, 103, 20),
-        (P36, 104, 20),
-        (P58, 105, 20),
-        (P59, 106, 20),
-        (P60, 107, 20),
+        (&P25, 97, 20),
+        (&P56, 98, 20),
+        (&P57, 99, 20),
+        (&P30, 100, 20),
+        (&P31, 101, 20),
+        (&P32, 102, 20),
+        (&P34, 103, 20),
+        (&P36, 104, 20),
+        (&P58, 105, 20),
+        (&P59, 106, 20),
+        (&P60, 107, 20),
     ];
     pub(super) const R67: &[rt::TemplateBindingRow] = &[
-        (P61, 125, 23),
-        (P62, 126, 23),
-        (P63, 127, 23),
-        (P64, 128, 23),
-        (P65, 129, 23),
+        (&P61, 125, 23),
+        (&P62, 126, 23),
+        (&P63, 127, 23),
+        (&P64, 128, 23),
+        (&P65, 129, 23),
     ];
     pub(super) const R68: &[rt::TemplateBindingRow] = &[
-        (P66, 132, 23),
-        (P67, 133, 23),
+        (&P66, 132, 23),
+        (&P67, 133, 23),
     ];
     pub(super) const R69: &[rt::TemplateBindingRow] = &[
-        (P3, 19, 29),
-        (P4, 20, 29),
-        (P5, 21, 29),
-        (P7, 22, 29),
+        (&P3, 19, 29),
+        (&P4, 20, 29),
+        (&P5, 21, 29),
+        (&P7, 22, 29),
     ];
     pub(super) const R70: &[rt::TemplateBindingRow] = &[
-        (P68, 20, 26),
-        (P30, 21, 26),
-        (P31, 22, 26),
-        (P32, 23, 26),
-        (P69, 24, 26),
-        (P34, 25, 26),
-        (P70, 26, 26),
+        (&P68, 20, 26),
+        (&P30, 21, 26),
+        (&P31, 22, 26),
+        (&P32, 23, 26),
+        (&P69, 24, 26),
+        (&P34, 25, 26),
+        (&P70, 26, 26),
     ];
     pub(super) const R71: &[rt::TemplateBindingRow] = &[
-        (P71, 32, 22),
-        (P72, 33, 22),
+        (&P71, 32, 22),
+        (&P72, 33, 22),
     ];
     pub(super) const R72: &[rt::TemplateBindingRow] = &[
-        (P73, 37, 22),
-        (P74, 38, 22),
-        (P75, 39, 22),
+        (&P73, 37, 22),
+        (&P74, 38, 22),
+        (&P75, 39, 22),
     ];
     pub(super) const R73: &[rt::TemplateBindingRow] = &[
-        (P76, 41, 22),
-        (P77, 42, 22),
+        (&P76, 41, 22),
+        (&P77, 42, 22),
     ];
     pub(super) const R74: &[rt::TemplateBindingRow] = &[
-        (P3, 10, 29),
-        (P4, 11, 29),
-        (P5, 12, 29),
-        (P7, 13, 29),
-        (P6, 14, 29),
+        (&P3, 10, 29),
+        (&P4, 11, 29),
+        (&P5, 12, 29),
+        (&P7, 13, 29),
+        (&P6, 14, 29),
     ];
     pub(super) const R75: &[rt::TemplateBindingRow] = &[
-        (P0, 16, 29),
-        (P2, 17, 29),
-        (P1, 18, 29),
+        (&P0, 16, 29),
+        (&P2, 17, 29),
+        (&P1, 18, 29),
     ];
     pub(super) const R76: &[rt::TemplateBindingRow] = &[
-        (P10, 10, 17),
-        (P11, 11, 17),
-        (P16, 12, 17),
-        (P9, 13, 17),
-        (P42, 14, 17),
+        (&P10, 10, 17),
+        (&P11, 11, 17),
+        (&P16, 12, 17),
+        (&P9, 13, 17),
+        (&P42, 14, 17),
     ];
     pub(super) const R77: &[rt::TemplateBindingRow] = &[
-        (P52, 18, 31),
-        (P1, 19, 31),
-        (P2, 20, 31),
-        (P53, 21, 31),
-        (P78, 22, 31),
-        (P79, 23, 31),
-        (P80, 24, 31),
+        (&P52, 18, 31),
+        (&P1, 19, 31),
+        (&P2, 20, 31),
+        (&P53, 21, 31),
+        (&P78, 22, 31),
+        (&P79, 23, 31),
+        (&P80, 24, 31),
     ];
     pub(super) const R78: &[rt::TemplateBindingRow] = &[
-        (P2, 29, 31),
-        (P1, 30, 31),
-        (P53, 31, 31),
-        (P78, 32, 31),
-        (P79, 33, 31),
-        (P80, 34, 31),
+        (&P2, 29, 31),
+        (&P1, 30, 31),
+        (&P53, 31, 31),
+        (&P78, 32, 31),
+        (&P79, 33, 31),
+        (&P80, 34, 31),
     ];
     pub(super) const R79: &[rt::TemplateBindingRow] = &[
-        (P81, 31, 29),
-        (P82, 32, 29),
-        (P3, 33, 29),
-        (P4, 34, 29),
-        (P5, 35, 29),
+        (&P81, 31, 29),
+        (&P82, 32, 29),
+        (&P3, 33, 29),
+        (&P4, 34, 29),
+        (&P5, 35, 29),
     ];
     pub(super) const R80: &[rt::TemplateBindingRow] = &[
-        (P83, 37, 29),
-        (P7, 38, 29),
+        (&P83, 37, 29),
+        (&P7, 38, 29),
     ];
     pub(super) const R81: &[rt::TemplateBindingRow] = &[
-        (P30, 22, 19),
-        (P84, 23, 19),
-        (P85, 24, 19),
-        (P86, 25, 19),
+        (&P30, 22, 19),
+        (&P84, 23, 19),
+        (&P85, 24, 19),
+        (&P86, 25, 19),
     ];
     pub(super) const R82: &[rt::TemplateBindingRow] = &[
-        (P1, 71, 31),
-        (P2, 72, 31),
+        (&P1, 71, 31),
+        (&P2, 72, 31),
     ];
     pub(super) const R83: &[rt::TemplateBindingRow] = &[
-        (P9, 131, 19),
-        (P10, 132, 19),
-        (P11, 133, 19),
-        (P16, 134, 19),
+        (&P9, 131, 19),
+        (&P10, 132, 19),
+        (&P11, 133, 19),
+        (&P16, 134, 19),
     ];
     pub(super) const R84: &[rt::TemplateBindingRow] = &[
-        (P48, 138, 29),
-        (P49, 139, 29),
+        (&P48, 138, 29),
+        (&P49, 139, 29),
     ];
     pub(super) const R85: &[rt::TemplateBindingRow] = &[
-        (P0, 146, 33),
-        (P1, 147, 33),
-        (P2, 148, 33),
+        (&P0, 146, 33),
+        (&P1, 147, 33),
+        (&P2, 148, 33),
     ];
     pub(super) const R86: &[rt::TemplateBindingRow] = &[
-        (P6, 150, 33),
-        (P87, 151, 33),
+        (&P6, 150, 33),
+        (&P87, 151, 33),
     ];
     pub(super) const R87: &[rt::TemplateBindingRow] = &[
-        (P9, 163, 19),
-        (P10, 164, 19),
-        (P11, 165, 19),
-        (P16, 166, 19),
+        (&P9, 163, 19),
+        (&P10, 164, 19),
+        (&P11, 165, 19),
+        (&P16, 166, 19),
     ];
     pub(super) const R88: &[rt::TemplateBindingRow] = &[
-        (P48, 170, 29),
-        (P49, 171, 29),
+        (&P48, 170, 29),
+        (&P49, 171, 29),
     ];
     pub(super) const R89: &[rt::TemplateBindingRow] = &[
-        (P0, 178, 33),
-        (P1, 179, 33),
-        (P2, 180, 33),
+        (&P0, 178, 33),
+        (&P1, 179, 33),
+        (&P2, 180, 33),
     ];
     pub(super) const R90: &[rt::TemplateBindingRow] = &[
-        (P6, 182, 33),
-        (P87, 183, 33),
+        (&P6, 182, 33),
+        (&P87, 183, 33),
     ];
     pub(super) const R91: &[rt::TemplateBindingRow] = &[
-        (P9, 195, 19),
-        (P10, 196, 19),
-        (P11, 197, 19),
-        (P16, 198, 19),
+        (&P9, 195, 19),
+        (&P10, 196, 19),
+        (&P11, 197, 19),
+        (&P16, 198, 19),
     ];
     pub(super) const R92: &[rt::TemplateBindingRow] = &[
-        (P48, 202, 29),
-        (P49, 203, 29),
+        (&P48, 202, 29),
+        (&P49, 203, 29),
     ];
     pub(super) const R93: &[rt::TemplateBindingRow] = &[
-        (P0, 210, 33),
-        (P1, 211, 33),
-        (P2, 212, 33),
+        (&P0, 210, 33),
+        (&P1, 211, 33),
+        (&P2, 212, 33),
     ];
     pub(super) const R94: &[rt::TemplateBindingRow] = &[
-        (P6, 214, 33),
-        (P87, 215, 33),
+        (&P6, 214, 33),
+        (&P87, 215, 33),
     ];
     pub(super) const R95: &[rt::TemplateBindingRow] = &[
-        (P9, 227, 19),
-        (P10, 228, 19),
-        (P11, 229, 19),
-        (P16, 230, 19),
+        (&P9, 227, 19),
+        (&P10, 228, 19),
+        (&P11, 229, 19),
+        (&P16, 230, 19),
     ];
     pub(super) const R96: &[rt::TemplateBindingRow] = &[
-        (P48, 234, 29),
-        (P49, 235, 29),
+        (&P48, 234, 29),
+        (&P49, 235, 29),
     ];
     pub(super) const R97: &[rt::TemplateBindingRow] = &[
-        (P0, 242, 33),
-        (P1, 243, 33),
-        (P2, 244, 33),
+        (&P0, 242, 33),
+        (&P1, 243, 33),
+        (&P2, 244, 33),
     ];
     pub(super) const R98: &[rt::TemplateBindingRow] = &[
-        (P6, 246, 33),
-        (P87, 247, 33),
+        (&P6, 246, 33),
+        (&P87, 247, 33),
     ];
     pub(super) const R99: &[rt::TemplateBindingRow] = &[
-        (P88, 97, 31),
-        (P18, 98, 31),
-        (P19, 99, 31),
+        (&P88, 97, 31),
+        (&P18, 98, 31),
+        (&P19, 99, 31),
     ];
     pub(super) const R100: &[rt::TemplateBindingRow] = &[
-        (P89, 105, 31),
-        (P18, 106, 31),
-        (P19, 107, 31),
+        (&P89, 105, 31),
+        (&P18, 106, 31),
+        (&P19, 107, 31),
     ];
     pub(super) const R101: &[rt::TemplateBindingRow] = &[
-        (P17, 28, 19),
-        (P48, 29, 19),
-        (P49, 30, 19),
-        (P9, 31, 19),
-        (P10, 32, 19),
-        (P11, 33, 19),
-        (P16, 34, 19),
+        (&P17, 28, 19),
+        (&P48, 29, 19),
+        (&P49, 30, 19),
+        (&P9, 31, 19),
+        (&P10, 32, 19),
+        (&P11, 33, 19),
+        (&P16, 34, 19),
     ];
     pub(super) const R102: &[rt::TemplateBindingRow] = &[
-        (P0, 67, 33),
-        (P1, 68, 33),
-        (P2, 69, 33),
+        (&P0, 67, 33),
+        (&P1, 68, 33),
+        (&P2, 69, 33),
     ];
     pub(super) const R103: &[rt::TemplateBindingRow] = &[
-        (P9, 98, 17),
-        (P10, 99, 17),
-        (P11, 100, 17),
-        (P16, 101, 17),
+        (&P9, 98, 17),
+        (&P10, 99, 17),
+        (&P11, 100, 17),
+        (&P16, 101, 17),
     ];
     pub(super) const R104: &[rt::TemplateBindingRow] = &[
-        (P17, 102, 22),
-        (P90, 103, 22),
-        (P91, 104, 22),
+        (&P17, 102, 22),
+        (&P90, 103, 22),
+        (&P91, 104, 22),
     ];
     pub(super) const R105: &[rt::TemplateBindingRow] = &[
-        (P92, 109, 24),
-        (P93, 110, 24),
+        (&P92, 109, 24),
+        (&P93, 110, 24),
     ];
     pub(super) const R106: &[rt::TemplateBindingRow] = &[
-        (P43, 131, 31),
-        (P44, 132, 31),
-        (P27, 133, 31),
-        (P45, 134, 31),
-        (P28, 135, 31),
+        (&P43, 131, 31),
+        (&P44, 132, 31),
+        (&P27, 133, 31),
+        (&P45, 134, 31),
+        (&P28, 135, 31),
     ];
     pub(super) const R107: &[rt::TemplateBindingRow] = &[
-        (P92, 138, 32),
-        (P90, 139, 32),
-        (P91, 140, 32),
+        (&P92, 138, 32),
+        (&P90, 139, 32),
+        (&P91, 140, 32),
     ];
     pub(super) const R108: &[rt::TemplateBindingRow] = &[
-        (P93, 142, 32),
-        (P94, 143, 32),
-        (P95, 144, 32),
+        (&P93, 142, 32),
+        (&P94, 143, 32),
+        (&P95, 144, 32),
     ];
     pub(super) const R109: &[rt::TemplateBindingRow] = &[
-        (P96, 153, 36),
-        (P97, 154, 36),
-        (P98, 155, 36),
-        (P99, 156, 36),
-        (P100, 157, 36),
-        (P101, 158, 36),
-        (P102, 159, 36),
-        (P103, 160, 36),
-        (P104, 161, 36),
-        (P105, 162, 36),
-        (P106, 163, 36),
+        (&P96, 153, 36),
+        (&P97, 154, 36),
+        (&P98, 155, 36),
+        (&P99, 156, 36),
+        (&P100, 157, 36),
+        (&P101, 158, 36),
+        (&P102, 159, 36),
+        (&P103, 160, 36),
+        (&P104, 161, 36),
+        (&P105, 162, 36),
+        (&P106, 163, 36),
     ];
     pub(super) const R110: &[rt::TemplateBindingRow] = &[
-        (P107, 165, 36),
-        (P108, 166, 36),
-        (P109, 167, 36),
-        (P110, 168, 36),
+        (&P107, 165, 36),
+        (&P108, 166, 36),
+        (&P109, 167, 36),
+        (&P110, 168, 36),
     ];
     pub(super) const R111: &[rt::TemplateBindingRow] = &[
-        (P16, 25, 19),
-        (P11, 26, 19),
+        (&P16, 25, 19),
+        (&P11, 26, 19),
     ];
     pub(super) const R112: &[rt::TemplateBindingRow] = &[
-        (P16, 33, 19),
-        (P11, 34, 19),
-        (P10, 35, 19),
+        (&P16, 33, 19),
+        (&P11, 34, 19),
+        (&P10, 35, 19),
     ];
     pub(super) const R113: &[rt::TemplateBindingRow] = &[
-        (P52, 57, 31),
-        (P1, 58, 31),
-        (P2, 59, 31),
-        (P111, 60, 31),
+        (&P52, 57, 31),
+        (&P1, 58, 31),
+        (&P2, 59, 31),
+        (&P111, 60, 31),
     ];
     pub(super) const R114: &[rt::TemplateBindingRow] = &[
-        (P2, 69, 29),
-        (P1, 70, 29),
-        (P111, 71, 29),
-        (P17, 72, 29),
+        (&P2, 69, 29),
+        (&P1, 70, 29),
+        (&P111, 71, 29),
+        (&P17, 72, 29),
     ];
     pub(super) const R115: &[rt::TemplateBindingRow] = &[
-        (P112, 54, 22),
-        (P113, 55, 22),
-        (P114, 56, 22),
-        (P115, 57, 22),
-        (P116, 58, 22),
+        (&P112, 54, 22),
+        (&P113, 55, 22),
+        (&P114, 56, 22),
+        (&P115, 57, 22),
+        (&P116, 58, 22),
     ];
     pub(super) const R116: &[rt::TemplateBindingRow] = &[
-        (P112, 111, 22),
-        (P113, 112, 22),
-        (P114, 113, 22),
-        (P115, 114, 22),
-        (P116, 115, 22),
+        (&P112, 111, 22),
+        (&P113, 112, 22),
+        (&P114, 113, 22),
+        (&P115, 114, 22),
+        (&P116, 115, 22),
     ];
     pub(super) const R117: &[rt::TemplateBindingRow] = &[
-        (P0, 13, 35),
-        (P117, 14, 35),
-        (P118, 15, 35),
-        (P119, 16, 35),
-        (P120, 17, 35),
-        (P3, 18, 35),
-        (P121, 19, 35),
+        (&P0, 13, 35),
+        (&P117, 14, 35),
+        (&P118, 15, 35),
+        (&P119, 16, 35),
+        (&P120, 17, 35),
+        (&P3, 18, 35),
+        (&P121, 19, 35),
     ];
     pub(super) const R118: &[rt::TemplateBindingRow] = &[
-        (P9, 39, 19),
-        (P10, 40, 19),
-        (P11, 41, 19),
-        (P16, 42, 19),
+        (&P9, 39, 19),
+        (&P10, 40, 19),
+        (&P11, 41, 19),
+        (&P16, 42, 19),
     ];
     pub(super) const R119: &[rt::TemplateBindingRow] = &[
-        (P0, 62, 33),
-        (P122, 63, 33),
+        (&P0, 62, 33),
+        (&P122, 63, 33),
     ];
     pub(super) const R120: &[rt::TemplateBindingRow] = &[
-        (P123, 70, 27),
-        (P33, 71, 27),
+        (&P123, 70, 27),
+        (&P33, 71, 27),
     ];
     pub(super) const R121: &[rt::TemplateBindingRow] = &[
-        (P9, 26, 19),
-        (P10, 27, 19),
-        (P11, 28, 19),
-        (P16, 29, 19),
+        (&P9, 26, 19),
+        (&P10, 27, 19),
+        (&P11, 28, 19),
+        (&P16, 29, 19),
     ];
     pub(super) const R122: &[rt::TemplateBindingRow] = &[
-        (P9, 14, 17),
-        (P10, 15, 17),
-        (P11, 16, 17),
-        (P16, 17, 17),
+        (&P9, 14, 17),
+        (&P10, 15, 17),
+        (&P11, 16, 17),
+        (&P16, 17, 17),
     ];
     pub(super) const R123: &[rt::TemplateBindingRow] = &[
-        (P42, 69, 17),
-        (P9, 70, 17),
-        (P10, 71, 17),
-        (P11, 72, 17),
-        (P16, 73, 17),
+        (&P42, 69, 17),
+        (&P9, 70, 17),
+        (&P10, 71, 17),
+        (&P11, 72, 17),
+        (&P16, 73, 17),
     ];
     pub(super) const R124: &[rt::TemplateBindingRow] = &[
-        (P9, 16, 17),
-        (P10, 17, 17),
-        (P11, 18, 17),
-        (P16, 19, 17),
+        (&P9, 16, 17),
+        (&P10, 17, 17),
+        (&P11, 18, 17),
+        (&P16, 19, 17),
     ];
     pub(super) const R125: &[rt::TemplateBindingRow] = &[
-        (P0, 68, 29),
-        (P1, 69, 29),
-        (P2, 70, 29),
-        (P3, 71, 29),
+        (&P0, 68, 29),
+        (&P1, 69, 29),
+        (&P2, 70, 29),
+        (&P3, 71, 29),
     ];
     pub(super) const R126: &[rt::TemplateBindingRow] = &[
-        (P6, 75, 29),
-        (P7, 76, 29),
+        (&P6, 75, 29),
+        (&P7, 76, 29),
     ];
     pub(super) const R127: &[rt::TemplateBindingRow] = &[
-        (P3, 52, 27),
-        (P4, 53, 27),
-        (P5, 54, 27),
+        (&P3, 52, 27),
+        (&P4, 53, 27),
+        (&P5, 54, 27),
     ];
     pub(super) const R128: &[rt::TemplateBindingRow] = &[
-        (P7, 56, 27),
-        (P54, 57, 27),
+        (&P7, 56, 27),
+        (&P54, 57, 27),
     ];
     pub(super) const R129: &[rt::TemplateBindingRow] = &[
-        (P30, 100, 21),
-        (P31, 101, 21),
-        (P32, 102, 21),
-        (P34, 103, 21),
-        (P26, 104, 21),
-        (P124, 105, 21),
+        (&P30, 100, 21),
+        (&P31, 101, 21),
+        (&P32, 102, 21),
+        (&P34, 103, 21),
+        (&P26, 104, 21),
+        (&P124, 105, 21),
     ];
     pub(super) const R130: &[rt::TemplateBindingRow] = &[
-        (P125, 113, 28),
-        (P126, 114, 28),
-        (P127, 115, 28),
+        (&P125, 113, 28),
+        (&P126, 114, 28),
+        (&P127, 115, 28),
     ];
     pub(super) const R131: &[rt::TemplateBindingRow] = &[
-        (P125, 119, 28),
-        (P126, 120, 28),
-        (P127, 121, 28),
+        (&P125, 119, 28),
+        (&P126, 120, 28),
+        (&P127, 121, 28),
     ];
     pub(super) const R132: &[rt::TemplateBindingRow] = &[
-        (P125, 127, 28),
-        (P126, 128, 28),
-        (P127, 129, 28),
+        (&P125, 127, 28),
+        (&P126, 128, 28),
+        (&P127, 129, 28),
     ];
     pub(super) const R133: &[rt::TemplateBindingRow] = &[
-        (P9, 187, 17),
-        (P10, 188, 17),
-        (P11, 189, 17),
-        (P16, 190, 17),
+        (&P9, 187, 17),
+        (&P10, 188, 17),
+        (&P11, 189, 17),
+        (&P16, 190, 17),
     ];
     pub(super) const R134: &[rt::TemplateBindingRow] = &[
-        (P3, 51, 27),
-        (P4, 52, 27),
-        (P5, 53, 27),
+        (&P3, 51, 27),
+        (&P4, 52, 27),
+        (&P5, 53, 27),
     ];
     pub(super) const R135: &[rt::TemplateBindingRow] = &[
-        (P7, 55, 27),
-        (P54, 56, 27),
+        (&P7, 55, 27),
+        (&P54, 56, 27),
     ];
     pub(super) const R136: &[rt::TemplateBindingRow] = &[
-        (P30, 98, 21),
-        (P31, 99, 21),
-        (P32, 100, 21),
-        (P34, 101, 21),
-        (P26, 102, 21),
-        (P124, 103, 21),
+        (&P30, 98, 21),
+        (&P31, 99, 21),
+        (&P32, 100, 21),
+        (&P34, 101, 21),
+        (&P26, 102, 21),
+        (&P124, 103, 21),
     ];
     pub(super) const R137: &[rt::TemplateBindingRow] = &[
-        (P125, 116, 30),
-        (P126, 117, 30),
-        (P127, 118, 30),
+        (&P125, 116, 30),
+        (&P126, 117, 30),
+        (&P127, 118, 30),
     ];
     pub(super) const R138: &[rt::TemplateBindingRow] = &[
-        (P125, 135, 30),
-        (P126, 136, 30),
-        (P127, 137, 30),
+        (&P125, 135, 30),
+        (&P126, 136, 30),
+        (&P127, 137, 30),
     ];
     pub(super) const R139: &[rt::TemplateBindingRow] = &[
-        (P125, 154, 30),
-        (P126, 155, 30),
-        (P127, 156, 30),
+        (&P125, 154, 30),
+        (&P126, 155, 30),
+        (&P127, 156, 30),
     ];
     pub(super) const R140: &[rt::TemplateBindingRow] = &[
-        (P125, 172, 30),
-        (P126, 173, 30),
-        (P127, 174, 30),
+        (&P125, 172, 30),
+        (&P126, 173, 30),
+        (&P127, 174, 30),
     ];
     pub(super) const R141: &[rt::TemplateBindingRow] = &[
-        (P9, 219, 17),
-        (P10, 220, 17),
-        (P11, 221, 17),
-        (P16, 222, 17),
+        (&P9, 219, 17),
+        (&P10, 220, 17),
+        (&P11, 221, 17),
+        (&P16, 222, 17),
     ];
     pub(super) const R142: &[rt::TemplateBindingRow] = &[
-        (P9, 55, 17),
-        (P10, 56, 17),
-        (P11, 57, 17),
-        (P16, 58, 17),
-        (P42, 59, 17),
+        (&P9, 55, 17),
+        (&P10, 56, 17),
+        (&P11, 57, 17),
+        (&P16, 58, 17),
+        (&P42, 59, 17),
     ];
     pub(super) const R143: &[rt::TemplateBindingRow] = &[
-        (P9, 251, 17),
-        (P10, 252, 17),
-        (P11, 253, 17),
-        (P16, 254, 17),
-        (P42, 255, 17),
+        (&P9, 251, 17),
+        (&P10, 252, 17),
+        (&P11, 253, 17),
+        (&P16, 254, 17),
+        (&P42, 255, 17),
     ];
     pub(super) const R144: &[rt::TemplateBindingRow] = &[
-        (P3, 34, 27),
-        (P4, 35, 27),
-        (P5, 36, 27),
-        (P7, 37, 27),
+        (&P3, 34, 27),
+        (&P4, 35, 27),
+        (&P5, 36, 27),
+        (&P7, 37, 27),
     ];
     pub(super) const R145: &[rt::TemplateBindingRow] = &[
-        (P6, 39, 27),
-        (P0, 40, 27),
-        (P1, 41, 27),
-        (P2, 42, 27),
+        (&P6, 39, 27),
+        (&P0, 40, 27),
+        (&P1, 41, 27),
+        (&P2, 42, 27),
     ];
     pub(super) const R146: &[rt::TemplateBindingRow] = &[
-        (P26, 142, 19),
-        (P30, 143, 19),
+        (&P26, 142, 19),
+        (&P30, 143, 19),
     ];
     pub(super) const R147: &[rt::TemplateBindingRow] = &[
-        (P128, 147, 19),
-        (P129, 148, 19),
+        (&P128, 147, 19),
+        (&P129, 148, 19),
     ];
     pub(super) const R148: &[rt::TemplateBindingRow] = &[
-        (P130, 151, 19),
-        (P131, 152, 19),
-        (P132, 153, 19),
+        (&P130, 151, 19),
+        (&P131, 152, 19),
+        (&P132, 153, 19),
     ];
     pub(super) const R149: &[rt::TemplateBindingRow] = &[
-        (P133, 156, 19),
-        (P134, 157, 19),
-        (P25, 158, 19),
+        (&P133, 156, 19),
+        (&P134, 157, 19),
+        (&P25, 158, 19),
     ];
     pub(super) const R150: &[rt::TemplateBindingRow] = &[
-        (P31, 173, 19),
-        (P26, 174, 19),
-        (P30, 175, 19),
+        (&P31, 173, 19),
+        (&P26, 174, 19),
+        (&P30, 175, 19),
     ];
     pub(super) const R151: &[rt::TemplateBindingRow] = &[
-        (P9, 36, 17),
-        (P10, 37, 17),
-        (P11, 38, 17),
-        (P16, 39, 17),
-        (P42, 40, 17),
+        (&P9, 36, 17),
+        (&P10, 37, 17),
+        (&P11, 38, 17),
+        (&P16, 39, 17),
+        (&P42, 40, 17),
     ];
     pub(super) const R152: &[rt::TemplateBindingRow] = &[
-        (P135, 50, 24),
-        (P136, 51, 24),
+        (&P135, 50, 24),
+        (&P136, 51, 24),
     ];
     pub(super) const R153: &[rt::TemplateBindingRow] = &[
-        (P9, 132, 17),
-        (P10, 133, 17),
-        (P11, 134, 17),
-        (P16, 135, 17),
-        (P42, 136, 17),
+        (&P9, 132, 17),
+        (&P10, 133, 17),
+        (&P11, 134, 17),
+        (&P16, 135, 17),
+        (&P42, 136, 17),
     ];
     pub(super) const R154: &[rt::TemplateBindingRow] = &[
-        (P137, 146, 24),
-        (P136, 147, 24),
+        (&P137, 146, 24),
+        (&P136, 147, 24),
     ];
     pub(super) const R155: &[rt::TemplateBindingRow] = &[
-        (P12, 229, 17),
-        (P13, 230, 17),
-        (P138, 231, 17),
+        (&P12, 229, 17),
+        (&P13, 230, 17),
+        (&P138, 231, 17),
     ];
     pub(super) const R156: &[rt::TemplateBindingRow] = &[
-        (P9, 258, 17),
-        (P10, 259, 17),
-        (P11, 260, 17),
-        (P16, 261, 17),
-        (P42, 262, 17),
-        (P138, 263, 17),
+        (&P9, 258, 17),
+        (&P10, 259, 17),
+        (&P11, 260, 17),
+        (&P16, 261, 17),
+        (&P42, 262, 17),
+        (&P138, 263, 17),
     ];
     pub(super) const R157: &[rt::TemplateBindingRow] = &[
-        (P139, 24, 20),
-        (P140, 25, 20),
-        (P141, 26, 20),
+        (&P139, 24, 20),
+        (&P140, 25, 20),
+        (&P141, 26, 20),
     ];
     pub(super) const R158: &[rt::TemplateBindingRow] = &[
-        (P142, 38, 29),
-        (P143, 39, 29),
+        (&P142, 38, 29),
+        (&P143, 39, 29),
     ];
     pub(super) const R159: &[rt::TemplateBindingRow] = &[
-        (P144, 60, 33),
-        (P145, 61, 33),
+        (&P144, 60, 33),
+        (&P145, 61, 33),
     ];
     pub(super) const R160: &[rt::TemplateBindingRow] = &[
-        (P146, 66, 33),
-        (P147, 67, 33),
+        (&P146, 66, 33),
+        (&P147, 67, 33),
     ];
     pub(super) const R161: &[rt::TemplateBindingRow] = &[
-        (P148, 159, 33),
-        (P149, 160, 33),
-        (P3, 161, 33),
-        (P4, 162, 33),
-        (P5, 163, 33),
+        (&P148, 159, 33),
+        (&P149, 160, 33),
+        (&P3, 161, 33),
+        (&P4, 162, 33),
+        (&P5, 163, 33),
     ];
     pub(super) const R162: &[rt::TemplateBindingRow] = &[
-        (P150, 165, 33),
-        (P7, 166, 33),
+        (&P150, 165, 33),
+        (&P7, 166, 33),
     ];
     pub(super) const R163: &[rt::TemplateBindingRow] = &[
-        (P9, 66, 19),
-        (P16, 67, 19),
-        (P10, 68, 19),
-        (P11, 69, 19),
+        (&P9, 66, 19),
+        (&P16, 67, 19),
+        (&P10, 68, 19),
+        (&P11, 69, 19),
     ];
     pub(super) const R164: &[rt::TemplateBindingRow] = &[
-        (P42, 71, 19),
-        (P151, 72, 19),
+        (&P42, 71, 19),
+        (&P151, 72, 19),
     ];
     pub(super) const R165: &[rt::TemplateBindingRow] = &[
-        (P9, 126, 19),
-        (P10, 127, 19),
-        (P11, 128, 19),
-        (P16, 129, 19),
-        (P42, 130, 19),
+        (&P9, 126, 19),
+        (&P10, 127, 19),
+        (&P11, 128, 19),
+        (&P16, 129, 19),
+        (&P42, 130, 19),
     ];
     pub(super) const R166: &[rt::TemplateBindingRow] = &[
-        (P18, 133, 25),
-        (P19, 134, 25),
+        (&P18, 133, 25),
+        (&P19, 134, 25),
     ];
     pub(super) const R167: &[rt::TemplateBindingRow] = &[
-        (P52, 146, 33),
-        (P79, 147, 33),
+        (&P52, 146, 33),
+        (&P79, 147, 33),
     ];
     pub(super) const R168: &[rt::TemplateBindingRow] = &[
-        (P3, 33, 39),
-        (P117, 34, 39),
-        (P118, 35, 39),
-        (P119, 36, 39),
-        (P120, 37, 39),
-        (P0, 38, 39),
-        (P121, 39, 39),
+        (&P3, 33, 39),
+        (&P117, 34, 39),
+        (&P118, 35, 39),
+        (&P119, 36, 39),
+        (&P120, 37, 39),
+        (&P0, 38, 39),
+        (&P121, 39, 39),
     ];
     pub(super) const R169: &[rt::TemplateBindingRow] = &[
-        (P152, 77, 17),
-        (P9, 78, 17),
-        (P10, 79, 17),
-        (P11, 80, 17),
-        (P16, 81, 17),
+        (&P152, 77, 17),
+        (&P9, 78, 17),
+        (&P10, 79, 17),
+        (&P11, 80, 17),
+        (&P16, 81, 17),
     ];
     pub(super) const R170: &[rt::TemplateBindingRow] = &[
-        (P46, 84, 25),
-        (P47, 85, 25),
-        (P27, 86, 25),
-        (P28, 87, 25),
-        (P45, 88, 25),
-        (P121, 89, 25),
-        (P29, 90, 25),
-        (P43, 91, 25),
-        (P44, 92, 25),
+        (&P46, 84, 25),
+        (&P47, 85, 25),
+        (&P27, 86, 25),
+        (&P28, 87, 25),
+        (&P45, 88, 25),
+        (&P121, 89, 25),
+        (&P29, 90, 25),
+        (&P43, 91, 25),
+        (&P44, 92, 25),
     ];
     pub(super) const R171: &[rt::TemplateBindingRow] = &[
-        (P33, 94, 29),
-        (P17, 95, 29),
+        (&P33, 94, 29),
+        (&P17, 95, 29),
     ];
     pub(super) const R172: &[rt::TemplateBindingRow] = &[
-        (P3, 32, 29),
-        (P4, 33, 29),
-        (P5, 34, 29),
-        (P7, 35, 29),
-        (P6, 36, 29),
+        (&P3, 32, 29),
+        (&P4, 33, 29),
+        (&P5, 34, 29),
+        (&P7, 35, 29),
+        (&P6, 36, 29),
     ];
     pub(super) const R173: &[rt::TemplateBindingRow] = &[
-        (P0, 38, 29),
-        (P2, 39, 29),
-        (P1, 40, 29),
+        (&P0, 38, 29),
+        (&P2, 39, 29),
+        (&P1, 40, 29),
     ];
     pub(super) const R174: &[rt::TemplateBindingRow] = &[
-        (P9, 13, 17),
-        (P10, 14, 17),
-        (P11, 15, 17),
-        (P16, 16, 17),
-        (P42, 17, 17),
-        (P19, 18, 17),
-        (P18, 19, 17),
+        (&P9, 13, 17),
+        (&P10, 14, 17),
+        (&P11, 15, 17),
+        (&P16, 16, 17),
+        (&P42, 17, 17),
+        (&P19, 18, 17),
+        (&P18, 19, 17),
     ];
 }
 

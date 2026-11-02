@@ -426,7 +426,7 @@ pub fn bind_template_binding(
 pub type TemplateBindingProperties = (fn() -> &'static FerroProperty, fn() -> &'static FerroProperty);
 
 /// A resolved property pair and the XAML position of its binding setter.
-pub type TemplateBindingRow = (TemplateBindingProperties, i32, i32);
+pub type TemplateBindingRow = (&'static TemplateBindingProperties, i32, i32);
 
 /// The source operand is evaluated by the caller. Resolve the destination after ProvideValue,
 /// as the interpreter does when it applies the property's binding setter.
@@ -446,7 +446,7 @@ pub fn apply_template_binding(
 pub fn bind_template_rows(
     target: &Ref<FerroObject>, rows: &[TemplateBindingRow],
 ) -> Result<(), XamlLoadError> {
-    for &((source, destination), line, column) in rows {
+    for &(&(source, destination), line, column) in rows {
         apply_template_binding(target, source(), destination, line, column)?;
     }
     Ok(())

@@ -301,9 +301,9 @@ fn template_binding_rows_resolve_operands_in_order_and_stop_on_unwind() {
     let target = Border::new();
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         bind_template_rows(target.upcast_ref::<FerroObject>(), &[
-            ((source, destination), 2, 3),
-            ((fail, destination), 3, 4),
-            ((source, destination), 4, 5),
+            (&(source, destination), 2, 3),
+            (&(fail, destination), 3, 4),
+            (&(source, destination), 4, 5),
         ]).unwrap();
     }));
     assert!(result.is_err());
