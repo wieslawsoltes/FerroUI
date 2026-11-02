@@ -232,16 +232,19 @@ mod tests {
             .split("fn __build_selector_shape_0_add_style")
             .nth(1)
             .unwrap();
-        assert!(helper.find("style_program::begin(") < helper.find("__markup_set_Selector"));
-        assert!(
-            helper.find("__markup_set_Selector") < helper.find("style_program::finish_dynamic")
-        );
+        let begin = helper.find("style_program::begin(").unwrap();
+        let select = helper.find("__markup_set_Selector").unwrap();
+        let attach = helper.find("style_program::finish_dynamic").unwrap();
+        assert!(begin < select && select < attach);
 
         assert!(!plans.helpers.contains("Border") && !plans.helpers.contains("Grid"));
         assert_eq!(
             plans.call("build", Some("prefix"), &steps("T", "s")),
             "__build_selector_shape_1(prefix, T, s)"
         );
+        assert!(plans
+            .start_style("__build_selector_shape_1(prefix, T, s)", None)
+            .is_none());
         assert_eq!(
             plans.call("build", None, &[(Op::Class, vec!["s".into()])]),
             "::ferroui_base::styling::Selectors::class(::core::option::Option::None, s)"
