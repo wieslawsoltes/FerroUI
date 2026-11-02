@@ -22,6 +22,8 @@
 /// What the run-time and the build-time back end share, read from the transformed AST alone.
 pub mod back_end;
 pub mod compiler_extensions;
+#[cfg(feature = "portable-xaml")]
+pub mod binary_document;
 /// The closed table of runtime library types, shared by the run-time and the build-time type system.
 pub mod core_table;
 pub mod parsers;
@@ -36,6 +38,8 @@ pub mod runtime;
 #[cfg(any(feature = "compiler", all(test, feature = "runtime")))]
 pub mod rust_emitter;
 
+#[cfg(feature = "runtime")]
+mod runtime_document_input;
 #[cfg(feature = "runtime")]
 mod ferro_runtime_xaml_loader;
 #[cfg(feature = "runtime")]

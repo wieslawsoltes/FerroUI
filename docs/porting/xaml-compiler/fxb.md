@@ -6,6 +6,8 @@ Enable the `binary-resources` feature of a built-in theme, for example `ferroui-
 
 Each lowered run within one dictionary becomes a separate `.fxb` file alongside its generated Rust module in `OUT_DIR/xaml`. Each compiled call includes only its own block and names its typed factory directly. A decoder in a client process needs no reflection, file I/O or second XML parse. The host-side encoder is feature-gated in the dependency-free `ferroui-xaml-binary` crate. Generated Rust keeps operations that cannot fit in a bounded block.
 
+Portable whole-document FXD images preserve the parsed XamlX syntax graph for runtime transformation. [FXD format and loader](fxd.md)
+
 ## Wire format
 
 | Field in order | Representation |

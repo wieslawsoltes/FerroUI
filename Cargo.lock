@@ -2071,6 +2071,7 @@ dependencies = [
  "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-xaml-binary",
+ "flate2",
  "xamlx",
 ]
 

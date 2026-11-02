@@ -29,6 +29,7 @@ use crate::compiler_extensions::{
     FerroXamlDiagnosticCodes, FerroXamlIlCompiler, FerroXamlIlCompilerConfiguration, FerroXamlIlLanguage,
     IXamlDocumentResource, IXamlDocumentTypeBuilderProvider, XamlDocumentResource,
 };
+use crate::runtime_document_input::DocumentInput;
 use crate::runtime::framework::{self, DocumentBody, RuntimeDocumentTypeBuilderProvider};
 use crate::runtime::type_system::RuntimeTypeSystem;
 
@@ -38,7 +39,7 @@ ferroui_base::ferro_thread_local! {
 
 /// What a document is transformed from.
 struct DocumentSource {
-    xaml: String,
+    input: DocumentInput,
     /// The type of the root instance the document populates.
     override_type: Option<Rc<dyn IXamlType>>,
     /// The name of the document in diagnostics.
@@ -118,19 +119,20 @@ fn group_key(sources: &[DocumentSource], configuration: &RuntimeXamlLoaderConfig
         configuration.local_assembly.map_or("", |assembly| assembly.name),
     );
     for source in sources {
-        // Two independent hashes of the text and its length stand for the text.
+        // The original bytes distinguish different revisions of either representation.
+        let bytes = source.input.bytes();
         let mut first = std::collections::hash_map::DefaultHasher::new();
-        source.xaml.hash(&mut first);
+        bytes.hash(&mut first);
         let mut second = std::collections::hash_map::DefaultHasher::new();
-        (source.xaml.len(), "ferro-xaml").hash(&mut second);
-        source.xaml.bytes().rev().for_each(|byte| byte.hash(&mut second));
+        (bytes.len(), "ferro-xaml").hash(&mut second);
+        bytes.iter().rev().for_each(|byte| byte.hash(&mut second));
         let _ = write!(
             key,
             "\n{}|{}|{}|{}|{:016x}{:016x}",
             source.name,
             source.base_uri.as_deref().unwrap_or(""),
             source.override_type.as_ref().map(|type_| type_.get_full_name()).unwrap_or_default(),
-            source.xaml.len(),
+            bytes.len(),
             first.finish(),
             second.finish(),
         );
@@ -179,15 +181,23 @@ impl FerroXamlIlRuntimeCompiler {
         documents: Vec<RuntimeXamlLoaderDocument>,
         configuration: &RuntimeXamlLoaderConfiguration,
     ) -> XamlResult<Vec<Option<BoxedValue>>> {
-        let runtime_type_system = Self::type_system();
-
-        // The text of the documents and the types of their root instances: what, with the
-        // configuration, determines the transformed documents.
-        let mut sources: Vec<DocumentSource> = Vec::with_capacity(documents.len());
-        for (index, document) in documents.iter().enumerate() {
-            let xaml = document.read_to_string().map_err(|e| {
+        let inputs = documents.into_iter().map(|document| {
+            let input = DocumentInput::read(&mut **document.xaml_stream()).map_err(|e| {
                 XamlError::internal("IOException", format!("Unable to read the XAML document: {e}"))
             })?;
+            Ok((document, input))
+        }).collect::<XamlResult<Vec<_>>>()?;
+        Self::load_inputs(inputs, configuration)
+    }
+
+    pub(crate) fn load_inputs(
+        inputs: Vec<(RuntimeXamlLoaderDocument, DocumentInput)>,
+        configuration: &RuntimeXamlLoaderConfiguration,
+    ) -> XamlResult<Vec<Option<BoxedValue>>> {
+        let runtime_type_system = Self::type_system();
+        let mut sources = Vec::with_capacity(inputs.len());
+        let mut documents = Vec::with_capacity(inputs.len());
+        for (index, (document, input)) in inputs.into_iter().enumerate() {
             let override_type: Option<Rc<dyn IXamlType>> =
                 document.root_instance.as_ref().map(|root| runtime_type_system.runtime_type_of(root));
             #[cfg(all(feature = "hot-reload", debug_assertions))]
@@ -195,11 +205,12 @@ impl FerroXamlIlRuntimeCompiler {
                 .and_then(|provider| ferroui_markup_xaml::reload_events::code_behind(&**provider, &document.root_instance))
                 .map(|root| runtime_type_system.runtime_type_of(&root)).or(override_type);
             sources.push(DocumentSource {
-                xaml,
+                input,
                 override_type,
                 name: document.document.clone().unwrap_or_else(|| format!("runtimexaml{index}")),
                 base_uri: document.base_uri.as_ref().map(|uri| uri.to_string()),
             });
+            documents.push(document);
         }
 
         // A group whose documents were transformed before on this thread is only
@@ -215,10 +226,10 @@ impl FerroXamlIlRuntimeCompiler {
             None => {
                 let type_system = runtime_type_system.as_type_system();
                 let group =
-                    Rc::new(Self::transform_group(&runtime_type_system, type_system, &sources, configuration)?);
+                    Rc::new(Self::transform_group(&runtime_type_system, type_system, &mut sources, configuration)?);
                 if let Some(key) = cache_key {
                     GROUPS.with(|groups| {
-                        let source_bytes = sources.iter().map(|source| source.xaml.len()).sum();
+                        let source_bytes = sources.iter().map(|source| source.input.bytes().len()).sum();
                         groups.borrow_mut().insert(key, source_bytes, group.clone());
                     });
                 }
@@ -268,7 +279,7 @@ impl FerroXamlIlRuntimeCompiler {
     fn transform_group(
         runtime_type_system: &Rc<RuntimeTypeSystem>,
         type_system: Rc<dyn IXamlTypeSystem>,
-        sources: &[DocumentSource],
+        sources: &mut [DocumentSource],
         configuration: &RuntimeXamlLoaderConfiguration,
     ) -> XamlResult<TransformedGroup> {
         let runtime_type_system = runtime_type_system.clone();
@@ -345,9 +356,9 @@ impl FerroXamlIlRuntimeCompiler {
 
         let timings = std::env::var_os(TIMINGS_VARIABLE).is_some();
         let (mut parse_time, mut transform_time) = (std::time::Duration::ZERO, std::time::Duration::ZERO);
-        for document in sources {
+        for document in sources.iter_mut() {
             let start = std::time::Instant::now();
-            let mut parsed: XamlDocument = compiler.parse(&document.xaml, document.override_type.clone())?;
+            let mut parsed: XamlDocument = document.input.parse(&compiler, document.override_type.clone())?;
             parse_time += start.elapsed();
             parsed.document = Some(document.name.clone());
             let start = std::time::Instant::now();
@@ -395,12 +406,12 @@ impl FerroXamlIlRuntimeCompiler {
         throw_exception_if_any_error(&diagnostics.borrow())?;
 
         // The counterpart of compiling each document into its builder type.
-        for ((resource, provider), source) in parsed_documents.iter().zip(&providers).zip(sources) {
+        for ((resource, provider), source) in parsed_documents.iter().zip(&providers).zip(sources.iter()) {
             let xaml_document = resource.xaml_document();
             let xaml_document = xaml_document.borrow();
             let runtime_document = interpreter.document(&xaml_document, resource.uri().as_deref())?;
             #[cfg(all(feature = "hot-reload", debug_assertions))]
-            { *runtime_document.source_text.borrow_mut() = Some(Rc::from(source.xaml.as_str())); }
+            { *runtime_document.source_text.borrow_mut() = source.input.source_text().map(Rc::from); }
             #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
             let _ = source;
             provider.set_body(DocumentBody {
