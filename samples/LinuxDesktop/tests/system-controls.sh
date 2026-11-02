@@ -183,13 +183,52 @@ wait_until original_month_visible
 appearance_is() {
     [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/appearance" 2>/dev/null || :) == "$1" ]]
 }
+# The persisted profile can lead the visual tree and its input focus. For
+# these default profiles, both radios start on. The macOS connectivity module
+# shows two blue radio badges in its left column. The Material shade shows two
+# filled tonal tiles beside each other. Both signatures exclude the chooser and
+# plain wallpaper. The shade's tile row may follow a real monitor's brightness
+# controls, so search for its two fills on the same scan lines.
+settings_presented() {
+    local profile=$1
+    import -window "$window" "$fixture/presentation.png"
+    if /usr/bin/python3 - "$fixture/presentation.png" "$profile" <<'PYTHON'
+import sys
+from PIL import Image, ImageChops
+
+image = Image.open(sys.argv[1]).convert("RGB")
+w, h = image.size
+mac = sys.argv[2] == "macos"
+color = (0, 122, 255) if mac else (56, 93, 72)
+bands = [band.point([255 if abs(v - c) <= 4 else 0 for v in range(256)])
+         for band, c in zip(image.split(), color)]
+mask = ImageChops.multiply(ImageChops.multiply(*bands[:2]), bands[2])
+def pixels(rect):
+    return mask.crop(rect).histogram()[255]
+if mac:
+    present = pixels((w - 320, 78, w - 232, 252)) > 900
+else:
+    present = any(pixels((w - 421, y, w - 245, y + 12)) > 780 and
+                  pixels((w - 208, y, w - 24, y + 12)) > 780
+                  for y in range(76, min(h - 100, 550), 10))
+sys.exit(0 if present else 1)
+PYTHON
+    then return 0; fi
+    # This command selects Quick Settings from any scene, including itself.
+    key ctrl+shift+q
+    return 1
+}
 for entry in '2 macos macos-control-center' '3 material material-quick-settings'; do
     read -r choice profile frame <<<"$entry"
     key ctrl+comma
     key "$choice"
     wait_until appearance_is "$profile"
+    xdotool windowactivate --sync "$window"
     key ctrl+shift+q
-    press_until w wifi_is false
+    wait_until settings_presented "$profile"
+    key w
+    wait_until wifi_is false
+    sleep .2
     press_until w wifi_is true
     bluetooth_cycle "$frame"
 done
