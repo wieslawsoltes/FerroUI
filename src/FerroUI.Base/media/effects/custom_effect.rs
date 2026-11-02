@@ -11,15 +11,20 @@
 //! [`Effect`](super::Effect) with properties) freezes into one through
 //! [`CustomEffectClass`].
 //!
-//! What a backend draws for a custom effect is the business of that
-//! backend's factory for the effect (steps E2 and later of the plan). A
-//! backend without one draws the content unchanged and reports it once
-//! ([`ImmutableCustomEffect::report_unhandled`]).
+//! An effect whose type describes itself as an effect graph
+//! ([`CustomEffect::graph`], step E2) is drawn by the render walk as that
+//! graph around the content of its visual, with the shared painter of the
+//! composition effects, on every backend. What a backend draws for another
+//! custom effect is the business of that backend's factory for the effect
+//! (steps E4 and later of the plan). A backend without one draws the content
+//! unchanged and reports it once ([`ImmutableCustomEffect::report_unhandled`]).
 
+use super::custom_effect_graph::{load_custom_effect_graph, CustomEffectGraph};
 use super::{IEffect, IImmutableEffect};
 use crate::animation::animators::{ColorAnimator, DoubleAnimator};
 use crate::logging::{LogEventLevel, Logger};
 use crate::media::Color;
+use crate::rendering::composition::effects::{CompositionEffectFactoryError, GraphicsEffect};
 use crate::{ObjectType, Point, Rect, Size, Thickness, Vector};
 use std::any::{Any, TypeId};
 use std::fmt;
@@ -321,6 +326,11 @@ impl From<Arc<str>> for EffectParameterValue {
     }
 }
 
+/// The name of the source parameter of the graph of a custom effect
+/// ([`CustomEffect::graph`]) that is the content of the visual the effect is
+/// set on: `content`.
+pub const CUSTOM_EFFECT_CONTENT: &str = "content";
+
 /// An effect defined outside the framework: an immutable value of plain
 /// data (numbers, colours, points; never a live object), shared with the
 /// render thread as an [`ImmutableCustomEffect`].
@@ -402,6 +412,72 @@ pub trait CustomEffect: Clone + PartialEq + Default + fmt::Debug + Send + Sync +
         });
         result
     }
+
+    /// The effect as an effect graph (#455, E2), in the vocabulary of the
+    /// composition effects
+    /// ([`GraphicsEffect`](crate::rendering::composition::effects::GraphicsEffect)):
+    /// the description of the graph, whose source parameter `content`
+    /// ([`CUSTOM_EFFECT_CONTENT`]) is the content of the visual the effect is
+    /// set on, and whose animatable members take the values of
+    /// [`for_each_graph_value`](Self::for_each_graph_value). `None` (the
+    /// default) for an effect without a graph.
+    ///
+    /// The description is read once per type and loaded into a graph with
+    /// the checks of `Compositor::create_effect_factory_with_properties`; the
+    /// render walk paints the graph around the content of the visual (the
+    /// composed content is the source parameter `content`, as the children
+    /// of a layer visual are the first source parameter of its effect), and
+    /// every frame only sets the values of the members. A graph whose source
+    /// parameters are not all `content`, or that does not load, is reported
+    /// once (a warning in the log area `Visual`) and the effect is drawn as
+    /// an effect without a graph.
+    ///
+    /// The content is one layer: a graph uses it once, along one path of
+    /// the graph; a second use of `content` draws nothing, except under a
+    /// source-over composite of a shadow of the content and the content
+    /// itself (a glow), which is drawn as the drop shadow effect of the
+    /// drawing contexts.
+    ///
+    /// **Members.** The animatable members are named as the animatable
+    /// properties of an effect factory, `EffectName.PropertyName`
+    /// (`Tint.Color`), where `EffectName` is the `name` of an effect of the
+    /// graph. A value of [`for_each_graph_value`](Self::for_each_graph_value)
+    /// named with a dot sets that member; a value named without one (as the
+    /// parameters are) sets the one animatable member of its kind of the
+    /// effect of the graph with that name: a parameter `amount` (a number)
+    /// sets `amount.Intensity` of a sepia effect named `amount`. A number
+    /// sets a scalar member, a colour a colour member; other kinds are not
+    /// members.
+    fn graph() -> Option<GraphicsEffect> {
+        None
+    }
+
+    /// Calls `f` with the name and the value of each animatable member of
+    /// the [`graph`](Self::graph) for this value, in a fixed order (the order
+    /// and the names do not depend on the value). By default the parameters
+    /// ([`for_each_parameter`](Self::for_each_parameter)): each parameter is
+    /// the value of the effect of the graph named after it. An effect whose
+    /// members are computed from its parameters (a matrix from a strength, a
+    /// clamped value) gives them here, named `EffectName.PropertyName`.
+    fn for_each_graph_value(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+        CustomEffect::for_each_parameter(self, f)
+    }
+
+    /// The CPU reference of the effect (decision 3 of the plan): applies the
+    /// effect to `pixels`, premultiplied RGBA of eight bits a channel, `width`
+    /// by `height` pixels in rows of `width * 4` bytes, the content drawn at
+    /// `scale` pixels per device independent pixel over the area of the
+    /// effect (its content and its padding). Returns whether the effect has
+    /// a reference; `false` (the default) leaves the pixels unchanged.
+    ///
+    /// It is what the render tests compare the output of the GPU with, and
+    /// the fallback of a backend that has no GPU program for the effect.
+    /// Every effect FerroUI ships has one; an application's own effect may
+    /// leave it out.
+    fn cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, scale: f64) -> bool {
+        let _ = (pixels, width, height, scale);
+        false
+    }
 }
 
 /// The type-erased form of a [`CustomEffect`], what an
@@ -417,6 +493,9 @@ pub(crate) trait AnyCustomEffect: fmt::Debug + Send + Sync + 'static {
     fn visit_parameters(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue));
     fn interpolate_value(&self, to: &dyn AnyCustomEffect, progress: f64) -> Option<Arc<dyn AnyCustomEffect>>;
     fn neutral_value(&self) -> Option<Arc<dyn AnyCustomEffect>>;
+    fn graph_of_type(&self) -> Option<Result<Arc<CustomEffectGraph>, CompositionEffectFactoryError>>;
+    fn visit_graph_values(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue));
+    fn value_cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, scale: f64) -> bool;
 }
 
 impl<T: CustomEffect> AnyCustomEffect for T {
@@ -447,6 +526,18 @@ impl<T: CustomEffect> AnyCustomEffect for T {
 
     fn neutral_value(&self) -> Option<Arc<dyn AnyCustomEffect>> {
         T::neutral().map(|neutral| Arc::new(neutral) as Arc<dyn AnyCustomEffect>)
+    }
+
+    fn graph_of_type(&self) -> Option<Result<Arc<CustomEffectGraph>, CompositionEffectFactoryError>> {
+        load_custom_effect_graph::<T>()
+    }
+
+    fn visit_graph_values(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+        CustomEffect::for_each_graph_value(self, f)
+    }
+
+    fn value_cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, scale: f64) -> bool {
+        CustomEffect::cpu_reference(self, pixels, width, height, scale)
     }
 }
 
@@ -536,6 +627,46 @@ impl ImmutableCustomEffect {
     /// ([`CustomEffect::neutral`]).
     pub fn neutral(&self) -> Option<ImmutableCustomEffect> {
         self.value.neutral_value().map(|value| Self { value })
+    }
+
+    /// The graph of the type of the effect, loaded once per type
+    /// ([`CustomEffect::graph`]); `None` when the type has none or it did not
+    /// load.
+    pub(crate) fn graph(&self) -> Option<Arc<CustomEffectGraph>> {
+        self.value.graph_of_type().and_then(Result::ok)
+    }
+
+    /// Whether the type of the effect has a graph that loaded
+    /// ([`CustomEffect::graph`]): the render walk draws the effect as that
+    /// graph around the content of its visual.
+    pub fn has_graph(&self) -> bool {
+        self.graph().is_some()
+    }
+
+    /// Why the graph of the type of the effect did not load, as an effect
+    /// factory reports it; `None` when it loaded or the type has none.
+    pub fn graph_error(&self) -> Option<CompositionEffectFactoryError> {
+        self.value.graph_of_type().and_then(Result::err)
+    }
+
+    /// The animatable members of the graph of the type: for each value of
+    /// [`for_each_graph_value`](Self::for_each_graph_value), in order, its
+    /// name and the full name of the member it sets
+    /// (`EffectName.PropertyName`). Empty without a graph.
+    pub fn graph_members(&self) -> Vec<(&'static str, String)> {
+        self.graph().map(|graph| graph.members.clone()).unwrap_or_default()
+    }
+
+    /// Calls `f` with the name and value of each animatable member of the
+    /// graph of the effect ([`CustomEffect::for_each_graph_value`]).
+    pub fn for_each_graph_value(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+        self.value.visit_graph_values(f)
+    }
+
+    /// Applies the CPU reference of the effect to premultiplied RGBA pixels
+    /// ([`CustomEffect::cpu_reference`]); returns whether the effect has one.
+    pub fn cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, scale: f64) -> bool {
+        self.value.value_cpu_reference(pixels, width, height, scale)
     }
 
     /// Reports that `backend` has no factory for this effect, so that it

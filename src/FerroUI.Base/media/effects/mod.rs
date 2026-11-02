@@ -3,6 +3,7 @@
 
 mod blur_effect;
 mod custom_effect;
+pub(crate) mod custom_effect_graph;
 mod custom_effect_registry;
 #[cfg(test)]
 mod custom_effect_tests;
@@ -13,9 +14,12 @@ mod i_blur_effect;
 mod i_drop_shadow_effect;
 mod i_effect;
 mod immutable_luminance_to_alpha_effect;
+pub mod library;
 
 pub use blur_effect::BlurEffect;
-pub use custom_effect::{CustomEffect, CustomEffectClass, EffectParameterValue, ImmutableCustomEffect};
+pub use custom_effect::{
+    CustomEffect, CustomEffectClass, EffectParameterValue, ImmutableCustomEffect, CUSTOM_EFFECT_CONTENT,
+};
 pub use custom_effect_registry::{CustomEffectRegistrationError, CustomEffectRegistry};
 pub use drop_shadow_effect::{DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase};
 pub use effect::Effect;
