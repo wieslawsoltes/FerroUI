@@ -259,3 +259,17 @@ fn a_command_bar_label_on_the_right_is_bounded_by_its_capitals_and_its_baseline(
     assert_eq!(ferroui_base::media::TextLineBounds::Full, TextBlock::new().text_line_bounds());
     window.close();
 }
+
+/// These are the two build paths published beside the class in compiled_xaml.xamlmeta.
+/// Downstream XAML can include either document without constructing WinUITheme first.
+#[test]
+fn exported_dictionary_builders_load_their_own_resources() {
+    let _app = start_application();
+    let compact = crate::compiled_xaml::build_densitystyles_compact_xaml(None).unwrap();
+    assert_eq!(from_markup_value::<f64>(&compact.get(&key("ControlContentThemeFontSize"))), Some(14.0));
+
+    let controls = crate::compiled_xaml::build_controls_winuicontrols_xaml(None).unwrap();
+    let keys = controls.resources().keys();
+    assert!(keys.contains(&ResourceKey::Type(Button::TYPE)));
+    assert!(keys.contains(&key("DefaultDatePickerStyle")));
+}
