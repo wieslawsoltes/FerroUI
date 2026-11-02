@@ -7,6 +7,11 @@
 //! its own equality, padding and interpolation, so transitions and
 //! animations of `Visual.Effect` work for every custom effect, registered or
 //! not, and the render thread never looks a name up.
+//!
+//! The effects FerroUI ships ([`library`](super::library)) are registered the
+//! first time the registry is read. Registering a type also loads its effect
+//! graph, if it has one ([`CustomEffect::graph`]), and registers the graph
+//! for the prewarm of the GPU programs.
 
 use super::custom_effect::normalize_identifier;
 use super::{CustomEffect, ImmutableCustomEffect};
@@ -61,8 +66,9 @@ impl std::error::Error for CustomEffectRegistrationError {}
 pub struct CustomEffectRegistry;
 
 impl CustomEffectRegistry {
-    /// Registers `T` under [`CustomEffect::NAME`]. Registering a type again
-    /// does nothing.
+    /// Registers `T` under [`CustomEffect::NAME`], and loads its graph
+    /// ([`CustomEffect::graph`]), which is registered for the prewarm.
+    /// Registering a type again does nothing.
     pub fn register<T: CustomEffect>() -> Result<(), CustomEffectRegistrationError> {
         let name = T::NAME;
         if name.is_empty() || !name.chars().all(|c| c.is_alphanumeric() || c == '-' || c == '_') {
@@ -84,6 +90,9 @@ impl CustomEffectRegistry {
             };
         }
         registry.push(Registration { name, key, type_id: TypeId::of::<T>(), parse: parse_registered::<T> });
+        drop(registry);
+        // Not under the lock: the graph is code of the effect.
+        let _ = super::custom_effect_graph::load_custom_effect_graph::<T>();
         Ok(())
     }
 
@@ -112,7 +121,9 @@ impl CustomEffectRegistry {
         Some(parse(&arguments).map_err(|reason| FormatError::from_string(format!("Unable to parse effect: {s} ({reason})"))))
     }
 
+    /// The registrations, the effects of the library among them.
     fn registry() -> std::sync::RwLockReadGuard<'static, Vec<Registration>> {
+        super::library::register_library_effects();
         REGISTRY.read().unwrap_or_else(|poisoned| poisoned.into_inner())
     }
 }

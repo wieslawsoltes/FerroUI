@@ -136,3 +136,76 @@ fn the_device_draws_the_exact_light_and_steady_frames_allocate_nothing() {
         }
     }
 }
+
+/// The custom effects FerroUI ships, drawn as their graphs in the hybrid
+/// and GPU modes (#455, E2), compared with the CPU reference of each effect
+/// applied to the same scene drawn plain in the same mode. The colour
+/// matrix layers are drawn there by the CPU fallback until the route of
+/// "layers with an effect" (E3, gpu-rendering.md); the test holds the
+/// output to the reference meanwhile.
+#[test]
+fn the_library_effects_match_their_cpu_references_in_the_gpu_modes() {
+    use ferroui_base::media::effects::library::{
+        BrightnessContrastEffect, GlowEffect, GrayscaleEffect, InvertEffect, SaturationEffect, SepiaEffect, TintEffect,
+    };
+    use ferroui_base::media::effects::ImmutableCustomEffect;
+    use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+    use ferroui_base::media::{BoxShadows, Color, Colors, EdgeMode, RenderOptions};
+    use ferroui_base::rendering::composition::effects::{pop_custom_effect_graph, push_custom_effect_graph};
+    use ferroui_base::RoundedRect;
+
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    fn scene(context: &mut dyn IDrawingContextImpl) {
+        let solid = |color: Color| ImmutableSolidColorBrush::new(color);
+        let square = |x: f64, y: f64, w: f64, h: f64| RoundedRect::from_rect(Rect::new(x, y, w, h));
+        context.push_render_options(RenderOptions { edge_mode: EdgeMode::Aliased, ..RenderOptions::default() });
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, square(24.0, 24.0, 20.0, 20.0), &BoxShadows::default());
+        let steel_blue = Color::from_rgb(48, 128, 192);
+        context.draw_rectangle(Some(&solid(steel_blue)), None, square(46.0, 24.0, 20.0, 20.0), &BoxShadows::default());
+        let orange = Color::from_argb(128, 255, 128, 0);
+        context.draw_rectangle(Some(&solid(orange)), None, square(24.0, 46.0, 42.0, 18.0), &BoxShadows::default());
+        context.pop_render_options();
+    }
+    let render = |mode: VelloRenderingMode, effect: Option<&ImmutableCustomEffect>| -> Vec<u8> {
+        let pixels = Rc::new(RefCell::new(vec![0u8; usize::from(SIZE) * usize::from(SIZE) * 4]));
+        let mut drawing = context(&device, mode, &pixels);
+        let bounds = Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE));
+        if let Some(effect) = effect {
+            assert!(push_custom_effect_graph(&mut drawing, effect, bounds));
+        }
+        scene(&mut drawing);
+        if let Some(effect) = effect {
+            assert!(pop_custom_effect_graph(&mut drawing, effect, bounds));
+        }
+        drawing.dispose();
+        let rendered = pixels.borrow().clone();
+        rendered
+    };
+
+    let effects = [
+        (ImmutableCustomEffect::new(TintEffect { color: Colors::TEAL, strength: 0.6 }), 2u8),
+        (ImmutableCustomEffect::new(GrayscaleEffect { amount: 0.8 }), 2),
+        (ImmutableCustomEffect::new(SepiaEffect { amount: 0.9 }), 2),
+        (ImmutableCustomEffect::new(SaturationEffect { saturation: 1.7 }), 2),
+        (ImmutableCustomEffect::new(BrightnessContrastEffect { brightness: 0.1, contrast: 1.4 }), 2),
+        (ImmutableCustomEffect::new(InvertEffect { amount: 1.0 }), 2),
+        (ImmutableCustomEffect::new(GlowEffect { color: Colors::BLUE, blur_radius: 4.0, intensity: 0.8 }), 12),
+    ];
+    for mode in device_modes(&device) {
+        for (effect, largest) in &effects {
+            let mut expected = render(mode, None);
+            assert!(effect.cpu_reference(&mut expected, usize::from(SIZE), usize::from(SIZE), 1.0), "{effect}");
+            let actual = render(mode, Some(effect));
+            let most = expected.iter().zip(&actual).map(|(a, b)| a.abs_diff(*b)).max().unwrap_or(0);
+            let total: u64 = expected.iter().zip(&actual).map(|(a, b)| u64::from(a.abs_diff(*b))).sum();
+            let mean = total as f64 / expected.len() as f64;
+            assert!(most <= *largest && mean <= 0.5, "{mode:?}: {effect}: largest difference {most}, mean {mean}");
+        }
+    }
+}

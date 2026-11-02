@@ -35,6 +35,7 @@ mod context_flyout_page;
 mod context_menu_page;
 mod cursor_page;
 mod custom_drawing;
+mod custom_effects_page;
 mod custom_drawing_example_control;
 mod data_validation_page;
 mod dialogs_page;

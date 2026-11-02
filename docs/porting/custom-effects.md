@@ -204,6 +204,53 @@ The registration of factories is per backend (`ferroui-skia` and `ferroui-vello`
 base crate only defines the descriptions), keyed by `value_type_id()`. A miss is the no-op of
 E1.
 
+**Graph effects as built (E2).** The hook is three provided members of `CustomEffect`:
+
+```rust
+fn graph() -> Option<GraphicsEffect> { None }      // type-level, read once per type
+fn for_each_graph_value(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+    CustomEffect::for_each_parameter(self, f)      // the values of the members, by default the parameters
+}
+fn cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, scale: f64) -> bool { false }
+```
+
+- *The content.* The source parameter `content` (`CUSTOM_EFFECT_CONTENT`) is the composed content
+  of the visual. A graph with another source parameter does not load. The content is one layer,
+  as the children of a layer visual are for its effect brush: the graph uses it once, along one
+  path; the exception is a source-over composite of a shadow of the content and the content itself
+  (the Win2D way of writing a glow or a drop shadow), which the painter draws as the drop shadow
+  effect of the drawing context around the content, both from the one layer. This also applies
+  to `LayerVisual.Effect`, whose padding now includes the shadows around the layer.
+- *Naming of the members.* A member is named as an animatable property of
+  `Compositor::create_effect_factory_with_properties`: `EffectName.PropertyName`, where
+  `EffectName` is the `name` of an effect of the graph and `PropertyName` one of its animatable
+  properties (`Tint.Color`, `Transfer.RedSlope`). A value of `for_each_graph_value` whose name has
+  a dot sets that member. A value whose name has no dot, as the parameters have, sets the one
+  animatable property of its kind of the effect named after it: the parameter `amount` (a number)
+  of `sepia` sets `amount.Intensity` of the sepia effect named `amount`. A number sets a scalar
+  property, a colour a colour property; an effect with no or several properties of the kind is a
+  load error (`InvalidAnimatableProperty`). An effect whose members are computed from its
+  parameters (a matrix from a strength, a clamped value) overrides `for_each_graph_value` and names
+  them in full.
+- *Loading and drawing.* The graph is loaded once per type by `EffectGraph::load_with_members`,
+  the loader and checks of the effect factories, cached by `TypeId` (process-wide, the render
+  thread loads a type it meets first, `CustomEffectRegistry::register` loads the registered ones
+  on the UI thread), and registered for the prewarm under `custom-effect:<NAME>`, which draws it
+  around an image as the walk draws it. The render walk asks the snapshot for its graph: with one,
+  it paints the graph around the content of the visual (`push_custom_effect_graph`, the content,
+  `pop_custom_effect_graph`), over the bounds of the subtree with the padding of the effect, the
+  values of the snapshot as the members; without one, it pushes the effect, which the backends
+  draw unchanged (E1). The painter is the one of the effect brushes (`EffectGraphPainter`), whose
+  host gives the values of the members: the property set of a brush, the snapshot of a custom
+  effect, the description in the prewarm.
+- *The library* (`ferroui_base::media::effects::library`, registered the first time the registry
+  is read): `tint` (a tint effect, `Tint.Color` the colour mixed with white by the strength),
+  `grayscale` (a saturation effect at `1 - amount`), `sepia` (Win2D's sepia effect, its intensity
+  the parameter), `saturation` (a saturation effect, clamped to 0..2.5), `brightness-contrast` and
+  `invert` (Win2D's linear transfer, slopes and offsets of the colour channels), `glow` (the shadow
+  of the content under the content, drawn as a drop shadow). Each matches Effector's matrices and
+  clamps, and has a CPU reference.
+
 ### 3.4 Runtime shaders and portability between Skia and Vello
 
 **Skia** runs SkSL on every surface (raster, Ganesh, Graphite). A shader effect is a save layer
@@ -291,6 +338,13 @@ ported as the reference set.
   inside the pushed effect (`rendering/composition/composition_custom_effect_tests.rs`); the no-op
   of each backend, pixel by pixel (`custom_effect_without_a_factory_draws_unchanged` in
   `ferroui-skia/tests.rs` and `ferroui-vello/effect_tests.rs`).
+- E2: the loader of the members (`effect_graph.rs`), the library effects (graphs, members, round
+  trips, neutral values, CPU references, registration and prewarm; `media/effects/library_tests.rs`),
+  the render walk drawing each library effect as its graph with the matrix of its snapshot, the
+  glow as a drop shadow, a parameter bound by the name of an effect and a graph that does not load
+  (`composition_custom_effect_tests.rs`), and each library effect drawn on Skia raster and Graphite
+  (`tests.rs`, `gpu/metal/tests.rs`) and on Vello CPU, hybrid and GPU (`effect_tests.rs`,
+  `gpu/effect_pass_tests.rs`) against its CPU reference.
 - Later steps: per effect and backend, the GPU output against the CPU reference
   (`tests/FerroUI.RenderTests`, `tests/FerroUI.RenderBackends.Comparison`); the steady-state test
   (no new texture or program over frames that change only parameters, with the allocation
@@ -305,7 +359,7 @@ Each step is one pull request from main.
 |---|---|---|---|
 | E0 | This plan | none | none |
 | E1 | The open effect model in ferroui-base (section 3.2): `CustomEffect`, `EffectParameterValue`, `ImmutableCustomEffect`, `CustomEffectClass` and `Effect::construct_custom`, `IEffect::as_custom_effect`, `EffectExtensions::to_custom_effect`, `CustomEffectRegistry` and `Effect::parse`, `CustomEffectAnimator` and `EffectTransition`; the no-op and the report of Skia and Vello; tests | additions (a provided method of `IEffect`) | low: the built-in effects take the same paths; an `IEffect` of an unknown kind still panics in `get_effect_output_padding` as upstream |
-| E2 | Graph effects (section 3.3, kind 1): the description hook of `CustomEffect`, loaded once per type into an `EffectGraph`, painted around the content by the render walk with the parameters as animatable members, registered for the prewarm; the colour effects of the sample set as graphs | addition | medium: the walk gains a second way to draw `Visual.Effect`; the graph painter is shared with the effect brushes |
+| E2 | Graph effects (section 3.3, kind 1): the description hook of `CustomEffect`, loaded once per type into an `EffectGraph`, painted around the content by the render walk with the parameters as animatable members, registered for the prewarm; the colour effects of the sample set as graphs. **Done**: `graph`, `for_each_graph_value`, `cpu_reference`, the library of section 3.3, the catalog page "Custom effects" | addition | medium: the walk gains a second way to draw `Visual.Effect`; the graph painter is shared with the effect brushes |
 | E3 | Convolution and the Vello colour layers: a `ConvolveMatrixEffect` node (Skia: a matrix convolution image filter; Vello: a WGSL pass), and Vello step 2 of gpu-rendering.md ("layers with an effect": the content into a pooled device texture, a pass into another) for the colour matrix nodes, so the graph effects are GPU on Vello's GPU and hybrid modes | addition | high: the Vello pass reads the content of a layer, a new route in the scene |
 | E4 | Runtime shader effects on Skia (section 3.4): the shader description (SkSL source, the uniform convention, children, blend mode, overlay or content-sampling), compiled once per thread by `runtime_effects.rs`, drawn as a runtime-shader image filter of a save layer; the shader samples | addition | medium: SkSL errors surface at the first draw (logged once, then the no-op) |
 | E5 | Runtime shader effects on Vello: the WGSL source of the description, checked with naga, a pass of `effect_passes.rs` compiled once per device on the route of E3; WebGL2 by GLSL ES generated at build time (decision 2); the CPU reference hook (decision 3) | addition | high: depends on E3 |
@@ -314,8 +368,14 @@ Each step is one pull request from main.
 | E8 | Samples and catalog pages (section 3.7) | none (samples) | low |
 | E9 | Validation and documentation: render tests GPU against the CPU reference per backend and mode, comparison scenes, the steady-state and prewarm tests, the rows of gpu-rendering.md, a section in winui-composition.md on how WinUI's effect and render subsystems map to FerroUI | none | low |
 
-Status: E0 and E1 are this pull request (#455). E1 has the model and the no-op; no backend draws a
-custom effect yet.
+Status: E0 and E1 are merged (#455): the model and the no-op. E2 is done: a custom effect whose
+type has a graph is drawn by the render walk as that graph around the content, through the painter
+of the composition effects, on every backend (section 3.3, "Graph effects as built"); the colour
+effects and the glow of the sample set ship as such effects with CPU references, and the render
+tests hold Skia (raster and Graphite) and Vello (CPU, hybrid and GPU modes) to those references.
+What each node costs on each backend is the status of gpu-rendering.md: the colour matrix layers
+are GPU on Skia and the CPU fallback on Vello until E3; the glow is GPU on Skia and on Vello where
+the scene has filter layers. Another custom effect keeps the no-op of E1.
 
 ## 5. Not in scope
 

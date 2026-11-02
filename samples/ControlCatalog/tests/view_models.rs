@@ -104,7 +104,7 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
 /// The pages of the section "Composition" (not from upstream): the composition page of the
 /// original, then one per feature of the WinUI composition API and of the WinUI materials, in the
 /// order of the page list.
-const COMPOSITION_PAGES: [&str; 20] = [
+const COMPOSITION_PAGES: [&str; 21] = [
     "Composition overview",
     "Connected animations",
     "Implicit animations",
@@ -121,6 +121,7 @@ const COMPOSITION_PAGES: [&str; 20] = [
     "Zoom and manipulation",
     "Acrylic brush",
     "Blend and colour effects",
+    "Custom effects",
     "Lighting",
     "Reveal",
     "System backdrops",
