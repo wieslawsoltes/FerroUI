@@ -4,7 +4,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::task::{Context, Poll};
 
-use super::dispatcher_task::current_task_of;
+use ferroui_system::task;
+
 use super::{Dispatcher, DispatcherPriority};
 
 /// Resumes the awaiting code from a dispatcher job of a given priority.
@@ -30,17 +31,16 @@ impl Resumption {
             let resumed = self.resumed.clone();
             let waker = cx.waker().clone();
             // When the awaiting code is a task of this dispatcher, the job
-            // polls it directly, so that it continues inside the job of the
-            // requested priority. Any other executor is woken up instead.
-            let task = current_task_of(&self.dispatcher).map(|task_id| (self.dispatcher.clone(), task_id));
+            // polls it directly (`task::poll_now`), so that it continues
+            // inside the job of the requested priority; a task that is being
+            // polled when the job runs (the job ran in a nested loop of its
+            // poll) is polled again through its own schedule after that poll.
+            // Any other executor is woken up instead.
+            let own_task = task::try_id().filter(|id| self.dispatcher.owns_task(*id));
             self.dispatcher.post(
                 move || {
                     resumed.store(true, Ordering::SeqCst);
-                    let polled = match &task {
-                        Some((dispatcher, task_id)) => dispatcher.poll_task(*task_id),
-                        None => false,
-                    };
-                    if !polled {
+                    if !own_task.is_some_and(task::poll_now) {
                         waker.wake();
                     }
                 },

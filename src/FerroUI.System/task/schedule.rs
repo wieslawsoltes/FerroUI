@@ -1,5 +1,7 @@
 //! Where the polls of a task run: [`Schedule`] and [`FirstPoll`].
 
+use super::join::AbortHandle;
+
 /// Where the polls of a task run: called from any thread, it queues `poll` to run on the task's
 /// thread, in order with the other work of that thread.
 ///
@@ -9,6 +11,13 @@
 pub trait Schedule: Send + Sync + 'static {
     /// Queues `poll` to run on the thread of the task.
     fn schedule(&self, poll: Box<dyn FnOnce() + Send>);
+
+    /// Told on the thread of a task, before its first poll, when the task is given to this
+    /// schedule: a schedule that ends its tasks itself (a dispatcher that shuts down aborts them)
+    /// keeps the handle, and may abort the task here. Does nothing by default.
+    fn spawned(&self, task: AbortHandle) {
+        let _ = task;
+    }
 }
 
 impl<F> Schedule for F

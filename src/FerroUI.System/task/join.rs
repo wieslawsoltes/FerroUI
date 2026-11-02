@@ -1,5 +1,5 @@
-//! [`JoinHandle`], the handle of a spawned task, and [`JoinError`], how a task ends without the
-//! output of its future.
+//! [`JoinHandle`], the handle of a spawned task, [`JoinError`], how a task ends without the
+//! output of its future, [`AbortHandle`] and the [`Id`] of a task.
 
 use super::executor::{panic_message, Failure, Header, LocalCallback};
 use super::shared::Shared;
@@ -10,6 +10,62 @@ use std::pin::Pin;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, PoisonError};
 use std::task::{Context, Poll, Waker};
+
+/// The id of a task, unique in the process.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Id(u64);
+
+impl Id {
+    pub(crate) fn new(id: u64) -> Self {
+        Self(id)
+    }
+
+    pub(crate) fn get(self) -> u64 {
+        self.0
+    }
+}
+
+impl fmt::Display for Id {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
+    }
+}
+
+/// Aborts a task without owning its outcome ([`JoinHandle::abort_handle`]): any number of them,
+/// from any thread. Dropping one does nothing to the task.
+#[derive(Clone)]
+pub struct AbortHandle {
+    header: Arc<Header>,
+}
+
+impl AbortHandle {
+    pub(crate) fn new(header: Arc<Header>) -> Self {
+        Self { header }
+    }
+
+    /// The id of the task.
+    pub fn id(&self) -> Id {
+        Id(self.header.id())
+    }
+
+    /// Whether the task has ended, in any way, and its future is dropped.
+    pub fn is_finished(&self) -> bool {
+        self.header.is_finished()
+    }
+
+    /// Aborts the task, as [`JoinHandle::abort`] does, unless it has ended.
+    pub fn abort(&self) {
+        if !self.is_finished() {
+            self.header.abort();
+        }
+    }
+}
+
+impl fmt::Debug for AbortHandle {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AbortHandle").field("id", &self.header.id()).field("finished", &self.is_finished()).finish()
+    }
+}
 
 /// Why a task ended without the output of its future.
 pub enum JoinError {
@@ -180,6 +236,16 @@ impl<T> JoinHandle<T> {
     /// Whether the task has ended, in any way.
     pub fn is_finished(&self) -> bool {
         self.cell.is_finished()
+    }
+
+    /// The id of the task.
+    pub fn id(&self) -> Id {
+        Id(self.header.id())
+    }
+
+    /// A handle that aborts the task, for other owners than the one of the outcome.
+    pub fn abort_handle(&self) -> AbortHandle {
+        AbortHandle::new(self.header.clone())
     }
 
     /// Aborts the task: its future is dropped and the outcome is [`JoinError::Canceled`], unless

@@ -196,7 +196,7 @@ question; each is decided in the step named.
 
 | # | Finding | Step |
 |---|---|---|
-| F1 | **Lost wake of a dispatcher task polled in a nested loop.** `poll_task` takes the task out of the table while it polls it and clears its `scheduled` flag. If the future pumps the queue during that poll (a synchronous `invoke_local_with_priority` at a priority other than `Send`, `DispatcherOperation::wait`, `push_frame`), and something it awaits completes there, the queued poll runs inside the pump, finds no task and does nothing, and `scheduled` stays set: every later wake is swallowed and the task never resumes. The executor of `ferroui-system` handles the same case (a wake during a poll repolls after it). | A2 fixes it, with a test |
+| F1 | **Lost wake of a dispatcher task polled in a nested loop.** `poll_task` takes the task out of the table while it polls it and clears its `scheduled` flag. If the future pumps the queue during that poll (a synchronous `invoke_local_with_priority` at a priority other than `Send`, `DispatcherOperation::wait`, `push_frame`), and something it awaits completes there, the queued poll runs inside the pump, finds no task and does nothing, and `scheduled` stays set: every later wake is swallowed and the task never resumes. The executor of `ferroui-system` handles the same case (a wake during a poll repolls after it). | A2 fixes it, with a test: done (`a_task_whose_poll_pumps_the_queue_resumes_after_a_wake_that_ran_in_the_pump`) |
 | F2 | **A panic in a future of `ferroui-system` strands it.** `poll_task` does not catch: the panic leaves through the call that woke the future (often `set_result`), the task stays `Running` in the table with its `polling` flag set, and the awaiters of the same task that were not woken yet never are (the panic leaves `finish` with the rest of its wakers). The dispatcher's executor catches and faults the task. | A1 (the panic faults the task, as on the dispatcher): done |
 | F3 | **Continuations inline or queued.** Section 1.4: the two executors of a dispatcher thread order continuations differently, and neither is the .NET rule. | A2 keeps the dispatcher's rule; A5 decides the rule for the tasks of the reactive libraries on a dispatcher thread |
 | F4 | **Order of cancellation callbacks.** The port runs them in the order of registration; .NET runs them in reverse order. Not recorded in DEVIATIONS. | A4 keeps the order of registration and records it |
@@ -436,7 +436,7 @@ where they are large.
 |---|---|---|---|
 | A0 (done, #498) | This plan; the ordering tests of section 2 | unchanged | none |
 | A1 (done) | The executor core in `ferroui-system` (`task::{spawn_local_on, JoinHandle, JoinError, Shared, Schedule, block_on}`), with its tests; `threading::tasks` (`Task`, `spawn_local`, `block_on`, `run`) on it with today's inline rule; a panic faults the task (F2) | additions | medium: every task of the reactive libraries; their ported tests and G9, G19, G20 guard it |
-| A2 | The dispatcher on the core: its schedule per priority, `Dispatcher::spawn_local`, `spawn_local_with_priority` and `spawn`; `DispatcherTask`, `DispatcherTaskScheduler` and `invoke_async_task*` as wrappers over them; `resume`, `yield_now`, `await_with_priority` on the core; the lost wake (F1) fixed, with a test | additions | high: every asynchronous step of the user interface; G1 to G17 unchanged |
+| A2 (done) | The dispatcher on the core: its schedule per priority, `Dispatcher::spawn_local`, `spawn_local_with_priority` and `spawn`; `DispatcherTask`, `DispatcherTaskScheduler` and `invoke_async_task*` as wrappers over them; `resume`, `yield_now`, `await_with_priority` on the core; the lost wake (F1) fixed, with a test | additions | high: every asynchronous step of the user interface; G1 to G17 unchanged |
 | A3 | `task::oneshot`; the ten local completions move to it, by crate (X11, remote protocol, dialogs, headless, iOS, Android, FreeDesktop, WinUI) | additions; `ferroui-x11`'s public `TaskCompletionSource` deprecated | low per crate; a dropped sender now cancels (F6, a DEVIATIONS row where the copy did not) |
 | A4 | One cancellation type: `CancellationToken` reshaped (section 3.7), `CancellationGuard`, `cancelled()`, `child_token()`, `drop_guard()`; `task::Canceled` for `OperationCanceledError` and `TaskCanceledError`; the local cancellation types replaced; F4 recorded | 0.5: the old names deprecated | medium: 602 uses; registrations that were dropped get `detach()` (the compiler lists them, as in D4) |
 | A5 | `SynchronizationContext` to the thread's schedule: `set_thread_schedule`, `Dispatcher::current_priority`, `FerroScheduler::install_on_ui_thread`, the Rx forms that capture a context, the dock services; the rule for the tasks of the reactive libraries on a dispatcher thread decided (F3) and its order tested | 0.5: the trait, `FerroSynchronizationContext` and `RestoreContext` deprecated | high where F3 changes an order; the Rx, ReactiveUI and dock tests guard it |
@@ -455,6 +455,33 @@ a task in the queue of the thread whose future completes the `Task` (a panic fau
 and `set_thread_poster` sets the thread's schedule; `Task`, `TaskCompletionSource` and their
 continuations keep their own state and behaviour, and nothing is deprecated yet (section 4: the
 old types become deprecated wrappers with the steps that replace their uses).
+
+A2 is done: the dispatcher is a schedule per priority of the core (`dispatcher_spawn.rs` of
+`ferroui-base`; `Dispatcher::task_schedule(priority)` posts each poll as a job at that priority),
+with `Dispatcher::spawn_local` (the priority of the current job, `Default` outside of one),
+`spawn_local_with_priority`, `spawn` and `spawn_with_priority` (a `Send` closure run in a job on
+the dispatcher thread, which polls the future it makes inside that job), giving `JoinHandle`.
+`DispatcherLocal::tasks` keeps the `AbortHandle`s of the dispatcher's tasks (the ended ones are
+pruned as it grows); the shutdown aborts them, and a task given to the dispatcher after its shutdown,
+after a reset or on another thread is aborted at once. `invoke_async_task*` and
+`DispatcherTaskScheduler` (`spawn`, `spawn_local`, `start_local`) spawn on it (the local forms and
+`start_local` with the first poll inside the job, as `FirstPoll::Now`); `DispatcherTask` keeps its
+own outcome state (clones, blocking waits, the panic raised again, the result taken once, a result
+that is not `Send` read on the dispatcher thread from a `Send` handle), filled by the future that
+the task runs, which catches the panic of the user's future. `resume`, `yield_now` and
+`await_with_priority` find the awaiting task with `task::try_id()` and poll it in the job of the
+requested priority with `task::poll_now`, which marks a task that is being polled instead of
+polling it inside its own poll (the other side of F1). The core gained what this needed:
+`spawn_on(create, schedule)` (a task spawned from any thread, made and first polled in the
+schedule's work), `AbortHandle`, `Id` with `JoinHandle::id` and `try_id()`, `poll_now(id)`, and
+`Schedule::spawned(AbortHandle)`, a provided method through which a schedule is told of its tasks.
+Not done in A2, so that no order changes: the dispatcher does not install itself as the schedule of
+its thread (section 3.1). Doing so would route the wakes of the tasks of `ferroui-system` that come
+from other threads through a dispatcher job on every dispatcher thread, where today they wait for
+`run_pending_wakes` unless `FerroScheduler::install_on_ui_thread` set the thread poster; it moves to
+A5 with `set_thread_schedule` and the rule of F3. Nothing is deprecated yet: `DispatcherTask`,
+`DispatcherTaskScheduler` and `invoke_async_task*` become deprecated with A6, which replaces their
+uses.
 
 ## 6. Not in scope
 

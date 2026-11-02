@@ -14,6 +14,14 @@
 //!   poll there (at most one queued poll at a time), and the schedule runs it on the task's
 //!   thread in order with its other work. The first poll runs inside the spawning call
 //!   ([`FirstPoll::Now`]) or is queued as well ([`FirstPoll::Scheduled`]).
+//! - [`spawn_on`] does the same from any thread: a `Send` closure makes the future on the
+//!   schedule's thread, inside the first work it gives the schedule, and the future is polled
+//!   there at once.
+//!
+//! A schedule is told of the tasks given to it ([`Schedule::spawned`]), with an [`AbortHandle`],
+//! so that it can end them (a dispatcher aborts its tasks when it shuts down). [`try_id`] is the
+//! [`Id`] of the task being polled, and [`poll_now`] polls a task of the thread inside the calling
+//! code (a dispatcher job that resumes it at another priority).
 //!
 //! In both cases a task is never polled inside its own poll: a wake that comes while it is polled
 //! polls it again once that poll has returned (the queue of the thread), or queues a poll (a
@@ -33,7 +41,7 @@ mod join;
 mod schedule;
 mod shared;
 
-pub use executor::{block_on, run_pending, set_thread_schedule, spawn_local, spawn_local_on};
-pub use join::{JoinError, JoinHandle};
+pub use executor::{block_on, poll_now, run_pending, set_thread_schedule, spawn_local, spawn_local_on, spawn_on, try_id};
+pub use join::{AbortHandle, Id, JoinError, JoinHandle};
 pub use schedule::{FirstPoll, Schedule};
 pub use shared::Shared;
