@@ -228,7 +228,15 @@ impl Appearance {
             dock_tiles: ["#385D48", "#526557", "#546960"],
         },
         tint: |c| c,
-        style: || ferroui_themes_material::MaterialTheme::new().as_style(),
+        style: || {
+            use ferroui_themes_material::{MaterialColorScheme, MaterialTheme};
+
+            let theme = MaterialTheme::new();
+            // The Garden wallpaper's eucalyptus leaf supplies the Android tonal palette.
+            let scheme = MaterialColorScheme::from_seed(Color::from_rgb(0x5c, 0x95, 0x7d), true);
+            theme.set_color_scheme(ThemeVariant::dark(), &scheme);
+            theme.as_style()
+        },
         variant: ThemeVariant::dark,
     });
     pub const ALL: &'static [Self] = &[Self::Windows, Self::MacOS, Self::Material];

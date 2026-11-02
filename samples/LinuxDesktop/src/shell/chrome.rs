@@ -5,7 +5,7 @@ use ferroui_base::media::{FontWeight, Geometry, Stretch, TextTrimming};
 use ferroui_controls::{Border, Button, StackPanel, TextBlock};
 use ferroui_view::prelude::*;
 
-use super::appearance::{Appearance, Layout, Palette};
+use super::appearance::{Appearance, ColorMode, Layout, Palette};
 use ferroui_markup_xaml::markup_extensions::DynamicResourceExtension;
 use std::rc::Rc;
 
@@ -141,25 +141,106 @@ pub(super) fn row(spacing: f64) -> El<StackPanel> {
         .vertical_alignment(V::Center)
 }
 
-pub(super) fn shell_panel() -> El<Border> {
-    let frame = if look().winui().is_some() {
+/// Only roots that paint the wallpaper into the same render target provide this
+/// marker. A Sway layer surface or a separate toast cannot sample other windows.
+#[derive(Clone, Copy)]
+pub(super) struct DesktopBackdrop;
+
+fn backdrop_or(
+    composed: &'static str,
+    detached: &'static str,
+) -> Bind<Rc<DynamicResourceExtension>> {
+    resource(if use_context::<DesktopBackdrop>().is_some() {
+        composed
+    } else {
+        detached
+    })
+}
+
+pub(super) fn bar_surface() -> El<Border> {
+    let appearance = look();
+    if let Some(settings) = appearance.winui() {
+        if settings.mode == ColorMode::HighContrast {
+            return border()
+                .background(resource("SystemColorWindowColorBrush"))
+                .border_brush(resource("SystemColorWindowTextColorBrush"));
+        }
         border()
-            .background(resource("FlyoutPresenterBackground"))
-            .border_brush(resource("SurfaceStrokeColorFlyoutBrush"))
-            .set(
-                ferroui_base::Visual::shadow_property(),
-                resource("WinUIThemeShadow"),
-            )
-            .set(
-                ferroui_base::Visual::translation_property(),
-                ferroui_base::Vector3D::new(0.0, 0.0, 32.0),
-            )
+            .background(backdrop_or(
+                "AcrylicInAppFillColorBaseBrush",
+                "SolidBackgroundFillColorBaseBrush",
+            ))
+            .border_brush(resource("CardStrokeColorDefaultBrush"))
+    } else if appearance == Appearance::MacOS {
+        border()
+            .background(backdrop_or(
+                "MacOSToolbarBackdropBrush",
+                "MacOSContentBackgroundBrush",
+            ))
+            .border_brush(resource("MacOSGlassBorderBrush"))
+    } else if appearance == Appearance::Material {
+        border()
+            .background(resource("MaterialSurfaceContainerBrush"))
+            .border_brush(resource("MaterialOutlineVariantBrush"))
+    } else {
+        border()
+            .background(colors().bar)
+            .border_brush(colors().bar_edge)
+    }
+}
+
+pub(super) fn dock_surface() -> El<Border> {
+    let dock = bar_surface();
+    if look() == Appearance::MacOS {
+        dock.box_shadow(resource("MacOSMenuShadow"))
+    } else {
+        dock
+    }
+}
+
+pub(super) fn shell_panel() -> El<Border> {
+    let appearance = look();
+    let frame = if let Some(settings) = appearance.winui() {
+        let frame = border()
+            .border_brush(resource("FlyoutBorderThemeBrush"))
+            .border_thickness(resource("FlyoutBorderThemeThickness"));
+        if settings.mode == ColorMode::HighContrast {
+            frame.background(resource("FlyoutPresenterBackground"))
+        } else {
+            frame
+                .background(backdrop_or(
+                    "FlyoutPresenterBackground",
+                    "SolidBackgroundFillColorBaseBrush",
+                ))
+                .set(
+                    ferroui_base::Visual::shadow_property(),
+                    resource("WinUIThemeShadow"),
+                )
+                .set(
+                    ferroui_base::Visual::translation_property(),
+                    ferroui_base::Vector3D::new(0.0, 0.0, 32.0),
+                )
+        }
+    } else if appearance == Appearance::MacOS {
+        border()
+            .background(backdrop_or(
+                "MacOSMenuBackdropBrush",
+                "MacOSContentBackgroundBrush",
+            ))
+            .border_brush(resource("MacOSGlassBorderBrush"))
+            .border_thickness(1)
+            .box_shadow(resource("MacOSMenuShadow"))
+    } else if appearance == Appearance::Material {
+        border()
+            .background(resource("MaterialSurfaceContainerHighBrush"))
+            .box_shadow(resource("MaterialElevation2BoxShadow"))
     } else {
         border()
             .background(colors().surface)
             .border_brush(resource("ControlStrokeColorDefaultBrush"))
+            .border_thickness(1)
     };
-    frame.border_thickness(1).corner_radius(colors().radius)
+    frame.corner_radius(colors().radius)
 }
 
 pub(super) fn action(name: &str, callback: impl Fn() + 'static) -> El<Button> {

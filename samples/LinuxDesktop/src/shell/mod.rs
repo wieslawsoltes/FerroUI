@@ -408,6 +408,7 @@ pub fn view(
     themes: Rc<ThemeController>,
     managed: bool,
 ) -> Element {
+    ferroui_view::provide_context(DesktopBackdrop);
     let state = create(initial, catalog, session, themes, managed);
     root(state, true)
 }

@@ -130,7 +130,7 @@ fn card(notice: &Notice, service: &Rc<Service>, revision: Signal<u64>, banner: b
     }
     border()
         .padding((12.0, 8.0))
-        .background(colors().tile)
+        .background(if banner { "Transparent" } else { colors().tile })
         .corner_radius(colors().radius)
         .child(details)
         .into()
@@ -383,7 +383,7 @@ pub(super) fn composed_banner(shell: Rc<Shell>) -> Element {
         let Some(notice) = shell.notifications.service.banner() else {
             return Element::Empty;
         };
-        border()
+        shell_panel()
             .width(356.0)
             .max_height(210.0)
             .horizontal_alignment(ferroui_base::layout::HorizontalAlignment::Right)
