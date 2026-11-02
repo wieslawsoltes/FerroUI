@@ -125,6 +125,27 @@ fn main() {
         Value::Number((tick + 511) as f64)
     );
 
+    let fields = (0..8192)
+        .map(|i| format!("property int value{i}: {i};\n"))
+        .collect::<String>();
+    let doc = ir::parse(&format!("import QtQml\nQtObject {{ property Component factory: Component {{ QtObject {{ property int amount: 1 }} }}; {fields} }}")).unwrap();
+    let mut owner = Instance::new(&doc, &types, Default::default()).unwrap();
+    let host = owner.root();
+    let Value::Object(factory) = owner.get(host, "factory").unwrap() else {
+        panic!("missing factory")
+    };
+    measure(
+        "create/retire child beside 8192 scalar properties",
+        128,
+        || {
+            let child = owner
+                .create_object(factory, Some(host), Default::default())
+                .unwrap();
+            owner.destroy_object(child).unwrap();
+            assert!(owner.type_name(child).is_none());
+        },
+    );
+
     #[cfg(feature = "diagnostics")]
     {
         let profiler = ferroui_qml::diagnostics::Debugger::default();

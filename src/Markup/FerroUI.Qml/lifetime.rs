@@ -3,6 +3,60 @@
 use super::*;
 use std::time::Duration;
 
+/// Potential incoming object references, in property order. Classify a new
+/// slot at its first retirement pass, then observe later writes to that slot.
+/// A slot stays eligible until its owner retires, including across rollback.
+#[derive(Default)]
+pub(crate) struct ReferenceSlots {
+    scanned: usize,
+    keys: BTreeSet<SlotId>,
+}
+
+impl ReferenceSlots {
+    /// Overlays and specialized reads can carry a target even on a scalar slot.
+    /// Registration is conservative until that slot retires, so rolling back a
+    /// link edit never requires a separate copy of this index.
+    pub fn track(&mut self, key: SlotId) {
+        self.keys.insert(key);
+    }
+
+    pub fn observe_value(&mut self, key: SlotId, value: &Value) {
+        if key < self.scanned && can_reference_object(value) {
+            self.track(key);
+        }
+    }
+
+    pub fn truncate(&mut self, len: usize) {
+        self.scanned = self.scanned.min(len);
+        if self.keys.last().is_some_and(|&key| key >= len) {
+            self.keys.split_off(&len);
+        }
+    }
+
+    fn candidates(&mut self, properties: &[Property], slots: &[Slot]) -> Vec<SlotId> {
+        for key in self.scanned..slots.len() {
+            if properties[key].alias.is_some() || can_reference_object(&slots[key].value) {
+                self.track(key);
+            }
+        }
+        self.scanned = slots.len();
+        self.keys.iter().copied().collect()
+    }
+}
+
+fn can_reference_object(value: &Value) -> bool {
+    matches!(
+        value,
+        Value::Object(_)
+            | Value::DelegateRow(_)
+            | Value::PropertyGroup(_, _)
+            | Value::AnchorGroup(_)
+            | Value::AnchorLine(_, _)
+            | Value::Method(_)
+            | Value::List(_)
+    )
+}
+
 impl Instance {
     pub fn destroy_object(&mut self, id: ObjectId) -> Result<(), Error> {
         self.transaction(|tx| tx.destroy_object(id))
@@ -19,19 +73,17 @@ impl Instance {
         }
         self.dynamic.behaviors.retain(|_, id| !dead.contains(id));
         self.dynamic.created.retain(|id| !dead.contains(id));
-        self.dynamic.loaders.retain(|id, _| !dead.contains(id));
-        self.dynamic.repeaters.retain(|id, _| !dead.contains(id));
         self.javascript.connections.retire(dead);
         self.javascript.deferred.retire(dead);
         self.retain_connections(|listener| !dead.contains(&listener.receiver));
-        self.watched.retain(|id, _| !dead.contains(id));
-        self.changes
-            .retain(|p, _| !dead.contains(&self.properties[*p].owner));
         if dead.iter().any(|id| self.models.contains_key(id)) {
             self.workers.retire_model_grants(dead);
         }
         for &id in dead {
+            self.watched.remove(&id);
             self.network.retire(id);
+            self.dynamic.loaders.remove(&id);
+            self.dynamic.repeaters.remove(&id);
             self.dynamic.deadlines.remove(&id);
             self.dynamic.file_errors.remove(&id);
             self.dynamic.loading.remove(&id);
@@ -47,6 +99,8 @@ impl Instance {
                 .take()
                 .expect("retiring staged object");
             for &slot in node.properties.values() {
+                self.reference_slots.keys.remove(&slot);
+                self.changes.remove(&slot);
                 let s = &mut self.slots[slot];
                 s.value = Value::Undefined;
                 s.binding = None;
@@ -55,8 +109,8 @@ impl Instance {
                 s.dependents = Edges::Empty;
                 let p = &mut self.properties[slot];
                 p.alias = None;
-                p.name.clear();
-                p.ty.clear();
+                p.name = String::new();
+                p.ty = String::new();
             }
         }
         while self.nodes.last().is_some_and(|n| !n.live) {
@@ -70,6 +124,7 @@ impl Instance {
             self.properties.pop();
             self.slots.pop();
         }
+        self.reference_slots.truncate(self.slots.len());
     }
 }
 
@@ -230,70 +285,12 @@ impl crate::transaction::Transaction<'_> {
                 self.touched(key).dependents = Edges::Empty;
             }
         }
-        for key in 0..self.model.slots.len() {
-            let prop = &self.model.properties[key];
-            if dead.contains(&prop.owner) || self.model.node(prop.owner).is_none() {
-                continue;
-            }
-            let alias_dead = match prop.alias {
-                Some(Alias::Object(id)) => dead.contains(&id),
-                Some(Alias::Slot(t)) => dead.contains(&self.model.properties[t].owner),
-                None => false,
-            };
-            let visual = self.model.nodes[prop.owner.index]
-                .visual_children
-                .as_deref()
-                == Some(prop.name.as_str());
-            let value = &self.model.slots[key].value;
-            let next = if alias_dead {
-                Some(Value::Null)
-            } else if visual {
-                if let Value::List(items) = value {
-                    items.iter().any(|v|matches!(v,Value::Object(child) if dead.contains(child))).then(||Value::List(items.iter().filter(|v| !matches!(v,Value::Object(child) if dead.contains(child))).cloned().collect()))
-                } else {
-                    None
-                }
-            } else {
-                release_value(value, &dead)
-            };
-            if alias_dead {
-                let alias = self.model.properties[key]
-                    .alias
-                    .take()
-                    .expect("invalidated alias");
-                self.structure.aliases.push((key, alias));
-            }
-            let expired = match self.model.slots[key].binding {
-                Some(InstalledBinding::PropertyRead(target)) => {
-                    dead.contains(&self.model.properties[target].owner)
-                }
-                Some(InstalledBinding::StateExpression {
-                    declaration,
-                    receiver,
-                    ..
-                }) => dead.contains(&declaration) || dead.contains(&receiver),
-                _ => false,
-            };
-            if expired {
-                self.replace_reads(key, BTreeSet::new());
-                self.touched(key).binding = None;
-                self.touched(key).dirty = false;
-                self.pending.remove(&key);
-            }
-            if self.model.slots[key]
-                .active_target
-                .is_some_and(|target| dead.contains(&self.model.properties[target].owner))
-            {
-                self.touched(key).active_target = None;
-            }
-            if self.model.slots[key].overlay.is_some() {
-                if let Some(overlay) = &mut self.touched(key).overlay {
-                    overlay.clear_dead_references(&dead);
-                }
-            }
-            if let Some(value) = next {
-                self.set_value(key, value);
-            }
+        let candidates = self
+            .model
+            .reference_slots
+            .candidates(&self.model.properties, &self.model.slots);
+        for key in candidates {
+            self.release_slot_references(key, &dead);
         }
         self.model.dynamic.revision = self
             .model
@@ -306,5 +303,85 @@ impl crate::transaction::Transaction<'_> {
         }
         self.structure.removed.extend(dead);
         Ok(())
+    }
+    // Preserve assignment, binding, alias and visual-list semantics when a
+    // surviving slot points into the retired subtree.
+    fn release_slot_references(&mut self, key: SlotId, dead: &BTreeSet<ObjectId>) {
+        let prop = &self.model.properties[key];
+        if dead.contains(&prop.owner) || self.model.node(prop.owner).is_none() {
+            return;
+        }
+        let alias_dead = match prop.alias {
+            Some(Alias::Object(id)) => dead.contains(&id),
+            Some(Alias::Slot(t)) => dead.contains(&self.model.properties[t].owner),
+            None => false,
+        };
+        let visual = self.model.nodes[prop.owner.index]
+            .visual_children
+            .as_deref()
+            == Some(prop.name.as_str());
+        let value = &self.model.slots[key].value;
+        let next = if alias_dead {
+            Some(Value::Null)
+        } else if visual {
+            if let Value::List(items) = value {
+                items
+                    .iter()
+                    .any(|v| matches!(v,Value::Object(child) if dead.contains(child)))
+                    .then(|| {
+                        Value::List(
+                            items
+                                .iter()
+                                .filter(
+                                    |v| !matches!(v,Value::Object(child) if dead.contains(child)),
+                                )
+                                .cloned()
+                                .collect(),
+                        )
+                    })
+            } else {
+                None
+            }
+        } else {
+            release_value(value, dead)
+        };
+        if alias_dead {
+            let alias = self.model.properties[key]
+                .alias
+                .take()
+                .expect("invalidated alias");
+            self.structure.aliases.push((key, alias));
+        }
+        let expired = match self.model.slots[key].binding {
+            Some(InstalledBinding::PropertyRead(target)) => {
+                dead.contains(&self.model.properties[target].owner)
+            }
+            Some(InstalledBinding::StateExpression {
+                declaration,
+                receiver,
+                ..
+            }) => dead.contains(&declaration) || dead.contains(&receiver),
+            _ => false,
+        };
+        if expired {
+            self.replace_reads(key, BTreeSet::new());
+            self.touched(key).binding = None;
+            self.touched(key).dirty = false;
+            self.pending.remove(&key);
+        }
+        if self.model.slots[key]
+            .active_target
+            .is_some_and(|target| dead.contains(&self.model.properties[target].owner))
+        {
+            self.touched(key).active_target = None;
+        }
+        if self.model.slots[key].overlay.is_some() {
+            if let Some(overlay) = &mut self.touched(key).overlay {
+                overlay.clear_dead_references(dead);
+            }
+        }
+        if let Some(value) = next {
+            self.set_value(key, value);
+        }
     }
 }

@@ -149,6 +149,9 @@ impl Instance {
                 continue;
             };
             if let Some(source) = self.scalar_read(key, script) {
+                if self.properties[key].owner != self.properties[source].owner {
+                    self.reference_slots.track(key);
+                }
                 self.slots[key].binding = Some(InstalledBinding::PropertyRead(source));
             }
         }
@@ -424,6 +427,7 @@ impl<'a> Builder<'a> {
                 emissions: Vec::new(),
                 nodes: Vec::new(),
                 ids: BTreeMap::new(),
+                reference_slots: Default::default(),
                 properties: Vec::new(),
                 slots: Vec::new(),
                 changes: BTreeMap::new(),

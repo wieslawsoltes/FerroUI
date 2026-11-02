@@ -367,6 +367,7 @@ impl Transaction<'_> {
             .unwrap_or_default()
         {
             let (receiver, target) = self.model.change_target(change, &decl)?;
+            self.model.reference_slots.track(decl.input);
             let slot = self.touched(decl.input);
             slot.binding = Some(InstalledBinding::StateExpression {
                 declaration: change,

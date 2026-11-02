@@ -562,3 +562,104 @@ fn retargeting_preserves_registration_order_across_signals_disposal_and_rollback
         Value::String("ABABABB".into())
     );
 }
+
+#[test]
+fn retirement_reuses_tail_indices_and_clears_references_written_during_destruction() {
+    let mut app = component(
+        r#"
+        id: root
+        property var references
+        property QtObject delivered
+        property var boundMethod
+        property int count: 0
+        property Component numbers: Component { QtObject { property int n: 0 } }
+        property Component holder: Component { QtObject { property QtObject peer } }
+        property Component target: Component {
+            QtObject {
+                id: dying
+                function method() {}
+                Component.onDestruction: {
+                    root.delivered = dying
+                    root.boundMethod = dying.method
+                    root.count++
+                }
+            }
+        }
+    "#,
+    )
+    .unwrap();
+    let root = app.root();
+    let make = |app: &mut Instance, name| {
+        let Value::Object(factory) = app.get(root, name).unwrap() else {
+            panic!("no factory")
+        };
+        app.create_object(factory, Some(root), Default::default())
+            .unwrap()
+    };
+    let number = make(&mut app, "numbers");
+    app.destroy_object(number).unwrap();
+    let holder = make(&mut app, "holder");
+    let target = make(&mut app, "target");
+    app.set(holder, "peer", Value::Object(target)).unwrap();
+    app.set(
+        root,
+        "references",
+        Value::List(vec![
+            Value::Object(target),
+            Value::List(vec![Value::Object(target)]),
+        ]),
+    )
+    .unwrap();
+    // Failed retirement must keep the original tree, values and future fixups.
+    app.set_validator(|_, changes| {
+        if changes.iter().any(|c| c.property == "count") {
+            Err(ferroui_qml::Error::new("reject destruction"))
+        } else {
+            Ok(())
+        }
+    });
+    assert!(app.destroy_object(target).is_err());
+    assert_eq!(app.get(holder, "peer").unwrap(), Value::Object(target));
+    assert_eq!(app.get(root, "count").unwrap(), Value::Number(0.));
+    app.set_validator(|_, _| Ok(()));
+    app.destroy_object(target).unwrap();
+    assert_eq!(app.get(holder, "peer").unwrap(), Value::Null);
+    assert_eq!(
+        app.get(root, "references").unwrap(),
+        Value::List(vec![Value::Null, Value::List(vec![Value::Null])])
+    );
+    assert_eq!(app.get(root, "delivered").unwrap(), Value::Null);
+    assert_eq!(app.get(root, "boundMethod").unwrap(), Value::Null);
+    assert_eq!(app.get(root, "count").unwrap(), Value::Number(1.));
+}
+
+#[test]
+fn rejected_first_retirement_remembers_reference_restored_from_the_journal() {
+    let mut app = component(
+        r#"
+        id: root
+        property var reference
+        property bool clearDuringHandler: true
+        property Component factory: Component {
+            QtObject { Component.onDestruction: { if (root.clearDuringHandler) root.reference = null } }
+        }
+        "#,
+    )
+    .unwrap();
+    let root = app.root();
+    let Value::Object(factory) = app.get(root, "factory").unwrap() else {
+        panic!("no factory")
+    };
+    let child = app
+        .create_object(factory, Some(root), Default::default())
+        .unwrap();
+    app.set(root, "reference", Value::Object(child)).unwrap();
+    app.set_validator(|_, _| Err(Error::new("reject retirement")));
+    assert!(app.destroy_object(child).is_err());
+    assert_eq!(app.get(root, "reference").unwrap(), Value::Object(child));
+    app.set_validator(|_, _| Ok(()));
+    app.set(root, "clearDuringHandler", Value::Bool(false))
+        .unwrap();
+    app.destroy_object(child).unwrap();
+    assert_eq!(app.get(root, "reference").unwrap(), Value::Null);
+}

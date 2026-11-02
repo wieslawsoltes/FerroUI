@@ -186,6 +186,8 @@ impl Instance {
             tx.timer_changes.rollback(&mut tx.model.timers);
             std::mem::take(&mut tx.animations).rollback(tx.model);
             for (key, old) in tx.original {
+                // The first retirement scan may have seen a temporary value.
+                tx.model.reference_slots.observe_value(key, &old.value);
                 tx.model.slots[key] = old;
             }
             tx.model.rollback_creation(tx.structure);
@@ -772,6 +774,7 @@ impl Transaction<'_> {
         }
         self.observe_quick_button(key);
         self.observe_range(key);
+        self.model.reference_slots.observe_value(key, &value);
         self.touched(key).value = value;
         self.observe_states(key);
         self.observe_animation(key);

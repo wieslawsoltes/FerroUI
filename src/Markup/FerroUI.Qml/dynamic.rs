@@ -198,6 +198,7 @@ impl Instance {
         self.nodes.truncate(c.nodes);
         self.properties.truncate(c.slots);
         self.slots.truncate(c.slots);
+        self.reference_slots.truncate(c.slots);
         self.dynamic.loading.retain(|id| id.index < c.nodes);
         self.dynamic.file_errors.retain(|id, _| id.index < c.nodes);
         self.dynamic.templates.retain(|id, _| id.index < c.nodes);

@@ -231,6 +231,7 @@ pub struct Instance {
     emissions: Vec<SignalEmission>,
     nodes: Vec<NodeEntry>,
     ids: BTreeMap<String, ObjectId>,
+    reference_slots: lifetime::ReferenceSlots,
     properties: Vec<Property>,
     slots: Vec<Slot>,
     changes: BTreeMap<SlotId, Value>,

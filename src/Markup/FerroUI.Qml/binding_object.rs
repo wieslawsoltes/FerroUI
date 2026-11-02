@@ -172,6 +172,10 @@ impl Transaction<'_> {
         if let Some(old) = old {
             self.remove_overlay(old, input, mode);
         }
+        if let Some(target) = target {
+            self.model.reference_slots.track(input);
+            self.model.reference_slots.track(target);
+        }
         self.touched(input).active_target = target;
         if let Some(target) = target {
             // The displaced expression no longer controls this slot. Detach it
