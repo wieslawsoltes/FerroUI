@@ -318,13 +318,13 @@ The differences from the upstream-ported adapter (`WinUITextInputMethod`) are in
 
   Release build on the development Mac:
 
-| Step, 1000 paragraphs | before F1 | F1 | F1b | F1c |
-|---|---|---|---|---|
-| type_character | 42.7 ms | 6.1 ms | 4.2 ms | to be measured |
-| move_selection | 38.8 ms | 2.0 ms | 1.8 ms | to be measured |
-| update_ime_preview | 47.5 ms | 11.0 ms | 3.2 ms | to be measured |
-| split_paragraph | | | 21.6 ms | to be measured |
-| format_paragraphs | | | | to be measured |
-| undo_paragraph_break | | | | to be measured |
+| Step, 1000 paragraphs | before F1 | F1 | F1b | F1c | S8 |
+|---|---|---|---|---|---|
+| type_character | 42.7 ms | 6.1 ms | 4.2 ms | 3.6 ms | 2.7 ms |
+| move_selection | 38.8 ms | 2.0 ms | 1.8 ms | 1.6 ms | 1.6 ms |
+| update_ime_preview | 47.5 ms | 11.0 ms | 3.2 ms | 2.9 ms | 2.8 ms |
+| split_paragraph | | | 21.6 ms | 4.1 ms | 3.2 ms |
+| format_paragraphs | | | | 3.7 ms | 2.8 ms |
+| undo_paragraph_break | | | | 3.5 ms | 2.7 ms |
 
 - **Still linear in the document (open in #439):** locating the blocks an edit spans, and the installation of blocks (an edit a paragraph at a time, an undo or a redo), walk the lengths of the blocks before them, as the splice of a run does; an edit group, a composition and a document with link fields or blocks that are not paragraphs still take snapshots of the whole document (S8 above). The selection is drawn as a formatting change of the runs instead of an overlay. The document's text is kept as one string, which an observation copies; grapheme and word steps (Backspace, Delete) read the text from the start of the document; the source of a view walks every paragraph after a change.
