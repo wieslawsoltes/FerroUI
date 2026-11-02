@@ -239,6 +239,17 @@ fn independent_dictionary_edit_executes_inside_the_compiled_theme() {
         .map(|(p, b)| (p.trim_start_matches('/'), if *p == "/DensityStyles/Compact.xaml" { replacement } else { std::str::from_utf8(b).unwrap() }))
         .collect();
     let image = compile_paged_documents(&documents).unwrap();
+    // Class constructors return native handles; a fallible markup operation in
+    // them reports its typed error by unwinding to the nearest loader scope.
+    let throwing = ferroui_markup_xaml::CompiledArchiveRoot {
+        load: |_, _| ferroui_markup_xaml::xaml_error_scope::throw(
+            ferroui_markup_xaml::XamlLoadError::with_message("failed during edited populate")),
+        ..linked
+    };
+    match FerroRuntimeXamlLoader::try_load_compiled_archive(&throwing, &image, &uri, &config, None) {
+        Err(error) => assert_eq!(error.message(), "failed during edited populate"),
+        Ok(_) => panic!("expected the original markup error"),
+    }
     let edited = FerroRuntimeXamlLoader::try_load_compiled_archive(&linked, &image, &uri, &config, None)
         .unwrap().expect("the entire edit stays behind a single native include boundary");
     let edited = from_markup_value::<Ref<WinUITheme>>(&Some(edited)).unwrap();

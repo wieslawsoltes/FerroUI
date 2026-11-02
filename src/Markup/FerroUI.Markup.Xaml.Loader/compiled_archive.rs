@@ -125,7 +125,9 @@ impl FerroRuntimeXamlLoader {
                 }),
             );
         }
-        archive_includes::with_revision(root.class, includes, || (root.load)(parent, root.uri))
+        ferroui_markup_xaml::xaml_error_scope::with_xaml_errors(|| {
+            archive_includes::with_revision(root.class, includes, || (root.load)(parent, root.uri))
+        })
     }
 }
 
