@@ -27,10 +27,10 @@ A separate host-only comparison includes the later traversal optimization and me
 
 | XAML generation only | Previous PR head s | Optimized host s |
 | --- | ---: | ---: |
-| Full native | 29.02 | 15.80 |
-| Full FXB | 30.41 | 17.45 |
-| Button roots, native | 4.65 | 2.92 |
-| Button roots, FXB | 5.19 | 3.09 |
+| Full native | 27.87 | 14.30 |
+| Full FXB | 26.84 | 13.62 |
+| Button roots, native | 4.28 | 2.67 |
+| Button roots, FXB | 4.11 | 2.67 |
 
 On an identical 456-leaf input, alternating 501 in-memory validation, expansion and drop passes per decoder measured 509 µs for the starting decoder and 349 µs for the candidate (median). The current full FXB resource set has 894 leaves and 7,354 records. A complete decode and drop of that larger set took 684 µs median over 101 passes.
 

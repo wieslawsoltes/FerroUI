@@ -13,20 +13,20 @@
   "optimized_visitor_commit": "b3b1eaefb30564730d01a4d875e6fc2442708599",
   "reproduce": "Build each revision\u2019s WinUI build script for either native or binary-resources, then pass the two executables and the four identical dependency .xamlmeta files to scripts/themes/bench/measure_host.py --allow-output-change (optionally --roots Button).",
   "mean_wall_s": {
-    "new-binary": 17.4516,
-    "new-native": 15.8016,
-    "new-rooted-binary": 3.0884,
-    "new-rooted-native": 2.915,
-    "old-binary": 30.4072,
-    "old-native": 29.0211,
-    "old-rooted-binary": 5.1881,
-    "old-rooted-native": 4.648
+    "new-binary": 13.6162,
+    "new-native": 14.2969,
+    "new-rooted-binary": 2.6716,
+    "new-rooted-native": 2.6681,
+    "old-binary": 26.842,
+    "old-native": 27.8672,
+    "old-rooted-binary": 4.1105,
+    "old-rooted-native": 4.2786
   },
   "runs": [
     {
       "case": "new-rooted-binary",
-      "wall_s": 2.92366,
-      "cpu_s": 2.92174,
+      "wall_s": 2.6886,
+      "cpu_s": 2.68587,
       "rust_bytes": 933574,
       "rust_sha256": "1420ff67acc2391b2433d998ca06aea107103bc1ae3773d9eb8ce9329fa001ec",
       "fxb_bytes": 31016,
@@ -34,8 +34,8 @@
     },
     {
       "case": "old-rooted-binary",
-      "wall_s": 5.13952,
-      "cpu_s": 5.10191,
+      "wall_s": 3.8921,
+      "cpu_s": 3.89003,
       "rust_bytes": 1165828,
       "rust_sha256": "ad3913d6fe58a3683e9ef23ccc1f1bd29d8cdbfa8f0cc6ea919966e6b40d8672",
       "fxb_bytes": 22362,
@@ -43,8 +43,8 @@
     },
     {
       "case": "old-native",
-      "wall_s": 29.91648,
-      "cpu_s": 29.78146,
+      "wall_s": 29.04192,
+      "cpu_s": 29.02225,
       "rust_bytes": 9234385,
       "rust_sha256": "5721a06aa3bba9662cf726235c518d933b89b6b79b3cf97b217de02c9fcd4902",
       "fxb_bytes": 0,
@@ -52,8 +52,8 @@
     },
     {
       "case": "new-native",
-      "wall_s": 16.24305,
-      "cpu_s": 16.2308,
+      "wall_s": 13.57762,
+      "cpu_s": 13.56726,
       "rust_bytes": 7903409,
       "rust_sha256": "84f0be9ec2d2585d2953fa3728a58dffe317a5b23c9e2f5d1a3b951b28ed3c78",
       "fxb_bytes": 0,
@@ -61,8 +61,8 @@
     },
     {
       "case": "new-binary",
-      "wall_s": 17.71469,
-      "cpu_s": 17.69772,
+      "wall_s": 13.98944,
+      "cpu_s": 13.97838,
       "rust_bytes": 7289507,
       "rust_sha256": "2478be11e58d141d4ebc36eb394580b776db7fd685159921606842bc87f5a16d",
       "fxb_bytes": 236219,
@@ -70,8 +70,8 @@
     },
     {
       "case": "old-binary",
-      "wall_s": 30.03987,
-      "cpu_s": 30.02937,
+      "wall_s": 28.30987,
+      "cpu_s": 28.27367,
       "rust_bytes": 8753658,
       "rust_sha256": "62fd121bd9b787e0f71df6229e39005dbc5157c0a8a81e9bce7a87012f213ef5",
       "fxb_bytes": 175024,
@@ -79,8 +79,8 @@
     },
     {
       "case": "old-rooted-native",
-      "wall_s": 4.64016,
-      "cpu_s": 4.60487,
+      "wall_s": 4.5132,
+      "cpu_s": 4.51132,
       "rust_bytes": 1223669,
       "rust_sha256": "2a4af77f61c85073278d25704f81c53028f49db3886769d7ca21e9a9dfb47c1b",
       "fxb_bytes": 0,
@@ -88,8 +88,8 @@
     },
     {
       "case": "new-rooted-native",
-      "wall_s": 3.08565,
-      "cpu_s": 3.05933,
+      "wall_s": 2.63999,
+      "cpu_s": 2.63732,
       "rust_bytes": 1007677,
       "rust_sha256": "6262ac293c1cd69055e87c298dacfcebe4d204e3a69422b74a18b651b8a5d8cd",
       "fxb_bytes": 0,
@@ -97,8 +97,8 @@
     },
     {
       "case": "new-rooted-native",
-      "wall_s": 2.7443,
-      "cpu_s": 2.74374,
+      "wall_s": 2.69631,
+      "cpu_s": 2.69054,
       "rust_bytes": 1007677,
       "rust_sha256": "6262ac293c1cd69055e87c298dacfcebe4d204e3a69422b74a18b651b8a5d8cd",
       "fxb_bytes": 0,
@@ -106,8 +106,8 @@
     },
     {
       "case": "old-rooted-native",
-      "wall_s": 4.65581,
-      "cpu_s": 4.65344,
+      "wall_s": 4.04401,
+      "cpu_s": 4.04192,
       "rust_bytes": 1223669,
       "rust_sha256": "2a4af77f61c85073278d25704f81c53028f49db3886769d7ca21e9a9dfb47c1b",
       "fxb_bytes": 0,
@@ -115,8 +115,8 @@
     },
     {
       "case": "old-binary",
-      "wall_s": 30.77457,
-      "cpu_s": 30.76062,
+      "wall_s": 25.37405,
+      "cpu_s": 25.36096,
       "rust_bytes": 8753658,
       "rust_sha256": "62fd121bd9b787e0f71df6229e39005dbc5157c0a8a81e9bce7a87012f213ef5",
       "fxb_bytes": 175024,
@@ -124,8 +124,8 @@
     },
     {
       "case": "new-binary",
-      "wall_s": 17.18846,
-      "cpu_s": 17.18095,
+      "wall_s": 13.24301,
+      "cpu_s": 13.22878,
       "rust_bytes": 7289507,
       "rust_sha256": "2478be11e58d141d4ebc36eb394580b776db7fd685159921606842bc87f5a16d",
       "fxb_bytes": 236219,
@@ -133,8 +133,8 @@
     },
     {
       "case": "new-native",
-      "wall_s": 15.36006,
-      "cpu_s": 15.35901,
+      "wall_s": 15.01615,
+      "cpu_s": 14.98495,
       "rust_bytes": 7903409,
       "rust_sha256": "84f0be9ec2d2585d2953fa3728a58dffe317a5b23c9e2f5d1a3b951b28ed3c78",
       "fxb_bytes": 0,
@@ -142,8 +142,8 @@
     },
     {
       "case": "old-native",
-      "wall_s": 28.12566,
-      "cpu_s": 28.11836,
+      "wall_s": 26.69251,
+      "cpu_s": 26.67685,
       "rust_bytes": 9234385,
       "rust_sha256": "5721a06aa3bba9662cf726235c518d933b89b6b79b3cf97b217de02c9fcd4902",
       "fxb_bytes": 0,
@@ -151,8 +151,8 @@
     },
     {
       "case": "old-rooted-binary",
-      "wall_s": 5.23677,
-      "cpu_s": 5.23458,
+      "wall_s": 4.32899,
+      "cpu_s": 4.32391,
       "rust_bytes": 1165828,
       "rust_sha256": "ad3913d6fe58a3683e9ef23ccc1f1bd29d8cdbfa8f0cc6ea919966e6b40d8672",
       "fxb_bytes": 22362,
@@ -160,12 +160,13 @@
     },
     {
       "case": "new-rooted-binary",
-      "wall_s": 3.25308,
-      "cpu_s": 3.2473,
+      "wall_s": 2.65461,
+      "cpu_s": 2.65314,
       "rust_bytes": 933574,
       "rust_sha256": "1420ff67acc2391b2433d998ca06aea107103bc1ae3773d9eb8ce9329fa001ec",
       "fxb_bytes": 31016,
       "fxb_sha256": "93563f8839f98915464401adcbf677b1bd41c48415cd45c4578f28498490d714"
     }
-  ]
+  ],
+  "candidate_commit": "0f2c266b6a0d3bdde0cf959f667f38a4c976415d"
 }
