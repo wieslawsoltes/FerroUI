@@ -61,14 +61,14 @@ fn popup_request_opening_new_target_replaces_older_publication(overlay: bool) {
     let once = Cell::new(true);
     let weak = f.flyout.downgrade();
     let target = f.second.clone();
-    let _ = f.flyout.opening(move |_| {
+    f.flyout.opening(move |_| {
         if once.replace(false) {
             weak.upgrade().unwrap().show_at(&target);
         }
-    });
+    }).detach();
     let opened = tracker();
     let observed = opened.clone();
-    let _ = f.flyout.opened(move || observed.set(observed.get() + 1));
+    f.flyout.opened(move || observed.set(observed.get() + 1)).detach();
     f.flyout.show_at(&f.first);
     f.assert_owner(&f.second);
     assert_eq!(
@@ -85,11 +85,11 @@ fn popup_request_opened_new_target_owns_detach_handlers(overlay: bool) {
     let once = Cell::new(true);
     let weak = f.flyout.downgrade();
     let target = f.second.clone();
-    let _ = f.flyout.opened(move || {
+    f.flyout.opened(move || {
         if once.replace(false) {
             weak.upgrade().unwrap().show_at(&target);
         }
-    });
+    }).detach();
     f.flyout.show_at(&f.first);
     f.assert_owner(&f.second);
     f.panel.children().remove(f.first.clone());
@@ -105,11 +105,11 @@ fn popup_request_closed_callback_owns_reopened_target(overlay: bool) {
     let once = Cell::new(true);
     let weak = f.flyout.downgrade();
     let target = f.second.clone();
-    let _ = f.flyout.closed(move || {
+    f.flyout.closed(move || {
         if once.replace(false) {
             weak.upgrade().unwrap().show_at(&target);
         }
-    });
+    }).detach();
     f.flyout.hide();
     f.assert_owner(&f.second);
     f.panel.children().remove(f.first.clone());
@@ -119,10 +119,10 @@ fn popup_request_closed_callback_owns_reopened_target(overlay: bool) {
 fn popup_request_opening_hide_retires_pending_open(overlay: bool) {
     let f = Fixture::new(overlay);
     let weak = f.flyout.downgrade();
-    let _ = f.flyout.opening(move |_| weak.upgrade().unwrap().hide());
+    f.flyout.opening(move |_| weak.upgrade().unwrap().hide()).detach();
     let opened = tracker();
     let observed = opened.clone();
-    let _ = f.flyout.opened(move || observed.set(observed.get() + 1));
+    f.flyout.opened(move || observed.set(observed.get() + 1)).detach();
     f.flyout.show_at(&f.first);
     assert!(!f.flyout.is_open());
     assert!(!f.flyout.popup().is_open());
@@ -135,10 +135,10 @@ fn popup_request_opening_detach_reattach_retires_pending_open(overlay: bool) {
     let f = Fixture::new(overlay);
     let panel = f.panel.clone();
     let target = f.first.clone();
-    let _ = f.flyout.opening(move |_| {
+    f.flyout.opening(move |_| {
         panel.children().remove(target.clone());
         panel.children().add(target.clone());
-    });
+    }).detach();
     f.flyout.show_at(&f.first);
     assert!(!f.flyout.is_open());
     assert!(!f.flyout.popup().is_open());
@@ -157,11 +157,11 @@ fn popup_request_closing_nested_show_wins(overlay: bool) {
     let once = Cell::new(true);
     let weak = f.flyout.downgrade();
     let target = f.second.clone();
-    let _ = f.flyout.closing(move |_| {
+    f.flyout.closing(move |_| {
         if once.replace(false) {
             weak.upgrade().unwrap().show_at(&target);
         }
-    });
+    }).detach();
     f.flyout.hide();
     f.assert_owner(&f.second);
     f.panel.children().remove(f.first.clone());
@@ -170,14 +170,14 @@ fn popup_request_closing_nested_show_wins(overlay: bool) {
 
 fn popup_request_canceled_hide_keeps_session_handlers(overlay: bool) {
     let f = Fixture::new(overlay);
-    let _ = f.flyout.closing(|args| args.set_cancel(true));
+    f.flyout.closing(|args| args.set_cancel(true)).detach();
     let once = Cell::new(true);
     let weak = f.flyout.downgrade();
-    let _ = f.flyout.opened(move || {
+    f.flyout.opened(move || {
         if once.replace(false) {
             weak.upgrade().unwrap().hide();
         }
-    });
+    }).detach();
     f.flyout.show_at(&f.first);
     f.assert_owner(&f.first);
     f.panel.children().remove(f.first.clone());
@@ -196,11 +196,11 @@ fn popup_request_retarget_close_preserves_nested_closed_show(overlay: bool) {
     let once = Cell::new(true);
     let weak = f.flyout.downgrade();
     let accepted = third.clone();
-    let _ = f.flyout.closed(move || {
+    f.flyout.closed(move || {
         if once.replace(false) {
             weak.upgrade().unwrap().show_at(&accepted);
         }
-    });
+    }).detach();
     f.flyout.show_at(&f.second);
     f.assert_owner(&third);
 }
@@ -245,12 +245,12 @@ fn popup_request_canceled_outer_open_cannot_overwrite_nested_is_open(overlay: bo
     let once = Cell::new(true);
     let weak = f.flyout.downgrade();
     let target = f.second.clone();
-    let _ = f.flyout.opening(move |args| {
+    f.flyout.opening(move |args| {
         if once.replace(false) {
             weak.upgrade().unwrap().show_at(&target);
             args.set_cancel(true);
         }
-    });
+    }).detach();
     f.flyout.set_is_open(true);
     f.assert_owner(&f.second);
 }
@@ -475,11 +475,11 @@ fn popup_request_superseded_control_request_does_not_open_ancestor_menu(overlay:
     let once = Cell::new(true);
     let weak = f.flyout.downgrade();
     let target = f.second.clone();
-    let _ = f.flyout.opening(move |_| {
+    f.flyout.opening(move |_| {
         if once.replace(false) {
             weak.upgrade().unwrap().show_at(&target);
         }
-    });
+    }).detach();
     let request = ContextRequestedEventArgs::new();
     f.first.raise_event(&request);
     assert!(request.handled());

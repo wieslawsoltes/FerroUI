@@ -10,7 +10,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::layout::{Layoutable, LayoutableImpl, LayoutableImplExt, VerticalAlignment};
 use ferroui_base::media::{Brushes, IBrush};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::{DateTime, HandlerList};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, AnyValue, BoxedValue,
@@ -673,16 +673,16 @@ impl DateTimePickerPanel {
         self.bounds().size()
     }
 
-    /// Raised when the selected value is set. Disposing the returned handle
-    /// removes the handler.
-    pub fn selection_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Raised when the selected value is set. Dropping the returned guard removes the handler;
+    /// [`Subscription::detach`] keeps it for the life of the panel.
+    pub fn selection_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.selection_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.selection_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Refreshes the content of the visible items.

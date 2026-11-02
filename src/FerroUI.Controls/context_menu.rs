@@ -8,7 +8,7 @@ use crate::{Application, Control, ControlImpl, ItemsControlImpl, MenuBase, MenuB
 use ferroui_base::input::{ContextRequestedEventArgs, FocusManager, InputElement, InputElementImpl, KeyEventArgs};
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEventArgs};
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::styling::{ISetterValue, Setter};
 use ferroui_base::utilities::{CancelEventArgs, HandlerList};
 use ferroui_base::{
@@ -335,16 +335,18 @@ impl ContextMenu {
         })
     }
 
-    /// Occurs when the value of the `IsOpen` property is changing from
-    /// false to true. Disposing the returned handle unsubscribes.
-    pub fn opening(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn(&CancelEventArgs)>(|menu| &menu.opening, Rc::new(handler))
+    /// Occurs when the value of the `IsOpen` property is changing from false to true. Dropping the
+    /// returned guard removes the handler; [`Subscription::detach`] keeps it for the life of the
+    /// menu.
+    pub fn opening(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn(&CancelEventArgs)>(|menu| &menu.opening, Rc::new(handler)))
     }
 
-    /// Occurs when the value of the `IsOpen` property is changing from
-    /// true to false. Disposing the returned handle unsubscribes.
-    pub fn closing(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn(&CancelEventArgs)>(|menu| &menu.closing, Rc::new(handler))
+    /// Occurs when the value of the `IsOpen` property is changing from true to false. Dropping the
+    /// returned guard removes the handler; [`Subscription::detach`] keeps it for the life of the
+    /// menu.
+    pub fn closing(&self, handler: impl Fn(&CancelEventArgs) + 'static) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn(&CancelEventArgs)>(|menu| &menu.closing, Rc::new(handler)))
     }
 
     /// The controls the menu is attached to that are still alive, or
@@ -449,13 +451,16 @@ impl ContextMenu {
         popup.and_then(|popup| popup.host())
     }
 
-    /// Raised when the popup host changes (the popup host provider
-    /// contract). Disposing the returned handle unsubscribes.
+    /// Raised when the popup host changes (the popup host provider contract). Dropping the returned
+    /// guard removes the handler; [`Subscription::detach`] keeps it for the life of the menu.
     pub fn popup_host_changed(
         &self,
         handler: impl Fn(Option<&Rc<dyn IPopupHost>>) + 'static,
-    ) -> Rc<dyn IDisposable> {
-        self.subscribe::<dyn Fn(Option<&Rc<dyn IPopupHost>>)>(|menu| &menu.popup_host_changed_handler, Rc::new(handler))
+    ) -> Subscription {
+        Subscription::new(self.subscribe::<dyn Fn(Option<&Rc<dyn IPopupHost>>)>(
+            |menu| &menu.popup_host_changed_handler,
+            Rc::new(handler),
+        ))
     }
 
     /// The menu as a popup host provider (the diagnostics contract it

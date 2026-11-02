@@ -2,7 +2,7 @@ use crate::i_native_menu_exporter_events_impl_bridge::INativeMenuExporterEventsI
 use crate::utils::debug_display::debug_type_name;
 use crate::{NativeMenuItem, NativeMenuItemBase};
 use ferroui_base::collections::{FerroList, NotifyCollectionChangedEventArgs, ResetBehavior};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, DirectProperty, FerroObject,
@@ -107,24 +107,33 @@ impl NativeMenu {
     ///
     /// Use this event to add, remove or modify menu items before a menu is
     /// shown or a hotkey is pressed.
-    pub fn needs_update(&self, handler: impl Fn(&NativeMenu) + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe(|menu| &menu.needs_update, handler)
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the menu.
+    pub fn needs_update(&self, handler: impl Fn(&NativeMenu) + 'static) -> Subscription {
+        Subscription::new(self.subscribe(|menu| &menu.needs_update, handler))
     }
 
     /// Raised before the menu is opened.
     ///
     /// Do not update the menu in this event; use
     /// [`needs_update`](Self::needs_update).
-    pub fn opening(&self, handler: impl Fn(&NativeMenu) + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe(|menu| &menu.opening, handler)
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the menu.
+    pub fn opening(&self, handler: impl Fn(&NativeMenu) + 'static) -> Subscription {
+        Subscription::new(self.subscribe(|menu| &menu.opening, handler))
     }
 
     /// Raised after the menu is closed.
     ///
     /// Do not update the menu in this event; use
     /// [`needs_update`](Self::needs_update).
-    pub fn closed(&self, handler: impl Fn(&NativeMenu) + 'static) -> Rc<dyn IDisposable> {
-        self.subscribe(|menu| &menu.closed, handler)
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the menu.
+    pub fn closed(&self, handler: impl Fn(&NativeMenu) + 'static) -> Subscription {
+        Subscription::new(self.subscribe(|menu| &menu.closed, handler))
     }
 
     fn subscribe(

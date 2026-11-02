@@ -113,8 +113,8 @@ fn virtual_callbacks_follow_frame_event_order_and_parameters_survive_history() {
     frame.navigating(|args| {
         assert!(!args.cancel());
         record("Frame.Navigating");
-    });
-    frame.navigated(|_| record("Frame.Navigated"));
+    }).detach();
+    frame.navigated(|_| record("Frame.Navigated")).detach();
     let parameter: BoxedValue = Rc::new("first parameter".to_string());
     assert!(frame
         .navigate(FirstPage::TYPE, Some(parameter.clone()))
@@ -172,11 +172,11 @@ fn frame_cancellation_stops_before_page_callback_and_accepts_request() {
         record("Frame.Cancel");
         let cloned = args.clone();
         cloned.set_cancel(true);
-    });
+    }).detach();
     frame.navigation_stopped(|args| {
         assert!(args.content().is_none());
         record("Frame.Stopped");
-    });
+    }).detach();
     assert!(frame.navigate(SecondPage::TYPE, None).unwrap());
     assert_eq!(frame.current_page(), Some(old));
     assert_eq!(frame.back_stack_depth(), 0);
@@ -189,7 +189,7 @@ fn page_cancellation_is_virtual_and_does_not_commit_history() {
     frame.navigate(FirstPage::TYPE, None).unwrap();
     events();
     CANCEL_PAGE.with(|cancel| cancel.set(true));
-    frame.navigation_stopped(|_| record("Stopped"));
+    frame.navigation_stopped(|_| record("Stopped")).detach();
     assert!(frame.navigate(SecondPage::TYPE, None).unwrap());
     assert_eq!(events(), ["FirstPage.NavigatingFrom", "Stopped"]);
     assert_eq!(frame.current_source_page_type(), Some(FirstPage::TYPE));
@@ -214,14 +214,14 @@ fn navigation_is_not_reentrant_and_history_edits_are_rejected_while_pending() {
                 .add(PageStackEntry::new(ThirdPage::TYPE, None)),
             Err(NavigationError::NavigationPending)
         );
-    });
+    }).detach();
     let weak = frame.downgrade();
     frame.navigated(move |_| {
         let frame = weak.upgrade().unwrap();
         assert!(!frame.navigate(ThirdPage::TYPE, None).unwrap());
         // Journal edits are allowed after its commit, even though nested navigation is not.
         frame.forward_stack().clear().unwrap();
-    });
+    }).detach();
     frame.navigate(FirstPage::TYPE, None).unwrap();
     frame.navigate(SecondPage::TYPE, None).unwrap();
     assert_eq!(frame.current_source_page_type(), Some(SecondPage::TYPE));
@@ -430,7 +430,7 @@ fn failures_preserve_content_history_and_allow_retry() {
     assert_eq!(frame.back_stack_depth(), 0);
     frame.navigation_failed(|args| {
         args.clone().set_handled(true);
-    });
+    }).detach();
     assert!(!frame.navigate(SecondPage::TYPE, None).unwrap());
     frame.unregister_page_factory(SecondPage::TYPE);
     assert!(frame.navigate(SecondPage::TYPE, None).unwrap());

@@ -1251,7 +1251,7 @@ fn container_prepared_is_raised_for_each_container_on_layout(target: Ref<ListBox
         assert_eq!(index.get(), e.index());
         index.set(index.get() + 1);
         handler_result.borrow_mut().push(e.container().clone());
-    });
+    }).detach();
 
     let _root = prepare(&target);
 
@@ -1301,7 +1301,7 @@ fn container_prepared_is_raised_for_added_item() {
     target.container_prepared(move |e| {
         assert_eq!(3, e.index());
         handler_result.borrow_mut().push(e.container().clone());
-    });
+    }).detach();
 
     data.add("Qux".to_string());
     layout(&target);
@@ -1328,7 +1328,7 @@ fn container_index_changed_is_raised_when_item_added() {
         index.set(index.get() + 1);
         assert_eq!(index.get(), e.new_index());
         handler_result.borrow_mut().push(e.container().clone());
-    });
+    }).detach();
 
     data.insert(1, "Qux".to_string());
     layout(&target);
@@ -1354,7 +1354,7 @@ fn container_clearing_is_raised_when_item_removed() {
     target.container_clearing(move |e| {
         assert_eq!(expected.as_ref(), Some(e.container()));
         handler_raised.set(handler_raised.get() + 1);
-    });
+    }).detach();
 
     data.remove_at(1);
     layout(&target);

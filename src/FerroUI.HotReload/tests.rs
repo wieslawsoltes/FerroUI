@@ -2439,9 +2439,10 @@ fn application_resource_revision_prepares_static_consumers_against_new_values() 
     let before = host.content();
     let notifications = Rc::new(std::cell::Cell::new(0));
     let observed = notifications.clone();
-    let _subscription = Application::current()
+    Application::current()
         .unwrap()
-        .resources_changed(move |_| observed.set(observed.get() + 1));
+        .resources_changed(move |_| observed.set(observed.get() + 1))
+        .detach();
     session.submit(
         resource_uri.into(),
         r#"<ResourceDictionary xmlns="https://github.com/ferroui"/>"#.into(),
@@ -2669,9 +2670,10 @@ fn application_style_revision_prepares_static_consumers_against_new_values() {
     let before = host.content();
     let notifications = Rc::new(std::cell::Cell::new(0));
     let observed = notifications.clone();
-    let _subscription = Application::current()
+    Application::current()
         .unwrap()
-        .resources_changed(move |_| observed.set(observed.get() + 1));
+        .resources_changed(move |_| observed.set(observed.get() + 1))
+        .detach();
     session.submit(
         resource_uri.into(),
         r#"<Styles xmlns="https://github.com/ferroui"/>"#.into(),

@@ -314,9 +314,9 @@ fn fires_drop_down_events() {
         let open_event = Rc::new(Cell::new(false));
         let close_event = Rc::new(Cell::new(false));
         let flag = open_event.clone();
-        control.drop_down_opened(move || flag.set(true));
+        control.drop_down_opened(move || flag.set(true)).detach();
         let flag = close_event.clone();
-        control.drop_down_closed(move || flag.set(true));
+        control.drop_down_closed(move || flag.set(true)).detach();
         control.set_items_source(Some(create_simple_string_array()));
 
         textbox.set_text(Some("a"));
@@ -417,7 +417,7 @@ fn minimum_prefix_length_works() {
 #[test]
 fn can_cancel_drop_down_opening() {
     run_test(|control, textbox| {
-        control.drop_down_opening(|e| e.set_cancel(true));
+        control.drop_down_opening(|e| e.set_cancel(true)).detach();
 
         textbox.set_text(Some("a"));
         run_jobs();
@@ -428,7 +428,7 @@ fn can_cancel_drop_down_opening() {
 #[test]
 fn can_cancel_drop_down_closing() {
     run_test(|control, textbox| {
-        control.drop_down_closing(|e| e.set_cancel(true));
+        control.drop_down_closing(|e| e.set_cancel(true)).detach();
 
         textbox.set_text(Some("a"));
         run_jobs();
@@ -449,9 +449,9 @@ fn can_cancel_population() {
         control.populating(move |e| {
             e.set_cancel(true);
             flag.set(true);
-        });
+        }).detach();
         let flag = populated.clone();
-        control.populated(move |_| flag.set(true));
+        control.populated(move |_| flag.set(true)).detach();
 
         textbox.set_text(Some("accounti"));
         run_jobs();
@@ -474,12 +474,12 @@ fn custom_population_supported() {
             let control = weak.upgrade().expect("the control is alive");
             control.set_items_source(Some(ItemsSource::from_strs([custom])));
             assert_eq!(Some(search), e.parameter());
-        });
+        }).detach();
         let (flag, ok) = (populated.clone(), populated_ok.clone());
         control.populated(move |e: &PopulatedEventArgs| {
             flag.set(true);
             ok.set(e.data().count() == 1);
-        });
+        }).detach();
 
         textbox.set_text(Some(search));
         run_jobs();
@@ -1690,10 +1690,10 @@ fn async_populator_supplies_the_items() {
         let calls = install_async_populator(control);
         let populating = Rc::new(Cell::new(false));
         let flag = populating.clone();
-        control.populating(move |_| flag.set(true));
+        control.populating(move |_| flag.set(true)).detach();
         let populated = Rc::new(Cell::new(0));
         let count = populated.clone();
-        control.populated(move |_| count.set(count.get() + 1));
+        control.populated(move |_| count.set(count.get() + 1)).detach();
         let original_count = control.items_source().expect("the control has items").count();
 
         textbox.set_text(Some("al"));
@@ -1727,7 +1727,7 @@ fn async_population_is_cancelled_when_the_text_changes_again() {
         let calls = install_async_populator(control);
         let populated = Rc::new(Cell::new(0));
         let count = populated.clone();
-        control.populated(move |_| count.set(count.get() + 1));
+        control.populated(move |_| count.set(count.get() + 1)).detach();
         let original_count = control.items_source().expect("the control has items").count();
 
         textbox.set_text(Some("a"));
@@ -1793,7 +1793,7 @@ fn minimum_populate_delay_defers_the_population_to_the_timer() {
     run_test(|control, textbox| {
         let populated = Rc::new(Cell::new(0));
         let count = populated.clone();
-        control.populated(move |_| count.set(count.get() + 1));
+        control.populated(move |_| count.set(count.get() + 1)).detach();
         let timers_before = Dispatcher::timers_for_unit_tests().len();
 
         control.set_minimum_populate_delay(TimeSpan::from_milliseconds(250.0));
@@ -1864,7 +1864,7 @@ fn value_member_binding_gives_the_text_of_the_items() {
         // The filter runs on the bound values.
         let view_count = Rc::new(Cell::new(0));
         let count = view_count.clone();
-        control.populated(move |e| count.set(e.data().count()));
+        control.populated(move |e| count.set(e.data().count())).detach();
         textbox.set_text(Some("be"));
         run_jobs();
         assert_eq!(2, view_count.get());
@@ -2100,7 +2100,7 @@ fn minimum_populate_delay_delays_the_asynchronous_population_and_its_cancellatio
         let calls = install_async_populator(control);
         let populated = Rc::new(Cell::new(0));
         let count = populated.clone();
-        control.populated(move |_| count.set(count.get() + 1));
+        control.populated(move |_| count.set(count.get() + 1)).detach();
         control.set_minimum_populate_delay(TimeSpan::from_milliseconds(250.0));
         assert!(delay_timers().is_empty());
 
@@ -2176,7 +2176,7 @@ fn value_member_binding_can_be_reset() {
         control.set_items_source(Some(ItemsSource::from_items(items.clone())));
         let view_count = Rc::new(Cell::new(usize::MAX));
         let count = view_count.clone();
-        control.populated(move |e| count.set(e.data().count()));
+        control.populated(move |e| count.set(e.data().count())).detach();
 
         control.set_value_member_binding(name_binding());
         assert!(control.value_member_binding().is_some());

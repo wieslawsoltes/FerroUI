@@ -6,7 +6,7 @@ use crate::automation::{
     ElementNotEnabledError, IAutomationEventSink,
 };
 use ferroui_base::data::core::{ValueType, ValueTypes};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, AnyValue, BoxedValue, FerroLocator, FerroObject, FerroObjectImpl,
@@ -638,28 +638,34 @@ impl AutomationPeer {
     }
 
     /// Occurs when the children of the automation peer have changed.
-    pub fn children_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the peer.
+    pub fn children_changed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.children_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.children_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Occurs when a property value of the automation peer has changed.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the peer.
     pub fn property_changed(
         &self,
         handler: impl Fn(&AutomationPropertyChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.property_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.property_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Raises an event to notify the automation client the peer's children have changed.
@@ -703,17 +709,20 @@ impl AutomationPeer {
     /// Observes the text-edit events explicitly raised by this peer. A platform
     /// receives the resolved EventsSource; this observation remains attached to
     /// the original peer. Disposal and the observer handle retain it weakly.
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the peer.
     pub fn text_edit_text_changed(
         &self,
         handler: impl Fn(&TextEditTextChangedEventArgs) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         let token = self.text_edit_text_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.text_edit_text_changed.remove(token);
             }
-        })
+        }))
     }
 
     /// Raises the native text-edit event on any peer, independently of whether

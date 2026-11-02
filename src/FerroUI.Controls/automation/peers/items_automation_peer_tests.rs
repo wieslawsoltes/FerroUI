@@ -179,7 +179,7 @@ fn list_box_peer_provides_the_selection() {
             assert!(e.new_value().is_none());
             count.set(count.get() + 1);
         }
-    });
+    }).detach();
 
     target.set_selected_index(1);
 

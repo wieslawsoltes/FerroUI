@@ -87,7 +87,7 @@ fn started_hold_gesture_should_raise_context_requested_event() {
     let context_requested = Rc::new(Cell::new(false));
 
     let requested = context_requested.clone();
-    let _opened = flyout.opened(move || requested.set(true));
+    flyout.opened(move || requested.set(true)).detach();
 
     let mouse = MouseTestHelper::new();
     mouse.down(&border);
@@ -113,9 +113,9 @@ fn cancelled_hold_gesture_should_cancel_context_flyout() {
     let context_canceled = Rc::new(Cell::new(false));
 
     let requested = context_requested.clone();
-    let _opened = flyout.opened(move || requested.set(true));
+    flyout.opened(move || requested.set(true)).detach();
     let canceled = context_canceled.clone();
-    let _closed = flyout.closed(move || canceled.set(true));
+    flyout.closed(move || canceled.set(true)).detach();
 
     let mouse = MouseTestHelper::new();
     mouse.down(&border);

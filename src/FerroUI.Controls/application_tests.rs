@@ -63,7 +63,7 @@ fn raises_resources_changed_when_event_handler_added_after_resources_has_been_ac
     let raised = Rc::new(Cell::new(false));
 
     let r = raised.clone();
-    application.resources_changed(move |_| r.set(true));
+    application.resources_changed(move |_| r.set(true)).detach();
     resources.add_value("foo", "bar".to_string());
 
     assert!(raised.get());
@@ -169,7 +169,7 @@ fn application_actual_theme_variant_follows_platform_settings_changes() {
 
     let raised = Rc::new(Cell::new(0));
     let r = raised.clone();
-    application.actual_theme_variant_changed(move || r.set(r.get() + 1));
+    application.actual_theme_variant_changed(move || r.set(r.get() + 1)).detach();
 
     platform_settings.set_theme_variant(PlatformThemeVariant::Dark);
 
@@ -264,7 +264,7 @@ fn switching_back_to_the_default_theme_variant_raises_actual_theme_variant_chang
 
     let raised = Rc::new(Cell::new(0));
     let r = raised.clone();
-    let _subscription = application.actual_theme_variant_changed(move || r.set(r.get() + 1));
+    application.actual_theme_variant_changed(move || r.set(r.get() + 1)).detach();
 
     // The application is a theme variant root: the default variant resolves
     // to the variant of the platform (light) in one step.

@@ -469,10 +469,10 @@ fn rich_hyperlink_hit_testing_keyboard_focus_and_cancellation_use_the_host() {
     assert!(view.hyperlink_at(Point::new(190.0, 95.0)).is_none());
     let invocations = Rc::new(Cell::new(0));
     let observed = invocations.clone();
-    let _subscription = link.click(move |event| {
+    link.click(move |event| {
         observed.set(observed.get() + 1);
         event.set_handled(true);
-    });
+    }).detach();
     let revision = view.document().revision();
     assert!(key(&view, Key::Tab, false).handled());
     assert!(link.is_focused());

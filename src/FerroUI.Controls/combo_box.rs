@@ -23,7 +23,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl};
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::{AlignmentX, FlowDirection, IBrush, Stretch, VisualBrush};
-use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, BoxedValue, DirectProperty, FerroObject,
@@ -462,25 +462,31 @@ impl ComboBox {
     }
 
     /// Occurs after the drop-down (popup) list of the [`ComboBox`] closes.
-    pub fn drop_down_closed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the combo box.
+    pub fn drop_down_closed(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.drop_down_closed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.drop_down_closed.remove(token);
             }
-        })
+        }))
     }
 
     /// Occurs after the drop-down (popup) list of the [`ComboBox`] opens.
-    pub fn drop_down_opened(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the combo box.
+    pub fn drop_down_opened(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.drop_down_opened.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(this) = weak.upgrade() {
                 this.drop_down_opened.remove(token);
             }
-        })
+        }))
     }
 
     /// Gets or sets a value indicating whether the dropdown is currently

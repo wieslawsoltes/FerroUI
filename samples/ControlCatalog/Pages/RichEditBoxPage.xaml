@@ -70,7 +70,7 @@ document.changed(move |_| {
     if let (Some(preview), Some(source)) = (preview.upgrade(), source.upgrade()) {
         let _ = preview.rich_document().restore(&source.snapshot());
     }
-});]]></x:String></controls:SampleSection.Code>
+}).detach();]]></x:String></controls:SampleSection.Code>
     </controls:SampleSection>
 
   </StackPanel>

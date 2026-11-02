@@ -445,7 +445,7 @@ impl DesignerWorkspace {
             if let Some(editor) = weak_editor.upgrade() {
                 editor.retire();
             }
-        });
+        }).detach();
         *self.prototype.editor.borrow_mut() = Some(PrototypeEditor::Flow(editor));
         *self.prototype.editor_model.borrow_mut() = Some(model);
         *self.prototype.flyout.borrow_mut() = Some(flyout.clone());
@@ -520,7 +520,7 @@ impl DesignerWorkspace {
             if let Some(editor) = weak_editor.upgrade() {
                 editor.retire();
             }
-        });
+        }).detach();
         *self.prototype.editor.borrow_mut() = Some(PrototypeEditor::Link(editor));
         *self.prototype.editor_model.borrow_mut() = Some(model);
         *self.prototype.flyout.borrow_mut() = Some(flyout.clone());

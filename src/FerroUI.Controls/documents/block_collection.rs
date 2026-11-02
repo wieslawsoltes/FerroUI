@@ -2,7 +2,7 @@ use super::{Block, IInlineHost};
 use ferroui_base::collections::{
     FerroList, NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs, ResetBehavior,
 };
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{IntoRef, Ref, StyledElement, Visual, WeakRef};
 use std::cell::{Cell, RefCell};
@@ -143,14 +143,16 @@ impl BlockCollection {
         blocks.iter().map(|b| b.text_length()).sum::<usize>() + blocks.len().saturating_sub(1)
     }
 
-    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+    /// Dropping the returned guard removes the handler; [`Subscription::detach`] keeps it for the
+    /// life of the collection.
+    pub fn invalidated(&self, handler: impl Fn() + 'static) -> Subscription {
         let token = self.0.invalidated.add(Rc::new(handler));
         let weak = Rc::downgrade(&self.0.invalidated);
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             if let Some(handlers) = weak.upgrade() {
                 handlers.remove(token);
             }
-        })
+        }))
     }
 
     pub(crate) fn set_logical_parent(&self, parent: Option<&StyledElement>) {

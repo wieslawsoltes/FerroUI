@@ -2958,10 +2958,10 @@ mod app {
             let file = NativeMenuItem::with_header("File");
             let file_menu = NativeMenu::new();
             let quit = NativeMenuItem::with_header("Quit");
-            let _click = {
+            {
                 let clicks = clicks.clone();
-                quit.click(move |_| clicks.set(clicks.get() + 1))
-            };
+                quit.click(move |_| clicks.set(clicks.get() + 1)).detach();
+            }
             file_menu.add(quit.clone());
             file.set_menu(Some(file_menu));
             menu.add(file);

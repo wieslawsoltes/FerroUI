@@ -50,7 +50,7 @@ pub struct SplitButton {
     is_flyout_open: Cell<bool>,
     is_keyboard_pressed: Cell<bool>,
     /// The subscriptions to the `Opened` and `Closed` events of the flyout.
-    flyout_events: RefCell<Option<(Rc<dyn IDisposable>, Rc<dyn IDisposable>)>>,
+    flyout_events: RefCell<Option<(Subscription, Subscription)>>,
     flyout_property_changed_disposable: RefCell<Option<Subscription>>,
     flyout_state_changed: HandlerList<dyn Fn()>,
 }

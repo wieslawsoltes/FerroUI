@@ -257,7 +257,7 @@ impl ManagedStorageProvider {
             let tcs = tcs.clone();
             flyout.closed(move || {
                 tcs.try_set_result(false);
-            });
+            }).detach();
         }
         flyout.set_content(Some(Control::boxed(prompt)));
         flyout.set_placement(PlacementMode::Center);

@@ -285,7 +285,7 @@ fn rich_selection_paragraph_typing_publishes_complete_alignment_and_caret_once()
             editor.rich_document().paragraphs()[0].text_alignment(),
             editor.selection(),
         ));
-    });
+    }).detach();
     assert!(editor.type_text("😀").unwrap());
     assert_eq!(
         &*observed.borrow(),

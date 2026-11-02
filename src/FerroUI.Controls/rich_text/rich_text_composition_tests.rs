@@ -83,14 +83,14 @@ fn rich_composition_model_and_editor_callbacks_observe_the_complete_accepted_pre
     let order = Rc::new(RefCell::new(Vec::new()));
     let observed = order.clone();
     let weak = Rc::downgrade(&editor);
-    let _model = document.changed(move |_| {
+    document.changed(move |_| {
         let editor = weak.upgrade().unwrap();
         assert_eq!(editor.document().text(), "q日😀z");
         assert_eq!(editor.active_composition_range(), Some(1..4));
         assert_eq!(editor.surrounding_text(), "qxz");
         assert_eq!(editor.input_method_selection(), EditorSelection::new(1, 2));
         observed.borrow_mut().push("model");
-    });
+    }).detach();
     let observed = order.clone();
     let weak = Rc::downgrade(&editor);
     editor.changed(move || {

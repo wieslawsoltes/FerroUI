@@ -185,7 +185,7 @@ impl TemplatedControlImpl for CarouselPage {
                 if let Some(this) = weak.upgrade() {
                     this.on_carousel_container_prepared(e);
                 }
-            });
+            }).detach();
             *this.carousel.borrow_mut() =
                 Some(CarouselPart { carousel: carousel.clone(), selection_changed: None, container_prepared });
             carousel.set_page_transition(this.page_transition());

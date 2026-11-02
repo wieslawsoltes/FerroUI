@@ -34,8 +34,8 @@ impl IAddEventHandler for FlyoutEventHandler {
         };
 
         match event_name {
-            "Opened" => Some(target.opened(event_handler)),
-            "Closed" => Some(target.closed(event_handler)),
+            "Opened" => Some(target.opened(event_handler).detach()),
+            "Closed" => Some(target.closed(event_handler).detach()),
             _ => None,
         }
     }

@@ -26,7 +26,7 @@ impl FerroObjectImpl for NativeControlHostPeer {
             if let Some(this) = weak.upgrade() {
                 this.on_native_control_handle_changed();
             }
-        });
+        }).detach();
     }
 }
 

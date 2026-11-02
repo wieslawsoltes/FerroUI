@@ -271,7 +271,7 @@ impl DesignerWorkspace {
             });
             flyout.set_content(Some(Control::boxed(editor.control())));
             this.preview_environment.borrow_mut().editor = Some(editor);
-        });
+        }).detach();
         let weak = Rc::downgrade(self);
         flyout.closed(move || {
             if let Some(this) = weak.upgrade() {
@@ -279,6 +279,6 @@ impl DesignerWorkspace {
                     editor.retire();
                 }
             }
-        });
+        }).detach();
     }
 }

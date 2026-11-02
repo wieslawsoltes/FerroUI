@@ -345,7 +345,7 @@ fn the_peer_reports_the_coerced_values_and_the_text_of_the_rating() {
     let peer = ControlAutomationPeer::create_peer_for_element(&rating);
     let recorded = Rc::new(RefCell::new(Vec::new()));
     let log = recorded.clone();
-    peer.property_changed(move |args| log.borrow_mut().push(args.clone()));
+    peer.property_changed(move |args| log.borrow_mut().push(args.clone())).detach();
     rating.set_rating_value(99.0);
     {
         let events = recorded.borrow();

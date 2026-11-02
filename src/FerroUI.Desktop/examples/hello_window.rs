@@ -131,7 +131,7 @@ fn logging_item(header: &str) -> Ref<NativeMenuItem> {
     let item = NativeMenuItem::with_header(header);
     let name = header.to_string();
     // The subscription lives as long as the item.
-    let _ = item.click(move |_| println!("Menu item clicked: {name}"));
+    item.click(move |_| println!("Menu item clicked: {name}")).detach();
     item
 }
 

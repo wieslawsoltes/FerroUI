@@ -90,11 +90,11 @@ fn value_property_raises_automation_property_changed_event_on_color_change() {
     let changed: Rc<RefCell<Option<AutomationPropertyChangedEventArgs>>> = Rc::new(RefCell::new(None));
 
     let sink = changed.clone();
-    let _subscription = peer.property_changed(move |e| {
+    peer.property_changed(move |e| {
         if std::ptr::eq(e.property(), ValuePatternIdentifiers::value_property()) {
             *sink.borrow_mut() = Some(e.clone());
         }
-    });
+    }).detach();
 
     spectrum.set_color(Colors::BLACK);
 
