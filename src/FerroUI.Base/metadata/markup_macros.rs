@@ -137,12 +137,29 @@ macro_rules! ferro_markup_type {
         $crate::ferro_markup_type!(@impl $kind $type_, $name, implied, { $($body)* });
     };
 
-    (@nullable struct $m:ident, $type_:ty) => {
+    // Match the value selected by @fns: explicit `this`, then the first
+    // handle, then the declared type. The declaration can be a marker.
+    (@nullable struct $m:ident, $this:ty, explicit, { $($body:tt)* }) => {
+        $crate::ferro_markup_type!(@nullable_value $m, $this);
+    };
+    (@nullable struct $m:ident, $this:ty, $form:ident, { $($body:tt)* }) => {
+        $crate::ferro_markup_type!(@nullable_handle $m, $this; $($body)*);
+    };
+    (@nullable $kind:ident $m:ident, $this:ty, $form:ident, { $($body:tt)* }) => {};
+    (@nullable_handle $m:ident, $this:ty; handles: [$first:ty $(, $more:ty)* $(,)?] $($rest:tt)*) => {
+        $crate::ferro_markup_type!(@nullable_value $m, $first);
+    };
+    (@nullable_handle $m:ident, $this:ty; $next:tt $($rest:tt)*) => {
+        $crate::ferro_markup_type!(@nullable_handle $m, $this; $($rest)*);
+    };
+    (@nullable_handle $m:ident, $this:ty;) => {
+        $crate::ferro_markup_type!(@nullable_value $m, $this);
+    };
+    (@nullable_value $m:ident, $type_:ty) => {
         $m.nullable = ::std::option::Option::Some(|| {
             $crate::data::core::ValueType::of::<::std::option::Option<$type_>>()
         });
     };
-    (@nullable $kind:ident $m:ident, $type_:ty) => {};
 
     (@kind class) => { $crate::metadata::MarkupTypeKind::Class };
     (@kind struct) => { $crate::metadata::MarkupTypeKind::Struct };
@@ -199,7 +216,7 @@ macro_rules! ferro_markup_type {
                         $crate::ferro_markup_type!(@kind $kind),
                         ::std::module_path!(),
                     );
-                    $crate::ferro_markup_type!(@nullable $kind markup, $type_);
+                    $crate::ferro_markup_type!(@nullable $kind markup, $this, $form, { $($body)* });
                     $crate::__ferro_compiler_metadata!(
                         $crate::ferro_markup_type!(@this $kind $form markup, $this);
                         markup.value = ::std::option::Option::Some(<$type_>::__MARKUP_VALUE);

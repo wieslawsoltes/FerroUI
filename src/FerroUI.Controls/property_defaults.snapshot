@@ -985,6 +985,7 @@ FerroUI.Input.GestureRecognizers.SwipeGestureRecognizer.CanVerticallySwipe: bool
 FerroUI.Input.GestureRecognizers.SwipeGestureRecognizer.IsEnabled: bool = True; OneWay
 FerroUI.Input.GestureRecognizers.SwipeGestureRecognizer.IsMouseEnabled: bool = False; OneWay
 FerroUI.Input.GestureRecognizers.SwipeGestureRecognizer.Threshold: f64 = 0; OneWay
+FerroUI.Input.InputElement.AllowFocusOnInteraction: bool = True; OneWay; inherits
 FerroUI.Input.InputElement.Cursor: Option<Rc<Cursor>> = (null); OneWay; inherits
 FerroUI.Input.InputElement.Focusable: bool = False; OneWay
 FerroUI.Input.InputElement.IsEnabled: bool = True; OneWay

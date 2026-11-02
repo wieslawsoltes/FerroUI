@@ -101,6 +101,10 @@ impl<T: PropertyValue> EffectiveValue<T> {
         self.value.borrow().clone()
     }
 
+    pub fn with_value<R>(&self, read: impl FnOnce(&T) -> R) -> R {
+        read(&self.value.borrow())
+    }
+
     pub fn set_local_value_and_raise(&self, owner: &FerroObject, value: T) {
         self.set_and_raise_core(owner, value, BindingPriority::LocalValue, false, false);
     }

@@ -9757,6 +9757,16 @@
         ],
         "attached": false
       },
+      "AllowFocusOnInteraction": {
+        "name": "AllowFocusOnInteraction",
+        "type_name": "bool",
+        "documentation": "InputElement.AllowFocusOnInteraction: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
       "IsEnabled": {
         "name": "IsEnabled",
         "type_name": "bool",

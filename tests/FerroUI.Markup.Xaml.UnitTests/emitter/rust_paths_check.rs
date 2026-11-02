@@ -1109,6 +1109,7 @@ pub fn property_accessors() -> Vec<(&'static ::ferroui_base::FerroProperty, &'st
         (::ferroui_base::Registrable::as_registered_property(::ferroui_base::controls::NameScope::name_scope_property()), "ferroui_base::controls::NameScope::name_scope_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_base::input::AccessKeyHandler::show_access_key_property()), "ferroui_base::input::AccessKeyHandler::show_access_key_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_base::input::DragDrop::allow_drop_property()), "ferroui_base::input::DragDrop::allow_drop_property"),
+        (::ferroui_base::Registrable::as_registered_property(::ferroui_base::input::InputElement::allow_focus_on_interaction_property()), "ferroui_base::input::InputElement::allow_focus_on_interaction_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_base::input::InputElement::cursor_property()), "ferroui_base::input::InputElement::cursor_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_base::input::InputElement::focusable_property()), "ferroui_base::input::InputElement::focusable_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_base::input::InputElement::is_effectively_enabled_property()), "ferroui_base::input::InputElement::is_effectively_enabled_property"),
