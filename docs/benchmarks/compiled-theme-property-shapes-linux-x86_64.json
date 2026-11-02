@@ -1,0 +1,6287 @@
+{
+ "title": "Typed property value shapes in the complete editable WinUI image and a standalone ordinal-storage experiment",
+ "runtime_source": "ff5ea13a23e3a659d46a38854ab9909d100976eb",
+ "shipping_bytes": 28324712,
+ "shipping_sha256": "459ea34851eb89e3556a9539da29b3bcbc7fa5a8af34ee2c2291f393dae85f21",
+ "symbol_identity_report": "compiled-theme-pgo-z-attribution-linux-x86_64.json",
+ "typed_property_census": {
+  "physical_text_bytes": 2556563,
+  "physical_ranges": 10533,
+  "categories": {
+   "unit-only enum verified in source": {
+    "text_bytes": 779526,
+    "distinct_payload_types": 111,
+    "type_names": [
+     "core::option::Option<ferroui_controls::automation::peers::automation_peer::AutomationControlType>",
+     "core::option::Option<ferroui_controls::automation::peers::automation_peer::AutomationLandmarkType>",
+     "core::option::Option<ferroui_controls::flex_panel::flex_align_items::FlexAlignItems>",
+     "core::option::Option<ferroui_controls::page::bar_layout_behavior::BarLayoutBehavior>",
+     "ferroui_base::combined_geometry::GeometryCombineMode",
+     "ferroui_base::input::input_scope_name_value::InputScopeNameValue",
+     "ferroui_base::input::keyboard_navigation_mode::KeyboardNavigationMode",
+     "ferroui_base::input::navigation::xy_focus_navigation_strategy::XYFocusNavigationStrategy",
+     "ferroui_base::input::pull_gesture_event_args::PullDirection",
+     "ferroui_base::input::text_input::text_input_content_type::TextInputContentType",
+     "ferroui_base::input::text_input::text_input_return_key_type::TextInputReturnKeyType",
+     "ferroui_base::input::window_decorations_element_role::WindowDecorationsElementRole",
+     "ferroui_base::layout::layoutable::HorizontalAlignment",
+     "ferroui_base::layout::layoutable::VerticalAlignment",
+     "ferroui_base::layout::orientation::Orientation",
+     "ferroui_base::media::acrylic_background_source::AcrylicBackgroundSource",
+     "ferroui_base::media::acrylic_brush::AcrylicBrushBackgroundSource",
+     "ferroui_base::media::alignment_x::AlignmentX",
+     "ferroui_base::media::alignment_y::AlignmentY",
+     "ferroui_base::media::background_sizing::BackgroundSizing",
+     "ferroui_base::media::baseline_alignment::BaselineAlignment",
+     "ferroui_base::media::fill_rule::FillRule",
+     "ferroui_base::media::flow_direction::FlowDirection",
+     "ferroui_base::media::font_stretch::FontStretch",
+     "ferroui_base::media::font_style::FontStyle",
+     "ferroui_base::media::font_typography::FontCapitals",
+     "ferroui_base::media::font_typography::FontEastAsianLanguage",
+     "ferroui_base::media::font_typography::FontEastAsianWidths",
+     "ferroui_base::media::font_typography::FontFraction",
+     "ferroui_base::media::font_typography::FontNumeralAlignment",
+     "ferroui_base::media::font_typography::FontNumeralStyle",
+     "ferroui_base::media::font_typography::FontVariants",
+     "ferroui_base::media::gradient_spread_method::GradientSpreadMethod",
+     "ferroui_base::media::imaging::bitmap_blending_mode::BitmapBlendingMode",
+     "ferroui_base::media::pen_line_cap::PenLineCap",
+     "ferroui_base::media::pen_line_join::PenLineJoin",
+     "ferroui_base::media::stretch::Stretch",
+     "ferroui_base::media::stretch_direction::StretchDirection",
+     "ferroui_base::media::sweep_direction::SweepDirection",
+     "ferroui_base::media::text_alignment::TextAlignment",
+     "ferroui_base::media::text_decoration_location::TextDecorationLocation",
+     "ferroui_base::media::text_decoration_unit::TextDecorationUnit",
+     "ferroui_base::media::text_line_bounds::TextLineBounds",
+     "ferroui_base::media::text_wrapping::TextWrapping",
+     "ferroui_base::media::tile_mode::TileMode",
+     "ferroui_base::rendering::composition::system_backdrops::MicaKind",
+     "ferroui_base::styling::container_sizing::ContainerSizing",
+     "ferroui_base::utilities::date_time_format_info::CalendarWeekRule",
+     "ferroui_base::utilities::day_of_week::DayOfWeek",
+     "ferroui_controls::auto_complete_box::auto_complete_filter_mode::AutoCompleteFilterMode",
+     "ferroui_controls::automation::automation_live_setting::AutomationLiveSetting",
+     "ferroui_controls::automation::automation_properties::AccessibilityView",
+     "ferroui_controls::automation::is_offscreen_behavior::IsOffscreenBehavior",
+     "ferroui_controls::button::ClickMode",
+     "ferroui_controls::button_spinner::Location",
+     "ferroui_controls::calendar::calendar::CalendarMode",
+     "ferroui_controls::calendar::calendar::CalendarSelectionMode",
+     "ferroui_controls::calendar_date_picker::calendar_date_picker_format::CalendarDatePickerFormat",
+     "ferroui_controls::command_bar::command_bar_default_label_position::CommandBarDefaultLabelPosition",
+     "ferroui_controls::command_bar::command_bar_overflow_button_visibility::CommandBarOverflowButtonVisibility",
+     "ferroui_controls::date_time_pickers::date_time_picker_panel::DateTimePickerPanelType",
+     "ferroui_controls::dock_panel::Dock",
+     "ferroui_controls::documents::block::LineStackingStrategy",
+     "ferroui_controls::documents::hyperlink::UnderlineStyle",
+     "ferroui_controls::documents::line_spacing_rule::LineSpacingRule",
+     "ferroui_controls::expander::ExpandDirection",
+     "ferroui_controls::flex_panel::flex_align_content::FlexAlignContent",
+     "ferroui_controls::flex_panel::flex_align_items::FlexAlignItems",
+     "ferroui_controls::flex_panel::flex_direction::FlexDirection",
+     "ferroui_controls::flex_panel::flex_justify_content::FlexJustifyContent",
+     "ferroui_controls::flex_panel::flex_wrap::FlexWrap",
+     "ferroui_controls::flyouts::flyout_show_mode::FlyoutShowMode",
+     "ferroui_controls::grid_splitter::GridResizeBehavior",
+     "ferroui_controls::grid_splitter::GridResizeDirection",
+     "ferroui_controls::info_bar::InfoBarSeverity",
+     "ferroui_controls::media::reveal_brush::ApplicationTheme",
+     "ferroui_controls::media::reveal_brush::RevealBrushState",
+     "ferroui_controls::menu_item_toggle_type::MenuItemToggleType",
+     "ferroui_controls::navigation::NavigationCacheMode",
+     "ferroui_controls::navigation_view_events::NavigationViewBackButtonVisible",
+     "ferroui_controls::navigation_view_events::NavigationViewPaneDisplayMode",
+     "ferroui_controls::navigation_view_events::NavigationViewSelectionFollowsFocus",
+     "ferroui_controls::notifications::notification_position::NotificationPosition",
+     "ferroui_controls::notifications::notification_type::NotificationType",
+     "ferroui_controls::number_box::NumberBoxSpinButtonPlacementMode",
+     "ferroui_controls::number_box::NumberBoxValidationMode",
+     "ferroui_controls::page::drawer_behavior::DrawerBehavior",
+     "ferroui_controls::page::drawer_layout_behavior::DrawerLayoutBehavior",
+     "ferroui_controls::page::drawer_placement::DrawerPlacement",
+     "ferroui_controls::page::tab_placement::TabPlacement",
+     "ferroui_controls::placement_mode::PlacementMode",
+     "ferroui_controls::platform::i_platform_feedback::FeedbackType",
+     "ferroui_controls::platform::i_x11_options_toplevel_impl_feature::X11NetWmWindowType",
+     "ferroui_controls::platform::win32_properties::Win32HitTestValue",
+     "ferroui_controls::platform::win32_properties::WindowCornerPreference",
+     "ferroui_controls::primitives::scroll_bar_visibility::ScrollBarVisibility",
+     "ferroui_controls::primitives::snap_points_alignment::SnapPointsAlignment",
+     "ferroui_controls::primitives::snap_points_type::SnapPointsType",
+     "ferroui_controls::rich_edit_box::RichEditCharacterCasing",
+     "ferroui_controls::rich_text::rich_text_transfer::RichEditClipboardFormat",
+     "ferroui_controls::slider::TickPlacement",
+     "ferroui_controls::split_view::split_view_display_mode::SplitViewDisplayMode",
+     "ferroui_controls::split_view::split_view_pane_placement::SplitViewPanePlacement",
+     "ferroui_controls::symbol_icon::Symbol",
+     "ferroui_controls::text_layout_rounding_placement::TextLayoutRoundingPlacement",
+     "ferroui_controls::tick_bar::TickBarPlacement",
+     "ferroui_controls::window::WindowClosingBehavior",
+     "ferroui_controls::window_decorations::WindowDecorations",
+     "ferroui_controls::window_startup_location::WindowStartupLocation",
+     "ferroui_controls::wrap_panel::WrapPanelItemsAlignment",
+     "ferroui_controls::zoom_mode::ZoomMode"
+    ]
+   },
+   "struct (including flags)": {
+    "text_bytes": 667797,
+    "distinct_payload_types": 63,
+    "type_names": [
+     "core::option::Option<ferroui_base::animation::time_span::TimeSpan>",
+     "core::option::Option<ferroui_base::animation::transitions_collection::Transitions>",
+     "core::option::Option<ferroui_base::controls::i_name_scope::NameScopeRef>",
+     "core::option::Option<ferroui_base::input::key_gesture::KeyGesture>",
+     "core::option::Option<ferroui_base::media::font_family::FontFamily>",
+     "core::option::Option<ferroui_base::rect::Rect>",
+     "core::option::Option<ferroui_base::styling::theme_variant::ThemeVariant>",
+     "core::option::Option<ferroui_base::styling::visual_query_provider::VisualQueryProvider>",
+     "core::option::Option<ferroui_base::utilities::culture_info::CultureInfo>",
+     "core::option::Option<ferroui_base::utilities::date_time::DateTime>",
+     "core::option::Option<ferroui_base::utilities::date_time_offset::DateTimeOffset>",
+     "core::option::Option<ferroui_base::utilities::decimal::Decimal>",
+     "core::option::Option<ferroui_base::utilities::uri::Uri>",
+     "core::option::Option<ferroui_controls::assigned_binding::AssignedBinding>",
+     "core::option::Option<ferroui_controls::auto_complete_box::auto_complete_box::AutoCompleteAsyncPopulator>",
+     "core::option::Option<ferroui_controls::data_validation_errors::ErrorConverter>",
+     "core::option::Option<ferroui_controls::design::DesignStyleValue>",
+     "core::option::Option<ferroui_controls::documents::inline_collection::InlineCollection>",
+     "core::option::Option<ferroui_controls::items_source::ItemsSource>",
+     "core::option::Option<ferroui_controls::native_menu_export::NativeMenuInfoRef>",
+     "core::option::Option<ferroui_controls::primitives::adorner_layer::AdornedElementInfoHandle>",
+     "core::option::Option<ferroui_controls::primitives::adorner_layer::AttachmentSubscriptions>",
+     "core::option::Option<ferroui_controls::primitives::adorner_layer::SavedAdornerLayer>",
+     "core::option::Option<ferroui_controls::primitives::popup::CustomPopupPlacementCallbackValue>",
+     "core::option::Option<ferroui_controls::tick_bar::TickList>",
+     "core::option::Option<ferroui_controls::visual_state::state_triggers::TriggerHostRef>",
+     "core::option::Option<ferroui_markup_xaml::diagnostics::xaml_source_info::XamlSourceInfo>",
+     "ferroui_base::animation::time_span::TimeSpan",
+     "ferroui_base::corner_radius::CornerRadius",
+     "ferroui_base::input::navigation::xy_focus_navigation_modes::XYFocusNavigationModes",
+     "ferroui_base::matrix::Matrix",
+     "ferroui_base::media::box_shadow::BoxShadow",
+     "ferroui_base::media::box_shadows::BoxShadows",
+     "ferroui_base::media::color::Color",
+     "ferroui_base::media::font_family::FontFamily",
+     "ferroui_base::media::font_weight::FontWeight",
+     "ferroui_base::media::text_formatting::text_tab_stop::TextTabStops",
+     "ferroui_base::pixel_rect::PixelRect",
+     "ferroui_base::point::Point",
+     "ferroui_base::rect::Rect",
+     "ferroui_base::relative_point::RelativePoint",
+     "ferroui_base::relative_rect::RelativeRect",
+     "ferroui_base::relative_scalar::RelativeScalar",
+     "ferroui_base::size::Size",
+     "ferroui_base::thickness::Thickness",
+     "ferroui_base::utilities::culture_info::CultureInfo",
+     "ferroui_base::utilities::date_time::DateTime",
+     "ferroui_base::utilities::date_time_offset::DateTimeOffset",
+     "ferroui_base::utilities::decimal::Decimal",
+     "ferroui_base::utilities::number_styles::NumberStyles",
+     "ferroui_base::vector::Vector",
+     "ferroui_controls::chrome::drawn_window_decoration_parts::DrawnWindowDecorationParts",
+     "ferroui_controls::chrome::title_bar_decorations::TitleBarDecorations",
+     "ferroui_controls::flex_panel::flex_basis::FlexBasis",
+     "ferroui_controls::grid_length::GridLength",
+     "ferroui_controls::primitives::popup_positioning::i_popup_positioner::PopupAnchor",
+     "ferroui_controls::primitives::popup_positioning::i_popup_positioner::PopupGravity",
+     "ferroui_controls::primitives::popup_positioning::i_popup_positioner::PopupPositionerConstraintAdjustment",
+     "ferroui_controls::rich_edit_box::DisabledFormattingAccelerators",
+     "ferroui_controls::selection_mode::SelectionMode",
+     "ferroui_controls::size_to_content::SizeToContent",
+     "ferroui_controls::spinner::ValidSpinDirections",
+     "ferroui_controls::window_transparency_level::WindowTransparencyLevelCollection"
+    ]
+   },
+   "Rust Rc": {
+    "text_bytes": 418500,
+    "distinct_payload_types": 31,
+    "type_names": [
+     "alloc::rc::Rc<dyn ferroui_base::media::text_trimming::TextTrimming>",
+     "alloc::rc::Rc<dyn ferroui_controls::number_box::INumberBoxNumberFormatter>",
+     "alloc::rc::Rc<dyn ferroui_controls::templates::i_template::ITemplateOf<core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::panel::Panel>>>>",
+     "core::option::Option<alloc::rc::Rc<[alloc::string::String]>>",
+     "core::option::Option<alloc::rc::Rc<[ferroui_base::input::input_scope_name_value::InputScopeNameValue]>>",
+     "core::option::Option<alloc::rc::Rc<[ferroui_base::utilities::value_span::ValueSpan<alloc::rc::Rc<dyn ferroui_base::media::text_formatting::text_run_properties::TextRunProperties>>]>>",
+     "core::option::Option<alloc::rc::Rc<[ferroui_base::utilities::value_span::ValueSpan<ferroui_base::media::text_formatting::text_paragraph_style::TextParagraphStyle>]>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_base::animation::i_clock::IClock>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_base::animation::i_page_transition::IPageTransition>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_base::data::converters::i_value_converter::IValueConverter>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_base::ferro_property::AnyValue>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_base::input::i_command::ICommand>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_base::media::effects::i_effect::IEffect>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_base::media::i_brush::IBrush>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_base::media::i_dash_style::IDashStyle>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_base::media::i_image::IImage>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_base::media::i_image_brush::IImageBrushSource>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_base::media::i_pen::IPen>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_base::media::i_transform::ITransform>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_base::media::imaging::i_bitmap::IBitmap>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_controls::chrome::i_window_drawn_decorations_template::IWindowDrawnDecorationsTemplate>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_controls::templates::i_control_template::IControlTemplate>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_controls::templates::i_data_template::IDataTemplate>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_controls::templates::i_template::ITemplateOf<core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::control::Control>>>>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_controls::templates::i_template::ITemplateOf<ferroui_base::type_system::Ref<ferroui_controls::control::Control>>>>",
+     "core::option::Option<alloc::rc::Rc<ferroui_base::input::cursor::Cursor>>",
+     "core::option::Option<alloc::rc::Rc<ferroui_base::media::glyph_run::GlyphRun>>",
+     "core::option::Option<alloc::rc::Rc<ferroui_base::utilities::number_format_info::NumberFormatInfo>>",
+     "core::option::Option<alloc::rc::Rc<ferroui_controls::definition_base::SharedSizeScope>>",
+     "core::option::Option<alloc::rc::Rc<ferroui_controls::tray_icon::TrayIcons>>",
+     "core::option::Option<alloc::rc::Rc<ferroui_controls::window_icon::WindowIcon>>"
+    ]
+   },
+   "Ferro Ref": {
+    "text_bytes": 306731,
+    "distinct_payload_types": 26,
+    "type_names": [
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_base::input::input_element::InputElement>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_base::input::input_scope::InputScope>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_base::media::cache_mode::CacheMode>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_base::media::drawing::Drawing>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_base::media::experimental_acrylic_material::ExperimentalAcrylicMaterial>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_base::media::geometry::Geometry>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_base::media::solid_color_brush::SolidColorBrush>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_base::media::theme_shadow::Shadow>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_base::media::transform::Transform>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_base::styling::control_theme::ControlTheme>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_base::visual::Visual>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::auto_suggest_box::AutoSuggestBox>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::button::Button>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::context_menu::ContextMenu>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::control::Control>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::flyouts::flyout_base::FlyoutBase>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::icon_element::IconElement>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::icon_source::IconSource>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::info_badge::InfoBadge>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::media::system_backdrop::SystemBackdrop>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::native_menu::NativeMenu>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::page::page::Page>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::primitives::thumb::Thumb>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::rating_item_info::RatingItemInfo>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::tool_tip::ToolTip>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::visual_state::visual_state_manager::VisualStateManager>>"
+    ]
+   },
+   "named framework, unresolved": {
+    "text_bytes": 160812,
+    "distinct_payload_types": 13,
+    "type_names": [
+     "core::option::Option<ferroui_base::collections::ferro_list::FerroList<alloc::rc::Rc<dyn ferroui_controls::command_bar::i_command_bar_element::ICommandBarElement>>>",
+     "core::option::Option<ferroui_base::collections::ferro_list::FerroList<ferroui_base::type_system::Ref<ferroui_controls::page::page::Page>>>",
+     "core::option::Option<ferroui_base::collections::ferro_list::FerroList<ferroui_base::type_system::Ref<ferroui_controls::visual_state::visual_state_group::VisualStateGroup>>>",
+     "core::option::Option<ferroui_base::media::font_feature_collection::FontFeatureCollection>",
+     "core::option::Option<ferroui_base::media::gradient_stops::GradientStops>",
+     "core::option::Option<ferroui_base::media::media_collection::MediaCollection<f64>>",
+     "core::option::Option<ferroui_base::media::points::Points>",
+     "core::option::Option<ferroui_base::media::text_decoration_collection::TextDecorationCollection>",
+     "core::option::Option<ferroui_base::media::transform_group::Transforms>",
+     "core::option::Option<ferroui_controls::auto_complete_box::auto_complete_box::AutoCompleteFilterPredicate<core::option::Option<alloc::rc::Rc<dyn ferroui_base::ferro_property::AnyValue>>>>",
+     "core::option::Option<ferroui_controls::auto_complete_box::auto_complete_box::AutoCompleteFilterPredicate<core::option::Option<alloc::string::String>>>",
+     "core::option::Option<ferroui_controls::auto_complete_box::auto_complete_box::AutoCompleteSelector<alloc::rc::Rc<dyn ferroui_base::ferro_property::AnyValue>>>",
+     "core::option::Option<ferroui_controls::auto_complete_box::auto_complete_box::AutoCompleteSelector<core::option::Option<alloc::string::String>>>"
+    ]
+   },
+   "primitive": {
+    "text_bytes": 104819,
+    "distinct_payload_types": 14,
+    "type_names": [
+     "bool",
+     "char",
+     "core::option::Option<bool>",
+     "core::option::Option<f64>",
+     "core::option::Option<i32>",
+     "f32",
+     "f64",
+     "i16",
+     "i32",
+     "i64",
+     "u16",
+     "u32",
+     "u64",
+     "u8"
+    ]
+   },
+   "Ferro ElementRef": {
+    "text_bytes": 50428,
+    "distinct_payload_types": 4,
+    "type_names": [
+     "core::option::Option<ferroui_base::element_ref::ElementRef<ferroui_base::input::input_element::InputElement>>",
+     "core::option::Option<ferroui_base::element_ref::ElementRef<ferroui_base::visual::Visual>>",
+     "core::option::Option<ferroui_base::element_ref::ElementRef<ferroui_controls::control::Control>>",
+     "core::option::Option<ferroui_base::element_ref::ElementRef<ferroui_controls::rich_text_block_overflow::RichTextBlockOverflow>>"
+    ]
+   },
+   "String": {
+    "text_bytes": 34520,
+    "distinct_payload_types": 2,
+    "type_names": [
+     "alloc::string::String",
+     "core::option::Option<alloc::string::String>"
+    ]
+   },
+   "other": {
+    "text_bytes": 22827,
+    "distinct_payload_types": 2,
+    "type_names": [
+     "core::option::Option<alloc::vec::Vec<alloc::rc::Rc<dyn ferroui_base::ferro_property::AnyValue>>>",
+     "core::time::Duration"
+    ]
+   },
+   "payload enum": {
+    "text_bytes": 9705,
+    "distinct_payload_types": 1,
+    "type_names": [
+     "core::option::Option<ferroui_controls::generators::item_container_generator::RecycleKey>"
+    ]
+   },
+   "shared code across payload classes": {
+    "text_bytes": 898,
+    "distinct_payload_types": 49,
+    "type_names": [
+     "alloc::rc::Rc<dyn ferroui_controls::templates::i_template::ITemplateOf<core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::panel::Panel>>>>",
+     "bool",
+     "char",
+     "core::option::Option<alloc::rc::Rc<[ferroui_base::utilities::value_span::ValueSpan<alloc::rc::Rc<dyn ferroui_base::media::text_formatting::text_run_properties::TextRunProperties>>]>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_base::media::i_pen::IPen>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_controls::templates::i_template::ITemplateOf<core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::control::Control>>>>>",
+     "core::option::Option<alloc::rc::Rc<dyn ferroui_controls::templates::i_template::ITemplateOf<ferroui_base::type_system::Ref<ferroui_controls::control::Control>>>>",
+     "core::option::Option<alloc::rc::Rc<ferroui_controls::window_icon::WindowIcon>>",
+     "core::option::Option<bool>",
+     "core::option::Option<ferroui_base::animation::transitions_collection::Transitions>",
+     "core::option::Option<ferroui_base::collections::ferro_list::FerroList<ferroui_base::type_system::Ref<ferroui_controls::visual_state::visual_state_group::VisualStateGroup>>>",
+     "core::option::Option<ferroui_base::element_ref::ElementRef<ferroui_base::visual::Visual>>",
+     "core::option::Option<ferroui_base::element_ref::ElementRef<ferroui_controls::control::Control>>",
+     "core::option::Option<ferroui_base::input::key_gesture::KeyGesture>",
+     "core::option::Option<ferroui_base::media::font_feature_collection::FontFeatureCollection>",
+     "core::option::Option<ferroui_base::media::gradient_stops::GradientStops>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_base::visual::Visual>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::icon_element::IconElement>>",
+     "core::option::Option<ferroui_base::type_system::Ref<ferroui_controls::native_menu::NativeMenu>>",
+     "core::option::Option<ferroui_controls::auto_complete_box::auto_complete_box::AutoCompleteSelector<core::option::Option<alloc::string::String>>>",
+     "core::option::Option<ferroui_controls::automation::peers::automation_peer::AutomationControlType>",
+     "core::option::Option<ferroui_controls::automation::peers::automation_peer::AutomationLandmarkType>",
+     "core::option::Option<ferroui_controls::flex_panel::flex_align_items::FlexAlignItems>",
+     "core::option::Option<ferroui_controls::generators::item_container_generator::RecycleKey>",
+     "core::option::Option<ferroui_controls::page::bar_layout_behavior::BarLayoutBehavior>",
+     "core::time::Duration",
+     "ferroui_base::combined_geometry::GeometryCombineMode",
+     "ferroui_base::input::input_scope_name_value::InputScopeNameValue",
+     "ferroui_base::input::keyboard_navigation_mode::KeyboardNavigationMode",
+     "ferroui_base::input::pull_gesture_event_args::PullDirection",
+     "ferroui_base::input::text_input::text_input_content_type::TextInputContentType",
+     "ferroui_base::layout::layoutable::VerticalAlignment",
+     "ferroui_base::media::baseline_alignment::BaselineAlignment",
+     "ferroui_base::media::color::Color",
+     "ferroui_base::media::font_typography::FontCapitals",
+     "ferroui_base::media::font_typography::FontEastAsianLanguage",
+     "ferroui_base::media::imaging::bitmap_blending_mode::BitmapBlendingMode",
+     "ferroui_base::media::text_alignment::TextAlignment",
+     "ferroui_base::media::text_formatting::text_tab_stop::TextTabStops",
+     "ferroui_base::pixel_rect::PixelRect",
+     "ferroui_controls::auto_complete_box::auto_complete_filter_mode::AutoCompleteFilterMode",
+     "ferroui_controls::grid_length::GridLength",
+     "ferroui_controls::navigation_view_events::NavigationViewPaneDisplayMode",
+     "ferroui_controls::placement_mode::PlacementMode",
+     "ferroui_controls::platform::i_x11_options_toplevel_impl_feature::X11NetWmWindowType",
+     "ferroui_controls::platform::win32_properties::Win32HitTestValue",
+     "ferroui_controls::wrap_panel::WrapPanelItemsAlignment",
+     "i16",
+     "i32"
+    ]
+   }
+  },
+  "families": {
+   "StyledProperty": 1327459,
+   "EffectiveValue": 1003400,
+   "BindingEntry": 204737,
+   "LocalValueBindingObserver": 20967
+  },
+  "scope": "Select sized t/T symbols naming StyledProperty, EffectiveValue, BindingEntry or LocalValueBindingObserver as a generic. The first matching generic in the demangled name defines the payload. Sum unique address/size pairs across aliases. Peel a single Option before classifying the outermost payload; preserve types without a resolvable source declaration as separate groups. One range with aliases from multiple groups is counted only in the shared category. Per-category distinct type counts are not additive.",
+  "evidence": "The 111 unit enum payload types include a nullable specialization. They resolve to 110 unique declarations, all fieldless, Copy and derived PartialEq. The inventory records their original source path and explicit discriminants.",
+  "read_symbols_command": "nm -S -C --defined-only SYMBOLIZED_ELF | gzip -1 > z.nm.gz",
+  "analysis_script": "from pathlib import Path\nimport gzip,re,sys,json,collections\nimport tomllib\nfrom functools import lru_cache\nrepo=Path(sys.argv[2])\ncrates={}\nfor path in (repo/'src').rglob('Cargo.toml'):\n try:\n  doc=tomllib.loads(path.read_text());pkg=doc.get('package',{}).get('name')\n  if pkg:crates[doc.get('lib',{}).get('name',pkg.replace('-','_'))]=path.parent\n except (OSError,ValueError):pass\n@lru_cache(None)\ndef lookup(p):\n parts=p.split('::');name=parts[-1];base=crates.get(parts[0]);\n if not base or '<' in p:return 'named framework, unresolved'\n prefix=base.joinpath(*parts[1:-1])\n for path in (prefix.with_suffix('.rs'),prefix/'mod.rs',prefix/'lib.rs'):\n  if not path.is_file():continue\n  s=path.read_text(errors='ignore')\n  pattern=r'\\benum\\s+'+re.escape(name)+r'\\s*\\{([^}]+)\\}'\n  m=re.search(pattern,s)\n  if m:\n   body=re.sub(r'//[^\\n]*','',m.group(1))\n   body=re.sub(r'#\\[[^\\]]*\\]','',body)\n   return 'unit-only enum verified in source' if '(' not in body and '{' not in body else 'payload enum'\n  if re.search(r'\\bstruct\\s+'+re.escape(name)+r'\\b',s):return 'struct (including flags)'\n return 'named framework, unresolved'\nsrc=Path(sys.argv[1]);raw=collections.defaultdict(set); families=collections.defaultdict(set);types=collections.defaultdict(set)\nmarkers=['::styled_property::StyledProperty<','::property_store::effective_value::EffectiveValue<','::property_store::binding_entry::BindingEntry<','::property_store::binding_entry::BindingValues<','::property_store::binding_entry::BoxedBindingEntry<','::property_store::local_value_binding_observer::LocalValueBindingObserver<']\nfor line in (gzip.open(src,'rt') if src.suffix=='.gz' else src.open()):\n x=line.split(' ',3)\n if len(x)!=4 or x[2] not in ('t','T'):continue\n addr=int(x[0],16);sz=int(x[1],16);sym=x[3]; found=[(sym.index(m),m) for m in markers if m in sym]\n if not found:continue\n i,m=min(found);i+=len(m);lv=1\n for j in range(i,len(sym)):\n  if sym[j]=='<':lv+=1\n  if sym[j]=='>':\n   lv-=1\n   if lv==0:break\n t=sym[i:j];p=t;nullable=''; \n if p.startswith('core::option::Option<') and p.endswith('>'):\n  p=p[len(\"core::option::Option<\"):-1];nullable='optional '\n if p.startswith('ferroui_base::type_system::Ref<'):g='Ferro Ref'\n elif p.startswith('ferroui_base::element_ref::ElementRef<'):g='Ferro ElementRef'\n elif p.startswith('alloc::rc::Rc<'):g='Rust Rc'\n elif p.startswith('alloc::sync::Arc<'):g='Rust Arc'\n elif p.split('::')[-1] in ['bool','i8','u8','i16','u16','i32','u32','i64','u64','usize','isize','f64','f32','char']:g='primitive'\n elif p=='alloc::string::String':g='String'\n elif p.startswith(('ferroui_','xamlx::')):g=lookup(p)\n else:g='other'\n raw[addr,sz].add(g);families[addr,sz].add(m.split('::')[-1].strip('<'));types[addr,sz].add(t)\nout=collections.Counter(); fam=collections.Counter(); distinct=collections.defaultdict(set)\nfor k,ss in raw.items():\n label=next(iter(ss)) if len(ss)==1 else 'shared code across payload classes';out[label]+=k[1];fam['/'.join(sorted(families[k]))]+=k[1];distinct[label].update(types[k])\nprint({k:(v,len(distinct[k])) for k,v in out.most_common()});print(fam.most_common());print('unique address bytes',sum(out.values()),'ranges',len(raw))\n\nprint(json.dumps({'physical_text_bytes':sum(out.values()),'physical_ranges':len(raw),'categories':{k:{'text_bytes':v,'distinct_payload_types':len(distinct[k]),'type_names':sorted(distinct[k])} for k,v in out.most_common()},'families':dict(fam.most_common())}))\n"
+ },
+ "ordinal_experiment": {
+  "method": "Rust 1.99.0 on Linux x86-64. For each of 34 blocks shuffle every combination of build and workload with seed 496303. Each fresh process runs 2,000,000 operations on CPU 6 using thread CPU time. Discard the first 3 blocks. Form candidate/native ratios within each remaining block. Report the median and the 2.5th and 97.5th percentiles of 4,000 resampled block medians.",
+  "seed": 496303,
+  "enum_count": 110,
+  "variant_count": 778,
+  "expected_codec_digest_readback_and_events": {
+   "write": [
+    14850459932805122838,
+    7445466,
+    1308320
+   ],
+   "read": [
+    14850459932805122838,
+    2000000,
+    0
+   ]
+  },
+  "summary": {
+   "native": {
+    "artifact_bytes": 364104,
+    "sha256": "3f429ac09a375f27e52fcbe8edb98f04ae90a3afe90080580ed4591740c9e688",
+    "sum_state_bytes_one_of_each": 1192,
+    "read": {
+     "ns_per_iteration": 6.5589605,
+     "paired_ratio_over_native": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "write": {
+     "ns_per_iteration": 46.7000475,
+     "paired_ratio_over_native": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "elf": {
+     "bytes": 364104,
+     "cies": 2,
+     "fdes": 699,
+     "allocated_file_sections": {
+      ".interp": 28,
+      ".note.ABI-tag": 32,
+      ".note.gnu.build-id": 36,
+      ".dynsym": 1512,
+      ".gnu.version": 126,
+      ".gnu.version_r": 272,
+      ".gnu.hash": 28,
+      ".dynstr": 946,
+      ".rela.dyn": 1464,
+      ".relr.dyn": 288,
+      ".rela.plt": 48,
+      ".gcc_except_table": 4292,
+      ".rodata": 25575,
+      ".eh_frame_hdr": 5604,
+      ".eh_frame": 29412,
+      ".text": 271576,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 15728,
+      ".dynamic": 480,
+      ".got": 488,
+      ".got.plt": 40,
+      ".tm_clone_table": 0,
+      ".data": 2608
+     }
+    }
+   },
+   "byte": {
+    "artifact_bytes": 367552,
+    "sha256": "1f6f41b0b1ccfc88550afb1ba15a1ae403889b9f8b80ebacf6077c026d1ce80e",
+    "sum_state_bytes_one_of_each": 440,
+    "read": {
+     "ns_per_iteration": 15.6295025,
+     "paired_ratio_over_native": [
+      2.3995620714270354,
+      2.246052058791746,
+      2.5345174840596054
+     ]
+    },
+    "write": {
+     "ns_per_iteration": 47.4380445,
+     "paired_ratio_over_native": [
+      1.0562314024819872,
+      1.0242338006747418,
+      1.0809260098073947
+     ]
+    },
+    "elf": {
+     "bytes": 367552,
+     "cies": 2,
+     "fdes": 734,
+     "allocated_file_sections": {
+      ".interp": 28,
+      ".note.ABI-tag": 32,
+      ".note.gnu.build-id": 36,
+      ".dynsym": 1512,
+      ".gnu.version": 126,
+      ".gnu.version_r": 272,
+      ".gnu.hash": 28,
+      ".dynstr": 946,
+      ".rela.dyn": 1464,
+      ".relr.dyn": 288,
+      ".rela.plt": 48,
+      ".gcc_except_table": 4292,
+      ".rodata": 25575,
+      ".eh_frame_hdr": 5884,
+      ".eh_frame": 31660,
+      ".text": 272472,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 15752,
+      ".dynamic": 480,
+      ".got": 488,
+      ".got.plt": 40,
+      ".tm_clone_table": 0,
+      ".data": 2608
+     }
+    }
+   },
+   "word": {
+    "artifact_bytes": 367712,
+    "sha256": "f41ed6a91cb3e8102a168eb012bd73c8b2990b6fbc4273ac19c7747ac088333b",
+    "sum_state_bytes_one_of_each": 1320,
+    "read": {
+     "ns_per_iteration": 14.623815,
+     "paired_ratio_over_native": [
+      2.2828858539551358,
+      2.134238395884084,
+      2.4620866287141334
+     ]
+    },
+    "write": {
+     "ns_per_iteration": 49.7264735,
+     "paired_ratio_over_native": [
+      1.0759158525155093,
+      1.0352228366861391,
+      1.1081657179566236
+     ]
+    },
+    "elf": {
+     "bytes": 367712,
+     "cies": 2,
+     "fdes": 734,
+     "allocated_file_sections": {
+      ".interp": 28,
+      ".note.ABI-tag": 32,
+      ".note.gnu.build-id": 36,
+      ".dynsym": 1512,
+      ".gnu.version": 126,
+      ".gnu.version_r": 272,
+      ".gnu.hash": 28,
+      ".dynstr": 946,
+      ".rela.dyn": 1464,
+      ".relr.dyn": 288,
+      ".rela.plt": 48,
+      ".gcc_except_table": 4292,
+      ".rodata": 25575,
+      ".eh_frame_hdr": 5884,
+      ".eh_frame": 31644,
+      ".text": 272648,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 15752,
+      ".dynamic": 480,
+      ".got": 488,
+      ".got.plt": 40,
+      ".tm_clone_table": 0,
+      ".data": 2608
+     }
+    }
+   },
+   "cached": {
+    "artifact_bytes": 366288,
+    "sha256": "c02045b9899c1d50ee5ad15503413976f3496b91632fcfda6d630c42439ca85e",
+    "sum_state_bytes_one_of_each": 832,
+    "read": {
+     "ns_per_iteration": 6.132973,
+     "paired_ratio_over_native": [
+      0.9222271781870601,
+      0.8906338295706859,
+      0.9581988897391049
+     ]
+    },
+    "write": {
+     "ns_per_iteration": 45.9848445,
+     "paired_ratio_over_native": [
+      0.9889905929492789,
+      0.9578446539133375,
+      1.050814830453948
+     ]
+    },
+    "elf": {
+     "bytes": 366288,
+     "cies": 2,
+     "fdes": 695,
+     "allocated_file_sections": {
+      ".interp": 28,
+      ".note.ABI-tag": 32,
+      ".note.gnu.build-id": 36,
+      ".dynsym": 1512,
+      ".gnu.version": 126,
+      ".gnu.version_r": 272,
+      ".gnu.hash": 28,
+      ".dynstr": 946,
+      ".rela.dyn": 1464,
+      ".relr.dyn": 288,
+      ".rela.plt": 48,
+      ".gcc_except_table": 4292,
+      ".rodata": 25575,
+      ".eh_frame_hdr": 5572,
+      ".eh_frame": 31272,
+      ".text": 271912,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 15752,
+      ".dynamic": 480,
+      ".got": 488,
+      ".got.plt": 40,
+      ".tm_clone_table": 0,
+      ".data": 2608
+     }
+    }
+   }
+  },
+  "rows": [
+   {
+    "cached": {
+     "write": {
+      "cpu_ns": 90773645,
+      "wall_ns": 93250344,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 10546216,
+      "wall_ns": 10716119,
+      "state_bytes": 832
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 30376216,
+      "wall_ns": 30916812,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 97801129,
+      "wall_ns": 110595436,
+      "state_bytes": 440
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 27516056,
+      "wall_ns": 27829228,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 100764757,
+      "wall_ns": 104579083,
+      "state_bytes": 1320
+     }
+    },
+    "native": {
+     "write": {
+      "cpu_ns": 80812552,
+      "wall_ns": 81692606,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 12409165,
+      "wall_ns": 12591642,
+      "state_bytes": 1192
+     }
+    }
+   },
+   {
+    "word": {
+     "write": {
+      "cpu_ns": 104019862,
+      "wall_ns": 105449420,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 29500357,
+      "wall_ns": 29723418,
+      "state_bytes": 1320
+     }
+    },
+    "native": {
+     "write": {
+      "cpu_ns": 90593652,
+      "wall_ns": 91334054,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 16398980,
+      "wall_ns": 16466002,
+      "state_bytes": 1192
+     }
+    },
+    "byte": {
+     "write": {
+      "cpu_ns": 100470488,
+      "wall_ns": 100735128,
+      "state_bytes": 440
+     },
+     "read": {
+      "cpu_ns": 30357930,
+      "wall_ns": 31384385,
+      "state_bytes": 440
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 11974840,
+      "wall_ns": 11976733,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 96629307,
+      "wall_ns": 96993805,
+      "state_bytes": 832
+     }
+    }
+   },
+   {
+    "byte": {
+     "write": {
+      "cpu_ns": 104030645,
+      "wall_ns": 104031864,
+      "state_bytes": 440
+     },
+     "read": {
+      "cpu_ns": 29037478,
+      "wall_ns": 29039427,
+      "state_bytes": 440
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 29329562,
+      "wall_ns": 29331409,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 96313460,
+      "wall_ns": 96822893,
+      "state_bytes": 1320
+     }
+    },
+    "native": {
+     "write": {
+      "cpu_ns": 87184801,
+      "wall_ns": 87234972,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 12722173,
+      "wall_ns": 12956392,
+      "state_bytes": 1192
+     }
+    },
+    "cached": {
+     "write": {
+      "cpu_ns": 89834141,
+      "wall_ns": 89835218,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 11855828,
+      "wall_ns": 12152612,
+      "state_bytes": 832
+     }
+    }
+   },
+   {
+    "byte": {
+     "read": {
+      "cpu_ns": 28957979,
+      "wall_ns": 29083561,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 95543130,
+      "wall_ns": 96568025,
+      "state_bytes": 440
+     }
+    },
+    "native": {
+     "read": {
+      "cpu_ns": 13121745,
+      "wall_ns": 13734452,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 90456627,
+      "wall_ns": 90534002,
+      "state_bytes": 1192
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 11686670,
+      "wall_ns": 12267453,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 92318623,
+      "wall_ns": 93148859,
+      "state_bytes": 832
+     }
+    },
+    "word": {
+     "write": {
+      "cpu_ns": 93642766,
+      "wall_ns": 93643590,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 28004932,
+      "wall_ns": 28007060,
+      "state_bytes": 1320
+     }
+    }
+   },
+   {
+    "byte": {
+     "write": {
+      "cpu_ns": 94876089,
+      "wall_ns": 95124040,
+      "state_bytes": 440
+     },
+     "read": {
+      "cpu_ns": 29120531,
+      "wall_ns": 29122149,
+      "state_bytes": 440
+     }
+    },
+    "native": {
+     "read": {
+      "cpu_ns": 12135769,
+      "wall_ns": 12138152,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 92631281,
+      "wall_ns": 92685574,
+      "state_bytes": 1192
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 11191936,
+      "wall_ns": 11299681,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 87080676,
+      "wall_ns": 87172000,
+      "state_bytes": 832
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 30556296,
+      "wall_ns": 30609519,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 104867320,
+      "wall_ns": 104880750,
+      "state_bytes": 1320
+     }
+    }
+   },
+   {
+    "byte": {
+     "write": {
+      "cpu_ns": 101006297,
+      "wall_ns": 101069402,
+      "state_bytes": 440
+     },
+     "read": {
+      "cpu_ns": 44483382,
+      "wall_ns": 49006998,
+      "state_bytes": 440
+     }
+    },
+    "word": {
+     "write": {
+      "cpu_ns": 94445670,
+      "wall_ns": 94722676,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 29487257,
+      "wall_ns": 29491204,
+      "state_bytes": 1320
+     }
+    },
+    "native": {
+     "write": {
+      "cpu_ns": 94814387,
+      "wall_ns": 94880659,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 14245618,
+      "wall_ns": 17147139,
+      "state_bytes": 1192
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 12145324,
+      "wall_ns": 12147436,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 99632364,
+      "wall_ns": 100397950,
+      "state_bytes": 832
+     }
+    }
+   },
+   {
+    "word": {
+     "write": {
+      "cpu_ns": 110305689,
+      "wall_ns": 116550758,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 31963118,
+      "wall_ns": 57093256,
+      "state_bytes": 1320
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 31963920,
+      "wall_ns": 31972194,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 101760331,
+      "wall_ns": 105833678,
+      "state_bytes": 440
+     }
+    },
+    "native": {
+     "read": {
+      "cpu_ns": 13459030,
+      "wall_ns": 14048957,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 95377137,
+      "wall_ns": 123385095,
+      "state_bytes": 1192
+     }
+    },
+    "cached": {
+     "write": {
+      "cpu_ns": 102287964,
+      "wall_ns": 112403176,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 12394064,
+      "wall_ns": 15411933,
+      "state_bytes": 832
+     }
+    }
+   },
+   {
+    "cached": {
+     "read": {
+      "cpu_ns": 12412041,
+      "wall_ns": 13099373,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 100676571,
+      "wall_ns": 119835907,
+      "state_bytes": 832
+     }
+    },
+    "native": {
+     "read": {
+      "cpu_ns": 13690874,
+      "wall_ns": 25754129,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 99935502,
+      "wall_ns": 102753773,
+      "state_bytes": 1192
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 34287817,
+      "wall_ns": 34582865,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 85489006,
+      "wall_ns": 86139903,
+      "state_bytes": 440
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 28567437,
+      "wall_ns": 28593107,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 104682438,
+      "wall_ns": 114147259,
+      "state_bytes": 1320
+     }
+    }
+   },
+   {
+    "native": {
+     "read": {
+      "cpu_ns": 13350046,
+      "wall_ns": 18188008,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 103528839,
+      "wall_ns": 123001278,
+      "state_bytes": 1192
+     }
+    },
+    "word": {
+     "write": {
+      "cpu_ns": 111036644,
+      "wall_ns": 126422463,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 29110233,
+      "wall_ns": 50360087,
+      "state_bytes": 1320
+     }
+    },
+    "byte": {
+     "write": {
+      "cpu_ns": 99975894,
+      "wall_ns": 101607388,
+      "state_bytes": 440
+     },
+     "read": {
+      "cpu_ns": 33835925,
+      "wall_ns": 34327597,
+      "state_bytes": 440
+     }
+    },
+    "cached": {
+     "write": {
+      "cpu_ns": 93615668,
+      "wall_ns": 95490001,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 12500924,
+      "wall_ns": 12748203,
+      "state_bytes": 832
+     }
+    }
+   },
+   {
+    "native": {
+     "write": {
+      "cpu_ns": 96523394,
+      "wall_ns": 120442303,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 15587213,
+      "wall_ns": 17192797,
+      "state_bytes": 1192
+     }
+    },
+    "word": {
+     "write": {
+      "cpu_ns": 94814574,
+      "wall_ns": 108863780,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 28510692,
+      "wall_ns": 28806863,
+      "state_bytes": 1320
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 32267360,
+      "wall_ns": 33932672,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 94132172,
+      "wall_ns": 94197700,
+      "state_bytes": 440
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 11619110,
+      "wall_ns": 17648061,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 94819556,
+      "wall_ns": 122812884,
+      "state_bytes": 832
+     }
+    }
+   },
+   {
+    "word": {
+     "write": {
+      "cpu_ns": 100777838,
+      "wall_ns": 100795809,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 27487572,
+      "wall_ns": 33339015,
+      "state_bytes": 1320
+     }
+    },
+    "native": {
+     "write": {
+      "cpu_ns": 81962604,
+      "wall_ns": 89187615,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 16067773,
+      "wall_ns": 16082470,
+      "state_bytes": 1192
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 10979400,
+      "wall_ns": 10997564,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 97487967,
+      "wall_ns": 97649846,
+      "state_bytes": 832
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 28642591,
+      "wall_ns": 28670772,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 91553547,
+      "wall_ns": 92870156,
+      "state_bytes": 440
+     }
+    }
+   },
+   {
+    "word": {
+     "read": {
+      "cpu_ns": 40440957,
+      "wall_ns": 41745023,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 107282156,
+      "wall_ns": 108523972,
+      "state_bytes": 1320
+     }
+    },
+    "native": {
+     "read": {
+      "cpu_ns": 13709061,
+      "wall_ns": 13907959,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 95366479,
+      "wall_ns": 103916443,
+      "state_bytes": 1192
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 12329828,
+      "wall_ns": 12468100,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 107441807,
+      "wall_ns": 113352653,
+      "state_bytes": 832
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 32100343,
+      "wall_ns": 46744432,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 117398530,
+      "wall_ns": 199275986,
+      "state_bytes": 440
+     }
+    }
+   },
+   {
+    "byte": {
+     "read": {
+      "cpu_ns": 31259005,
+      "wall_ns": 49394330,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 108710163,
+      "wall_ns": 108898200,
+      "state_bytes": 440
+     }
+    },
+    "cached": {
+     "write": {
+      "cpu_ns": 91611187,
+      "wall_ns": 149336876,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 12947562,
+      "wall_ns": 19915163,
+      "state_bytes": 832
+     }
+    },
+    "word": {
+     "write": {
+      "cpu_ns": 108039342,
+      "wall_ns": 146989464,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 34355158,
+      "wall_ns": 34704038,
+      "state_bytes": 1320
+     }
+    },
+    "native": {
+     "write": {
+      "cpu_ns": 95643053,
+      "wall_ns": 130277909,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 11911440,
+      "wall_ns": 12066840,
+      "state_bytes": 1192
+     }
+    }
+   },
+   {
+    "byte": {
+     "write": {
+      "cpu_ns": 93461465,
+      "wall_ns": 97019423,
+      "state_bytes": 440
+     },
+     "read": {
+      "cpu_ns": 30559602,
+      "wall_ns": 30862994,
+      "state_bytes": 440
+     }
+    },
+    "word": {
+     "write": {
+      "cpu_ns": 113087082,
+      "wall_ns": 116338385,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 29247630,
+      "wall_ns": 29414785,
+      "state_bytes": 1320
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 13749149,
+      "wall_ns": 13767101,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 105021674,
+      "wall_ns": 120197995,
+      "state_bytes": 832
+     }
+    },
+    "native": {
+     "read": {
+      "cpu_ns": 17606040,
+      "wall_ns": 17755762,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 90519210,
+      "wall_ns": 91722720,
+      "state_bytes": 1192
+     }
+    }
+   },
+   {
+    "native": {
+     "read": {
+      "cpu_ns": 12598018,
+      "wall_ns": 13109419,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 87862860,
+      "wall_ns": 93324824,
+      "state_bytes": 1192
+     }
+    },
+    "cached": {
+     "write": {
+      "cpu_ns": 91969689,
+      "wall_ns": 93168118,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 15262034,
+      "wall_ns": 15274095,
+      "state_bytes": 832
+     }
+    },
+    "byte": {
+     "write": {
+      "cpu_ns": 111783273,
+      "wall_ns": 115416189,
+      "state_bytes": 440
+     },
+     "read": {
+      "cpu_ns": 36297391,
+      "wall_ns": 39613565,
+      "state_bytes": 440
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 39130384,
+      "wall_ns": 45093248,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 96331576,
+      "wall_ns": 101078202,
+      "state_bytes": 1320
+     }
+    }
+   },
+   {
+    "cached": {
+     "write": {
+      "cpu_ns": 101421164,
+      "wall_ns": 101815248,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 11501726,
+      "wall_ns": 11502872,
+      "state_bytes": 832
+     }
+    },
+    "native": {
+     "read": {
+      "cpu_ns": 12003485,
+      "wall_ns": 14064923,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 107006293,
+      "wall_ns": 113028002,
+      "state_bytes": 1192
+     }
+    },
+    "byte": {
+     "write": {
+      "cpu_ns": 91511124,
+      "wall_ns": 91827225,
+      "state_bytes": 440
+     },
+     "read": {
+      "cpu_ns": 35534806,
+      "wall_ns": 35665175,
+      "state_bytes": 440
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 29157365,
+      "wall_ns": 36547718,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 97198631,
+      "wall_ns": 116675962,
+      "state_bytes": 1320
+     }
+    }
+   },
+   {
+    "native": {
+     "read": {
+      "cpu_ns": 12368528,
+      "wall_ns": 22256799,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 98597859,
+      "wall_ns": 99166263,
+      "state_bytes": 1192
+     }
+    },
+    "cached": {
+     "write": {
+      "cpu_ns": 82889664,
+      "wall_ns": 128951924,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 20271852,
+      "wall_ns": 26581624,
+      "state_bytes": 832
+     }
+    },
+    "byte": {
+     "write": {
+      "cpu_ns": 109734192,
+      "wall_ns": 111089620,
+      "state_bytes": 440
+     },
+     "read": {
+      "cpu_ns": 32455149,
+      "wall_ns": 38746477,
+      "state_bytes": 440
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 40456793,
+      "wall_ns": 47252117,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 108726415,
+      "wall_ns": 108897688,
+      "state_bytes": 1320
+     }
+    }
+   },
+   {
+    "byte": {
+     "write": {
+      "cpu_ns": 109978533,
+      "wall_ns": 120396379,
+      "state_bytes": 440
+     },
+     "read": {
+      "cpu_ns": 31436070,
+      "wall_ns": 31442850,
+      "state_bytes": 440
+     }
+    },
+    "native": {
+     "write": {
+      "cpu_ns": 100276741,
+      "wall_ns": 100365783,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 13098071,
+      "wall_ns": 15308862,
+      "state_bytes": 1192
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 29901401,
+      "wall_ns": 29961053,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 103115217,
+      "wall_ns": 103308610,
+      "state_bytes": 1320
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 20640660,
+      "wall_ns": 23618237,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 89524169,
+      "wall_ns": 97150919,
+      "state_bytes": 832
+     }
+    }
+   },
+   {
+    "word": {
+     "write": {
+      "cpu_ns": 95171154,
+      "wall_ns": 97333024,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 26613442,
+      "wall_ns": 30124886,
+      "state_bytes": 1320
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 28314312,
+      "wall_ns": 32960950,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 100794632,
+      "wall_ns": 105947610,
+      "state_bytes": 440
+     }
+    },
+    "native": {
+     "write": {
+      "cpu_ns": 96273736,
+      "wall_ns": 101901721,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 13048358,
+      "wall_ns": 13411717,
+      "state_bytes": 1192
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 11584520,
+      "wall_ns": 11604434,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 83076712,
+      "wall_ns": 85521378,
+      "state_bytes": 832
+     }
+    }
+   },
+   {
+    "cached": {
+     "write": {
+      "cpu_ns": 88984645,
+      "wall_ns": 90598473,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 13490926,
+      "wall_ns": 15549889,
+      "state_bytes": 832
+     }
+    },
+    "native": {
+     "read": {
+      "cpu_ns": 13641519,
+      "wall_ns": 14968599,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 99509831,
+      "wall_ns": 100875368,
+      "state_bytes": 1192
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 32246341,
+      "wall_ns": 37423460,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 92741145,
+      "wall_ns": 121127059,
+      "state_bytes": 440
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 27826768,
+      "wall_ns": 40431459,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 102616873,
+      "wall_ns": 143954488,
+      "state_bytes": 1320
+     }
+    }
+   },
+   {
+    "cached": {
+     "read": {
+      "cpu_ns": 12186835,
+      "wall_ns": 15318497,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 88938887,
+      "wall_ns": 126521583,
+      "state_bytes": 832
+     }
+    },
+    "native": {
+     "write": {
+      "cpu_ns": 90599167,
+      "wall_ns": 132486230,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 13117921,
+      "wall_ns": 21582591,
+      "state_bytes": 1192
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 35240535,
+      "wall_ns": 51935864,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 96897817,
+      "wall_ns": 108415729,
+      "state_bytes": 440
+     }
+    },
+    "word": {
+     "write": {
+      "cpu_ns": 97477080,
+      "wall_ns": 121267339,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 28289533,
+      "wall_ns": 39037668,
+      "state_bytes": 1320
+     }
+    }
+   },
+   {
+    "native": {
+     "read": {
+      "cpu_ns": 13122027,
+      "wall_ns": 13126885,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 91432114,
+      "wall_ns": 92133033,
+      "state_bytes": 1192
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 37898286,
+      "wall_ns": 54681455,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 99452947,
+      "wall_ns": 128786409,
+      "state_bytes": 1320
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 29315937,
+      "wall_ns": 33743228,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 90668551,
+      "wall_ns": 103938186,
+      "state_bytes": 440
+     }
+    },
+    "cached": {
+     "write": {
+      "cpu_ns": 99329310,
+      "wall_ns": 102465355,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 12979363,
+      "wall_ns": 12994720,
+      "state_bytes": 832
+     }
+    }
+   },
+   {
+    "byte": {
+     "read": {
+      "cpu_ns": 28620096,
+      "wall_ns": 28783201,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 103234442,
+      "wall_ns": 104772121,
+      "state_bytes": 440
+     }
+    },
+    "word": {
+     "write": {
+      "cpu_ns": 100401352,
+      "wall_ns": 100423504,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 41100087,
+      "wall_ns": 41116843,
+      "state_bytes": 1320
+     }
+    },
+    "native": {
+     "write": {
+      "cpu_ns": 93400095,
+      "wall_ns": 98449850,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 12742401,
+      "wall_ns": 12752011,
+      "state_bytes": 1192
+     }
+    },
+    "cached": {
+     "write": {
+      "cpu_ns": 100997119,
+      "wall_ns": 105797291,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 11586543,
+      "wall_ns": 14035579,
+      "state_bytes": 832
+     }
+    }
+   },
+   {
+    "native": {
+     "write": {
+      "cpu_ns": 97738753,
+      "wall_ns": 112162325,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 13139207,
+      "wall_ns": 13151466,
+      "state_bytes": 1192
+     }
+    },
+    "byte": {
+     "write": {
+      "cpu_ns": 95651599,
+      "wall_ns": 98359502,
+      "state_bytes": 440
+     },
+     "read": {
+      "cpu_ns": 28560968,
+      "wall_ns": 31240295,
+      "state_bytes": 440
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 11558452,
+      "wall_ns": 11567027,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 92480978,
+      "wall_ns": 92492880,
+      "state_bytes": 832
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 29136385,
+      "wall_ns": 29141921,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 94932559,
+      "wall_ns": 103516293,
+      "state_bytes": 1320
+     }
+    }
+   },
+   {
+    "byte": {
+     "read": {
+      "cpu_ns": 30901260,
+      "wall_ns": 33840711,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 89152340,
+      "wall_ns": 107033466,
+      "state_bytes": 440
+     }
+    },
+    "native": {
+     "write": {
+      "cpu_ns": 88329916,
+      "wall_ns": 93582140,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 15635123,
+      "wall_ns": 16373887,
+      "state_bytes": 1192
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 11995600,
+      "wall_ns": 12008951,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 87357456,
+      "wall_ns": 96348883,
+      "state_bytes": 832
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 30030571,
+      "wall_ns": 43676714,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 94944169,
+      "wall_ns": 101730862,
+      "state_bytes": 1320
+     }
+    }
+   },
+   {
+    "native": {
+     "write": {
+      "cpu_ns": 79112375,
+      "wall_ns": 79132218,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 11346826,
+      "wall_ns": 11386641,
+      "state_bytes": 1192
+     }
+    },
+    "word": {
+     "write": {
+      "cpu_ns": 87342304,
+      "wall_ns": 87364354,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 35392935,
+      "wall_ns": 37262496,
+      "state_bytes": 1320
+     }
+    },
+    "cached": {
+     "write": {
+      "cpu_ns": 158948859,
+      "wall_ns": 164716816,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 20507591,
+      "wall_ns": 20523894,
+      "state_bytes": 832
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 30090898,
+      "wall_ns": 42092103,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 89276983,
+      "wall_ns": 92123309,
+      "state_bytes": 440
+     }
+    }
+   },
+   {
+    "cached": {
+     "read": {
+      "cpu_ns": 12702002,
+      "wall_ns": 12806130,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 96874748,
+      "wall_ns": 96899838,
+      "state_bytes": 832
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 33412674,
+      "wall_ns": 34730004,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 91850598,
+      "wall_ns": 91874712,
+      "state_bytes": 440
+     }
+    },
+    "native": {
+     "read": {
+      "cpu_ns": 11677388,
+      "wall_ns": 14208053,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 82759519,
+      "wall_ns": 82807561,
+      "state_bytes": 1192
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 30041762,
+      "wall_ns": 35667953,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 93588233,
+      "wall_ns": 98208118,
+      "state_bytes": 1320
+     }
+    }
+   },
+   {
+    "byte": {
+     "write": {
+      "cpu_ns": 90539439,
+      "wall_ns": 90555170,
+      "state_bytes": 440
+     },
+     "read": {
+      "cpu_ns": 31624636,
+      "wall_ns": 31651312,
+      "state_bytes": 440
+     }
+    },
+    "cached": {
+     "write": {
+      "cpu_ns": 82620905,
+      "wall_ns": 87056896,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 11160317,
+      "wall_ns": 11489854,
+      "state_bytes": 832
+     }
+    },
+    "word": {
+     "write": {
+      "cpu_ns": 91472607,
+      "wall_ns": 99213430,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 29391265,
+      "wall_ns": 29404378,
+      "state_bytes": 1320
+     }
+    },
+    "native": {
+     "write": {
+      "cpu_ns": 78542166,
+      "wall_ns": 78558307,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 11937543,
+      "wall_ns": 18565392,
+      "state_bytes": 1192
+     }
+    }
+   },
+   {
+    "word": {
+     "write": {
+      "cpu_ns": 92348246,
+      "wall_ns": 92454114,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 27443997,
+      "wall_ns": 41256368,
+      "state_bytes": 1320
+     }
+    },
+    "native": {
+     "read": {
+      "cpu_ns": 11365584,
+      "wall_ns": 12476993,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 90962395,
+      "wall_ns": 95810398,
+      "state_bytes": 1192
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 11298555,
+      "wall_ns": 11307324,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 90193359,
+      "wall_ns": 91158617,
+      "state_bytes": 832
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 28964388,
+      "wall_ns": 31677070,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 97158024,
+      "wall_ns": 123967426,
+      "state_bytes": 440
+     }
+    }
+   },
+   {
+    "byte": {
+     "read": {
+      "cpu_ns": 28327813,
+      "wall_ns": 35655614,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 92900312,
+      "wall_ns": 146494544,
+      "state_bytes": 440
+     }
+    },
+    "word": {
+     "write": {
+      "cpu_ns": 101524275,
+      "wall_ns": 158012553,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 27648261,
+      "wall_ns": 31764209,
+      "state_bytes": 1320
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 14529690,
+      "wall_ns": 17531679,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 85412493,
+      "wall_ns": 86487974,
+      "state_bytes": 832
+     }
+    },
+    "native": {
+     "read": {
+      "cpu_ns": 17401861,
+      "wall_ns": 17622403,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 88809708,
+      "wall_ns": 90146295,
+      "state_bytes": 1192
+     }
+    }
+   },
+   {
+    "cached": {
+     "read": {
+      "cpu_ns": 11980780,
+      "wall_ns": 11988451,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 90969031,
+      "wall_ns": 100507870,
+      "state_bytes": 832
+     }
+    },
+    "native": {
+     "read": {
+      "cpu_ns": 12794370,
+      "wall_ns": 17484700,
+      "state_bytes": 1192
+     },
+     "write": {
+      "cpu_ns": 94495855,
+      "wall_ns": 100256087,
+      "state_bytes": 1192
+     }
+    },
+    "byte": {
+     "write": {
+      "cpu_ns": 98032984,
+      "wall_ns": 99596222,
+      "state_bytes": 440
+     },
+     "read": {
+      "cpu_ns": 29144772,
+      "wall_ns": 29154585,
+      "state_bytes": 440
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 29040462,
+      "wall_ns": 32874271,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 104717067,
+      "wall_ns": 113035538,
+      "state_bytes": 1320
+     }
+    }
+   },
+   {
+    "cached": {
+     "write": {
+      "cpu_ns": 85887432,
+      "wall_ns": 85906124,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 12265946,
+      "wall_ns": 16349690,
+      "state_bytes": 832
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 33815799,
+      "wall_ns": 33918290,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 87977149,
+      "wall_ns": 88035433,
+      "state_bytes": 440
+     }
+    },
+    "native": {
+     "write": {
+      "cpu_ns": 91654819,
+      "wall_ns": 100343367,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 15077549,
+      "wall_ns": 15282367,
+      "state_bytes": 1192
+     }
+    },
+    "word": {
+     "write": {
+      "cpu_ns": 93310790,
+      "wall_ns": 126440614,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 28720317,
+      "wall_ns": 52981849,
+      "state_bytes": 1320
+     }
+    }
+   },
+   {
+    "native": {
+     "write": {
+      "cpu_ns": 80647310,
+      "wall_ns": 106188541,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 11772739,
+      "wall_ns": 14840610,
+      "state_bytes": 1192
+     }
+    },
+    "cached": {
+     "read": {
+      "cpu_ns": 10170557,
+      "wall_ns": 10290078,
+      "state_bytes": 832
+     },
+     "write": {
+      "cpu_ns": 85541436,
+      "wall_ns": 86578959,
+      "state_bytes": 832
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 28580968,
+      "wall_ns": 36913895,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 87173775,
+      "wall_ns": 138256204,
+      "state_bytes": 440
+     }
+    },
+    "word": {
+     "read": {
+      "cpu_ns": 31275588,
+      "wall_ns": 52708154,
+      "state_bytes": 1320
+     },
+     "write": {
+      "cpu_ns": 97612032,
+      "wall_ns": 112532875,
+      "state_bytes": 1320
+     }
+    }
+   },
+   {
+    "cached": {
+     "write": {
+      "cpu_ns": 84454341,
+      "wall_ns": 84581605,
+      "state_bytes": 832
+     },
+     "read": {
+      "cpu_ns": 14316933,
+      "wall_ns": 14343554,
+      "state_bytes": 832
+     }
+    },
+    "word": {
+     "write": {
+      "cpu_ns": 104735266,
+      "wall_ns": 104768101,
+      "state_bytes": 1320
+     },
+     "read": {
+      "cpu_ns": 28137394,
+      "wall_ns": 39265423,
+      "state_bytes": 1320
+     }
+    },
+    "native": {
+     "write": {
+      "cpu_ns": 117437873,
+      "wall_ns": 151409637,
+      "state_bytes": 1192
+     },
+     "read": {
+      "cpu_ns": 11850216,
+      "wall_ns": 18807686,
+      "state_bytes": 1192
+     }
+    },
+    "byte": {
+     "read": {
+      "cpu_ns": 28746825,
+      "wall_ns": 41568369,
+      "state_bytes": 440
+     },
+     "write": {
+      "cpu_ns": 89462232,
+      "wall_ns": 135267043,
+      "state_bytes": 440
+     }
+    }
+   }
+  ],
+  "modes": {
+   "native": "Concrete enum effective and optional base fields, native priority kernel per enum type.",
+   "word": "One shared NonZeroU32 state kernel. Convert at the typed boundary by generated exhaustive matches.",
+   "byte": "One shared NonZeroU8 state kernel. Every observed declaration has fewer than 255 variants.",
+   "cached": "Byte kernel plus a typed effective-value read cache. The base retains its byte encoding."
+  },
+  "limits": [
+   "Standalone property priority kernel. Both builds have typed callback metadata and expose the actual enum to the notification sink. Object storage, property lookup, bindings, coercion callbacks with reentrancy and full framework notification delivery are outside this experiment.",
+   "Read-only runs sample each property at its default enumerable value. The write replay selects changing values, priorities, coercion and reevaluation. The digest checks all declared variant encodings and original discriminants; event counts and accumulated readbacks must match across all arms.",
+   "Sharing coverage and eligible machine-code bytes are different quantities. These small fixture binary sizes do not predict an application delta."
+  ],
+  "source": "#![allow(dead_code)]\nuse std::any::{Any, TypeId};\nuse std::cell::Cell;\nuse std::hint::black_box;\nuse std::num::{NonZeroU8, NonZeroU32};\nuse std::time::Instant;\n\ntrait Codec: Copy + PartialEq + 'static {\n    const N: u32;\n    fn encode(self) -> u32;\n    fn decode(ordinal: u32) -> Option<Self>;\n    fn discriminant(self) -> i64;\n}\n\n// Mirrors the two independent priorities of an EffectiveValue. The caller\n// supplies the already validated/coerced value. Both builds use this body.\nstruct Slot<T: Copy> {\n    value: Cell<T>,\n    base: Cell<Option<T>>,\n    priority: Cell<i8>,\n    base_priority: Cell<i8>,\n}\nimpl<T: Copy + PartialEq> Slot<T> {\n    fn new(default: T) -> Self {\n        Self { value: Cell::new(default), base: Cell::new(None), priority: Cell::new(9), base_priority: Cell::new(9) }\n    }\n    #[inline(never)]\n    fn write(&self, value: T, priority: i8) -> (Option<T>, bool) {\n        let mut old = None;\n        let mut base_changed = false;\n        if priority <= self.priority.get() {\n            let previous = self.value.replace(value);\n            self.priority.set(priority);\n            if previous != value { old = Some(previous) }\n        }\n        if priority >= 0 && priority <= self.base_priority.get() {\n            base_changed = self.base.replace(Some(value)) != Some(value);\n            self.base_priority.set(priority);\n        }\n        (old, base_changed)\n    }\n    fn begin_reevaluation(&self, clear_local: bool) {\n        if self.priority.get() != 0 || clear_local { self.priority.set(9) }\n        if self.base_priority.get() != 0 || clear_local { self.base_priority.set(9) }\n    }\n}\n\n// The identity, metadata callback and value at the public boundary remain the\n// actual enum type in all three configurations.\nstruct Property<E: Codec> {\n    #[cfg(native)] slot: Slot<E>,\n    #[cfg(word)] slot: Slot<NonZeroU32>,\n    #[cfg(byte)] slot: Slot<NonZeroU8>,\n    #[cfg(cache)] current: Cell<E>,\n    coerce: Option<fn(E) -> E>,\n}\ntype Change<'a> = dyn FnMut(TypeId, &dyn Any, &dyn Any, bool) + 'a;\n\nimpl<E: Codec> Property<E> {\n    fn new() -> Self {\n        let default = E::decode(1).unwrap();\n        Self { slot: Slot::new(Self::store(default)), #[cfg(cache)] current: Cell::new(default), coerce: Some(|e| {\n            if e.encode() == E::N { E::decode(1).unwrap() } else { e }\n        }) }\n    }\n    #[cfg(native)] #[inline] fn store(value: E) -> E { value }\n    #[cfg(native)] #[inline] fn load(value: E) -> E { value }\n    #[cfg(word)] #[inline] fn store(value: E) -> NonZeroU32 { NonZeroU32::new(value.encode()).unwrap() }\n    #[cfg(word)] #[inline] fn load(value: NonZeroU32) -> E { E::decode(value.get()).unwrap() }\n    #[cfg(byte)] #[inline] fn store(value: E) -> NonZeroU8 { NonZeroU8::new(u8::try_from(value.encode()).unwrap()).unwrap() }\n    #[cfg(byte)] #[inline] fn load(value: NonZeroU8) -> E { E::decode(value.get() as u32).unwrap() }\n\n    fn set(&self, value: E, priority: i8, coerce: bool, change: &mut Change<'_>) {\n        let new = if coerce { self.coerce.map_or(value, |f| f(value)) } else { value };\n        let (old, base_changed) = self.slot.write(Self::store(new), priority);\n        if let Some(old) = old {\n            #[cfg(cache)] let old = {let _ = old; self.current.replace(new)};\n            #[cfg(not(cache))] let old = Self::load(old);\n            change(TypeId::of::<E>(), &old, &new, true);\n        } else if base_changed {\n            change(TypeId::of::<E>(), &new, &new, false);\n        }\n    }\n}\ntrait Lane {\n    fn verify_codec(&self) -> u64;\n    fn step(&self, random: u32, change: &mut Change<'_>) -> u32;\n    fn read(&self) -> u32;\n    fn storage_bytes(&self) -> usize;\n}\n\nimpl<E: Codec> Lane for Property<E> {\n    fn verify_codec(&self) -> u64 {\n        assert!(E::decode(0).is_none() && E::decode(E::N + 1).is_none());\n        let mut checksum = 0u64;\n        for ordinal in 1..=E::N {\n            let value = E::decode(ordinal).unwrap();\n            let roundtrip = Self::load(Self::store(value));\n            assert!(roundtrip == value && value.encode() == ordinal);\n            checksum = checksum.wrapping_mul(131).wrapping_add(value.discriminant() as u64);\n        }\n        checksum\n    }\n    fn read(&self) -> u32 {\n        #[cfg(cache)] {self.current.get().encode()}\n        #[cfg(not(cache))] {Self::load(self.slot.value.get()).encode()}\n    }\n    fn step(&self, random: u32, change: &mut Change<'_>) -> u32 {\n        if random & 7 == 0 { self.slot.begin_reevaluation(random & 0x40 == 0); }\n        let value = E::decode(1 + ((random >> 8) % E::N)).unwrap();\n        let priority = ((random >> 23) % 5) as i8 - 1;\n        self.set(value, priority, random & 4 != 0, change);\n        self.read()\n    }\n    fn storage_bytes(&self) -> usize {\n        #[cfg(cache)] {std::mem::size_of::<(Slot<NonZeroU8>, E)>()}\n        #[cfg(not(cache))] {std::mem::size_of_val(&self.slot)}\n    }\n}\n\ninclude!(\"enums.rs\");\n\n#[repr(C)] struct Timespec { sec:i64, ns: i64 }\nunsafe extern \"C\" { fn clock_gettime(clock:i32, time:*mut Timespec) -> i32; }\nfn cpu() -> i64 {\n    let mut t=Timespec{sec:0,ns:0};assert_eq!(unsafe{clock_gettime(3,&mut t)},0);t.sec*1_000_000_000+t.ns\n}\n\nfn main() {\n    let lanes=registered();\n    let hash=lanes.iter().fold(0u64, |s, p| s.wrapping_mul(31).wrapping_add(p.verify_codec()));\n    let state_bytes:usize=lanes.iter().map(|p|p.storage_bytes()).sum();\n    let mode=std::env::args().nth(1).unwrap(); let mut seed=93138971u32;let mut sum=0u64;let mut notifications=0u64;\n    let mut change=|id, old:&dyn Any, value:&dyn Any, effective| {\n        assert_eq!(old.type_id(),id);assert_eq!(value.type_id(),id);\n        notifications+=if effective{2}else{1};\n    };\n    let wall=Instant::now();let start=cpu();\n    for _ in 0..2_000_000usize {\n        seed = seed.wrapping_mul(1664525).wrapping_add(1013904223);let prop=&lanes[(seed as usize>>16)%lanes.len()];\n        let value=if mode==\"read\"{prop.read()}else{prop.step(seed, &mut change)};\n        sum+=black_box(value) as u64;\n    }\n    let elapsed=cpu()-start;\n    println!(\"{} {} {} {} {} {} {} {}\",mode,lanes.len(),hash,state_bytes,sum,notifications,elapsed,wall.elapsed().as_nanos());\n}\n",
+  "declaration_inventory_format": [
+   "qualified type",
+   "source file",
+   "repr or null",
+   "ordered [variant, explicit discriminant or null]"
+  ],
+  "declaration_inventory": [
+   [
+    "ferroui_base::combined_geometry::GeometryCombineMode",
+    "src/FerroUI.Base/combined_geometry.rs",
+    "i32",
+    [
+     [
+      "Union",
+      "0"
+     ],
+     [
+      "Intersect",
+      "1"
+     ],
+     [
+      "Xor",
+      "2"
+     ],
+     [
+      "Exclude",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::input::input_scope_name_value::InputScopeNameValue",
+    "src/FerroUI.Base/input/input_scope_name_value.rs",
+    "i32",
+    [
+     [
+      "Default",
+      "0"
+     ],
+     [
+      "Url",
+      "1"
+     ],
+     [
+      "EmailSmtpAddress",
+      "5"
+     ],
+     [
+      "PersonalFullName",
+      "7"
+     ],
+     [
+      "CurrencyAmountAndSymbol",
+      "20"
+     ],
+     [
+      "CurrencyAmount",
+      "21"
+     ],
+     [
+      "DateMonthNumber",
+      "23"
+     ],
+     [
+      "DateDayNumber",
+      "24"
+     ],
+     [
+      "DateYear",
+      "25"
+     ],
+     [
+      "Digits",
+      "28"
+     ],
+     [
+      "Number",
+      "29"
+     ],
+     [
+      "Password",
+      "31"
+     ],
+     [
+      "TelephoneNumber",
+      "32"
+     ],
+     [
+      "TelephoneCountryCode",
+      "33"
+     ],
+     [
+      "TelephoneAreaCode",
+      "34"
+     ],
+     [
+      "TelephoneLocalNumber",
+      "35"
+     ],
+     [
+      "TimeHour",
+      "37"
+     ],
+     [
+      "TimeMinutesOrSeconds",
+      "38"
+     ],
+     [
+      "NumberFullWidth",
+      "39"
+     ],
+     [
+      "AlphanumericHalfWidth",
+      "40"
+     ],
+     [
+      "AlphanumericFullWidth",
+      "41"
+     ],
+     [
+      "Hiragana",
+      "44"
+     ],
+     [
+      "KatakanaHalfWidth",
+      "45"
+     ],
+     [
+      "KatakanaFullWidth",
+      "46"
+     ],
+     [
+      "Hanja",
+      "47"
+     ],
+     [
+      "HangulHalfWidth",
+      "48"
+     ],
+     [
+      "HangulFullWidth",
+      "49"
+     ],
+     [
+      "Search",
+      "50"
+     ],
+     [
+      "Formula",
+      "51"
+     ],
+     [
+      "SearchIncremental",
+      "52"
+     ],
+     [
+      "ChineseHalfWidth",
+      "53"
+     ],
+     [
+      "ChineseFullWidth",
+      "54"
+     ],
+     [
+      "NativeScript",
+      "55"
+     ],
+     [
+      "Text",
+      "57"
+     ],
+     [
+      "Chat",
+      "58"
+     ],
+     [
+      "NameOrPhoneNumber",
+      "59"
+     ],
+     [
+      "EmailNameOrAddress",
+      "60"
+     ],
+     [
+      "Maps",
+      "62"
+     ],
+     [
+      "NumericPassword",
+      "63"
+     ],
+     [
+      "NumericPin",
+      "64"
+     ],
+     [
+      "AlphanumericPin",
+      "65"
+     ],
+     [
+      "FormulaNumber",
+      "67"
+     ],
+     [
+      "ChatWithoutEmoji",
+      "68"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::input::keyboard_navigation_mode::KeyboardNavigationMode",
+    "src/FerroUI.Base/input/keyboard_navigation_mode.rs",
+    null,
+    [
+     [
+      "Continue",
+      null
+     ],
+     [
+      "Cycle",
+      null
+     ],
+     [
+      "Contained",
+      null
+     ],
+     [
+      "Once",
+      null
+     ],
+     [
+      "None",
+      null
+     ],
+     [
+      "Local",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::input::navigation::xy_focus_navigation_strategy::XYFocusNavigationStrategy",
+    "src/FerroUI.Base/input/navigation/xy_focus_navigation_strategy.rs",
+    "i32",
+    [
+     [
+      "Auto",
+      "0"
+     ],
+     [
+      "Projection",
+      "1"
+     ],
+     [
+      "NavigationDirectionDistance",
+      "2"
+     ],
+     [
+      "RectilinearDistance",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::input::pull_gesture_event_args::PullDirection",
+    "src/FerroUI.Base/input/pull_gesture_event_args.rs",
+    null,
+    [
+     [
+      "TopToBottom",
+      null
+     ],
+     [
+      "BottomToTop",
+      null
+     ],
+     [
+      "LeftToRight",
+      null
+     ],
+     [
+      "RightToLeft",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::input::text_input::text_input_content_type::TextInputContentType",
+    "src/FerroUI.Base/input/text_input/text_input_content_type.rs",
+    "i32",
+    [
+     [
+      "Normal",
+      "0"
+     ],
+     [
+      "Alpha",
+      "1"
+     ],
+     [
+      "Digits",
+      "2"
+     ],
+     [
+      "Pin",
+      "3"
+     ],
+     [
+      "Number",
+      "4"
+     ],
+     [
+      "Email",
+      "5"
+     ],
+     [
+      "Url",
+      "6"
+     ],
+     [
+      "Name",
+      "7"
+     ],
+     [
+      "Password",
+      "8"
+     ],
+     [
+      "Social",
+      "9"
+     ],
+     [
+      "Search",
+      "10"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::input::text_input::text_input_return_key_type::TextInputReturnKeyType",
+    "src/FerroUI.Base/input/text_input/text_input_return_key_type.rs",
+    "i32",
+    [
+     [
+      "Default",
+      "0"
+     ],
+     [
+      "Return",
+      "1"
+     ],
+     [
+      "Done",
+      "2"
+     ],
+     [
+      "Go",
+      "3"
+     ],
+     [
+      "Send",
+      "4"
+     ],
+     [
+      "Search",
+      "5"
+     ],
+     [
+      "Next",
+      "6"
+     ],
+     [
+      "Previous",
+      "7"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::input::window_decorations_element_role::WindowDecorationsElementRole",
+    "src/FerroUI.Base/input/window_decorations_element_role.rs",
+    "i32",
+    [
+     [
+      "None",
+      "0"
+     ],
+     [
+      "DecorationsElement",
+      "1"
+     ],
+     [
+      "User",
+      "2"
+     ],
+     [
+      "TitleBar",
+      "3"
+     ],
+     [
+      "ResizeN",
+      "4"
+     ],
+     [
+      "ResizeS",
+      "5"
+     ],
+     [
+      "ResizeE",
+      "6"
+     ],
+     [
+      "ResizeW",
+      "7"
+     ],
+     [
+      "ResizeNE",
+      "8"
+     ],
+     [
+      "ResizeNW",
+      "9"
+     ],
+     [
+      "ResizeSE",
+      "10"
+     ],
+     [
+      "ResizeSW",
+      "11"
+     ],
+     [
+      "CloseButton",
+      "12"
+     ],
+     [
+      "MinimizeButton",
+      "13"
+     ],
+     [
+      "MaximizeButton",
+      "14"
+     ],
+     [
+      "FullScreenButton",
+      "15"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::layout::layoutable::HorizontalAlignment",
+    "src/FerroUI.Base/layout/layoutable.rs",
+    null,
+    [
+     [
+      "Stretch",
+      null
+     ],
+     [
+      "Left",
+      null
+     ],
+     [
+      "Center",
+      null
+     ],
+     [
+      "Right",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::layout::layoutable::VerticalAlignment",
+    "src/FerroUI.Base/layout/layoutable.rs",
+    null,
+    [
+     [
+      "Stretch",
+      null
+     ],
+     [
+      "Top",
+      null
+     ],
+     [
+      "Center",
+      null
+     ],
+     [
+      "Bottom",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::layout::orientation::Orientation",
+    "src/FerroUI.Base/layout/orientation.rs",
+    "i32",
+    [
+     [
+      "Horizontal",
+      "0"
+     ],
+     [
+      "Vertical",
+      "1"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::acrylic_background_source::AcrylicBackgroundSource",
+    "src/FerroUI.Base/media/acrylic_background_source.rs",
+    "i32",
+    [
+     [
+      "None",
+      "0"
+     ],
+     [
+      "Digger",
+      "1"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::acrylic_brush::AcrylicBrushBackgroundSource",
+    "src/FerroUI.Base/media/acrylic_brush.rs",
+    "i32",
+    [
+     [
+      "HostBackdrop",
+      "0"
+     ],
+     [
+      "Backdrop",
+      "1"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::alignment_x::AlignmentX",
+    "src/FerroUI.Base/media/alignment_x.rs",
+    "i32",
+    [
+     [
+      "Left",
+      "0"
+     ],
+     [
+      "Center",
+      "1"
+     ],
+     [
+      "Right",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::alignment_y::AlignmentY",
+    "src/FerroUI.Base/media/alignment_y.rs",
+    "i32",
+    [
+     [
+      "Top",
+      "0"
+     ],
+     [
+      "Center",
+      "1"
+     ],
+     [
+      "Bottom",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::background_sizing::BackgroundSizing",
+    "src/FerroUI.Base/media/background_sizing.rs",
+    "i32",
+    [
+     [
+      "InnerBorderEdge",
+      "0"
+     ],
+     [
+      "OuterBorderEdge",
+      "1"
+     ],
+     [
+      "CenterBorder",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::baseline_alignment::BaselineAlignment",
+    "src/FerroUI.Base/media/baseline_alignment.rs",
+    null,
+    [
+     [
+      "Top",
+      null
+     ],
+     [
+      "Center",
+      null
+     ],
+     [
+      "Bottom",
+      null
+     ],
+     [
+      "Baseline",
+      null
+     ],
+     [
+      "TextTop",
+      null
+     ],
+     [
+      "TextBottom",
+      null
+     ],
+     [
+      "Subscript",
+      null
+     ],
+     [
+      "Superscript",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::fill_rule::FillRule",
+    "src/FerroUI.Base/media/fill_rule.rs",
+    "i32",
+    [
+     [
+      "EvenOdd",
+      "0"
+     ],
+     [
+      "NonZero",
+      "1"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::flow_direction::FlowDirection",
+    "src/FerroUI.Base/media/flow_direction.rs",
+    null,
+    [
+     [
+      "LeftToRight",
+      null
+     ],
+     [
+      "RightToLeft",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::font_stretch::FontStretch",
+    "src/FerroUI.Base/media/font_stretch.rs",
+    "i32",
+    [
+     [
+      "Normal",
+      "5"
+     ],
+     [
+      "UltraCondensed",
+      "1"
+     ],
+     [
+      "ExtraCondensed",
+      "2"
+     ],
+     [
+      "Condensed",
+      "3"
+     ],
+     [
+      "SemiCondensed",
+      "4"
+     ],
+     [
+      "SemiExpanded",
+      "6"
+     ],
+     [
+      "Expanded",
+      "7"
+     ],
+     [
+      "ExtraExpanded",
+      "8"
+     ],
+     [
+      "UltraExpanded",
+      "9"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::font_style::FontStyle",
+    "src/FerroUI.Base/media/font_style.rs",
+    "i32",
+    [
+     [
+      "Normal",
+      "0"
+     ],
+     [
+      "Italic",
+      "1"
+     ],
+     [
+      "Oblique",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::font_typography::FontCapitals",
+    "src/FerroUI.Base/media/font_typography.rs",
+    "i32",
+    [
+     [
+      "Normal",
+      "0"
+     ],
+     [
+      "AllSmallCaps",
+      "1"
+     ],
+     [
+      "SmallCaps",
+      "2"
+     ],
+     [
+      "AllPetiteCaps",
+      "3"
+     ],
+     [
+      "PetiteCaps",
+      "4"
+     ],
+     [
+      "Unicase",
+      "5"
+     ],
+     [
+      "Titling",
+      "6"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::font_typography::FontEastAsianLanguage",
+    "src/FerroUI.Base/media/font_typography.rs",
+    "i32",
+    [
+     [
+      "Normal",
+      "0"
+     ],
+     [
+      "HojoKanji",
+      "1"
+     ],
+     [
+      "Jis04",
+      "2"
+     ],
+     [
+      "Jis78",
+      "3"
+     ],
+     [
+      "Jis83",
+      "4"
+     ],
+     [
+      "Jis90",
+      "5"
+     ],
+     [
+      "NlcKanji",
+      "6"
+     ],
+     [
+      "Simplified",
+      "7"
+     ],
+     [
+      "Traditional",
+      "8"
+     ],
+     [
+      "TraditionalNames",
+      "9"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::font_typography::FontEastAsianWidths",
+    "src/FerroUI.Base/media/font_typography.rs",
+    "i32",
+    [
+     [
+      "Normal",
+      "0"
+     ],
+     [
+      "Full",
+      "1"
+     ],
+     [
+      "Half",
+      "2"
+     ],
+     [
+      "Proportional",
+      "3"
+     ],
+     [
+      "Quarter",
+      "4"
+     ],
+     [
+      "Third",
+      "5"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::font_typography::FontFraction",
+    "src/FerroUI.Base/media/font_typography.rs",
+    "i32",
+    [
+     [
+      "Normal",
+      "0"
+     ],
+     [
+      "Stacked",
+      "1"
+     ],
+     [
+      "Slashed",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::font_typography::FontNumeralAlignment",
+    "src/FerroUI.Base/media/font_typography.rs",
+    "i32",
+    [
+     [
+      "Normal",
+      "0"
+     ],
+     [
+      "Proportional",
+      "1"
+     ],
+     [
+      "Tabular",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::font_typography::FontNumeralStyle",
+    "src/FerroUI.Base/media/font_typography.rs",
+    "i32",
+    [
+     [
+      "Normal",
+      "0"
+     ],
+     [
+      "Lining",
+      "1"
+     ],
+     [
+      "OldStyle",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::font_typography::FontVariants",
+    "src/FerroUI.Base/media/font_typography.rs",
+    "i32",
+    [
+     [
+      "Normal",
+      "0"
+     ],
+     [
+      "Superscript",
+      "1"
+     ],
+     [
+      "Subscript",
+      "2"
+     ],
+     [
+      "Ordinal",
+      "3"
+     ],
+     [
+      "Inferior",
+      "4"
+     ],
+     [
+      "Ruby",
+      "5"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::gradient_spread_method::GradientSpreadMethod",
+    "src/FerroUI.Base/media/gradient_spread_method.rs",
+    "i32",
+    [
+     [
+      "Pad",
+      "0"
+     ],
+     [
+      "Reflect",
+      "1"
+     ],
+     [
+      "Repeat",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::imaging::bitmap_blending_mode::BitmapBlendingMode",
+    "src/FerroUI.Base/media/imaging/bitmap_blending_mode.rs",
+    "u8",
+    [
+     [
+      "Unspecified",
+      "0"
+     ],
+     [
+      "SourceOver",
+      "1"
+     ],
+     [
+      "Source",
+      "2"
+     ],
+     [
+      "Destination",
+      "3"
+     ],
+     [
+      "DestinationOver",
+      "4"
+     ],
+     [
+      "SourceIn",
+      "5"
+     ],
+     [
+      "DestinationIn",
+      "6"
+     ],
+     [
+      "SourceOut",
+      "7"
+     ],
+     [
+      "DestinationOut",
+      "8"
+     ],
+     [
+      "SourceAtop",
+      "9"
+     ],
+     [
+      "DestinationAtop",
+      "10"
+     ],
+     [
+      "Xor",
+      "11"
+     ],
+     [
+      "Plus",
+      "12"
+     ],
+     [
+      "Screen",
+      "13"
+     ],
+     [
+      "Overlay",
+      "14"
+     ],
+     [
+      "Darken",
+      "15"
+     ],
+     [
+      "Lighten",
+      "16"
+     ],
+     [
+      "ColorDodge",
+      "17"
+     ],
+     [
+      "ColorBurn",
+      "18"
+     ],
+     [
+      "HardLight",
+      "19"
+     ],
+     [
+      "SoftLight",
+      "20"
+     ],
+     [
+      "Difference",
+      "21"
+     ],
+     [
+      "Exclusion",
+      "22"
+     ],
+     [
+      "Multiply",
+      "23"
+     ],
+     [
+      "Hue",
+      "24"
+     ],
+     [
+      "Saturation",
+      "25"
+     ],
+     [
+      "Color",
+      "26"
+     ],
+     [
+      "Luminosity",
+      "27"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::pen_line_cap::PenLineCap",
+    "src/FerroUI.Base/media/pen_line_cap.rs",
+    "i32",
+    [
+     [
+      "Flat",
+      "0"
+     ],
+     [
+      "Round",
+      "1"
+     ],
+     [
+      "Square",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::pen_line_join::PenLineJoin",
+    "src/FerroUI.Base/media/pen_line_join.rs",
+    "i32",
+    [
+     [
+      "Bevel",
+      "0"
+     ],
+     [
+      "Miter",
+      "1"
+     ],
+     [
+      "Round",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::stretch::Stretch",
+    "src/FerroUI.Base/media/stretch.rs",
+    "i32",
+    [
+     [
+      "None",
+      "0"
+     ],
+     [
+      "Fill",
+      "1"
+     ],
+     [
+      "Uniform",
+      "2"
+     ],
+     [
+      "UniformToFill",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::stretch_direction::StretchDirection",
+    "src/FerroUI.Base/media/stretch_direction.rs",
+    "i32",
+    [
+     [
+      "UpOnly",
+      "0"
+     ],
+     [
+      "DownOnly",
+      "1"
+     ],
+     [
+      "Both",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::sweep_direction::SweepDirection",
+    "src/FerroUI.Base/media/sweep_direction.rs",
+    "i32",
+    [
+     [
+      "CounterClockwise",
+      "0"
+     ],
+     [
+      "Clockwise",
+      "1"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::text_alignment::TextAlignment",
+    "src/FerroUI.Base/media/text_alignment.rs",
+    null,
+    [
+     [
+      "Left",
+      null
+     ],
+     [
+      "Center",
+      null
+     ],
+     [
+      "Right",
+      null
+     ],
+     [
+      "Start",
+      null
+     ],
+     [
+      "End",
+      null
+     ],
+     [
+      "DetectFromContent",
+      null
+     ],
+     [
+      "Justify",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::text_decoration_location::TextDecorationLocation",
+    "src/FerroUI.Base/media/text_decoration_location.rs",
+    "i32",
+    [
+     [
+      "Underline",
+      "0"
+     ],
+     [
+      "Overline",
+      "1"
+     ],
+     [
+      "Strikethrough",
+      "2"
+     ],
+     [
+      "Baseline",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::text_decoration_unit::TextDecorationUnit",
+    "src/FerroUI.Base/media/text_decoration_unit.rs",
+    null,
+    [
+     [
+      "FontRecommended",
+      null
+     ],
+     [
+      "FontRenderingEmSize",
+      null
+     ],
+     [
+      "Pixel",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::text_line_bounds::TextLineBounds",
+    "src/FerroUI.Base/media/text_line_bounds.rs",
+    "i32",
+    [
+     [
+      "Full",
+      null
+     ],
+     [
+      "TrimToCapHeight",
+      null
+     ],
+     [
+      "TrimToBaseline",
+      null
+     ],
+     [
+      "Tight",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::text_wrapping::TextWrapping",
+    "src/FerroUI.Base/media/text_wrapping.rs",
+    null,
+    [
+     [
+      "NoWrap",
+      null
+     ],
+     [
+      "Wrap",
+      null
+     ],
+     [
+      "WrapWithOverflow",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::media::tile_mode::TileMode",
+    "src/FerroUI.Base/media/tile_mode.rs",
+    "i32",
+    [
+     [
+      "None",
+      "0"
+     ],
+     [
+      "FlipX",
+      "1"
+     ],
+     [
+      "FlipY",
+      "2"
+     ],
+     [
+      "FlipXY",
+      "3"
+     ],
+     [
+      "Tile",
+      "4"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::rendering::composition::system_backdrops::MicaKind",
+    "src/FerroUI.Base/rendering/composition/system_backdrops.rs",
+    "i32",
+    [
+     [
+      "Base",
+      "0"
+     ],
+     [
+      "BaseAlt",
+      "1"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::styling::container_sizing::ContainerSizing",
+    "src/FerroUI.Base/styling/container_sizing.rs",
+    null,
+    [
+     [
+      "Normal",
+      null
+     ],
+     [
+      "Width",
+      null
+     ],
+     [
+      "Height",
+      null
+     ],
+     [
+      "WidthAndHeight",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::utilities::date_time_format_info::CalendarWeekRule",
+    "src/FerroUI.Base/utilities/date_time_format_info.rs",
+    "u8",
+    [
+     [
+      "FirstDay",
+      "0"
+     ],
+     [
+      "FirstFullWeek",
+      "1"
+     ],
+     [
+      "FirstFourDayWeek",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_base::utilities::day_of_week::DayOfWeek",
+    "src/FerroUI.Base/utilities/day_of_week.rs",
+    "u8",
+    [
+     [
+      "Sunday",
+      "0"
+     ],
+     [
+      "Monday",
+      "1"
+     ],
+     [
+      "Tuesday",
+      "2"
+     ],
+     [
+      "Wednesday",
+      "3"
+     ],
+     [
+      "Thursday",
+      "4"
+     ],
+     [
+      "Friday",
+      "5"
+     ],
+     [
+      "Saturday",
+      "6"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::auto_complete_box::auto_complete_filter_mode::AutoCompleteFilterMode",
+    "src/FerroUI.Controls/auto_complete_box/auto_complete_filter_mode.rs",
+    "i32",
+    [
+     [
+      "None",
+      "0"
+     ],
+     [
+      "StartsWith",
+      "1"
+     ],
+     [
+      "StartsWithCaseSensitive",
+      "2"
+     ],
+     [
+      "StartsWithOrdinal",
+      "3"
+     ],
+     [
+      "StartsWithOrdinalCaseSensitive",
+      "4"
+     ],
+     [
+      "Contains",
+      "5"
+     ],
+     [
+      "ContainsCaseSensitive",
+      "6"
+     ],
+     [
+      "ContainsOrdinal",
+      "7"
+     ],
+     [
+      "ContainsOrdinalCaseSensitive",
+      "8"
+     ],
+     [
+      "Equals",
+      "9"
+     ],
+     [
+      "EqualsCaseSensitive",
+      "10"
+     ],
+     [
+      "EqualsOrdinal",
+      "11"
+     ],
+     [
+      "EqualsOrdinalCaseSensitive",
+      "12"
+     ],
+     [
+      "Custom",
+      "13"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::automation::automation_live_setting::AutomationLiveSetting",
+    "src/FerroUI.Controls/automation/automation_live_setting.rs",
+    "i32",
+    [
+     [
+      "Off",
+      "0"
+     ],
+     [
+      "Polite",
+      "1"
+     ],
+     [
+      "Assertive",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::automation::automation_properties::AccessibilityView",
+    "src/FerroUI.Controls/automation/automation_properties.rs",
+    "i32",
+    [
+     [
+      "Default",
+      null
+     ],
+     [
+      "Raw",
+      null
+     ],
+     [
+      "Control",
+      null
+     ],
+     [
+      "Content",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::automation::is_offscreen_behavior::IsOffscreenBehavior",
+    "src/FerroUI.Controls/automation/is_offscreen_behavior.rs",
+    "i32",
+    [
+     [
+      "Default",
+      null
+     ],
+     [
+      "Onscreen",
+      null
+     ],
+     [
+      "Offscreen",
+      null
+     ],
+     [
+      "FromClip",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::automation::peers::automation_peer::AutomationControlType",
+    "src/FerroUI.Controls/automation/peers/automation_peer.rs",
+    "i32",
+    [
+     [
+      "None",
+      null
+     ],
+     [
+      "Button",
+      null
+     ],
+     [
+      "Calendar",
+      null
+     ],
+     [
+      "CheckBox",
+      null
+     ],
+     [
+      "ComboBox",
+      null
+     ],
+     [
+      "ComboBoxItem",
+      null
+     ],
+     [
+      "Edit",
+      null
+     ],
+     [
+      "Hyperlink",
+      null
+     ],
+     [
+      "Image",
+      null
+     ],
+     [
+      "ListItem",
+      null
+     ],
+     [
+      "List",
+      null
+     ],
+     [
+      "Menu",
+      null
+     ],
+     [
+      "MenuBar",
+      null
+     ],
+     [
+      "MenuItem",
+      null
+     ],
+     [
+      "ProgressBar",
+      null
+     ],
+     [
+      "RadioButton",
+      null
+     ],
+     [
+      "ScrollBar",
+      null
+     ],
+     [
+      "Slider",
+      null
+     ],
+     [
+      "Spinner",
+      null
+     ],
+     [
+      "StatusBar",
+      null
+     ],
+     [
+      "Tab",
+      null
+     ],
+     [
+      "TabItem",
+      null
+     ],
+     [
+      "Text",
+      null
+     ],
+     [
+      "ToolBar",
+      null
+     ],
+     [
+      "ToolTip",
+      null
+     ],
+     [
+      "Tree",
+      null
+     ],
+     [
+      "TreeItem",
+      null
+     ],
+     [
+      "Custom",
+      null
+     ],
+     [
+      "Group",
+      null
+     ],
+     [
+      "Thumb",
+      null
+     ],
+     [
+      "DataGrid",
+      null
+     ],
+     [
+      "DataItem",
+      null
+     ],
+     [
+      "Document",
+      null
+     ],
+     [
+      "SplitButton",
+      null
+     ],
+     [
+      "Window",
+      null
+     ],
+     [
+      "Pane",
+      null
+     ],
+     [
+      "Header",
+      null
+     ],
+     [
+      "HeaderItem",
+      null
+     ],
+     [
+      "Table",
+      null
+     ],
+     [
+      "TitleBar",
+      null
+     ],
+     [
+      "Separator",
+      null
+     ],
+     [
+      "Expander",
+      null
+     ],
+     [
+      "ScrollViewer",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::automation::peers::automation_peer::AutomationLandmarkType",
+    "src/FerroUI.Controls/automation/peers/automation_peer.rs",
+    "i32",
+    [
+     [
+      "Banner",
+      null
+     ],
+     [
+      "Complementary",
+      null
+     ],
+     [
+      "ContentInfo",
+      null
+     ],
+     [
+      "Region",
+      null
+     ],
+     [
+      "Form",
+      null
+     ],
+     [
+      "Main",
+      null
+     ],
+     [
+      "Navigation",
+      null
+     ],
+     [
+      "Search",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::button::ClickMode",
+    "src/FerroUI.Controls/button.rs",
+    null,
+    [
+     [
+      "Release",
+      null
+     ],
+     [
+      "Press",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::button_spinner::Location",
+    "src/FerroUI.Controls/button_spinner.rs",
+    null,
+    [
+     [
+      "Left",
+      null
+     ],
+     [
+      "Right",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::calendar::calendar::CalendarMode",
+    "src/FerroUI.Controls/calendar/calendar.rs",
+    "i32",
+    [
+     [
+      "Month",
+      "0"
+     ],
+     [
+      "Year",
+      "1"
+     ],
+     [
+      "Decade",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::calendar::calendar::CalendarSelectionMode",
+    "src/FerroUI.Controls/calendar/calendar.rs",
+    "i32",
+    [
+     [
+      "SingleDate",
+      "0"
+     ],
+     [
+      "SingleRange",
+      "1"
+     ],
+     [
+      "MultipleRange",
+      "2"
+     ],
+     [
+      "None",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::calendar_date_picker::calendar_date_picker_format::CalendarDatePickerFormat",
+    "src/FerroUI.Controls/calendar_date_picker/calendar_date_picker_format.rs",
+    "i32",
+    [
+     [
+      "Long",
+      "0"
+     ],
+     [
+      "Short",
+      "1"
+     ],
+     [
+      "Custom",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::command_bar::command_bar_default_label_position::CommandBarDefaultLabelPosition",
+    "src/FerroUI.Controls/command_bar/command_bar_default_label_position.rs",
+    "i32",
+    [
+     [
+      "Bottom",
+      "0"
+     ],
+     [
+      "Right",
+      "1"
+     ],
+     [
+      "Collapsed",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::command_bar::command_bar_overflow_button_visibility::CommandBarOverflowButtonVisibility",
+    "src/FerroUI.Controls/command_bar/command_bar_overflow_button_visibility.rs",
+    "i32",
+    [
+     [
+      "Auto",
+      "0"
+     ],
+     [
+      "Visible",
+      "1"
+     ],
+     [
+      "Collapsed",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::date_time_pickers::date_time_picker_panel::DateTimePickerPanelType",
+    "src/FerroUI.Controls/date_time_pickers/date_time_picker_panel.rs",
+    "i32",
+    [
+     [
+      "Year",
+      "0"
+     ],
+     [
+      "Month",
+      "1"
+     ],
+     [
+      "Day",
+      "2"
+     ],
+     [
+      "Hour",
+      "3"
+     ],
+     [
+      "Minute",
+      "4"
+     ],
+     [
+      "TimePeriod",
+      "5"
+     ],
+     [
+      "Second",
+      "6"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::dock_panel::Dock",
+    "src/FerroUI.Controls/dock_panel.rs",
+    "i32",
+    [
+     [
+      "Left",
+      "0"
+     ],
+     [
+      "Bottom",
+      "1"
+     ],
+     [
+      "Right",
+      "2"
+     ],
+     [
+      "Top",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::documents::block::LineStackingStrategy",
+    "src/FerroUI.Controls/documents/block.rs",
+    "i32",
+    [
+     [
+      "MaxHeight",
+      "0"
+     ],
+     [
+      "BlockLineHeight",
+      "1"
+     ],
+     [
+      "BaselineToBaseline",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::documents::hyperlink::UnderlineStyle",
+    "src/FerroUI.Controls/documents/hyperlink.rs",
+    "i32",
+    [
+     [
+      "None",
+      "0"
+     ],
+     [
+      "Single",
+      "1"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::documents::line_spacing_rule::LineSpacingRule",
+    "src/FerroUI.Controls/documents/line_spacing_rule.rs",
+    "i32",
+    [
+     [
+      "Undefined",
+      "0"
+     ],
+     [
+      "Single",
+      "1"
+     ],
+     [
+      "OneAndHalf",
+      "2"
+     ],
+     [
+      "Double",
+      "3"
+     ],
+     [
+      "AtLeast",
+      "4"
+     ],
+     [
+      "Exactly",
+      "5"
+     ],
+     [
+      "Multiple",
+      "6"
+     ],
+     [
+      "Percent",
+      "7"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::expander::ExpandDirection",
+    "src/FerroUI.Controls/expander.rs",
+    "i32",
+    [
+     [
+      "Down",
+      "0"
+     ],
+     [
+      "Up",
+      "1"
+     ],
+     [
+      "Left",
+      "2"
+     ],
+     [
+      "Right",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::flex_panel::flex_align_content::FlexAlignContent",
+    "src/FerroUI.Controls/flex_panel/flex_align_content.rs",
+    "i32",
+    [
+     [
+      "FlexStart",
+      "0"
+     ],
+     [
+      "FlexEnd",
+      "1"
+     ],
+     [
+      "Center",
+      "2"
+     ],
+     [
+      "Stretch",
+      "3"
+     ],
+     [
+      "SpaceBetween",
+      "4"
+     ],
+     [
+      "SpaceAround",
+      "5"
+     ],
+     [
+      "SpaceEvenly",
+      "6"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::flex_panel::flex_align_items::FlexAlignItems",
+    "src/FerroUI.Controls/flex_panel/flex_align_items.rs",
+    "i32",
+    [
+     [
+      "FlexStart",
+      "0"
+     ],
+     [
+      "FlexEnd",
+      "1"
+     ],
+     [
+      "Center",
+      "2"
+     ],
+     [
+      "Stretch",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::flex_panel::flex_direction::FlexDirection",
+    "src/FerroUI.Controls/flex_panel/flex_direction.rs",
+    "i32",
+    [
+     [
+      "Row",
+      "0"
+     ],
+     [
+      "RowReverse",
+      "1"
+     ],
+     [
+      "Column",
+      "2"
+     ],
+     [
+      "ColumnReverse",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::flex_panel::flex_justify_content::FlexJustifyContent",
+    "src/FerroUI.Controls/flex_panel/flex_justify_content.rs",
+    "i32",
+    [
+     [
+      "FlexStart",
+      "0"
+     ],
+     [
+      "FlexEnd",
+      "1"
+     ],
+     [
+      "Center",
+      "2"
+     ],
+     [
+      "SpaceBetween",
+      "3"
+     ],
+     [
+      "SpaceAround",
+      "4"
+     ],
+     [
+      "SpaceEvenly",
+      "5"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::flex_panel::flex_wrap::FlexWrap",
+    "src/FerroUI.Controls/flex_panel/flex_wrap.rs",
+    "i32",
+    [
+     [
+      "NoWrap",
+      "0"
+     ],
+     [
+      "Wrap",
+      "1"
+     ],
+     [
+      "WrapReverse",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::flyouts::flyout_show_mode::FlyoutShowMode",
+    "src/FerroUI.Controls/flyouts/flyout_show_mode.rs",
+    "i32",
+    [
+     [
+      "Standard",
+      "0"
+     ],
+     [
+      "Transient",
+      "1"
+     ],
+     [
+      "TransientWithDismissOnPointerMoveAway",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::grid_splitter::GridResizeBehavior",
+    "src/FerroUI.Controls/grid_splitter.rs",
+    "i32",
+    [
+     [
+      "BasedOnAlignment",
+      "0"
+     ],
+     [
+      "CurrentAndNext",
+      "1"
+     ],
+     [
+      "PreviousAndCurrent",
+      "2"
+     ],
+     [
+      "PreviousAndNext",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::grid_splitter::GridResizeDirection",
+    "src/FerroUI.Controls/grid_splitter.rs",
+    "i32",
+    [
+     [
+      "Auto",
+      "0"
+     ],
+     [
+      "Columns",
+      "1"
+     ],
+     [
+      "Rows",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::info_bar::InfoBarSeverity",
+    "src/FerroUI.Controls/info_bar.rs",
+    "i32",
+    [
+     [
+      "Informational",
+      "0"
+     ],
+     [
+      "Success",
+      "1"
+     ],
+     [
+      "Warning",
+      "2"
+     ],
+     [
+      "Error",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::media::reveal_brush::ApplicationTheme",
+    "src/FerroUI.Controls/media/reveal_brush.rs",
+    "i32",
+    [
+     [
+      "Light",
+      "0"
+     ],
+     [
+      "Dark",
+      "1"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::media::reveal_brush::RevealBrushState",
+    "src/FerroUI.Controls/media/reveal_brush.rs",
+    "i32",
+    [
+     [
+      "Normal",
+      "0"
+     ],
+     [
+      "PointerOver",
+      "1"
+     ],
+     [
+      "Pressed",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::menu_item_toggle_type::MenuItemToggleType",
+    "src/FerroUI.Controls/menu_item_toggle_type.rs",
+    null,
+    [
+     [
+      "None",
+      null
+     ],
+     [
+      "CheckBox",
+      null
+     ],
+     [
+      "Radio",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::navigation::NavigationCacheMode",
+    "src/FerroUI.Controls/navigation.rs",
+    "i32",
+    [
+     [
+      "Disabled",
+      "0"
+     ],
+     [
+      "Required",
+      "1"
+     ],
+     [
+      "Enabled",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::navigation_view_events::NavigationViewBackButtonVisible",
+    "src/FerroUI.Controls/navigation_view_events.rs",
+    "i32",
+    [
+     [
+      "Collapsed",
+      "0"
+     ],
+     [
+      "Visible",
+      "1"
+     ],
+     [
+      "Auto",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::navigation_view_events::NavigationViewPaneDisplayMode",
+    "src/FerroUI.Controls/navigation_view_events.rs",
+    "i32",
+    [
+     [
+      "Auto",
+      "0"
+     ],
+     [
+      "Left",
+      "1"
+     ],
+     [
+      "Top",
+      "2"
+     ],
+     [
+      "LeftCompact",
+      "3"
+     ],
+     [
+      "LeftMinimal",
+      "4"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::navigation_view_events::NavigationViewSelectionFollowsFocus",
+    "src/FerroUI.Controls/navigation_view_events.rs",
+    "i32",
+    [
+     [
+      "Disabled",
+      "0"
+     ],
+     [
+      "Enabled",
+      "1"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::notifications::notification_position::NotificationPosition",
+    "src/FerroUI.Controls/notifications/notification_position.rs",
+    "i32",
+    [
+     [
+      "TopLeft",
+      "0"
+     ],
+     [
+      "TopRight",
+      "1"
+     ],
+     [
+      "BottomLeft",
+      "2"
+     ],
+     [
+      "BottomRight",
+      "3"
+     ],
+     [
+      "TopCenter",
+      "4"
+     ],
+     [
+      "BottomCenter",
+      "5"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::notifications::notification_type::NotificationType",
+    "src/FerroUI.Controls/notifications/notification_type.rs",
+    "i32",
+    [
+     [
+      "Information",
+      "0"
+     ],
+     [
+      "Success",
+      "1"
+     ],
+     [
+      "Warning",
+      "2"
+     ],
+     [
+      "Error",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::number_box::NumberBoxSpinButtonPlacementMode",
+    "src/FerroUI.Controls/number_box.rs",
+    "i32",
+    [
+     [
+      "Hidden",
+      "0"
+     ],
+     [
+      "Compact",
+      "1"
+     ],
+     [
+      "Inline",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::number_box::NumberBoxValidationMode",
+    "src/FerroUI.Controls/number_box.rs",
+    "i32",
+    [
+     [
+      "InvalidInputOverwritten",
+      "0"
+     ],
+     [
+      "Disabled",
+      "1"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::page::bar_layout_behavior::BarLayoutBehavior",
+    "src/FerroUI.Controls/page/bar_layout_behavior.rs",
+    "i32",
+    [
+     [
+      "Inset",
+      "0"
+     ],
+     [
+      "Overlay",
+      "1"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::page::drawer_behavior::DrawerBehavior",
+    "src/FerroUI.Controls/page/drawer_behavior.rs",
+    "i32",
+    [
+     [
+      "Auto",
+      "0"
+     ],
+     [
+      "Flyout",
+      "1"
+     ],
+     [
+      "Locked",
+      "2"
+     ],
+     [
+      "Disabled",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::page::drawer_layout_behavior::DrawerLayoutBehavior",
+    "src/FerroUI.Controls/page/drawer_layout_behavior.rs",
+    "i32",
+    [
+     [
+      "Overlay",
+      "0"
+     ],
+     [
+      "Split",
+      "1"
+     ],
+     [
+      "CompactOverlay",
+      "2"
+     ],
+     [
+      "CompactInline",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::page::drawer_placement::DrawerPlacement",
+    "src/FerroUI.Controls/page/drawer_placement.rs",
+    "i32",
+    [
+     [
+      "Left",
+      "0"
+     ],
+     [
+      "Right",
+      "1"
+     ],
+     [
+      "Top",
+      "2"
+     ],
+     [
+      "Bottom",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::page::tab_placement::TabPlacement",
+    "src/FerroUI.Controls/page/tab_placement.rs",
+    "i32",
+    [
+     [
+      "Auto",
+      "0"
+     ],
+     [
+      "Top",
+      "1"
+     ],
+     [
+      "Bottom",
+      "2"
+     ],
+     [
+      "Left",
+      "3"
+     ],
+     [
+      "Right",
+      "4"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::placement_mode::PlacementMode",
+    "src/FerroUI.Controls/placement_mode.rs",
+    "i32",
+    [
+     [
+      "Pointer",
+      "0"
+     ],
+     [
+      "Bottom",
+      "1"
+     ],
+     [
+      "Right",
+      "2"
+     ],
+     [
+      "Left",
+      "3"
+     ],
+     [
+      "Top",
+      "4"
+     ],
+     [
+      "Center",
+      "5"
+     ],
+     [
+      "AnchorAndGravity",
+      "6"
+     ],
+     [
+      "TopEdgeAlignedLeft",
+      "7"
+     ],
+     [
+      "TopEdgeAlignedRight",
+      "8"
+     ],
+     [
+      "BottomEdgeAlignedLeft",
+      "9"
+     ],
+     [
+      "BottomEdgeAlignedRight",
+      "10"
+     ],
+     [
+      "LeftEdgeAlignedTop",
+      "11"
+     ],
+     [
+      "LeftEdgeAlignedBottom",
+      "12"
+     ],
+     [
+      "RightEdgeAlignedTop",
+      "13"
+     ],
+     [
+      "RightEdgeAlignedBottom",
+      "14"
+     ],
+     [
+      "Custom",
+      "15"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::platform::i_platform_feedback::FeedbackType",
+    "src/FerroUI.Controls/platform/i_platform_feedback.rs",
+    "i32",
+    [
+     [
+      "None",
+      "0"
+     ],
+     [
+      "Auto",
+      "1"
+     ],
+     [
+      "Sound",
+      "2"
+     ],
+     [
+      "Haptic",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::platform::i_x11_options_toplevel_impl_feature::X11NetWmWindowType",
+    "src/FerroUI.Controls/platform/i_x11_options_toplevel_impl_feature.rs",
+    "i32",
+    [
+     [
+      "Normal",
+      "0"
+     ],
+     [
+      "Dialog",
+      "1"
+     ],
+     [
+      "Utility",
+      "2"
+     ],
+     [
+      "Menu",
+      "3"
+     ],
+     [
+      "Toolbar",
+      "4"
+     ],
+     [
+      "Splash",
+      "5"
+     ],
+     [
+      "Dock",
+      "6"
+     ],
+     [
+      "Desktop",
+      "7"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::platform::win32_properties::Win32HitTestValue",
+    "src/FerroUI.Controls/platform/win32_properties.rs",
+    "i32",
+    [
+     [
+      "Nowhere",
+      "0"
+     ],
+     [
+      "Client",
+      "1"
+     ],
+     [
+      "Caption",
+      "2"
+     ],
+     [
+      "MinButton",
+      "8"
+     ],
+     [
+      "MaxButton",
+      "9"
+     ],
+     [
+      "Left",
+      "10"
+     ],
+     [
+      "Right",
+      "11"
+     ],
+     [
+      "Top",
+      "12"
+     ],
+     [
+      "TopLeft",
+      "13"
+     ],
+     [
+      "TopRight",
+      "14"
+     ],
+     [
+      "Bottom",
+      "15"
+     ],
+     [
+      "BottomLeft",
+      "16"
+     ],
+     [
+      "BottomRight",
+      "17"
+     ],
+     [
+      "Close",
+      "20"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::platform::win32_properties::WindowCornerPreference",
+    "src/FerroUI.Controls/platform/win32_properties.rs",
+    "i32",
+    [
+     [
+      "Default",
+      "0"
+     ],
+     [
+      "DoNotRound",
+      "1"
+     ],
+     [
+      "Round",
+      "2"
+     ],
+     [
+      "RoundSmall",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::primitives::scroll_bar_visibility::ScrollBarVisibility",
+    "src/FerroUI.Controls/primitives/scroll_bar_visibility.rs",
+    "i32",
+    [
+     [
+      "Disabled",
+      "0"
+     ],
+     [
+      "Auto",
+      "1"
+     ],
+     [
+      "Hidden",
+      "2"
+     ],
+     [
+      "Visible",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::primitives::snap_points_alignment::SnapPointsAlignment",
+    "src/FerroUI.Controls/primitives/snap_points_alignment.rs",
+    "i32",
+    [
+     [
+      "Near",
+      "0"
+     ],
+     [
+      "Center",
+      "1"
+     ],
+     [
+      "Far",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::primitives::snap_points_type::SnapPointsType",
+    "src/FerroUI.Controls/primitives/snap_points_type.rs",
+    "i32",
+    [
+     [
+      "None",
+      "0"
+     ],
+     [
+      "Mandatory",
+      "1"
+     ],
+     [
+      "MandatorySingle",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::rich_edit_box::RichEditCharacterCasing",
+    "src/FerroUI.Controls/rich_edit_box.rs",
+    "i32",
+    [
+     [
+      "Normal",
+      "0"
+     ],
+     [
+      "Lower",
+      "1"
+     ],
+     [
+      "Upper",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::rich_text::rich_text_transfer::RichEditClipboardFormat",
+    "src/FerroUI.Controls/rich_text/rich_text_transfer.rs",
+    "i32",
+    [
+     [
+      "AllFormats",
+      "0"
+     ],
+     [
+      "PlainText",
+      "1"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::slider::TickPlacement",
+    "src/FerroUI.Controls/slider.rs",
+    "i32",
+    [
+     [
+      "None",
+      "0"
+     ],
+     [
+      "TopLeft",
+      "1"
+     ],
+     [
+      "BottomRight",
+      "2"
+     ],
+     [
+      "Outside",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::split_view::split_view_display_mode::SplitViewDisplayMode",
+    "src/FerroUI.Controls/split_view/split_view_display_mode.rs",
+    "i32",
+    [
+     [
+      "Inline",
+      "0"
+     ],
+     [
+      "CompactInline",
+      "1"
+     ],
+     [
+      "Overlay",
+      "2"
+     ],
+     [
+      "CompactOverlay",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::split_view::split_view_pane_placement::SplitViewPanePlacement",
+    "src/FerroUI.Controls/split_view/split_view_pane_placement.rs",
+    "i32",
+    [
+     [
+      "Left",
+      "0"
+     ],
+     [
+      "Right",
+      "1"
+     ],
+     [
+      "Top",
+      "2"
+     ],
+     [
+      "Bottom",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::symbol_icon::Symbol",
+    "src/FerroUI.Controls/symbol_icon.rs",
+    "u32",
+    [
+     [
+      "Previous",
+      "0xE100"
+     ],
+     [
+      "Next",
+      "0xE101"
+     ],
+     [
+      "Play",
+      "0xE102"
+     ],
+     [
+      "Pause",
+      "0xE103"
+     ],
+     [
+      "Edit",
+      "0xE104"
+     ],
+     [
+      "Save",
+      "0xE105"
+     ],
+     [
+      "Clear",
+      "0xE106"
+     ],
+     [
+      "Delete",
+      "0xE107"
+     ],
+     [
+      "Remove",
+      "0xE108"
+     ],
+     [
+      "Add",
+      "0xE109"
+     ],
+     [
+      "Cancel",
+      "0xE10A"
+     ],
+     [
+      "Accept",
+      "0xE10B"
+     ],
+     [
+      "More",
+      "0xE10C"
+     ],
+     [
+      "Redo",
+      "0xE10D"
+     ],
+     [
+      "Undo",
+      "0xE10E"
+     ],
+     [
+      "Home",
+      "0xE10F"
+     ],
+     [
+      "Up",
+      "0xE110"
+     ],
+     [
+      "Forward",
+      "0xE111"
+     ],
+     [
+      "Back",
+      "0xE112"
+     ],
+     [
+      "Favorite",
+      "0xE113"
+     ],
+     [
+      "Camera",
+      "0xE114"
+     ],
+     [
+      "Setting",
+      "0xE115"
+     ],
+     [
+      "Video",
+      "0xE116"
+     ],
+     [
+      "Sync",
+      "0xE117"
+     ],
+     [
+      "Download",
+      "0xE118"
+     ],
+     [
+      "Mail",
+      "0xE119"
+     ],
+     [
+      "Find",
+      "0xE11A"
+     ],
+     [
+      "Help",
+      "0xE11B"
+     ],
+     [
+      "Upload",
+      "0xE11C"
+     ],
+     [
+      "Emoji",
+      "0xE11D"
+     ],
+     [
+      "TwoPage",
+      "0xE11E"
+     ],
+     [
+      "LeaveChat",
+      "0xE11F"
+     ],
+     [
+      "MailForward",
+      "0xE120"
+     ],
+     [
+      "Clock",
+      "0xE121"
+     ],
+     [
+      "Send",
+      "0xE122"
+     ],
+     [
+      "Crop",
+      "0xE123"
+     ],
+     [
+      "RotateCamera",
+      "0xE124"
+     ],
+     [
+      "People",
+      "0xE125"
+     ],
+     [
+      "OpenPane",
+      "0xE126"
+     ],
+     [
+      "ClosePane",
+      "0xE127"
+     ],
+     [
+      "World",
+      "0xE128"
+     ],
+     [
+      "Flag",
+      "0xE129"
+     ],
+     [
+      "PreviewLink",
+      "0xE12A"
+     ],
+     [
+      "Globe",
+      "0xE12B"
+     ],
+     [
+      "Trim",
+      "0xE12C"
+     ],
+     [
+      "AttachCamera",
+      "0xE12D"
+     ],
+     [
+      "ZoomIn",
+      "0xE12E"
+     ],
+     [
+      "Bookmarks",
+      "0xE12F"
+     ],
+     [
+      "Document",
+      "0xE130"
+     ],
+     [
+      "ProtectedDocument",
+      "0xE131"
+     ],
+     [
+      "Page",
+      "0xE132"
+     ],
+     [
+      "Bullets",
+      "0xE133"
+     ],
+     [
+      "Comment",
+      "0xE134"
+     ],
+     [
+      "MailFilled",
+      "0xE135"
+     ],
+     [
+      "ContactInfo",
+      "0xE136"
+     ],
+     [
+      "HangUp",
+      "0xE137"
+     ],
+     [
+      "ViewAll",
+      "0xE138"
+     ],
+     [
+      "MapPin",
+      "0xE139"
+     ],
+     [
+      "Phone",
+      "0xE13A"
+     ],
+     [
+      "VideoChat",
+      "0xE13B"
+     ],
+     [
+      "Switch",
+      "0xE13C"
+     ],
+     [
+      "Contact",
+      "0xE13D"
+     ],
+     [
+      "Rename",
+      "0xE13E"
+     ],
+     [
+      "Pin",
+      "0xE141"
+     ],
+     [
+      "MusicInfo",
+      "0xE142"
+     ],
+     [
+      "Go",
+      "0xE143"
+     ],
+     [
+      "Keyboard",
+      "0xE144"
+     ],
+     [
+      "DockLeft",
+      "0xE145"
+     ],
+     [
+      "DockRight",
+      "0xE146"
+     ],
+     [
+      "DockBottom",
+      "0xE147"
+     ],
+     [
+      "Remote",
+      "0xE148"
+     ],
+     [
+      "Refresh",
+      "0xE149"
+     ],
+     [
+      "Rotate",
+      "0xE14A"
+     ],
+     [
+      "Shuffle",
+      "0xE14B"
+     ],
+     [
+      "List",
+      "0xE14C"
+     ],
+     [
+      "Shop",
+      "0xE14D"
+     ],
+     [
+      "SelectAll",
+      "0xE14E"
+     ],
+     [
+      "Orientation",
+      "0xE14F"
+     ],
+     [
+      "Import",
+      "0xE150"
+     ],
+     [
+      "ImportAll",
+      "0xE151"
+     ],
+     [
+      "BrowsePhotos",
+      "0xE155"
+     ],
+     [
+      "WebCam",
+      "0xE156"
+     ],
+     [
+      "Pictures",
+      "0xE158"
+     ],
+     [
+      "SaveLocal",
+      "0xE159"
+     ],
+     [
+      "Caption",
+      "0xE15A"
+     ],
+     [
+      "Stop",
+      "0xE15B"
+     ],
+     [
+      "ShowResults",
+      "0xE15C"
+     ],
+     [
+      "Volume",
+      "0xE15D"
+     ],
+     [
+      "Repair",
+      "0xE15E"
+     ],
+     [
+      "Message",
+      "0xE15F"
+     ],
+     [
+      "Page2",
+      "0xE160"
+     ],
+     [
+      "CalendarDay",
+      "0xE161"
+     ],
+     [
+      "CalendarWeek",
+      "0xE162"
+     ],
+     [
+      "Calendar",
+      "0xE163"
+     ],
+     [
+      "Character",
+      "0xE164"
+     ],
+     [
+      "MailReplyAll",
+      "0xE165"
+     ],
+     [
+      "Read",
+      "0xE166"
+     ],
+     [
+      "Link",
+      "0xE167"
+     ],
+     [
+      "Account",
+      "0xE168"
+     ],
+     [
+      "ShowBcc",
+      "0xE169"
+     ],
+     [
+      "HideBcc",
+      "0xE16A"
+     ],
+     [
+      "Cut",
+      "0xE16B"
+     ],
+     [
+      "Attach",
+      "0xE16C"
+     ],
+     [
+      "Paste",
+      "0xE16D"
+     ],
+     [
+      "Filter",
+      "0xE16E"
+     ],
+     [
+      "Copy",
+      "0xE16F"
+     ],
+     [
+      "Emoji2",
+      "0xE170"
+     ],
+     [
+      "Important",
+      "0xE171"
+     ],
+     [
+      "MailReply",
+      "0xE172"
+     ],
+     [
+      "SlideShow",
+      "0xE173"
+     ],
+     [
+      "Sort",
+      "0xE174"
+     ],
+     [
+      "Manage",
+      "0xE178"
+     ],
+     [
+      "AllApps",
+      "0xE179"
+     ],
+     [
+      "DisconnectDrive",
+      "0xE17A"
+     ],
+     [
+      "MapDrive",
+      "0xE17B"
+     ],
+     [
+      "NewWindow",
+      "0xE17C"
+     ],
+     [
+      "OpenWith",
+      "0xE17D"
+     ],
+     [
+      "ContactPresence",
+      "0xE181"
+     ],
+     [
+      "Priority",
+      "0xE182"
+     ],
+     [
+      "GoToToday",
+      "0xE184"
+     ],
+     [
+      "Font",
+      "0xE185"
+     ],
+     [
+      "FontColor",
+      "0xE186"
+     ],
+     [
+      "Contact2",
+      "0xE187"
+     ],
+     [
+      "Folder",
+      "0xE188"
+     ],
+     [
+      "Audio",
+      "0xE189"
+     ],
+     [
+      "Placeholder",
+      "0xE18A"
+     ],
+     [
+      "View",
+      "0xE18B"
+     ],
+     [
+      "SetLockScreen",
+      "0xE18C"
+     ],
+     [
+      "SetTile",
+      "0xE18D"
+     ],
+     [
+      "ClosedCaption",
+      "0xE190"
+     ],
+     [
+      "StopSlideShow",
+      "0xE191"
+     ],
+     [
+      "Permissions",
+      "0xE192"
+     ],
+     [
+      "Highlight",
+      "0xE193"
+     ],
+     [
+      "DisableUpdates",
+      "0xE194"
+     ],
+     [
+      "UnFavorite",
+      "0xE195"
+     ],
+     [
+      "UnPin",
+      "0xE196"
+     ],
+     [
+      "OpenLocal",
+      "0xE197"
+     ],
+     [
+      "Mute",
+      "0xE198"
+     ],
+     [
+      "Italic",
+      "0xE199"
+     ],
+     [
+      "Underline",
+      "0xE19A"
+     ],
+     [
+      "Bold",
+      "0xE19B"
+     ],
+     [
+      "MoveToFolder",
+      "0xE19C"
+     ],
+     [
+      "LikeDislike",
+      "0xE19D"
+     ],
+     [
+      "Dislike",
+      "0xE19E"
+     ],
+     [
+      "Like",
+      "0xE19F"
+     ],
+     [
+      "AlignRight",
+      "0xE1A0"
+     ],
+     [
+      "AlignCenter",
+      "0xE1A1"
+     ],
+     [
+      "AlignLeft",
+      "0xE1A2"
+     ],
+     [
+      "Zoom",
+      "0xE1A3"
+     ],
+     [
+      "ZoomOut",
+      "0xE1A4"
+     ],
+     [
+      "OpenFile",
+      "0xE1A5"
+     ],
+     [
+      "OtherUser",
+      "0xE1A6"
+     ],
+     [
+      "Admin",
+      "0xE1A7"
+     ],
+     [
+      "Street",
+      "0xE1C3"
+     ],
+     [
+      "Map",
+      "0xE1C4"
+     ],
+     [
+      "ClearSelection",
+      "0xE1C5"
+     ],
+     [
+      "FontDecrease",
+      "0xE1C6"
+     ],
+     [
+      "FontIncrease",
+      "0xE1C7"
+     ],
+     [
+      "FontSize",
+      "0xE1C8"
+     ],
+     [
+      "CellPhone",
+      "0xE1C9"
+     ],
+     [
+      "ReShare",
+      "0xE1CA"
+     ],
+     [
+      "Tag",
+      "0xE1CB"
+     ],
+     [
+      "RepeatOne",
+      "0xE1CC"
+     ],
+     [
+      "RepeatAll",
+      "0xE1CD"
+     ],
+     [
+      "OutlineStar",
+      "0xE1CE"
+     ],
+     [
+      "SolidStar",
+      "0xE1CF"
+     ],
+     [
+      "Calculator",
+      "0xE1D0"
+     ],
+     [
+      "Directions",
+      "0xE1D1"
+     ],
+     [
+      "Target",
+      "0xE1D2"
+     ],
+     [
+      "Library",
+      "0xE1D3"
+     ],
+     [
+      "PhoneBook",
+      "0xE1D4"
+     ],
+     [
+      "Memo",
+      "0xE1D5"
+     ],
+     [
+      "Microphone",
+      "0xE1D6"
+     ],
+     [
+      "PostUpdate",
+      "0xE1D7"
+     ],
+     [
+      "BackToWindow",
+      "0xE1D8"
+     ],
+     [
+      "FullScreen",
+      "0xE1D9"
+     ],
+     [
+      "NewFolder",
+      "0xE1DA"
+     ],
+     [
+      "CalendarReply",
+      "0xE1DB"
+     ],
+     [
+      "UnSyncFolder",
+      "0xE1DD"
+     ],
+     [
+      "ReportHacked",
+      "0xE1DE"
+     ],
+     [
+      "SyncFolder",
+      "0xE1DF"
+     ],
+     [
+      "BlockContact",
+      "0xE1E0"
+     ],
+     [
+      "SwitchApps",
+      "0xE1E1"
+     ],
+     [
+      "AddFriend",
+      "0xE1E2"
+     ],
+     [
+      "TouchPointer",
+      "0xE1E3"
+     ],
+     [
+      "GoToStart",
+      "0xE1E4"
+     ],
+     [
+      "ZeroBars",
+      "0xE1E5"
+     ],
+     [
+      "OneBar",
+      "0xE1E6"
+     ],
+     [
+      "TwoBars",
+      "0xE1E7"
+     ],
+     [
+      "ThreeBars",
+      "0xE1E8"
+     ],
+     [
+      "FourBars",
+      "0xE1E9"
+     ],
+     [
+      "Scan",
+      "0xE294"
+     ],
+     [
+      "Preview",
+      "0xE295"
+     ],
+     [
+      "GlobalNavigationButton",
+      "0xE700"
+     ],
+     [
+      "Share",
+      "0xE72D"
+     ],
+     [
+      "Print",
+      "0xE749"
+     ],
+     [
+      "XboxOneConsole",
+      "0xE990"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::text_layout_rounding_placement::TextLayoutRoundingPlacement",
+    "src/FerroUI.Controls/text_layout_rounding_placement.rs",
+    "i32",
+    [
+     [
+      "Below",
+      null
+     ],
+     [
+      "Above",
+      null
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::tick_bar::TickBarPlacement",
+    "src/FerroUI.Controls/tick_bar.rs",
+    "i32",
+    [
+     [
+      "Left",
+      "0"
+     ],
+     [
+      "Top",
+      "1"
+     ],
+     [
+      "Right",
+      "2"
+     ],
+     [
+      "Bottom",
+      "3"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::window::WindowClosingBehavior",
+    "src/FerroUI.Controls/window.rs",
+    "i32",
+    [
+     [
+      "OwnerAndChildWindows",
+      "0"
+     ],
+     [
+      "OwnerWindowOnly",
+      "1"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::window_decorations::WindowDecorations",
+    "src/FerroUI.Controls/window_decorations.rs",
+    "i32",
+    [
+     [
+      "None",
+      "0"
+     ],
+     [
+      "BorderOnly",
+      "1"
+     ],
+     [
+      "Full",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::window_startup_location::WindowStartupLocation",
+    "src/FerroUI.Controls/window_startup_location.rs",
+    "i32",
+    [
+     [
+      "Manual",
+      "0"
+     ],
+     [
+      "CenterScreen",
+      "1"
+     ],
+     [
+      "CenterOwner",
+      "2"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::wrap_panel::WrapPanelItemsAlignment",
+    "src/FerroUI.Controls/wrap_panel.rs",
+    "i32",
+    [
+     [
+      "Start",
+      "0"
+     ],
+     [
+      "Center",
+      "1"
+     ],
+     [
+      "End",
+      "2"
+     ],
+     [
+      "Justify",
+      "3"
+     ],
+     [
+      "Stretch",
+      "4"
+     ],
+     [
+      "StretchAll",
+      "5"
+     ]
+    ]
+   ],
+   [
+    "ferroui_controls::zoom_mode::ZoomMode",
+    "src/FerroUI.Controls/zoom_mode.rs",
+    "i32",
+    [
+     [
+      "Disabled",
+      "0"
+     ],
+     [
+      "Enabled",
+      "1"
+     ]
+    ]
+   ]
+  ],
+  "replay_files_python": "import json, pathlib, sys\nreport = json.loads(pathlib.Path(sys.argv[1]).read_text())[\"ordinal_experiment\"]\npathlib.Path(\"main.rs\").write_text(report[\"source\"])\nout, names = [], []\nfor i, (_, _, representation, values) in enumerate(report[\"declaration_inventory\"]):\n    name = \"E\" + str(i)\n    names.append(name)\n    if representation:\n        out.append(\"#[repr(\" + representation + \")]\")\n    variants = \", \".join(v + (\" = \" + n if n is not None else \"\") for v,n in values)\n    out.append(\"#[derive(Clone, Copy, PartialEq)] enum \" + name + \" {\" + variants + \"}\")\n    encode = \",\".join(\"Self::\" + v + \"=>\" + str(i + 1) for i,(v,_) in enumerate(values))\n    decode = \",\".join(str(i + 1) + \"=>Some(Self::\" + v + \")\" for i,(v,_) in enumerate(values))\n    out.append(\"impl Codec for \" + name + \" { const N: u32=\" + str(len(values)) + \"; fn encode(self)->u32 {match self {\" + encode + \"}} fn decode(id:u32)->Option<Self>{match id {\" + decode + \",_=>None}} fn discriminant(self)->i64 {self as i64}}\")\nout.append(\"fn registered()->Vec<Box<dyn Lane>>{vec![\" + \",\".join(\"Box::new(Property::<\" + n + \">::new())\" for n in names) + \"]}\")\npathlib.Path(\"enums.rs\").write_text(\"\\n\".join(out) + \"\\n\")\n",
+  "rustc_flags": [
+   "--edition=2021",
+   "-Copt-level=z",
+   "-Ccodegen-units=1",
+   "-Clto=fat",
+   "-Cpanic=unwind",
+   "-Cllvm-args=--addrsig",
+   "-Clink-arg=-fuse-ld=lld",
+   "-Clink-arg=-Wl,--icf=safe",
+   "-Clink-arg=-Wl,-z,pack-relative-relocs",
+   "-Cstrip=symbols"
+  ],
+  "rustc_cfg": {
+   "native": [
+    "--cfg",
+    "native"
+   ],
+   "byte": [
+    "--cfg",
+    "byte"
+   ],
+   "word": [
+    "--cfg",
+    "word"
+   ],
+   "cached": [
+    "--cfg",
+    "byte",
+    "--cfg",
+    "cache"
+   ]
+  },
+  "binary_invocation": "Run rustc with the listed flags, the matching cfg arguments, main.rs and -o <mode>. Run the resulting binary once per sampled case with either read or write. The per-process columns are mode, type count, declaration digest, aggregate state bytes, value checksum, weighted notification count, thread CPU nanoseconds and wall nanoseconds.",
+  "source_sha256": {
+   "main.rs": "15ea52f4b0136147bf5c9f5f62cadeaadad63b70d290d6d0d894883f6a8020e0",
+   "enums.rs": "090df0fc1dbcc1d46207b0a643ad0588c456f92fc5a1d62f855585b00b063e53"
+  }
+ }
+}

@@ -706,3 +706,35 @@ fn assign_binding_is_a_flag_of_the_property_definition() {
     assert!(RegBindings::TYPE.find_property("MemberBinding").unwrap().assign_binding());
     assert!(RegBindings::member_binding_property().add_owner::<RegBindingsOwner>().assign_binding());
 }
+
+#[test]
+fn upcast_handles_share_allocation_identity_and_hash_across_owners() {
+    use std::hash::{DefaultHasher, Hash, Hasher};
+
+    fn hash<T: Hash>(value: &T) -> u64 {
+        let mut state = DefaultHasher::new();
+        value.hash(&mut state);
+        state.finish()
+    }
+
+    let first = RegDerived::new();
+    let second = RegDerived::new();
+    let base = first.clone().upcast::<RegBase>();
+    assert_eq!(first, base);
+    assert_eq!(hash(&first), hash(&base));
+    assert!(!second.ptr_eq(&base));
+
+    let first_weak = first.downgrade();
+    let base_weak = base.downgrade();
+    let second_weak = second.downgrade();
+    assert!(first_weak.ptr_eq(&base_weak));
+    assert!(!second_weak.ptr_eq(&base_weak));
+
+    drop(base);
+    drop(first);
+    drop(second);
+    assert!(first_weak.upgrade().is_none());
+    assert!(second_weak.upgrade().is_none());
+    assert!(first_weak.ptr_eq(&base_weak));
+    assert!(!second_weak.ptr_eq(&base_weak));
+}

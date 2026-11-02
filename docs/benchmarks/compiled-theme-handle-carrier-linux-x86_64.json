@@ -1,0 +1,349 @@
+{
+  "workload": "Two-word handle isolated from the object system. Genuine Rc<dyn Any> allocations of mixed concrete types, with 8-byte and 64-byte alignment. Equality and hashing use object identity. Handle<Base> traverses the valid offset-zero object prefix. Weak remains Weak<dyn Any>. All variants pass typed panic + exactly-once destruction, weak expiry, strong counts, upcast equality/hash, alignment and Option size checks.",
+  "modes": {
+    "stock": "Rc<dyn Any> with existing Rc::as_ptr address comparisons",
+    "identity": "Rc<dyn Any> with standard Rc::ptr_eq replacing only strong identity comparison",
+    "raw": "Two-word NonNull<dyn Any> from Rc::into_raw, stable raw count and reconstruction APIs. Weak creation takes a temporary extra strong via increment/from_raw.",
+    "shared": "Same data-first handle with out-of-line clone/drop."
+  },
+  "build": "rustc 1.99, x86_64-unknown-linux-gnu, opt-level=z, FatLTO, one codegen unit, unwind, safe ICF and RELR. Fixed fixture, unprofiled. 96 distinct typed getter, owned-read and identity-comparison leaves. The static fixture totals must not be extrapolated into the PGO shipping consumer.",
+  "method": "Linux per-thread CPU clock on CPU 6. 61 seeded shuffled forward/reverse four-arm blocks after 3 warmups. Each process runs all five lanes; each lane uses 1,048,576 operations. Per-block average of two processes per arm, paired bootstrap of median ratios, 3,000 resamples, 95% interval. Lower ratios are faster.",
+  "sizes": {
+    "stock": {
+      "stripped_cdylib_bytes": 293904,
+      "text": 219769,
+      "unwind": 29780,
+      "function_families": {
+        "read": {
+          "bytes": 3164,
+          "distinct": 96
+        },
+        "owned": {
+          "bytes": 7196,
+          "distinct": 96
+        },
+        "eq": {
+          "bytes": 4693,
+          "distinct": 96
+        }
+      },
+      "stripped_benchmark_bytes": 288024,
+      "specimen_binary_sha256": "d6188365f1d155aee2a53c484e6306e8e8e1e18e583f15ffc14e0d4b592e64cd"
+    },
+    "identity": {
+      "stripped_cdylib_bytes": 290736,
+      "text": 216601,
+      "unwind": 29780,
+      "function_families": {
+        "read": {
+          "bytes": 3164,
+          "distinct": 96
+        },
+        "owned": {
+          "bytes": 7196,
+          "distinct": 96
+        },
+        "eq": {
+          "bytes": 1525,
+          "distinct": 96
+        }
+      },
+      "stripped_benchmark_bytes": 287960,
+      "specimen_binary_sha256": "e908869795f6119313cf9e67b99568d5caa1f4cb59174caf6a966ac2e9a1ca7d"
+    },
+    "raw": {
+      "stripped_cdylib_bytes": 287440,
+      "text": 213657,
+      "unwind": 29420,
+      "function_families": {
+        "read": {
+          "bytes": 1436,
+          "distinct": 96
+        },
+        "owned": {
+          "bytes": 5948,
+          "distinct": 96
+        },
+        "eq": {
+          "bytes": 1525,
+          "distinct": 96
+        }
+      },
+      "stripped_benchmark_bytes": 288496,
+      "specimen_binary_sha256": "36dfa7934cb14ce75ac38ed4aa6d585d361c28b7a5c87373f37189b6ab7fbd4b"
+    },
+    "shared": {
+      "stripped_cdylib_bytes": 287440,
+      "text": 213657,
+      "unwind": 29420,
+      "function_families": {
+        "read": {
+          "bytes": 1436,
+          "distinct": 96
+        },
+        "owned": {
+          "bytes": 5948,
+          "distinct": 96
+        },
+        "eq": {
+          "bytes": 1525,
+          "distinct": 96
+        }
+      },
+      "stripped_benchmark_bytes": 288496,
+      "specimen_binary_sha256": "9cace69c6ae594d2c5886fb015048b4f3f55ccc19d39ae3b9d0712b4bba16d04"
+    }
+  },
+  "lanes": [
+    "deref_read",
+    "clone_read_drop",
+    "weak_upgrade_read_drop",
+    "identity_eq",
+    "downgrade_upgrade_read_drop"
+  ],
+  "benchmarks": {
+    "deref_read": {
+      "median_ns_per_op": {
+        "stock": 1.7681,
+        "identity": 1.7676,
+        "raw": 1.2022,
+        "shared": 1.206
+      },
+      "paired_ratio_to_stock": {
+        "identity": [
+          1.00744,
+          0.9881,
+          1.02361
+        ],
+        "raw": [
+          0.693,
+          0.67723,
+          0.7036
+        ],
+        "shared": [
+          0.68154,
+          0.66662,
+          0.69029
+        ]
+      }
+    },
+    "clone_read_drop": {
+      "median_ns_per_op": {
+        "stock": 3.8994,
+        "identity": 3.9091,
+        "raw": 8.0711,
+        "shared": 7.1868
+      },
+      "paired_ratio_to_stock": {
+        "identity": [
+          0.99693,
+          0.99024,
+          1.00671
+        ],
+        "raw": [
+          2.04118,
+          2.01392,
+          2.07079
+        ],
+        "shared": [
+          1.83774,
+          1.81425,
+          1.8556
+        ]
+      }
+    },
+    "weak_upgrade_read_drop": {
+      "median_ns_per_op": {
+        "stock": 5.1834,
+        "identity": 5.6489,
+        "raw": 7.5448,
+        "shared": 6.3174
+      },
+      "paired_ratio_to_stock": {
+        "identity": [
+          1.09609,
+          1.08781,
+          1.10843
+        ],
+        "raw": [
+          1.46546,
+          1.45685,
+          1.48076
+        ],
+        "shared": [
+          1.22566,
+          1.20983,
+          1.23772
+        ]
+      }
+    },
+    "identity_eq": {
+      "median_ns_per_op": {
+        "stock": 2.8815,
+        "identity": 1.9936,
+        "raw": 1.972,
+        "shared": 1.9375
+      },
+      "paired_ratio_to_stock": {
+        "identity": [
+          0.69312,
+          0.67185,
+          0.70874
+        ],
+        "raw": [
+          0.7003,
+          0.67029,
+          0.71243
+        ],
+        "shared": [
+          0.6753,
+          0.65588,
+          0.69007
+        ]
+      }
+    },
+    "downgrade_upgrade_read_drop": {
+      "median_ns_per_op": {
+        "stock": 7.4539,
+        "identity": 8.038,
+        "raw": 13.2247,
+        "shared": 12.7209
+      },
+      "paired_ratio_to_stock": {
+        "identity": [
+          1.06975,
+          1.05538,
+          1.0802
+        ],
+        "raw": [
+          1.76486,
+          1.74293,
+          1.77534
+        ],
+        "shared": [
+          1.67952,
+          1.65613,
+          1.69006
+        ]
+      }
+    }
+  },
+  "sources": {
+    "core.rs": "use std::{any::Any,cell::Cell,hash::{Hash,Hasher},hint::black_box,marker::PhantomData,mem,ops::Deref,ptr::NonNull,rc::{Rc,Weak}};\n\n#[cfg(not(raw))] struct Carrier(Rc<dyn Any>);\n#[cfg(raw)] struct Carrier(NonNull<dyn Any>, PhantomData<Rc<dyn Any>>);\nimpl Carrier {\n    #[inline] fn new(x: Rc<dyn Any>) -> Self {\n        #[cfg(not(raw))] {Self(x)}\n        #[cfg(raw)] {Self(NonNull::new(Rc::into_raw(x).cast_mut()).unwrap(), PhantomData)}\n    }\n    #[inline] fn pointer(&self) -> *const dyn Any {\n        #[cfg(not(raw))] {Rc::as_ptr(&self.0)}\n        #[cfg(raw)] {self.0.as_ptr()}\n    }\n    #[inline] fn weak(&self) -> Weak<dyn Any> {\n        #[cfg(not(raw))] {Rc::downgrade(&self.0)}\n        #[cfg(raw)] {\n            let p=self.0.as_ptr();\n            // Add a separate owned reference for the temporary Rc, which drops normally.\n            unsafe{ Rc::increment_strong_count(p); Rc::downgrade(&Rc::from_raw(p)) }\n        }\n    }\n}\nimpl Clone for Carrier {\n    #[cfg_attr(shared,inline(never))] #[cfg_attr(not(shared),inline)]\n    fn clone(&self)->Self {\n        #[cfg(not(raw))] {Self(self.0.clone())}\n        #[cfg(raw)] {unsafe{Rc::increment_strong_count(self.0.as_ptr())} Self(self.0,PhantomData)}\n    }\n}\n#[cfg(raw)] impl Drop for Carrier {\n    #[cfg_attr(shared,inline(never))] #[cfg_attr(not(shared),inline)]\n    fn drop(&mut self){ unsafe{drop(Rc::from_raw(self.0.as_ptr()))} }\n}\n#[repr(transparent)] struct Handle<T:'static>(Carrier,PhantomData<T>);\nimpl<T:'static> Handle<T> {\n    fn make(x:T)->Self { Self(Carrier::new(Rc::new(x)),PhantomData) }\n    fn upcast(self)->Handle<Base> where T:BasePrefix { Handle(self.0, PhantomData) }\n    fn is_eq<U:'static>(&self,y:&Handle<U>)->bool {\n        #[cfg(identity)] { Rc::ptr_eq(&self.0.0, &y.0.0) }\n        #[cfg(not(identity))] { std::ptr::addr_eq(self.0.pointer(),y.0.pointer()) }\n    }\n    fn weak(&self)->Weak<dyn Any>{self.0.weak()}\n}\nimpl<T:'static> Clone for Handle<T>{#[inline] fn clone(&self)->Self {Handle(self.0.clone(),PhantomData)}}\nimpl<T:'static> Hash for Handle<T>{#[inline] fn hash<H:Hasher>(&self,s:&mut H){(self.0.pointer().cast::<()>() as usize).hash(s)}}\nimpl<T:'static> Deref for Handle<T>{type Target=T;#[inline] fn deref(&self)->&T{unsafe{&*self.0.pointer().cast::<T>()}}}\nfn upgrade(w:&Weak<dyn Any>)->Option<Handle<Base>> {w.upgrade().map(|x|Handle(Carrier::new(x),PhantomData))}\n#[repr(C)] struct Base{value:Cell<u64>,tag:usize}\nunsafe trait BasePrefix{} // Each implementing repr(C) object has Base as its first field.\nunsafe impl BasePrefix for Base{}\n#[repr(C)] struct Plain<const N:usize>{base:Base, extra:[u64;3]}\n#[repr(C,align(64))] struct Align<const N:usize>{base:Base, extra:[u64;3]}\nunsafe impl<const N:usize> BasePrefix for Plain<N>{}\nunsafe impl<const N:usize> BasePrefix for Align<N>{}\nfn base(n:usize)->Base{Base{value:Cell::new((n*13+7) as u64),tag:n}}\nfn plain<const N:usize>(n:usize)->Handle<Plain<N>> {Handle::make(Plain{base:base(n),extra:[3,5,7]})}\nfn align<const N:usize>(n:usize)->Handle<Align<N>> {Handle::make(Align{base:base(n),extra:[3,5,7]})}\n",
+    "gen.py": "from pathlib import Path\nd=Path(__file__).resolve().parent\ndef ty(i): return 'Align' if i%2 else 'Plain'\ns=['#![allow(dead_code,unused_imports,private_interfaces)]','include!(\"core.rs\");']\n# Every slot is an externally addressable, concretely typed leaf that simulates a generated property\n# accessor. A per-owner field and conversion constant force concrete distinct endpoints.\nfor n in range(96):\n t=f'{ty(n)}<{n}>'\n s += [f'#[no_mangle] pub fn read_{n}(x:&Handle<{t}>)->u64{{x.base.value.get().wrapping_add(x.extra[{n%3}]) ^ {n}}}',\n       f'#[no_mangle] pub fn owned_{n}(x:&Handle<{t}>)->u64{{let y=black_box(x.clone());y.base.value.get().wrapping_add(y.extra[{n%3}]) ^ {n}}}',\n       f'#[no_mangle] pub fn eq_{n}(x:&Handle<{t}>,y:&Handle<Base>)->usize{{if x.is_eq(y) {{{n+1}}} else {{0}}}}']\n(d/'size.rs').write_text('\\n'.join(s)+'\\n')\n",
+    "bench.rs": "#![allow(dead_code,unused_imports)]\ninclude!(\"core.rs\");\nuse std::{collections::hash_map::DefaultHasher,panic::{catch_unwind,AssertUnwindSafe}};\nfn digest<T:'static>(h:&Handle<T>)->u64 {let mut s=DefaultHasher::new();h.hash(&mut s);s.finish()}\nfn qa(){\n assert_eq!(mem::size_of::<Handle<Base>>(),2*mem::size_of::<usize>());assert_eq!(mem::size_of::<Option<Handle<Base>>>(),mem::size_of::<Handle<Base>>());\n let x=align::<1>(7);let addr=x.0.pointer().cast::<()>() as usize;assert_eq!(addr%64,0);\n let w=x.weak();assert_eq!(w.strong_count(),1);let y=x.clone().upcast();assert!(x.is_eq(&y));assert_eq!(digest(&x),digest(&y));\n drop(x);assert_eq!(w.strong_count(),1);assert!(upgrade(&w).unwrap().is_eq(&y));drop(y);assert!(upgrade(&w).is_none());\n struct Watch(Rc<Cell<usize>>);impl Drop for Watch{fn drop(&mut self){self.0.set(self.0.get()+1)}}\n #[repr(C,align(64))] struct P {base:Base,watch:Watch} unsafe impl BasePrefix for P {}\n let count=Rc::new(Cell::new(0));let h=Handle::make(P{base:base(17),watch:Watch(count.clone())}).upcast();let w=h.weak();\n let panic=catch_unwind(AssertUnwindSafe(move||{let _owned=h.clone();let _h=h;std::panic::panic_any(119u32)}));\n assert_eq!(*panic.unwrap_err().downcast::<u32>().unwrap(),119);assert!(upgrade(&w).is_none());assert_eq!(count.get(),1);\n}\n#[inline(never)] fn run(lane:usize,v:&[Handle<Base>],weak:&[Weak<dyn Any>],iterations:usize)->u64 {\n let mut acc=0u64;let len=v.len();\n macro_rules! bench {($step:expr)=>{for i in 0..iterations {let j=(i.wrapping_mul(40503)>>4)&(len-1);acc=acc.wrapping_add($step(j,i))}}}\n match lane {\n  0=>bench!(|j:usize,_|black_box(&v[j]).value.get()),\n  1=>bench!(|j:usize,_|{let x=black_box(v[j].clone());x.value.get()}),\n  2=>bench!(|j:usize,_|{let x=black_box(upgrade(black_box(&weak[j])).unwrap());x.value.get()}),\n  3=>bench!(|j:usize,i:usize|{let t=if i&1==0 {j}else{j.wrapping_add(1)&(len-1)};black_box(&v[j]).is_eq(black_box(&v[t]))as u64}),\n  4=>bench!(|j:usize,_|{let w=black_box(v[j].weak());let x=black_box(upgrade(&w).unwrap());x.value.get()}),\n  _=>unreachable!()\n };black_box(acc)\n}\n#[repr(C)]struct Timespec{secs:i64,nanos:i64}\nunsafe extern \"C\"{fn clock_gettime(clock:i32,ts:*mut Timespec)->i32;}\nfn clock()->i64{let mut t=Timespec{secs:0,nanos:0};assert_eq!(unsafe{clock_gettime(3,&mut t)},0);t.secs*1_000_000_000+t.nanos}\nfn main(){if std::env::args().nth(1).as_deref()==Some(\"qa\"){qa();return}\n let seed:usize=std::env::args().nth(1).unwrap().parse().unwrap();let n=1<<20;\n let v:Vec<_>=(0..512).map(|i|match i%4{0=>plain::<0>(i).upcast(),1=>align::<1>(i).upcast(),2=>plain::<2>(i).upcast(),_=>align::<3>(i).upcast()}).collect();\n let w:Vec<_>=v.iter().map(Handle::weak).collect();\n for k in 0..5 {let lane=(k+seed)%5;let a=clock();let checksum=run(lane,black_box(&v),black_box(&w),n);let dur=clock()-a;println!(\"{} {} {}\",lane,checksum,dur);}\n}\n"
+  },
+  "shipping_alignment_signature": {
+    "source": "ff5ea13a",
+    "shipping_sha256": "459ea34851eb89e3556a9539da29b3bcbc7fa5a8af34ee2c2291f393dae85f21",
+    "method": "Match three consecutive decoded instructions in the shipping .text: mov reg,[base+0x10], dec same-reg, and same-reg,-16, fully within an identified function. This is the exact alignment idiom in the stock Ref fixture. Other Rust DST and layout operations also match, while spelling variations do not. These totals are signature measurements, not a byte saving or a complete census.",
+    "sites": 26300,
+    "matched_bytes": 289954,
+    "distinct_functions": 13826,
+    "by_category": {
+      "Property registration, stores and observers": 7736,
+      "Other framework and application code": 6014,
+      "Callable entries and trait shims": 2584,
+      "Generated native XAML functions": 2251,
+      "Bindings, reactive operators and events": 1929,
+      "Other XAML runtime, theme and codecs": 1861,
+      "Other closure bodies": 1382,
+      "Class projection, initialization and virtual dispatch": 1312,
+      "Reflection and value conversion": 746,
+      "Reference counting and weak handles": 225,
+      "Other Rust and native code": 179,
+      "Collection primitives": 42,
+      "Aliases from multiple categories": 16,
+      "Other explicit Drop implementations": 13,
+      "Compiler-generated destruction": 10
+    },
+    "by_family": {
+      "ferroui_base::property_store::local_value_binding_observer::Untyped as ferroui_system::i_observable::IObserver::on_next": 1019,
+      "core::option::Option as ferroui_base::ferro_property::AnyValue::any_value_eq": 1010,
+      "ferroui_base::type_system::Ref as ferroui_base::ferro_property::AnyValue::any_value_eq": 858,
+      "::__patch_parent_vtable::{closure} as core::ops::function::FnOnce::call_once": 836,
+      "ferroui_base::property_store::binding_entry::UntypedObserver as ferroui_system::i_observable::IObserver::on_next": 588,
+      "ferroui_base::metadata::markup_type::MarkupArguments::next": 554,
+      "::__MARKUP::MARKUP::{closure} as core::ops::function::FnOnce::call_once": 510,
+      "ferroui_base::styled_property::StyledProperty as ferroui_base::ferro_property::PropertyRoutes::route_bind": 501,
+      "::MARKUP::MARKUP::{closure} as core::ops::function::FnOnce::call_once": 441,
+      "ferroui_base::type_system::Ref::cast": 432,
+      "ferroui_base::property_store::effective_value::EffectiveValue::set_and_raise_core": 353,
+      "ferroui_base::property_store::effective_value::EffectiveValue as ferroui_base::property_store::effective_value::EffectiveValueDyn::coerce_value": 337,
+      "::build_vtable::{closure} as core::ops::function::FnOnce::call_once": 331,
+      "ferroui_base::data::binding_notification::BindingNotification::to_binding_value::{closure}": 307,
+      "ferroui_base::interactivity::interactive::Interactive::add_handler_as::{closure}": 282
+    }
+  },
+  "interpretation": "The data-first strong handle reduces dereference and equality cost but moves the dynamic payload-to-header adjustment into reference counting. Its measured clone, upgrade and weak-round-trip regressions reject it for a parity build. Rc::ptr_eq alone keeps the standard carrier and shortens strong identity comparisons. Unchanged weak benchmark lanes differed across linked executable layouts; determine the overall cost from the integrated application. The production signature counts an instruction pattern and cannot be multiplied by the specimen or interpreted as exclusively Rc instructions.",
+  "reproduction": [
+    "Write the sources entries side by side and run python3 gen.py. Build from that directory.",
+    "For each arm use no cfg for stock, --cfg identity, --cfg raw, or --cfg raw --cfg shared as named.",
+    "rustc --edition=2021 size.rs --crate-name handle_fixture --crate-type=cdylib -Copt-level=z -Ccodegen-units=1 -Cpanic=unwind -Cembed-bitcode=yes -Clto=fat -Cllvm-args=--addrsig -Clink-arg=-fuse-ld=lld -Clink-arg=-Wl,--icf=safe,-z,pack-relative-relocs $CFG -o size-$ARM",
+    "Build bench.rs with the same flags except --crate-type=cdylib. Run bench-$ARM qa and bench-$ARM SEED. Strip the size executable with GNU strip --strip-all -o size-$ARM.stripped size-$ARM.",
+    "Use nm -S -n on the unstripped libraries and count the unique physical intervals named read_[0-9]+, owned_[0-9]+, and eq_[0-9]+. Each array in the samples has the five lanes in listed order. The four shuffled arms run once forward then once in reverse order."
+  ],
+  "samples": [
+    {"order":["identity","raw","stock","shared"],"seed":590305,"thread_cpu_ns":{"identity":[[1786206,4061661,5813306,1885494,8259514],[1804173,4030795,5882008,1929610,8304972]],"raw":[[1221106,8389057,7801803,1935008,14308602],[1219925,8199966,7890766,2262455,13628619]],"stock":[[1931723,4402118,5742811,3082344,7825529],[1776322,4107379,5336387,2803290,7863626]],"shared":[[1253464,7329181,6372358,2054205,13126094],[1246083,7796977,7104807,2152181,13178430]]}},
+    {"order":["stock","identity","raw","shared"],"seed":8120620,"thread_cpu_ns":{"stock":[[1815440,4042322,5342707,2727076,7729016],[1749662,4026619,5207826,2783359,7784268]],"identity":[[1847778,3999919,5751885,1895369,8293705],[1801510,4033499,5820137,1940055,8357179]],"raw":[[1246995,8260115,7725681,1957411,13657282],[1265822,8250861,7735706,1942189,13764351]],"shared":[[1230220,7428418,6420980,1850433,12971914],[1215849,7439004,6318567,1752968,12920837]]}},
+    {"order":["identity","shared","raw","stock"],"seed":4086682,"thread_cpu_ns":{"identity":[[1766076,4757626,5866355,1952594,8351291],[1829671,4030574,5923670,1966725,8510488]],"shared":[[1214346,7251605,6604303,1897583,12947126],[1249629,7414658,6416684,1780358,13238249]],"raw":[[1234847,8294056,7739550,1883772,13505818],[1196239,8305563,7671279,1897442,13815781]],"stock":[[1777263,4132887,5363066,2782178,7725711],[1753267,4056845,5273654,2747826,7711319]]}},
+    {"order":["identity","stock","shared","raw"],"seed":3187047,"thread_cpu_ns":{"identity":[[1833046,4038316,5880667,1907117,8190522],[1373753,3521377,4996761,1775390,7255231]],"stock":[[1796522,4097775,5349556,2793846,7845659],[1281626,3105619,4961450,2324116,6907073]],"shared":[[1250770,7332816,6360720,1852075,13033635],[799479,7102293,5275035,1489215,11114350]],"raw":[[1367804,14288752,7748855,1979644,13692084],[1269979,10734255,16823341,1848710,28654688]]}},
+    {"order":["identity","stock","shared","raw"],"seed":7466046,"thread_cpu_ns":{"identity":[[1210530,3739022,4862452,1368765,6755218],[1853016,4282038,6307041,1453011,8228608]],"stock":[[1339452,3208151,4977273,2206191,6515570],[3276353,4247637,5844563,3116295,8404140]],"shared":[[790405,7776577,9881977,2054936,13151490],[1332262,7804118,6969936,2123709,14600966]],"raw":[[1005616,7801163,6766414,1786667,11563628],[1239424,7279367,7872619,2029108,14618931]]}},
+    {"order":["shared","raw","stock","identity"],"seed":6907611,"thread_cpu_ns":{"shared":[[1284310,7795164,6788176,1949169,15286445],[1766247,7574065,6780695,1898103,13275355]],"raw":[[1276448,9083560,8255279,2346680,14968233],[1295838,8172455,7663608,1925964,14360608]],"stock":[[1838384,4154419,5756822,2902286,8240456],[1873427,3094974,4439893,2263797,8114439]],"identity":[[1245723,4228659,5355805,1746938,6192690],[1211041,3017698,4585059,1368576,6354802]]}},
+    {"order":["stock","shared","raw","identity"],"seed":6926129,"thread_cpu_ns":{"stock":[[1213144,2937699,4189821,2031171,7019240],[1925544,4326916,5948036,2976447,8535125]],"shared":[[807931,6470534,5410377,1408515,10512315],[1339252,7873631,6854665,2196627,14632102]],"raw":[[1076901,8379318,8422507,2539347,12402046],[1277450,9043120,8494624,2185050,14902685]],"identity":[[1863321,4269861,6903147,2293100,8814480],[1843502,4282569,6415431,2382403,8798746]]}},
+    {"order":["raw","shared","stock","identity"],"seed":606513,"thread_cpu_ns":{"raw":[[1318921,8933487,8408355,2200903,14976214],[1335215,8956100,8400294,2222325,15096563]],"shared":[[1360664,7907751,7197915,2122818,14235222],[857044,6421320,5800197,2241324,11345524]],"stock":[[1935659,4281758,5932964,3175372,8558359],[1832295,4263310,5844763,2946863,8527433]],"identity":[[1963590,4304912,6599515,2278098,9149749],[1819557,4286785,6404766,2179632,9127806]]}},
+    {"order":["stock","identity","raw","shared"],"seed":3148175,"thread_cpu_ns":{"stock":[[1857653,4321528,5988978,3024859,8630877],[1160546,2935857,4334567,2019083,6092021]],"identity":[[1903241,4277612,6581870,2228294,9109900],[1221076,2908947,4334917,1370919,6144499]],"raw":[[1324409,9032634,8414705,2234753,14853792],[1287606,9139393,7192307,1366292,11130024]],"shared":[[1279603,7932708,6970317,2184199,14538103],[1260545,7929985,7099459,2225510,14552063]]}},
+    {"order":["stock","shared","raw","identity"],"seed":1954458,"thread_cpu_ns":{"stock":[[1178413,2883018,4495416,2043579,6219971],[1857132,4324712,6113283,3015475,8816773]],"shared":[[799989,6353519,5092284,1385210,10568919],[785608,6723079,7692471,1414694,10863097]],"raw":[[784156,6966912,5943981,1390398,11483730],[784096,7334229,6145009,1388255,11476629]],"identity":[[1241847,2950348,4388337,1586820,6318758],[1139965,2898511,4704317,1521964,6493788]]}},
+    {"order":["raw","identity","stock","shared"],"seed":7262643,"thread_cpu_ns":{"raw":[[1236790,9096229,8598598,2229446,14951868],[1259884,8818526,8410379,2181705,14390934]],"identity":[[1877052,4281598,6675769,2307963,9176299],[1940557,4175249,6554088,2165571,9046405]],"stock":[[1859216,4164124,5862089,3078990,8866598],[1855260,4205896,5686798,3035555,8104834]],"shared":[[1091049,8313916,6576200,2232671,13843559],[1481253,8545570,6110638,2026053,13843083]]}},
+    {"order":["raw","shared","identity","stock"],"seed":4968378,"thread_cpu_ns":{"raw":[[1272032,9152603,8220476,2280351,14418755],[1338150,8908780,8179035,2089849,15962961]],"shared":[[1236088,7375640,6241463,2297578,13643081],[1685317,8287927,7513265,2129217,14899024]],"identity":[[1882489,4326414,6588539,2200633,8938354],[2135456,4149111,5879655,2064932,8739427]],"stock":[[1868329,6522270,5598587,2835327,12020708],[1811635,3270555,5635712,2671513,8593651]]}},
+    {"order":["shared","identity","raw","stock"],"seed":6118903,"thread_cpu_ns":{"shared":[[1254796,7835834,6665033,2072983,13825242],[1295767,7919839,6722588,2044010,13710662]],"identity":[[1885574,4124505,6342172,2245009,8742603],[1751675,4163283,6445927,2047566,8812407]],"raw":[[1282247,8823403,7877526,2438717,14533766],[1267495,8941098,8501554,2181124,14648857]],"stock":[[1949700,4272685,6025582,2791001,8362928],[1881328,4877704,6051460,2965100,9058413]]}},
+    {"order":["raw","identity","shared","stock"],"seed":588981,"thread_cpu_ns":{"raw":[[1335856,8904985,8494587,2255825,15032813],[1285783,8993376,7815796,2235174,15176872]],"identity":[[1809721,4303901,6360780,2354221,9522123],[1850453,4321777,6532847,2158560,9420781]],"shared":[[1335807,7906971,6701137,2143979,13547945],[1327063,8787189,7538498,2091871,16166612]],"stock":[[1559319,4462057,6140844,2641108,8760119],[2180503,4130133,5777433,2884862,9182076]]}},
+    {"order":["raw","identity","shared","stock"],"seed":5372853,"thread_cpu_ns":{"raw":[[1395846,9067306,9151581,2276603,14469912],[1280414,8830043,8266896,2097320,14610730]],"identity":[[1871544,4285494,6506358,2205340,8948139],[1723584,4326144,6260862,2514159,8944684]],"shared":[[1281767,8035271,7227539,1960966,13998259],[1250660,8056763,7220930,2459098,14356853]],"stock":[[1802981,4358433,5866325,3404323,8501534],[1835430,4190443,5896871,3402120,8183382]]}},
+    {"order":["identity","raw","shared","stock"],"seed":7846344,"thread_cpu_ns":{"identity":[[1403558,4015943,5131852,1410568,6606135],[2150167,4377590,5915549,2394421,8163352]],"raw":[[987599,13250898,11883985,1670204,13547740],[1199894,7847221,7454537,1894057,13065743]],"shared":[[890895,8025546,6089857,1684635,12088269],[1049401,7178187,6359889,2084981,12226095]],"stock":[[1395375,3393677,5305160,3016667,6786424],[1708691,3913291,5739426,3067552,7687664]]}},
+    {"order":["identity","stock","shared","raw"],"seed":7137165,"thread_cpu_ns":{"identity":[[1912405,3980230,5737083,2321273,8480343],[2230247,4844075,6883748,2441922,8336539]],"stock":[[1835441,4553362,6336263,2533817,8237880],[2099652,4052056,6136877,3464362,8397921]],"shared":[[1285482,7679473,7129132,2188295,12897432],[1243659,7818819,7484612,2174655,15860047]],"raw":[[1279083,8549940,9032835,1605548,16292853],[1619659,10018539,8361756,2588159,16316859]]}},
+    {"order":["raw","stock","shared","identity"],"seed":2551652,"thread_cpu_ns":{"raw":[[1261907,8775371,8756945,1491499,14166530],[1216980,8136221,7826410,2061145,14500869]],"stock":[[2169797,4757276,5748109,3462249,8477078],[1661001,3835745,5234176,3638061,7330643]],"shared":[[1517096,8269785,8493813,1980255,14479367],[1146577,6913793,7696737,2214653,13392863]],"identity":[[1762381,4509076,6642939,2183336,8325782],[1930661,3886129,6532257,2091811,8936122]]}},
+    {"order":["shared","stock","raw","identity"],"seed":676570,"thread_cpu_ns":{"shared":[[1286073,7412645,6796087,2135185,13876850],[1221737,7366196,6660516,2179433,13345289]],"stock":[[1772477,4074500,5469164,3117968,8009453],[1762190,4054470,5401294,3198287,7835494]],"raw":[[1298842,8397870,7901271,2179601,14421078],[1260284,8126306,7753171,2234353,13965561]],"identity":[[1950230,4141229,5849961,2139482,8322719],[1869729,4142451,5814327,2126994,8150913]]}},
+    {"order":["raw","identity","stock","shared"],"seed":8346107,"thread_cpu_ns":{"raw":[[1216509,8138284,7847902,2151249,14407558],[1219934,8788060,8504279,2514620,14903326]],"identity":[[1737905,6421351,5745555,2089337,8319203],[1878814,4351111,6328722,2454030,9184220]],"stock":[[2078672,5464368,6615254,2628910,14330825],[1870082,4295038,6611955,3372906,8523176]],"shared":[[1299503,8947302,8802653,5679147,17578794],[1426272,8105435,6086272,2186833,14975694]]}},
+    {"order":["identity","stock","shared","raw"],"seed":2481989,"thread_cpu_ns":{"identity":[[1889991,4317622,6568669,2604855,9040827],[1671956,3745931,6483022,2388242,8032717]],"stock":[[1858204,4369729,5912443,3112680,8552390],[1737594,3368199,4997893,2163968,6306319]],"shared":[[1396908,7852449,7127971,2181654,13949197],[813610,6611924,5352130,1608002,10778110]],"raw":[[1328265,8915020,8214217,2549182,14921192],[865868,7074903,6832151,1413051,13809449]]}},
+    {"order":["identity","shared","stock","raw"],"seed":3658910,"thread_cpu_ns":{"identity":[[1587050,4669065,6378307,2270497,8921920],[1885354,4312434,6462692,2439759,7778449]],"shared":[[1257400,8016343,7356111,2408031,14698291],[1292442,7973209,7969042,2477284,14190646]],"stock":[[1875129,4499573,6234572,3658882,8614292],[1910722,4281077,5873255,3355250,8571068]],"raw":[[1318701,8817604,8197382,2211479,14586323],[1291251,8713870,8487043,2489993,14909245]]}},
+    {"order":["identity","stock","raw","shared"],"seed":5722958,"thread_cpu_ns":{"identity":[[1864683,4322790,6459777,2452768,9034557],[2065201,4302469,6733765,2540549,9405759]],"stock":[[1907787,4373775,5803521,3335261,8272814],[1572269,4832197,6233441,3374334,9298339]],"raw":[[1313443,8862030,8238453,2287062,14838119],[1300474,8862181,8215268,2437445,14400388]],"shared":[[1303138,8406012,6624262,2456223,12287656],[1342236,8075290,7225356,2306271,14636880]]}},
+    {"order":["identity","shared","raw","stock"],"seed":4806845,"thread_cpu_ns":{"identity":[[1938663,4471651,6710520,4497198,9280613],[3393067,4935922,6664973,2098531,9955437]],"shared":[[1503566,8498289,7391994,2449273,14750088],[922082,6897639,6107304,1860457,12750333]],"raw":[[1344219,8879267,8423448,2368182,14289382],[1206915,8089541,7785990,2180634,13924670]],"stock":[[1915899,4170523,5887407,3034393,9046545],[2146192,4442518,6011411,3059751,7979177]]}},
+    {"order":["shared","identity","raw","stock"],"seed":554050,"thread_cpu_ns":{"shared":[[1254816,7814573,6852132,2146462,13684643],[1283729,7930295,6606415,1653319,12982969]],"identity":[[1855269,4161590,6411406,2067264,9207244],[1944452,4303672,6298758,2097229,8965494]],"raw":[[1182669,8806468,8186756,2307532,14790870],[1287344,8646730,7020001,1544948,12429507]],"stock":[[1291240,2973152,4657107,2321723,6400250],[1981878,3414068,4961489,2197668,8076322]]}},
+    {"order":["stock","raw","identity","shared"],"seed":4528263,"thread_cpu_ns":{"stock":[[1311150,3440077,5132233,2964980,7104416],[2026336,4186578,6015057,2991049,8294827]],"raw":[[1182499,9007988,8614543,2004792,14483501],[1243850,8517158,8002462,1910101,14810538]],"identity":[[1871603,4033549,6174934,2246802,9113424],[1961858,3696488,5829660,2161474,7703968]],"shared":[[823886,7399325,6640737,1743563,13146623],[1129020,7491612,5615962,1834629,16335140]]}},
+    {"order":["identity","shared","raw","stock"],"seed":3542259,"thread_cpu_ns":{"identity":[[1926686,4168931,6123117,2103368,8910204],[1718806,4133178,6111029,2116788,8705167]],"shared":[[1278181,7686912,6653246,2029418,13624267],[1328916,7760763,6670231,2163658,13855897]],"raw":[[1242999,8984193,8085555,2162587,14130997],[1414984,8788653,8103452,2129688,14616830]],"stock":[[1958067,4533683,5684780,3015345,8214688],[1868920,4134189,5427563,3049295,8045226]]}},
+    {"order":["identity","raw","shared","stock"],"seed":7319061,"thread_cpu_ns":{"identity":[[1871383,4163893,6108795,2204979,8624758],[1868720,4162831,6177377,2083068,8714370]],"raw":[[1292573,8426182,8777996,2129437,13972712],[1336018,8552680,7941151,2092582,13990798]],"shared":[[1316438,7518752,7053039,2008027,13670101],[1324139,7646793,6693546,2074114,13517465]],"stock":[[1834529,4103934,5646478,3233038,8123443],[1841949,4142732,5567851,3027623,8064304]]}},
+    {"order":["raw","shared","identity","stock"],"seed":2094811,"thread_cpu_ns":{"raw":[[1255637,8516206,8134649,2130919,14172188],[1371140,8597467,8208258,2168796,14749717]],"shared":[[1252873,7657590,6723720,2073343,13586327],[1463086,7885198,6718993,2067154,13358928]],"identity":[[1837062,4176202,6165390,2189266,8639149],[1863471,4199636,6185620,2147303,8682123]],"stock":[[1881969,4195730,5666888,3047833,8108349],[1886206,4188480,5660249,3026311,8304051]]}},
+    {"order":["raw","shared","identity","stock"],"seed":6022521,"thread_cpu_ns":{"raw":[[1296458,8373113,7916083,2138120,14300699],[1229489,8897163,8884965,2199652,14764079]],"shared":[[1317019,8127609,9332350,2588941,14130136],[1327695,7716026,6950637,2122867,13721579]],"identity":[[1922579,4285253,6227662,2227523,8860329],[1961658,4365403,6322353,2153292,8882069]],"stock":[[1895739,4306394,5711064,3085289,8384029],[1959805,4269059,5779416,3108883,8387044]]}},
+    {"order":["shared","stock","raw","identity"],"seed":693099,"thread_cpu_ns":{"shared":[[1267996,7688245,6897799,2104741,13576061],[1361144,7806671,6863158,2210999,13623413]],"stock":[[1865334,4273005,5796041,3108213,8369558],[1888168,4304212,5702831,2993312,8140568]],"raw":[[1341646,8773138,8302088,2145111,14605132],[1302998,8866417,8458471,2326991,14725462]],"identity":[[1914928,4188410,6090989,2148566,8924584],[1934878,4366394,6143037,2186231,8780339]]}},
+    {"order":["identity","stock","shared","raw"],"seed":2471355,"thread_cpu_ns":{"identity":[[1849451,4266216,6379378,2184379,9211921],[1774720,3736998,5467131,1972113,7795995]],"stock":[[1877983,4381677,5610515,3162884,8275969],[1861468,4058246,5313413,3088864,7467927]],"shared":[[1329487,7778780,6777440,2143078,13430425],[1368656,7882334,6766223,2076979,13509553]],"raw":[[1275437,8602484,8023744,2502012,14130867],[1257050,8481895,8033528,2184439,14224756]]}},
+    {"order":["stock","shared","raw","identity"],"seed":4356044,"thread_cpu_ns":{"stock":[[1747919,3796337,4860268,2848907,7326978],[1827708,4145435,5417928,3118828,7958918]],"shared":[[1240525,7326987,6548510,2054997,12692638],[1236899,7773291,6616311,2052563,13115006]],"raw":[[1226424,8276600,7974941,2084230,13821637],[1267255,8376178,7858458,2130089,13793565]],"identity":[[1865715,4094731,6019703,2121445,8520643],[1869230,4128480,6076087,2108846,8519882]]}},
+    {"order":["raw","shared","identity","stock"],"seed":3122466,"thread_cpu_ns":{"raw":[[1157992,7906820,7585372,1912605,12772376],[1162880,7740463,7474697,1901729,13672565]],"shared":[[1200706,6970818,6270526,1828920,12803703],[1207846,7032179,6196125,1890812,12439431]],"identity":[[1674191,3860462,5520010,1961428,7525243],[1720599,3864187,5707900,1915308,7939859]],"stock":[[1727208,3719702,5026996,2844411,7339797],[1753308,3836476,5004483,3078759,7348169]]}},
+    {"order":["identity","stock","shared","raw"],"seed":1142835,"thread_cpu_ns":{"identity":[[1739166,3875344,5693919,2056479,8106487],[1743713,4024736,5714278,2017310,8263951]],"stock":[[1827067,3955453,5168888,2854245,7913559],[6838195,4001061,5315025,2986832,7571912]],"shared":[[1363327,7520576,6754662,1539149,14526424],[1408234,7361780,6471435,2003820,13873214]],"raw":[[944054,9219904,7748235,2107364,13713075],[1206555,8348267,7746022,2028187,13700396]]}},
+    {"order":["raw","identity","shared","stock"],"seed":1607570,"thread_cpu_ns":{"raw":[[1322217,8114117,7566274,1990531,13572807],[1193916,7879279,7441998,1857302,13734758]],"identity":[[1728341,4038897,5572768,1989178,8130714],[1799066,3932669,5656793,1893576,7990414]],"shared":[[1259333,7501097,6696070,2151530,13429253],[1230821,6938240,6105421,1793107,12444036]],"stock":[[1968648,4175821,6122376,3458784,9017521],[1826346,4001802,5083521,2887745,7420287]]}},
+    {"order":["shared","raw","stock","identity"],"seed":2342434,"thread_cpu_ns":{"shared":[[1193054,7252217,7015754,1791755,12199204],[1228588,7272316,6232710,1910843,13538706]],"raw":[[1185333,7735536,7528777,1838665,12904153],[1237641,8200156,7699521,1973466,13484526]],"stock":[[1463247,3276103,4590297,2272580,11635175],[1774489,3915263,5092213,2861656,7251386]],"identity":[[2045362,3250815,5580391,1658156,7200378],[1787909,3887161,5685365,1838144,12293530]]}},
+    {"order":["raw","shared","stock","identity"],"seed":7055691,"thread_cpu_ns":{"raw":[[1234537,7989543,7626183,1988368,13608530],[1235037,8205404,7631790,1878534,13805072]],"shared":[[1230410,7291214,6579235,1964673,12975990],[1259193,7238076,6367820,1862630,12985543]],"stock":[[1809341,4049832,5261616,2893103,7813401],[1750523,4065045,5285882,2873594,8107738]],"identity":[[1795160,3995603,5763472,1983560,8242269],[1770754,3991547,5710163,1958683,8153576]]}},
+    {"order":["shared","raw","identity","stock"],"seed":2944187,"thread_cpu_ns":{"shared":[[1206664,7212707,6351518,1927157,13004091],[1210780,8213662,5855178,1523085,15565221]],"raw":[[1205232,7946349,7590860,2002969,13364297],[1315405,9491727,5820727,1366692,13120089]],"identity":[[1758856,3987041,5638547,2032323,8327086],[1204621,2913885,5552658,1775681,6106813]],"stock":[[1742171,3942143,5173184,2889188,7523440],[1780909,3903005,5126234,2849087,7465042]]}},
+    {"order":["raw","stock","shared","identity"],"seed":8324885,"thread_cpu_ns":{"raw":[[1302177,9053075,7964657,1754790,13316866],[1294506,8792237,8687430,2292650,14704740]],"stock":[[1313554,3072660,4745829,2594338,7447927],[1977791,4346204,6208714,3086841,7743717]],"shared":[[891776,7145427,6745653,1987867,13168375],[1310910,7926459,6891299,2067806,14274299]],"identity":[[1898964,4299905,5981976,2147023,9068327],[1906726,4270522,6510333,2223406,9070331]]}},
+    {"order":["shared","stock","identity","raw"],"seed":5407518,"thread_cpu_ns":{"shared":[[1319262,8113518,7091978,2141575,14260301],[1192023,7606173,7028442,1991562,13588430]],"stock":[[1895479,4323169,5862318,3225787,8758997],[1931663,4087980,5731645,2258599,7245916]],"identity":[[1274596,3593495,4749454,1446401,6924238],[1915238,4327967,6529501,2279069,9533459]],"raw":[[877065,8012998,6520107,1824313,12580510],[1259904,9976879,9138332,1538058,16090829]]}},
+    {"order":["shared","raw","identity","stock"],"seed":414706,"thread_cpu_ns":{"shared":[[1324750,8137603,7457512,2496003,13523473],[1289809,7856084,6093473,1817994,13247303]],"raw":[[1323518,8352022,7775325,2331097,14308990],[1298531,7811228,8389357,2334643,15406083]],"identity":[[1771485,4023243,5719546,2312560,7441668],[1305701,3134392,5141137,1694220,7136284]],"stock":[[1878584,4340346,5641171,3075033,7223644],[1848018,4338722,5696753,3176505,8408235]]}},
+    {"order":["stock","identity","shared","raw"],"seed":3236014,"thread_cpu_ns":{"stock":[[1827157,4342890,6024680,3396031,8481004],[1817042,4345573,5857812,3182724,8011545]],"identity":[[1786857,4134299,6166762,2068285,9200063],[1892725,4189090,5976007,2031021,9133815]],"shared":[[827150,6935155,5307955,2041927,10934492],[1263128,7873579,6969536,2066753,14119188]],"raw":[[1220615,8580632,7917596,2096929,13886193],[1265141,8855291,6788687,1792536,14302221]]}},
+    {"order":["identity","raw","shared","stock"],"seed":5819544,"thread_cpu_ns":{"identity":[[1825355,4216742,6418626,2281884,9196959],[2065001,4221889,6448101,2271971,8772007]],"raw":[[1246764,8912916,9485809,2321443,14692091],[1238622,8893347,8078495,2141324,14309793]],"shared":[[1159235,7667283,7004007,2040355,12734200],[1259884,7617539,6885642,1910252,13943549]],"stock":[[1818114,4228179,5808238,2816809,8599881],[1849841,4323390,5792906,3112259,8064004]]}},
+    {"order":["raw","identity","stock","shared"],"seed":7354215,"thread_cpu_ns":{"raw":[[1292783,8524988,8139316,2186251,14161752],[1228427,7922583,7410261,2133714,13085121]],"identity":[[1922879,4152606,7433315,1861899,8369199],[1866225,4045307,5572978,1868509,8145092]],"stock":[[1804033,4205704,5541432,3119500,7859129],[1925754,4203051,5409826,2924881,8126176]],"shared":[[1239473,7443391,6742067,2080705,13338960],[1240896,7373778,6664523,1982368,13515581]]}},
+    {"order":["stock","raw","shared","identity"],"seed":5123558,"thread_cpu_ns":{"stock":[[1587100,3768265,5243189,2806795,7600655],[1968137,3919500,5372150,3355360,7463061]],"raw":[[1212233,8005246,7617950,1975438,13409614],[830966,9865030,8648063,1579780,13975606]],"shared":[[1175408,8835508,7931520,1856521,13193331],[908511,9069889,7089524,1908909,12872645]],"identity":[[1824584,4385522,6331217,2272330,8624907],[1890521,4641363,6239801,2379670,9021609]]}},
+    {"order":["identity","stock","raw","shared"],"seed":4973324,"thread_cpu_ns":{"identity":[[2026123,4176981,6110859,2502022,9373038],[1672868,3969083,5930690,2218600,7792229]],"stock":[[1977771,4062602,5473561,3283694,7783156],[1983490,4043644,5450897,3093571,7673634]],"raw":[[1368516,8277641,9296929,2478876,13534771],[1419992,8169581,7723547,2264548,13237800]],"shared":[[1365431,8080348,6979371,2173032,14379407],[1345842,7484683,6716790,2200643,13225290]]}},
+    {"order":["raw","shared","stock","identity"],"seed":5760923,"thread_cpu_ns":{"raw":[[1266324,7913138,7697819,2165170,13318038],[1251131,7900601,7445595,1942890,12956371]],"shared":[[1289087,7132329,6513447,2067645,12807118],[1323508,6933452,6279630,1901037,12190121]],"stock":[[1568663,3820863,5269707,3210434,7590749],[1889170,3810567,5066325,2983227,8158936]],"identity":[[1858965,4081671,5835400,2060494,8079427],[1863051,3798019,5653709,2100714,8255139]]}},
+    {"order":["raw","stock","identity","shared"],"seed":6051191,"thread_cpu_ns":{"raw":[[1322227,7976062,7595837,1994827,12978803],[1295186,8010925,7526994,1910191,12842571]],"stock":[[1874468,3864397,5047737,2952772,7448738],[1900246,3869625,5061148,2973363,7401578]],"identity":[[1908709,3849014,5622112,1998762,7923394],[1967316,3861243,5710404,1967326,8195900]],"shared":[[1325932,7058628,6179972,1982199,12315437],[1306945,6999731,6321172,1904653,12222639]]}},
+    {"order":["shared","identity","stock","raw"],"seed":4149101,"thread_cpu_ns":{"shared":[[1311981,7169223,6279971,1895269,12541624],[1251061,7370652,6248003,1954767,12508795]],"identity":[[1889250,3845129,5721700,1954638,8010424],[1898744,3807523,5695100,2280532,8626330]],"stock":[[1901378,3838169,5010272,2969467,7438663],[1906906,3915133,5099104,2981495,7602047]],"raw":[[1298391,7765690,7444252,1960025,13186602],[1286714,7745769,7422169,1902580,13220053]]}},
+    {"order":["identity","shared","raw","stock"],"seed":2159311,"thread_cpu_ns":{"identity":[[1803693,3787754,5733418,2053274,8014120],[1964892,3741645,5336598,2034085,7654845]],"shared":[[1367304,7284656,6407250,1945695,13318976],[1286864,7012120,6634647,1989039,12114168]],"raw":[[1336458,8731166,8167818,2051050,14423172],[1349717,7877285,7654765,2111310,13019794]],"stock":[[2030881,4573623,5259913,3084447,7259207],[2004872,3878258,4927739,2812604,7389600]]}},
+    {"order":["identity","stock","shared","raw"],"seed":6812914,"thread_cpu_ns":{"identity":[[1950431,3740964,5351179,2028988,7625351],[1765095,3963496,5754219,2106493,8003393]],"stock":[[1921728,3857538,4985415,3113860,7096615],[1860307,4316269,5184741,3076375,7707603]],"shared":[[1276499,6995775,6460018,2059733,12529446],[1122790,7283264,6774315,2149798,12627422]],"raw":[[1292963,8659559,7697479,2017370,14527737],[1134497,7763417,7584852,2124388,13206372]]}},
+    {"order":["identity","raw","stock","shared"],"seed":4367817,"thread_cpu_ns":{"identity":[[1871002,3864188,5928688,2029829,8128780],[1967906,4539281,5751204,2151069,9722020]],"raw":[[1244561,8073167,7771387,2130900,13777632],[1271361,8452291,7771930,2247552,13458858]],"stock":[[1874457,4568815,5188607,3336202,7832920],[1877473,3905750,5125233,3119380,7705161]],"shared":[[1290800,7062804,6580427,1860057,12386732],[1227496,7085208,6180894,1962078,12653631]]}},
+    {"order":["stock","identity","raw","shared"],"seed":2343140,"thread_cpu_ns":{"stock":[[1835961,4071686,5155208,3044959,7758800],[1854078,4192486,5502173,3098989,7753776]],"identity":[[1917030,4011957,6027905,1994114,8138534],[1840838,3999187,5925925,2029019,8155793]],"raw":[[1248426,8280587,7711970,2002179,13522423],[1283839,8160671,7895851,2091601,14042509]],"shared":[[1247155,7393037,6245458,1948768,12896274],[1267756,7640734,6816879,2065973,12369156]]}},
+    {"order":["shared","raw","identity","stock"],"seed":7670385,"thread_cpu_ns":{"shared":[[1250440,7381768,6872693,2047865,13039929],[1281967,6991339,6522802,1964893,12752975]],"raw":[[1493451,8474964,7905478,2222305,16128077],[1243830,7991527,7584841,1983360,12961277]],"identity":[[1990229,4328277,5714339,2002077,8491319],[1838054,3889345,5935377,2013405,8596075]],"stock":[[1872915,4069363,5303898,3240722,8045479],[1847078,4171683,5296147,3062856,7615387]]}},
+    {"order":["shared","stock","raw","identity"],"seed":6507605,"thread_cpu_ns":{"shared":[[1232633,7240649,6503164,1915078,12901391],[1297329,7019270,6337575,1990361,12752173]],"stock":[[1829961,4200017,5182117,3190476,7978346],[1871013,3899630,5179414,3004588,7409440]],"raw":[[1296258,8452542,8265353,2034496,13452151],[1320543,8343579,7940000,2036678,13365147]],"identity":[[1884553,3790377,5680819,1963119,8219806],[1963741,3912509,5865494,2239461,8476482]]}},
+    {"order":["raw","stock","identity","shared"],"seed":1531810,"thread_cpu_ns":{"raw":[[1255468,7960501,7656187,1985564,13025853],[1293342,8074110,7821564,2000035,13175886]],"stock":[[1863492,3878549,5133776,2988504,7424793],[1954167,4176301,5349728,3263422,7684499]],"identity":[[1818334,3892990,5725615,2027977,8600374],[1955679,4067632,5729622,2370227,8424892]],"shared":[[1217050,7191938,6435501,2052703,13089280],[1326813,7845862,6510482,2166693,13082618]]}},
+    {"order":["raw","stock","identity","shared"],"seed":3531413,"thread_cpu_ns":{"raw":[[1247546,8107597,7845899,2016698,13780285],[1264470,8172346,7920233,2010600,13340872]],"stock":[[1987005,4104514,5573722,3058148,7698570],[1877612,4086778,5277168,3108243,7629528]],"identity":[[1845755,4237343,5817032,2156988,8346352],[1884573,4008903,6515701,2042036,8510636]],"shared":[[1265092,7277544,6669098,2073696,13341991],[1292351,7388239,6534489,2095126,13987717]]}},
+    {"order":["stock","raw","identity","shared"],"seed":5254410,"thread_cpu_ns":{"stock":[[1839836,3920661,5176059,3065049,7480626],[1805946,3911668,5125603,3068955,7395900]],"raw":[[1297550,7941221,7635426,1972163,13093164],[1237330,7941481,7568176,2072252,13111640]],"identity":[[1828759,3908774,5733839,1985624,8057314],[1842311,3854002,5656393,2000986,8012298]],"shared":[[1244211,7131106,6287853,1988077,12523406],[1286774,7161762,6309014,1973635,12474874]]}},
+    {"order":["identity","shared","stock","raw"],"seed":2307469,"thread_cpu_ns":{"identity":[[1854518,3872420,5614360,1989409,7965567],[1760028,3807322,5646788,1970230,7858849]],"shared":[[1251481,7077807,6343244,1938443,12434735],[1199574,7047712,6374311,1946775,12331511]],"stock":[[1817713,3855234,5048158,2996487,7353656],[1859135,3864678,5057571,3046431,7320698]],"raw":[[1215878,7882373,7536108,1997251,12987728],[1276288,7844496,7549148,1990570,13064290]]}},
+    {"order":["shared","identity","raw","stock"],"seed":4178995,"thread_cpu_ns":{"shared":[[1208477,7028733,6156987,2004611,11913978],[1233705,7260928,6437855,2058651,12747569]],"identity":[[1912775,3791329,5536735,1948297,7930706],[1878694,3957296,5816241,2066815,8149190]],"raw":[[1257129,7897476,7447377,1879706,13000646],[1247275,8001280,7649838,2059944,13133044]],"stock":[[1851634,3906840,5127626,3000163,7277414],[1854198,3868844,5139194,3016817,7428969]]}}
+  ]
+}
