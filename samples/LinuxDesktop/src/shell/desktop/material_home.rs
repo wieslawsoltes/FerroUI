@@ -122,12 +122,10 @@ fn shortcut_button(shell: &Rc<Shell>, shortcut: Shortcut) -> El<Button> {
     .background("Transparent")
     .automation_properties_help_text("Open the shortcut menu for app actions and pinning.")
     .child(
-        stack_panel().spacing(4.0).child(icon).child(
-            shell_text(&app.name, 12.0, colors().bar_ink)
-                .max_width(SLOT - 8.0)
-                .font_weight(FontWeight::Medium)
-                .horizontal_alignment(H::Center),
-        ),
+        stack_panel()
+            .spacing(4.0)
+            .child(icon)
+            .child(shortcut_label(&app.name)),
     )
     .with(move |button| {
         // The gesture recognizer reads its attached property from the original
@@ -179,6 +177,38 @@ fn shortcut_button(shell: &Rc<Shell>, shortcut: Shortcut) -> El<Button> {
         );
         button.set_context_flyout(&menu);
     })
+}
+
+// The label sits directly on the wallpaper, which can change from dark
+// foliage to cream petals under the same word. Tight ambient and offset key
+// shadows keep the glyph edges readable without a solid label plate.
+fn shortcut_label(name: &str) -> El<Border> {
+    use ferroui_base::media::{effects::ImmutableDropShadowEffect, Colors};
+    border()
+        .horizontal_alignment(H::Center)
+        .with(|border| {
+            border.set_effect(Some(Rc::new(ImmutableDropShadowEffect::new(
+                0.0,
+                1.0,
+                2.0,
+                Colors::BLACK,
+                0.95,
+            ))))
+        })
+        .child(
+            shell_text(name, 12.0, "#FFFFFF")
+                .max_width(SLOT - 8.0)
+                .font_weight(FontWeight::Medium)
+                .with(|text| {
+                    text.set_effect(Some(Rc::new(ImmutableDropShadowEffect::new(
+                        0.0,
+                        0.0,
+                        2.0,
+                        Colors::BLACK,
+                        0.95,
+                    ))))
+                }),
+        )
 }
 
 fn item(name: &str, invoke: impl Fn() + 'static) -> ferroui_base::Ref<MenuItem> {

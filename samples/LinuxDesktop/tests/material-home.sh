@@ -157,6 +157,28 @@ key Menu
 until_ok menu_visible
 key Home Return
 until_ok test -f "$fixture/compose"
+# Verify the actual artwork after a live resize. The rust-colored flower
+# center stays in view, and the clock retains dark green wallpaper behind it.
+garden_presented() {
+    local w=$1 h=$2 x=$3 y=$4
+    capture "$fixture/garden.png"
+    /usr/bin/python3 - "$fixture/garden.png" "$w" "$h" "$x" "$y" <<'PYGARDEN'
+import sys
+from PIL import Image
+w, h, x, y = map(int, sys.argv[2:])
+im = Image.open(sys.argv[1]).convert("RGB")
+if im.size != (w,h):
+    sys.exit(1)
+red, green, blue = im.getpixel((x,y))
+r, g, b = im.getpixel((min(255, w - 1), 118))
+sys.exit(0 if red > green + 40 and red > blue + 50 and g > r + 8 and g > b + 3 else 1)
+PYGARDEN
+}
+xdotool windowsize --sync "$win" 360 640
+until_ok garden_presented 360 640 252 384
+cp "$fixture/garden.png" "$out/material-portrait.png"
+xdotool windowsize --sync "$win" 1280 800
+until_ok garden_presented 1280 800 896 295
 key Escape alt+F4
 wait "$shell"; shell=
 echo 'Verified Material home app actions, hold without launch, opt-in/out of app suggestions and persistent pin changes.'

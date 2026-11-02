@@ -122,10 +122,6 @@ fn garden(look: Appearance) -> El<Canvas> {
     canvas()
         .width(1440.0)
         .height(900.0)
-        .background(gradient(
-            look,
-            &[(0.0, "#233F36"), (0.65, "#345847"), (1.0, "#385449")],
-        ))
         .child(shape(
             look,
             "M0 642 C167 477 293 556 398 665 C482 755 566 801 690 801 V900 H0 Z",
@@ -168,6 +164,50 @@ fn garden(look: Appearance) -> El<Canvas> {
         ))
 }
 
+/// Keep the flower's center at 70% of the viewport width, the same fraction
+/// it occupies on the design canvas. On narrow outputs cap the flower's
+/// diameter and root the leaves at the bottom, leaving clear space for the
+/// clock. Only the transform changes during output resize.
+fn garden_viewport(look: Appearance, composed: bool) -> Element {
+    use ferroui_base::media::MatrixTransform;
+    use ferroui_base::{Matrix, RelativePoint};
+    let transform = MatrixTransform::new();
+    let drawing = garden(look).with({
+        let transform = transform.clone();
+        move |drawing| {
+            drawing.set_render_transform_origin(RelativePoint::TOP_LEFT);
+            drawing.set_render_transform(Some(transform.clone().into()));
+        }
+    });
+    canvas()
+        .background(gradient(
+            look,
+            &[(0.0, "#233F36"), (0.65, "#345847"), (1.0, "#385449")],
+        ))
+        .clip_to_bounds(true)
+        .is_hit_test_visible(false)
+        .with(move |viewport| cache_composed(viewport, composed))
+        .on_size_changed(move |event| {
+            let size = event.new_size();
+            let cover = (size.width / 1440.0).max(size.height / 900.0);
+            let scale = cover.min(size.width / 800.0);
+            let offset_x = (size.width - 1440.0 * scale).min(0.0) * (1008.0 / 1440.0);
+            let offset_y = (size.height - 900.0 * scale).max(0.0);
+            transform.set_matrix(Matrix::new(scale, 0.0, 0.0, scale, offset_x, offset_y));
+        })
+        .child(drawing)
+        .into()
+}
+
+fn cache_composed(host: &ferroui_base::Visual, composed: bool) {
+    // The private compositor repaints clients and live backdrops over this
+    // visual. A delegated Wayland wallpaper already has its own surface.
+    if composed {
+        use ferroui_base::media::{BitmapCache, CacheMode};
+        host.set_cache_mode(BitmapCache::new().upcast::<CacheMode>());
+    }
+}
+
 pub(super) fn wallpaper(look: Appearance, composed: bool) -> Element {
     if look
         .winui()
@@ -183,18 +223,10 @@ pub(super) fn wallpaper(look: Appearance, composed: bool) -> Element {
             folds::wallpaper(look.winui().is_some_and(|s| s.mode == ColorMode::Dark))
         }
         Wallpaper::Horizon => horizon(look).into_element(),
-        Wallpaper::Garden => garden(look).into_element(),
+        Wallpaper::Garden => return garden_viewport(look, composed),
     };
     viewbox()
-        .with(move |host| {
-            // The private compositor repaints clients and live backdrops over
-            // this visual. Reuse one raster layer at the current output scale.
-            // Delegated Wayland wallpapers already live on a separate surface.
-            if composed {
-                use ferroui_base::media::{BitmapCache, CacheMode};
-                host.set_cache_mode(BitmapCache::new().upcast::<CacheMode>());
-            }
-        })
+        .with(move |host| cache_composed(host, composed))
         .stretch(Stretch::UniformToFill)
         .clip_to_bounds(true)
         .is_hit_test_visible(false)
