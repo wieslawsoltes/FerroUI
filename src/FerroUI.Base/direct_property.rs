@@ -24,7 +24,6 @@ pub(crate) trait DirectPropertyAccessor<T> {
 /// of its owner.
 pub struct DirectPropertyBase<T: PropertyValue> {
     base: FerroProperty,
-    owner: &'static TypeInfo,
     metadata: MetadataTable<DirectPropertyMetadata<T>>,
     accessor: OnceCell<&'static dyn DirectPropertyAccessor<T>>,
 }
@@ -57,7 +56,7 @@ impl<T: PropertyValue> DirectPropertyBase<T> {
     /// The class that registered this instance of the property.
     #[inline]
     pub fn owner(&self) -> &'static TypeInfo {
-        self.owner
+        self.base.owner_type()
     }
 
     #[inline]
@@ -265,7 +264,6 @@ impl<TOwner: ObjectType, T: PropertyValue> DirectProperty<TOwner, T> {
         Self::leak(Self {
             base: DirectPropertyBase {
                 base,
-                owner: TOwner::TYPE,
                 metadata: MetadataTable::new(TOwner::TYPE, metadata),
                 accessor: OnceCell::new(),
             },
@@ -310,7 +308,6 @@ impl<TOwner: ObjectType, T: PropertyValue> DirectProperty<TOwner, T> {
         let result = DirectProperty::<TNewOwner, T>::leak(DirectProperty {
             base: DirectPropertyBase {
                 base: FerroProperty::for_added_owner(&self.base.base, TNewOwner::TYPE, setter.is_none()),
-                owner: TNewOwner::TYPE,
                 metadata: MetadataTable::for_added_owner(&self.base.metadata, TNewOwner::TYPE, metadata),
                 accessor: OnceCell::new(),
             },
