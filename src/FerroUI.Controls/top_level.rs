@@ -431,7 +431,7 @@ impl TopLevel {
                     insets.set_system_bar_color(Some(color_brush.color()));
                 }
             }
-        });
+        }).detach();
 
         Self::auto_safe_area_padding_property().changed().add_class_handler::<Control>(|view, _| {
             let top_level = view
@@ -441,10 +441,10 @@ impl TopLevel {
             if let Some(top_level) = top_level {
                 top_level.invalidate_child_insets_padding();
             }
-        });
+        }).detach();
 
         // The subscription lives as long as the property.
-        let _ = ToolTip::service_enabled_property().changed().subscribe(Self::on_tool_tip_service_enabled_changed);
+        ToolTip::service_enabled_property().changed().subscribe(Self::on_tool_tip_service_enabled_changed).detach();
     }
 
     fn on_tool_tip_service_enabled_changed(args: &FerroPropertyChangedEventArgs<'_>) {

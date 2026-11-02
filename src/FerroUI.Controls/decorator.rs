@@ -58,7 +58,7 @@ impl Decorator {
             Self::child_property().as_property(),
             Self::padding_property().as_property(),
         ]);
-        Self::child_property().changed().add_class_handler::<Decorator>(|x, e| x.child_changed(e));
+        Self::child_property().changed().add_class_handler::<Decorator>(|x, e| x.child_changed(e)).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

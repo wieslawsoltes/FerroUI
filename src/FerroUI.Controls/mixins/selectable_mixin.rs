@@ -25,6 +25,6 @@ impl SelectableMixin {
 
                 sender.raise_event(&RoutedEventArgs::with_event(SelectingItemsControl::is_selected_changed_event()));
             }
-        });
+        }).detach();
     }
 }

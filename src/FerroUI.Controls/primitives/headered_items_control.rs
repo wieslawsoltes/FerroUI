@@ -105,7 +105,7 @@ ferroui_base::ferro_properties! { impl HeaderedItemsControl {
 impl HeaderedItemsControl {
     fn static_constructor() {
         register_content_presenter_host::<HeaderedItemsControl>();
-        Self::header_property().changed().add_class_handler::<HeaderedItemsControl>(|x, e| x.header_changed(e));
+        Self::header_property().changed().add_class_handler::<HeaderedItemsControl>(|x, e| x.header_changed(e)).detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

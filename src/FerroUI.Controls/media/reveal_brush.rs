@@ -488,7 +488,7 @@ impl RevealBrush {
 
     fn static_constructor() {
         // `OnIsContainerPropertyChanged`.
-        let _ = Self::is_container_property().changed().subscribe(|e| {
+        Self::is_container_property().changed().subscribe(|e| {
             let Some(element) = e.sender().downcast_ref::<Visual>() else { return };
             let lights = element.lights();
             if e.get_new_value::<bool>() {
@@ -501,9 +501,9 @@ impl RevealBrush {
                     }
                 }
             }
-        });
+        }).detach();
         // `OnStatePropertyChanged`.
-        let _ = Self::state_property().changed().subscribe(|e| {
+        Self::state_property().changed().subscribe(|e| {
             let (old, new) = e.get_old_and_new_value::<RevealBrushState>();
             if old == new {
                 return;
@@ -517,7 +517,7 @@ impl RevealBrush {
                     hover.go_to_state(new);
                 }
             }
-        });
+        }).detach();
     }
 
     pub fn color(&self) -> Color {

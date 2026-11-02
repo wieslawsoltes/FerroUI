@@ -168,7 +168,7 @@ fn changed_observable_fired() {
     let value: Recorder<String> = Recorder::new();
 
     let v = value.clone();
-    Class1::foo_property().changed().subscribe(move |x| v.push(x.get_new_value::<String>()));
+    Class1::foo_property().changed().subscribe(move |x| v.push(x.get_new_value::<String>())).detach();
     target.set_value(Class1::foo_property(), s("newvalue"));
 
     assert_eq!(vec![s("newvalue")], value.get());
@@ -180,7 +180,7 @@ fn changed_observable_fired_only_on_effective_value_change() {
     let result: Recorder<String> = Recorder::new();
 
     let r = result.clone();
-    Class1::foo_property().changed().subscribe(move |x| r.push(x.get_new_value::<String>()));
+    Class1::foo_property().changed().subscribe(move |x| r.push(x.get_new_value::<String>())).detach();
     target.set_value_with_priority(Class1::foo_property(), s("animated"), BindingPriority::Animation);
     target.set_value(Class1::foo_property(), s("local"));
 

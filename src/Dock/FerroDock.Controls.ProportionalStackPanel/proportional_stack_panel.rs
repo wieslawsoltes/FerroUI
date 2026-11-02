@@ -72,7 +72,8 @@ impl ProportionalStackPanel {
                 }
                 parent.invalidate_measure();
                 parent.invalidate_arrange();
-            });
+            })
+            .detach();
         Self::collapsed_proportion_property()
             .changed()
             .add_class_handler::<Control>(|sender, _| {
@@ -87,7 +88,8 @@ impl ProportionalStackPanel {
                 }
                 parent.invalidate_measure();
                 parent.invalidate_arrange();
-            });
+            })
+            .detach();
     }
     /// Initializes fields for this panel or a derived sizing-policy class.
     pub fn construct() -> Self {

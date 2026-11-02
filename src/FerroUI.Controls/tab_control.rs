@@ -343,7 +343,8 @@ impl TabControl {
         Layoutable::affects_measure::<TabControl>(&[Self::tab_strip_placement_property().as_property()]);
         SelectingItemsControl::selected_item_property()
             .changed()
-            .add_class_handler::<TabControl>(|x, _| x.update_selected_content(None));
+            .add_class_handler::<TabControl>(|x, _| x.update_selected_content(None))
+            .detach();
         crate::automation::AutomationProperties::control_type_override_property()
             .override_default_value::<TabControl>(Some(crate::automation::peers::AutomationControlType::Tab));
     }

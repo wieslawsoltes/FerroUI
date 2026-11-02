@@ -127,10 +127,12 @@ impl ViewportBehavior {
     fn static_constructor() {
         Self::is_fully_in_viewport_property()
             .changed()
-            .add_class_handler::<ViewportBehavior>(|behavior, e| Self::on_is_fully_in_viewport_changed(behavior, e));
+            .add_class_handler::<ViewportBehavior>(|behavior, e| Self::on_is_fully_in_viewport_changed(behavior, e))
+            .detach();
         Self::is_in_viewport_property()
             .changed()
-            .add_class_handler::<ViewportBehavior>(|behavior, e| Self::on_is_in_viewport_changed(behavior, e));
+            .add_class_handler::<ViewportBehavior>(|behavior, e| Self::on_is_in_viewport_changed(behavior, e))
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

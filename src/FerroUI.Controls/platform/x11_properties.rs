@@ -30,8 +30,8 @@ ferro_properties! {
 
 impl X11Properties {
     fn static_constructor() {
-        Self::net_wm_window_type_property().changed().add_class_handler::<TopLevel>(Self::on_net_wm_window_type_changed);
-        Self::wm_class_property().changed().add_class_handler::<TopLevel>(Self::on_wm_class_changed);
+        Self::net_wm_window_type_property().changed().add_class_handler::<TopLevel>(Self::on_net_wm_window_type_changed).detach();
+        Self::wm_class_property().changed().add_class_handler::<TopLevel>(Self::on_wm_class_changed).detach();
     }
 
     pub fn set_net_wm_window_type(obj: &Window, value: X11NetWmWindowType) {

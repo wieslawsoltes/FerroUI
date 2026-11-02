@@ -61,7 +61,8 @@ impl RowDefinition {
 
         Self::height_property()
             .changed()
-            .add_class_handler::<DefinitionBase>(DefinitionBase::on_user_size_property_changed);
+            .add_class_handler::<DefinitionBase>(DefinitionBase::on_user_size_property_changed)
+            .detach();
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

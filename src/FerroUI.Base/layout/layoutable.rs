@@ -832,7 +832,7 @@ impl Layoutable {
                     let layoutable: &Layoutable = sender.upcast();
                     layoutable.invalidate_measure();
                 }
-            });
+            }).detach();
         }
     }
 
@@ -846,7 +846,7 @@ impl Layoutable {
                     let layoutable: &Layoutable = sender.upcast();
                     layoutable.invalidate_arrange();
                 }
-            });
+            }).detach();
         }
     }
 

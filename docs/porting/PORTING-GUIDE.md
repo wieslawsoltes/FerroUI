@@ -194,7 +194,7 @@ ferro_properties! {
 - Value types must be `Clone + PartialEq + 'static`.
 - `GetValue(P)` → `self.get_value(Self::p_property())`; `SetValue` → `set_value`; `SetCurrentValue` → `set_current_value`; `ClearValue` → `clear_value`; direct properties use `set_and_raise(property, &self.field, value)`.
 - `OnPropertyChanged(change)` override → `impl FerroObjectImpl for X { fn on_property_changed(this, change) { Self::parent_on_property_changed(this, change); if change.property() == Self::foo_property().as_property() { let (old, new) = change.get_old_and_new_value::<T>(); .. } } }`.
-- `FooProperty.Changed.AddClassHandler<X>((x, e) => ..)` → `Self::foo_property().changed().add_class_handler::<X>(|x, e| ..)`.
+- `FooProperty.Changed.AddClassHandler<X>((x, e) => ..)` → `Self::foo_property().changed().add_class_handler::<X>(|x, e| ..).detach()`. `add_class_handler` and `subscribe` return a `Subscription` guard that removes the handler when it is dropped; `detach()` keeps a class handler registered once for the life of the property.
 
 ### Migrating a class to `ferro_properties!` / `static_constructor()`
 
@@ -227,7 +227,7 @@ impl Geometry {
             return;
         }
 
-        Self::transform_property().changed().add_class_handler::<Geometry>(|x, e| x.transform_property_changed(e));
+        Self::transform_property().changed().add_class_handler::<Geometry>(|x, e| x.transform_property_changed(e)).detach();
     }
 
     pub fn construct() -> Self { .. }
@@ -247,7 +247,7 @@ ferro_properties! { impl Geometry {
 
 impl Geometry {
     fn static_constructor() {
-        Self::transform_property().changed().add_class_handler::<Geometry>(|x, e| x.transform_property_changed(e));
+        Self::transform_property().changed().add_class_handler::<Geometry>(|x, e| x.transform_property_changed(e)).detach();
     }
 
     pub fn construct() -> Self { .. }

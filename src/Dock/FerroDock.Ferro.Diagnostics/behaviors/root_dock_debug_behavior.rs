@@ -33,7 +33,8 @@ impl RootDockDebugBehavior {
                 // assign DataContext. Native Initialized waits for a logical root;
                 // selection-name lookup itself remains deferred until visual attach.
                 Self::initialize(view.to_ref());
-            });
+            })
+            .detach();
     }
     fn initialize(view: Ref<RootDockDebug>) {
         let owner = view.clone();

@@ -1,6 +1,6 @@
 use crate::data::{BindingMode, BindingPriority};
 use crate::property_store::{EffectiveValueDyn, IValueEntry};
-use crate::reactive::{Disposable, IDisposable, IObservable};
+use crate::reactive::{Disposable, IDisposable, IObservable, Subscription};
 use crate::utilities::HandlerList;
 use crate::{
     AttachedProperty, DirectProperty, DirectPropertyMetadata, FerroObject, FerroPropertyChangedEventArgs,
@@ -226,19 +226,27 @@ impl PropertyChangedObservable {
     }
 
     /// Subscribes to changes of the property on any object.
-    pub fn subscribe(&'static self, handler: impl Fn(&FerroPropertyChangedEventArgs<'_>) + 'static) -> Rc<dyn IDisposable> {
+    ///
+    /// Dropping the returned guard removes the handler; call
+    /// [`detach`](Subscription::detach) to keep it for the life of the
+    /// property.
+    pub fn subscribe(&'static self, handler: impl Fn(&FerroPropertyChangedEventArgs<'_>) + 'static) -> Subscription {
         let token = self.handlers.add(Rc::new(handler));
-        Disposable::create(move || {
+        Subscription::new(Disposable::create(move || {
             self.handlers.remove(token);
-        })
+        }))
     }
 
     /// Subscribes a handler that is only invoked for objects of class
     /// `TTarget` (or classes derived from it).
+    ///
+    /// Dropping the returned guard removes the handler; call
+    /// [`detach`](Subscription::detach) to keep it for the life of the
+    /// property, as a class handler registered once for its class does.
     pub fn add_class_handler<TTarget: ObjectType>(
         &'static self,
         handler: impl Fn(&TTarget, &FerroPropertyChangedEventArgs<'_>) + 'static,
-    ) -> Rc<dyn IDisposable> {
+    ) -> Subscription {
         self.subscribe(move |e| {
             if let Some(target) = e.sender().downcast_ref::<TTarget>() {
                 handler(target, e);
