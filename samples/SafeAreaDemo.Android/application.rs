@@ -91,7 +91,8 @@ mod application {
             },
             Duration::from_millis(ms),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 
     /// The smoke run asked for with the extras of the intent; the activity and its intent exist
@@ -129,6 +130,7 @@ mod application {
             },
             Duration::from_millis(250),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 }

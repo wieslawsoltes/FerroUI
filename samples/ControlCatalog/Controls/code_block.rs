@@ -4,7 +4,7 @@ use ferroui_base::input::platform::ClipboardExtensions;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEventArgs, RoutedEventHandlerToken};
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_markup_enum, ferro_properties, instantiate, BoxedValue,
@@ -49,7 +49,7 @@ pub struct CodeBlock {
     text: RefCell<Option<Ref<SelectableTextBlock>>>,
     copy_button: RefCell<Option<Ref<Button>>>,
     copy_click: RefCell<Option<RoutedEventHandlerToken>>,
-    copy_reset: RefCell<Option<Rc<dyn IDisposable>>>,
+    copy_reset: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(CodeBlock: TemplatedControl);

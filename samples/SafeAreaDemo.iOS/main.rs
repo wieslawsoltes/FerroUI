@@ -84,7 +84,8 @@ mod host {
             },
             Duration::from_millis(ms),
             DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 
     fn note(text: &str) {

@@ -201,7 +201,7 @@ impl ConnectedAnimation {
             Duration::from_secs(3),
             DispatcherPriority::BACKGROUND,
         );
-        *animation.timeout_timer_disposable.borrow_mut() = Some(Subscription::new(timeout_timer_disposable));
+        *animation.timeout_timer_disposable.borrow_mut() = Some(timeout_timer_disposable);
 
         animation
     }

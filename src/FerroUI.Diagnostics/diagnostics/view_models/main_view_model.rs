@@ -503,13 +503,14 @@ impl MainViewModel {
                 // expand the parent nodes. Because at this point the TreeView isn't visible,
                 // this will fail unless we schedule the selection to run after layout.
                 let new_tree = new_tree.clone();
-                let _ = DispatcherTimer::run_once(
+                DispatcherTimer::run_once(
                     move || {
                         new_tree.select_control(&control);
                     },
                     Duration::ZERO,
                     DispatcherPriority::default(),
-                );
+                )
+                .detach();
             }
         }
 

@@ -10,7 +10,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::metadata::from_markup_value;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl,
@@ -26,7 +26,7 @@ use std::time::Duration;
 #[repr(C)]
 pub struct MainView {
     base: UserControl,
-    timer: RefCell<Option<Rc<dyn IDisposable>>>,
+    timer: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(MainView: UserControl);

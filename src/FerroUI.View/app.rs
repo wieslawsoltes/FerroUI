@@ -89,6 +89,7 @@ fn smoke_exit(window: &Ref<Window>) {
             move || window.close(),
             std::time::Duration::from_millis(ms),
             ferroui_base::threading::DispatcherPriority::NORMAL,
-        );
+        )
+        .detach();
     }
 }

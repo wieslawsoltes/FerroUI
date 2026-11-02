@@ -216,7 +216,8 @@ mod host {
                             move || println!("Native views of {header} after the transition: {}", native_views()),
                             Duration::from_millis(ms / 2),
                             DispatcherPriority::NORMAL,
-                        );
+                        )
+                        .detach();
                         return true;
                     }
                     println!("Selected every page ({})", pages.len());
@@ -227,7 +228,8 @@ mod host {
                 },
                 Duration::from_millis(ms),
                 DispatcherPriority::NORMAL,
-            );
+            )
+            .detach();
         }
 
         if let Some(ms) = exit_after {
@@ -239,7 +241,8 @@ mod host {
                 },
                 Duration::from_millis(ms),
                 DispatcherPriority::NORMAL,
-            );
+            )
+            .detach();
         }
     }
 }

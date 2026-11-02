@@ -66,11 +66,13 @@ fn smoke_run() {
                     },
                     Duration::from_millis(ms),
                     DispatcherPriority::NORMAL,
-                );
+                )
+                .detach();
             }
             false
         },
         Duration::from_millis(250),
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
 }

@@ -95,6 +95,7 @@ impl X11ActiveWindowTracker {
             },
             Duration::from_secs(1),
             DispatcherPriority::INPUT,
-        );
+        )
+        .detach();
     }
 }

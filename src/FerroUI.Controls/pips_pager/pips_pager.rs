@@ -643,7 +643,8 @@ impl PipsPager {
             },
             Duration::from_millis(FRAME_MS),
             DispatcherPriority::RENDER,
-        );
+        )
+        .detach();
     }
 
     fn animate_step(
@@ -683,7 +684,8 @@ impl PipsPager {
                 },
                 Duration::from_millis(16),
                 DispatcherPriority::RENDER,
-            );
+            )
+            .detach();
         }
     }
 

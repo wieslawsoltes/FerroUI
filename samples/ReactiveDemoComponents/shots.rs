@@ -56,7 +56,8 @@ pub fn capture_if_asked(window: &Ref<Window>, name: &'static str) {
             std::env::var("FERROUI_REACTIVE_DEMO_SHOTS_DELAY_MS").ok().and_then(|ms| ms.parse().ok()).unwrap_or(2000),
         ),
         DispatcherPriority::NORMAL,
-    );
+    )
+    .detach();
 }
 
 fn capture(window: &Ref<Window>, file: &Path) {

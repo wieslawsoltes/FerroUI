@@ -2602,6 +2602,7 @@ mod windows {
                 Duration::from_millis(40),
                 DispatcherPriority::NORMAL,
             )
+            .detach()
         });
 
         println!("Entering main loop");
