@@ -13,6 +13,49 @@ The reference executable is the 28,324,712-byte stripped Linux x86-64 PIE at run
 
 The 296,347-byte FXP occurs once. Even eliminating every byte of that archive would cover only 3.5% of the required saving. The dynamic linker uses 27,240 bytes of RELR for 111,346 relative relocations. The larger cost is what the referenced tables make reachable. In `.data.rel.ro` alone, 85,769 pointer slots point to 42,613 distinct instruction addresses. Several pointers can refer to the same implementation. A method referenced by both a virtual table and a descriptor still occupies a single physical range.
 
+## Smaller unwind records with the original code layout
+
+The stripped full editable WinUI executable is **28,087,224 bytes** with the optional compact unwind link. This is **237,488 bytes (0.84%)** below the 28,324,712-byte PGO-z reference, and **48.54%** below the original 54,577,848-byte ordinary release. The 19,827,298-byte target remains **8,259,926 bytes** away. The measured ELF has SHA-256 `4ba4f0f1484addeebf864fad3f3ad72f54b9161e06974b32befd797b043ac6a8`.
+
+| Full Linux x86-64 ELF, fixed input object and ordinary LLD | Installed bytes | Savings from reference |
+|---|---:|---:|
+| Reference | 28,324,712 | — |
+| Compact repeated outgoing-argument rules | 28,170,840 | 153,872 B |
+| Use shorter signed CFA offsets when exact | 28,240,728 | 83,984 B |
+| Both encodings, ordinary placement | 28,086,776 | 237,936 B |
+| **Both encodings, original virtual addresses** | **28,087,224** | **237,488 B** |
+
+Rust emits frame descriptions for stack walking and exception handling. The final image contains 52,234 removable repeats of an already assigned outgoing-argument size. In 80,547 other instructions, a shorter signed operand encodes exactly the same stack offset using the common information entry’s data-alignment factor. The tool rewrites the final relocatable Rust object and lets LLD resolve the addresses. A file-free `NOLOAD` reservation maintains the original virtual layout. It costs 448 file bytes compared with ordinary placement. All 28 other allocated sections match in addresses, sizes and contents, including the complete machine code, Rust data, exception handlers' tables and dynamic relocations. The earlier placement changed code alignment and showed slower embedded startup on one CPU.
+
+Independent decoding compared **80,615 function ranges, 861,594 unwind-rule transitions and 27,657 exception-table targets**. All eight archive checks passed, covering the embedded theme, installed and edited FXP versions, a structural edit and complete interpreter fallback. Nested destructors ran in the expected order and native panic backtraces matched.
+
+Across 121 paired embedded launches on each of two pinned CPUs, the candidate/reference median time ratios to the first typed Button were **0.977** (95% interval 0.942–0.997) and **0.998** (0.978–1.014). Scalar edits, structural edits and full interpreter fallback had intervals spanning parity on both CPUs. The 19-pair full-fallback intervals were wider, 0.920–1.187 and 0.976–1.029. In a separate 81-launch comparison, the warm startup medians were **7.31 ms** with compact unwind, **7.66 ms** for the previous best and **11.97 ms** for the historical compact FatLTO main build. After verified executable-page eviction, the corresponding medians were **17.64, 16.99 and 25.98 ms** over 31 launches each.
+
+The long in-process test walked two real application stacks 8,192 times per stack and process. Both retained the same return addresses on every walk. Median CPU ratios for the affected 21-frame stack were 0.934 and 0.961, and for the 16-frame control they were 1.018 and 1.004. An end-to-end forced-panic timing that included teardown was slower on one pin and faster on another. First painted frames remain unmeasured.
+
+### Reproduce the selected release
+
+Add `--compact-unwind` to the existing Linux x86-64 PGO-z workflow, using the same locked consumer, Rust toolchain and merged profile. The flag applies to the final profile-use link. The driver first creates the ordinary release, and replaces it only when the compact image is smaller and its layout and frame-index checks pass. It copies frames with unsupported instructions verbatim. An unsupported object or altered load layout leaves the ordinary linker output in place.
+
+```sh
+python3 scripts/themes/bench/profile_winui.py --source "$PWD" \
+  --consumer "$work/reference/consumer" --work-dir "$work" \
+  --use-profile "$baseline_profile" --use-opt-level z --compact-unwind
+```
+
+### Source trials
+
+| Trial | Size measurement | Runtime outcome |
+|---|---|---|
+| Shared animation clock, delay and iteration decisions across animator types | Full app 28,212,216 B, saving 112,496 B | All 44 animation and eight archive cases passed. Normal frame delivery took 21–25% longer on two cores. |
+| Shared property registration and lookup, shared boxed marker checks, and shared reflection receiver conversion | Public property consumer 3,778,240 → 3,657,152 B. Real getter consumer 3,747,608 → 3,626,944 B. | Exact-owner lookup improved 24%. Inherited lookup took 27–29% longer, styled boxed writes 31–32% longer, and successful reflected reads 10–12% longer. |
+| Final machine outlining at threshold 48 | Property consumer 8,695,648 → 8,347,936 B | Plain property reads took 35–44% longer on two CPUs. |
+| Fixed outgoing call frames | Property consumer 8,695,648 → 8,688,192 B | Scoped metadata access took 6.7% and 9.3% longer. |
+
+All 88 reflected results, 352 diagnostic cases and an external conversion matched for the combined Rust trial. The retained runtime uses the original typed animation, property and reflection paths. The cold-registration, inheritance and getter measurements used the production Base libraries. Their individual contributions to a slowdown in the combined build remain unresolved. [Animation trial](https://github.com/wieslawsoltes/FerroUI/commit/9d4f4149987efa1016a51b1b812234021d3d676f) · [Property and reflection trial](https://github.com/wieslawsoltes/FerroUI/commit/a67d4c5ed0c7982f41b25103a97489d13780a784) · [Measured links, section verification and timings](benchmarks/compiled-theme-compact-unwind-linux-x86_64.json)
+
+The three public consumers can be linked against each build’s production Base rlib using the final release flags. The animation consumer accepts `normal`, `reverse`, `alternate` and `attach`. The property consumer accepts `registration`, `lookups` and `marker`. The getter consumer compares actual pointers obtained from the runtime metadata. Its `check` command validates the complete result manifest before timing. [Frame probe](../scripts/themes/bench/keyframe_probe.rs) · [Property routes probe](../scripts/themes/bench/property_registration_routes.rs) · [Generated getter probe](../scripts/themes/bench/actual_getters.rs)
+
 ## Results from the implementation trials
 
 | Full release with the same profile data and link policy | Stripped bytes | Smaller than previous best | Boxed style notification and read |
