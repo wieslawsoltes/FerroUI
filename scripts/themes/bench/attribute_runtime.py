@@ -10,6 +10,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import os
 import subprocess
 
 
@@ -89,7 +90,64 @@ def category(name):
     return "Other Rust and native code"
 
 
-def classify(symbols, identity):
+def unwind_families(path, ranges):
+    """Join FDEs to code by start address. GNU readelf decodes the DWARF pointers."""
+    sections = section_map(path)
+    groups_at = {}
+    for (address, _), (group, _) in ranges.items():
+        if address in groups_at and groups_at[address] != group:
+            group = "Overlapping categories"
+        groups_at[address] = group
+
+    _, frame_offset, frame_size = sections[".eh_frame"]
+    with path.open("rb") as stream:
+        stream.seek(5)
+        byteorder = {b"\x01": "little", b"\x02": "big"}[stream.read(1)]
+        stream.seek(frame_offset)
+        frame_data = stream.read(frame_size)
+        header = b""
+        if ".eh_frame_hdr" in sections:
+            stream.seek(sections[".eh_frame_hdr"][1])
+            header = stream.read(12)
+
+    in_frames = False
+    fdes = Counter()
+    frame_bytes = Counter()
+    record = re.compile(r"^\s*([0-9a-fA-F]+)\s+\w+\s+\w+\s+FDE cie=\w+ pc=([0-9a-fA-F]+)\.\.")
+    with subprocess.Popen(["readelf", "--debug-dump=frames", "--wide", path],
+                          stdout=subprocess.PIPE, text=True, env={**os.environ, "LC_ALL": "C"}) as proc:
+        for line in proc.stdout:
+            if line.startswith("Contents of the "):
+                in_frames = line.startswith("Contents of the .eh_frame section")
+            if in_frames and (match := record.match(line)):
+                offset, pc = (int(n, 16) for n in match.groups())
+                size = int.from_bytes(frame_data[offset:offset + 4], byteorder)
+                length = (12 + int.from_bytes(frame_data[offset + 4:offset + 12], byteorder)
+                          if size == 0xffffffff else 4 + size)
+                if offset + length > frame_size:
+                    raise ValueError("frame record extends past .eh_frame")
+                group = groups_at.get(pc, "No sized symbol")
+                frame_bytes[group] += length
+                fdes[group] += 1
+        if proc.wait():
+            raise ValueError("readelf could not decode the unwind records")
+
+    if not fdes:
+        raise ValueError("no .eh_frame FDE records were decoded")
+    output = {"frame_count": sum(fdes.values()), "fde_bytes": dict(frame_bytes.most_common()),
+              "fdes_by_category": dict(fdes.most_common()),
+              "cie_and_padding_bytes": frame_size - sum(frame_bytes.values())}
+    # GNU x86-64 .eh_frame_hdr uses 32-bit data-relative pairs. Other headers
+    # still get exact FDE totals without assuming a particular index encoding.
+    if (header[:4] == bytes.fromhex("011b033b") and len(header) == 12
+            and int.from_bytes(header[8:12], byteorder) == sum(fdes.values())
+            and sections[".eh_frame_hdr"][2] == 12 + 8 * sum(fdes.values())):
+        output["index_bytes"] = {group: count * 8 for group, count in fdes.items()}
+        output["index_header_bytes"] = 12
+    return output
+
+
+def classify(symbols, identity, unwind_image=None):
     start = identity["address"]
     end = start + identity["bytes"]
     ranges = {}
@@ -146,7 +204,7 @@ def classify(symbols, identity):
                 del active[label]
         previous = position
     assert sum(groups.values()) == identity["bytes"]
-    return {
+    result = {
         "text": identity, "symbol_records": n_symbols, "unique_ranges": len(ranges),
         "alias_records": n_symbols - len(ranges), "partial_overlap_bytes": overlap,
         "categories": dict(groups.most_common()),
@@ -156,11 +214,15 @@ def classify(symbols, identity):
             for kind in groups
         },
     }
+    if unwind_image is not None:
+        result["unwind"] = unwind_families(unwind_image, ranges)
+    return result
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("executable", type=Path)
+    parser.add_argument("--unwind", action="store_true", help="also attribute DWARF frame records by function address")
     parser.add_argument("--match", type=Path, help="verify against a separate shipping binary")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -169,7 +231,7 @@ def main():
         parser.error("symbolized and shipping executables have different .text")
     with subprocess.Popen(["nm", "-n", "-S", "-C", "--defined-only", args.executable],
                           stdout=subprocess.PIPE, text=True) as proc:
-        result = classify(proc.stdout, identity)
+        result = classify(proc.stdout, identity, args.executable if args.unwind else None)
         if proc.wait():
             raise SystemExit("nm failed")
     args.output.write_text(json.dumps(result, indent=2) + "\n")
