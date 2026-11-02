@@ -16,6 +16,16 @@ Open **Notifications** on the shell or press **Ctrl+N** with shell focus. **Do N
 
 Each notification shows its receipt time. The sender's icon uses the supplied icon name or file, with the installed application's icon from its `desktop-entry` hint as a fallback. Group identity also uses that hint, so two applications with the same visible name can be cleared independently. Pressing a notification title invokes its supplied `default` action.
 
+## Native captures
+
+These frames show the same independent D-Bus senders on the three desktop profiles. Their status artwork comes from the clients.
+
+| Windows 11 Notification Center | macOS notification stack | Material notification shade |
+| --- | --- | --- |
+| [![Windows notification sources](screenshots/notifications.webp)](screenshots/notifications.webp) | [![macOS notification stack](screenshots/macos-notifications.webp)](screenshots/macos-notifications.webp) | [![Material notification shade](screenshots/material-notifications.webp)](screenshots/material-notifications.webp) |
+
+[Passive Windows banner over a focused client](screenshots/toast.webp)
+
 ## Delivery
 
 - The server advertises plain-text bodies and actions. Selecting a button emits `ActionInvoked`. A non-resident notification then emits `NotificationClosed` with reason 2.
