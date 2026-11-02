@@ -543,7 +543,7 @@ fn result_tile(
     action(&format!("Launch {}", app.name), move || {
         state.launch(&state.catalog.applications()[index])
     })
-    .context_menu(Some(menu))
+    .with(move |button| button.set_context_menu(Some(menu.clone())))
     .with(reveal_selection(index, selected))
     .automation_properties_help_text("Open the context menu to pin or unpin this application.")
     .height(if material { 88.0 } else { 76.0 })
