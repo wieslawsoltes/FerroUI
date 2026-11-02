@@ -2354,6 +2354,26 @@ pub fn x_fixes_query_major_version(display: XDisplay) -> Option<c_int> {
     Some(major)
 }
 
+/// Set a window's bounding shape from a native region. `None` restores the
+/// default bounds. Callers check XFixes 2.0 support on the target screen.
+pub fn x_fixes_set_bounding_shape(display: XDisplay, window: XID, rectangles: Option<&mut [XRectangle]>) {
+    let Some(fixes) = libraries().xfixes.as_ref() else { return };
+    // SAFETY: XFixes copies the slice in XFixesCreateRegion. The remaining
+    // requests use resource IDs on this connection and are processed in order.
+    unsafe {
+        let region = if let Some(rectangles) = rectangles {
+            let Ok(count) = c_int::try_from(rectangles.len()) else { return };
+            (fixes.XFixesCreateRegion)(display.raw(), rectangles.as_mut_ptr(), count)
+        } else {
+            0
+        };
+        (fixes.XFixesSetWindowShapeRegion)(display.raw(), window, 0 /* ShapeBounding */, 0, 0, region);
+        if region != 0 {
+            (fixes.XFixesDestroyRegion)(display.raw(), region);
+        }
+    }
+}
+
 /// `ShapeInput`: the kind of the input shape of a window.
 pub const SHAPE_INPUT: c_int = 2;
 

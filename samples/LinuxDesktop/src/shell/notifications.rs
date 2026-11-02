@@ -3,6 +3,7 @@
 //! allocated until the first notification arrives.
 mod cards;
 mod center;
+mod x11_outline;
 
 use super::appearance::{Appearance, Layout};
 use super::chrome::*;
@@ -154,11 +155,11 @@ impl Banner {
                 output.as_deref(),
                 geometry.layer(),
             )?;
-            super::wayland::transparent(&window);
             window
         } else {
             Window::new()
         };
+        super::wayland::transparent(&window);
         window.set_title(Some("Ferro Desktop Notification".into()));
         window.set_window_decorations(WindowDecorations::None);
         window.set_show_in_taskbar(false);
@@ -194,6 +195,9 @@ impl Banner {
         let owner = Owner::new_root();
         let content = owner.with(|| {
             ferroui_view::provide_context(shell.appearance);
+            if !self.wayland {
+                x11_outline::attach(&self.window, f64::from(colors().radius));
+            }
             shell_panel()
                 .padding(4)
                 .child(
@@ -248,10 +252,10 @@ impl Banner {
 }
 impl Drop for Banner {
     fn drop(&mut self) {
-        self.window.close();
         if let Some(owner) = self.content_owner.take() {
             owner.dispose();
         }
+        self.window.close();
     }
 }
 
