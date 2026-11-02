@@ -25,6 +25,24 @@ The build-script numbers in the table precede a later XamlX traversal optimizati
 
 On an identical 456-leaf input, alternating 501 in-memory validation, expansion and drop passes per decoder measured 509 µs for the starting decoder and 349 µs for the candidate (median). The current full FXB resource set has 894 leaves and 7,354 records. A complete decode and drop of that larger set took 684 µs median over 101 passes.
 
+## Runtime XML and portable FXD
+
+These standalone consumers embed one production dictionary and pass its bytes to `FerroRuntimeXamlLoader::load_stream`. Both verify that the selected resource is still deferred, trigger its first lookup and assert the result type. The Fluent case also checks the brush color. The XML binary uses the default runtime loader. The FXD binary adds the `portable-xaml` feature. Each startup value is the median of 25 interleaved fresh processes with a warm file cache, measured through the flushed success marker.
+
+| Runtime document | Embedded bytes | Stripped app B | Warm app build s | Dictionary load ms | First lookup µs | Spawn to resource ms |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| WinUI ThemeShadows XML | 2,648 | 56,781,736 | 0.78 | 5.070 | 16.87 | 9.399 |
+| WinUI ThemeShadows FXD | 732 | 56,853,272 | 0.95 | 4.522 | 12.03 | 8.434 |
+| Fluent BaseResources XML | 35,412 | 56,815,640 | 0.75 | 31.328 | 67.36 | 36.734 |
+| Fluent BaseResources FXD | 15,760 | 56,869,448 | 0.81 | 27.645 | 71.66 | 32.163 |
+
+Both representations run the same XamlX type resolution, transformations and interpreter on first load. For these one-document consumers, handling FXD added 71,536 and 53,808 bytes respectively to the stripped executable, including the smaller embedded payload. The warm app build cleans only the consumer, then compiles and links with its dependencies cached. The separately measured runtime loader rustc units took 34.59 s with XML and 36.24 s with portable loading enabled. The standalone release encoder read, parsed, compressed and atomically published each document in 1.426 ms (WinUI) and 4.930 ms (Fluent), including process startup and exit. [Raw observations and toolchain](benchmarks/portable-theme-runtime-linux-x86_64.json)
+
+```sh
+python3 scripts/themes/bench/measure_document.py --work-dir /tmp/doc-winui --fixture winui
+python3 scripts/themes/bench/measure_document.py --work-dir /tmp/doc-fluent --fixture fluent
+```
+
 ## Initial WinUI release measurements
 
 The same consumer constructed WinUI and resolved its first deferred Button theme in each configuration. This Linux x86-64 run used rustc 1.99.0, opt-level 3, one Cargo job, no incremental compilation and no cross-crate LTO. Startup is the median of 21 fresh processes per mode, interleaved with a warm OS page cache. MB uses decimal units.

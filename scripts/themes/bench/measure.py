@@ -40,7 +40,7 @@ def build(cargo_args, directory, env):
     return time.perf_counter() - start, [json.loads(line) for line in proc.stdout.splitlines()]
 
 
-def cargo_timings(target):
+def cargo_timings(target, packages=(THEME, PROBE)):
     # Keep the documented HTML report as the canonical raw artifact. Cargo's
     # embedded table is optional diagnostic detail, and can change with Cargo.
     report = target / "cargo-timings/cargo-timing.html"
@@ -52,7 +52,7 @@ def cargo_timings(target):
                 units, _ = json.JSONDecoder().raw_decode(text.split(marker, 1)[1])
                 return [
                     {"package": u["name"], "target": u["target"].strip(), "seconds": u["duration"]}
-                    for u in units if u["name"] in (THEME, PROBE)
+                    for u in units if u["name"] in packages
                 ]
             except (ValueError, KeyError, TypeError):
                 pass
