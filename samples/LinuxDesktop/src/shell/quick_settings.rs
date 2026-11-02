@@ -105,19 +105,19 @@ enum Level {
 }
 
 impl Level {
-    fn percent(&self, snapshot: &Snapshot) -> Option<u8> {
+    fn percent(&self, snapshot: &Snapshot) -> Option<u16> {
         match self {
-            Self::Volume => snapshot.audio.map(|a| a.percent.min(100) as u8),
+            Self::Volume => snapshot.audio.map(|a| a.percent),
             Self::Backlight(device) => snapshot
                 .backlights
                 .iter()
                 .find(|light| &light.device == device)
-                .map(|light| light.percent),
+                .map(|light| u16::from(light.percent)),
         }
     }
 
     fn change(&self, values: &Snapshot, percent: u8) -> Option<Change> {
-        if self.percent(values)? == percent {
+        if self.percent(values)? == u16::from(percent) {
             return None;
         }
         match self {
@@ -184,7 +184,7 @@ fn level_slider(shell: &Rc<Shell>, target: Level, label: &str) -> Element {
             values.with(|s| {
                 s.as_ref()
                     .and_then(|s| read.percent(s))
-                    .map_or(0., f64::from)
+                    .map_or(0., |percent| f64::from(percent.min(100)))
             })
         })
         .is_enabled(move || {
@@ -524,4 +524,29 @@ pub(super) fn calendar_view(shell: &Rc<Shell>) -> Element {
                 ),
         )
         .into()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::services::quick_settings::{Audio, Mixer};
+
+    #[test]
+    fn a_boosted_sink_can_be_returned_to_the_slider_maximum() {
+        let mut devices = Snapshot {
+            audio: Some(Audio {
+                mixer: Mixer::PulseAudio,
+                percent: 145,
+                muted: false,
+            }),
+            ..Default::default()
+        };
+        assert_eq!(Level::Volume.percent(&devices), Some(145));
+        assert!(matches!(
+            Level::Volume.change(&devices, 100),
+            Some(Change::SetLevel(Mixer::PulseAudio, 100))
+        ));
+        devices.audio.as_mut().unwrap().percent = 100;
+        assert!(Level::Volume.change(&devices, 100).is_none());
+    }
 }
