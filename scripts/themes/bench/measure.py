@@ -150,6 +150,8 @@ def main():
     parser.add_argument("--launches", type=positive_int, default=15, help="number of measured, fresh-process launches")
     parser.add_argument("--compare-with", type=Path, action="append", default=[],
                         help="also time a previous work directory's stripped-probe, interleaved with the new one")
+    parser.add_argument("--startup-baseline", type=Path,
+                        help="interleave this reference executable and require median time to Button at or below its median")
     parser.add_argument("--compare-archive", type=Path, action="append", default=[],
                         help="also launch the precompiled consumer with an FXP file on disk")
     args = parser.parse_args()
@@ -242,6 +244,11 @@ def main():
     subprocess.run(["strip", str(stripped)], check=True)
     stripped_bytes = stripped.stat().st_size
     executables = [stripped, *(path.resolve() for path in args.compare_with)]
+    baseline = args.startup_baseline.resolve() if args.startup_baseline else None
+    if baseline == stripped:
+        parser.error("the startup baseline must be a different executable")
+    if baseline and baseline not in executables:
+        executables.append(baseline)
     if len(set(executables)) != len(executables):
         parser.error("each probe must have a distinct path")
     # Warm the OS page cache first. Each timed sample performs actual theme
@@ -277,11 +284,21 @@ def main():
         "launches": launches,
         "median": {k: statistics.median(sample[k] for sample in launches) for k in launches[0]},
     }
-    if args.compare_with or args.compare_archive:
+    if baseline:
+        baseline_ns = statistics.median(row["process_ready_ns"] for row in samples[baseline])
+        candidate_ns = result["median"]["process_ready_ns"]
+        result["startup_comparison"] = {
+            "baseline": str(baseline), "baseline_median_ns": baseline_ns,
+            "candidate_median_ns": candidate_ns, "ratio": candidate_ns / baseline_ns,
+            "passed": candidate_ns <= baseline_ns,
+        }
+    if baseline or args.compare_with or args.compare_archive:
         result["interleaved_launches"] = {str(path): rows for path, rows in samples.items()}
     report = json.dumps(result, indent=2) + "\n"
     (work / "report.json").write_text(report)
     print(report, end="")
+    if baseline and not result["startup_comparison"]["passed"]:
+        raise SystemExit(f"median startup exceeded reference ({candidate_ns / 1e6:.3f} ms vs {baseline_ns / 1e6:.3f} ms)")
     if args.max_theme_bytes and result["theme_allocated_bytes"] > args.max_theme_bytes:
         raise SystemExit(f"WinUI contributed {result['theme_allocated_bytes']} bytes; limit {args.max_theme_bytes}")
 
