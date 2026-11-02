@@ -203,22 +203,18 @@ pub(super) fn compile_documents_with_binary(
             // The build methods of the documents of the group, by their functions: what
             // an include the group transformers linked calls.
             let names: Vec<String> = group.iter().map(|(index, _, _, _)| compiled[*index].function_name.clone()).collect();
-            let functions_of_group = || {
-                let mut functions = DocumentFunctions::default();
-                functions.binary = binary.cloned();
-                for (name, transformed) in names.iter().zip(&transformed) {
-                    if let (Some(build), Some(root_class)) = (&transformed.build, root_value_handle_of(types, &transformed.root)) {
-                        functions.insert_value(build, name, root_class);
-                    }
+            let mut functions = DocumentFunctions::default();
+            functions.binary = binary.cloned();
+            for (name, document) in names.iter().zip(&transformed) {
+                if let (Some(build), Some(root_class)) = (&document.build, root_value_handle_of(types, &document.root)) {
+                    functions.insert_value(build, name, root_class);
                 }
-                functions
-            };
+            }
             // The functions each document calls.
             let mut calls: Vec<(usize, Vec<String>)> = Vec::with_capacity(group.len());
             // The namespace information of the documents, one constant per distinct table.
             let mut tables: Vec<String> = Vec::new();
             for ((index, name, _, _), transformed) in group.iter().zip(&transformed) {
-                let functions = functions_of_group();
                 let document = &mut compiled[*index];
                 let Some(table) = transformed.namespaces.clone() else {
                     document.source = Err("the document has no namespace information".to_string());
@@ -254,7 +250,7 @@ pub(super) fn compile_documents_with_binary(
                     document.source = Err(format!("the type system of the host cannot answer: {}", unanswered.join("; ")));
                 }
                 document.namespaces = Some((constant, table));
-                calls.push((*index, functions.called()));
+                calls.push((*index, functions.take_called()));
             }
             // A document that calls the function of a document that is not eligible is not
             // eligible either.
@@ -302,7 +298,9 @@ pub fn generate_file_with_binary_resources(
     host: &EmitterHost<'_>, assembly_name: &str, root_uri: &str, documents: &[(&str, &str)],
     options: &TransformOptions, binary: Option<&super::BinaryResourceFiles>,
 ) -> GeneratedFile {
-    file_of(assembly_name, root_uri, compile_documents_with_binary(host, documents, Some(root_uri), options, binary))
+    let mut file = file_of(assembly_name, root_uri, compile_documents_with_binary(host, documents, Some(root_uri), options, binary));
+    if let Some(binary) = binary { binary.declare_manifest(&mut file.source); }
+    file
 }
 
 /// The generated file of the compiled documents of an assembly.
@@ -812,16 +810,17 @@ pub fn generate_class_file_with_binary_resources(
     let mut tables: Vec<String> = Vec::new();
     let mut sources = Vec::with_capacity(documents.len());
     let mut not_eligible = Vec::new();
-    let mut emitted: Vec<usize> = Vec::new();
+    let mut by_function = HashMap::with_capacity(names.len());
+    for (index, name) in names.iter().enumerate() {
+        by_function.entry(name.as_str()).or_insert(index);
+    }
     let loadable: Vec<usize> =
         (1..documents.len()).filter(|index| public[*index] && has_build[*index]).collect();
     let mut pending: Vec<usize> = loadable.iter().rev().copied().collect();
     pending.push(0);
+    let mut scheduled = vec![false; documents.len()];
+    for &index in &pending { scheduled[index] = true; }
     while let Some(index) = pending.pop() {
-        if emitted.contains(&index) {
-            continue;
-        }
-        emitted.push(index);
         let (document, transformed, function_name) = (&documents[index], &transformed[index], &names[index]);
         let table = transformed.namespaces.clone().ok_or_else(|| format!("{}: no namespace information", document.0))?;
         let table_index = match tables.iter().position(|known| *known == table) {
@@ -853,9 +852,9 @@ pub fn generate_class_file_with_binary_resources(
         if !unanswered.is_empty() {
             not_eligible.push(format!("{}: the type system of the host cannot answer: {}", document.0, unanswered.join("; ")));
         }
-        for called in functions.called() {
-            if let Some(next) = names.iter().position(|name| *name == called) {
-                if !emitted.contains(&next) && !pending.contains(&next) {
+        for called in functions.take_called() {
+            if let Some(&next) = by_function.get(called.as_str()) {
+                if !std::mem::replace(&mut scheduled[next], true) {
                     pending.push(next);
                 }
             }
@@ -910,12 +909,13 @@ pub fn generate_class_file_with_binary_resources(
     source.push_str(&loader_table(documents, &names, &loadable, class_path, constructor.as_ref()));
     // The file is a module of the crate of the class: that crate is `crate` in it.
     let own_crate = class_path.trim_start_matches("::").split("::").next().unwrap_or_default();
-    let source = source.replace(&format!("::{own_crate}::"), "crate::");
+    let mut source = source.replace(&format!("::{own_crate}::"), "crate::");
+    if let Some(binary) = binary { binary.declare_manifest(&mut source); }
 
     // The emitted documents, as other crates see them: the class, and every other
     // document with its build function.
-    let mut exported = Vec::with_capacity(emitted.len());
-    for index in std::iter::once(0).chain((1..documents.len()).filter(|index| emitted.contains(index))) {
+    let mut exported = Vec::with_capacity(sources.len());
+    for index in (0..documents.len()).filter(|&index| scheduled[index]) {
         let root_type = root_type_name(&transformed[index].root).unwrap_or_default();
         let uri = documents[index].2.clone().unwrap_or_default();
         exported.push(match index {

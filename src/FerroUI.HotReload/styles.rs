@@ -13,14 +13,30 @@ use std::{
     rc::{Rc, Weak},
 };
 
+pub(crate) struct StyleSlot {
+    container: WeakRef<Styles>,
+    current: Rc<RefCell<Weak<dyn IStyle>>>,
+}
+impl StyleSlot {
+    pub(crate) fn new(container: &Ref<Styles>, index: usize) -> Result<Self, ReloadError> {
+        let provider = container
+            .snapshot()
+            .get(index)
+            .cloned()
+            .ok_or_else(|| ReloadError::Failed("Invalid style contribution index".into()))?;
+        Ok(Self {
+            container: container.downgrade(),
+            current: Rc::new(RefCell::new(Rc::downgrade(&provider))),
+        })
+    }
+}
 /// Replaces one style or nested Styles contribution, retaining its container and
 /// application-owned siblings. Native style removal detaches the previous frames;
 /// addition invalidates styling for the owner and its logical descendants.
 /// Register static-resource consumers as dependencies of this document.
 /// Applications caching the replaced style need an explicit refresh adapter.
 pub struct StyleReloadTarget {
-    container: WeakRef<Styles>,
-    current: Rc<RefCell<Weak<dyn IStyle>>>,
+    slot: StyleSlot,
     uri: String,
     dependencies: Vec<String>,
     configuration: RuntimeXamlLoaderConfiguration,
@@ -43,14 +59,8 @@ impl StyleReloadTarget {
         uri: String,
         configuration: RuntimeXamlLoaderConfiguration,
     ) -> Result<Self, ReloadError> {
-        let provider = container
-            .snapshot()
-            .get(index)
-            .cloned()
-            .ok_or_else(|| ReloadError::Failed("Invalid style contribution index".into()))?;
         Ok(Self {
-            container: container.downgrade(),
-            current: Rc::new(RefCell::new(Rc::downgrade(&provider))),
+            slot: StyleSlot::new(container, index)?,
             uri: crate::document_key(&uri),
             dependencies: Vec::new(),
             configuration,
@@ -76,21 +86,23 @@ impl StyleReloadTarget {
     }
 
     pub fn is_alive(&self) -> bool {
-        self.container.upgrade().is_some()
+        self.slot.container.upgrade().is_some()
     }
     pub(crate) fn tracks(&self, style: &Rc<dyn IStyle>) -> bool {
-        self.current
+        self.slot
+            .current
             .borrow()
             .upgrade()
             .is_some_and(|current| style_ptr_eq(&current, style))
     }
     pub(crate) fn is_attached(&self) -> bool {
-        self.container.upgrade().is_some_and(|container| {
-            container.snapshot().iter().any(|style| self.tracks(style))
-        })
+        self.slot
+            .container
+            .upgrade()
+            .is_some_and(|container| container.snapshot().iter().any(|style| self.tracks(style)))
     }
 }
-struct Change {
+pub(crate) struct Change {
     container: Ref<Styles>,
     index: usize,
     old: Rc<dyn IStyle>,
@@ -148,7 +160,7 @@ impl ReloadTarget for StyleReloadTarget {
         self: Rc<Self>,
         sources: Rc<Sources>,
     ) -> Result<Option<crate::ResourcePreparation>, ReloadError> {
-        let old = self.current.borrow().upgrade().ok_or_else(|| {
+        let old = self.slot.current.borrow().upgrade().ok_or_else(|| {
             ReloadError::RestartRequired("Owned resource/style contribution was removed".into())
         })?;
         let original: Rc<dyn ferroui_base::controls::IResourceNode> = old;
@@ -161,26 +173,9 @@ impl ReloadTarget for StyleReloadTarget {
 }
 impl StyleReloadTarget {
     fn prepare_change(&self, sources: Rc<Sources>) -> Result<Change, ReloadError> {
-        let container = self
-            .container
-            .upgrade()
-            .ok_or_else(|| ReloadError::Failed("Style container closed".into()))?;
-        let old = self.current.borrow().upgrade().ok_or_else(|| {
-            ReloadError::RestartRequired("Owned style contribution was removed".into())
-        })?;
-        let entries = container.snapshot();
-        let mut matches = entries
-            .iter()
-            .enumerate()
-            .filter(|(_, entry)| style_ptr_eq(entry, &old));
-        let index = matches.next().map(|(index, _)| index).ok_or_else(|| {
-            ReloadError::RestartRequired("Owned style contribution was replaced".into())
-        })?;
-        if matches.next().is_some() {
-            return Err(ReloadError::RestartRequired(
-                "Ambiguous style contribution ownership".into(),
-            ));
-        }
+        self.slot.prepare(|| self.load(sources))
+    }
+    fn load(&self, sources: Rc<Sources>) -> Result<Rc<dyn IStyle>, ReloadError> {
         let source = sources
             .get(&self.uri)
             .ok_or_else(|| ReloadError::Failed("Missing style source".into()))?;
@@ -205,8 +200,36 @@ impl StyleReloadTarget {
             Some(self.configuration.clone()),
         )
         .map_err(|error| ReloadError::Failed(error.to_string()))?;
-        let new = Rc::<dyn IStyle>::from_xaml_object(&candidate)
-            .ok_or_else(|| ReloadError::Failed("Expected style".into()))?;
+        Rc::<dyn IStyle>::from_xaml_object(&candidate)
+            .ok_or_else(|| ReloadError::Failed("Expected style".into()))
+    }
+}
+impl StyleSlot {
+    pub(crate) fn prepare(
+        &self,
+        build: impl FnOnce() -> Result<Rc<dyn IStyle>, ReloadError>,
+    ) -> Result<Change, ReloadError> {
+        let container = self
+            .container
+            .upgrade()
+            .ok_or_else(|| ReloadError::Failed("Style container closed".into()))?;
+        let old = self.current.borrow().upgrade().ok_or_else(|| {
+            ReloadError::RestartRequired("Owned style contribution was removed".into())
+        })?;
+        let entries = container.snapshot();
+        let mut matches = entries
+            .iter()
+            .enumerate()
+            .filter(|(_, entry)| style_ptr_eq(entry, &old));
+        let index = matches.next().map(|(index, _)| index).ok_or_else(|| {
+            ReloadError::RestartRequired("Owned style contribution was replaced".into())
+        })?;
+        if matches.next().is_some() {
+            return Err(ReloadError::RestartRequired(
+                "Ambiguous style contribution ownership".into(),
+            ));
+        }
+        let new = build()?;
         Ok(Change {
             container,
             index,

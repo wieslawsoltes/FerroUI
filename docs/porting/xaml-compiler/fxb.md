@@ -27,7 +27,23 @@ All numeric fields other than the signature, version, kind and ARGB word use can
 
 A reload client can decode and replace one run independently. Build the candidate using the same emitter to obtain the new bytes. Each block has a module-qualified ID, for example `my_app::compiled_xaml/compiled_xaml-0123456789abcdef.fxb`. The suffix is derived from the compiled function name, factory kind and first key, with deterministic disambiguation. Editing another run usually leaves the ID intact. Changing the set of calls, the factory kind, or the first key of a run can change the generated Rust and requires rebuilding.
 
-A debug host with both `hot-reload` and `binary-resources` can stage bytes under that ID and reconstruct the theme under the candidate snapshot. A host can also call `Batch::decode` on a worker thread, transfer the validated batch to the UI thread, and call `replace_decoded` there. Publish the new theme after successful reconstruction. Existing deferred resources keep their original generation alive. The API does not watch files or mutate a live resource dictionary.
+A debug host with both `hot-reload` and `binary-resources` can stage bytes under that ID and reconstruct the theme under the candidate snapshot. A host can also call `Batch::decode` on a worker thread, transfer the validated batch to the UI thread, and call `replace_decoded` there. Publish the new theme after successful reconstruction. Existing deferred resources keep their original generation alive. The development host can watch a file and replace a mounted theme through the same style contribution change and rollback machinery that handles source edits. Enable `ferroui-hot-reload/binary-resources`, then pass the module’s debug-only `FXB_MANIFEST` constant to the watcher. It supplies the build path and embedded baseline of a JSON manifest containing the exact relative leaf names, factory kinds, per-leaf FNV-1a/64 content fingerprints, module path and native caller fingerprint. The producer writes all leaves and atomically renames the new manifest into place last. Each leaf is validated against this generation before the watcher constructs a candidate. A torn multi-file update preserves the mounted theme. External editors publishing a block must update its fingerprint in the generation manifest. To watch a deployed directory, supply its manifest path paired with the same embedded baseline. A changed native caller or leaf layout requests a restart; a missing, malformed or out-of-directory input rejects the update. The UI loop calls `poll`; the existing file watcher debounces partial saves, and the host validates each stable batch before replacing the contribution. Other styles in the container keep their identity and order. The compiled constructor callback can also restore an application's density or other theme settings.
+
+```rust
+use ferroui_hot_reload::BinaryThemeWatcher;
+use std::time::Duration;
+
+let mut watcher = BinaryThemeWatcher::from_manifest(
+    &owner_styles, theme_index,
+    ferroui_themes_winui::compiled_xaml::FXB_MANIFEST,
+    Duration::from_millis(50),
+)?;
+
+// On the UI tick where the application normally pumps reload events.
+watcher.poll(|| Ok(ferroui_themes_winui::WinUITheme::new().as_style()))?;
+```
+
+The lower-level snapshot API supports custom publication and rollback policies.
 
 ```rust
 use std::rc::Rc;

@@ -41,7 +41,7 @@ pub fn encode(kind: Kind, rows: &[Resource<'_>]) -> Result<Vec<u8>, Error> {
         || strings
             .iter()
             .try_fold(0usize, |n, s| n.checked_add(s.len()))
-            .is_none_or(|n| n > MAX_BYTES)
+            .is_none_or(|n| n > MAX_BLOCK_BYTES)
     {
         return Err(Error("FXB string table too large"));
     }
@@ -76,7 +76,7 @@ pub fn encode(kind: Kind, rows: &[Resource<'_>]) -> Result<Vec<u8>, Error> {
         uint(&mut out, zigzag(row.line, row.value_line));
         uint(&mut out, zigzag(row.column, row.value_column));
     }
-    if out.len() > MAX_BYTES {
+    if out.len() > MAX_BLOCK_BYTES {
         return Err(Error("FXB block too large"));
     }
     Ok(out)

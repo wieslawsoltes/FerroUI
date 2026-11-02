@@ -4,7 +4,7 @@
 use super::{theme_resources, DocumentInfo, XamlIlContext, XamlLoadError};
 use ferroui_base::{controls::ResourceDictionary, Ref};
 use ferroui_xaml_binary::Payload;
-pub use ferroui_xaml_binary::{Batch, Kind};
+pub use ferroui_xaml_binary::{fingerprint, Batch, Kind, MAX_BLOCK_BYTES};
 use std::rc::Rc;
 
 /// An individually linkable compiled block. The stable identifier is used by reload

@@ -7116,6 +7116,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build",
  "ferroui-controls",
+ "ferroui-hot-reload",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
 ]

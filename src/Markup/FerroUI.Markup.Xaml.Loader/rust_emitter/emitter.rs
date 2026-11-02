@@ -3958,6 +3958,11 @@ impl<'a> DocumentFunctions<'a> {
         Some(found)
     }
 
+    /// Drain the current document's edges while retaining the group's build-method index.
+    pub(super) fn take_called(&self) -> Vec<String> {
+        self.called.take()
+    }
+
     /// The functions the documents emitted so far call.
     pub fn called(&self) -> Vec<String> {
         self.called.borrow().clone()

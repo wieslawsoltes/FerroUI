@@ -23,6 +23,15 @@ impl BinaryResourceFiles {
         self.files.take()
     }
 
+    /// Expose the compiled call-site manifest only to development hosts. A release
+    /// build never expands the include or retains the host's absolute OUT_DIR path.
+    pub(super) fn declare_manifest(&self, source: &mut String) {
+        let name = super::rust_string_literal(&format!("{}.fxb.json", self.module));
+        source.push_str(&format!(
+            "\n/// Original build path and compiled baseline of the FXB hot-reload manifest.\n#[cfg(debug_assertions)]\npub const FXB_MANIFEST: (&str, &str) = (concat!(env!(\"OUT_DIR\"), \"/xaml/\", {name}), include_str!({name}));\n"
+        ));
+    }
+
     pub(super) fn add(&self, function: &str, kind: Kind, rows: &[Resource<'_>]) -> Option<String> {
         // Oversized runs still have the identical typed Rust representation.
         let bytes = encode(kind, rows).ok()?;

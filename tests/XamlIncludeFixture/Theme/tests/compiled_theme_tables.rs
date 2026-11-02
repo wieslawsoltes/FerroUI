@@ -117,3 +117,61 @@ fn explicit_root_keeps_alias_chain_and_omits_unreferenced_factories() {
     assert!(!generated.contains("Dynamic1"));
     assert!(!generated.contains("bind_dynamic_resource"));
 }
+
+#[cfg(all(feature = "binary-reload-tests", debug_assertions))]
+#[test]
+fn generated_manifest_reloads_a_live_resource_through_its_alias() {
+    use ferroui_base::styling::{IStyle, Styles};
+    use ferroui_hot_reload::{BinaryThemeWatcher, ReloadError};
+    use std::{fs, path::Path, rc::Rc, time::{Duration, Instant}};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    crate::register_types();
+    let (original, embedded) = crate::compact_binary::FXB_MANIFEST;
+    let base = Path::new(original).parent().unwrap();
+    let folder = std::env::temp_dir().join(format!("compiled-theme-reload-{}", std::process::id()));
+    fs::create_dir_all(&folder).unwrap();
+    use ferroui_markup_xaml::xaml_il::runtime::compiled::binary_resources::fingerprint;
+    let mut changed = 0;
+    let mut generation = embedded.to_owned();
+    for entry in fs::read_dir(base).unwrap() {
+        let entry = entry.unwrap();
+        let name = entry.file_name();
+        let name = name.to_str().unwrap();
+        if !name.ends_with(".fxb") || !embedded.contains(&format!("\"{name}\"")) { continue; }
+        let mut bytes = fs::read(entry.path()).unwrap();
+        if let Some(at) = bytes.windows(4).position(|w| w == 0xff112233u32.to_le_bytes()) {
+            let old = format!("{:016x}", fingerprint(&bytes));
+            bytes[at..at + 4].copy_from_slice(&0xffabcdefu32.to_le_bytes());
+            generation = generation.replace(&old, &format!("{:016x}", fingerprint(&bytes)));
+            changed += 1;
+        }
+        fs::write(folder.join(name), bytes).unwrap();
+    }
+    assert_eq!(changed, 1);
+    let manifest = folder.join("compact_binary.fxb.json");
+    fs::write(&manifest, generation).unwrap();
+    let build = || {
+        let theme = Styles::new();
+        let resources = crate::compact_binary::build_compact_xaml(Some(XamlIlRuntimeHelpers::create_root_service_provider_v3(None)))
+            .map_err(|e| ReloadError::Failed(e.to_string()))?;
+        theme.set_resources(resources);
+        Ok::<Rc<dyn IStyle>, ReloadError>(theme.into())
+    };
+    let owner = Styles::new();
+    owner.add(build().unwrap());
+    let color = || {
+        let alias = owner.try_get_resource(&"Alias2".into(), None).flatten().unwrap();
+        ValueTypes::as_object(&*alias).and_then(|value| value.cast::<SolidColorBrush>()).unwrap().color()
+    };
+    assert_eq!(color(), Color::from_uint32(0xff112233));
+    let mut watcher = BinaryThemeWatcher::from_manifest(&owner, 0, (manifest.to_str().unwrap(), embedded), Duration::from_millis(10)).unwrap();
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while !watcher.poll(build).unwrap() {
+        assert!(Instant::now() < deadline, "no compiled file revision delivered");
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    assert_eq!(color(), Color::from_uint32(0xffabcdef));
+    drop(watcher);
+    fs::remove_dir_all(folder).unwrap();
+}

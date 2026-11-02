@@ -146,7 +146,9 @@ pub fn generate_file_binary(
     configuration: &RuntimeXamlLoaderConfiguration, dependencies: &[XamlMetadata],
     binary: Option<&super::BinaryResourceFiles>,
 ) -> GeneratedFile {
-    file_of(assembly_name, root_uri, compile_with_binary(documents, Some(root_uri), configuration, dependencies, binary))
+    let mut file = file_of(assembly_name, root_uri, compile_with_binary(documents, Some(root_uri), configuration, dependencies, binary));
+    if let Some(binary) = binary { binary.declare_manifest(&mut file.source); }
+    file
 }
 
 /// A group of documents with owned texts as the borrowed form

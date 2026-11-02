@@ -102,6 +102,7 @@
 
 mod binary_files;
 pub use binary_files::BinaryResourceFiles;
+pub use ferroui_xaml_binary::fingerprint as binary_fingerprint;
 mod compiled;
 mod compiled_resources;
 pub mod emit_types;

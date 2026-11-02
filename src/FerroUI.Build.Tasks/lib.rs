@@ -746,7 +746,7 @@ impl Build {
                         for warning in &file.warnings {
                             diagnostics.warning(FerroXamlDiagnosticCodes::XAML_LOADER_UNREACHABLE, class_document, warning, &mut lines, &mut errors);
                         }
-                        write_binary_files(&xaml_directory, binary.as_ref(), &mut errors);
+                        write_binary_files(&path, &module_path, &file.source, binary.as_ref(), &mut errors);
                         write_if_changed(&path, &file.source, &mut errors);
                         let class_metadata = file.metadata(&[]);
                         if group.exported {
@@ -814,7 +814,7 @@ impl Build {
                     false => errors.push(diagnostics::error(FerroXamlDiagnosticCodes::EMIT_ERROR, name, &reason)),
                 }
             }
-            write_binary_files(&xaml_directory, binary.as_ref(), &mut errors);
+            write_binary_files(&path, &module_path, &file.source, binary.as_ref(), &mut errors);
             write_if_changed(&path, &file.source, &mut errors);
             write_if_changed(&xaml_directory.join(format!("{}.map.json", group.module)), &file.position_map, &mut errors);
             if group.exported {
@@ -1042,20 +1042,41 @@ fn collect(root: &Path, directory: &Path, found: &mut Vec<(String, PathBuf)>) ->
 }
 
 /// Materialize only the binary leaves referenced by this compilation.
-fn write_binary_files(directory: &Path, files: Option<&BinaryResourceFiles>, errors: &mut Vec<String>) {
+fn write_binary_files(module_file: &Path, module: &str, source: &str, files: Option<&BinaryResourceFiles>, errors: &mut Vec<String>) {
     let Some(files) = files else { return };
-    let files = files.take();
-    if files.is_empty() { return; }
+    let directory = module_file.parent().expect("generated module directory");
     if let Err(error) = fs::create_dir_all(directory) {
         errors.push(format!("{}: {error}", directory.display()));
         return;
     }
-    for (name, bytes) in files {
-        let path = directory.join(name);
+    use ferroui_markup_xaml_loader::rust_emitter::binary_fingerprint;
+    let mut blocks = std::collections::BTreeMap::new();
+    for (name, bytes) in files.take() {
+        let path = directory.join(&name);
+        blocks.insert(name, (bytes[5], format!("{:016x}", binary_fingerprint(&bytes))));
         if fs::read(&path).ok().as_deref() != Some(bytes.as_slice()) {
             if let Err(error) = fs::write(&path, bytes) {
                 errors.push(format!("{}: {error}", path.display()));
+                return;
             }
+        }
+    }
+    // The caller signature includes native fallback code. A changed native body or call
+    // graph requires recompiling, even if the same FXB files still exist on disk.
+    let caller = binary_fingerprint(source.as_bytes());
+    let manifest = serde_json::json!({
+        "version": 1, "module": module.trim_start_matches("::"),
+        "caller": format!("{caller:016x}"), "blocks": blocks,
+    });
+    // One rename commits this generation. A watcher observing a partial set of new
+    // leaves before publication rejects them against the previous complete manifest.
+    let path = module_file.with_extension("fxb.json");
+    let manifest = manifest.to_string();
+    if fs::read_to_string(&path).ok().as_deref() != Some(manifest.as_str()) {
+        let tmp = path.with_extension(format!("json.{}.tmp", std::process::id()));
+        if let Err(error) = fs::write(&tmp, manifest).and_then(|()| fs::rename(&tmp, &path)) {
+            let _ = fs::remove_file(&tmp);
+            errors.push(format!("{}: {error}", path.display()));
         }
     }
 }

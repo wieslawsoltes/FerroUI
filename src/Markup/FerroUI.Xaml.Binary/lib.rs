@@ -9,8 +9,16 @@
 use std::{fmt, sync::Arc};
 
 const HEADER: &[u8; 5] = b"FXB\0\x01";
-const MAX_BYTES: usize = 16 << 20;
+pub const MAX_BLOCK_BYTES: usize = 16 << 20;
 const MAX_ITEMS: usize = 1 << 20;
+
+/// FNV-1a/64 generation consistency check used by the development manifest.
+/// This identifies torn publications or stale files; it is not an authentication tag.
+pub fn fingerprint(bytes: &[u8]) -> u64 {
+    bytes.iter().fold(0xcbf29ce484222325u64, |h, &b| {
+        (h ^ u64::from(b)).wrapping_mul(0x100000001b3)
+    })
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
@@ -19,6 +27,18 @@ pub enum Kind {
     LiteralBrush = 2,
     DynamicBrush = 3,
     StaticBrush = 4,
+}
+
+impl Kind {
+    pub fn from_wire(tag: u8) -> Option<Self> {
+        match tag {
+            1 => Some(Self::Alias),
+            2 => Some(Self::LiteralBrush),
+            3 => Some(Self::DynamicBrush),
+            4 => Some(Self::StaticBrush),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -94,17 +114,12 @@ impl Batch {
     /// Decode one whole immutable block. Truncation, trailing data, unbounded counts,
     /// dangling references and out-of-range source locations are errors.
     pub fn decode(bytes: &[u8]) -> Result<Self, Error> {
-        if bytes.len() > MAX_BYTES || !bytes.starts_with(HEADER) {
+        if bytes.len() > MAX_BLOCK_BYTES || !bytes.starts_with(HEADER) {
             return Err(Error("invalid FXB header, version or length"));
         }
         let mut bytes = &bytes[HEADER.len()..];
-        let kind = match take(&mut bytes, 1)?[0] {
-            1 => Kind::Alias,
-            2 => Kind::LiteralBrush,
-            3 => Kind::DynamicBrush,
-            4 => Kind::StaticBrush,
-            _ => return Err(Error("unsupported FXB record kind")),
-        };
+        let kind =
+            Kind::from_wire(take(&mut bytes, 1)?[0]).ok_or(Error("unsupported FXB record kind"))?;
         let strings = uint(&mut bytes)? as usize;
         let count = uint(&mut bytes)? as usize;
         // Every string requires two lengths, every row at least six bytes.
@@ -120,8 +135,8 @@ impl Batch {
             let suffix = uint(&mut bytes)? as usize;
             let previous = &text[previous_start..];
             if !previous.is_char_boundary(prefix)
-                || prefix > MAX_BYTES - text.len()
-                || suffix > MAX_BYTES - text.len() - prefix
+                || prefix > MAX_BLOCK_BYTES - text.len()
+                || suffix > MAX_BLOCK_BYTES - text.len() - prefix
             {
                 return Err(Error("invalid FXB string prefix or expanded length"));
             }

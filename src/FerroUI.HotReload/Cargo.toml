@@ -15,6 +15,9 @@ path = "lib.rs"
 [package.metadata.release]
 group = "tools"
 
+[features]
+binary-resources = ["ferroui-markup-xaml/binary-resources"]
+
 [dependencies]
 serde_json = "1"
 ferroui-base = { workspace = true, features = ["hot-reload"] }

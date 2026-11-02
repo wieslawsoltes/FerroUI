@@ -1,5 +1,9 @@
 //! Development reload transactions. All targets and commits remain on the creating UI thread.
 #![cfg(debug_assertions)]
+#[cfg(feature = "binary-resources")]
+mod binary_themes;
+#[cfg(feature = "binary-resources")]
+pub use binary_themes::BinaryThemeWatcher;
 mod component;
 mod state_scope;
 mod handlers;
