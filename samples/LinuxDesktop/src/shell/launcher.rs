@@ -45,7 +45,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     let width = shell.metrics().width;
     let query = shell.query;
     let page = shell.page;
-    let slot = signal(0usize);
+    let slot = signal(None::<usize>);
     let catalog = shell.catalog.clone();
     let pinned_only = signal(false);
     let favorites = shell.favorites;
@@ -66,14 +66,25 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     let active_page = memo(move |_| page.get().min(pages.get() - 1));
     let offset = memo(move |_| active_page.get() * presentation.get().capacity());
     let selected = memo(move |_| {
-        let position = offset.get() + slot.get().min(presentation.get().capacity() - 1);
+        let position = offset.get()
+            + slot
+                .get()
+                .unwrap_or(0)
+                .min(presentation.get().capacity() - 1);
         position.min(count.get().saturating_sub(1))
     });
     let selected_app = memo(move |_| matches.with(|items| items.get(selected.get()).copied()));
+    let highlight = memo(move |_| {
+        if slot.get().is_some() || searching.get() || layout == Layout::MenuBarDock {
+            selected_app.get()
+        } else {
+            None
+        }
+    });
     let set_page = move |page_index| {
         batch(|| {
             page.set_if_changed(page_index);
-            slot.set_if_changed(0);
+            slot.set_if_changed(None);
         })
     };
     let toggle_scope = move || {
@@ -126,7 +137,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     .columns(columns as i32)
                     .children(
                         items
-                            .map(|index| result_tile(&state, index, selected_app, layout))
+                            .map(|index| result_tile(&state, index, highlight, layout))
                             .collect::<Vec<_>>(),
                     )
                     .into(),
@@ -134,7 +145,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     .spacing(2.0)
                     .children(
                         items
-                            .map(|index| result_row(&state, index, pinned_only.get(), selected_app))
+                            .map(|index| result_row(&state, index, pinned_only.get(), highlight))
                             .collect::<Vec<_>>(),
                     )
                     .into(),
@@ -181,7 +192,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                         }.min(length - 1);
                         batch(|| {
                             page.set_if_changed(next / capacity);
-                            slot.set_if_changed(next % capacity);
+                            slot.set_if_changed(Some(next % capacity));
                         });
                     }
                     (Key::Left | Key::Right, KeyModifiers::ALT) if pinned_only.get_untracked() => {
@@ -523,6 +534,7 @@ fn result_tile(
         state.launch(&state.catalog.applications()[index])
     })
     .context_menu(Some(menu))
+    .with(reveal_selection(index, selected))
     .automation_properties_help_text("Open the context menu to pin or unpin this application.")
     .height(if material { 88.0 } else { 76.0 })
     .horizontal_alignment(H::Stretch)
@@ -611,13 +623,29 @@ fn result_row(
         .child(
             grid()
                 .column_definitions("*,Auto")
-                .child(result_button(shell, index))
+                .child(result_button(shell, index).with(reveal_selection(index, selected)))
                 .child(edits.grid_column(1).child(pin_button(shell, index))),
         )
         .into()
 }
 
-fn result_button(shell: &Rc<Shell>, index: usize) -> Element {
+fn reveal_selection(
+    index: usize,
+    selected: Memo<Option<usize>>,
+) -> impl Fn(&ferroui_base::Ref<ferroui_controls::Button>) {
+    move |button| {
+        let weak = button.downgrade();
+        effect(move || {
+            if selected.get() == Some(index) {
+                if let Some(button) = weak.upgrade() {
+                    button.bring_into_view();
+                }
+            }
+        });
+    }
+}
+
+fn result_button(shell: &Rc<Shell>, index: usize) -> El<ferroui_controls::Button> {
     let application = &shell.catalog.applications()[index];
     let state = shell.clone();
     let subtitle = if application.description.is_empty() {
@@ -654,7 +682,6 @@ fn result_button(shell: &Rc<Shell>, index: usize) -> Element {
                     .child(shell_text(subtitle, 11.0, Ink::Secondary)),
             ),
     )
-    .into()
 }
 
 pub(super) fn app_icon(shell: &Shell, application: &DesktopApplication) -> Element {
