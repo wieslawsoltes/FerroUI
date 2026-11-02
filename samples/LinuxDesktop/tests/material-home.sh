@@ -146,6 +146,17 @@ open_menu right
 until_ok menu_visible
 key End Return
 until_ok pins_are '["studio.desktop","leaves.desktop"]'
+until_ok menu_dismissed
+until_ok find_note
+# Press on the tile, then release outside to move focus without opening
+# its application. Invoke the shortcut menu from the keyboard.
+rm -f "$fixture/compose"
+xdotool mousemove --window "$win" "$x" "$y" mousedown 1 mousemove --window "$win" "$((x+70))" "$((y-20))" mouseup 1
+sleep .15
+key Menu
+until_ok menu_visible
+key Home Return
+until_ok test -f "$fixture/compose"
 key Escape alt+F4
 wait "$shell"; shell=
 echo 'Verified Material home app actions, hold without launch, opt-in/out of app suggestions and persistent pin changes.'
