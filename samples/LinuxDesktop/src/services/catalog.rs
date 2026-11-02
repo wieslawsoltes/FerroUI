@@ -17,7 +17,7 @@ pub struct DesktopApplication {
     /// Serialized GIcon, usually a single theme icon name.
     pub icon: String,
     pub actions: Vec<DesktopAction>,
-    pub(super) category: &'static str,
+    pub(crate) category: &'static str,
     search_text: String,
 }
 
