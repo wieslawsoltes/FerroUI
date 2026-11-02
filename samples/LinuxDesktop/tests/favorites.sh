@@ -38,7 +38,9 @@ done
 openbox --sm-disable >"$output/openbox.log" 2>&1 &
 wm_pid=$!
 start_shell() {
-    "$binary" --theme=windows "$@" >>"$output/favorites.log" 2>&1 &
+    local profile=$1
+    shift
+    "$binary" --theme="$profile" "$@" >>"$output/favorites.log" 2>&1 &
     shell_pid=$!
     shell_window=$(timeout 25s xdotool search --sync --onlyvisible --name '^Ferro Desktop$' | head -1)
     xdotool windowactivate --sync "$shell_window"
@@ -67,7 +69,7 @@ search() {
     key ctrl+a
     xdotool type --clearmodifiers --delay 12 "Ferro Fixture $1"
 }
-start_shell "$@"
+start_shell windows "$@"
 key ctrl+k; sleep .25
 search Atlas; key ctrl+p; pins_are '["ferro-atlas.desktop"]'
 search Beacon; key ctrl+p; pins_are '["ferro-atlas.desktop","ferro-beacon.desktop"]'
@@ -81,10 +83,42 @@ sleep .2
 import -window "$shell_window" "$output/pinned-taskbar.png"
 key alt+F4
 wait "$shell_pid"; shell_pid=
-start_shell "$@"
+start_shell windows "$@"
 key ctrl+k; sleep .25; key ctrl+shift+p Return
 for ((i=0; i<80; i++)); do [[ -f "$fixture/beacon.launched" ]] && break; sleep .1; done
 [[ -f "$fixture/beacon.launched" && ! -f "$fixture/atlas.launched" ]]
 key ctrl+k; sleep .2
 search Beacon; key ctrl+p; pins_are '["ferro-atlas.desktop"]'
 echo 'Verified GIO launch from restored pins, reordering and removal.'
+
+# Keep keyboard focus in the search field while traversing a page boundary.
+# Spotlight has six rows per page. The wide Material drawer has fifteen tiles.
+key alt+F4
+wait "$shell_pid"; shell_pid=
+for number in {01..18}; do
+    cat >"$XDG_DATA_HOME/applications/ferro-navigation-$number.desktop" <<ENTRY
+[Desktop Entry]
+Type=Application
+Name=Ferro Navigation $number
+Exec=/usr/bin/touch "$fixture/navigation-$number.launched"
+ENTRY
+done
+for profile in macos material; do
+    case "$profile" in macos) expected=06 ;; material) expected=15 ;; esac
+    start_shell "$profile" "$@"
+    key ctrl+k; sleep .25
+    xdotool type --clearmodifiers --delay 12 'Ferro Navigation'
+    key Page_Down Up Return
+    for ((i=0; i<80; i++)); do
+        [[ -f "$fixture/navigation-$expected.launched" ]] && break
+        sleep .1
+    done
+    [[ -f "$fixture/navigation-$expected.launched" ]] || {
+        echo "The $profile launcher did not open keyboard selection $expected" >&2
+        import -window "$shell_window" "$output/failed-$profile-selection.png" || :
+        exit 1
+    }
+    key alt+F4
+    wait "$shell_pid"; shell_pid=
+done
+echo 'Verified Spotlight and Material keyboard selection across result pages.'
