@@ -477,13 +477,22 @@ pub(crate) fn validate_size(size: Size) -> Result<(), ChartError> {
     }
 }
 
+/// The series colours of the source's default (light) theme: `ColorPalletes.MaterialDesign500`,
+/// taken in series order (`Theme.GetSeriesColor`).
+pub const PALETTE: [Color; 9] = [
+    Color::from_rgb(33, 150, 243),
+    Color::from_rgb(244, 67, 54),
+    Color::from_rgb(139, 195, 74),
+    Color::from_rgb(0, 188, 212),
+    Color::from_rgb(63, 81, 181),
+    Color::from_rgb(255, 193, 7),
+    Color::from_rgb(0, 150, 136),
+    Color::from_rgb(233, 30, 99),
+    Color::from_rgb(96, 125, 139),
+];
+
 pub fn palette_color(index: usize) -> Color {
-    const COLORS: [u32; 10] = [
-        0xff4263eb, 0xff15aabf, 0xfff59f00, 0xffe64980, 0xff40c057, 0xff7950f2, 0xffff922b,
-        0xff228be6, 0xff82c91e, 0xffbe4bdb,
-    ];
-    let c = COLORS[index % COLORS.len()];
-    Color::from_argb((c >> 24) as u8, (c >> 16) as u8, (c >> 8) as u8, c as u8)
+    PALETTE[index % PALETTE.len()]
 }
 
 #[cfg(test)]
