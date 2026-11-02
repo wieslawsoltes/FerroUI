@@ -95,34 +95,55 @@ fn rich_highlights_preserve_inline_format_and_selection_has_foreground_priority(
         "the run must not cover the highlight background"
     );
 
+    // The selection is drawn over the lines (#439), not as a format of the runs: the drawn
+    // selected glyphs take the selection foreground before the highlight's, and the run's
+    // background is left out under the selection highlight.
+    use crate::rich_text_selection_overlay_tests::{close, fills, glyphs, overlaps, render};
+    let span = |range: std::ops::Range<usize>| {
+        let rects = view.get_rects_for_range(range);
+        (rects[0].x, rects[0].right())
+    };
     view.set_selection_foreground_brush(Some(Brushes::white()));
     view.select(1, 3);
     assert_eq!(
         rich_brush_color(rich_source_properties(&view, 1).foreground_brush()),
-        Some(Colors::WHITE)
-    );
-    view.set_selection_foreground_brush(None);
-    assert_eq!(
-        rich_brush_color(rich_source_properties(&view, 1).foreground_brush()),
         Some(Colors::BLUE)
     );
+    let selected = span(1..3);
+    let drawn = render(&view);
+    let white = glyphs(&drawn, Colors::WHITE);
+    assert_eq!(white.len(), 1, "{drawn:#?}");
+    let visible = white[0].visible();
+    assert!(close(visible.0, selected.0) && close(visible.1, selected.1));
+    assert!(glyphs(&drawn, Colors::BLUE)
+        .iter()
+        .all(|painted| !overlaps(painted.visible(), selected)));
+    view.set_selection_foreground_brush(None);
+    let drawn = render(&view);
+    assert!(glyphs(&drawn, Colors::WHITE).is_empty());
+    assert!(glyphs(&drawn, Colors::BLUE)
+        .iter()
+        .any(|painted| overlaps(painted.visible(), selected)));
     view.select(3, 4);
-    assert!(
-        rich_source_properties(&view, 3)
-            .background_brush()
-            .is_none()
-    );
-    view.set_is_text_selection_enabled(false);
     assert_eq!(
         rich_brush_color(rich_source_properties(&view, 3).background_brush()),
         Some(Colors::AQUA)
     );
+    let selected = span(3..4);
+    let backgrounds = fills(&render(&view), Colors::AQUA);
+    assert!(!backgrounds.is_empty());
+    assert!(backgrounds
+        .iter()
+        .all(|rect| !overlaps((rect.x, rect.right()), selected)));
+    view.set_is_text_selection_enabled(false);
+    assert!(fills(&render(&view), Colors::AQUA)
+        .iter()
+        .any(|rect| overlaps((rect.x, rect.right()), selected)));
     view.set_is_text_selection_enabled(true);
     view.set_selection_highlight_color(None);
-    assert_eq!(
-        rich_brush_color(rich_source_properties(&view, 3).background_brush()),
-        Some(Colors::AQUA)
-    );
+    assert!(fills(&render(&view), Colors::AQUA)
+        .iter()
+        .any(|rect| overlaps((rect.x, rect.right()), selected)));
     assert_eq!(view.document().revision(), revision);
     assert_eq!(
         rich_brush_color(run.foreground().as_ref()),
