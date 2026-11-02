@@ -318,3 +318,16 @@ phase = "C3"
 pull = 466
 deprecated = "ferroui_x11::x11_exception::X11Exception"
 behaviour = "same"
+
+# C4: `Task`, `TaskCompletionSource` and `SynchronizationContext` become futures on the executor of
+# `ferroui_system::task` (docs/idiomatic-rust-async.md); the old types remain one release as
+# deprecated wrappers.
+
+[[name]]
+upstream = "System.Threading.Tasks.TaskCompletionSource"
+rust = "ferroui_system::task::oneshot"
+kind = "type"
+phase = "C4"
+deprecated = "ferroui_x11::selections::selection_helper::TaskCompletionSource"
+behaviour = "deviation"
+notes = "Step A3. `oneshot::channel()` gives a Sender (SetResult and TrySetResult are send, which gives the value back when the receiver is gone; SetCanceled is dropping the sender) and a Receiver (the task: a future of Result<T, Canceled>, try_recv, blocking_recv, recv_timeout, shared() for several waiters). A dropped sender cancels its receiver, where a dropped TaskCompletionSource leaves its task pending (F6; DEVIATIONS rows of the X11, remote protocol, iOS, Android and WinUI code). Also deprecated: ferroui_x11::selections::selection_helper::TaskCompletionFuture, ferroui_ios::completion::{Completion, CompletionFuture}. ferroui_system::threading::tasks::TaskCompletionSource keeps its behaviour until the steps that replace its uses (section 4)."
