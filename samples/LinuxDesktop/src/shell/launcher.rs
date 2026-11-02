@@ -154,6 +154,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     });
 
     let field = NodeRef::<ferroui_controls::TextBox>::new();
+    let field_focused = signal(false);
     let state = shell.clone();
     let search = text_box()
         .name("ApplicationSearch")
@@ -165,8 +166,23 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
             Layout::BottomNavigation => "Search apps",
         })
         .text(query.two_way())
+        .on_got_focus(move |_| field_focused.set_if_changed(true))
+        .on_lost_focus(move |_| field_focused.set_if_changed(false))
+        .on_template_applied(|args| {
+            // Search owns one focus border around its icon, text and close command.
+            // Keep the themed presenter, editing commands, caret and IME host.
+            let scope = args.name_scope();
+            if let Some(chrome) = scope.find_as::<ferroui_controls::Border>("BorderElement") {
+                chrome.set_background(None);
+                chrome.set_border_thickness(ferroui_base::Thickness::uniform(0.0));
+            }
+            if let Some(ring) = scope.find_as::<ferroui_controls::Border>("MacOSPointerFocusRing") {
+                ring.set_is_visible(false);
+            }
+        })
         .on_changed(ferroui_controls::TextBox::text_property(), move |_| set_page(0))
         .with(move |input| {
+            input.set_focus_adorner(None);
             let weak = input.downgrade();
             state.search_box.replace(Some(weak.clone()));
             let shell = state.clone();
@@ -283,8 +299,14 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                 border()
                     .grid_row(1)
                     .background(if spotlight { "Transparent" } else { p.tile })
-                    .border_brush(p.edge)
-                    .border_thickness(if layout == Layout::Taskbar { 1 } else { 0 })
+                    .border_brush(move || {
+                        if field_focused.get() {
+                            p.accent
+                        } else {
+                            p.edge
+                        }
+                    })
+                    .border_thickness(1)
                     .corner_radius(if is_drawer { 26 } else { 8 })
                     .padding((12.0, 3.0))
                     .child(
