@@ -2731,17 +2731,69 @@ mod native {
         }
     }
 
-    /// `CreateCaret` without a bitmap: a caret of the window of a width
-    /// and a height.
+    ferroui_base::ferro_thread_local! {
+        /// The bitmap of the caret [`create_caret`] made on this thread; 0
+        /// for none. The system does not delete the bitmap of a caret.
+        static CARET_BITMAP: std::cell::Cell<isize> = const { std::cell::Cell::new(0) };
+    }
+
+    /// `CreateCaret` with a blank bitmap of a width and a height: a caret of
+    /// the window that replaces the caret of the thread, hidden until
+    /// [`show_caret`]. Shown, it draws nothing: the system inverts the
+    /// window under it with the bitmap (`SRCINVERT`), and a monochrome
+    /// bitmap of zeros is the text colour of the device context, black,
+    /// which inverts nothing; a window without a redirection bitmap shows
+    /// nothing drawn with GDI anyway. The bitmap of the caret it replaces is
+    /// deleted.
     pub fn create_caret(hwnd: isize, width: i32, height: i32) -> bool {
-        // SAFETY: a handle and numbers.
-        unsafe { wm::CreateCaret(h(hwnd), std::ptr::null_mut(), width, height) != 0 }
+        let bitmap = create_bitmap(width.max(1), height.max(1), 1, 1, &[]);
+        if bitmap == 0 {
+            return false;
+        }
+        // SAFETY: a handle, and a bitmap that lives until the caret is
+        // replaced or destroyed. With a bitmap the size arguments are
+        // ignored.
+        let created = unsafe { wm::CreateCaret(h(hwnd), h(bitmap), 0, 0) != 0 };
+        if !created {
+            delete_object(bitmap);
+            return false;
+        }
+        delete_object(CARET_BITMAP.with(|cell| cell.replace(bitmap)));
+        true
+    }
+
+    /// `ShowCaret` of a caret of a window of the calling thread.
+    pub fn show_caret(hwnd: isize) -> bool {
+        // SAFETY: a handle.
+        unsafe { wm::ShowCaret(h(hwnd)) != 0 }
     }
 
     /// `SetCaretPos`.
     pub fn set_caret_pos(x: i32, y: i32) -> bool {
         // SAFETY: numbers.
         unsafe { wm::SetCaretPos(x, y) != 0 }
+    }
+
+    /// The caret of the thread of a window as the system has it
+    /// (`GetGUIThreadInfo`): the window that owns it, its rectangle in the
+    /// client coordinates of that window, and whether it is shown
+    /// (`GUI_CARETBLINKING`). `None` when the call fails or the thread has
+    /// no caret.
+    pub fn gui_thread_caret(hwnd: isize) -> Option<(isize, RECT, bool)> {
+        // SAFETY: a handle; no out parameter for the process.
+        let thread = unsafe { wm::GetWindowThreadProcessId(h(hwnd), std::ptr::null_mut()) };
+        let mut info = wm::GUITHREADINFO { cbSize: std::mem::size_of::<wm::GUITHREADINFO>() as u32, ..Default::default() };
+        // SAFETY: a valid out structure of the size given.
+        let ok = thread != 0 && unsafe { wm::GetGUIThreadInfo(thread, &mut info) != 0 };
+        if !ok || info.hwndCaret.is_null() {
+            return None;
+        }
+        let rect = info.rcCaret;
+        Some((
+            info.hwndCaret as isize,
+            RECT { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom },
+            info.flags & wm::GUI_CARETBLINKING != 0,
+        ))
     }
 
     /// `GetCaretPos`: where the caret of the thread is, in the client
@@ -2753,10 +2805,14 @@ mod native {
         ok.then_some((point.x, point.y))
     }
 
-    /// `DestroyCaret`.
+    /// `DestroyCaret`, and the bitmap [`create_caret`] made for it is
+    /// deleted (it is no longer the shape of a caret: destroyed here, or
+    /// replaced by a caret another window of the thread created).
     pub fn destroy_caret() -> bool {
         // SAFETY: no arguments.
-        unsafe { wm::DestroyCaret() != 0 }
+        let destroyed = unsafe { wm::DestroyCaret() != 0 };
+        delete_object(CARET_BITMAP.with(|cell| cell.replace(0)));
+        destroyed
     }
 
     /// The version of the system as `RtlGetVersion` reports it: major,
