@@ -7951,17 +7951,27 @@ fn build_controls_fluentcontrols_xaml_deferred_13(
 fn build_controls_fluentcontrols_xaml_deferred_14(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_fluentcontrols_xaml_factory_shape_14(service_provider, <__t::Carousel as __t::StaticType>::TYPE, build_controls_fluentcontrols_xaml_deferred_15, 7)
+}
+
+#[inline(never)]
+fn __build_controls_fluentcontrols_xaml_factory_shape_14(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: rt::DeferredBuild,
+    arg2: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(4,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     // Controls/FluentControls.xaml(4,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Carousel as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/FluentControls.xaml(5,6) Content
     let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/FluentControls.xaml(6,8) Value
     let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/FluentControls.xaml(7,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_15, 7, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg1, arg2, 10)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
@@ -8085,20 +8095,12 @@ fn build_controls_fluentcontrols_xaml_deferred_18(
 fn build_controls_fluentcontrols_xaml_deferred_19(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(4,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
     // Controls/FluentControls.xaml(4,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ItemsControl as __t::StaticType>::TYPE));
     // Controls/FluentControls.xaml(5,6) Content
-    let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/FluentControls.xaml(6,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/FluentControls.xaml(7,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_20, 7, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_fluentcontrols_xaml_factory_shape_14(service_provider, <__t::ItemsControl as __t::StaticType>::TYPE, build_controls_fluentcontrols_xaml_deferred_20, 7)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(7,10)` (a template or a deferred resource).
@@ -10283,20 +10285,12 @@ fn build_controls_fluentcontrols_xaml_deferred_47(
 fn build_controls_fluentcontrols_xaml_deferred_48(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(4,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
     // Controls/FluentControls.xaml(4,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::TransitioningContentControl as __t::StaticType>::TYPE));
     // Controls/FluentControls.xaml(5,6) Content
-    let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/FluentControls.xaml(6,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/FluentControls.xaml(7,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_49, 7, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_fluentcontrols_xaml_factory_shape_14(service_provider, <::ferroui_controls::TransitioningContentControl as __t::StaticType>::TYPE, build_controls_fluentcontrols_xaml_deferred_49, 7)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(7,10)` (a template or a deferred resource).
@@ -11046,20 +11040,12 @@ fn build_controls_fluentcontrols_xaml_deferred_61(
 fn build_controls_fluentcontrols_xaml_deferred_62(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(4,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
     // Controls/FluentControls.xaml(4,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::RefreshContainer as __t::StaticType>::TYPE));
     // Controls/FluentControls.xaml(6,6) Content
-    let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/FluentControls.xaml(7,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/FluentControls.xaml(8,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_63, 8, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_fluentcontrols_xaml_factory_shape_14(service_provider, <::ferroui_controls::RefreshContainer as __t::StaticType>::TYPE, build_controls_fluentcontrols_xaml_deferred_63, 8)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(8,10)` (a template or a deferred resource).
@@ -21825,6 +21811,15 @@ fn build_controls_fluentcontrols_xaml_deferred_261(
 fn build_controls_fluentcontrols_xaml_deferred_262(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_fluentcontrols_xaml_factory_shape_262(service_provider, 64, 74)
+}
+
+#[inline(never)]
+fn __build_controls_fluentcontrols_xaml_factory_shape_262(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: i32,
+    arg1: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(64,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
@@ -21832,8 +21827,8 @@ fn build_controls_fluentcontrols_xaml_deferred_262(
     // Controls/FluentControls.xaml(64,4) TargetType
     __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Button as __t::StaticType>::TYPE));
     // Controls/FluentControls.xaml(64,74) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "PipsPagerNavigationButtonTheme", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 64, 74)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 64, 74)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 64, 74)?);
+    let provided_0 = rt::provide_static_resource(&context, "PipsPagerNavigationButtonTheme", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg0, arg1)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg0, arg1)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg0, arg1)?);
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
@@ -21842,17 +21837,10 @@ fn build_controls_fluentcontrols_xaml_deferred_262(
 fn build_controls_fluentcontrols_xaml_deferred_263(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(67,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/FluentControls.xaml(67,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Button as __t::StaticType>::TYPE));
     // Controls/FluentControls.xaml(67,70) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "PipsPagerNavigationButtonTheme", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 67, 70)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 67, 70)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 67, 70)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_fluentcontrols_xaml_factory_shape_262(service_provider, 67, 70)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(69,4)` (a template or a deferred resource).
@@ -31822,6 +31810,17 @@ fn build_controls_fluentcontrols_xaml_deferred_344(
 fn build_controls_fluentcontrols_xaml_deferred_345(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_fluentcontrols_xaml_factory_shape_345(service_provider, build_controls_fluentcontrols_xaml_deferred_346, 32, build_controls_fluentcontrols_xaml_deferred_347, 52)
+}
+
+#[inline(never)]
+fn __build_controls_fluentcontrols_xaml_factory_shape_345(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: rt::DeferredBuild,
+    arg1: i32,
+    arg2: rt::DeferredBuild,
+    arg3: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/FluentControls.xaml(28,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
@@ -31836,7 +31835,7 @@ fn build_controls_fluentcontrols_xaml_deferred_345(
     // Controls/FluentControls.xaml(31,8) TargetType
     __t::ControlTemplate::__markup_set_TargetType(&control_template_0, __t::Option::Some(<__t::DataValidationErrors as __t::StaticType>::TYPE));
     // Controls/FluentControls.xaml(32,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_346, 32, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg0, arg1, 10)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
@@ -31846,7 +31845,7 @@ fn build_controls_fluentcontrols_xaml_deferred_345(
     let data_template_0 = __t::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(data_template_0.clone()));
     // Controls/FluentControls.xaml(52,10) Content
-    let deferred_1 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_347, 52, 10)?;
+    let deferred_1 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg2, arg3, 10)?;
     __t::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(__t::Clone::clone(&deferred_1)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_1, rt::to_object(__t::Clone::clone(&data_template_0)));
@@ -31976,36 +31975,16 @@ fn build_controls_fluentcontrols_xaml_deferred_347(
 fn build_controls_fluentcontrols_xaml_deferred_348(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/FluentControls.xaml(65,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/FluentControls.xaml(65,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::DataValidationErrors as __t::StaticType>::TYPE));
     // Controls/FluentControls.xaml(67,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/FluentControls.xaml(68,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/FluentControls.xaml(68,8) TargetType
-    __t::ControlTemplate::__markup_set_TargetType(&control_template_0, __t::Option::Some(<__t::DataValidationErrors as __t::StaticType>::TYPE));
     // Controls/FluentControls.xaml(69,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_349, 69, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
     // Controls/FluentControls.xaml(86,6) Content
-    let setter_1 = rt::new_setter_with_parent(&context, rt::property(__t::DataValidationErrors::error_template_property()));
     // Controls/FluentControls.xaml(87,8) Value
-    let data_template_0 = __t::DataTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(data_template_0.clone()));
     // Controls/FluentControls.xaml(88,10) Content
-    let deferred_1 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_350, 88, 10)?;
-    __t::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(__t::Clone::clone(&deferred_1)));
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_1, rt::to_object(__t::Clone::clone(&data_template_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_fluentcontrols_xaml_factory_shape_345(service_provider, build_controls_fluentcontrols_xaml_deferred_349, 69, build_controls_fluentcontrols_xaml_deferred_350, 88)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(69,10)` (a template or a deferred resource).
@@ -35043,19 +35022,29 @@ fn build_controls_fluentcontrols_xaml_deferred_371(
 fn build_controls_fluentcontrols_xaml_deferred_372(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_fluentcontrols_xaml_factory_shape_372(service_provider, <__t::RepeatButton as __t::StaticType>::TYPE, build_controls_fluentcontrols_xaml_deferred_373, 51)
+}
+
+#[inline(never)]
+fn __build_controls_fluentcontrols_xaml_factory_shape_372(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: rt::DeferredBuild,
+    arg2: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(48,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/FluentControls.xaml(48,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::RepeatButton as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/FluentControls.xaml(49,6) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/FluentControls.xaml(50,8) Value
     let control_template_0 = __t::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/FluentControls.xaml(51,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_373, 51, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg1, arg2, 10)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
@@ -35120,24 +35109,12 @@ fn build_controls_fluentcontrols_xaml_deferred_373(
 fn build_controls_fluentcontrols_xaml_deferred_374(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(63,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/FluentControls.xaml(63,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::RepeatButton as __t::StaticType>::TYPE));
     // Controls/FluentControls.xaml(64,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/FluentControls.xaml(65,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/FluentControls.xaml(66,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_375, 66, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_fluentcontrols_xaml_factory_shape_372(service_provider, <__t::RepeatButton as __t::StaticType>::TYPE, build_controls_fluentcontrols_xaml_deferred_375, 66)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(66,10)` (a template or a deferred resource).
@@ -35197,24 +35174,12 @@ fn build_controls_fluentcontrols_xaml_deferred_375(
 fn build_controls_fluentcontrols_xaml_deferred_376(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(78,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/FluentControls.xaml(78,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Thumb as __t::StaticType>::TYPE));
     // Controls/FluentControls.xaml(79,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/FluentControls.xaml(80,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/FluentControls.xaml(81,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_377, 81, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_fluentcontrols_xaml_factory_shape_372(service_provider, <__t::Thumb as __t::StaticType>::TYPE, build_controls_fluentcontrols_xaml_deferred_377, 81)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(81,10)` (a template or a deferred resource).

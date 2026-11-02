@@ -17188,19 +17188,29 @@ fn build_controls_macoscontrols_xaml_deferred_16(
 fn build_controls_macoscontrols_xaml_deferred_17(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_macoscontrols_xaml_factory_shape_17(service_provider, <__t::SymbolIcon as __t::StaticType>::TYPE, build_controls_macoscontrols_xaml_deferred_18, 34)
+}
+
+#[inline(never)]
+fn __build_controls_macoscontrols_xaml_factory_shape_17(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: rt::DeferredBuild,
+    arg2: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(31,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(31,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::SymbolIcon as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/MacOSControls.xaml(32,6) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/MacOSControls.xaml(33,8) Value
     let control_template_0 = __t::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/MacOSControls.xaml(34,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_18, 34, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg1, arg2, 10)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
@@ -17313,17 +17323,27 @@ fn build_controls_macoscontrols_xaml_deferred_20(
 fn build_controls_macoscontrols_xaml_deferred_21(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_macoscontrols_xaml_factory_shape_21(service_provider, <__t::ItemsControl as __t::StaticType>::TYPE, build_controls_macoscontrols_xaml_deferred_22, 27)
+}
+
+#[inline(never)]
+fn __build_controls_macoscontrols_xaml_factory_shape_21(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: rt::DeferredBuild,
+    arg2: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(24,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     // Controls/MacOSControls.xaml(24,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ItemsControl as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/MacOSControls.xaml(25,6) Content
     let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/MacOSControls.xaml(26,8) Value
     let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/MacOSControls.xaml(27,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_22, 27, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg1, arg2, 10)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
@@ -17770,20 +17790,12 @@ fn build_controls_macoscontrols_xaml_deferred_27(
 fn build_controls_macoscontrols_xaml_deferred_28(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(32,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
     // Controls/MacOSControls.xaml(32,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::TransitioningContentControl as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(33,6) Content
-    let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/MacOSControls.xaml(34,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/MacOSControls.xaml(35,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_29, 35, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_21(service_provider, <::ferroui_controls::TransitioningContentControl as __t::StaticType>::TYPE, build_controls_macoscontrols_xaml_deferred_29, 35)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(35,10)` (a template or a deferred resource).
@@ -22325,6 +22337,17 @@ fn build_controls_macoscontrols_xaml_deferred_74(
 fn build_controls_macoscontrols_xaml_deferred_75(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_macoscontrols_xaml_factory_shape_75(service_provider, 55, 73, "BodyStrongTextBlockFontSize", 56)
+}
+
+#[inline(never)]
+fn __build_controls_macoscontrols_xaml_factory_shape_75(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: i32,
+    arg1: i32,
+    arg2: &'static str,
+    arg3: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(55,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
@@ -22332,12 +22355,12 @@ fn build_controls_macoscontrols_xaml_deferred_75(
     // Controls/MacOSControls.xaml(55,4) TargetType
     __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(55,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 55, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 55, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 55, 73)?);
+    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg0, arg1)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg0, arg1)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg0, arg1)?);
     // Controls/MacOSControls.xaml(56,6) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TextBlock::font_size_property()));
     // Controls/MacOSControls.xaml(56,33) Value
-    let provided_1 = rt::provide_static_resource(&context, "BodyStrongTextBlockFontSize", || rt::setter_value_property(), 56, 33)?;
+    let provided_1 = rt::provide_static_resource(&context, arg2, || rt::setter_value_property(), arg3, 33)?;
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, __t::Clone::clone(&provided_1));
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
@@ -22374,115 +22397,76 @@ fn build_controls_macoscontrols_xaml_deferred_76(
 fn build_controls_macoscontrols_xaml_deferred_77(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(62,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(62,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(62,78) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 62, 78)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 62, 78)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 62, 78)?);
     // Controls/MacOSControls.xaml(63,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TextBlock::font_size_property()));
     // Controls/MacOSControls.xaml(63,33) Value
-    let provided_1 = rt::provide_static_resource(&context, "BodyLargeTextBlockFontSize", || rt::setter_value_property(), 63, 33)?;
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, __t::Clone::clone(&provided_1));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_75(service_provider, 62, 78, "BodyLargeTextBlockFontSize", 63)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(65,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_78(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(65,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(65,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(65,71) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 65, 71)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 65, 71)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 65, 71)?);
     // Controls/MacOSControls.xaml(66,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TextBlock::font_size_property()));
     // Controls/MacOSControls.xaml(66,33) Value
-    let provided_1 = rt::provide_static_resource(&context, "SubtitleTextBlockFontSize", || rt::setter_value_property(), 66, 33)?;
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, __t::Clone::clone(&provided_1));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_75(service_provider, 65, 71, "SubtitleTextBlockFontSize", 66)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(68,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_79(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(68,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(68,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(68,68) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 68, 68)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 68, 68)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 68, 68)?);
     // Controls/MacOSControls.xaml(69,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TextBlock::font_size_property()));
     // Controls/MacOSControls.xaml(69,33) Value
-    let provided_1 = rt::provide_static_resource(&context, "TitleTextBlockFontSize", || rt::setter_value_property(), 69, 33)?;
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, __t::Clone::clone(&provided_1));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_75(service_provider, 68, 68, "TitleTextBlockFontSize", 69)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(72,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_80(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(72,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(72,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(72,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 72, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 72, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 72, 73)?);
     // Controls/MacOSControls.xaml(73,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TextBlock::font_size_property()));
     // Controls/MacOSControls.xaml(73,33) Value
-    let provided_1 = rt::provide_static_resource(&context, "TitleLargeTextBlockFontSize", || rt::setter_value_property(), 73, 33)?;
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, __t::Clone::clone(&provided_1));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_75(service_provider, 72, 73, "TitleLargeTextBlockFontSize", 73)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(76,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_81(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(76,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(76,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(76,70) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 76, 70)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 76, 70)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 76, 70)?);
     // Controls/MacOSControls.xaml(77,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TextBlock::font_size_property()));
     // Controls/MacOSControls.xaml(77,33) Value
-    let provided_1 = rt::provide_static_resource(&context, "DisplayTextBlockFontSize", || rt::setter_value_property(), 77, 33)?;
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, __t::Clone::clone(&provided_1));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_75(service_provider, 76, 70, "DisplayTextBlockFontSize", 77)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(81,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_82(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_macoscontrols_xaml_factory_shape_82(service_provider, 81, 69, 46.0_f64, 83)
+}
+
+#[inline(never)]
+fn __build_controls_macoscontrols_xaml_factory_shape_82(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: i32,
+    arg1: i32,
+    arg2: f64,
+    arg3: i32,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(81,4) ControlTheme
@@ -22491,14 +22475,14 @@ fn build_controls_macoscontrols_xaml_deferred_82(
     // Controls/MacOSControls.xaml(81,4) TargetType
     __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(81,69) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 81, 69)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 81, 69)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 81, 69)?);
+    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg0, arg1)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg0, arg1)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg0, arg1)?);
     // Controls/MacOSControls.xaml(82,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TextBlock::font_size_property()), rt::to_object(46.0_f64));
+    rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TextBlock::font_size_property()), rt::to_object(arg2));
     // Controls/MacOSControls.xaml(83,6) Content
     let setter_1 = rt::new_setter(rt::property(__t::TextBlock::font_weight_property()));
     // Controls/MacOSControls.xaml(83,6) Value
-    let value_0 = rt::invoked(__t::FontWeight::__markup_parse(__t::String::from("Light")), 83, 35)?;
+    let value_0 = rt::invoked(__t::FontWeight::__markup_parse(__t::String::from("Light")), arg3, 35)?;
     rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_1, rt::to_object(__t::Clone::clone(&value_0)));
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
@@ -22508,24 +22492,13 @@ fn build_controls_macoscontrols_xaml_deferred_82(
 fn build_controls_macoscontrols_xaml_deferred_83(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(85,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(85,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(85,72) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 85, 72)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 85, 72)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 85, 72)?);
     // Controls/MacOSControls.xaml(86,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TextBlock::font_size_property()), rt::to_object(34.0_f64));
     // Controls/MacOSControls.xaml(87,6) Content
-    let setter_1 = rt::new_setter(rt::property(__t::TextBlock::font_weight_property()));
     // Controls/MacOSControls.xaml(87,6) Value
-    let value_0 = rt::invoked(__t::FontWeight::__markup_parse(__t::String::from("Light")), 87, 35)?;
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_1, rt::to_object(__t::Clone::clone(&value_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_82(service_provider, 85, 72, 34.0_f64, 87)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(23,4)` (a template or a deferred resource).
@@ -23425,15 +23398,26 @@ fn build_controls_macoscontrols_xaml_deferred_95(
 fn build_controls_macoscontrols_xaml_deferred_96(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::Button as __t::StaticType>::TYPE, "AccentButtonStyle", 320, 69)
+}
+
+#[inline(never)]
+fn __build_controls_macoscontrols_xaml_factory_shape_96(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: &'static str,
+    arg2: i32,
+    arg3: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(320,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(320,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Button as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/MacOSControls.xaml(320,69) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "AccentButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 320, 69)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 320, 69)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 320, 69)?);
+    let provided_0 = rt::provide_static_resource(&context, arg1, || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg2, arg3)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg2, arg3)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg2, arg3)?);
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
@@ -23442,34 +23426,20 @@ fn build_controls_macoscontrols_xaml_deferred_96(
 fn build_controls_macoscontrols_xaml_deferred_97(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(321,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(321,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Button as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(321,72) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "SubtleButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 321, 72)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 321, 72)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 321, 72)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::Button as __t::StaticType>::TYPE, "SubtleButtonStyle", 321, 72)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(323,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_98(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(323,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(323,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Button as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(323,61) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 323, 61)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 323, 61)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 323, 61)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::Button as __t::StaticType>::TYPE, "DefaultButtonStyle", 323, 61)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(21,4)` (a template or a deferred resource).
@@ -23813,17 +23783,10 @@ fn build_controls_macoscontrols_xaml_deferred_105(
 fn build_controls_macoscontrols_xaml_deferred_106(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(140,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(140,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::RepeatButton as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(140,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultRepeatButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 140, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 140, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 140, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::RepeatButton as __t::StaticType>::TYPE, "DefaultRepeatButtonStyle", 140, 73)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(23,4)` (a template or a deferred resource).
@@ -24375,17 +24338,10 @@ fn build_controls_macoscontrols_xaml_deferred_113(
 fn build_controls_macoscontrols_xaml_deferred_114(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(217,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(217,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ToggleButton as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(217,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultToggleButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 217, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 217, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 217, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::ToggleButton as __t::StaticType>::TYPE, "DefaultToggleButtonStyle", 217, 73)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(20,4)` (a template or a deferred resource).
@@ -24584,17 +24540,10 @@ fn build_controls_macoscontrols_xaml_deferred_117(
 fn build_controls_macoscontrols_xaml_deferred_118(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(89,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(89,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::HyperlinkButton as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(89,79) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultHyperlinkButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 89, 79)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 89, 79)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 89, 79)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::HyperlinkButton as __t::StaticType>::TYPE, "DefaultHyperlinkButtonStyle", 89, 79)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(23,4)` (a template or a deferred resource).
@@ -25511,17 +25460,10 @@ fn build_controls_macoscontrols_xaml_deferred_121(
 fn build_controls_macoscontrols_xaml_deferred_122(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(312,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(312,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CheckBox as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(312,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultCheckBoxStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 312, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 312, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 312, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::CheckBox as __t::StaticType>::TYPE, "DefaultCheckBoxStyle", 312, 65)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(22,4)` (a template or a deferred resource).
@@ -26176,17 +26118,10 @@ fn build_controls_macoscontrols_xaml_deferred_125(
 fn build_controls_macoscontrols_xaml_deferred_126(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(218,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(218,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::RadioButton as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(218,71) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultRadioButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 218, 71)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 218, 71)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 218, 71)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <::ferroui_controls::RadioButton as __t::StaticType>::TYPE, "DefaultRadioButtonStyle", 218, 71)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(15,4)` (a template or a deferred resource).
@@ -27794,15 +27729,26 @@ fn build_controls_macoscontrols_xaml_deferred_144(
 fn build_controls_macoscontrols_xaml_deferred_145(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_macoscontrols_xaml_factory_shape_145(service_provider, <__t::ScrollBar as __t::StaticType>::TYPE, "DefaultScrollBarStyle", 274, 67)
+}
+
+#[inline(never)]
+fn __build_controls_macoscontrols_xaml_factory_shape_145(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: &'static str,
+    arg2: i32,
+    arg3: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/MacOSControls.xaml(274,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(274,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ScrollBar as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/MacOSControls.xaml(274,67) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultScrollBarStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 274, 67)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 274, 67)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 274, 67)?);
+    let provided_0 = rt::provide_static_resource(&context, arg1, || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg2, arg3)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg2, arg3)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg2, arg3)?);
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
@@ -28144,30 +28090,33 @@ fn build_controls_macoscontrols_xaml_deferred_147(
 fn build_controls_macoscontrols_xaml_deferred_148(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(161,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(161,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ScrollViewer as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(161,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultScrollViewerStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 161, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 161, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 161, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::ScrollViewer as __t::StaticType>::TYPE, "DefaultScrollViewerStyle", 161, 73)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(163,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_149(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_macoscontrols_xaml_factory_shape_149(service_provider, <__t::ScrollViewer as __t::StaticType>::TYPE, build_controls_macoscontrols_xaml_deferred_150, 164)
+}
+
+#[inline(never)]
+fn __build_controls_macoscontrols_xaml_factory_shape_149(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: rt::DeferredBuild,
+    arg2: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     let control_template_0 = __t::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/MacOSControls.xaml(163,4) TargetType
-    __t::ControlTemplate::__markup_set_TargetType(&control_template_0, __t::Option::Some(<__t::ScrollViewer as __t::StaticType>::TYPE));
+    __t::ControlTemplate::__markup_set_TargetType(&control_template_0, __t::Option::Some(arg0));
     // Controls/MacOSControls.xaml(164,6) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_150, 164, 6)?;
+    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg1, arg2, 6)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_template_0))
@@ -29642,17 +29591,10 @@ fn build_controls_macoscontrols_xaml_deferred_160(
 fn build_controls_macoscontrols_xaml_deferred_161(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(427,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(427,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBox as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(427,63) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultTextBoxStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 427, 63)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 427, 63)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 427, 63)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::TextBox as __t::StaticType>::TYPE, "DefaultTextBoxStyle", 427, 63)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(15,4)` (a template or a deferred resource).
@@ -29782,17 +29724,10 @@ fn build_controls_macoscontrols_xaml_deferred_163(
 fn build_controls_macoscontrols_xaml_deferred_164(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(43,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(43,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ToolTip as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(43,63) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultToolTipStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 43, 63)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 43, 63)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 43, 63)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::ToolTip as __t::StaticType>::TYPE, "DefaultToolTipStyle", 43, 63)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(23,4)` (a template or a deferred resource).
@@ -30315,17 +30250,10 @@ fn build_controls_macoscontrols_xaml_deferred_167(
 fn build_controls_macoscontrols_xaml_deferred_168(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/MacOSControls.xaml(134,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(134,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ProgressBar as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(134,71) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultProgressBarStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 134, 71)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 134, 71)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 134, 71)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_145(service_provider, <__t::ProgressBar as __t::StaticType>::TYPE, "DefaultProgressBarStyle", 134, 71)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(36,4)` (a template or a deferred resource).
@@ -30435,6 +30363,17 @@ fn build_controls_macoscontrols_xaml_deferred_172(
 fn build_controls_macoscontrols_xaml_deferred_173(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_macoscontrols_xaml_factory_shape_173(service_provider, build_controls_macoscontrols_xaml_deferred_174, 29, build_controls_macoscontrols_xaml_deferred_175, 51)
+}
+
+#[inline(never)]
+fn __build_controls_macoscontrols_xaml_factory_shape_173(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: rt::DeferredBuild,
+    arg1: i32,
+    arg2: rt::DeferredBuild,
+    arg3: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/MacOSControls.xaml(26,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
@@ -30449,7 +30388,7 @@ fn build_controls_macoscontrols_xaml_deferred_173(
     // Controls/MacOSControls.xaml(28,8) TargetType
     __t::ControlTemplate::__markup_set_TargetType(&control_template_0, __t::Option::Some(<__t::DataValidationErrors as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(29,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_174, 29, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg0, arg1, 10)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
@@ -30459,7 +30398,7 @@ fn build_controls_macoscontrols_xaml_deferred_173(
     let data_template_0 = __t::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(data_template_0.clone()));
     // Controls/MacOSControls.xaml(51,10) Content
-    let deferred_1 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_175, 51, 10)?;
+    let deferred_1 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg2, arg3, 10)?;
     __t::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(__t::Clone::clone(&deferred_1)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_1, rt::to_object(__t::Clone::clone(&data_template_0)));
@@ -30594,36 +30533,16 @@ fn build_controls_macoscontrols_xaml_deferred_175(
 fn build_controls_macoscontrols_xaml_deferred_176(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/MacOSControls.xaml(64,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(64,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::DataValidationErrors as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(65,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/MacOSControls.xaml(66,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/MacOSControls.xaml(66,8) TargetType
-    __t::ControlTemplate::__markup_set_TargetType(&control_template_0, __t::Option::Some(<__t::DataValidationErrors as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(67,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_177, 67, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
     // Controls/MacOSControls.xaml(86,6) Content
-    let setter_1 = rt::new_setter_with_parent(&context, rt::property(__t::DataValidationErrors::error_template_property()));
     // Controls/MacOSControls.xaml(87,8) Value
-    let data_template_0 = __t::DataTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(data_template_0.clone()));
     // Controls/MacOSControls.xaml(88,10) Content
-    let deferred_1 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_178, 88, 10)?;
-    __t::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(__t::Clone::clone(&deferred_1)));
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_1, rt::to_object(__t::Clone::clone(&data_template_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_173(service_provider, build_controls_macoscontrols_xaml_deferred_177, 67, build_controls_macoscontrols_xaml_deferred_178, 88)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(67,10)` (a template or a deferred resource).
@@ -32755,17 +32674,10 @@ fn build_controls_macoscontrols_xaml_deferred_201(
 fn build_controls_macoscontrols_xaml_deferred_202(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(61,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(61,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Calendar as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(61,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultCalendarViewStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 61, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 61, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 61, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::Calendar as __t::StaticType>::TYPE, "DefaultCalendarViewStyle", 61, 65)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(21,4)` (a template or a deferred resource).
@@ -33531,17 +33443,10 @@ fn build_controls_macoscontrols_xaml_deferred_208(
 fn build_controls_macoscontrols_xaml_deferred_209(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(266,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(266,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CalendarDatePicker as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(266,85) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultCalendarDatePicker", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 266, 85)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 266, 85)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 266, 85)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::CalendarDatePicker as __t::StaticType>::TYPE, "DefaultCalendarDatePicker", 266, 85)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(21,4)` (a template or a deferred resource).
@@ -34080,17 +33985,10 @@ fn build_controls_macoscontrols_xaml_deferred_215(
 fn build_controls_macoscontrols_xaml_deferred_216(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(181,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(181,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::DatePicker as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(181,69) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultDatePickerStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 181, 69)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 181, 69)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 181, 69)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::DatePicker as __t::StaticType>::TYPE, "DefaultDatePickerStyle", 181, 69)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(183,4)` (a template or a deferred resource).
@@ -34776,17 +34674,10 @@ fn build_controls_macoscontrols_xaml_deferred_218(
 fn build_controls_macoscontrols_xaml_deferred_219(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(333,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(333,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::DatePickerPresenter as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(333,87) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultDatePickerFlyoutPresenterStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 333, 87)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 333, 87)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 333, 87)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <::ferroui_controls::DatePickerPresenter as __t::StaticType>::TYPE, "DefaultDatePickerFlyoutPresenterStyle", 333, 87)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(21,4)` (a template or a deferred resource).
@@ -36411,18 +36302,30 @@ fn build_controls_macoscontrols_xaml_deferred_233(
 fn build_controls_macoscontrols_xaml_deferred_234(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_macoscontrols_xaml_factory_shape_234(service_provider, <__t::Button as __t::StaticType>::TYPE, "WindowCaptionButton", 46, 37, "MacOSTrafficLightZoomBrush")
+}
+
+#[inline(never)]
+fn __build_controls_macoscontrols_xaml_factory_shape_234(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: &'static str,
+    arg2: i32,
+    arg3: i32,
+    arg4: &'static str,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(46,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(46,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Button as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/MacOSControls.xaml(46,37) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "WindowCaptionButton", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 46, 37)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 46, 37)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 46, 37)?);
+    let provided_0 = rt::provide_static_resource(&context, arg1, || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg2, arg3)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg2, arg3)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg2, arg3)?);
     // Controls/MacOSControls.xaml(47,6) Content
     // Controls/MacOSControls.xaml(47,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), "MacOSTrafficLightZoomBrush");
+    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), arg4);
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
@@ -36431,40 +36334,24 @@ fn build_controls_macoscontrols_xaml_deferred_234(
 fn build_controls_macoscontrols_xaml_deferred_235(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(49,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(49,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Button as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(49,37) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "WindowCaptionButton", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 49, 37)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 49, 37)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 49, 37)?);
     // Controls/MacOSControls.xaml(50,6) Content
     // Controls/MacOSControls.xaml(50,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), "MacOSTrafficLightMinimizeBrush");
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_234(service_provider, <__t::Button as __t::StaticType>::TYPE, "WindowCaptionButton", 49, 37, "MacOSTrafficLightMinimizeBrush")
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(52,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_236(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(52,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(52,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Button as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(52,79) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "WindowCaptionButton", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 52, 79)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 52, 79)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 52, 79)?);
     // Controls/MacOSControls.xaml(53,6) Content
     // Controls/MacOSControls.xaml(53,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), "MacOSTrafficLightCloseBrush");
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_234(service_provider, <__t::Button as __t::StaticType>::TYPE, "WindowCaptionButton", 52, 79, "MacOSTrafficLightCloseBrush")
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(55,4)` (a template or a deferred resource).
@@ -36779,20 +36666,12 @@ fn build_controls_macoscontrols_xaml_deferred_240(
 fn build_controls_macoscontrols_xaml_deferred_241(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(125,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
     // Controls/MacOSControls.xaml(125,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ContentControl as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(126,6) Content
-    let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/MacOSControls.xaml(127,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/MacOSControls.xaml(128,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_242, 128, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_21(service_provider, <__t::ContentControl as __t::StaticType>::TYPE, build_controls_macoscontrols_xaml_deferred_242, 128)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(128,10)` (a template or a deferred resource).
@@ -37640,17 +37519,10 @@ fn build_controls_macoscontrols_xaml_deferred_244(
 fn build_controls_macoscontrols_xaml_deferred_245(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(251,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(251,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::WindowDrawnDecorations as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(251,93) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultTitleBarStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 251, 93)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 251, 93)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 251, 93)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::WindowDrawnDecorations as __t::StaticType>::TYPE, "DefaultTitleBarStyle", 251, 93)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(58,4)` (a template or a deferred resource).
@@ -38240,22 +38112,34 @@ fn build_controls_macoscontrols_xaml_deferred_248(
 fn build_controls_macoscontrols_xaml_deferred_249(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_macoscontrols_xaml_factory_shape_249(service_provider, <__t::ScrollViewer as __t::StaticType>::TYPE, "DefaultScrollViewerStyle", 46, build_controls_macoscontrols_xaml_deferred_250, 49)
+}
+
+#[inline(never)]
+fn __build_controls_macoscontrols_xaml_factory_shape_249(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: &'static str,
+    arg2: i32,
+    arg3: rt::DeferredBuild,
+    arg4: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(46,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(46,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ScrollViewer as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/MacOSControls.xaml(46,78) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultScrollViewerStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 46, 78)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 46, 78)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 46, 78)?);
+    let provided_0 = rt::provide_static_resource(&context, arg1, || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg2, 78)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg2, 78)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg2, 78)?);
     // Controls/MacOSControls.xaml(47,6) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/MacOSControls.xaml(48,8) Value
     let control_template_0 = __t::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/MacOSControls.xaml(49,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_250, 49, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg3, arg4, 10)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
@@ -41161,17 +41045,10 @@ fn build_controls_macoscontrols_xaml_deferred_272(
 fn build_controls_macoscontrols_xaml_deferred_273(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(37,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(37,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TabStrip as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(37,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultSelectorBarStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 37, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 37, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 37, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::TabStrip as __t::StaticType>::TYPE, "DefaultSelectorBarStyle", 37, 65)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(16,4)` (a template or a deferred resource).
@@ -41400,17 +41277,10 @@ fn build_controls_macoscontrols_xaml_deferred_276(
 fn build_controls_macoscontrols_xaml_deferred_277(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(67,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(67,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TabStripItem as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(67,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultSelectorBarItemStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 67, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 67, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 67, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::TabStripItem as __t::StaticType>::TYPE, "DefaultSelectorBarItemStyle", 67, 73)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(18,4)` (a template or a deferred resource).
@@ -44662,17 +44532,10 @@ fn build_controls_macoscontrols_xaml_deferred_296(
 fn build_controls_macoscontrols_xaml_deferred_297(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(277,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(277,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::SplitView as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(277,67) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultSplitViewStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 277, 67)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 277, 67)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 277, 67)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::SplitView as __t::StaticType>::TYPE, "DefaultSplitViewStyle", 277, 67)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(59,4)` (a template or a deferred resource).
@@ -46729,27 +46592,13 @@ fn build_controls_macoscontrols_xaml_deferred_315(
 fn build_controls_macoscontrols_xaml_deferred_316(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(189,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(189,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ToggleButton as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(189,78) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "PaneToggleButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 189, 78)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 189, 78)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 189, 78)?);
     // Controls/MacOSControls.xaml(190,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/MacOSControls.xaml(191,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/MacOSControls.xaml(192,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_317, 192, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_249(service_provider, <__t::ToggleButton as __t::StaticType>::TYPE, "PaneToggleButtonStyle", 189, build_controls_macoscontrols_xaml_deferred_317, 192)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(192,10)` (a template or a deferred resource).
@@ -48295,17 +48144,10 @@ fn build_controls_macoscontrols_xaml_deferred_327(
 fn build_controls_macoscontrols_xaml_deferred_328(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(82,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(82,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Carousel as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(82,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultFlipViewStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 82, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 82, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 82, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::Carousel as __t::StaticType>::TYPE, "DefaultFlipViewStyle", 82, 65)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(29,4)` (a template or a deferred resource).
@@ -48952,15 +48794,26 @@ fn build_controls_macoscontrols_xaml_deferred_331(
 fn build_controls_macoscontrols_xaml_deferred_332(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_macoscontrols_xaml_factory_shape_332(service_provider, <__t::CommandBarButton as __t::StaticType>::TYPE, "DefaultAppBarButtonStyle", 173, 81)
+}
+
+#[inline(never)]
+fn __build_controls_macoscontrols_xaml_factory_shape_332(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: &'static str,
+    arg2: i32,
+    arg3: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(173,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(173,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CommandBarButton as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/MacOSControls.xaml(173,81) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultAppBarButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 173, 81)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 173, 81)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 173, 81)?);
+    let provided_0 = rt::provide_static_resource(&context, arg1, || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg2, arg3)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg2, arg3)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg2, arg3)?);
     // Controls/MacOSControls.xaml(174,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::Layoutable::horizontal_alignment_property()), rt::to_object(__t::HorizontalAlignment::Stretch));
     // Controls/MacOSControls.xaml(175,6) Content
@@ -48973,17 +48826,10 @@ fn build_controls_macoscontrols_xaml_deferred_332(
 fn build_controls_macoscontrols_xaml_deferred_333(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(177,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(177,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CommandBarButton as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(177,81) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultAppBarButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 177, 81)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 177, 81)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 177, 81)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::CommandBarButton as __t::StaticType>::TYPE, "DefaultAppBarButtonStyle", 177, 81)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(178,4)` (a template or a deferred resource).
@@ -50256,38 +50102,22 @@ fn build_controls_macoscontrols_xaml_deferred_336(
 fn build_controls_macoscontrols_xaml_deferred_337(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(501,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(501,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CommandBarToggleButton as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(501,93) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultAppBarToggleButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 501, 93)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 501, 93)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 501, 93)?);
     // Controls/MacOSControls.xaml(502,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::Layoutable::horizontal_alignment_property()), rt::to_object(__t::HorizontalAlignment::Stretch));
     // Controls/MacOSControls.xaml(503,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::Layoutable::width_property()), rt::to_object(::core::primitive::f64::NAN));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_332(service_provider, <__t::CommandBarToggleButton as __t::StaticType>::TYPE, "DefaultAppBarToggleButtonStyle", 501, 93)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(505,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_338(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(505,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(505,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CommandBarToggleButton as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(505,93) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultAppBarToggleButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 505, 93)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 505, 93)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 505, 93)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::CommandBarToggleButton as __t::StaticType>::TYPE, "DefaultAppBarToggleButtonStyle", 505, 93)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(506,4)` (a template or a deferred resource).
@@ -50429,17 +50259,10 @@ fn build_controls_macoscontrols_xaml_deferred_340(
 fn build_controls_macoscontrols_xaml_deferred_341(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(532,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(532,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CommandBarSeparator as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(532,87) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultAppBarSeparatorStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 532, 87)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 532, 87)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 532, 87)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::CommandBarSeparator as __t::StaticType>::TYPE, "DefaultAppBarSeparatorStyle", 532, 87)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(533,4)` (a template or a deferred resource).
@@ -51269,17 +51092,10 @@ fn build_controls_macoscontrols_xaml_deferred_349(
 fn build_controls_macoscontrols_xaml_deferred_350(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(668,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(668,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CommandBar as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(668,69) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultCommandBarStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 668, 69)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 668, 69)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 668, 69)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::CommandBar as __t::StaticType>::TYPE, "DefaultCommandBarStyle", 668, 69)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(21,4)` (a template or a deferred resource).
@@ -51772,17 +51588,10 @@ fn build_controls_macoscontrols_xaml_deferred_357(
 fn build_controls_macoscontrols_xaml_deferred_358(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(177,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(177,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::DropDownButton as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(177,77) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultDropDownButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 177, 77)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 177, 77)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 177, 77)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <::ferroui_controls::DropDownButton as __t::StaticType>::TYPE, "DefaultDropDownButtonStyle", 177, 77)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(25,4)` (a template or a deferred resource).
@@ -52769,17 +52578,10 @@ fn build_controls_macoscontrols_xaml_deferred_364(
 fn build_controls_macoscontrols_xaml_deferred_365(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(332,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(332,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::SplitButton as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(332,71) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "SplitButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 332, 71)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 332, 71)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 332, 71)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::SplitButton as __t::StaticType>::TYPE, "SplitButtonStyle", 332, 71)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(336,4)` (a template or a deferred resource).
@@ -54288,17 +54090,10 @@ fn build_controls_macoscontrols_xaml_deferred_374(
 fn build_controls_macoscontrols_xaml_deferred_375(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(156,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(156,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ToggleSwitch as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(156,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultToggleSwitchStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 156, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 156, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 156, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::ToggleSwitch as __t::StaticType>::TYPE, "DefaultToggleSwitchStyle", 156, 73)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(24,4)` (a template or a deferred resource).
@@ -54443,24 +54238,12 @@ fn build_controls_macoscontrols_xaml_deferred_377(
 fn build_controls_macoscontrols_xaml_deferred_378(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(66,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(66,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::RepeatButton as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(67,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/MacOSControls.xaml(68,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/MacOSControls.xaml(69,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_379, 69, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_17(service_provider, <__t::RepeatButton as __t::StaticType>::TYPE, build_controls_macoscontrols_xaml_deferred_379, 69)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(69,10)` (a template or a deferred resource).
@@ -54523,24 +54306,12 @@ fn build_controls_macoscontrols_xaml_deferred_379(
 fn build_controls_macoscontrols_xaml_deferred_380(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(82,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(82,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::RepeatButton as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(83,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/MacOSControls.xaml(84,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/MacOSControls.xaml(85,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_381, 85, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_17(service_provider, <__t::RepeatButton as __t::StaticType>::TYPE, build_controls_macoscontrols_xaml_deferred_381, 85)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(85,10)` (a template or a deferred resource).
@@ -54603,20 +54374,12 @@ fn build_controls_macoscontrols_xaml_deferred_381(
 fn build_controls_macoscontrols_xaml_deferred_382(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(99,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
     // Controls/MacOSControls.xaml(99,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::RepeatButton as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(100,6) Content
-    let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/MacOSControls.xaml(101,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/MacOSControls.xaml(102,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_383, 102, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_21(service_provider, <__t::RepeatButton as __t::StaticType>::TYPE, build_controls_macoscontrols_xaml_deferred_383, 102)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(102,10)` (a template or a deferred resource).
@@ -55670,17 +55433,10 @@ fn build_controls_macoscontrols_xaml_deferred_387(
 fn build_controls_macoscontrols_xaml_deferred_388(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(391,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(391,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Slider as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(391,61) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultSliderStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 391, 61)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 391, 61)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 391, 61)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::Slider as __t::StaticType>::TYPE, "DefaultSliderStyle", 391, 61)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(23,4)` (a template or a deferred resource).
@@ -57863,17 +57619,10 @@ fn build_controls_macoscontrols_xaml_deferred_406(
 fn build_controls_macoscontrols_xaml_deferred_407(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(373,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(373,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Expander as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(373,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultExpanderStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 373, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 373, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 373, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::Expander as __t::StaticType>::TYPE, "DefaultExpanderStyle", 373, 65)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(59,4)` (a template or a deferred resource).
@@ -59184,17 +58933,10 @@ fn build_controls_macoscontrols_xaml_deferred_427(
 fn build_controls_macoscontrols_xaml_deferred_428(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(42,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(42,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::RefreshContainer as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(42,81) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultRefreshContainerStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 42, 81)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 42, 81)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 42, 81)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <::ferroui_controls::RefreshContainer as __t::StaticType>::TYPE, "DefaultRefreshContainerStyle", 42, 81)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(18,4)` (a template or a deferred resource).
@@ -59356,17 +59098,10 @@ fn build_controls_macoscontrols_xaml_deferred_430(
 fn build_controls_macoscontrols_xaml_deferred_431(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(50,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(50,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::FlyoutPresenter as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(50,79) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultFlyoutPresenterStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 50, 79)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 50, 79)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 50, 79)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <::ferroui_controls::FlyoutPresenter as __t::StaticType>::TYPE, "DefaultFlyoutPresenterStyle", 50, 79)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(17,4)` (a template or a deferred resource).
@@ -59518,17 +59253,10 @@ fn build_controls_macoscontrols_xaml_deferred_433(
 fn build_controls_macoscontrols_xaml_deferred_434(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(44,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(44,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::MenuFlyoutPresenter as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(44,87) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultMenuFlyoutPresenterStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 44, 87)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 44, 87)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 44, 87)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <::ferroui_controls::MenuFlyoutPresenter as __t::StaticType>::TYPE, "DefaultMenuFlyoutPresenterStyle", 44, 87)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(23,4)` (a template or a deferred resource).
@@ -60908,17 +60636,10 @@ fn build_controls_macoscontrols_xaml_deferred_442(
 fn build_controls_macoscontrols_xaml_deferred_443(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/MacOSControls.xaml(285,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(285,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::MenuItem as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(285,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultMenuFlyoutItemStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 285, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 285, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 285, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_145(service_provider, <__t::MenuItem as __t::StaticType>::TYPE, "DefaultMenuFlyoutItemStyle", 285, 65)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(18,4)` (a template or a deferred resource).
@@ -61726,17 +61447,10 @@ fn build_controls_macoscontrols_xaml_deferred_451(
 fn build_controls_macoscontrols_xaml_deferred_452(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(90,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(90,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ListBoxItem as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(90,71) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultListBoxItemStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 90, 71)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 90, 71)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 90, 71)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::ListBoxItem as __t::StaticType>::TYPE, "DefaultListBoxItemStyle", 90, 71)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(91,4)` (a template or a deferred resource).
@@ -62478,17 +62192,10 @@ fn build_controls_macoscontrols_xaml_deferred_460(
 fn build_controls_macoscontrols_xaml_deferred_461(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(77,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(77,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ListBox as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(77,63) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultListBoxStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 77, 63)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 77, 63)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 77, 63)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::ListBox as __t::StaticType>::TYPE, "DefaultListBoxStyle", 77, 63)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(16,4)` (a template or a deferred resource).
@@ -62920,17 +62627,10 @@ fn build_controls_macoscontrols_xaml_deferred_465(
 fn build_controls_macoscontrols_xaml_deferred_466(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(116,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(116,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::ComboBoxItem as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(116,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultComboBoxItemStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 116, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 116, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 116, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <::ferroui_controls::ComboBoxItem as __t::StaticType>::TYPE, "DefaultComboBoxItemStyle", 116, 73)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(30,4)` (a template or a deferred resource).
@@ -64107,17 +63807,10 @@ fn build_controls_macoscontrols_xaml_deferred_471(
 fn build_controls_macoscontrols_xaml_deferred_472(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(393,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(393,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ComboBox as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(393,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultComboBoxStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 393, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 393, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 393, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::ComboBox as __t::StaticType>::TYPE, "DefaultComboBoxStyle", 393, 65)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(19,4)` (a template or a deferred resource).
@@ -64804,17 +64497,10 @@ fn build_controls_macoscontrols_xaml_deferred_478(
 fn build_controls_macoscontrols_xaml_deferred_479(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/MacOSControls.xaml(154,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(154,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TreeViewItem as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(154,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "MUX_TreeViewItemStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 154, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 154, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 154, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_145(service_provider, <__t::TreeViewItem as __t::StaticType>::TYPE, "MUX_TreeViewItemStyle", 154, 73)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(38,4)` (a template or a deferred resource).
@@ -64896,17 +64582,10 @@ fn build_controls_macoscontrols_xaml_deferred_481(
 fn build_controls_macoscontrols_xaml_deferred_482(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(67,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(67,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::TreeView as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(67,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultTreeViewStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 67, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 67, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 67, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <::ferroui_controls::TreeView as __t::StaticType>::TYPE, "DefaultTreeViewStyle", 67, 65)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(21,4)` (a template or a deferred resource).
@@ -65831,17 +65510,10 @@ fn build_controls_macoscontrols_xaml_deferred_488(
 fn build_controls_macoscontrols_xaml_deferred_489(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(300,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(300,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::AutoCompleteBox as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(300,79) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultAutoSuggestBoxStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 300, 79)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 300, 79)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 300, 79)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::AutoCompleteBox as __t::StaticType>::TYPE, "DefaultAutoSuggestBoxStyle", 300, 79)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(37,4)` (a template or a deferred resource).
@@ -66050,59 +65722,48 @@ fn build_controls_macoscontrols_xaml_deferred_491(
 fn build_controls_macoscontrols_xaml_deferred_492(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(86,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(86,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(86,67) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 86, 67)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 86, 67)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 86, 67)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "DefaultInfoBadgeStyle", 86, 67)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(88,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_493(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(88,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(88,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(88,75) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 88, 75)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 88, 75)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 88, 75)?);
     // Controls/MacOSControls.xaml(89,6) Content
     // Controls/MacOSControls.xaml(89,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), "SystemFillColorAttentionBrush");
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_234(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "DefaultInfoBadgeStyle", 88, 75, "SystemFillColorAttentionBrush")
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(91,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_494(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(91,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(91,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(91,77) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "AttentionDotInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 91, 77)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 91, 77)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 91, 77)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "AttentionDotInfoBadgeStyle", 91, 77)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(92,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_495(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_macoscontrols_xaml_factory_shape_495(service_provider, "AttentionDotInfoBadgeStyle", 92, 76, "\u{ea38}")
+}
+
+#[inline(never)]
+fn __build_controls_macoscontrols_xaml_factory_shape_495(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static str,
+    arg1: i32,
+    arg2: i32,
+    arg3: &'static str,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(92,4) ControlTheme
@@ -66111,17 +65772,17 @@ fn build_controls_macoscontrols_xaml_deferred_495(
     // Controls/MacOSControls.xaml(92,4) TargetType
     __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(92,76) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "AttentionDotInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 92, 76)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 92, 76)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 92, 76)?);
+    let provided_0 = rt::provide_static_resource(&context, arg0, || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg1, arg2)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg1, arg2)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg1, arg2)?);
     // Controls/MacOSControls.xaml(93,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::padding_property()), rt::to_object(__t::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 0.0_f64, 2.0_f64)));
     // Controls/MacOSControls.xaml(94,6) Content
     let setter_1 = rt::new_setter(rt::property(__t::InfoBadge::icon_source_property()));
     // Controls/MacOSControls.xaml(95,8) Value
     // Controls/MacOSControls.xaml(95,8) FontIconSource
-    let font_icon_source_0 = __t::FontIconSource::new();
+    let font_icon_source_0 = ::ferroui_controls::FontIconSource::new();
     // Controls/MacOSControls.xaml(95,23) Glyph
-    font_icon_source_0.set_value(__t::FontIconSource::glyph_property(), __t::String::from("\u{ea38}"));
+    font_icon_source_0.set_value(::ferroui_controls::FontIconSource::glyph_property(), __t::String::from(arg3));
     rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_1, rt::to_object(__t::Clone::clone(&font_icon_source_0)));
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
@@ -66131,101 +65792,59 @@ fn build_controls_macoscontrols_xaml_deferred_495(
 fn build_controls_macoscontrols_xaml_deferred_496(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(99,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(99,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(99,79) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 99, 79)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 99, 79)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 99, 79)?);
     // Controls/MacOSControls.xaml(100,6) Content
     // Controls/MacOSControls.xaml(100,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), "SystemFillColorSolidNeutralBrush");
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_234(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "DefaultInfoBadgeStyle", 99, 79, "SystemFillColorSolidNeutralBrush")
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(102,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_497(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(102,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(102,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(102,81) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "InformationalDotInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 102, 81)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 102, 81)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 102, 81)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "InformationalDotInfoBadgeStyle", 102, 81)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(103,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_498(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(103,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(103,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(103,80) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "InformationalDotInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 103, 80)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 103, 80)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 103, 80)?);
     // Controls/MacOSControls.xaml(104,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::padding_property()), rt::to_object(__t::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 0.0_f64, 2.0_f64)));
     // Controls/MacOSControls.xaml(105,6) Content
-    let setter_1 = rt::new_setter(rt::property(__t::InfoBadge::icon_source_property()));
     // Controls/MacOSControls.xaml(106,8) Value
     // Controls/MacOSControls.xaml(106,8) FontIconSource
-    let font_icon_source_0 = __t::FontIconSource::new();
     // Controls/MacOSControls.xaml(106,23) Glyph
-    font_icon_source_0.set_value(__t::FontIconSource::glyph_property(), __t::String::from("\u{f13f}"));
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_1, rt::to_object(__t::Clone::clone(&font_icon_source_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_495(service_provider, "InformationalDotInfoBadgeStyle", 103, 80, "\u{f13f}")
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(110,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_499(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(110,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(110,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(110,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 110, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 110, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 110, 73)?);
     // Controls/MacOSControls.xaml(111,6) Content
     // Controls/MacOSControls.xaml(111,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), "SystemFillColorSuccessBrush");
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_234(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "DefaultInfoBadgeStyle", 110, 73, "SystemFillColorSuccessBrush")
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(113,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_500(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(113,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(113,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(113,75) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "SuccessDotInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 113, 75)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 113, 75)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 113, 75)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "SuccessDotInfoBadgeStyle", 113, 75)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(114,4)` (a template or a deferred resource).
@@ -66257,37 +65876,22 @@ fn build_controls_macoscontrols_xaml_deferred_501(
 fn build_controls_macoscontrols_xaml_deferred_502(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(120,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(120,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(120,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 120, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 120, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 120, 73)?);
     // Controls/MacOSControls.xaml(121,6) Content
     // Controls/MacOSControls.xaml(121,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), "SystemFillColorCautionBrush");
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_234(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "DefaultInfoBadgeStyle", 120, 73, "SystemFillColorCautionBrush")
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(123,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_503(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(123,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(123,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(123,75) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "CautionDotInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 123, 75)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 123, 75)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 123, 75)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "CautionDotInfoBadgeStyle", 123, 75)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(124,4)` (a template or a deferred resource).
@@ -66319,37 +65923,22 @@ fn build_controls_macoscontrols_xaml_deferred_504(
 fn build_controls_macoscontrols_xaml_deferred_505(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(130,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(130,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(130,74) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 130, 74)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 130, 74)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 130, 74)?);
     // Controls/MacOSControls.xaml(131,6) Content
     // Controls/MacOSControls.xaml(131,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), "SystemFillColorCriticalBrush");
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_234(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "DefaultInfoBadgeStyle", 130, 74, "SystemFillColorCriticalBrush")
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(133,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_506(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(133,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(133,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(133,76) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "CriticalDotInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 133, 76)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 133, 76)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 133, 76)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "CriticalDotInfoBadgeStyle", 133, 76)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(134,4)` (a template or a deferred resource).
@@ -67242,16 +66831,9 @@ fn build_controls_macoscontrols_xaml_deferred_512(
 fn build_controls_macoscontrols_xaml_deferred_513(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/MacOSControls.xaml(109,4) TargetType
-    __t::ControlTemplate::__markup_set_TargetType(&control_template_0, __t::Option::Some(<__t::SymbolIcon as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(110,6) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_514, 110, 6)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_template_0))
+    __build_controls_macoscontrols_xaml_factory_shape_149(service_provider, <__t::SymbolIcon as __t::StaticType>::TYPE, build_controls_macoscontrols_xaml_deferred_514, 110)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(110,6)` (a template or a deferred resource).
@@ -67757,17 +67339,10 @@ fn build_controls_macoscontrols_xaml_deferred_519(
 fn build_controls_macoscontrols_xaml_deferred_520(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(78,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(78,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::RadioButtons as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(78,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultRadioButtonsStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 78, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 78, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 78, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <::ferroui_controls::RadioButtons as __t::StaticType>::TYPE, "DefaultRadioButtonsStyle", 78, 73)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(28,4)` (a template or a deferred resource).
@@ -68439,17 +68014,10 @@ fn build_controls_macoscontrols_xaml_deferred_523(
 fn build_controls_macoscontrols_xaml_deferred_524(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(161,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(161,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::RichEditBox as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(161,71) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultRichEditBoxStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 161, 71)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 161, 71)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 161, 71)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::RichEditBox as __t::StaticType>::TYPE, "DefaultRichEditBoxStyle", 161, 71)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(110,4)` (a template or a deferred resource).
@@ -72361,17 +71929,10 @@ fn build_controls_macoscontrols_xaml_deferred_536(
 fn build_controls_macoscontrols_xaml_deferred_537(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(231,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/MacOSControls.xaml(231,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TitleBar as __t::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(231,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultTitleBarControlStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 231, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 231, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 231, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_macoscontrols_xaml_factory_shape_96(service_provider, <__t::TitleBar as __t::StaticType>::TYPE, "DefaultTitleBarControlStyle", 231, 65)
 }
 
 static BUILD_DENSITYSTYLES_COMPACT_XAML_THEME_CONSTANTS_0: &[rt::theme_resources::ConstantRow<u64>] = &[
@@ -72618,7 +72179,6 @@ mod __t {
     pub(super) use ::ferroui_controls::Expander;
     pub(super) use ::ferroui_controls::ExperimentalAcrylicBorder;
     pub(super) use ::ferroui_controls::FerroListOf;
-    pub(super) use ::ferroui_controls::FontIconSource;
     pub(super) use ::ferroui_controls::Grid;
     pub(super) use ::ferroui_controls::GridLength;
     pub(super) use ::ferroui_controls::GridSplitter;

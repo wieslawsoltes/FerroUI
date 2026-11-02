@@ -1,6 +1,7 @@
 //! Intern deferred factories after unused slots have been eliminated. A shape has the
-//! exact same typed operations, local lifetimes, namespace table and child factories.
-//! Only literal operands vary. The original fn pointer still identifies each use site.
+//! exact same typed operations, local lifetimes and namespace table.
+//! A calling thunk owns its literal, type and child-factory operands, so an unused
+//! resource and its imports can be discarded together.
 use std::collections::HashMap;
 use std::fmt::Write;
 use std::ops::Range;
@@ -10,6 +11,8 @@ enum Kind {
     Text,
     Float,
     Position,
+    StaticType,
+    DeferredBuild,
 }
 
 impl Kind {
@@ -18,6 +21,8 @@ impl Kind {
             Self::Text => "&'static str",
             Self::Float => "f64",
             Self::Position => "i32",
+            Self::StaticType => "&'static ::ferroui_base::TypeInfo",
+            Self::DeferredBuild => "rt::DeferredBuild",
         }
     }
     fn marker(self) -> &'static str {
@@ -25,6 +30,8 @@ impl Kind {
             Self::Text => "\x01",
             Self::Float => "\x02",
             Self::Position => "\x03",
+            Self::StaticType => "\x04",
+            Self::DeferredBuild => "\x05",
         }
     }
 }
@@ -39,6 +46,7 @@ fn has_location(call: &str) -> bool {
         call,
         "rt::bind"
             | "rt::cast"
+            | "rt::cast_checked"
             | "rt::exact"
             | "rt::instance"
             | "rt::invoked"
@@ -51,6 +59,7 @@ fn has_location(call: &str) -> bool {
             | "rt::apply_template_binding"
             | "rt::bind_or_set_priority"
             | "rt::defer"
+            | "rt::add_deferred_resource"
             | "rt::register_name"
             | "rt::register_name_value"
             | "rt::complete_root_name_scope"
@@ -65,8 +74,17 @@ struct Call<'a> {
     in_closure: bool,
 }
 
+// A direct reference to an associated constant has no runtime registration or getter.
+// Keep the reference in the calling thunk so a discarded resource cannot root its type.
+fn is_static_type(value: &str) -> bool {
+    value
+        .strip_prefix("<::")
+        .and_then(|s| s.strip_suffix(" as ::ferroui_base::StaticType>::TYPE"))
+        .is_some_and(|path| path.split("::").all(super::emitter::is_identifier))
+}
+
 // This examines only the emitter's single-line call expressions. Copy unknown syntax
-// verbatim. No Rust identifier, type, expression, factory reference or getter is lifted.
+// verbatim. Never hoist constructors, getters, or closure operands.
 fn operands(line: &str, offset: usize, out: &mut Vec<Operand>) {
     let mut calls: Vec<Call<'_>> = Vec::new();
     let mut i = 0;
@@ -107,6 +125,16 @@ fn operands(line: &str, offset: usize, out: &mut Vec<Operand>) {
                             .is_some_and(|n| n.parse::<f64>().is_ok())
                         {
                             Some(Kind::Float)
+                        } else if matches!(call.name, "rt::defer" | "rt::add_deferred_resource")
+                            && call.previous.as_ref().is_some_and(|r| &line[r.clone()] == "&context")
+                            && super::emitter::is_identifier(arg)
+                        {
+                            // Both signatures take a DeferredBuild immediately after the
+                            // context. Passing that fn item through the thunk retains only
+                            // this resource's child and does not evaluate any XAML code.
+                            Some(Kind::DeferredBuild)
+                        } else if is_static_type(arg) {
+                            Some(Kind::StaticType)
                         } else if super::emitter::is_string_literal(arg) {
                             Some(Kind::Text)
                         } else {
@@ -214,8 +242,8 @@ impl Group {
         let mut fields: Vec<usize> = Vec::new();
         let mut body = String::new();
         let mut slot = 0;
-        for part in shape.split_inclusive(['\x01', '\x02', '\x03']) {
-            let Some(code) = part.strip_suffix(['\x01', '\x02', '\x03']) else {
+        for part in shape.split_inclusive(['\x01', '\x02', '\x03', '\x04', '\x05']) {
+            let Some(code) = part.strip_suffix(['\x01', '\x02', '\x03', '\x04', '\x05']) else {
                 body.push_str(part);
                 continue;
             };
@@ -349,6 +377,30 @@ mod tests {
                 ("3", "i32")
             ]
         );
+    }
+
+    #[test]
+    fn resolved_types_stay_in_thunks_and_runtime_getters_stay_in_the_body() {
+        let factory = |id, class| format!(r#"fn site_{id}(service_provider: &Provider) -> Result<Value, XamlLoadError> {{
+    let parent = ControlTheme::new();
+    ControlTheme::set_target(&parent, Some(<::controls::{class} as ::ferroui_base::StaticType>::TYPE));
+    let base = rt::provide_static_resource(&context, "base", || descriptor(<::controls::Theme as ::ferroui_base::StaticType>::TYPE), {id}, 2)?;
+    let base = rt::cast_checked(base, getter(), "Theme", {id}, 2)?;
+    let child = rt::defer(result_type, &context, child_{id}, {id}, 2)?;
+    Ok(set_base(parent, base, child))
+}}
+"#);
+        let mut factories = vec![factory(0, "Button"), factory(1, "TextBox"), factory(2, "Slider")];
+        share("doc", &mut factories);
+        assert!(factories[0].contains("arg0: &'static ::ferroui_base::TypeInfo"));
+        assert!(factories[0].contains("ControlTheme::set_target(&parent, Some(arg0))"));
+        assert!(factories[0].contains("rt::cast_checked(base, getter(), \"Theme\", arg1, 2)"));
+        assert!(factories[0].contains("|| descriptor(<::controls::Theme as ::ferroui_base::StaticType>::TYPE)"));
+        assert!(factories[0].contains("arg2: rt::DeferredBuild"));
+        assert!(!factories[0].contains("child_1"));
+        assert!(!factories[0].contains("::controls::TextBox"));
+        assert!(factories[1].contains("__doc_factory_shape_0(service_provider, <::controls::TextBox as ::ferroui_base::StaticType>::TYPE, 1, child_1)"));
+        assert!(!is_static_type("<::controls::Generic<T> as ::ferroui_base::StaticType>::TYPE"));
     }
 
     #[test]

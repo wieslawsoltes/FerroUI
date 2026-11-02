@@ -4967,17 +4967,27 @@ fn build_controls_simplecontrols_xaml_deferred_27(
 fn build_controls_simplecontrols_xaml_deferred_28(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_simplecontrols_xaml_factory_shape_28(service_provider, <__t::Carousel as __t::StaticType>::TYPE, build_controls_simplecontrols_xaml_deferred_29, 7)
+}
+
+#[inline(never)]
+fn __build_controls_simplecontrols_xaml_factory_shape_28(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: rt::DeferredBuild,
+    arg2: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     // Controls/SimpleControls.xaml(4,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Carousel as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/SimpleControls.xaml(5,6) Content
     let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/SimpleControls.xaml(6,8) Value
     let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/SimpleControls.xaml(7,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_simplecontrols_xaml_deferred_29, 7, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg1, arg2, 10)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
@@ -5739,20 +5749,12 @@ fn build_controls_simplecontrols_xaml_deferred_43(
 fn build_controls_simplecontrols_xaml_deferred_44(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
     // Controls/SimpleControls.xaml(4,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ItemsControl as __t::StaticType>::TYPE));
     // Controls/SimpleControls.xaml(6,6) Content
-    let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/SimpleControls.xaml(7,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/SimpleControls.xaml(8,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_simplecontrols_xaml_deferred_45, 8, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_simplecontrols_xaml_factory_shape_28(service_provider, <__t::ItemsControl as __t::StaticType>::TYPE, build_controls_simplecontrols_xaml_deferred_45, 8)
 }
 
 /// Builds the deferred content at `Controls/SimpleControls.xaml(8,10)` (a template or a deferred resource).
@@ -7517,20 +7519,12 @@ fn build_controls_simplecontrols_xaml_deferred_72(
 fn build_controls_simplecontrols_xaml_deferred_73(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
     // Controls/SimpleControls.xaml(4,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::TransitioningContentControl as __t::StaticType>::TYPE));
     // Controls/SimpleControls.xaml(7,6) Content
-    let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/SimpleControls.xaml(8,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/SimpleControls.xaml(9,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_simplecontrols_xaml_deferred_74, 9, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_simplecontrols_xaml_factory_shape_28(service_provider, <::ferroui_controls::TransitioningContentControl as __t::StaticType>::TYPE, build_controls_simplecontrols_xaml_deferred_74, 9)
 }
 
 /// Builds the deferred content at `Controls/SimpleControls.xaml(9,10)` (a template or a deferred resource).
@@ -10147,20 +10141,12 @@ fn build_controls_simplecontrols_xaml_deferred_96(
 fn build_controls_simplecontrols_xaml_deferred_97(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
     // Controls/SimpleControls.xaml(4,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
     // Controls/SimpleControls.xaml(4,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::RefreshContainer as __t::StaticType>::TYPE));
     // Controls/SimpleControls.xaml(6,6) Content
-    let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/SimpleControls.xaml(7,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/SimpleControls.xaml(8,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_simplecontrols_xaml_deferred_98, 8, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_simplecontrols_xaml_factory_shape_28(service_provider, <::ferroui_controls::RefreshContainer as __t::StaticType>::TYPE, build_controls_simplecontrols_xaml_deferred_98, 8)
 }
 
 /// Builds the deferred content at `Controls/SimpleControls.xaml(8,10)` (a template or a deferred resource).

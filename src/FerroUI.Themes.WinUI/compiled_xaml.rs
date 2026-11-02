@@ -19646,19 +19646,29 @@ fn build_controls_winuicontrols_xaml_deferred_16(
 fn build_controls_winuicontrols_xaml_deferred_17(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_winuicontrols_xaml_factory_shape_17(service_provider, <__t::SymbolIcon as __t::StaticType>::TYPE, build_controls_winuicontrols_xaml_deferred_18, 29)
+}
+
+#[inline(never)]
+fn __build_controls_winuicontrols_xaml_factory_shape_17(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: rt::DeferredBuild,
+    arg2: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(26,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(26,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::SymbolIcon as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/WinUIControls.xaml(27,6) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/WinUIControls.xaml(28,8) Value
     let control_template_0 = __t::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/WinUIControls.xaml(29,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_18, 29, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg1, arg2, 10)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
@@ -19771,17 +19781,27 @@ fn build_controls_winuicontrols_xaml_deferred_20(
 fn build_controls_winuicontrols_xaml_deferred_21(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_winuicontrols_xaml_factory_shape_21(service_provider, <__t::ItemsControl as __t::StaticType>::TYPE, build_controls_winuicontrols_xaml_deferred_22, 27)
+}
+
+#[inline(never)]
+fn __build_controls_winuicontrols_xaml_factory_shape_21(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: rt::DeferredBuild,
+    arg2: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(24,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     // Controls/WinUIControls.xaml(24,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ItemsControl as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/WinUIControls.xaml(25,6) Content
     let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/WinUIControls.xaml(26,8) Value
     let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/WinUIControls.xaml(27,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_22, 27, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg1, arg2, 10)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
@@ -20242,20 +20262,12 @@ fn build_controls_winuicontrols_xaml_deferred_27(
 fn build_controls_winuicontrols_xaml_deferred_28(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(32,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
     // Controls/WinUIControls.xaml(32,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::TransitioningContentControl as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(33,6) Content
-    let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/WinUIControls.xaml(34,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/WinUIControls.xaml(35,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_29, 35, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_21(service_provider, <::ferroui_controls::TransitioningContentControl as __t::StaticType>::TYPE, build_controls_winuicontrols_xaml_deferred_29, 35)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(35,10)` (a template or a deferred resource).
@@ -26104,6 +26116,17 @@ fn build_controls_winuicontrols_xaml_deferred_74(
 fn build_controls_winuicontrols_xaml_deferred_75(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_winuicontrols_xaml_factory_shape_75(service_provider, 55, 73, "BodyStrongTextBlockFontSize", 56)
+}
+
+#[inline(never)]
+fn __build_controls_winuicontrols_xaml_factory_shape_75(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: i32,
+    arg1: i32,
+    arg2: &'static str,
+    arg3: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(55,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
@@ -26111,12 +26134,12 @@ fn build_controls_winuicontrols_xaml_deferred_75(
     // Controls/WinUIControls.xaml(55,4) TargetType
     __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(55,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 55, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 55, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 55, 73)?);
+    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg0, arg1)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg0, arg1)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg0, arg1)?);
     // Controls/WinUIControls.xaml(56,6) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TextBlock::font_size_property()));
     // Controls/WinUIControls.xaml(56,33) Value
-    let provided_1 = rt::provide_static_resource(&context, "BodyStrongTextBlockFontSize", || rt::setter_value_property(), 56, 33)?;
+    let provided_1 = rt::provide_static_resource(&context, arg2, || rt::setter_value_property(), arg3, 33)?;
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, __t::Clone::clone(&provided_1));
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
@@ -26153,115 +26176,76 @@ fn build_controls_winuicontrols_xaml_deferred_76(
 fn build_controls_winuicontrols_xaml_deferred_77(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(62,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(62,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(62,78) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 62, 78)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 62, 78)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 62, 78)?);
     // Controls/WinUIControls.xaml(63,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TextBlock::font_size_property()));
     // Controls/WinUIControls.xaml(63,33) Value
-    let provided_1 = rt::provide_static_resource(&context, "BodyLargeTextBlockFontSize", || rt::setter_value_property(), 63, 33)?;
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, __t::Clone::clone(&provided_1));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_75(service_provider, 62, 78, "BodyLargeTextBlockFontSize", 63)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(65,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_78(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(65,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(65,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(65,71) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 65, 71)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 65, 71)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 65, 71)?);
     // Controls/WinUIControls.xaml(66,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TextBlock::font_size_property()));
     // Controls/WinUIControls.xaml(66,33) Value
-    let provided_1 = rt::provide_static_resource(&context, "SubtitleTextBlockFontSize", || rt::setter_value_property(), 66, 33)?;
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, __t::Clone::clone(&provided_1));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_75(service_provider, 65, 71, "SubtitleTextBlockFontSize", 66)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(68,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_79(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(68,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(68,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(68,68) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 68, 68)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 68, 68)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 68, 68)?);
     // Controls/WinUIControls.xaml(69,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TextBlock::font_size_property()));
     // Controls/WinUIControls.xaml(69,33) Value
-    let provided_1 = rt::provide_static_resource(&context, "TitleTextBlockFontSize", || rt::setter_value_property(), 69, 33)?;
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, __t::Clone::clone(&provided_1));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_75(service_provider, 68, 68, "TitleTextBlockFontSize", 69)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(72,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_80(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(72,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(72,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(72,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 72, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 72, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 72, 73)?);
     // Controls/WinUIControls.xaml(73,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TextBlock::font_size_property()));
     // Controls/WinUIControls.xaml(73,33) Value
-    let provided_1 = rt::provide_static_resource(&context, "TitleLargeTextBlockFontSize", || rt::setter_value_property(), 73, 33)?;
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, __t::Clone::clone(&provided_1));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_75(service_provider, 72, 73, "TitleLargeTextBlockFontSize", 73)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(76,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_81(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(76,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(76,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(76,70) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 76, 70)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 76, 70)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 76, 70)?);
     // Controls/WinUIControls.xaml(77,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TextBlock::font_size_property()));
     // Controls/WinUIControls.xaml(77,33) Value
-    let provided_1 = rt::provide_static_resource(&context, "DisplayTextBlockFontSize", || rt::setter_value_property(), 77, 33)?;
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, __t::Clone::clone(&provided_1));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_75(service_provider, 76, 70, "DisplayTextBlockFontSize", 77)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(81,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_82(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_winuicontrols_xaml_factory_shape_82(service_provider, 81, 69, 46.0_f64, 83)
+}
+
+#[inline(never)]
+fn __build_controls_winuicontrols_xaml_factory_shape_82(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: i32,
+    arg1: i32,
+    arg2: f64,
+    arg3: i32,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(81,4) ControlTheme
@@ -26270,14 +26254,14 @@ fn build_controls_winuicontrols_xaml_deferred_82(
     // Controls/WinUIControls.xaml(81,4) TargetType
     __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(81,69) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 81, 69)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 81, 69)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 81, 69)?);
+    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg0, arg1)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg0, arg1)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg0, arg1)?);
     // Controls/WinUIControls.xaml(82,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TextBlock::font_size_property()), rt::to_object(46.0_f64));
+    rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TextBlock::font_size_property()), rt::to_object(arg2));
     // Controls/WinUIControls.xaml(83,6) Content
     let setter_1 = rt::new_setter(rt::property(__t::TextBlock::font_weight_property()));
     // Controls/WinUIControls.xaml(83,6) Value
-    let value_0 = rt::invoked(__t::FontWeight::__markup_parse(__t::String::from("Light")), 83, 35)?;
+    let value_0 = rt::invoked(__t::FontWeight::__markup_parse(__t::String::from("Light")), arg3, 35)?;
     rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_1, rt::to_object(__t::Clone::clone(&value_0)));
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
@@ -26287,24 +26271,13 @@ fn build_controls_winuicontrols_xaml_deferred_82(
 fn build_controls_winuicontrols_xaml_deferred_83(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(85,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(85,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBlock as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(85,72) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "BaseTextBlockStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 85, 72)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 85, 72)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 85, 72)?);
     // Controls/WinUIControls.xaml(86,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TextBlock::font_size_property()), rt::to_object(34.0_f64));
     // Controls/WinUIControls.xaml(87,6) Content
-    let setter_1 = rt::new_setter(rt::property(__t::TextBlock::font_weight_property()));
     // Controls/WinUIControls.xaml(87,6) Value
-    let value_0 = rt::invoked(__t::FontWeight::__markup_parse(__t::String::from("Light")), 87, 35)?;
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_1, rt::to_object(__t::Clone::clone(&value_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_82(service_provider, 85, 72, 34.0_f64, 87)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(32,4)` (a template or a deferred resource).
@@ -26928,15 +26901,26 @@ fn build_controls_winuicontrols_xaml_deferred_91(
 fn build_controls_winuicontrols_xaml_deferred_92(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::Button as __t::StaticType>::TYPE, "DefaultButtonStyle", 258, 61)
+}
+
+#[inline(never)]
+fn __build_controls_winuicontrols_xaml_factory_shape_92(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: &'static str,
+    arg2: i32,
+    arg3: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(258,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(258,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Button as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/WinUIControls.xaml(258,61) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 258, 61)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 258, 61)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 258, 61)?);
+    let provided_0 = rt::provide_static_resource(&context, arg1, || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg2, arg3)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg2, arg3)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg2, arg3)?);
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
@@ -27130,17 +27114,10 @@ fn build_controls_winuicontrols_xaml_deferred_95(
 fn build_controls_winuicontrols_xaml_deferred_96(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(95,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(95,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::RepeatButton as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(95,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultRepeatButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 95, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 95, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 95, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::RepeatButton as __t::StaticType>::TYPE, "DefaultRepeatButtonStyle", 95, 73)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(27,4)` (a template or a deferred resource).
@@ -27540,17 +27517,10 @@ fn build_controls_winuicontrols_xaml_deferred_99(
 fn build_controls_winuicontrols_xaml_deferred_100(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(175,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(175,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ToggleButton as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(175,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultToggleButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 175, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 175, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 175, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::ToggleButton as __t::StaticType>::TYPE, "DefaultToggleButtonStyle", 175, 73)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(35,4)` (a template or a deferred resource).
@@ -28557,17 +28527,10 @@ fn build_controls_winuicontrols_xaml_deferred_112(
 fn build_controls_winuicontrols_xaml_deferred_113(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(96,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(96,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::HyperlinkButton as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(96,79) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultHyperlinkButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 96, 79)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 96, 79)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 96, 79)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::HyperlinkButton as __t::StaticType>::TYPE, "DefaultHyperlinkButtonStyle", 96, 79)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(33,4)` (a template or a deferred resource).
@@ -29462,17 +29425,10 @@ fn build_controls_winuicontrols_xaml_deferred_116(
 fn build_controls_winuicontrols_xaml_deferred_117(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(313,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(313,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CheckBox as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(313,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultCheckBoxStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 313, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 313, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 313, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::CheckBox as __t::StaticType>::TYPE, "DefaultCheckBoxStyle", 313, 65)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(33,4)` (a template or a deferred resource).
@@ -30101,17 +30057,10 @@ fn build_controls_winuicontrols_xaml_deferred_120(
 fn build_controls_winuicontrols_xaml_deferred_121(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(228,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(228,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::RadioButton as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(228,71) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultRadioButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 228, 71)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 228, 71)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 228, 71)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <::ferroui_controls::RadioButton as __t::StaticType>::TYPE, "DefaultRadioButtonStyle", 228, 71)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(53,4)` (a template or a deferred resource).
@@ -31701,15 +31650,26 @@ fn build_controls_winuicontrols_xaml_deferred_139(
 fn build_controls_winuicontrols_xaml_deferred_140(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_winuicontrols_xaml_factory_shape_140(service_provider, <__t::ScrollBar as __t::StaticType>::TYPE, "DefaultScrollBarStyle", 495, 67)
+}
+
+#[inline(never)]
+fn __build_controls_winuicontrols_xaml_factory_shape_140(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: &'static str,
+    arg2: i32,
+    arg3: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/WinUIControls.xaml(495,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(495,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ScrollBar as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/WinUIControls.xaml(495,67) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultScrollBarStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 495, 67)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 495, 67)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 495, 67)?);
+    let provided_0 = rt::provide_static_resource(&context, arg1, || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg2, arg3)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg2, arg3)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg2, arg3)?);
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
@@ -32042,30 +32002,33 @@ fn build_controls_winuicontrols_xaml_deferred_142(
 fn build_controls_winuicontrols_xaml_deferred_143(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(161,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(161,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ScrollViewer as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(161,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultScrollViewerStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 161, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 161, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 161, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::ScrollViewer as __t::StaticType>::TYPE, "DefaultScrollViewerStyle", 161, 73)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(163,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_144(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_winuicontrols_xaml_factory_shape_144(service_provider, <__t::ScrollViewer as __t::StaticType>::TYPE, build_controls_winuicontrols_xaml_deferred_145, 164)
+}
+
+#[inline(never)]
+fn __build_controls_winuicontrols_xaml_factory_shape_144(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: rt::DeferredBuild,
+    arg2: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let control_template_0 = __t::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/WinUIControls.xaml(163,4) TargetType
-    __t::ControlTemplate::__markup_set_TargetType(&control_template_0, __t::Option::Some(<__t::ScrollViewer as __t::StaticType>::TYPE));
+    __t::ControlTemplate::__markup_set_TargetType(&control_template_0, __t::Option::Some(arg0));
     // Controls/WinUIControls.xaml(164,6) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_145, 164, 6)?;
+    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg1, arg2, 6)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_template_0))
@@ -33428,17 +33391,10 @@ fn build_controls_winuicontrols_xaml_deferred_154(
 fn build_controls_winuicontrols_xaml_deferred_155(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(444,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(444,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TextBox as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(444,63) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultTextBoxStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 444, 63)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 444, 63)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 444, 63)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::TextBox as __t::StaticType>::TYPE, "DefaultTextBoxStyle", 444, 63)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(35,4)` (a template or a deferred resource).
@@ -33592,17 +33548,10 @@ fn build_controls_winuicontrols_xaml_deferred_157(
 fn build_controls_winuicontrols_xaml_deferred_158(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(85,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(85,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ToolTip as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(85,63) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultToolTipStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 85, 63)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 85, 63)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 85, 63)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::ToolTip as __t::StaticType>::TYPE, "DefaultToolTipStyle", 85, 63)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(63,4)` (a template or a deferred resource).
@@ -34451,17 +34400,10 @@ fn build_controls_winuicontrols_xaml_deferred_161(
 fn build_controls_winuicontrols_xaml_deferred_162(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/WinUIControls.xaml(259,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(259,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ProgressBar as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(259,71) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultProgressBarStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 259, 71)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 259, 71)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 259, 71)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_140(service_provider, <__t::ProgressBar as __t::StaticType>::TYPE, "DefaultProgressBarStyle", 259, 71)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(36,4)` (a template or a deferred resource).
@@ -34571,6 +34513,17 @@ fn build_controls_winuicontrols_xaml_deferred_166(
 fn build_controls_winuicontrols_xaml_deferred_167(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_winuicontrols_xaml_factory_shape_167(service_provider, build_controls_winuicontrols_xaml_deferred_168, 29, build_controls_winuicontrols_xaml_deferred_169, 51)
+}
+
+#[inline(never)]
+fn __build_controls_winuicontrols_xaml_factory_shape_167(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: rt::DeferredBuild,
+    arg1: i32,
+    arg2: rt::DeferredBuild,
+    arg3: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/WinUIControls.xaml(26,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
@@ -34585,7 +34538,7 @@ fn build_controls_winuicontrols_xaml_deferred_167(
     // Controls/WinUIControls.xaml(28,8) TargetType
     __t::ControlTemplate::__markup_set_TargetType(&control_template_0, __t::Option::Some(<__t::DataValidationErrors as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(29,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_168, 29, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg0, arg1, 10)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
@@ -34595,7 +34548,7 @@ fn build_controls_winuicontrols_xaml_deferred_167(
     let data_template_0 = __t::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(data_template_0.clone()));
     // Controls/WinUIControls.xaml(51,10) Content
-    let deferred_1 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_169, 51, 10)?;
+    let deferred_1 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg2, arg3, 10)?;
     __t::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(__t::Clone::clone(&deferred_1)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_1, rt::to_object(__t::Clone::clone(&data_template_0)));
@@ -34730,36 +34683,16 @@ fn build_controls_winuicontrols_xaml_deferred_169(
 fn build_controls_winuicontrols_xaml_deferred_170(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
     // Controls/WinUIControls.xaml(64,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(64,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::DataValidationErrors as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(65,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/WinUIControls.xaml(66,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/WinUIControls.xaml(66,8) TargetType
-    __t::ControlTemplate::__markup_set_TargetType(&control_template_0, __t::Option::Some(<__t::DataValidationErrors as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(67,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_171, 67, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
     // Controls/WinUIControls.xaml(86,6) Content
-    let setter_1 = rt::new_setter_with_parent(&context, rt::property(__t::DataValidationErrors::error_template_property()));
     // Controls/WinUIControls.xaml(87,8) Value
-    let data_template_0 = __t::DataTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(data_template_0.clone()));
     // Controls/WinUIControls.xaml(88,10) Content
-    let deferred_1 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_172, 88, 10)?;
-    __t::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(__t::Clone::clone(&deferred_1)));
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_1, rt::to_object(__t::Clone::clone(&data_template_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_167(service_provider, build_controls_winuicontrols_xaml_deferred_171, 67, build_controls_winuicontrols_xaml_deferred_172, 88)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(67,10)` (a template or a deferred resource).
@@ -36838,17 +36771,10 @@ fn build_controls_winuicontrols_xaml_deferred_195(
 fn build_controls_winuicontrols_xaml_deferred_196(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(61,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(61,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Calendar as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(61,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultCalendarViewStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 61, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 61, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 61, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::Calendar as __t::StaticType>::TYPE, "DefaultCalendarViewStyle", 61, 65)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(58,4)` (a template or a deferred resource).
@@ -37579,17 +37505,10 @@ fn build_controls_winuicontrols_xaml_deferred_203(
 fn build_controls_winuicontrols_xaml_deferred_204(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(297,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(297,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CalendarDatePicker as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(297,85) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultCalendarDatePicker", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 297, 85)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 297, 85)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 297, 85)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::CalendarDatePicker as __t::StaticType>::TYPE, "DefaultCalendarDatePicker", 297, 85)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(73,4)` (a template or a deferred resource).
@@ -38108,17 +38027,10 @@ fn build_controls_winuicontrols_xaml_deferred_209(
 fn build_controls_winuicontrols_xaml_deferred_210(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(229,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(229,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::DatePicker as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(229,69) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultDatePickerStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 229, 69)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 229, 69)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 229, 69)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::DatePicker as __t::StaticType>::TYPE, "DefaultDatePickerStyle", 229, 69)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(231,4)` (a template or a deferred resource).
@@ -38810,17 +38722,10 @@ fn build_controls_winuicontrols_xaml_deferred_212(
 fn build_controls_winuicontrols_xaml_deferred_213(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(381,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(381,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::DatePickerPresenter as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(381,87) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultDatePickerFlyoutPresenterStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 381, 87)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 381, 87)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 381, 87)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <::ferroui_controls::DatePickerPresenter as __t::StaticType>::TYPE, "DefaultDatePickerFlyoutPresenterStyle", 381, 87)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(67,4)` (a template or a deferred resource).
@@ -40745,20 +40650,12 @@ fn build_controls_winuicontrols_xaml_deferred_227(
 fn build_controls_winuicontrols_xaml_deferred_228(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(222,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
     // Controls/WinUIControls.xaml(222,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ContentControl as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(223,6) Content
-    let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/WinUIControls.xaml(224,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/WinUIControls.xaml(225,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_229, 225, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_21(service_provider, <__t::ContentControl as __t::StaticType>::TYPE, build_controls_winuicontrols_xaml_deferred_229, 225)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(225,10)` (a template or a deferred resource).
@@ -41517,17 +41414,10 @@ fn build_controls_winuicontrols_xaml_deferred_231(
 fn build_controls_winuicontrols_xaml_deferred_232(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(429,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(429,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::WindowDrawnDecorations as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(429,93) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultTitleBarStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 429, 93)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 429, 93)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 429, 93)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::WindowDrawnDecorations as __t::StaticType>::TYPE, "DefaultTitleBarStyle", 429, 93)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(58,4)` (a template or a deferred resource).
@@ -42314,22 +42204,25 @@ fn build_controls_winuicontrols_xaml_deferred_237(
 fn build_controls_winuicontrols_xaml_deferred_238(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(84,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(84,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(84,67) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 84, 67)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 84, 67)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 84, 67)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "DefaultInfoBadgeStyle", 84, 67)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(86,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_239(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_winuicontrols_xaml_factory_shape_239(service_provider, 86, 75, "SystemFillColorAttentionBrush")
+}
+
+#[inline(never)]
+fn __build_controls_winuicontrols_xaml_factory_shape_239(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: i32,
+    arg1: i32,
+    arg2: &'static str,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(86,4) ControlTheme
@@ -42338,11 +42231,11 @@ fn build_controls_winuicontrols_xaml_deferred_239(
     // Controls/WinUIControls.xaml(86,4) TargetType
     __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(86,75) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 86, 75)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 86, 75)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 86, 75)?);
+    let provided_0 = rt::provide_static_resource(&context, "DefaultInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg0, arg1)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg0, arg1)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg0, arg1)?);
     // Controls/WinUIControls.xaml(87,6) Content
     // Controls/WinUIControls.xaml(87,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), "SystemFillColorAttentionBrush");
+    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), arg2);
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
@@ -42351,22 +42244,26 @@ fn build_controls_winuicontrols_xaml_deferred_239(
 fn build_controls_winuicontrols_xaml_deferred_240(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(89,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(89,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(89,77) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "AttentionDotInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 89, 77)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 89, 77)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 89, 77)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "AttentionDotInfoBadgeStyle", 89, 77)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(90,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_241(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_winuicontrols_xaml_factory_shape_241(service_provider, "AttentionDotInfoBadgeStyle", 90, 76, "\u{ea38}")
+}
+
+#[inline(never)]
+fn __build_controls_winuicontrols_xaml_factory_shape_241(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static str,
+    arg1: i32,
+    arg2: i32,
+    arg3: &'static str,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(90,4) ControlTheme
@@ -42375,17 +42272,17 @@ fn build_controls_winuicontrols_xaml_deferred_241(
     // Controls/WinUIControls.xaml(90,4) TargetType
     __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(90,76) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "AttentionDotInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 90, 76)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 90, 76)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 90, 76)?);
+    let provided_0 = rt::provide_static_resource(&context, arg0, || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg1, arg2)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg1, arg2)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg1, arg2)?);
     // Controls/WinUIControls.xaml(91,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::padding_property()), rt::to_object(__t::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 0.0_f64, 2.0_f64)));
     // Controls/WinUIControls.xaml(92,6) Content
     let setter_1 = rt::new_setter(rt::property(__t::InfoBadge::icon_source_property()));
     // Controls/WinUIControls.xaml(93,8) Value
     // Controls/WinUIControls.xaml(93,8) FontIconSource
-    let font_icon_source_0 = __t::FontIconSource::new();
+    let font_icon_source_0 = ::ferroui_controls::FontIconSource::new();
     // Controls/WinUIControls.xaml(93,23) Glyph
-    font_icon_source_0.set_value(__t::FontIconSource::glyph_property(), __t::String::from("\u{ea38}"));
+    font_icon_source_0.set_value(::ferroui_controls::FontIconSource::glyph_property(), __t::String::from(arg3));
     rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_1, rt::to_object(__t::Clone::clone(&font_icon_source_0)));
     context.pop_parent();
     __t::Result::Ok(rt::to_value(control_theme_0.clone()))
@@ -42395,101 +42292,59 @@ fn build_controls_winuicontrols_xaml_deferred_241(
 fn build_controls_winuicontrols_xaml_deferred_242(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(97,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(97,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(97,79) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 97, 79)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 97, 79)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 97, 79)?);
     // Controls/WinUIControls.xaml(98,6) Content
     // Controls/WinUIControls.xaml(98,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), "SystemFillColorSolidNeutralBrush");
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_239(service_provider, 97, 79, "SystemFillColorSolidNeutralBrush")
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(100,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_243(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(100,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(100,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(100,81) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "InformationalDotInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 100, 81)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 100, 81)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 100, 81)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "InformationalDotInfoBadgeStyle", 100, 81)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(101,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_244(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(101,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(101,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(101,80) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "InformationalDotInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 101, 80)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 101, 80)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 101, 80)?);
     // Controls/WinUIControls.xaml(102,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::padding_property()), rt::to_object(__t::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 0.0_f64, 2.0_f64)));
     // Controls/WinUIControls.xaml(103,6) Content
-    let setter_1 = rt::new_setter(rt::property(__t::InfoBadge::icon_source_property()));
     // Controls/WinUIControls.xaml(104,8) Value
     // Controls/WinUIControls.xaml(104,8) FontIconSource
-    let font_icon_source_0 = __t::FontIconSource::new();
     // Controls/WinUIControls.xaml(104,23) Glyph
-    font_icon_source_0.set_value(__t::FontIconSource::glyph_property(), __t::String::from("\u{f13f}"));
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_1, rt::to_object(__t::Clone::clone(&font_icon_source_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_241(service_provider, "InformationalDotInfoBadgeStyle", 101, 80, "\u{f13f}")
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(108,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_245(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(108,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(108,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(108,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 108, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 108, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 108, 73)?);
     // Controls/WinUIControls.xaml(109,6) Content
     // Controls/WinUIControls.xaml(109,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), "SystemFillColorSuccessBrush");
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_239(service_provider, 108, 73, "SystemFillColorSuccessBrush")
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(111,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_246(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(111,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(111,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(111,75) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "SuccessDotInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 111, 75)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 111, 75)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 111, 75)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "SuccessDotInfoBadgeStyle", 111, 75)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(112,4)` (a template or a deferred resource).
@@ -42521,37 +42376,22 @@ fn build_controls_winuicontrols_xaml_deferred_247(
 fn build_controls_winuicontrols_xaml_deferred_248(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(118,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(118,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(118,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 118, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 118, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 118, 73)?);
     // Controls/WinUIControls.xaml(119,6) Content
     // Controls/WinUIControls.xaml(119,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), "SystemFillColorCautionBrush");
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_239(service_provider, 118, 73, "SystemFillColorCautionBrush")
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(121,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_249(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(121,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(121,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(121,75) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "CautionDotInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 121, 75)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 121, 75)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 121, 75)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "CautionDotInfoBadgeStyle", 121, 75)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(122,4)` (a template or a deferred resource).
@@ -42583,37 +42423,22 @@ fn build_controls_winuicontrols_xaml_deferred_250(
 fn build_controls_winuicontrols_xaml_deferred_251(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(128,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(128,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(128,74) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 128, 74)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 128, 74)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 128, 74)?);
     // Controls/WinUIControls.xaml(129,6) Content
     // Controls/WinUIControls.xaml(129,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::TemplatedControl::background_property()), "SystemFillColorCriticalBrush");
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_239(service_provider, 128, 74, "SystemFillColorCriticalBrush")
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(131,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_252(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(131,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(131,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::InfoBadge as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(131,76) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "CriticalDotInfoBadgeStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 131, 76)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 131, 76)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 131, 76)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::InfoBadge as __t::StaticType>::TYPE, "CriticalDotInfoBadgeStyle", 131, 76)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(132,4)` (a template or a deferred resource).
@@ -43331,39 +43156,44 @@ fn build_controls_winuicontrols_xaml_deferred_255(
 fn build_controls_winuicontrols_xaml_deferred_256(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(229,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(229,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TitleBar as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(229,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultTitleBarControlStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 229, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 229, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 229, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::TitleBar as __t::StaticType>::TYPE, "DefaultTitleBarControlStyle", 229, 65)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(46,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_257(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_winuicontrols_xaml_factory_shape_257(service_provider, <__t::ScrollViewer as __t::StaticType>::TYPE, "DefaultScrollViewerStyle", 46, build_controls_winuicontrols_xaml_deferred_258, 49)
+}
+
+#[inline(never)]
+fn __build_controls_winuicontrols_xaml_factory_shape_257(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: &'static str,
+    arg2: i32,
+    arg3: rt::DeferredBuild,
+    arg4: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(46,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(46,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ScrollViewer as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/WinUIControls.xaml(46,78) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultScrollViewerStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 46, 78)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 46, 78)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 46, 78)?);
+    let provided_0 = rt::provide_static_resource(&context, arg1, || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg2, 78)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg2, 78)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg2, 78)?);
     // Controls/WinUIControls.xaml(47,6) Content
     let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/WinUIControls.xaml(48,8) Value
     let control_template_0 = __t::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/WinUIControls.xaml(49,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_258, 49, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, arg3, arg4, 10)?;
     __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
@@ -46256,17 +46086,10 @@ fn build_controls_winuicontrols_xaml_deferred_280(
 fn build_controls_winuicontrols_xaml_deferred_281(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(60,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(60,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TabStrip as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(60,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultSelectorBarStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 60, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 60, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 60, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::TabStrip as __t::StaticType>::TYPE, "DefaultSelectorBarStyle", 60, 65)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(57,4)` (a template or a deferred resource).
@@ -46757,17 +46580,10 @@ fn build_controls_winuicontrols_xaml_deferred_284(
 fn build_controls_winuicontrols_xaml_deferred_285(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(210,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(210,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TabStripItem as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(210,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultSelectorBarItemStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 210, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 210, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 210, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::TabStripItem as __t::StaticType>::TYPE, "DefaultSelectorBarItemStyle", 210, 73)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(83,4)` (a template or a deferred resource).
@@ -49776,17 +49592,10 @@ fn build_controls_winuicontrols_xaml_deferred_304(
 fn build_controls_winuicontrols_xaml_deferred_305(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(417,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(417,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::SplitView as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(417,67) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultSplitViewStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 417, 67)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 417, 67)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 417, 67)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::SplitView as __t::StaticType>::TYPE, "DefaultSplitViewStyle", 417, 67)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(59,4)` (a template or a deferred resource).
@@ -51885,27 +51694,13 @@ fn build_controls_winuicontrols_xaml_deferred_323(
 fn build_controls_winuicontrols_xaml_deferred_324(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(189,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(189,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ToggleButton as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(189,78) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "PaneToggleButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 189, 78)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 189, 78)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 189, 78)?);
     // Controls/WinUIControls.xaml(190,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/WinUIControls.xaml(191,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/WinUIControls.xaml(192,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_325, 192, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_257(service_provider, <__t::ToggleButton as __t::StaticType>::TYPE, "PaneToggleButtonStyle", 189, build_controls_winuicontrols_xaml_deferred_325, 192)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(192,10)` (a template or a deferred resource).
@@ -56650,17 +56445,10 @@ fn build_controls_winuicontrols_xaml_deferred_345(
 fn build_controls_winuicontrols_xaml_deferred_346(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(82,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(82,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Carousel as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(82,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultFlipViewStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 82, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 82, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 82, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::Carousel as __t::StaticType>::TYPE, "DefaultFlipViewStyle", 82, 65)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(105,4)` (a template or a deferred resource).
@@ -57283,15 +57071,26 @@ fn build_controls_winuicontrols_xaml_deferred_349(
 fn build_controls_winuicontrols_xaml_deferred_350(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
+    __build_controls_winuicontrols_xaml_factory_shape_350(service_provider, <__t::CommandBarButton as __t::StaticType>::TYPE, "DefaultAppBarButtonStyle", 304, 81)
+}
+
+#[inline(never)]
+fn __build_controls_winuicontrols_xaml_factory_shape_350(
+    service_provider: &__t::Rc<dyn __t::IServiceProvider>,
+    arg0: &'static __t::TypeInfo,
+    arg1: &'static str,
+    arg2: i32,
+    arg3: i32,
+) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(304,4) ControlTheme
     let control_theme_0 = __t::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(304,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CommandBarButton as __t::StaticType>::TYPE));
+    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(arg0));
     // Controls/WinUIControls.xaml(304,81) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultAppBarButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 304, 81)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 304, 81)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 304, 81)?);
+    let provided_0 = rt::provide_static_resource(&context, arg1, || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), arg2, arg3)?;
+    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", arg2, arg3)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, arg2, arg3)?);
     // Controls/WinUIControls.xaml(305,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::Layoutable::horizontal_alignment_property()), rt::to_object(__t::HorizontalAlignment::Stretch));
     // Controls/WinUIControls.xaml(306,6) Content
@@ -57304,17 +57103,10 @@ fn build_controls_winuicontrols_xaml_deferred_350(
 fn build_controls_winuicontrols_xaml_deferred_351(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(309,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(309,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CommandBarButton as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(309,81) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultAppBarButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 309, 81)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 309, 81)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 309, 81)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::CommandBarButton as __t::StaticType>::TYPE, "DefaultAppBarButtonStyle", 309, 81)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(312,4)` (a template or a deferred resource).
@@ -58563,38 +58355,22 @@ fn build_controls_winuicontrols_xaml_deferred_354(
 fn build_controls_winuicontrols_xaml_deferred_355(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(708,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(708,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CommandBarToggleButton as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(708,93) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultAppBarToggleButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 708, 93)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 708, 93)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 708, 93)?);
     // Controls/WinUIControls.xaml(709,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::Layoutable::horizontal_alignment_property()), rt::to_object(__t::HorizontalAlignment::Stretch));
     // Controls/WinUIControls.xaml(710,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<__t::StyleBase>(), rt::property(__t::Layoutable::width_property()), rt::to_object(::core::primitive::f64::NAN));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_350(service_provider, <__t::CommandBarToggleButton as __t::StaticType>::TYPE, "DefaultAppBarToggleButtonStyle", 708, 93)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(713,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_356(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(713,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(713,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CommandBarToggleButton as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(713,93) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultAppBarToggleButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 713, 93)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 713, 93)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 713, 93)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::CommandBarToggleButton as __t::StaticType>::TYPE, "DefaultAppBarToggleButtonStyle", 713, 93)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(716,4)` (a template or a deferred resource).
@@ -58736,17 +58512,10 @@ fn build_controls_winuicontrols_xaml_deferred_358(
 fn build_controls_winuicontrols_xaml_deferred_359(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(752,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(752,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CommandBarSeparator as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(752,87) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultAppBarSeparatorStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 752, 87)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 752, 87)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 752, 87)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::CommandBarSeparator as __t::StaticType>::TYPE, "DefaultAppBarSeparatorStyle", 752, 87)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(755,4)` (a template or a deferred resource).
@@ -59547,17 +59316,10 @@ fn build_controls_winuicontrols_xaml_deferred_367(
 fn build_controls_winuicontrols_xaml_deferred_368(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(973,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(973,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::CommandBar as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(973,69) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultCommandBarStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 973, 69)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 973, 69)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 973, 69)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::CommandBar as __t::StaticType>::TYPE, "DefaultCommandBarStyle", 973, 69)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(32,4)` (a template or a deferred resource).
@@ -59902,17 +59664,10 @@ fn build_controls_winuicontrols_xaml_deferred_371(
 fn build_controls_winuicontrols_xaml_deferred_372(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(142,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(142,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::DropDownButton as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(142,77) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultDropDownButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 142, 77)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 142, 77)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 142, 77)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <::ferroui_controls::DropDownButton as __t::StaticType>::TYPE, "DefaultDropDownButtonStyle", 142, 77)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(63,4)` (a template or a deferred resource).
@@ -60892,17 +60647,10 @@ fn build_controls_winuicontrols_xaml_deferred_378(
 fn build_controls_winuicontrols_xaml_deferred_379(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(379,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(379,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::SplitButton as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(379,71) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "SplitButtonStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 379, 71)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 379, 71)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 379, 71)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::SplitButton as __t::StaticType>::TYPE, "SplitButtonStyle", 379, 71)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(383,4)` (a template or a deferred resource).
@@ -62776,17 +62524,10 @@ fn build_controls_winuicontrols_xaml_deferred_388(
 fn build_controls_winuicontrols_xaml_deferred_389(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(343,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(343,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ToggleSwitch as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(343,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultToggleSwitchStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 343, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 343, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 343, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::ToggleSwitch as __t::StaticType>::TYPE, "DefaultToggleSwitchStyle", 343, 73)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(59,4)` (a template or a deferred resource).
@@ -62928,24 +62669,12 @@ fn build_controls_winuicontrols_xaml_deferred_391(
 fn build_controls_winuicontrols_xaml_deferred_392(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(102,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(102,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::RepeatButton as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(103,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/WinUIControls.xaml(104,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/WinUIControls.xaml(105,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_393, 105, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_17(service_provider, <__t::RepeatButton as __t::StaticType>::TYPE, build_controls_winuicontrols_xaml_deferred_393, 105)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(105,10)` (a template or a deferred resource).
@@ -63008,24 +62737,12 @@ fn build_controls_winuicontrols_xaml_deferred_393(
 fn build_controls_winuicontrols_xaml_deferred_394(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(118,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(118,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::RepeatButton as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(119,6) Content
-    let setter_0 = rt::new_setter_with_parent(&context, rt::property(__t::TemplatedControl::template_property()));
     // Controls/WinUIControls.xaml(120,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/WinUIControls.xaml(121,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_395, 121, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_17(service_provider, <__t::RepeatButton as __t::StaticType>::TYPE, build_controls_winuicontrols_xaml_deferred_395, 121)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(121,10)` (a template or a deferred resource).
@@ -63088,20 +62805,12 @@ fn build_controls_winuicontrols_xaml_deferred_395(
 fn build_controls_winuicontrols_xaml_deferred_396(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(135,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
     // Controls/WinUIControls.xaml(135,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::RepeatButton as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(136,6) Content
-    let setter_0 = rt::new_setter(rt::property(__t::TemplatedControl::template_property()));
     // Controls/WinUIControls.xaml(137,8) Value
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
     // Controls/WinUIControls.xaml(138,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_397, 138, 10)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<__t::StyleBase>(), &setter_0, rt::to_object(__t::Clone::clone(&control_template_0)));
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_21(service_provider, <__t::RepeatButton as __t::StaticType>::TYPE, build_controls_winuicontrols_xaml_deferred_397, 138)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(138,10)` (a template or a deferred resource).
@@ -64163,17 +63872,10 @@ fn build_controls_winuicontrols_xaml_deferred_401(
 fn build_controls_winuicontrols_xaml_deferred_402(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(432,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(432,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Slider as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(432,61) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultSliderStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 432, 61)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 432, 61)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 432, 61)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::Slider as __t::StaticType>::TYPE, "DefaultSliderStyle", 432, 61)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(67,4)` (a template or a deferred resource).
@@ -66978,17 +66680,10 @@ fn build_controls_winuicontrols_xaml_deferred_423(
 fn build_controls_winuicontrols_xaml_deferred_424(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(386,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(386,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::Expander as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(386,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultExpanderStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 386, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 386, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 386, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::Expander as __t::StaticType>::TYPE, "DefaultExpanderStyle", 386, 65)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(59,4)` (a template or a deferred resource).
@@ -68239,17 +67934,10 @@ fn build_controls_winuicontrols_xaml_deferred_444(
 fn build_controls_winuicontrols_xaml_deferred_445(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(42,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(42,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::RefreshContainer as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(42,81) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultRefreshContainerStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 42, 81)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 42, 81)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 42, 81)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <::ferroui_controls::RefreshContainer as __t::StaticType>::TYPE, "DefaultRefreshContainerStyle", 42, 81)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(39,4)` (a template or a deferred resource).
@@ -68398,17 +68086,10 @@ fn build_controls_winuicontrols_xaml_deferred_447(
 fn build_controls_winuicontrols_xaml_deferred_448(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(86,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(86,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::FlyoutPresenter as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(86,79) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultFlyoutPresenterStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 86, 79)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 86, 79)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 86, 79)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <::ferroui_controls::FlyoutPresenter as __t::StaticType>::TYPE, "DefaultFlyoutPresenterStyle", 86, 79)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(44,4)` (a template or a deferred resource).
@@ -68557,17 +68238,10 @@ fn build_controls_winuicontrols_xaml_deferred_450(
 fn build_controls_winuicontrols_xaml_deferred_451(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(87,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(87,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::MenuFlyoutPresenter as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(87,87) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultMenuFlyoutPresenterStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 87, 87)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 87, 87)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 87, 87)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <::ferroui_controls::MenuFlyoutPresenter as __t::StaticType>::TYPE, "DefaultMenuFlyoutPresenterStyle", 87, 87)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(79,4)` (a template or a deferred resource).
@@ -69926,17 +69600,10 @@ fn build_controls_winuicontrols_xaml_deferred_459(
 fn build_controls_winuicontrols_xaml_deferred_460(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/WinUIControls.xaml(454,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(454,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::MenuItem as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(454,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultMenuFlyoutItemStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 454, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 454, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 454, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_140(service_provider, <__t::MenuItem as __t::StaticType>::TYPE, "DefaultMenuFlyoutItemStyle", 454, 65)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(60,4)` (a template or a deferred resource).
@@ -70419,17 +70086,10 @@ fn build_controls_winuicontrols_xaml_deferred_465(
 fn build_controls_winuicontrols_xaml_deferred_466(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(200,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(200,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::Menu as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(200,57) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultMenuBarStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 200, 57)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 200, 57)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 200, 57)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <::ferroui_controls::Menu as __t::StaticType>::TYPE, "DefaultMenuBarStyle", 200, 57)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(69,4)` (a template or a deferred resource).
@@ -70698,17 +70358,10 @@ fn build_controls_winuicontrols_xaml_deferred_468(
 fn build_controls_winuicontrols_xaml_deferred_469(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(157,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(157,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ListBoxItem as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(157,71) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultListBoxItemStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 157, 71)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 157, 71)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 157, 71)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::ListBoxItem as __t::StaticType>::TYPE, "DefaultListBoxItemStyle", 157, 71)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(162,4)` (a template or a deferred resource).
@@ -71545,17 +71198,10 @@ fn build_controls_winuicontrols_xaml_deferred_477(
 fn build_controls_winuicontrols_xaml_deferred_478(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(77,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(77,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ListBox as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(77,63) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultListBoxStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 77, 63)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 77, 63)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 77, 63)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::ListBox as __t::StaticType>::TYPE, "DefaultListBoxStyle", 77, 63)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(40,4)` (a template or a deferred resource).
@@ -71973,17 +71619,10 @@ fn build_controls_winuicontrols_xaml_deferred_482(
 fn build_controls_winuicontrols_xaml_deferred_483(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(175,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(175,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::ComboBoxItem as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(175,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultComboBoxItemStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 175, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 175, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 175, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <::ferroui_controls::ComboBoxItem as __t::StaticType>::TYPE, "DefaultComboBoxItemStyle", 175, 73)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(82,4)` (a template or a deferred resource).
@@ -73088,17 +72727,10 @@ fn build_controls_winuicontrols_xaml_deferred_487(
 fn build_controls_winuicontrols_xaml_deferred_488(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(434,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(434,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::ComboBox as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(434,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultComboBoxStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 434, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 434, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 434, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::ComboBox as __t::StaticType>::TYPE, "DefaultComboBoxStyle", 434, 65)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(60,4)` (a template or a deferred resource).
@@ -73899,17 +73531,10 @@ fn build_controls_winuicontrols_xaml_deferred_494(
 fn build_controls_winuicontrols_xaml_deferred_495(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/WinUIControls.xaml(300,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(300,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::TreeViewItem as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(300,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "MUX_TreeViewItemStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 300, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 300, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 300, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_140(service_provider, <__t::TreeViewItem as __t::StaticType>::TYPE, "MUX_TreeViewItemStyle", 300, 73)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(38,4)` (a template or a deferred resource).
@@ -73991,17 +73616,10 @@ fn build_controls_winuicontrols_xaml_deferred_497(
 fn build_controls_winuicontrols_xaml_deferred_498(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(67,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(67,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::TreeView as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(67,65) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultTreeViewStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 67, 65)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 67, 65)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 67, 65)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <::ferroui_controls::TreeView as __t::StaticType>::TYPE, "DefaultTreeViewStyle", 67, 65)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(53,4)` (a template or a deferred resource).
@@ -74849,17 +74467,10 @@ fn build_controls_winuicontrols_xaml_deferred_504(
 fn build_controls_winuicontrols_xaml_deferred_505(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(316,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(316,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::AutoCompleteBox as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(316,79) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultAutoSuggestBoxStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 316, 79)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 316, 79)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 316, 79)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::AutoCompleteBox as __t::StaticType>::TYPE, "DefaultAutoSuggestBoxStyle", 316, 79)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(67,4)` (a template or a deferred resource).
@@ -74978,16 +74589,9 @@ fn build_controls_winuicontrols_xaml_deferred_507(
 fn build_controls_winuicontrols_xaml_deferred_508(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    let control_template_0 = __t::ControlTemplate::__markup_new_0();
-    context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/WinUIControls.xaml(107,4) TargetType
-    __t::ControlTemplate::__markup_set_TargetType(&control_template_0, __t::Option::Some(<__t::SymbolIcon as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(108,6) Content
-    let deferred_0 = rt::defer(rt::class_handle(<__t::Control as __t::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_509, 108, 6)?;
-    __t::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(__t::Clone::clone(&deferred_0)));
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_template_0))
+    __build_controls_winuicontrols_xaml_factory_shape_144(service_provider, <__t::SymbolIcon as __t::StaticType>::TYPE, build_controls_winuicontrols_xaml_deferred_509, 108)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(108,6)` (a template or a deferred resource).
@@ -75499,17 +75103,10 @@ fn build_controls_winuicontrols_xaml_deferred_514(
 fn build_controls_winuicontrols_xaml_deferred_515(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(76,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(76,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<::ferroui_controls::RadioButtons as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(76,73) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultRadioButtonsStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 76, 73)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 76, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 76, 73)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <::ferroui_controls::RadioButtons as __t::StaticType>::TYPE, "DefaultRadioButtonsStyle", 76, 73)
 }
 
 /// Builds the deferred content at `Controls/WinUIControls.xaml(26,4)` (a template or a deferred resource).
@@ -76181,17 +75778,10 @@ fn build_controls_winuicontrols_xaml_deferred_518(
 fn build_controls_winuicontrols_xaml_deferred_519(
     service_provider: &__t::Rc<dyn __t::IServiceProvider>,
 ) -> __t::Result<__t::MarkupValue, __t::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     // Controls/WinUIControls.xaml(159,4) ControlTheme
-    let control_theme_0 = __t::ControlTheme::new();
-    context.push_parent(rt::to_value(control_theme_0.clone()));
     // Controls/WinUIControls.xaml(159,4) TargetType
-    __t::ControlTheme::__markup_set_TargetType(&control_theme_0, __t::Option::Some(<__t::RichEditBox as __t::StaticType>::TYPE));
     // Controls/WinUIControls.xaml(159,71) BasedOn
-    let provided_0 = rt::provide_static_resource(&context, "DefaultRichEditBoxStyle", || rt::boxed(rt::clr_property_info(rt::class_markup(<__t::ControlTheme as __t::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), false)), 159, 71)?;
-    __t::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<__t::ControlTheme as __t::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 159, 71)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 159, 71)?);
-    context.pop_parent();
-    __t::Result::Ok(rt::to_value(control_theme_0.clone()))
+    __build_controls_winuicontrols_xaml_factory_shape_92(service_provider, <__t::RichEditBox as __t::StaticType>::TYPE, "DefaultRichEditBoxStyle", 159, 71)
 }
 
 static BUILD_DENSITYSTYLES_COMPACT_XAML_THEME_CONSTANTS_0: &[rt::theme_resources::ConstantRow<u64>] = &[
@@ -76448,7 +76038,6 @@ mod __t {
     pub(super) use ::ferroui_controls::DrawerPage;
     pub(super) use ::ferroui_controls::Expander;
     pub(super) use ::ferroui_controls::FerroListOf;
-    pub(super) use ::ferroui_controls::FontIconSource;
     pub(super) use ::ferroui_controls::Grid;
     pub(super) use ::ferroui_controls::GridLength;
     pub(super) use ::ferroui_controls::GridSplitter;
