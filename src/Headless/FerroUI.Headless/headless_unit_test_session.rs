@@ -36,10 +36,7 @@ use crate::{
 };
 use ferroui_base::media::{FontManager, MediaContext};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::threading::{
-    CancellationToken, CancellationTokenSource, Dispatcher, DispatcherFrame, FerroSynchronizationContext,
-    OperationCanceledError,
-};
+use ferroui_base::threading::{CancellationToken, Canceled, Dispatcher, DispatcherFrame, FerroSynchronizationContext};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::{AppBuilder, Application, Control, IToolTipService};
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
@@ -120,7 +117,7 @@ impl<T> HeadlessUnitTestTask<T> {
     /// # Panics
     /// Raises the panic of the dispatched action, or of the cleanup after
     /// it, again.
-    pub fn wait(self) -> Result<T, OperationCanceledError> {
+    pub fn wait(self) -> Result<T, Canceled> {
         Self::take(self.receiver.blocking_recv())
     }
 
@@ -130,7 +127,7 @@ impl<T> HeadlessUnitTestTask<T> {
     /// # Panics
     /// Panics when the task has not finished in time (`TimeoutException`);
     /// otherwise as [`wait`](Self::wait).
-    pub fn wait_timeout(self, timeout: Duration) -> Result<T, OperationCanceledError> {
+    pub fn wait_timeout(self, timeout: Duration) -> Result<T, Canceled> {
         let mut receiver = self.receiver;
         match receiver.recv_timeout(timeout) {
             Ok(None) => panic!("The operation has timed out."),
@@ -139,11 +136,11 @@ impl<T> HeadlessUnitTestTask<T> {
         }
     }
 
-    fn take(outcome: Result<Result<T, Exception>, oneshot::Canceled>) -> Result<T, OperationCanceledError> {
+    fn take(outcome: Result<Result<T, Exception>, Canceled>) -> Result<T, Canceled> {
         match outcome {
             Ok(Ok(result)) => Ok(result),
             Ok(Err(exception)) => resume_unwind(exception),
-            Err(oneshot::Canceled) => Err(OperationCanceledError),
+            Err(canceled) => Err(canceled),
         }
     }
 }
@@ -191,10 +188,10 @@ impl BlockingQueue {
     }
 
     /// `Take(CancellationToken)`: `None` is the cancellation of the token.
-    fn take(&self, cancellation_token_source: &CancellationTokenSource) -> Option<WorkItem> {
+    fn take(&self, cancellation_token: &CancellationToken) -> Option<WorkItem> {
         let mut state = self.lock();
         loop {
-            if cancellation_token_source.is_cancellation_requested() {
+            if cancellation_token.is_cancelled() {
                 return None;
             }
             if let Some(item) = state.items.pop_front() {
@@ -228,7 +225,7 @@ impl BlockingQueue {
 /// `dispatch` methods to keep execution flow on the UI thread. Disposing
 /// unit test session stops internal dispatcher loop.
 pub struct HeadlessUnitTestSession {
-    cancellation_token_source: CancellationTokenSource,
+    cancellation_token: CancellationToken,
     queue: Arc<BlockingQueue>,
     dispatch_task: Mutex<Option<JoinHandle<()>>>,
     isolated: bool,
@@ -243,16 +240,6 @@ fn sessions() -> &'static Mutex<HashMap<&'static str, Arc<HeadlessUnitTestSessio
 /// not given.
 static HEADLESS_ASSEMBLY: FerroTestAssembly =
     FerroTestAssembly { name: env!("CARGO_PKG_NAME"), test_application: None, test_isolation: None };
-
-/// Cancels the source when dropped: when the future it is a local of has
-/// run to its end, has panicked or was dropped.
-struct CancelOnDrop(CancellationTokenSource);
-
-impl Drop for CancelOnDrop {
-    fn drop(&mut self) {
-        self.0.cancel();
-    }
-}
 
 /// Drops the compositor of the headless platform when the thread of a
 /// session ends (see `FerroHeadlessPlatform::release_compositor`).
@@ -317,16 +304,16 @@ impl HeadlessUnitTestSession {
         Fut: Future + 'static,
         Fut::Output: Send + 'static,
     {
-        if self.cancellation_token_source.is_cancellation_requested() {
+        if self.cancellation_token.is_cancelled() {
             panic!("Cannot access a disposed object.\nObject name: 'Session was already disposed.'.");
         }
 
-        let token = self.cancellation_token_source.token();
+        let token = self.cancellation_token.clone();
         let isolated = self.isolated;
 
         let (tcs, task) = TaskCompletionSource::<Fut::Output>::new();
         self.queue.add(Box::new(move |session: &SessionThread| {
-            let cts = CancellationTokenSource::new();
+            let cts = CancellationToken::new();
             let global_cts = {
                 let cts = cts.clone();
                 token.register(move || cts.cancel())
@@ -359,9 +346,10 @@ impl HeadlessUnitTestSession {
             match catch_unwind(AssertUnwindSafe(|| {
                 // The future is started as a call of an asynchronous method is: it runs to its
                 // first pending await before `start_local` returns. The guard is the continuation
-                // of the original, which cancels the source when the task has finished.
+                // of the original, which cancels the token when the task has finished: when the
+                // future has run to its end, has panicked or was dropped.
                 let future = action();
-                let guard = CancelOnDrop(cts.clone());
+                let guard = cts.clone().drop_guard();
                 let task = Dispatcher::ui_thread().to_task_scheduler().start_local(async move {
                     let _guard = guard;
                     future.await
@@ -373,14 +361,14 @@ impl HeadlessUnitTestSession {
                     };
                 }
 
-                if cts.is_cancellation_requested() {
+                if cts.is_cancelled() {
                     should_cancel = true;
                     None
                 } else {
                     let frame = DispatcherFrame::new();
                     let inner_cts = {
                         let frame = frame.clone();
-                        cts.token().register(move || frame.set_continue(false))
+                        cts.register(move || frame.set_continue(false))
                     };
                     Dispatcher::ui_thread().push_frame(&frame);
                     inner_cts.dispose();
@@ -415,7 +403,7 @@ impl HeadlessUnitTestSession {
     }
 
     pub fn dispose(&self) {
-        self.cancellation_token_source.cancel();
+        self.cancellation_token.cancel();
         self.queue.wake();
         let dispatch_task = self.dispatch_task.lock().unwrap_or_else(PoisonError::into_inner).take();
         if let Some(dispatch_task) = dispatch_task {
@@ -457,11 +445,11 @@ impl HeadlessUnitTestSession {
         isolation_level: FerroTestIsolationLevel,
     ) -> Arc<HeadlessUnitTestSession> {
         let (tcs, started) = mpsc::channel::<Result<(), Exception>>();
-        let cancellation_token_source = CancellationTokenSource::new();
+        let cancellation_token = CancellationToken::new();
         let queue = Arc::new(BlockingQueue::default());
 
         let task = {
-            let cancellation_token_source = cancellation_token_source.clone();
+            let cancellation_token = cancellation_token.clone();
             let queue = queue.clone();
             thread::Builder::new()
                 .name("HeadlessUnitTestSession".to_owned())
@@ -495,9 +483,9 @@ impl HeadlessUnitTestSession {
                         }
                     };
 
-                    while !cancellation_token_source.is_cancellation_requested() {
+                    while !cancellation_token.is_cancelled() {
                         // `None` is the `OperationCanceledException` of the original.
-                        if let Some(action) = queue.take(&cancellation_token_source) {
+                        if let Some(action) = queue.take(&cancellation_token) {
                             action(&session);
                         }
                     }
@@ -513,7 +501,7 @@ impl HeadlessUnitTestSession {
 
         let run_isolated = isolation_level == FerroTestIsolationLevel::PerTest;
         Arc::new(HeadlessUnitTestSession {
-            cancellation_token_source,
+            cancellation_token,
             queue,
             dispatch_task: Mutex::new(Some(task)),
             isolated: run_isolated,

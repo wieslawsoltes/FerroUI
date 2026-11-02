@@ -195,7 +195,7 @@ impl CatalogueSearchService {
 
 impl ICrateSearchService for CatalogueSearchService {
     fn search(&self, term: &str, token: CancellationToken) -> Task<Vec<CrateSearchMetadata>> {
-        if token.is_cancellation_requested() {
+        if token.is_cancelled() {
             return Task::from_canceled();
         }
         Task::from_result(Self::find(term))
@@ -308,7 +308,7 @@ mod online {
         /// request that has started runs to its end, and the reactive pipeline drops its result
         /// when the subscription is gone (NuGet.Protocol hands the token to the HTTP client).
         fn search(&self, term: &str, token: CancellationToken) -> Task<Vec<CrateSearchMetadata>> {
-            if token.is_cancellation_requested() {
+            if token.is_cancelled() {
                 return Task::from_canceled();
             }
             let term = term.to_owned();

@@ -2,12 +2,12 @@ use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 
-use super::{CancellationTokenSource, Dispatcher, IControlledDispatcherImpl};
+use super::{CancellationToken, Dispatcher, IControlledDispatcherImpl};
 
 #[derive(Default)]
 struct FrameState {
     is_running: bool,
-    cancellation_token_source: Option<CancellationTokenSource>,
+    cancellation_token: Option<CancellationToken>,
 }
 
 /// Represents an execution loop in the [`Dispatcher`].
@@ -95,14 +95,14 @@ impl DispatcherFrame {
             let state = self.lock();
             self.continue_.store(value, Ordering::SeqCst);
             if !value {
-                state.cancellation_token_source.clone()
+                state.cancellation_token.clone()
             } else {
                 None
             }
         };
         // Canceled outside of the lock: cancellation runs callbacks.
-        if let Some(source) = to_cancel {
-            source.cancel();
+        if let Some(token) = to_cancel {
+            token.cancel();
         }
     }
 
@@ -122,9 +122,8 @@ impl DispatcherFrame {
                     panic!("This frame is already running");
                 }
 
-                let source = CancellationTokenSource::new();
-                let token = source.token();
-                state.cancellation_token_source = Some(source);
+                let token = CancellationToken::new();
+                state.cancellation_token = Some(token.clone());
                 state.is_running = true;
                 token
             };
@@ -136,13 +135,13 @@ impl DispatcherFrame {
             }));
 
             // finally
-            let source = {
+            let token = {
                 let mut state = self.lock();
                 state.is_running = false;
-                state.cancellation_token_source.take()
+                state.cancellation_token.take()
             };
-            if let Some(source) = source {
-                source.cancel();
+            if let Some(token) = token {
+                token.cancel();
             }
             if let Err(payload) = result {
                 resume_unwind(payload);
@@ -152,9 +151,9 @@ impl DispatcherFrame {
 
     pub(crate) fn maybe_exit_on_dispatcher_request(&self) {
         if self.exit_when_requested {
-            let source = self.lock().cancellation_token_source.clone();
-            if let Some(source) = source {
-                source.cancel();
+            let token = self.lock().cancellation_token.clone();
+            if let Some(token) = token {
+                token.cancel();
             }
         }
     }

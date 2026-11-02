@@ -39,7 +39,7 @@ fn produce(
         recurse(ticks_to_duration(100));
     });
 
-    let _ = token.register_local(move || d.dispose());
+    token.register_local(move || d.dispose()).detach();
 }
 
 fn producer1(results: Rc<dyn IObserver<i32>>, scheduler: Rc<dyn IScheduler>, token: CancellationToken) -> Task<()> {

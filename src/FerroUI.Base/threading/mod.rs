@@ -25,16 +25,19 @@ mod ferro_synchronization_context;
 mod i_dispatcher;
 mod i_dispatcher_impl;
 
-pub use ferroui_system::threading::{CancellationToken, CancellationTokenRegistration, CancellationTokenSource};
+pub use ferroui_system::task::Canceled;
+pub use ferroui_system::threading::{CancellationGuard, CancellationToken, DropGuard, WaitForCancellation};
+#[allow(deprecated)]
+pub use ferroui_system::threading::{CancellationTokenRegistration, CancellationTokenSource};
 pub use dispatcher::{
     Dispatcher, DispatcherUnhandledExceptionEventHandler, DispatcherUnhandledExceptionFilterEventHandler,
 };
 pub use dispatcher_event_args::DispatcherEventArgs;
 pub use dispatcher_frame::DispatcherFrame;
 pub use dispatcher_main_loop::DispatcherProcessingDisabled;
-pub use dispatcher_operation::{
-    DispatcherException, DispatcherOperation, DispatcherOperationStatus, OperationCanceledError,
-};
+pub use dispatcher_operation::{DispatcherException, DispatcherOperation, DispatcherOperationStatus};
+#[allow(deprecated)]
+pub use dispatcher_operation::OperationCanceledError;
 pub use dispatcher_options::DispatcherOptions;
 pub use dispatcher_priority::{DispatcherPriority, DispatcherPriorityOutOfRangeError};
 pub use dispatcher_invoke::DispatcherInvokeError;

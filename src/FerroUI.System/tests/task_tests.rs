@@ -44,6 +44,8 @@ fn completed_tasks() {
 fn a_cancellation_error_cancels() {
     let task = Task::<i32>::from_exception(Rc::new(TaskCanceledError::default()));
     assert_eq!(task.status(), TaskStatus::Canceled);
+    let task = Task::<i32>::from_exception(Rc::new(crate::task::Canceled));
+    assert_eq!(task.status(), TaskStatus::Canceled);
 }
 
 #[test]
@@ -220,33 +222,33 @@ fn a_removed_continuation_does_not_run() {
 
 #[test]
 fn register_local_runs_on_the_thread_that_registered() {
-    use crate::threading::CancellationTokenSource;
+    use crate::threading::CancellationToken;
 
     // Canceled on this thread: at once.
-    let source = CancellationTokenSource::new();
+    let source = CancellationToken::new();
     let ran = Rc::new(Cell::new(0));
     let r = ran.clone();
-    let _registration = source.token().register_local(move || r.set(r.get() + 1));
+    let _registration = source.register_local(move || r.set(r.get() + 1));
     source.cancel();
     assert_eq!(ran.get(), 1);
 
     // Canceled already: at once.
     let r = ran.clone();
-    let _registration = source.token().register_local(move || r.set(r.get() + 1));
+    let _registration = source.register_local(move || r.set(r.get() + 1));
     assert_eq!(ran.get(), 2);
 
     // Disposed: never.
-    let source = CancellationTokenSource::new();
+    let source = CancellationToken::new();
     let r = ran.clone();
-    let registration = source.token().register_local(move || r.set(r.get() + 100));
+    let registration = source.register_local(move || r.set(r.get() + 100));
     registration.dispose();
     source.cancel();
     assert_eq!(ran.get(), 2);
 
     // Canceled on another thread: when this thread runs its pending wakes.
-    let source = CancellationTokenSource::new();
+    let source = CancellationToken::new();
     let r = ran.clone();
-    let _registration = source.token().register_local(move || r.set(r.get() + 10));
+    let _registration = source.register_local(move || r.set(r.get() + 10));
     let remote = source.clone();
     std::thread::spawn(move || remote.cancel()).join().unwrap();
     assert_eq!(ran.get(), 2);

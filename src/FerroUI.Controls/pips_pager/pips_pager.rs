@@ -8,7 +8,7 @@ use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEvent, Rou
 use ferroui_base::layout::{LayoutableImpl, Orientation};
 use ferroui_base::reactive::Subscription;
 use ferroui_base::styling::ControlTheme;
-use ferroui_base::threading::{CancellationToken, CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTimer};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_routed_event, instantiate,
     DirectProperty, DirectPropertyMetadata, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Nullable,
@@ -40,7 +40,7 @@ pub struct PipsPager {
     updating_pager_size: Cell<bool>,
     is_initial_load: Cell<bool>,
     last_selected_page_index: Cell<i32>,
-    scroll_animation_cts: RefCell<Option<CancellationTokenSource>>,
+    scroll_animation_cts: RefCell<Option<CancellationToken>>,
     template_settings: RefCell<Ref<PipsPagerTemplateSettings>>,
 }
 
@@ -622,8 +622,8 @@ impl PipsPager {
         if let Some(cts) = self.scroll_animation_cts.take() {
             cts.cancel();
         }
-        let cts = CancellationTokenSource::new();
-        let token = cts.token();
+        let cts = CancellationToken::new();
+        let token = cts.clone();
         *self.scroll_animation_cts.borrow_mut() = Some(cts);
 
         let start_offset = if is_horizontal { scroll_viewer.offset().x } else { scroll_viewer.offset().y };
@@ -659,7 +659,7 @@ impl PipsPager {
         is_horizontal: bool,
         token: &CancellationToken,
     ) {
-        if token.is_cancellation_requested() {
+        if token.is_cancelled() {
             return;
         }
 

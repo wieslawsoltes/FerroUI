@@ -2314,7 +2314,7 @@ fn registering_selector(
 
         let canceled = tcs.clone();
         let on_cancel = on_cancel.clone();
-        let _ = token.register_local(move || on_cancel(&canceled));
+        token.register_local(move || on_cancel(&canceled)).detach();
 
         Ok(tcs.task())
     }

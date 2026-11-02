@@ -6,7 +6,7 @@ use super::{
 use crate::platform::IPlatformLifetimeEventsImpl;
 use crate::{AppBuilder, ShutdownMode, Window, WindowCloseReason};
 use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, Subscription};
-use ferroui_base::threading::{CancellationTokenSource, Dispatcher};
+use ferroui_base::threading::{CancellationToken, Dispatcher};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{FerroLocator, LocatorExtensions, Ref};
 use std::any::Any;
@@ -28,7 +28,7 @@ use std::rc::{Rc, Weak};
 pub struct ClassicDesktopStyleApplicationLifetime {
     this: Weak<ClassicDesktopStyleApplicationLifetime>,
     exit_code: Cell<i32>,
-    cts: RefCell<Option<CancellationTokenSource>>,
+    cts: RefCell<Option<CancellationToken>>,
     is_shutting_down: Cell<bool>,
     windows: RefCell<Vec<Ref<Window>>>,
     global_events_subscriptions: RefCell<Option<Rc<CompositeDisposable>>>,
@@ -281,7 +281,7 @@ impl ClassicDesktopStyleApplicationLifetime {
         // The token source exists exactly while a main loop can be exited:
         // without run loops there is no loop for a shutdown to exit.
         if runs_main_loop {
-            *self.cts.borrow_mut() = Some(CancellationTokenSource::new());
+            *self.cts.borrow_mut() = Some(CancellationToken::new());
         }
 
         self.show_main_window();
@@ -289,7 +289,7 @@ impl ClassicDesktopStyleApplicationLifetime {
         if runs_main_loop {
             // A shutdown while the main window was shown has taken the
             // source already; the loop must not start then.
-            let token = self.cts.borrow().as_ref().map(CancellationTokenSource::token);
+            let token = self.cts.borrow().clone();
             if let Some(token) = token {
                 dispatcher.main_loop(&token);
             }

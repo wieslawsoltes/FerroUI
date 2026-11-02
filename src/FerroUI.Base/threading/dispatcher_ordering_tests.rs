@@ -311,7 +311,7 @@ fn a_nested_frame_runs_the_queue_in_priority_order_before_the_job_that_pushed_it
     let _services = DispatcherServices::new(SimpleDispatcherImpl::new(SimpleKind::Controlled));
     let disp = Dispatcher::ui_thread();
     let log = Log::new();
-    let outer = CancellationTokenSource::new();
+    let outer = CancellationToken::new();
     let nested = DispatcherFrame::new();
     {
         let (l, d, frame, outer) = (log.clone(), disp.clone(), nested.clone(), outer.clone());
@@ -338,7 +338,7 @@ fn a_nested_frame_runs_the_queue_in_priority_order_before_the_job_that_pushed_it
         );
     }
 
-    disp.main_loop(&outer.token());
+    disp.main_loop(&outer);
     // Inside the frame the queue runs as it does outside: the highest priority first, the order of
     // arrival within a priority, background work included; the job that pushed the frame
     // continues when the frame exits.
@@ -472,12 +472,12 @@ fn a_timer_that_becomes_due_during_a_job_runs_before_the_next_job_of_its_priorit
 fn a_canceled_operation_leaves_the_queue_and_its_awaiter_resumes_in_its_own_job() {
     let t = DispatcherTests::new();
     let log = Log::new();
-    let source = CancellationTokenSource::new();
+    let source = CancellationToken::new();
     t.ui_thread.post_local(log.add("first"), DispatcherPriority::NORMAL);
     let canceled = t.ui_thread.invoke_async_local_with_cancellation(
         log.add("canceled"),
         DispatcherPriority::NORMAL,
-        &source.token(),
+        &source,
     );
     t.ui_thread.post_local(log.add("last"), DispatcherPriority::NORMAL);
 
@@ -505,9 +505,9 @@ fn a_canceled_operation_leaves_the_queue_and_its_awaiter_resumes_in_its_own_job(
     t.ui_thread.run_jobs(None);
     assert_eq!(
         log.entries(),
-        ["first", "last", "the awaiting task saw Err(OperationCanceledError)"]
+        ["first", "last", "the awaiting task saw Err(Canceled)"]
     );
-    assert_eq!(canceled.result(), Err(OperationCanceledError));
+    assert_eq!(canceled.result(), Err(Canceled));
     assert!(task.is_completed_successfully());
 }
 

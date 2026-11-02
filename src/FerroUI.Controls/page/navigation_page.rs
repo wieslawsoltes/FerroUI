@@ -20,7 +20,7 @@ use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::{FlowDirection, Geometry, StreamGeometry};
 use ferroui_base::reactive::{Disposable, ObservableExt, Subscription};
-use ferroui_base::threading::{CancellationTokenSource, DispatcherTask};
+use ferroui_base::threading::{CancellationToken, DispatcherTask};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, AnyValue, AttachedProperty,
@@ -55,10 +55,10 @@ pub struct NavigationPage {
     content_host: RefCell<Option<Ref<Panel>>>,
     page_presenter: RefCell<Option<Ref<ContentPresenter>>>,
     page_back_presenter: RefCell<Option<Ref<ContentPresenter>>>,
-    current_transition: RefCell<Option<Rc<CancellationTokenSource>>>,
+    current_transition: RefCell<Option<Rc<CancellationToken>>>,
     /// `None` stands for a completed task.
     last_page_transition_task: RefCell<Option<DispatcherTask<()>>>,
-    current_modal_transition: RefCell<Option<Rc<CancellationTokenSource>>>,
+    current_modal_transition: RefCell<Option<Rc<CancellationToken>>>,
     nav_bar: RefCell<Option<(Ref<Border>, RoutedEventHandlerToken)>>,
     nav_bar_shadow: RefCell<Option<Ref<Border>>>,
     is_pop: Cell<bool>,
@@ -411,7 +411,7 @@ impl MultiPageImpl for NavigationPage {
             }
 
             if let Some(resolved_transition) = resolved_transition {
-                let cancel = Rc::new(CancellationTokenSource::new());
+                let cancel = Rc::new(CancellationToken::new());
                 *this.current_transition.borrow_mut() = Some(cancel.clone());
 
                 let old_presenter = page_presenter;
@@ -1989,17 +1989,17 @@ impl NavigationPage {
 
     /// Cancels the running modal transition and makes a new cancellation
     /// source the current one.
-    fn begin_modal_transition(&self) -> Rc<CancellationTokenSource> {
+    fn begin_modal_transition(&self) -> Rc<CancellationToken> {
         let previous = self.current_modal_transition.borrow_mut().take();
         if let Some(previous) = previous {
             previous.cancel();
         }
-        let cts = Rc::new(CancellationTokenSource::new());
+        let cts = Rc::new(CancellationToken::new());
         *self.current_modal_transition.borrow_mut() = Some(cts.clone());
         cts
     }
 
-    fn end_modal_transition(&self, cts: &Rc<CancellationTokenSource>) {
+    fn end_modal_transition(&self, cts: &Rc<CancellationToken>) {
         let mut current = self.current_modal_transition.borrow_mut();
         if current.as_ref().is_some_and(|current| Rc::ptr_eq(current, cts)) {
             *current = None;
@@ -2014,11 +2014,11 @@ impl NavigationPage {
         from: Option<&Ref<ContentPresenter>>,
         to: Option<&Ref<ContentPresenter>>,
         forward: bool,
-        cts: &Rc<CancellationTokenSource>,
+        cts: &Rc<CancellationToken>,
     ) -> TransitionOutcome {
         let from: Option<Ref<Visual>> = from.map(|from| from.clone().upcast());
         let to: Option<Ref<Visual>> = to.map(|to| to.clone().upcast());
-        let task = transition.start(from.as_ref(), to.as_ref(), forward, cts.token());
+        let task = transition.start(from.as_ref(), to.as_ref(), forward, (**cts).clone());
         let outcome = TransitionOutcomeFuture { task }.await;
         if let TransitionOutcome::Faulted = outcome {
             if let Some(logger) = Logger::try_get(LogEventLevel::Error, LogArea::CONTROL) {
@@ -2578,11 +2578,11 @@ impl NavigationPage {
         from: Ref<ContentPresenter>,
         to: Ref<ContentPresenter>,
         forward: bool,
-        ct: Rc<CancellationTokenSource>,
+        ct: Rc<CancellationToken>,
     ) {
         let from_visual: Ref<Visual> = from.clone().upcast();
         let to_visual: Ref<Visual> = to.upcast();
-        let task = transition.start(Some(&from_visual), Some(&to_visual), forward, ct.token());
+        let task = transition.start(Some(&from_visual), Some(&to_visual), forward, (*ct).clone());
         match (TransitionOutcomeFuture { task }).await {
             TransitionOutcome::Canceled => return,
             TransitionOutcome::Faulted => {
@@ -2593,7 +2593,7 @@ impl NavigationPage {
             TransitionOutcome::Completed => {}
         }
 
-        if ct.is_cancellation_requested() {
+        if ct.is_cancelled() {
             return;
         }
 
