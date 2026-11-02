@@ -10,7 +10,7 @@ mod native_reentrancy_tests {
         TextInputMethodTextBounds,
     };
     use ferroui_base::layout::{ILayoutManager, ILayoutRoot, LayoutManager, Layoutable};
-    use ferroui_base::reactive::Disposable;
+    use ferroui_base::reactive::{Disposable, IDisposable};
     use ferroui_base::rendering::{
         IHitTester, IPresentationSource, IRenderer, ManagedHitTester, RendererDiagnostics,
         SceneInvalidatedEventArgs,
