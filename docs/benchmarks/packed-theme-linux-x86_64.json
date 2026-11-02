@@ -1,0 +1,373 @@
+{
+  "toolchain": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1",
+  "platform": "Linux x86-64",
+  "method": "Cargo release, single job, opt-level=3, cross-crate LTO off. Size variants set only ferroui-themes-winui to opt-level=z and one codegen unit. GNU-compatible ELF LLD input sections matched against allocated output section headers. Seven fresh, rotating warm-page-cache processes per executable after warm-up. Times end when WinUITheme::new() and a successful deferred Button type lookup flush stdout. Both binary formats contain all 169 documents. Unchanged build dependencies were reused. Cargo units are single-run observations on a shared host.",
+  "data": {
+    "indexed_pre_merge_fix": {
+      "stripped_executable_bytes": 59747592,
+      "archive_bytes": 432438,
+      "generated_theme_rust_bytes": 0,
+      "generated_registry_rust_bytes": 1552,
+      "launches": [
+        {
+          "create_ns": 3699469369,
+          "button_lookup_ns": 1324946,
+          "create_and_button_ns": 3700794315,
+          "process_ready_ns": 3707941509,
+          "process_ns": 3751802822
+        },
+        {
+          "create_ns": 4573727611,
+          "button_lookup_ns": 1439365,
+          "create_and_button_ns": 4575166976,
+          "process_ready_ns": 4578965490,
+          "process_ns": 4632123769
+        },
+        {
+          "create_ns": 3624117005,
+          "button_lookup_ns": 1390061,
+          "create_and_button_ns": 3625507066,
+          "process_ready_ns": 3629303150,
+          "process_ns": 3678429113
+        },
+        {
+          "create_ns": 4177069679,
+          "button_lookup_ns": 1324545,
+          "create_and_button_ns": 4178394224,
+          "process_ready_ns": 4183088922,
+          "process_ns": 4231813260
+        },
+        {
+          "create_ns": 4270120851,
+          "button_lookup_ns": 1399416,
+          "create_and_button_ns": 4271520267,
+          "process_ready_ns": 4275983359,
+          "process_ns": 4330232266
+        },
+        {
+          "create_ns": 7560901448,
+          "button_lookup_ns": 1366297,
+          "create_and_button_ns": 7562267745,
+          "process_ready_ns": 7570126486,
+          "process_ns": 7658019533
+        },
+        {
+          "create_ns": 3672185985,
+          "button_lookup_ns": 991444,
+          "create_and_button_ns": 3673177429,
+          "process_ready_ns": 3680802440,
+          "process_ns": 3713411654
+        }
+      ],
+      "median": {
+        "create_ns": 4177069679,
+        "button_lookup_ns": 1366297,
+        "create_and_button_ns": 4178394224,
+        "process_ready_ns": 4183088922,
+        "process_ns": 4231813260
+      }
+    },
+    "indexed_release": {
+      "stripped_executable_bytes": 59764712,
+      "allocated_sections": {
+        ".gcc_except_table": 30344,
+        ".rodata": 441264,
+        ".eh_frame": 66372,
+        ".text": 321387,
+        ".tbss": 76,
+        ".data.rel.ro": 23960,
+        ".data": 1580
+      },
+      "allocated_bytes": 884983,
+      "rlib_bytes": 3604342,
+      "cargo_units": [
+        {
+          "package": "ferroui-markup-xaml-loader",
+          "target": "",
+          "seconds": 8.38
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "build-script",
+          "seconds": 0.9
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "build-script (run)",
+          "seconds": 1.44
+        },
+        {
+          "package": "ferroui-markup-xaml-loader",
+          "target": "",
+          "seconds": 39.54
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "",
+          "seconds": 9.09
+        },
+        {
+          "package": "winui-theme-probe",
+          "target": "winui-theme-probe \"bin\"",
+          "seconds": 0.7
+        }
+      ],
+      "archive_bytes": 432438,
+      "generated_theme_rust_bytes": 0,
+      "generated_registry_rust_bytes": 1552,
+      "launches": [
+        {
+          "create_ns": 2199630982,
+          "button_lookup_ns": 1310229,
+          "create_and_button_ns": 2200941211,
+          "process_ready_ns": 2207071752,
+          "process_ns": 2269041797
+        },
+        {
+          "create_ns": 1911233298,
+          "button_lookup_ns": 1292149,
+          "create_and_button_ns": 1912525447,
+          "process_ready_ns": 1916743059,
+          "process_ns": 1959964263
+        },
+        {
+          "create_ns": 1976279646,
+          "button_lookup_ns": 1388520,
+          "create_and_button_ns": 1977668166,
+          "process_ready_ns": 1983595310,
+          "process_ns": 2033268256
+        },
+        {
+          "create_ns": 2169942446,
+          "button_lookup_ns": 1337654,
+          "create_and_button_ns": 2171280100,
+          "process_ready_ns": 2176808776,
+          "process_ns": 2224143649
+        },
+        {
+          "create_ns": 2267481802,
+          "button_lookup_ns": 1441318,
+          "create_and_button_ns": 2268923120,
+          "process_ready_ns": 2280213791,
+          "process_ns": 2334931751
+        },
+        {
+          "create_ns": 2145460138,
+          "button_lookup_ns": 1239670,
+          "create_and_button_ns": 2146699808,
+          "process_ready_ns": 2152595865,
+          "process_ns": 2196093948
+        },
+        {
+          "create_ns": 2024086239,
+          "button_lookup_ns": 1299709,
+          "create_and_button_ns": 2025385948,
+          "process_ready_ns": 2030921522,
+          "process_ns": 2086512183
+        }
+      ],
+      "median": {
+        "create_ns": 2145460138,
+        "button_lookup_ns": 1310229,
+        "create_and_button_ns": 2146699808,
+        "process_ready_ns": 2152595865,
+        "process_ns": 2196093948
+      }
+    },
+    "indexed_size": {
+      "stripped_executable_bytes": 59660112,
+      "allocated_sections": {
+        ".gcc_except_table": 23732,
+        ".rodata": 437810,
+        ".eh_frame": 80508,
+        ".text": 208240,
+        ".tbss": 76,
+        ".data.rel.ro": 19800,
+        ".data": 1580
+      },
+      "allocated_bytes": 771746,
+      "rlib_bytes": 3269460,
+      "archive_bytes": 432438,
+      "generated_theme_rust_bytes": 0,
+      "generated_registry_rust_bytes": 1552,
+      "launches": [
+        {
+          "create_ns": 2250158994,
+          "button_lookup_ns": 1453947,
+          "create_and_button_ns": 2251612941,
+          "process_ready_ns": 2279635236,
+          "process_ns": 2330245222
+        },
+        {
+          "create_ns": 2232860496,
+          "button_lookup_ns": 1447308,
+          "create_and_button_ns": 2234307804,
+          "process_ready_ns": 2238165278,
+          "process_ns": 2288927923
+        },
+        {
+          "create_ns": 2103605807,
+          "button_lookup_ns": 1415299,
+          "create_and_button_ns": 2105021106,
+          "process_ready_ns": 2115545519,
+          "process_ns": 2181223428
+        },
+        {
+          "create_ns": 2275979948,
+          "button_lookup_ns": 1459164,
+          "create_and_button_ns": 2277439112,
+          "process_ready_ns": 2281267338,
+          "process_ns": 2334513460
+        },
+        {
+          "create_ns": 3033062688,
+          "button_lookup_ns": 1442793,
+          "create_and_button_ns": 3034505481,
+          "process_ready_ns": 3038468983,
+          "process_ns": 3103061353
+        },
+        {
+          "create_ns": 2099206934,
+          "button_lookup_ns": 1458635,
+          "create_and_button_ns": 2100665569,
+          "process_ready_ns": 2104753413,
+          "process_ns": 2155910604
+        },
+        {
+          "create_ns": 3388861118,
+          "button_lookup_ns": 2487294,
+          "create_and_button_ns": 3391348412,
+          "process_ready_ns": 3396281633,
+          "process_ns": 3455900477
+        }
+      ],
+      "median": {
+        "create_ns": 2250158994,
+        "button_lookup_ns": 1453947,
+        "create_and_button_ns": 2251612941,
+        "process_ready_ns": 2279635236,
+        "process_ns": 2330245222
+      }
+    },
+    "solid_size": {
+      "stripped_executable_bytes": 59498128,
+      "allocated_sections": {
+        ".gcc_except_table": 23804,
+        ".rodata": 250757,
+        ".eh_frame": 80676,
+        ".text": 208797,
+        ".tbss": 76,
+        ".data.rel.ro": 19840,
+        ".data": 1612
+      },
+      "allocated_bytes": 585562,
+      "rlib_bytes": 3088644,
+      "cargo_units": [
+        {
+          "package": "ferroui-markup-xaml-loader",
+          "target": "",
+          "seconds": 7.76
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "build-script",
+          "seconds": 1.34
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "build-script (run)",
+          "seconds": 1.9
+        },
+        {
+          "package": "ferroui-markup-xaml-loader",
+          "target": "",
+          "seconds": 42.54
+        },
+        {
+          "package": "ferroui-themes-winui",
+          "target": "",
+          "seconds": 4.46
+        },
+        {
+          "package": "winui-theme-probe",
+          "target": "winui-theme-probe \"bin\"",
+          "seconds": 1.7
+        }
+      ],
+      "archive_bytes": 245385,
+      "generated_theme_rust_bytes": 0,
+      "generated_registry_rust_bytes": 1552,
+      "launches": [
+        {
+          "create_ns": 2503304085,
+          "button_lookup_ns": 1353328,
+          "create_and_button_ns": 2504657413,
+          "process_ready_ns": 2514900200,
+          "process_ns": 2560823674
+        },
+        {
+          "create_ns": 2171250818,
+          "button_lookup_ns": 1324085,
+          "create_and_button_ns": 2172574903,
+          "process_ready_ns": 2178365198,
+          "process_ns": 2221177791
+        },
+        {
+          "create_ns": 2154708844,
+          "button_lookup_ns": 1324335,
+          "create_and_button_ns": 2156033179,
+          "process_ready_ns": 2163460838,
+          "process_ns": 2230306967
+        },
+        {
+          "create_ns": 2062625293,
+          "button_lookup_ns": 1277115,
+          "create_and_button_ns": 2063902408,
+          "process_ready_ns": 2067928315,
+          "process_ns": 2114521639
+        },
+        {
+          "create_ns": 3384987361,
+          "button_lookup_ns": 925406,
+          "create_and_button_ns": 3385912767,
+          "process_ready_ns": 3389994983,
+          "process_ns": 3432285008
+        },
+        {
+          "create_ns": 2103426316,
+          "button_lookup_ns": 1546033,
+          "create_and_button_ns": 2104972349,
+          "process_ready_ns": 2112580391,
+          "process_ns": 2232643955
+        },
+        {
+          "create_ns": 3548225299,
+          "button_lookup_ns": 1470195,
+          "create_and_button_ns": 3549695494,
+          "process_ready_ns": 3553686052,
+          "process_ns": 3632193317
+        }
+      ],
+      "median": {
+        "create_ns": 2171250818,
+        "button_lookup_ns": 1324335,
+        "create_and_button_ns": 2172574903,
+        "process_ready_ns": 2178365198,
+        "process_ns": 2232643955
+      },
+      "sha256_stripped_executable": "76b63c25fc8ac727cb9512e7528e0bde86d675c95d7a95eb2f5d869560a3c524",
+      "archive_sha256": "2d9c358630fc3a746ba120fafbcd352ddf0d06d7dc344c86d623a403527e5444",
+      "reproduce": "python3 scripts/themes/bench/measure.py --work-dir /tmp/winui-solid --solid --size-optimize-theme --lld-link-map",
+      "full_theme_target_bytes": 600000,
+      "bytes_below_target": 14438,
+      "coverage": "All SHF_ALLOC input sections from the WinUI rlib recorded in LLD output. Shared interpreter, controls, allocator, linker padding and synthesized relocations are outside this number and counted by the stripped executable measurement."
+    }
+  },
+  "benchmarked_probe": "scripts/themes/bench/winui.rs",
+  "revision_notes": "The solid distribution is the shipping implementation in 7f05a8fa. Its dependencies were built from a benchmark-only working tree with the same source files for the binary format and runtime, before the subsequent type resolver cache fix. The pre-merge fixture preceded the copy-on-write variant merge and retained-child visitor changes. The row is a comparison of the two binaries, not a single-change ablation.",
+  "functional_checks": [
+    "All 169 documents compared equal to the XML parser after canonical stored-FXD re-encoding.",
+    "A production consumer built WinUITheme by its public URI and the private Button document URI remained inaccessible. The consumer checked light, dark and high-contrast colors, normal and compact padding, memoized Button/DatePicker/ComboBox/Window control themes, and built the Button template.",
+    "Seven interleaved fresh-process samples per variant checked successful Button resolution before reporting elapsed time."
+  ]
+}
