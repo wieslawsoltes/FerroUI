@@ -77,6 +77,34 @@ Name=00 Fixture IDE
 Categories=IDE;Development;
 Exec=/usr/bin/touch "$fixture/ide.launched"
 ENTRY
+cat >"$XDG_DATA_HOME/applications/ferro-study.desktop" <<ENTRY
+[Desktop Entry]
+Type=Application
+Name=00 Study
+Categories=Education;
+Exec=/usr/bin/touch "$fixture/study.launched"
+ENTRY
+
+# Wait for both a new layout and a settled frame. Saving the selected view can
+# precede the presentation of its first compositor batch.
+capture_changed() {
+    local previous=$1 name=$2 changed settled i
+    convert "$previous" -resize '160x100!' "$fixture/baseline.png"
+    cp "$fixture/baseline.png" "$fixture/prior.png"
+    for ((i=0; i<65; i++)); do
+        import -window "$shell_window" "$fixture/current.png"
+        convert "$fixture/current.png" -resize '160x100!' "$fixture/sample.png"
+        changed=$(compare -fuzz 4% -metric AE "$fixture/baseline.png" "$fixture/sample.png" null: 2>&1 || :)
+        settled=$(compare -fuzz 2% -metric AE "$fixture/prior.png" "$fixture/sample.png" null: 2>&1 || :)
+        if awk -v c="$changed" -v s="$settled" 'BEGIN {exit !(c+0>90 && s+0<12)}'; then
+            cp "$fixture/current.png" "$output/$name.png"; return
+        fi
+        cp "$fixture/sample.png" "$fixture/prior.png"
+        sleep .08
+    done
+    echo "The $name launcher view did not present" >&2
+    cp "$fixture/current.png" "$output/failed-$name.png"; return 1
+}
 start_shell windows "$@"
 key ctrl+k; sleep .25
 search Atlas; key ctrl+p; pins_are '["ferro-atlas.desktop"]'
@@ -104,19 +132,29 @@ echo 'Verified GIO launch from restored pins, reordering and removal.'
 key alt+F4
 wait "$shell_pid"; shell_pid=
 start_shell windows "$@"
-key ctrl+k; sleep .25
+import -window "$shell_window" "$fixture/start-home.png"
+key ctrl+k
+capture_changed "$fixture/start-home.png" start-grid
 key ctrl+3
 for ((i=0; i<60; i++)); do [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/start-view" 2>/dev/null || :) == Category ]] && break; sleep .1; done
 [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/start-view") == Category ]]
-sleep .2; import -window "$shell_window" "$output/start-categories.png"
-# Development sorts first. Return opens its folder; Alt+Left returns to All.
-key Return alt+Left Return Return
-for ((i=0; i<80; i++)); do [[ -f "$fixture/ide.launched" ]] && break; sleep .1; done
-[[ -f "$fixture/ide.launched" ]] || { echo "Start category did not launch its selected app" >&2; exit 1; }
-key ctrl+k; sleep .25; key ctrl+2
+capture_changed "$output/start-grid.png" start-categories
+# Grid places the IDE first. Category places Development first and Education
+# second. Enter and Alt+Left must drill in and out without launching an app.
+key Return
+capture_changed "$output/start-categories.png" start-development
+key alt+Left
+capture_changed "$output/start-development.png" start-categories-back
+key Right Return Return
+for ((i=0; i<80; i++)); do [[ -f "$fixture/study.launched" ]] && break; sleep .1; done
+[[ -f "$fixture/study.launched" && ! -f "$fixture/ide.launched" ]] || { echo "Start category did not launch its selected app" >&2; exit 1; }
+capture_changed "$output/start-categories-back.png" start-dismissed
+key ctrl+k
+capture_changed "$output/start-dismissed.png" start-reopened
+key ctrl+2
 for ((i=0; i<60; i++)); do [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/start-view") == List ]] && break; sleep .1; done
 [[ $(cat "$XDG_CONFIG_HOME/ferro-desktop/start-view") == List ]]
-sleep .2; import -window "$shell_window" "$output/start-recent-list.png"
+capture_changed "$output/start-reopened.png" start-recent-list
 key alt+F4; wait "$shell_pid"; shell_pid=
 for number in {01..18}; do
     cat >"$XDG_DATA_HOME/applications/ferro-navigation-$number.desktop" <<ENTRY
