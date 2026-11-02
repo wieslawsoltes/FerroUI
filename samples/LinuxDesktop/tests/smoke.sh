@@ -71,6 +71,15 @@ Comment=$comment
 Icon=applications-graphics
 Exec=touch "$fixture/spotlight-launched-$entry"
 EOF
+    if [[ $entry == primary ]]; then
+        cat >>"$XDG_DATA_HOME/applications/$desktop.desktop" <<EOF
+Actions=Calibrate;
+
+[Desktop Action Calibrate]
+Name=Calibrate display
+Exec=touch "$fixture/spotlight-calibrated"
+EOF
+    fi
 done
 
 # Disable the WM's own shortcuts so a workspace switch tests the shell's
@@ -266,8 +275,15 @@ PYGTK
             [[ $(xdotool getactivewindow) == "$live" && ! -e $fixture/spotlight-launched-primary && ! -e $fixture/spotlight-launched-secondary ]] || {
                 echo 'Spotlight failed to activate the selected real GTK window' >&2; exit 1;
             }
+            xdotool windowactivate --sync "$shell_window" key --clearmodifiers ctrl+k
+            # The retained selection exposes the localized desktop-entry action.
+            # Its GIO launch must run separately from the app's default Exec.
+            capture macos-spotlight-reopened macos-applications
+            xdotool key --clearmodifiers Tab Return
+            for ((i=0; i<70; i++)); do [[ -e $fixture/spotlight-calibrated ]] && break; sleep .1; done
+            [[ -e $fixture/spotlight-calibrated && ! -e $fixture/spotlight-launched-primary ]]
             kill "$spotlight_client"; wait "$spotlight_client" || :; unset spotlight_client
-            xdotool windowactivate --sync "$shell_window" key --clearmodifiers ctrl+k ctrl+a BackSpace
+            xdotool windowactivate --sync "$shell_window" key --clearmodifiers ctrl+k
             xdotool key --clearmodifiers ctrl+1
             capture macos-spotlight-applications macos-applications
             dismiss_launcher "$theme" macos-spotlight-applications "$theme"

@@ -114,7 +114,11 @@ fn result(
     .into()
 }
 
-fn details(shell: &Rc<Shell>, selected: Memo<Option<usize>>) -> Element {
+fn details(
+    shell: &Rc<Shell>,
+    selected: Memo<Option<usize>>,
+    first_action: NodeRef<ferroui_controls::Button>,
+) -> Element {
     let state = shell.clone();
     dynamic(move || -> Element {
         let Some(index) = selected.get() else {
@@ -175,6 +179,28 @@ fn details(shell: &Rc<Shell>, selected: Memo<Option<usize>>) -> Element {
                 list.into()
             })
         });
+        let mut quick_actions = stack_panel().spacing(3.);
+        if !app.actions.is_empty() {
+            quick_actions = quick_actions.child(
+                shell_text("Quick Actions", 11., Ink::Secondary).font_weight(FontWeight::SemiBold),
+            );
+        }
+        for (ordinal, desktop_action) in app.actions.iter().enumerate() {
+            let shell = state.clone();
+            let id = desktop_action.id.clone();
+            let command = action(&desktop_action.label, move || {
+                shell.launch_entry(&shell.catalog.applications()[index], Some(id.clone()));
+            })
+            .horizontal_content_alignment(H::Left)
+            .min_height(0.)
+            .padding((6., 3.))
+            .child(shell_text(&desktop_action.label, 12., Ink::Primary));
+            quick_actions = quick_actions.child(if ordinal == 0 {
+                command.node_ref(first_action)
+            } else {
+                command
+            });
+        }
         stack_panel()
             .spacing(7.0)
             .margin((12., 10.))
@@ -184,7 +210,11 @@ fn details(shell: &Rc<Shell>, selected: Memo<Option<usize>>) -> Element {
                     .child(app_icon_sized(&state, app, 54.)),
             )
             .child(shell_text(&app.name, 19., Ink::Primary).font_weight(FontWeight::SemiBold))
-            .child(shell_text("Application", 12., Ink::Secondary))
+            .child(shell_text(
+                &format!("Application · {}", app.category),
+                12.,
+                Ink::Secondary,
+            ))
             .child(
                 shell_text(&app.description, 13., Ink::Primary)
                     .is_visible(!app.description.is_empty())
@@ -223,6 +253,7 @@ fn details(shell: &Rc<Shell>, selected: Memo<Option<usize>>) -> Element {
                             })),
                     ),
             )
+            .child(quick_actions)
             .child(list)
             .into()
     })
@@ -278,6 +309,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
             cursor.set_if_changed(0);
         }
     });
+    let first_action = NodeRef::<ferroui_controls::Button>::new();
     let key_state = shell.clone();
     let search = search_editor(shell, "Spotlight Search",
         "Type to search, use the arrows to select a result, and press Return to open. Command+1 browses applications.",
@@ -289,6 +321,10 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     if let Some(i) = Results::List.navigate(key, position.get_untracked(), length.get_untracked(), true) {
                         cursor.set_if_changed(i);
                     } else { return; }
+                }
+                (Key::Tab, KeyModifiers::NONE) if selected.get_untracked()
+                    .is_some_and(|i| !key_state.catalog.applications()[i].actions.is_empty()) => {
+                    if !first_action.get_untracked().is_some_and(|button| button.focus()) { return; }
                 }
                 (Key::Return, KeyModifiers::NONE) => {
                     if let Some(i) = selected.get_untracked() { open_app(&key_state, i); } else { return; }
@@ -367,7 +403,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
         memo(move |_| browse_apps.get() && !searching.get() && !pins_only.get() && page.get() == 0),
     );
     let narrow = memo(move |_| width.get() < 620.);
-    let pane = details(shell, selected);
+    let pane = details(shell, selected, first_action);
     let body = grid()
         .row_definitions("Auto,Auto")
         .column_definitions("3*,2*")
