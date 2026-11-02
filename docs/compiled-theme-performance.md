@@ -23,6 +23,15 @@ Both full builds contained a dictionary registration for each of `DefaultButtonS
 
 The build-script numbers in the table precede a later XamlX traversal optimization. Against identical inputs, four reversed-order, standalone build-script runs measured 30.91 s before and 18.35 s after on average (40.6% less wall time). Both the generated Rust and the exported type metadata had identical SHA-256 hashes. [Host measurement and input fingerprints](benchmarks/compiled-theme-host-namespace.json)
 
+A separate host-only comparison includes the later traversal optimization and measures all four WinUI modes from the previous PR head. It ran each configuration twice in reverse order with fresh output directories. Generated Rust matched the measured release consumers in every case. [Per-run times, model hashes and sidecar fingerprints](benchmarks/compiled-theme-host-matrix.json)
+
+| XAML generation only | Previous PR head s | Optimized host s |
+| --- | ---: | ---: |
+| Full native | 29.02 | 15.80 |
+| Full FXB | 30.41 | 17.45 |
+| Button roots, native | 4.65 | 2.92 |
+| Button roots, FXB | 5.19 | 3.09 |
+
 On an identical 456-leaf input, alternating 501 in-memory validation, expansion and drop passes per decoder measured 509 µs for the starting decoder and 349 µs for the candidate (median). The current full FXB resource set has 894 leaves and 7,354 records. A complete decode and drop of that larger set took 684 µs median over 101 passes.
 
 ## Runtime XML and portable FXD
